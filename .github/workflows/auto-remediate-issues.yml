@@ -169,7 +169,7 @@ jobs:
 
           Fixes #526
 
-          Co-Authored-By: Auto-Remediation Bot <noreply@github.com>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
           # Push branch
           git push origin "$BRANCH_NAME"
@@ -277,7 +277,7 @@ jobs:
           This commit adds a reference implementation for security headers.
           Manual integration into api/server.py is required.
 
-          Co-Authored-By: Auto-Remediation Bot <noreply@github.com>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
           git push origin "$BRANCH_NAME"
 
@@ -369,7 +369,7 @@ jobs:
 
           Addresses #525
 
-          Co-Authored-By: Auto-Remediation Bot <noreply@github.com>" || echo "No changes to commit"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>" || echo "No changes to commit"
 
           if git diff --quiet HEAD~1; then
             echo "No documentation changes generated"

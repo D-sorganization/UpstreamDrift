@@ -212,7 +212,7 @@ jobs:
           if ! git diff --staged --quiet; then
             git commit -m "fix: resolve priority issues
 
-          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
             git push origin "$BRANCH_NAME"
 
             if [ "$REUSING_PR" = "true" ] && [ -n "$EXISTING_PR_NUM" ]; then

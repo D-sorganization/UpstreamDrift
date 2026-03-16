@@ -302,7 +302,7 @@ jobs:
 
           PRs addressed: #${{ steps.analyze.outputs.prs }}
 
-          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           EOF
           )"
 

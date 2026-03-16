@@ -327,7 +327,7 @@ jobs:
 
           CI verification loop will check if more fixes are needed.
 
-          Co-Authored-By: Jules Auto-Repair <jules-bot@users.noreply.github.com>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
                 git push origin "$BRANCH"
                 echo "✅ Pushed repair iteration $iteration"

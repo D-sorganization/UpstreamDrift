@@ -325,7 +325,7 @@ jobs:
           Assessment Score: ${{ needs.run-assessments.outputs.assessment_score }}/10
           Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
-          Co-Authored-By: Jules Assessment Bot <jules-bot@gasification-model.local>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
           git push -u origin "$BRANCH_NAME"
 

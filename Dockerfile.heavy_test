@@ -1,0 +1,95 @@
+# Dockerfile.heavy_test
+# ─────────────────────────────────────────────────────────────────────────────
+# LOCAL PARITY IMAGE for d-sorg-fleet-4core custom runner.
+# Built and used by: wsl bash run_local_heavy_tests.sh
+#
+# Must stay in sync with:
+#   .github/workflows/heavy-tests-opt-in.yml (calls reusable-heavy-tests.yml)
+#
+# Build args:
+#   PYTHON_VERSION (default: 3.11)
+# ─────────────────────────────────────────────────────────────────────────────
+ARG PYTHON_VERSION=3.11
+FROM python:${PYTHON_VERSION}-bookworm
+
+# Avoid interactive prompts during apt
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PYTHONUNBUFFERED=1
+# X11 headless display (mirrors xvfb-run on the runner)
+ENV DISPLAY=:99
+
+# ── System dependencies (mirrors runner apt-get steps) ───────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl git \
+    # X11 + display
+    xvfb x11-utils mesa-utils \
+    libgl1 libegl1 \
+    libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 libxcb-image0 \
+    libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-shape0 \
+    libxcb-xinerama0 libxcb-xkb1 libxcb-xinput0 libxcb-xfixes0 \
+    libdbus-1-3 libxrandr2 libxss1 libxcursor1 libxcomposite1 \
+    libasound2-dev libxi6 libxtst6 \
+    # SDL2 (for Game/Pygame tools)
+    libsdl2-dev libsdl2-mixer-dev libsdl2-image-dev libsdl2-ttf-dev \
+    # Node (for any JS tooling)
+    nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# ── Python tooling ────────────────────────────────────────────────────────────
+RUN pip install --upgrade pip setuptools wheel
+
+# ── Testing infrastructure (mirrors reusable-heavy-tests.yml) ────────────────
+RUN pip install \
+    pytest \
+    pytest-cov \
+    pytest-timeout \
+    pytest-xdist \
+    ruff \
+    black \
+    mypy
+
+# ── Heavy physics / robotics engines ─────────────────────────────────────────
+# pinned to last-known-good versions; update deliberately
+RUN pip install \
+    pinocchio \
+    pink \
+    mujoco \
+    mediapipe \
+    meshcat \
+    pyvista \
+    vtk
+
+# ── Scientific stack ──────────────────────────────────────────────────────────
+RUN pip install \
+    numpy \
+    scipy \
+    sympy \
+    matplotlib \
+    pandas \
+    trimesh \
+    ezdxf \
+    pyyaml
+
+# ── Optional tooling (best-effort, non-fatal) ─────────────────────────────────
+RUN pip install PyQt6 || echo "PyQt6 not available on this platform — skipping"
+RUN pip install drake    || echo "Drake not available on this platform — skipping"
+RUN pip install opensim  || echo "OpenSim not available on this platform — skipping"
+RUN pip install myosuite || echo "MyoSuite not available on this platform — skipping"
+
+WORKDIR /app
+
+# ── Copy codebase ─────────────────────────────────────────────────────────────
+COPY . /app/
+
+# ── Install project in editable mode ─────────────────────────────────────────
+RUN if [ -f "pyproject.toml" ]; then \
+      pip install -e ".[dev,test]" || pip install -e . || true; \
+    elif [ -f "requirements.txt" ]; then \
+      pip install -r requirements.txt || true; \
+    fi
+
+# ── Default: run heavy suite with Xvfb ───────────────────────────────────────
+CMD ["xvfb-run", "--auto-servernum", "--server-args=-screen 0 1920x1080x24", \
+     "pytest", "-v", "-m", "live_simulation", \
+     "--timeout=300", "--timeout-method=thread", \
+     "--tb=short", "tests/heavy_integration/"]

@@ -272,7 +272,7 @@ jobs:
           This commit was created by Jules PR AutoFix workflow.
           CI verification loop will check if more fixes are needed.
 
-          Co-Authored-By: Jules AutoFix <jules-bot@users.noreply.github.com>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
               # Push changes
               git push origin "$BRANCH"

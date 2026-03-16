@@ -403,7 +403,7 @@ jobs:
 
           Automated update by Jules Critics Comments Writer.
 
-          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
             git push origin "$BRANCH_NAME"
 
