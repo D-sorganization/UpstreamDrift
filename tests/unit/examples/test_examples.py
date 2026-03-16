@@ -52,20 +52,24 @@ def test_motion_training_demo(mock_close, mock_show, monkeypatch, tmp_path):
     mock_trajectory.events.club_head_speed = 100.0
     mock_trajectory.frames = list(range(10))
     mock_parser.parse.return_value = mock_trajectory
-    
-    sys.modules["motion_training.club_trajectory_parser"].ClubTrajectoryParser = mock_parser_class
-    
+
+    sys.modules[
+        "motion_training.club_trajectory_parser"
+    ].ClubTrajectoryParser = mock_parser_class
+
     mock_ik_result = MagicMock()
     mock_ik_result.convergence_rate = 1.0
     mock_ik_result.left_hand_errors = [0.0]
     mock_ik_result.right_hand_errors = [0.0]
-    
+
     mock_solver_class = MagicMock()
     mock_solver = mock_solver_class.return_value
     mock_solver.model.nq = 10
     mock_solver.solve_trajectory.return_value = mock_ik_result
-    
-    sys.modules["motion_training.dual_hand_ik_solver"].create_ik_solver = mock_solver_class
+
+    sys.modules[
+        "motion_training.dual_hand_ik_solver"
+    ].create_ik_solver = mock_solver_class
 
     # Needs to mock before run_path execution via sys.modules or monkeypatch on import
     # But for a script run via runpy, monkeypatching the actual module objects works if they are imported!

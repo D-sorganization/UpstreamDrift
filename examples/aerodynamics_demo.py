@@ -29,12 +29,13 @@ def _report_forces(engine: AerodynamicsEngine, speed_ms: float, label: str) -> N
     assert engine is not None, "Engine must be provided"
     assert speed_ms >= 0.0, "Speed must be non-negative"
     assert label, "Label must not be empty"
-    
+
     velocity = np.array([speed_ms, 0.0, 0.0])
     spin = np.array([0.0, 300.0, 0.0])  # ~2 870 rpm back-spin
 
     forces = engine.compute_forces(velocity, spin)
     import numpy.linalg as npla
+
     drag_n = float(npla.norm(forces["drag"]))
     lift_n = float(npla.norm(forces["lift"]))
     magnus_n = float(npla.norm(forces["magnus"]))
