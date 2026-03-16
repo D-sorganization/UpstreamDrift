@@ -104,7 +104,7 @@ jobs:
       # Commit Data for Agent Context
       # ---------------------------------------------------------
       - name: Commit Assessment Data
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(assessment): pre-assessment data collection"
           branch: "automation/assessment-${{ steps.date.outputs.date }}"

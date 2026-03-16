@@ -253,7 +253,7 @@ jobs:
           done
 
       - name: Commit Report
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(physics): technical physics audit"
           file_pattern: "docs/assessments/physics/*.md"

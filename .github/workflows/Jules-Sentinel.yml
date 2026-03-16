@@ -161,7 +161,7 @@ jobs:
           done
 
       - name: Commit Journal
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(sentinel): weekly security audit"
           file_pattern: ".jules/sentinel.md"

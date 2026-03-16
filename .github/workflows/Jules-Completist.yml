@@ -222,7 +222,7 @@ jobs:
           done
 
       - name: Commit Report
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(completist): daily incomplete implementation audit"
           file_pattern: |

@@ -231,7 +231,7 @@ jobs:
           done
 
       - name: Commit Review
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(legal): update patent risk assessment"
           file_pattern: "docs/legal/patents/*.md"

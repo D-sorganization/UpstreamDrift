@@ -28,7 +28,7 @@ jobs:
           echo "" >> .jules/curie.md
 
       - name: Commit Journal Updates
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(curie): monthly hygiene report"
           file_pattern: ".jules/curie.md"
