@@ -6,12 +6,56 @@ and adherence to the DRY principle.
 
 from __future__ import annotations
 
+import os
 import sys
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    """Add command line options for Tools vendoring resolution."""
+    parser.addoption(
+        "--tools-mode",
+        action="store",
+        default="local",
+        choices=["local", "vendored"],
+        help="Tools resolution mode: 'local' (src/shared/python) or 'vendored' (vendor/ud-tools/src/shared/python)",
+    )
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Dynamically adjust system path based on selected Tools mode."""
+    mode = config.getoption("--tools-mode")
+    root_dir = Path(__file__).resolve().parent.parent
+    local_path = str((root_dir / "src/shared/python").resolve())
+    vendored_path = str((root_dir / "vendor/ud-tools/src/shared/python").resolve())
+
+    # Only process if directories actually exist
+    if not os.path.exists(local_path) or not os.path.exists(vendored_path):
+        return
+
+    # Clean existing occurrences to enforce determinism (case-insensitive on Windows)
+    clean_path = []
+    for p in sys.path:
+        try:
+            resolved_p = str(Path(p).resolve()).lower()
+            if resolved_p not in (local_path.lower(), vendored_path.lower()):
+                clean_path.append(p)
+        except Exception:
+            clean_path.append(p)
+    sys.path = clean_path
+
+    if mode == "vendored":
+        # Force vendored tools to have precedence
+        sys.path.insert(0, vendored_path)
+        sys.path.append(local_path)
+    else:
+        # Force local shared codebase to have precedence
+        sys.path.insert(0, local_path)
+        sys.path.append(vendored_path)
 
 # Engine module prefixes whose sys.modules entries must be isolated between
 # tests.  Pinocchio's C extension (pinocchio_pywrap_default) is corrupted by

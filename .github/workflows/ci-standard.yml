@@ -250,6 +250,7 @@ jobs:
           REQUIRE_REAL_TOOLS_REPO: "1"
         run: |
           xvfb-run --auto-servernum pytest tests/shared_contracts/ \
+            --tools-mode=vendored \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short
