@@ -1,5 +1,5 @@
 # Import paths configured at test runner level via pyproject.toml/conftest.py
-import os
+
 import subprocess
 import sys
 import unittest
@@ -74,7 +74,9 @@ class TestVerification(unittest.TestCase):
         """Run code quality check on modified files."""
         print("\nRunning Code Quality Check...")
         tool_path = "tools/code_quality_check.py"
-        if not os.path.exists(tool_path):
+        from os.path import exists
+
+        if not exists(tool_path):
             print("⚠️ code_quality_check.py not found.")
             return
 
@@ -85,7 +87,7 @@ class TestVerification(unittest.TestCase):
         ]
 
         for file_path in files_to_check:
-            if os.path.exists(file_path):
+            if exists(file_path):
                 result = subprocess.run(
                     [sys.executable, tool_path, file_path],
                     capture_output=True,

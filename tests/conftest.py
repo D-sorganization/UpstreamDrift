@@ -144,6 +144,9 @@ def clean_pendulum_dynamics():
 
     def _create(m1_kg=1.0, l1_m=1.0):
         assert m1_kg is not None, "m1_kg must be provided"
+        assert l1_m is not None, "l1_m must be provided"
+        assert m1_kg > 0.0, "m1_kg must be positive"
+        assert l1_m > 0.0, "l1_m must be positive"
         upper_segment = SegmentProperties(
             length_m=l1_m,
             mass_kg=m1_kg,
@@ -185,8 +188,7 @@ def mock_drake_dependencies():
     without having Drake installed.
     """
     mock_pydrake = MagicMock()
-    mock_interfaces = MagicMock()
-    mock_interfaces.PhysicsEngine = MockPhysicsEngine
+    mock_interfaces = MagicMock(PhysicsEngine=MockPhysicsEngine)
 
     with patch.dict(
         "sys.modules",
@@ -214,8 +216,7 @@ def mock_mujoco_dependencies():
     without having MuJoCo installed.
     """
     mock_mujoco = MagicMock()
-    mock_interfaces = MagicMock()
-    mock_interfaces.PhysicsEngine = MockPhysicsEngine
+    mock_interfaces = MagicMock(PhysicsEngine=MockPhysicsEngine)
 
     # Create common MuJoCo structure mocks
     # These are needed for attribute access in many tests

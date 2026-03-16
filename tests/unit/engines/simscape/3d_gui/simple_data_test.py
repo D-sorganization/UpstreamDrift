@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 
 import numpy as np
-import scipy.io
+from scipy.io import loadmat
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ def analyze_matlab_files() -> bool:
     for filename in existing_files:
         logger.debug(f"\n--- Analyzing {filename} ---")
         try:
-            mat_data = scipy.io.loadmat(filename)
+            mat_data = loadmat(filename)
 
             logger.info(f"Keys in {filename}:")
             for key in mat_data:
@@ -66,7 +66,7 @@ def check_signal_bus_structure() -> bool:
 
     try:
         # Load BASEQ to analyze structure
-        mat_data = scipy.io.loadmat("BASEQ.mat")
+        mat_data = loadmat("BASEQ.mat")
 
         if "BASEQ" in mat_data:
             baseq_data = mat_data["BASEQ"]
@@ -91,7 +91,9 @@ def check_signal_bus_structure() -> bool:
                         )
 
                     return True
-                logger.info("⚠️  This appears to be traditional logging (fewer columns)")
+                logger.info(
+                    "⚠️  This appears to be traditional logging (fewer columns)"
+                )
                 return False
 
         return False
@@ -107,9 +109,9 @@ def check_required_signals() -> bool:
 
     try:
         # Load all three files
-        baseq_data = scipy.io.loadmat("BASEQ.mat")
-        ztcfq_data = scipy.io.loadmat("ZTCFQ.mat")
-        delta_data = scipy.io.loadmat("DELTAQ.mat")
+        baseq_data = loadmat("BASEQ.mat")
+        ztcfq_data = loadmat("ZTCFQ.mat")
+        delta_data = loadmat("DELTAQ.mat")
 
         # Check for required signals (these would be column indices in the data)
 
@@ -137,7 +139,9 @@ def check_required_signals() -> bool:
                     if dataset.shape[1] >= 6:  # At least 6 signals for positions
                         logger.info(f"    ✅ {name} has sufficient signals for GUI")
                     else:
-                        logger.warning(f"    ⚠️  {name} may be missing required signals")
+                        logger.warning(
+                            f"    ⚠️  {name} may be missing required signals"
+                        )
 
         return True
 

@@ -38,7 +38,8 @@ def _skip_if_torch_broken(request: pytest.FixtureRequest) -> None:
         return  # torch works just fine — nothing to do
 
     # Check by test name
-    node_id = request.node.nodeid
+    node = request.node
+    node_id = node.nodeid
     for name in _TORCH_DEPENDENT_TESTS:
         if name in node_id:
             pytest.skip("torch DLL incompatible with current Python/OS environment")

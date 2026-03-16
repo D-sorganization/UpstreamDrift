@@ -6,7 +6,9 @@ from PyQt6.QtWidgets import QApplication
 # Mocking parts of the system if needed, but since I have the shared library it should work.
 # We need to make sure PYTHONPATH includes src/
 
-sys.path.append(os.getcwd())
+getcwd = os.getcwd
+sys_path = sys.path
+sys_path.append(getcwd())
 
 
 def verify_launcher_init():
@@ -22,9 +24,11 @@ def verify_launcher_init():
 
         # Check if tabs exist
         if hasattr(launcher, "main_tabs"):
-            print(f"Tabs found: {launcher.main_tabs.count()}")
-            for i in range(launcher.main_tabs.count()):
-                print(f"  Tab {i}: {launcher.main_tabs.tabText(i)}")
+            main_tabs = launcher.main_tabs
+            tab_count = main_tabs.count()
+            print(f"Tabs found: {tab_count}")
+            for i in range(tab_count):
+                print(f"  Tab {i}: {main_tabs.tabText(i)}")
         else:
             print("ERROR: main_tabs not found")
             return False
