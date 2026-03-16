@@ -138,15 +138,17 @@ def build_msi() -> bool:
 def create_installer_info() -> None:
     """Create installer information file."""
     available_engines = detect_physics_engines()
+    major, minor, micro = sys.version_info[:3]
 
     info = {
         "version": "1.0.0",
         "build_date": "2026-01-12",
         "physics_engines": available_engines,
-        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "python_version": f"{major}.{minor}.{micro}",
         "platform": "Windows x64",
     }
 
+    DIST_DIR.mkdir(parents=True, exist_ok=True)
     info_file = DIST_DIR / "installer_info.json"
     import json
 
@@ -204,7 +206,8 @@ def main() -> None:
     output_files = list(DIST_DIR.glob("*"))
     if output_files:
         for file_path in output_files:
-            file_path.stat().st_size / (1024 * 1024)
+            size_mb = os.path.getsize(file_path) / (1024 * 1024)
+            print(f"Generated {file_path.name} ({size_mb:.2f} MB)")  # noqa: T201
 
 
 if __name__ == "__main__":

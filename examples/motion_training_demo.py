@@ -21,7 +21,11 @@ import sys
 from pathlib import Path
 
 # Add the motion_training module to path
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(
+    0,
+    str(PROJECT_ROOT / "src" / "engines" / "physics_engines" / "pinocchio" / "python"),
+)
 
 
 def parse_args():
@@ -90,6 +94,9 @@ def parse_args():
 
 def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: Path):
     """Run trajectory analysis and generate plots."""
+    assert trajectory_path is not None, "trajectory_path required"
+    assert sheet_name, "sheet_name required"
+    assert output_dir is not None, "output_dir required"
     from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
     print("\n=== Trajectory Analysis ===")
@@ -98,12 +105,13 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
 
     print(f"Loaded trajectory: {trajectory.num_frames} frames")
     print(f"Duration: {trajectory.duration:.3f} seconds")
+    events = trajectory.events
     print("Events:")
-    print(f"  Address (A): frame {trajectory.events.address}")
-    print(f"  Top (T): frame {trajectory.events.top}")
-    print(f"  Impact (I): frame {trajectory.events.impact}")
-    print(f"  Finish (F): frame {trajectory.events.finish}")
-    print(f"  Club head speed: {trajectory.events.club_head_speed} mph")
+    print(f"  Address (A): frame {events.address}")
+    print(f"  Top (T): frame {events.top}")
+    print(f"  Impact (I): frame {events.impact}")
+    print(f"  Finish (F): frame {events.finish}")
+    print(f"  Club head speed: {events.club_head_speed} mph")
 
     # Generate 3D plot
     try:
@@ -125,6 +133,9 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
 
 
 def _parse_and_subsample(trajectory_path, sheet_name, subsample):
+    assert trajectory_path is not None, "trajectory_path required"
+    assert sheet_name, "sheet_name required"
+    assert subsample > 0, "subsample must be positive"
     from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
     print("\n[1/5] Parsing club trajectory...")
@@ -142,6 +153,8 @@ def _parse_and_subsample(trajectory_path, sheet_name, subsample):
 
 
 def _init_and_solve_ik(urdf_path, trajectory):
+    assert urdf_path is not None, "urdf_path required"
+    assert trajectory is not None, "trajectory required"
     from motion_training.dual_hand_ik_solver import (
         IKSolverSettings,
         create_ik_solver,
@@ -159,7 +172,8 @@ def _init_and_solve_ik(urdf_path, trajectory):
             urdf_path=urdf_path,
             settings=settings,
         )
-        print(f"      Model DOF: {solver.model.nq}")
+        solver_model = solver.model
+        print(f"      Model DOF: {solver_model.nq}")
     except Exception as e:
         print(f"      Error loading model: {e}")
         print("      Try running with --plot-only to skip IK")
@@ -180,6 +194,9 @@ def _init_and_solve_ik(urdf_path, trajectory):
 
 
 def _export_results(ik_result, trajectory, output_dir):
+    assert ik_result is not None, "ik_result required"
+    assert trajectory is not None, "trajectory required"
+    assert output_dir is not None, "output_dir required"
     from motion_training.trajectory_exporter import TrajectoryExporter
 
     print("\n[4/5] Exporting results...")
@@ -227,7 +244,8 @@ def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback):
             from motion_training.motion_visualizer import MotionVisualizer
 
             motion_viz = MotionVisualizer(urdf_path=urdf_path)
-            print(f"      Open in browser: {motion_viz.viewer.url()}")
+            viewer = motion_viz.viewer
+            print(f"      Open in browser: {viewer.url()}")
 
             if playback:
                 print("      Press Ctrl+C to stop playback")
@@ -252,6 +270,10 @@ def run_ik_demo(
     playback: bool = False,
 ):
     """Run the full IK demo."""
+    assert trajectory_path is not None, "trajectory_path required"
+    assert sheet_name, "sheet_name required"
+    assert urdf_path is not None, "urdf_path required"
+    assert output_dir is not None, "output_dir required"
     print("\n" + "=" * 60)
     print("Motion Training Demo")
     print("=" * 60)

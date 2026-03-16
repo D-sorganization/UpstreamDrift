@@ -13,11 +13,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+project_root = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(project_root))
 
-import numpy as np
+import numpy as np  # noqa: E402
 
-from src.shared.python.physics.aerodynamics import (
+from src.shared.python.physics.aerodynamics import (  # noqa: E402
     AerodynamicsConfig,
     AerodynamicsEngine,
 )
@@ -25,14 +26,19 @@ from src.shared.python.physics.aerodynamics import (
 
 def _report_forces(engine: AerodynamicsEngine, speed_ms: float, label: str) -> None:
     """Print force components for a ball travelling at *speed_ms* m/s."""
+    assert engine is not None, "Engine must be provided"
+    assert speed_ms >= 0.0, "Speed must be non-negative"
+    assert label, "Label must not be empty"
+    
     velocity = np.array([speed_ms, 0.0, 0.0])
     spin = np.array([0.0, 300.0, 0.0])  # ~2 870 rpm back-spin
 
     forces = engine.compute_forces(velocity, spin)
-    drag_n = float(np.linalg.norm(forces["drag"]))
-    lift_n = float(np.linalg.norm(forces["lift"]))
-    magnus_n = float(np.linalg.norm(forces["magnus"]))
-    total_n = float(np.linalg.norm(forces["total"]))
+    import numpy.linalg as npla
+    drag_n = float(npla.norm(forces["drag"]))
+    lift_n = float(npla.norm(forces["lift"]))
+    magnus_n = float(npla.norm(forces["magnus"]))
+    total_n = float(npla.norm(forces["total"]))
 
     print(
         f"{label:30s}  speed={speed_ms:5.1f} m/s"

@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 # Allow running from repo root without installing the package
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import numpy as np
 
