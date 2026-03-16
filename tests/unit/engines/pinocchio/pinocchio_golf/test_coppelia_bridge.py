@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.pinocchio_golf.coppelia_bridge."""
+"""Tests for src.engines.physics_engines.pinocchio.python.pinocchio_golf.coppelia_bridge."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.pinocchio_golf.coppelia_bridge
+        import src.engines.physics_engines.pinocchio.python.pinocchio_golf.coppelia_bridge
 
         assert (
-            engines.physics_engines.pinocchio.python.pinocchio_golf.coppelia_bridge
+            src.engines.physics_engines.pinocchio.python.pinocchio_golf.coppelia_bridge
             is not None
         )
     except ImportError as e:

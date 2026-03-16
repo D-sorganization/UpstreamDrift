@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.motion_training.motion_visualizer."""
+"""Tests for src.engines.physics_engines.pinocchio.python.motion_training.motion_visualizer."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.motion_training.motion_visualizer
+        import src.engines.physics_engines.pinocchio.python.motion_training.motion_visualizer
 
         assert (
-            engines.physics_engines.pinocchio.python.motion_training.motion_visualizer
+            src.engines.physics_engines.pinocchio.python.motion_training.motion_visualizer
             is not None
         )
     except ImportError as e:

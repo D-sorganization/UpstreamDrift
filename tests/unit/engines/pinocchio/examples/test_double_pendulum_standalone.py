@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.examples.double_pendulum_standalone."""
+"""Tests for src.engines.physics_engines.pinocchio.python.examples.double_pendulum_standalone."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.examples.double_pendulum_standalone
+        import src.engines.physics_engines.pinocchio.python.examples.double_pendulum_standalone
 
         assert (
-            engines.physics_engines.pinocchio.python.examples.double_pendulum_standalone
+            src.engines.physics_engines.pinocchio.python.examples.double_pendulum_standalone
             is not None
         )
     except ImportError as e:

@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend."""
+"""Tests for src.engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend
+        import src.engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend
 
         assert (
-            engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend
+            src.engines.physics_engines.pinocchio.python.dtack.backends.mujoco_backend
             is not None
         )
     except ImportError as e:
