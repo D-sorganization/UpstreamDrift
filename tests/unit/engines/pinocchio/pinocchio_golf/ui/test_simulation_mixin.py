@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin."""
+"""Tests for src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin
+        import src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin
 
         assert (
-            engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin
+            src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin
             is not None
         )
     except ImportError as e:

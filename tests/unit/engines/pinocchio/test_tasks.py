@@ -20,8 +20,8 @@ def mock_pinocchio_env() -> Generator[None, None, None]:
     }
     with patch.dict(sys.modules, mock_mods):
         # Clean up module under test to ensure it imports mocks
-        if "engines.physics_engines.pinocchio.python.dtack.ik.tasks" in sys.modules:
-            del sys.modules["engines.physics_engines.pinocchio.python.dtack.ik.tasks"]
+        if "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks" in sys.modules:
+            del sys.modules["src.engines.physics_engines.pinocchio.python.dtack.ik.tasks"]
         yield
 
 
@@ -30,7 +30,7 @@ def test_create_joint_coupling_task(mock_pinocchio_env) -> None:
     # This is the mocked pinocchio
     import pinocchio as pin  # noqa: I001
 
-    from engines.physics_engines.pinocchio.python.dtack.ik.tasks import (  # noqa: I001
+    from src.engines.physics_engines.pinocchio.python.dtack.ik.tasks import (  # noqa: I001
         create_joint_coupling_task,
     )
 

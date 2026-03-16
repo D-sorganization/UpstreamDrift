@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.dtack.utils.optical_parser."""
+"""Tests for src.engines.physics_engines.pinocchio.python.dtack.utils.optical_parser."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.dtack.utils.optical_parser
+        import src.engines.physics_engines.pinocchio.python.dtack.utils.optical_parser
 
         assert (
-            engines.physics_engines.pinocchio.python.dtack.utils.optical_parser
+            src.engines.physics_engines.pinocchio.python.dtack.utils.optical_parser
             is not None
         )
     except ImportError as e:

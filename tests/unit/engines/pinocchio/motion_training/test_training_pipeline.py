@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.motion_training.training_pipeline."""
+"""Tests for src.engines.physics_engines.pinocchio.python.motion_training.training_pipeline."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.motion_training.training_pipeline
+        import src.engines.physics_engines.pinocchio.python.motion_training.training_pipeline
 
         assert (
-            engines.physics_engines.pinocchio.python.motion_training.training_pipeline
+            src.engines.physics_engines.pinocchio.python.motion_training.training_pipeline
             is not None
         )
     except ImportError as e:

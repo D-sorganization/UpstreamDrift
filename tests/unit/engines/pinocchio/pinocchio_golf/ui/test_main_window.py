@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window."""
+"""Tests for src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window
+        import src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window
 
         assert (
-            engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window
+            src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window
             is not None
         )
     except ImportError as e:

@@ -1,4 +1,4 @@
-"""Tests for engines.physics_engines.pinocchio.python.pinocchio_golf.manipulability."""
+"""Tests for src.engines.physics_engines.pinocchio.python.pinocchio_golf.manipulability."""
 
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 def test_import():
     """Verify the module can be imported."""
     try:
-        import engines.physics_engines.pinocchio.python.pinocchio_golf.manipulability
+        import src.engines.physics_engines.pinocchio.python.pinocchio_golf.manipulability
 
         assert (
-            engines.physics_engines.pinocchio.python.pinocchio_golf.manipulability
+            src.engines.physics_engines.pinocchio.python.pinocchio_golf.manipulability
             is not None
         )
     except ImportError as e:
