@@ -19,12 +19,11 @@ if TYPE_CHECKING:
     from PIL.Image import Image as PILImage
 
 # Configure logging
-from src.shared.python.launcher_utils import (
+from src.shared.python.gui_pkg.launcher_utils import (
     check_python_dependencies,
     get_repo_root,
     git_sync_repository,
 )
-
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
 setup_logging()

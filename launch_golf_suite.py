@@ -19,7 +19,8 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("golf_launcher")
 
 
-def main():
+def parse_arguments() -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Golf Modeling Suite - Biomechanical Golf Simulation",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -68,7 +69,12 @@ Examples:
         help="Don't auto-open browser",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def route_launch(args: argparse.Namespace) -> None:
+    """Route the launch based on parsed arguments."""
+    assert args is not None, "Parsed arguments must be provided"
 
     if args.engine:
         # Direct engine launch (legacy support)
@@ -104,6 +110,7 @@ Examples:
         except ImportError:
             logger.error("Could not load classic launcher. Check installation.")
             exit(1)
+
     elif args.api_only:
         # API server only
         environ["GOLF_NO_BROWSER"] = "true"
@@ -111,6 +118,7 @@ Examples:
         from src.api.local_server import main as api_main
 
         api_main()
+
     else:
         # Default: Web UI (recommended)
         environ["GOLF_PORT"] = str(args.port)
@@ -119,6 +127,12 @@ Examples:
         from src.api.local_server import main as server_main
 
         server_main()
+
+
+def main() -> None:
+    """Main entry point for unified launcher."""
+    args = parse_arguments()
+    route_launch(args)
 
 
 if __name__ == "__main__":
