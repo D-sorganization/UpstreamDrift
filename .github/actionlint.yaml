@@ -1,0 +1,6 @@
+self-hosted-runner:
+  labels:
+    - d-sorg-fleet-4core
+    - ubuntu-latest
+    - ubuntu-22.04
+    - ubuntu-24.04
