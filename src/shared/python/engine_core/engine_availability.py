@@ -30,554 +30,207 @@ Usage:
 from __future__ import annotations
 
 import functools
+import importlib
+import logging
+import os
+import sys
 from collections.abc import Callable
+from enum import Enum
 from typing import Any, TypeVar
 
-# Engine availability flags - evaluated at import time
-MUJOCO_AVAILABLE: bool = False
-PINOCCHIO_AVAILABLE: bool = False
-DRAKE_AVAILABLE: bool = False
-OPENSIM_AVAILABLE: bool = False
-MYOSUITE_AVAILABLE: bool = False
-MEDIAPIPE_AVAILABLE: bool = False
-DM_CONTROL_AVAILABLE: bool = False
-PYTORCH_AVAILABLE: bool = False
-TENSORFLOW_AVAILABLE: bool = False
-MYOCONVERTER_AVAILABLE: bool = False
-OPENPOSE_AVAILABLE: bool = False
-SCIPY_AVAILABLE: bool = False
-MATPLOTLIB_AVAILABLE: bool = False
+logger = logging.getLogger(__name__)
 
-# Data & I/O library flags
-NUMPY_AVAILABLE: bool = False
-PANDAS_AVAILABLE: bool = False
-PYARROW_AVAILABLE: bool = False
-FASTPARQUET_AVAILABLE: bool = False
-HDF5_AVAILABLE: bool = False
-EZC3D_AVAILABLE: bool = False
-C3D_AVAILABLE: bool = False
-YAML_AVAILABLE: bool = False
 
-# GUI library flags
-PYQT6_AVAILABLE: bool = False
-PYQT5_AVAILABLE: bool = False
-PYSIDE6_AVAILABLE: bool = False
-PYTEST_QT_AVAILABLE: bool = False
+class EngineStatus(Enum):
+    AVAILABLE = "available"
+    NOT_INSTALLED = "not_installed"
+    BROKEN = "broken"
 
-# Additional optional library flags
-PIL_AVAILABLE: bool = False
-CV2_AVAILABLE: bool = False
-STRUCTLOG_AVAILABLE: bool = False
-GYMNASIUM_AVAILABLE: bool = False
-GYM_AVAILABLE: bool = False
-URDFPY_AVAILABLE: bool = False
-TRIMESH_AVAILABLE: bool = False
-MOVIEPY_AVAILABLE: bool = False
-CX_FREEZE_AVAILABLE: bool = False
-JSONSCHEMA_AVAILABLE: bool = False
-COLORAMA_AVAILABLE: bool = False
-TQDM_AVAILABLE: bool = False
-REQUESTS_AVAILABLE: bool = False
 
-# Scientific computing and ML library flags
-NUMBA_AVAILABLE: bool = False
-FASTDTW_AVAILABLE: bool = False
-SKLEARN_AVAILABLE: bool = False
-PYQTGRAPH_AVAILABLE: bool = False
-SYMPY_AVAILABLE: bool = False
-SKIMAGE_AVAILABLE: bool = False
-SEABORN_AVAILABLE: bool = False
+_engine_status_cache: dict[str, EngineStatus] = {}
+_engine_error_cache: dict[str, Exception] = {}
 
-# Check NumPy (almost always available but good to check)
-try:
-    import numpy  # noqa: F401
 
-    NUMPY_AVAILABLE = True
-except ImportError:
-    pass
+def _probe_engine(
+    engine_name: str,
+    import_name: str | None = None,
+    is_broken_check: Callable[[Exception], bool] | None = None,
+) -> EngineStatus:
+    name = engine_name.lower()
+    if name in _engine_status_cache:
+        return _engine_status_cache[name]
 
-# Check Pandas
-try:
-    import pandas  # noqa: F401
+    if import_name is None:
+        import_name = name
 
-    PANDAS_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check PyArrow
-try:
-    import pyarrow  # noqa: F401
-
-    PYARROW_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check fastparquet
-try:
-    import fastparquet  # noqa: F401
-
-    FASTPARQUET_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check h5py (HDF5)
-try:
-    import h5py  # noqa: F401
-
-    HDF5_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check ezc3d (C3D file format)
-try:
-    import ezc3d  # noqa: F401
-
-    EZC3D_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check c3d (alternative C3D library)
-try:
-    import c3d  # noqa: F401
-
-    C3D_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check PyYAML
-try:
-    import yaml  # type: ignore  # noqa: F401
-
-    YAML_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check PyQt6
-try:
-    from PyQt6 import QtWidgets as _PyQt6Widgets  # noqa: F401
-
-    PYQT6_AVAILABLE = True
-    del _PyQt6Widgets
-except (ImportError, OSError):
-    pass
-
-# Check PyQt5
-try:
-    from PyQt5 import QtWidgets as _PyQt5Widgets  # noqa: F401
-
-    PYQT5_AVAILABLE = True
-    del _PyQt5Widgets
-except (ImportError, OSError):
-    pass
-
-# Check PySide6
-try:
-    from PySide6 import QtWidgets as _PySide6Widgets  # noqa: F401
-
-    PYSIDE6_AVAILABLE = True
-    del _PySide6Widgets
-except (ImportError, OSError):
-    pass
-
-# Check pytest-qt (for Qt widget testing)
-try:
-    import pytestqt  # noqa: F401
-
-    PYTEST_QT_AVAILABLE = True
-except ImportError:
-    pass
-
-# Derived availability flags
-PARQUET_AVAILABLE: bool = PYARROW_AVAILABLE or FASTPARQUET_AVAILABLE
-QT_AVAILABLE: bool = PYQT6_AVAILABLE or PYQT5_AVAILABLE or PYSIDE6_AVAILABLE
-
-# Check MuJoCo
-# On Windows with Python 3.13+, mujoco has DLL loading issues that cause crashes
-# We skip the import entirely in this case to prevent access violations
-import os as _os  # noqa: E402
-import sys as _sys  # noqa: E402
-
-_skip_mujoco = (
-    _sys.platform == "win32"
-    and _sys.version_info >= (3, 13)
-    and _os.environ.get("SKIP_MUJOCO_IMPORT", "").lower() == "true"
-)
-
-if _skip_mujoco:
-    import logging  # noqa: E402
-
-    logging.getLogger(__name__).warning(
-        "Skipping MuJoCo import on Windows Python 3.13+ due to DLL issues. "
-        "Set FORCE_MUJOCO_IMPORT=true to override."
-    )
-else:
-    # Set plugin path before import to reduce plugin loading issues
-    if "MUJOCO_PLUGIN_PATH" not in _os.environ:
-        _os.environ["MUJOCO_PLUGIN_PATH"] = ""
+    # Windows specfic skip for MuJoCo
+    if name == "mujoco":
+        if (
+            sys.platform == "win32"
+            and sys.version_info >= (3, 13)
+            and os.environ.get("SKIP_MUJOCO_IMPORT", "").lower() == "true"
+        ):
+            logger.warning(
+                "Skipping MuJoCo import on Windows Python 3.13+ due to DLL issues. Set FORCE_MUJOCO_IMPORT=true to override."
+            )
+            _engine_status_cache[name] = EngineStatus.BROKEN
+            return EngineStatus.BROKEN
+        if "MUJOCO_PLUGIN_PATH" not in os.environ:
+            os.environ["MUJOCO_PLUGIN_PATH"] = ""
 
     try:
-        import mujoco  # noqa: F401
-
-        MUJOCO_AVAILABLE = True
-    except ImportError:
-        pass
-    except OSError as e:
-        # Handle DLL loading failures on Windows (e.g., plugin initialization errors)
-        import logging  # noqa: E402
-
-        logging.getLogger(__name__).warning(f"MuJoCo DLL loading failed: {e}")
-
-# Check Pinocchio
-try:
-    import pinocchio  # noqa: F401
-
-    PINOCCHIO_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check Drake
-# Test pydrake.all to verify full installation (bare import pydrake
-# succeeds on incomplete installs).
-try:
-    import pydrake.all  # noqa: F401
-
-    DRAKE_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Check OpenSim
-try:
-    import opensim  # noqa: F401
-
-    OPENSIM_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check MyoSuite
-try:
-    import myosuite  # noqa: F401
-
-    MYOSUITE_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check MediaPipe
-try:
-    import mediapipe  # noqa: F401
-
-    MEDIAPIPE_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check dm_control
-try:
-    import dm_control  # noqa: F401
-
-    DM_CONTROL_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check PyTorch
-try:
-    import torch  # noqa: F401
-
-    PYTORCH_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Check TensorFlow
-try:
-    import tensorflow  # noqa: F401
-
-    TENSORFLOW_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Check MyoConverter
-try:
-    import myoconverter  # noqa: F401
-
-    MYOCONVERTER_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Check OpenPose (Python bindings are named 'pyopenpose', not 'openpose')
-try:
-    import pyopenpose  # noqa: F401
-
-    OPENPOSE_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Check SciPy
-try:
-    import scipy  # noqa: F401
-
-    SCIPY_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check Matplotlib
-try:
-    import matplotlib  # noqa: F401
-
-    MATPLOTLIB_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check PIL/Pillow
-try:
-    from PIL import Image  # noqa: F401
-
-    PIL_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check OpenCV
-try:
-    import cv2  # noqa: F401
-
-    CV2_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check structlog
-try:
-    import structlog  # noqa: F401
-
-    STRUCTLOG_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check gymnasium (new OpenAI Gym)
-try:
-    import gymnasium  # noqa: F401
-
-    GYMNASIUM_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check gym (legacy OpenAI Gym)
-try:
-    import gym  # noqa: F401
-
-    GYM_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check urdfpy
-try:
-    import urdfpy  # noqa: F401
-
-    URDFPY_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check trimesh
-try:
-    import trimesh  # noqa: F401
-
-    TRIMESH_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check moviepy
-try:
-    import moviepy  # noqa: F401
-
-    MOVIEPY_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check cx_Freeze (for installers)
-try:
-    import cx_Freeze  # noqa: F401
-
-    CX_FREEZE_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check jsonschema
-try:
-    import jsonschema  # noqa: F401
-
-    JSONSCHEMA_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check colorama
-try:
-    import colorama  # noqa: F401
-
-    COLORAMA_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check tqdm
-try:
-    import tqdm  # noqa: F401
-
-    TQDM_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check requests
-try:
-    import requests  # type: ignore  # noqa: F401
-
-    REQUESTS_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check Numba (JIT compilation)
-try:
-    import numba  # noqa: F401
-
-    NUMBA_AVAILABLE = True
-except (ImportError, OSError):
-    pass
-
-# Check fastdtw (Dynamic Time Warping)
-try:
-    import fastdtw  # noqa: F401
-
-    FASTDTW_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check scikit-learn
-try:
-    import sklearn  # noqa: F401
-
-    SKLEARN_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check pyqtgraph
-try:
-    import pyqtgraph  # noqa: F401
-
-    PYQTGRAPH_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check SymPy (symbolic math)
-try:
-    import sympy  # noqa: F401
-
-    SYMPY_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check scikit-image
-try:
-    import skimage  # noqa: F401
-
-    SKIMAGE_AVAILABLE = True
-except ImportError:
-    pass
-
-# Check seaborn
-try:
-    import seaborn  # noqa: F401
-
-    SEABORN_AVAILABLE = True
-except ImportError:
-    pass
-
-# Derived availability flags
-GYM_ANY_AVAILABLE: bool = GYMNASIUM_AVAILABLE or GYM_AVAILABLE
-
-# Mapping of engine names to availability flags
-_ENGINE_FLAGS: dict[str, bool] = {
-    # Physics engines
-    "mujoco": MUJOCO_AVAILABLE,
-    "pinocchio": PINOCCHIO_AVAILABLE,
-    "drake": DRAKE_AVAILABLE,
-    "opensim": OPENSIM_AVAILABLE,
-    "myosuite": MYOSUITE_AVAILABLE,
-    "dm_control": DM_CONTROL_AVAILABLE,
-    # ML frameworks
-    "pytorch": PYTORCH_AVAILABLE,
-    "torch": PYTORCH_AVAILABLE,  # Alias
-    "tensorflow": TENSORFLOW_AVAILABLE,
-    "tf": TENSORFLOW_AVAILABLE,  # Alias
-    # Pose estimation
-    "mediapipe": MEDIAPIPE_AVAILABLE,
-    "myoconverter": MYOCONVERTER_AVAILABLE,
-    "openpose": OPENPOSE_AVAILABLE,
-    # Scientific computing
-    "scipy": SCIPY_AVAILABLE,
-    "matplotlib": MATPLOTLIB_AVAILABLE,
-    "numpy": NUMPY_AVAILABLE,
-    "pandas": PANDAS_AVAILABLE,
-    # Data I/O
-    "pyarrow": PYARROW_AVAILABLE,
-    "fastparquet": FASTPARQUET_AVAILABLE,
-    "parquet": PARQUET_AVAILABLE,
-    "hdf5": HDF5_AVAILABLE,
-    "h5py": HDF5_AVAILABLE,  # Alias
-    # C3D file format libraries (two packages exist: ezc3d and c3d)
-    "ezc3d": EZC3D_AVAILABLE,  # ezc3d package (recommended)
-    "c3d": EZC3D_AVAILABLE,  # Backwards-compatible alias for ezc3d
-    "c3d_pkg": C3D_AVAILABLE,  # c3d package (alternative to ezc3d)
-    "c3d_any": EZC3D_AVAILABLE or C3D_AVAILABLE,  # Either C3D library available
-    "yaml": YAML_AVAILABLE,
-    "pyyaml": YAML_AVAILABLE,  # Alias
-    # GUI frameworks
-    "pyqt6": PYQT6_AVAILABLE,
-    "pyqt5": PYQT5_AVAILABLE,
-    "pyside6": PYSIDE6_AVAILABLE,
-    "qt": QT_AVAILABLE,
-    "pytest_qt": PYTEST_QT_AVAILABLE,
-    "pytestqt": PYTEST_QT_AVAILABLE,  # Alias
-    # Image/Video processing
-    "pil": PIL_AVAILABLE,
-    "pillow": PIL_AVAILABLE,  # Alias
-    "cv2": CV2_AVAILABLE,
-    "opencv": CV2_AVAILABLE,  # Alias
-    "moviepy": MOVIEPY_AVAILABLE,
-    # Robotics/Simulation
-    "urdfpy": URDFPY_AVAILABLE,
-    "trimesh": TRIMESH_AVAILABLE,
-    "gymnasium": GYMNASIUM_AVAILABLE,
-    "gym": GYM_AVAILABLE,
-    "gym_any": GYM_ANY_AVAILABLE,
-    # Utilities
-    "structlog": STRUCTLOG_AVAILABLE,
-    "cx_freeze": CX_FREEZE_AVAILABLE,
-    "jsonschema": JSONSCHEMA_AVAILABLE,
-    "colorama": COLORAMA_AVAILABLE,
-    "tqdm": TQDM_AVAILABLE,
-    "requests": REQUESTS_AVAILABLE,
-    # Scientific computing and ML
-    "numba": NUMBA_AVAILABLE,
-    "fastdtw": FASTDTW_AVAILABLE,
-    "sklearn": SKLEARN_AVAILABLE,
-    "scikit-learn": SKLEARN_AVAILABLE,  # Alias
-    "pyqtgraph": PYQTGRAPH_AVAILABLE,
-    "sympy": SYMPY_AVAILABLE,
-    "skimage": SKIMAGE_AVAILABLE,
-    "scikit-image": SKIMAGE_AVAILABLE,  # Alias
-    "seaborn": SEABORN_AVAILABLE,
+        if import_name == "drake":
+            importlib.import_module("pydrake.all")
+        elif import_name == "torch":
+            importlib.import_module("torch")
+        elif import_name == "tf":
+            importlib.import_module("tensorflow")
+        elif import_name == "pyopenpose":
+            importlib.import_module("pyopenpose")
+        elif import_name == "h5py":
+            importlib.import_module("h5py")
+        elif import_name == "yaml":
+            importlib.import_module("yaml")
+        elif import_name == "pillow":
+            importlib.import_module("PIL.Image")
+        elif import_name == "pyqt6":
+            importlib.import_module("PyQt6.QtWidgets")
+        elif import_name == "pyqt5":
+            importlib.import_module("PyQt5.QtWidgets")
+        elif import_name == "pyside6":
+            importlib.import_module("PySide6.QtWidgets")
+        else:
+            importlib.import_module(import_name)
+
+        _engine_status_cache[name] = EngineStatus.AVAILABLE
+    except ImportError as e:
+        _engine_status_cache[name] = EngineStatus.NOT_INSTALLED
+        _engine_error_cache[name] = e
+    except Exception as e:
+        # Any other exception during load means it's broken
+        if is_broken_check is None or is_broken_check(e):
+            _engine_status_cache[name] = EngineStatus.BROKEN
+            _engine_error_cache[name] = e
+            logger.warning(f"{import_name} loading failed: {e}")
+        else:
+            _engine_status_cache[name] = EngineStatus.NOT_INSTALLED
+            _engine_error_cache[name] = e
+
+    return _engine_status_cache[name]
+
+
+_MODULE_MAPPING = {
+    "mujoco": "mujoco",
+    "pinocchio": "pinocchio",
+    "drake": "drake",
+    "opensim": "opensim",
+    "myosuite": "myosuite",
+    "dm_control": "dm_control",
+    "pytorch": "torch",
+    "torch": "torch",
+    "tensorflow": "tensorflow",
+    "tf": "tensorflow",
+    "mediapipe": "mediapipe",
+    "myoconverter": "myoconverter",
+    "openpose": "pyopenpose",
+    "scipy": "scipy",
+    "matplotlib": "matplotlib",
+    "numpy": "numpy",
+    "pandas": "pandas",
+    "pyarrow": "pyarrow",
+    "fastparquet": "fastparquet",
+    "hdf5": "h5py",
+    "h5py": "h5py",
+    "ezc3d": "ezc3d",
+    "c3d": "ezc3d",
+    "c3d_pkg": "c3d",
+    "yaml": "yaml",
+    "pyyaml": "yaml",
+    "pyqt6": "pyqt6",
+    "pyqt5": "pyqt5",
+    "pyside6": "pyside6",
+    "pytest_qt": "pytestqt",
+    "pytestqt": "pytestqt",
+    "pil": "pillow",
+    "pillow": "pillow",
+    "cv2": "cv2",
+    "opencv": "cv2",
+    "moviepy": "moviepy",
+    "urdfpy": "urdfpy",
+    "trimesh": "trimesh",
+    "gymnasium": "gymnasium",
+    "gym": "gym",
+    "structlog": "structlog",
+    "cx_freeze": "cx_Freeze",
+    "jsonschema": "jsonschema",
+    "colorama": "colorama",
+    "tqdm": "tqdm",
+    "requests": "requests",
+    "numba": "numba",
+    "fastdtw": "fastdtw",
+    "sklearn": "sklearn",
+    "scikit-learn": "sklearn",
+    "pyqtgraph": "pyqtgraph",
+    "sympy": "sympy",
+    "skimage": "skimage",
+    "scikit-image": "skimage",
+    "seaborn": "seaborn",
 }
 
 
+def get_engine_status(engine_name: str) -> EngineStatus:
+    name = engine_name.lower()
+
+    if name == "parquet":
+        return (
+            EngineStatus.AVAILABLE
+            if (
+                get_engine_status("pyarrow") == EngineStatus.AVAILABLE
+                or get_engine_status("fastparquet") == EngineStatus.AVAILABLE
+            )
+            else EngineStatus.NOT_INSTALLED
+        )
+    if name == "c3d_any":
+        return (
+            EngineStatus.AVAILABLE
+            if (
+                get_engine_status("ezc3d") == EngineStatus.AVAILABLE
+                or get_engine_status("c3d_pkg") == EngineStatus.AVAILABLE
+            )
+            else EngineStatus.NOT_INSTALLED
+        )
+    if name == "qt":
+        return (
+            EngineStatus.AVAILABLE
+            if (
+                get_engine_status("pyqt6") == EngineStatus.AVAILABLE
+                or get_engine_status("pyqt5") == EngineStatus.AVAILABLE
+                or get_engine_status("pyside6") == EngineStatus.AVAILABLE
+            )
+            else EngineStatus.NOT_INSTALLED
+        )
+    if name == "gym_any":
+        return (
+            EngineStatus.AVAILABLE
+            if (
+                get_engine_status("gymnasium") == EngineStatus.AVAILABLE
+                or get_engine_status("gym") == EngineStatus.AVAILABLE
+            )
+            else EngineStatus.NOT_INSTALLED
+        )
+
+    import_name = _MODULE_MAPPING.get(name, name)
+    return _probe_engine(name, import_name)
+
+
+def get_engine_error(engine_name: str) -> Exception | None:
+    get_engine_status(engine_name)
+    return _engine_error_cache.get(engine_name.lower())
+
+
 def is_engine_available(engine_name: str) -> bool:
-    """Check if a physics engine or library is available.
-
-    Args:
-        engine_name: Name of the engine (case-insensitive).
-
-    Returns:
-        True if the engine is importable, False otherwise.
-
-    Example:
-        if is_engine_available("mujoco"):
-            import mujoco
-            model = mujoco.MjModel.from_xml_path(...)
-    """
-    return _ENGINE_FLAGS.get(engine_name.lower(), False)
+    """Check if a physics engine or library is available."""
+    return get_engine_status(engine_name) == EngineStatus.AVAILABLE
 
 
 def get_available_engines() -> list[str]:
@@ -586,7 +239,7 @@ def get_available_engines() -> list[str]:
     Returns:
         List of engine names that are importable.
     """
-    return [name for name, available in _ENGINE_FLAGS.items() if available]
+    return [name for name in _MODULE_MAPPING if is_engine_available(name)]
 
 
 def get_unavailable_engines() -> list[str]:
@@ -595,7 +248,21 @@ def get_unavailable_engines() -> list[str]:
     Returns:
         List of engine names that are not importable.
     """
-    return [name for name, available in _ENGINE_FLAGS.items() if not available]
+    return [name for name in _MODULE_MAPPING if not is_engine_available(name)]
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy evaluation of _AVAILABLE variables without evaluating missing ones prematurely."""
+    if name.endswith("_AVAILABLE"):
+        engine = name[:-10].lower()
+        if engine in _MODULE_MAPPING or engine in (
+            "parquet",
+            "c3d_any",
+            "qt",
+            "gym_any",
+        ):
+            return is_engine_available(engine)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 # Type variable for decorated functions
@@ -603,49 +270,25 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F], F]:
-    """Decorator to skip test/function if engine is not available.
-
-    This is primarily intended for use with pytest tests but can be used
-    with any callable.
-
-    Args:
-        engine_name: Name of the required engine.
-        reason: Optional reason message for skipping.
-
-    Returns:
-        Decorated function that skips if engine unavailable.
-
-    Example:
-        @require_engine("pinocchio")
-        def test_pinocchio_forward_kinematics():
-            import pinocchio
-            ...
-
-        @require_engine("mujoco", reason="MuJoCo required for physics sim")
-        def run_simulation():
-            ...
-    """
+    """Decorator to skip test/function if engine is not available."""
     assert engine_name is not None, "engine_name must be provided"
-    assert engine_name is not None, "engine_name must be provided"
-    skip_reason = reason or f"{engine_name} not installed"
 
     def decorator(func: F) -> F:
-        """Wrap the function to skip or raise when the engine is unavailable."""
-
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            """Check engine availability and skip or raise before execution."""
-            if not is_engine_available(engine_name):
-                # Try to use pytest.skip if available (for test functions)
+            status = get_engine_status(engine_name)
+            if status != EngineStatus.AVAILABLE:
+                msg = reason or f"{engine_name} not available ({status.value})"
+                if status == EngineStatus.BROKEN:
+                    err = get_engine_error(engine_name)
+                    msg += f" - {err}"
                 try:
                     import pytest
 
-                    pytest.skip(skip_reason)
+                    pytest.skip(msg)
                 except ImportError:
-                    # If not in pytest, raise an ImportError
                     raise ImportError(
-                        f"Required engine '{engine_name}' is not available. "
-                        f"{skip_reason}"
+                        f"Required engine '{engine_name}' is not available. {msg}"
                     ) from None
             return func(*args, **kwargs)
 
@@ -655,30 +298,19 @@ def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F],
 
 
 def skip_if_unavailable(engine_name: str) -> Any:
-    """Create a pytest skip marker for unavailable engines.
-
-    This is a convenience function for creating pytest markers.
-
-    Args:
-        engine_name: Name of the engine to check.
-
-    Returns:
-        pytest.mark.skipif marker or raises ImportError if pytest unavailable.
-
-    Example:
-        import pytest
-        from src.shared.python.engine_core.engine_availability import skip_if_unavailable
-
-        @skip_if_unavailable("mujoco")
-        def test_mujoco_jacobian():
-            ...
-    """
+    """Create a pytest skip marker for unavailable engines."""
     try:
         import pytest
 
+        status = get_engine_status(engine_name)
+        msg = f"{engine_name} not installed/broken ({status.value})"
+        if status == EngineStatus.BROKEN:
+            err = get_engine_error(engine_name)
+            msg += f" - {err}"
+
         return pytest.mark.skipif(
-            not is_engine_available(engine_name),
-            reason=f"{engine_name} not installed",
+            status != EngineStatus.AVAILABLE,
+            reason=msg,
         )
     except ImportError:
         raise ImportError(
