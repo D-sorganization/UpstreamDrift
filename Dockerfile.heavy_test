@@ -51,7 +51,7 @@ RUN pip install \
 # ── Heavy physics / robotics engines ─────────────────────────────────────────
 # pinned to last-known-good versions; update deliberately
 RUN pip install \
-    pinocchio \
+    pin \
     pink \
     mujoco \
     mediapipe \
