@@ -36,7 +36,7 @@ permissions:
 
 jobs:
   cross-engine-validation:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet-4core
     timeout-minutes: 60
 
     strategy:
@@ -56,7 +56,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev,drake,pinocchio]"
+          pip install -e ".[dev,drake,pinocchio,opensim,myosuite]"
           pip install "mujoco>=3.3.0,<4.0.0"
 
       - name: Verify native engine imports
@@ -73,7 +73,7 @@ jobs:
         env:
           UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
         run: |
-          pytest tests/integration/test_cross_engine_validation.py \
+          pytest tests/heavy_integration/test_cross_engine_integration.py \
             -v \
             --tb=short \
             --junitxml=test-results/cross-engine-junit.xml \
@@ -168,7 +168,7 @@ jobs:
               1. Review test results in [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
               2. Investigate which engine import or cross-engine assertion failed
               3. Check for recent engine updates or integration changes
-              4. Run local validation: \`pytest tests/integration/test_cross_engine_validation.py -v\`
+              4. Run local validation: \`pytest tests/heavy_integration/test_cross_engine_integration.py -v\`
 
               **Possible Causes:**
               - Engine library version upgrade
