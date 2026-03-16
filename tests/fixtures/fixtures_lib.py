@@ -21,9 +21,9 @@ import pytest
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.engine_core.engine_availability import (
-    DRAKE_AVAILABLE,
-    MUJOCO_AVAILABLE,
-    PINOCCHIO_AVAILABLE,
+    EngineStatus,
+    get_engine_error,
+    get_engine_status,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -92,16 +92,30 @@ def _strict_engine_probes_enabled() -> bool:
 
 def _probe_engine_instance(
     name: str,
-    availability_check: Callable[[], bool],
     loader: Callable[[], Any],
 ) -> EngineInstance:
     """Build an EngineInstance while preserving missing vs broken state."""
-    if not availability_check():
+    status = get_engine_status(name)
+
+    if status == EngineStatus.NOT_INSTALLED:
         return EngineInstance(
             name=name,
             engine=None,
             available=False,
             status=EngineProbeStatus.MISSING,
+        )
+
+    if status == EngineStatus.BROKEN:
+        message = f"{name} import failed: {get_engine_error(name)}"
+        if _strict_engine_probes_enabled():
+            pytest.fail(message)
+        logger.warning(message)
+        return EngineInstance(
+            name=name,
+            engine=None,
+            available=False,
+            status=EngineProbeStatus.BROKEN,
+            error=str(get_engine_error(name)),
         )
 
     try:
@@ -126,22 +140,6 @@ def _probe_engine_instance(
         )
 
 
-# DRY: Use centralized availability flags from engine_availability module
-def _check_mujoco_available() -> bool:
-    """Check if MuJoCo is available (delegates to engine_availability)."""
-    return MUJOCO_AVAILABLE
-
-
-def _check_drake_available() -> bool:
-    """Check if Drake is available (delegates to engine_availability)."""
-    return DRAKE_AVAILABLE
-
-
-def _check_pinocchio_available() -> bool:
-    """Check if Pinocchio is available (delegates to engine_availability)."""
-    return PINOCCHIO_AVAILABLE
-
-
 @pytest.fixture
 def available_engines() -> dict[str, bool]:
     """Return dictionary of engine availability.
@@ -155,9 +153,9 @@ def available_engines() -> dict[str, bool]:
         ...     # MuJoCo tests can run
     """
     return {
-        "MuJoCo": _check_mujoco_available(),
-        "Drake": _check_drake_available(),
-        "Pinocchio": _check_pinocchio_available(),
+        "MuJoCo": get_engine_status("mujoco") == EngineStatus.AVAILABLE,
+        "Drake": get_engine_status("drake") == EngineStatus.AVAILABLE,
+        "Pinocchio": get_engine_status("pinocchio") == EngineStatus.AVAILABLE,
     }
 
 
@@ -195,7 +193,7 @@ def mujoco_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         engine.reset()
         return engine
 
-    return _probe_engine_instance("MuJoCo", _check_mujoco_available, _load_engine)
+    return _probe_engine_instance("MuJoCo", _load_engine)
 
 
 @pytest.fixture
@@ -216,7 +214,7 @@ def drake_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         engine.reset()
         return engine
 
-    return _probe_engine_instance("Drake", _check_drake_available, _load_engine)
+    return _probe_engine_instance("Drake", _load_engine)
 
 
 @pytest.fixture
@@ -237,7 +235,7 @@ def pinocchio_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         engine.reset()
         return engine
 
-    return _probe_engine_instance("Pinocchio", _check_pinocchio_available, _load_engine)
+    return _probe_engine_instance("Pinocchio", _load_engine)
 
 
 @pytest.fixture
