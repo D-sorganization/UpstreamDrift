@@ -134,9 +134,10 @@ class TestLauncherSystemCheck:
             cwd=str(REPO_ROOT),
         )
         # Accept 0 (success) or 2 (unrecognized args — flag not yet implemented)
-        assert result.returncode in (0, 2), (
-            f"Unexpected launcher exit code {result.returncode}:\n{result.stderr}"
-        )
+        assert result.returncode in (
+            0,
+            2,
+        ), f"Unexpected launcher exit code {result.returncode}:\n{result.stderr}"
 
 
 @pytest.mark.live_simulation

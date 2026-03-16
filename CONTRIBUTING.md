@@ -67,6 +67,8 @@ python3 -m mypy .
 python3 -m pytest
 ```
 
+> **Note on Tests**: Because our CI pipeline strictly checks test files, please run `ruff check tests/ --fix` and `black tests/` before submitting to prevent failures on test suites.
+
 ## 🎯 Physics Engine Guidelines
 
 Current support tiers:

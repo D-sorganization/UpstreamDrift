@@ -57,6 +57,7 @@ def pytest_configure(config: pytest.Config) -> None:
         sys.path.insert(0, local_path)
         sys.path.append(vendored_path)
 
+
 # Engine module prefixes whose sys.modules entries must be isolated between
 # tests.  Pinocchio's C extension (pinocchio_pywrap_default) is corrupted by
 # PinocchioProbe.probe(); Drake gets replaced with MagicMock objects by tests

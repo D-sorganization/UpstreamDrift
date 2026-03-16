@@ -48,8 +48,8 @@ def test_model_generation_imports_resolve_from_tools_provider() -> None:
 
     # Execute actual contract behavior instead of just checking callability
     urdf = module.quick_urdf(height_m=1.8, mass_kg=80.0, robot_name="test_robot")
-    assert 'test_robot' in urdf
-    assert '<link' in urdf
+    assert "test_robot" in urdf
+    assert "<link" in urdf
     assert module.DEFAULT_HEIGHT_M > 0
 
 
@@ -59,7 +59,7 @@ def test_upstream_drift_tools_imports_resolve_from_tools_provider() -> None:
 
     state_manager = importlib.import_module("upstream_drift_tools.utils.state_manager")
     _assert_from_tools(Path(state_manager.__file__).resolve())
-    
+
     # Execute actual contract behavior
     manager = state_manager.StateManager()
     manager.save_state("test_key", {"test_key": "test_value"})

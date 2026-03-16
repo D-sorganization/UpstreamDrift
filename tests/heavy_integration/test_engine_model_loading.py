@@ -1,5 +1,7 @@
-import pytest
 from pathlib import Path
+
+import pytest
+
 
 class TestEngineModelCompatibility:
     """Test that physics engines work with different model sources."""
