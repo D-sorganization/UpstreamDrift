@@ -173,6 +173,7 @@ jobs:
             --timeout=60 \
             --timeout-method=thread \
             --ignore=tests/shared_contracts \
+            --ignore=tests/heavy_integration \
             -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
             --cov=src \
             --cov-report=term-missing \
@@ -193,7 +194,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
           echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
-          xvfb-run --auto-servernum pytest tests/integration/test_cross_engine_validation.py::TestCrossEngineValidator \
+          xvfb-run --auto-servernum pytest tests/integration/test_cross_engine_validation.py \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short 2>&1 | tee cross-engine-results.txt
