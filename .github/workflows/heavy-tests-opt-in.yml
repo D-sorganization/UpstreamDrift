@@ -23,9 +23,134 @@ on:
 
 jobs:
   run-heavy-tests:
-    uses: D-sorganization/Repository_Management/.github/workflows/reusable-heavy-tests.yml@main
-    with:
-      repo_name: 'UpstreamDrift'
-      test_path: 'tests/heavy_integration/'
-      python_version: ${{ inputs.python_version || '3.11' }}
-    secrets: inherit
+    name: Heavy Integration Tests
+    runs-on: d-sorg-fleet-4core
+    timeout-minutes: 90
+    env:
+      HEAVY_TEST_SLACK_WEBHOOK: ${{ secrets.HEAVY_TEST_SLACK_WEBHOOK }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python_version || '3.11' }}
+          cache: pip
+
+      - name: Install system display dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            xvfb x11-utils mesa-utils \
+            libgl1 libegl1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
+            libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \
+            libdbus-1-3 libxrandr2 libxss1 libxcursor1 libxcomposite1 \
+            libasound2-dev libxi6 libxtst6
+
+      - name: Install Python dependencies
+        timeout-minutes: 20
+        run: |
+          pip install --upgrade pip
+          if [ -f pyproject.toml ]; then pip install -e ".[dev,test]" || pip install -e .; fi
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install \
+            pinocchio \
+            pink \
+            mujoco \
+            mediapipe \
+            meshcat \
+            pyvista \
+            vtk \
+            scipy \
+            sympy \
+            trimesh \
+            pytest pytest-cov pytest-timeout pytest-xdist
+
+      - name: Verify heavy dependencies
+        run: |
+          python -c "
+          import sys
+          deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy']
+          failures = []
+          for pkg in deps:
+              try:
+                  __import__(pkg)
+                  print(f'OK {pkg}')
+              except ImportError as exc:
+                  failures.append(f'{pkg}: {exc}')
+                  print(f'FAIL {pkg}: {exc}')
+          if failures:
+              sys.exit(1)
+          "
+
+      - name: Run heavy integration tests
+        timeout-minutes: 60
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \
+            pytest \
+              -v \
+              -m "live_simulation" \
+              --timeout=300 \
+              --timeout-method=thread \
+              --tb=short \
+              --no-header \
+              -p no:randomly \
+              --junit-xml=heavy_test_results.xml \
+              --cov=. \
+              --cov-report=xml:heavy_coverage.xml \
+              --cov-report=term-missing \
+              tests/heavy_integration/ \
+            | tee heavy_test_output.log
+
+      - name: Summarize heavy test results
+        if: always()
+        run: |
+          echo "## Heavy Integration Test Report - UpstreamDrift" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Python version: ${{ inputs.python_version || '3.11' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f heavy_test_results.xml ]; then
+            python3 - <<'PYEOF'
+          import os
+          import xml.etree.ElementTree as ET
+          tree = ET.parse('heavy_test_results.xml')
+          root = tree.getroot()
+          suite = root.find('.//testsuite') or root
+          total = int(suite.get('tests', 0))
+          failures = int(suite.get('failures', 0))
+          errors = int(suite.get('errors', 0))
+          skipped = int(suite.get('skipped', 0))
+          passed = total - failures - errors - skipped
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as fh:
+              fh.write(f"| Status | Count |\n|--------|-------|\n")
+              fh.write(f"| Passed | {passed} |\n")
+              fh.write(f"| Failed | {failures} |\n")
+              fh.write(f"| Errors | {errors} |\n")
+              fh.write(f"| Skipped | {skipped} |\n")
+              fh.write(f"| Total | {total} |\n\n")
+          PYEOF
+          fi
+          echo "### Tail of test output" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -40 heavy_test_output.log >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload heavy test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heavy-test-results-UpstreamDrift-${{ github.run_id }}
+          path: |
+            heavy_test_results.xml
+            heavy_test_output.log
+            heavy_coverage.xml
+          retention-days: 30
+
+      - name: Notify on failure
+        if: failure() && env.HEAVY_TEST_SLACK_WEBHOOK != ''
+        run: |
+          curl -s -X POST "$HEAVY_TEST_SLACK_WEBHOOK" \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"Heavy integration tests failed for UpstreamDrift on ${GITHUB_REF_NAME}. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"}"
