@@ -52,7 +52,7 @@ jobs:
           echo "stale=$STALE" >> "$GITHUB_OUTPUT"
 
       - name: Upload status report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: vendor-freshness-report
           path: vendor_status.json

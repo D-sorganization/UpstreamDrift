@@ -153,7 +153,7 @@ jobs:
           echo "critical_issues=$CRITICAL_ISSUES" >> $GITHUB_OUTPUT
 
       - name: Upload Assessment Reports
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: assessment-reports
           path: |

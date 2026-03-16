@@ -110,7 +110,7 @@ jobs:
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: matlab-quality-report
