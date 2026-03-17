@@ -141,8 +141,10 @@ def test_launch_script_unified(mock_popen, manager):
 def test_launch_script_separate_term(mock_popen, manager):
     manager.use_separate_terminals = True
 
+    script_path = Path("/fake/script.py")
+    cwd_path = Path("/fake/cwd")
     with patch("os.name", "nt"):
-        manager.launch_script("Test", Path("/fake/script.py"), Path("/fake/cwd"))
+        manager.launch_script("Test", script_path, cwd_path)
         mock_popen.assert_called_once()
         assert "cmd /c" in mock_popen.call_args[0][0]
 
