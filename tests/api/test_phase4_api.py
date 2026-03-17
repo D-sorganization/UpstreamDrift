@@ -594,7 +594,7 @@ class TestAIPDispatcher:
         registry = MethodRegistry()
         registry.register("test.add", lambda a, b, **kw: a + b)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             dispatch(
                 registry,
                 {
@@ -618,7 +618,7 @@ class TestAIPDispatcher:
 
         registry = MethodRegistry()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             dispatch(
                 registry,
                 {
@@ -640,7 +640,7 @@ class TestAIPDispatcher:
 
         registry = MethodRegistry()
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             dispatch(
                 registry,
                 {
@@ -663,7 +663,7 @@ class TestAIPDispatcher:
         registry = MethodRegistry()
         registry.register("test.noop", lambda **kw: None)
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             dispatch(
                 registry,
                 {
@@ -687,7 +687,7 @@ class TestAIPDispatcher:
             lambda name="world", **kw: f"hello {name}",
         )
 
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             dispatch(
                 registry,
                 {

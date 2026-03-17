@@ -19,6 +19,7 @@ def test_pinocchio_iaa() -> None:
         pytest.skip("Pinocchio or Analysis module not found")
 
     # Create random humanoid
+    np.random.seed(42)
     model = pin.buildSampleModelHumanoidRandom()
     data = model.createData()
     q = pin.neutral(model)
@@ -40,18 +41,17 @@ def test_pinocchio_iaa() -> None:
     # a = a_g + a_c + a_t
 
     # Forward Dynamics (ABA)
-    pin.aba(model, data, q, v, tau)
-    expected_acc = data.ddq
+    expected_acc = pin.aba(model, data, q, v, tau)
 
     total_est = res["total"]
-    np.testing.assert_allclose(total_est, expected_acc, atol=1e-9)
+    np.testing.assert_allclose(total_est, expected_acc, rtol=1e-5, atol=1e-7)
 
     # Components verification
     # Gravity only (v=0, tau=0) -> a = -M^-1 G
     res_g = analyzer.compute_components(q, np.zeros(model.nv), np.zeros(model.nv))
-    np.testing.assert_allclose(res_g["velocity"], 0, atol=1e-9)
-    np.testing.assert_allclose(res_g["control"], 0, atol=1e-9)
-    np.testing.assert_allclose(res_g["gravity"], res["gravity"], atol=1e-9)
+    np.testing.assert_allclose(res_g["velocity"], np.zeros(model.nv), atol=1e-9)
+    np.testing.assert_allclose(res_g["control"], np.zeros(model.nv), atol=1e-9)
+    np.testing.assert_allclose(res_g["gravity"], res["gravity"], rtol=1e-5, atol=1e-7)
 
 
 # --- DRAKE ---

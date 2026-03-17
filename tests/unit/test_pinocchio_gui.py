@@ -43,24 +43,33 @@ class TestPinocchioGUI:
     @pytest.fixture
     def mock_gui(self, qapp):
         """Create a mocked PinocchioGUI instance."""
-        # Use patch for everything that might cause import errors or runtime errors
-        with (
-            patch(
-                "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"
-            ),
-            patch(
-                "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"
-            ),
-            patch(
-                "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
-            ) as mock_urdf,
-        ):
-            mock_urdf.return_value.exists.return_value = False
+        from contextlib import ExitStack
 
-            # Late import to ensure mocks apply
-            from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
-                PinocchioGUI,
+        # Late import to ensure mocks apply
+        from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
+            MESHCAT_AVAILABLE,
+            PinocchioGUI,
+        )
+
+        with ExitStack() as stack:
+            if MESHCAT_AVAILABLE:
+                stack.enter_context(
+                    patch(
+                        "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"
+                    )
+                )
+                stack.enter_context(
+                    patch(
+                        "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"
+                    )
+                )
+
+            mock_urdf = stack.enter_context(
+                patch(
+                    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
+                )
             )
+            mock_urdf.return_value.exists.return_value = False
 
             gui = PinocchioGUI()
             return gui
