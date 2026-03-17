@@ -3,6 +3,8 @@ import sys
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication, QDoubleSpinBox, QLabel, QSlider
 
+_HORIZONTAL = Qt.Orientation.Horizontal
+
 
 class MockWindowFix:
     def __init__(self) -> None:
@@ -11,7 +13,7 @@ class MockWindowFix:
         self.actuator_labels = []
         self.control_system_calls = 0
 
-        self.slider = QSlider(Qt.Orientation.Horizontal)
+        self.slider = QSlider(_HORIZONTAL)
         self.slider.setMinimum(-100)
         self.slider.setMaximum(100)
 

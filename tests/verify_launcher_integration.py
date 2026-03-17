@@ -25,10 +25,12 @@ def verify_launcher_init():
         # Check if tabs exist
         if hasattr(launcher, "main_tabs"):
             main_tabs = launcher.main_tabs
+            assert main_tabs is not None, "main_tabs must not be None"
             tab_count = main_tabs.count()
             print(f"Tabs found: {tab_count}")
             for i in range(tab_count):
-                print(f"  Tab {i}: {main_tabs.tabText(i)}")
+                tab_text = main_tabs.tabText(i)
+                print(f"  Tab {i}: {tab_text}")
         else:
             print("ERROR: main_tabs not found")
             return False

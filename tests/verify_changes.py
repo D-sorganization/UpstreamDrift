@@ -93,12 +93,13 @@ class TestVerification(unittest.TestCase):
                     capture_output=True,
                     text=True,
                 )
-                if result.returncode == 0:
+                returncode = result.returncode
+                stdout = result.stdout
+                stderr = result.stderr
+                if returncode == 0:
                     print(f"✅ {file_path} passed quality check.")
                 else:
-                    print(
-                        f"❌ {file_path} FAILED quality check:\n{result.stdout}\n{result.stderr}"
-                    )
+                    print(f"❌ {file_path} FAILED quality check:\n{stdout}\n{stderr}")
                     # We don't fail the test here to let others run, but ideally we should
                     # self.fail(f"Code quality check failed for {file_path}")
 

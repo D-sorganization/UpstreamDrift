@@ -324,10 +324,15 @@ def set_identical_state(
         q: Joint positions to set.
         v: Joint velocities to set.
     """
+    assert isinstance(engines, list), "engines must be a list"
+    assert isinstance(q, np.ndarray), "q must be a numpy array"
+    assert isinstance(v, np.ndarray), "v must be a numpy array"
     for eng in engines:
-        if eng.available and eng.engine is not None:
-            eng.engine.set_state(q, v)
-            eng.engine.forward()
+        eng_available = eng.available
+        eng_engine = eng.engine
+        if eng_available and eng_engine is not None:
+            eng_engine.set_state(q, v)
+            eng_engine.forward()
 
 
 def get_states(
@@ -341,10 +346,13 @@ def get_states(
     Returns:
         Dictionary mapping engine names to (q, v) tuples.
     """
+    assert isinstance(engines, list), "engines must be a list"
     states = {}
     for eng in engines:
-        if eng.available and eng.engine is not None:
-            q, v = eng.engine.get_state()
+        eng_available = eng.available
+        eng_engine = eng.engine
+        if eng_available and eng_engine is not None:
+            q, v = eng_engine.get_state()
             states[eng.name] = (q, v)
     return states
 
@@ -365,14 +373,17 @@ def compute_accelerations(engines: list[EngineInstance]) -> dict[str, np.ndarray
         The negative sign follows from the bias-force convention used by
         MuJoCo, Drake, and Pinocchio.
     """
+    assert isinstance(engines, list), "engines must be a list"
     accelerations = {}
     for eng in engines:
-        if eng.available and eng.engine is not None:
+        eng_available = eng.available
+        eng_engine = eng.engine
+        if eng_available and eng_engine is not None:
             # Compute forward kinematics/dynamics
-            eng.engine.forward()
+            eng_engine.forward()
             # Get acceleration from bias forces and mass matrix
-            M = eng.engine.compute_mass_matrix()
-            bias = eng.engine.compute_bias_forces()
+            M = eng_engine.compute_mass_matrix()
+            bias = eng_engine.compute_bias_forces()
             if M.size > 0 and bias.size > 0:
                 # NOTE: The leading minus sign follows the bias-force convention
                 # For tau = 0: M * qacc = -bias => qacc = -M^-1 * bias
