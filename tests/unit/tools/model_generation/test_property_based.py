@@ -477,12 +477,12 @@ class TestMirrorInvolution:
         result_joint = builder.joints[0]
 
         for i in range(3):
-            assert abs(result_joint.origin.xyz[i] - joint_origin[i]) < 1e-10, (
-                f"joint origin[{i}] mismatch after double mirror({axis})"
-            )
-            assert abs(result_joint.axis[i] - joint_axis[i]) < 1e-10, (
-                f"joint axis[{i}] mismatch after double mirror({axis})"
-            )
+            assert (
+                abs(result_joint.origin.xyz[i] - joint_origin[i]) < 1e-10
+            ), f"joint origin[{i}] mismatch after double mirror({axis})"
+            assert (
+                abs(result_joint.axis[i] - joint_axis[i]) < 1e-10
+            ), f"joint axis[{i}] mismatch after double mirror({axis})"
 
     @given(axis=mirror_axis_strategy)
     @settings(max_examples=30)

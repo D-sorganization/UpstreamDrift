@@ -435,12 +435,12 @@ class CooperativeManipulation:
         Returns:
             List of force vectors for each contact.
         """
-        assert desired_object_wrench is not None, (
-            "desired_object_wrench must be provided"
-        )
-        assert desired_object_wrench is not None, (
-            "desired_object_wrench must be provided"
-        )
+        assert (
+            desired_object_wrench is not None
+        ), "desired_object_wrench must be provided"
+        assert (
+            desired_object_wrench is not None
+        ), "desired_object_wrench must be provided"
         G = self.compute_grasp_matrix(object_pose)
         n_contacts = len(self._grasp_points)
 

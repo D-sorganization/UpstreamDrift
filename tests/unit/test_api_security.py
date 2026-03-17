@@ -411,12 +411,12 @@ class TestSecurityBestPractices:
         ]
 
         for pattern in suspicious_patterns:
-            assert pattern not in security_source.lower(), (
-                f"Found suspicious pattern in security.py: {pattern}"
-            )
-            assert pattern not in dependencies_source.lower(), (
-                f"Found suspicious pattern in dependencies.py: {pattern}"
-            )
+            assert (
+                pattern not in security_source.lower()
+            ), f"Found suspicious pattern in security.py: {pattern}"
+            assert (
+                pattern not in dependencies_source.lower()
+            ), f"Found suspicious pattern in dependencies.py: {pattern}"
 
     def test_secure_random_generation(self) -> None:
         """Test that secrets module is used for random generation."""

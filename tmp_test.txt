@@ -1,0 +1,72 @@
+bringing up nodes...
+bringing up nodes...
+
+FFFFFFF.                                                                 [100%]
+================================== FAILURES ===================================
+______________________________ test_widget_init _______________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:46: in test_widget_init
+    assert tracer_widget.speed_spin.value() == 163.0
+E   RuntimeError: wrapped C/C++ object of type QDoubleSpinBox has been deleted
+______________________________ test_apply_preset ______________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:50: in test_apply_preset
+    tracer_widget._apply_preset("7iron")
+src\launchers\shot_tracer.py:313: in _apply_preset
+    self.speed_spin.setValue(speed)
+E   RuntimeError: wrapped C/C++ object of type QDoubleSpinBox has been deleted
+__________________________ test_get_selected_models ___________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:57: in test_get_selected_models
+    models = tracer_widget._get_selected_models()
+src\launchers\shot_tracer.py:324: in _get_selected_models
+    if checkbox and checkbox.isChecked():
+E   RuntimeError: wrapped C/C++ object of type QCheckBox has been deleted
+________________________ test_run_comparison_no_models ________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:67: in test_run_comparison_no_models
+    tracer_widget.model_checkboxes["mock"].setChecked(False)
+E   RuntimeError: wrapped C/C++ object of type QCheckBox has been deleted
+_________________________ test_run_comparison_success _________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:85: in test_run_comparison_success
+    tracer_widget._run_comparison()
+src\launchers\shot_tracer.py:332: in _run_comparison
+    ball_speed_mph=self.speed_spin.value(),
+E   RuntimeError: wrapped C/C++ object of type QDoubleSpinBox has been deleted
+__________________________ test_run_comparison_error __________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:100: in test_run_comparison_error
+    tracer_widget._run_comparison()
+src\launchers\shot_tracer.py:332: in _run_comparison
+    ball_speed_mph=self.speed_spin.value(),
+E   RuntimeError: wrapped C/C++ object of type QDoubleSpinBox has been deleted
+__________________________ test_clear_visualization ___________________________
+[gw0] win32 -- Python 3.13.3 C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+tests\launchers\test_shot_tracer.py:108: in test_clear_visualization
+    tracer_widget.results_table.setRowCount(1)
+E   RuntimeError: wrapped C/C++ object of type QTableWidget has been deleted
+============================== warnings summary ===============================
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\_hypothesis_pytestplugin.py:469: 14 warnings
+  C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_hypothesis_pytestplugin.py:469: UserWarning: Skipping collection of '.hypothesis' directory - this usually means you've explicitly set the `norecursedirs` pytest config option, replacing rather than extending the default ignores.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================ slowest 20 durations =============================
+0.20s setup    tests/launchers/test_shot_tracer.py::test_widget_init
+0.01s setup    tests/launchers/test_shot_tracer.py::test_run_comparison_no_models
+0.01s setup    tests/launchers/test_shot_tracer.py::test_run_comparison_error
+0.01s setup    tests/launchers/test_shot_tracer.py::test_get_selected_models
+0.01s setup    tests/launchers/test_shot_tracer.py::test_run_comparison_success
+0.01s setup    tests/launchers/test_shot_tracer.py::test_clear_visualization
+
+(14 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ===========================
+FAILED tests/launchers/test_shot_tracer.py::test_widget_init - RuntimeError: ...
+FAILED tests/launchers/test_shot_tracer.py::test_apply_preset - RuntimeError:...
+FAILED tests/launchers/test_shot_tracer.py::test_get_selected_models - Runtim...
+FAILED tests/launchers/test_shot_tracer.py::test_run_comparison_no_models - R...
+FAILED tests/launchers/test_shot_tracer.py::test_run_comparison_success - Run...
+FAILED tests/launchers/test_shot_tracer.py::test_run_comparison_error - Runti...
+FAILED tests/launchers/test_shot_tracer.py::test_clear_visualization - Runtim...
+7 failed, 1 passed, 14 warnings in 21.89s

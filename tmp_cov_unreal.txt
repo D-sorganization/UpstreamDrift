@@ -1,0 +1,29 @@
+bringing up nodes...
+bringing up nodes...
+
+
+WARNING: Failed to generate report: No data to report.
+
+
+ERROR: Coverage failure: total of 0.0 is less than fail-under=40.0
+
+
+------------------------------ coverage ------------------------------
+---------------------- coverage: failed workers ----------------------
+The following workers failed to return coverage data, ensure that pytest-cov is installed on these workers.
+gw0
+gw1
+gw2
+gw3
+gw4
+gw5
+gw6
+gw7
+gw8
+gw9
+gw10
+gw11
+gw12
+gw13
+
+FAIL Required test coverage of 40.0% not reached. Total coverage: 0.00%
