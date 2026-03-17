@@ -304,9 +304,9 @@ class SettingsDialog(QDialog):
                     lines = text.strip().splitlines()
                     recent = "\n".join(lines[-200:])
                     self._log_viewer.setPlainText(recent)
-                    self._log_viewer.moveCursor(
-                        self._log_viewer.textCursor().End  # type: ignore[arg-type]
-                    )
+                    from PyQt6.QtGui import QTextCursor
+
+                    self._log_viewer.moveCursor(QTextCursor.MoveOperation.End)
                     return
                 except (RuntimeError, ValueError, AttributeError) as e:
                     logger.debug("Could not display log file %s: %s", log_path, e)
@@ -321,9 +321,9 @@ class SettingsDialog(QDialog):
                 lines = text.strip().splitlines()
                 recent = "\n".join(lines[-300:])
                 self._proc_log_viewer.setPlainText(recent)
-                self._proc_log_viewer.moveCursor(
-                    self._proc_log_viewer.textCursor().End  # type: ignore[arg-type]
-                )
+                from PyQt6.QtGui import QTextCursor
+
+                self._proc_log_viewer.moveCursor(QTextCursor.MoveOperation.End)
                 return
             except (RuntimeError, ValueError, AttributeError) as e:
                 logger.debug("Could not display process log %s: %s", log_path, e)

@@ -53,7 +53,7 @@ except ImportError:
     pg = None  # type: ignore[assignment]
     gl = None  # type: ignore[assignment]
 
-from flight_models import (  # noqa: E402
+from src.shared.python.physics.flight_models import (  # noqa: E402
     FlightModelRegistry,
     FlightModelType,
     FlightResult,

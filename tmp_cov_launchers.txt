@@ -1,0 +1,59 @@
+bringing up nodes...
+bringing up nodes...
+
+...................
+ERROR: Coverage failure: total of 2.0 is less than fail-under=40.0
+                                                                         [100%]
+
+---------- coverage: platform win32, python 3.13.3-final-0 -----------
+Name                                           Stmts   Miss Branch BrPart  Cover   Missing
+------------------------------------------------------------------------------------------
+src\launchers\assets\generate_tile_images.py      95     95     32      0   0.0%   8-275
+src\launchers\assets\optimize_assets.py           74     74     28      0   0.0%   18-168
+src\launchers\base.py                            164    164     24      0   0.0%   10-379
+src\launchers\docker_dialog.py                    93     93      8      0   0.0%   7-147
+src\launchers\docker_manager.py                  114    114     34      0   0.0%   7-319
+src\launchers\drake_dashboard.py                  19     19      6      0   0.0%   6-38
+src\launchers\golf_launcher.py                   360    360    110      0   0.0%   16-688
+src\launchers\golf_suite_launcher.py             204    204     14      0   0.0%   15-423
+src\launchers\help_dialogs.py                     94     94     24      0   0.0%   6-179
+src\launchers\launcher_constants.py               63     63      8      0   0.0%   3-109
+src\launchers\launcher_diagnostics.py            285    285     60      0   0.0%   13-744
+src\launchers\launcher_dialogs.py                203    203     64      0   0.0%   10-428
+src\launchers\launcher_layout_manager.py         143    143     52      0   0.0%   7-353
+src\launchers\launcher_model_handlers.py         137     44     22      1  65.4%   31, 40, 69-76, 111-121, 223-224, 247-258, 281-297, 405, 441-448
+src\launchers\launcher_process_manager.py        237    237     70      0   0.0%   14-566
+src\launchers\launcher_simulation.py             319    319    102      0   0.0%   10-603
+src\launchers\launcher_theme.py                  141    141     30      0   0.0%   9-282
+src\launchers\launcher_ui_setup.py               315    315     20      0   0.0%   9-540
+src\launchers\matlab_launcher_unified.py          10     10      0      0   0.0%   9-52
+src\launchers\model_card.py                      180    180     66      0   0.0%   6-305
+src\launchers\model_registry.py                   55     55      8      0   0.0%   3-88
+src\launchers\motion_capture_launcher.py          23     23      2      0   0.0%   9-76
+src\launchers\mujoco_dashboard.py                  4      4      0      0   0.0%   7-15
+src\launchers\mujoco_unified_launcher.py          33     33      4      0   0.0%   9-90
+src\launchers\pinocchio_dashboard.py               4      4      0      0   0.0%   6-14
+src\launchers\settings_dialog.py                 331    331     38      0   0.0%   8-558
+src\launchers\shot_tracer.py                     255    255     34      0   0.0%   15-507
+src\launchers\startup.py                         155    155     14      0   0.0%   6-295
+src\launchers\ui_components.py                     7      7      0      0   0.0%   16-50
+src\launchers\unified_launcher.py                102    102     34      0   0.0%   13-245
+------------------------------------------------------------------------------------------
+TOTAL                                           4219   4126    908      1   2.0%
+
+3 empty files skipped.
+
+FAIL Required test coverage of 40.0% not reached. Total coverage: 2.03%
+============================ slowest 20 durations =============================
+0.03s setup    tests/launchers/test_model_handlers.py::TestPuttingGreenHandler::test_can_handle_putting_green
+0.02s setup    tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_can_handle_special_app
+0.02s setup    tests/launchers/test_model_handlers.py::TestRegistryIntegration::test_registry_handles_special_app
+0.02s setup    tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_launch_motion_capture
+0.02s setup    tests/launchers/test_model_handlers.py::TestPuttingGreenHandler::test_launch_putting_green
+0.01s setup    tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_launch_model_explorer
+0.01s setup    tests/launchers/test_model_handlers.py::TestPuttingGreenHandler::test_launch_fails_no_path
+0.01s setup    tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_launch_matlab_unified
+0.01s setup    tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_launch_fails_for_missing_script
+0.01s setup    tests/launchers/test_model_handlers.py::TestSpecialAppHandler::test_launch_fails_for_missing_path
+
+(10 durations < 0.005s hidden.  Use -vv to show these durations.)

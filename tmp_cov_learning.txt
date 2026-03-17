@@ -1,0 +1,47 @@
+bringing up nodes...
+bringing up nodes...
+
+.....................................                                    [100%]
+
+---------- coverage: platform win32, python 3.13.3-final-0 -----------
+Name                                             Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------------------------
+src\learning\__init__.py                             6      0      0      0 100.0%
+src\learning\imitation\__init__.py                   4      0      0      0 100.0%
+src\learning\imitation\dataset.py                  148     24     30     10  79.8%   47, 52, 89, 91, 138->140, 141, 143, 208, 224, 232-233, 244-247, 273, 328->331, 414-422, 431
+src\learning\imitation\learners.py                 337    129     64      5  59.6%   18-20, 108-112, 168, 322, 394->397, 399->402, 468-472, 490-493, 498-502, 512-550, 574-599, 615-617, 621-623, 627-629, 703-709, 744-788, 804-817, 835->837, 837->840, 846-861, 865-880
+src\learning\retargeting\__init__.py                 3      0      0      0 100.0%
+src\learning\retargeting\retargeter.py             229     84     78     12  57.0%   46, 52, 57->61, 61->exit, 291->289, 334-338, 365->370, 386-411, 427-455, 473-520, 538, 562->565, 569-571, 610->608, 614, 638-662
+src\learning\rl\__init__.py                          6      0      0      0 100.0%
+src\learning\rl\base_env.py                        112     75     24      0  27.2%   12-14, 73-108, 112-114, 118-120, 124, 132-133, 146-147, 166-193, 210-227, 235-240, 244-245, 250-252, 309, 317, 327-329, 333-334
+src\learning\rl\configs.py                          88     31     16      0  54.8%   78-93, 125-135, 169, 185-190, 226
+src\learning\rl\humanoid_envs.py                   198    174    100      0   8.1%   61-82, 86-89, 93-94, 98-151, 155-191, 195-198, 202-220, 224-234, 238-250, 284-305, 309-310, 315-326, 330-353, 357-391, 395-403, 407-408, 412-423
+src\learning\rl\manipulation_envs.py               264    231     98      0   9.1%   62-88, 93-102, 106-110, 114-124, 128-130, 134-139, 143-183, 187-192, 201-236, 240-246, 250-260, 266-274, 308-330, 334, 338-342, 351-360, 364-368, 372-389, 393-395, 399-401, 405-407, 411-458, 462-518, 522-527, 531-536, 540-554
+src\learning\sim2real\__init__.py                    4      0      0      0 100.0%
+src\learning\sim2real\domain_randomization.py      160     14     60     26  80.0%   119->123, 123->127, 127->131, 131->135, 135->139, 140, 153->156, 159->167, 162->164, 167->175, 170->172, 175->183, 178->180, 183->191, 186->188, 191->200, 195->197, 200->220, 225->228, 228->233, 233->238, 238->243, 243->246, 266, 289, 305-317, 333, 346
+src\learning\sim2real\system_identification.py     182    132     76      4  21.7%   86->89, 89->92, 92->95, 95->98, 106-145, 163-200, 219-230, 253-286, 298-326, 339-366, 424-458
+--------------------------------------------------------------------------------------------
+TOTAL                                             1741    894    546     57  42.1%
+
+Required test coverage of 40.0% reached. Total coverage: 42.06%
+============================ slowest 20 durations =============================
+0.44s call     tests/learning/test_imitation.py::TestBehaviorCloning::test_bc_train
+0.25s call     tests/learning/test_imitation.py::TestBehaviorCloning::test_bc_save_load
+0.16s call     tests/learning/test_imitation.py::TestBehaviorCloning::test_bc_creation
+0.15s call     tests/learning/test_sim2real.py::TestDomainRandomization::test_randomizer_creation
+0.15s call     tests/learning/test_imitation.py::TestGAIL::test_gail_creation
+0.15s call     tests/learning/test_retargeting.py::TestMotionRetargeter::test_direct_retargeting
+0.14s call     tests/learning/test_imitation.py::TestDemonstration::test_demonstration_creation
+0.14s call     tests/learning/test_sim2real.py::TestSystemIdentification::test_compute_reality_gap
+0.12s call     tests/learning/test_imitation.py::TestDemonstrationDataset::test_dataset_add
+0.11s call     tests/learning/test_imitation.py::TestDemonstrationDataset::test_dataset_save_load
+0.11s call     tests/learning/test_retargeting.py::TestMotionRetargeter::test_retargeting_preserves_angles
+0.09s call     tests/learning/test_sim2real.py::TestDomainRandomization::test_reset_to_nominal
+0.05s setup    tests/learning/test_imitation.py::TestGAIL::test_gail_creation
+0.05s setup    tests/learning/test_imitation.py::TestDemonstration::test_demonstration_creation
+0.04s setup    tests/learning/test_imitation.py::TestBehaviorCloning::test_bc_creation
+0.04s setup    tests/learning/test_sim2real.py::TestDomainRandomization::test_config_defaults
+0.04s setup    tests/learning/test_sim2real.py::TestSystemIdentification::test_identifier_creation
+0.04s setup    tests/learning/test_retargeting.py::TestMotionRetargeter::test_retargeter_creation
+0.04s setup    tests/learning/test_retargeting.py::TestSkeletonConfig::test_skeleton_creation
+0.04s setup    tests/learning/test_imitation.py::TestDemonstrationDataset::test_dataset_creation
