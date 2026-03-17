@@ -9,7 +9,8 @@ def test_import():
         import src.engines.physics_engines.pinocchio.python.swing_plane_integration
 
         assert (
-            src.engines.physics_engines.pinocchio.python.swing_plane_integration is not None
+            src.engines.physics_engines.pinocchio.python.swing_plane_integration
+            is not None
         )
     except ImportError as e:
         pytest.skip(f"Missing dependencies or import error: {e}")

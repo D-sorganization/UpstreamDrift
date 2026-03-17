@@ -9,7 +9,8 @@ def test_import():
         import src.engines.physics_engines.pinocchio.python.dtack.gui.main_window
 
         assert (
-            src.engines.physics_engines.pinocchio.python.dtack.gui.main_window is not None
+            src.engines.physics_engines.pinocchio.python.dtack.gui.main_window
+            is not None
         )
     except ImportError as e:
         pytest.skip(f"Missing dependencies or import error: {e}")

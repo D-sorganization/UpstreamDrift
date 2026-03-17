@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from src.shared.python.ai.types import (
     AgentChunk,
@@ -25,9 +26,9 @@ def test_expertise_level_comparison():
 
     # Invalid comparisons
     with pytest.raises(TypeError):
-        ExpertiseLevel.BEGINNER < 5
+        _ = ExpertiseLevel.BEGINNER < 5  # type: ignore
     with pytest.raises(TypeError):
-        ExpertiseLevel.BEGINNER <= 5
+        _ = ExpertiseLevel.BEGINNER <= 5  # type: ignore
 
 
 def test_provider_capabilities():

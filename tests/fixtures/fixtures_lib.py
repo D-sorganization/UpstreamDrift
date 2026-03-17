@@ -250,11 +250,15 @@ def all_available_pendulum_engines(
         List of EngineInstance objects that are available and loaded.
     """
     assert mujoco_pendulum is not None, "mujoco_pendulum must be provided"
+    assert drake_pendulum is not None, "drake_pendulum must be provided"
+    assert pinocchio_pendulum is not None, "pinocchio_pendulum must be provided"
     engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
     available = [e for e in engines if e.available]
 
     if len(available) < 2:
-        states = ", ".join(f"{e.name}={e.status.value}" for e in engines)
+        states = ", ".join(
+            f"{e.name}={getattr(e.status, 'value', str(e.status))}" for e in engines
+        )
         pytest.skip(
             f"Need at least 2 engines for cross-validation, got {len(available)} ({states})"
         )
@@ -344,9 +348,12 @@ def skip_if_insufficient_engines(
         pytest.skip: If fewer than min_count engines are available.
     """
     assert engines is not None, "engines must be provided"
+    assert min_count > 0, "min_count must be positive"
     available = [e for e in engines if e.available]
     if len(available) < min_count:
-        states = ", ".join(f"{e.name}={e.status.value}" for e in engines)
+        states = ", ".join(
+            f"{e.name}={getattr(e.status, 'value', str(e.status))}" for e in engines
+        )
         pytest.skip(
             f"Need at least {min_count} engines for cross-validation, "
             f"got {len(available)}: {[e.name for e in available]} ({states})"

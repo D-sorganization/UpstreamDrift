@@ -39,6 +39,8 @@ class MockWindowFix:
 
     def on_actuator_slider_changed(self, actuator_index: int, value: int) -> None:
         assert actuator_index is not None, "actuator_index must be provided"
+        assert actuator_index >= 0, "actuator_index must be non-negative"
+        assert isinstance(value, int), "value must be an int"
         self.slider_calls += 1
         print(f"Slider changed to {value}")
 
@@ -53,6 +55,8 @@ class MockWindowFix:
 
     def on_constant_value_changed(self, actuator_index: int, value: float) -> None:
         assert actuator_index is not None, "actuator_index must be provided"
+        assert actuator_index >= 0, "actuator_index must be non-negative"
+        assert isinstance(value, float), "value must be a float"
         self.spinbox_calls += 1
         print(f"Spinbox changed to {value}")
 
@@ -72,27 +76,32 @@ def run_test() -> None:
     window = MockWindowFix()
 
     print("--- Test Fix: Setting Spinbox to 50.5 ---")
-    window.constant_input.setValue(50.5)
 
-    final_spinbox_value = window.constant_input.value()
-    final_slider_value = window.slider.value()
+    constant_input = window.constant_input
+    constant_input.setValue(50.5)
+
+    final_spinbox_value = constant_input.value()
+    slider = window.slider
+    final_slider_value = slider.value()
 
     print(f"Final Spinbox Value: {final_spinbox_value}")
     print(f"Final Slider Value: {final_slider_value}")
-    print(
-        f"Total Callbacks: Slider={window.slider_calls}, Spinbox={window.spinbox_calls}"
-    )
-    print(f"Control System Updates: {window.control_system_calls}")
+
+    slider_calls = window.slider_calls
+    spinbox_calls = window.spinbox_calls
+    print(f"Total Callbacks: Slider={slider_calls}, Spinbox={spinbox_calls}")
+    control_calls = window.control_system_calls
+    print(f"Control System Updates: {control_calls}")
 
     if final_spinbox_value == 50.5:
         print("PASS: Precision kept.")
     else:
         print("FAIL: Precision lost!")
 
-    if window.control_system_calls == 1:
+    if control_calls == 1:
         print("PASS: Single update.")
     else:
-        print(f"FAIL: {window.control_system_calls} updates.")
+        print(f"FAIL: {control_calls} updates.")
 
 
 if __name__ == "__main__":

@@ -35,7 +35,9 @@ def run_tutorial() -> None:
     spinal_analyzer, spinal_result = create_example_analysis()
 
     logger.info(f"   Peak Compression: {spinal_result.peak_compression_bw:.1f}x BW")
-    logger.info(f"   Overall Spinal Risk: {spinal_result.overall_risk.value.upper()}")
+    spinal_risk_enum = spinal_result.overall_risk
+    spinal_risk_name = getattr(spinal_risk_enum, "name", str(spinal_risk_enum))
+    logger.info(f"   Overall Spinal Risk: {spinal_risk_name.upper()}")
 
     # 2. Joint Stress Analysis
     # ------------------------
@@ -92,7 +94,9 @@ def run_tutorial() -> None:
     logger.info("INJURY RISK REPORT")
     logger.info("=" * 40)
     logger.info(f"Overall Risk Score: {report.overall_risk_score:.1f}/100")
-    logger.info(f"Risk Level:         {report.overall_risk_level.value.upper()}")
+    report_risk_enum = report.overall_risk_level
+    report_risk_name = getattr(report_risk_enum, "name", str(report_risk_enum))
+    logger.info(f"Risk Level:         {report_risk_name.upper()}")
 
     logger.info("\nTop Risk Factors:")
     for risk in report.top_risks:
