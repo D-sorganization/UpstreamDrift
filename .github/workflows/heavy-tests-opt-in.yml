@@ -24,7 +24,7 @@ on:
 jobs:
   run-heavy-tests:
     name: Heavy Integration Tests
-    runs-on: d-sorg-fleet-4core
+    runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       HEAVY_TEST_SLACK_WEBHOOK: ${{ secrets.HEAVY_TEST_SLACK_WEBHOOK }}
