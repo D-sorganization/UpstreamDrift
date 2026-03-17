@@ -8,11 +8,16 @@ from pathlib import Path
 import numpy as np
 
 # Add src to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys_path = sys.path
+sys_path.insert(0, str(Path(__file__).parent.parent))
 
-from src.unreal_integration.geometry import Quaternion, Vector3
-from src.unreal_integration.mesh_loader import LoadedMesh, MeshFace, MeshVertex
-from src.unreal_integration.viewer_backends import (
+from src.unreal_integration.geometry import Quaternion, Vector3  # noqa: E402
+from src.unreal_integration.mesh_loader import (  # noqa: E402
+    LoadedMesh,
+    MeshFace,
+    MeshVertex,
+)
+from src.unreal_integration.viewer_backends import (  # noqa: E402
     create_viewer,
 )
 

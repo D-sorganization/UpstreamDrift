@@ -97,6 +97,11 @@ def _format_report(
     assessment_id: str, name: str, findings: list[str], score: int | None
 ) -> str:
     """Format an assessment report as markdown."""
+    assert isinstance(assessment_id, str), "assessment_id must be a string"
+    assert isinstance(name, str), "name must be a string"
+    assert isinstance(findings, list), "findings must be a list"
+    assert score is None or isinstance(score, int), "score must be None or an int"
+
     if score is not None:
         score = max(0, min(10, score))
         score_display = f"{score}/10"
@@ -117,6 +122,9 @@ def _format_report(
 
 def run_assessment(assessment_id: str, output_path: Path) -> int:
     """Run a specific assessment and generate report."""
+    assert isinstance(assessment_id, str), "assessment_id must be a string"
+    assert isinstance(output_path, Path), "output_path must be a Path object"
+
     assessment = ASSESSMENTS.get(
         assessment_id, {"name": "General", "description": "Manual review required"}
     )
@@ -134,7 +142,8 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     findings, score = handler()
 
     report = _format_report(assessment_id, assessment["name"], findings, score)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    parent_dir = output_path.parent
+    parent_dir.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report)
 
     score_display = f"{score}/10" if score is not None else "PENDING REVIEW"

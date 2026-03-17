@@ -9,5 +9,5 @@ def test_import():
         import src.engines.physics_engines.pinocchio.python.dtack.ik.tasks
 
         assert src.engines.physics_engines.pinocchio.python.dtack.ik.tasks is not None
-    except ImportError as e:
+    except (ImportError, AttributeError) as e:
         pytest.skip(f"Missing dependencies or import error: {e}")

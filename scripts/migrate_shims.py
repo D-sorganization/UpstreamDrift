@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SHARED_DIR = REPO_ROOT / "src" / "shared" / "python"
@@ -43,6 +44,10 @@ def find_importers(
     Returns list of (filepath, line_number, line_content) tuples.
     Excludes the shim file itself and __pycache__ dirs.
     """
+    assert isinstance(shim_name, str), "shim_name must be a string"
+    assert isinstance(search_dirs, list), "search_dirs must be a list"
+    assert isinstance(exclude_path, Path), "exclude_path must be a Path object"
+
     results: list[tuple[Path, int, str]] = []
     pattern = re.compile(
         rf"(?:from\s+src\.shared\.python\.{shim_name}\s+import\s)"
@@ -86,6 +91,10 @@ def rewrite_import(
 
     Returns True if changes were made.
     """
+    assert isinstance(filepath, Path), "filepath must be a Path object"
+    assert isinstance(shim_name, str), "shim_name must be a string"
+    assert isinstance(real_subpath, str), "real_subpath must be a string"
+
     content = filepath.read_text(encoding="utf-8")
     original = content
 
@@ -111,6 +120,9 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
 
     Returns a summary dict.
     """
+    assert isinstance(shim_path, Path), "shim_path must be a Path object"
+    assert isinstance(dry_run, bool), "dry_run must be a boolean"
+
     shim_name = shim_path.stem
     real_subpath = get_shim_mapping(shim_path)
 
@@ -146,7 +158,7 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
                 continue
         real_importers.append((fpath, lineno, line))
 
-    result = {
+    result: dict[str, Any] = {
         "shim": shim_name,
         "real_path": real_subpath,
         "importers": len(real_importers),
@@ -155,10 +167,10 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
     }
 
     if dry_run:
+        fc1 = result["files_changed"]
+        assert isinstance(fc1, list)
         for fpath, lineno, line in real_importers:
-            result["files_changed"].append(
-                f"  {fpath.relative_to(REPO_ROOT)}:{lineno}: {line.strip()}"
-            )
+            fc1.append(f"  {fpath.relative_to(REPO_ROOT)}:{lineno}: {line.strip()}")
         return result
 
     # Rewrite imports
@@ -181,9 +193,11 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
 def main() -> None:
     """Main entry point."""
     dry_run = "--dry-run" in sys.argv
-    max_imports = (
-        int(sys.argv[sys.argv.index("--max") + 1]) if "--max" in sys.argv else 999
-    )
+    argv = sys.argv
+    max_imports = 999
+    if "--max" in argv:
+        idx = argv.index("--max") + 1
+        max_imports = int(argv[idx])
 
     # Find all shim files
     shim_files = sorted(SHARED_DIR.glob("*.py"))

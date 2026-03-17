@@ -92,12 +92,43 @@ def _strict_engine_probes_enabled() -> bool:
 
 def _probe_engine_instance(
     name: str,
-    loader: Callable[[], Any],
+    availability_check_or_loader: Callable[[], Any],
+    loader: Callable[[], Any] | None = None,
 ) -> EngineInstance:
-    """Build an EngineInstance while preserving missing vs broken state."""
-    status = get_engine_status(name)
+    """Build an EngineInstance while preserving missing vs broken state.
 
-    if status == EngineStatus.NOT_INSTALLED:
+    Args:
+        name: Engine display name (e.g. "MuJoCo", "Drake").
+        availability_check_or_loader: Either an availability callable (when
+            ``loader`` is also provided) or the loader callable itself.
+        loader: Optional explicit loader callable; if supplied,
+            ``availability_check_or_loader`` is treated as an availability
+            predicate returning a truthy value when the engine is present.
+    """
+    assert isinstance(name, str), "name must be a string"
+
+    # Normalise the two-form vs three-form call convention.
+    if loader is None:
+        # Two-argument form: _probe_engine_instance(name, loader)
+        actual_loader = availability_check_or_loader
+        # Determine availability from the engine registry.
+        status = get_engine_status(name)
+        is_available = status == EngineStatus.AVAILABLE
+        is_broken = status == EngineStatus.BROKEN
+        engine_error = get_engine_error(name)
+    else:
+        # Three-argument form: _probe_engine_instance(name, avail_fn, loader)
+        availability_check = availability_check_or_loader
+        actual_loader = loader
+        try:
+            available_result = availability_check()
+        except Exception:
+            available_result = False
+        is_available = bool(available_result)
+        is_broken = False
+        engine_error = None
+
+    if not is_available and not is_broken:
         return EngineInstance(
             name=name,
             engine=None,
@@ -105,21 +136,21 @@ def _probe_engine_instance(
             status=EngineProbeStatus.MISSING,
         )
 
-    if status == EngineStatus.BROKEN:
-        message = f"{name} import failed: {get_engine_error(name)}"
+    if is_broken:
+        error_msg = f"{name} import failed: {engine_error}"
         if _strict_engine_probes_enabled():
-            pytest.fail(message)
-        logger.warning(message)
+            pytest.fail(error_msg)
+        logger.warning(error_msg)
         return EngineInstance(
             name=name,
             engine=None,
             available=False,
             status=EngineProbeStatus.BROKEN,
-            error=str(get_engine_error(name)),
+            error=str(engine_error),
         )
 
     try:
-        engine = loader()
+        engine = actual_loader()
         return EngineInstance(
             name=name,
             engine=engine,
@@ -157,6 +188,21 @@ def available_engines() -> dict[str, bool]:
         "Drake": get_engine_status("drake") == EngineStatus.AVAILABLE,
         "Pinocchio": get_engine_status("pinocchio") == EngineStatus.AVAILABLE,
     }
+
+
+def _check_mujoco_available() -> bool:
+    """Return True if MuJoCo is available in this environment."""
+    return get_engine_status("mujoco") == EngineStatus.AVAILABLE
+
+
+def _check_drake_available() -> bool:
+    """Return True if Drake (pydrake) is available in this environment."""
+    return get_engine_status("drake") == EngineStatus.AVAILABLE
+
+
+def _check_pinocchio_available() -> bool:
+    """Return True if Pinocchio is available in this environment."""
+    return get_engine_status("pinocchio") == EngineStatus.AVAILABLE
 
 
 @pytest.fixture

@@ -86,7 +86,7 @@ def _probe_engine(
         elif import_name == "tf":
             importlib.import_module("tensorflow")
         elif import_name == "pyopenpose":
-            importlib.import_module("pyopenpose")
+            importlib.import_module("pyopenpose")  # import pyopenpose (dynamic)
         elif import_name == "h5py":
             importlib.import_module("h5py")
         elif import_name == "yaml":
@@ -176,6 +176,10 @@ _MODULE_MAPPING = {
     "scikit-image": "skimage",
     "seaborn": "seaborn",
 }
+
+_ENGINE_FLAGS: dict[str, bool] = dict.fromkeys(
+    _MODULE_MAPPING, False
+)  # availability populated lazily via get_engine_status at call time
 
 
 def get_engine_status(engine_name: str) -> EngineStatus:

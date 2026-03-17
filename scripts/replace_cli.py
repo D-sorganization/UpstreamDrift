@@ -1,4 +1,4 @@
-import os
+from os.path import exists
 
 files_to_update = [
     "install.sh",
@@ -12,7 +12,7 @@ files_to_update = [
 ]
 
 for file_path in files_to_update:
-    if not os.path.exists(file_path):
+    if not exists(file_path):
         continue
     with open(file_path, encoding="utf-8") as f:
         content = f.read()

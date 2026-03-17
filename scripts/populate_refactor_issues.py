@@ -84,10 +84,12 @@ for issue in issues:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         if result.returncode == 0:
             print(" [OK]")
-            print(result.stdout.strip())
+            out_str = getattr(result, "stdout", "")
+            print(out_str.strip() if out_str else "")
         else:
             print(" [FAILED]")
-            print(result.stderr.strip())
+            err_str = getattr(result, "stderr", "")
+            print(err_str.strip() if err_str else "")
     except FileNotFoundError:
         print(" [ERROR] gh command not found.")
         break

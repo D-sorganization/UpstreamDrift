@@ -9,7 +9,8 @@ _PROJECT_ROOT = _SCRIPT_DIR.parent
 
 # Ensure the project root is on sys.path so ``src`` is importable.
 if str(_PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(_PROJECT_ROOT))
+    sys_path = sys.path
+    sys_path.insert(0, str(_PROJECT_ROOT))
 
 from src.shared.python.physics.physics_parameters import get_registry  # noqa: E402
 

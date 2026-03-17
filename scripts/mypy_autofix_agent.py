@@ -140,6 +140,12 @@ COMMON_TYPE_IMPORTS = {
 
 def run_mypy(config_file: str | None = None, targets: list[str] | None = None) -> str:
     """Run mypy and return raw output."""
+    assert config_file is None or isinstance(config_file, str), (
+        "config_file must be a string or None"
+    )
+    assert targets is None or isinstance(targets, list), (
+        "targets must be a list or None"
+    )
     if not targets:
         # Default to src and tests if no targets provided, but check if they exist
         targets = []
@@ -202,6 +208,8 @@ def write_file_lines(filepath: str, lines: list[str]) -> None:
 
 def has_type_ignore(line: str, code: str | None = None) -> bool:
     """Check if a line already has a type: ignore comment."""
+    assert isinstance(line, str), "line must be a string"
+    assert code is None or isinstance(code, str), "code must be a string or None"
     if "# type: ignore" in line:
         if code and f"[{code}]" in line:
             return True
@@ -215,6 +223,8 @@ def has_type_ignore(line: str, code: str | None = None) -> bool:
 
 def add_type_ignore(line: str, code: str) -> str:
     """Add # type: ignore[code] to a line."""
+    assert isinstance(line, str), "line must be a string"
+    assert isinstance(code, str), "code must be a string"
     stripped = line.rstrip("\n\r")
     # Check if there's already an inline comment
     if "# type: ignore" in stripped:
@@ -245,9 +255,12 @@ def fix_callable_as_type(lines: list[str], error: MypyError) -> Fix | None:
 
     This is a REAL fix, not a suppression.
     """
+    assert isinstance(lines, list), "lines must be a list"
+    assert isinstance(error, MypyError), "error must be MypyError"
     if error.code != "valid-type":
         return None
-    if '"callable" is not valid as a type' not in error.message.lower():
+    msg_lower = error.message.lower()
+    if '"callable" is not valid as a type' not in msg_lower:
         return None
 
     idx = error.line - 1
@@ -286,6 +299,8 @@ def fix_union_attr(lines: list[str], error: MypyError) -> Fix | None:
 
     This is a REAL fix - adds proper type narrowing.
     """
+    assert isinstance(lines, list), "lines must be a list"
+    assert isinstance(error, MypyError), "error must be MypyError"
     if error.code != "union-attr":
         return None
 
@@ -345,6 +360,8 @@ def fix_name_not_defined(lines: list[str], error: MypyError) -> Fix | None:
 
     This is a REAL fix when the name is a known type.
     """
+    assert isinstance(lines, list), "lines must be a list"
+    assert isinstance(error, MypyError), "error must be MypyError"
     if error.code != "name-defined":
         return None
 
@@ -371,6 +388,8 @@ def fix_import_errors(lines: list[str], error: MypyError) -> Fix | None:
 
     These are SUPPRESSIONS but acceptable for third-party packages.
     """
+    assert isinstance(lines, list), "lines must be a list"
+    assert isinstance(error, MypyError), "error must be MypyError"
     if error.code not in ("import-untyped", "import-not-found"):
         return None
 
@@ -398,6 +417,8 @@ def fix_generic_suppression(lines: list[str], error: MypyError) -> Fix | None:
     Only used when no real fix is available. Uses specific error codes
     rather than blanket ignores.
     """
+    assert isinstance(lines, list), "lines must be a list"
+    assert isinstance(error, MypyError), "error must be MypyError"
     # Only suppress specific, well-understood error codes
     suppressible_codes = {
         "assignment",
@@ -442,6 +463,8 @@ def _ensure_import(lines: list[str], import_statement: str) -> bool:
     Inserts after the last existing import from the same module.
     Returns True if import was added.
     """
+    assert isinstance(lines, list), "lines must be a list"
+    assert isinstance(import_statement, str), "import_statement must be a string"
     # Check if already imported
     for line in lines:
         if import_statement in line:
@@ -514,7 +537,19 @@ def run_agent(
     targets: list[str] | None = None,
 ) -> AgentReport:
     """Main agent loop: observe, classify, fix, report."""
+    assert isinstance(max_fixes, int), "max_fixes must be an int"
+    assert isinstance(max_files, int), "max_files must be an int"
+    assert isinstance(dry_run, bool), "dry_run must be a bool"
+    assert isinstance(verbose, bool), "verbose must be a bool"
+    assert config_file is None or isinstance(config_file, str), (
+        "config_file must be None or string"
+    )
+    assert targets is None or isinstance(targets, list), "targets must be None or list"
+
     report = AgentReport()
+    reasons = report.skipped_reasons
+    fixes_applied = report.fixes_applied
+    files_modified_list = report.files_modified
 
     # Step 1: Run mypy
     if verbose:
@@ -536,9 +571,7 @@ def run_agent(
         if is_safe_path(error.file):
             errors_by_file[error.file].append(error)
         else:
-            report.skipped_reasons.append(
-                f"Skipped {error.file}:{error.line} - outside safe path"
-            )
+            reasons.append(f"Skipped {error.file}:{error.line} - outside safe path")
 
     # Step 3: Apply fixes (file by file, respecting limits)
     files_modified = 0
@@ -555,14 +588,10 @@ def run_agent(
 
     for filepath, file_errors in sorted(errors_by_file.items()):
         if files_modified >= max_files:
-            report.skipped_reasons.append(
-                f"Skipped {filepath} - max files ({max_files}) reached"
-            )
+            reasons.append(f"Skipped {filepath} - max files ({max_files}) reached")
             continue
         if total_fixes >= max_fixes:
-            report.skipped_reasons.append(
-                f"Skipped {filepath} - max fixes ({max_fixes}) reached"
-            )
+            reasons.append(f"Skipped {filepath} - max fixes ({max_fixes}) reached")
             continue
 
         lines = read_file_lines(filepath)
@@ -589,7 +618,7 @@ def run_agent(
                     report.real_fixes += 1
                 else:
                     report.suppressions += 1
-                report.fixes_applied.append(
+                fixes_applied.append(
                     f"  [{fix.strategy}] {fix.file}:{fix.line} - {fix.description}"
                 )
                 if verbose:
@@ -601,7 +630,7 @@ def run_agent(
                         fix.description,
                     )
             else:
-                report.skipped_reasons.append(
+                reasons.append(
                     f"No fix available: {error.file}:{error.line} [{error.code}] {error.message[:60]}"
                 )
 
@@ -609,7 +638,7 @@ def run_agent(
             if not dry_run:
                 write_file_lines(filepath, lines)
             files_modified += 1
-            report.files_modified.append(filepath)
+            files_modified_list.append(filepath)
 
     report.errors_fixed = total_fixes
 

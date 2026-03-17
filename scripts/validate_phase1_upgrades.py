@@ -6,7 +6,6 @@ This script validates that all Phase 1 infrastructure improvements
 are working correctly and provides a comprehensive status report.
 """
 
-import importlib.util
 import sys
 from pathlib import Path
 
@@ -328,15 +327,16 @@ class Phase1Validator:
 
         # Check OutputManager class
         try:
-            spec = importlib.util.spec_from_file_location(
-                "output_manager", output_manager_path
-            )
-            if spec is None or spec.loader is None:
+            from importlib.util import module_from_spec, spec_from_file_location
+
+            spec = spec_from_file_location("output_manager", output_manager_path)
+            loader = getattr(spec, "loader", None)
+            if spec is None or loader is None:
                 print("   Failed to load output_manager spec")
                 return False
 
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            module = module_from_spec(spec)
+            loader.exec_module(module)
 
             # Check required classes and methods
             if not hasattr(module, "OutputManager"):

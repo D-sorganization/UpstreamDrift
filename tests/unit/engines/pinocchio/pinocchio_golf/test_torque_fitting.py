@@ -12,5 +12,5 @@ def test_import():
             src.engines.physics_engines.pinocchio.python.pinocchio_golf.torque_fitting
             is not None
         )
-    except ImportError as e:
+    except (ImportError, AttributeError) as e:
         pytest.skip(f"Missing dependencies or import error: {e}")

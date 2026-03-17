@@ -241,6 +241,8 @@ def run_review(root_path: Path):
 
 def generate_markdown_report(results, output_path):
     """Write the pragmatic review results as a Markdown report."""
+    assert isinstance(results, dict), "results must be a dictionary"
+    assert isinstance(output_path, Path), "output_path must be a Path object"
     md = [f"# Pragmatic Programmer Review: {results['repository']}"]
     md.append(f"**Date**: {results['timestamp'][:10]}")
     md.append(f"**Files**: {results['files_analyzed']}")
@@ -255,7 +257,8 @@ def generate_markdown_report(results, output_path):
         if issue.get("files"):
             md.append(f"  - Files: {', '.join(issue['files'][:3])}")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    parent_dir = output_path.parent
+    parent_dir.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         f.write("\n".join(md))
 

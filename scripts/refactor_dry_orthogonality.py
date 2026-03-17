@@ -223,6 +223,8 @@ class DRYRefactorer:
         self, directory: Path, refactor_func: Callable[[Path], bool]
     ) -> int:
         """Process all Python files in directory with given refactor function."""
+        assert isinstance(directory, Path), "directory must be a Path object"
+        assert callable(refactor_func), "refactor_func must be callable"
         count = 0
         for py_file in directory.rglob("*.py"):
             # Skip __pycache__ and .mypy_cache

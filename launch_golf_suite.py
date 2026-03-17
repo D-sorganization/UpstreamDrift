@@ -75,8 +75,15 @@ Examples:
 def route_launch(args: argparse.Namespace) -> None:
     """Route the launch based on parsed arguments."""
     assert args is not None, "Parsed arguments must be provided"
+    assert isinstance(args, argparse.Namespace), "args must be a Namespace object"
 
-    if args.engine:
+    engine_arg = getattr(args, "engine", None)
+    classic_arg = getattr(args, "classic", False)
+    api_only_arg = getattr(args, "api_only", False)
+    port_arg = getattr(args, "port", 8000)
+    no_browser_arg = getattr(args, "no_browser", False)
+
+    if engine_arg:
         # Direct engine launch (legacy support)
         try:
             from src.shared.python.launcher_factory import launch_engine_directly
@@ -87,20 +94,20 @@ def route_launch(args: argparse.Namespace) -> None:
 
         # Check if engine is web-only
         web_only_engines = {"matlab_2d", "matlab_3d"}
-        if args.engine in web_only_engines:
+        if engine_arg in web_only_engines:
             logger.info(
                 "Engine '%s' requires the web UI. Launching web UI instead...",
-                args.engine,
+                engine_arg,
             )
-            environ["GOLF_DEFAULT_ENGINE"] = args.engine
+            environ["GOLF_DEFAULT_ENGINE"] = str(engine_arg)
             from src.api.local_server import main as server_main
 
             server_main()
             return
 
-        launch_engine_directly(args.engine)
+        launch_engine_directly(engine_arg)
 
-    elif args.classic:
+    elif classic_arg:
         # Classic PyQt6 launcher
         try:
             # Try new location first
@@ -111,18 +118,18 @@ def route_launch(args: argparse.Namespace) -> None:
             logger.error("Could not load classic launcher. Check installation.")
             exit(1)
 
-    elif args.api_only:
+    elif api_only_arg:
         # API server only
         environ["GOLF_NO_BROWSER"] = "true"
-        environ["GOLF_PORT"] = str(args.port)
+        environ["GOLF_PORT"] = str(port_arg)
         from src.api.local_server import main as api_main
 
         api_main()
 
     else:
         # Default: Web UI (recommended)
-        environ["GOLF_PORT"] = str(args.port)
-        if args.no_browser:
+        environ["GOLF_PORT"] = str(port_arg)
+        if no_browser_arg:
             environ["GOLF_NO_BROWSER"] = "true"
         from src.api.local_server import main as server_main
 

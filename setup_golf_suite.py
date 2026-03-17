@@ -41,7 +41,9 @@ def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
         Optimized PIL Image.
     """
     assert img is not None, "Image cannot be None"
-    assert size > 0, "Size must be strictly positive"
+    assert size is not None, "size must be provided"
+    assert isinstance(size, int), "size must be an integer"
+    assert size > 0, "size must be strictly positive"
 
     from PIL import ImageEnhance, ImageFilter
 
@@ -64,6 +66,8 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
     """
     assert source_path is not None, "Source path must not be None"
     assert output_path is not None, "Output path must not be None"
+    assert isinstance(source_path, pathlib.Path), "source_path must be a Path object"
+    assert isinstance(output_path, pathlib.Path), "output_path must be a Path object"
 
     if not source_path.exists():
         logger.error(f"Source image not found: {source_path}")
@@ -118,6 +122,10 @@ def create_shortcut_windows(
     assert target_script, "Target script must not be empty"
     assert working_dir is not None, "Working directory must be provided"
     assert icon_path is not None, "Icon path must be provided"
+    assert isinstance(target_script, str), "target_script must be a string"
+    assert isinstance(working_dir, pathlib.Path), "working_dir must be a Path object"
+    assert isinstance(icon_path, pathlib.Path), "icon_path must be a Path object"
+    assert isinstance(description, str), "description must be a string"
 
     python_exe = sys.executable
 

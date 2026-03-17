@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+from os.path import exists, join
 
 DATA_DIR = ".jules/completist_data"
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -21,6 +22,10 @@ EXCLUDE_DIRS = [
 
 def run_grep(pattern, output_file, extended_regex=False):
     """Run grep with the given pattern and write results to output_file."""
+    assert isinstance(pattern, str), "pattern must be a string"
+    assert isinstance(output_file, str), "output_file must be a string"
+    assert isinstance(extended_regex, bool), "extended_regex must be a bool"
+
     cmd = ["grep", "-rn"]
     if extended_regex:
         cmd.append("-E")
@@ -45,7 +50,7 @@ def main():
     print("Refreshing completist data...")
 
     # 1. Run find_stubs.py
-    if os.path.exists("scripts/find_stubs.py"):
+    if exists("scripts/find_stubs.py"):
         print("Running scripts/find_stubs.py...")
         subprocess.run([sys.executable, "scripts/find_stubs.py"])
     else:
@@ -54,15 +59,15 @@ def main():
     # 2. Grep for TODOs
     run_grep(
         "TODO|FIXME|XXX|HACK|TEMP",
-        os.path.join(DATA_DIR, "todo_markers.txt"),
+        join(DATA_DIR, "todo_markers.txt"),
         extended_regex=True,
     )
 
     # 3. Grep for NotImplementedError
-    run_grep("NotImplementedError", os.path.join(DATA_DIR, "not_implemented.txt"))
+    run_grep("NotImplementedError", join(DATA_DIR, "not_implemented.txt"))
 
     # 4. Grep for abstractmethod
-    run_grep("@abstractmethod", os.path.join(DATA_DIR, "abstract_methods.txt"))
+    run_grep("@abstractmethod", join(DATA_DIR, "abstract_methods.txt"))
 
     print("Done.")
 

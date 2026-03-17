@@ -1,5 +1,6 @@
 import os
 import re
+from os.path import join
 
 
 def scan_for_incomplete_code(root_dir):
@@ -10,7 +11,7 @@ def scan_for_incomplete_code(root_dir):
         "pass_block": re.compile(r"^\s*pass\s*$"),
     }
 
-    results = {}
+    results: dict[str, list[tuple[int, str, str]]] = {}
 
     for dirpath, _, filenames in os.walk(root_dir):
         if any(
@@ -30,7 +31,7 @@ def scan_for_incomplete_code(root_dir):
             if not filename.endswith((".py", ".ts", ".js", ".cpp", ".h", ".m")):
                 continue
 
-            filepath = os.path.join(dirpath, filename)
+            filepath = join(dirpath, filename)
 
             try:
                 with open(filepath, encoding="utf-8", errors="ignore") as f:
