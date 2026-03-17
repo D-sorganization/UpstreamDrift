@@ -67,18 +67,22 @@ class TestLauncherModule:
     @patch("sys.argv", ["launch_golf_suite.py", "--help"])
     def test_main_help_argument(self):
         """Test main function with help argument."""
+        import argparse
+
         try:
             import launch_golf_suite
 
-            # Mock argparse to avoid actual help output
-            with patch("argparse.ArgumentParser.parse_args") as mock_parse:
-                mock_args = Mock()
-                mock_args.help = True
-                mock_parse.return_value = mock_args
-
-                # Should handle help gracefully
-                with contextlib.suppress(SystemExit):
-                    launch_golf_suite.main()
+            # Use a real argparse.Namespace so DbC assertions pass
+            real_args = argparse.Namespace(
+                engine=None, classic=False, api_only=False, port=8000, no_browser=False
+            )
+            with (
+                patch("argparse.ArgumentParser.parse_args", return_value=real_args),
+                # Prevent GUI / engine launch side-effects
+                patch.object(launch_golf_suite, "route_launch", return_value=None),
+                contextlib.suppress(SystemExit),
+            ):
+                launch_golf_suite.main()
 
         except ImportError:
             pytest.skip("Main launcher not available")

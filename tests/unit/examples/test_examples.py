@@ -21,7 +21,42 @@ def test_aerodynamics_demo(monkeypatch):
 
 
 def test_basic_flight_simulation(monkeypatch):
-    run_example("basic_flight_simulation.py", monkeypatch)
+    """basic_flight_simulation.py requires the Rust physics kernel.
+
+    When Rust is not installed (e.g. CI without the wheel), we mock
+    ``is_rust_available`` and the ``upstream_physics`` C extension so that the
+    example produces a plausible trajectory without the native library.
+    """
+    import sys
+    from types import ModuleType
+    from unittest.mock import MagicMock, patch
+
+    # Build a minimal fake 'upstream_physics' that satisfies the API used by
+    # BallFlightSimulator.simulate_trajectory().
+    fake_physics = ModuleType("upstream_physics")
+
+    class _FakePoint:
+        def __init__(self, t, x, z):
+            self.t, self.x, self.y, self.z = t, x, 0.0, z
+            self.vx, self.vy, self.vz = 70.0, 0.0, 10.0
+
+    class _FakeResult:
+        def get_points(self):
+            return [_FakePoint(i * 0.05, i * 3.0, max(0.0, 20.0 - i)) for i in range(5)]
+
+    fake_physics.IntegratorConfig = MagicMock(return_value=object())
+    fake_physics.AeroBallProperties = MagicMock(return_value=object())
+    fake_physics.AirProperties = MagicMock(return_value=object())
+    fake_physics.simulate_ball_trajectory_py = MagicMock(return_value=_FakeResult())
+
+    with (
+        patch.dict(sys.modules, {"upstream_physics": fake_physics}),
+        patch(
+            "src.shared.python.physics.rust_kernel.is_rust_available",
+            return_value=True,
+        ),
+    ):
+        run_example("basic_flight_simulation.py", monkeypatch)
 
 
 def test_topography_demo(monkeypatch):
