@@ -113,12 +113,12 @@ class MediaPipeEstimator(PoseEstimator):
             min_tracking_confidence: Minimum confidence for pose tracking
             enable_temporal_smoothing: Whether to apply Kalman filtering
         """
-        assert (
-            min_detection_confidence is not None
-        ), "min_detection_confidence must be provided"
-        assert (
-            min_detection_confidence is not None
-        ), "min_detection_confidence must be provided"
+        assert min_detection_confidence is not None, (
+            "min_detection_confidence must be provided"
+        )
+        assert min_detection_confidence is not None, (
+            "min_detection_confidence must be provided"
+        )
         self.pose_detector: Any | None = None
         self.min_detection_confidence = min_detection_confidence
         self.min_tracking_confidence = min_tracking_confidence

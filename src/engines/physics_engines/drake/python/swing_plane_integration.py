@@ -155,12 +155,12 @@ class DrakeSwingPlaneAnalyzer:
             trajectory_optimizer: DrakeMotionOptimizer instance
             swing_plane_constraint_weight: Weight for swing plane deviation cost
         """
-        assert (
-            swing_plane_constraint_weight is not None
-        ), "swing_plane_constraint_weight must be provided"
-        assert (
-            swing_plane_constraint_weight is not None
-        ), "swing_plane_constraint_weight must be provided"
+        assert swing_plane_constraint_weight is not None, (
+            "swing_plane_constraint_weight must be provided"
+        )
+        assert swing_plane_constraint_weight is not None, (
+            "swing_plane_constraint_weight must be provided"
+        )
         self.logger.info(
             f"Integrating swing plane constraints with weight "
             f"{swing_plane_constraint_weight}"

@@ -57,7 +57,9 @@ def changed_python_files(
             continue
         if _is_excluded(raw):
             continue
-        paths.append(repo_root / raw)
+        full_path = repo_root / raw
+        if full_path.exists():
+            paths.append(full_path)
     return paths
 
 

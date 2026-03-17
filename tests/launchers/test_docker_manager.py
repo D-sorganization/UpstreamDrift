@@ -145,10 +145,11 @@ def test_docker_launcher_check_image_exists_false():
 def test_build_launch_command_windows():
     launcher = DockerLauncher(repo_root=Path("/fake/repo"), image_name="my_image")
 
+    repo_path = Path("/fake/repo/src/some/drake_model.py")
     with patch("os.name", "nt"):
         cmd = launcher.build_launch_command(
             model_type="drake",
-            repo_path=Path("/fake/repo/src/some/drake_model.py"),
+            repo_path=repo_path,
             use_gpu=True,
         )
         assert "DISPLAY=host.docker.internal:0" in cmd

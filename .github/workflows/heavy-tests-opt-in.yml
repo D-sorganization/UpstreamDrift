@@ -2,7 +2,7 @@ name: Heavy Integration Tests (Opt-In)
 # ─────────────────────────────────────────────────────────────────────────────
 # ISOLATION CONTRACT: This workflow MUST NOT run on standard PR required lanes.
 #   • Trigger: manual dispatch OR weekly schedule ONLY
-#   • Runner: d-sorg-fleet-4core (custom image, NOT ubuntu-latest)
+#   • Runner: ubuntu-latest (or dedicated runner if configured)
 #   • Marker: live_simulation (explicitly EXCLUDED from ci-standard.yml)
 #
 # Parity: mirrors scripts/run_local_heavy_tests.sh exactly.

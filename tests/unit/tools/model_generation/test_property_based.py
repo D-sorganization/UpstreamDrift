@@ -136,7 +136,7 @@ class TestURDFXMLWellFormedness:
     """Property: any valid body parameters must produce well-formed URDF XML."""
 
     @given(params=valid_body_params())
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_arbitrary_box_body_produces_well_formed_xml(self, params: dict) -> None:
         """
         Invariant: ManualBuilder with a single box link always emits
@@ -177,7 +177,7 @@ class TestURDFXMLWellFormedness:
         radius=dimension_strategy,
         length=dimension_strategy,
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_arbitrary_cylinder_body_produces_well_formed_xml(
         self,
         mass: float,
@@ -203,7 +203,7 @@ class TestURDFXMLWellFormedness:
         assert root.tag == "robot"
 
     @given(mass=mass_strategy, radius=dimension_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_arbitrary_sphere_body_produces_well_formed_xml(
         self,
         mass: float,
@@ -289,7 +289,7 @@ class TestLinkJointHierarchyConsistency:
         assert child_elem.get("link") == child_link.name
 
     @given(n_children=st.integers(min_value=1, max_value=5))
-    @settings(max_examples=30)
+    @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])
     def test_star_topology_all_children_connected(self, n_children: int) -> None:
         """
         Invariant: a root with N children produces N joints and N+1 links.
@@ -329,7 +329,7 @@ class TestInertiaScalingPreservesRatios:
     """Property: scaling inertia to a new mass preserves moment ratios."""
 
     @given(inertia=valid_inertia(), new_mass=mass_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_scale_to_mass_preserves_ratios(
         self,
         inertia: Inertia,
@@ -362,7 +362,7 @@ class TestInertiaScalingPreservesRatios:
             assert abs(original_ratio - scaled_ratio) < 1e-6
 
     @given(inertia=valid_inertia(), factor=scale_factor_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_scale_twice_equals_direct_scale(
         self,
         inertia: Inertia,
@@ -385,7 +385,7 @@ class TestMirrorInvolution:
     """Property: mirror(axis) applied twice == identity."""
 
     @given(axis=mirror_axis_strategy)
-    @settings(max_examples=30)
+    @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])
     def test_mirror_twice_is_identity_single_link(self, axis: str) -> None:
         """
         Invariant: mirroring a single-link model about any axis twice
@@ -436,7 +436,7 @@ class TestMirrorInvolution:
             assert abs(result_link.inertia.center_of_mass[i] - original_com[i]) < 1e-10
 
     @given(axis=mirror_axis_strategy)
-    @settings(max_examples=30)
+    @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])
     def test_mirror_twice_is_identity_two_link_chain(self, axis: str) -> None:
         """
         Invariant: mirroring a two-link chain twice restores joint origins
@@ -477,15 +477,15 @@ class TestMirrorInvolution:
         result_joint = builder.joints[0]
 
         for i in range(3):
-            assert (
-                abs(result_joint.origin.xyz[i] - joint_origin[i]) < 1e-10
-            ), f"joint origin[{i}] mismatch after double mirror({axis})"
-            assert (
-                abs(result_joint.axis[i] - joint_axis[i]) < 1e-10
-            ), f"joint axis[{i}] mismatch after double mirror({axis})"
+            assert abs(result_joint.origin.xyz[i] - joint_origin[i]) < 1e-10, (
+                f"joint origin[{i}] mismatch after double mirror({axis})"
+            )
+            assert abs(result_joint.axis[i] - joint_axis[i]) < 1e-10, (
+                f"joint axis[{i}] mismatch after double mirror({axis})"
+            )
 
     @given(axis=mirror_axis_strategy)
-    @settings(max_examples=30)
+    @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])
     def test_mirror_toggles_handedness(self, axis: str) -> None:
         """
         Invariant: mirroring toggles handedness, so double mirror
@@ -511,7 +511,7 @@ class TestMirrorNegatesCorrectComponent:
         y=st.floats(min_value=-5, max_value=5, allow_nan=False),
         z=st.floats(min_value=-5, max_value=5, allow_nan=False),
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_mirror_negates_only_one_axis(
         self,
         axis: str,
@@ -555,7 +555,7 @@ class TestInertiaFromPrimitivesPositiveDefinite:
         sy=dimension_strategy,
         sz=dimension_strategy,
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_box_inertia_positive_definite(
         self,
         mass: float,
@@ -572,7 +572,7 @@ class TestInertiaFromPrimitivesPositiveDefinite:
         assert inertia.is_positive_definite()
 
     @given(mass=mass_strategy, radius=dimension_strategy, length=dimension_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_cylinder_inertia_positive_definite(
         self,
         mass: float,
@@ -584,7 +584,7 @@ class TestInertiaFromPrimitivesPositiveDefinite:
         assert inertia.is_positive_definite()
 
     @given(mass=mass_strategy, radius=dimension_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_sphere_inertia_positive_definite(
         self,
         mass: float,
@@ -598,7 +598,7 @@ class TestInertiaFromPrimitivesPositiveDefinite:
         assert abs(inertia.iyy - inertia.izz) < 1e-12
 
     @given(mass=mass_strategy, radius=dimension_strategy, length=dimension_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_capsule_inertia_positive_definite(
         self,
         mass: float,
@@ -619,7 +619,7 @@ class TestInertiaTriangleInequality:
         sy=dimension_strategy,
         sz=dimension_strategy,
     )
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_box_satisfies_triangle_inequality(
         self,
         mass: float,
@@ -632,7 +632,7 @@ class TestInertiaTriangleInequality:
         assert inertia.satisfies_triangle_inequality()
 
     @given(mass=mass_strategy, radius=dimension_strategy)
-    @settings(max_examples=50)
+    @settings(max_examples=50, suppress_health_check=[HealthCheck.too_slow])
     def test_sphere_satisfies_triangle_inequality(
         self,
         mass: float,

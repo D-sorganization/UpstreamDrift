@@ -83,17 +83,17 @@ class TestMassMatrix:
     def test_symmetric(self, default_dynamics: DoublePendulumDynamics) -> None:
         for theta2 in [0.0, math.pi / 4, -math.pi / 3, math.pi / 2]:
             M = default_dynamics.mass_matrix(theta2)
-            assert M[0][1] == pytest.approx(
-                M[1][0], rel=1e-12
-            ), f"M not symmetric at theta2={theta2}"
+            assert M[0][1] == pytest.approx(M[1][0], rel=1e-12), (
+                f"M not symmetric at theta2={theta2}"
+            )
 
     def test_positive_definite(self, default_dynamics: DoublePendulumDynamics) -> None:
         for theta2 in np.linspace(-math.pi, math.pi, 20):
             M = np.array(default_dynamics.mass_matrix(theta2))
             eigenvalues = np.linalg.eigvalsh(M)
-            assert np.all(
-                eigenvalues > 0
-            ), f"M not positive-definite at theta2={theta2:.3f}: {eigenvalues}"
+            assert np.all(eigenvalues > 0), (
+                f"M not positive-definite at theta2={theta2:.3f}: {eigenvalues}"
+            )
 
     def test_diagonal_dominant_at_zero(
         self, default_dynamics: DoublePendulumDynamics
