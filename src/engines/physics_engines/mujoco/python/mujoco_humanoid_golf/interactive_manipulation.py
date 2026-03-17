@@ -651,9 +651,7 @@ class InteractiveManipulator:
                         maintain_orientation=True,
                     )
 
-            elif (
-                constraint.constraint_type == ConstraintType.RELATIVE_TO_BODY
-            ):  # noqa: SIM102
+            elif constraint.constraint_type == ConstraintType.RELATIVE_TO_BODY:  # noqa: SIM102
                 # Maintain relative pose to reference body
                 if (
                     constraint.reference_body_id is not None
