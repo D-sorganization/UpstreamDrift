@@ -106,14 +106,15 @@ class ProcessManager:
         src_dir = str(self.repo_root / "src")
 
         existing_path = env.get("PYTHONPATH", "")
-        paths_to_add = []
+        separator = ";" if os.name == "nt" else ":"
+        current_paths = existing_path.split(separator) if existing_path else []
 
-        if repo_root_str not in existing_path:
+        paths_to_add = []
+        if repo_root_str not in current_paths:
             paths_to_add.append(repo_root_str)
-        if src_dir not in existing_path:
+        if src_dir not in current_paths:
             paths_to_add.append(src_dir)
 
-        separator = ";" if os.name == "nt" else ":"
         if paths_to_add:
             new_paths = separator.join(paths_to_add)
             env["PYTHONPATH"] = (
@@ -305,21 +306,25 @@ class ProcessManager:
         try:
             process_env = env or self.get_subprocess_env()
 
-            # Ensure PYTHONPATH is set correctly
             if os.name == "nt":
                 current_pythonpath = process_env.get("PYTHONPATH", "")
                 repo_root_str = str(self.repo_root)
                 src_dir_str = str(self.repo_root / "src")
 
+                current_paths = (
+                    current_pythonpath.split(";") if current_pythonpath else []
+                )
                 paths_to_add = []
-                if repo_root_str not in current_pythonpath:
+                if repo_root_str not in current_paths:
                     paths_to_add.append(repo_root_str)
-                if src_dir_str not in current_pythonpath:
+                if src_dir_str not in current_paths:
                     paths_to_add.append(src_dir_str)
 
                 if paths_to_add:
                     process_env["PYTHONPATH"] = (
                         f"{';'.join(paths_to_add)};{current_pythonpath}"
+                        if current_pythonpath
+                        else ";".join(paths_to_add)
                     )
 
             if self.use_separate_terminals:

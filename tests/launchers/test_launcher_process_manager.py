@@ -253,3 +253,274 @@ def test_start_vcxsrv(mock_exists, mock_popen, mock_is_running):
 
     with patch("os.name", "posix"):
         assert start_vcxsrv() is False
+
+
+def test_init_log_file_oserror(manager):
+    with patch.object(Path, "mkdir", side_effect=OSError("Boom")):
+        manager._init_log_file()  # Should silently pass
+
+
+def test_get_log_path():
+    path = ProcessManager.get_log_path()
+    assert path.name == "process_output.log"
+
+
+@patch("src.launchers.launcher_process_manager.datetime")
+@patch("builtins.open", side_effect=OSError("Boom"))
+def test_write_log_line_oserror(mock_open_file, mock_datetime, manager):
+    manager._write_log_line("TestApp", "Hello")  # Should pass
+
+
+def test_stream_output_runtime_error(manager):
+    mock_proc = MagicMock()
+    mock_proc.stdout.readline.side_effect = RuntimeError("Boom")
+    mock_proc.wait.return_value = 0
+    manager._stream_output("TestApp", mock_proc)  # Should catch exception
+
+
+@patch("subprocess.Popen")
+def test_launch_script_keep_terminal(mock_popen, manager):
+    manager.use_separate_terminals = True
+    with patch("os.name", "nt"):
+        manager.launch_script(
+            "Test", Path("script.py"), Path("."), keep_terminal_open=True
+        )
+        assert "& pause" in mock_popen.call_args[0][0]
+
+
+@patch("subprocess.Popen", side_effect=OSError("Boom"))
+def test_launch_script_oserror(mock_popen, manager):
+    res = manager.launch_script("Test", Path("script.py"), Path("."))
+    assert res is None
+
+
+@patch("subprocess.Popen")
+def test_launch_module_keep_terminal(mock_popen, manager):
+    manager.use_separate_terminals = True
+    with patch("os.name", "nt"), patch.dict("os.environ", {}):
+        # We need to simulate the env stuff in launch_module
+        manager.launch_module("Test", "my_module", Path("."), keep_terminal_open=True)
+        assert "& pause" in mock_popen.call_args[0][0]
+
+
+@patch("subprocess.Popen")
+def test_launch_in_wsl_posix(mock_popen, manager):
+    with patch("os.name", "posix"):
+        res = manager.launch_in_wsl("script.py")
+        assert res is True
+        mock_popen.assert_called_once()
+
+
+@patch("subprocess.Popen", side_effect=OSError("Boom"))
+def test_launch_in_wsl_oserror(mock_popen, manager):
+    assert manager.launch_in_wsl("script.py") is False
+
+
+@patch("subprocess.Popen")
+def test_launch_module_in_wsl_no_cwd(mock_popen, manager):
+    with patch("os.name", "posix"):
+        res = manager.launch_module_in_wsl("my_module")
+        assert res is True
+
+
+@patch("subprocess.Popen")
+def test_launch_module_in_wsl_nt(mock_popen, manager):
+    with patch("os.name", "nt"):
+        res = manager.launch_module_in_wsl("my_module")
+        assert res is True
+
+
+@patch("subprocess.Popen", side_effect=OSError("Boom"))
+def test_launch_module_in_wsl_oserror(mock_popen, manager):
+    assert manager.launch_module_in_wsl("my_module") is False
+
+
+@patch("src.launchers.launcher_process_manager.kill_process_tree")
+def test_cleanup_processes_fallback(mock_kill, manager):
+    mock_proc = MagicMock()
+    mock_proc.poll.return_value = None
+    mock_proc.wait.side_effect = __import__("subprocess").TimeoutExpired(
+        cmd="", timeout=5
+    )
+
+    manager.running_processes = {"proc": mock_proc}
+    mock_kill.return_value = False  # Trigger fallback
+
+    manager.cleanup_processes()
+    mock_proc.terminate.assert_called_once()
+    mock_proc.kill.assert_called_once()
+    assert len(manager.running_processes) == 0
+
+
+def test_cleanup_processes_oserror(manager):
+    mock_proc = MagicMock()
+    mock_proc.poll.side_effect = OSError("Boom")
+    manager.running_processes = {"proc": mock_proc}
+    manager.cleanup_processes()  # Should not crash
+    assert len(manager.running_processes) == 0
+
+
+@patch("subprocess.run", side_effect=OSError("Boom"))
+def test_is_vcxsrv_running_oserror(mock_run):
+    with patch("os.name", "nt"):
+        assert is_vcxsrv_running() is False
+
+
+@patch("src.launchers.launcher_process_manager.is_vcxsrv_running", return_value=True)
+def test_start_vcxsrv_already_running(mock_is_running):
+    with patch("os.name", "nt"):
+        assert start_vcxsrv() is True
+
+
+@patch("src.launchers.launcher_process_manager.is_vcxsrv_running", return_value=False)
+@patch("subprocess.Popen", side_effect=ImportError("Boom"))
+@patch.object(Path, "exists", return_value=True)
+def test_start_vcxsrv_import_error(mock_exists, mock_popen, mock_is_running):
+    # Loop over VCXSRV_PATHS but all raise ImportError
+    with patch("os.name", "nt"):
+        assert start_vcxsrv() is False
+
+
+def test_subprocess_constants_fallback():
+    import importlib
+    import subprocess
+
+    import src.launchers.launcher_process_manager as lpm
+
+    with (
+        patch("sys.platform", "win32"),
+        patch("subprocess.CREATE_NO_WINDOW", side_effect=AttributeError),
+        patch("subprocess.CREATE_NEW_CONSOLE", side_effect=AttributeError),
+    ):
+        # We temporarily remove them from subprocess if they exist
+        orig_no_win = getattr(subprocess, "CREATE_NO_WINDOW", None)
+        orig_new_cons = getattr(subprocess, "CREATE_NEW_CONSOLE", None)
+
+        if hasattr(subprocess, "CREATE_NO_WINDOW"):
+            del subprocess.CREATE_NO_WINDOW
+        if hasattr(subprocess, "CREATE_NEW_CONSOLE"):
+            del subprocess.CREATE_NEW_CONSOLE
+
+        importlib.reload(lpm)
+
+        assert lpm.CREATE_NO_WINDOW == 0x08000000
+        assert lpm.CREATE_NEW_CONSOLE == 0x00000010
+
+        if orig_no_win is not None:
+            subprocess.CREATE_NO_WINDOW = orig_no_win
+        if orig_new_cons is not None:
+            subprocess.CREATE_NEW_CONSOLE = orig_new_cons
+
+    with patch("sys.platform", "linux"):
+        importlib.reload(lpm)
+        assert lpm.CREATE_NO_WINDOW == 0
+        assert lpm.CREATE_NEW_CONSOLE == 0
+
+    importlib.reload(lpm)
+
+
+def test_get_subprocess_env_already_exists(manager):
+    repo_str = str(manager.repo_root)
+    src_str = str(manager.repo_root / "src")
+
+    with patch.dict("os.environ", {"PYTHONPATH": f"{repo_str};{src_str}"}):
+        env = manager.get_subprocess_env()
+        # Should not append them twice
+        assert env["PYTHONPATH"] == f"{repo_str};{src_str}"
+
+
+def test_get_subprocess_env_empty(manager):
+    with patch.dict("os.environ", clear=True):
+        env = manager.get_subprocess_env()
+        separator = ";" if __import__("os").name == "nt" else ":"
+        assert separator in env["PYTHONPATH"]
+
+
+def test_stream_output_empty_lines(manager):
+    mock_proc = MagicMock()
+    # readline returns empty bytes to trigger immediate exit,
+    # and b"   \n" to trigger empty stripped line
+    mock_proc.stdout.readline.side_effect = [b"    \n", b""]
+    mock_proc.stderr.readline.side_effect = [b"\n", b""]
+    mock_proc.wait.return_value = 0
+    manager._emit_output = MagicMock()
+
+    manager._stream_output("TestApp", mock_proc)
+
+    manager._emit_output.assert_called_once_with("TestApp", "[exited with code 0]")
+
+
+def test_stream_output_no_streams(manager):
+    mock_proc = MagicMock()
+    mock_proc.stdout = None
+    mock_proc.stderr = None
+    mock_proc.wait.return_value = 0
+    manager._emit_output = MagicMock()
+
+    manager._stream_output("TestApp", mock_proc)
+
+    manager._emit_output.assert_called_once_with("TestApp", "[exited with code 0]")
+
+
+@patch("subprocess.Popen")
+def test_launch_module_unified_nt_pythonpath(mock_popen, manager):
+    manager.use_separate_terminals = False
+
+    repo_str = str(manager.repo_root)
+    src_str = str(manager.repo_root / "src")
+
+    with patch("os.name", "nt"):
+        # True, True branch (neither in path, passed via explicit env)
+        manager.launch_module(
+            "Test", "my_module", Path("."), env={"PYTHONPATH": "some_other"}
+        )
+        env_passed = mock_popen.call_args[1]["env"]
+        assert repo_str in env_passed["PYTHONPATH"]
+        assert src_str in env_passed["PYTHONPATH"]
+        assert "some_other" in env_passed["PYTHONPATH"]
+
+        # False, False branch
+        manager.launch_module(
+            "Test", "my_module", Path("."), env={"PYTHONPATH": f"{repo_str};{src_str}"}
+        )
+        env_passed = mock_popen.call_args[1]["env"]
+        # Shouldn't duplicate
+        assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str}"
+
+        # False, True branch
+        manager.launch_module(
+            "Test", "my_module", Path("."), env={"PYTHONPATH": f"{repo_str};foo"}
+        )
+        env_passed = mock_popen.call_args[1]["env"]
+        assert env_passed["PYTHONPATH"] == f"{src_str};{repo_str};foo"
+
+        # True, False branch
+        manager.launch_module(
+            "Test", "my_module", Path("."), env={"PYTHONPATH": f"{src_str};foo"}
+        )
+        env_passed = mock_popen.call_args[1]["env"]
+        assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str};foo"
+
+    with patch("os.name", "posix"):
+        manager.launch_module("Test", "my_module", Path("."))
+        assert mock_popen.called
+
+
+@patch("subprocess.Popen")
+def test_launch_module_separate_terminals(mock_popen, manager):
+    manager.use_separate_terminals = True
+
+    with patch("os.name", "nt"):
+        manager.launch_module("Test", "my_module", Path("."), keep_terminal_open=False)
+        assert "cmd /c" in mock_popen.call_args[0][0]
+
+    with patch("os.name", "posix"):
+        manager.launch_module("Test", "my_module", Path("."), keep_terminal_open=False)
+        assert mock_popen.call_args[0][0][1] == "-m"
+
+
+@patch("src.launchers.launcher_process_manager.is_vcxsrv_running", return_value=False)
+@patch.object(Path, "exists", return_value=False)
+def test_start_vcxsrv_not_found(mock_exists, mock_is_running):
+    with patch("os.name", "nt"):
+        assert start_vcxsrv() is False
