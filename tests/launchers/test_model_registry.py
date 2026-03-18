@@ -1,12 +1,12 @@
 """Tests for model_registry."""
 
-from pathlib import Path
-from unittest.mock import mock_open, patch
+from pathlib import Path  # noqa: E402
+from unittest.mock import mock_open, patch  # noqa: E402
 
-import pytest
-import yaml
+import pytest  # noqa: E402
+import yaml  # noqa: E402
 
-from src.launchers.model_registry import (
+from src.launchers.model_registry import (  # noqa: E402
     ModelRegistry,
     ModelSpec,
     _registry,

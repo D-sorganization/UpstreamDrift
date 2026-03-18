@@ -1,10 +1,10 @@
 """Tests for golf_suite_launcher.py."""
 
-import sys
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
 
 @pytest.fixture
@@ -41,7 +41,28 @@ def test_init_raises_without_pyqt():
         import src.launchers.golf_suite_launcher as gsl
 
         with pytest.raises(ImportError, match="PyQt6 is required"):
-            gsl.GolfLauncher.__init__(MagicMock())
+            gsl.GolfLauncher()
+
+
+def test_imports_without_pyqt():
+    import importlib
+
+    import src.launchers.golf_suite_launcher as gsl
+
+    with patch(
+        "src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", False
+    ):
+        try:
+            importlib.reload(gsl)
+            assert gsl.QtWidgets is None
+            assert gsl.QtCore is None
+            assert gsl.QtGui is None
+        finally:
+            # Restore module state so other tests on this worker do not fail!
+            pass
+
+    # Always reload after the patch has ended to restore true state
+    importlib.reload(gsl)
 
 
 def test_init_sets_paths(mock_pyqt):
@@ -53,6 +74,27 @@ def test_init_sets_paths(mock_pyqt):
         assert hasattr(launcher, "mujoco_path")
         assert hasattr(launcher, "drake_path")
         assert "engines" in str(launcher.mujoco_path)
+
+
+def test_setup_ui_execution(qapp):
+    from src.launchers.golf_suite_launcher import GolfLauncher
+
+    # Do not patch _setup_ui, let it execute with real PyQT
+    launcher = GolfLauncher()
+
+    # Verify that UI components were created
+    assert hasattr(launcher, "status")
+    assert hasattr(launcher, "log_text")
+    assert hasattr(launcher, "btn_mujoco")
+    assert hasattr(launcher, "btn_drake")
+    assert hasattr(launcher, "btn_pinocchio")
+    assert hasattr(launcher, "btn_opensim")
+    assert hasattr(launcher, "btn_myosim")
+    assert hasattr(launcher, "btn_openpose")
+    assert hasattr(launcher, "btn_urdf")
+    assert hasattr(launcher, "btn_shot_tracer")
+    assert hasattr(launcher, "copy_btn")
+    assert hasattr(launcher, "clear_btn")
 
 
 def test_launch_script_success(launcher):
@@ -128,12 +170,31 @@ def test_copy_log(launcher, mock_pyqt):
     launcher.copy_btn.setText.assert_called_with("Copied!")
 
 
+def test_copy_log_no_clipboard(launcher, mock_pyqt):
+    mock_widgets, mock_core = mock_pyqt
+    mock_widgets.QApplication.clipboard.return_value = None
+
+    launcher.log_text.toPlainText.return_value = "Log content"
+    launcher.copy_log()
+    launcher.copy_btn.setText.assert_not_called()
+
+
 def test_restore_btn(launcher):
     mock_btn = MagicMock()
     mock_icon = MagicMock()
     launcher._restore_btn(mock_btn, "Restored", mock_icon)
     mock_btn.setText.assert_called_once_with("Restored")
     mock_btn.setIcon.assert_called_once_with(mock_icon)
+
+
+def test_restore_btn_none(launcher):
+    # Tests the fallback conditions where btn=None or icon=None
+    launcher._restore_btn(None, "Restored", MagicMock())
+
+    mock_btn = MagicMock()
+    launcher._restore_btn(mock_btn, "Restored", None)
+    mock_btn.setText.assert_called_once_with("Restored")
+    mock_btn.setIcon.assert_not_called()
 
 
 def test_launcher_methods(launcher):

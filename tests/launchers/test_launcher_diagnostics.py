@@ -1,11 +1,11 @@
 """Tests for launcher_diagnostics."""
 
-import json
-from unittest.mock import MagicMock, mock_open, patch
+import json  # noqa: E402
+from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
-import yaml
+import yaml  # noqa: E402
 
-from src.launchers.launcher_diagnostics import (
+from src.launchers.launcher_diagnostics import (  # noqa: E402
     DiagnosticResult,
     LauncherDiagnostics,
     reset_layout_config,
@@ -273,5 +273,187 @@ def test_run_cli_diagnostics(mock_run):
         "summary": {"status": "healthy", "passed": 1, "failed": 0, "warnings": 0},
         "checks": [{"name": "check1", "status": "pass", "message": "msg"}],
         "recommendations": ["Do this"],
+    }
+    run_cli_diagnostics()
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_models_yaml_yaml_error(mock_exists):
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", mock_open(read_data="[ : invalid yaml")):
+        res = diag.check_models_yaml()
+    assert res.status == "fail"
+    assert "YAML parsing error" in res.message
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=ImportError("mock"),
+)
+def test_check_model_registry_import_error(mock_registry_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_model_registry()
+    assert res.status == "fail"
+    assert "Failed to import" in res.message
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=RuntimeError("mock"),
+)
+def test_check_model_registry_runtime_error(mock_registry_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_model_registry()
+    assert res.status == "fail"
+    assert "ModelRegistry error" in res.message
+
+
+@patch("pathlib.Path.exists", return_value=True)
+def test_check_layout_config_os_error(mock_exists):
+    diag = LauncherDiagnostics()
+    with patch("builtins.open", side_effect=OSError("denied")):
+        res = diag.check_layout_config()
+    assert res.status == "warning"
+    assert "Error reading layout" in res.message
+
+
+def test_check_pyqt6_availability_success():
+    diag = LauncherDiagnostics()
+    with (
+        patch("PyQt6.QtCore.PYQT_VERSION_STR", "6.0", create=True),
+        patch("PyQt6.QtCore.QT_VERSION_STR", "6.0", create=True),
+        patch("PyQt6.QtWidgets.QApplication", create=True),
+    ):
+        res = diag.check_pyqt6_availability()
+    assert res.status == "pass"
+    assert "PyQt6 available" in res.message
+
+
+def test_check_pyqt6_availability_import_error():
+    diag = LauncherDiagnostics()
+    with patch.dict("sys.modules", {"PyQt6.QtCore": None, "PyQt6.QtWidgets": None}):
+        res = diag.check_pyqt6_availability()
+    assert res.status == "fail"
+
+
+@patch("src.shared.python.engine_core.engine_manager.EngineManager")
+def test_check_engine_availability_probe_error(mock_manager_class):
+    diag = LauncherDiagnostics()
+    mock_mgr = MagicMock()
+    mock_manager_class.return_value = mock_mgr
+
+    import enum
+
+    class MockStatus(enum.Enum):
+        AVAILABLE = "available"
+
+    class MockType(enum.Enum):
+        MUJOCO = "mujoco"
+
+    mock_probe = MagicMock()
+    mock_probe.probe.side_effect = RuntimeError("probe failed")
+
+    mock_mgr.get_available_engines.return_value = []
+    mock_mgr.engine_status = {MockType.MUJOCO: MockStatus.AVAILABLE}
+    mock_mgr.engine_paths = {MockType.MUJOCO: "/fake"}
+    mock_mgr.probes = {MockType.MUJOCO: mock_probe}
+
+    res = diag.check_engine_availability()
+    assert res.status == "warning"
+
+
+@patch("src.shared.python.engine_core.engine_manager.EngineManager")
+def test_check_engine_availability_no_probe(mock_manager_class):
+    diag = LauncherDiagnostics()
+    mock_mgr = MagicMock()
+    mock_manager_class.return_value = mock_mgr
+
+    import enum
+
+    from src.shared.python.engine_core.engine_registry import EngineStatus
+
+    class MockType(enum.Enum):
+        MUJOCO = "mujoco"
+
+    # No probe
+    mock_mgr.get_available_engines.return_value = [MockType.MUJOCO]
+    mock_mgr.engine_status = {MockType.MUJOCO: EngineStatus.AVAILABLE}
+    mock_mgr.engine_paths = {MockType.MUJOCO: "/fake"}
+    mock_mgr.probes = {}
+
+    res = diag.check_engine_availability()
+    assert res.status == "pass"
+
+
+@patch(
+    "src.shared.python.engine_core.engine_manager.EngineManager",
+    side_effect=ImportError("mock"),
+)
+def test_check_engine_availability_import_error(mock_manager_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_engine_availability()
+    assert res.status == "warning"
+
+
+@patch(
+    "src.shared.python.engine_core.engine_manager.EngineManager",
+    side_effect=RuntimeError("mock"),
+)
+def test_check_engine_availability_runtime_error(mock_manager_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_engine_availability()
+    assert res.status == "warning"
+
+
+def test_generate_recommendations():
+    diag = LauncherDiagnostics()
+    res1 = DiagnosticResult("models_yaml", "fail", "msg", {})
+    res2 = DiagnosticResult("model_registry", "fail", "msg", {})
+    res3 = DiagnosticResult("pyqt6_availability", "fail", "msg", {})
+    res4 = DiagnosticResult("asset_files", "fail", "msg", {})
+    res5 = DiagnosticResult(
+        "layout_config", "warning", "msg", {"missing_from_saved": ["drake"]}
+    )
+    res6 = DiagnosticResult("asset_files", "warning", "msg", {})
+
+    diag.results.extend([res1, res2, res3, res4, res5, res6])
+    recs = diag._generate_recommendations()
+    assert len(recs) == 6
+
+    # Test healthy branch
+    diag.results.clear()
+    diag.results.append(DiagnosticResult("test", "pass", "ok"))
+    recs = diag._generate_recommendations()
+    assert len(recs) == 1
+    assert "operational" in recs[0]
+
+
+@patch("pathlib.Path.exists", return_value=True)
+@patch("pathlib.Path.rename", side_effect=OSError("mock"))
+def test_reset_layout_config_error(mock_rename, mock_exists):
+    from src.launchers.launcher_diagnostics import reset_layout_config
+
+    assert reset_layout_config() is False
+
+
+@patch.object(LauncherDiagnostics, "run_all_checks")
+def test_run_cli_diagnostics_failures_and_warnings(mock_run):
+    mock_run.return_value = {
+        "summary": {"status": "degraded", "passed": 0, "failed": 1, "warnings": 1},
+        "checks": [
+            {
+                "name": "fail_check",
+                "status": "fail",
+                "message": "fail msg",
+                "details": {"missing_expected_ids": ["x"]},
+            },
+            {
+                "name": "warn_check",
+                "status": "warning",
+                "message": "warn msg",
+                "details": {"missing_from_saved": ["y"]},
+            },
+        ],
+        "recommendations": ["Do this", "Do that"],
     }
     run_cli_diagnostics()

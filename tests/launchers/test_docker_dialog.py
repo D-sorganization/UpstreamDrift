@@ -1,13 +1,13 @@
 """Tests for docker_dialog.py."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
 # Ensure PyQt classes are available
 pytest.importorskip("PyQt6")
 
-from src.launchers.docker_dialog import EnvironmentDialog
+from src.launchers.docker_dialog import EnvironmentDialog  # noqa: E402
 
 
 @pytest.fixture

@@ -91,22 +91,25 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         tooltip: str,
         accessible_name: str,
         slot: object,
-        icon_pixmap: QtWidgets.QStyle.StandardPixmap = QtWidgets.QStyle.StandardPixmap.SP_MediaPlay,
-    ) -> QtWidgets.QPushButton:
+        icon_pixmap: object = None,
+    ) -> "QtWidgets.QPushButton":
         """Create a standard engine launch button."""
-        assert label is not None, "label must be provided"
         assert label is not None, "label must be provided"
         btn = QtWidgets.QPushButton(label)
         btn.setMinimumHeight(40)
-        btn.setIcon(self.style().standardIcon(icon_pixmap))
+
+        if icon_pixmap is None and PYQT6_AVAILABLE:
+            icon_pixmap = QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
+
+        if PYQT6_AVAILABLE and icon_pixmap is not None:
+            btn.setIcon(self.style().standardIcon(icon_pixmap))  # type: ignore
         btn.setToolTip(tooltip)
         btn.setAccessibleName(accessible_name)
         btn.clicked.connect(slot)  # type: ignore[arg-type]
         return btn
 
-    def _setup_engine_buttons(self, layout: QtWidgets.QVBoxLayout) -> None:
+    def _setup_engine_buttons(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create and add all engine launch buttons to the layout."""
-        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         self.btn_mujoco = self._create_engine_button(
             "Launch &MuJoCo Engine",
@@ -161,13 +164,16 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             "Launch Interactive URDF model builder",
             "Launch URDF Generator",
             self._launch_urdf,
-            icon_pixmap=QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton,
+            icon_pixmap=(
+                QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton
+                if PYQT6_AVAILABLE
+                else None
+            ),
         )
         layout.addWidget(self.btn_urdf)
 
-    def _setup_shot_tracer_section(self, layout: QtWidgets.QVBoxLayout) -> None:
+    def _setup_shot_tracer_section(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Add separator and shot tracer button to the layout."""
-        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         layout.addSpacing(10)
 
@@ -183,13 +189,16 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             "Launch the ball flight visualization (Waterloo/Penner model)",
             "Launch Shot Tracer",
             self._launch_shot_tracer,
-            icon_pixmap=QtWidgets.QStyle.StandardPixmap.SP_ArrowForward,
+            icon_pixmap=(
+                QtWidgets.QStyle.StandardPixmap.SP_ArrowForward
+                if PYQT6_AVAILABLE
+                else None
+            ),
         )
         layout.addWidget(self.btn_shot_tracer)
 
-    def _setup_log_area(self, layout: QtWidgets.QVBoxLayout) -> None:
+    def _setup_log_area(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create the simulation log group box with copy/clear controls."""
-        assert layout is not None, "layout must be provided"
         assert layout is not None, "layout must be provided"
         layout.addSpacing(20)
 
@@ -311,7 +320,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             self.status.setText("Log copied")
             QtCore.QTimer.singleShot(3000, lambda: self.status.setText("Ready"))
 
-    def _restore_btn(self, btn: QtWidgets.QPushButton, text: str, icon: object) -> None:
+    def _restore_btn(
+        self, btn: "QtWidgets.QPushButton", text: str, icon: object
+    ) -> None:
         if btn:
             btn.setText(text)
             if icon is not None:

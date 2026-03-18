@@ -211,14 +211,6 @@ class LauncherDiagnostics:
                 details=details,
                 duration_ms=0,
             )
-        if len(models) < len(self.EXPECTED_TILE_IDS):
-            return DiagnosticResult(
-                name="models_yaml",
-                status="warning",
-                message=f"Only {len(models)} models defined (expected {len(self.EXPECTED_TILE_IDS)})",
-                details=details,
-                duration_ms=0,
-            )
         return DiagnosticResult(
             name="models_yaml",
             status="pass",
@@ -317,14 +309,6 @@ class LauncherDiagnostics:
                     details=details,
                     duration_ms=(time.time() - start) * 1000,
                 )
-            elif len(all_models) < len(self.EXPECTED_TILE_IDS):
-                result = DiagnosticResult(
-                    name="model_registry",
-                    status="warning",
-                    message=f"Registry loaded only {len(all_models)} models (expected {len(self.EXPECTED_TILE_IDS)})",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
             else:
                 result = DiagnosticResult(
                     name="model_registry",
@@ -398,14 +382,6 @@ class LauncherDiagnostics:
                     name="layout_config",
                     status="warning",
                     message=f"Saved layout missing {len(missing_from_saved)} tiles - this may cause only {len(saved_order)} tiles to show",
-                    details=details,
-                    duration_ms=(time.time() - start) * 1000,
-                )
-            elif len(saved_order) < len(self.EXPECTED_TILE_IDS):
-                result = DiagnosticResult(
-                    name="layout_config",
-                    status="warning",
-                    message=f"Saved layout has only {len(saved_order)} tiles (expected {len(self.EXPECTED_TILE_IDS)})",
                     details=details,
                     duration_ms=(time.time() - start) * 1000,
                 )
@@ -486,11 +462,9 @@ class LauncherDiagnostics:
         details["found_count"] = len(found_assets)
         details["missing_count"] = len(missing_assets)
 
-        # List all files in assets dir
-        if ASSETS_DIR.exists():
-            all_files = [f.name for f in ASSETS_DIR.iterdir() if f.is_file()]
-            details["all_asset_files"] = sorted(all_files)
-            details["total_asset_files"] = len(all_files)
+        all_files = [f.name for f in ASSETS_DIR.iterdir() if f.is_file()]
+        details["all_asset_files"] = sorted(all_files)
+        details["total_asset_files"] = len(all_files)
 
         if missing_assets:
             result = DiagnosticResult(

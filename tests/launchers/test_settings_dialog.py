@@ -1,12 +1,12 @@
 """Tests for SettingsDialog."""
 
-import time
-from unittest.mock import MagicMock, patch
+import time  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-import pytest
-from PyQt6.QtWidgets import QWidget
+import pytest  # noqa: E402
+from PyQt6.QtWidgets import QWidget  # noqa: E402
 
-from src.launchers.settings_dialog import (
+from src.launchers.settings_dialog import (  # noqa: E402
     TAB_CONFIG,
     TAB_DIAGNOSTICS,
     TAB_LAYOUT,

@@ -1,0 +1,43 @@
+{
+    "name": "UpstreamDrift Dev Environment",
+    "build": {
+        "dockerfile": "../Dockerfile.heavy_test",
+        "args": {
+            "PYTHON_VERSION": "3.11"
+        }
+    },
+    // Mount the codebase dynamically
+    "workspaceMount": "source=${localWorkspaceFolder},target=/app,type=bind,consistency=cached",
+    "workspaceFolder": "/app",
+    
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.testing.pytestEnabled": true,
+                "python.testing.pytestArgs": [
+                    "tests"
+                ],
+                // Headless test settings (safe GUI tests)
+                "python.testing.env": {
+                    "QT_QPA_PLATFORM": "offscreen",
+                    "QT_DEBUG_PLUGINS": "0",
+                    "DISPLAY": ":99"
+                },
+                "[python]": {
+                    "editor.defaultFormatter": "charliermarsh.ruff",
+                    "editor.formatOnSave": true
+                }
+            },
+            "extensions": [
+                "ms-python.python",
+                "charliermarsh.ruff",
+                "tamasfe.even-better-toml"
+            ]
+        }
+    },
+    
+    // Start X virtual framebuffer in the background for display tasks
+    "postCreateCommand": "sudo Xvfb :99 -ac -screen 0 1920x1080x24 &",
+    "runArgs": ["--network=host"]
+}

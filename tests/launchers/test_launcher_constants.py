@@ -1,9 +1,9 @@
-import importlib
-from unittest.mock import patch
+import importlib  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from src.launchers.launcher_constants import (
+from src.launchers.launcher_constants import (  # noqa: E402
     _lazy_imports,
     _lazy_load_engine_manager,
     _lazy_load_model_registry,

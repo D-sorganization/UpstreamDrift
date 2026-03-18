@@ -1,9 +1,14 @@
+import os  # noqa: E402
+
+if not hasattr(os, "startfile"):
+    os.startfile = lambda x: None  # type: ignore
+
 """Tests for launcher_model_handlers."""
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from pathlib import Path  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-from src.launchers.launcher_model_handlers import (
+from src.launchers.launcher_model_handlers import (  # noqa: E402
     DocumentHandler,
     MatlabFileHandler,
     ModelHandler,
@@ -197,7 +202,7 @@ def test_protocol_methods():
     class Concrete(ModelHandler):
         pass
 
-    c = Concrete()
+    c = Concrete()  # type: ignore
     assert c.can_handle("x") is None
     assert c.launch(None, Path(""), MagicMock()) is None
 

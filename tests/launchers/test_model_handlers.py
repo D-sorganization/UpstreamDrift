@@ -5,15 +5,15 @@ motion_capture, model_explorer, matlab_unified, and putting_green
 tiles can be launched correctly.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: E402
 
-from dataclasses import dataclass
-from pathlib import Path
-from unittest.mock import MagicMock
+from dataclasses import dataclass  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import MagicMock  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from src.launchers.launcher_model_handlers import (
+from src.launchers.launcher_model_handlers import (  # noqa: E402
     ModelHandlerRegistry,
     PuttingGreenHandler,
     SpecialAppHandler,

@@ -143,10 +143,28 @@ class TestBasicContactPhysics:
     @pytest.mark.slow
     def test_pinocchio_contact_behavior(self, ball_urdf):
         """Document Pinocchio contact behavior."""
-        pytest.skip("Pinocchio algorithmic contact - different paradigm")
-        # NOTE: Pinocchio uses constraint-based contact (not soft contact)
-        # Energy dissipation model fundamentally different
-        # May need separate test methodology
+        try:
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+                PinocchioPhysicsEngine,
+            )
+        except ImportError:
+            pytest.skip("Pinocchio not installed")
+
+        engine = PinocchioPhysicsEngine()
+        try:
+            # We use a mock path or actual loaded path, but ball_urdf is provided
+            engine.load_from_path(ball_urdf)
+        except Exception as e:
+            pytest.skip(f"Pinocchio URDF loading failed/broken: {e}")
+
+        # Ensure DbC logic works and it doesn't crash on contact calculation
+        contact_forces = engine.compute_contact_forces()
+        assert isinstance(contact_forces, np.ndarray), "Should return a numpy array"
+        assert contact_forces.shape == (3,), "Should return a 3-element force vector"
+        # Since it's a known limitation in ABA without constraint solver, we expect 0 natively
+        assert np.all(contact_forces == 0), (
+            "Currently expects zero forces without constraint solver"
+        )
 
 
 class TestCrossEngineContactComparison:

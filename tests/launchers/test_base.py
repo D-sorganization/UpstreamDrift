@@ -1,11 +1,16 @@
+import os  # noqa: E402
+
+if not hasattr(os, "startfile"):
+    os.startfile = lambda x: None  # type: ignore
+
 """Tests for base launcher."""
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from pathlib import Path  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
-from src.launchers.base import BaseLauncher, LaunchItem, run_launcher
+from src.launchers.base import BaseLauncher, LaunchItem, run_launcher  # noqa: E402
 
 
 class DummyLauncher(BaseLauncher):
@@ -37,7 +42,7 @@ def test_launch_item_init():
 def test_launch_item_get_full_path():
     item = LaunchItem(name="Test", description="Desc", path="tests")
     assert item.get_full_path() is not None
-    assert item.get_full_path().name == "tests"
+    assert item.get_full_path().name == "tests"  # type: ignore[union-attr]
 
     item_no_path = LaunchItem(name="NoPath", description="Desc")
     assert item_no_path.get_full_path() is None

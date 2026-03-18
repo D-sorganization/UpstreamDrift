@@ -1,15 +1,17 @@
 """Tests for docker_manager."""
 
-import subprocess
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+import subprocess  # noqa: E402
+from pathlib import Path  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-from src.launchers.docker_manager import (
+from src.launchers.docker_manager import (  # noqa: E402
     DockerBuildThread,
     DockerCheckThread,
     DockerLauncher,
 )
-from src.shared.python.security.secure_subprocess import SecureSubprocessError
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,  # noqa: E402
+)
 
 
 @patch("src.launchers.docker_manager.secure_run")

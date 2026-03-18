@@ -60,7 +60,7 @@ class CloudClient:
                     self._save_token()
                     return True
                 return False
-            except (RuntimeError, ValueError, OSError):
+            except (RuntimeError, ValueError, OSError, httpx.RequestError):
                 # Fail gracefully in local mode
                 return False
 

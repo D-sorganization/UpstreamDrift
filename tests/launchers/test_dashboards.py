@@ -1,22 +1,22 @@
 """Tests for various dashboard launchers."""
 
-import sys
-from unittest.mock import MagicMock, patch
+import sys  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-from src.engines.physics_engines.drake.python.drake_physics_engine import (
+from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
     DrakePhysicsEngine,
 )
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
     MuJoCoPhysicsEngine,
 )
-from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: E402
     PinocchioPhysicsEngine,
 )
-from src.launchers.drake_dashboard import main as drake_main
-from src.launchers.matlab_launcher_unified import MatlabLauncher
-from src.launchers.matlab_launcher_unified import main as matlab_main
-from src.launchers.mujoco_dashboard import main as mujoco_main
-from src.launchers.pinocchio_dashboard import main as pinocchio_main
+from src.launchers.drake_dashboard import main as drake_main  # noqa: E402
+from src.launchers.matlab_launcher_unified import MatlabLauncher  # noqa: E402
+from src.launchers.matlab_launcher_unified import main as matlab_main  # noqa: E402
+from src.launchers.mujoco_dashboard import main as mujoco_main  # noqa: E402
+from src.launchers.pinocchio_dashboard import main as pinocchio_main  # noqa: E402
 
 
 def test_mujoco_dashboard_main():

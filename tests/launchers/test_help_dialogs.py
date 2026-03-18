@@ -1,14 +1,14 @@
 """Tests for help_dialogs.py."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
 # Ensure PyQt classes are available
 pytest.importorskip("PyQt6")
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt  # noqa: E402
 
-from src.launchers.help_dialogs import (
+from src.launchers.help_dialogs import (  # noqa: E402
     ContextHelpDock,
     HelpDialog,
     LayoutManagerDialog,

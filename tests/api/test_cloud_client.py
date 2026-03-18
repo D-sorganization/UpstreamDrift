@@ -1,5 +1,6 @@
 """Tests for the optional cloud client."""
 
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -9,7 +10,7 @@ from src.api.cloud_client import CloudClient
 
 
 @pytest.fixture
-def temp_cache_dir(tmp_path: Path) -> Path:
+def temp_cache_dir(tmp_path: Path) -> Generator[Path, None, None]:
     """Mock Path.home to point to temp dir."""
     with patch("src.api.cloud_client.Path.home", return_value=tmp_path):
         yield tmp_path
@@ -64,7 +65,7 @@ async def test_login_success(temp_cache_dir: Path) -> None:
     mock_client_class = MagicMock()
     mock_client_class.return_value.__aenter__.return_value = mock_client_instance
 
-    with patch("httpx.AsyncClient", mock_client_class):
+    with patch("src.api.cloud_client.httpx.AsyncClient", mock_client_class):
         client = CloudClient()
         success = await client.login("test@example.com", "password")
 
@@ -89,7 +90,7 @@ async def test_login_failure(temp_cache_dir: Path) -> None:
     mock_client_class = MagicMock()
     mock_client_class.return_value.__aenter__.return_value = mock_client_instance
 
-    with patch("httpx.AsyncClient", mock_client_class):
+    with patch("src.api.cloud_client.httpx.AsyncClient", mock_client_class):
         client = CloudClient()
         success = await client.login("test@example.com", "wrong")
 
@@ -105,7 +106,7 @@ async def test_login_network_error(temp_cache_dir: Path) -> None:
     mock_client_class = MagicMock()
     mock_client_class.return_value.__aenter__.return_value = mock_client_instance
 
-    with patch("httpx.AsyncClient", mock_client_class):
+    with patch("src.api.cloud_client.httpx.AsyncClient", mock_client_class):
         client = CloudClient()
         success = await client.login("test@example.com", "password")
 
