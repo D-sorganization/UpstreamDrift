@@ -275,7 +275,7 @@ def test_rebuild_grid_no_widget(layout_manager):
     # Test when item has no widget, and when takeAt returns None
     grid_layout = MagicMock()
     grid_layout.count.side_effect = [2, 1, 0]
-    
+
     mock_item = MagicMock()
     mock_item.widget.return_value = None
     # First returns item without widget, second returns None directly
@@ -290,7 +290,7 @@ def test_rebuild_grid_missing_model(layout_manager):
     # Test paths where model creation fails or is skipped
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
-    
+
     layout_manager.model_order = ["missing_model"]
     layout_manager.rebuild_grid(grid_layout)
     assert grid_layout.addWidget.call_count == 0
@@ -300,12 +300,12 @@ def test_rebuild_grid_existing_card(layout_manager):
     # Test path where card is already in model_cards
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
-    
+
     # Pre-populate card
     mock_card = MagicMock()
     layout_manager.model_cards["model_1"] = mock_card
     layout_manager.model_order = ["model_1"]
-    
+
     with patch.object(layout_manager, "_create_card") as mock_create:
         layout_manager.rebuild_grid(grid_layout)
         mock_create.assert_not_called()
@@ -315,13 +315,13 @@ def test_rebuild_grid_existing_card(layout_manager):
 def test_rebuild_grid_multiple_columns(layout_manager, available_models):
     # Add dummy models to trigger column wrap
     for i in range(5):
-        available_models[f"model_{i+3}"] = MagicMock()
-    
+        available_models[f"model_{i + 3}"] = MagicMock()
+
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
     layout_manager.model_order = ["model_1", "model_2", "model_3", "model_4", "model_5"]
     layout_manager.rebuild_grid(grid_layout)
-    
+
     # Check that it wrapped around
     assert grid_layout.addWidget.call_count == 5
     # The last call should be row=1, col=0 because GRID_COLUMNS=4
