@@ -61,6 +61,45 @@ def test_drake_dashboard_main_no_args():
         )
 
 
+def test_drake_dashboard_main_no_args_dialog_canceled():
+    with (
+        patch.object(sys, "argv", ["drake_dashboard.py"]),
+        patch("src.launchers.drake_dashboard.get_qapp"),
+        patch("src.launchers.drake_dashboard.QFileDialog") as mock_dialog_class,
+        patch("src.launchers.drake_dashboard.launch_dashboard") as mock_launch,
+    ):
+        mock_dialog = MagicMock()
+        mock_dialog_class.return_value = mock_dialog
+        mock_dialog.exec.return_value = False
+
+        drake_main()
+        mock_launch.assert_called_once_with(
+            engine_class=DrakePhysicsEngine,
+            title="Drake Golf Analysis Dashboard",
+            model_path=None,
+        )
+
+
+def test_drake_dashboard_main_no_args_dialog_no_selection():
+    with (
+        patch.object(sys, "argv", ["drake_dashboard.py"]),
+        patch("src.launchers.drake_dashboard.get_qapp"),
+        patch("src.launchers.drake_dashboard.QFileDialog") as mock_dialog_class,
+        patch("src.launchers.drake_dashboard.launch_dashboard") as mock_launch,
+    ):
+        mock_dialog = MagicMock()
+        mock_dialog_class.return_value = mock_dialog
+        mock_dialog.exec.return_value = True
+        mock_dialog.selectedFiles.return_value = []
+
+        drake_main()
+        mock_launch.assert_called_once_with(
+            engine_class=DrakePhysicsEngine,
+            title="Drake Golf Analysis Dashboard",
+            model_path=None,
+        )
+
+
 def test_drake_dashboard_main_with_args():
     with (
         patch.object(sys, "argv", ["drake_dashboard.py", "--model", "my_model.urdf"]),

@@ -114,7 +114,7 @@ class DockerBuildThread(QThread):
 
             if process.stdout:
                 for line in iter(process.stdout.readline, ""):
-                    if line:
+                    if line.strip():
                         self.log_signal.emit(line.strip())
                 process.stdout.close()
 

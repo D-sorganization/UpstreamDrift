@@ -172,3 +172,132 @@ def test_timer_event(parent_launcher, qapp):
     text = dialog._build_status.text()
     assert "Building..." in text
     assert "elapsed" in text
+
+
+def test_settings_dialog_no_launcher():
+    # Test initialization without a parent launcher to cover the 'if launcher' conditions
+    dialog = SettingsDialog(parent=None, initial_tab=TAB_CONFIG)
+    assert dialog.parent() is None
+
+    # Test diagnostics refresh without a launcher parent
+    with patch(
+        "src.launchers.launcher_diagnostics.LauncherDiagnostics"
+    ) as mock_diag_class:
+        mock_diag = MagicMock()
+        # Include detailed checks, engines, and recommendations to cover render functions
+        mock_diag.run_all_checks.return_value = {
+            "summary": {
+                "status": "degraded",
+                "passed": 1,
+                "failed": 0,
+                "warnings": 0,
+                "total_checks": 1,
+            },
+            "checks": [
+                {
+                    "name": "test_check",
+                    "status": "pass",
+                    "message": "OK",
+                    "duration_ms": 123.4,
+                },
+                {
+                    "name": "engine_availability",
+                    "status": "warning",
+                    "message": "Some engines missing",
+                    "duration_ms": 10,
+                    "details": {
+                        "engines": [
+                            {
+                                "name": "drake",
+                                "installed": False,
+                                "missing_deps": ["pydrake"],
+                                "diagnostic": "Missing pydrake",
+                            },
+                            {
+                                "name": "mujoco",
+                                "installed": True,
+                                "version": "2.3.0",
+                                "diagnostic": "OK",
+                            },
+                        ]
+                    },
+                },
+            ],
+            "recommendations": ["Do this", "Do that"],
+        }
+        mock_diag_class.return_value = mock_diag
+
+        dialog._refresh_diagnostics()
+        html = dialog._diag_browser.toHtml()
+        assert "123ms" in html
+        assert "pydrake" in html
+        assert "Do this" in html
+
+
+def test_load_logs_exceptions(parent_launcher, qapp):
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
+
+    # Refresh all logs triggers both loading functions
+    with (
+        patch("pathlib.Path.exists", return_value=True),
+        patch("pathlib.Path.read_text", side_effect=OSError("Boom")),
+    ):
+        dialog._refresh_all_logs()
+
+    assert "No log file found" in dialog._log_viewer.toPlainText()
+    assert "No process output log yet" in dialog._proc_log_viewer.toPlainText()
+
+
+def test_on_build_log(parent_launcher, qapp):
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+
+    # Should update the text and cursor
+    dialog._on_build_log("Step 1/2")
+    assert "Step 1/2" in dialog.build_console.toPlainText()
+
+    # Test when scrollbar is completely fake/missing
+    with patch.object(dialog.build_console, "verticalScrollBar", return_value=None):
+        dialog._on_build_log("Step 2/2")
+
+
+def test_on_build_finished_no_timer(parent_launcher, qapp):
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog._build_start_time = 0
+    # Timer not set
+    if hasattr(dialog, "_build_timer_id"):
+        del dialog._build_timer_id
+
+    dialog._on_build_finished(False, "Failed early")
+    assert "FAILED" in dialog._build_status.text()
+
+
+def test_cancel_build_no_timer(parent_launcher, qapp):
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog.build_thread = MagicMock()
+    dialog.build_thread.isRunning.return_value = True
+
+    # Timer not set
+    if hasattr(dialog, "_build_timer_id"):
+        del dialog._build_timer_id
+
+    dialog._cancel_build()
+    assert "cancelled" in dialog._build_status.text().lower()
+
+
+def test_cancel_build_not_running(parent_launcher, qapp):
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    dialog.build_thread = MagicMock()
+    dialog.build_thread.isRunning.return_value = False
+
+    # Should not do anything
+    dialog._cancel_build()
+    dialog.build_thread.terminate.assert_not_called()
+
+
+def test_timer_event_no_start_time(parent_launcher, qapp):
+    dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
+    if hasattr(dialog, "_build_start_time"):
+        del dialog._build_start_time
+
+    # Should not raise any error
+    dialog.timerEvent(None)

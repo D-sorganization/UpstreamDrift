@@ -308,7 +308,7 @@ class SettingsDialog(QDialog):
 
                     self._log_viewer.moveCursor(QTextCursor.MoveOperation.End)
                     return
-                except (RuntimeError, ValueError, AttributeError) as e:
+                except (RuntimeError, ValueError, AttributeError, OSError) as e:
                     logger.debug("Could not display log file %s: %s", log_path, e)
         self._log_viewer.setPlainText("(No log file found)")
 
@@ -325,7 +325,7 @@ class SettingsDialog(QDialog):
 
                 self._proc_log_viewer.moveCursor(QTextCursor.MoveOperation.End)
                 return
-            except (RuntimeError, ValueError, AttributeError) as e:
+            except (RuntimeError, ValueError, AttributeError, OSError) as e:
                 logger.debug("Could not display process log %s: %s", log_path, e)
         self._proc_log_viewer.setPlainText(
             "(No process output log yet — launch a model to generate output)"
