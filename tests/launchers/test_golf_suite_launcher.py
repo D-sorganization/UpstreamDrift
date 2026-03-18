@@ -8,7 +8,7 @@ import pytest
 
 
 @pytest.fixture
-def mock_pyqt():
+def mock_pyqt(qapp):
     """Mock PyQt6 components for testing non-UI logic safely."""
     with (
         patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", True),
