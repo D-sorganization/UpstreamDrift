@@ -4,11 +4,16 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# We need to mock golf_launcher import inside unified_launcher because it might trigger Qt stuff
-# causing issues in headless env if not careful.
-sys.modules["launchers.golf_launcher"] = MagicMock()
-
+# Cleaned up global sys.modules mutation
 from src.launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def mock_golf_launcher_module() -> Generator[MagicMock, None, None]:
+    """Mock golf_launcher module."""
+    mock_mod = MagicMock()
+    with patch.dict(sys.modules, {"launchers.golf_launcher": mock_mod}):
+        yield mock_mod
 
 
 @pytest.fixture
@@ -21,14 +26,9 @@ def mock_qapp() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_golf_launcher() -> MagicMock:
+def mock_golf_launcher(mock_golf_launcher_module: MagicMock) -> MagicMock:
     """Mock golf launcher."""
-    # unified_launcher imports GolfLauncher from .golf_launcher locally
-    # We need to patch the class where it is used.
-    # Since it's imported inside __init__, we patch it there?
-    # Or rely on sys.modules mock.
-
-    mock_module = sys.modules["launchers.golf_launcher"]
+    mock_module = mock_golf_launcher_module
     mock_cls = mock_module.GolfLauncher
     mock_instance = mock_cls.return_value
     return mock_instance
@@ -47,16 +47,15 @@ def test_init_no_pyqt() -> None:
         UnifiedLauncher()
 
 
-def test_mainloop(mock_qapp, mock_golf_launcher) -> None:
+def test_mainloop(mock_qapp, mock_golf_launcher, mock_golf_launcher_module) -> None:
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 
     launcher.mainloop()
 
     # mainloop now delegates to golf_launcher.main which calls sys.exit
-    # Since we mocked sys.modules["launchers.golf_launcher"],
-    # the main function should be called.
-    sys.modules["launchers.golf_launcher"].main.assert_called_once()
+    # Since we mocked it, the main function should be called.
+    mock_golf_launcher_module.main.assert_called_once()
 
 
 def test_launch_function() -> None:
