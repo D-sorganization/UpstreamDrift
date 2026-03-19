@@ -90,7 +90,7 @@ def generate_noise(
             pink += np.repeat(hold, step)[:n_samples]
         # Normalize and scale
         if np.std(pink) > 0:
-            pink = np.asarray(pink / np.std(pink) * amplitude, dtype=float)
+            pink[:] = (pink / np.std(pink)) * amplitude
         noise = pink
 
     elif noise_type == "brown":

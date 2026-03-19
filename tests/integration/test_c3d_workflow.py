@@ -84,25 +84,42 @@ def mock_ezc3d():
         yield mock
 
 
-def test_reader_ingestion(mock_c3d_file, mock_ezc3d):
+def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path):
     """Test C3D reading and dataframe conversion."""
-    reader = C3DDataReader(mock_c3d_file)
-    meta = reader.get_metadata()
+    from src.shared.python.validation_pkg.workflow_diagnostics import (
+        WorkflowDiagnosticContext,
+    )
 
-    assert meta.frame_count == 10
-    assert meta.frame_rate == 100.0
-    assert meta.marker_labels == ["Marker1", "Marker2"]
-    assert meta.analog_units == ["V"]
-    assert meta.events[0].label == "Heel Strike"
+    with WorkflowDiagnosticContext(
+        dump_dir=str(tmp_path), workflow_name="c3d_ingestion"
+    ) as ctx:
+        reader = C3DDataReader(mock_c3d_file)
+        meta = reader.get_metadata()
+        ctx.record_state(
+            "metadata_extracted",
+            {"frame_count": meta.frame_count, "rate": meta.frame_rate},
+        )
 
-    df = reader.points_dataframe(include_time=True)
-    assert len(df) == 20  # 2 markers * 10 frames
-    assert "time" in df.columns
-    assert "residual" in df.columns
+        assert meta.frame_count == 10
+        assert meta.frame_rate == 100.0
+        assert meta.marker_labels == ["Marker1", "Marker2"]
+        assert meta.analog_units == ["V"]
+        assert meta.events[0].label == "Heel Strike"
 
-    # Check values
-    m1 = df[df["marker"] == "Marker1"]
-    assert m1.iloc[1]["x"] == 1.0  # Frame 1 is 1.0
+        ctx.record_state("metadata_assertions_passed", True)
+
+        df = reader.points_dataframe(include_time=True)
+        ctx.record_state("dataframe", df.head(5).to_dict())
+
+        assert len(df) == 20  # 2 markers * 10 frames
+        assert "time" in df.columns
+        assert "residual" in df.columns
+
+        # Check values
+        m1 = df[df["marker"] == "Marker1"]
+        assert m1.iloc[1]["x"] == 1.0  # Frame 1 is 1.0
+
+        ctx.record_state("test_complete", True)
 
 
 def test_unit_conversion(mock_c3d_file, mock_ezc3d):
