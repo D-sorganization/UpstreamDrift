@@ -10,7 +10,8 @@ items:
   - id: GH1957
     title: "Upgrade Example Notebooks & Scripts to align with recent architectural refactoring"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-19T16:18:34Z"
     github_issue: 1957
     artefact: .gaai/project/contexts/artefacts/stories/GH1957.story.md
     dependencies: []
