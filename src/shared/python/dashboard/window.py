@@ -233,7 +233,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         # Check for get_joint_names method (standard interface)
         if hasattr(self.engine, "get_joint_names"):
             try:
-                names = self.engine.get_joint_names()  # type: ignore
+                names = self.engine.get_joint_names()  # type: ignore[union-attr]
                 if names:
                     return names
             except (ValueError, RuntimeError, AttributeError) as e:

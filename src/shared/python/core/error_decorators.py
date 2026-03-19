@@ -164,7 +164,7 @@ def retry_on_error(
                         logger.error(
                             f"All {max_attempts} attempts failed for {func.__name__}"
                         )
-            raise last_exception  # type: ignore
+            raise last_exception  # type: ignore[misc]
 
         return cast(F, wrapper)
 

@@ -254,12 +254,12 @@ class ProcessingMixin:
             # Show preview without modifying current signal
             mode_map = {
                 "Hard Clip": SaturationMode.HARD,
-                "Soft Clip (tanh)": SaturationMode.SOFT_TANH,  # type: ignore
-                "Soft Clip (sigmoid)": SaturationMode.SOFT_SIGMOID,  # type: ignore
-                "Polynomial": SaturationMode.POLYNOMIAL,  # type: ignore
+                "Soft Clip (tanh)": SaturationMode.SOFT_TANH,  # type: ignore[attr-defined]
+                "Soft Clip (sigmoid)": SaturationMode.SOFT_SIGMOID,  # type: ignore[attr-defined]
+                "Polynomial": SaturationMode.POLYNOMIAL,  # type: ignore[attr-defined]
             }
             mode = mode_map.get(
-                self.sat_mode_combo.currentText(),  # type: ignore
+                self.sat_mode_combo.currentText(),  # type: ignore[attr-defined]
                 SaturationMode.HARD,  # type: ignore[attr-defined]
             )
 
@@ -465,7 +465,7 @@ class ProcessingMixin:
                 return
 
             # Calculate frequency response
-            w, h = scipy_signal.freqz(spec.b_coeffs, spec.a_coeffs, fs=fs)  # type: ignore
+            w, h = scipy_signal.freqz(spec.b_coeffs, spec.a_coeffs, fs=fs)  # type: ignore[attr-defined]
 
             # Plot on secondary canvas
             self.canvas2.axes.clear()  # type: ignore[attr-defined]
@@ -482,9 +482,9 @@ class ProcessingMixin:
 
         except ImportError as e:
             QMessageBox.warning(
-                self,
+                self,  # type: ignore[arg-type]
                 "Error",
-                f"Failed to compute frequency response: {e}",  # type: ignore[arg-type]
+                f"Failed to compute frequency response: {e}",
             )
 
     def _add_noise(self) -> None:

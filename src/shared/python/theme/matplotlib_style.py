@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
 
-from .colors import CHART_COLORS, Colors  # type: ignore
+from .colors import CHART_COLORS, Colors  # type: ignore[attr-defined]
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure

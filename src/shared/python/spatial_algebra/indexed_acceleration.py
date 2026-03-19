@@ -54,7 +54,7 @@ class IndexedAcceleration:
         if self.centrifugal is not None:
             components.append(self.centrifugal)
 
-        return sum(components)  # type: ignore
+        return sum(components)  # type: ignore[return-value]
 
     def assert_closure(
         self,

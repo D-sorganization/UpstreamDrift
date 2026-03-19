@@ -119,7 +119,7 @@ class LocalRepository(Repository):
 
     def list_models(self) -> list[RepositoryModel]:
         """List all URDF models in the directory."""
-        models = []  # type: ignore
+        models = []  # type: ignore[var-annotated]
 
         if not self._path.exists():
             return models

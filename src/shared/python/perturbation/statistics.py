@@ -86,13 +86,13 @@ def compute_metric_statistics(values: np.ndarray) -> MetricStatistics:
         return arr
 
     return MetricStatistics(
-        mean=_to_scalar_or_array(mean),  # type: ignore
-        std=_to_scalar_or_array(std),  # type: ignore
-        cv=_to_scalar_or_array(cv),  # type: ignore
-        min_val=_to_scalar_or_array(np.min(values, axis=0)),  # type: ignore
-        max_val=_to_scalar_or_array(np.max(values, axis=0)),  # type: ignore
-        median=_to_scalar_or_array(median),  # type: ignore
-        iqr=_to_scalar_or_array(iqr),  # type: ignore
-        p5=_to_scalar_or_array(p5),  # type: ignore
-        p95=_to_scalar_or_array(p95),  # type: ignore
+        mean=_to_scalar_or_array(mean),  # type: ignore[arg-type]
+        std=_to_scalar_or_array(std),  # type: ignore[arg-type]
+        cv=_to_scalar_or_array(cv),  # type: ignore[arg-type]
+        min_val=_to_scalar_or_array(np.min(values, axis=0)),  # type: ignore[arg-type]
+        max_val=_to_scalar_or_array(np.max(values, axis=0)),  # type: ignore[arg-type]
+        median=_to_scalar_or_array(median),  # type: ignore[arg-type]
+        iqr=_to_scalar_or_array(iqr),  # type: ignore[arg-type]
+        p5=_to_scalar_or_array(p5),  # type: ignore[arg-type]
+        p95=_to_scalar_or_array(p95),  # type: ignore[arg-type]
     )

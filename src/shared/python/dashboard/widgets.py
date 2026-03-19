@@ -845,7 +845,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         # Try to get data dictionary
         data_dict = {}
         if hasattr(self.recorder, "export_to_dict"):
-            data_dict = self.recorder.export_to_dict()  # type: ignore
+            data_dict = self.recorder.export_to_dict()  # type: ignore[union-attr]
         elif hasattr(self.recorder, "frames"):
             # Try to build minimal dict from frames if accessible
             # This is specific to some recorder implementations, risky but helpful fallback

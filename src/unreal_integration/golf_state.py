@@ -317,7 +317,7 @@ class TrajectoryPoint:
             time=float(d["time"]),
             position=Vector3.from_dict(d["position"]),
             velocity=Vector3.from_dict(d["velocity"]) if "velocity" in d else None,
-            color=color,  # type: ignore
+            color=color,  # type: ignore[arg-type]
         )
 
 

@@ -801,7 +801,7 @@ class GreenSurface:
         assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         try:
-            import rasterio  # type: ignore
+            import rasterio  # type: ignore[import-untyped]
         except ImportError as err:
             raise ImportError(
                 "rasterio required for GeoTIFF support. Install with: pip install rasterio"

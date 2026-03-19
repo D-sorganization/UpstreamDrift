@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pinocchio as pin  # type: ignore
+import pinocchio as pin  # type: ignore[import-untyped]
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import (
@@ -33,8 +33,8 @@ try:
     MESHCAT_AVAILABLE = True
 except ImportError:
     MESHCAT_AVAILABLE = False
-    g = None  # type: ignore
-    viz = None  # type: ignore
+    g = None  # type: ignore[assignment]
+    viz = None  # type: ignore[assignment]
 
 if MESHCAT_AVAILABLE:
     from pinocchio.visualize import MeshcatVisualizer

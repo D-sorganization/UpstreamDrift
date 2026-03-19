@@ -177,7 +177,7 @@ class ScrubberEngine:
         if "warning" in cooling_water:
             warnings.append(str(cooling_water["warning"]))
 
-        return (  # type: ignore
+        return (  # type: ignore[return-value]
             caustic_req.get("naoh_pure_kg_hr", 0.0),
             caustic_req.get("naoh_solution_L_hr", 0.0),
             heat_duty["total_heat_kw"],

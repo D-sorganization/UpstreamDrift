@@ -284,7 +284,7 @@ class ForceVector:
             magnitude=float(d["magnitude"]),
             force_type=d.get("force_type", "force"),
             joint_name=d.get("joint_name"),
-            color=color,  # type: ignore
+            color=color,  # type: ignore[arg-type]
             scale_factor=d.get("scale_factor", 1.0),
             validate=validate,
         )

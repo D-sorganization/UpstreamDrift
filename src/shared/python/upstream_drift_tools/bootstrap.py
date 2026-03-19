@@ -49,9 +49,9 @@ def ensure_paths(repo_root: Path | str | None = None) -> Path:
         repo_root = Path(repo_root).resolve()
 
     standard_paths = [
-        repo_root / "src" / "shared" / "python",  # type: ignore
-        repo_root / "src",  # type: ignore
-        repo_root / "src" / "python" / "src",  # type: ignore
+        repo_root / "src" / "shared" / "python",  # type: ignore[operator]
+        repo_root / "src",  # type: ignore[operator]
+        repo_root / "src" / "python" / "src",  # type: ignore[operator]
     ]
 
     for path in standard_paths:
@@ -59,4 +59,4 @@ def ensure_paths(repo_root: Path | str | None = None) -> Path:
         if path.exists() and path_str not in sys.path:
             sys.path.insert(0, path_str)
 
-    return repo_root  # type: ignore
+    return repo_root  # type: ignore[return-value]

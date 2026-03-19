@@ -104,7 +104,7 @@ class GolfSwingModel:
             OpenSimModelLoadError: If the model cannot be loaded.
         """
         try:
-            import opensim  # type: ignore
+            import opensim  # type: ignore[import-untyped]
         except ImportError as e:
             raise OpenSimNotInstalledError(
                 "OpenSim is not installed.\n"

@@ -118,9 +118,9 @@ class JointInfo:
             joint_type=joint_type,
             parent_link=parent_link,
             child_link=child_link,
-            origin_xyz=xyz,  # type: ignore
-            origin_rpy=rpy,  # type: ignore
-            axis=axis,  # type: ignore
+            origin_xyz=xyz,  # type: ignore[arg-type]
+            origin_rpy=rpy,  # type: ignore[arg-type]
+            axis=axis,  # type: ignore[arg-type]
             lower_limit=lower,
             upper_limit=upper,
             effort_limit=effort,

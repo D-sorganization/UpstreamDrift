@@ -122,9 +122,9 @@ class MeshReference:
             absolute_path=absolute_path,
             link_name=link_name,
             context=context,
-            scale=scale,  # type: ignore
-            origin_xyz=origin_xyz,  # type: ignore
-            origin_rpy=origin_rpy,  # type: ignore
+            scale=scale,  # type: ignore[arg-type]
+            origin_xyz=origin_xyz,  # type: ignore[arg-type]
+            origin_rpy=origin_rpy,  # type: ignore[arg-type]
             exists=exists,
             file_size=file_size,
         )

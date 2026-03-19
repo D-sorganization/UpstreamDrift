@@ -52,7 +52,7 @@ class ModificationMixin:
 
     def copy_subtree(self, model_id: str, root_link: str) -> bool: ...  # type: ignore[empty-body]
 
-    def _generate_unique_name(  # type: ignore
+    def _generate_unique_name(  # type: ignore[empty-body]
         self, base_name: str, existing_names: set[str]
     ) -> str: ...  # type: ignore[empty-body]
 

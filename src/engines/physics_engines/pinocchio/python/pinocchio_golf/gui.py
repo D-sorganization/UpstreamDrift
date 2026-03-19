@@ -16,11 +16,11 @@ from pathlib import Path
 import numpy as np
 
 try:
-    import pinocchio as pin  # type: ignore
+    import pinocchio as pin  # type: ignore[import-untyped]
 
     PINOCCHIO_AVAILABLE = True
 except ImportError:
-    pin = None  # type: ignore
+    pin = None  # type: ignore[assignment]
     PINOCCHIO_AVAILABLE = False
 from PyQt6 import QtCore, QtWidgets
 
@@ -47,7 +47,7 @@ try:
     MESHCAT_AVAILABLE = True
 except ImportError:
     MESHCAT_AVAILABLE = False
-    viz = None  # type: ignore
+    viz = None  # type: ignore[assignment]
 
 if MESHCAT_AVAILABLE:
     from pinocchio.visualize import MeshcatVisualizer

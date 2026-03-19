@@ -562,7 +562,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
         return EditorState(
             models=models_copy,
-            clipboard=copy.deepcopy(self._clipboard),  # type: ignore
+            clipboard=copy.deepcopy(self._clipboard),  # type: ignore[arg-type]
             operation_history=[],
             timestamp=time.time(),
         )
@@ -572,7 +572,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         assert state is not None, "state must be provided"
         assert state is not None, "state must be provided"
         self._models = state.models
-        self._clipboard = state.clipboard  # type: ignore
+        self._clipboard = state.clipboard  # type: ignore[assignment]
 
     # ============================================================
     # Export

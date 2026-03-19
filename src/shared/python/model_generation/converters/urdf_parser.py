@@ -493,7 +493,7 @@ class URDFParser:
         origin_elem = elem.find("origin")
         if origin_elem is not None:
             xyz_str = origin_elem.get("xyz", "0 0 0")
-            com = tuple(float(v) for v in xyz_str.split())  # type: ignore
+            com = tuple(float(v) for v in xyz_str.split())  # type: ignore[assignment]
 
         # Mass
         mass = 1.0
@@ -588,7 +588,7 @@ class URDFParser:
         color_elem = elem.find("color")
         if color_elem is not None:
             rgba_str = color_elem.get("rgba", "0.8 0.8 0.8 1.0")
-            color = tuple(float(v) for v in rgba_str.split())  # type: ignore
+            color = tuple(float(v) for v in rgba_str.split())  # type: ignore[assignment]
 
         texture = None
         texture_elem = elem.find("texture")

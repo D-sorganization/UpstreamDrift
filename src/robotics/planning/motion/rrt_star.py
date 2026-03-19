@@ -94,7 +94,7 @@ class RRTStarPlanner(MotionPlanner):
         assert collision_checker is not None, "collision_checker must be provided"
         assert collision_checker is not None, "collision_checker must be provided"
         super().__init__(collision_checker, config or RRTStarConfig())
-        self._config: RRTStarConfig = self._config  # type: ignore
+        self._config: RRTStarConfig = self._config  # type: ignore[assignment]
         self._nodes: list[TreeNode] = []
         self._num_collision_checks = 0
         self._dimension = 0

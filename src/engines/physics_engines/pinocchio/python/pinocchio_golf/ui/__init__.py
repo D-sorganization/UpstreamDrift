@@ -10,8 +10,8 @@ try:
     MESHCAT_AVAILABLE = True
 except ImportError:
     MESHCAT_AVAILABLE = False
-    g = None  # type: ignore
-    viz = None  # type: ignore
+    g = None  # type: ignore[assignment]
+    viz = None  # type: ignore[assignment]
 
 if MESHCAT_AVAILABLE:
     from pinocchio.visualize import MeshcatVisualizer

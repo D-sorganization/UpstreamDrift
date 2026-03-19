@@ -372,7 +372,7 @@ class ComparativePlotter:
         ax.set_title(title, fontsize=14, fontweight="bold")
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_zlabel("Z (m)")  # type: ignore
+        ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
         ax.legend()
         fig.tight_layout()
 

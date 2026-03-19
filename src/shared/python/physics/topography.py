@@ -451,7 +451,7 @@ class TopographyData:
         assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         try:
-            import rasterio  # type: ignore
+            import rasterio  # type: ignore[import-untyped]
         except ImportError as err:
             raise ImportError(
                 "rasterio required for GeoTIFF support. Install with: pip install rasterio"
@@ -482,7 +482,7 @@ class TopographyData:
         assert filepath is not None, "filepath must be provided"
         assert filepath is not None, "filepath must be provided"
         try:
-            from PIL import Image  # type: ignore
+            from PIL import Image  # type: ignore[import-untyped]
         except ImportError:
             # Fall back to matplotlib if PIL not available
             import matplotlib.pyplot as plt

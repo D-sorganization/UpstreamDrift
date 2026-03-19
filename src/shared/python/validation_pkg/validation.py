@@ -326,7 +326,7 @@ def validate_physical_bounds(func: F) -> F:
 
         return func(*args, **kwargs)
 
-    return wrapper  # type: ignore
+    return wrapper  # type: ignore[return-value]
 
 
 # Example usage for documentation
