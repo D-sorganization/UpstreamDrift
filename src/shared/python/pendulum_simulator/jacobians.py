@@ -92,9 +92,9 @@ def ellipsoid_from_jacobian(
         non-finite values.
     """
     assert isinstance(J, np.ndarray), "J must be a numpy ndarray"
-    assert (
-        J.ndim == 2 and J.shape[0] == 2 and J.shape[1] >= 1
-    ), f"J must have shape (2, n) with n≥1, got {J.shape}"
+    assert J.ndim == 2 and J.shape[0] == 2 and J.shape[1] >= 1, (
+        f"J must have shape (2, n) with n≥1, got {J.shape}"
+    )
     assert np.all(np.isfinite(J)), "J must not contain NaN or Inf"
 
     # SVD of J directly: J = U Σ Vᵀ, J Jᵀ = U Σ² Uᵀ
@@ -256,9 +256,9 @@ def jacobian_triple(
         ``"wrist2"`` : (2, 3) ndarray — Jacobian at segment-2 tip
         ``"tip"``    : (2, 3) ndarray — Jacobian at segment-3 tip
     """
-    assert (
-        np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2)
-    ), "All angles must be finite"
+    assert np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2), (
+        "All angles must be finite"
+    )
     assert L1 > 0 and L2 > 0 and L3 > 0, "All segment lengths must be positive"
 
     theta2 = theta1 + phi1  # absolute angle of segment 2
@@ -310,9 +310,9 @@ def ellipsoids_triple(
     dict with keys ``"wrist1"``, ``"wrist2"``, and ``"tip"``,
     each containing the same sub-keys as :func:`ellipsoids_double`.
     """
-    assert (
-        np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2)
-    ), "All angles must be finite"
+    assert np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2), (
+        "All angles must be finite"
+    )
     assert L1 > 0 and L2 > 0 and L3 > 0, "All segment lengths must be positive"
 
     jacs = jacobian_triple(theta1, phi1, phi2, L1, L2, L3)

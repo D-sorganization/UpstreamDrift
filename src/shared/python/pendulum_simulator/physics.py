@@ -121,12 +121,12 @@ class TorqueClamp:
         # Accept negative inputs by taking abs (#1138)
         object.__setattr__(self, "max_torque1", abs(self.max_torque1))
         object.__setattr__(self, "max_torque2", abs(self.max_torque2))
-        assert (
-            self.max_torque1 > 0
-        ), f"|max_torque1| must be positive, got {self.max_torque1}"
-        assert (
-            self.max_torque2 > 0
-        ), f"|max_torque2| must be positive, got {self.max_torque2}"
+        assert self.max_torque1 > 0, (
+            f"|max_torque1| must be positive, got {self.max_torque1}"
+        )
+        assert self.max_torque2 > 0, (
+            f"|max_torque2| must be positive, got {self.max_torque2}"
+        )
 
 
 # Type aliases
@@ -370,9 +370,9 @@ class JointLimitsNDOF:
         assert self.angle_min.ndim == 1, "angle_min must be 1D"
         assert self.angle_max.ndim == 1, "angle_max must be 1D"
         assert self.angle_min.shape == self.angle_max.shape, "Shape mismatch"
-        assert np.all(
-            self.angle_min < self.angle_max
-        ), "min must be < max for all joints"
+        assert np.all(self.angle_min < self.angle_max), (
+            "min must be < max for all joints"
+        )
         assert self.stiffness > 0, f"stiffness must be positive, got {self.stiffness}"
         assert self.damping >= 0, f"damping must be non-negative, got {self.damping}"
 
@@ -421,9 +421,9 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
     Pre: tau.shape == limits.shape, all limits > 0.
     Post: |result[i]| <= limits[i] for all i.
     """
-    assert (
-        tau.shape == limits.shape
-    ), f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
+    assert tau.shape == limits.shape, (
+        f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
+    )
     assert np.all(limits > 0), "All limits must be positive"
     result: np.ndarray = np.clip(tau, -limits, limits)
     return result
@@ -502,9 +502,9 @@ def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dic
     result = {"shoulder": (0.0, 0.0), "wrist": (wx, wy), "tip": (tx, ty)}
     _wrist_dist = np.hypot(wx, wy)
     _tip_dist = np.hypot(tx - wx, ty - wy)
-    assert (
-        abs(_wrist_dist - L1) < 1e-9
-    ), f"Wrist distance {_wrist_dist:.6f} ≠ L1={L1:.6f}"
+    assert abs(_wrist_dist - L1) < 1e-9, (
+        f"Wrist distance {_wrist_dist:.6f} ≠ L1={L1:.6f}"
+    )
     assert abs(_tip_dist - L2) < 1e-9, f"Tip distance {_tip_dist:.6f} ≠ L2={L2:.6f}"
     return result
 
