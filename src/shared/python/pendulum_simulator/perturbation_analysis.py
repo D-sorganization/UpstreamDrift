@@ -114,6 +114,60 @@ def generate_noise(
 
 
 # ---------------------------------------------------------------------------
+# Torque profile perturbation (additive noise on raw time-series)
+# ---------------------------------------------------------------------------
+
+
+def perturb_torque_profile(
+    profile: np.ndarray,
+    noise_amplitude: float,
+    noise_type: str = "additive",
+    seed: int | None = None,
+) -> np.ndarray:
+    """Perturb a raw torque time-series profile with additive noise.
+
+    Parameters
+    ----------
+    profile : np.ndarray, shape (n_steps,)
+        Nominal torque profile over time.
+    noise_amplitude : float
+        Standard deviation of the additive Gaussian noise. Use 0.0 for no noise.
+    noise_type : str
+        Currently only 'additive' is supported (zero-mean Gaussian noise).
+    seed : int, optional
+        Random seed for reproducibility.
+
+    Returns
+    -------
+    np.ndarray, shape (n_steps,)
+        Perturbed torque profile.
+
+    Design by Contract
+    ------------------
+    Pre:  profile.ndim == 1, len(profile) > 0
+    Pre:  noise_amplitude >= 0
+    Pre:  noise_type == 'additive'
+    Post: output.shape == profile.shape
+    """
+    if profile.ndim != 1 or len(profile) == 0:
+        raise ValueError(
+            f"profile must be a non-empty 1-D array, got shape {profile.shape}"
+        )
+    if noise_amplitude < 0:
+        raise ValueError(f"noise_amplitude must be non-negative, got {noise_amplitude}")
+    if noise_type != "additive":
+        raise ValueError(f"noise_type must be 'additive', got {noise_type!r}")
+    if noise_amplitude == 0.0:
+        return profile.copy()
+
+    rng = np.random.default_rng(seed)
+    noise = rng.normal(0.0, noise_amplitude, size=len(profile))
+    result = profile + noise
+    assert result.shape == profile.shape
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Torque coefficient perturbation
 # ---------------------------------------------------------------------------
 
