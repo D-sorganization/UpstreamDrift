@@ -1,15 +1,16 @@
 """Drake Dashboard Launcher.
 
 Launches the Unified Dashboard with the Drake Physics Engine.
+
+The Drake engine package is deferred to inside ``main()`` so that
+importing this module does NOT trigger pydrake package loading.  This
+satisfies the lazy-loading requirement from Guideline Issue #1956.
 """
 
 import argparse
 
 from PyQt6.QtWidgets import QFileDialog
 
-from src.engines.physics_engines.drake.python.drake_physics_engine import (
-    DrakePhysicsEngine,
-)
 from src.shared.python.dashboard.launcher import launch_dashboard
 from src.shared.python.ui.qt.utils import get_qapp
 
@@ -34,6 +35,11 @@ def main() -> None:
             selected = dialog.selectedFiles()
             if selected:
                 model_path = selected[0]
+
+    # Deferred import: only loads pydrake when this launcher is actually invoked
+    from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
+        DrakePhysicsEngine,
+    )
 
     launch_dashboard(
         engine_class=DrakePhysicsEngine,  # type: ignore[type-abstract]
