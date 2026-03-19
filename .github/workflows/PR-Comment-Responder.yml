@@ -71,7 +71,7 @@ jobs:
             echo "should_skip=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         if: steps.filter.outputs.is_bot != 'true' && steps.pr_state.outputs.should_skip != 'true'
         with:
           fetch-depth: 1

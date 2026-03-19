@@ -123,14 +123,14 @@ jobs:
             echo "exceeded=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
           python-version: "3.11"

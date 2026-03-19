@@ -51,7 +51,7 @@ jobs:
         github.event.pull_request.user.type == 'Bot'))
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 5

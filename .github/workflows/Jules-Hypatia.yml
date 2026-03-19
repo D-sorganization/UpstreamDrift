@@ -12,7 +12,7 @@ jobs:
   archive-stale-docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Identify Stale Documentation
         id: find_stale
