@@ -67,13 +67,14 @@ jobs:
             sympy \
             trimesh \
             c3d \
+            ezdxf \
             pytest pytest-cov pytest-timeout pytest-xdist
 
       - name: Verify heavy dependencies
         run: |
           python -c "
           import sys
-          deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'c3d']
+          deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'c3d', 'ezdxf']
           failures = []
           for pkg in deps:
               try:
