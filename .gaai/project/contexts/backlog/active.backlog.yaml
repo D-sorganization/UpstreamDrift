@@ -1,0 +1,8 @@
+# GAAI Active Backlog
+# Auto-populated by Discovery daemon from GitHub issues.
+# Rules:
+#   - One item = one Story
+#   - Must have a corresponding artefact with acceptance criteria
+#   - Only Discovery may add items; only Delivery may update status
+
+items: []
