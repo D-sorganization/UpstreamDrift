@@ -55,8 +55,12 @@ items:
   - id: GH1949
     title: "[Testing] 526 source modules have no corresponding test file"
     priority: medium
-    status: in_progress
+    status: done
     started_at: "2026-03-19T16:41:25Z"
+    completed_at: "2026-03-19T16:51:28Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2027"
+    pr_number: 2027
+    pr_status: "open"
     github_issue: 1949
     artefact: .gaai/project/contexts/artefacts/stories/GH1949.story.md
     dependencies: []
