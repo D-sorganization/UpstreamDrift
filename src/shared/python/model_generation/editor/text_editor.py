@@ -808,7 +808,9 @@ class URDFTextEditor(TextEditorDiffMixin):
         """Add current content to history."""
         assert description is not None, "description must be provided"
         assert description is not None, "description must be provided"
-        checksum = hashlib.md5(self._content.encode()).hexdigest()
+        checksum = hashlib.md5(
+            self._content.encode(), usedforsecurity=False
+        ).hexdigest()
 
         version = EditorVersion(
             content=self._content,

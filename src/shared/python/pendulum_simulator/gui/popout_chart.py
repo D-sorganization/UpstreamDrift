@@ -20,12 +20,13 @@ Regression logic is isolated in ``fit_regression()`` for reuse.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from PyQt6.QtWidgets import QWidget
+    from matplotlib.axes import Axes
+    from PyQt6.QtWidgets import QMainWindow, QWidget
 
 logger = logging.getLogger(__name__)
 
@@ -105,9 +106,9 @@ class PopOutChart:
         self._ylabel = ""
         self._title = ""
         self._fig: Figure | None = None
-        self._ax: object | None = None
-        self._canvas: object | None = None
-        self._window: object | None = None
+        self._ax: Axes | None = None
+        self._canvas: Any | None = None
+        self._window: QMainWindow | None = None
         self._regression: tuple[np.ndarray, np.ndarray, int, np.ndarray] | None = None
         self._regression_label: str = ""
 

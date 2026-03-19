@@ -1,6 +1,7 @@
 # Issue: [MyoSuite] Perturbation Analysis: Core Module Implementation
 
 ## Labels
+
 `perturbation-analysis`, `physics-engine`, `myosuite`, `phase-1`
 
 ## Summary
@@ -15,6 +16,7 @@ a hand-tuned one.
 
 MyoSuite wraps MuJoCo with musculotendon dynamics in a gym-compatible interface. This
 uniquely enables:
+
 - Evaluating RL-trained policies for sensitivity to observation noise and muscle noise
 - Comparing RL policies trained with different objectives for robustness
 - Testing whether curriculum-learning or domain-randomization during training produces
@@ -28,12 +30,14 @@ speed — providing a principled way to select among policies beyond just reward
 ## Requirements
 
 ### Core Protocol Implementation
+
 - [ ] Create `src/engines/physics_engines/myosuite/python/perturbation/analyzer.py`
 - [ ] Implement `MyoSuitePerturbationAnalyzer` class conforming to `PerturbationAnalyzer` protocol
 - [ ] Use `MyoSuitePhysicsEngine` for simulation
 - [ ] Support MyoSuite environment loading via gym interface
 
 ### Action/Control Profile Handling
+
 - [ ] Accept control profiles as:
   - Polynomial coefficients per muscle (for parity with pendulum)
   - Time-series muscle activation arrays a(t) ∈ [0,1]^n_muscles
@@ -43,6 +47,7 @@ speed — providing a principled way to select among policies beyond just reward
 - [ ] Validate action dimensions match environment action space
 
 ### Perturbation Modes
+
 - [ ] **Action perturbation** (primary):
   - Additive noise on muscle activations (clamped to [0, 1])
   - Multiplicative noise on muscle activations
@@ -57,6 +62,7 @@ speed — providing a principled way to select among policies beyond just reward
   - Tests robustness to model uncertainty / inter-subject variability
 
 ### Simulation Loop
+
 - [ ] Reset environment via `env.reset()` before each trial
 - [ ] Set initial state if possible (via `env.sim.data.qpos/qvel`)
 - [ ] Step via `env.step(action)` for each timestep
@@ -66,6 +72,7 @@ speed — providing a principled way to select among policies beyond just reward
 - [ ] Support both fixed-length and variable-length episodes
 
 ### Metric Extraction
+
 - [ ] Compute all mandatory metrics per §4.2 of guidelines
 - [ ] Use `env.sim.data.xpos[body_id]` for end-effector position
 - [ ] Add MyoSuite-specific optional metrics:
@@ -78,6 +85,7 @@ speed — providing a principled way to select among policies beyond just reward
   - `policy_entropy` — action distribution entropy (if stochastic policy)
 
 ### RL Policy Evaluation Mode
+
 - [ ] Accept pre-trained policy as `policy_fn(obs) → action`
 - [ ] Apply perturbation to observations (tests sensor robustness)
 - [ ] Apply perturbation to actions (tests actuator robustness)
@@ -85,6 +93,7 @@ speed — providing a principled way to select among policies beyond just reward
 - [ ] Report which policy achieves best RS while maintaining reward threshold
 
 ### Statistics & Reporting
+
 - [ ] Use shared `MetricStatistics` and `variability_summary()` from shared module
 - [ ] Compute Robustness Score
 - [ ] Compute reward-conditioned RS (RS only for trials achieving minimum reward)
@@ -92,6 +101,7 @@ speed — providing a principled way to select among policies beyond just reward
 - [ ] Include muscle and RL-specific statistics in export
 
 ### Comparison
+
 - [ ] Implement `compare_profiles()` for two action profiles or policies
 - [ ] Compare open-loop (recorded actions) vs closed-loop (policy) robustness
 - [ ] Mann-Whitney U test per metric
@@ -99,6 +109,7 @@ speed — providing a principled way to select among policies beyond just reward
 - [ ] Pareto frontier: reward vs robustness score across policies
 
 ### Testing
+
 - [ ] Unit test: zero-amplitude → identical results (CV=0)
 - [ ] Unit test: seed reproducibility
 - [ ] Unit test: monotonicity (amplitude ↑ → CV ↑)
@@ -120,6 +131,7 @@ speed — providing a principled way to select among policies beyond just reward
 - All tests pass
 
 ## Parity Checklist
+
 - [ ] Implements `PerturbationAnalyzer` protocol
 - [ ] Supports white, pink, and brown noise
 - [ ] Supports additive and multiplicative perturbation
@@ -133,11 +145,13 @@ speed — providing a principled way to select among policies beyond just reward
 - [ ] JSON export compatible with cross-engine comparison schema
 
 ## Dependencies
+
 - Issue #006: Pendulum reference implementation (for shared utilities)
 - Issue #010: OpenSim perturbation (shared muscle-level patterns)
 - `src/shared/python/perturbation/` shared module must exist
 
 ## References
+
 - Guidelines: `docs/perturbation_analysis_parity_guidelines.md`
 - MyoSuite engine: `src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py`
 - MyoSuite muscle analysis: `src/engines/physics_engines/myosuite/python/muscle_analysis.py`

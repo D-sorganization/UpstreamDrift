@@ -1,6 +1,7 @@
 # Issue: [Pendulum Models] Perturbation Analysis: Core Module Formalization
 
 ## Labels
+
 `perturbation-analysis`, `physics-engine`, `pendulum`, `phase-1`
 
 ## Summary
@@ -24,6 +25,7 @@ which one produces more consistent clubhead speed when joint torques vary?"
 ## Requirements
 
 ### Core Protocol Compliance
+
 - [ ] Create `PendulumPerturbationAnalyzer` class implementing `PerturbationAnalyzer` protocol
 - [ ] Wrap existing `batch_perturb_and_simulate()` inside `run_batch()` method
 - [ ] Wrap existing `perturb_torque_coeffs()` inside `perturb_torque()` method
@@ -31,12 +33,14 @@ which one produces more consistent clubhead speed when joint torques vary?"
 - [ ] Implement `extract_metrics()` returning all mandatory metrics
 
 ### Perturbation Modes
+
 - [ ] Retain existing additive perturbation on polynomial coefficients
 - [ ] Add multiplicative perturbation mode: `coeff *= (1 + amplitude * noise)`
 - [ ] Add combined (both) mode applying additive then multiplicative
 - [ ] Expose mode selection via `PerturbationConfig.perturb_mode`
 
 ### Mandatory Metrics
+
 - [ ] `end_effector_position_final` — tip position at motion end (2D for pendulum)
 - [ ] `end_effector_velocity_final` — tip velocity at motion end
 - [ ] `end_effector_speed_final` — scalar tip speed at motion end
@@ -49,24 +53,28 @@ which one produces more consistent clubhead speed when joint torques vary?"
 - [ ] `motion_duration` — time to complete (fixed for pendulum, but report it)
 
 ### Statistics & Reporting
+
 - [ ] Extend `variability_summary()` to return `MetricStatistics` dataclass
 - [ ] Add median, IQR, p5, p95 percentiles to summary
 - [ ] Compute Robustness Score (RS = 1/(1+CV_weighted))
 - [ ] JSON export matching schema in guidelines §8.1
 
 ### Comparison
+
 - [ ] Implement `compare_profiles()` for two torque coefficient sets
 - [ ] Statistical test: Mann-Whitney U for each metric
 - [ ] Return `ComparisonReport` with winner determination and confidence
 
 ### Shared Utilities Extraction
+
 - [ ] Extract `PerturbationConfig`, `PerturbationResult`, `PerturbationSummary`,
-  `MetricStatistics` to `src/shared/python/perturbation/config.py`
+      `MetricStatistics` to `src/shared/python/perturbation/config.py`
 - [ ] Extract noise generation to `src/shared/python/perturbation/noise.py`
 - [ ] Extract statistics computation to `src/shared/python/perturbation/statistics.py`
 - [ ] Extract Robustness Score to `src/shared/python/perturbation/robustness_score.py`
 
 ### Testing
+
 - [ ] Unit tests: zero-amplitude → CV=0
 - [ ] Unit tests: seed reproducibility
 - [ ] Unit tests: increasing amplitude → increasing CV (monotonicity)
@@ -75,6 +83,7 @@ which one produces more consistent clubhead speed when joint torques vary?"
 - [ ] Integration test: comparison report for two known profiles
 
 ### GUI Updates
+
 - [ ] Update `perturbation_panel.py` to use new protocol-based analyzer
 - [ ] Add perturbation mode selector (additive/multiplicative/both)
 - [ ] Add comparison button to run two profiles side-by-side
@@ -90,6 +99,7 @@ which one produces more consistent clubhead speed when joint torques vary?"
 - Shared utility modules importable by other engine implementations
 
 ## Parity Checklist
+
 - [ ] Implements `PerturbationAnalyzer` protocol
 - [ ] Supports white, pink, and brown noise
 - [ ] Supports additive and multiplicative perturbation
@@ -103,9 +113,11 @@ which one produces more consistent clubhead speed when joint torques vary?"
 - [ ] JSON export compatible with cross-engine comparison schema
 
 ## Dependencies
+
 - None (this is the reference implementation)
 
 ## References
+
 - Guidelines: `docs/perturbation_analysis_parity_guidelines.md`
 - Existing implementation: `src/shared/python/pendulum_simulator/perturbation_analysis.py`
 - GUI panel: `src/shared/python/pendulum_simulator/gui/perturbation_panel.py`

@@ -104,7 +104,7 @@ class SimulationResult(TrajectoryResultMixin):
             self.limits,
             self.clamp,
         )
-        return state_dot[2:]
+        return state_dot[2:]  # type: ignore[index]
 
     def joint_forces_at(self, idx: int) -> dict:
         assert idx is not None, "idx must be provided"

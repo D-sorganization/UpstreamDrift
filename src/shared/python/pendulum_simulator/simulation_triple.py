@@ -76,7 +76,7 @@ class TripleSimulationResult(TrajectoryResultMixin):
         state_dot = equations_of_motion(
             self.states[idx], self.t[idx], self.params, self.torque_func
         )
-        return state_dot[3:]
+        return state_dot[3:]  # type: ignore[index]
 
     def joint_forces_at(self, idx: int) -> dict:
         assert idx is not None, "idx must be provided"
@@ -190,7 +190,7 @@ def run_simulation(
                 qddot_correction = np.linalg.solve(M, tau_limit)
             except np.linalg.LinAlgError:
                 qddot_correction = np.linalg.lstsq(M, tau_limit, rcond=None)[0]
-            dydt[3:] += qddot_correction
+            dydt[3:] += qddot_correction  # type: ignore[index]
         return dydt
 
     t, states = integrate_ode(

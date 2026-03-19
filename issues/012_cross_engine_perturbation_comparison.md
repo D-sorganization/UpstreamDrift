@@ -1,6 +1,7 @@
 # Issue: [All Engines] Perturbation Analysis: Cross-Engine Comparison Framework
 
 ## Labels
+
 `perturbation-analysis`, `cross-engine`, `phase-3`
 
 ## Summary
@@ -18,6 +19,7 @@ in MuJoCo, it should also be more consistent in Drake and Pinocchio (for equival
 rigid-body models). Any disagreement signals a model discrepancy worth investigating.
 
 This framework also enables:
+
 - Selecting the right engine for a given analysis (speed vs fidelity trade-off)
 - Validating engine implementations against each other
 - Publishing cross-engine robustness benchmarks
@@ -25,6 +27,7 @@ This framework also enables:
 ## Requirements
 
 ### Cross-Engine Runner
+
 - [ ] Create `src/shared/python/perturbation/cross_engine_runner.py`
 - [ ] Accept list of engine names and a shared `PerturbationConfig`
 - [ ] Load equivalent models in each engine (model mapping registry)
@@ -33,6 +36,7 @@ This framework also enables:
 - [ ] Collect all `PerturbationSummary` results
 
 ### Model Equivalence Registry
+
 - [ ] Create mapping: one logical model → per-engine model files
   - e.g., "double_pendulum_golf" → {pinocchio: "dp_golf.urdf", drake: "dp_golf.sdf", ...}
 - [ ] Validate kinematic chain equivalence (same DOF, same topology)
@@ -40,12 +44,14 @@ This framework also enables:
 - [ ] Report any discrepancies before running comparison
 
 ### Torque Profile Translation
+
 - [ ] Convert polynomial coefficients to engine-specific representations
 - [ ] Verify that nominal (unperturbed) trajectories match across engines
-  (within integration tolerance)
+      (within integration tolerance)
 - [ ] Report nominal trajectory divergence as a pre-check
 
 ### Consistency Validation
+
 - [ ] Compare Robustness Scores across engines for the same profile
 - [ ] Flag engines where RS differs by more than configurable threshold
 - [ ] Compare robustness **rankings** (A vs B) across engines
@@ -53,6 +59,7 @@ This framework also enables:
 - [ ] Statistical test for ranking consistency (Kendall's W)
 
 ### Combined Reporting
+
 - [ ] Create `CrossEngineComparisonReport` dataclass:
   - Per-engine summaries
   - Robustness Score table (engines × profiles)
@@ -63,20 +70,23 @@ This framework also enables:
 - [ ] CSV export for external analysis tools
 
 ### Dashboard / Visualization
+
 - [ ] Combined histogram overlay: same metric across all engines
 - [ ] Robustness Score bar chart: engines side by side
 - [ ] Heatmap: metrics × engines showing CV values
 - [ ] Scatter plot: RS_engine_A vs RS_engine_B for correlation
 - [ ] Integration with existing launcher dashboards (pinocchio_dashboard,
-  drake_dashboard, mujoco_dashboard)
+      drake_dashboard, mujoco_dashboard)
 
 ### Benchmark Suite
+
 - [ ] Define standard benchmark models and torque profiles
 - [ ] Automated regression test: run all engines, check ranking consistency
 - [ ] Performance benchmarking: time per trial per engine
 - [ ] CI integration: run benchmark on PR to detect regressions
 
 ### Testing
+
 - [ ] Unit test: model equivalence checker catches mismatched DOF
 - [ ] Unit test: torque profile translation preserves values
 - [ ] Integration test: full cross-engine run on 2-DOF pendulum
@@ -94,6 +104,7 @@ This framework also enables:
 - All tests pass
 
 ## Dependencies
+
 - Issue #006: Pendulum perturbation analysis (reference)
 - Issue #007: Pinocchio perturbation analysis
 - Issue #008: Drake perturbation analysis
@@ -102,6 +113,7 @@ This framework also enables:
 - Issue #011: MyoSuite perturbation analysis
 
 ## References
+
 - Guidelines: `docs/perturbation_analysis_parity_guidelines.md`
 - Engine protocol: `src/shared/python/engine_core/interfaces.py`
 - Existing dashboards: `src/launchers/pinocchio_dashboard.py`, `drake_dashboard.py`, `mujoco_dashboard.py`

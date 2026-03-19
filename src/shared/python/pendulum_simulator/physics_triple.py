@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -74,7 +75,7 @@ class TriplePendulumParams:
 
 
 # Type alias: state vector [theta1, phi1, phi2, dtheta1, dphi1, dphi2]
-State = npt.NDArray[np.float64]  # shape (6,)
+State: TypeAlias = npt.NDArray[np.float64]  # shape (6,)
 
 # Torque function signature: (t) -> (tau1, tau2, tau3)
 TorqueFunc = Callable[[float], tuple[float, float, float]]

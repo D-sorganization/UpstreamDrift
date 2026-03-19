@@ -71,7 +71,9 @@ class URDFComponent:
 
     def get_hash(self) -> str:
         """Get unique hash for this component."""
-        return hashlib.md5(self.xml_content.encode()).hexdigest()[:8]
+        return hashlib.md5(
+            self.xml_content.encode(), usedforsecurity=False
+        ).hexdigest()[:8]
 
     def to_dict(self) -> dict[str, Any]:
         """Convert component to dictionary."""

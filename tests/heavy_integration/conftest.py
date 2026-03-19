@@ -14,6 +14,26 @@ from pathlib import Path
 
 import pytest
 
+_HEAVY_INTEGRATION_DIR = Path(__file__).parent
+
+
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Auto-apply live_simulation marker to every test in heavy_integration/.
+
+    This ensures CI workflows that filter by ``-m live_simulation`` always
+    include all tests in this directory, without requiring each file to
+    declare the marker manually.
+    """
+    marker = pytest.mark.live_simulation
+    for item in items:
+        try:
+            item_path = Path(item.fspath)
+        except Exception:  # noqa: BLE001
+            continue
+        if _HEAVY_INTEGRATION_DIR in item_path.parents:
+            item.add_marker(marker, append=False)
+
+
 # ── Display Fixture ───────────────────────────────────────────────────────────
 
 

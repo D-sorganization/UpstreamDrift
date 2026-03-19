@@ -251,8 +251,8 @@ class SimRenderingMixin:
                     (255, 0, 255),
                     1,
                 )
-            except Exception:
-                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("cv2 label overlay failed, skipping: %s", exc)
         return img
 
     def _update_background_colors(self: Any) -> None:

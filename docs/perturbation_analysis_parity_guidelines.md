@@ -24,10 +24,12 @@ support cross-engine comparison through a unified reporting layer.
 ## 2. Motivation & Use Cases
 
 ### 2.1 Core Question
+
 Given two movement solutions (e.g., two golf swing torque profiles), which one produces
 more consistent outcomes when subjected to small, realistic variations in joint torque?
 
 ### 2.2 Applications
+
 - **Golf swing consistency**: Compare amateur vs professional torque profiles for
   sensitivity to perturbation
 - **Rehabilitation**: Identify movement strategies that are robust to muscle weakness
@@ -200,18 +202,18 @@ class PerturbationAnalyzer(Protocol):
 
 ### 4.2 Required Outcome Metrics (Mandatory for All Engines)
 
-| Metric Key | Description | Units |
-|---|---|---|
-| `end_effector_position_final` | End-effector 3D position at motion end | meters (3D vector) |
-| `end_effector_velocity_final` | End-effector 3D velocity at motion end | m/s (3D vector) |
-| `end_effector_speed_final` | End-effector scalar speed at motion end | m/s |
-| `peak_end_effector_speed` | Maximum end-effector speed during motion | m/s |
-| `total_energy_final` | Total mechanical energy at motion end | Joules |
-| `joint_angles_final` | All joint angles at motion end | radians (per-joint) |
-| `joint_velocities_final` | All joint velocities at motion end | rad/s (per-joint) |
-| `trajectory_rmse` | RMSE of perturbed vs nominal trajectory | mixed (state units) |
-| `trajectory_max_deviation` | Max deviation from nominal trajectory | mixed (state units) |
-| `motion_duration` | Time to complete motion (if variable) | seconds |
+| Metric Key                    | Description                              | Units               |
+| ----------------------------- | ---------------------------------------- | ------------------- |
+| `end_effector_position_final` | End-effector 3D position at motion end   | meters (3D vector)  |
+| `end_effector_velocity_final` | End-effector 3D velocity at motion end   | m/s (3D vector)     |
+| `end_effector_speed_final`    | End-effector scalar speed at motion end  | m/s                 |
+| `peak_end_effector_speed`     | Maximum end-effector speed during motion | m/s                 |
+| `total_energy_final`          | Total mechanical energy at motion end    | Joules              |
+| `joint_angles_final`          | All joint angles at motion end           | radians (per-joint) |
+| `joint_velocities_final`      | All joint velocities at motion end       | rad/s (per-joint)   |
+| `trajectory_rmse`             | RMSE of perturbed vs nominal trajectory  | mixed (state units) |
+| `trajectory_max_deviation`    | Max deviation from nominal trajectory    | mixed (state units) |
+| `motion_duration`             | Time to complete motion (if variable)    | seconds             |
 
 ### 4.3 Required Noise Models (All Engines Must Support)
 
@@ -235,6 +237,7 @@ class PerturbationAnalyzer(Protocol):
 **Existing work**: `src/shared/python/pendulum_simulator/perturbation_analysis.py`
 
 **Approach**:
+
 - Extend existing `batch_perturb_and_simulate()` to match unified protocol
 - Add multiplicative perturbation mode
 - Add trajectory RMSE and max deviation metrics
@@ -251,6 +254,7 @@ class PerturbationAnalyzer(Protocol):
 **Location**: `src/engines/physics_engines/pinocchio/`
 
 **Approach**:
+
 - Create `pinocchio_perturbation_analysis.py` in engine directory
 - Use `PinocchioPhysicsEngine` for simulation (inherits `BasePhysicsEngine`)
 - Perturb torque profiles via `compute_inverse_dynamics()` → add noise → forward simulate
@@ -266,6 +270,7 @@ class PerturbationAnalyzer(Protocol):
 **Location**: `src/engines/physics_engines/drake/`
 
 **Approach**:
+
 - Create `drake_perturbation_analysis.py` in engine directory
 - Use `DrakePhysicsEngine` with `MultibodyPlant` for simulation
 - Perturb via `plant.get_actuation_input_port()` signal injection
@@ -281,6 +286,7 @@ class PerturbationAnalyzer(Protocol):
 **Location**: `src/engines/physics_engines/mujoco/`
 
 **Approach**:
+
 - Create `mujoco_perturbation_analysis.py` in engine directory
 - Use `MuJoCoPhysicsEngine` for simulation
 - Perturb `data.ctrl` (control inputs) directly
@@ -296,6 +302,7 @@ class PerturbationAnalyzer(Protocol):
 **Location**: `src/engines/physics_engines/opensim/`
 
 **Approach**:
+
 - Create `opensim_perturbation_analysis.py` in engine directory
 - Use `OpenSimPhysicsEngine` for musculoskeletal simulation
 - Perturb **muscle excitations** (not raw torques) — more physiologically meaningful
@@ -314,6 +321,7 @@ robust
 **Location**: `src/engines/physics_engines/myosuite/`
 
 **Approach**:
+
 - Create `myosuite_perturbation_analysis.py` in engine directory
 - Use `MyoSuitePhysicsEngine` for muscle-driven simulation
 - Perturb muscle activations via environment action space
@@ -353,6 +361,7 @@ w_i  = weight for metric i (configurable, default uniform)
 ```
 
 Properties:
+
 - RS ∈ (0, 1] — higher is more robust
 - RS = 1 means zero variation (perfectly consistent)
 - RS ≈ 0 means extreme variation (highly sensitive)
@@ -380,6 +389,7 @@ class ComparisonReport:
 ### 6.4 Cross-Engine Consistency Check
 
 Run the same comparison across engines and verify:
+
 - Robustness ranking (A vs B) is consistent across engines
 - CV magnitudes are within expected scaling factors
 - Flag any engine where the ranking disagrees (potential model discrepancy)
@@ -409,6 +419,7 @@ Every perturbation analysis issue MUST include:
 ```
 
 Examples:
+
 - `[Pinocchio] Perturbation Analysis: Core Module Implementation`
 - `[Drake] Perturbation Analysis: Cross-Engine Comparison Integration`
 - `[All Engines] Perturbation Analysis: Unified Comparison Dashboard`
@@ -418,6 +429,7 @@ Examples:
 Each engine should have issues in this order:
 
 **Phase 1 — Core Module** (one issue per engine):
+
 - Implement `PerturbationAnalyzer` protocol for the engine
 - Noise generation (white, pink, brown)
 - Additive and multiplicative perturbation modes
@@ -426,6 +438,7 @@ Each engine should have issues in this order:
 - Unit tests with known-sensitivity test cases
 
 **Phase 2 — Comparison & Reporting** (one issue per engine):
+
 - `compare_profiles()` implementation
 - Robustness Score computation
 - Statistical tests (Mann-Whitney U, bootstrap CI)
@@ -433,6 +446,7 @@ Each engine should have issues in this order:
 - Integration with existing engine dashboard
 
 **Phase 3 — Cross-Engine Integration** (shared issues):
+
 - Unified comparison runner across all engines
 - Cross-engine consistency validation
 - Combined dashboard / reporting UI
@@ -442,6 +456,7 @@ Each engine should have issues in this order:
 
 ```markdown
 ## Parity Checklist
+
 - [ ] Implements `PerturbationAnalyzer` protocol
 - [ ] Supports white, pink, and brown noise
 - [ ] Supports additive and multiplicative perturbation
@@ -473,43 +488,43 @@ Every engine must pass these validation scenarios:
 
 ```json
 {
-    "schema_version": "1.0",
-    "engine": "pinocchio",
-    "model": "double_pendulum_golf",
-    "config": {
-        "n_trials": 200,
-        "noise_type": "white",
-        "noise_amplitude": 0.05,
-        "perturb_mode": "additive",
-        "seed": 42
+  "schema_version": "1.0",
+  "engine": "pinocchio",
+  "model": "double_pendulum_golf",
+  "config": {
+    "n_trials": 200,
+    "noise_type": "white",
+    "noise_amplitude": 0.05,
+    "perturb_mode": "additive",
+    "seed": 42
+  },
+  "summary": {
+    "n_successful": 198,
+    "n_failed": 2,
+    "failure_rate": 0.01,
+    "metrics": {
+      "end_effector_speed_final": {
+        "mean": 45.2,
+        "std": 1.8,
+        "cv": 0.0398,
+        "median": 45.1,
+        "iqr": 2.4,
+        "min": 40.1,
+        "max": 50.3,
+        "p5": 42.1,
+        "p95": 48.3
+      }
     },
-    "summary": {
-        "n_successful": 198,
-        "n_failed": 2,
-        "failure_rate": 0.01,
-        "metrics": {
-            "end_effector_speed_final": {
-                "mean": 45.2,
-                "std": 1.8,
-                "cv": 0.0398,
-                "median": 45.1,
-                "iqr": 2.4,
-                "min": 40.1,
-                "max": 50.3,
-                "p5": 42.1,
-                "p95": 48.3
-            }
-        },
-        "robustness_score": 0.962
-    },
-    "trials": [
-        {
-            "trial_id": 0,
-            "success": true,
-            "metrics": {"end_effector_speed_final": 45.3},
-            "perturbed_input_hash": "abc123"
-        }
-    ]
+    "robustness_score": 0.962
+  },
+  "trials": [
+    {
+      "trial_id": 0,
+      "success": true,
+      "metrics": { "end_effector_speed_final": 45.3 },
+      "perturbed_input_hash": "abc123"
+    }
+  ]
 }
 ```
 
@@ -561,14 +576,14 @@ Every engine must pass these validation scenarios:
 
 ## 10. Implementation Priority
 
-| Priority | Engine | Rationale |
-|---|---|---|
-| 1 | Pendulum Models | Reference implementation exists; extend and formalize |
-| 2 | Pinocchio | Clean analytical dynamics; good for validation |
-| 3 | MuJoCo | Most widely used; fast simulation enables large batches |
-| 4 | Drake | Strong systems framework; good for signal-level perturbation |
-| 5 | OpenSim | Muscle-level perturbation adds unique physiological insight |
-| 6 | MyoSuite | RL policy evaluation; depends on OpenSim patterns |
+| Priority | Engine          | Rationale                                                    |
+| -------- | --------------- | ------------------------------------------------------------ |
+| 1        | Pendulum Models | Reference implementation exists; extend and formalize        |
+| 2        | Pinocchio       | Clean analytical dynamics; good for validation               |
+| 3        | MuJoCo          | Most widely used; fast simulation enables large batches      |
+| 4        | Drake           | Strong systems framework; good for signal-level perturbation |
+| 5        | OpenSim         | Muscle-level perturbation adds unique physiological insight  |
+| 6        | MyoSuite        | RL policy evaluation; depends on OpenSim patterns            |
 
 ---
 
@@ -594,6 +609,7 @@ src/engines/physics_engines/<engine>/python/
 ```
 
 Shared utilities should live in:
+
 ```
 src/shared/python/perturbation/
     __init__.py
@@ -609,17 +625,17 @@ src/shared/python/perturbation/
 
 ## 12. Glossary
 
-| Term | Definition |
-|---|---|
-| **CV (Coefficient of Variation)** | std / |mean| — dimensionless measure of variability |
-| **Robustness Score (RS)** | 1/(1+CV_weighted) — unified robustness metric ∈ (0,1] |
-| **Perturbation amplitude** | Scale factor for noise magnitude relative to nominal input |
-| **White noise** | Independent, identically distributed Gaussian samples |
-| **Pink noise (1/f)** | Power spectral density ∝ 1/f — correlated temporal noise |
-| **Brown noise** | Integrated white noise — random walk / drift |
-| **Monte Carlo** | Repeated random sampling to estimate statistical properties |
-| **ZTCF** | Zero-Torque Counterfactual — passive dynamics prediction |
-| **ZVCF** | Zero-Velocity Counterfactual — with control but no momentum |
+| Term                              | Definition                                                  |
+| --------------------------------- | ----------------------------------------------------------- | ---- | -------------------------------------- |
+| **CV (Coefficient of Variation)** | std /                                                       | mean | — dimensionless measure of variability |
+| **Robustness Score (RS)**         | 1/(1+CV_weighted) — unified robustness metric ∈ (0,1]       |
+| **Perturbation amplitude**        | Scale factor for noise magnitude relative to nominal input  |
+| **White noise**                   | Independent, identically distributed Gaussian samples       |
+| **Pink noise (1/f)**              | Power spectral density ∝ 1/f — correlated temporal noise    |
+| **Brown noise**                   | Integrated white noise — random walk / drift                |
+| **Monte Carlo**                   | Repeated random sampling to estimate statistical properties |
+| **ZTCF**                          | Zero-Torque Counterfactual — passive dynamics prediction    |
+| **ZVCF**                          | Zero-Velocity Counterfactual — with control but no momentum |
 
 ---
 
