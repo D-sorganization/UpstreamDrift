@@ -104,7 +104,8 @@ def log_summary() -> None:
     logger.info("\n" + "=" * 60)
     logger.info("HOOK SUMMARY")
     logger.info("=" * 60)
-    logger.info("""
+    logger.info(
+        """
 PRE-COMMIT (runs on every commit, <15 seconds):
   - ruff (lint + auto-fix)
   - black (format)
@@ -123,7 +124,8 @@ MANUAL COMMANDS:
   pre-commit run --all-files      # Run all pre-commit hooks
   pre-commit run --hook-stage pre-push  # Run pre-push hooks manually
   pre-commit autoupdate           # Update hook versions
-""")
+"""
+    )
 
 
 def main() -> None:

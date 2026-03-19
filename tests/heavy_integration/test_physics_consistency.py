@@ -52,9 +52,9 @@ class TestPendulumAnalytical:
 
         np.testing.assert_allclose(M, M.T, atol=1e-12)
         eigenvalues = np.linalg.eigvalsh(M)
-        assert all(ev > 0 for ev in eigenvalues), (
-            f"M not positive definite: eigs={eigenvalues}"
-        )
+        assert all(
+            ev > 0 for ev in eigenvalues
+        ), f"M not positive definite: eigs={eigenvalues}"
 
     def test_mass_matrix_varies_with_configuration(self) -> None:
         """Mass matrix should change with joint angles (coupled inertia)."""
