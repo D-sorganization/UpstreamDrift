@@ -66,7 +66,9 @@ class TestEngineProbing:
 class TestEngineLoading:
     """Test engine loading functionality."""
 
-    @pytest.mark.skip(reason="Engine Python modules not installed in test environment")
+    @pytest.mark.xfail(
+        reason="Engine Python modules not installed in test environment", strict=False
+    )
     @pytest.mark.parametrize(
         "engine_name",
         [
@@ -137,7 +139,9 @@ class TestSimulationStart:
         """Fixture to ensure MuJoCo is loaded."""
         client.post("/api/engines/mujoco/load")
 
-    @pytest.mark.skip(reason="MuJoCo Python module not installed in test environment")
+    @pytest.mark.xfail(
+        reason="MuJoCo Python module not installed in test environment", strict=False
+    )
     def test_start_simulation_with_mujoco(self, client, loaded_mujoco: None) -> None:
         """Test starting a simulation with MuJoCo engine."""
         response = client.post(
@@ -178,8 +182,9 @@ class TestPuttingGreenEngine:
         assert data["status"] == "loaded"
         assert data["engine"] == "putting_green"
 
-    @pytest.mark.skip(
-        reason="Proper Putting Green implementation pending (Issue #1136)"
+    @pytest.mark.xfail(
+        reason="Proper Putting Green implementation pending (Issue #1136)",
+        strict=False,
     )
     def test_putting_green_simulation(self, client) -> None:
         """Test Putting Green simulation (will be implemented in #1136)."""

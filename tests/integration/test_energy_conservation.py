@@ -153,10 +153,11 @@ class TestEnergyConservation:
             f"Drift: {energies[-1] - initial_total_energy:.6e} J"
         )
 
-    @pytest.mark.skip(
+    @pytest.mark.xfail(
         reason="MuJoCo mass matrix computation issue - ΔKE is 2x expected. "
         "Needs investigation of qM usage or motor modeling. "
-        "Other energy conservation tests pass."
+        "Other energy conservation tests pass.",
+        strict=False,
     )
     def test_work_energy_theorem(
         self, simple_pendulum_model: tuple[mujoco.MjModel, mujoco.MjData]

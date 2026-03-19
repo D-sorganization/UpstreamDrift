@@ -103,9 +103,10 @@ class TestMediaPipeEstimator:
             assert "nose" in result.raw_keypoints
             assert result.raw_keypoints["nose"][0] == 0.5
 
-    @pytest.mark.skip(
+    @pytest.mark.xfail(
         reason="cv2 module-level import is None when OpenCV unavailable; "
-        "nested mock patches conflict with fixture-level cv2 mock"
+        "nested mock patches conflict with fixture-level cv2 mock",
+        strict=False,
     )
     def test_estimate_from_video(
         self, estimator_instance: mediapipe_estimator.MediaPipeEstimator

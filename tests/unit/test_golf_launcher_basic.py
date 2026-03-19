@@ -178,19 +178,9 @@ class TestDockerThreads:
 
         thread.result.emit.assert_called_with(False)
 
-    @pytest.mark.skip(reason="DockerBuildThread moved to src.launchers.docker_manager")
-    def test_docker_build_thread_success(self, mocked_launcher_module):
-        """Test DockerBuildThread success (skipped: moved to docker_manager)."""
-
-    @pytest.mark.skip(reason="DockerBuildThread moved to src.launchers.docker_manager")
-    def test_docker_build_thread_failure(self, mocked_launcher_module):
-        """Test DockerBuildThread failure (skipped: moved to docker_manager)."""
-
-    @pytest.mark.skip(reason="DockerBuildThread moved to src.launchers.docker_manager")
-    def test_docker_build_thread_missing_path(self, mocked_launcher_module):
-        """Test DockerBuildThread with missing path (skipped: moved to docker_manager)."""
-
-    @pytest.mark.skip(reason="HelpDialog Qt construction crashes worker in CI")
+    @pytest.mark.xfail(
+        reason="HelpDialog Qt construction crashes worker in CI", strict=False
+    )
     @patch("pathlib.Path.read_text", return_value="# Help")
     @patch("pathlib.Path.exists", return_value=True)
     def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module):

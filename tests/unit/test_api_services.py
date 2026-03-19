@@ -177,8 +177,9 @@ class TestAnalysisService:
         service = AnalysisService(mock_engine_manager)
         assert service.engine_manager is mock_engine_manager
 
-    @pytest.mark.skip(
-        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result"
+    @pytest.mark.xfail(
+        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result",
+        strict=False,
     )
     @pytest.mark.asyncio
     async def test_analyze_biomechanics_basic(self, service: AnalysisService) -> None:
@@ -197,8 +198,9 @@ class TestAnalysisService:
         result = await service.analyze_biomechanics(request)
         assert result is not None
 
-    @pytest.mark.skip(
-        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result"
+    @pytest.mark.xfail(
+        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result",
+        strict=False,
     )
     @pytest.mark.asyncio
     async def test_analyze_biomechanics_missing_data(
@@ -228,8 +230,9 @@ class TestServiceIntegration:
         manager.get_active_physics_engine.return_value = mock_engine
         return manager
 
-    @pytest.mark.skip(
-        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result"
+    @pytest.mark.xfail(
+        reason="DbC @ensure postcondition breaks async: evaluates coroutine not result",
+        strict=False,
     )
     @pytest.mark.asyncio
     async def test_simulation_to_analysis_flow(

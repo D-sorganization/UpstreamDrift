@@ -9,7 +9,10 @@ from src.api.server import app
 client = TestClient(app)
 
 
-@pytest.mark.skip(reason="Auth login endpoint not yet implemented at /api/auth/login")
+@pytest.mark.xfail(
+    reason="Auth login endpoint not yet implemented at /api/auth/login",
+    strict=False,
+)
 def test_rate_limiting():
     # Attempt to hit the login endpoint multiple times
     # Assuming limit is something like 5/minute

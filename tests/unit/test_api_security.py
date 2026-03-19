@@ -144,8 +144,9 @@ class TestBcryptAPIKeyVerification:
         assert cost_factor >= 12, f"Bcrypt cost factor {cost_factor} is too low"
 
     @requires_bcrypt
-    @pytest.mark.skip(
-        reason="APIKey model lacks prefix_hash column (schema migration needed)"
+    @pytest.mark.xfail(
+        reason="APIKey model lacks prefix_hash column (schema migration needed)",
+        strict=False,
     )
     async def test_api_key_verification_integration(self) -> None:
         """Test full API key verification flow."""
