@@ -15,6 +15,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
@@ -518,3 +519,5 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+pytestmark = pytest.mark.live_simulation

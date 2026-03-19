@@ -30,3 +30,6 @@ class TestEngineModelCompatibility:
         registry = ModelRegistry()
         models = registry.get_all_models()
         assert isinstance(models, list)
+
+
+pytestmark = pytest.mark.live_simulation

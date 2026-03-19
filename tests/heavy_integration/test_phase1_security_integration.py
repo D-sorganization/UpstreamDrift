@@ -16,6 +16,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
     skip_if_unavailable,
@@ -332,3 +334,5 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+pytestmark = pytest.mark.live_simulation

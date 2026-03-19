@@ -69,7 +69,7 @@ fi
 # ── Step 3: Verify dependencies (parity with 'Verify Heavy Dependencies' step) ─
 echo -e "\n${YELLOW}[3/5] Verifying heavy dependencies...${RESET}"
 docker run --rm --network=host "${IMAGE_NAME}" python -c "
-deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy']
+deps = ['mujoco', 'pinocchio', 'mediapipe', 'pyvista', 'trimesh', 'scipy', 'sympy', 'c3d']
 failures = []
 for pkg in deps:
     try:
