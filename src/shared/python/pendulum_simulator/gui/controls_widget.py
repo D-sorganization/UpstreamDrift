@@ -439,7 +439,9 @@ class ControlsWidget(ControlsWidgetBase):
                 row.addWidget(widget)
                 layout.addLayout(row)
         else:
-            self.inp_dtheta1 = LabeledInput("dθ1", "0", "Arm angular velocity rad/s", lw)  # type: ignore[assignment]
+            self.inp_dtheta1 = LabeledInput(
+                "dθ1", "0", "Arm angular velocity rad/s", lw
+            )  # type: ignore[assignment]
             self.inp_dphi = LabeledInput("dφ", "0", "Club angular velocity rad/s", lw)  # type: ignore[assignment]
             layout.addLayout(_row(self.inp_theta1, self.inp_phi))
             layout.addLayout(_row(self.inp_dtheta1, self.inp_dphi))

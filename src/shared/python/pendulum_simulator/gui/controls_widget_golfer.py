@@ -221,7 +221,9 @@ class ControlsWidgetGolfer(ControlsWidgetBase):
                 row.addWidget(w)
                 layout.addLayout(row)
         else:
-            self.inp_m_hub = LabeledInput("Standoff", "0.001", "Standoff mass (massless)")  # type: ignore[assignment]
+            self.inp_m_hub = LabeledInput(
+                "Standoff", "0.001", "Standoff mass (massless)"
+            )  # type: ignore[assignment]
             self.inp_m_r_upper = LabeledInput("R Upper", "3.5", "Right upper arm")  # type: ignore[assignment]
             self.inp_m_r_fore = LabeledInput("R Fore", "2.0", "Right forearm")  # type: ignore[assignment]
             self.inp_m_l_upper = LabeledInput("L Upper", "3.5", "Left upper arm")  # type: ignore[assignment]
@@ -281,7 +283,9 @@ class ControlsWidgetGolfer(ControlsWidgetBase):
                 row.addWidget(w)
                 layout.addLayout(row)
         else:
-            self.inp_L_hub = LabeledInput("Standoff", "0.15", "Standoff length (COM offset)")  # type: ignore[assignment]
+            self.inp_L_hub = LabeledInput(
+                "Standoff", "0.15", "Standoff length (COM offset)"
+            )  # type: ignore[assignment]
             self.inp_L_r_upper = LabeledInput("R Upper", "0.35", "Right upper arm")  # type: ignore[assignment]
             self.inp_L_r_fore = LabeledInput("R Fore", "0.30", "Right forearm")  # type: ignore[assignment]
             self.inp_L_l_upper = LabeledInput("L Upper", "0.35", "Left upper arm")  # type: ignore[assignment]
