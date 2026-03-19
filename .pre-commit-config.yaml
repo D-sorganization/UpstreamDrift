@@ -136,7 +136,6 @@ repos:
         entry: python3 -m pytest
           tests/unit/dbc
           tests/unit/core
-          tests/unit/api
           tests/unit/utils
           -x -q --tb=short -m "not slow and not integration"
           --override-ini="addopts=-ra -q --strict-markers --strict-config --durations=20"

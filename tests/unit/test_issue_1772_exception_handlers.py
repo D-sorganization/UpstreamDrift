@@ -45,9 +45,10 @@ def test_no_bare_pass_in_fixed_files() -> None:
         if lines:
             violations[rel_path] = lines
 
-    assert not violations, (
-        "Bare ``pass`` exception handlers still present (issue #1772):\n"
-        + "\n".join(f"  {path}: lines {lns}" for path, lns in violations.items())
+    assert (
+        not violations
+    ), "Bare ``pass`` exception handlers still present (issue #1772):\n" + "\n".join(
+        f"  {path}: lines {lns}" for path, lns in violations.items()
     )
 
 
@@ -57,9 +58,9 @@ def test_sim_widget_handler_uses_logger_debug() -> None:
     if not filepath.exists():
         return
     source = filepath.read_text(encoding="utf-8")
-    assert "logger.debug" in source, (
-        "sim_widget.py must use logger.debug in exception handlers (issue #1772)"
-    )
+    assert (
+        "logger.debug" in source
+    ), "sim_widget.py must use logger.debug in exception handlers (issue #1772)"
 
 
 def test_sim_rendering_mixin_handler_uses_logger_debug() -> None:
@@ -68,9 +69,9 @@ def test_sim_rendering_mixin_handler_uses_logger_debug() -> None:
     if not filepath.exists():
         return
     source = filepath.read_text(encoding="utf-8")
-    assert source.count("logger.debug") >= 2, (
-        "sim_rendering_mixin.py must have at least 2 logger.debug calls (issue #1772)"
-    )
+    assert (
+        source.count("logger.debug") >= 2
+    ), "sim_rendering_mixin.py must have at least 2 logger.debug calls (issue #1772)"
 
 
 def test_drake_gui_viz_handler_uses_logger() -> None:
@@ -79,9 +80,9 @@ def test_drake_gui_viz_handler_uses_logger() -> None:
     if not filepath.exists():
         return
     source = filepath.read_text(encoding="utf-8")
-    assert "LOGGER.debug" in source or "logger.debug" in source, (
-        "drake_gui_viz.py must use a logger.debug call in the ValueError handler (issue #1772)"
-    )
+    assert (
+        "LOGGER.debug" in source or "logger.debug" in source
+    ), "drake_gui_viz.py must use a logger.debug call in the ValueError handler (issue #1772)"
 
 
 def test_docker_sim_handlers_use_logger_debug() -> None:
@@ -90,6 +91,6 @@ def test_docker_sim_handlers_use_logger_debug() -> None:
     if not filepath.exists():
         return
     source = filepath.read_text(encoding="utf-8")
-    assert source.count("logger.debug") >= 4, (
-        "mujoco docker sim.py must have at least 4 logger.debug calls (issue #1772)"
-    )
+    assert (
+        source.count("logger.debug") >= 4
+    ), "mujoco docker sim.py must have at least 4 logger.debug calls (issue #1772)"

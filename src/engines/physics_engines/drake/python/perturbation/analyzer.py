@@ -289,9 +289,9 @@ class DrakePerturbationAnalyzer:
         assert isinstance(profile, dict), f"profile must be a dict, got {type(profile)}"
         assert "coeffs" in profile, "'coeffs' key missing from profile"
         coeffs = profile["coeffs"]
-        assert isinstance(coeffs, list) and len(coeffs) > 0, (
-            "profile['coeffs'] must be a non-empty list"
-        )
+        assert (
+            isinstance(coeffs, list) and len(coeffs) > 0
+        ), "profile['coeffs'] must be a non-empty list"
         self._base_coeffs = coeffs
         self._nominal_result = self._simulate(coeffs)
 
@@ -303,9 +303,9 @@ class DrakePerturbationAnalyzer:
         Pre: ``set_base_torque_profile`` has been called.
         Post: returned dict has 'coeffs' with same shape as base.
         """
-        assert self._base_coeffs is not None, (
-            "set_base_torque_profile() must be called before perturb_torque()"
-        )
+        assert (
+            self._base_coeffs is not None
+        ), "set_base_torque_profile() must be called before perturb_torque()"
         perturbed = perturb_torque_coeffs(
             self._base_coeffs,
             noise_amplitude=config.noise_amplitude,
@@ -331,9 +331,9 @@ class DrakePerturbationAnalyzer:
         Pre: sim_result is a DrakeSimResult with n_steps >= 2.
         Post: all MANDATORY_METRICS present; all values finite.
         """
-        assert isinstance(sim_result, DrakeSimResult), (
-            f"sim_result must be DrakeSimResult, got {type(sim_result)}"
-        )
+        assert isinstance(
+            sim_result, DrakeSimResult
+        ), f"sim_result must be DrakeSimResult, got {type(sim_result)}"
         assert sim_result.n_steps >= 2, "Simulation must have >= 2 steps"
 
         r = sim_result
@@ -385,9 +385,9 @@ class DrakePerturbationAnalyzer:
         Post: result.success_rate in [0, 1].
         Post: result.robustness_score in [0, 1].
         """
-        assert self._base_coeffs is not None, (
-            "set_base_torque_profile() must be called before run_batch()"
-        )
+        assert (
+            self._base_coeffs is not None
+        ), "set_base_torque_profile() must be called before run_batch()"
 
         t_start = time.monotonic()
         base_seed = config.seed if config.seed is not None else 0

@@ -345,12 +345,12 @@ def diagnose_task_points(
     Returns:
         Map of body_name -> JacobianDiagnostics
     """
-    assert engine_compute_jacobian is not None, (
-        "engine_compute_jacobian must be provided"
-    )
-    assert engine_compute_jacobian is not None, (
-        "engine_compute_jacobian must be provided"
-    )
+    assert (
+        engine_compute_jacobian is not None
+    ), "engine_compute_jacobian must be provided"
+    assert (
+        engine_compute_jacobian is not None
+    ), "engine_compute_jacobian must be provided"
     if task_points is None:
         task_points = GOLF_TASK_POINTS
 

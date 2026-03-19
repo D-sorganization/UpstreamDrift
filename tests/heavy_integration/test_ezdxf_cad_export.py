@@ -86,9 +86,9 @@ class TestEzdxfRoundtrip:
             loaded_doc = ezdxf.readfile(str(dxf_path))
             loaded_msp = loaded_doc.modelspace()
             loaded_entities = list(loaded_msp)
-            assert len(loaded_entities) == 4, (
-                f"Expected 4 lines after reload, got {len(loaded_entities)}"
-            )
+            assert (
+                len(loaded_entities) == 4
+            ), f"Expected 4 lines after reload, got {len(loaded_entities)}"
 
     def test_layers_survive_roundtrip(self, ezdxf) -> None:
         """Layer assignments survive a write→read cycle."""

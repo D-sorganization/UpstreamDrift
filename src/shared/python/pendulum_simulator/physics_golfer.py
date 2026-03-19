@@ -164,18 +164,18 @@ class GolferParams:
 
         assert self.d_rs >= 0, f"d_rs must be non-negative, got {self.d_rs}"
         assert self.d_ls >= 0, f"d_ls must be non-negative, got {self.d_ls}"
-        assert self.grip_right >= 0, (
-            f"grip_right must be non-negative, got {self.grip_right}"
-        )
-        assert self.grip_left >= 0, (
-            f"grip_left must be non-negative, got {self.grip_left}"
-        )
+        assert (
+            self.grip_right >= 0
+        ), f"grip_right must be non-negative, got {self.grip_right}"
+        assert (
+            self.grip_left >= 0
+        ), f"grip_left must be non-negative, got {self.grip_left}"
         assert self.grip_right <= self.L_club, "grip_right must be ≤ L_club"
         assert self.grip_left <= self.L_club, "grip_left must be ≤ L_club"
         assert self.g >= 0, f"g must be non-negative, got {self.g}"
-        assert self.m_clubhead >= 0, (
-            f"m_clubhead must be non-negative, got {self.m_clubhead}"
-        )
+        assert (
+            self.m_clubhead >= 0
+        ), f"m_clubhead must be non-negative, got {self.m_clubhead}"
 
         for name in ["b_hub", "b_rs", "b_re", "b_rh", "b_ls", "b_le", "b_lh"]:
             val = getattr(self, name)

@@ -197,9 +197,9 @@ def _load_analyzer(engine_name: str, **kwargs: Any) -> Any:
     -------
     analyzer instance or raises ImportError / ValueError.
     """
-    assert engine_name in SUPPORTED_ENGINES, (
-        f"Unsupported engine: {engine_name!r}.  Choose from {SUPPORTED_ENGINES}"
-    )
+    assert (
+        engine_name in SUPPORTED_ENGINES
+    ), f"Unsupported engine: {engine_name!r}.  Choose from {SUPPORTED_ENGINES}"
 
     entry = _ENGINE_LOADER_MAP[engine_name]
     module_path, cls_name = entry.split("|")
@@ -285,9 +285,9 @@ class CrossEnginePerturbationRunner:
             engines = list(SUPPORTED_ENGINES)
 
         for name in engines:
-            assert name in SUPPORTED_ENGINES, (
-                f"Unknown engine: {name!r}.  Supported: {SUPPORTED_ENGINES}"
-            )
+            assert (
+                name in SUPPORTED_ENGINES
+            ), f"Unknown engine: {name!r}.  Supported: {SUPPORTED_ENGINES}"
 
         self._engines = engines
         self._profile = profile
@@ -337,9 +337,9 @@ class CrossEnginePerturbationRunner:
         -------
         CrossEngineReport
         """
-        assert self._profile is not None, (
-            "set_profile() must be called before run_all()"
-        )
+        assert (
+            self._profile is not None
+        ), "set_profile() must be called before run_all()"
 
         t_wall_start = time.monotonic()
         summaries: dict[str, PerturbationSummary] = {}
@@ -385,9 +385,9 @@ class CrossEnginePerturbationRunner:
         Pre:  ``profile`` has been set.
         Pre:  engine_name in SUPPORTED_ENGINES.
         """
-        assert self._profile is not None, (
-            "set_profile() must be called before run_single()"
-        )
+        assert (
+            self._profile is not None
+        ), "set_profile() must be called before run_single()"
         assert engine_name in SUPPORTED_ENGINES, f"Unknown engine: {engine_name!r}"
         analyzer = self._get_or_load_analyzer(engine_name)
         analyzer.set_base_torque_profile(self._profile)

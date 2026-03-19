@@ -218,9 +218,9 @@ def run_simulation(
     -------
     GolferSimulationResult
     """
-    assert initial_state.shape == (2 * N_DOF,), (
-        f"Initial state shape must be ({2 * N_DOF},), got {initial_state.shape}"
-    )
+    assert initial_state.shape == (
+        2 * N_DOF,
+    ), f"Initial state shape must be ({2 * N_DOF},), got {initial_state.shape}"
     assert np.all(np.isfinite(initial_state)), "Initial state must be finite"
     assert t_end > 0, f"t_end must be positive, got {t_end}"
     assert 0 < dt < t_end, f"dt must be in (0, t_end), got {dt}"
