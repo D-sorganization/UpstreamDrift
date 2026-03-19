@@ -40,7 +40,7 @@ jobs:
           fi
           echo "failed_branch=$FAILED_BRANCH" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ steps.branch.outputs.failed_branch }}
           fetch-depth: 0
@@ -59,7 +59,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         if: steps.jules.outputs.enabled == 'true'
-        with: { node-version: "20" }
+        with: { node-version: "24" }
       - run: npm install -g @google/jules
         if: steps.jules.outputs.enabled == 'true'
       - run: jules auth --token ${{ secrets.JULES_API_KEY }}

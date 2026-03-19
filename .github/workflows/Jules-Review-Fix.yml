@@ -32,13 +32,13 @@ jobs:
             echo "authorized=true" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.auth.outputs.authorized == 'true'
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: actions/setup-node@v4
         if: steps.auth.outputs.authorized == 'true'
-        with: { node-version: "20" }
+        with: { node-version: "24" }
       - run: npm install -g @google/jules
         if: steps.auth.outputs.authorized == 'true'
 

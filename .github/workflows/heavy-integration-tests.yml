@@ -8,8 +8,8 @@ jobs:
     runs-on: d-sorg-fleet-4core
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
@@ -21,7 +21,7 @@ jobs:
         run: pytest -v -m "live_simulation" --cov=src --cov-report=xml:heavy_coverage.xml --tb=short
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: heavy-test-results-${{ github.run_id }}
           path: heavy_coverage.xml

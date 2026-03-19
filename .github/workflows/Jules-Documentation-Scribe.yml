@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 2 # We need at least 2 commits to run diff (HEAD and HEAD^)
 
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node
         if: steps.changes.outputs.files != ''
         uses: actions/setup-node@v4
-        with: { node-version: "20" }
+        with: { node-version: "24" }
 
       - name: Install & Auth Jules
         if: steps.changes.outputs.files != ''

@@ -10,11 +10,11 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.11" }
       - uses: actions/setup-node@v4
-        with: { node-version: "20" }
+        with: { node-version: "24" }
       - run: |
           npm install -g @google/jules
           pip install ruff==0.14.10
