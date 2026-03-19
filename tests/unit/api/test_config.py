@@ -1,4 +1,5 @@
 """Unit tests for the UpstreamDrift API configuration module."""
+
 import os
 from unittest.mock import patch
 
@@ -69,19 +70,22 @@ def test_get_server_port_env_valid() -> None:
 
 
 def test_get_server_port_env_invalid_type() -> None:
-    with patch.dict(os.environ, {"API_PORT": "invalid"}), pytest.raises(
-        ValueError, match="Invalid API_PORT value: 'invalid'"
+    with (
+        patch.dict(os.environ, {"API_PORT": "invalid"}),
+        pytest.raises(ValueError, match="Invalid API_PORT value: 'invalid'"),
     ):
         get_server_port()
 
 
 def test_get_server_port_env_out_of_bounds() -> None:
-    with patch.dict(os.environ, {"API_PORT": "0"}), pytest.raises(
-        ValueError, match="Invalid API_PORT value: '0'"
+    with (
+        patch.dict(os.environ, {"API_PORT": "0"}),
+        pytest.raises(ValueError, match="Invalid API_PORT value: '0'"),
     ):
         get_server_port()
-    
-    with patch.dict(os.environ, {"API_PORT": "70000"}), pytest.raises(
-        ValueError, match="Invalid API_PORT value: '70000'"
+
+    with (
+        patch.dict(os.environ, {"API_PORT": "70000"}),
+        pytest.raises(ValueError, match="Invalid API_PORT value: '70000'"),
     ):
         get_server_port()

@@ -8,6 +8,7 @@ from typing import Any
 
 class WorkflowDiagnosticContext:
     """Context manager for heavy workflow tests that records state and dumps diagnostics on failure."""
+
     def __init__(self, dump_dir: str, workflow_name: str) -> None:
         self.dump_dir = Path(dump_dir)
         self.workflow_name = workflow_name
@@ -35,10 +36,10 @@ class WorkflowDiagnosticContext:
         return True
 
     def _dump_diagnostics(
-        self, 
-        exc_type: type[BaseException], 
-        exc_val: BaseException | None, 
-        exc_tb: TracebackType | None
+        self,
+        exc_type: type[BaseException],
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Dump the recorded states to a file for diagnostics."""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -59,4 +60,6 @@ class WorkflowDiagnosticContext:
             try:
                 json.dump(diagnostic_data, f, indent=4, default=str)
             except Exception as e:
-                f.write(f"Failed to serialize state: {e}\n\nStates stringified: {str(self.states)}")
+                f.write(
+                    f"Failed to serialize state: {e}\n\nStates stringified: {str(self.states)}"
+                )
