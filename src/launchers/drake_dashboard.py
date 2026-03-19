@@ -1,21 +1,25 @@
 """Drake Dashboard Launcher.
 
 Launches the Unified Dashboard with the Drake Physics Engine.
+
+The Drake physics engine import is deferred to ``main()`` to ensure strict
+lazy-loading: importing this module does not trigger the Drake/pydrake dependency chain.
 """
 
 import argparse
 
 from PyQt6.QtWidgets import QFileDialog
 
-from src.engines.physics_engines.drake.python.drake_physics_engine import (
-    DrakePhysicsEngine,
-)
 from src.shared.python.dashboard.launcher import launch_dashboard
 from src.shared.python.ui.qt.utils import get_qapp
 
 
 def main() -> None:
     """Main entry point."""
+    from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
+        DrakePhysicsEngine,
+    )
+
     parser = argparse.ArgumentParser(description="Drake Golf Analysis Dashboard")
     parser.add_argument(
         "--model", type=str, help="Path to model file (URDF/SDF)", default=None
