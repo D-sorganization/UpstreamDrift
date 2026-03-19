@@ -73,11 +73,12 @@ items:
     title: "Bug: Severe Divergence in Cross-Engine Perturbation Consistency (CV > 1.0)"
     priority: high
     status: done
-    started_at: "2026-03-19T16:28:22Z"
-    completed_at: "2026-03-19T16:39:40Z"
+    started_at: "2026-03-19T09:28:22-07:00"
+    completed_at: "2026-03-19T09:40:01-07:00"
     pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2025"
     pr_number: 2025
     pr_status: "open"
+    cost_usd: 2.8612
     github_issue: 2021
     artefact: .gaai/project/contexts/artefacts/stories/GH2021.story.md
     dependencies: []
