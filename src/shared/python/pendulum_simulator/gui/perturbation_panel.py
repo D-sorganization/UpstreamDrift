@@ -29,6 +29,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+import numpy as np
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -43,8 +44,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from ..perturbation.config import PerturbationConfig, PerturbationSummary
 from ..perturbation_analysis import (
-    PerturbationConfig,
+    PendulumPerturbationAnalyzer,
     variability_summary,
 )
 
@@ -138,30 +140,13 @@ class _PerturbWorker(QObject):
         self._cancelled = True
 
     def run(self) -> None:
-        """Run all trials, emitting progress after each."""
-        from ..perturbation_analysis import perturb_torque_coeffs
+        """Run all trials using the protocol analyzer."""
+        analyzer = PendulumPerturbationAnalyzer(self._simulate_fn, self._extract_fn)
+        analyzer.set_base_torque_profile(self._base_coeffs)
+        summary: PerturbationSummary = analyzer.run_batch(self._config)
+        self.progress.emit(summary.config.n_trials)
+        self.finished.emit([summary])
 
-        results = []
-        base_seed = self._config.seed if self._config.seed is not None else 0
-        for i in range(self._config.n_trials):
-            if self._cancelled:
-                break
-            trial_seed = base_seed + i
-            try:
-                perturbed = perturb_torque_coeffs(
-                    self._base_coeffs,
-                    noise_amplitude=self._config.noise_amplitude,
-                    noise_type=self._config.noise_type,
-                    seed=trial_seed,
-                )
-                sim_result = self._simulate_fn(perturbed)
-                metrics = self._extract_fn(sim_result)
-                results.append(metrics)
-            except (ValueError, RuntimeError, FloatingPointError, AssertionError):
-                logger.warning("Trial %d failed, skipping", i, exc_info=True)
-            self.progress.emit(i + 1)
-
-        self.finished.emit(results)
 
 
 # ---------------------------------------------------------------------------
@@ -252,6 +237,14 @@ class PerturbationPanel(QWidget):
         row1.addWidget(self._noise_combo)
         lay.addLayout(row1)
 
+        # Mode
+        row_mode = QHBoxLayout()
+        row_mode.addWidget(QLabel("Mode:"))
+        self._mode_combo = QComboBox()
+        self._mode_combo.addItems(["additive", "multiplicative", "both"])
+        row_mode.addWidget(self._mode_combo)
+        lay.addLayout(row_mode)
+
         # Amplitude
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("Amplitude:"))
@@ -321,7 +314,7 @@ class PerturbationPanel(QWidget):
         lay.setSpacing(2)
 
         self._result_labels: dict[str, QLabel] = {}
-        for key in ("Mean", "Std", "CV", "Min", "Max", "Trials"):
+        for key in ("Mode", "Mean", "Std", "CV", "Min", "Max", "Score", "Trials"):
             row = QHBoxLayout()
             row.addWidget(QLabel(f"{key}:"))
             lbl = QLabel("—")
@@ -360,6 +353,7 @@ class PerturbationPanel(QWidget):
             n_trials=self._trials_spin.value(),
             noise_type=self._noise_combo.currentText(),
             noise_amplitude=self._amp_spin.value(),
+            perturb_mode=self._mode_combo.currentText(),
             seed=seed_val if seed_val > 0 else None,
         )
 
@@ -438,19 +432,29 @@ class PerturbationPanel(QWidget):
     # Result display helpers
     # ------------------------------------------------------------------
 
-    def _display_summary(self, summary: dict) -> None:
+    def _display_summary(self, summary: PerturbationSummary) -> None:
         assert summary is not None, "summary must be provided"
-        mean = summary["tip_speed_mean"]
-        std = summary["tip_speed_std"]
-        cv = summary["tip_speed_cv"]
-        mn = summary["tip_speed_min"]
-        mx = summary["tip_speed_max"]
-        n = summary["n_trials"]
+        
+        if "end_effector_speed_final" in summary.metrics:
+            stats = summary.metrics["end_effector_speed_final"]
+            mean = float(stats.mean) if np.isscalar(stats.mean) or getattr(stats.mean, 'ndim', 1) == 0 else 0.0
+            std = float(stats.std) if np.isscalar(stats.std) or getattr(stats.std, 'ndim', 1) == 0 else 0.0
+            cv = float(stats.cv) if np.isscalar(stats.cv) or getattr(stats.cv, 'ndim', 1) == 0 else 0.0
+            mn = float(stats.min_val) if np.isscalar(stats.min_val) or getattr(stats.min_val, 'ndim', 1) == 0 else 0.0
+            mx = float(stats.max_val) if np.isscalar(stats.max_val) or getattr(stats.max_val, 'ndim', 1) == 0 else 0.0
+        else:
+            mean = std = cv = mn = mx = 0.0
+
+        score = summary.robustness_score
+        n = summary.config.n_trials
+        
+        self._result_labels["Mode"].setText(summary.config.perturb_mode)
         self._result_labels["Mean"].setText(f"{mean:.3f} m/s")
         self._result_labels["Std"].setText(f"{std:.3f} m/s")
         self._result_labels["CV"].setText(f"{cv * 100:.2f} %")
         self._result_labels["Min"].setText(f"{mn:.3f} m/s")
         self._result_labels["Max"].setText(f"{mx:.3f} m/s")
+        self._result_labels["Score"].setText(f"{score:.3f}")
         self._result_labels["Trials"].setText(str(n))
 
     def _clear_results(self) -> None:
