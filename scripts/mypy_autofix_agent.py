@@ -140,12 +140,12 @@ COMMON_TYPE_IMPORTS = {
 
 def run_mypy(config_file: str | None = None, targets: list[str] | None = None) -> str:
     """Run mypy and return raw output."""
-    assert config_file is None or isinstance(
-        config_file, str
-    ), "config_file must be a string or None"
-    assert targets is None or isinstance(
-        targets, list
-    ), "targets must be a list or None"
+    assert config_file is None or isinstance(config_file, str), (
+        "config_file must be a string or None"
+    )
+    assert targets is None or isinstance(targets, list), (
+        "targets must be a list or None"
+    )
     if not targets:
         # Default to src and tests if no targets provided, but check if they exist
         targets = []
@@ -541,9 +541,9 @@ def run_agent(
     assert isinstance(max_files, int), "max_files must be an int"
     assert isinstance(dry_run, bool), "dry_run must be a bool"
     assert isinstance(verbose, bool), "verbose must be a bool"
-    assert config_file is None or isinstance(
-        config_file, str
-    ), "config_file must be None or string"
+    assert config_file is None or isinstance(config_file, str), (
+        "config_file must be None or string"
+    )
     assert targets is None or isinstance(targets, list), "targets must be None or list"
 
     report = AgentReport()

@@ -105,9 +105,9 @@ class TestDrakeModelLoading:
         except Exception as exc:
             pytest.skip(f"Drake URDF loading failed: {exc}")
 
-        assert (
-            plant.num_positions() == 1
-        ), f"Expected 1 DOF for pendulum, got {plant.num_positions()}"
+        assert plant.num_positions() == 1, (
+            f"Expected 1 DOF for pendulum, got {plant.num_positions()}"
+        )
 
 
 class TestDrakeSimulation:

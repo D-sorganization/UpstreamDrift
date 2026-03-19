@@ -73,7 +73,7 @@ def generate_noise(
         # Fallback for static type analyzers
         noise = np.zeros(n_samples)
 
-    assert noise.shape == (
-        n_samples,
-    ), f"Expected shape ({n_samples},), got {noise.shape}"
+    assert noise.shape == (n_samples,), (
+        f"Expected shape ({n_samples},), got {noise.shape}"
+    )
     return noise

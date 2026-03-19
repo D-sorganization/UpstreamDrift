@@ -44,9 +44,9 @@ class TestHumanoidPresetsConstant:
         """_HUMANOID_PRESETS must be a dict."""
         import model_generation
 
-        assert isinstance(
-            model_generation._HUMANOID_PRESETS, dict
-        ), f"_HUMANOID_PRESETS must be a dict, got {type(model_generation._HUMANOID_PRESETS)}"
+        assert isinstance(model_generation._HUMANOID_PRESETS, dict), (
+            f"_HUMANOID_PRESETS must be a dict, got {type(model_generation._HUMANOID_PRESETS)}"
+        )
 
     def test_constant_has_exactly_four_keys(self):
         """_HUMANOID_PRESETS must contain exactly four preset keys."""
@@ -58,56 +58,58 @@ class TestHumanoidPresetsConstant:
             "average",
             "heavy",
             "lean",
-        }, f"Expected keys {{athletic, average, heavy, lean}}, got {set(presets.keys())}"
+        }, (
+            f"Expected keys {{athletic, average, heavy, lean}}, got {set(presets.keys())}"
+        )
 
     def test_athletic_preset_values(self):
         """athletic preset must set gender_factor=0.7 and shoulder_width_factor=1.1."""
         import model_generation
 
         athletic = model_generation._HUMANOID_PRESETS["athletic"]
-        assert (
-            athletic.get("gender_factor") == 0.7
-        ), f"athletic gender_factor expected 0.7, got {athletic.get('gender_factor')}"
-        assert (
-            athletic.get("shoulder_width_factor") == 1.1
-        ), f"athletic shoulder_width_factor expected 1.1, got {athletic.get('shoulder_width_factor')}"
+        assert athletic.get("gender_factor") == 0.7, (
+            f"athletic gender_factor expected 0.7, got {athletic.get('gender_factor')}"
+        )
+        assert athletic.get("shoulder_width_factor") == 1.1, (
+            f"athletic shoulder_width_factor expected 1.1, got {athletic.get('shoulder_width_factor')}"
+        )
 
     def test_average_preset_values(self):
         """average preset must set gender_factor=0.5 and nothing else."""
         import model_generation
 
         average = model_generation._HUMANOID_PRESETS["average"]
-        assert (
-            average.get("gender_factor") == 0.5
-        ), f"average gender_factor expected 0.5, got {average.get('gender_factor')}"
+        assert average.get("gender_factor") == 0.5, (
+            f"average gender_factor expected 0.5, got {average.get('gender_factor')}"
+        )
         # average should not have extra keys
-        assert set(average.keys()) == {
-            "gender_factor"
-        }, f"average preset should only have 'gender_factor', got {set(average.keys())}"
+        assert set(average.keys()) == {"gender_factor"}, (
+            f"average preset should only have 'gender_factor', got {set(average.keys())}"
+        )
 
     def test_heavy_preset_values(self):
         """heavy preset must set gender_factor=0.5 and hip_width_factor=1.15."""
         import model_generation
 
         heavy = model_generation._HUMANOID_PRESETS["heavy"]
-        assert (
-            heavy.get("gender_factor") == 0.5
-        ), f"heavy gender_factor expected 0.5, got {heavy.get('gender_factor')}"
-        assert (
-            heavy.get("hip_width_factor") == 1.15
-        ), f"heavy hip_width_factor expected 1.15, got {heavy.get('hip_width_factor')}"
+        assert heavy.get("gender_factor") == 0.5, (
+            f"heavy gender_factor expected 0.5, got {heavy.get('gender_factor')}"
+        )
+        assert heavy.get("hip_width_factor") == 1.15, (
+            f"heavy hip_width_factor expected 1.15, got {heavy.get('hip_width_factor')}"
+        )
 
     def test_lean_preset_values(self):
         """lean preset must set gender_factor=0.5 and shoulder_width_factor=0.95."""
         import model_generation
 
         lean = model_generation._HUMANOID_PRESETS["lean"]
-        assert (
-            lean.get("gender_factor") == 0.5
-        ), f"lean gender_factor expected 0.5, got {lean.get('gender_factor')}"
-        assert (
-            lean.get("shoulder_width_factor") == 0.95
-        ), f"lean shoulder_width_factor expected 0.95, got {lean.get('shoulder_width_factor')}"
+        assert lean.get("gender_factor") == 0.5, (
+            f"lean gender_factor expected 0.5, got {lean.get('gender_factor')}"
+        )
+        assert lean.get("shoulder_width_factor") == 0.95, (
+            f"lean shoulder_width_factor expected 0.95, got {lean.get('shoulder_width_factor')}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -238,9 +240,9 @@ class TestQuickFunctionsUseSharedPresets:
         call_kwargs = mock_builder.set_parameters.call_args[1]
         # No extra preset keys should leak in
         extra_keys = {"gender_factor", "shoulder_width_factor", "hip_width_factor"}
-        assert not extra_keys.intersection(
-            call_kwargs.keys()
-        ), f"Unknown preset should not set any extra params, got {call_kwargs}"
+        assert not extra_keys.intersection(call_kwargs.keys()), (
+            f"Unknown preset should not set any extra params, got {call_kwargs}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -271,6 +273,6 @@ class TestPresetsNotMutated:
         ):
             model_generation.quick_urdf(preset="athletic")
 
-        assert (
-            before == model_generation._HUMANOID_PRESETS
-        ), "_HUMANOID_PRESETS was mutated during quick_urdf call"
+        assert before == model_generation._HUMANOID_PRESETS, (
+            "_HUMANOID_PRESETS was mutated during quick_urdf call"
+        )

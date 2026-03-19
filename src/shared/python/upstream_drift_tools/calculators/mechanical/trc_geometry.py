@@ -308,12 +308,12 @@ class TRCGeometryEngine:
             VesselGeometryResult containing detailed calculations
         """
         # DbC preconditions
-        assert (
-            dimensions.cylinder_diameter > 0
-        ), f"cylinder_diameter must be positive, got {dimensions.cylinder_diameter}"
-        assert (
-            dimensions.cylinder_height > 0
-        ), f"cylinder_height must be positive, got {dimensions.cylinder_height}"
+        assert dimensions.cylinder_diameter > 0, (
+            f"cylinder_diameter must be positive, got {dimensions.cylinder_diameter}"
+        )
+        assert dimensions.cylinder_height > 0, (
+            f"cylinder_height must be positive, got {dimensions.cylinder_height}"
+        )
 
         results = VesselGeometryResult()
         if not layers:
