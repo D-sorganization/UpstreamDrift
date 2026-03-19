@@ -40,7 +40,8 @@ items:
   - id: GH1953
     title: "Centralize and implement Screw Axis visualizations across all engines"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-19T16:28:26Z"
     github_issue: 1953
     artefact: .gaai/project/contexts/artefacts/stories/GH1953.story.md
     dependencies: []
