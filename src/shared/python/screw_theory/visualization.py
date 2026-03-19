@@ -23,7 +23,7 @@ def plot_screw_axis_3d(
 ) -> None:
     """Plot screw axis in 3D matplotlib axes.
 
-    Helper function for visualizing screw axes. Requires `ax` to be a 
+    Helper function for visualizing screw axes. Requires `ax` to be a
     matplotlib 3D Axes3D subplot projection object.
 
     Args:
@@ -34,7 +34,7 @@ def plot_screw_axis_3d(
         label: Label for legend
     """
     assert screw is not None, "screw must be provided"
-    
+
     start, end = compute_screw_endpoints(screw, length)
 
     # Draw axis as line
@@ -50,7 +50,7 @@ def plot_screw_axis_3d(
     # Draw arrow at end showing torque/twist direction
     arrow_length = length * 0.1
     arrow = end - start
-    
+
     # safeguard division by zero
     arrow_norm_scale = float(np.linalg.norm(arrow))
     if arrow_norm_scale > 1e-10:

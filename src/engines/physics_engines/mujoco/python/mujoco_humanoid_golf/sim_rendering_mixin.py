@@ -226,10 +226,9 @@ class SimRenderingMixin:
             # Compute rigorous instantaneous screw axis per Guideline C3
             try:
                 from .screw_kinematics import ScrewKinematicsAnalyzer
+
                 analyzer = ScrewKinematicsAnalyzer(self.model)
-                twist = analyzer.compute_twist(
-                    self.data.qpos, self.data.qvel, body_id
-                )
+                twist = analyzer.compute_twist(self.data.qpos, self.data.qvel, body_id)
                 screw = analyzer.compute_screw_axis(twist)
 
                 # Visualize screw axis line

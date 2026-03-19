@@ -240,7 +240,9 @@ class ControlsWidgetBase(QWidget):
         layout.addWidget(self.chk_limits)
         self.limit_min_inputs: list[_LI] = []
         self.limit_max_inputs: list[_LI] = []
-        for label, lo, hi in zip(joint_labels, min_defaults, max_defaults, strict=False):
+        for label, lo, hi in zip(
+            joint_labels, min_defaults, max_defaults, strict=False
+        ):
             row_layout = QHBoxLayout()
             row_layout.setContentsMargins(0, 0, 0, 0)
             row_layout.setSpacing(4)

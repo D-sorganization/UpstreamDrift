@@ -49,12 +49,14 @@ class ScrewVisualizationTab(QtWidgets.QWidget):
         # Target Body Input/Combo Box
         body_layout = QtWidgets.QHBoxLayout()
         body_layout.addWidget(QtWidgets.QLabel("Target Body:"))
-        
+
         self.target_body_input = QtWidgets.QLineEdit()
         self.target_body_input.setPlaceholderText("e.g. club_head")
-        self.target_body_input.setToolTip("Name of the reference frame to analyze (ISA).")
+        self.target_body_input.setToolTip(
+            "Name of the reference frame to analyze (ISA)."
+        )
         self.target_body_input.returnPressed.connect(self._on_body_submit)
-        
+
         body_layout.addWidget(self.target_body_input)
         group_layout.addLayout(body_layout)
 

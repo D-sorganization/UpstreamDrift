@@ -3,7 +3,7 @@
 This module implements screw theory abstractions across all engines.
 It provides the core abstractions for `Twist` and `ScrewAxis` data models,
 and provides the math methods necessary to extract instantaneous axes (ISA)
-from twists. 
+from twists.
 This fulfills Guideline C3 ("Instantaneous screw axis (ISA) / twist extraction")
 while applying DRY (Don't Repeat Yourself) by abstracting these computations
 away from specific engine implementations (MuJoCo, Drake, etc.).
