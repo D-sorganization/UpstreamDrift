@@ -65,7 +65,8 @@ items:
   - id: GH1744
     title: "test: Raise test coverage from 50% to 70%"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-19T20:41:04Z"
     github_issue: 1744
     artefact: .gaai/project/contexts/artefacts/stories/GH1744.story.md
     dependencies: []
