@@ -89,8 +89,12 @@ items:
   - id: GH2020
     title: "Feature: Cross-Engine Perturbation Comparison Dashboard (GUI/CLI)"
     priority: medium
-    status: in_progress
+    status: done
     started_at: "2026-03-19T20:41:07Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2030"
+    pr_number: 2030
+    pr_status: "open"
+    completed_at: "2026-03-19T20:47:48Z"
     github_issue: 2020
     artefact: .gaai/project/contexts/artefacts/stories/GH2020.story.md
     dependencies: []
