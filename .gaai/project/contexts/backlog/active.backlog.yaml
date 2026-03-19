@@ -53,3 +53,21 @@ items:
     artefact: .gaai/project/contexts/artefacts/stories/GH1744.story.md
     dependencies: []
     created_at: 2026-03-19
+
+  - id: GH2021
+    title: "Bug: Severe Divergence in Cross-Engine Perturbation Consistency (CV > 1.0)"
+    priority: high
+    status: refined
+    github_issue: 2021
+    artefact: .gaai/project/contexts/artefacts/stories/GH2021.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH2020
+    title: "Feature: Cross-Engine Perturbation Comparison Dashboard (GUI/CLI)"
+    priority: medium
+    status: refined
+    github_issue: 2020
+    artefact: .gaai/project/contexts/artefacts/stories/GH2020.story.md
+    dependencies: []
+    created_at: 2026-03-19
