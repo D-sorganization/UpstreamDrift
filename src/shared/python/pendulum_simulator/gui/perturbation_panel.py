@@ -148,7 +148,6 @@ class _PerturbWorker(QObject):
         self.finished.emit([summary])
 
 
-
 # ---------------------------------------------------------------------------
 # Perturbation panel widget
 # ---------------------------------------------------------------------------
@@ -434,20 +433,40 @@ class PerturbationPanel(QWidget):
 
     def _display_summary(self, summary: PerturbationSummary) -> None:
         assert summary is not None, "summary must be provided"
-        
+
         if "end_effector_speed_final" in summary.metrics:
             stats = summary.metrics["end_effector_speed_final"]
-            mean = float(stats.mean) if np.isscalar(stats.mean) or getattr(stats.mean, 'ndim', 1) == 0 else 0.0
-            std = float(stats.std) if np.isscalar(stats.std) or getattr(stats.std, 'ndim', 1) == 0 else 0.0
-            cv = float(stats.cv) if np.isscalar(stats.cv) or getattr(stats.cv, 'ndim', 1) == 0 else 0.0
-            mn = float(stats.min_val) if np.isscalar(stats.min_val) or getattr(stats.min_val, 'ndim', 1) == 0 else 0.0
-            mx = float(stats.max_val) if np.isscalar(stats.max_val) or getattr(stats.max_val, 'ndim', 1) == 0 else 0.0
+            mean = (
+                float(stats.mean)
+                if np.isscalar(stats.mean) or getattr(stats.mean, "ndim", 1) == 0
+                else 0.0
+            )
+            std = (
+                float(stats.std)
+                if np.isscalar(stats.std) or getattr(stats.std, "ndim", 1) == 0
+                else 0.0
+            )
+            cv = (
+                float(stats.cv)
+                if np.isscalar(stats.cv) or getattr(stats.cv, "ndim", 1) == 0
+                else 0.0
+            )
+            mn = (
+                float(stats.min_val)
+                if np.isscalar(stats.min_val) or getattr(stats.min_val, "ndim", 1) == 0
+                else 0.0
+            )
+            mx = (
+                float(stats.max_val)
+                if np.isscalar(stats.max_val) or getattr(stats.max_val, "ndim", 1) == 0
+                else 0.0
+            )
         else:
             mean = std = cv = mn = mx = 0.0
 
         score = summary.robustness_score
         n = summary.config.n_trials
-        
+
         self._result_labels["Mode"].setText(summary.config.perturb_mode)
         self._result_labels["Mean"].setText(f"{mean:.3f} m/s")
         self._result_labels["Std"].setText(f"{std:.3f} m/s")

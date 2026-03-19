@@ -28,17 +28,20 @@ logger = logging.getLogger(__name__)
 
 class SimulateFn(Protocol):
     """Protocol for simulation callable."""
+
     def __call__(self, coeffs: list[list[float]]) -> object: ...
 
 
 class ExtractFn(Protocol):
     """Protocol for metric extraction callable."""
+
     def __call__(self, result: object) -> dict[str, float | np.ndarray]: ...
 
 
 # ---------------------------------------------------------------------------
 # Backward Compatibility & Torque Utils
 # ---------------------------------------------------------------------------
+
 
 def perturb_torque_coeffs(
     coeffs: list[list[float]],
@@ -63,7 +66,7 @@ def perturb_torque_coeffs(
     for joint_coeffs in coeffs:
         n = len(joint_coeffs)
         joint_noise = noise[idx : idx + n]
-        
+
         perturbed: list[float] = []
         for i, c in enumerate(joint_coeffs):
             p = float(c)
@@ -72,9 +75,9 @@ def perturb_torque_coeffs(
                 p += float(joint_noise[i])
             # Apply multiplicative
             if perturb_mode in {"multiplicative", "both"}:
-                p *= (1.0 + float(joint_noise[i]))
+                p *= 1.0 + float(joint_noise[i])
             perturbed.append(p)
-            
+
         result.append(perturbed)
         idx += n
 
@@ -112,6 +115,7 @@ def variability_summary(
 # Core Analyzer Protocol Implementation
 # ---------------------------------------------------------------------------
 
+
 class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
     """Implements the Parity Guidelines PerturbationAnalyzer for pendulum."""
 
@@ -125,7 +129,9 @@ class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
         assert isinstance(profile, list)
         self._base_coeffs = profile
 
-    def perturb_torque(self, config: PerturbationConfig, seed: int) -> list[list[float]]:
+    def perturb_torque(
+        self, config: PerturbationConfig, seed: int
+    ) -> list[list[float]]:
         """Apply perturbation to base torque."""
         assert self._base_coeffs, "Base torque profile must be set first"
         return perturb_torque_coeffs(
@@ -140,25 +146,25 @@ class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
         """Extract the mandatory metrics from a given simulation result."""
         # Use underlying extraction and standardize keys
         extracted = self.extract_fn(sim_result)
-        
-        # Mandatory mapping as per guidelines 
+
+        # Mandatory mapping as per guidelines
         mapped: dict[str, float | np.ndarray] = {}
         if "tip_position_final" in extracted:
             mapped["end_effector_position_final"] = extracted["tip_position_final"]
         if "tip_speed_final" in extracted:
             mapped["end_effector_speed_final"] = float(extracted["tip_speed_final"])
-        
+
         # Propagate the rest
         for k, v in extracted.items():
             if k not in mapped:
                 mapped[k] = v
-                
+
         return mapped
 
     def run_batch(self, config: PerturbationConfig) -> PerturbationSummary:
         """Run full Monte Carlo batch and compute statistics."""
         assert self._base_coeffs, "Base torque profile must be set first"
-        
+
         start_time = time.perf_counter()
         raw_metrics_list = []
         base_seed = config.seed if config.seed is not None else 0
@@ -175,8 +181,10 @@ class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
                 continue
 
         execution_time_sec = time.perf_counter() - start_time
-        success_rate = len(raw_metrics_list) / config.n_trials if config.n_trials > 0 else 0.0
-        
+        success_rate = (
+            len(raw_metrics_list) / config.n_trials if config.n_trials > 0 else 0.0
+        )
+
         # Compile statistics
         metrics_stats: dict[str, MetricStatistics] = {}
         if raw_metrics_list:
@@ -202,6 +210,7 @@ class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
             execution_time_sec=execution_time_sec,
         )
 
+
 # Maintain existing method for testing/GUI compatibility
 def batch_perturb_and_simulate(
     base_coeffs: list[list[float]],
@@ -212,10 +221,10 @@ def batch_perturb_and_simulate(
     """Run N perturbed simulations and collect results using old paradigm."""
     analyzer = PendulumPerturbationAnalyzer(simulate_fn, extract_fn)
     analyzer.set_base_torque_profile(base_coeffs)
-    
+
     base_seed = config.seed if config.seed is not None else 0
     results = []
-    
+
     for i in range(config.n_trials):
         trial_seed = base_seed + i
         perturbed = analyzer.perturb_torque(config, trial_seed)
@@ -225,5 +234,5 @@ def batch_perturb_and_simulate(
             results.append(metrics)
         except Exception:
             continue
-            
+
     return results
