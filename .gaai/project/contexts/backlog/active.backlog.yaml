@@ -26,11 +26,12 @@ items:
     title: "Consolidate GUI Interfaces and ensure strict lazy-loading of engine dependencies"
     priority: medium
     status: done
-    started_at: "2026-03-19T16:18:38Z"
-    completed_at: "2026-03-19T16:27:18Z"
+    started_at: "2026-03-19T09:18:38-07:00"
+    completed_at: "2026-03-19T09:27:37-07:00"
     pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2023"
     pr_number: 2023
     pr_status: "open"
+    cost_usd: 2.0227
     github_issue: 1956
     artefact: .gaai/project/contexts/artefacts/stories/GH1956.story.md
     dependencies: []
