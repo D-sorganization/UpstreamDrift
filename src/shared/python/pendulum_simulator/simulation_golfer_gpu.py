@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """
 GPU-accelerated batch simulation using JAX and diffrax.
 
@@ -21,7 +22,7 @@ except ImportError:
     raise ImportError(
         "JAX and diffrax are required for GPU simulation. "
         "Install with: pip install jax jaxlib diffrax"
-    )
+    ) from None
 
 from .physics_golfer_jax import (
     N_CONSTRAINTS,

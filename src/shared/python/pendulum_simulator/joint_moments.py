@@ -181,7 +181,7 @@ def triple_pendulum_moments(
     endpoints = ["elbow", "wrist", "tip"]
 
     result = {}
-    for i, (jname, ename) in enumerate(zip(joints, endpoints)):
+    for i, (jname, ename) in enumerate(zip(joints, endpoints, strict=False)):
         j_pos = np.array(positions[jname])
         e_pos = np.array(positions[ename])
         com = (j_pos + e_pos) / 2.0
@@ -239,7 +239,7 @@ def golfer_pendulum_moments(
     endpoints = ["rs", "re", "rh", "club_tip", "le", "lh", "club_tip"]
 
     result = {}
-    for i, (jname, ename) in enumerate(zip(joints, endpoints)):
+    for i, (jname, ename) in enumerate(zip(joints, endpoints, strict=False)):
         j_pos_raw = positions.get(jname)
         e_pos_raw = positions.get(ename)
         f_raw = joint_forces.get(jname)

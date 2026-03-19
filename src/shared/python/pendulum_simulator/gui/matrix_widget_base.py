@@ -316,28 +316,19 @@ class MatrixWidgetBase(QWidget):
         # Tau lines (use joint names if available, else generic indices)
         col_labels = self.get_column_labels()
         for i, t in enumerate(tau):
-            if i < len(col_labels):
-                label = col_labels[i]
-            else:
-                label = f"joint_{i + 1}"
+            label = col_labels[i] if i < len(col_labels) else f"joint_{i + 1}"
             lines.append((f"tau_{label:>4s} = {t:+8.2f} N*m", self.COLOR_TEXT))
 
         # Gravity lines
         for i, g in enumerate(G):
-            if i < len(col_labels):
-                label = col_labels[i]
-            else:
-                label = f"joint_{i + 1}"
+            label = col_labels[i] if i < len(col_labels) else f"joint_{i + 1}"
             lines.append((f"G_{label:>5s} = {g:+8.2f} N*m", QColor(130, 200, 130)))
 
         # Try to add Coriolis if available
         try:
             C = self._result.coriolis_at(idx)
             for i, c in enumerate(C):
-                if i < len(col_labels):
-                    label = col_labels[i]
-                else:
-                    label = f"joint_{i + 1}"
+                label = col_labels[i] if i < len(col_labels) else f"joint_{i + 1}"
                 lines.append((f"C_{label:>5s} = {c:+8.2f} N*m", QColor(180, 130, 200)))
         except (AttributeError, TypeError):
             pass

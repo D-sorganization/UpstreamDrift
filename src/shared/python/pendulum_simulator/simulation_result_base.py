@@ -55,21 +55,21 @@ class TrajectoryResultMixin:
         """
         assert idx is not None, "idx must be provided"
         self._check_idx(idx)
-        torque_func = self.torque_func
+        torque_func = self.torque_func  # type: ignore[attr-defined]
         tau_drive = np.array(torque_func(self.t[idx]))
         tau_friction: np.ndarray = self.friction_torques_at(idx)  # type: ignore[attr-defined]
         return np.asarray(tau_drive + tau_friction)
 
     def all_positions(self) -> list[Any]:
-        positions_at = self.positions_at
+        positions_at = self.positions_at  # type: ignore[attr-defined]
         return [positions_at(i) for i in range(self.n_steps)]
 
     def all_mass_matrices(self) -> list[Any]:
-        mass_matrix_at = self.mass_matrix_at
+        mass_matrix_at = self.mass_matrix_at  # type: ignore[attr-defined]
         return [mass_matrix_at(i) for i in range(self.n_steps)]
 
     def all_energies(self) -> dict[str, np.ndarray]:
-        energy_at = self.energy_at
+        energy_at = self.energy_at  # type: ignore[attr-defined]
         first = energy_at(0)
         return {
             key: np.asarray(
@@ -79,17 +79,17 @@ class TrajectoryResultMixin:
         }
 
     def all_accelerations(self) -> np.ndarray:
-        accelerations_at = self.accelerations_at
+        accelerations_at = self.accelerations_at  # type: ignore[attr-defined]
         return np.asarray(
             [accelerations_at(i) for i in range(self.n_steps)], dtype=float
         )
 
     def all_torques(self) -> np.ndarray:
-        torques_at = self.torques_at
+        torques_at = self.torques_at  # type: ignore[attr-defined]
         return np.asarray([torques_at(i) for i in range(self.n_steps)], dtype=float)
 
     def all_friction_torques(self) -> np.ndarray:
-        friction_torques_at = self.friction_torques_at
+        friction_torques_at = self.friction_torques_at  # type: ignore[attr-defined]
         return np.asarray(
             [friction_torques_at(i) for i in range(self.n_steps)],
             dtype=float,

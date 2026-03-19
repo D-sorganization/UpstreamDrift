@@ -262,13 +262,18 @@ class MainWindow(QMainWindow):
         self._toolstrip = ToolStrip()
         main_layout.addWidget(self._toolstrip)
 
+        from src.shared.python.screw_theory.ui import ScrewVisualizationTab
+
         self._tabs = QTabWidget()
         self._double_panel = build_double_panel(self)
         self._triple_panel = build_triple_panel(self)
         self._golfer_panel = build_golfer_panel(self)
+        self._screw_panel = ScrewVisualizationTab()
+
         self._tabs.addTab(self._double_panel, "⚙ Double Pendulum")
         self._tabs.addTab(self._triple_panel, "⚙ Triple Pendulum")
         self._tabs.addTab(self._golfer_panel, "⚙ Golfer Upper Body")
+        self._tabs.addTab(self._screw_panel, "⚙ Screw Kinematics")
         # Hide tab bar — model selection is via toolstrip dropdown (#1149)
         tab_bar = self._tabs.tabBar()
         if tab_bar is not None:

@@ -362,13 +362,13 @@ class SimulationPanel(QWidget):
         clamp = self._clamp_builder(p) if self._clamp_builder else None
 
         # Build kwargs for the runner function
-        run_kwargs: dict = dict(
-            params=params,
-            initial_state=initial_state,
-            t_end=p["t_end"],
-            torque_func=torque_func,
-            dt=float(p.get("dt", 0.005)),
-        )
+        run_kwargs: dict = {
+            "params": params,
+            "initial_state": initial_state,
+            "t_end": p["t_end"],
+            "torque_func": torque_func,
+            "dt": float(p.get("dt", 0.005)),
+        }
         if limits is not None:
             run_kwargs["limits"] = limits
         if clamp is not None:

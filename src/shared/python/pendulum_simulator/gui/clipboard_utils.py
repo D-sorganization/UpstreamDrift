@@ -46,7 +46,7 @@ def series_to_tsv(
     assert len(x) == len(y), f"Length mismatch: {len(x)} vs {len(y)}"
     header = f"{x_label}\t{y_label}"
     lines = [header]
-    for xi, yi in zip(x, y):
+    for xi, yi in zip(x, y, strict=False):
         lines.append(f"{xi:.6g}\t{yi:.6g}")
     return "\n".join(lines)
 

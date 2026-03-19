@@ -82,7 +82,7 @@ def _chain_endpoint(
     """
     assert origin is not None, "origin must be provided"
     x, y = origin
-    for angle, length in zip(angles_abs, lengths):
+    for angle, length in zip(angles_abs, lengths, strict=False):
         x += length * np.sin(angle)
         y -= length * np.cos(angle)
     return (x, y)

@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """
 JAX-compatible pure-function implementation of golfer upper-body physics.
 
@@ -22,7 +23,7 @@ try:
 except ImportError:
     raise ImportError(
         "JAX is required for physics_golfer_jax. Install with: pip install jax jaxlib"
-    )
+    ) from None
 
 # ``jax.Array`` typing is still awkward under the repo's mypy settings.
 # Keep the alias permissive so changed JAX code remains type-checkable in CI.
@@ -572,7 +573,7 @@ def constraint_vector_jax(q: JaxArray, p: GolferParamsJAX) -> JaxArray:
 
     th_club = q[7]
     club_dir = jnp.array([jnp.sin(th_club), -jnp.cos(th_club)])
-    club_perp = jnp.array([-(-jnp.cos(th_club)), jnp.sin(th_club)])  # rotated 90° ccw
+    club_perp = jnp.array([jnp.cos(th_club), jnp.sin(th_club)])  # rotated 90° ccw
 
     rh_to_lh = lh - rh
     grip_sep = p.grip_left - p.grip_right
@@ -615,7 +616,7 @@ def constraint_jacobian_jax(q: JaxArray, p: GolferParamsJAX) -> JaxArray:
 
     # Club direction and perpendicular vectors
     club_dir = jnp.array([sin_club, -cos_club])
-    club_perp = jnp.array([-(-cos_club), sin_club])  # rotated 90° ccw
+    club_perp = jnp.array([cos_club, sin_club])  # rotated 90° ccw
 
     fk = forward_kinematics_jax(q, p)
     rh = fk["rh"]

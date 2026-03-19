@@ -642,10 +642,13 @@ class OptimizationWidget(QWidget):
 
         # Warm start
         warm_start = None
-        if self._chk_warm.isChecked() and self._last_best_coeffs is not None:
-            if len(self._last_best_coeffs) == n_params:
-                warm_start = self._last_best_coeffs.copy()
-                self._log.append("🔄 Warm-starting from previous best solution")
+        if (
+            self._chk_warm.isChecked()
+            and self._last_best_coeffs is not None
+            and len(self._last_best_coeffs) == n_params
+        ):
+            warm_start = self._last_best_coeffs.copy()
+            self._log.append("🔄 Warm-starting from previous best solution")
 
         self._log.clear()
         self._log.append(f"Starting {method} optimization...")

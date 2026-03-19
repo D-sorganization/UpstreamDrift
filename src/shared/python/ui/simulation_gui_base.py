@@ -157,6 +157,12 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
 
         self.main_tab_widget.addTab(sim_tab, "Simulation")
 
+        from src.shared.python.screw_theory.ui import ScrewVisualizationTab
+
+        # Screw Kinematics Tab
+        self.screw_viz_tab = ScrewVisualizationTab()
+        self.main_tab_widget.addTab(self.screw_viz_tab, "Screw Kinematics")
+
         # Status bar
         self._build_status_bar()
 

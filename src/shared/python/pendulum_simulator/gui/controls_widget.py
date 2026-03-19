@@ -12,6 +12,8 @@ by controls_widget_triple.py and controls_widget_golfer.py.
 
 from __future__ import annotations
 
+import contextlib
+
 import numpy as np
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QColor
@@ -536,17 +538,13 @@ class ControlsWidget(ControlsWidgetBase):
 
     def _on_tilt_edited(self, text: str) -> None:
         """Emit tilt_changed in real-time when Tilt input is edited."""
-        try:
+        with contextlib.suppress(ValueError):
             self.tilt_changed.emit(np.radians(float(text)))
-        except ValueError:
-            pass
 
     def _on_azimuth_edited(self, text: str) -> None:
         """Emit azimuth_changed in real-time when Azimuth input is edited."""
-        try:
+        with contextlib.suppress(ValueError):
             self.azimuth_changed.emit(np.radians(float(text)))
-        except ValueError:
-            pass
 
     # ── Override base set_slider_range/value to also update lbl_frame ─
     def set_slider_range(self, max_val: int) -> None:

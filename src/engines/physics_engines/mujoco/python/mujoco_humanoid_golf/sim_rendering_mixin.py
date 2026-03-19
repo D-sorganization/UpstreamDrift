@@ -223,40 +223,37 @@ class SimRenderingMixin:
             y_offset += 15
 
         if getattr(self, "show_live_screw", False):
-            T2 = np.eye(4)
-            T2[:3, :3] = mat
-            T2[:3, 3] = pos
-            prev_T = self._prev_body_ts.get(body_id)
-            self._prev_body_ts[body_id] = T2
+            # Compute rigorous instantaneous screw axis per Guideline C3
+            try:
+                from .screw_kinematics import ScrewKinematicsAnalyzer
+                analyzer = ScrewKinematicsAnalyzer(self.model)
+                twist = analyzer.compute_twist(
+                    self.data.qpos, self.data.qvel, body_id
+                )
+                screw = analyzer.compute_screw_axis(twist)
 
-            if prev_T is not None:
-                R_rel = prev_T[:3, :3].T @ T2[:3, :3]
-                tr = np.trace(R_rel)
-                theta = np.arccos(np.clip((tr - 1) / 2.0, -1.0, 1.0))
-                if abs(theta) > 1e-6:
-                    axis = np.array(
-                        [
-                            R_rel[2, 1] - R_rel[1, 2],
-                            R_rel[0, 2] - R_rel[2, 0],
-                            R_rel[1, 0] - R_rel[0, 1],
-                        ]
-                    ) / (2 * np.sin(theta))
-                    world_axis = prev_T[:3, :3] @ axis
-                    vec_end = pos + world_axis * 0.5
-                    end_px = self._world_to_screen(vec_end)
-                    if end_px:
-                        cv2.arrowedLine(
-                            img, (x, y), end_px, (255, 0, 255), 2, tipLength=0.2
-                        )
-                    cv2.putText(
-                        img,
-                        f"Screw Angle: {np.rad2deg(theta):.2f} deg",
-                        (x + 10, y + y_offset),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.4,
-                        (255, 0, 255),
-                        1,
-                    )
+                # Visualize screw axis line
+                start_pt, end_pt = analyzer.visualize_screw_axis(screw, length=0.5)
+
+                start_px = self._world_to_screen(start_pt)
+                end_px = self._world_to_screen(end_pt)
+
+                if start_px and end_px:
+                    cv2.line(img, start_px, end_px, (255, 0, 255), 2)
+                    # Add direction arrow pointer
+                    cv2.circle(img, end_px, 3, (255, 0, 255), -1)
+
+                cv2.putText(
+                    img,
+                    f"ISA Pitch: {screw.pitch:.3f} m/rad",
+                    (x + 10, y + y_offset),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.4,
+                    (255, 0, 255),
+                    1,
+                )
+            except Exception:
+                pass
         return img
 
     def _update_background_colors(self: Any) -> None:

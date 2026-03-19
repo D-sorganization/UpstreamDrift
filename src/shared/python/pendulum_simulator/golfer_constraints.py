@@ -135,7 +135,7 @@ def analytical_constraint_jacobian(q: np.ndarray, p: GolferParams) -> np.ndarray
 
     # Club direction and perpendicular vectors
     club_dir = np.array([sin_club, -cos_club])
-    club_perp = np.array([-(-cos_club), sin_club])  # rotated 90° ccw
+    club_perp = np.array([cos_club, sin_club])  # rotated 90° ccw
 
     # Constraint 1-2: LH position matches grip_left on club
     Phi_q = np.zeros((4, N_DOF))

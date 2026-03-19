@@ -558,7 +558,7 @@ class GolferPendulumWidget(BasePendulumWidget):
         positions = [hub, re, rh, le, lh, club_com, club_tip]
 
         total_m = sum(masses)
-        com = sum(m * p for m, p in zip(masses, positions)) / total_m
+        com = sum(m * p for m, p in zip(masses, positions, strict=False)) / total_m
 
         com_px = self._world_to_pixel(float(com[0]), float(com[1]))
 

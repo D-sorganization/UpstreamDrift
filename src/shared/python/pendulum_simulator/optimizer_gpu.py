@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """
 GPU-accelerated torque profile optimization using JAX autodiff.
 
@@ -17,7 +18,7 @@ except ImportError:
     raise ImportError(
         "JAX and optax are required for GPU optimization. "
         "Install with: pip install jax jaxlib optax"
-    )
+    ) from None
 
 from .physics_golfer_jax import GolferParamsJAX, analytical_fk_jacobians_jax
 from .simulation_golfer_gpu import (

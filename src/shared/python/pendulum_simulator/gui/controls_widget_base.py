@@ -202,7 +202,7 @@ class ControlsWidgetBase(QWidget):
         self.chk_clamp.setStyleSheet(STYLE_CHECK)
         layout.addWidget(self.chk_clamp)
         self.clamp_inputs: list[_LI] = []
-        for label, default in zip(joint_labels, defaults):
+        for label, default in zip(joint_labels, defaults, strict=False):
             inp = _LI(f"Max |τ {label}|", str(default), f"Max {label} torque ±(N·m)")
             layout.addWidget(inp)
             self.clamp_inputs.append(inp)
@@ -240,7 +240,7 @@ class ControlsWidgetBase(QWidget):
         layout.addWidget(self.chk_limits)
         self.limit_min_inputs: list[_LI] = []
         self.limit_max_inputs: list[_LI] = []
-        for label, lo, hi in zip(joint_labels, min_defaults, max_defaults):
+        for label, lo, hi in zip(joint_labels, min_defaults, max_defaults, strict=False):
             row_layout = QHBoxLayout()
             row_layout.setContentsMargins(0, 0, 0, 0)
             row_layout.setSpacing(4)
