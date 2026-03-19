@@ -20,7 +20,8 @@ items:
   - id: GH1956
     title: "Consolidate GUI Interfaces and ensure strict lazy-loading of engine dependencies"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-19T16:18:38Z"
     github_issue: 1956
     artefact: .gaai/project/contexts/artefacts/stories/GH1956.story.md
     dependencies: []
