@@ -14,8 +14,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.live_simulation
-
 from src.shared.python.engine_core.engine_availability import (
     OPENSIM_AVAILABLE,
     skip_if_unavailable,
@@ -118,9 +116,9 @@ class TestOpenSimMuscleModels:
         )
 
         # Basic sanity check: force should be positive and reasonable
-        assert 0 < F_muscle <= F_max * 1.5, (
-            f"Muscle force {F_muscle} outside expected range"
-        )
+        assert (
+            0 < F_muscle <= F_max * 1.5
+        ), f"Muscle force {F_muscle} outside expected range"
 
     def test_activation_dynamics(self, simple_arm_model):
         """Section J: Verify activation dynamics (30-50ms delay)."""
@@ -372,3 +370,6 @@ class TestOpenSimGripModel:
         except Exception as e:
             logger.info(f"Wrap addition failed (expected for simple model): {e}")
             # This is acceptable - we're testing the interface exists
+
+
+pytestmark = pytest.mark.live_simulation

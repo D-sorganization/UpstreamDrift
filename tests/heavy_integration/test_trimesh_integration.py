@@ -181,3 +181,6 @@ class TestTrimeshProjectIntegration:
         )
 
         assert InertiaCalculator is not None
+
+
+pytestmark = pytest.mark.live_simulation

@@ -95,3 +95,6 @@ def pinocchio_model():
         return model
     except ImportError:
         pytest.skip("pinocchio not installed")
+
+
+pytestmark = pytest.mark.live_simulation

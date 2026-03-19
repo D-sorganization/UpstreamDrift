@@ -155,3 +155,6 @@ class TestSymPyContracts:
         x_vals = np.linspace(0, 2 * np.pi, 100)
         result = f(x_vals)
         np.testing.assert_allclose(result, 1.0, atol=1e-14)
+
+
+pytestmark = pytest.mark.live_simulation

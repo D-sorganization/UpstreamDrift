@@ -15,8 +15,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.live_simulation
-
 from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -391,9 +389,9 @@ class TestMyoSuiteEngine:
             ):
                 actuator_id = analyzer.muscle_actuator_ids[0]
                 ctrl_value = engine.sim.data.ctrl[actuator_id]
-                assert 0.7 <= ctrl_value <= 0.9, (
-                    f"Activation not set correctly: {ctrl_value}"
-                )
+                assert (
+                    0.7 <= ctrl_value <= 0.9
+                ), f"Activation not set correctly: {ctrl_value}"
 
         except Exception as e:
             pytest.skip(f"Activation setting test failed: {e}")
@@ -414,3 +412,6 @@ class TestCrossValidation:
         # Grip force should agree within ±15% (Section K2)
         logger.info("Grip cross-validation: Placeholder")
         pytest.skip("Pending multi-engine grip models")
+
+
+pytestmark = pytest.mark.live_simulation

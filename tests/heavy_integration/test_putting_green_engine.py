@@ -144,3 +144,6 @@ class TestPuttingGreenSimulator:
 
         np.testing.assert_allclose(q1_f, q2_f, atol=1e-14)
         np.testing.assert_allclose(v1_f, v2_f, atol=1e-14)
+
+
+pytestmark = pytest.mark.live_simulation

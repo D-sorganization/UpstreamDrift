@@ -13,8 +13,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-pytestmark = pytest.mark.live_simulation
-
 from src.shared.python.data_io.path_utils import get_src_root
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineStatus
 
@@ -85,9 +83,9 @@ class TestEngineManagerIntegration:
             # If status says available, path must exist
             status = manager.get_engine_status(engine_type)
             if status == EngineStatus.AVAILABLE or status == EngineStatus.LOADED:
-                assert path.exists(), (
-                    f"{engine_type} marked as {status} but path doesn't exist"
-                )
+                assert (
+                    path.exists()
+                ), f"{engine_type} marked as {status} but path doesn't exist"
 
 
 @pytest.mark.skipif(not SIMPLE_ARM_URDF.exists(), reason="Test asset missing")
@@ -275,6 +273,9 @@ class TestCrossEngineConsistency:
         if len(valid_dofs) >= 2:
             # All engines should agree on DOF count
             dof_values = list(valid_dofs.values())
-            assert all(d == dof_values[0] for d in dof_values), (
-                f"Engines disagree on DOFs: {valid_dofs}"
-            )
+            assert all(
+                d == dof_values[0] for d in dof_values
+            ), f"Engines disagree on DOFs: {valid_dofs}"
+
+
+pytestmark = pytest.mark.live_simulation

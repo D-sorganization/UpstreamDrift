@@ -22,7 +22,6 @@ class TestMeshcatCore:
         """Meshcat Visualizer can be instantiated headlessly."""
         try:
             import meshcat
-            import meshcat.visualizer as viz
         except ImportError:
             pytest.skip("meshcat not installed")
 
@@ -73,7 +72,6 @@ class TestMeshcatPinocchioIntegration:
     def test_pinocchio_meshcat_display(self) -> None:
         """Pinocchio's MeshcatVisualizer can display a model."""
         try:
-            import meshcat
             import pinocchio as pin
         except ImportError:
             pytest.skip("meshcat or pinocchio not installed")
@@ -92,7 +90,7 @@ class TestMeshcatPinocchioIntegration:
         j1 = model.addJoint(0, pin.JointModelRZ(), pin.SE3.Identity(), "joint1")
         model.appendBodyToJoint(j1, inertia, pin.SE3.Identity())
 
-        data = model.createData()
+        model.createData()
         q = pin.neutral(model)
 
         vis_model = pin.GeometryModel()
@@ -135,3 +133,6 @@ class TestProjectMeshcatWiring:
         )
 
         assert MeshcatViewer is not None
+
+
+pytestmark = pytest.mark.live_simulation

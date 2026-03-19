@@ -65,7 +65,7 @@ class TestC3DCore:
             reader = c3d.Reader(f)
 
             frames_read = 0
-            for i, points, analog in reader.read_frames():
+            for _i, points, _analog in reader.read_frames():
                 frames_read += 1
                 assert points.shape[0] == n_markers
 
@@ -125,3 +125,6 @@ class TestC3DProjectIntegration:
         from src.shared.python.data_io.export import export_to_c3d
 
         assert callable(export_to_c3d)
+
+
+pytestmark = pytest.mark.live_simulation

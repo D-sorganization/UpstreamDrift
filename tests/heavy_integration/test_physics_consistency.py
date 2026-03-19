@@ -15,8 +15,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.live_simulation
-
 from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
 )
@@ -54,9 +52,9 @@ class TestPendulumAnalytical:
 
         np.testing.assert_allclose(M, M.T, atol=1e-12)
         eigenvalues = np.linalg.eigvalsh(M)
-        assert all(ev > 0 for ev in eigenvalues), (
-            f"M not positive definite: eigs={eigenvalues}"
-        )
+        assert all(
+            ev > 0 for ev in eigenvalues
+        ), f"M not positive definite: eigs={eigenvalues}"
 
     def test_mass_matrix_varies_with_configuration(self) -> None:
         """Mass matrix should change with joint angles (coupled inertia)."""
@@ -329,3 +327,6 @@ class TestCrossEngineConsistency:
                 atol=1e-6,
                 err_msg=f"{eng.name}: inverse dynamics inconsistent",
             )
+
+
+pytestmark = pytest.mark.live_simulation
