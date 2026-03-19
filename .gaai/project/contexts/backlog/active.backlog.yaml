@@ -25,7 +25,7 @@ items:
   - id: GH1956
     title: "Consolidate GUI Interfaces and ensure strict lazy-loading of engine dependencies"
     priority: medium
-    status: in_progress
+    status: done
     started_at: "2026-03-19T16:18:38Z"
     completed_at: "2026-03-19T16:27:18Z"
     pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2023"
