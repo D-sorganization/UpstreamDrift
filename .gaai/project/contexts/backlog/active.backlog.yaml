@@ -55,7 +55,8 @@ items:
   - id: GH1949
     title: "[Testing] 526 source modules have no corresponding test file"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-19T16:41:25Z"
     github_issue: 1949
     artefact: .gaai/project/contexts/artefacts/stories/GH1949.story.md
     dependencies: []
