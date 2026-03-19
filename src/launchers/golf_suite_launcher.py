@@ -82,6 +82,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.urdf_path = (
             self.suite_root / "tools/urdf_generator/launch_urdf_generator.py"
         )
+        self.pendulum_path = (
+            self.suite_root / "src/shared/python/pendulum_simulator/__main__.py"
+        )
 
         self._setup_ui()
 
@@ -171,6 +174,14 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             ),
         )
         layout.addWidget(self.btn_urdf)
+
+        self.btn_pendulum = self._create_engine_button(
+            "Launch &Pendulum Sim",
+            "Launch Double/Triple Pendulum Simulator",
+            "Launch Pendulums",
+            self._launch_pendulums,
+        )
+        layout.addWidget(self.btn_pendulum)
 
     def _setup_shot_tracer_section(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Add separator and shot tracer button to the layout."""
@@ -410,6 +421,10 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
     def _launch_urdf(self) -> None:
         cwd = self.urdf_path.parent
         self._launch_script("URDF Generator", self.urdf_path, cwd)
+
+    def _launch_pendulums(self) -> None:
+        cwd = self.pendulum_path.parent.parent
+        self._launch_script("Pendulum Simulator", self.pendulum_path, cwd)
 
     def _launch_shot_tracer(self) -> None:
         # Shot tracer is in launchers/ directory
