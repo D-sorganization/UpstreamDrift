@@ -15,6 +15,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.live_simulation
 
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE

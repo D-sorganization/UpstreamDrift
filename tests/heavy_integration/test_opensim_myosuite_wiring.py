@@ -16,6 +16,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.live_simulation
+
 from src.shared.python.engine_core.engine_registry import EngineType
 
 if TYPE_CHECKING:

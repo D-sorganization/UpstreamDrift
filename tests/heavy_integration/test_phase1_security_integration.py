@@ -16,6 +16,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytestmark = pytest.mark.live_simulation
+
 from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
     skip_if_unavailable,

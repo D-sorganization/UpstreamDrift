@@ -13,6 +13,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.live_simulation
+
 from src.shared.python.data_io.path_utils import get_src_root
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineStatus
 

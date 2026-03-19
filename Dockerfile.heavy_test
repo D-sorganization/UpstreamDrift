@@ -68,7 +68,8 @@ RUN pip install \
     pandas \
     trimesh \
     ezdxf \
-    pyyaml
+    pyyaml \
+    c3d
 
 # ── Optional tooling (best-effort, non-fatal) ─────────────────────────────────
 RUN pip install PyQt6 || echo "PyQt6 not available on this platform — skipping"

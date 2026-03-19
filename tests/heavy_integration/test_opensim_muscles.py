@@ -14,6 +14,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.live_simulation
+
 from src.shared.python.engine_core.engine_availability import (
     OPENSIM_AVAILABLE,
     skip_if_unavailable,

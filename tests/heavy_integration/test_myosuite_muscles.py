@@ -15,6 +15,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.live_simulation
+
 from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 

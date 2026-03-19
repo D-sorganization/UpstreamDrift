@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.live_simulation
+
 
 class TestEngineModelCompatibility:
     """Test that physics engines work with different model sources."""
