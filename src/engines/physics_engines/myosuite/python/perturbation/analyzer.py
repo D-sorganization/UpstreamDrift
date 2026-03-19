@@ -39,7 +39,6 @@ import numpy as np
 
 from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.pendulum_simulator.perturbation_analysis import (
-    generate_noise,
     perturb_torque_coeffs,
 )
 from src.shared.python.perturbation.config import (
@@ -168,42 +167,6 @@ class ComparisonReport:
 # ---------------------------------------------------------------------------
 # Coefficient perturbation helper
 # ---------------------------------------------------------------------------
-
-
-def _perturb_coeffs_by_mode(
-    coeffs: list[list[float]],
-    config: PerturbationConfig,
-    seed: int,
-) -> list[list[float]]:
-    """Apply noise to polynomial torque coefficients.
-
-    Supports 'additive', 'multiplicative', and 'both' modes.
-    """
-    mode = config.perturb_mode
-    total = sum(len(j) for j in coeffs)
-
-    if mode in ("additive", "both"):
-        coeffs = perturb_torque_coeffs(
-            coeffs,
-            noise_amplitude=config.noise_amplitude,
-            noise_type=config.noise_type,
-            seed=seed,
-        )
-
-    if mode in ("multiplicative", "both"):
-        noise = generate_noise(
-            config.noise_type, total, config.noise_amplitude, seed + 1
-        )
-        idx = 0
-        result = []
-        for joint_coeffs in coeffs:
-            n = len(joint_coeffs)
-            perturbed = [c * (1.0 + noise[idx + i]) for i, c in enumerate(joint_coeffs)]
-            result.append(perturbed)
-            idx += n
-        coeffs = result
-
-    return coeffs
 
 
 # ---------------------------------------------------------------------------
@@ -378,7 +341,13 @@ class MyoSuitePerturbationAnalyzer:
         assert self._base_coeffs is not None, (
             "set_base_torque_profile() must be called before perturb_torque()"
         )
-        perturbed = _perturb_coeffs_by_mode(self._base_coeffs, config, seed)
+        perturbed = perturb_torque_coeffs(
+            self._base_coeffs,
+            noise_amplitude=config.noise_amplitude,
+            noise_type=config.noise_type,
+            seed=seed,
+            perturb_mode=config.perturb_mode,
+        )
         return {"coeffs": perturbed}
 
     def extract_metrics(self, sim_result: object) -> dict[str, float | np.ndarray]:
@@ -467,8 +436,12 @@ class MyoSuitePerturbationAnalyzer:
         n_success = 0
 
         for i in range(config.n_trials):
-            perturbed = _perturb_coeffs_by_mode(
-                self._base_coeffs, config, base_seed + i
+            perturbed = perturb_torque_coeffs(
+                self._base_coeffs,
+                noise_amplitude=config.noise_amplitude,
+                noise_type=config.noise_type,
+                seed=base_seed + i,
+                perturb_mode=config.perturb_mode,
             )
             try:
                 sim = self._simulate(perturbed)
@@ -559,10 +532,12 @@ class MyoSuitePerturbationAnalyzer:
             self.set_base_torque_profile(profile)
             values = []
             for i in range(config.n_trials):
-                perturbed = _perturb_coeffs_by_mode(
+                perturbed = perturb_torque_coeffs(
                     self._base_coeffs,  # type: ignore[arg-type]
-                    config,
-                    base_seed + i,
+                    noise_amplitude=config.noise_amplitude,
+                    noise_type=config.noise_type,
+                    seed=base_seed + i,
+                    perturb_mode=config.perturb_mode,
                 )
                 try:
                     sim = self._simulate(perturbed)

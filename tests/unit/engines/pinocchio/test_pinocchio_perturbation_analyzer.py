@@ -22,7 +22,9 @@ from src.engines.physics_engines.pinocchio.python.perturbation.analyzer import (
     MANDATORY_METRICS,
     ComparisonReport,
     PinocchioSimResult,
-    _perturb_coeffs_by_mode,
+)
+from src.shared.python.pendulum_simulator.perturbation_analysis import (
+    perturb_torque_coeffs,
 )
 from src.shared.python.perturbation.config import PerturbationConfig
 
@@ -78,7 +80,13 @@ class TestPerturbCoeffsByMode:
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.0, noise_type="white", perturb_mode="additive"
         )
-        result = _perturb_coeffs_by_mode(coeffs, config, seed=0)
+        result = perturb_torque_coeffs(
+            coeffs,
+            noise_amplitude=config.noise_amplitude,
+            noise_type=config.noise_type,
+            perturb_mode=config.perturb_mode,
+            seed=0,
+        )
         flat_orig = [c for j in coeffs for c in j]
         flat_res = [c for j in result for c in j]
         assert all(abs(a - b) < 1e-12 for a, b in zip(flat_orig, flat_res, strict=True))
@@ -91,7 +99,13 @@ class TestPerturbCoeffsByMode:
             noise_type="white",
             perturb_mode="multiplicative",
         )
-        result = _perturb_coeffs_by_mode(coeffs, config, seed=0)
+        result = perturb_torque_coeffs(
+            coeffs,
+            noise_amplitude=config.noise_amplitude,
+            noise_type=config.noise_type,
+            perturb_mode=config.perturb_mode,
+            seed=0,
+        )
         assert len(result) == len(coeffs)
         for orig, res in zip(coeffs, result, strict=True):
             assert len(res) == len(orig)
@@ -101,7 +115,13 @@ class TestPerturbCoeffsByMode:
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.1, noise_type="white", perturb_mode="both"
         )
-        result = _perturb_coeffs_by_mode(coeffs, config, seed=0)
+        result = perturb_torque_coeffs(
+            coeffs,
+            noise_amplitude=config.noise_amplitude,
+            noise_type=config.noise_type,
+            perturb_mode=config.perturb_mode,
+            seed=0,
+        )
         assert len(result) == len(coeffs)
 
     def test_additive_reproducible_with_same_seed(self) -> None:
@@ -109,8 +129,20 @@ class TestPerturbCoeffsByMode:
         config = PerturbationConfig(
             n_trials=1, noise_amplitude=0.3, noise_type="white", perturb_mode="additive"
         )
-        r1 = _perturb_coeffs_by_mode(coeffs, config, seed=5)
-        r2 = _perturb_coeffs_by_mode(coeffs, config, seed=5)
+        r1 = perturb_torque_coeffs(
+            coeffs,
+            noise_amplitude=config.noise_amplitude,
+            noise_type=config.noise_type,
+            perturb_mode=config.perturb_mode,
+            seed=5,
+        )
+        r2 = perturb_torque_coeffs(
+            coeffs,
+            noise_amplitude=config.noise_amplitude,
+            noise_type=config.noise_type,
+            perturb_mode=config.perturb_mode,
+            seed=5,
+        )
         assert r1 == r2
 
 
