@@ -453,7 +453,8 @@ class AISettingsDialog(QDialog):
         self.setMinimumSize(500, 400)
 
         # Apply Dark Theme styling
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QDialog, QWidget {
                 background-color: #1e1e1e;
                 color: #e0e0e0;
@@ -520,7 +521,8 @@ class AISettingsDialog(QDialog):
             QDialogButtonBox QPushButton {
                 min-width: 60px;
             }
-        """)
+        """
+        )
 
         self._settings = AISettings.load()
         self._setup_ui()

@@ -96,7 +96,8 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         if not use_builtin_theme:
             pass  # Skip built-in theme; host app provides styling
         else:
-            self.setStyleSheet("""
+            self.setStyleSheet(
+                """
             QWidget {
                 background-color: #2b2b2b;
                 color: #ffffff;
@@ -161,7 +162,8 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
             QPushButton#fitBtn:hover {
                 background-color: #388e3c;
             }
-        """)
+        """
+            )
 
         # UI Setup
         self._setup_ui()
