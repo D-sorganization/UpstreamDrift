@@ -5,7 +5,7 @@
 #   - Must have a corresponding artefact with acceptance criteria
 #   - Only Discovery may add items; only Delivery may update status
 
-items: []
+items:
 
   - id: GH1957
     title: "Upgrade Example Notebooks & Scripts to align with recent architectural refactoring"
