@@ -89,7 +89,8 @@ items:
   - id: GH2020
     title: "Feature: Cross-Engine Perturbation Comparison Dashboard (GUI/CLI)"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-19T20:41:07Z"
     github_issue: 2020
     artefact: .gaai/project/contexts/artefacts/stories/GH2020.story.md
     dependencies: []
