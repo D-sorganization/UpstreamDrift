@@ -1,4 +1,3 @@
-./launch_golf_suite.py:22 main
 ./src/api/middleware/error_handler.py:58 sync_wrapper
 ./src/api/middleware/error_handler.py:36 async_wrapper
 ./src/api/routes/engines.py:34 EngineListResponse
@@ -53,6 +52,11 @@
 ./src/shared/python/calc_backend/routers/ode_solver.py:103 compute_derivs
 ./src/shared/python/calc_backend/routers/thermal_profile.py:36 power_func
 ./src/shared/python/calc_backend/routers/thermal_profile.py:50 deriv
+./src/shared/python/engine_core/engine_availability.py:44 EngineStatus
+./src/shared/python/engine_core/engine_availability.py:185 get_engine_status
+./src/shared/python/engine_core/engine_availability.py:230 get_engine_error
+./src/shared/python/engine_core/engine_availability.py:280 decorator
+./src/shared/python/engine_core/engine_availability.py:282 wrapper
 ./src/shared/python/upstream_drift_tools/data_processing/core.py:552 get_statistics
 ./src/shared/python/upstream_drift_tools/data_processing/core.py:610 reset
 ./src/shared/python/upstream_drift_tools/calculators/conversion/service.py:146 convert
@@ -175,12 +179,6 @@
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py:52 MotionCapturePlotter
 ./src/tools/code_quality_check.py:11 Colors
 ./src/tools/check_markdown_links.py:91 main
-./src/tools/model_generation/editor/text_editor_validation.py:21 ValidationProtocol
-./src/tools/model_generation/editor/frankenstein_transforms.py:21 TransformProtocol
-./src/tools/model_generation/editor/frankenstein_transforms.py:31 copy_subtree
-./src/tools/model_generation/editor/frankenstein_history.py:20 HistoryProtocol
-./src/tools/model_generation/editor/frankenstein_clipboard.py:20 ClipboardProtocol
-./src/tools/model_generation/editor/frankenstein_clipboard.py:27 get_connecting_joint
 ./shared/models/opensim/opensim-models/Geometry/remove_vtp_normals.py:8 remove_normals_node
 ./shared/models/opensim/opensim-models/Geometry/remove_vtp_normals.py:11 remove_normals_from_vtp
 ./shared/models/opensim/opensim-models/Geometry/remove_vtp_normals.py:21 main
@@ -192,11 +190,11 @@
 ./scripts/check_module_size_budget.py:39 iter_python_files
 ./scripts/check_module_size_budget.py:50 load_baseline
 ./scripts/check_module_size_budget.py:57 main
-./scripts/scan_for_incomplete_code.py:5 scan_for_incomplete_code
+./scripts/scan_for_incomplete_code.py:6 scan_for_incomplete_code
 ./scripts/generate_fresh_assessment.py:48 main
 ./scripts/check_vendor_updates.py:71 SubmoduleStatus
 ./scripts/check_vendor_updates.py:232 build_arg_parser
 ./scripts/check_file_size_budget.py:58 main
 ./scripts/check_no_print_calls.py:47 changed_python_files
-./scripts/check_no_print_calls.py:82 main
+./scripts/check_no_print_calls.py:84 main
 ./scripts/check_docs_governance.py:37 main

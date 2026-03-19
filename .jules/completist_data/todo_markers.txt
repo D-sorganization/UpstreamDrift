@@ -1,5 +1,3 @@
-./pytest_collect_out.txt:4666:              Postcondition: All codes follow GMS-XXX-NNN format.
-./pytest_collect_out.txt:17420:              Every error code must follow GMS-XXX-NNN pattern.
 ./src/api/utils/error_codes.py:53:    # General Errors (GMS-GEN-XXX)
 ./src/api/utils/error_codes.py:59:    # Engine Errors (GMS-ENG-XXX)
 ./src/api/utils/error_codes.py:67:    # Simulation Errors (GMS-SIM-XXX)
@@ -146,20 +144,8 @@
 ./shared/models/opensim/opensim-models/CMakeLists.txt:45:# TODO subject01_metabolics* files?
 ./shared/models/opensim/opensim-models/CMakeLists.txt:82:    # TODO should we copy over the OutputReference folder?
 ./shared/models/opensim/opensim-models/CMakeLists.txt:104:        PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not?
-./REVIEW_SUMMARY.txt:146:4. TODO/FIXME blocker too aggressive (doesn't allow issue references)
-./BUILD_INFRASTRUCTURE_REVIEW.md:312:   - Placeholder (TODO/FIXME) blocker
-./BUILD_INFRASTRUCTURE_REVIEW.md:325:3. **TODO/FIXME check is blocking:** CI fails if any TODOs found
-./BUILD_INFRASTRUCTURE_REVIEW.md:341:3. TODO/FIXME blocker is too aggressive
-./BUILD_INFRASTRUCTURE_REVIEW.md:342:   - Modern practice: TODOs with issue numbers allowed
-./BUILD_INFRASTRUCTURE_REVIEW.md:343:   - **Fix:** Update check to allow `TODO #123` format
-./BUILD_INFRASTRUCTURE_REVIEW.md:729:      # FIX: Allow TODOs with issue references
-./BUILD_INFRASTRUCTURE_REVIEW.md:733:            grep -rn "TODO\|FIXME" . \
-./BUILD_INFRASTRUCTURE_REVIEW.md:737:            | grep -v "# TODO #[0-9]" \
-./BUILD_INFRASTRUCTURE_REVIEW.md:738:            | grep -v "# FIXME #[0-9]"
-./BUILD_INFRASTRUCTURE_REVIEW.md:742:            echo "::error::Orphaned placeholders. Link to GitHub issues: # TODO #123"
-./BUILD_INFRASTRUCTURE_REVIEW.md:878:- [ ] Fix TODO/FIXME check to allow references: `# TODO #123`
-./scripts/refresh_completist_data.py:54:    # 2. Grep for TODOs
-./scripts/refresh_completist_data.py:56:        "TODO|FIXME|XXX|HACK|TEMP",
+./scripts/refresh_completist_data.py:59:    # 2. Grep for TODOs
+./scripts/refresh_completist_data.py:61:        "TODO|FIXME|XXX|HACK|TEMP",
 ./scripts/analyze_completist_data.py:107:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 ./scripts/analyze_completist_data.py:119:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
 ./scripts/analyze_completist_data.py:133:        if marker_item["type"] == "TODO":
@@ -174,13 +160,13 @@
 ./scripts/generate_todo_fixme_register.py:25:        "# TODO/FIXME Debt Register",
 ./scripts/generate_todo_fixme_register.py:27:        "This register is generated from inline TODO/FIXME markers.",
 ./scripts/generate_todo_fixme_register.py:41:        marker = "TODO" if "TODO" in text else "FIXME"
-./scripts/scan_for_incomplete_code.py:7:        "TODO": re.compile(r"TODO"),
-./scripts/scan_for_incomplete_code.py:8:        "FIXME": re.compile(r"FIXME"),
+./scripts/scan_for_incomplete_code.py:8:        "TODO": re.compile(r"TODO"),
+./scripts/scan_for_incomplete_code.py:9:        "FIXME": re.compile(r"FIXME"),
 ./scripts/pragmatic_programmer_review.py:176:    """Report high TODO counts as a technical debt indicator."""
 ./scripts/pragmatic_programmer_review.py:182:            if "TODO" in content:
 ./scripts/pragmatic_programmer_review.py:192:                "title": f"High TODO count ({len(todos)})",
 ./scripts/pragmatic_programmer_review.py:195:                "recommendation": "Review TODOs",
-./scripts/setup_hooks.py:109:  - quality-check (no TODOs/FIXMEs)
+./scripts/setup_hooks.py:112:  - quality-check (no TODOs/FIXMEs)
 ./scripts/check_docs_governance.py:13:    ROOT / "docs" / "adr" / "ADR_TEMPLATE.md",
 ./scripts/check_docs_governance.py:61:        and p not in {"docs/adr/README.md", "docs/adr/ADR_TEMPLATE.md"}
 ./AGENTS.md:200:- ❌ **DO NOT** leave `TODO`/`FIXME` markers for more than one sprint.
@@ -200,7 +186,7 @@
 ./.github/workflows/ci-standard.yml:69:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
 ./.github/workflows/ci-standard.yml:74:              | xargs -0 grep -nE "TODO|FIXME" || true
 ./.github/workflows/ci-standard.yml:78:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
-./.github/workflows/nightly-cross-engine.yml:200:          # TODO: Generate HTML dashboard showing:
+./.github/workflows/nightly-cross-engine.yml:221:            # TODO: Generate HTML dashboard showing:
 ./.github/workflows/Jules-PR-AutoFix.yml:48:  MAX_FIX_ATTEMPTS: 5
 ./.github/workflows/Jules-PR-AutoFix.yml:121:          MAX_ATTEMPTS="${{ github.event.inputs.max_iterations || env.MAX_FIX_ATTEMPTS }}"
 ./.github/workflows/Jules-PR-AutoFix.yml:123:          if [ "$FIX_COUNT" -ge "$MAX_ATTEMPTS" ]; then
@@ -228,8 +214,6 @@
 ./ui/src/api/client.ts:33:const MAX_RECONNECT_ATTEMPTS = 5;
 ./ui/src/api/client.ts:170:      if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
 ./ui/src/api/client.ts:172:        console.log(`WebSocket closed unexpectedly. Reconnecting in ${Math.round(delay)}ms (attempt ${reconnectAttemptsRef.current + 1}/${MAX_RECONNECT_ATTEMPTS})`);
-./full_collect.txt:4666:              Postcondition: All codes follow GMS-XXX-NNN format.
-./full_collect.txt:17580:              Every error code must follow GMS-XXX-NNN pattern.
 ./assets/config/unit_constants.json:116:    "NTP_TEMPERATURE_K": 293.15,
 ./assets/config/unit_constants.json:134:    "SATP_TEMPERATURE_K": 298.15,
 ./assets/config/unit_constants.json:135:    "SCFM_60F_TEMPERATURE_K": 288.706,
@@ -238,12 +222,6 @@
 ./tests/unit/api/test_error_codes.py:36:        """Postcondition: All codes follow GMS-XXX-NNN format."""
 ./tests/unit/utils/test_error_codes.py:39:        """Every error code must follow GMS-XXX-NNN pattern."""
 ./tests/unit/utils/test_error_codes.py:42:            assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN"
-./tests/unit/engines/simscape/3d/test_constants_file.py:35:        TEMPERATURE_C,
-./tests/unit/engines/simscape/3d/test_constants_file.py:56:        TEMPERATURE_C,
-./tests/unit/engines/simscape/3d/test_constants_file.py:196:        assert TEMPERATURE_C == 20.0
-./tests/unit/engines/simscape/3d/test_constants_file.py:198:        assert 15.0 <= TEMPERATURE_C <= 25.0
-./tests/unit/engines/simscape/3d/test_constants_file.py:233:            TEMPERATURE_C,
-./tests/unit/engines/simscape/3d/test_constants_file.py:257:            TEMPERATURE_C,
 ./tests/unit/test_steam_engine.py:35:            CRITICAL_TEMPERATURE_WATER,
 ./tests/unit/test_steam_engine.py:40:        assert pytest.approx(647.15) == CRITICAL_TEMPERATURE_WATER
 ./tests/unit/tools/model_generation/test_se3_transform_fix.py:29:THREE_LINK_CHAIN_TEMPLATE = """\

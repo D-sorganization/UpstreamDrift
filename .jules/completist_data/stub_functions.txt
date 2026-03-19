@@ -238,33 +238,12 @@
 ./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py:75 reset
 ./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/pinocchio_interface.py:154 sync_pinocchio_to_mujoco
 ./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/core/main_window.py:471 _build_base_ui
-./src/engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py:299 compute_contact_forces
 ./src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:321 _build_base_ui
 ./src/engines/physics_engines/pinocchio/python/pinocchio_golf/analysis_controller.py:33 generate_plot
 ./src/engines/physics_engines/pinocchio/python/pinocchio_golf/ui/main_window.py:156 _build_base_ui
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:568 _create_club_geometry
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:874 _render_face_normal
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_playback_controller.py:281 _on_position_changed
-./src/tools/model_generation/plugins/__init__.py:21 name
-./src/tools/model_generation/plugins/__init__.py:27 version
-./src/tools/model_generation/plugins/__init__.py:32 initialize
-./src/tools/model_generation/plugins/__init__.py:36 shutdown
-./src/tools/model_generation/library/repository.py:42 name
-./src/tools/model_generation/library/repository.py:48 description
-./src/tools/model_generation/library/repository.py:53 list_models
-./src/tools/model_generation/library/repository.py:58 download_model
-./src/tools/model_generation/editor/frankenstein_transforms.py:27 _save_state
-./src/tools/model_generation/editor/frankenstein_transforms.py:28 _generate_unique_name
-./src/tools/model_generation/editor/frankenstein_transforms.py:31 copy_subtree
-./src/tools/model_generation/editor/frankenstein_clipboard.py:26 _save_state
-./src/tools/model_generation/editor/frankenstein_clipboard.py:27 get_connecting_joint
-./src/tools/model_generation/editor/frankenstein_clipboard.py:30 _generate_unique_name
-./src/tools/model_generation/builders/base_builder.py:158 build
-./src/tools/model_generation/builders/base_builder.py:168 clear
-./src/tools/humanoid_character_builder/generators/mesh_generator.py:93 backend_name
-./src/tools/humanoid_character_builder/generators/mesh_generator.py:99 is_available
-./src/tools/humanoid_character_builder/generators/mesh_generator.py:104 generate
-./src/tools/humanoid_character_builder/generators/mesh_generator.py:124 get_supported_segments
 ./src/tools/model_explorer/visualization_widget.py:421 initializeGL
 ./src/tools/model_explorer/visualization_widget.py:432 resizeGL
 ./src/tools/model_explorer/urdf_editor_window.py:310 _on_joints_updated
@@ -346,6 +325,14 @@
 ./tests/integration/test_golf_launcher_integration.py:119 start
 ./tests/integration/test_golf_launcher_integration.py:122 wait
 ./tests/integration/test_golf_launcher_integration.py:125 run
+./tests/launchers/test_launcher_theme.py:16 select_model
+./tests/launchers/test_launcher_theme.py:19 update_launch_button
+./tests/launchers/test_shot_tracer.py:136 setCameraPosition
+./tests/launchers/test_shot_tracer.py:139 addItem
+./tests/launchers/test_shot_tracer.py:142 removeItem
+./tests/launchers/test_shot_tracer.py:145 clear
+./tests/launchers/test_unified_launcher.py:51 fake_main
+./tests/launchers/test_unified_launcher.py:68 fake_main
 ./tests/learning/test_sim2real.py:62 set_joint_torques
 ./tests/unit/test_lazy_imports.py:135 test_launcher_starts_without_mujoco
 ./tests/unit/test_golf_launcher_basic.py:20 __init__
@@ -464,6 +451,10 @@
 ./tests/unit/core/test_error_decorators.py:220 my_func
 ./tests/unit/shared_python/test_utils.py:259 set_state
 ./tests/unit/shared_python/test_simulation_gui_base.py:64 sync_kinematic_controls
+./tests/unit/shared_python/test_ai_tool_registry.py:120 my_func
+./tests/unit/shared_python/test_ai_tool_registry.py:156 t1
+./tests/unit/shared_python/test_ai_tool_registry.py:160 t2
+./tests/unit/shared_python/test_ai_tool_registry.py:179 tool
 ./tests/unit/shared_python/test_dashboard_recorder.py:33 forward
 ./tests/unit/shared_python/test_dashboard_recorder.py:36 set_control
 ./tests/unit/shared_python/test_dashboard_recorder.py:84 load_from_path
@@ -473,6 +464,10 @@
 ./tests/unit/shared_python/test_comparative_plotting.py:44 set_analysis_config
 ./tests/unit/shared_python/test_plotting.py:48 set_analysis_config
 ./tests/unit/shared_python/test_comparative_analysis.py:28 set_analysis_config
+./tests/unit/shared_python/ai/adapters/test_ollama_adapter.py:272 __exit__
+./tests/unit/shared_python/ai/adapters/test_ollama_adapter.py:263 raise_for_status
+./tests/unit/shared_python/ai/adapters/test_anthropic_adapter.py:318 __exit__
+./tests/unit/shared_python/ai/adapters/test_anthropic_adapter.py:345 __exit__
 ./tests/unit/test_unreal_integration/test_mesh_loader.py:544 test_gltf_with_skeleton
 ./tests/unit/engines/test_plugin_registry.py:45 load_from_path
 ./tests/unit/engines/test_plugin_registry.py:48 load_from_string
