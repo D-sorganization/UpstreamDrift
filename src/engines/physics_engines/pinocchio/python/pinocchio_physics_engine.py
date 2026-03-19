@@ -296,6 +296,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         tau = pin.rnea(self.model, self.data, self.q, self.v, qacc)
         return cast(np.ndarray, tau)
 
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Contact forces must contain finite values")
     def compute_contact_forces(self) -> np.ndarray:
         """Compute total contact forces (ground reaction force, GRF).
 
@@ -314,9 +316,16 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         )
         return np.zeros(3)
 
+    @precondition(
+        lambda self, body_name: self.is_initialized,
+        "Engine must be initialized",
+    )
+    @postcondition(
+        lambda res: res is None or all(check_finite(v) for v in res.values()),
+        "Jacobian matrices must contain finite values",
+    )
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
-        assert body_name is not None, "body_name must be provided"
         assert body_name is not None, "body_name must be provided"
         if self.model is None or self.data is None:
             return None
@@ -382,7 +391,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             q_ddot_control: Control acceleration vector (nv,)
         """
         assert tau is not None, "tau must be provided"
-        assert tau is not None, "tau must be provided"
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -397,6 +405,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
         return a_control
 
+    @precondition(lambda self, q, v: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "ZTCF acceleration must contain finite values")
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
 
@@ -410,7 +420,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             q_ddot_ZTCF: Acceleration under zero torque (n_v,)
         """
         assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -422,6 +431,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
         return cast(np.ndarray, a_ztcf)
 
+    @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "ZVCF acceleration must contain finite values")
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
 
@@ -433,7 +444,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZVCF: Acceleration with v=0 (n_v,)
         """
-        assert q is not None, "q must be provided"
         assert q is not None, "q must be provided"
         if self.model is None or self.data is None:
             return np.array([])
@@ -449,3 +459,23 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         a_zvcf = pin.aba(self.model, self.data, q, v_zero, tau)
 
         return cast(np.ndarray, a_zvcf)
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Affine drift must contain finite values")
+    def compute_affine_drift(self) -> np.ndarray:
+        """Compute the 'Drift' vector f(q, qdot).
+
+        Legacy method - use compute_drift_acceleration() for Section F compliance.
+
+        Returns acceleration when tau = 0 (and no active control).
+        """
+        return self.compute_drift_acceleration()
+
+    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
+    def get_sensors(self) -> dict[str, float | np.ndarray]:
+        """Get all sensor readings.
+
+        Currently Pinocchio standard data doesn't map directly to sensor definitions.
+        Returns empty dict for parity with unconfigured MuJoCo models.
+        """
+        return {}

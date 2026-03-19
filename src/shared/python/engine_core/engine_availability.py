@@ -99,6 +99,12 @@ def _probe_engine(
             importlib.import_module("PyQt5.QtWidgets")
         elif import_name == "pyside6":
             importlib.import_module("PySide6.QtWidgets")
+        elif import_name == "pinocchio":
+            pin = importlib.import_module("pinocchio")
+            if not hasattr(pin, "buildModelFromUrdf"):
+                raise ImportError(
+                    "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
+                )
         else:
             importlib.import_module(import_name)
 

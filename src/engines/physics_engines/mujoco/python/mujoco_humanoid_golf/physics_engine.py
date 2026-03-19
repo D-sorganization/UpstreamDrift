@@ -30,9 +30,12 @@ logger = get_logger(__name__)
 # Model directories allowed for loading (relative to suite root)
 # Hardening: Prevent loading from arbitrary system paths
 SUITE_ROOT = Path(__file__).parents[5]
+REPO_ROOT = SUITE_ROOT.parent
+
 ALLOWED_MODEL_DIRS = [
     SUITE_ROOT / "engines",
     SUITE_ROOT / "shared" / "resources",
+    REPO_ROOT / "tests" / "fixtures",
     Path(tempfile.gettempdir()),  # Allow temp dir for tests
 ]
 
