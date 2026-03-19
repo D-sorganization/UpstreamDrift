@@ -65,8 +65,12 @@ items:
   - id: GH1744
     title: "test: Raise test coverage from 50% to 70%"
     priority: medium
-    status: in_progress
+    status: done
     started_at: "2026-03-19T20:41:04Z"
+    completed_at: "2026-03-19T22:00:00Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2031"
+    pr_number: 2031
+    pr_status: "open"
     github_issue: 1744
     artefact: .gaai/project/contexts/artefacts/stories/GH1744.story.md
     dependencies: []
