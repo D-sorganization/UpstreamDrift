@@ -41,11 +41,12 @@ items:
     title: "Centralize and implement Screw Axis visualizations across all engines"
     priority: medium
     status: done
-    started_at: "2026-03-19T16:28:26Z"
-    completed_at: "2026-03-19T16:40:21Z"
+    started_at: "2026-03-19T09:28:26-07:00"
+    completed_at: "2026-03-19T09:40:27-07:00"
     pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2026"
     pr_number: 2026
     pr_status: "open"
+    cost_usd: 2.771
     github_issue: 1953
     artefact: .gaai/project/contexts/artefacts/stories/GH1953.story.md
     dependencies: []
