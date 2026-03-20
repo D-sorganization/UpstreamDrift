@@ -122,7 +122,8 @@ items:
   - id: GH2036
     title: "526 source modules have no corresponding test file"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-03-20T13:04:58Z"
     github_issue: 2036
     artefact: .gaai/project/contexts/artefacts/stories/GH2036.story.md
     dependencies: []
