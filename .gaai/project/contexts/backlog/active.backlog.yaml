@@ -126,9 +126,12 @@ items:
   - id: GH2036
     title: "526 source modules have no corresponding test file"
     priority: medium
-    status: in_progress
+    status: done
     started_at: "2026-03-20T13:04:58Z"
     completed_at: "2026-03-20T13:16:52Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2042"
+    pr_number: 2042
+    pr_status: "open"
     github_issue: 2036
     artefact: .gaai/project/contexts/artefacts/stories/GH2036.story.md
     dependencies: []
