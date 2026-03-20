@@ -140,7 +140,7 @@ items:
   - id: GH2035
     title: "Audit and reduce 310 pytest.skip calls"
     priority: medium
-    status: refined
+    status: in_progress
     github_issue: 2035
     artefact: .gaai/project/contexts/artefacts/stories/GH2035.story.md
     dependencies: []
@@ -149,7 +149,7 @@ items:
   - id: GH2034
     title: "Reduce 1227 type:ignore comments systematically"
     priority: medium
-    status: refined
+    status: in_progress
     github_issue: 2034
     artefact: .gaai/project/contexts/artefacts/stories/GH2034.story.md
     dependencies: []
