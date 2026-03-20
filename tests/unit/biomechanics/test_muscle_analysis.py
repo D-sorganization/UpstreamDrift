@@ -5,7 +5,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.biomechanics.muscle_analysis import (
+pytest.importorskip(
+    "sklearn", reason="scikit-learn is required for muscle synergy analysis"
+)
+
+from src.shared.python.biomechanics.muscle_analysis import (  # noqa: E402
     MuscleSynergyAnalyzer,
     SynergyResult,
 )

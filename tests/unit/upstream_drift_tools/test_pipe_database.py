@@ -28,7 +28,7 @@ class TestGetRoughness:
         assert r_mm > r_m
 
     def test_smooth_lower_roughness_than_concrete(self) -> None:
-        r_smooth = get_roughness("Smooth", "m")
+        r_smooth = get_roughness("Glass", "m")
         r_concrete = get_roughness("Concrete", "m")
         assert r_smooth < r_concrete
 
