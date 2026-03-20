@@ -166,7 +166,7 @@
 ./scripts/pragmatic_programmer_review.py:182:            if "TODO" in content:
 ./scripts/pragmatic_programmer_review.py:192:                "title": f"High TODO count ({len(todos)})",
 ./scripts/pragmatic_programmer_review.py:195:                "recommendation": "Review TODOs",
-./scripts/setup_hooks.py:112:  - quality-check (no TODOs/FIXMEs)
+./scripts/setup_hooks.py:113:  - quality-check (no TODOs/FIXMEs)
 ./scripts/check_docs_governance.py:13:    ROOT / "docs" / "adr" / "ADR_TEMPLATE.md",
 ./scripts/check_docs_governance.py:61:        and p not in {"docs/adr/README.md", "docs/adr/ADR_TEMPLATE.md"}
 ./AGENTS.md:200:- ❌ **DO NOT** leave `TODO`/`FIXME` markers for more than one sprint.
@@ -183,9 +183,9 @@
 ./.github/workflows/Jules-Completist.yml:132:          - FIXME comments
 ./.github/workflows/Jules-Completist.yml:133:          - HACK/TEMP markers
 ./.github/workflows/Jules-Auto-Rebase.yml:17:          echo "TODO: Implement automatic rebase of stale PRs onto main."
-./.github/workflows/ci-standard.yml:69:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
-./.github/workflows/ci-standard.yml:74:              | xargs -0 grep -nE "TODO|FIXME" || true
-./.github/workflows/ci-standard.yml:78:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+./.github/workflows/ci-standard.yml:72:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+./.github/workflows/ci-standard.yml:77:              | xargs -0 grep -nE "TODO|FIXME" || true
+./.github/workflows/ci-standard.yml:81:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
 ./.github/workflows/nightly-cross-engine.yml:221:            # TODO: Generate HTML dashboard showing:
 ./.github/workflows/Jules-PR-AutoFix.yml:48:  MAX_FIX_ATTEMPTS: 5
 ./.github/workflows/Jules-PR-AutoFix.yml:121:          MAX_ATTEMPTS="${{ github.event.inputs.max_iterations || env.MAX_FIX_ATTEMPTS }}"
@@ -222,10 +222,14 @@
 ./tests/unit/api/test_error_codes.py:36:        """Postcondition: All codes follow GMS-XXX-NNN format."""
 ./tests/unit/utils/test_error_codes.py:39:        """Every error code must follow GMS-XXX-NNN pattern."""
 ./tests/unit/utils/test_error_codes.py:42:            assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN"
+./tests/unit/upstream_drift_tools/test_unit_constants.py:21:    STP_TEMPERATURE_K,
+./tests/unit/upstream_drift_tools/test_unit_constants.py:82:        assert abs(STP_TEMPERATURE_K - 273.15) < 1e-6
 ./tests/unit/test_steam_engine.py:35:            CRITICAL_TEMPERATURE_WATER,
 ./tests/unit/test_steam_engine.py:40:        assert pytest.approx(647.15) == CRITICAL_TEMPERATURE_WATER
 ./tests/unit/tools/model_generation/test_se3_transform_fix.py:29:THREE_LINK_CHAIN_TEMPLATE = """\
 ./tests/unit/tools/model_generation/test_se3_transform_fix.py:70:    return THREE_LINK_CHAIN_TEMPLATE.format(
+./tests/unit/theme/test_typography.py:32:            FontSizes.XXXL,
+./tests/unit/theme/test_typography.py:41:        assert FontSizes.XXXL >= FontSizes.XXL
 ./tests/tools/test_code_quality_check.py:74:    lines = ["# TODO: fix this", "def test():", "    ...  ", "    pass"]
 ./tests/tools/test_code_quality_check.py:78:    assert any("TODO placeholder" in t for t in types)
 ./tests/tools/test_code_quality_check.py:83:    lines = ["# FIXME: broken logic"]
