@@ -112,8 +112,12 @@ items:
   - id: GH2037
     title: "Fix broken pre-push hook (uses pytest instead of python3 -m pytest)"
     priority: medium
-    status: in_progress
+    status: done
     started_at: "2026-03-20T13:04:53Z"
+    completed_at: "2026-03-20T13:16:57Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2041"
+    pr_number: 2041
+    pr_status: "open"
     github_issue: 2037
     artefact: .gaai/project/contexts/artefacts/stories/GH2037.story.md
     dependencies: []
@@ -124,6 +128,7 @@ items:
     priority: medium
     status: in_progress
     started_at: "2026-03-20T13:04:58Z"
+    completed_at: "2026-03-20T13:16:52Z"
     github_issue: 2036
     artefact: .gaai/project/contexts/artefacts/stories/GH2036.story.md
     dependencies: []
