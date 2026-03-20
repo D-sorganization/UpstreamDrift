@@ -258,7 +258,7 @@ class OpenSimGolfGUI(QMainWindow):
             self._screw_viz_tab = _ScrewVisualizationTab()
             self._tabs.addTab(self._screw_viz_tab, "Screw Kinematics")
         else:
-            self._screw_viz_tab = None
+            self._screw_viz_tab = None  # type: ignore[assignment]
 
         layout.addWidget(self._tabs)
 
