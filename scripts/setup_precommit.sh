@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-python -m pip install --upgrade pip
-pip install pre-commit black isort ruff mypy nbstripout
+python3 -m pip install --upgrade pip
+python3 -m pip install pre-commit ruff mypy nbstripout
 pre-commit install
-echo "Pre-commit hooks installed."
+pre-commit install --hook-type pre-push
+echo "Pre-commit hooks installed (commit + pre-push)."

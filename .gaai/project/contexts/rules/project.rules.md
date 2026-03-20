@@ -34,7 +34,7 @@ python3 -m pytest -x --timeout=60 -q
 9. Module size budget baseline in `module_size_budget_baseline.json` for modules exceeding default limits.
 10. No TODO/FIXME comments unless a tracked GitHub issue exists.
 11. Use `python3` — never bare `python`.
-12. Pre-push hook is broken (uses `pytest` instead of `python3 -m pytest`); use `--no-verify` for push.
+12. Pre-push hook uses `python3 -m pytest` (fixed in #2037). Run `pre-commit install --hook-type pre-push` after cloning.
 
 ## CI Watch (Post-PR)
 13. After creating a PR, invoke the `ci-watch-and-fix` skill to monitor CI and remediate failures.
