@@ -166,7 +166,7 @@
 ./scripts/pragmatic_programmer_review.py:182:            if "TODO" in content:
 ./scripts/pragmatic_programmer_review.py:192:                "title": f"High TODO count ({len(todos)})",
 ./scripts/pragmatic_programmer_review.py:195:                "recommendation": "Review TODOs",
-./scripts/setup_hooks.py:113:  - quality-check (no TODOs/FIXMEs)
+./scripts/setup_hooks.py:136:  - quality-check (no TODOs/FIXMEs)
 ./scripts/check_docs_governance.py:13:    ROOT / "docs" / "adr" / "ADR_TEMPLATE.md",
 ./scripts/check_docs_governance.py:61:        and p not in {"docs/adr/README.md", "docs/adr/ADR_TEMPLATE.md"}
 ./AGENTS.md:200:- ❌ **DO NOT** leave `TODO`/`FIXME` markers for more than one sprint.
