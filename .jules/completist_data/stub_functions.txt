@@ -396,6 +396,7 @@
 ./tests/unit/test_golf_launcher_logic.py:147 setToolTip
 ./tests/unit/test_golf_launcher_logic.py:180 setPixmap
 ./tests/unit/test_launcher_x11_logic.py:73 _start_meshcat_browser
+./tests/unit/test_plotting_extras.py:22 set_analysis_config
 ./tests/unit/test_launcher_ux.py:53 test_empty_state_ux
 ./tests/unit/test_security_and_module_fixes.py:64 test_production_env_without_secret_key_raises_runtime_error
 ./tests/unit/test_ux_enhancements.py:9 __init__
@@ -456,6 +457,7 @@
 ./tests/unit/test_golf_suite_launcher.py:137 clear
 ./tests/unit/test_golf_suite_launcher.py:145 __init__
 ./tests/unit/test_golf_suite_launcher.py:151 critical
+./tests/unit/test_plotting_renderers.py:32 set_analysis_config
 ./tests/unit/dashboard/test_recorder.py:26 load_from_path
 ./tests/unit/dashboard/test_recorder.py:29 load_from_string
 ./tests/unit/dashboard/test_recorder.py:32 reset
