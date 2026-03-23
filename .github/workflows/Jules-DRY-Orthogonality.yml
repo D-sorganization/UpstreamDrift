@@ -39,7 +39,7 @@ jobs:
       violations_found: ${{ steps.analyze.outputs.violations_found }}
       summary: ${{ steps.analyze.outputs.summary }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 20
 
@@ -190,7 +190,7 @@ jobs:
         category: [path, logging, imports, datetime, config, exceptions, env]
       max-parallel: 1
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Create/Update Issue for ${{ matrix.category }}
         env:

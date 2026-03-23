@@ -123,7 +123,7 @@ jobs:
             echo "exceeded=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         with:
           ref: ${{ steps.branch.outputs.branch }}

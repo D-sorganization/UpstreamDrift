@@ -28,7 +28,7 @@ jobs:
       issue_list: ${{ steps.prioritize.outputs.issues }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get open issues with auto-fix labels
         id: get_issues
@@ -113,7 +113,7 @@ jobs:
     if: contains(needs.prioritize-issues.outputs.issue_list, '526') || contains(github.event.inputs.issue_numbers, '526')
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -213,7 +213,7 @@ jobs:
     if: contains(needs.prioritize-issues.outputs.issue_list, '521') || contains(github.event.inputs.issue_numbers, '521')
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -324,7 +324,7 @@ jobs:
     if: contains(needs.prioritize-issues.outputs.issue_list, '525') || contains(github.event.inputs.issue_numbers, '525')
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Python
         uses: actions/setup-python@v6

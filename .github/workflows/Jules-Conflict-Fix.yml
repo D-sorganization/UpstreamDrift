@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor != 'jules-bot'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with: { node-version: "24" }
       - run: npm install -g @google/jules
