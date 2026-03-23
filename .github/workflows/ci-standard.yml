@@ -205,7 +205,7 @@ jobs:
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
           echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
