@@ -5,6 +5,7 @@ Provides realistic club specifications for different club types.
 
 from __future__ import annotations
 
+import functools
 import json
 from dataclasses import dataclass
 from typing import Any, cast  # noqa: ICN003
@@ -461,6 +462,7 @@ SHAFT_FLEX_DATA: dict[str, dict[str, Any]] = {
 }
 
 
+@functools.lru_cache(maxsize=256)
 def get_recommended_flex(swing_speed_mph: float) -> str:
     """Get recommended shaft flex for swing speed.
 

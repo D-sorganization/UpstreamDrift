@@ -29,6 +29,7 @@ Usage:
 
 from __future__ import annotations
 
+import functools
 import os
 from typing import TypeVar
 
@@ -287,6 +288,7 @@ def get_env_list(
     return items
 
 
+@functools.cache
 def get_environment() -> str:
     """Get the current deployment environment.
 
@@ -451,6 +453,7 @@ def require_env(name: str) -> str:
     return result
 
 
+@functools.cache
 def is_docker() -> bool:
     """Check if running inside a Docker container.
 
@@ -465,6 +468,7 @@ def is_docker() -> bool:
     )
 
 
+@functools.cache
 def is_wsl() -> bool:
     """Check if running in Windows Subsystem for Linux (WSL).
 

@@ -238,6 +238,7 @@ def get_engine_error(engine_name: str) -> Exception | None:
     return _engine_error_cache.get(engine_name.lower())
 
 
+@functools.lru_cache(maxsize=128)
 def is_engine_available(engine_name: str) -> bool:
     """Check if a physics engine or library is available."""
     return get_engine_status(engine_name) == EngineStatus.AVAILABLE
