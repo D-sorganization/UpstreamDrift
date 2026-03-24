@@ -326,15 +326,14 @@ _MODULE_HANDLERS = [
         module_name="src.engines.physics_engines.mujoco.python.humanoid_launcher",
         display_name="Comprehensive Golf Model",
     ),
+    ModuleHandler(
+        model_types={"drake", "drake_golf"},
+        module_name="src.engines.physics_engines.drake.python.src.drake_gui_app",
+        display_name="Drake Golf Model",
+    ),
 ]
 
 _SCRIPT_HANDLERS = [
-    ScriptHandler(
-        model_types={"drake", "drake_golf"},
-        script_path="src/engines/physics_engines/drake/python/src/drake_gui_app.py",
-        display_name="Drake Golf Model",
-        cwd_path="src/engines/physics_engines/drake/python",
-    ),
     ScriptHandler(
         model_types={"pinocchio", "pinocchio_golf"},
         script_path="src/engines/physics_engines/pinocchio/python/pinocchio_golf/main.py",

@@ -109,11 +109,29 @@ class ProcessManager:
         separator = ";" if os.name == "nt" else ":"
         current_paths = existing_path.split(separator) if existing_path else []
 
+        shared_python = str(self.repo_root / "src" / "shared" / "python")
+        mujoco_python = str(
+            self.repo_root / "src" / "engines" / "physics_engines" / "mujoco" / "python"
+        )
+        # Include conda site-packages for opensim/pinocchio if available.
+        # Use os.path to avoid WindowsPath instantiation issues on Linux.
+        conda_sp = os.path.join(
+            os.path.expanduser("~"),
+            "miniconda3",
+            "lib",
+            "python3.10",
+            "site-packages",
+        )
+
+        # repo_root and src are always added (required for imports).
+        # Optional extras are only added when the directory exists.
         paths_to_add = []
-        if repo_root_str not in current_paths:
-            paths_to_add.append(repo_root_str)
-        if src_dir not in current_paths:
-            paths_to_add.append(src_dir)
+        for p in [repo_root_str, src_dir]:
+            if p not in current_paths:
+                paths_to_add.append(p)
+        for p in [shared_python, mujoco_python, conda_sp]:
+            if p not in current_paths and os.path.isdir(p):
+                paths_to_add.append(p)
 
         if paths_to_add:
             new_paths = separator.join(paths_to_add)
@@ -235,6 +253,16 @@ class ProcessManager:
         try:
             process_env = env or self.get_subprocess_env()
 
+            # Diagnostic: log full launch details for debugging silent failures
+            logger.info(
+                "Launching script %s: cmd=[%s, %s], cwd=%s, PYTHONPATH=%s",
+                name,
+                sys.executable,
+                script_path,
+                cwd,
+                process_env.get("PYTHONPATH", "<unset>")[:300],
+            )
+
             if self.use_separate_terminals:
                 # Legacy: each engine gets its own console window
                 if os.name == "nt":
@@ -326,6 +354,16 @@ class ProcessManager:
                         if current_pythonpath
                         else ";".join(paths_to_add)
                     )
+
+            # Diagnostic: log full launch details for debugging silent failures
+            logger.info(
+                "Launching module %s: cmd=[%s, -m, %s], cwd=%s, PYTHONPATH=%s",
+                name,
+                sys.executable,
+                module_name,
+                cwd,
+                process_env.get("PYTHONPATH", "<unset>")[:300],
+            )
 
             if self.use_separate_terminals:
                 # Legacy: each engine gets its own console window

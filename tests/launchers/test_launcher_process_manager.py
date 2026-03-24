@@ -447,7 +447,10 @@ def test_get_subprocess_env_already_exists(manager):
     repo_str = str(manager.repo_root)
     src_str = str(manager.repo_root / "src")
 
-    with patch.dict("os.environ", {"PYTHONPATH": f"{repo_str}{os.pathsep}{src_str}"}):
+    with (
+        patch.dict("os.environ", {"PYTHONPATH": f"{repo_str}{os.pathsep}{src_str}"}),
+        patch("os.path.isdir", return_value=False),
+    ):
         env = manager.get_subprocess_env()
         # Should not append them twice
         assert env["PYTHONPATH"] == f"{repo_str}{os.pathsep}{src_str}"
