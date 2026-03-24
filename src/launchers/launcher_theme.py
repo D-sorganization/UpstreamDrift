@@ -76,14 +76,12 @@ class LauncherThemeMixin:
 
             self._theme_manager = ThemeManager.instance()
 
-            # Restore saved theme preference
-            self._theme_manager.load_saved_theme()
-
             # Apply matplotlib styling globally
             apply_golf_suite_style()
 
-            # Register callback for dynamic theme switching
-            self._theme_manager.on_theme_changed(self._on_theme_changed)
+            # Register callback for dynamic theme switching via Qt signal
+            if hasattr(self._theme_manager, "themeChanged"):
+                self._theme_manager.themeChanged.connect(self._on_theme_changed)
 
         except ImportError as e:
             logger.warning(f"Theme system unavailable: {e}")
@@ -109,7 +107,7 @@ class LauncherThemeMixin:
         if hasattr(self, "_theme_actions"):
             from src.shared.python.theme import ThemeManager
 
-            current = ThemeManager.instance().theme_name
+            current = ThemeManager.instance().get_current_theme_name()
             for action in self._theme_actions:
                 action.setChecked(action.text() == current)
 
@@ -141,24 +139,25 @@ class LauncherThemeMixin:
             for name, preset in preset_map.items():
                 action = QAction(name, self)
                 action.setCheckable(True)
-                action.setChecked(manager.theme_name == name)
-                action.triggered.connect(lambda checked, p=preset: manager.set_theme(p))
+                action.setChecked(manager.get_current_theme_name() == name)
+                action.triggered.connect(
+                    lambda checked, p=preset: manager.change_theme(p.value)
+                )
                 group.addAction(action)
                 theme_menu.addAction(action)
                 self._theme_actions.append(action)
 
-            # Fleet-wide themes
-            fleet_names = manager.get_available_fleet_themes()
-            if fleet_names:
+            # Additional built-in themes beyond the core presets
+            all_themes = manager.get_available_themes()
+            extra_themes = [t for t in all_themes if t not in preset_map]
+            if extra_themes:
                 theme_menu.addSeparator()
-                for fleet_name in fleet_names:
-                    if fleet_name in preset_map:
-                        continue
-                    action = QAction(fleet_name, self)
+                for theme_name in extra_themes:
+                    action = QAction(theme_name, self)
                     action.setCheckable(True)
-                    action.setChecked(manager.theme_name == fleet_name)
+                    action.setChecked(manager.get_current_theme_name() == theme_name)
                     action.triggered.connect(
-                        lambda checked, n=fleet_name: manager.set_fleet_theme(n)
+                        lambda checked, n=theme_name: manager.change_theme(n)
                     )
                     group.addAction(action)
                     theme_menu.addAction(action)
@@ -171,7 +170,7 @@ class LauncherThemeMixin:
                 for cname in custom_names:
                     action = QAction(cname, self)
                     action.setCheckable(True)
-                    action.setChecked(manager.theme_name == cname)
+                    action.setChecked(manager.get_current_theme_name() == cname)
                     action.triggered.connect(
                         lambda checked, n=cname: manager.change_theme(n)
                     )
