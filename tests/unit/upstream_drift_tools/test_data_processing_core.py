@@ -1,8 +1,9 @@
-"""Tests for src.shared.python.upstream_drift_tools.data_processing.core (Issues #1949, #1744)."""
+"""Tests for src.shared.python.upstream_drift_tools.data_processing.core (Issues #1949, #1744, #2065)."""
 
 from __future__ import annotations
 
 import pandas as pd
+import pytest
 
 from src.shared.python.upstream_drift_tools.data_processing.core import (
     AggregationType,
@@ -11,6 +12,10 @@ from src.shared.python.upstream_drift_tools.data_processing.core import (
     DataProcessorEngine,
     FitType,
     ProcessingResult,
+    _validate_dataframe_expression,
+)
+from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
+    TransformationError,
 )
 
 # ---------------------------------------------------------------------------
@@ -140,3 +145,73 @@ class TestDataProcessorEngineLoad:
         engine = DataProcessorEngine()
         result = engine.get_statistics()
         assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# Expression validation (security -- issue #2065)
+# ---------------------------------------------------------------------------
+
+
+class TestValidateDataframeExpression:
+    """Unit tests for the _validate_dataframe_expression guard in core."""
+
+    def test_safe_arithmetic_passes(self) -> None:
+        _validate_dataframe_expression("col_a + col_b")
+
+    def test_safe_comparison_passes(self) -> None:
+        _validate_dataframe_expression("velocity > 0")
+
+    def test_import_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("__import__('subprocess')")
+
+    def test_exec_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("exec('rm -rf /')")
+
+    def test_eval_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("eval('2+2')")
+
+    def test_dunder_attribute_rejected(self) -> None:
+        with pytest.raises(ValueError, match="dunder"):
+            _validate_dataframe_expression("x.__globals__")
+
+    def test_lambda_rejected(self) -> None:
+        with pytest.raises(ValueError, match="Disallowed"):
+            _validate_dataframe_expression("lambda: None")
+
+    def test_open_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("open('/etc/shadow')")
+
+    def test_syntax_error_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="Syntax error"):
+            _validate_dataframe_expression("=== bad")
+
+
+class TestDataProcessorEngineAddCalculatedColumn:
+    """Integration tests for add_calculated_column security (issue #2065)."""
+
+    def _loaded_engine(self) -> DataProcessorEngine:
+        engine = DataProcessorEngine()
+        df = pd.DataFrame({"x": [1.0, 2.0, 3.0], "y": [10.0, 20.0, 30.0]})
+        engine.load_dataframe(df)
+        return engine
+
+    def test_safe_expression_adds_column(self) -> None:
+        engine = self._loaded_engine()
+        result = engine.add_calculated_column("z", "x + y")
+        assert result.success is True
+        assert "z" in engine.data.columns
+        assert list(engine.data["z"]) == [11.0, 22.0, 33.0]
+
+    def test_exec_raises_transformation_error(self) -> None:
+        engine = self._loaded_engine()
+        with pytest.raises(TransformationError, match="forbidden name"):
+            engine.add_calculated_column("z", "exec('import os')")
+
+    def test_dunder_raises_transformation_error(self) -> None:
+        engine = self._loaded_engine()
+        with pytest.raises(TransformationError, match="dunder"):
+            engine.add_calculated_column("z", "x.__class__")

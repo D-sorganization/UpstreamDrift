@@ -1,11 +1,15 @@
-"""Tests for src.shared.python.data_processing.processor (Issues #1949, #1744)."""
+"""Tests for src.shared.python.data_processing.processor (Issues #1949, #1744, #2065)."""
 
 from __future__ import annotations
 
 import pandas as pd
 import pytest
 
-from src.shared.python.data_processing.processor import DataProcessor, DatasetInfo
+from src.shared.python.data_processing.processor import (
+    DataProcessor,
+    DatasetInfo,
+    _validate_dataframe_expression,
+)
 
 # ---------------------------------------------------------------------------
 # DatasetInfo dataclass
@@ -163,3 +167,74 @@ class TestDataProcessorDescribe:
         dp.load_dataframe(pd.DataFrame({"x": [1.0, 2.0, 3.0]}))
         result = dp.describe()
         assert isinstance(result, dict)
+
+
+# ---------------------------------------------------------------------------
+# Expression validation (security -- issue #2065)
+# ---------------------------------------------------------------------------
+
+
+class TestValidateDataframeExpression:
+    """Unit tests for the _validate_dataframe_expression guard."""
+
+    def test_safe_arithmetic_passes(self) -> None:
+        _validate_dataframe_expression("a + b * 2")
+
+    def test_safe_comparison_passes(self) -> None:
+        _validate_dataframe_expression("x > 0")
+
+    def test_safe_division_passes(self) -> None:
+        _validate_dataframe_expression("distance / time")
+
+    def test_import_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("__import__('os')")
+
+    def test_exec_name_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("exec('x=1')")
+
+    def test_eval_name_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("eval('1+1')")
+
+    def test_dunder_attribute_rejected(self) -> None:
+        with pytest.raises(ValueError, match="dunder"):
+            _validate_dataframe_expression("x.__class__")
+
+    def test_lambda_rejected(self) -> None:
+        with pytest.raises(ValueError, match="Disallowed"):
+            _validate_dataframe_expression("lambda x: x")
+
+    def test_open_name_rejected(self) -> None:
+        with pytest.raises(ValueError, match="forbidden name"):
+            _validate_dataframe_expression("open('/etc/passwd').read()")
+
+    def test_syntax_error_raises_value_error(self) -> None:
+        with pytest.raises(ValueError, match="Syntax error"):
+            _validate_dataframe_expression("a +* b")
+
+
+class TestDataProcessorApplyFormula:
+    """Integration tests for apply_formula security (issue #2065)."""
+
+    def _loaded_dp(self) -> DataProcessor:
+        dp = DataProcessor()
+        dp.load_dataframe(pd.DataFrame({"a": [1.0, 2.0, 3.0], "b": [4.0, 5.0, 6.0]}))
+        return dp
+
+    def test_apply_formula_safe_expression(self) -> None:
+        dp = self._loaded_dp()
+        dp.apply_formula("c", "a + b")
+        assert "c" in dp.dataframe.columns
+        assert list(dp.dataframe["c"]) == [5.0, 7.0, 9.0]
+
+    def test_apply_formula_rejects_exec(self) -> None:
+        dp = self._loaded_dp()
+        with pytest.raises(ValueError, match="forbidden name"):
+            dp.apply_formula("c", "exec('import os')")
+
+    def test_apply_formula_rejects_dunder(self) -> None:
+        dp = self._loaded_dp()
+        with pytest.raises(ValueError, match="dunder"):
+            dp.apply_formula("c", "a.__class__")

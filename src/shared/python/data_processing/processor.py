@@ -9,6 +9,7 @@ See issue #407.
 
 from __future__ import annotations
 
+import ast
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -18,6 +19,88 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 SUPPORTED_FILTER_TYPES = {"butterworth", "moving_average", "median", "savgol"}
+
+# ---------------------------------------------------------------------------
+# Expression validation (security -- issue #2065)
+# ---------------------------------------------------------------------------
+
+#: AST node types that must not appear in DataFrame.eval() expressions
+_DISALLOWED_EVAL_NODES: tuple[type, ...] = (
+    ast.Import,
+    ast.ImportFrom,
+    ast.Lambda,
+    ast.ListComp,
+    ast.DictComp,
+    ast.SetComp,
+    ast.GeneratorExp,
+    ast.Await,
+    ast.Yield,
+    ast.YieldFrom,
+    ast.Global,
+    ast.Nonlocal,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+)
+
+#: Bare names that must never appear in an expression
+_FORBIDDEN_NAMES: frozenset[str] = frozenset(
+    {
+        "__builtins__",
+        "__import__",
+        "__class__",
+        "__subclasses__",
+        "__globals__",
+        "__locals__",
+        "__code__",
+        "__dict__",
+        "exec",
+        "eval",
+        "compile",
+        "open",
+        "breakpoint",
+        "input",
+    }
+)
+
+
+def _validate_dataframe_expression(expression: str) -> None:
+    """Validate that *expression* is safe to pass to ``DataFrame.eval()``.
+
+    Raises ``ValueError`` for any expression that contains constructs which
+    could lead to arbitrary code execution (imports, lambdas, dunder
+    attribute access, forbidden built-in names, etc.).
+
+    This follows the same AST-validation approach used by
+    ``ExpressionFunction`` in the pendulum physics engine (see issue #2065).
+
+    Args:
+        expression: The expression string to validate.
+
+    Raises:
+        ValueError: If the expression contains disallowed syntax.
+    """
+    try:
+        tree = ast.parse(expression, mode="eval")
+    except SyntaxError as exc:
+        raise ValueError(f"Syntax error in expression: {exc}") from exc
+
+    for node in ast.walk(tree):
+        # Reject disallowed node types outright
+        if isinstance(node, _DISALLOWED_EVAL_NODES):
+            raise ValueError(
+                f"Disallowed construct in expression: {type(node).__name__}"
+            )
+
+        # Reject attribute access to dunder names (e.g. `x.__class__`)
+        if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+            raise ValueError(
+                f"Attribute access to dunder name '{node.attr}' is not permitted"
+            )
+
+        # Reject forbidden bare names
+        if isinstance(node, ast.Name) and node.id in _FORBIDDEN_NAMES:
+            raise ValueError(f"Use of forbidden name '{node.id}' is not permitted")
 
 
 @dataclass
@@ -347,9 +430,10 @@ class DataProcessor:
         """
         assert new_column is not None, "new_column must be provided"
         assert new_column is not None, "new_column must be provided"
+        # Security (issue #2065): validate the expression before passing to
+        # DataFrame.eval() which can execute arbitrary Python code.
+        _validate_dataframe_expression(expression)
         df = self.dataframe
-        # pandas DataFrame.eval() is safe -- it only resolves column names
-        # within the dataframe and does not execute arbitrary Python code.
         df[new_column] = df.eval(expression)
         self._history.append(f"Created column '{new_column}' = {expression}")
         return self

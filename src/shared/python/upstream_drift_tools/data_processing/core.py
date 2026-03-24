@@ -6,6 +6,7 @@ Ported from Gasification Model and ud-tools legacy Data Processor.
 
 from __future__ import annotations
 
+import ast
 import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -31,6 +32,88 @@ from .exceptions import (
 from .io import DataReader, DataWriter
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Expression validation (security -- issue #2065)
+# ---------------------------------------------------------------------------
+
+#: AST node types that must not appear in DataFrame.eval() expressions
+_DISALLOWED_EVAL_NODES: tuple[type, ...] = (
+    ast.Import,
+    ast.ImportFrom,
+    ast.Lambda,
+    ast.ListComp,
+    ast.DictComp,
+    ast.SetComp,
+    ast.GeneratorExp,
+    ast.Await,
+    ast.Yield,
+    ast.YieldFrom,
+    ast.Global,
+    ast.Nonlocal,
+    ast.FunctionDef,
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+)
+
+#: Bare names that must never appear in an expression
+_FORBIDDEN_NAMES: frozenset[str] = frozenset(
+    {
+        "__builtins__",
+        "__import__",
+        "__class__",
+        "__subclasses__",
+        "__globals__",
+        "__locals__",
+        "__code__",
+        "__dict__",
+        "exec",
+        "eval",
+        "compile",
+        "open",
+        "breakpoint",
+        "input",
+    }
+)
+
+
+def _validate_dataframe_expression(expression: str) -> None:
+    """Validate that *expression* is safe to pass to ``DataFrame.eval()``.
+
+    Raises ``ValueError`` for any expression that contains constructs which
+    could lead to arbitrary code execution (imports, lambdas, dunder
+    attribute access, forbidden built-in names, etc.).
+
+    This follows the same AST-validation approach used by
+    ``ExpressionFunction`` in the pendulum physics engine (see issue #2065).
+
+    Args:
+        expression: The expression string to validate.
+
+    Raises:
+        ValueError: If the expression contains disallowed syntax.
+    """
+    try:
+        tree = ast.parse(expression, mode="eval")
+    except SyntaxError as exc:
+        raise ValueError(f"Syntax error in expression: {exc}") from exc
+
+    for node in ast.walk(tree):
+        # Reject disallowed node types outright
+        if isinstance(node, _DISALLOWED_EVAL_NODES):
+            raise ValueError(
+                f"Disallowed construct in expression: {type(node).__name__}"
+            )
+
+        # Reject attribute access to dunder names (e.g. `x.__class__`)
+        if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
+            raise ValueError(
+                f"Attribute access to dunder name '{node.attr}' is not permitted"
+            )
+
+        # Reject forbidden bare names
+        if isinstance(node, ast.Name) and node.id in _FORBIDDEN_NAMES:
+            raise ValueError(f"Use of forbidden name '{node.id}' is not permitted")
 
 
 class DataFormat(Enum):
@@ -251,6 +334,12 @@ class DataProcessorEngine(BaseCalculationEngine):
             raise DataNotLoadedError("No data loaded")
         if not name:
             raise TransformationError("Column name must not be empty")
+        # Security (issue #2065): validate the expression before passing to
+        # DataFrame.eval() which can execute arbitrary Python code.
+        try:
+            _validate_dataframe_expression(expression)
+        except ValueError as exc:
+            raise TransformationError(str(exc)) from exc
         self._save_undo_state()
         try:
             self.data[name] = self.data.eval(expression)
