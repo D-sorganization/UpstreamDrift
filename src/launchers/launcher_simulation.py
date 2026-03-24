@@ -88,13 +88,13 @@ import sys
 import os
 try:
     import {module_name}
-    print("OK")
+    sys.stdout.write("OK\\n")
 except ImportError as e:
-    print(f"ImportError: {{e}}")
+    sys.stdout.write(f"ImportError: {{e}}\\n")
 except OSError as e:
-    print(f"OSError: {{e}}")
+    sys.stdout.write(f"OSError: {{e}}\\n")
 except (RuntimeError, TypeError, AttributeError) as e:
-    print(f"Error: {{type(e).__name__}}: {{e}}")
+    sys.stdout.write(f"Error: {{type(e).__name__}}: {{e}}\\n")
 """
         try:
             result = subprocess.run(
@@ -217,7 +217,17 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.lbl_status.setText(f"* {model.name} Running")
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             else:
-                self.show_toast(f"Failed to launch {model.name}", "error")
+                # Diagnostic: log why launch failed for debugging silent failures
+                logger.error(
+                    "Launch failed for %s (type=%s, path=%s, handler=%s)",
+                    model.name,
+                    model.type,
+                    getattr(model, "path", "N/A"),
+                    type(handler).__name__,
+                )
+                self.show_toast(
+                    f"Failed to launch {model.name} — check console", "error"
+                )
                 self.lbl_status.setText("* Launch Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
         elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
