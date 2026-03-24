@@ -424,7 +424,7 @@ class DrakePerturbationAnalyzer:
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -518,7 +518,7 @@ class DrakePerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except Exception as e:  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 

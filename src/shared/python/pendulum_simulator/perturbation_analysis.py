@@ -232,7 +232,7 @@ def batch_perturb_and_simulate(
             sim_result = simulate_fn(perturbed)
             metrics = extract_fn(sim_result)
             results.append(metrics)
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             continue
 
     return results
