@@ -43,6 +43,33 @@ class MujocoUnifiedLauncher(BaseLauncher):
             ),
         ]
 
+    @staticmethod
+    def _get_launch_env() -> dict[str, str]:
+        """Build environment dict with PYTHONPATH for subprocess launches."""
+        import os
+
+        env = os.environ.copy()
+        paths = [
+            str(REPO_ROOT),
+            str(REPO_ROOT / "src"),
+            str(REPO_ROOT / "src" / "shared" / "python"),
+            str(
+                REPO_ROOT / "src" / "engines" / "physics_engines" / "mujoco" / "python"
+            ),
+            str(
+                REPO_ROOT
+                / "src"
+                / "engines"
+                / "physics_engines"
+                / "mujoco"
+                / "python"
+                / "mujoco_humanoid_golf"
+            ),
+        ]
+        existing = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = os.pathsep.join(paths + ([existing] if existing else []))
+        return env
+
     def _launch_python_script(self, relative_path: str) -> None:
         """Launch a Python script in a new process.
 
@@ -57,7 +84,8 @@ class MujocoUnifiedLauncher(BaseLauncher):
             return
 
         try:
-            subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT)
+            env = self._get_launch_env()
+            subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT, env=env)
         except (FileNotFoundError, PermissionError, OSError) as e:
             self.show_error("Launch Error", str(e))
 
@@ -77,9 +105,11 @@ class MujocoUnifiedLauncher(BaseLauncher):
             cwd = REPO_ROOT / cwd_suffix
 
         try:
+            env = self._get_launch_env()
             subprocess.Popen(
                 [sys.executable, "-m", module_name],
                 cwd=cwd,
+                env=env,
             )
         except (FileNotFoundError, PermissionError, OSError) as e:
             self.show_error("Launch Error", str(e))
