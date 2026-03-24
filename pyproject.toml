@@ -290,8 +290,8 @@ markers = [
     "requires_gpu: marks tests that require a GPU (skip with '-m not requires_gpu')",
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::PendingDeprecationWarning",
+    # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)
+    "ignore:Please update your 'hppfcl' imports to 'coal':DeprecationWarning:hppfcl",
 ]
 
 # ---------------------------------------------------------------------------

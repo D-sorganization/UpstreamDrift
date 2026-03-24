@@ -190,7 +190,10 @@ class SimulationService:
 
             result = await self.run_simulation(request)
 
-            active_tasks[task_id] = {"status": "completed", "result": result.dict()}
+            active_tasks[task_id] = {
+                "status": "completed",
+                "result": result.model_dump(),
+            }
 
         except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
             active_tasks[task_id] = {"status": "failed", "error": str(e)}

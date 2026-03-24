@@ -19,6 +19,8 @@ API Versioning (#1488):
 """
 
 import os
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import Any
 
 import uvicorn
@@ -58,6 +60,96 @@ limiter = Limiter(key_func=get_remote_address)
 # API version constant
 API_VERSION = "v1"
 API_PREFIX = f"/api/{API_VERSION}"
+
+
+def _init_video_pipeline() -> Any:
+    """Initialize the video pose pipeline, returning None on failure.
+
+    Extracted from startup_event for SRP and testability.
+    """
+    try:
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+            VideoProcessingConfig,
+        )
+
+        video_config = VideoProcessingConfig(
+            estimator_type="mediapipe",
+            min_confidence=0.5,
+            enable_temporal_smoothing=True,
+        )
+        return VideoPosePipeline(video_config)
+    except ImportError as e:
+        logger.info("MediaPipe not installed, video features disabled: %s", e)
+    except AttributeError as e:
+        logger.warning(
+            "MediaPipe installed but incompatible, video features disabled: %s",
+            e,
+        )
+    except OSError as e:
+        logger.warning(
+            "Video pipeline failed to initialize (camera/device issue): %s", e
+        )
+    except RuntimeError as e:
+        logger.warning("Video pipeline runtime initialization failed: %s", e)
+    return None
+
+
+# Background task storage with TTL cleanup and concurrency limits
+active_tasks = TaskManager()
+
+
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:  # type: ignore[type-arg]
+    """Manage application lifespan: startup and shutdown.
+
+    All services are stored in app.state for proper dependency injection
+    via FastAPI's Depends() mechanism. This enables:
+    - Better testability (dependencies can be overridden)
+    - Cleaner separation of concerns
+    - Type-safe dependency resolution
+    """
+    try:
+        # Initialize database (Issue #544)
+        logger.info("Initializing database...")
+        init_db()
+        logger.info("Database initialized successfully")
+
+        # Initialize engine manager
+        engine_manager = EngineManager()
+        fastapi_app.state.engine_manager = engine_manager
+        logger.info("Engine manager initialized")
+
+        # Initialize services and store in app.state for dependency injection
+        fastapi_app.state.simulation_service = SimulationService(engine_manager)
+        fastapi_app.state.analysis_service = AnalysisService(engine_manager)
+        fastapi_app.state.task_manager = active_tasks
+        fastapi_app.state.logger = logger
+
+        # Initialize video pipeline with default config
+        video_pipeline = _init_video_pipeline()
+        fastapi_app.state.video_pipeline = video_pipeline
+
+        # All routes now use FastAPI Depends() for dependency injection.
+        # No legacy configure() calls needed.
+
+        logger.info("Golf Modeling Suite API %s started successfully", API_PREFIX)
+
+    except OSError as e:
+        logger.error("Database or file system error during initialization: %s", e)
+        raise
+    except ImportError as e:
+        logger.error("Missing required dependency: %s", e)
+        raise
+    except RuntimeError as e:
+        logger.error("Engine initialization failed: %s", e)
+        raise
+    except (TypeError, AttributeError) as e:
+        logger.exception("Unexpected error during API initialization: %s", e)
+        raise
+
+    yield
+
 
 # Initialize FastAPI app with enhanced OpenAPI metadata (#1488)
 app = FastAPI(
@@ -108,6 +200,7 @@ app = FastAPI(
         503: {"description": "Service not initialized"},
         429: {"description": "Rate limit exceeded"},
     },
+    lifespan=lifespan,
 )
 
 # Security middleware
@@ -143,92 +236,6 @@ app.middleware("http")(_tracer.trace_request)
 
 # All services are stored in app.state and accessed via Depends() in routes.
 # No module-level mutable state in route modules.
-
-# Background task storage with TTL cleanup and concurrency limits
-active_tasks = TaskManager()
-
-
-@app.on_event("startup")
-async def startup_event() -> None:
-    """Initialize services on startup.
-
-    All services are stored in app.state for proper dependency injection
-    via FastAPI's Depends() mechanism. This enables:
-    - Better testability (dependencies can be overridden)
-    - Cleaner separation of concerns
-    - Type-safe dependency resolution
-    """
-    try:
-        # Initialize database (Issue #544)
-        logger.info("Initializing database...")
-        init_db()
-        logger.info("Database initialized successfully")
-
-        # Initialize engine manager
-        engine_manager = EngineManager()
-        app.state.engine_manager = engine_manager
-        logger.info("Engine manager initialized")
-
-        # Initialize services and store in app.state for dependency injection
-        app.state.simulation_service = SimulationService(engine_manager)
-        app.state.analysis_service = AnalysisService(engine_manager)
-        app.state.task_manager = active_tasks
-        app.state.logger = logger
-
-        # Initialize video pipeline with default config
-        video_pipeline = _init_video_pipeline()
-        app.state.video_pipeline = video_pipeline
-
-        # All routes now use FastAPI Depends() for dependency injection.
-        # No legacy configure() calls needed.
-
-        logger.info("Golf Modeling Suite API %s started successfully", API_PREFIX)
-
-    except OSError as e:
-        logger.error("Database or file system error during initialization: %s", e)
-        raise
-    except ImportError as e:
-        logger.error("Missing required dependency: %s", e)
-        raise
-    except RuntimeError as e:
-        logger.error("Engine initialization failed: %s", e)
-        raise
-    except (TypeError, AttributeError) as e:
-        logger.exception("Unexpected error during API initialization: %s", e)
-        raise
-
-
-def _init_video_pipeline() -> Any:
-    """Initialize the video pose pipeline, returning None on failure.
-
-    Extracted from startup_event for SRP and testability.
-    """
-    try:
-        from src.shared.python.gui_pkg.video_pose_pipeline import (
-            VideoPosePipeline,
-            VideoProcessingConfig,
-        )
-
-        video_config = VideoProcessingConfig(
-            estimator_type="mediapipe",
-            min_confidence=0.5,
-            enable_temporal_smoothing=True,
-        )
-        return VideoPosePipeline(video_config)
-    except ImportError as e:
-        logger.info("MediaPipe not installed, video features disabled: %s", e)
-    except AttributeError as e:
-        logger.warning(
-            "MediaPipe installed but incompatible, video features disabled: %s",
-            e,
-        )
-    except OSError as e:
-        logger.warning(
-            "Video pipeline failed to initialize (camera/device issue): %s", e
-        )
-    except RuntimeError as e:
-        logger.warning("Video pipeline runtime initialization failed: %s", e)
-    return None
 
 
 # ── Route Registration ──────────────────────────────────────────

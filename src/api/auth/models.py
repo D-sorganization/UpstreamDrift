@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -15,7 +15,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.sql import func
 
 # Create the base class for SQLAlchemy models
@@ -23,7 +23,7 @@ Base = declarative_base()
 
 if TYPE_CHECKING:
     # For type checking, we need to tell MyPy that Base is a class
-    from sqlalchemy.ext.declarative import DeclarativeMeta
+    from sqlalchemy.orm import DeclarativeMeta
 
     Base = DeclarativeMeta
 
@@ -187,6 +187,8 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     """User response model (excludes sensitive data)."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     role: UserRole
     is_active: bool
@@ -197,9 +199,6 @@ class UserResponse(UserBase):
     simulations_this_month: int
     created_at: datetime
     last_login: datetime | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class LoginRequest(BaseModel):
@@ -230,6 +229,8 @@ class APIKeyCreate(BaseModel):
 class APIKeyResponse(BaseModel):
     """API key response model."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     key: str | None = None  # Only returned on creation
@@ -238,9 +239,6 @@ class APIKeyResponse(BaseModel):
     usage_count: int
     created_at: datetime
     expires_at: datetime | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class UsageQuotas(BaseModel):
