@@ -74,3 +74,23 @@ class BiomechanicalData:
     # Counterfactual Data (e.g. ZTCF, ZVCF results for this timestep)
     # Key: Counterfactual Name (e.g. 'ztcf_pos', 'zvcf_force'), Value: Data array
     counterfactuals: dict[str, np.ndarray] = field(default_factory=dict)
+
+    # ZTCF (Zero-Torque Counterfactual) joint forces
+    # Forces at each joint under zero applied torque (passive drift component).
+    # Shape: (n_joints, n_dims) — same layout as joint_forces.
+    ztcf_joint_forces: np.ndarray = field(
+        default_factory=lambda: np.array([]),
+    )
+
+    # ZTCF generalized accelerations (qddot under zero torque)
+    # Shape: (n_dof,) — angular accelerations with no driving torques.
+    ztcf_accelerations: np.ndarray = field(
+        default_factory=lambda: np.array([]),
+    )
+
+    # Active control force delta: total joint_forces − ztcf_joint_forces.
+    # Represents the contribution solely from applied joint torques.
+    # Shape: (n_joints, n_dims) — same layout as joint_forces.
+    force_delta: np.ndarray = field(
+        default_factory=lambda: np.array([]),
+    )
