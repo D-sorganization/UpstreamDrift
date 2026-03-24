@@ -94,12 +94,15 @@ jobs:
           pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703
 
       # SECURITY: Bandit static security analysis (Issue #782)
+      # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
       - name: Bandit Security Scan
         run: |
-          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1 || true)"
+          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1)"
+          exit_code=$?
           echo "$bandit_output"
           echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
           echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
+          exit $exit_code
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
