@@ -21,7 +21,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from contracts import ensure, require
+from src.shared.python.contracts import ensure, require
 
 logger = logging.getLogger(__name__)
 

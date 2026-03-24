@@ -11,10 +11,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-try:
-    from src.shared.python.contracts import require
-except ImportError:
-    from contracts import require  # type: ignore[no-redef]
+from src.shared.python.contracts import require
 
 
 @dataclass

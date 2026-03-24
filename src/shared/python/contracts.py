@@ -1,7 +1,18 @@
 """Design by Contract (DbC) enforcement for the Tools platform.
 
-This module provides lightweight helpers and decorators for enforcing
-pre-conditions, post-conditions, and invariants at runtime.
+This is the **canonical** DbC implementation for ``src/shared/python``.
+Domain-specific shims in sub-packages (e.g.
+``humanoid_character_builder.contracts`` and
+``model_generation.core.contracts``) re-export from this module for
+backward compatibility.  All new code should import directly from here::
+
+    from src.shared.python.contracts import require, ensure, precondition
+
+Relationship to ``src/shared/python/core/contracts/``:
+    That package is a separately evolved contracts implementation used by
+    the ``src/shared/python/core/`` sub-system.  The two implementations
+    are intentionally distinct; this module is the authoritative source
+    for the wider platform.
 
 Enforcement Levels (controlled via ``DBC_LEVEL`` environment variable):
   - ``enforce`` (default): Raise ``ContractViolationError`` on failure.

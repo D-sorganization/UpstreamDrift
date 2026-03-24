@@ -33,15 +33,12 @@ import numpy as np
 try:
     from src.shared.python.contracts import require  # noqa: I001
 except ImportError:
-    try:
-        from contracts import require  # type: ignore[no-redef]  # noqa: I001
-    except ImportError:
 
-        def require(condition: bool, *args: object) -> None:  # type: ignore[misc]
-            """Fallback require() when contracts module is unavailable."""
-            if not condition:
-                msg = args[0] if args else "Precondition violated"
-                raise AssertionError(msg)
+    def require(condition: bool, *args: object) -> None:  # type: ignore[misc]
+        """Fallback require() when contracts module is unavailable."""
+        if not condition:
+            msg = args[0] if args else "Precondition violated"
+            raise AssertionError(msg)
 
 
 __all__ = [

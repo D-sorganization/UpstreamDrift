@@ -16,7 +16,7 @@ import pytest
 # Ensure contracts are enforced during testing
 os.environ["DBC_LEVEL"] = "enforce"
 
-from contracts import ContractViolationError  # noqa: E402
+from src.shared.python.contracts import ContractViolationError  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Sample URDF fixtures
@@ -457,7 +457,7 @@ class TestBaseURDFBuilderInvariants:
 
     def test_check_invariants_dangling_joint_parent(self):
         """Joint referencing nonexistent parent raises InvariantError."""
-        from contracts import InvariantError
+        from src.shared.python.contracts import InvariantError
 
         ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
             self._create_concrete_builder()
@@ -481,7 +481,7 @@ class TestBaseURDFBuilderInvariants:
 
     def test_check_invariants_dangling_joint_child(self):
         """Joint referencing nonexistent child raises InvariantError."""
-        from contracts import InvariantError
+        from src.shared.python.contracts import InvariantError
 
         ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
             self._create_concrete_builder()
@@ -505,7 +505,7 @@ class TestBaseURDFBuilderInvariants:
 
     def test_check_invariants_duplicate_link_names(self):
         """Duplicate link names raise InvariantError."""
-        from contracts import InvariantError
+        from src.shared.python.contracts import InvariantError
 
         ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
             self._create_concrete_builder()
@@ -523,7 +523,7 @@ class TestBaseURDFBuilderInvariants:
 
     def test_check_invariants_duplicate_joint_names(self):
         """Duplicate joint names raise InvariantError."""
-        from contracts import InvariantError
+        from src.shared.python.contracts import InvariantError
 
         ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
             self._create_concrete_builder()
