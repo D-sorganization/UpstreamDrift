@@ -3,8 +3,6 @@ Engine Manager for Golf Modeling Suite.
 
 This module provides unified management of different physics engines
 including MuJoCo, Drake, Pinocchio, OpenSim, MATLAB models, and pendulum models.
-
-OBS-001: Migrated to structured logging with structlog for better observability.
 """
 
 from collections.abc import Callable
@@ -210,25 +208,23 @@ class EngineManager(ContractChecker):
             if engine_path.exists():
                 self.engine_status[engine_type] = EngineStatus.AVAILABLE
                 logger.info(
-                    "engine_discovered",
-                    engine=engine_type.value,
-                    path=str(engine_path),
-                    status="available",
+                    "engine_discovered engine=%s path=%s status=available",
+                    engine_type.value,
+                    engine_path,
                 )
             else:
                 self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
                 logger.warning(
-                    "engine_not_found",
-                    engine=engine_type.value,
-                    path=str(engine_path),
-                    status="unavailable",
+                    "engine_not_found engine=%s path=%s status=unavailable",
+                    engine_type.value,
+                    engine_path,
                 )
 
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine."""
         assert engine_type is not None, "engine_type must be provided"
         assert engine_type is not None, "engine_type must be provided"
-        logger.info("engine_loading_started", engine=engine_type.value)
+        logger.info("engine_loading_started engine=%s", engine_type.value)
         self.engine_status[engine_type] = EngineStatus.LOADING
         self.active_physics_engine = None
 
@@ -250,9 +246,8 @@ class EngineManager(ContractChecker):
 
             self.engine_status[engine_type] = EngineStatus.LOADED
             logger.info(
-                "engine_loaded_successfully",
-                engine=engine_type.value,
-                status="loaded",
+                "engine_loaded_successfully engine=%s status=loaded",
+                engine_type.value,
             )
 
         except GolfModelingError:
@@ -261,9 +256,9 @@ class EngineManager(ContractChecker):
         except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
             self.engine_status[engine_type] = EngineStatus.ERROR
             logger.error(
-                "engine_load_failed",
-                engine=engine_type.value,
-                error=str(e),
+                "engine_load_failed engine=%s error=%s",
+                engine_type.value,
+                e,
                 exc_info=True,
             )
             raise EngineLaunchError(engine_type.value, reason=str(e)) from e
@@ -277,10 +272,8 @@ class EngineManager(ContractChecker):
             import matlab.engine
 
             logger.info(
-                "matlab_engine_starting",
-                engine=engine_type.value,
-                timeout_seconds=60,
-                note="This may take 30-60 seconds",
+                "matlab_engine_starting engine=%s timeout_seconds=60 (This may take 30-60 seconds)",
+                engine_type.value,
             )
             # REL-001: Add timeout to prevent infinite hangs
             engine = matlab.engine.start_matlab(timeout=60.0)
@@ -295,15 +288,14 @@ class EngineManager(ContractChecker):
             self._matlab_engine = engine
             self._matlab_model_dir = model_dir
             logger.info(
-                "matlab_engine_loaded",
-                engine=engine_type.value,
-                model_dir=str(model_dir),
+                "matlab_engine_loaded engine=%s model_dir=%s",
+                engine_type.value,
+                model_dir,
             )
 
         except ImportError as e:
             logger.error(
-                "matlab_engine_import_failed",
-                error="MATLAB Engine for Python not installed",
+                "matlab_engine_import_failed: MATLAB Engine for Python not installed",
                 exc_info=True,
             )
             raise GolfModelingError("MATLAB Engine for Python not installed.") from e
@@ -313,10 +305,10 @@ class EngineManager(ContractChecker):
         if self._matlab_engine is not None:
             try:
                 self._matlab_engine.quit()
-                logger.info("matlab_engine_shutdown", status="success")
+                logger.info("matlab_engine_shutdown status=success")
             except (RuntimeError, OSError) as e:
                 logger.warning(
-                    "matlab_engine_shutdown_failed", error=str(e), exc_info=True
+                    "matlab_engine_shutdown_failed error=%s", e, exc_info=True
                 )
             self._matlab_engine = None
 

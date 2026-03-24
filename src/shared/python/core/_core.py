@@ -3,14 +3,20 @@
 This module contains base exceptions and logging setup that do not require
 heavy dependencies like numpy, pandas, or matplotlib.
 
-OBS-001: Added structured logging with structlog for production-ready observability.
+Logging strategy: stdlib ``logging`` is the canonical logging mechanism for
+this codebase.  Structured logging configuration (including optional structlog
+processors) lives in ``logging_pkg.logging_config`` and is applied at
+application start-up via ``setup_logging()`` / ``setup_structured_logging()``.
+Callers should obtain loggers with ``get_logger(__name__)`` rather than calling
+``logging.getLogger(__name__)`` directly so that any future pipeline changes
+propagate automatically.
+
+See GitHub issue #2061 for the rationale behind removing the per-module
+structlog configuration that previously lived here.
 """
 
 import logging
 import sys
-from typing import Any, cast
-
-import structlog
 
 from .exceptions import DataFormatError, EngineNotFoundError, GolfModelingError
 
@@ -25,7 +31,7 @@ __all__ = [
 
 
 def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
-    """Set up consistent logging across all engines (legacy).
+    """Set up consistent logging across all engines.
 
     Args:
         name: Logger name (typically __name__)
@@ -33,12 +39,7 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
 
     Returns:
         Configured logger instance
-
-    Note:
-        This is the legacy logging setup. For new code, consider using
-        setup_structured_logging() and get_logger() for better observability.
     """
-    assert name is not None, "name must be provided"
     assert name is not None, "name must be provided"
     logger = logging.getLogger(name)
     logger.setLevel(level)
@@ -54,132 +55,60 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-# Mutable holder to track if structured logging has been configured (avoids 'global')
-_logging_state: dict[str, bool] = {"configured": False}
-
-
-def _build_base_processors() -> list[Any]:
-    return [
-        structlog.stdlib.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.CallsiteParameterAdder(
-            parameters={
-                structlog.processors.CallsiteParameter.FILENAME,
-                structlog.processors.CallsiteParameter.FUNC_NAME,
-                structlog.processors.CallsiteParameter.LINENO,
-            }
-        ),
-        structlog.processors.format_exc_info,
-        structlog.processors.StackInfoRenderer(),
-    ]
-
-
-def _build_output_processors(json_output: bool, dev_mode: bool) -> list[Any]:
-    assert json_output is not None, "json_output must be provided"
-    assert json_output is not None, "json_output must be provided"
-    if dev_mode and not json_output:
-        return [
-            structlog.dev.ConsoleRenderer(
-                colors=True,
-                exception_formatter=structlog.dev.plain_traceback,
-            )
-        ]
-    if json_output:
-        return [
-            structlog.processors.dict_tracebacks,
-            structlog.processors.JSONRenderer(),
-        ]
-    return [structlog.processors.KeyValueRenderer()]
-
-
-def _apply_structlog_config(processors: list[Any], level: int) -> None:
-    structlog.configure(
-        processors=processors,
-        wrapper_class=structlog.make_filtering_bound_logger(level),
-        context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(),
-        cache_logger_on_first_use=True,
-    )
-
-
 def setup_structured_logging(
     level: int = logging.INFO,
     json_output: bool = False,
     dev_mode: bool = True,
 ) -> None:
-    """Configure structured logging with structlog.
+    """Configure logging for the Golf Modeling Suite.
 
-    OBS-001: Production-ready structured logging configuration.
-
-    This function configures structlog with:
-    - Timestamp processing
-    - Log level filtering
-    - Stack info extraction
-    - Exception formatting
-    - Optional JSON output for production
-    - Console-friendly output for development
+    Delegates to the canonical ``logging_pkg.logging_config.setup_logging``
+    so that all configuration (including optional structlog processors and
+    sensitive-data redaction) is applied in one place.
 
     Args:
         level: Minimum log level (default: logging.INFO)
-        json_output: If True, output JSON; if False, use human-readable format
-        dev_mode: If True, enable development-friendly features (colors, pretty printing)
-
-    Example:
-        >>> from shared.python.core import setup_structured_logging, get_logger
-        >>> setup_structured_logging(level=logging.DEBUG, dev_mode=True)
-        >>> logger = get_logger(__name__)
-        >>> logger.info("simulation_started", engine="mujoco", duration=2.5)
+        json_output: If True, request JSON output (passed through to
+            ``logging_config.setup_logging`` when structlog is available).
+        dev_mode: If True, enable development-friendly features.
     """
-    assert level is not None, "level must be provided"
-    assert level is not None, "level must be provided"
-    import threading
+    try:
+        from src.shared.python.logging_pkg.logging_config import (
+            setup_logging as _canonical_setup,
+        )
 
-    _logging_lock = threading.Lock()
-
-    if _logging_state["configured"]:
-        return
-
-    with _logging_lock:
-        if _logging_state["configured"]:
-            return
-
-    logging.basicConfig(
-        format="%(message)s",
-        stream=sys.stdout,
-        level=level,
-    )
-
-    processors = _build_base_processors()
-    processors.extend(_build_output_processors(json_output, dev_mode))
-    _apply_structlog_config(processors, level)
-
-    _logging_state["configured"] = True
+        _canonical_setup(
+            level=level,
+            json_output=json_output,
+            dev_mode=dev_mode,
+        )
+    except ImportError:
+        # Fallback when running in a minimal environment without the full package
+        logging.basicConfig(
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            stream=sys.stdout,
+            level=level,
+        )
 
 
-def get_logger(name: str) -> structlog.stdlib.BoundLogger:
-    """Get a structured logger instance.
+def get_logger(name: str) -> logging.Logger:
+    """Get a stdlib logger instance.
 
-    OBS-001: Structured logger with rich contextual information.
+    This is the standard way to obtain a logger throughout the codebase.
+    All modules should use this function rather than calling
+    ``logging.getLogger()`` directly, so that any future changes to the
+    logging pipeline (e.g. adding handlers or processors) can be made in
+    one place.
 
     Args:
-        name: Logger name (typically __name__)
+        name: Logger name (typically ``__name__``)
 
     Returns:
-        Structured logger that supports:
-        - Keyword arguments for structured data
-        - Method chaining with bind()
-        - Automatic context propagation
+        :class:`logging.Logger` instance.
 
     Example:
+        >>> from src.shared.python.core import get_logger
         >>> logger = get_logger(__name__)
-        >>> logger.info("processing_file", filename="data.csv", size_mb=12.5)
-        >>> # Bind persistent context
-        >>> request_logger = logger.bind(request_id="abc-123")
-        >>> request_logger.info("request_started")
-        >>> request_logger.info("request_completed", duration_ms=250)
+        >>> logger.info("simulation_started")
     """
-    # Ensure structured logging is configured with defaults
-    if not _logging_state["configured"]:
-        setup_structured_logging()
-
-    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
+    return logging.getLogger(name)

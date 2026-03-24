@@ -121,9 +121,9 @@ class OutputManager:
         }
 
         logger.info(
-            "output_manager_initialized",
-            base_path=str(self.base_path),
-            num_directories=len(self.directories),
+            "output_manager_initialized base_path=%s num_directories=%d",
+            self.base_path,
+            len(self.directories),
         )
 
     def create_output_structure(self) -> None:
@@ -222,20 +222,20 @@ class OutputManager:
             )
 
             logger.info(
-                "simulation_results_saved",
-                file_path=str(file_path),
-                format=format_type.value,
-                engine=engine,
+                "simulation_results_saved file_path=%s format=%s engine=%s",
+                file_path,
+                format_type.value,
+                engine,
             )
             return file_path
 
         except (FileNotFoundError, PermissionError, OSError) as e:
             logger.error(
-                "simulation_save_failed",
-                filename=filename,
-                format=format_type.value,
-                engine=engine,
-                error=str(e),
+                "simulation_save_failed filename=%s format=%s engine=%s error=%s",
+                filename,
+                format_type.value,
+                engine,
+                e,
                 exc_info=True,
             )
             raise
@@ -409,10 +409,10 @@ class OutputManager:
 
         future = executor.submit(_save_task)
         logger.debug(
-            "async_save_submitted",
-            filename=filename,
-            format=format_type.value,
-            engine=engine,
+            "async_save_submitted filename=%s format=%s engine=%s",
+            filename,
+            format_type.value,
+            engine,
         )
         return future
 
@@ -451,9 +451,9 @@ class OutputManager:
                     on_error(result)
                 else:
                     logger.error(
-                        "background_save_failed",
-                        filename=filename,
-                        error=str(result),
+                        "background_save_failed filename=%s error=%s",
+                        filename,
+                        result,
                     )
             elif on_complete:
                 on_complete(result)
@@ -743,9 +743,9 @@ class OutputManager:
                         continue
 
         logger.info(
-            "cleanup_completed",
-            files_cleaned=cleaned_count,
-            max_age_days=max_age_days,
+            "cleanup_completed files_cleaned=%d max_age_days=%s",
+            cleaned_count,
+            max_age_days,
         )
         return cleaned_count
 
