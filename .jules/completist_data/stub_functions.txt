@@ -18,7 +18,7 @@
 ./src/unreal_integration/viewer_backends.py:285 render
 ./src/unreal_integration/skeleton.py:46 __post_init__
 ./src/unreal_integration/geometry.py:61 __post_init__
-./src/launchers/golf_launcher.py:302 create_model_card
+./src/launchers/golf_launcher.py:310 create_model_card
 ./src/launchers/launcher_model_handlers.py:29 can_handle
 ./src/launchers/launcher_model_handlers.py:33 launch
 ./src/launchers/base.py:318 get_items
