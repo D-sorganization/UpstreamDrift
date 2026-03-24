@@ -625,7 +625,19 @@ class DrakePerturbationAnalyzer:
             else:
                 joint_polys.append(np.array([0.0]))
 
-        # Manual Euler integration (avoids Simulator complexity for short sims)
+        # Runge-Kutta 4 integration
+        def compute_a(q_val: np.ndarray, v_val: np.ndarray, t_val: float) -> np.ndarray:
+            plant.SetPositions(plant_context, q_val)
+            plant.SetVelocities(plant_context, v_val)
+            tau_val = np.array(
+                [float(np.polyval(joint_polys[j], t_val)) for j in range(nu)]
+            )
+            plant.get_actuation_input_port().FixValue(plant_context, tau_val)
+            M_val = plant.CalcMassMatrixViaInverseDynamics(plant_context)
+            bias_val = plant.CalcBiasTerm(plant_context)
+            gravity_val = plant.CalcGravityGeneralizedForces(plant_context)
+            return np.linalg.solve(M_val, tau_val - bias_val + gravity_val)  # type: ignore[no-any-return]
+
         q = np.zeros(nq)
         v = np.zeros(nv)
         t = 0.0
@@ -637,23 +649,20 @@ class DrakePerturbationAnalyzer:
 
         n_steps = max(2, int(self._t_end / dt))
         for _ in range(n_steps):
-            tau = np.array([float(np.polyval(joint_polys[j], t)) for j in range(nu)])
+            k1_v = compute_a(q, v, t)
+            k1_q = v
 
-            # Set plant state and compute accelerations
-            plant.SetPositions(plant_context, q)
-            plant.SetVelocities(plant_context, v)
-            plant.get_actuation_input_port().FixValue(plant_context, tau)
+            k2_v = compute_a(q + 0.5 * dt * k1_q, v + 0.5 * dt * k1_v, t + 0.5 * dt)
+            k2_q = v + 0.5 * dt * k1_v
 
-            M = plant.CalcMassMatrixViaInverseDynamics(plant_context)
-            bias = plant.CalcBiasTerm(plant_context)
-            gravity = plant.CalcGravityGeneralizedForces(plant_context)
+            k3_v = compute_a(q + 0.5 * dt * k2_q, v + 0.5 * dt * k2_v, t + 0.5 * dt)
+            k3_q = v + 0.5 * dt * k2_v
 
-            # a = M^{-1} (tau - bias + gravity)
-            rhs = tau - bias + gravity
-            a = np.linalg.solve(M, rhs)
+            k4_v = compute_a(q + dt * k3_q, v + dt * k3_v, t + dt)
+            k4_q = v + dt * k3_v
 
-            v = v + a * dt
-            q = q + v * dt
+            v = v + (dt / 6.0) * (k1_v + 2 * k2_v + 2 * k3_v + k4_v)
+            q = q + (dt / 6.0) * (k1_q + 2 * k2_q + 2 * k3_q + k4_q)
             t += dt
 
             t_list.append(t)
