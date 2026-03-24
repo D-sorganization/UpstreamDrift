@@ -8,9 +8,11 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.core.physics_constants import (
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_RADIUS_M,
+)
 from src.shared.python.physics.impact_model import (
-    GOLF_BALL_MASS,
-    GOLF_BALL_RADIUS,
     FiniteTimeImpactModel,
     ImpactEvent,
     ImpactModelType,
@@ -103,7 +105,7 @@ class TestRigidBodyImpactModel:
         model = RigidBodyImpactModel()
         result = model.solve(default_pre_state, default_params)
 
-        m_ball = GOLF_BALL_MASS
+        m_ball = GOLF_BALL_MASS_KG
         m_club = default_pre_state.clubhead_mass
 
         # Pre-impact momentum
@@ -158,7 +160,7 @@ class TestSpringDamperImpactModel:
             clubhead_velocity=np.array([40.0, 0.0, 0.0]),
             clubhead_angular_velocity=np.zeros(3),
             clubhead_orientation=np.array([1.0, 0.0, 0.0]),
-            ball_position=np.array([GOLF_BALL_RADIUS, 0.0, 0.0]),
+            ball_position=np.array([GOLF_BALL_RADIUS_M, 0.0, 0.0]),
             ball_velocity=np.zeros(3),
             ball_angular_velocity=np.zeros(3),
         )
@@ -179,7 +181,7 @@ class TestSpringDamperImpactModel:
             clubhead_velocity=np.array([40.0, 0.0, 0.0]),
             clubhead_angular_velocity=np.zeros(3),
             clubhead_orientation=np.array([1.0, 0.0, 0.0]),
-            ball_position=np.array([GOLF_BALL_RADIUS, 0.0, 0.0]),
+            ball_position=np.array([GOLF_BALL_RADIUS_M, 0.0, 0.0]),
             ball_velocity=np.zeros(3),
             ball_angular_velocity=np.zeros(3),
         )

@@ -173,7 +173,9 @@ def test_execute_local_launch(launcher):
 
     handler.launch.return_value = False
     launcher._execute_local_launch(model)
-    launcher.show_toast.assert_called_with("Failed to launch M1", "error")
+    launcher.show_toast.assert_called_with(
+        "Failed to launch M1 — check console", "error"
+    )
 
     # Handler missing
     launcher.model_handler_registry.get_handler.return_value = None

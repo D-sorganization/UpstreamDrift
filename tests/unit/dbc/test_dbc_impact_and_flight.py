@@ -140,11 +140,11 @@ class TestRigidBodyImpactPostconditions(unittest.TestCase):
 
     def test_momentum_conservation(self) -> None:
         """Linear momentum must be conserved."""
-        from src.shared.python.physics.impact_model import GOLF_BALL_MASS
+        from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
 
         pre = _make_pre_state()
         result = self._solve()
-        m_ball = GOLF_BALL_MASS
+        m_ball = GOLF_BALL_MASS_KG
         m_club = pre.clubhead_mass
 
         p_before = m_club * pre.clubhead_velocity + m_ball * pre.ball_velocity

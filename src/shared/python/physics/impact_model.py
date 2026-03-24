@@ -42,15 +42,6 @@ if TYPE_CHECKING:
 
 logger = get_logger(__name__)
 
-# Physical constants for golf ball (re-exported from centralized module)
-GOLF_BALL_MASS: float = float(GOLF_BALL_MASS_KG)
-GOLF_BALL_RADIUS: float = float(GOLF_BALL_RADIUS_M)
-GOLF_BALL_MOMENT_INERTIA: float = float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
-
-# Default impact parameters (re-exported from centralized module)
-DEFAULT_COR: float = float(DRIVER_COR)
-DEFAULT_CONTACT_DURATION: float = float(TYPICAL_CONTACT_DURATION_S)
-
 
 class ImpactModelType(Enum):
     """Types of impact physics models."""
@@ -127,8 +118,8 @@ class ImpactParameters:
         gear_effect_factor: Gear effect spin amplification (0-1)
     """
 
-    cor: float = DEFAULT_COR
-    contact_duration: float = DEFAULT_CONTACT_DURATION
+    cor: float = float(DRIVER_COR)
+    contact_duration: float = float(TYPICAL_CONTACT_DURATION_S)
     contact_stiffness: float = 1e6  # [N/m]
     contact_damping: float = 1e3  # [N·s/m]
     friction_coefficient: float = 0.4
@@ -190,8 +181,8 @@ class RigidBodyImpactModel(ImpactModel):
         assert v_rel is not None, "v_rel must be provided"
         assert v_rel is not None, "v_rel must be provided"
         v_approach = np.dot(v_rel, n)
-        m_eff = (GOLF_BALL_MASS * m_club_effective) / (
-            GOLF_BALL_MASS + m_club_effective
+        m_eff = (GOLF_BALL_MASS_KG * m_club_effective) / (
+            GOLF_BALL_MASS_KG + m_club_effective
         )
         j = (1 + cor) * m_eff * v_approach
         return j, v_approach
@@ -216,10 +207,12 @@ class RigidBodyImpactModel(ImpactModel):
         tangent_dir = v_tangent / tangent_mag
         j_friction = min(
             float(friction_coefficient * j),
-            float(GOLF_BALL_MASS * tangent_mag * 0.4),
+            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
         )
         spin_axis = np.cross(n, tangent_dir)
-        spin_magnitude = j_friction / (GOLF_BALL_MOMENT_INERTIA / GOLF_BALL_RADIUS)
+        spin_magnitude = j_friction / (
+            GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 / GOLF_BALL_RADIUS_M
+        )
         return pre_state.ball_angular_velocity + spin_magnitude * spin_axis
 
     def _compute_energy_transfer(
@@ -229,8 +222,10 @@ class RigidBodyImpactModel(ImpactModel):
     ) -> float:
         assert pre_ball_velocity is not None, "pre_ball_velocity must be provided"
         assert pre_ball_velocity is not None, "pre_ball_velocity must be provided"
-        ke_pre = 0.5 * GOLF_BALL_MASS * np.dot(pre_ball_velocity, pre_ball_velocity)
-        ke_post = 0.5 * GOLF_BALL_MASS * np.dot(post_ball_velocity, post_ball_velocity)
+        ke_pre = 0.5 * GOLF_BALL_MASS_KG * np.dot(pre_ball_velocity, pre_ball_velocity)
+        ke_post = (
+            0.5 * GOLF_BALL_MASS_KG * np.dot(post_ball_velocity, post_ball_velocity)
+        )
         return ke_post - ke_pre
 
     @precondition(
@@ -278,7 +273,7 @@ class RigidBodyImpactModel(ImpactModel):
 
         j, v_approach = self._compute_impulse(v_rel, n, m_club_effective, params.cor)
 
-        v_ball_post = pre_state.ball_velocity + (j / GOLF_BALL_MASS) * n
+        v_ball_post = pre_state.ball_velocity + (j / GOLF_BALL_MASS_KG) * n
         v_club_post = pre_state.clubhead_velocity - (j / pre_state.clubhead_mass) * n
 
         ball_spin = self._compute_friction_spin(
@@ -375,7 +370,7 @@ class SpringDamperImpactModel(ImpactModel):
         """
         assert pre_state is not None, "pre_state must be provided"
         assert pre_state is not None, "pre_state must be provided"
-        m_ball = GOLF_BALL_MASS
+        m_ball = GOLF_BALL_MASS_KG
         m_club = pre_state.clubhead_mass
 
         n = pre_state.clubhead_orientation / np.linalg.norm(
@@ -383,7 +378,7 @@ class SpringDamperImpactModel(ImpactModel):
         )
 
         # Initial state - place ball at contact
-        x_ball = GOLF_BALL_RADIUS * n  # Ball surface at origin
+        x_ball = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
         v_ball = pre_state.ball_velocity.copy()
         x_club = np.zeros(3)
         v_club = pre_state.clubhead_velocity.copy()
@@ -398,7 +393,7 @@ class SpringDamperImpactModel(ImpactModel):
 
         for _ in range(max_steps):
             # Penetration depth (along normal)
-            gap = np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS
+            gap = np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M
 
             if gap < 0:  # In contact (penetration)
                 penetration = -gap
@@ -436,7 +431,7 @@ class SpringDamperImpactModel(ImpactModel):
                 # Don't increment contact_time here, it's only for contact duration
 
                 # Check if we've reached the ball
-                if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS < 0:
+                if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS_M < 0:
                     continue
 
         # Energy calculation
@@ -583,9 +578,9 @@ def validate_energy_balance(
     """
     assert pre_state is not None, "pre_state must be provided"
     assert pre_state is not None, "pre_state must be provided"
-    m_ball = GOLF_BALL_MASS
+    m_ball = GOLF_BALL_MASS_KG
     m_club = pre_state.clubhead_mass
-    I_ball = GOLF_BALL_MOMENT_INERTIA
+    I_ball = GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
 
     # Pre-impact kinetic energy
     ke_ball_pre = (
