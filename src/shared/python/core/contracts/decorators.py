@@ -59,12 +59,14 @@ def precondition(
 
     def decorator(func: F) -> F:
         """Wrap the function with precondition checking logic."""
-        if not enabled or get_contract_level() == ContractLevel.OFF:
-            return func
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """Execute precondition check before calling the wrapped function."""
+            # Check level at call time so runtime changes to contract level take effect
+            if not enabled or get_contract_level() == ContractLevel.OFF:
+                return func(*args, **kwargs)
+
             # Bind arguments to get named parameters
             sig = inspect.signature(func)
             try:
@@ -133,12 +135,14 @@ def postcondition(
 
     def decorator(func: F) -> F:
         """Wrap the function with postcondition checking logic."""
-        if not enabled or get_contract_level() == ContractLevel.OFF:
-            return func
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """Execute the wrapped function and verify its postcondition."""
+            # Check level at call time so runtime changes to contract level take effect
+            if not enabled or get_contract_level() == ContractLevel.OFF:
+                return func(*args, **kwargs)
+
             result = func(*args, **kwargs)
 
             # Evaluate the postcondition
@@ -200,12 +204,14 @@ def require_state(
 
     def decorator(func: F) -> F:
         """Wrap the method with state validation logic."""
-        if get_contract_level() == ContractLevel.OFF:
-            return func
 
         @functools.wraps(func)
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             """Verify required object state before executing the wrapped method."""
+            # Check level at call time so runtime changes to contract level take effect
+            if get_contract_level() == ContractLevel.OFF:
+                return func(self, *args, **kwargs)
+
             if not state_check(self):
                 operation = operation_desc or func.__name__
                 current_level = get_contract_level()
