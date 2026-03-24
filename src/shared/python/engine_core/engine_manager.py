@@ -79,7 +79,14 @@ class EngineManager(ContractChecker):
         if suite_root is None:
             suite_root = get_src_root()
         self.suite_root = Path(suite_root)
-        self.engines_root = self.suite_root / "engines"
+        # Engines live under src/engines. When suite_root is the repo root
+        # (not src/), prefer src/engines which has the complete engine set.
+        src_engines = self.suite_root / "src" / "engines"
+        direct_engines = self.suite_root / "engines"
+        if src_engines.exists():
+            self.engines_root = src_engines
+        else:
+            self.engines_root = direct_engines
 
         self.current_engine: EngineType | None = None
         self.active_physics_engine: PhysicsEngine | None = None
@@ -91,7 +98,7 @@ class EngineManager(ContractChecker):
             EngineType.DRAKE: (self.engines_root / "physics_engines" / "drake"),
             EngineType.PINOCCHIO: (self.engines_root / "physics_engines" / "pinocchio"),
             EngineType.OPENSIM: (self.engines_root / "physics_engines" / "opensim"),
-            EngineType.MYOSIM: (self.engines_root / "physics_engines" / "myosim"),
+            EngineType.MYOSIM: (self.engines_root / "physics_engines" / "myosuite"),
             EngineType.MATLAB_2D: (
                 self.engines_root / "Simscape_Multibody_Models" / "2D_Golf_Model"
             ),

@@ -88,17 +88,23 @@ class TestEngineLoading:
         assert "version" in data
         assert "capabilities" in data
 
+    @pytest.mark.xfail(
+        reason="Engine Python modules not installed in test environment", strict=False
+    )
     @pytest.mark.parametrize(
         "engine_name",
         [
-            "myosuite",  # Not installed yet
+            "myosuite",
         ],
     )
-    def test_load_unavailable_engine(self, client, engine_name: str) -> None:
-        """Test loading unavailable engine fails gracefully."""
+    def test_load_myosuite_engine(self, client, engine_name: str) -> None:
+        """Test loading myosuite engine (path fixed: myosim -> myosuite)."""
         response = client.post(f"/api/engines/{engine_name}/load")
-        # Should return error status
-        assert response.status_code in [400, 500]
+        assert response.status_code == 200, f"Failed to load {engine_name}"
+
+        data = response.json()
+        assert data["status"] == "loaded"
+        assert data["engine"] == engine_name
 
     def test_load_unknown_engine(self, client) -> None:
         """Test loading unknown engine returns 400."""

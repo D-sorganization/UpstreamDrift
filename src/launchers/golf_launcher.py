@@ -89,7 +89,15 @@ class GolfLauncher(
         """
         super().__init__()
         self.setWindowTitle("UpstreamDrift")
-        self.resize(1400, 900)
+        # Size to 80% of screen, capped at 1400x900
+        screen = QApplication.primaryScreen()
+        if screen:
+            avail = screen.availableGeometry()
+            w = min(int(avail.width() * 0.80), 1400)
+            h = min(int(avail.height() * 0.80), 900)
+        else:
+            w, h = 1280, 800
+        self.resize(w, h)
         self.center_window()
 
         self._startup_time_ms = (
@@ -335,14 +343,22 @@ class GolfLauncher(
         self.model_order = self.layout_manager.model_order
         self._sync_model_cards()
 
-        # Restore window geometry
+        # Restore window geometry, clamped to screen bounds
         geo = layout_data.get("window_geometry", {})
         if geo:
             x = geo.get("x", 100)
             y = geo.get("y", 100)
             w = geo.get("width", 1280)
             h = geo.get("height", 800)
-            if y < 30:
+            # Clamp to screen size
+            screen = QApplication.primaryScreen()
+            if screen:
+                avail = screen.availableGeometry()
+                w = min(w, avail.width() - 40)
+                h = min(h, avail.height() - 40)
+                x = max(avail.x(), min(x, avail.x() + avail.width() - w))
+                y = max(avail.y() + 30, min(y, avail.y() + avail.height() - h))
+            elif y < 30:
                 y = 50
             self.setGeometry(x, y, w, h)
         else:

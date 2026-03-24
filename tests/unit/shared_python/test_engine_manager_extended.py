@@ -34,7 +34,7 @@ def mock_suite_root(tmp_path) -> Path:
     (physics / "drake").mkdir()
     (physics / "pinocchio").mkdir()
     (physics / "opensim").mkdir()
-    (physics / "myosim").mkdir()
+    (physics / "myosuite").mkdir()
     # Add missing engine dirs that EngineManager.engine_paths requires
     (physics / "pendulum").mkdir()
     (physics / "putting_green").mkdir()
