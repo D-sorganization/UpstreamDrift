@@ -37,7 +37,7 @@ def get_python_metrics(file_path: Path) -> dict[str, Any]:
             elif isinstance(node, ast.If | ast.For | ast.While | ast.ExceptHandler):
                 metrics["branches"] += 1
 
-    except Exception as e:
+    except (OSError, SyntaxError, UnicodeDecodeError) as e:
         logger.debug("Failed to parse %s: %s", file_path, e)
 
     return metrics
@@ -87,7 +87,7 @@ def get_detailed_function_metrics(content: str) -> list[dict[str, Any]]:
                         "has_docstring": ast.get_docstring(node) is not None,
                     }
                 )
-    except Exception as e:
+    except (SyntaxError, UnicodeDecodeError) as e:
         logger.debug("Failed to parse content: %s", e)
     return functions
 
