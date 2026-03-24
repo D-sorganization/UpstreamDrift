@@ -365,12 +365,23 @@ class TestProcessImmediateDeathDetection:
         """If a launched script exits immediately, stderr is captured and logged."""
         from src.launchers.launcher_process_manager import ProcessManager
 
-        # Create a script that exits with error immediately
+        # Create a script that exits with error immediately.
+        # Patch validate_script_path because this test exercises process-lifecycle
+        # behaviour, not input-sanitization (which is tested separately).
         bad_script = tmp_path / "bad_script.py"
         bad_script.write_text("import sys; sys.exit(1)\n")
 
         pm = ProcessManager(REPO_ROOT)
-        with patch.object(pm, "_emit_output") as mock_emit:
+        with (
+            patch("src.launchers.launcher_process_manager.validate_script_path"),
+            patch(
+                "src.launchers.launcher_process_manager.secure_popen",
+                side_effect=lambda cmd, cwd=None, suite_root=None, **kw: __import__(
+                    "subprocess"
+                ).Popen(cmd, cwd=str(cwd) if cwd else None, **kw),
+            ),
+            patch.object(pm, "_emit_output") as mock_emit,
+        ):
             process = pm.launch_script("test_bad", bad_script, tmp_path)
             assert process is not None, "launch_script should return a process"
 
@@ -394,7 +405,10 @@ class TestProcessImmediateDeathDetection:
         """If a launched module exits immediately, the exit is detected."""
         from src.launchers.launcher_process_manager import ProcessManager
 
-        # Create a minimal module that fails
+        # Create a minimal module that fails.
+        # Patch secure_popen's cwd check by using the real subprocess.Popen
+        # with a relaxed cwd so that process-lifecycle behaviour can be tested
+        # independently of security validation (tested separately).
         mod_dir = tmp_path / "failing_mod"
         mod_dir.mkdir()
         (mod_dir / "__main__.py").write_text(
@@ -402,7 +416,15 @@ class TestProcessImmediateDeathDetection:
         )
 
         pm = ProcessManager(REPO_ROOT)
-        with patch.object(pm, "_emit_output") as mock_emit:
+        with (
+            patch(
+                "src.launchers.launcher_process_manager.secure_popen",
+                side_effect=lambda cmd, cwd=None, suite_root=None, **kw: __import__(
+                    "subprocess"
+                ).Popen(cmd, cwd=str(cwd) if cwd else None, **kw),
+            ),
+            patch.object(pm, "_emit_output") as mock_emit,
+        ):
             process = pm.launch_module("test_bad_mod", "failing_mod", tmp_path)
             assert process is not None
 
