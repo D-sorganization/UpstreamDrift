@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-import os
+from pathlib import Path
 
 import dm_control
 import imageio
@@ -46,8 +46,8 @@ TARGET_POSE = {
 def get_cmu_xml_path() -> str:
     """Locate the CMU Humanoid XML file."""
     # Heuristic to find the XML
-    suite_dir = os.path.dirname(dm_control.suite.__file__)
-    return os.path.join(suite_dir, "humanoid_CMU.xml")
+    suite_dir = Path(dm_control.suite.__file__).parent
+    return str(suite_dir / "humanoid_CMU.xml")
 
 
 def pd_control(physics, target_pose, actuators, kp=10.0, kd=1.0) -> np.ndarray:
@@ -164,7 +164,7 @@ def _load_and_patch_xml(xml_path) -> mjcf.Physics:
 
     Returns the compiled physics object, or None if patching fails.
     """
-    if not os.path.exists(xml_path):
+    if not Path(xml_path).exists():
         raise FileNotFoundError(f"XML not found at {xml_path}")
 
     logger.info("Found XML: %s", xml_path)
@@ -177,12 +177,12 @@ def _load_and_patch_xml(xml_path) -> mjcf.Physics:
     logger.info("------------------------")
 
     # Build assets dictionary for included files
-    suite_dir = os.path.dirname(xml_path)
-    common_dir = os.path.join(suite_dir, "common")
+    suite_dir = Path(xml_path).parent
+    common_dir = suite_dir / "common"
     assets = {}
     for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
-        path = os.path.join(common_dir, filename)
-        if os.path.exists(path):
+        path = common_dir / filename
+        if path.exists():
             with open(path, "rb") as f:
                 assets[f"./common/{filename}"] = f.read()
 

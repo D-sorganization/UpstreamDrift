@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import tempfile
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol, cast
 
 import numpy as np
@@ -887,16 +888,16 @@ class SimulationPanel(QWidget):
                 self._display_frame(i)
                 QApplication.processEvents()
                 pix = cast("QWidget", self.pendulum).grab()
-                frame_path = os.path.join(tmp_dir, f"frame_{i:05d}.png")
-                pix.save(frame_path)
+                frame_path = Path(tmp_dir) / f"frame_{i:05d}.png"
+                pix.save(str(frame_path))
 
             if ffmpeg_path is None:
-                out_dir = os.path.splitext(path)[0] + "_frames"
+                out_dir = str(Path(path).with_suffix("")) + "_frames"
                 os.makedirs(out_dir, exist_ok=True)
                 for name in os.listdir(tmp_dir):
                     shutil.move(
-                        os.path.join(tmp_dir, name),
-                        os.path.join(out_dir, name),
+                        str(Path(tmp_dir) / name),
+                        str(Path(out_dir) / name),
                     )
                 QMessageBox.warning(
                     self,
@@ -912,7 +913,7 @@ class SimulationPanel(QWidget):
                 "-framerate",
                 str(fps),
                 "-i",
-                os.path.join(tmp_dir, "frame_%05d.png"),
+                str(Path(tmp_dir) / "frame_%05d.png"),
                 "-pix_fmt",
                 "yuv420p",
                 path,

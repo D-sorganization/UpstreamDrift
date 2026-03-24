@@ -16,6 +16,7 @@ import subprocess
 import sys
 import threading
 from functools import partial
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -65,21 +66,21 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
         if self.is_windows:
             # Dynamic path resolution
-            current_dir = os.path.dirname(os.path.abspath(__file__))  # .../docker/gui
-            docker_dir = os.path.dirname(current_dir)  # .../docker
-            self.repo_path = os.path.dirname(docker_dir)  # .../ (Repo Root)
+            current_dir = Path(__file__).resolve().parent  # .../docker/gui
+            docker_dir = current_dir.parent  # .../docker
+            self.repo_path = str(docker_dir.parent)  # .../ (Repo Root)
 
             # Convert to WSL path (e.g. C:\Users -> /mnt/c/Users)
             drive = self.repo_path[0].lower()
             rel_path = self.repo_path[2:].replace("\\", "/")
             self.wsl_path = f"/mnt/{drive}{rel_path}"
         else:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            docker_dir = os.path.dirname(current_dir)
-            self.repo_path = os.path.dirname(docker_dir)
+            current_dir = Path(__file__).resolve().parent
+            docker_dir = current_dir.parent
+            self.repo_path = str(docker_dir.parent)
             self.wsl_path = "/workspace"
 
-        self.config_path = os.path.join(self.repo_path, "simulation_config.json")
+        self.config_path = str(Path(self.repo_path) / "simulation_config.json")
 
         # Variables
         self.colors = DEFAULT_COLORS.copy()
@@ -127,7 +128,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
     def load_config(self) -> None:
         """Load configuration from JSON."""
-        if os.path.exists(self.config_path):
+        if Path(self.config_path).exists():
             try:
                 with open(self.config_path) as f:
                     data = json.load(f)
@@ -914,11 +915,11 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
     def open_file(self, filepath) -> None:
         """Open a file with the default application."""
         if self.is_windows:
-            if os.path.exists(filepath):
+            if Path(filepath).exists():
                 os.startfile(filepath)  # type: ignore[attr-defined]
             else:
                 messagebox.showerror("Error", f"File not found: {filepath}")
-        elif os.path.exists(filepath):
+        elif Path(filepath).exists():
             try:
                 subprocess.call(["xdg-open", filepath])
             except FileNotFoundError:
@@ -928,12 +929,12 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
 
     def open_video(self) -> None:
         """Open the generated video file."""
-        vid_path = os.path.join(self.repo_path, "humanoid_golf.mp4")
+        vid_path = str(Path(self.repo_path) / "humanoid_golf.mp4")
         self.open_file(vid_path)
 
     def open_data(self) -> None:
         """Open the generated data file."""
-        csv_path = os.path.join(self.repo_path, "golf_data.csv")
+        csv_path = str(Path(self.repo_path) / "golf_data.csv")
         self.open_file(csv_path)
 
 

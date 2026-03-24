@@ -8,7 +8,7 @@ MuJoCo humanoid golf simulation backend.
 from __future__ import annotations
 
 import logging
-import os
+from pathlib import Path
 
 import dm_control.suite
 import numpy as np
@@ -60,13 +60,13 @@ PANTS_PARTS = [
 
 def get_cmu_xml_path() -> str:
     """Locate the CMU Humanoid XML file within dm_control."""
-    suite_dir = os.path.dirname(dm_control.suite.__file__)
-    xml_path = os.path.join(suite_dir, "humanoid_CMU.xml")
-    if not os.path.exists(xml_path):
+    suite_dir = Path(dm_control.suite.__file__).parent
+    xml_path = suite_dir / "humanoid_CMU.xml"
+    if not xml_path.exists():
         raise FileNotFoundError(
             f"Could not find 'humanoid_CMU.xml' at expected location: {xml_path}"
         )
-    return xml_path
+    return str(xml_path)
 
 
 def get_actuator_indices(physics) -> dict[str, int]:
@@ -85,13 +85,13 @@ def _load_cmu_mjcf() -> mjcf.RootElement:
     with open(xml_path) as f:
         xml_string = f.read()
 
-    suite_dir = os.path.dirname(xml_path)
-    common_dir = os.path.join(suite_dir, "common")
+    suite_dir = Path(xml_path).parent
+    common_dir = suite_dir / "common"
 
     assets = {}
     for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
-        path = os.path.join(common_dir, filename)
-        if os.path.exists(path):
+        path = common_dir / filename
+        if path.exists():
             with open(path, "rb") as f:
                 assets[f"./common/{filename}"] = f.read()
 
