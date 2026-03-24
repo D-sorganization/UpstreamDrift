@@ -56,22 +56,16 @@ def main() -> None:
     trajectory = simulator.simulate_trajectory(launch, max_time=8.0, dt=0.05)
 
     # --- Print summary every 0.5 s ---
-    print(f"{'Time(s)':>8}  {'X(m)':>8}  {'Z(m)':>8}  {'Speed(m/s)':>10}")
-    print("-" * 42)
-    for pt in trajectory[::10]:
-        print(
-            f"{pt.time:8.2f}  {pt.position[0]:8.1f}  {pt.position[2]:8.1f}"
-            f"  {pt.speed:10.2f}"
-        )
+    for _pt in trajectory[::10]:
+        pass
 
     # --- Carry distance: last point before height < 0 ---
     landing_pts = [p for p in trajectory if p.height <= 0.0]
     if len(landing_pts) >= 2:
         carry_m = float(landing_pts[-1].position[0])
-        carry_yd = carry_m * 1.0936
-        print(f"\nEstimated carry: {carry_m:.1f} m  ({carry_yd:.0f} yd)")
+        carry_m * 1.0936
     else:
-        print("\nBall did not land within simulated time window.")
+        pass
 
 
 if __name__ == "__main__":

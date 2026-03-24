@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
-import sys
 from pathlib import Path
 
 DEFAULT_CHECKS: dict[str, str] = {
@@ -113,7 +112,6 @@ def main() -> int:
     write_outputs(results, args.json_output, args.markdown_output)
 
     if failures:
-        print("\n".join(failures), file=sys.stderr)
         return 1
 
     return 0

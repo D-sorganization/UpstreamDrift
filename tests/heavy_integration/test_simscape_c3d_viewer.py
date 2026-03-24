@@ -114,7 +114,7 @@ class TestC3DViewerHeadless:
         try:
             win = C3DViewerMainWindow()
             assert win is not None
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"C3DViewerMainWindow failed to instantiate: {exc}")
         finally:
             app.quit()

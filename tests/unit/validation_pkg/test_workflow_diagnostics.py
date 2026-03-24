@@ -98,7 +98,7 @@ class TestWorkflowDiagnosticContextOnFailure:
                 ctx.record_state("phase1", "phase1_data")
                 ctx.record_state("phase2", 99)
                 raise Exception("fail")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
         json_files = list(tmp_path.glob("**/diagnostics.json"))
         with open(json_files[0]) as f:
@@ -119,7 +119,7 @@ class TestWorkflowDiagnosticContextOnFailure:
         try:
             with WorkflowDiagnosticContext(str(tmp_path), "test"):
                 raise Exception("x")
-        except Exception:
+        except Exception:  # noqa: BLE001
             pass
         json_files = list(tmp_path.glob("**/diagnostics.json"))
         with open(json_files[0]) as f:

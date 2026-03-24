@@ -50,7 +50,7 @@ def test_pinocchio_golfer_stability():
     # are required or that relative paths in the URDF resolve correctly.
     try:
         model = pinocchio.buildModelFromUrdf(str(urdf_path))
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         pytest.fail(f"Failed to load Golfer URDF: {e}")
 
     data = model.createData()
@@ -67,7 +67,7 @@ def test_pinocchio_golfer_stability():
         # Compute forward dynamics
         tau = np.zeros(model.nv)
         a = pinocchio.aba(model, data, q, v, tau)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         pytest.fail(f"Forward dynamics (ABA) failed: {e}")
 
     # 5. Stability Check
@@ -102,7 +102,7 @@ def test_mujoco_myoarm_stability():
     try:
         model = mujoco.MjModel.from_xml_path(str(xml_path))
         data = mujoco.MjData(model)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         pytest.fail(f"Failed to load MyoArm XML: {e}")
 
     # 3. Step Simulation
@@ -110,7 +110,7 @@ def test_mujoco_myoarm_stability():
     try:
         for _ in range(steps):
             mujoco.mj_step(model, data)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         pytest.fail(f"Simulation stepping failed: {e}")
 
     # 4. Check State

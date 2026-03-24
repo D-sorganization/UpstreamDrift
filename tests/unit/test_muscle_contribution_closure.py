@@ -165,7 +165,6 @@ if MYOSUITE_AVAILABLE:
                 )
 
                 # Log for inspection (useful for understanding muscle function)
-                print(f"{muscle_name}: a = {a_muscle[0]:.6f} rad/s²")
 
         @pytest.mark.parametrize(
             "activation_level",
@@ -232,7 +231,7 @@ if MYOSUITE_AVAILABLE:
             engine = _MyoSuitePhysicsEngine()
             try:
                 engine.load_from_path(model_name)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 pytest.skip(f"Model {model_name} not available: {e}")
 
             # Standard closure test

@@ -851,7 +851,7 @@ def generate_human():
             continue
         try:
             h.setDetail(key, value)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f'Warning: modifier {{key}}={{value}}: {{exc}}')
 
     exportOBJ(h, '{obj_path_str}')

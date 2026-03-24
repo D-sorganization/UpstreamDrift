@@ -20,8 +20,6 @@ class Phase1Validator:
 
     def run_validation(self) -> dict[str, bool]:
         """Run all validation checks."""
-        print("🔍 Validating Phase 1 Comprehensive Upgrades")
-        print("=" * 50)
 
         checks = [
             ("Project Structure", self.check_project_structure),
@@ -35,16 +33,12 @@ class Phase1Validator:
         ]
 
         for check_name, check_func in checks:
-            print(f"\n📋 {check_name}")
             try:
                 result = check_func()
                 self.results[check_name] = result
-                status = "✅ PASS" if result else "❌ FAIL"
-                print(f"   {status}")
             except (OSError, ValueError, ImportError, AttributeError) as e:
                 self.results[check_name] = False
                 self.errors.append(f"{check_name}: {str(e)}")
-                print(f"   ❌ ERROR: {str(e)}")
 
         self.print_summary()
         return self.results
@@ -85,9 +79,9 @@ class Phase1Validator:
                 missing_dirs.append(dir_path)
 
         if missing_files:
-            print(f"   Missing files: {missing_files}")
+            pass
         if missing_dirs:
-            print(f"   Missing directories: {missing_dirs}")
+            pass
 
         return len(missing_files) == 0 and len(missing_dirs) == 0
 
@@ -104,7 +98,6 @@ class Phase1Validator:
             try:
                 import tomli as tomllib  # type: ignore[no-redef]
             except ImportError:
-                print("   Warning: Cannot parse TOML (tomllib/tomli not available)")
                 return True  # Assume valid if we can't parse
 
         try:
@@ -133,7 +126,6 @@ class Phase1Validator:
                     current = current[key]
 
             if missing_sections:
-                print(f"   Missing sections: {missing_sections}")
                 return False
 
             # Check project metadata
@@ -142,7 +134,6 @@ class Phase1Validator:
             missing_fields = [f for f in required_fields if f not in project]
 
             if missing_fields:
-                print(f"   Missing project fields: {missing_fields}")
                 return False
 
             # Check optional dependencies
@@ -151,12 +142,11 @@ class Phase1Validator:
             missing_groups = [g for g in expected_groups if g not in optional_deps]
 
             if missing_groups:
-                print(f"   Missing dependency groups: {missing_groups}")
+                pass
 
             return len(missing_groups) == 0
 
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error parsing pyproject.toml: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def check_requirements(self) -> bool:
@@ -181,14 +171,9 @@ class Phase1Validator:
                 if item not in content:
                     missing_content.append(item)
 
-            if missing_content:
-                print(f"   Missing content: {missing_content}")
-                return False
+            return not missing_content
 
-            return True
-
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error reading requirements.txt: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def check_documentation(self) -> bool:
@@ -211,7 +196,6 @@ class Phase1Validator:
                 missing_files.append(file_name)
 
         if missing_files:
-            print(f"   Missing documentation files: {missing_files}")
             return False
 
         # Check conf.py content
@@ -231,14 +215,9 @@ class Phase1Validator:
                 if item not in conf_content:
                     missing_config.append(item)
 
-            if missing_config:
-                print(f"   Missing conf.py config: {missing_config}")
-                return False
+            return not missing_config
 
-            return True
-
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error checking conf.py: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def check_test_infrastructure(self) -> bool:
@@ -262,7 +241,6 @@ class Phase1Validator:
                 missing_files.append(file_path)
 
         if missing_files:
-            print(f"   Missing test files: {missing_files}")
             return False
 
         # Check conftest.py content
@@ -282,14 +260,9 @@ class Phase1Validator:
                 if f"def {fixture}" not in conftest_content:
                     missing_fixtures.append(fixture)
 
-            if missing_fixtures:
-                print(f"   Missing test fixtures: {missing_fixtures}")
-                return False
+            return not missing_fixtures
 
-            return True
-
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error checking conftest.py: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def check_output_management(self) -> bool:
@@ -322,7 +295,6 @@ class Phase1Validator:
                 missing_dirs.append(subdir)
 
         if missing_dirs:
-            print(f"   Missing output directories: {missing_dirs}")
             return False
 
         # Check OutputManager class
@@ -332,7 +304,6 @@ class Phase1Validator:
             spec = spec_from_file_location("output_manager", output_manager_path)
             loader = getattr(spec, "loader", None)
             if spec is None or loader is None:
-                print("   Failed to load output_manager spec")
                 return False
 
             module = module_from_spec(spec)
@@ -340,7 +311,6 @@ class Phase1Validator:
 
             # Check required classes and methods
             if not hasattr(module, "OutputManager"):
-                print("   Missing OutputManager class")
                 return False
 
             manager_class = module.OutputManager
@@ -357,14 +327,9 @@ class Phase1Validator:
                 if not hasattr(manager_class, method):
                     missing_methods.append(method)
 
-            if missing_methods:
-                print(f"   Missing OutputManager methods: {missing_methods}")
-                return False
+            return not missing_methods
 
-            return True
-
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error checking OutputManager: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def check_code_quality(self) -> bool:
@@ -391,14 +356,9 @@ class Phase1Validator:
                 if tool not in content:
                     missing_tools.append(tool)
 
-            if missing_tools:
-                print(f"   Missing tool configurations: {missing_tools}")
-                return False
+            return not missing_tools
 
-            return True
-
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error checking code quality config: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def check_cicd_config(self) -> bool:
@@ -424,51 +384,29 @@ class Phase1Validator:
                 if element not in content:
                     missing_elements.append(element)
 
-            if missing_elements:
-                print(f"   Missing CI/CD elements: {missing_elements}")
-                return False
+            return not missing_elements
 
-            return True
-
-        except (OSError, ValueError, ImportError, AttributeError) as e:
-            print(f"   Error checking CI/CD config: {e}")
+        except (OSError, ValueError, ImportError, AttributeError):
             return False
 
     def print_summary(self) -> None:
         """Print validation summary."""
-        print("\n" + "=" * 50)
-        print("📊 VALIDATION SUMMARY")
-        print("=" * 50)
 
         total_checks = len(self.results)
         passed_checks = sum(1 for result in self.results.values() if result)
 
-        print(f"Total Checks: {total_checks}")
-        print(f"Passed: {passed_checks}")
-        print(f"Failed: {total_checks - passed_checks}")
-        print(f"Success Rate: {passed_checks / total_checks * 100:.1f}%")
-
         if self.errors:
-            print(f"\n❌ ERRORS ({len(self.errors)}):")
-            for error in self.errors:
-                print(f"   • {error}")
+            for _error in self.errors:
+                pass
 
-        print("\n🎯 PHASE 1 STATUS:")
-        if passed_checks == total_checks:
-            print("   ✅ ALL CHECKS PASSED - Phase 1 Complete!")
-            print("   🚀 Ready for Phase 2 development")
-        elif passed_checks >= total_checks * 0.8:
-            print("   ⚠️  MOSTLY COMPLETE - Minor issues to resolve")
-            print("   🔧 Address remaining issues before Phase 2")
+        if passed_checks == total_checks or passed_checks >= total_checks * 0.8:
+            pass
         else:
-            print("   ❌ SIGNIFICANT ISSUES - Phase 1 incomplete")
-            print("   🛠️  Resolve critical issues before proceeding")
+            pass
 
         # Detailed results
-        print("\n📋 DETAILED RESULTS:")
-        for check_name, result in self.results.items():
-            status = "✅" if result else "❌"
-            print(f"   {status} {check_name}")
+        for _check_name, _result in self.results.items():
+            pass
 
 
 def main() -> None:

@@ -406,7 +406,7 @@ class DiagnosticsViewer(QDialog):
         # Events are displayed newest-first (reversed)
         if 0 <= row < len(self._displayed_events):
             event = list(reversed(self._displayed_events))[row]
-            text = event.details if event.details else "(no additional details)"
+            text = event.details or "(no additional details)"
             if event.extra:
                 text += f"\n\nExtra data:\n{json.dumps(event.extra, indent=2)}"
             self._details.setPlainText(text)

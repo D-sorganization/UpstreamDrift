@@ -55,7 +55,7 @@ class TestMyoSuiteMuscleAnalyzer:
                 f"Found {len(analyzer.muscle_names)} muscles: {analyzer.muscle_names}"
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning(f"MyoSuite environment test failed: {e}")
             pytest.skip("Could not load MyoSuite environment")
 
@@ -84,7 +84,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             logger.info(f"Muscle activations: {activations}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Activation test failed: {e}")
 
     def test_muscle_force_computation(self, myosuite_env_available):
@@ -116,7 +116,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             logger.info(f"Muscle forces: {forces}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Force test failed: {e}")
 
     def test_moment_arm_computation(self, myosuite_env_available):
@@ -144,7 +144,7 @@ class TestMyoSuiteMuscleAnalyzer:
             for muscle_name, r in list(moment_arms.items())[:3]:  # First 3 muscles
                 logger.info(f"Moment arms for {muscle_name}: {r}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Moment arm test failed: {e}")
 
     def test_muscle_induced_acceleration(self, myosuite_env_available):
@@ -181,7 +181,7 @@ class TestMyoSuiteMuscleAnalyzer:
                 f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}"
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Induced acceleration test failed: {e}")
 
     def test_comprehensive_muscle_analysis(self, myosuite_env_available):
@@ -222,7 +222,7 @@ class TestMyoSuiteMuscleAnalyzer:
                 f"  Activation power: {list(analysis.activation_power.values())[:3]}"
             )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Comprehensive analysis failed: {e}")
 
 
@@ -237,7 +237,7 @@ class TestMyoSuiteGripModel:
             # Use hand environment if available
             try:
                 env = gym.make("myoHandPoseRandom-v0")
-            except Exception:
+            except Exception:  # noqa: BLE001
                 # Fallback to elbow
                 env = gym.make("myoElbowPose1D6MRandom-v0")
 
@@ -261,7 +261,7 @@ class TestMyoSuiteGripModel:
             # Just verify interface works
             assert isinstance(grip_muscles, list)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Grip muscle test failed: {e}")
 
     def test_total_grip_force_computation(self, myosuite_env_available):
@@ -271,7 +271,7 @@ class TestMyoSuiteGripModel:
 
             try:
                 env = gym.make("myoHandPoseRandom-v0")
-            except Exception:
+            except Exception:  # noqa: BLE001
                 pytest.skip("Hand model not available")
 
             env.reset()
@@ -299,7 +299,7 @@ class TestMyoSuiteGripModel:
             # Should be positive with activation
             assert total_force >= 0.0
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Grip force test failed: {e}")
 
 
@@ -332,7 +332,7 @@ class TestMyoSuiteEngine:
 
             logger.info(f"Control acceleration: {a_control}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Drift-control test failed: {e}")
 
     def test_muscle_analyzer_integration(self, myosuite_env_available):
@@ -353,7 +353,7 @@ class TestMyoSuiteEngine:
 
             logger.info(f"Analyzer muscles: {analyzer.muscle_names}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Analyzer integration test failed: {e}")
 
     def test_muscle_activation_setting(self, myosuite_env_available):
@@ -393,7 +393,7 @@ class TestMyoSuiteEngine:
                     f"Activation not set correctly: {ctrl_value}"
                 )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Activation setting test failed: {e}")
 
 

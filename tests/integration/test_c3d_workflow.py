@@ -159,7 +159,7 @@ def test_gui_load_logic(qapp, mock_c3d_file, mock_ezc3d):
     """Test GUI loading logic using the refactored path."""
     try:
         window = C3DViewerMainWindow()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         pytest.skip(f"GUI initialization failed (headless environment?): {e}")
 
     # Load the model directly using the service function

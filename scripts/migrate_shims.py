@@ -222,9 +222,7 @@ def main() -> None:
         importers = find_importers(shim_path.stem, search_dirs, shim_path)
         if len(importers) > max_imports:
             if dry_run:
-                print(
-                    f"SKIP {shim_path.stem} ({len(importers)} imports > {max_imports})"
-                )
+                pass
             continue
 
         result = process_shim(shim_path, dry_run=dry_run)
@@ -232,22 +230,13 @@ def main() -> None:
         if result["status"] == "not_a_shim":
             continue
 
-        prefix = "DRY" if dry_run else "OK"
-        print(
-            f"[{prefix}] {result['shim']} -> {result['real_path']} "
-            f"({result['importers']} imports)"
-        )
         if result.get("files_changed"):
-            for f in result["files_changed"]:
-                print(f"     {f}")
+            for _f in result["files_changed"]:
+                pass
 
         if not dry_run and result["status"] == "removed":
             total_removed += 1
             total_imports_updated += result["importers"]
-
-    print(f"\n{'DRY RUN - ' if dry_run else ''}Summary:")
-    print(f"  Shims removed: {total_removed}")
-    print(f"  Imports updated: {total_imports_updated}")
 
 
 if __name__ == "__main__":

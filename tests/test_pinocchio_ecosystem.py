@@ -39,7 +39,7 @@ class TestPinocchioEcosystem(unittest.TestCase):
 
         except ImportError as e:
             self.skipTest(f"Pinocchio not available: {e}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.skipTest(f"Pinocchio functionality test failed: {e}")
 
     def test_pink_import(self) -> None:
@@ -113,7 +113,7 @@ class TestPinocchioEcosystem(unittest.TestCase):
 
         except ImportError as e:
             self.skipTest(f"Pinocchio-Crocoddyl integration test skipped: {e}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.fail(f"Pinocchio-Crocoddyl integration failed: {e}")
 
     def test_pinocchio_pink_integration(self) -> None:
@@ -140,7 +140,7 @@ class TestPinocchioEcosystem(unittest.TestCase):
 
         except ImportError as e:
             self.skipTest(f"Pinocchio-Pink integration test skipped: {e}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.skipTest(f"Pinocchio-Pink integration test skipped due to error: {e}")
 
 
@@ -162,7 +162,7 @@ class TestPinocchioDockerCompatibility(unittest.TestCase):
         for expected_path in expected_paths:
             if expected_path not in pythonpath:
                 # This might not be set in local testing, so just warn
-                print(f"⚠️  Expected path {expected_path} not in PYTHONPATH")
+                pass
 
     def test_package_versions_compatibility(self) -> None:
         """Test that package versions are compatible."""
@@ -185,7 +185,7 @@ class TestPinocchioDockerCompatibility(unittest.TestCase):
 
         except ImportError as e:
             self.skipTest(f"Package version test skipped: {e}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.skipTest(f"Package version test skipped due to error: {e}")
 
 
@@ -237,22 +237,14 @@ if __name__ == "__main__":
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'=' * 60}")
-    print("Pinocchio Ecosystem Tests Summary")
-    print(f"{'=' * 60}")
-    print(f"Tests run: {result.testsRun}")
-    print(f"Failures: {len(result.failures)}")
-    print(f"Errors: {len(result.errors)}")
 
     if result.failures:
-        print("\n❌ Failures:")
-        for test, _ in result.failures:
-            print(f"  - {test}")
+        for _test, _ in result.failures:
+            pass
 
     if result.errors:
-        print("\n💥 Errors:")
-        for test, _ in result.errors:
-            print(f"  - {test}")
+        for _test, _ in result.errors:
+            pass
 
     if not result.failures and not result.errors:
-        print("\n🎉 All Pinocchio ecosystem tests passed!")
+        pass

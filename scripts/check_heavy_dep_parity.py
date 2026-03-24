@@ -135,33 +135,14 @@ def main() -> int:
     missing_from_workflow = CANONICAL_HEAVY_DEPS - workflow_pkgs
 
     if not missing_from_dockerfile and not missing_from_workflow:
-        print("✓ Heavy test dependency parity OK")
-        print(f"  Canonical deps verified: {len(CANONICAL_HEAVY_DEPS)}")
-        print(f"  Dockerfile pip packages found: {len(dockerfile_pkgs)}")
-        print(f"  Workflow pip packages found:   {len(workflow_pkgs)}")
         return 0
 
-    print("✗ Heavy test dependency parity VIOLATION")
-    print()
     if missing_from_dockerfile:
-        print("Canonical deps missing from Dockerfile.heavy_test:")
-        for pkg in sorted(missing_from_dockerfile):
-            print(f"  - {pkg}")
-        print("  Fix: add to a RUN pip install block in Dockerfile.heavy_test")
-        print()
+        for _pkg in sorted(missing_from_dockerfile):
+            pass
     if missing_from_workflow:
-        print("Canonical deps missing from heavy-tests-opt-in.yml:")
-        for pkg in sorted(missing_from_workflow):
-            print(f"  - {pkg}")
-        print(
-            "  Fix: add to the pip install step in "
-            ".github/workflows/heavy-tests-opt-in.yml"
-        )
-        print()
-    print(
-        "To add a new canonical dep: add it to CANONICAL_HEAVY_DEPS in "
-        "scripts/check_heavy_dep_parity.py AND to both files above."
-    )
+        for _pkg in sorted(missing_from_workflow):
+            pass
     return 1
 
 

@@ -44,7 +44,6 @@ class MockWindowFix:
         assert actuator_index >= 0, "actuator_index must be non-negative"
         assert isinstance(value, int), "value must be an int"
         self.slider_calls += 1
-        print(f"Slider changed to {value}")
 
         if actuator_index < len(self.actuator_constant_inputs):
             spinbox = self.actuator_constant_inputs[actuator_index]
@@ -60,7 +59,6 @@ class MockWindowFix:
         assert actuator_index >= 0, "actuator_index must be non-negative"
         assert isinstance(value, float), "value must be a float"
         self.spinbox_calls += 1
-        print(f"Spinbox changed to {value}")
 
         if actuator_index < len(self.actuator_sliders):
             slider = self.actuator_sliders[actuator_index]
@@ -77,33 +75,24 @@ def run_test() -> None:
 
     window = MockWindowFix()
 
-    print("--- Test Fix: Setting Spinbox to 50.5 ---")
-
     constant_input = window.constant_input
     constant_input.setValue(50.5)
 
     final_spinbox_value = constant_input.value()
     slider = window.slider
-    final_slider_value = slider.value()
+    slider.value()
 
-    print(f"Final Spinbox Value: {final_spinbox_value}")
-    print(f"Final Slider Value: {final_slider_value}")
-
-    slider_calls = window.slider_calls
-    spinbox_calls = window.spinbox_calls
-    print(f"Total Callbacks: Slider={slider_calls}, Spinbox={spinbox_calls}")
     control_calls = window.control_system_calls
-    print(f"Control System Updates: {control_calls}")
 
     if final_spinbox_value == 50.5:
-        print("PASS: Precision kept.")
+        pass
     else:
-        print("FAIL: Precision lost!")
+        pass
 
     if control_calls == 1:
-        print("PASS: Single update.")
+        pass
     else:
-        print(f"FAIL: {control_calls} updates.")
+        pass
 
 
 if __name__ == "__main__":

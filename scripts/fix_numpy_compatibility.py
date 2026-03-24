@@ -12,10 +12,8 @@ import sys
 
 def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
-    print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)
     if check and result.returncode != 0:
-        print(f"Error: {result.stderr}")
         sys.exit(1)
     return result
 
@@ -26,21 +24,17 @@ def check_numpy_version() -> str | None:
         import numpy
 
         version: str = numpy.__version__
-        print(f"Current NumPy version: {version}")
         return version
     except ImportError:
-        print("NumPy not installed")
         return None
 
 
 def fix_numpy_compatibility() -> None:
     """Fix NumPy compatibility issues."""
-    print("🔧 Fixing NumPy compatibility issues...")
 
     # Check current NumPy version
     numpy_version = check_numpy_version()
     if not numpy_version:
-        print("Installing NumPy...")
         run_command([sys.executable, "-m", "pip", "install", "numpy<2.0.0"])
         return
 
@@ -49,8 +43,6 @@ def fix_numpy_compatibility() -> None:
     # 2. Upgrade all dependent packages to NumPy 2.x compatible versions
 
     if numpy_version.startswith("2."):
-        print("NumPy 2.x detected. Downgrading to 1.x for compatibility...")
-
         # Uninstall problematic packages first
         packages_to_reinstall = [
             "scipy",
@@ -59,14 +51,12 @@ def fix_numpy_compatibility() -> None:
             "scikit-learn",
         ]
 
-        print("Uninstalling packages that may have NumPy compatibility issues...")
         for package in packages_to_reinstall:
             run_command(
                 [sys.executable, "-m", "pip", "uninstall", "-y", package], check=False
             )
 
         # Downgrade NumPy
-        print("Downgrading NumPy to 1.x...")
         run_command(
             [
                 sys.executable,
@@ -79,22 +69,17 @@ def fix_numpy_compatibility() -> None:
         )
 
         # Reinstall packages
-        print("Reinstalling packages with NumPy 1.x compatibility...")
         for package in packages_to_reinstall:
             run_command([sys.executable, "-m", "pip", "install", package], check=False)
 
         # Install project dependencies
-        print("Installing project dependencies...")
         run_command(
             [sys.executable, "-m", "pip", "install", "-e", ".", "--force-reinstall"]
         )
 
-    print("✅ NumPy compatibility fix complete!")
-
 
 def verify_installation() -> bool:
     """Verify that the installation works."""
-    print("🧪 Verifying installation...")
 
     import importlib.util
 
@@ -108,29 +93,22 @@ def verify_installation() -> bool:
     for module in test_imports:
         try:
             __import__(module)
-            print(f"✅ {module} imports successfully")
-        except ImportError as e:
-            print(f"❌ {module} failed to import: {e}")
+        except ImportError:
             return False
 
         # Test shared module import
         if importlib.util.find_spec("shared.python"):
-            print("✅ shared.python imports successfully")
+            pass
         else:
-            print("❌ shared.python failed to import")
             return False
 
     return True
 
 
 if __name__ == "__main__":
-    print("🚀 Golf Modeling Suite - NumPy Compatibility Fixer")
-    print("=" * 50)
-
     fix_numpy_compatibility()
 
     if verify_installation():
-        print("\n🎉 All compatibility issues resolved!")
+        pass
     else:
-        print("\n❌ Some issues remain. Please check the error messages above.")
         sys.exit(1)

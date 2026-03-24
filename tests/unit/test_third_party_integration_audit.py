@@ -259,7 +259,7 @@ class TestPinocchioIntegrationAudit:
             engine.load_from_string(simple_urdf, extension=".urdf")
             with pytest.raises(NotImplementedError):
                 engine.compute_contact_forces()
-        except Exception:
+        except Exception:  # noqa: BLE001
             pytest.skip("Could not load URDF in Pinocchio")
 
     @skip_if_unavailable("pinocchio")

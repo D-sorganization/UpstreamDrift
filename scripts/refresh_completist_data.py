@@ -36,25 +36,21 @@ def run_grep(pattern, output_file, extended_regex=False):
     for d in EXCLUDE_DIRS:
         cmd.extend(["--exclude-dir", d])
 
-    print(f"Running: {' '.join(cmd)} > {output_file}")
-
     try:
         with open(output_file, "w") as f:
             subprocess.run(cmd, stdout=f, stderr=subprocess.PIPE, text=True)
-    except (OSError, subprocess.SubprocessError) as e:
-        print(f"Error running grep: {e}")
+    except (OSError, subprocess.SubprocessError):
+        pass
 
 
 def main():
     """Refresh completist audit data by running grep scans and stub finders."""
-    print("Refreshing completist data...")
 
     # 1. Run find_stubs.py
     if exists("scripts/find_stubs.py"):
-        print("Running scripts/find_stubs.py...")
         subprocess.run([sys.executable, "scripts/find_stubs.py"])
     else:
-        print("scripts/find_stubs.py not found!")
+        pass
 
     # 2. Grep for TODOs
     run_grep(
@@ -68,8 +64,6 @@ def main():
 
     # 4. Grep for abstractmethod
     run_grep("@abstractmethod", join(DATA_DIR, "abstract_methods.txt"))
-
-    print("Done.")
 
 
 if __name__ == "__main__":

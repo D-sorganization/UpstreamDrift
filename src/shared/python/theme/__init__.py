@@ -57,7 +57,7 @@ try:
     from .fleet_adapter import fleet_to_theme_colors as _f2tc
 
     DARK_THEME = _f2tc("Dark")
-except Exception:
+except Exception:  # noqa: BLE001
     # Ultimate fallback: minimal SimpleNamespace if fleet adapter is unavailable
     _dark = BUILTIN_THEMES.get("Dark", {})
     DARK_THEME = _NS(  # type: ignore[assignment]

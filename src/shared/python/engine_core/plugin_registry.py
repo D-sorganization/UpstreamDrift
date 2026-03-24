@@ -204,7 +204,11 @@ class EngineLifecycle:
         if hasattr(engine, "shutdown") and callable(engine.shutdown):
             try:
                 engine.shutdown()
+<<<<<<< HEAD
+            except Exception:  # noqa: BLE001
+=======
             except (RuntimeError, OSError, AttributeError):
+>>>>>>> 0c26af43669343130507bfca10acb92d437af274
                 logger.warning(
                     "Engine shutdown failed for %s", engine_type, exc_info=True
                 )
@@ -248,7 +252,11 @@ def discover_entry_point_plugins() -> list[dict[str, Any]]:
                 logger.warning(
                     "Entry point %s did not return a valid plugin dict", ep.name
                 )
+<<<<<<< HEAD
+        except Exception:  # noqa: BLE001
+=======
         except (ImportError, AttributeError, TypeError, RuntimeError):
+>>>>>>> 0c26af43669343130507bfca10acb92d437af274
             logger.warning("Failed to load engine plugin %s", ep.name, exc_info=True)
 
     return results

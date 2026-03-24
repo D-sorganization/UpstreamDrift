@@ -131,7 +131,7 @@ class TestCrossEngineConsistency:
                     g = eng.engine.compute_gravity_forces()
                     if g.size > 0:
                         results[eng.name] = g
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"Gravity forces failed for {eng.name}: {e}")
 
         if len(results) < 2:
@@ -182,7 +182,7 @@ class TestCrossEngineConsistency:
                     bias = eng.engine.compute_bias_forces()
                     if bias.size > 0:
                         results[eng.name] = bias
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"Bias forces failed for {eng.name}: {e}")
 
         if len(results) < 2:

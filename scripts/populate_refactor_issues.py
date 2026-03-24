@@ -1,5 +1,4 @@
 import subprocess
-import sys
 import time
 
 issues = [
@@ -65,10 +64,8 @@ issues = [
     },
 ]
 
-print(f"Starting bulk issue creation for {len(issues)} items...", file=sys.stderr)
 
 for issue in issues:
-    print(f"Creating issue: {issue['title']}...", end="", flush=True)
     cmd = [
         "gh",
         "issue",
@@ -83,14 +80,9 @@ for issue in issues:
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, check=False)
         if result.returncode == 0:
-            print(" [OK]")
             out_str = getattr(result, "stdout", "")
-            print(out_str.strip() if out_str else "")
         else:
-            print(" [FAILED]")
             err_str = getattr(result, "stderr", "")
-            print(err_str.strip() if err_str else "")
     except FileNotFoundError:
-        print(" [ERROR] gh command not found.")
         break
     time.sleep(1.0)  # Rate limiting

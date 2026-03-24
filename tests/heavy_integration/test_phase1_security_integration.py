@@ -212,8 +212,6 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
         # Test valid working directory (within suite)
         valid_cwd = suite_root / "scripts"
-        print(f"DEBUG: suite_root={suite_root}")
-        print(f"DEBUG: valid_cwd={valid_cwd}")
         with patch("pathlib.Path.exists", return_value=True):
             try:
                 secure_run(
@@ -223,7 +221,6 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
                     timeout=10,
                 )
             except SecureSubprocessError as e:
-                print(f"DEBUG: CAUGHT ERROR: {e}")
                 if "not allowed" not in str(e):
                     raise  # Re-raise if not about executable whitelist
 
@@ -305,7 +302,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
                     timeout=10,
                 )
                 results.append(result.returncode)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 errors.append(e)
 
         # Run multiple subprocesses concurrently

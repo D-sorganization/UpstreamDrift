@@ -222,18 +222,15 @@ def test_escape_shortcut_logic(mocked_launcher_module):
 
         # Check if QShortcut was called with a key sequence for "Esc"
         found_escape = False
-        print(f"DEBUG: Calls to QShortcut: {len(MockShortcut.call_args_list)}")
-        for i, call in enumerate(MockShortcut.call_args_list):
+        for _i, call in enumerate(MockShortcut.call_args_list):
             args = call[0]
             if args:
                 first_arg = args[0]
-                print(f"DEBUG: Call {i} arg[0]: {first_arg} type: {type(first_arg)}")
                 if hasattr(first_arg, "key_str"):
-                    print(f"DEBUG: Call {i} key_str: {first_arg.key_str}")
                     if first_arg.key_str == "Esc":
                         found_escape = True
                         break
                 else:
-                    print(f"DEBUG: Call {i} has no key_str attribute")
+                    pass
 
         assert found_escape, "Escape shortcut not registered"

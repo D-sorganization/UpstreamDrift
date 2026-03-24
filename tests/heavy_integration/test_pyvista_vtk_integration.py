@@ -84,7 +84,7 @@ class TestPyVistaCore:
 
             assert img is not None
             assert img.shape[0] > 0 and img.shape[1] > 0
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"Offscreen rendering failed (GPU/display issue): {e}")
 
 

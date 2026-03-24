@@ -122,7 +122,7 @@ def _probe_engine_instance(
         actual_loader = loader
         try:
             available_result = availability_check()
-        except Exception:
+        except Exception:  # noqa: BLE001
             available_result = False
         is_available = bool(available_result)
         is_broken = False
@@ -157,7 +157,7 @@ def _probe_engine_instance(
             available=True,
             status=EngineProbeStatus.READY,
         )
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         message = f"{name} is installed but failed to initialize test fixture: {exc}"
         if _strict_engine_probes_enabled():
             pytest.fail(message)

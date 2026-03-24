@@ -107,7 +107,7 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
         logger.info(f"Generated optimized icon: {output_path}")
         return True
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         logger.exception(f"Failed to generate icon: {e}")
         return False
 

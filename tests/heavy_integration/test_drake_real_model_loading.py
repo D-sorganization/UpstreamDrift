@@ -87,7 +87,7 @@ class TestDrakeModelLoading:
         try:
             parser.AddModelFromFile(str(minimal_urdf_path))
             plant.Finalize()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"Drake URDF loading failed (may need SceneGraph): {exc}")
 
         assert plant.num_positions() >= 1, "Plant has no DOF after loading URDF"
@@ -102,7 +102,7 @@ class TestDrakeModelLoading:
         try:
             parser.AddModelFromFile(str(minimal_urdf_path))
             plant.Finalize()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"Drake URDF loading failed: {exc}")
 
         assert plant.num_positions() == 1, (
@@ -135,7 +135,7 @@ class TestDrakeSimulation:
         parser = Parser(plant)
         try:
             parser.AddModelFromFile(str(minimal_urdf_path))
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"Drake URDF loading failed: {exc}")
 
         plant.Finalize()

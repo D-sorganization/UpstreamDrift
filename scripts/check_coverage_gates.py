@@ -61,26 +61,15 @@ def load_coverage_report(path: str) -> dict:
         SystemExit: If the file does not exist or is invalid JSON.
     """
     if not os.path.isfile(path):
-        print(f"ERROR: Coverage report not found: {path}", file=sys.stderr)
-        print(
-            "  Run: python3 -m pytest --cov=src --cov-report=json -q",
-            file=sys.stderr,
-        )
         sys.exit(2)
 
     try:
         with open(path) as f:
             data = json.load(f)
-    except json.JSONDecodeError as exc:
-        print(f"ERROR: Invalid JSON in {path}: {exc}", file=sys.stderr)
+    except json.JSONDecodeError:
         sys.exit(2)
 
     if "files" not in data:
-        print(
-            "ERROR: Coverage report missing 'files' key. "
-            "Ensure you used --cov-report=json.",
-            file=sys.stderr,
-        )
         sys.exit(2)
 
     return data
@@ -138,30 +127,15 @@ def check_gates(
     """
     all_passed = True
 
-    print()
-    print(
-        f"{'Module':<12} {'Covered':>8} {'Total':>8} {'Pct':>7} {'Gate':>7} {'Status':>8}"
-    )
-    print("-" * 58)
-
     for gate_name, threshold in sorted(gates.items()):
         if gate_name in coverage:
             covered, total, pct = coverage[gate_name]
             passed = pct >= threshold
-            status = "PASS" if passed else "FAIL"
             if not passed:
                 all_passed = False
-            print(
-                f"{gate_name:<12} {covered:>8} {total:>8} {pct:>6.1f}% {threshold:>6.1f}% {status:>8}"
-            )
         else:
             # No source files found for this gate — skip silently
-            print(
-                f"{gate_name:<12} {'—':>8} {'—':>8} {'—':>7} {threshold:>6.1f}% {'SKIP':>8}"
-            )
-
-    print("-" * 58)
-    print()
+            pass
 
     return all_passed
 
@@ -188,10 +162,8 @@ def main() -> None:
     passed = check_gates(coverage, COVERAGE_GATES)
 
     if passed:
-        print("All coverage gates passed.")
         sys.exit(0)
     else:
-        print("One or more coverage gates FAILED.", file=sys.stderr)
         sys.exit(1)
 
 

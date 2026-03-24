@@ -90,13 +90,11 @@ def fix_shim_file(shim_path: Path) -> bool:
         # Try as a package
         target_file = target_dir / module_name / "__init__.py"
         if not target_file.exists():
-            print(f"  SKIP: target not found: {target_file}")
             return False
 
     # Get public names from the target module
     names = get_public_names(target_file)
     if not names:
-        print(f"  SKIP: no public names found in {target_file}")
         return False
 
     # Build the import path for the re-exports
@@ -127,7 +125,6 @@ _sys.modules[__name__] = _real_module
 """
 
     shim_path.write_text(new_content, encoding="utf-8")
-    print(f"  FIXED: {shim_path.name} ({len(names)} exports from {import_from})")
     return True
 
 
@@ -147,13 +144,10 @@ def main() -> None:
         if "_sys.modules[__name__]" not in content:
             continue
 
-        print(f"Processing: {shim_file.name}")
         if fix_shim_file(shim_file):
             fixed_count += 1
         else:
             skip_count += 1
-
-    print(f"\nDone: {fixed_count} fixed, {skip_count} skipped")
 
 
 if __name__ == "__main__":

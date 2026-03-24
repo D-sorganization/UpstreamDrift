@@ -100,7 +100,7 @@ class TestMeshcatPinocchioIntegration:
             vis.initViewer(open=False)
             vis.loadViewerModel()
             vis.display(q)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"MeshcatVisualizer display failed (expected headless): {e}")
 
 

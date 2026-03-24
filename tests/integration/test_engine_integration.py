@@ -97,7 +97,7 @@ class TestEngineIntegration:
                         manager.get_engine_status(engine_type)
                         != EngineStatus.UNAVAILABLE
                     )
-            except Exception:
+            except Exception:  # noqa: BLE001
                 # Some probes may fail if dependencies missing - that's expected
                 pass
 
@@ -299,6 +299,6 @@ class TestEngineConfiguration:
                 success = manager.switch_engine(engine)
                 assert success is True
                 assert manager.current_engine == engine
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 # Some engines might not be fully implemented yet
                 pytest.skip(f"Engine {engine} not fully implemented: {e}")

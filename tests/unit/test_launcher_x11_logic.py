@@ -116,8 +116,6 @@ def test_live_view_environment_flags(mocked_launcher):
         # Flatten the args if it's a list of strings
         full_command = " ".join(args)
 
-        print(f"DEBUG Command: {full_command}")
-
         # Assert Critical Flags for X11 on Windows
         assert "DISPLAY=host.docker.internal:0" in full_command
         assert "MUJOCO_GL=glfw" in full_command

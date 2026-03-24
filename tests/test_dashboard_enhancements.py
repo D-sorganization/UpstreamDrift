@@ -182,7 +182,7 @@ if PYQT6_AVAILABLE:
                         window.plot_type_combo.setCurrentIndex(idx)
                         try:
                             window.refresh_static_plot()
-                        except Exception as e:
+                        except Exception as e:  # noqa: BLE001
                             self.fail(f"Plotting '{option}' raised exception: {e}")
                     else:
                         self.fail(f"Option '{option}' not found in combo box")

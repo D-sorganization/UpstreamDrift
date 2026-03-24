@@ -54,7 +54,7 @@ class TestThemeSystem:
 
         try:
             apply_dark_theme(qt_app)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"apply_dark_theme raised: {exc}")
 
     def test_light_theme_applicable(self, qt_app) -> None:
@@ -69,7 +69,7 @@ class TestThemeSystem:
 
         try:
             apply_light_theme(qt_app)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"apply_light_theme raised: {exc}")
 
 
@@ -105,7 +105,7 @@ class TestGolfLauncherInstantiation:
         try:
             win = GolfLauncher()
             assert win is not None
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"GolfLauncher instantiation failed: {exc}")
 
 
@@ -133,7 +133,7 @@ class TestPendulumSimulatorGui:
         try:
             win = PendulumMainWindow()
             assert win is not None
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"PendulumMainWindow instantiation failed: {exc}")
 
 
@@ -157,7 +157,7 @@ class TestModelExplorerGui:
         try:
             win = ModelExplorerWindow()
             assert win is not None
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"ModelExplorerWindow instantiation failed: {exc}")
 
 

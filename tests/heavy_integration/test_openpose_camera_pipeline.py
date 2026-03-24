@@ -62,7 +62,7 @@ class TestOpenPoseEstimatorBehavior:
 
         try:
             estimator = OpenPoseEstimator()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             # May fail if pyopenpose native library is absent — expected
             pytest.skip(f"OpenPoseEstimator instantiation requires native libs: {exc}")
 
@@ -79,7 +79,7 @@ class TestOpenPoseEstimatorBehavior:
 
         try:
             estimator = OpenPoseEstimator()
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"OpenPoseEstimator requires native libs: {exc}")
 
         # Synthetic 480×640 BGR frame
@@ -88,7 +88,7 @@ class TestOpenPoseEstimatorBehavior:
 
         try:
             result = estimator.estimate(frame)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"estimate() requires native OpenPose runtime: {exc}")
 
         # Result object should have at least a keypoints attribute

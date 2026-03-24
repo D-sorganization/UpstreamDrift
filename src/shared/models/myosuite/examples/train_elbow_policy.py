@@ -16,6 +16,7 @@ Usage:
 """
 
 import argparse
+import contextlib
 import logging
 import sys
 
@@ -134,10 +135,8 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             step += 1
 
             # Visualize (if display available)
-            try:
+            with contextlib.suppress(RuntimeError, OSError, AttributeError):
                 env.mj_render()
-            except (RuntimeError, OSError, AttributeError):
-                pass
 
         logger.info(
             "Episode %d: Steps=%d, Reward=%.2f", episode + 1, step, total_reward

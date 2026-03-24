@@ -361,7 +361,7 @@ class TestTrajectoryPostconditions(unittest.TestCase):
         launch = LaunchConditions(velocity=velocity, launch_angle=angle)
         try:
             return sim.simulate_trajectory(launch, max_time=8.0, dt=0.01)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             if "TypingError" in type(e).__name__ or "nopython" in str(e):
                 self.skipTest(f"Numba JIT incompatibility (pre-existing): {e}")
             raise

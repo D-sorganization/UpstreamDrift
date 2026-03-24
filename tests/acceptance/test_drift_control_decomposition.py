@@ -56,7 +56,7 @@ class TestDriftControlDecomposition:
 
         try:
             engine.load_from_path(pendulum_urdf)
-        except Exception:
+        except Exception:  # noqa: BLE001
             pytest.skip(f"{engine_name} failed to load URDF")
 
         # Set state (non-rest position)
@@ -124,7 +124,7 @@ class TestDriftControlDecomposition:
         engine = _get_engine(engine_name)
         try:
             engine.load_from_path(pendulum_urdf)
-        except Exception:
+        except Exception:  # noqa: BLE001
             pytest.skip(f"{engine_name} failed to load URDF")
 
         q_initial, v_initial = np.array([0.3]), np.array([0.2])

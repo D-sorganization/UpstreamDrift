@@ -114,7 +114,7 @@ class TestIKSolverWithModel:
 
         try:
             solver = DualHandIKSolver(model=model, settings=settings)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"DualHandIKSolver instantiation failed: {exc}")
 
         assert solver is not None
@@ -143,7 +143,7 @@ class TestIKSolverWithModel:
 
         try:
             solver = DualHandIKSolver(model=model, settings=settings)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"DualHandIKSolver instantiation failed: {exc}")
 
         # Use neutral config as starting point — a zero-motion solve
@@ -153,7 +153,7 @@ class TestIKSolverWithModel:
 
         try:
             result = solver.solve(q0, target_left, target_right)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"IK solve raised (may need specific model frames): {exc}")
 
         assert result is not None

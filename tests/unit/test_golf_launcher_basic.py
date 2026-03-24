@@ -137,7 +137,7 @@ def mocked_launcher_module():
             import src.launchers.golf_launcher
 
             yield src.launchers.golf_launcher
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.skip(f"golf_launcher import failed under mocked Qt: {exc}")
         finally:
             # Cleanup: Remove the module from sys.modules so subsequent tests

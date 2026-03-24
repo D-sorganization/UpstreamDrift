@@ -367,6 +367,6 @@ class TestOpenSimGripModel:
                 length=0.15,  # 15 cm
             )
             logger.info("Successfully added cylindrical wrap")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.info(f"Wrap addition failed (expected for simple model): {e}")
             # This is acceptable - we're testing the interface exists

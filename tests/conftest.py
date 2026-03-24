@@ -44,7 +44,7 @@ def pytest_configure(config: pytest.Config) -> None:
             resolved_p = str(Path(p).resolve()).lower()
             if resolved_p not in (local_path.lower(), vendored_path.lower()):
                 clean_path.append(p)
-        except Exception:
+        except Exception:  # noqa: BLE001
             clean_path.append(p)
     sys.path = clean_path
 
