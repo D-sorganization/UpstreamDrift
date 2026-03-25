@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import cast
 
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
@@ -37,4 +36,4 @@ async def validate_upload_size(
             )
             return add_security_headers_to_response(response, request)
 
-    return cast(Response, await call_next(request))
+    return await call_next(request)

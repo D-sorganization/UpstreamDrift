@@ -100,7 +100,7 @@ active_tasks = TaskManager()
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:  # type: ignore[type-arg]
+async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     """Manage application lifespan: startup and shutdown.
 
     All services are stored in app.state for proper dependency injection

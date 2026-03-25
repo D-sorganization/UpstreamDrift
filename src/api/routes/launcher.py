@@ -6,6 +6,8 @@ enabling both launchers to derive their tile lists from a single source.
 
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
@@ -179,7 +181,7 @@ async def get_logo(filename: str) -> FileResponse:
 _capabilities_state: dict[str, dict[str, dict[str, str]] | None] = {"cache": None}
 
 
-def _build_engine_profiles() -> dict:
+def _build_engine_profiles() -> dict[str, Any]:
     from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
 
     F = CapabilityLevel.FULL

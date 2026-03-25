@@ -386,7 +386,7 @@ class AnalysisService:
 
         return result
 
-    def _detect_swing_phase(self, state: dict) -> str | None:
+    def _detect_swing_phase(self, state: dict[str, Any]) -> str | None:
         """Detect current swing phase from engine state.
 
         Simple heuristic-based phase detection. For production use,
@@ -408,7 +408,7 @@ class AnalysisService:
         if data is None:
             return []
         if isinstance(data, np.ndarray):
-            return list(data.tolist())  # type: ignore[no-any-return]
+            return list(data.tolist())
         if isinstance(data, (list, tuple)):
             return list(data)
         if isinstance(data, (int, float)):

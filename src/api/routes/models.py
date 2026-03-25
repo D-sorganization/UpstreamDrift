@@ -84,7 +84,9 @@ def _discover_models() -> list[dict[str, str]]:
     return models
 
 
-def _parse_urdf_geometry(visual_elem: Any, materials: dict[str, list[float]]) -> dict:
+def _parse_urdf_geometry(
+    visual_elem: Any, materials: dict[str, list[float]]
+) -> dict[str, Any]:
     """Parse a single <visual> element into geometry data.
 
     Args:

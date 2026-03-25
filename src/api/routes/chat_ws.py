@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
@@ -105,7 +106,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
 
 
 @router.get("/chat/sessions")
-async def list_sessions(request: Request) -> list[dict]:
+async def list_sessions(request: Request) -> list[dict[str, Any]]:
     """List all active chat sessions."""
     return request.app.state.chat_service.list_sessions()  # type: ignore[no-any-return]
 
@@ -115,7 +116,7 @@ async def list_sessions(request: Request) -> list[dict]:
     lambda request, session_id: session_id is not None and len(session_id.strip()) > 0,
     "Session ID must be a non-empty string",
 )
-async def get_history(request: Request, session_id: str) -> dict:
+async def get_history(request: Request, session_id: str) -> dict[str, Any]:
     """Get message history for a session."""
     assert request is not None, "request must be provided"
     messages = request.app.state.chat_service.get_session_history(session_id)

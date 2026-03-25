@@ -63,7 +63,7 @@ def _magnitude_to_color(magnitude: float, max_magnitude: float) -> list[float]:
     return [r, g, b, 1.0]
 
 
-def _extract_engine_state(engine_manager: EngineManager) -> tuple[Any, dict]:
+def _extract_engine_state(engine_manager: EngineManager) -> tuple[Any, dict[str, Any]]:
     """Extract the active engine and its current state.
 
     Args:
@@ -154,7 +154,7 @@ def _is_filtered_out(config: ForceOverlayRequest, body_name: str) -> bool:
 
 def _build_applied_torque_vectors(
     config: ForceOverlayRequest,
-    torques: list,
+    torques: list[Any],
     joint_names: list[str],
     n_joints: int,
 ) -> list[ForceVector3D]:

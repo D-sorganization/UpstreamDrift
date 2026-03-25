@@ -173,7 +173,9 @@ def _find_logo_file(logo_name: str) -> Path | None:
     return None
 
 
-def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
+def _find_tile_in_manifest(
+    tile_id: str,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Find a tile by ID in the launcher manifest.
 
     Args:
@@ -199,7 +201,7 @@ def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
 
 
 def _execute_tile_launch(
-    tile_id: str, tile: dict, launcher_service: Any
+    tile_id: str, tile: dict[str, Any], launcher_service: Any
 ) -> dict[str, Any] | JSONResponse:
     """Execute the launch of a tile using the appropriate handler.
 
@@ -224,7 +226,7 @@ def _execute_tile_launch(
     class _TileModel:
         """Minimal model object compatible with handler.launch()."""
 
-        def __init__(self, data: dict) -> None:
+        def __init__(self, data: dict[str, Any]) -> None:
             for k, v in data.items():
                 setattr(self, k, v)
 

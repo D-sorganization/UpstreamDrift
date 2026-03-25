@@ -212,7 +212,7 @@ async def create_api_key(
     response = APIKeyResponse.from_orm(db_api_key)
     response.key = api_key  # Include the actual key in response
 
-    return response  # type: ignore[no-any-return]
+    return response
 
 
 @router.get("/api-keys", response_model=list[APIKeyResponse])

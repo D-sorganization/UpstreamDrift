@@ -43,16 +43,23 @@ jobs:
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
       - name: Lint
-        run: ruff check src scripts tests
+        run: ruff check .
 
       # Use ruff format (consistent with pre-commit hooks) - ruff format is
       # a strict superset of black's style; running both causes conflicts.
+      # Runs on full repo (.) to catch formatting issues outside src/scripts/tests.
       - name: Check Formatting (ruff)
-        run: ruff format --check src scripts tests
+        run: ruff format --check .
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -e .[dev]
+      # Baseline mypy check across all of src/
       - run: mypy src --config-file pyproject.toml
+      # Strict mypy for the fully-annotated API layer (issue #2105).
+      # --follow-imports=silent applies strict rules only to src/api/ files,
+      # not to their transitive dependencies (which have pre-existing issues).
+      - name: MyPy Strict (src/api)
+        run: mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
 
       - name: Dependency Direction Fitness Check
         run: python3 scripts/check_dependency_direction.py
@@ -186,6 +193,7 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
+            --cov-fail-under=10 \
             --tb=short \
             -v
 
