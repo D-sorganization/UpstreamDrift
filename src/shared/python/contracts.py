@@ -47,6 +47,7 @@ import functools
 import inspect
 import logging
 import os
+import sys
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
 
@@ -655,3 +656,17 @@ def has_finite_elements(array: Any) -> bool:
     import numpy as np
 
     return bool(np.all(np.isfinite(array)))
+
+
+# ─── Module Identity Guard ──────────────────────────────────────
+# When sys.path includes both '.' (repo root) and 'src/shared/python',
+# this module can be loaded under two different names:
+#   - 'src.shared.python.contracts'  (via repo root + src package)
+#   - 'contracts'                    (via src/shared/python in sys.path)
+# The dual-loading creates two distinct class objects, breaking isinstance()
+# checks in pytest.raises() calls. Register all known alternate module names
+# to point to THIS module object, preventing class identity mismatches.
+_this_module = sys.modules[__name__]
+for _alias in ("contracts", "shared.python.contracts", "src.shared.python.contracts"):
+    sys.modules[_alias] = _this_module
+del _this_module, _alias

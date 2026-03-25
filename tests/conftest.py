@@ -67,9 +67,11 @@ def pytest_configure(config: pytest.Config) -> None:
 
         canonical_name = "src.shared.python.contracts"
         canonical_mod = importlib.import_module(canonical_name)
+        # Always override — even if already present — to ensure a single class identity.
+        # xdist workers may have loaded 'contracts' via the short sys.path entry before
+        # pytest_configure runs, creating a stale second module instance.
         for alias in ("contracts", "shared.python.contracts"):
-            if alias not in sys.modules:
-                sys.modules[alias] = canonical_mod
+            sys.modules[alias] = canonical_mod
     except Exception:  # noqa: BLE001
         pass  # Don't block test collection if this fails
 
