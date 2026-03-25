@@ -5,7 +5,6 @@ Provides the splash screen, async startup worker, and startup result container.
 
 from __future__ import annotations
 
-import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -291,7 +290,9 @@ class AsyncStartupWorker(QThread):
                 logger.debug("Docker not available or timed out")
 
             self.progress_signal.emit("Ready", 100)
-            time.sleep(0.5)
+            self.msleep(
+                500
+            )  # QThread.msleep: non-blocking within the Qt thread scheduler
             self.finished_signal.emit(self.results)
         except ImportError as e:
             logger.error(f"Startup failed: {e}")

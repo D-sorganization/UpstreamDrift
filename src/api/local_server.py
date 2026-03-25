@@ -643,7 +643,6 @@ def create_local_app() -> FastAPI:
 def print_logo_animated() -> None:
     """Print the Upstream Drift logo with scroll animation."""
     import sys
-    import time
 
     # ANSI escape codes
     ORANGE = "\033[38;5;208m"
@@ -670,7 +669,7 @@ def print_logo_animated() -> None:
         for line in logo:
             logger.info("    %s%s%s", ORANGE, line, RESET)
             sys.stdout.flush()
-            time.sleep(0.03)  # Scroll effect
+            # Scroll effect delay removed: time.sleep() blocks async/GUI contexts
     except UnicodeEncodeError:
         logger.info("    %sUPSTREAM DRIFT%s", ORANGE, RESET)
     logger.info("")
@@ -714,7 +713,6 @@ def print_server_info(host: str, port: int) -> None:
 
 def main() -> None:
     """Launch local server with auto-open browser."""
-    import time
     import webbrowser
     from threading import Timer
 
@@ -732,13 +730,10 @@ def main() -> None:
 
     port = get_golf_port(default=8000)
 
-    # Print startup info in matrix green
+    # Print startup info in matrix green (no artificial delays -- cosmetic sleeps removed)
     print_matrix_status("Loading physics engine manager...")
-    time.sleep(0.1)
     print_matrix_status("Registering API routes...")
-    time.sleep(0.1)
     print_matrix_status("Configuring static file server...")
-    time.sleep(0.1)
     print_matrix_status(f"Server ready on port {port}")
     logger.info("")
 

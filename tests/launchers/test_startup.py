@@ -206,7 +206,7 @@ def test_startup_worker_run_success(mock_registry, mock_engine_mgr, mock_secure_
     worker.finished_signal = MagicMock()
     worker.error_signal = MagicMock()
 
-    with patch("src.launchers.startup.time.sleep"):
+    with patch.object(worker, "msleep"):
         worker.run()
 
     assert worker.results.registry is not None
@@ -229,7 +229,7 @@ def test_startup_worker_run_engine_import_error(
 
     mock_engine_mgr.side_effect = ImportError("Test error")
 
-    with patch("src.launchers.startup.time.sleep"):
+    with patch.object(worker, "msleep"):
         worker.run()
 
     assert worker.results.registry is not None
@@ -271,7 +271,7 @@ def test_startup_worker_run_docker_error(
 
     mock_secure_run.side_effect = RuntimeError("Docker error")
 
-    with patch("src.launchers.startup.time.sleep"):
+    with patch.object(worker, "msleep"):
         worker.run()
 
     assert worker.results.docker_available is False

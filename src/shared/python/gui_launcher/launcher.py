@@ -258,10 +258,16 @@ class GUILauncher:
         )
 
         if self.config.auto_open_browser:
+            import threading
             import time
 
-            time.sleep(2)  # Give the server time to start
-            webbrowser.open(f"http://localhost:{self.config.port}")
+            def _open_after_start() -> None:
+                # time.sleep here is intentional: this runs in a daemon thread,
+                # not the GUI thread, so it does not block the event loop.
+                time.sleep(2)  # Give the dev server time to start
+                webbrowser.open(f"http://localhost:{self.config.port}")
+
+            threading.Thread(target=_open_after_start, daemon=True).start()
 
         try:
             return self._process.wait()
@@ -542,7 +548,9 @@ def launch_web_app(
         import time
 
         def _open_browser() -> None:
-            time.sleep(2)
+            # time.sleep here is intentional: runs in a daemon thread,
+            # not the GUI/main thread, so it does not block the event loop.
+            time.sleep(2)  # Give the dev server time to start
             webbrowser.open(f"http://localhost:{port}")
 
         threading.Thread(target=_open_browser, daemon=True).start()

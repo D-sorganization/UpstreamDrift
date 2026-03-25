@@ -965,6 +965,7 @@ class UnrealBridgeBackend(ViewerBackend):
         self._server_thread: threading.Thread | None = None
         self._frame_queue: Queue[UnrealDataFrame] = Queue()
         self._stop_event = threading.Event()
+        self._server_ready_event = threading.Event()
         self._frame_counter = 0
         self._object_counter = 0
         self._start_time = 0.0
@@ -985,13 +986,14 @@ class UnrealBridgeBackend(ViewerBackend):
 
         # Start background thread
         self._stop_event.clear()
+        self._server_ready_event.clear()
         self._server_thread = threading.Thread(
             target=self._run_server_loop, daemon=True, name="UnrealBridgeThread"
         )
         self._server_thread.start()
 
-        # Wait a bit for server to start (not strictly necessary but safer)
-        time.sleep(0.1)
+        # Block until the server loop signals it has started (replaces time.sleep)
+        self._server_ready_event.wait(timeout=5.0)
 
         self._is_initialized = True
         logger.info(
@@ -1009,6 +1011,7 @@ class UnrealBridgeBackend(ViewerBackend):
 
             # Start server
             await self._server.start()
+            self._server_ready_event.set()
 
             # Process frames
             while not self._stop_event.is_set():

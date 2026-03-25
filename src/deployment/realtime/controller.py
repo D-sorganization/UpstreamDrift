@@ -149,6 +149,9 @@ class RealTimeController:
         self._state_lock = threading.Lock()
         self._command_lock = threading.Lock()
 
+        # Event signalled whenever a new state reading is stored
+        self._state_event = threading.Event()
+
     @property
     def is_connected(self) -> bool:
         """Check if connected to robot."""
@@ -291,6 +294,8 @@ class RealTimeController:
 
                 with self._state_lock:
                     self._last_state = state
+                self._state_event.set()
+                self._state_event.clear()
 
                 # Compute control
                 if self._control_callback is not None:
@@ -497,14 +502,16 @@ class RealTimeController:
             Robot state or None if timeout.
         """
         assert timeout is not None, "timeout must be provided"
-        assert timeout is not None, "timeout must be provided"
         start = time.perf_counter()
-        initial_state = self._last_state
+        with self._state_lock:
+            initial_state = self._last_state
 
-        while time.perf_counter() - start < timeout:
+        remaining = timeout
+        while remaining > 0:
+            self._state_event.wait(timeout=remaining)
             with self._state_lock:
                 if self._last_state is not initial_state:
                     return self._last_state
-            time.sleep(0.001)
+            remaining = timeout - (time.perf_counter() - start)
 
         return None
