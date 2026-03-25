@@ -201,11 +201,7 @@ exclude = [
     "src/shared/models/opensim/opensim-models",
     # Pending type annotation cleanup (consolidated PR 2026-01-31)
     "src/shared/python/plotting/",
-    "src/shared/python/tests/",
     "src/shared/python/ui/qt/widgets/",
-    "src/shared/python/dashboard/tests/",
-    "src/engines/physics_engines/pinocchio/python/motion_training/",
-    "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/",
     "src/launchers/",
     # Additional directories with complex typing issues (pre-existing)
     "src/shared/python/pose_editor/",
@@ -222,9 +218,7 @@ exclude = [
     "src/engines/physics_engines/mujoco/python/humanoid_launcher_ui.py",
     # Test stubs with pre-existing issues
     "src/engines/physics_engines/drake/python/tests/",
-    "src/engines/physics_engines/pinocchio/python/tests/",
     # Root/example scripts use runtime src. prefixed imports
-    "examples/",
     "installer/",
     "start_api_server.py",
     "setup_golf_suite.py",

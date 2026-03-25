@@ -73,7 +73,7 @@ class TrajectoryExporter:
 
         # Compute timestep
         if self.num_frames > 1:
-            self.timestep = np.mean(np.diff(self.times))
+            self.timestep = float(np.mean(np.diff(self.times)))
         else:
             self.timestep = 0.001
 

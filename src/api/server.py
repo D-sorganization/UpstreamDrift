@@ -18,7 +18,6 @@ API Versioning (#1488):
     Legacy un-prefixed routes are also registered for backward compatibility.
 """
 
-import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
@@ -31,6 +30,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from src.shared.python.config.environment import get_environment
 from src.shared.python.engine_core.engine_manager import EngineManager
 
 # Configure logging - use centralized logging config
@@ -110,6 +110,14 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:  # type:
     - Type-safe dependency resolution
     """
     try:
+        # Validate environment variables before any service initialisation.
+        # env_validator checks GOLF_API_SECRET_KEY, DATABASE_URL, and the
+        # production checklist; it raises on critical failures so misconfigured
+        # deployments fail fast instead of silently using insecure defaults.
+        from src.shared.python.security.env_validator import validate_environment
+
+        validate_environment(raise_on_error=get_environment() == "production")
+
         # Initialize database (Issue #544)
         logger.info("Initializing database...")
         init_db()
@@ -254,8 +262,8 @@ logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX
 if __name__ == "__main__":
     # SECURITY FIX: Only enable auto-reload in development mode
     # Auto-reload in production can enable code injection attacks
-    environment = os.getenv("ENVIRONMENT", "development").lower()
-    enable_reload = environment == "development"
+    # Use canonical get_environment() from shared config (normalises "dev", "prod", etc.)
+    enable_reload = get_environment() == "development"
 
     if enable_reload:
         logger.warning("Running with auto-reload enabled (development mode)")
