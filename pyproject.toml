@@ -98,6 +98,8 @@ dev = [
     "opencv-python-headless>=4.8.0",
     # Required for property-based testing
     "hypothesis>=6.0.0",
+    # Required for database migration tooling (issue #2078)
+    "alembic>=1.13.0",
 ]
 
 # GUI testing (requires PyQt6)
