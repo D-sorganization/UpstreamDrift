@@ -22,6 +22,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import numpy.typing as npt
 
+from src.shared.python.contracts import require
+
 from .spatial_vectors import skew
 from .transforms import xtrans
 
@@ -56,6 +58,11 @@ def euler_to_rotation_matrix(
         3x3 rotation matrix
     """
     euler = np.asarray(euler, dtype=np.float64)
+    require(
+        euler.shape == (3,),
+        "euler must be a length-3 array [roll, pitch, yaw]",
+        euler.shape,
+    )
     roll, pitch, yaw = euler[0], euler[1], euler[2]
 
     cr, sr = np.cos(roll), np.sin(roll)
@@ -86,6 +93,7 @@ def rotation_matrix_to_euler(R: Mat3) -> Vec3:
         [roll, pitch, yaw] in radians
     """
     R = np.asarray(R, dtype=np.float64)
+    require(R.shape == (3, 3), "R must be a (3, 3) rotation matrix", R.shape)
 
     # Handle gimbal lock
     if np.abs(R[2, 0]) >= 1.0 - 1e-10:
@@ -143,6 +151,14 @@ def quaternion_to_euler(quat: Quat | list[float]) -> Vec3:
         [roll, pitch, yaw] in radians
     """
     quat = np.asarray(quat, dtype=np.float64)
+    require(
+        quat.shape == (4,), "quat must be a length-4 array [w, x, y, z]", quat.shape
+    )
+    require(
+        float(np.linalg.norm(quat)) > 1e-10,
+        "quat must not be a zero vector",
+        float(np.linalg.norm(quat)),
+    )
     w, x, y, z = quat[0], quat[1], quat[2], quat[3]
 
     # Roll (x-axis rotation)
@@ -173,6 +189,14 @@ def quaternion_to_rotation_matrix(quat: Quat | list[float]) -> Mat3:
         3x3 rotation matrix
     """
     quat = np.asarray(quat, dtype=np.float64)
+    require(
+        quat.shape == (4,), "quat must be a length-4 array [w, x, y, z]", quat.shape
+    )
+    require(
+        float(np.linalg.norm(quat)) > 1e-10,
+        "quat must not be a zero vector",
+        float(np.linalg.norm(quat)),
+    )
     quat = quat / np.linalg.norm(quat)  # Normalize
     w, x, y, z = quat[0], quat[1], quat[2], quat[3]
 
@@ -198,6 +222,7 @@ def rotation_matrix_to_quaternion(R: Mat3) -> Quat:
         Quaternion [w, x, y, z]
     """
     R = np.asarray(R, dtype=np.float64)
+    require(R.shape == (3, 3), "R must be a (3, 3) rotation matrix", R.shape)
     trace = R[0, 0] + R[1, 1] + R[2, 2]
 
     if trace > 0:
@@ -239,9 +264,13 @@ def axis_angle_to_rotation_matrix(axis: Vec3 | list[float], angle: float) -> Mat
     Returns:
         3x3 rotation matrix
     """
-    assert axis is not None, "axis must be provided"
-    assert axis is not None, "axis must be provided"
     axis = np.asarray(axis, dtype=np.float64)
+    require(axis.shape == (3,), "axis must be a (3,) vector", axis.shape)
+    require(
+        float(np.linalg.norm(axis)) > 1e-10,
+        "axis must not be a zero vector",
+        float(np.linalg.norm(axis)),
+    )
     axis = axis / np.linalg.norm(axis)  # Normalize
 
     K = skew(axis)

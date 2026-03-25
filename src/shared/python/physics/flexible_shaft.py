@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.contracts import check_positive, require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -159,8 +160,13 @@ def compute_section_inertia(
     Returns:
         Second moment of area [m⁴]
     """
-    assert outer_diameter is not None, "outer_diameter must be provided"
-    assert outer_diameter is not None, "outer_diameter must be provided"
+    check_positive(outer_diameter, "outer_diameter")
+    check_positive(wall_thickness, "wall_thickness")
+    require(
+        wall_thickness <= outer_diameter / 2,
+        "wall_thickness must not exceed outer_diameter / 2",
+        wall_thickness,
+    )
     d_outer = outer_diameter
     d_inner = outer_diameter - 2 * wall_thickness
     d_inner = max(d_inner, 0.0)  # Ensure non-negative
@@ -185,8 +191,13 @@ def compute_section_area(
     Returns:
         Cross-sectional area [m²]
     """
-    assert outer_diameter is not None, "outer_diameter must be provided"
-    assert outer_diameter is not None, "outer_diameter must be provided"
+    check_positive(outer_diameter, "outer_diameter")
+    check_positive(wall_thickness, "wall_thickness")
+    require(
+        wall_thickness <= outer_diameter / 2,
+        "wall_thickness must not exceed outer_diameter / 2",
+        wall_thickness,
+    )
     d_outer = outer_diameter
     d_inner = outer_diameter - 2 * wall_thickness
     d_inner = max(d_inner, 0.0)
@@ -266,9 +277,13 @@ def create_standard_shaft(
     Returns:
         ShaftProperties with linear taper
     """
+    require(material is not None, "material must be provided", material)
+    check_positive(length, "length")
+    require(n_stations >= 2, "n_stations must be at least 2", n_stations)
+    check_positive(tip_diameter, "tip_diameter")
+    check_positive(butt_diameter, "butt_diameter")
+    check_positive(wall_thickness, "wall_thickness")
     # Linear station positions from tip to butt
-    assert material is not None, "material must be provided"
-    assert material is not None, "material must be provided"
     stations = np.linspace(0, length, n_stations)
 
     # Linear taper in diameter
@@ -942,8 +957,12 @@ def compute_static_deflection(
     Returns:
         Deflection at each station [m]
     """
-    assert properties is not None, "properties must be provided"
-    assert properties is not None, "properties must be provided"
+    require(properties is not None, "properties must be provided", properties)
+    require(
+        0.0 <= load_position <= properties.length,
+        "load_position must be within shaft length [0, length]",
+        load_position,
+    )
     EI = compute_EI_profile(properties)
     EI_avg = float(np.mean(EI))  # Use average for simplicity
 
