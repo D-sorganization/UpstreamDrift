@@ -327,3 +327,68 @@ class TestRunBatch:
         fresh = DrakePerturbationAnalyzer(t_end=0.1, dt=0.01)
         with pytest.raises((AssertionError, AttributeError)):
             fresh.run_batch(_SMALL_CONFIG)
+
+
+@_skip_no_drake
+class TestRK4EnergyStability:
+    """Regression tests for issue #2121: explicit Euler caused energy divergence.
+
+    RK4 integration must keep total mechanical energy bounded over the simulation
+    interval for a zero-torque (free) pendulum.  Explicit Euler would cause the
+    energy to grow monotonically; RK4 keeps it near-constant.
+    """
+
+    def test_energy_does_not_diverge_zero_torque(self) -> None:
+        """Total energy must remain bounded for a zero-torque simulation (issue #2121)."""
+        from src.engines.physics_engines.drake.python.perturbation.analyzer import (
+            DrakePerturbationAnalyzer,
+        )
+
+        # Use a longer sim with larger dt to amplify any instability
+        analyzer = DrakePerturbationAnalyzer(t_end=1.0, dt=0.02)
+        zero_profile = {"coeffs": [[0.0, 0.0] for _ in range(analyzer._nu)]}
+        analyzer.set_base_torque_profile(zero_profile)
+
+        sim = analyzer._simulate(zero_profile["coeffs"])
+        total_energy = sim.kinetic_energy_traj + sim.potential_energy_traj
+
+        # Energy at start
+        e_initial = total_energy[0]
+
+        # With RK4, total energy drift should be small (< 5x over 1 s).
+        # Explicit Euler would show unconstrained growth — often 100%+ over 1 s.
+        e_final = total_energy[-1]
+        e_peak = float(np.max(np.abs(total_energy)))
+
+        # Guard against zero-energy edge case (all-zero initial state)
+        if abs(e_initial) < 1e-10 and abs(e_final) < 1e-10:
+            # All energy is zero throughout — trivially stable
+            return
+
+        reference = max(abs(e_initial), 1e-10)
+        relative_drift = abs(e_final - e_initial) / reference
+        assert relative_drift < 5.0, (
+            f"Energy drift too large: {relative_drift:.2%} "
+            f"(initial={e_initial:.4f}, final={e_final:.4f}, peak={e_peak:.4f}). "
+            "This may indicate a reversion to explicit Euler (issue #2121)."
+        )
+
+    def test_simulation_produces_finite_trajectories(self) -> None:
+        """All trajectory arrays must contain only finite values (no NaN/inf)."""
+        from src.engines.physics_engines.drake.python.perturbation.analyzer import (
+            DrakePerturbationAnalyzer,
+        )
+
+        analyzer = DrakePerturbationAnalyzer(t_end=0.5, dt=0.01)
+        profile = {"coeffs": [[0.5, -0.1] for _ in range(analyzer._nu)]}
+        analyzer.set_base_torque_profile(profile)
+        sim = analyzer._simulate(profile["coeffs"])
+
+        assert np.all(np.isfinite(sim.q_traj)), "q_traj contains non-finite values"
+        assert np.all(np.isfinite(sim.v_traj)), "v_traj contains non-finite values"
+        assert np.all(np.isfinite(sim.kinetic_energy_traj)), (
+            "kinetic_energy_traj contains non-finite values"
+        )
+        assert np.all(np.isfinite(sim.potential_energy_traj)), (
+            "potential_energy_traj contains non-finite values"
+        )

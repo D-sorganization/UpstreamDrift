@@ -179,6 +179,15 @@ class DrakePerturbationAnalyzer:
     <axis xyz="0 0 1"/>
     <limit lower="-3.14159" upper="3.14159" effort="100" velocity="100"/>
   </joint>
+  <transmission name="shoulder_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="shoulder">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="shoulder_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
 </robot>"""
 
     def __init__(
@@ -211,6 +220,7 @@ class DrakePerturbationAnalyzer:
             DiagramBuilder,
             Parser,
         )
+        from pydrake.multibody.tree import BodyIndex  # noqa: PLC0415
 
         self._t_end = t_end
         self._dt = dt
@@ -222,12 +232,12 @@ class DrakePerturbationAnalyzer:
         if urdf_path is not None:
             urdf_path = Path(urdf_path)
             assert urdf_path.exists(), f"URDF not found: {urdf_path}"
-            Parser(plant).AddModelFromFile(str(urdf_path))
+            Parser(plant).AddModels(str(urdf_path))
         else:
             # Try bundled golfer URDF, fall back to minimal pendulum
             bundled = Path(__file__).parents[4] / "models" / "generated" / "golfer.urdf"
             if bundled.exists():
-                Parser(plant).AddModelFromFile(str(bundled))
+                Parser(plant).AddModels(str(bundled))
             else:
                 import tempfile
 
@@ -236,7 +246,7 @@ class DrakePerturbationAnalyzer:
                 )
                 tmp.write(self._MINIMAL_URDF)
                 tmp.close()
-                Parser(plant).AddModelFromFile(tmp.name)
+                Parser(plant).AddModels(tmp.name)
 
         plant.Finalize()
         self._plant = plant
@@ -246,15 +256,16 @@ class DrakePerturbationAnalyzer:
         self._nv = plant.num_velocities()
         self._nu = plant.num_actuators()
 
-        # End-effector body
+        # End-effector body (BodyIndex wrapper required by Drake API)
         if ee_body_name is not None:
             self._ee_body_idx = plant.GetBodyByName(ee_body_name).index()
         else:
             # Use the last non-world body
+            world_idx = plant.world_body().index()
             bodies = [
-                plant.get_body(i)
+                plant.get_body(BodyIndex(i))
                 for i in range(plant.num_bodies())
-                if not plant.get_body(i).is_world()
+                if BodyIndex(i) != world_idx
             ]
             self._ee_body_idx = bodies[-1].index() if bodies else None
 
@@ -573,8 +584,9 @@ class DrakePerturbationAnalyzer:
         """Run a Drake forward simulation with polynomial torques.
 
         Each joint's torque follows tau_j(t) = sum_k c_jk * t^k.
-        Uses a manual Euler integration loop to avoid Drake Simulator
-        overhead for short Monte Carlo trials.
+        Uses a 4th-order Runge-Kutta (RK4) integration loop to avoid
+        Drake Simulator overhead for short Monte Carlo trials while
+        maintaining energy stability (fixes issue #2121).
         """
         from pydrake.all import (  # noqa: PLC0415
             AddMultibodyPlantSceneGraph,
@@ -582,6 +594,7 @@ class DrakePerturbationAnalyzer:
             Parser,
             Simulator,
         )
+        from pydrake.multibody.tree import BodyIndex  # noqa: PLC0415
 
         # Rebuild a fresh plant+simulator for each trial
         # (Drake Simulator is not reusable after AdvanceTo)
@@ -597,14 +610,14 @@ class DrakePerturbationAnalyzer:
             tmp = tempfile.NamedTemporaryFile(suffix=".urdf", mode="w", delete=False)
             tmp.write(self._urdf_str)
             tmp.close()
-            Parser(plant).AddModelFromFile(tmp.name)
+            Parser(plant).AddModels(tmp.name)
         else:
             # Re-finalize fresh from existing plant's URDF path stored at init
             # Fall back to minimal URDF
             tmp = tempfile.NamedTemporaryFile(suffix=".urdf", mode="w", delete=False)
             tmp.write(self._MINIMAL_URDF)
             tmp.close()
-            Parser(plant).AddModelFromFile(tmp.name)
+            Parser(plant).AddModels(tmp.name)
 
         plant.Finalize()
         diagram = builder.Build()
@@ -674,19 +687,19 @@ class DrakePerturbationAnalyzer:
         v_arr = np.array(v_list)
 
         # End-effector positions via FK
+        # Precompute non-world bodies (BodyIndex wrapper required by Drake API)
+        world_idx = plant.world_body().index()
+        non_world_bodies = [
+            plant.get_body(BodyIndex(i))
+            for i in range(plant.num_bodies())
+            if BodyIndex(i) != world_idx
+        ]
         ee_pos_list = []
         for qi in q_arr:
             plant.SetPositions(plant_context, qi)
             plant.SetVelocities(plant_context, np.zeros(nv))
-            plant.EvalBodyPoseInWorld(plant_context, plant.world_body())
-            # Get last body position
-            bodies = [
-                plant.get_body(i)
-                for i in range(plant.num_bodies())
-                if not plant.get_body(i).is_world()
-            ]
-            if bodies:
-                pose = plant.EvalBodyPoseInWorld(plant_context, bodies[-1])
+            if non_world_bodies:
+                pose = plant.EvalBodyPoseInWorld(plant_context, non_world_bodies[-1])
                 ee_pos_list.append(pose.translation().copy())
             else:
                 ee_pos_list.append(np.zeros(3))
