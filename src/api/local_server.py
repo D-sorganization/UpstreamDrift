@@ -4,6 +4,10 @@ Local-first API server for Golf Modeling Suite.
 Runs entirely on localhost with NO authentication required.
 This is the default mode - free, offline, no accounts needed.
 
+API Versioning (#2070):
+    All routes are served under ``/api/v1/`` for forward compatibility.
+    Legacy ``/api/`` routes are also registered for backward compatibility.
+
 Diagnostic Features:
 - /api/diagnostics - JSON diagnostic report
 - /api/diagnostics/html - Browser-friendly diagnostic page
@@ -61,6 +65,10 @@ logger = logging.getLogger(__name__)
 
 logger = get_logger(__name__)
 
+# API versioning constants (#2070)
+API_VERSION = "v1"
+API_PREFIX = f"/api/{API_VERSION}"
+
 
 # Track startup metrics for diagnostics
 _startup_metrics: dict[str, Any] = {
@@ -103,7 +111,22 @@ def _configure_cors(app: FastAPI) -> None:
 
 
 def _register_api_routers(app: FastAPI) -> None:
-    """Register all API route routers on the app."""
+    """Register all API route routers on the app.
+
+    Routes are mounted at both the versioned prefix (``/api/v1/``) and the
+    legacy prefix (``/api/``) to maintain backward compatibility (#2070).
+    """
+    # Versioned routes: /api/v1/... (canonical, forward-compatible)
+    app.include_router(engines.router, prefix=API_PREFIX, tags=["Engines"])
+    app.include_router(simulation.router, prefix=API_PREFIX, tags=["Simulation"])
+    app.include_router(
+        simulation_ws.router, prefix=API_PREFIX, tags=["Simulation WebSocket"]
+    )
+    app.include_router(chat_ws.router, prefix=API_PREFIX, tags=["Chat"])
+    app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
+    app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
+
+    # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
     app.include_router(simulation.router, prefix="/api", tags=["Simulation"])
     app.include_router(
@@ -565,11 +588,20 @@ def _mount_static_files_and_spa(app: FastAPI) -> None:
 
 
 def create_local_app() -> FastAPI:
-    """Create FastAPI app configured for local use."""
+    """Create FastAPI app configured for local use.
 
+    Routes are registered at both ``/api/v1/`` (versioned, canonical) and
+    ``/api/`` (legacy, deprecated) for backward compatibility (#2070).
+    """
     app = FastAPI(
         title="Golf Modeling Suite",
-        description="Local physics simulation for golf biomechanics",
+        description=(
+            "Local physics simulation for golf biomechanics.\n\n"
+            "## Versioning\n"
+            f"Current API version: **{API_VERSION}**. "
+            f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
+            "Legacy `/api/` routes are maintained for backward compatibility."
+        ),
         version="2.0.0",
         docs_url="/api/docs",  # Swagger UI available locally
         redoc_url="/api/redoc",
