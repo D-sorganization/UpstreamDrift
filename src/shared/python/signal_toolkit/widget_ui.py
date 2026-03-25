@@ -6,6 +6,7 @@ Contains all widget construction and signal-slot connection methods.
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT,
@@ -33,10 +34,20 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from .widget_protocol import _SignalToolkitHost
+
 logger = logging.getLogger(__name__)
 
+# Use the protocol as the mixin base so mypy understands that ``self``
+# carries all the host widget attributes.  At runtime this resolves to
+# ``object``, so there is no actual inheritance from the protocol.
+if TYPE_CHECKING:
+    _Base = _SignalToolkitHost
+else:
+    _Base = object
 
-class UISetupMixin:
+
+class UISetupMixin(_Base):
     """Mixin providing all UI construction methods for SignalToolkitWidget."""
 
     def _setup_ui(self) -> None:
@@ -875,36 +886,36 @@ class UISetupMixin:
         self.signal_type_combo.currentIndexChanged.connect(
             self.param_stack.setCurrentIndex
         )
-        self.generate_btn.clicked.connect(self._generate_signal)  # type: ignore[attr-defined]
+        self.generate_btn.clicked.connect(self._generate_signal)
 
         # Fitting
-        self.fit_btn.clicked.connect(self._fit_function)  # type: ignore[attr-defined]
-        self.auto_fit_btn.clicked.connect(self._auto_fit)  # type: ignore[attr-defined]
+        self.fit_btn.clicked.connect(self._fit_function)
+        self.auto_fit_btn.clicked.connect(self._auto_fit)
 
         # Limits
-        self.apply_sat_btn.clicked.connect(self._apply_saturation)  # type: ignore[attr-defined]
-        self.sat_preview_check.stateChanged.connect(self._update_saturation_preview)  # type: ignore[attr-defined]
+        self.apply_sat_btn.clicked.connect(self._apply_saturation)
+        self.sat_preview_check.stateChanged.connect(self._update_saturation_preview)
 
         # Calculus
-        self.show_derivative_btn.clicked.connect(self._show_derivative)  # type: ignore[attr-defined]
-        self.show_integral_btn.clicked.connect(self._show_integral)  # type: ignore[attr-defined]
-        self.tangent_slider.valueChanged.connect(self._update_tangent_position)  # type: ignore[attr-defined]
-        self.show_tangent_check.stateChanged.connect(self._toggle_tangent)  # type: ignore[attr-defined]
-        self.int_lower_slider.valueChanged.connect(self._update_integral_bounds)  # type: ignore[attr-defined]
-        self.int_upper_slider.valueChanged.connect(self._update_integral_bounds)  # type: ignore[attr-defined]
+        self.show_derivative_btn.clicked.connect(self._show_derivative)
+        self.show_integral_btn.clicked.connect(self._show_integral)
+        self.tangent_slider.valueChanged.connect(self._update_tangent_position)
+        self.show_tangent_check.stateChanged.connect(self._toggle_tangent)
+        self.int_lower_slider.valueChanged.connect(self._update_integral_bounds)
+        self.int_upper_slider.valueChanged.connect(self._update_integral_bounds)
 
         # Filters
-        self.apply_filter_btn.clicked.connect(self._apply_filter)  # type: ignore[attr-defined]
-        self.show_freq_response_btn.clicked.connect(self._show_frequency_response)  # type: ignore[attr-defined]
+        self.apply_filter_btn.clicked.connect(self._apply_filter)
+        self.show_freq_response_btn.clicked.connect(self._show_frequency_response)
 
         # Noise
-        self.add_noise_btn.clicked.connect(self._add_noise)  # type: ignore[attr-defined]
-        self.reset_signal_btn.clicked.connect(self._reset_signal)  # type: ignore[attr-defined]
+        self.add_noise_btn.clicked.connect(self._add_noise)
+        self.reset_signal_btn.clicked.connect(self._reset_signal)
 
         # Import
-        self.browse_btn.clicked.connect(self._browse_file)  # type: ignore[attr-defined]
-        self.import_btn.clicked.connect(self._import_signal)  # type: ignore[attr-defined]
+        self.browse_btn.clicked.connect(self._browse_file)
+        self.import_btn.clicked.connect(self._import_signal)
 
         # Output
-        self.apply_btn.clicked.connect(self._apply_to_joint)  # type: ignore[attr-defined]
-        self.export_btn.clicked.connect(self._export_signal)  # type: ignore[attr-defined]
+        self.apply_btn.clicked.connect(self._apply_to_joint)
+        self.export_btn.clicked.connect(self._export_signal)
