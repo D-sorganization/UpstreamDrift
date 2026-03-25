@@ -57,7 +57,6 @@ class EngineState:
             nv: Number of velocity coordinates
         """
         assert nq is not None, "nq must be provided"
-        assert nq is not None, "nq must be provided"
         self.q: np.ndarray = np.zeros(nq)  # Positions
         self.v: np.ndarray = np.zeros(nv)  # Velocities
         self.a: np.ndarray = np.zeros(nv)  # Accelerations

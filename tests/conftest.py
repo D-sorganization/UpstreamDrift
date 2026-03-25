@@ -57,6 +57,22 @@ def pytest_configure(config: pytest.Config) -> None:
         sys.path.insert(0, local_path)
         sys.path.append(vendored_path)
 
+    # Prevent dual-loading of shared contracts module under different path aliases.
+    # With both '.' and 'src/shared/python' in sys.path, 'contracts' can be
+    # imported as both 'src.shared.python.contracts' and 'contracts', creating
+    # two distinct class objects that break pytest.raises() catches in Python 3.11+.
+    # Pre-load via the canonical path and alias all alternate module names.
+    try:
+        import importlib
+
+        canonical_name = "src.shared.python.contracts"
+        canonical_mod = importlib.import_module(canonical_name)
+        for alias in ("contracts", "shared.python.contracts"):
+            if alias not in sys.modules:
+                sys.modules[alias] = canonical_mod
+    except Exception:  # noqa: BLE001
+        pass  # Don't block test collection if this fails
+
 
 # Engine module prefixes whose sys.modules entries must be isolated between
 # tests.  Pinocchio's C extension (pinocchio_pywrap_default) is corrupted by
