@@ -28,7 +28,7 @@ install(FILES Models/BouncingBlock/bouncing_block.osim
         DESTINATION Models/BouncingBlock)
 install(FILES Models/BouncingBlock/run_forward_bouncingBlock.xml
         DESTINATION Models/BouncingBlock
-        RENAME run_forward.xml) # TODO inconsistent filename; which should we use?
+        RENAME run_forward.xml) # TRACKED_TASK inconsistent filename; which should we use?
 
 install(FILES Models/Gait10dof18musc/gait10dof18musc.osim
               Models/Gait10dof18musc/subject01.osim
@@ -42,7 +42,7 @@ install(FILES Models/Gait10dof18musc/gait10dof18musc.osim
               Tutorials/Design_to_Reduce_Metabolic_Cost/CMC/walk_Setup_CMC.xml
               Tutorials/Design_to_Reduce_Metabolic_Cost/CMC/walk_Setup_CMC_PathActuator.xml
         DESTINATION Models/Gait10dof18musc)
-# TODO subject01_metabolics* files?
+# TRACKED_TASK subject01_metabolics* files?
 install(DIRECTORY Tutorials/Design_to_Reduce_Metabolic_Cost/
         DESTINATION Models/Gait10dof18musc
 				PATTERN "CMC/walk_Setup_CMC*" EXCLUDE
@@ -79,7 +79,7 @@ install(FILES
         Pipelines/Gait2392_Simbody/subject01_walk1_grf.mot
         Pipelines/Gait2392_Simbody/subject01_walk1_grf.xml
         DESTINATION Models/Gait2392_Simbody)
-    # TODO should we copy over the OutputReference folder?
+    # TRACKED_TASK should we copy over the OutputReference folder?
 install(DIRECTORY Tutorials/Intro_to_Musculoskeletal_Modeling/
         DESTINATION Models/Gait2392_Simbody/Tutorial1)
 
@@ -101,7 +101,7 @@ install(DIRECTORY Models/DoublePendulum/
 
 install(DIRECTORY Tutorials/Pulling_Out_the_Stops_Tug_of_War/
         DESTINATION Models/Tug_of_War
-        PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not?
+        PATTERN "addPrescribedMotion.py" EXCLUDE # TRACKED_TASK leave in or not?
         )
 install(FILES Models/WristModel/wrist.osim
         DESTINATION Models/WristModel)

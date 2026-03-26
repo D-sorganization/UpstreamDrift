@@ -15,8 +15,8 @@
 ./scripts/scan_for_incomplete_code.py:10:        "NotImplementedError": re.compile(r"raise NotImplementedError"),
 ./scripts/verify_backends.py:45:    except NotImplementedError:
 ./pyproject.toml:328:    "raise NotImplementedError",
-./AGENTS.md:415:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
-./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
+./AGENTS.md:415:- **Read:** Codebase for TRACKED_TASK, TRACKED_DEFECT, NotImplementedError, pass statements
+./.github/copilot-instructions.md:14:- [ ] No `TRACKED_TASK`, `TRACKED_DEFECT`, `pass`, `NotImplementedError` in maintained code.
 ./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
 ./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
 ./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements

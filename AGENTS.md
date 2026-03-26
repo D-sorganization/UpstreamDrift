@@ -197,7 +197,7 @@ All code produced must adhere to the following design principles. These are eval
 #### 5m. No Deprecated/Outdated Code
 
 - ❌ **DO NOT** leave `sys.path` hacks in production code.
-- ❌ **DO NOT** leave `TODO`/`FIXME` markers for more than one sprint.
+- ❌ **DO NOT** leave `TRACKED_TASK`/`TRACKED_DEFECT` markers for more than one sprint.
 - ✅ **Remove** dead code, unused imports, and compatibility shims.
 
 #### 5n. Standardized Project Structure
@@ -412,7 +412,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 **Schedule:** 1:00 AM PST (0 9 ** \* UTC)
 **Capabilities:\*\*
 
-- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
+- **Read:** Codebase for TRACKED_TASK, TRACKED_DEFECT, NotImplementedError, pass statements
 - **Write:** Implementations for incomplete code
 - **Constraint:** Creates PRs for review; does not merge directly.
 

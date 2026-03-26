@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-This review identifies critical implementation gaps, placeholder code, physics inaccuracies, and legal/patent risks within the codebase. Several modules contain `TODO`, `FIXME`, or `NotImplementedError` markers that indicate features were started but not completed.
+This review identifies critical implementation gaps, placeholder code, physics inaccuracies, and legal/patent risks within the codebase. Several modules contain `TRACKED_TASK`, `TRACKED_DEFECT`, or `NotImplementedError` markers that indicate features were started but not completed.
 
 ## 1. Critical Implementation Gaps (Blocking)
 
@@ -44,11 +44,11 @@ Missing or simplified physics models that compromise simulation accuracy.
 *   **File:** `src/shared/python/physics/ball_flight_physics.py`
 *   **Status:** **PARTIAL / TODOs**
 *   **Details:**
-    *   Missing implementation for "Environmental Gradient Modeling" (TODO).
-    *   Missing implementation for "Hydrodynamic Lubrication" (TODO).
-    *   Missing implementation for "Dimple Geometry Optimization" (TODO).
-    *   Missing implementation for "Turbulence Modeling" (TODO).
-    *   Missing implementation for "Mud Ball Physics" (TODO).
+    *   Missing implementation for "Environmental Gradient Modeling" (TRACKED_TASK).
+    *   Missing implementation for "Hydrodynamic Lubrication" (TRACKED_TASK).
+    *   Missing implementation for "Dimple Geometry Optimization" (TRACKED_TASK).
+    *   Missing implementation for "Turbulence Modeling" (TRACKED_TASK).
+    *   Missing implementation for "Mud Ball Physics" (TRACKED_TASK).
     *   Hardcoded aerodynamic coefficients (`cd0=0.21`, etc.) without configuration.
 *   **Impact:** Simulation may not reflect real-world ball behavior under complex conditions.
 
@@ -56,16 +56,16 @@ Missing or simplified physics models that compromise simulation accuracy.
 *   **File:** `src/shared/python/physics/flexible_shaft.py`
 *   **Status:** **PARTIAL / TODOs**
 *   **Details:**
-    *   Missing "Torsional Dynamics" (TODO). The current Euler-Bernoulli beam model ignores twist.
-    *   Missing "Asymmetric Cross-Sections" (TODO).
+    *   Missing "Torsional Dynamics" (TRACKED_TASK). The current Euler-Bernoulli beam model ignores twist.
+    *   Missing "Asymmetric Cross-Sections" (TRACKED_TASK).
 *   **Impact:** Unable to model shaft spine alignment or twisting effects during swing.
 
 ### Impact Model
 *   **File:** `src/shared/python/physics/impact_model.py`
-*   **Status:** **SIMPLIFIED / FIXME**
+*   **Status:** **SIMPLIFIED / TRACKED_DEFECT**
 *   **Details:**
     *   `RigidBodyImpactModel` uses a simplified scalar effective mass formula (`1 / (1/m + r^2/I)`).
-    *   FIXME: "this uses a simplified scalar effective mass model."
+    *   TRACKED_DEFECT: "this uses a simplified scalar effective mass model."
 *   **Impact:** Ignores full 3D inertia tensor and impact vector direction, leading to inaccuracies in off-center impacts.
 
 ### Ground Reaction Forces (GRF)
@@ -83,9 +83,9 @@ Missing metrics required for advanced swing analysis.
 *   **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
 *   **Status:** **MISSING METRICS / TODOs**
 *   **Details:**
-    *   Missing "Proximal Braking Efficiency" calculation (TODO).
-    *   Missing "X-Factor Stretch" calculation (TODO).
-    *   Missing "Inter-segmental Power Flow" calculation (TODO).
+    *   Missing "Proximal Braking Efficiency" calculation (TRACKED_TASK).
+    *   Missing "X-Factor Stretch" calculation (TRACKED_TASK).
+    *   Missing "Inter-segmental Power Flow" calculation (TRACKED_TASK).
 *   **Impact:** Incomplete biomechanical analysis capabilities.
 
 ## 4. Legal and Patent Risks
@@ -98,7 +98,7 @@ Implementation choices that pose legal or maintenance risks.
 *   **File:** `src/shared/python/injury/injury_risk.py`
 *   **Risk:** Usage of "X-Factor Stretch" term and specific thresholds (e.g., > 55 degrees) poses trademark/patent risk (TPI/McLean).
 *   **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
-*   **Risk:** FIXME explicitly states "The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation."
+*   **Risk:** TRACKED_DEFECT explicitly states "The `efficiency_score` calculation may infringe on patents. Needs review and reimplementation."
 
 ### Data Copyright
 *   **File:** `src/shared/python/validation_pkg/validation_data.py`

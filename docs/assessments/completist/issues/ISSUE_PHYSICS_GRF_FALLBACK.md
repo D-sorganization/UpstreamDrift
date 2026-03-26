@@ -8,7 +8,7 @@ assignees: physics-team
 The `extract_grf_from_contacts` function in `src/shared/python/physics/ground_reaction_forces.py` (Line 385) implements an incorrect fallback mechanism when engine contact data is unavailable:
 
 ```python
-# FIXME: This fallback calculation is inaccurate for dynamic movements.
+# TRACKED_DEFECT: This fallback calculation is inaccurate for dynamic movements.
 # It only accounts for static weight (W=mg) and ignores dynamic acceleration forces (F=m(g+a)).
 total_force[2] += abs(np.sum(g))
 ```

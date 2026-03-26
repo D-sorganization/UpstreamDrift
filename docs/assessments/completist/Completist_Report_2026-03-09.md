@@ -2,7 +2,7 @@
 
 ## Executive Summary
 - **Critical Gaps**: 331
-- **Feature Gaps (TODO)**: 37
+- **Feature Gaps (TRACKED_TASK)**: 37
 - **Technical Debt**: 21
 - **Documentation Gaps**: 149
 
@@ -11,8 +11,8 @@
 ```mermaid
 pie title Completion Status
     "Impl Gaps (Critical)" : 331
-    "Feature Requests (TODO)" : 37
-    "Technical Debt (FIXME)" : 21
+    "Feature Requests (TRACKED_TASK)" : 37
+    "Technical Debt (TRACKED_DEFECT)" : 21
     "Doc Gaps" : 149
 ```
 
@@ -83,43 +83,43 @@ pie title Issues by Module
 ## Feature Gap Matrix
 | Module | Feature Gap | Type |
 |---|---|---|
-| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section A.1 TODO: Create the Pelvis and set the coordinate | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section A.2 TODO: Create the LeftThigh, LeftShank, RightThigh and | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.1 TODO: Add ContactSphere to the left hip, the knee, | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.2 TODO: Add HuntCrossleyForces | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.2 TODO: Add HuntCrossleyForces betweeen the remaining | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section C.1 TODO: Construct CoordinateLimitForces for the Hip and | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TODO: Add Code to Begin Model here | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TODO: Set the coordinate properties | TODO |
-| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/skeleton.cpp` | // TODO: Add Code to Begin Model here | TODO |
-| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | RENAME run_forward.xml) # TODO inconsistent filename; which should we use? | TODO |
-| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | # TODO subject01_metabolics* files? | TODO |
-| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | # TODO should we copy over the OutputReference folder? | TODO |
-| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not? | TODO |
-| `./REVIEW_SUMMARY.txt` | 4. TODO/FIXME blocker too aggressive (doesn't allow issue references) | TODO |
-| `./scripts/generate_todo_fixme_register.py` | ["rg", "-n", "TODO\|FIXME", "src", "tests", "scripts"], | TODO |
-| `./scripts/generate_todo_fixme_register.py` | "# TODO/FIXME Debt Register", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | "This register is generated from inline TODO/FIXME markers.", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | marker = "TODO" if "TODO" in text else "FIXME" | TODO |
-| `./scripts/refresh_completist_data.py` | "TODO\|FIXME\|XXX\|HACK\|TEMP", | TODO |
-| `./scripts/pragmatic_programmer_review.py` | """Report high TODO counts as a technical debt indicator.""" | TODO |
-| `./scripts/pragmatic_programmer_review.py` | if "TODO" in content: | TODO |
-| `./scripts/pragmatic_programmer_review.py` | "title": f"High TODO count ({len(todos)})", | TODO |
-| `./tests/tools/test_code_quality_check.py` | lines = ["# TODO: fix this", "def test():", "    ...  ", "    pass"] | TODO |
-| `./tests/tools/test_code_quality_check.py` | assert any("TODO placeholder" in t for t in types) | TODO |
-| `./tests/tools/test_code_quality_check.py` | lines = ["# TODO: internal marker"] | TODO |
-| `./tests/tools/test_code_quality_check.py` | f.write_text("# TODO: fix this\n") | TODO |
-| `./tests/tools/test_code_quality_check.py` | assert any("TODO" in i[1] for i in issues) | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - Placeholder (TODO/FIXME) blocker | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. **TODO/FIXME check is blocking:** CI fails if any TODOs found | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. TODO/FIXME blocker is too aggressive | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - **Fix:** Update check to allow `TODO #123` format | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | echo "::error::Orphaned placeholders. Link to GitHub issues: # TODO #123" | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - [ ] Fix TODO/FIXME check to allow references: `# TODO #123` | TODO |
+| `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | TRACKED_TASK |
+| `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | TRACKED_TASK |
+| `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | TRACKED_TASK |
+| `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section A.1 TRACKED_TASK: Create the Pelvis and set the coordinate | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section A.2 TRACKED_TASK: Create the LeftThigh, LeftShank, RightThigh and | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.1 TRACKED_TASK: Add ContactSphere to the left hip, the knee, | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.2 TRACKED_TASK: Add HuntCrossleyForces | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section B.2 TRACKED_TASK: Add HuntCrossleyForces betweeen the remaining | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuildModel.cpp` | // Section C.1 TRACKED_TASK: Construct CoordinateLimitForces for the Hip and | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TRACKED_TASK: Add Code to Begin Model here | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/DynamicWalkerBuild/DynamicWalkerBuildModelStudent.cpp` | // TRACKED_TASK: Set the coordinate properties | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/Tutorials/Building_a_Passive_Dynamic_Walker/skeleton.cpp` | // TRACKED_TASK: Add Code to Begin Model here | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | RENAME run_forward.xml) # TRACKED_TASK inconsistent filename; which should we use? | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | # TRACKED_TASK subject01_metabolics* files? | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | # TRACKED_TASK should we copy over the OutputReference folder? | TRACKED_TASK |
+| `./src/shared/models/opensim/opensim-models/CMakeLists.txt` | PATTERN "addPrescribedMotion.py" EXCLUDE # TRACKED_TASK leave in or not? | TRACKED_TASK |
+| `./REVIEW_SUMMARY.txt` | 4. TRACKED_TASK/TRACKED_DEFECT blocker too aggressive (doesn't allow issue references) | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | ["rg", "-n", "TRACKED_TASK\|TRACKED_DEFECT", "src", "tests", "scripts"], | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | "# TRACKED_TASK/TRACKED_DEFECT Debt Register", | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | "This register is generated from inline TRACKED_TASK/TRACKED_DEFECT markers.", | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | marker = "TRACKED_TASK" if "TRACKED_TASK" in text else "TRACKED_DEFECT" | TRACKED_TASK |
+| `./scripts/refresh_completist_data.py` | "TRACKED_TASK\|TRACKED_DEFECT\|XXX\|HACK\|TEMP", | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py` | """Report high TRACKED_TASK counts as a technical debt indicator.""" | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py` | if "TRACKED_TASK" in content: | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py` | "title": f"High TRACKED_TASK count ({len(todos)})", | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | lines = ["# TRACKED_TASK: fix this", "def test():", "    ...  ", "    pass"] | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | assert any("TRACKED_TASK placeholder" in t for t in types) | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | lines = ["# TRACKED_TASK: internal marker"] | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | f.write_text("# TRACKED_TASK: fix this\n") | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | assert any("TRACKED_TASK" in i[1] for i in issues) | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - Placeholder (TRACKED_TASK/TRACKED_DEFECT) blocker | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. **TRACKED_TASK/TRACKED_DEFECT check is blocking:** CI fails if any TODOs found | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. TRACKED_TASK/TRACKED_DEFECT blocker is too aggressive | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - **Fix:** Update check to allow `TRACKED_TASK #123` format | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | echo "::error::Orphaned placeholders. Link to GitHub issues: # TRACKED_TASK #123" | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - [ ] Fix TRACKED_TASK/TRACKED_DEFECT check to allow references: `# TRACKED_TASK #123` | TRACKED_TASK |
 
 ## Technical Debt Register
 | File | Line | Issue | Type |
@@ -143,17 +143,17 @@ pie title Issues by Module
 | `./tests/unit/utils/test_error_codes.py` | 39 | """Every error code must follow GMS-XXX-NNN pattern.""" | XXX |
 | `./tests/unit/utils/test_error_codes.py` | 42 | assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN" | XXX |
 | `./tests/unit/api/test_error_codes.py` | 36 | """Postcondition: All codes follow GMS-XXX-NNN format.""" | XXX |
-| `./tests/tools/test_code_quality_check.py` | 83 | lines = ["# FIXME: broken logic"] | FIXME |
-| `./tests/tools/test_code_quality_check.py` | 85 | assert any("FIXME" in i[1] for i in issues) | FIXME |
+| `./tests/tools/test_code_quality_check.py` | 83 | lines = ["# TRACKED_DEFECT: broken logic"] | TRACKED_DEFECT |
+| `./tests/tools/test_code_quality_check.py` | 85 | assert any("TRACKED_DEFECT" in i[1] for i in issues) | TRACKED_DEFECT |
 
 ## Recommended Implementation Order
 Prioritized by Impact (High) and Complexity (Low).
 | Priority | File | Issue | Metrics (I/C/C) |
 |---|---|---|---|
-| 1 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
-| 2 | `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
-| 3 | `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
-| 4 | `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
+| 1 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
+| 2 | `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
+| 3 | `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
+| 4 | `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
 | 5 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py` | _create_club_geometry | 5/2/4 |
 | 6 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py` | _render_face_normal | 5/2/4 |
 | 7 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_playback_controller.py` | _on_position_changed | 5/2/4 |

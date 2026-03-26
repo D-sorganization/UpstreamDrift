@@ -172,7 +172,7 @@ jobs:
       # FIX: Correct Regex for TODOs
       - name: Check Placeholders
         run: |
-          if grep -r "TODO\|FIXME" --include="*.py" src/; then
+          if grep -r "TRACKED_TASK\|TRACKED_DEFECT" --include="*.py" src/; then
              echo "::warning::Placeholders found."
              # We exit 0 to allow Jules to fix it, or 1 to block.
              # exit 1

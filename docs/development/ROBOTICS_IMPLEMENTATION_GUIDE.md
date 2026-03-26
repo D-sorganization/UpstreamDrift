@@ -524,13 +524,13 @@ disallow_untyped_defs = true
 
 | Component                     | Priority | Status | Dependencies |
 | ----------------------------- | -------- | ------ | ------------ |
-| Core Types & Protocols        | Critical | TODO   | None         |
-| ContactState & ContactManager | Critical | TODO   | Core         |
-| ForceTorqueSensor             | High     | TODO   | Core         |
-| Whole-Body Control (HQP)      | Critical | TODO   | Contact      |
-| Bipedal Locomotion (LIPM)     | Critical | TODO   | WBC          |
-| API Integration               | High     | TODO   | All above    |
-| Test Suite                    | Critical | TODO   | All above    |
+| Core Types & Protocols        | Critical | TRACKED_TASK   | None         |
+| ContactState & ContactManager | Critical | TRACKED_TASK   | Core         |
+| ForceTorqueSensor             | High     | TRACKED_TASK   | Core         |
+| Whole-Body Control (HQP)      | Critical | TRACKED_TASK   | Contact      |
+| Bipedal Locomotion (LIPM)     | Critical | TRACKED_TASK   | WBC          |
+| API Integration               | High     | TRACKED_TASK   | All above    |
+| Test Suite                    | Critical | TRACKED_TASK   | All above    |
 
 ### Phase 2: Perception & Planning
 

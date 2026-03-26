@@ -15,7 +15,7 @@ Jules automation creates individual PRs for each fix attempt but doesn't close s
 - PR #668: Fix cv2 import
 - PR #669: Fix mypy errors
 - PR #670: Fix mypy errors (again)
-- PR #671: Remove TODO placeholders
+- PR #671: Remove TRACKED_TASK placeholders
 - etc.
 
 Each PR attempts to fix the CI failure from the previous PR, but the old PRs are never closed.

@@ -71,18 +71,18 @@ def test_is_legitimate_pass_dbc_non_int():
 
 
 def test_check_banned_patterns():
-    lines = ["# TODO: fix this", "def test():", "    ...  ", "    pass"]
+    lines = ["# TRACKED_TASK: fix this", "def test():", "    ...  ", "    pass"]
     issues = check_banned_patterns(lines, Path("test_file.py"))
     assert len(issues) >= 2
     types = [issue[1] for issue in issues]
-    assert any("TODO placeholder" in t for t in types)
+    assert any("TRACKED_TASK placeholder" in t for t in types)
     assert any("Ellipsis placeholder" in t for t in types)
 
 
 def test_check_banned_patterns_fixme():
-    lines = ["# FIXME: broken logic"]
+    lines = ["# TRACKED_DEFECT: broken logic"]
     issues = check_banned_patterns(lines, Path("test.py"))
-    assert any("FIXME" in i[1] for i in issues)
+    assert any("TRACKED_DEFECT" in i[1] for i in issues)
 
 
 def test_check_banned_patterns_not_implemented_error():
@@ -99,7 +99,7 @@ def test_check_banned_patterns_template_placeholder():
 
 def test_check_banned_patterns_skips_quality_scripts():
     """Self-referential quality check scripts must be excluded."""
-    lines = ["# TODO: internal marker"]
+    lines = ["# TRACKED_TASK: internal marker"]
     issues = check_banned_patterns(lines, Path("code_quality_check.py"))
     assert issues == []
 
@@ -208,10 +208,10 @@ def test_check_file_clean(tmp_path):
 
 
 def test_check_file_with_todo(tmp_path):
-    f = tmp_path / "todo.py"
-    f.write_text("# TODO: fix this\n")
+    f = tmp_path / "TRACKED_TASK.py"
+    f.write_text("# TRACKED_TASK: fix this\n")
     issues = check_file(f)
-    assert any("TODO" in i[1] for i in issues)
+    assert any("TRACKED_TASK" in i[1] for i in issues)
 
 
 def test_check_file_dbc_non_path():

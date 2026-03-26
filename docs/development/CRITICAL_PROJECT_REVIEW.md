@@ -87,7 +87,7 @@ While the project demonstrates sophisticated architecture and strong documentati
 
 ### Critical Issues 🚨
 
-- **122 TODO/FIXME Comments**: Indicates unfinished work (CI now blocks these - good!)
+- **122 TRACKED_TASK/TRACKED_DEFECT Comments**: Indicates unfinished work (CI now blocks these - good!)
 - **Known Bugs Documented**: Tests contain comments like "The previous implementation was BUGGY" but bugs may not be fully fixed
 - **Deprecated Code**: Functions marked deprecated still in use
 
@@ -268,7 +268,7 @@ logger.info(f"Temporary password: {password}")
 
 ### Weaknesses ❌
 
-- **TODO/FIXME Blocking**: Now blocks CI (good!), but 122 instances existed until recently
+- **TRACKED_TASK/TRACKED_DEFECT Blocking**: Now blocks CI (good!), but 122 instances existed until recently
 - **MATLAB CI Disabled**: MATLAB tests don't run in CI (non-blocking status check)
 - **Security Audit**: `pip-audit` runs but doesn't fail on vulnerabilities (continue-on-error)
 - **No Performance Regression Testing**: Benchmarks exist but not tracked in CI
@@ -330,7 +330,7 @@ Apply black formatting
 
 ### Debt Tracking ✅
 
-- **Documented Issues**: 122 TODO/FIXME comments (now blocked by CI - good!)
+- **Documented Issues**: 122 TRACKED_TASK/TRACKED_DEFECT comments (now blocked by CI - good!)
 - **Remediation Plans**: `docs/plans/` contains improvement strategies
 - **Jules-Tech-Custodian**: Automated agent monitors debt
 
@@ -355,7 +355,7 @@ Apply black formatting
 
 ### Debt Trend
 
-- **Positive**: CI now blocks TODO/FIXME (prevents new debt)
+- **Positive**: CI now blocks TRACKED_TASK/TRACKED_DEFECT (prevents new debt)
 - **Negative**: Existing debt accumulation is substantial
 - **Positive**: Automated agents help maintain quality
 
@@ -501,7 +501,7 @@ Apply black formatting
 - ⚠️ Code Review Process (unclear)
 - ✅ License (MIT)
 - ⚠️ Performance Testing (exists but not in CI)
-- ❌ **Zero TODO/FIXME** (now blocked by CI - good)
+- ❌ **Zero TRACKED_TASK/TRACKED_DEFECT** (now blocked by CI - good)
 - ⚠️ **Maintainability** (god objects impede)
 
 **Production Ready**: **NO** - Security issues must be resolved first.

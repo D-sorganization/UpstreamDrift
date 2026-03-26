@@ -8,8 +8,8 @@ assignees: biomechanics-team
 The `kinematic_sequence.py` module currently analyzes the timing and velocity of body segments (kinematics) but completely omits kinetic metrics (forces, torques, powers) that are essential for explaining *why* the sequence occurs.
 
 Explicit TODOs include:
-- `TODO: Implement Proximal Braking Efficiency calculation.`
-- `TODO: Implement Inter-segmental Power Flow calculation.`
+- `TRACKED_TASK: Implement Proximal Braking Efficiency calculation.`
+- `TRACKED_TASK: Implement Inter-segmental Power Flow calculation.`
 
 ## Expected Behavior
 The biomechanics module should compute:

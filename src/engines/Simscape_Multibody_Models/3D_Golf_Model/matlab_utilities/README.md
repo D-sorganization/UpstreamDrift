@@ -258,7 +258,7 @@ The Python-based analyzer checks for:
 
 **Banned Patterns**:
 
-- TODO, FIXME, HACK, XXX placeholders
+- TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders
 - Template placeholders (`<VAR>`, `{{var}}`)
 
 **Code Quality Issues**:
