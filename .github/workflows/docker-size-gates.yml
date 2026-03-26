@@ -3,6 +3,7 @@ name: Docker Size and Health Check
 on:
   push:
     branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   docker-smoke-and-size:

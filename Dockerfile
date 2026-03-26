@@ -45,7 +45,7 @@ RUN conda install -y -c conda-forge \
     && conda clean --all --yes
 
 # Copy requirements file
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements.lock /tmp/requirements.txt
 
 # Install Python dependencies from requirements.txt
 # Filter out comments, WSL/Linux notes, and blank lines
