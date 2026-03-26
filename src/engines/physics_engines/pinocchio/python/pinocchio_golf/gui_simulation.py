@@ -41,9 +41,7 @@ class SimulationMixin:
         if not (checked is not None):
             raise ValueError("checked must be provided")
         self.is_running = not self.is_running
-        self.btn_run.setText(
-            "Pause Simulation" if self.is_running else "Run Simulation"
-        )
+        self.btn_run.setText("Pause Simulation" if self.is_running else "Run Simulation")
         self.btn_run.setChecked(self.is_running)
 
     def _reset_simulation(self: Any) -> None:
@@ -73,9 +71,7 @@ class SimulationMixin:
             self.btn_record.setText("Stop Recording")
         else:
             self.recorder.stop_recording()
-            self.log_write(
-                f"Recording stopped. Frames: {self.recorder.get_num_frames()}"
-            )
+            self.log_write(f"Recording stopped. Frames: {self.recorder.get_num_frames()}")
             self.btn_record.setText("Record")
 
     def _game_loop(self: Any) -> None:
@@ -97,13 +93,13 @@ class SimulationMixin:
     def _advance_physics(self: Any) -> None:
         """Integrate physics forward by one time step."""
         if not (self.model is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.data is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.q is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.v is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         tau = np.zeros(self.model.nv)
         a = pin.aba(self.model, self.data, self.q, self.v, tau)
         self.v += a * self.dt
@@ -113,13 +109,13 @@ class SimulationMixin:
     def _record_frame(self: Any) -> None:
         """Record a single frame of simulation data."""
         if not (self.model is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.data is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.q is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.v is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         tau = np.zeros(self.model.nv)
 
         # Compute energies for recording
@@ -153,9 +149,9 @@ class SimulationMixin:
     ) -> tuple[np.ndarray | None, np.ndarray | None]:
         """Find the club head frame and return its position and velocity."""
         if not (self.model is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.data is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         club_head_pos = None
         club_head_vel = None
 
@@ -238,9 +234,9 @@ class SimulationMixin:
     def _compute_specific_sources(self: Any, induced: dict[str, np.ndarray]) -> None:
         """Compute induced accelerations for specific actuator sources."""
         if not (self.analyzer is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.q is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         sources_to_compute: list[str] = []
         txt = self.combo_induced.currentText()
         if txt:
@@ -275,7 +271,7 @@ class SimulationMixin:
         Returns None if the source cannot be resolved.
         """
         if not (self.model is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         spec_tau = np.zeros(self.model.nv)
 
         # Check if it's a joint name

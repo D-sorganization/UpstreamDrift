@@ -326,9 +326,7 @@ def format_type_error(
         raise ValueError("field must be provided")
     if not (field is not None):
         raise ValueError("field must be provided")
-    expected = (
-        expected_type if isinstance(expected_type, str) else expected_type.__name__
-    )
+    expected = expected_type if isinstance(expected_type, str) else expected_type.__name__
     actual = actual_type if isinstance(actual_type, str) else actual_type.__name__
     return f"Invalid type for '{field}': expected {expected}, got {actual}"
 

@@ -51,7 +51,9 @@ class MuJoCoMeshcatAdapter:
         logger.info(f"Meshcat initialized at {self.url}")
 
         # Determine host-accessible URL if in Docker
-        if os.environ.get("MESHCAT_HOST") == "0.0.0.0":  # nosec B104 - comparing env var value, not binding to an address
+        if (
+            os.environ.get("MESHCAT_HOST") == "0.0.0.0"
+        ):  # nosec B104 - comparing env var value, not binding to an address
             try:
                 port = self.url.split(":")[-1].split("/")[0]
                 host_url = f"http://127.0.0.1:{port}/static/"
@@ -84,9 +86,7 @@ class MuJoCoMeshcatAdapter:
             rgba = model.geom_rgba[i]
 
             # Material/Color
-            material = g.MeshPhongMaterial(
-                color=self._rgba_to_hex(rgba), opacity=rgba[3]
-            )
+            material = g.MeshPhongMaterial(color=self._rgba_to_hex(rgba), opacity=rgba[3])
 
             shape = None
 
@@ -214,14 +214,10 @@ class MuJoCoMeshcatAdapter:
             pos = data.xpos[i]
 
             if show_force and np.linalg.norm(f) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/forces/{body_name}", pos, f * force_scale, 0xFF0000
-                )
+                self._draw_arrow(f"overlays/forces/{body_name}", pos, f * force_scale, 0xFF0000)
 
             if show_torque and np.linalg.norm(t) > 1e-3:
-                self._draw_arrow(
-                    f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
-                )
+                self._draw_arrow(f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF)
 
     def draw_induced_vectors(
         self,
@@ -288,9 +284,7 @@ class MuJoCoMeshcatAdapter:
             arrow_dir = joint_axis * arrow_len
 
             # Magenta
-            self._draw_arrow(
-                f"overlays/induced/joint_{j}", joint_pos, arrow_dir, 0xFF00FF
-            )
+            self._draw_arrow(f"overlays/induced/joint_{j}", joint_pos, arrow_dir, 0xFF00FF)
 
     def draw_cf_vectors(
         self,
@@ -478,9 +472,7 @@ class MuJoCoMeshcatAdapter:
             self.vis["overlays/trajectories"].delete()
             self.vis["overlays/arrows"].delete()
 
-    def _draw_arrow(
-        self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
-    ) -> None:
+    def _draw_arrow(self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int) -> None:
         if not (path is not None):
             raise ValueError("path must be provided")
         if not (path is not None):

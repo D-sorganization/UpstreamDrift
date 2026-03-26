@@ -40,9 +40,7 @@ class GUIBuilder:
         layout.addLayout(toolbar)
 
     @staticmethod
-    def setup_visualization_panel(
-        gui: PinocchioGUI, parent_layout: QtWidgets.QVBoxLayout
-    ) -> None:
+    def setup_visualization_panel(gui: PinocchioGUI, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the visualization group box."""
         if not (gui is not None):
             raise ValueError("gui must be provided")

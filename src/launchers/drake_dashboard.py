@@ -2,9 +2,8 @@
 
 Launches the Unified Dashboard with the Drake Physics Engine.
 
-The Drake engine package is deferred to inside ``main()`` so that
-importing this module does NOT trigger pydrake package loading.  This
-satisfies the lazy-loading requirement from Guideline Issue #1956.
+The Drake physics engine import is deferred to ``main()`` to ensure strict
+lazy-loading: importing this module does not trigger the Drake/pydrake dependency chain.
 """
 
 import argparse
@@ -17,10 +16,12 @@ from src.shared.python.ui.qt.utils import get_qapp
 
 def main() -> None:
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Drake Golf Analysis Dashboard")
-    parser.add_argument(
-        "--model", type=str, help="Path to model file (URDF/SDF)", default=None
+    from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
+        DrakePhysicsEngine,
     )
+
+    parser = argparse.ArgumentParser(description="Drake Golf Analysis Dashboard")
+    parser.add_argument("--model", type=str, help="Path to model file (URDF/SDF)", default=None)
     args = parser.parse_args()
 
     model_path = args.model
@@ -35,11 +36,6 @@ def main() -> None:
             selected = dialog.selectedFiles()
             if selected:
                 model_path = selected[0]
-
-    # Deferred import: only loads pydrake when this launcher is actually invoked
-    from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: PLC0415
-        DrakePhysicsEngine,
-    )
 
     launch_dashboard(
         engine_class=DrakePhysicsEngine,  # type: ignore[type-abstract]

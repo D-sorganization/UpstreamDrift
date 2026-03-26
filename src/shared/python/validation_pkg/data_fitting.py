@@ -240,9 +240,7 @@ class InverseKinematicsSolver:
 
         # Check reachability
         if d > L1 + L2:
-            raise ValueError(
-                f"Target at distance {d:.3f}m is unreachable (max: {L1 + L2:.3f}m)"
-            )
+            raise ValueError(f"Target at distance {d:.3f}m is unreachable (max: {L1 + L2:.3f}m)")
         if d < abs(L1 - L2):
             raise ValueError(f"Target at distance {d:.3f}m is too close")
 
@@ -302,9 +300,7 @@ class InverseKinematicsSolver:
 
         # Compute R-squared
         total_variance = np.var(target_positions.flatten())
-        r_squared = (
-            1.0 - (np.var(residuals) / total_variance) if total_variance > 0 else 0.0
-        )
+        r_squared = 1.0 - (np.var(residuals) / total_variance) if total_variance > 0 else 0.0
 
         # Condition number from Jacobian
         try:
@@ -320,8 +316,7 @@ class InverseKinematicsSolver:
         return FitResult(
             success=result.success,
             parameters={
-                name: float(angle)
-                for name, angle in zip(self.joint_names, result.x, strict=False)
+                name: float(angle) for name, angle in zip(self.joint_names, result.x, strict=False)
             },
             residuals=residuals,
             rms_error=rms,
@@ -351,9 +346,7 @@ class InverseKinematicsSolver:
         x, y, z = 0.0, 0.0, 0.0
         cumulative_angle = 0.0
 
-        for _i, (joint_name, angle) in enumerate(
-            zip(self.joint_names, angles, strict=False)
-        ):
+        for _i, (joint_name, angle) in enumerate(zip(self.joint_names, angles, strict=False)):
             cumulative_angle += angle
 
             # Get segment length (use 0.3m default if not specified)
@@ -400,9 +393,7 @@ class ParameterEstimator:
         self.anthropometric_model = anthropometric_model
         self._load_regression_coefficients()
 
-        logger.info(
-            f"Parameter estimator initialized with '{anthropometric_model}' model"
-        )
+        logger.info(f"Parameter estimator initialized with '{anthropometric_model}' model")
 
     def _load_regression_coefficients(self) -> None:
         """Load anthropometric regression coefficients.
@@ -491,9 +482,7 @@ class ParameterEstimator:
             mass_frac, com_frac, rog_frac = self.coefficients[segment_name]
         else:
             # Default values
-            logger.warning(
-                f"Unknown segment '{segment_name}', using default coefficients"
-            )
+            logger.warning(f"Unknown segment '{segment_name}', using default coefficients")
             mass_frac, com_frac, rog_frac = 0.02, 0.5, 0.3
 
         # Compute parameters
@@ -535,9 +524,7 @@ class ParameterEstimator:
         params: dict[str, Any] = {}
         for segment_name in segment_names:
             length = known_lengths.get(segment_name, 0.3) if known_lengths else 0.3
-            segment_params = self.estimate_segment_params(
-                segment_name, length, total_body_mass
-            )
+            segment_params = self.estimate_segment_params(segment_name, length, total_body_mass)
             params[f"{segment_name}_length"] = segment_params.length
             params[f"{segment_name}_mass"] = segment_params.mass
         return FitResult(
@@ -580,9 +567,7 @@ class ParameterEstimator:
 
             all_residuals.append(residual)
 
-            segment_params = self.estimate_segment_params(
-                segment_name, length, total_body_mass
-            )
+            segment_params = self.estimate_segment_params(segment_name, length, total_body_mass)
             fitted_params[f"{segment_name}_length"] = segment_params.length
             fitted_params[f"{segment_name}_mass"] = segment_params.mass
             fitted_params[f"{segment_name}_com"] = segment_params.com_position
@@ -630,20 +615,14 @@ class ParameterEstimator:
             )
 
         marker_frames = [
-            state.marker_positions
-            for state in kinematic_data
-            if state.marker_positions is not None
+            state.marker_positions for state in kinematic_data if state.marker_positions is not None
         ]
 
         if not marker_frames:
-            return self._fit_from_anthropometry(
-                segment_names, total_body_mass, known_lengths
-            )
+            return self._fit_from_anthropometry(segment_names, total_body_mass, known_lengths)
 
         marker_array = np.array(marker_frames)
-        return self._fit_from_markers(
-            marker_array, segment_names, total_body_mass, known_lengths
-        )
+        return self._fit_from_markers(marker_array, segment_names, total_body_mass, known_lengths)
 
 
 # =============================================================================
@@ -700,12 +679,8 @@ class SensitivityAnalyzer:
 
         # Perturb up and down
         try:
-            output_up = model_func({parameter_name: nominal_value + delta})[
-                output_metric
-            ]
-            output_down = model_func({parameter_name: nominal_value - delta})[
-                output_metric
-            ]
+            output_up = model_func({parameter_name: nominal_value + delta})[output_metric]
+            output_down = model_func({parameter_name: nominal_value - delta})[output_metric]
             output_nominal = model_func({parameter_name: nominal_value})[output_metric]
         except (RuntimeError, ValueError, OSError) as e:
             logger.warning(f"Sensitivity computation failed: {e}")
@@ -722,9 +697,7 @@ class SensitivityAnalyzer:
         partial = (output_up - output_down) / (2 * delta)
 
         # Elasticity (dimensionless sensitivity)
-        elasticity = (
-            (partial * nominal_value / output_nominal) if output_nominal != 0 else 0.0
-        )
+        elasticity = (partial * nominal_value / output_nominal) if output_nominal != 0 else 0.0
 
         # Normalized sensitivity index
         output_range = abs(output_up - output_down)
@@ -783,15 +756,9 @@ class SensitivityAnalyzer:
                 for i, s in enumerate(sorted_sens)
             ],
             "summary_statistics": {
-                "mean_sensitivity": float(
-                    np.mean([s.sensitivity_index for s in sensitivities])
-                ),
-                "max_sensitivity": float(
-                    max(s.sensitivity_index for s in sensitivities)
-                ),
-                "mean_elasticity": float(
-                    np.mean([abs(s.elasticity) for s in sensitivities])
-                ),
+                "mean_sensitivity": float(np.mean([s.sensitivity_index for s in sensitivities])),
+                "max_sensitivity": float(max(s.sensitivity_index for s in sensitivities)),
+                "mean_elasticity": float(np.mean([abs(s.elasticity) for s in sensitivities])),
             },
         }
 
@@ -947,9 +914,7 @@ class A3FittingPipeline:
         for i, t in enumerate(timestamps):
             state = KinematicState(
                 timestamp=float(t),
-                marker_positions=(
-                    marker_positions[i] if i < len(marker_positions) else None
-                ),
+                marker_positions=(marker_positions[i] if i < len(marker_positions) else None),
             )
             kinematic_data.append(state)
 

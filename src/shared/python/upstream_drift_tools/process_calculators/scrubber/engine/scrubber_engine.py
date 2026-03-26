@@ -162,9 +162,7 @@ class ScrubberEngine:
         )
 
         water_condensed = (
-            inputs.gas_flow_kg_hr
-            * 0.0015
-            * (inputs.inlet_temp_c - inputs.target_outlet_temp_c)
+            inputs.gas_flow_kg_hr * 0.0015 * (inputs.inlet_temp_c - inputs.target_outlet_temp_c)
         )
         heat_duty = calculate_heat_transfer_duty(
             gas_flow_kg_hr=inputs.gas_flow_kg_hr,
@@ -211,9 +209,7 @@ class ScrubberEngine:
         # 1. Physical properties
         temp_k = inputs.inlet_temp_c + 273.15
         pressure_pa = inputs.pressure_bar * 1e5
-        gas_density = calculate_gas_density(
-            temp_k, pressure_pa, inputs.molecular_weight
-        )
+        gas_density = calculate_gas_density(temp_k, pressure_pa, inputs.molecular_weight)
 
         # 2. Column sizing
         (
@@ -250,8 +246,8 @@ class ScrubberEngine:
             )
 
         # 5. Thermal & caustic
-        naoh_pure, naoh_sol, heat_kw, cw_flow, therm_warnings = (
-            ScrubberEngine._calculate_thermal(inputs, acid_gas_removed)
+        naoh_pure, naoh_sol, heat_kw, cw_flow, therm_warnings = ScrubberEngine._calculate_thermal(
+            inputs, acid_gas_removed
         )
 
         packing_obj = PACKING_DATABASE.get(inputs.packing_name)

@@ -124,9 +124,7 @@ class ThermoPropertiesCalculator:
         fractions = {k: v / total for k, v in composition.items()}
 
         # Mixture molecular weight
-        mix_mw = sum(
-            fractions.get(s, 0) * MOLECULAR_WEIGHTS.get(s, 28.0) for s in fractions
-        )
+        mix_mw = sum(fractions.get(s, 0) * MOLECULAR_WEIGHTS.get(s, 28.0) for s in fractions)
 
         # Mixture molar Cp
         mix_cp = sum(fractions.get(s, 0) * MOLAR_CP_298.get(s, 29.0) for s in fractions)
@@ -141,9 +139,7 @@ class ThermoPropertiesCalculator:
         enthalpy = mix_cp * (temp_k - 298.15)
 
         # Entropy relative to 298.15 K, 101325 Pa reference
-        entropy = mix_cp * math.log(temp_k / 298.15) - R_GAS * math.log(
-            pressure_pa / 101325.0
-        )
+        entropy = mix_cp * math.log(temp_k / 298.15) - R_GAS * math.log(pressure_pa / 101325.0)
 
         # Gibbs free energy
         gibbs = enthalpy - temp_k * entropy

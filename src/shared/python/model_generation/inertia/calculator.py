@@ -415,9 +415,7 @@ class InertiaCalculator:
         if mesh_props is None:
             return self._create_default_inertia_result(mass, mode, str(mesh_path))
 
-        result = self._scale_and_create_result(
-            mesh_props, mass, density, mode, str(mesh_path)
-        )
+        result = self._scale_and_create_result(mesh_props, mass, density, mode, str(mesh_path))
 
         self._cache[cache_key] = result
         return result
@@ -430,9 +428,7 @@ class InertiaCalculator:
             return Path(source)
         raise ValueError(f"Mesh mode requires path, got {type(source)}")
 
-    def _load_mesh(
-        self, mesh_path: Path, mode: InertiaMode, mass: float | None
-    ) -> Any | None:
+    def _load_mesh(self, mesh_path: Path, mode: InertiaMode, mass: float | None) -> Any | None:
         """Load mesh from file, returning None on failure."""
         if not (mesh_path is not None):
             raise ValueError("mesh_path must be provided")
@@ -467,9 +463,7 @@ class InertiaCalculator:
             raise ValueError("mesh_path must be provided")
         is_watertight = mesh.is_watertight
         if not is_watertight:
-            logger.warning(
-                f"Mesh {mesh_path} is not watertight, inertia may be inaccurate"
-            )
+            logger.warning(f"Mesh {mesh_path} is not watertight, inertia may be inaccurate")
 
         try:
             return {
@@ -565,9 +559,7 @@ class InertiaCalculator:
         **kwargs: Any,
     ) -> InertiaResult:
         """Compute using anthropometric data."""
-        segment_name = kwargs.get(
-            "segment_name", source if isinstance(source, str) else None
-        )
+        segment_name = kwargs.get("segment_name", source if isinstance(source, str) else None)
         gender_factor = kwargs.get("gender_factor", 0.5)
         length = dimensions.get("length", 0.1) if dimensions else 0.1
 
@@ -596,9 +588,7 @@ class InertiaCalculator:
                 source=f"anthropometric:{segment_name}",
             )
         except ImportError:
-            logger.warning(
-                "Anthropometry data not available, falling back to primitive"
-            )
+            logger.warning("Anthropometry data not available, falling back to primitive")
             return self._compute_primitive(
                 Geometry.cylinder(length * 0.1, length),
                 mass,

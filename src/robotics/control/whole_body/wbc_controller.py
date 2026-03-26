@@ -121,9 +121,7 @@ class WholeBodyController:
             TypeError: If engine doesn't implement required protocol.
         """
         if not isinstance(engine, RoboticsCapable):
-            raise TypeError(
-                f"Engine must implement RoboticsCapable, got {type(engine).__name__}"
-            )
+            raise TypeError(f"Engine must implement RoboticsCapable, got {type(engine).__name__}")
 
         self._engine = engine
         self._config = config or WBCConfig()
@@ -337,15 +335,11 @@ class WholeBodyController:
 
         # Add regularization on contact forces
         if n_contact_vars > 0:
-            H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
-                n_contact_vars
-            )
+            H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(n_contact_vars)
 
         # Build constraints
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
-        A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
-            n_v, n_contact_vars, qd
-        )
+        A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(n_v, n_contact_vars, qd)
 
         # Variable bounds
         x_lb, x_ub = self._build_variable_bounds(n_v, n_contact_vars, qd)
@@ -404,9 +398,7 @@ class WholeBodyController:
         x_solution = np.zeros(n_vars)
 
         for _priority, tasks in sorted(priority_groups.items(), reverse=True):
-            H, g, accumulated_A = self._build_priority_level_cost(
-                tasks, n_v, n_vars, accumulated_A
-            )
+            H, g, accumulated_A = self._build_priority_level_cost(tasks, n_v, n_vars, accumulated_A)
             self._apply_regularization(H, n_v, n_contact_vars)
 
             problem = self._build_level_qp(H, g, n_v, n_contact_vars, M, nle, qd)
@@ -454,9 +446,7 @@ class WholeBodyController:
     def _apply_regularization(self, H, n_v, n_contact_vars):
         H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
         if n_contact_vars > 0:
-            H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
-                n_contact_vars
-            )
+            H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(n_contact_vars)
 
     def _build_level_qp(self, H, g, n_v, n_contact_vars, M, nle, qd):
         if not (H is not None):
@@ -464,9 +454,7 @@ class WholeBodyController:
         if not (H is not None):
             raise ValueError("H must be provided")
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
-        A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
-            n_v, n_contact_vars, qd
-        )
+        A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(n_v, n_contact_vars, qd)
         x_lb, x_ub = self._build_variable_bounds(n_v, n_contact_vars, qd)
 
         return QPProblem(

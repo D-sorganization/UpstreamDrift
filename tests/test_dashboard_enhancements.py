@@ -104,9 +104,7 @@ if PYQT6_AVAILABLE:
             else:
                 # Cast to QApplication since we know we created QApplication above
                 existing = QtWidgets.QApplication.instance()
-                cls.app = (
-                    existing if isinstance(existing, QtWidgets.QApplication) else None
-                )
+                cls.app = existing if isinstance(existing, QtWidgets.QApplication) else None
 
         def setUp(self):
             self.engine = MockPhysicsEngine()

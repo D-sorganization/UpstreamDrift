@@ -48,9 +48,7 @@ def create_windows_optimized_icons() -> int:
     )
 
     # Create main large PNG
-    save_png_icons(
-        img, assets_dir, "golf_robot_windows_optimized", [256], mode="extreme"
-    )
+    save_png_icons(img, assets_dir, "golf_robot_windows_optimized", [256], mode="extreme")
 
     logger.info("Windows-optimized icons created successfully!")
     return 0

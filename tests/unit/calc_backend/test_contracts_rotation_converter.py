@@ -35,9 +35,7 @@ class TestRotationConverterRequest:
         assert req.euler_convention == "xyz"
 
     def test_custom_euler_convention(self) -> None:
-        req = RotationConverterRequest(
-            type="euler", value=[0.0, 0.0, 0.0], euler_convention="zyx"
-        )
+        req = RotationConverterRequest(type="euler", value=[0.0, 0.0, 0.0], euler_convention="zyx")
         assert req.euler_convention == "zyx"
 
     def test_invalid_type_raises(self) -> None:
@@ -113,9 +111,7 @@ class TestReferenceFrameConversionResponse:
     def test_construction(self) -> None:
         resp = ReferenceFrameConversionResponse(
             operation="homogeneous_transform",
-            results={
-                "matrix": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-            },
+            results={"matrix": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]},
             explanation_markdown="The identity transform.",
             explanation_latex=r"T = I",
         )

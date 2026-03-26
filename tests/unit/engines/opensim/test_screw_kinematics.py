@@ -83,9 +83,7 @@ class TestWithMockedOpenSim:
             analyzer.state = state
         return analyzer
 
-    def test_compute_twist_returns_twist_instance(
-        self, sk: OpenSimScrewKinematics
-    ) -> None:
+    def test_compute_twist_returns_twist_instance(self, sk: OpenSimScrewKinematics) -> None:
         mock_opensim = MagicMock()
         with patch.dict("sys.modules", {"opensim": mock_opensim}):
             twist = sk.compute_twist("radius")
@@ -98,9 +96,7 @@ class TestWithMockedOpenSim:
             twist = sk.compute_twist("radius")
         assert abs(twist.angular[2] - 1.5) < 1e-9  # z-component from mock
 
-    def test_compute_twist_unknown_body_raises(
-        self, sk: OpenSimScrewKinematics
-    ) -> None:
+    def test_compute_twist_unknown_body_raises(self, sk: OpenSimScrewKinematics) -> None:
         sk.model.getBodySet().getIndex.return_value = -1
         mock_opensim = MagicMock()
         with (
@@ -109,9 +105,7 @@ class TestWithMockedOpenSim:
         ):
             sk.compute_twist("ghost_body")
 
-    def test_compute_screw_axis_returns_screw_axis(
-        self, sk: OpenSimScrewKinematics
-    ) -> None:
+    def test_compute_screw_axis_returns_screw_axis(self, sk: OpenSimScrewKinematics) -> None:
         twist = Twist(
             angular=np.array([0.0, 0.0, 2.0]),
             linear=np.array([0.3, 0.0, 0.0]),
@@ -121,9 +115,7 @@ class TestWithMockedOpenSim:
         screw = sk.compute_screw_axis(twist)
         assert isinstance(screw, ScrewAxis)
 
-    def test_analyze_key_points_skips_missing_bodies(
-        self, sk: OpenSimScrewKinematics
-    ) -> None:
+    def test_analyze_key_points_skips_missing_bodies(self, sk: OpenSimScrewKinematics) -> None:
         def index_side_effect(name: str) -> int:
             return 0 if name == "radius" else -1
 
@@ -136,9 +128,7 @@ class TestWithMockedOpenSim:
         assert "radius" in results
         assert "missing_body" not in results
 
-    def test_visualize_screw_axis_segment_length(
-        self, sk: OpenSimScrewKinematics
-    ) -> None:
+    def test_visualize_screw_axis_segment_length(self, sk: OpenSimScrewKinematics) -> None:
         screw = ScrewAxis(
             axis_direction=np.array([0.0, 0.0, 1.0]),
             axis_point=np.zeros(3),

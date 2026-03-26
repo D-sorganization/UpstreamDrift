@@ -632,9 +632,7 @@ class LauncherDiagnostics:
                 elif result.name == "pyqt6_availability":
                     recommendations.append("Install PyQt6 with: pip install PyQt6")
                 elif result.name == "asset_files":
-                    recommendations.append(
-                        "Restore missing asset files in src/launchers/assets/"
-                    )
+                    recommendations.append("Restore missing asset files in src/launchers/assets/")
 
             elif result.status == "warning":
                 if result.name == "layout_config":
@@ -725,9 +723,7 @@ def run_cli_diagnostics() -> None:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Golf Modeling Suite Launcher Diagnostics"
-    )
+    parser = argparse.ArgumentParser(description="Golf Modeling Suite Launcher Diagnostics")
     parser.add_argument(
         "--reset-layout", action="store_true", help="Reset layout config to defaults"
     )

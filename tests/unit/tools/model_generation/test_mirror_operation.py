@@ -228,9 +228,7 @@ class TestMirrorRoundtrip:
                 )
             # Inertia products restored
             for key in ("ixy", "ixz", "iyz"):
-                assert link_after["inertia"][key] == pytest.approx(
-                    link_before["inertia"][key]
-                )
+                assert link_after["inertia"][key] == pytest.approx(link_before["inertia"][key])
             # COM restored
             for j in range(3):
                 assert link_after["inertia"]["center_of_mass"][j] == pytest.approx(

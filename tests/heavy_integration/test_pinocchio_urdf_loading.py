@@ -14,8 +14,7 @@ import numpy as np
 import pytest
 
 GOLFER_URDF = (
-    Path(__file__).parents[2]
-    / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+    Path(__file__).parents[2] / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
 )
 
 
@@ -128,9 +127,7 @@ class TestPinocchioJacobian:
         pin.computeJointJacobians(model, data, q)
         # Use the last body frame as end-effector proxy
         last_frame_id = model.nframes - 1
-        J = pin.getFrameJacobian(
-            model, data, last_frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
-        )
+        J = pin.getFrameJacobian(model, data, last_frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
         assert J.shape == (6, model.nv)
         assert np.all(np.isfinite(J))
 

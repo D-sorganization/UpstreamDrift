@@ -89,9 +89,7 @@ class ConfigurationManager(ContractChecker):
         """Define class invariants for ConfigurationManager."""
         return [
             (
-                lambda: (
-                    self.config_path is not None and isinstance(self.config_path, Path)
-                ),
+                lambda: (self.config_path is not None and isinstance(self.config_path, Path)),
                 "config_path must be a valid Path and never None",
             ),
         ]

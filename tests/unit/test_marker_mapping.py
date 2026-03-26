@@ -80,9 +80,7 @@ class TestMarkerMapping:
 
         # Add 4 markers
         for i in range(4):
-            mapper.add_mapping(
-                MarkerMapping(f"M{i}", "torso", np.array([i * 0.1, 0, 0]))
-            )
+            mapper.add_mapping(MarkerMapping(f"M{i}", "torso", np.array([i * 0.1, 0, 0])))
 
         # 3 good markers + 1 outlier
         marker_pos = np.array(

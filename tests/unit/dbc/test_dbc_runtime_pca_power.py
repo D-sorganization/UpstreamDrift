@@ -28,12 +28,8 @@ def _make_pca_mixin(n: int = 100, n_joints: int = 3) -> object:
     obj.compute_principal_component_analysis = (
         PCAAnalysisMixin.compute_principal_component_analysis.__get__(obj)
     )
-    obj.compute_principal_movements = (
-        PCAAnalysisMixin.compute_principal_movements.__get__(obj)
-    )
-    obj.analyze_kinematic_sequence = (
-        PCAAnalysisMixin.analyze_kinematic_sequence.__get__(obj)
-    )
+    obj.compute_principal_movements = PCAAnalysisMixin.compute_principal_movements.__get__(obj)
+    obj.analyze_kinematic_sequence = PCAAnalysisMixin.analyze_kinematic_sequence.__get__(obj)
     return obj
 
 
@@ -52,12 +48,8 @@ def _make_power_mixin(n: int = 100, n_joints: int = 3) -> object:
     obj._work_metrics_cache = {}
 
     obj.compute_work_metrics = PowerWorkMetricsMixin.compute_work_metrics.__get__(obj)
-    obj.compute_joint_power_metrics = (
-        PowerWorkMetricsMixin.compute_joint_power_metrics.__get__(obj)
-    )
-    obj.compute_impulse_metrics = PowerWorkMetricsMixin.compute_impulse_metrics.__get__(
-        obj
-    )
+    obj.compute_joint_power_metrics = PowerWorkMetricsMixin.compute_joint_power_metrics.__get__(obj)
+    obj.compute_impulse_metrics = PowerWorkMetricsMixin.compute_impulse_metrics.__get__(obj)
     obj.compute_phase_space_path_length = (
         PowerWorkMetricsMixin.compute_phase_space_path_length.__get__(obj)
     )

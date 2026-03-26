@@ -335,9 +335,7 @@ class TestRunBatch:
 
     def test_zero_amplitude_full_success(self, analyzer) -> None:  # type: ignore[no-untyped-def]
         analyzer.set_base_torque_profile(_ZERO_PROFILE)
-        config = PerturbationConfig(
-            n_trials=3, noise_amplitude=0.0, noise_type="white", seed=0
-        )
+        config = PerturbationConfig(n_trials=3, noise_amplitude=0.0, noise_type="white", seed=0)
         result = analyzer.run_batch(config)
         assert result.success_rate == 1.0
 

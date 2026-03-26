@@ -128,29 +128,21 @@ class TurfProperties:
         """Validate and normalize properties."""
         # Validate stimp rating
         if not 1 <= self.stimp_rating <= 15:
-            raise ValueError(
-                f"stimp_rating must be between 1 and 15, got {self.stimp_rating}"
-            )
+            raise ValueError(f"stimp_rating must be between 1 and 15, got {self.stimp_rating}")
 
         # Normalize grain direction
         grain_mag = np.linalg.norm(self.grain_direction)
         if grain_mag > 0:
-            object.__setattr__(
-                self, "grain_direction", self.grain_direction / grain_mag
-            )
+            object.__setattr__(self, "grain_direction", self.grain_direction / grain_mag)
         else:
             object.__setattr__(self, "grain_direction", np.array([1.0, 0.0]))
 
         # Set defaults based on grass type if not provided
         if self.grain_strength is None:
-            object.__setattr__(
-                self, "grain_strength", self.grass_type.default_grain_strength
-            )
+            object.__setattr__(self, "grain_strength", self.grass_type.default_grain_strength)
 
         if self.height_of_cut_mm is None:
-            object.__setattr__(
-                self, "height_of_cut_mm", self.grass_type.default_height_mm
-            )
+            object.__setattr__(self, "height_of_cut_mm", self.grass_type.default_height_mm)
 
     @property
     def rolling_friction_coefficient(self) -> float:
@@ -178,7 +170,7 @@ class TurfProperties:
         # Adjust for height of cut (longer grass = more friction)
         # Note: height_of_cut_mm is guaranteed non-None after __post_init__
         if not (self.height_of_cut_mm is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         height_factor = 1.0 + 0.05 * (self.height_of_cut_mm - 3.0) / 2.0
 
         return base_friction * height_factor
@@ -275,7 +267,7 @@ class TurfProperties:
         # Effect is proportional to grain strength and inversely to speed
         # Note: grain_strength is guaranteed non-None after __post_init__
         if not (self.grain_strength is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         curve_amount = self.grain_strength * 0.01 / (1.0 + speed)
         return velocity + curve_amount * cross_grain * speed
 
@@ -407,8 +399,6 @@ class TurfProperties:
         }
 
         if name not in presets:
-            raise ValueError(
-                f"Unknown preset '{name}'. Available: {list(presets.keys())}"
-            )
+            raise ValueError(f"Unknown preset '{name}'. Available: {list(presets.keys())}")
 
         return presets[name]

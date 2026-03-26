@@ -66,27 +66,19 @@ class TestEngineRegistration:
         return MagicMock()
 
     def test_requires_binary_defaults_empty(self) -> None:
-        reg = EngineRegistration(
-            engine_type=EngineType.MUJOCO, factory=self._make_factory()
-        )
+        reg = EngineRegistration(engine_type=EngineType.MUJOCO, factory=self._make_factory())
         assert reg.requires_binary == []
 
     def test_probe_class_defaults_none(self) -> None:
-        reg = EngineRegistration(
-            engine_type=EngineType.MUJOCO, factory=self._make_factory()
-        )
+        reg = EngineRegistration(engine_type=EngineType.MUJOCO, factory=self._make_factory())
         assert reg.probe_class is None
 
     def test_registration_path_defaults_none(self) -> None:
-        reg = EngineRegistration(
-            engine_type=EngineType.DRAKE, factory=self._make_factory()
-        )
+        reg = EngineRegistration(engine_type=EngineType.DRAKE, factory=self._make_factory())
         assert reg.registration_path is None
 
     def test_stores_engine_type(self) -> None:
-        reg = EngineRegistration(
-            engine_type=EngineType.PINOCCHIO, factory=self._make_factory()
-        )
+        reg = EngineRegistration(engine_type=EngineType.PINOCCHIO, factory=self._make_factory())
         assert reg.engine_type == EngineType.PINOCCHIO
 
     def test_accepts_path(self) -> None:
@@ -104,9 +96,7 @@ class TestEngineRegistration:
 
 
 class TestEngineRegistry:
-    def _make_registration(
-        self, engine_type: EngineType = EngineType.MUJOCO
-    ) -> EngineRegistration:
+    def _make_registration(self, engine_type: EngineType = EngineType.MUJOCO) -> EngineRegistration:
         return EngineRegistration(engine_type=engine_type, factory=MagicMock())
 
     def test_starts_empty(self) -> None:

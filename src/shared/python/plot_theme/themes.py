@@ -91,22 +91,16 @@ class PlotTheme:
     grid_linestyle: str = "-"
 
     # Primary data colors
-    primary_colors: list[str] = field(
-        default_factory=lambda: ["#8B5CF6", "#A78BFA", "#C4B5FD"]
-    )
+    primary_colors: list[str] = field(default_factory=lambda: ["#8B5CF6", "#A78BFA", "#C4B5FD"])
     primary_color: str = "#8B5CF6"
     primary_alpha: float = 0.8
 
     # Secondary colors
-    secondary_colors: list[str] = field(
-        default_factory=lambda: ["#3B82F6", "#60A5FA", "#93C5FD"]
-    )
+    secondary_colors: list[str] = field(default_factory=lambda: ["#3B82F6", "#60A5FA", "#93C5FD"])
     secondary_color: str = "#3B82F6"
 
     # Accent colors
-    accent_colors: list[str] = field(
-        default_factory=lambda: ["#10B981", "#34D399", "#6EE7B7"]
-    )
+    accent_colors: list[str] = field(default_factory=lambda: ["#10B981", "#34D399", "#6EE7B7"])
     accent_color: str = "#10B981"
 
     # Colormaps
@@ -167,9 +161,7 @@ class PlotTheme:
             "legend.edgecolor": self.axes_edgecolor,
             "legend.facecolor": self.axes_facecolor,
             # Image
-            "image.cmap": (
-                self.heatmap_cmap if isinstance(self.heatmap_cmap, str) else "viridis"
-            ),
+            "image.cmap": (self.heatmap_cmap if isinstance(self.heatmap_cmap, str) else "viridis"),
         }
         params.update(self.rcparams)
         return params

@@ -628,9 +628,7 @@ class URDFImporter:
         tree = DefusedET.parse(urdf_path)
         root = tree.getroot()
 
-        model_name = str(
-            model_name or root.get("name", "imported_robot") or "imported_robot"
-        )
+        model_name = str(model_name or root.get("name", "imported_robot") or "imported_robot")
 
         mujoco_root, worldbody = self._create_mjcf_skeleton(model_name)
 
@@ -665,9 +663,7 @@ class URDFImporter:
             )
 
         ET.indent(mujoco_root, space="  ")
-        mujoco_xml = str(
-            ET.tostring(mujoco_root, encoding="unicode", xml_declaration=True)
-        )
+        mujoco_xml = str(ET.tostring(mujoco_root, encoding="unicode", xml_declaration=True))
 
         logger.info("Imported URDF from %s", urdf_path)
         return mujoco_xml
@@ -761,9 +757,7 @@ class URDFImporter:
             self._populate_body_geometry(child_body, child_link)
 
             # Recursively build grandchildren
-            for _grandchild_joint, gc_link_name in self._find_child_links(
-                joints, child_link_name
-            ):
+            for _grandchild_joint, gc_link_name in self._find_child_links(joints, child_link_name):
                 grandchild_link = links.get(gc_link_name)
                 if grandchild_link is not None:
                     self._build_mujoco_body(
@@ -811,9 +805,7 @@ class URDFImporter:
             iyz = inertia_elem.get("iyz", "0.0")
 
             # Use fullinertia if off-diagonal terms present, else use diaginertia
-            has_off_diagonal = (
-                float(ixy) != 0.0 or float(ixz) != 0.0 or float(iyz) != 0.0
-            )
+            has_off_diagonal = float(ixy) != 0.0 or float(ixz) != 0.0 or float(iyz) != 0.0
             if has_off_diagonal:
                 # MuJoCo fullinertia format: "ixx iyy izz ixy ixz iyz"
                 inertial_elem.set(

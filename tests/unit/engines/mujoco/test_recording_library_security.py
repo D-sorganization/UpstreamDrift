@@ -105,9 +105,7 @@ def test_add_recording_path_traversal(isolated_library, temp_library) -> None:
     source_path.write_text("{}")
 
     # Metadata with path traversal
-    metadata = RecordingMetadata(
-        filename="../pwned.txt", golfer_name="Hacker", club_type="Driver"
-    )
+    metadata = RecordingMetadata(filename="../pwned.txt", golfer_name="Hacker", club_type="Driver")
 
     # Attempt to add recording
     # Should sanitize "../pwned.txt" to "pwned.txt" and succeed
@@ -115,9 +113,7 @@ def test_add_recording_path_traversal(isolated_library, temp_library) -> None:
 
     # Check if file exists outside library (vulnerability check)
     pwned_path = Path(temp_library).parent / "pwned.txt"
-    assert not pwned_path.exists(), (
-        "Path traversal succeeded! File created outside library."
-    )
+    assert not pwned_path.exists(), "Path traversal succeeded! File created outside library."
 
     # Check if file exists inside library (sanitized)
     sanitized_path = Path(temp_library) / "pwned.txt"
@@ -153,9 +149,7 @@ def test_add_recording_dot_dot_sanitization(isolated_library, temp_library) -> N
     source_path = Path(temp_library) / "source.json"
     source_path.write_text("{}")
 
-    metadata = RecordingMetadata(
-        filename="..", golfer_name="Hacker", club_type="Driver"
-    )
+    metadata = RecordingMetadata(filename="..", golfer_name="Hacker", club_type="Driver")
 
     # This should raise ValueError because ".." is an invalid filename
     with pytest.raises(ValueError, match='Filename cannot be empty, ".", or ".."'):

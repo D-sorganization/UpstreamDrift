@@ -64,9 +64,7 @@ def run_tests(engine_filter: str, test_type: str) -> bool:
     Returns:
         True if tests passed, False otherwise.
     """
-    logger.info(
-        f"Starting Physics Validation (Engine: {engine_filter}, Type: {test_type})"
-    )
+    logger.info(f"Starting Physics Validation (Engine: {engine_filter}, Type: {test_type})")
 
     test_files = get_test_files(test_type)
 

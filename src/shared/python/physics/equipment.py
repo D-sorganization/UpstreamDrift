@@ -73,7 +73,5 @@ def get_club_config(club_type: str) -> dict[str, float | list[float]]:
     """
     if club_type not in CLUB_CONFIGS:
         valid_types = ", ".join(CLUB_CONFIGS.keys())
-        raise ValueError(
-            f"Invalid club_type '{club_type}'. Must be one of: {valid_types}"
-        )
+        raise ValueError(f"Invalid club_type '{club_type}'. Must be one of: {valid_types}")
     return CLUB_CONFIGS[club_type]

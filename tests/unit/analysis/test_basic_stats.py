@@ -105,9 +105,7 @@ class TestFindPeaksInData:
         # Signal with clear peaks at t ≈ 0.25 and t ≈ 0.75
         t = np.linspace(0, 1, n)
         self.obj.times = t
-        self.two_peak_data = np.exp(-((t - 0.25) ** 2) / 0.001) + np.exp(
-            -((t - 0.75) ** 2) / 0.001
-        )
+        self.two_peak_data = np.exp(-((t - 0.25) ** 2) / 0.001) + np.exp(-((t - 0.75) ** 2) / 0.001)
 
     def test_returns_list(self) -> None:
         peaks = self.obj.find_peaks_in_data(self.two_peak_data)

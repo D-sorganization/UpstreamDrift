@@ -236,9 +236,7 @@ class TestGitHubAPIAuth:
 
         repo = GitHubRepository(owner="test", repo="models")
         with patch.dict("os.environ", {"GITHUB_TOKEN": "ghp_testtoken123"}):
-            req = repo._build_api_request(
-                "https://api.github.com/repos/test/models/contents/"
-            )
+            req = repo._build_api_request("https://api.github.com/repos/test/models/contents/")
         assert req.get_header("Authorization") == "token ghp_testtoken123"
         assert req.get_header("Accept") == "application/vnd.github.v3+json"
 
@@ -248,9 +246,7 @@ class TestGitHubAPIAuth:
 
         repo = GitHubRepository(owner="test", repo="models")
         with patch.dict("os.environ", {}, clear=True):
-            req = repo._build_api_request(
-                "https://api.github.com/repos/test/models/contents/"
-            )
+            req = repo._build_api_request("https://api.github.com/repos/test/models/contents/")
         assert req.get_header("Authorization") is None
         # Accept header should always be present
         assert req.get_header("Accept") == "application/vnd.github.v3+json"
@@ -366,9 +362,7 @@ class TestGitHubAPIAuth:
             [{"name": "a.urdf", "type": "file", "path": "a.urdf"}]
         ).encode()
         page1_response.headers = MagicMock()
-        page1_response.headers.get.return_value = (
-            '<https://api.github.com/test?page=2>; rel="next"'
-        )
+        page1_response.headers.get.return_value = '<https://api.github.com/test?page=2>; rel="next"'
         page1_response.__enter__ = Mock(return_value=page1_response)
         page1_response.__exit__ = Mock(return_value=False)
 
@@ -385,9 +379,7 @@ class TestGitHubAPIAuth:
         mock_urlopen.side_effect = [page1_response, page2_response]
 
         with patch("time.sleep"):
-            result = repo._api_request_with_retry(
-                "https://api.github.com/test", paginate=True
-            )
+            result = repo._api_request_with_retry("https://api.github.com/test", paginate=True)
         assert len(result) == 2
         assert mock_urlopen.call_count == 2
 

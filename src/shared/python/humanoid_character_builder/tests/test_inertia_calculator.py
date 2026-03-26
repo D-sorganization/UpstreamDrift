@@ -29,9 +29,7 @@ class TestInertiaResult:
         assert result.izz > 0
 
     def test_as_matrix(self):
-        result = InertiaResult(
-            ixx=1.0, iyy=2.0, izz=3.0, ixy=0.1, ixz=0.2, iyz=0.3, mass=1.0
-        )
+        result = InertiaResult(ixx=1.0, iyy=2.0, izz=3.0, ixy=0.1, ixz=0.2, iyz=0.3, mass=1.0)
         matrix = result.as_matrix()
 
         assert matrix.shape == (3, 3)
@@ -43,9 +41,7 @@ class TestInertiaResult:
         assert matrix[1, 2] == 0.3
 
     def test_as_urdf_dict(self):
-        result = InertiaResult(
-            ixx=1.0, iyy=2.0, izz=3.0, ixy=0.1, ixz=0.2, iyz=0.3, mass=1.0
-        )
+        result = InertiaResult(ixx=1.0, iyy=2.0, izz=3.0, ixy=0.1, ixz=0.2, iyz=0.3, mass=1.0)
         urdf_dict = result.as_urdf_dict()
 
         assert "ixx" in urdf_dict

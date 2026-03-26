@@ -49,9 +49,7 @@ class MeshCatViewer:
         self.viewer.open()
         logger.info("MeshCat viewer initialized")
 
-    def load_model(
-        self, model: pin.Model, visual_model: pin.GeometryModel | None = None
-    ) -> None:
+    def load_model(self, model: pin.Model, visual_model: pin.GeometryModel | None = None) -> None:
         """Load Pinocchio model into viewer.
 
         Args:

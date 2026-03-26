@@ -37,9 +37,7 @@ def _fail(msg: str) -> int:
 def main() -> int:
     missing = [str(p.relative_to(ROOT)) for p in REQUIRED_FILES if not p.exists()]
     if missing:
-        return _fail(
-            "Missing required docs governance files:\n- " + "\n- ".join(missing)
-        )
+        return _fail("Missing required docs governance files:\n- " + "\n- ".join(missing))
 
     changed = _git_changed_files()
     changed_set = set(changed)
@@ -57,8 +55,7 @@ def main() -> int:
     adr_changes = [
         p
         for p in changed
-        if p.startswith("docs/adr/")
-        and p not in {"docs/adr/README.md", "docs/adr/ADR_TEMPLATE.md"}
+        if p.startswith("docs/adr/") and p not in {"docs/adr/README.md", "docs/adr/ADR_TEMPLATE.md"}
     ]
     if adr_changes and "docs/adr/README.md" not in changed_set:
         return _fail("ADR changes detected without updating docs/adr/README.md")

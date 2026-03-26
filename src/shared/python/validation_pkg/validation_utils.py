@@ -47,9 +47,7 @@ def validate_array_shape(
         validate_array_shape(rotation, (3, 3), "rotation matrix")
     """
     if array.shape != expected_shape:
-        raise ValueError(
-            f"{name} shape mismatch: expected {expected_shape}, got {array.shape}"
-        )
+        raise ValueError(f"{name} shape mismatch: expected {expected_shape}, got {array.shape}")
 
 
 def validate_array_dimensions(
@@ -71,9 +69,7 @@ def validate_array_dimensions(
         validate_array_dimensions(vector, 1, "velocity vector")
     """
     if array.ndim != expected_ndim:
-        raise ValueError(
-            f"{name} dimension mismatch: expected {expected_ndim}D, got {array.ndim}D"
-        )
+        raise ValueError(f"{name} dimension mismatch: expected {expected_ndim}D, got {array.ndim}D")
 
 
 def validate_array_length(
@@ -95,9 +91,7 @@ def validate_array_length(
         validate_array_length(positions, model.nq, "position vector")
     """
     if len(array) != expected_length:
-        raise ValueError(
-            f"{name} length mismatch: expected {expected_length}, got {len(array)}"
-        )
+        raise ValueError(f"{name} length mismatch: expected {expected_length}, got {len(array)}")
 
 
 def validate_positive(
@@ -150,14 +144,10 @@ def validate_range(
     """
     if inclusive:
         if not (min_value <= value <= max_value):
-            raise ValueError(
-                f"{name} must be in [{min_value}, {max_value}], got {value}"
-            )
+            raise ValueError(f"{name} must be in [{min_value}, {max_value}], got {value}")
     else:
         if not (min_value < value < max_value):
-            raise ValueError(
-                f"{name} must be in ({min_value}, {max_value}), got {value}"
-            )
+            raise ValueError(f"{name} must be in ({min_value}, {max_value}), got {value}")
 
 
 def validate_file_exists(

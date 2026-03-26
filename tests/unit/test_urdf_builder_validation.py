@@ -37,9 +37,7 @@ class TestPhysicalValidation:
         builder = URDFBuilder()
 
         # Negative Ixx
-        with pytest.raises(
-            ValueError, match="Inertia diagonal elements must be positive"
-        ):
+        with pytest.raises(ValueError, match="Inertia diagonal elements must be positive"):
             builder.add_segment(
                 {
                     "name": "test_segment",
@@ -52,9 +50,7 @@ class TestPhysicalValidation:
             )
 
         # Zero Iyy
-        with pytest.raises(
-            ValueError, match="Inertia diagonal elements must be positive"
-        ):
+        with pytest.raises(ValueError, match="Inertia diagonal elements must be positive"):
             builder.add_segment(
                 {
                     "name": "test_segment",

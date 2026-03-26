@@ -131,5 +131,5 @@ def _joint_labels_for_ndof(n_joints: int) -> list[str]:
         return list(_JOINT_LABELS_7)
     result = [f"Joint {i + 1}" for i in range(n_joints)]
     if not (len(result) == n_joints):
-        raise ValueError('DbC Blocked: Precondition failed.')
+        raise ValueError("DbC Blocked: Precondition failed.")
     return result

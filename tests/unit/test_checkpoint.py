@@ -151,9 +151,7 @@ class TestCheckpointManager:
         """Create mock engine."""
         return MockEngine()
 
-    def test_save_checkpoint(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_save_checkpoint(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test saving a checkpoint."""
         engine.q = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0])
         engine.time = 0.5
@@ -163,9 +161,7 @@ class TestCheckpointManager:
         assert manager.count == 1
         assert checkpoint_id in [cp["id"] for cp in manager.list_checkpoints()]
 
-    def test_restore_checkpoint(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_restore_checkpoint(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test restoring a checkpoint."""
         # Save initial state
         engine.q = np.ones(7) * 5.0
@@ -182,9 +178,7 @@ class TestCheckpointManager:
         assert np.allclose(engine.q, np.ones(7) * 5.0)
         assert engine.time == 1.0
 
-    def test_tagged_checkpoint(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_tagged_checkpoint(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test saving and restoring with tags."""
         engine.time = 0.5
         manager.save(engine, tag="impact")
@@ -196,9 +190,7 @@ class TestCheckpointManager:
         manager.restore_by_tag(engine, "impact")
         assert engine.time == 0.5
 
-    def test_restore_by_time(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_restore_by_time(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test restoring to nearest time."""
         # Save checkpoint at t=1.0
         engine.time = 1.0
@@ -213,9 +205,7 @@ class TestCheckpointManager:
         # Should be restored to 1.0
         assert engine.time == 1.0
 
-    def test_max_checkpoints(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_max_checkpoints(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test circular buffer respects max size."""
         # Save more than max
         for i in range(15):
@@ -224,9 +214,7 @@ class TestCheckpointManager:
 
         assert manager.count == 10  # Should be capped
 
-    def test_auto_checkpoint(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_auto_checkpoint(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test automatic checkpointing."""
         manager.enable_auto_checkpoint(interval_steps=5)
 
@@ -238,9 +226,7 @@ class TestCheckpointManager:
 
         assert created >= 3  # Should have created at least 3 auto checkpoints
 
-    def test_disk_persistence(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_disk_persistence(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test saving and loading from disk."""
         with tempfile.TemporaryDirectory() as tmpdir:
             path = Path(tmpdir) / "checkpoints.json"
@@ -258,9 +244,7 @@ class TestCheckpointManager:
             assert count == 1
             assert "test" in new_manager.list_tags()
 
-    def test_restore_previous(
-        self, manager: CheckpointManager, engine: MockEngine
-    ) -> None:
+    def test_restore_previous(self, manager: CheckpointManager, engine: MockEngine) -> None:
         """Test undo functionality."""
         engine.time = 0.0
         manager.save(engine)

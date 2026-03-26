@@ -472,9 +472,7 @@ class CharacterBuilder:
             raise ValueError("segment_name must be provided")
         if dimensions is None:
             all_dims = estimate_segment_dimensions(1.75, 0.5)  # Default height, neutral
-            dimensions = all_dims.get(
-                segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
-            )
+            dimensions = all_dims.get(segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05})
 
         # Get default mass if not provided
         if mass is None:
@@ -485,24 +483,16 @@ class CharacterBuilder:
         if mode in (InertiaMode.MESH_UNIFORM_DENSITY, InertiaMode.MESH_SPECIFIED_MASS):
             if mesh_path:
                 if mode == InertiaMode.MESH_SPECIFIED_MASS:
-                    return self._mesh_inertia_calc.compute_from_mesh(
-                        mesh_path, mass=mass
-                    )
-                return self._mesh_inertia_calc.compute_from_mesh(
-                    mesh_path, density=density
-                )
-            logger.warning(
-                f"No mesh path provided for {segment_name}, falling back to primitive"
-            )
+                    return self._mesh_inertia_calc.compute_from_mesh(mesh_path, mass=mass)
+                return self._mesh_inertia_calc.compute_from_mesh(mesh_path, density=density)
+            logger.warning(f"No mesh path provided for {segment_name}, falling back to primitive")
 
         # Primitive approximation
         length = dimensions.get("length", 0.1)
         width = dimensions.get("width", 0.05)
         depth = dimensions.get("depth", 0.05)
 
-        shape, shape_dims = estimate_segment_primitive(
-            segment_name, length, width, depth
-        )
+        shape, shape_dims = estimate_segment_primitive(segment_name, length, width, depth)
         return self._primitive_inertia_calc.compute(shape, mass, shape_dims)
 
     def compute_all_inertias(
@@ -565,9 +555,7 @@ class CharacterBuilder:
         segments = {}
         for segment_name in HUMANOID_SEGMENTS:
             mass = masses.get(segment_name, 1.0)
-            dims = dimensions.get(
-                segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
-            )
+            dims = dimensions.get(segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05})
 
             # Get mesh paths if available
             visual_path = None

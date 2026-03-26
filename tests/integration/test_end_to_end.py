@@ -42,13 +42,10 @@ class TestLauncherIntegration:
         assert result.returncode == 0
 
         # Should contain usage information
-        assert (
-            "Golf Modeling Suite" in result.stdout or "usage" in result.stdout.lower()
-        )
+        assert "Golf Modeling Suite" in result.stdout or "usage" in result.stdout.lower()
 
     @pytest.mark.skipif(
-        not sys.platform.startswith("win")
-        and not __import__("os").environ.get("DISPLAY"),
+        not sys.platform.startswith("win") and not __import__("os").environ.get("DISPLAY"),
         reason="Requires display for PyQt6 (not available in CI)",
     )
     def test_unified_launcher_show_status(self):
@@ -142,9 +139,7 @@ class TestEngineProbes:
             results = manager.probe_all_engines()
 
         # Check if any engine is available
-        available_engines = [
-            r for r in results.values() if r.status == ProbeStatus.AVAILABLE
-        ]
+        available_engines = [r for r in results.values() if r.status == ProbeStatus.AVAILABLE]
 
         # If no engines available, at least verify we get proper diagnostics
         if not available_engines:
@@ -250,9 +245,7 @@ class TestPhysicsParameters:
 
         # Should contain parameter information (may be in stdout or stderr via logging)
         combined_output = result.stdout + result.stderr
-        assert (
-            "Physics Parameter Registry" in combined_output or len(combined_output) > 0
-        )
+        assert "Physics Parameter Registry" in combined_output or len(combined_output) > 0
         assert (
             "BALL" in combined_output
             or "ball" in combined_output.lower()

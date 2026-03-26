@@ -184,9 +184,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
 
         for segment_name, segment_def in HUMANOID_SEGMENTS.items():
             try:
-                dims = dimensions.get(
-                    segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
-                )
+                dims = dimensions.get(segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05})
                 length = dims["length"]
                 width = dims["width"]
                 depth = dims["depth"]
@@ -198,15 +196,11 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
                     mesh = trimesh.creation.icosphere(radius=length / 2, subdivisions=2)
                 elif geom_type == GeometryType.CYLINDER:
                     radius = (width + depth) / 4
-                    mesh = trimesh.creation.cylinder(
-                        radius=radius, height=length, sections=16
-                    )
+                    mesh = trimesh.creation.cylinder(radius=radius, height=length, sections=16)
                 elif geom_type == GeometryType.CAPSULE:
                     radius = (width + depth) / 4
                     cyl_height = max(0.01, length - 2 * radius)
-                    mesh = trimesh.creation.capsule(
-                        radius=radius, height=cyl_height, count=[8, 8]
-                    )
+                    mesh = trimesh.creation.capsule(radius=radius, height=cyl_height, count=[8, 8])
                 else:  # BOX or default
                     mesh = trimesh.creation.box(extents=(width, depth, length))
 
@@ -311,9 +305,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
         # Try the scripted MakeHuman API
         try:
-            return self._generate_via_api(
-                params, modifiers, visual_dir, collision_dir, **kwargs
-            )
+            return self._generate_via_api(params, modifiers, visual_dir, collision_dir, **kwargs)
         except (
             ValueError,
             ZeroDivisionError,
@@ -387,9 +379,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
             mesh_paths: dict[str, Path] = {}
             collision_paths: dict[str, Path] = {}
 
-            all_vertices = (
-                np.array(mesh.vertices) if hasattr(mesh, "vertices") else vertices
-            )
+            all_vertices = np.array(mesh.vertices) if hasattr(mesh, "vertices") else vertices
             all_faces = np.array(mesh.faces) if hasattr(mesh, "faces") else faces
 
             for mh_group, segment_name in self.MH_VERTEX_GROUP_MAP.items():
@@ -475,9 +465,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
         return self._segment_mesh_from_groups(mesh, visual_dir, collision_dir, params)
 
-    def _segment_mesh(
-        self, visual_dir: Path, collision_dir: Path
-    ) -> GeneratedMeshResult:
+    def _segment_mesh(self, visual_dir: Path, collision_dir: Path) -> GeneratedMeshResult:
         """Segment a generated mesh by vertex groups."""
         if not (visual_dir is not None):
             raise ValueError("visual_dir must be provided")
@@ -730,15 +718,9 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         modifiers["macrodetails-proportions/ShoulderWidth"] = float(
             params.shoulder_width_factor - 1.0
         )
-        modifiers["macrodetails-proportions/HipWidth"] = float(
-            params.hip_width_factor - 1.0
-        )
-        modifiers["macrodetails-proportions/ArmLength"] = float(
-            params.arm_length_factor - 1.0
-        )
-        modifiers["macrodetails-proportions/LegLength"] = float(
-            params.leg_length_factor - 1.0
-        )
+        modifiers["macrodetails-proportions/HipWidth"] = float(params.hip_width_factor - 1.0)
+        modifiers["macrodetails-proportions/ArmLength"] = float(params.arm_length_factor - 1.0)
+        modifiers["macrodetails-proportions/LegLength"] = float(params.leg_length_factor - 1.0)
 
         return modifiers
 
@@ -793,9 +775,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
                 line = line.strip()
                 if line.startswith("v "):
                     parts = line.split()
-                    vertices_raw.append(
-                        [float(parts[1]), float(parts[2]), float(parts[3])]
-                    )
+                    vertices_raw.append([float(parts[1]), float(parts[2]), float(parts[3])])
                 elif line.startswith("f "):
                     parts = line.split()[1:]
                     # Handle face refs like "1/2/3" — extract vertex index only
@@ -807,15 +787,9 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
                         for k in range(1, len(indices) - 1):
                             faces_raw.append([indices[0], indices[k], indices[k + 1]])
 
-        vertices = (
-            np.array(vertices_raw, dtype=np.float64)
-            if vertices_raw
-            else np.zeros((0, 3))
-        )
+        vertices = np.array(vertices_raw, dtype=np.float64) if vertices_raw else np.zeros((0, 3))
         faces = (
-            np.array(faces_raw, dtype=np.int64)
-            if faces_raw
-            else np.zeros((0, 3), dtype=np.int64)
+            np.array(faces_raw, dtype=np.int64) if faces_raw else np.zeros((0, 3), dtype=np.int64)
         )
         return vertices, faces
 
@@ -870,7 +844,7 @@ def generate_human():
         try:
             h.setDetail(key, value)
         except Exception as exc:  # noqa: BLE001
-            print(f'Warning: modifier {{key}}={{value}}: {{exc}}')
+            logger.info(f'Warning: modifier {{key}}={{value}}: {{exc}}')
 
     exportOBJ(h, '{obj_path_str}')
 
@@ -1281,9 +1255,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
 
             mesh = _trimesh_module.Trimesh(vertices=vertices, faces=faces)  # type: ignore[union-attr]
 
-            return self._segment_smplx_mesh(
-                mesh, model, visual_dir, collision_dir, params
-            )
+            return self._segment_smplx_mesh(mesh, model, visual_dir, collision_dir, params)
 
         except (
             ValueError,
@@ -1398,13 +1370,9 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             )
 
         # Build per-segment meshes using _segment_mesh + _trimesh_module
-        all_vertices = (
-            np.asarray(mesh.vertices) if hasattr(mesh, "vertices") else np.zeros((0, 3))
-        )
+        all_vertices = np.asarray(mesh.vertices) if hasattr(mesh, "vertices") else np.zeros((0, 3))
         all_faces = (
-            np.asarray(mesh.faces)
-            if hasattr(mesh, "faces")
-            else np.zeros((0, 3), dtype=np.int64)
+            np.asarray(mesh.faces) if hasattr(mesh, "faces") else np.zeros((0, 3), dtype=np.int64)
         )
 
         mesh_paths: dict[str, Path] = {}
@@ -1471,9 +1439,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             try:
                 vertex_set = set(vertices)
                 face_mask = [
-                    i
-                    for i, face in enumerate(mesh.faces)
-                    if any(v in vertex_set for v in face)
+                    i for i, face in enumerate(mesh.faces) if any(v in vertex_set for v in face)
                 ]
 
                 if not face_mask:
@@ -1564,9 +1530,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                 # Find faces using these vertices
                 vertex_set = set(vertex_indices)
                 face_mask = [
-                    i
-                    for i, face in enumerate(mesh.faces)
-                    if any(v in vertex_set for v in face)
+                    i for i, face in enumerate(mesh.faces) if any(v in vertex_set for v in face)
                 ]
 
                 if not face_mask:

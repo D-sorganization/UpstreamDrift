@@ -274,7 +274,7 @@ class PinocchioPerturbationAnalyzer:
         Post: returned dict has 'coeffs' with same shape as base.
         """
         if not (self._base_coeffs is not None):
-            raise ValueError(()
+            raise ValueError(
             "set_base_torque_profile() must be called before perturb_torque()"
         )
         perturbed = perturb_torque_coeffs(
@@ -302,10 +302,8 @@ class PinocchioPerturbationAnalyzer:
         Pre: sim_result is a PinocchioSimResult with n_steps >= 2.
         Post: all MANDATORY_METRICS present; all values finite.
         """
-        if not (isinstance(sim_result):
-            raise ValueError(PinocchioSimResult), ()
-            f"sim_result must be PinocchioSimResult, got {type(sim_result)}"
-        )
+        if not isinstance(sim_result, PinocchioSimResult):
+            raise ValueError("f"sim_result must be PinocchioSimResult, got {type(sim_result)}")
         if not (sim_result.n_steps >= 2):
             raise ValueError("Simulation must have >= 2 steps")
 
@@ -374,7 +372,7 @@ class PinocchioPerturbationAnalyzer:
         Post: result.robustness_score in [0, 1].
         """
         if not (self._base_coeffs is not None):
-            raise ValueError(()
+            raise ValueError(
             "set_base_torque_profile() must be called before run_batch()"
         )
 

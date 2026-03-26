@@ -9,8 +9,7 @@ def test_import():
         import src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui_simulation
 
         assert (
-            src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui_simulation
-            is not None
+            src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui_simulation is not None
         )
     except (ImportError, AttributeError) as e:
         pytest.skip(f"Missing dependencies or import error: {e}")

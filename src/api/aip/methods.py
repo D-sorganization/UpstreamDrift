@@ -326,9 +326,7 @@ def _model_query(
                 if property_name == "joints" and hasattr(engine, "get_joint_names"):
                     return {"joints": list(engine.get_joint_names())}
         except (ValueError, RuntimeError, AttributeError) as exc:
-            _logger.warning(
-                "model.get_property(%r): engine query failed: %s", property_name, exc
-            )
+            _logger.warning("model.get_property(%r): engine query failed: %s", property_name, exc)
 
     return {"property": property_name, "data": None, "note": "No active model"}
 

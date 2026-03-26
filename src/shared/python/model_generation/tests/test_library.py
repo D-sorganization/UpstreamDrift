@@ -158,9 +158,7 @@ class TestRepository:
         # Create some URDF files
         (repo_dir / "robot1.urdf").write_text("<robot name='robot1'></robot>")
         (repo_dir / "subdir").mkdir()
-        (repo_dir / "subdir" / "robot2.urdf").write_text(
-            "<robot name='robot2'></robot>"
-        )
+        (repo_dir / "subdir" / "robot2.urdf").write_text("<robot name='robot2'></robot>")
 
         repo = LocalRepository(repo_dir, name="test_local")
         models = repo.list_models()

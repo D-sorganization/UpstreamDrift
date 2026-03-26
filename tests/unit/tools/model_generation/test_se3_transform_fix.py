@@ -187,9 +187,7 @@ class TestSE3TransformComposition:
 
         ac_joint = _delete_B_and_get_ac_joint(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
-        expected_pos, expected_rpy = _expected_se3_compose(
-            ab_xyz, ab_rpy, bc_xyz, bc_rpy
-        )
+        expected_pos, expected_rpy = _expected_se3_compose(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
         np.testing.assert_allclose(ac_joint.origin.xyz, expected_pos, atol=1e-10)
         np.testing.assert_allclose(ac_joint.origin.rpy, expected_rpy, atol=1e-10)
@@ -219,9 +217,7 @@ class TestSE3TransformComposition:
 
         ac_joint = _delete_B_and_get_ac_joint(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
-        expected_pos, expected_rpy = _expected_se3_compose(
-            ab_xyz, ab_rpy, bc_xyz, bc_rpy
-        )
+        expected_pos, expected_rpy = _expected_se3_compose(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
         np.testing.assert_allclose(ac_joint.origin.xyz, expected_pos, atol=1e-10)
         np.testing.assert_allclose(ac_joint.origin.rpy, expected_rpy, atol=1e-10)
@@ -239,9 +235,7 @@ class TestSE3TransformComposition:
 
         ac_joint = _delete_B_and_get_ac_joint(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
-        expected_pos, expected_rpy = _expected_se3_compose(
-            ab_xyz, ab_rpy, bc_xyz, bc_rpy
-        )
+        expected_pos, expected_rpy = _expected_se3_compose(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
         np.testing.assert_allclose(ac_joint.origin.xyz, expected_pos, atol=1e-10)
         np.testing.assert_allclose(ac_joint.origin.rpy, expected_rpy, atol=1e-10)
@@ -260,9 +254,7 @@ class TestSE3TransformComposition:
 
         ac_joint = _delete_B_and_get_ac_joint(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
-        expected_pos, expected_rpy = _expected_se3_compose(
-            ab_xyz, ab_rpy, bc_xyz, bc_rpy
-        )
+        expected_pos, expected_rpy = _expected_se3_compose(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
         np.testing.assert_allclose(ac_joint.origin.xyz, expected_pos, atol=1e-10)
         np.testing.assert_allclose(ac_joint.origin.rpy, expected_rpy, atol=1e-10)
@@ -292,9 +284,7 @@ class TestSE3TransformComposition:
 
         ac_joint = _delete_B_and_get_ac_joint(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
-        expected_pos, expected_rpy = _expected_se3_compose(
-            ab_xyz, ab_rpy, bc_xyz, bc_rpy
-        )
+        expected_pos, expected_rpy = _expected_se3_compose(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
         np.testing.assert_allclose(ac_joint.origin.xyz, expected_pos, atol=1e-10)
         np.testing.assert_allclose(ac_joint.origin.rpy, expected_rpy, atol=1e-10)
@@ -321,9 +311,7 @@ class TestSE3TransformComposition:
 
         ac_joint = _delete_B_and_get_ac_joint(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
-        expected_pos, expected_rpy = _expected_se3_compose(
-            ab_xyz, ab_rpy, bc_xyz, bc_rpy
-        )
+        expected_pos, expected_rpy = _expected_se3_compose(ab_xyz, ab_rpy, bc_xyz, bc_rpy)
 
         np.testing.assert_allclose(ac_joint.origin.xyz, expected_pos, atol=1e-10)
 

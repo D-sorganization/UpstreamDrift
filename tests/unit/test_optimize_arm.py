@@ -135,9 +135,7 @@ def mock_pinocchio():
 def test_main_execution(mock_casadi, mock_pinocchio):
     with (
         patch("os.path.exists", return_value=True),
-        patch(
-            "src.shared.python.optimization.examples.optimize_arm.np.savetxt"
-        ) as mock_save,
+        patch("src.shared.python.optimization.examples.optimize_arm.np.savetxt") as mock_save,
     ):
         main()
 
@@ -162,9 +160,7 @@ def test_main_missing_dependencies():
             "Test Error",
             create=True,
         ),
-        patch(
-            "src.shared.python.optimization.examples.optimize_arm.logger"
-        ) as mock_logger,
+        patch("src.shared.python.optimization.examples.optimize_arm.logger") as mock_logger,
     ):
         main()
         mock_logger.error.assert_any_call(

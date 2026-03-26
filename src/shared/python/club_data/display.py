@@ -292,9 +292,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
                 clubs = load_club_data(file_path)
                 self.load_clubs(clubs)
             except (RuntimeError, ValueError, OSError) as e:
-                QtWidgets.QMessageBox.critical(
-                    self, "Load Error", f"Failed to load club data: {e}"
-                )
+                QtWidgets.QMessageBox.critical(self, "Load Error", f"Failed to load club data: {e}")
 
     def _on_load_players(self) -> None:
         """Handle load players button click."""
@@ -359,17 +357,11 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
             self.lbl_moi.setText("--")
             return
 
-        self.lbl_length.setText(
-            f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)"
-        )
-        self.lbl_head_mass.setText(
-            f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)"
-        )
+        self.lbl_length.setText(f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)")
+        self.lbl_head_mass.setText(f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)")
         self.lbl_loft.setText(f"{club.loft_degrees:.1f}\u00b0")
         self.lbl_lie_angle.setText(f"{club.lie_angle_degrees:.1f}\u00b0")
-        self.lbl_total_mass.setText(
-            f"{club.total_mass_grams:.0f} g ({club.total_mass_kg:.3f} kg)"
-        )
+        self.lbl_total_mass.setText(f"{club.total_mass_grams:.0f} g ({club.total_mass_kg:.3f} kg)")
         self.lbl_moi.setText(f"{club.moment_of_inertia:.0f} g\u00b7cm\u00b2")
 
     def _update_metrics_display(self, player: ProPlayerData | None) -> None:
@@ -386,9 +378,7 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
         self.lbl_club_speed.setText(
             f"{m.club_head_speed_mph:.1f} mph ({m.club_head_speed_ms:.1f} m/s)"
         )
-        self.lbl_ball_speed.setText(
-            f"{m.ball_speed_mph:.1f} mph ({m.ball_speed_ms:.1f} m/s)"
-        )
+        self.lbl_ball_speed.setText(f"{m.ball_speed_mph:.1f} mph ({m.ball_speed_ms:.1f} m/s)")
         self.lbl_launch_angle.setText(f"{m.launch_angle_degrees:.1f}\u00b0")
         self.lbl_carry_distance.setText(
             f"{m.carry_distance_yards:.0f} yds ({m.carry_distance_meters:.0f} m)"

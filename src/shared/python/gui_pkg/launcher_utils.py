@@ -42,9 +42,7 @@ def invoke_main(main_func: Callable[[], int | None]) -> None:
         sys.exit(1)
 
 
-def check_python_dependencies(
-    required_modules: list[str], install_missing: bool = False
-) -> bool:
+def check_python_dependencies(required_modules: list[str], install_missing: bool = False) -> bool:
     """Check if required python modules are installed.
 
     Args:
@@ -123,9 +121,7 @@ def get_repo_root() -> Path:
     return Path(__file__).parent.parent.parent.parent.absolute()
 
 
-def ensure_environment_var(
-    name: str, default: str, description: str | None = None
-) -> str:
+def ensure_environment_var(name: str, default: str, description: str | None = None) -> str:
     """Ensure an environment variable is set, using a default if missing.
 
     Args:

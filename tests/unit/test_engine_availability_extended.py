@@ -136,9 +136,7 @@ class TestAvailabilityFlags:
         """Each availability flag should be a plain bool."""
         import importlib
 
-        mod = importlib.import_module(
-            "src.shared.python.engine_core.engine_availability"
-        )
+        mod = importlib.import_module("src.shared.python.engine_core.engine_availability")
         flag = getattr(mod, flag_name)
         assert isinstance(flag, bool), f"{flag_name} should be bool, got {type(flag)}"
 

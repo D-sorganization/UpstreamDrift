@@ -63,9 +63,7 @@ def launch_dashboard(
         from src.shared.python.ai.gui.chat_dock_widget import ChatDockWidget
 
         engine_name = (
-            getattr(engine_class, "__name__", "engine")
-            .lower()
-            .replace("physicsengine", "")
+            getattr(engine_class, "__name__", "engine").lower().replace("physicsengine", "")
         )
         chat_dock = ChatDockWidget(engine_context=engine_name, parent=window)
         window.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, chat_dock)

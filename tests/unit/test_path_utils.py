@@ -103,9 +103,7 @@ class TestGetOutputDir:
 
     def test_creates_directory(self, tmp_path: Path) -> None:
         """Test that output dir is created if it doesn't exist."""
-        with patch(
-            "src.shared.python.data_io.path_utils.get_repo_root", return_value=tmp_path
-        ):
+        with patch("src.shared.python.data_io.path_utils.get_repo_root", return_value=tmp_path):
             # Clear the cache to force recalculation
             import src.shared.python.data_io.path_utils as path_utils
 

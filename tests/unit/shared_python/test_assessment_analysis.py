@@ -274,15 +274,10 @@ class TestClassifyAssessmentCategory:
         assert classify_assessment_category(source) == expected
 
     def test_keyword_architecture(self) -> None:
-        assert (
-            classify_assessment_category("some_source", "architecture issues")
-            == "Architecture"
-        )
+        assert classify_assessment_category("some_source", "architecture issues") == "Architecture"
 
     def test_keyword_quality(self) -> None:
-        assert (
-            classify_assessment_category("X", "code quality concern") == "Code Quality"
-        )
+        assert classify_assessment_category("X", "code quality concern") == "Code Quality"
 
     def test_keyword_testing(self) -> None:
         assert classify_assessment_category("test_suite") == "Testing"

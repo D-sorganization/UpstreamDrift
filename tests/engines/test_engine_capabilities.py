@@ -186,9 +186,7 @@ class TestDatasetExporter:
 
     def test_chronological_order_enforced(self, exporter: DatasetExporter) -> None:
         """Records must be in chronological order."""
-        exporter.add_record(
-            DatasetRecord(time=1.0, positions=np.zeros(3), velocities=np.zeros(3))
-        )
+        exporter.add_record(DatasetRecord(time=1.0, positions=np.zeros(3), velocities=np.zeros(3)))
         with pytest.raises(ValueError, match="chronological"):
             exporter.add_record(
                 DatasetRecord(time=0.5, positions=np.zeros(3), velocities=np.zeros(3))

@@ -107,9 +107,7 @@ class TestChatSessionInfo:
 
 class TestChatHistoryResponse:
     def test_basic_construction(self) -> None:
-        resp = ChatHistoryResponse(
-            session_id="s1", messages=[{"role": "user", "content": "hi"}]
-        )
+        resp = ChatHistoryResponse(session_id="s1", messages=[{"role": "user", "content": "hi"}])
         assert resp.session_id == "s1"
         assert len(resp.messages) == 1
 

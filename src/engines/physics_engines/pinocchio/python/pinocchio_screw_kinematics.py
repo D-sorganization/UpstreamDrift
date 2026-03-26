@@ -57,8 +57,7 @@ class PinocchioScrewKinematics:
         """
         if not PINOCCHIO_AVAILABLE:
             raise ImportError(
-                "pinocchio is not installed. "
-                "Install it to use PinocchioScrewKinematics."
+                "pinocchio is not installed. " "Install it to use PinocchioScrewKinematics."
             )
         if not (model is not None):
             raise ValueError("model must be provided")

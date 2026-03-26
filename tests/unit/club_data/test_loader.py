@@ -37,9 +37,7 @@ class TestClubSpecification:
         assert club.length_meters == pytest.approx(45.5 * 0.0254)
 
     def test_head_mass_kg_derived_from_grams(self) -> None:
-        club = ClubSpecification(
-            name="Driver", club_type="Driver", head_mass_grams=200.0
-        )
+        club = ClubSpecification(name="Driver", club_type="Driver", head_mass_grams=200.0)
         assert club.head_mass_kg == pytest.approx(0.2)
 
     def test_total_mass_grams(self) -> None:

@@ -22,9 +22,7 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export
 )
 
 # Path to the mujoco module reference inside video_export (imported as `mj`)
-_VID_EXPORT_MJ = (
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.mj"
-)
+_VID_EXPORT_MJ = "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export.mj"
 
 # Mock constants for headless environment
 WIDTH = 640
@@ -278,9 +276,7 @@ class TestVideoExporter:
                 True,
             ),
         ):
-            success = exporter = VideoExporter(
-                model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4
-            )
+            success = exporter = VideoExporter(model, data, WIDTH, HEIGHT, FPS, VideoFormat.MP4)
             success = exporter.export_recording(
                 "test.mp4",
                 initial_state,

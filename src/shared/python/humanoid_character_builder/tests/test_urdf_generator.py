@@ -210,9 +210,7 @@ class TestCompositeJointExpansion:
 
         # Look for _x, _y, _z suffixes if gimbal was expanded
         # Note: names might differ depending on joint definition
-        expanded = any(
-            "_x" in name or "_y" in name or "_z" in name for name in joint_names
-        )
+        expanded = any("_x" in name or "_y" in name or "_z" in name for name in joint_names)
         assert expanded
 
     def test_no_expansion(self):
@@ -232,9 +230,7 @@ class TestCompositeJointExpansion:
         # So we should see a single revolute joint for the gimbal joint.
 
         # Specifically neck_to_head
-        neck_joints = [
-            j for j in root.findall("joint") if j.get("name").startswith("neck_to_head")
-        ]
+        neck_joints = [j for j in root.findall("joint") if j.get("name").startswith("neck_to_head")]
         assert len(neck_joints) == 1
         assert neck_joints[0].get("type") == "revolute"
 

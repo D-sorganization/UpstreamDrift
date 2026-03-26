@@ -153,9 +153,7 @@ class C3DDataReader:
 
         if self._metadata is None:
             point_parameters = self._get_point_parameters()
-            marker_labels = [
-                label.strip() for label in point_parameters["LABELS"]["value"]
-            ]
+            marker_labels = [label.strip() for label in point_parameters["LABELS"]["value"]]
             frame_count = int(point_parameters["FRAMES"]["value"][0])
             frame_rate = float(point_parameters["RATE"]["value"][0])
             units = str(point_parameters["UNITS"]["value"][0])
@@ -328,8 +326,7 @@ class C3DDataReader:
                 data["time"] = frame_indices / metadata.frame_rate
             else:
                 logger.warning(
-                    "Frame rate is 0. Time column will be omitted "
-                    "despite include_time=True."
+                    "Frame rate is 0. Time column will be omitted " "despite include_time=True."
                 )
 
         return pd.DataFrame(data).reset_index(drop=True)
@@ -358,13 +355,10 @@ class C3DDataReader:
         if channel_count == 0:
             return pd.DataFrame(columns=columns)
 
-        values = analog_array.transpose(2, 0, 1).reshape(
-            frame_count * subframes, channel_count
-        )
+        values = analog_array.transpose(2, 0, 1).reshape(frame_count * subframes, channel_count)
         sample_indices = np.arange(values.shape[0])
         channel_names = np.array(
-            metadata.analog_labels
-            or [f"Analog_{idx + 1}" for idx in range(channel_count)]
+            metadata.analog_labels or [f"Analog_{idx + 1}" for idx in range(channel_count)]
         )
 
         dataframe = pd.DataFrame(
@@ -418,9 +412,7 @@ class C3DDataReader:
             residual_nan_threshold=residual_nan_threshold,
             target_units=target_units,
         )
-        return self._export_dataframe(
-            dataframe, output_path, file_format, sanitize=True
-        )
+        return self._export_dataframe(dataframe, output_path, file_format, sanitize=True)
 
     def export_analog(
         self,
@@ -449,9 +441,7 @@ class C3DDataReader:
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
         dataframe = self.analog_dataframe(include_time=include_time)
-        return self._export_dataframe(
-            dataframe, output_path, file_format, sanitize=True
-        )
+        return self._export_dataframe(dataframe, output_path, file_format, sanitize=True)
 
     def get_force_plate_channels(self) -> dict[int, dict[str, str]]:
         """Detect and map force plate channels by plate number.
@@ -586,9 +576,7 @@ class C3DDataReader:
 
     def _pivot_analog_data(self) -> pd.DataFrame:
         analog_df = self.analog_dataframe(include_time=False)
-        return analog_df.pivot(
-            index="sample", columns="channel", values="value"
-        ).reset_index()
+        return analog_df.pivot(index="sample", columns="channel", values="value").reset_index()
 
     @staticmethod
     def _build_plate_dataframes(
@@ -608,8 +596,7 @@ class C3DDataReader:
             missing_keys = required_keys - set(channels.keys())
             if missing_keys:
                 logger.warning(
-                    f"Force plate {plate_num} missing channels: {missing_keys}. "
-                    "Skipping."
+                    f"Force plate {plate_num} missing channels: {missing_keys}. " "Skipping."
                 )
                 continue
 
@@ -643,17 +630,13 @@ class C3DDataReader:
         try:
             return cast(dict[str, Any], c3d_data["parameters"]["POINT"])
         except KeyError as error:  # pragma: no cover - defensive guard
-            raise ValueError(
-                f"POINT parameters missing from C3D file: {self.file_path}"
-            ) from error
+            raise ValueError(f"POINT parameters missing from C3D file: {self.file_path}") from error
 
     def _get_analog_parameters(self) -> dict[str, Any] | None:
         """Get ANALOG parameters from the C3D file, if present."""
         c3d_data = self._load()
         analog_params = c3d_data["parameters"].get("ANALOG")
-        return (
-            cast(dict[str, Any], analog_params) if analog_params is not None else None
-        )
+        return cast(dict[str, Any], analog_params) if analog_params is not None else None
 
     def _get_analog_details(self) -> tuple[list[str], float | None, list[str]]:
         """Get analog channel labels, sample rate, and units from the C3D file."""
@@ -667,13 +650,9 @@ class C3DDataReader:
             analog_rate = None
         else:
             labels = [
-                label.strip()
-                for label in analog_parameters.get("LABELS", {}).get("value", [])
+                label.strip() for label in analog_parameters.get("LABELS", {}).get("value", [])
             ]
-            units = [
-                unit.strip()
-                for unit in analog_parameters.get("UNITS", {}).get("value", [])
-            ]
+            units = [unit.strip() for unit in analog_parameters.get("UNITS", {}).get("value", [])]
             analog_rate = float(analog_parameters.get("RATE", {}).get("value", [0])[0])
 
         if not labels and channel_count > 0:
@@ -793,9 +772,7 @@ class C3DDataReader:
 
         if not file_format:
             if not path.suffix:
-                raise ValueError(
-                    "File format could not be inferred from the path suffix."
-                )
+                raise ValueError("File format could not be inferred from the path suffix.")
             file_format = path.suffix.lstrip(".")
 
         normalized_format = file_format.lower()
@@ -844,8 +821,7 @@ class C3DDataReader:
 
         if not is_test_env and base_dir not in path.parents and path != base_dir:
             raise ValueError(
-                f"Security: Refusing to output to {path} "
-                f"(outside project root {base_dir})"
+                f"Security: Refusing to output to {path} " f"(outside project root {base_dir})"
             )
 
     def _build_export_metadata(self, dataframe: pd.DataFrame) -> dict[str, Any]:
@@ -876,9 +852,7 @@ class C3DDataReader:
         _write_sidecar_metadata(path, metadata)
 
     @staticmethod
-    def _export_json(
-        dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
-    ) -> None:
+    def _export_json(dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]) -> None:
         output = {
             "metadata": metadata,
             "data": dataframe.to_dict(orient="records"),
@@ -887,9 +861,7 @@ class C3DDataReader:
             json.dump(output, f, indent=2)
 
     @staticmethod
-    def _export_npz(
-        dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
-    ) -> None:
+    def _export_npz(dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]) -> None:
         if not (dataframe is not None):
             raise ValueError("dataframe must be provided")
         if not (dataframe is not None):
@@ -911,7 +883,5 @@ def load_tour_average_reader(base_directory: Path | None = None) -> C3DDataReade
     """
 
     base_path = base_directory or Path(__file__).resolve().parents[2]
-    default_path = (
-        base_path / "matlab" / "Data" / "Optical C3D Files" / "CaptureExport Tour average.c3d"
-    )
+    default_path = base_path / "matlab" / "Data" / "Optical C3D Files" / "CaptureExport Tour average.c3d"
     return C3DDataReader(default_path)

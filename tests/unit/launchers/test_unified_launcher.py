@@ -99,15 +99,11 @@ def test_show_status() -> None:
         launcher = UnifiedLauncher()
 
         with (
-            patch(
-                "src.shared.python.engine_core.engine_manager.EngineManager"
-            ) as mock_mgr_cls,
+            patch("src.shared.python.engine_core.engine_manager.EngineManager") as mock_mgr_cls,
             patch("builtins.print") as mock_print,
         ):
             mock_mgr = mock_mgr_cls.return_value
-            mock_mgr.get_available_engines.return_value = [
-                MagicMock(value="test_engine")
-            ]
+            mock_mgr.get_available_engines.return_value = [MagicMock(value="test_engine")]
 
             launcher.show_status()
 

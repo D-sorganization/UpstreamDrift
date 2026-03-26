@@ -47,9 +47,7 @@ def test_joint_definitions(inclined_plane_model: mujoco.MjModel) -> None:
     # Helper to get joint ID
     def get_joint_id(name: str) -> int:
         """Return the MuJoCo joint ID for a given joint name."""
-        return int(
-            mujoco.mj_name2id(inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, name)
-        )
+        return int(mujoco.mj_name2id(inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, name))
 
     # 1. Shoulder Hinge
     shoulder_id = get_joint_id("shoulder")
@@ -84,9 +82,7 @@ def test_actuator_coupling(inclined_plane_model: mujoco.MjModel) -> None:
 
         # Get coupled joint ID
         joint_id = inclined_plane_model.actuator_trnid[i, 0]
-        joint_name = mujoco.mj_id2name(
-            inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, joint_id
-        )
+        joint_name = mujoco.mj_id2name(inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, joint_id)
 
         # Ensure we are actuating the expected joints
         assert joint_name in ["shoulder", "wrist_universal_1", "wrist_universal_2"]

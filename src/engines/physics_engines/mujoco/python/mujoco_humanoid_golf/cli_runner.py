@@ -60,8 +60,7 @@ def load_model(model_key: str) -> tuple[mujoco.MjModel, mujoco.MjData]:
         candidate = _resolve_model_path(model_key)
         if not candidate.exists():
             raise ValueError(
-                f"Unknown model '{model_key}'. Available: "
-                f"{', '.join(sorted(MODEL_SPECS))}",
+                f"Unknown model '{model_key}'. Available: " f"{', '.join(sorted(MODEL_SPECS))}",
             )
         model = mujoco.MjModel.from_xml_path(candidate.as_posix())
     elif spec["mode"] == "xml_string":
@@ -273,9 +272,7 @@ def run_batch(batch_path: Path, base_args: argparse.Namespace) -> None:
             model=entry["model"],
             duration=float(entry.get("duration", base_args.duration)),
             timestep=entry.get("timestep", base_args.timestep),
-            control_config=(
-                Path(entry["control_config"]) if "control_config" in entry else None
-            ),
+            control_config=(Path(entry["control_config"]) if "control_config" in entry else None),
             output_json=Path(entry["output_json"]) if "output_json" in entry else None,
             output_csv=Path(entry["output_csv"]) if "output_csv" in entry else None,
             show_summary=entry.get("summary", base_args.summary),

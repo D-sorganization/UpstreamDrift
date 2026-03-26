@@ -243,9 +243,7 @@ class BundledAssets:
 
         return meshes_dir
 
-    def get_model_metadata(
-        self, model_category: str, model_name: str
-    ) -> dict[str, Any]:
+    def get_model_metadata(self, model_category: str, model_name: str) -> dict[str, Any]:
         """Get metadata for a bundled model.
 
 

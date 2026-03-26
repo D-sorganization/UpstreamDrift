@@ -52,9 +52,7 @@ def fix_numpy_compatibility() -> None:
         ]
 
         for package in packages_to_reinstall:
-            run_command(
-                [sys.executable, "-m", "pip", "uninstall", "-y", package], check=False
-            )
+            run_command([sys.executable, "-m", "pip", "uninstall", "-y", package], check=False)
 
         # Downgrade NumPy
         run_command(
@@ -73,9 +71,7 @@ def fix_numpy_compatibility() -> None:
             run_command([sys.executable, "-m", "pip", "install", package], check=False)
 
         # Install project dependencies
-        run_command(
-            [sys.executable, "-m", "pip", "install", "-e", ".", "--force-reinstall"]
-        )
+        run_command([sys.executable, "-m", "pip", "install", "-e", ".", "--force-reinstall"])
 
 
 def verify_installation() -> bool:

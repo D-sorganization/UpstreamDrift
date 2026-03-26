@@ -131,9 +131,7 @@ class TestControlSystem:
         num_actuators = 3
         system = ControlSystem(num_actuators)
         assert len(system.actuator_controls) == num_actuators
-        assert all(
-            isinstance(ctrl, ActuatorControl) for ctrl in system.actuator_controls
-        )
+        assert all(isinstance(ctrl, ActuatorControl) for ctrl in system.actuator_controls)
 
     def test_control_system_compute_control_vector(self) -> None:
         """Test computing control torques for all actuators."""

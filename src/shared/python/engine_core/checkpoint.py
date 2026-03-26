@@ -340,9 +340,7 @@ class CheckpointManager(ContractChecker):
         self._auto_enabled = True
         self._auto_interval_steps = interval_steps
         self._auto_interval_time = interval_time
-        logger.info(
-            f"Auto-checkpoint enabled: steps={interval_steps}, time={interval_time}s"
-        )
+        logger.info(f"Auto-checkpoint enabled: steps={interval_steps}, time={interval_time}s")
 
     def disable_auto_checkpoint(self) -> None:
         """Disable automatic checkpointing."""

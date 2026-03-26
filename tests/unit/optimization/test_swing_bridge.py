@@ -75,22 +75,16 @@ class TestSwingOptimizationConfigDefaults:
     def test_default_n_joints(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.n_joints == 7
 
-    def test_default_horizon_steps(
-        self, default_config: SwingOptimizationConfig
-    ) -> None:
+    def test_default_horizon_steps(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.horizon_steps == 100
 
     def test_default_dt(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.dt == 0.01
 
-    def test_default_max_iterations(
-        self, default_config: SwingOptimizationConfig
-    ) -> None:
+    def test_default_max_iterations(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.max_iterations == 50
 
-    def test_default_convergence_tol(
-        self, default_config: SwingOptimizationConfig
-    ) -> None:
+    def test_default_convergence_tol(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.convergence_tol == 1e-6
 
     def test_default_target_clubhead_velocity(
@@ -98,14 +92,10 @@ class TestSwingOptimizationConfigDefaults:
     ) -> None:
         assert default_config.target_clubhead_velocity == 50.0
 
-    def test_default_control_cost_weight(
-        self, default_config: SwingOptimizationConfig
-    ) -> None:
+    def test_default_control_cost_weight(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.control_cost_weight == 0.01
 
-    def test_default_terminal_cost_weight(
-        self, default_config: SwingOptimizationConfig
-    ) -> None:
+    def test_default_terminal_cost_weight(self, default_config: SwingOptimizationConfig) -> None:
         assert default_config.terminal_cost_weight == 100.0
 
 
@@ -299,16 +289,12 @@ class TestCostMatrices:
     def test_q_positive_semi_definite(self, bridge: SwingOptimizationBridge) -> None:
         Q, _ = bridge._build_cost_matrices(7)
         eigenvalues = np.linalg.eigvalsh(Q)
-        assert np.all(eigenvalues >= -1e-12), (
-            f"Q is not PSD: min eigenvalue = {eigenvalues.min()}"
-        )
+        assert np.all(eigenvalues >= -1e-12), f"Q is not PSD: min eigenvalue = {eigenvalues.min()}"
 
     def test_r_positive_semi_definite(self, bridge: SwingOptimizationBridge) -> None:
         _, R = bridge._build_cost_matrices(7)
         eigenvalues = np.linalg.eigvalsh(R)
-        assert np.all(eigenvalues >= -1e-12), (
-            f"R is not PSD: min eigenvalue = {eigenvalues.min()}"
-        )
+        assert np.all(eigenvalues >= -1e-12), f"R is not PSD: min eigenvalue = {eigenvalues.min()}"
 
     def test_r_diagonal_values(self, bridge: SwingOptimizationBridge) -> None:
         _, R = bridge._build_cost_matrices(7)
@@ -323,9 +309,7 @@ class TestCostMatrices:
         Q, _ = bridge._build_cost_matrices(7)
         np.testing.assert_array_equal(Q[:7, :7], np.zeros((7, 7)))
 
-    def test_build_cost_matrices_n_zero_raises(
-        self, bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_build_cost_matrices_n_zero_raises(self, bridge: SwingOptimizationBridge) -> None:
         with pytest.raises(ValueError, match="n must be >= 1"):
             bridge._build_cost_matrices(0)
 
@@ -384,9 +368,7 @@ class TestTrajectoryEvaluation:
         # trajectory has horizon_steps + 1 entries (initial + each step)
         assert len(traj) == small_bridge.config.horizon_steps + 1
 
-    def test_zero_controls_zero_initial_state(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_zero_controls_zero_initial_state(self, small_bridge: SwingOptimizationBridge) -> None:
         """Zero controls from rest should keep state at zero."""
         n = small_bridge.config.n_joints
         controls = [np.zeros(n) for _ in range(small_bridge.config.horizon_steps)]
@@ -433,30 +415,22 @@ class TestOptimizeSwing:
         result = small_bridge.optimize_swing(x0)
         assert len(result.optimal_torques) == small_bridge.config.horizon_steps
 
-    def test_result_trajectory_length(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_result_trajectory_length(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert len(result.trajectory) == small_bridge.config.horizon_steps + 1
 
-    def test_computation_time_positive(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_computation_time_positive(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert result.computation_time_s > 0
 
-    def test_iterations_at_least_one(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_iterations_at_least_one(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert result.iterations >= 1
 
-    def test_clubhead_velocity_non_negative(
-        self, small_bridge: SwingOptimizationBridge
-    ) -> None:
+    def test_clubhead_velocity_non_negative(self, small_bridge: SwingOptimizationBridge) -> None:
         x0 = np.zeros(small_bridge.state_dim)
         result = small_bridge.optimize_swing(x0)
         assert result.clubhead_velocity >= 0.0
@@ -493,9 +467,7 @@ class TestOptimizeSwingWithMockEngine:
         config = SwingOptimizationConfig(n_joints=2, horizon_steps=5, max_iterations=2)
         engine = MagicMock()
         # Engine returns a plausible next state
-        engine.step.side_effect = lambda state, u, dt: (
-            state + np.concatenate([u * dt, u * dt])
-        )
+        engine.step.side_effect = lambda state, u, dt: (state + np.concatenate([u * dt, u * dt]))
 
         b = SwingOptimizationBridge(config, engine=engine)
         x0 = np.zeros(4)

@@ -329,15 +329,15 @@ class KeyboardMouseInput(BaseInputDevice):
             return
 
         # Compute velocity from key states
-        vx = self._key_velocity * (
-            1 if self._buttons["forward"] else 0
-        ) - self._key_velocity * (1 if self._buttons["backward"] else 0)
-        vy = self._key_velocity * (
-            1 if self._buttons["left"] else 0
-        ) - self._key_velocity * (1 if self._buttons["right"] else 0)
-        vz = self._key_velocity * (
-            1 if self._buttons["up"] else 0
-        ) - self._key_velocity * (1 if self._buttons["down"] else 0)
+        vx = self._key_velocity * (1 if self._buttons["forward"] else 0) - self._key_velocity * (
+            1 if self._buttons["backward"] else 0
+        )
+        vy = self._key_velocity * (1 if self._buttons["left"] else 0) - self._key_velocity * (
+            1 if self._buttons["right"] else 0
+        )
+        vz = self._key_velocity * (1 if self._buttons["up"] else 0) - self._key_velocity * (
+            1 if self._buttons["down"] else 0
+        )
 
         self._twist[:3] = [vx, vy, vz]
 

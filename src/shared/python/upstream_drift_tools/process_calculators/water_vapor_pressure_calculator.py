@@ -14,9 +14,7 @@ class WaterVaporPressureCalculator:
         """Initialize the calculator."""
         self.calculator = SyngasWaterCalculator()
 
-    def calculate_vapor_pressure(
-        self, temperature_c: float, method: str = "auto"
-    ) -> float:
+    def calculate_vapor_pressure(self, temperature_c: float, method: str = "auto") -> float:
         """
         Calculate vapor pressure in Pa.
 

@@ -128,19 +128,13 @@ class Styles:
     BTN_SAVE = "background-color: #107c10; color: white; padding: 8px;"
     """Green save button for config/settings panels."""
 
-    BTN_DOCKER_RUN = (
-        "background-color: #107c10; color: white;padding: 10px; font-weight: bold;"
-    )
+    BTN_DOCKER_RUN = "background-color: #107c10; color: white;padding: 10px; font-weight: bold;"
     """Docker simulation run button."""
 
-    BTN_DOCKER_STOP = (
-        "background-color: #d13438; color: white;padding: 10px; font-weight: bold;"
-    )
+    BTN_DOCKER_STOP = "background-color: #d13438; color: white;padding: 10px; font-weight: bold;"
     """Docker simulation stop button."""
 
-    BTN_DOCKER_REBUILD = (
-        "background-color: #8b5cf6; color: white;padding: 10px; font-weight: bold;"
-    )
+    BTN_DOCKER_REBUILD = "background-color: #8b5cf6; color: white;padding: 10px; font-weight: bold;"
     """Docker environment rebuild button."""
 
     BTN_GENERATE_PLOT = (
@@ -189,8 +183,7 @@ class Styles:
     """Layout lock toggle button (checkable)."""
 
     BTN_RECORD_CHECKED = (
-        "QPushButton:checked { background-color: #d62728; color: white; "
-        "font-weight: bold; }"
+        "QPushButton:checked { background-color: #d62728; color: white; " "font-weight: bold; }"
     )
     """Record button checked state (recording active)."""
 
@@ -327,14 +320,10 @@ class Styles:
     # Recording Status Indicators
     # ══════════════════════════════════════════════════════════════════
 
-    RECORDING_ACTIVE = (
-        "background-color: #d62728; color: white; font-weight: bold; padding: 5px;"
-    )
+    RECORDING_ACTIVE = "background-color: #d62728; color: white; font-weight: bold; padding: 5px;"
     """Recording actively in progress."""
 
-    RECORDING_STOPPED = (
-        "background-color: #ff7f0e; color: white; font-weight: bold; padding: 5px;"
-    )
+    RECORDING_STOPPED = "background-color: #ff7f0e; color: white; font-weight: bold; padding: 5px;"
     """Recording stopped with data available."""
 
     RECORDING_IDLE = "font-weight: bold; padding: 5px;"
@@ -412,14 +401,10 @@ class Styles:
     )
     """Chat input text field."""
 
-    CHAT_HEADER = (
-        "QWidget {  background-color: #252526;  border-bottom: 1px solid #333333;}"
-    )
+    CHAT_HEADER = "QWidget {  background-color: #252526;  border-bottom: 1px solid #333333;}"
     """Chat panel header bar."""
 
-    CHAT_INPUT_CONTAINER = (
-        "QWidget {  background-color: #252526;  border-top: 1px solid #333333;}"
-    )
+    CHAT_INPUT_CONTAINER = "QWidget {  background-color: #252526;  border-top: 1px solid #333333;}"
     """Chat input container bar."""
 
     CHAT_COMBO = (
@@ -603,14 +588,10 @@ class Styles:
     POSE_EST_TITLE = "font-size: 18px; font-weight: bold; margin-bottom: 10px;"
     """Title banner for pose estimation GUIs."""
 
-    BTN_RUN_OPENPOSE = (
-        "background-color: #28a745; color: white; padding: 10px; font-weight: bold;"
-    )
+    BTN_RUN_OPENPOSE = "background-color: #28a745; color: white; padding: 10px; font-weight: bold;"
     """Green run button for OpenPose analysis."""
 
-    BTN_RUN_MEDIAPIPE = (
-        "background-color: #ff9900; color: white; padding: 10px; font-weight: bold;"
-    )
+    BTN_RUN_MEDIAPIPE = "background-color: #ff9900; color: white; padding: 10px; font-weight: bold;"
     """Orange run button for MediaPipe analysis."""
 
     # ══════════════════════════════════════════════════════════════════
@@ -676,14 +657,10 @@ class Styles:
     )
     """Dark-themed group box with subtle border."""
 
-    BTN_POLY_GENERATOR = (
-        "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
-    )
+    BTN_POLY_GENERATOR = "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
     """Blue polynomial generator tool button."""
 
-    BTN_SIGNAL_TOOLKIT = (
-        "background-color: #6b5b95; color: white; padding: 8px; font-weight: bold;"
-    )
+    BTN_SIGNAL_TOOLKIT = "background-color: #6b5b95; color: white; padding: 8px; font-weight: bold;"
     """Purple signal toolkit tool button."""
 
     TEXT_HELP_HINT = "color: #aaa; font-style: italic; font-size: 11px;"

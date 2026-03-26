@@ -236,9 +236,7 @@ class TestGripContactModel:
         velocities = np.zeros((1, 3))
         body_names = ["hand"]
 
-        model.update_from_mujoco(
-            positions, normals, forces, velocities, body_names, timestamp=0.0
-        )
+        model.update_from_mujoco(positions, normals, forces, velocities, body_names, timestamp=0.0)
 
         result = model.check_static_equilibrium(club_weight=5.0)
 
@@ -256,9 +254,7 @@ class TestGripContactModel:
         forces = np.array([[0.0, 0.0, 100.0]])
         velocities = np.zeros((1, 3))
 
-        model.update_from_mujoco(
-            positions, normals, forces, velocities, ["hand"], timestamp=0.0
-        )
+        model.update_from_mujoco(positions, normals, forces, velocities, ["hand"], timestamp=0.0)
 
         margins = model.check_slip_margin()
 
@@ -422,9 +418,7 @@ class TestPressureVisualization:
         # Pressure = Force / Area = 100 / 0.01 = 10000 Pa
         assert data.max_pressure == pytest.approx(10000.0)
         assert len(data.normalized_pressures) == 1
-        assert data.normalized_pressures[0] == pytest.approx(
-            1.0
-        )  # Max is normalized to 1
+        assert data.normalized_pressures[0] == pytest.approx(1.0)  # Max is normalized to 1
 
     def test_multiple_contacts_pressure(self) -> None:
         """Should compute pressure distribution for multiple contacts."""
@@ -504,9 +498,7 @@ class TestStaticEquilibriumValidation:
         forces = np.array([[0.0, 0.0, 5.0]])  # 5N upward force
         velocities = np.zeros((1, 3))
 
-        model.update_from_mujoco(
-            positions, normals, forces, velocities, ["hand"], timestamp=0.0
-        )
+        model.update_from_mujoco(positions, normals, forces, velocities, ["hand"], timestamp=0.0)
 
         result = model.check_static_equilibrium(club_weight=5.0)
 
@@ -523,9 +515,7 @@ class TestStaticEquilibriumValidation:
         forces = np.array([[0.0, 0.0, 2.0]])  # Only 2N, need 5N
         velocities = np.zeros((1, 3))
 
-        model.update_from_mujoco(
-            positions, normals, forces, velocities, ["hand"], timestamp=0.0
-        )
+        model.update_from_mujoco(positions, normals, forces, velocities, ["hand"], timestamp=0.0)
 
         result = model.check_static_equilibrium(club_weight=5.0)
 
@@ -547,9 +537,7 @@ class TestDynamicSwingValidation:
         forces = np.array([[100.0, 0.0, 100.0]])
         velocities = np.zeros((1, 3))
 
-        model.update_from_mujoco(
-            positions, normals, forces, velocities, ["hand"], timestamp=0.0
-        )
+        model.update_from_mujoco(positions, normals, forces, velocities, ["hand"], timestamp=0.0)
 
         margins = model.check_slip_margin()
 
@@ -568,9 +556,7 @@ class TestDynamicSwingValidation:
         forces = np.array([[50.0, 0.0, 100.0]])
         velocities = np.zeros((1, 3))
 
-        model.update_from_mujoco(
-            positions, normals, forces, velocities, ["hand"], timestamp=0.0
-        )
+        model.update_from_mujoco(positions, normals, forces, velocities, ["hand"], timestamp=0.0)
 
         margins = model.check_slip_margin()
 

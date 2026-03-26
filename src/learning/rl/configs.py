@@ -133,9 +133,7 @@ class ActionConfig:
         action = action * self.action_scale
         # Smooth
         if self.smoothing_alpha > 0 and prev_action is not None:
-            action = (
-                self.smoothing_alpha * prev_action + (1 - self.smoothing_alpha) * action
-            )
+            action = self.smoothing_alpha * prev_action + (1 - self.smoothing_alpha) * action
         return action
 
 
@@ -211,9 +209,7 @@ class TaskConfig:
     """
 
     task_type: TaskType = TaskType.LOCOMOTION
-    target_velocity: NDArray[np.floating] = field(
-        default_factory=lambda: np.array([1.0, 0.0, 0.0])
-    )
+    target_velocity: NDArray[np.floating] = field(default_factory=lambda: np.array([1.0, 0.0, 0.0]))
     target_position: NDArray[np.floating] | None = None
     target_orientation: NDArray[np.floating] | None = None
     max_episode_steps: int = 1000

@@ -32,16 +32,12 @@ class TestApplySaturation:
     """Tests for apply_saturation function."""
 
     def test_hard_clipping(self, sine_signal: Signal) -> None:
-        saturated = apply_saturation(
-            sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.HARD
-        )
+        saturated = apply_saturation(sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.HARD)
         assert np.all(saturated.values >= -1.0)
         assert np.all(saturated.values <= 1.0)
 
     def test_tanh_saturation(self, sine_signal: Signal) -> None:
-        saturated = apply_saturation(
-            sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.TANH
-        )
+        saturated = apply_saturation(sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.TANH)
         assert np.all(saturated.values >= -1.0 - 1e-9)
         assert np.all(saturated.values <= 1.0 + 1e-9)
 
@@ -52,21 +48,15 @@ class TestApplySaturation:
         assert saturated.values.shape == sine_signal.values.shape
 
     def test_atan_saturation(self, sine_signal: Signal) -> None:
-        saturated = apply_saturation(
-            sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.ATAN
-        )
+        saturated = apply_saturation(sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.ATAN)
         assert saturated.values.shape == sine_signal.values.shape
 
     def test_soft_saturation(self, sine_signal: Signal) -> None:
-        saturated = apply_saturation(
-            sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.SOFT
-        )
+        saturated = apply_saturation(sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.SOFT)
         assert saturated.values.shape == sine_signal.values.shape
 
     def test_cubic_saturation(self, sine_signal: Signal) -> None:
-        saturated = apply_saturation(
-            sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.CUBIC
-        )
+        saturated = apply_saturation(sine_signal, lower=-1.0, upper=1.0, mode=SaturationMode.CUBIC)
         assert saturated.values.shape == sine_signal.values.shape
 
     def test_exponential_saturation(self, sine_signal: Signal) -> None:
@@ -86,9 +76,7 @@ class TestApplySaturation:
     def test_no_clipping_within_bounds(self, t: np.ndarray) -> None:
         """Signal within bounds should be unchanged for hard clip."""
         small_sig = Signal(time=t, values=0.5 * np.sin(t), name="small")
-        result = apply_saturation(
-            small_sig, lower=-1.0, upper=1.0, mode=SaturationMode.HARD
-        )
+        result = apply_saturation(small_sig, lower=-1.0, upper=1.0, mode=SaturationMode.HARD)
         assert np.allclose(result.values, small_sig.values)
 
 
@@ -154,9 +142,7 @@ class TestApplyHysteresis:
         assert result.values.shape == sine_signal.values.shape
 
     def test_hysteresis_smooth(self, sine_signal: Signal) -> None:
-        result = apply_hysteresis(
-            sine_signal, threshold_up=1.0, threshold_down=-1.0, smooth=True
-        )
+        result = apply_hysteresis(sine_signal, threshold_up=1.0, threshold_down=-1.0, smooth=True)
         assert result.values.shape == sine_signal.values.shape
 
     def test_custom_output_levels(self, sine_signal: Signal) -> None:
@@ -203,9 +189,7 @@ class TestSaturationUtilities:
     """Tests for create_saturation_function and visualize_saturation_curves."""
 
     def test_create_saturation_function(self) -> None:
-        sat_fn = create_saturation_function(
-            lower=-1.0, upper=1.0, mode=SaturationMode.HARD
-        )
+        sat_fn = create_saturation_function(lower=-1.0, upper=1.0, mode=SaturationMode.HARD)
         x = np.array([-2.0, -0.5, 0.0, 0.5, 2.0])
         result = sat_fn(x)
         assert np.all(result >= -1.0)

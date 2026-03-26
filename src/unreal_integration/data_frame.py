@@ -187,14 +187,9 @@ class UnrealDataFrame:
         if not (d is not None):
             raise ValueError("d must be provided")
         joints = {
-            name: JointState.from_dict(js_dict)
-            for name, js_dict in d.get("joints", {}).items()
+            name: JointState.from_dict(js_dict) for name, js_dict in d.get("joints", {}).items()
         }
-        forces = (
-            [ForceVector.from_dict(f) for f in d.get("forces", [])]
-            if "forces" in d
-            else None
-        )
+        forces = [ForceVector.from_dict(f) for f in d.get("forces", [])] if "forces" in d else None
         club = ClubState.from_dict(d["club"]) if "club" in d else None
         ball = BallState.from_dict(d["ball"]) if "ball" in d else None
         metrics = SwingMetrics.from_dict(d["metrics"]) if "metrics" in d else None
@@ -203,9 +198,7 @@ class UnrealDataFrame:
             if "trajectory" in d
             else None
         )
-        environment = (
-            EnvironmentState.from_dict(d["environment"]) if "environment" in d else None
-        )
+        environment = EnvironmentState.from_dict(d["environment"]) if "environment" in d else None
 
         return cls(
             timestamp=float(d["timestamp"]),

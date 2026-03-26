@@ -33,9 +33,7 @@ def test_apply_styles_success(qapp):
     }
     mock_manager.get_current_stylesheet.return_value = "QWidget { color: red; }"
 
-    with patch(
-        "src.shared.python.theme.ThemeManager.instance", return_value=mock_manager
-    ):
+    with patch("src.shared.python.theme.ThemeManager.instance", return_value=mock_manager):
         launcher.apply_styles()
 
     style = launcher.styleSheet()
@@ -64,12 +62,8 @@ def test_apply_theme_system(qapp):
     mock_manager.themeChanged = MagicMock()
 
     with (
-        patch(
-            "src.shared.python.theme.ThemeManager.instance", return_value=mock_manager
-        ),
-        patch(
-            "src.shared.python.theme.apply_golf_suite_style", create=True
-        ) as mock_apply,
+        patch("src.shared.python.theme.ThemeManager.instance", return_value=mock_manager),
+        patch("src.shared.python.theme.apply_golf_suite_style", create=True) as mock_apply,
     ):
         launcher._apply_theme_system()
 
@@ -137,9 +131,7 @@ def test_setup_theme_menu_and_plot(qapp):
     mock_manager.get_custom_theme_names.return_value = ["Custom1"]
 
     with (
-        patch(
-            "src.shared.python.theme.ThemeManager.instance", return_value=mock_manager
-        ),
+        patch("src.shared.python.theme.ThemeManager.instance", return_value=mock_manager),
         patch("matplotlib.pyplot.style.available", ["_classic", "classic", "ggplot"]),
     ):
         launcher._setup_theme_menu(menu)
@@ -155,9 +147,7 @@ def test_setup_theme_menu_and_plot(qapp):
     assert "Custom1" in names
 
     # Test import error for ThemeManager
-    with patch(
-        "src.shared.python.theme.ThemeManager.instance", side_effect=ImportError("Boom")
-    ):
+    with patch("src.shared.python.theme.ThemeManager.instance", side_effect=ImportError("Boom")):
         menu2 = QMenu()
         launcher._setup_theme_menu(menu2)
         assert len(menu2.actions()) == 1
@@ -189,9 +179,7 @@ def test_set_plot_theme(qapp):
 
     with (
         patch("PyQt6.QtCore.QSettings") as mock_settings_class,
-        patch(
-            "src.shared.python.theme.apply_golf_suite_style", create=True
-        ) as mock_apply,
+        patch("src.shared.python.theme.apply_golf_suite_style", create=True) as mock_apply,
     ):
         mock_settings = MagicMock()
         mock_settings_class.return_value = mock_settings
@@ -228,7 +216,5 @@ def test_open_theme_manager_dialog(mock_dialog_class, qapp):
         launcher._open_theme_manager_dialog()
         mock_dialog.exec.assert_called_once()
 
-    with patch(
-        "src.shared.python.theme.ThemeManager.instance", side_effect=ImportError("Boom")
-    ):
+    with patch("src.shared.python.theme.ThemeManager.instance", side_effect=ImportError("Boom")):
         launcher._open_theme_manager_dialog()  # Shouldn't crash

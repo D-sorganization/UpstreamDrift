@@ -17,9 +17,7 @@ except (ImportError, OSError):
     QFileDialog = None  # type: ignore[misc, assignment]
     QMessageBox = None  # type: ignore[misc, assignment]
 
-pytestmark = pytest.mark.skipif(
-    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
-)
+pytestmark = pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available")
 
 if PYQT6_AVAILABLE:
     from shared.python.pose_estimation.openpose_gui import OpenPoseGUI
@@ -98,9 +96,7 @@ def test_run_analysis(gui, qtbot) -> None:
         assert "Starting OpenPose analysis" in gui.log_area.toPlainText()
 
         # Simulate worker completion: directly call _on_finished
-        with patch(
-            "shared.python.pose_estimation.openpose_gui.QMessageBox"
-        ) as mock_msg_cls:
+        with patch("shared.python.pose_estimation.openpose_gui.QMessageBox") as mock_msg_cls:
             gui._on_finished([])  # Trigger completion with empty results
             assert "Analysis complete!" in gui.log_area.toPlainText()
             assert gui.btn_run.isEnabled()

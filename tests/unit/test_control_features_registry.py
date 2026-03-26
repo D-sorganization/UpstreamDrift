@@ -151,9 +151,7 @@ class TestFeatureExecution:
         assert isinstance(result, list)
         assert len(result) == 2
 
-    def test_execute_nonexistent_raises(
-        self, registry: ControlFeaturesRegistry
-    ) -> None:
+    def test_execute_nonexistent_raises(self, registry: ControlFeaturesRegistry) -> None:
         """Test executing non-existent feature raises ValueError."""
         with pytest.raises(ValueError, match="not found"):
             registry.execute("nonexistent_method")

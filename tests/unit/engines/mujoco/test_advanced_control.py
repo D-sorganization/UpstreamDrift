@@ -359,9 +359,7 @@ class TestAdvancedController:
             assert np.all(np.isfinite(tau))
         except np.linalg.LinAlgError:
             # Singular matrix is acceptable for some configurations
-            pytest.skip(
-                "Singular matrix in operational space control (expected in configs)"
-            )
+            pytest.skip("Singular matrix in operational space control (expected in configs)")
 
     def test_find_body_id(self, model_and_data) -> None:
         """Test finding body ID."""
@@ -389,13 +387,11 @@ class TestTrajectoryGenerator:
         duration = 1.0
         dt = 0.01
 
-        positions, velocities, accelerations = (
-            TrajectoryGenerator.minimum_jerk_trajectory(
-                start,
-                goal,
-                duration,
-                dt,
-            )
+        positions, velocities, accelerations = TrajectoryGenerator.minimum_jerk_trajectory(
+            start,
+            goal,
+            duration,
+            dt,
         )
 
         assert positions.shape[1] == 2
@@ -416,13 +412,11 @@ class TestTrajectoryGenerator:
         duration = 0.5
         dt = 0.01
 
-        positions, velocities, accelerations = (
-            TrajectoryGenerator.minimum_jerk_trajectory(
-                start,
-                goal,
-                duration,
-                dt,
-            )
+        positions, velocities, accelerations = TrajectoryGenerator.minimum_jerk_trajectory(
+            start,
+            goal,
+            duration,
+            dt,
         )
 
         assert positions.shape[1] == 1
@@ -473,13 +467,11 @@ class TestTrajectoryGenerator:
         duration = 1.0
         dt = 0.01
 
-        positions, velocities, accelerations = (
-            TrajectoryGenerator.minimum_jerk_trajectory(
-                start,
-                goal,
-                duration,
-                dt,
-            )
+        positions, velocities, accelerations = TrajectoryGenerator.minimum_jerk_trajectory(
+            start,
+            goal,
+            duration,
+            dt,
         )
 
         # Check that velocities and accelerations are finite

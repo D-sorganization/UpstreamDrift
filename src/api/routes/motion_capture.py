@@ -65,9 +65,7 @@ class RecordingInfo(BaseModel):
 class CaptureSessionRequest(BaseModel):
     """Request to start a capture session."""
 
-    source_type: str = Field(
-        "mediapipe", description="Capture source: c3d, openpose, mediapipe"
-    )
+    source_type: str = Field("mediapipe", description="Capture source: c3d, openpose, mediapipe")
     frame_rate: float = Field(30.0, description="Target frame rate", gt=0)
 
 
@@ -355,9 +353,7 @@ async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
 @router.get("/frame/{recording_name}/{frame_index}", response_model=SkeletonFrame)
 @precondition(
     lambda recording_name, frame_index: (
-        recording_name is not None
-        and len(recording_name.strip()) > 0
-        and frame_index >= 0
+        recording_name is not None and len(recording_name.strip()) > 0 and frame_index >= 0
     ),
     "Recording name must be non-empty and frame index must be non-negative",
 )

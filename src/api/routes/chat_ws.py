@@ -56,17 +56,13 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
             if action == "send":
                 user_message = msg.get("message", "").strip()
                 if not user_message:
-                    await websocket.send_json(
-                        {"type": "error", "detail": "Empty message"}
-                    )
+                    await websocket.send_json({"type": "error", "detail": "Empty message"})
                     continue
 
                 engine_context = msg.get("engine_context")
 
                 try:
-                    chat_service.add_user_message(
-                        session_id, user_message, engine_context
-                    )
+                    chat_service.add_user_message(session_id, user_message, engine_context)
                 except ValueError as e:
                     await websocket.send_json({"type": "error", "detail": str(e)})
                     continue
@@ -75,9 +71,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
                 async for chunk in chat_service.stream_response(session_id):
                     await websocket.send_json({"type": "chunk", "content": chunk})
 
-                await websocket.send_json(
-                    {"type": "complete", "session_id": session_id}
-                )
+                await websocket.send_json({"type": "complete", "session_id": session_id})
 
             elif action == "history":
                 messages = chat_service.get_session_history(session_id)
@@ -86,14 +80,10 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
             elif action == "new_session":
                 ctx = chat_service.get_or_create_session(None)
                 session_id = ctx.session_id
-                await websocket.send_json(
-                    {"type": "session_created", "session_id": session_id}
-                )
+                await websocket.send_json({"type": "session_created", "session_id": session_id})
 
             else:
-                await websocket.send_json(
-                    {"type": "error", "detail": f"Unknown action: {action}"}
-                )
+                await websocket.send_json({"type": "error", "detail": f"Unknown action: {action}"})
 
     except WebSocketDisconnect:
         logger.debug("Chat WebSocket disconnected: session=%s", session_id)

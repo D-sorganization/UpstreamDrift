@@ -45,8 +45,7 @@ def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:
         >>> T = exponential_map(S, 0.5)
     """
     s_screw = np.asarray(S).flatten()
-    if not (s_screw.shape == (6):
-        raise ValueError(), f"S must be 6x1, got shape {s_screw.shape}")
+    assert s_screw.shape == (6,), f"S must be 6x1, got shape {s_screw.shape}"
 
     omega = s_screw[:3]
     v = s_screw[3:]
@@ -64,9 +63,7 @@ def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:
         # Rodrigues' formula for rotation matrix
         # R = I + sin(theta)*omega_hat + (1-cos(theta))*omega_hat^2
         r_rot = (
-            np.eye(3)
-            + np.sin(theta) * omega_hat
-            + (1 - np.cos(theta)) * (omega_hat @ omega_hat)
+            np.eye(3) + np.sin(theta) * omega_hat + (1 - np.cos(theta)) * (omega_hat @ omega_hat)
         )
 
         # Position component (Proposition 3.14 in Lynch & Park)
@@ -118,8 +115,7 @@ def logarithmic_map(T: np.ndarray) -> tuple[np.ndarray, float]:  # noqa: PLR0911
         >>> S, theta = logarithmic_map(T)
     """
     t_transform = np.asarray(T)
-    if not (t_transform.shape == (4):
-        raise ValueError(4), f"T must be 4x4, got shape {t_transform.shape}")
+    assert t_transform.shape == (4, 4), f"T must be 4x4, got shape {t_transform.shape}"
 
     # Extract rotation and position
     r_rot = t_transform[:3, :3]

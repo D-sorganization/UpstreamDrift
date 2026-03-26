@@ -124,9 +124,7 @@ class UISetupMixin:
 
         self.main_tabs.addTab(sim_tab, "Simulation")
 
-    def _setup_visualization_panel(
-        self: Any, sim_layout: QtWidgets.QVBoxLayout
-    ) -> None:
+    def _setup_visualization_panel(self: Any, sim_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the visualization group box."""
         if not (sim_layout is not None):
             raise ValueError("sim_layout must be provided")
@@ -150,8 +148,7 @@ class UISetupMixin:
         # Live Analysis Toggle
         self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
         self.chk_live_analysis.setToolTip(
-            "Compute Induced Accelerations and Counterfactuals in real-time "
-            "(Can slow down sim)"
+            "Compute Induced Accelerations and Counterfactuals in real-time " "(Can slow down sim)"
         )
         self.chk_live_analysis.toggled.connect(self._on_live_analysis_toggled)
         vis_layout.addWidget(self.chk_live_analysis)
@@ -227,8 +224,7 @@ class UISetupMixin:
         self.combo_induced.setEditable(True)
         self.combo_induced.addItems(["gravity", "velocity", "total"])
         self.combo_induced.setToolTip(
-            "Select source (e.g. gravity) or type "
-            "specific torque vector in comma-sep form"
+            "Select source (e.g. gravity) or type " "specific torque vector in comma-sep form"
         )
 
         # Use lineEdit signal to avoid lag on keystrokes
@@ -273,9 +269,7 @@ class UISetupMixin:
         scale_layout.addWidget(self.spin_torque_scale)
         vis_layout.addLayout(scale_layout)
 
-    def _setup_matrix_analysis_panel(
-        self: Any, sim_layout: QtWidgets.QVBoxLayout
-    ) -> None:
+    def _setup_matrix_analysis_panel(self: Any, sim_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the matrix analysis group box."""
         if not (sim_layout is not None):
             raise ValueError("sim_layout must be provided")
@@ -309,9 +303,7 @@ class UISetupMixin:
         rec_layout = QtWidgets.QHBoxLayout()
         self.btn_record = QtWidgets.QPushButton("Record")
         self.btn_record.setCheckable(True)
-        self.btn_record.setStyleSheet(
-            "QPushButton:checked { background-color: #ffcccc; }"
-        )
+        self.btn_record.setStyleSheet("QPushButton:checked { background-color: #ffcccc; }")
         self.btn_record.clicked.connect(self._toggle_recording)
         rec_layout.addWidget(self.btn_record)
 
@@ -406,9 +398,7 @@ class UISetupMixin:
         idx_q = self.model.joints[i].idx_q
         idx = int(idx_q)  # Capture index into q vector
 
-        slider.valueChanged.connect(
-            lambda val, s=spin, k=idx: self._on_slider(val, s, k)
-        )
+        slider.valueChanged.connect(lambda val, s=spin, k=idx: self._on_slider(val, s, k))
         spin.valueChanged.connect(lambda val, s=slider, k=idx: self._on_spin(val, s, k))
 
         r_layout.addWidget(slider)
@@ -442,9 +432,7 @@ class UISetupMixin:
 
                 slider_idx += 1
 
-    def _on_slider(
-        self: Any, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
-    ) -> None:
+    def _on_slider(self: Any, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int) -> None:
         if not (val is not None):
             raise ValueError("val must be provided")
         if not (val is not None):

@@ -98,8 +98,7 @@ def main() -> None:
                 resolved_image = legacy_image
                 docker_ok = True
                 docker_msg = (
-                    f"Found legacy image '{legacy_image}' "
-                    f"(preferred: '{PRIMARY_DOCKER_IMAGE}')"
+                    f"Found legacy image '{legacy_image}' " f"(preferred: '{PRIMARY_DOCKER_IMAGE}')"
                 )
                 break
 
@@ -122,9 +121,7 @@ def main() -> None:
             if res.returncode == 0:
                 log_result("Docker Libs (libEGL/XCB)", "OK", "Installed")
             else:
-                log_result(
-                    "Docker Libs (libEGL/XCB)", "FAIL", "Missing dependencies in image"
-                )
+                log_result("Docker Libs (libEGL/XCB)", "FAIL", "Missing dependencies in image")
                 logger.warning(res.stderr)
         except (subprocess.SubprocessError, OSError) as e:
             log_result("Docker Libs (libEGL/XCB)", "FAIL", str(e))
@@ -141,9 +138,7 @@ def main() -> None:
     for f in files:
         path = root / f
         exists = path.exists()
-        log_result(
-            f"File: {f}", "OK" if exists else "FAIL", "Found" if exists else "Missing"
-        )
+        log_result(f"File: {f}", "OK" if exists else "FAIL", "Found" if exists else "Missing")
 
     logger.info("\n" + "=" * 60)
     logger.info("Check complete.")

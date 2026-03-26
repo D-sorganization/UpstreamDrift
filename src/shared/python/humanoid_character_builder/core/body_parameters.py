@@ -231,9 +231,7 @@ class BodyParameters:
         """
         return self.segment_overrides.get(segment_name, SegmentParameters())
 
-    def set_segment_override(
-        self, segment_name: str, params: SegmentParameters
-    ) -> None:
+    def set_segment_override(self, segment_name: str, params: SegmentParameters) -> None:
         """Set override parameters for a specific segment."""
         self.segment_overrides[segment_name] = params
 
@@ -347,9 +345,7 @@ class BodyParameters:
 
 
 # Convenience factory functions
-def create_athletic_body(
-    height_m: float = 1.80, mass_kg: float = 80.0
-) -> BodyParameters:
+def create_athletic_body(height_m: float = 1.80, mass_kg: float = 80.0) -> BodyParameters:
     """Create athletic body type parameters."""
     return BodyParameters(
         height_m=height_m,
@@ -362,9 +358,7 @@ def create_athletic_body(
     )
 
 
-def create_average_body(
-    height_m: float = 1.75, mass_kg: float = 75.0
-) -> BodyParameters:
+def create_average_body(height_m: float = 1.75, mass_kg: float = 75.0) -> BodyParameters:
     """Create average body type parameters."""
     return BodyParameters(
         height_m=height_m,

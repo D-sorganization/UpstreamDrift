@@ -60,6 +60,4 @@ class WorkflowDiagnosticContext:
             try:
                 json.dump(diagnostic_data, f, indent=4, default=str)
             except (TypeError, ValueError, OverflowError) as e:
-                f.write(
-                    f"Failed to serialize state: {e}\n\nStates stringified: {str(self.states)}"
-                )
+                f.write(f"Failed to serialize state: {e}\n\nStates stringified: {str(self.states)}")

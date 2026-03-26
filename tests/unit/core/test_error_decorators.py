@@ -118,9 +118,7 @@ class TestHandleImportError:
     def test_import_failure_returns_default(self) -> None:
         """Returns default_value when ImportError occurs."""
 
-        @handle_import_error(
-            module_name="nonexistent_module_xyz", default_value="fallback"
-        )
+        @handle_import_error(module_name="nonexistent_module_xyz", default_value="fallback")
         def import_missing() -> str:
             raise ImportError("No module named 'nonexistent_module_xyz'")
 

@@ -54,9 +54,7 @@ def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
     if not (df_analog is not None):
         raise ValueError("df_analog must be provided")
     analog: dict[str, AnalogData] = {}
-    units_map = dict(
-        zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False)
-    )
+    units_map = dict(zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False))
     if not df_analog.empty and "channel" in df_analog.columns:
         for name in df_analog["channel"].unique():
             mask = df_analog["channel"] == name
@@ -92,9 +90,7 @@ def _build_metadata_ui(filepath: str, metadata_obj) -> dict[str, str]:
         "Units (POINT)": metadata_obj.units,
     }
     if metadata_obj.events:
-        events_str = ", ".join(
-            [f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events]
-        )
+        events_str = ", ".join([f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events])
         metadata_ui["Events"] = events_str
     return metadata_ui
 

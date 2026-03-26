@@ -204,9 +204,7 @@ class BallFlightModel(ABC):
             v = trajectory[-1].velocity
             v_horiz = math.sqrt(v[0] ** 2 + v[1] ** 2)
             angle = (
-                math.degrees(math.atan2(-v[2], v_horiz))
-                if v_horiz > MIN_SPEED_THRESHOLD
-                else 90.0
+                math.degrees(math.atan2(-v[2], v_horiz)) if v_horiz > MIN_SPEED_THRESHOLD else 90.0
             )
 
         return FlightResult(trajectory, self.name, carry, max_h, time, angle, lateral)
@@ -245,13 +243,9 @@ class BallFlightModel(ABC):
         )
 
         t_eval = np.arange(0, sol.t[-1], dt)
-        points = [
-            TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval
-        ]
+        points = [TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval]
         if sol.t[-1] not in t_eval:
-            points.append(
-                TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1])
-            )
+            points.append(TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1]))
 
         return self._compute_metrics(points)
 
@@ -310,9 +304,7 @@ class WaterlooPennerModel(BallFlightModel):
             v_rel = v_val - wind_v
             speed = np.linalg.norm(v_rel)
             if speed < MIN_SPEED_THRESHOLD:
-                return np.array(
-                    [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
-                )
+                return np.array([v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity])
 
             vu = v_rel / speed
             s = (omega_m * launch.ball_radius) / speed
@@ -320,20 +312,12 @@ class WaterlooPennerModel(BallFlightModel):
             cl_val = float(cl0 + cl1 * s + cl2 * s**2)
             cl = min(cl_max, cl_val)
 
-            acc = (
-                -(0.5 * launch.air_density * speed**2 * cd * area / launch.ball_mass)
-                * vu
-            )
+            acc = -(0.5 * launch.air_density * speed**2 * cd * area / launch.ball_mass) * vu
             if omega_m > 0:
                 cross = np.cross(omega_v / omega_m, vu)
                 if np.linalg.norm(cross) > NUMERICAL_EPSILON:
                     acc += (
-                        0.5
-                        * launch.air_density
-                        * speed**2
-                        * cl
-                        * area
-                        / launch.ball_mass
+                        0.5 * launch.air_density * speed**2 * cl * area / launch.ball_mass
                     ) * (cross / np.linalg.norm(cross))
 
             acc[2] -= launch.gravity
@@ -345,9 +329,7 @@ class WaterlooPennerModel(BallFlightModel):
 class MacDonaldHanzelyModel(BallFlightModel):
     """MacDonald-Hanzely model implementation."""
 
-    def __init__(
-        self, cd: float = 0.225, cl: float = 0.20, decay: float = 0.05
-    ) -> None:
+    def __init__(self, cd: float = 0.225, cl: float = 0.20, decay: float = 0.05) -> None:
         self.cd, self.cl, self.decay = cd, cl, decay
 
     @property
@@ -391,9 +373,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
             v_rel = v_val - wind_v
             speed = np.linalg.norm(v_rel)
             if speed < MIN_SPEED_THRESHOLD:
-                return np.array(
-                    [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
-                )
+                return np.array([v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity])
 
             omega = omega_0 * math.exp(-self.decay * t)
             vu = v_rel / speed
@@ -404,12 +384,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
                 cross = np.cross(spin_axis, vu)
                 if np.linalg.norm(cross) > NUMERICAL_EPSILON:
                     acc += (
-                        0.5
-                        * launch.air_density
-                        * area
-                        * cl_eff
-                        * speed**2
-                        / launch.ball_mass
+                        0.5 * launch.air_density * area * cl_eff * speed**2 / launch.ball_mass
                     ) * (cross / np.linalg.norm(cross))
 
             acc[2] -= launch.gravity
@@ -486,9 +461,7 @@ class ConstantCoefficientModel(BallFlightModel):
             v_rel = v_val - wind_v
             speed = np.linalg.norm(v_rel)
             if speed < MIN_SPEED_THRESHOLD:
-                return np.array(
-                    [v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity]
-                )
+                return np.array([v_val[0], v_val[1], v_val[2], 0.0, 0.0, -launch.gravity])
 
             omega = omega_0 * math.exp(-self._spec.spin_decay * t)
             vu = v_rel / speed
@@ -499,12 +472,7 @@ class ConstantCoefficientModel(BallFlightModel):
                 cross = np.cross(spin_axis, vu)
                 if np.linalg.norm(cross) > NUMERICAL_EPSILON:
                     acc += (
-                        0.5
-                        * launch.air_density
-                        * area
-                        * cl_eff
-                        * speed**2
-                        / launch.ball_mass
+                        0.5 * launch.air_density * area * cl_eff * speed**2 / launch.ball_mass
                     ) * (cross / np.linalg.norm(cross))
 
             acc[2] -= launch.gravity

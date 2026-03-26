@@ -90,10 +90,8 @@ def _solve_constrained_dynamics(
     tuple[np.ndarray, np.ndarray]
         Joint accelerations and constraint multipliers.
     """
-    if not (state.shape == (2 * N_DOF):
-        raise ValueError(), f"State shape must be ({2 * N_DOF},)")
-    if not (np.all(np.isfinite(state))):
-        raise ValueError("State must be finite")
+    assert state.shape == (2 * N_DOF,), f"State shape must be ({2 * N_DOF},)"
+    assert np.all(np.isfinite(state)), "State must be finite"
 
     q = state[:N_DOF]
     qdot = state[N_DOF:]
@@ -109,17 +107,13 @@ def _solve_constrained_dynamics(
 
         tau[:7] = clamp_torque_ndof(tau[:7], torque_limits[:7])
 
-    native_result = _native_backend.golfer_constrained_dynamics(
-        q, qdot, tau, params, alpha, beta
-    )
+    native_result = _native_backend.golfer_constrained_dynamics(q, qdot, tau, params, alpha, beta)
     if native_result is not None:
         qddot, lambda_forces = native_result
-        if not (np.all(np.isfinite(qddot))):
-            raise ValueError(f"qddot has non-finite values: {qddot}")
-        if not (np.all(np.isfinite(lambda_forces))):
-            raise ValueError(()
-            f"Constraint forces have non-finite values: {lambda_forces}"
-        )
+        assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
+        assert np.all(
+            np.isfinite(lambda_forces)
+        ), f"Constraint forces have non-finite values: {lambda_forces}"
         return qddot, lambda_forces
 
     # Compute dynamic terms
@@ -168,12 +162,10 @@ def _solve_constrained_dynamics(
     qddot = sol[:n]
     lambda_forces = sol[n:]
 
-    if not (np.all(np.isfinite(qddot))):
-        raise ValueError(f"qddot has non-finite values: {qddot}")
-    if not (np.all(np.isfinite(lambda_forces))):
-        raise ValueError(()
-        f"Constraint forces have non-finite values: {lambda_forces}"
-    )
+    assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
+    assert np.all(
+        np.isfinite(lambda_forces)
+    ), f"Constraint forces have non-finite values: {lambda_forces}"
     return qddot, lambda_forces
 
 
@@ -187,8 +179,7 @@ def constrained_accelerations(
     torque_limits: np.ndarray | None = None,
 ) -> np.ndarray:
     """Compute constrained accelerations using augmented Lagrangian method."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     qddot, _ = _solve_constrained_dynamics(
         state, t, params, torque_func, alpha, beta, torque_limits
     )
@@ -207,13 +198,10 @@ def constraint_forces(
 
     Returns
     -------
-    lambda_vec : np.ndarray, shape (4,) — constraint forces
+    lambda_vec : np.ndarray, shape (4,) â€” constraint forces
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
-    _, lambda_forces = _solve_constrained_dynamics(
-        state, t, params, torque_func, alpha, beta
-    )
+    assert state is not None, "state must be provided"
+    _, lambda_forces = _solve_constrained_dynamics(state, t, params, torque_func, alpha, beta)
     return lambda_forces
 
 
@@ -224,8 +212,7 @@ def _constraint_acceleration_bias(
 
     This is the acceleration-level bias term from the constraint.
     """
-    if not (q is not None):
-        raise ValueError("q must be provided")
+    assert q is not None, "q must be provided"
     eps = 1e-7
     Phi_q_0 = constraint_jacobian(q, params)
     Phi_q_dt = constraint_jacobian(q + eps * qdot, params)
@@ -273,15 +260,11 @@ def equations_of_motion(
     -------
     state_dot : np.ndarray, shape (16,)
     """
-    if not (state.shape == (2 * N_DOF):
-        raise ValueError(), f"State shape must be ({2 * N_DOF},)")
-    if not (np.all(np.isfinite(state))):
-        raise ValueError(f"State has non-finite values: {state}")
+    assert state.shape == (2 * N_DOF,), f"State shape must be ({2 * N_DOF},)"
+    assert np.all(np.isfinite(state)), f"State has non-finite values: {state}"
 
     qdot = state[N_DOF:]
-    qddot = constrained_accelerations(
-        state, t, params, torque_func, alpha, beta, torque_limits
-    )
+    qddot = constrained_accelerations(state, t, params, torque_func, alpha, beta, torque_limits)
 
     state_dot = np.zeros(2 * N_DOF)
     state_dot[:N_DOF] = qdot
@@ -297,10 +280,9 @@ def constraint_violation(state: State, params: GolferParams) -> float:
 
     Returns
     -------
-    float — ||Phi(q)||_2
+    float â€” ||Phi(q)||_2
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     q = state[:N_DOF]
     Phi = constraint_vector(q, params)
     return float(np.linalg.norm(Phi))
@@ -329,18 +311,12 @@ def project_to_constraints(
     -------
     q_projected : np.ndarray, shape (8,)
     """
-    if not (q.shape == (N_DOF):
-        raise ValueError(), f"q must have shape ({N_DOF},), got {q.shape}")
-    if not (np.all(np.isfinite(q))):
-        raise ValueError("q must be finite")
-    if not (max_iter > 0):
-        raise ValueError(f"max_iter must be positive, got {max_iter}")
-    if not (tol > 0):
-        raise ValueError(f"tol must be positive, got {tol}")
+    assert q.shape == (N_DOF,), f"q must have shape ({N_DOF},), got {q.shape}"
+    assert np.all(np.isfinite(q)), "q must be finite"
+    assert max_iter > 0, f"max_iter must be positive, got {max_iter}"
+    assert tol > 0, f"tol must be positive, got {tol}"
 
-    native_projection = _native_backend.golfer_project_to_constraints(
-        q, params, max_iter, tol
-    )
+    native_projection = _native_backend.golfer_project_to_constraints(q, params, max_iter, tol)
     if native_projection is not None:
         residual = float(np.linalg.norm(constraint_vector(native_projection, params)))
         if residual < tol:
@@ -353,9 +329,7 @@ def project_to_constraints(
             return q
         Phi_q = constraint_jacobian(q, params)
         # Use pseudoinverse for robustness
-        dq = Phi_q.T @ np.linalg.solve(
-            Phi_q @ Phi_q.T + 1e-12 * np.eye(N_CONSTRAINTS), Phi
-        )
+        dq = Phi_q.T @ np.linalg.solve(Phi_q @ Phi_q.T + 1e-12 * np.eye(N_CONSTRAINTS), Phi)
         q -= dq
 
     residual = float(np.linalg.norm(constraint_vector(q, params)))
@@ -378,8 +352,7 @@ def project_velocity(
     -------
     qdot_projected : np.ndarray, shape (8,)
     """
-    if not (q is not None):
-        raise ValueError("q must be provided")
+    assert q is not None, "q must be provided"
     native_projection = _native_backend.golfer_project_velocity(q, qdot, params)
     if native_projection is not None:
         native_violation = constraint_jacobian(q, params) @ native_projection

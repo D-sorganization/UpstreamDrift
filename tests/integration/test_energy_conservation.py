@@ -303,9 +303,7 @@ class TestEnergyConservation:
         # Compare with actuator power
         # (Skip first/last few points due to gradient edge effects)
         valid_range = slice(5, -5)
-        correlation = np.corrcoef(
-            de_dt_numeric[valid_range], powers_actuator[valid_range]
-        )[0, 1]
+        correlation = np.corrcoef(de_dt_numeric[valid_range], powers_actuator[valid_range])[0, 1]
 
         assert correlation > 0.95, (
             f"Power balance mismatch: correlation between dE/dt and P_actuator "

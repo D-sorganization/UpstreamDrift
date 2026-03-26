@@ -49,9 +49,7 @@ try:
 except ImportError:
     _DRAKE_AVAILABLE = False
 
-_skip_no_drake = pytest.mark.skipif(
-    not _DRAKE_AVAILABLE, reason="pydrake not installed"
-)
+_skip_no_drake = pytest.mark.skipif(not _DRAKE_AVAILABLE, reason="pydrake not installed")
 
 
 # ---------------------------------------------------------------------------
@@ -386,9 +384,9 @@ class TestRK4EnergyStability:
 
         assert np.all(np.isfinite(sim.q_traj)), "q_traj contains non-finite values"
         assert np.all(np.isfinite(sim.v_traj)), "v_traj contains non-finite values"
-        assert np.all(np.isfinite(sim.kinetic_energy_traj)), (
-            "kinetic_energy_traj contains non-finite values"
-        )
-        assert np.all(np.isfinite(sim.potential_energy_traj)), (
-            "potential_energy_traj contains non-finite values"
-        )
+        assert np.all(
+            np.isfinite(sim.kinetic_energy_traj)
+        ), "kinetic_energy_traj contains non-finite values"
+        assert np.all(
+            np.isfinite(sim.potential_energy_traj)
+        ), "potential_energy_traj contains non-finite values"

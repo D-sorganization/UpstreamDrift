@@ -191,9 +191,7 @@ class PlotThemeMixin:
         )
 
         # Add callback for theme changes
-        self._plot_theme_manager.add_theme_change_callback(
-            self._on_plot_theme_changed_internal
-        )
+        self._plot_theme_manager.add_theme_change_callback(self._on_plot_theme_changed_internal)
 
         if apply_immediately:
             self._plot_theme_manager.apply_to_matplotlib()

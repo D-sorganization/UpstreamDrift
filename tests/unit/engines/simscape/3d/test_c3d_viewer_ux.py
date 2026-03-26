@@ -87,9 +87,7 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
                 mock_c3d.return_value = mock_data
 
                 with (
-                    patch(
-                        "PyQt6.QtWidgets.QApplication.setOverrideCursor"
-                    ) as mock_set_cursor,
+                    patch("PyQt6.QtWidgets.QApplication.setOverrideCursor") as mock_set_cursor,
                     patch(
                         "PyQt6.QtWidgets.QApplication.restoreOverrideCursor"
                     ) as mock_restore_cursor,

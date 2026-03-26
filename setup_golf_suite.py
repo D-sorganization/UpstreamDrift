@@ -44,8 +44,9 @@ def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
         raise ValueError("Image cannot be None")
     if not (size is not None):
         raise ValueError("size must be provided")
-    if not (isinstance(size):
-        raise ValueError(int), "size must be an integer")
+    if not isinstance(size, int):
+
+        raise ValueError("size must be an integer")
     if not (size > 0):
         raise ValueError("size must be strictly positive")
 
@@ -72,10 +73,12 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
         raise ValueError("Source path must not be None")
     if not (output_path is not None):
         raise ValueError("Output path must not be None")
-    if not (isinstance(source_path):
-        raise ValueError(pathlib.Path), "source_path must be a Path object")
-    if not (isinstance(output_path):
-        raise ValueError(pathlib.Path), "output_path must be a Path object")
+    if not isinstance(source_path, pathlib.Path):
+
+        raise ValueError("source_path must be a Path object")
+    if not isinstance(output_path, pathlib.Path):
+
+        raise ValueError("output_path must be a Path object")
 
     if not source_path.exists():
         logger.error(f"Source image not found: {source_path}")
@@ -133,14 +136,18 @@ def create_shortcut_windows(
         raise ValueError("Working directory must be provided")
     if not (icon_path is not None):
         raise ValueError("Icon path must be provided")
-    if not (isinstance(target_script):
-        raise ValueError(str), "target_script must be a string")
-    if not (isinstance(working_dir):
-        raise ValueError(pathlib.Path), "working_dir must be a Path object")
-    if not (isinstance(icon_path):
-        raise ValueError(pathlib.Path), "icon_path must be a Path object")
-    if not (isinstance(description):
-        raise ValueError(str), "description must be a string")
+    if not isinstance(target_script, str):
+
+        raise ValueError("target_script must be a string")
+    if not isinstance(working_dir, pathlib.Path):
+
+        raise ValueError("working_dir must be a Path object")
+    if not isinstance(icon_path, pathlib.Path):
+
+        raise ValueError("icon_path must be a Path object")
+    if not isinstance(description, str):
+
+        raise ValueError("description must be a string")
 
     python_exe = sys.executable
 

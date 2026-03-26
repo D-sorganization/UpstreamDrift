@@ -14,9 +14,7 @@ from pydrake.all import (
     Sphere,
 )
 
-FRAME_AXIS_LENGTH_M: typing.Final[float] = (
-    0.2  # [m] Axle length for frame visualization
-)
+FRAME_AXIS_LENGTH_M: typing.Final[float] = 0.2  # [m] Axle length for frame visualization
 FRAME_AXIS_RADIUS_M: typing.Final[float] = 0.005  # [m] Axle radius
 COM_SPHERE_RADIUS_M: typing.Final[float] = 0.015  # [m] COM marker radius
 
@@ -53,9 +51,7 @@ class DrakeVisualizer:
             radius = FRAME_AXIS_RADIUS_M
 
             # X Axis (Red)
-            self.meshcat.SetObject(
-                f"{path}/x", Cylinder(radius, length), Rgba(1, 0, 0, 1)
-            )
+            self.meshcat.SetObject(f"{path}/x", Cylinder(radius, length), Rgba(1, 0, 0, 1))
             X_x = RigidTransform(
                 RotationMatrix.MakeYRotation(pi / 2),
                 [length / 2, 0, 0],  # type: ignore[call-overload]  # pydrake list-to-array overload
@@ -63,9 +59,7 @@ class DrakeVisualizer:
             self.meshcat.SetTransform(f"{path}/x", X_x)
 
             # Y Axis (Green)
-            self.meshcat.SetObject(
-                f"{path}/y", Cylinder(radius, length), Rgba(0, 1, 0, 1)
-            )
+            self.meshcat.SetObject(f"{path}/y", Cylinder(radius, length), Rgba(0, 1, 0, 1))
             X_y = RigidTransform(
                 RotationMatrix.MakeXRotation(-pi / 2),
                 [0, length / 2, 0],  # type: ignore[call-overload]  # pydrake list-to-array overload
@@ -73,9 +67,7 @@ class DrakeVisualizer:
             self.meshcat.SetTransform(f"{path}/y", X_y)
 
             # Z Axis (Blue)
-            self.meshcat.SetObject(
-                f"{path}/z", Cylinder(radius, length), Rgba(0, 0, 1, 1)
-            )
+            self.meshcat.SetObject(f"{path}/z", Cylinder(radius, length), Rgba(0, 0, 1, 1))
             X_z = RigidTransform(RotationMatrix(), [0, 0, length / 2])  # type: ignore[call-overload]  # pydrake list-to-array overload
             self.meshcat.SetTransform(f"{path}/z", X_z)
 
@@ -106,9 +98,7 @@ class DrakeVisualizer:
         path = f"{self.prefix}/coms/{body_name}"
         if visible:
             # Sphere for COM
-            self.meshcat.SetObject(
-                path, Sphere(COM_SPHERE_RADIUS_M), Rgba(1, 1, 0, 1)
-            )  # Yellow
+            self.meshcat.SetObject(path, Sphere(COM_SPHERE_RADIUS_M), Rgba(1, 1, 0, 1))  # Yellow
             self.visible_coms.add(body_name)
         else:
             self.meshcat.Delete(path)

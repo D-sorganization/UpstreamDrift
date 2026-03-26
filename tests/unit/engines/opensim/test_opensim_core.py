@@ -104,9 +104,7 @@ class TestGolfSwingModel:
         with pytest.raises(FileNotFoundError, match="OpenSim model file not found"):
             GolfSwingModel(model_path="/nonexistent/path/model.osim")
 
-    def test_opensim_not_installed_error(
-        self, mock_opensim_missing_env, temp_model_file
-    ) -> None:
+    def test_opensim_not_installed_error(self, mock_opensim_missing_env, temp_model_file) -> None:
         """Test that missing OpenSim raises OpenSimNotInstalledError."""
         with pytest.raises(OpenSimNotInstalledError, match="OpenSim is not installed"):
             GolfSwingModel(model_path=temp_model_file)
@@ -119,9 +117,7 @@ class TestGolfSwingModel:
         with pytest.raises(OpenSimModelLoadError, match="Failed to load OpenSim model"):
             GolfSwingModel(model_path=temp_model_file)
 
-    def test_opensim_model_loads_successfully(
-        self, mock_opensim_env, temp_model_file
-    ) -> None:
+    def test_opensim_model_loads_successfully(self, mock_opensim_env, temp_model_file) -> None:
         """Test successful model loading with mocked OpenSim."""
         model = GolfSwingModel(model_path=temp_model_file)
 
@@ -155,9 +151,7 @@ class TestNoFallbackBehavior:
         # This test ensures we don't accidentally re-add the demo mode
         assert not hasattr(GolfSwingModel, "_run_demo_simulation")
 
-    def test_error_messages_are_helpful(
-        self, mock_opensim_missing_env, temp_model_file
-    ) -> None:
+    def test_error_messages_are_helpful(self, mock_opensim_missing_env, temp_model_file) -> None:
         """Test that error messages include installation guidance."""
         try:
             GolfSwingModel(model_path=temp_model_file)
@@ -165,8 +159,5 @@ class TestNoFallbackBehavior:
         except OpenSimNotInstalledError as e:
             error_msg = str(e)
             # Verify helpful content
-            assert (
-                "conda install" in error_msg.lower()
-                or "pip install" in error_msg.lower()
-            )
+            assert "conda install" in error_msg.lower() or "pip install" in error_msg.lower()
             assert "mujoco" in error_msg.lower() or "pinocchio" in error_msg.lower()

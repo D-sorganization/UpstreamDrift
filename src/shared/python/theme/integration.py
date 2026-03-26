@@ -124,9 +124,7 @@ def create_theme_menu(
         action.setData(theme_name)
 
         # Connect to theme change
-        action.triggered.connect(
-            lambda checked, name=theme_name: manager.change_theme(name)
-        )
+        action.triggered.connect(lambda checked, name=theme_name: manager.change_theme(name))
 
         theme_group.addAction(action)
         theme_menu.addAction(action)
@@ -143,15 +141,11 @@ def create_theme_menu(
         theme_menu.addSeparator()
 
         create_action = QAction("Create Custom Theme...", window)
-        create_action.triggered.connect(
-            lambda: _open_custom_theme_editor(manager, window)
-        )
+        create_action.triggered.connect(lambda: _open_custom_theme_editor(manager, window))
         theme_menu.addAction(create_action)
 
         manage_action = QAction("Manage Themes...", window)
-        manage_action.triggered.connect(
-            lambda: _open_theme_manager_dialog(manager, window)
-        )
+        manage_action.triggered.connect(lambda: _open_theme_manager_dialog(manager, window))
         theme_menu.addAction(manage_action)
 
     # Add to parent if provided

@@ -412,15 +412,11 @@ class WorkflowEngine:
         if failure is not None:
             return failure
 
-        validation_failure = self._validate_step_result(
-            step, execution, tool_result, start_time
-        )
+        validation_failure = self._validate_step_result(step, execution, tool_result, start_time)
         if validation_failure is not None:
             return validation_failure
 
-        return self._finalize_step_success(
-            step, execution, workflow, tool_result, start_time
-        )
+        return self._finalize_step_success(step, execution, workflow, tool_result, start_time)
 
     def _check_step_condition(
         self,
@@ -605,9 +601,7 @@ class WorkflowEngine:
         if workflow is None:
             return {"error": "Workflow not found"}
 
-        completed = sum(
-            1 for r in execution.step_results if r.status == StepStatus.COMPLETED
-        )
+        completed = sum(1 for r in execution.step_results if r.status == StepStatus.COMPLETED)
         total = len(workflow.steps)
 
         return {

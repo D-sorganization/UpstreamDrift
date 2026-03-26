@@ -5,9 +5,9 @@ Computes the resultant force system at a user-configurable action point
 on the club from the two grip forces (right hand, left hand).
 
 Supports three force decompositions:
-    1. Overall forces — from full constrained dynamics
-    2. ZTCF forces — from zero-torque counterfactual
-    3. DELTA forces — from M-pseudoinverse (zero-velocity) decomposition
+    1. Overall forces â€” from full constrained dynamics
+    2. ZTCF forces â€” from zero-torque counterfactual
+    3. DELTA forces â€” from M-pseudoinverse (zero-velocity) decomposition
 
 Design by Contract
 ------------------
@@ -57,15 +57,14 @@ def club_action_point(
 
     Returns
     -------
-    np.ndarray, shape (2,) — (x, y) position of the action point.
+    np.ndarray, shape (2,) â€” (x, y) position of the action point.
 
     Design by Contract
     ------------------
     Pre:  -1.0 <= alpha <= 1.0
     Post: returned array is shape (2,) and finite.
     """
-    if not (-1.0 <= alpha <= 1.0):
-        raise ValueError(f"alpha must be in [-1, 1], got {alpha}")
+    assert -1.0 <= alpha <= 1.0, f"alpha must be in [-1, 1], got {alpha}"
 
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
@@ -80,10 +79,8 @@ def club_action_point(
     t = (alpha + 1.0) / 2.0
     result = (1.0 - t) * grip_r + t * grip_l
 
-    if not (result.shape == (2):
-        raise ValueError(), f"Expected shape (2,), got {result.shape}")
-    if not (np.all(np.isfinite(result))):
-        raise ValueError(f"Action point is not finite: {result}")
+    assert result.shape == (2,), f"Expected shape (2,), got {result.shape}"
+    assert np.all(np.isfinite(result)), f"Action point is not finite: {result}"
     return result
 
 
@@ -100,27 +97,25 @@ def net_force_on_club(
 
     Parameters
     ----------
-    f_right : (fx, fy) — force from the right hand
-    f_left  : (fx, fy) — force from the left hand
+    f_right : (fx, fy) â€” force from the right hand
+    f_left  : (fx, fy) â€” force from the left hand
 
     Returns
     -------
-    np.ndarray, shape (2,) — net force vector
+    np.ndarray, shape (2,) â€” net force vector
 
     Design by Contract
     ------------------
     Post: returned array is shape (2,) and finite.
     """
     net = np.array(f_right, dtype=float) + np.array(f_left, dtype=float)
-    if not (net.shape == (2):
-        raise ValueError())
-    if not (np.all(np.isfinite(net))):
-        raise ValueError(f"Net force is not finite: {net}")
+    assert net.shape == (2,)
+    assert np.all(np.isfinite(net)), f"Net force is not finite: {net}"
     return net  # type: ignore[no-any-return]
 
 
 def _cross_2d(r: np.ndarray, f: np.ndarray) -> float:
-    """2D cross product (z-component): r × F = rx*Fy - ry*Fx."""
+    """2D cross product (z-component): r Ã— F = rx*Fy - ry*Fx."""
     return float(r[0] * f[1] - r[1] * f[0])
 
 
@@ -131,17 +126,17 @@ def moment_of_net_force(
 ) -> float:
     """Compute the moment of the net force about the action point.
 
-    In 2D, moment = r × F where r = force_point - action_point.
+    In 2D, moment = r Ã— F where r = force_point - action_point.
 
     Parameters
     ----------
     net_force : np.ndarray, shape (2,)
-    force_point : np.ndarray, shape (2,) — where the net force acts
-    action_point : np.ndarray, shape (2,) — point about which to compute moment
+    force_point : np.ndarray, shape (2,) â€” where the net force acts
+    action_point : np.ndarray, shape (2,) â€” point about which to compute moment
 
     Returns
     -------
-    float — scalar moment (positive = counterclockwise)
+    float â€” scalar moment (positive = counterclockwise)
 
     Design by Contract
     ------------------
@@ -150,8 +145,7 @@ def moment_of_net_force(
     """
     r = force_point - action_point
     m = _cross_2d(r, net_force)
-    if not (np.isfinite(m)):
-        raise ValueError(f"Moment is not finite: {m}")
+    assert np.isfinite(m), f"Moment is not finite: {m}"
     return m
 
 
@@ -170,28 +164,28 @@ def equivalent_couple(
 
     couple = (M_right + M_left) - M_net
 
-    where M_right = r_right × F_right, M_left = r_left × F_left, and
+    where M_right = r_right Ã— F_right, M_left = r_left Ã— F_left, and
     M_net = moment of (F_right + F_left) acting at the action point itself
     (which is zero since the net force is placed there by definition).
 
     Actually: the net force is considered to act at the action point, so
     M_net = 0 (zero moment arm). The couple captures the remaining torque:
 
-    couple = r_right × F_right + r_left × F_left
+    couple = r_right Ã— F_right + r_left Ã— F_left
 
     where r_right = pos_right - action_point, r_left = pos_left - action_point.
 
     Parameters
     ----------
     f_right : np.ndarray, shape (2,)
-    pos_right : np.ndarray, shape (2,) — right hand position
+    pos_right : np.ndarray, shape (2,) â€” right hand position
     f_left : np.ndarray, shape (2,)
-    pos_left : np.ndarray, shape (2,) — left hand position
+    pos_left : np.ndarray, shape (2,) â€” left hand position
     action_point : np.ndarray, shape (2,)
 
     Returns
     -------
-    float — scalar couple (positive = counterclockwise)
+    float â€” scalar couple (positive = counterclockwise)
 
     Design by Contract
     ------------------
@@ -211,8 +205,7 @@ def equivalent_couple(
     # Couple = total moment - moment of net force at action point = total moment - 0
     couple = total_moment
 
-    if not (np.isfinite(couple)):
-        raise ValueError(f"Couple is not finite: {couple}")
+    assert np.isfinite(couple), f"Couple is not finite: {couple}"
     return couple
 
 
@@ -233,12 +226,12 @@ def club_force_decomposition(
 
     Parameters
     ----------
-    q : np.ndarray, shape (8,) — generalized coordinates
-    qdot : np.ndarray, shape (8,) — generalized velocities
-    qddot : np.ndarray, shape (8,) — generalized accelerations
+    q : np.ndarray, shape (8,) â€” generalized coordinates
+    qdot : np.ndarray, shape (8,) â€” generalized velocities
+    qddot : np.ndarray, shape (8,) â€” generalized accelerations
     p : GolferParams
-    forces : dict — output of net_joint_forces() with keys 'rh' and 'lh'
-    alpha : float — action point parameter [-1, +1]
+    forces : dict â€” output of net_joint_forces() with keys 'rh' and 'lh'
+    alpha : float â€” action point parameter [-1, +1]
 
     Returns
     -------
@@ -257,10 +250,8 @@ def club_force_decomposition(
     Pre:  'rh' and 'lh' in forces dict
     Post: all values are finite
     """
-    if not ("rh" in forces):
-        raise ValueError("forces dict must contain 'rh' (right hand)")
-    if not ("lh" in forces):
-        raise ValueError("forces dict must contain 'lh' (left hand)")
+    assert "rh" in forces, "forces dict must contain 'rh' (right hand)"
+    assert "lh" in forces, "forces dict must contain 'lh' (left hand)"
 
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
@@ -279,7 +270,7 @@ def club_force_decomposition(
 
     # For the moment of the net force, we compute it about the action point.
     # The "force point" is the centroid of the two hand positions weighted by
-    # force magnitudes — but since we're placing the net force at the action
+    # force magnitudes â€” but since we're placing the net force at the action
     # point, the moment of net force about the action point is 0.
     # The couple captures the full residual.
     moment = 0.0  # Net force acts at the action point by definition
@@ -310,8 +301,7 @@ def overall_club_decomposition(
     Uses the actual constrained dynamics to get accelerations and
     computes net joint forces from F = ma - mg.
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .constraint_solver import constrained_accelerations
     from .physics_golfer import net_joint_forces
 
@@ -328,8 +318,7 @@ def ztcf_club_decomposition(
     alpha: float = 0.0,
 ) -> dict[str, float | np.ndarray]:
     """Club force decomposition using zero-torque counterfactual forces."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .counterfactual_golfer import zero_torque_accelerations
     from .physics_golfer import net_joint_forces
 
@@ -350,8 +339,7 @@ def delta_club_decomposition(
 
     DELTA accelerations = M^+ * tau at zero velocity.
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .jacobians_golfer import delta_matrix
     from .physics_golfer import net_joint_forces
 

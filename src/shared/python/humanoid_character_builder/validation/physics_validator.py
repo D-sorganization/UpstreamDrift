@@ -140,9 +140,7 @@ class PhysicsValidator:
             # Or negative angle indicating it's already tipped?
             tipping_angle = 0.0
 
-        return StabilityResult(
-            is_stable=is_stable, margin=margin, tipping_angle=tipping_angle
-        )
+        return StabilityResult(is_stable=is_stable, margin=margin, tipping_angle=tipping_angle)
 
     def check_self_collisions(self, model: HumanoidModel) -> list[str]:
         """

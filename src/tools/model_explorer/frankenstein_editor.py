@@ -544,12 +544,8 @@ class ModelPanel(QWidget):
 
         # Materials
         if self.model.materials:
-            materials_item = QTreeWidgetItem(
-                ["Materials", "", f"({len(self.model.materials)})"]
-            )
-            materials_item.setFlags(
-                materials_item.flags() & ~Qt.ItemFlag.ItemIsSelectable
-            )
+            materials_item = QTreeWidgetItem(["Materials", "", f"({len(self.model.materials)})"])
+            materials_item.setFlags(materials_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
             self.tree.addTopLevelItem(materials_item)
 
             for name, material in self.model.materials.items():
@@ -585,14 +581,10 @@ class ModelPanel(QWidget):
 
         try:
             if comp_type == "link":
-                new_name = (
-                    name_prefix + element.get("name", "link") if name_prefix else None
-                )
+                new_name = name_prefix + element.get("name", "link") if name_prefix else None
                 result = self.model.add_link(element, new_name)
             elif comp_type == "joint":
-                new_name = (
-                    name_prefix + element.get("name", "joint") if name_prefix else None
-                )
+                new_name = name_prefix + element.get("name", "joint") if name_prefix else None
                 result = self.model.add_joint(element, new_name)
             elif comp_type == "material":
                 result = self.model.add_material(element)
@@ -808,9 +800,7 @@ class FrankensteinEditor(QWidget):
                 if child is not None:
                     child_link = child.get("link")
                     if child_link and child_link in source_model.links:
-                        count += self._copy_link_chain(
-                            source_model, child_link, name_mapping
-                        )
+                        count += self._copy_link_chain(source_model, child_link, name_mapping)
 
         return count
 
@@ -886,16 +876,12 @@ class FrankensteinEditor(QWidget):
         if right_model and right_model.file_path:
             self.left_panel.file_label.setText(f"File: {right_model.file_path.name}")
         else:
-            self.left_panel.file_label.setText(
-                "No file" if not right_model else "New model"
-            )
+            self.left_panel.file_label.setText("No file" if not right_model else "New model")
 
         if left_model and left_model.file_path:
             self.right_panel.file_label.setText(f"File: {left_model.file_path.name}")
         else:
-            self.right_panel.file_label.setText(
-                "No file" if not left_model else "New model"
-            )
+            self.right_panel.file_label.setText("No file" if not left_model else "New model")
 
         # Refresh trees
         self.left_panel._refresh_tree()
@@ -964,9 +950,7 @@ class FrankensteinEditor(QWidget):
 
         target_type = target_item.data(1, Qt.ItemDataRole.UserRole)
         if target_type != "link":
-            self.status_label.setText(
-                "Please select a link (not a joint) from working model"
-            )
+            self.status_label.setText("Please select a link (not a joint) from working model")
             return
 
         target_link_name = target_item.text(0)
@@ -1075,26 +1059,18 @@ class FrankensteinEditor(QWidget):
         ]
 
         if links_only_source:
-            diff_lines.append(
-                f"Links only in source: {', '.join(sorted(links_only_source))}"
-            )
+            diff_lines.append(f"Links only in source: {', '.join(sorted(links_only_source))}")
         if links_only_target:
-            diff_lines.append(
-                f"Links only in working: {', '.join(sorted(links_only_target))}"
-            )
+            diff_lines.append(f"Links only in working: {', '.join(sorted(links_only_target))}")
         if links_both:
             diff_lines.append(f"Links in both: {', '.join(sorted(links_both))}")
 
         diff_lines.append("")
 
         if joints_only_source:
-            diff_lines.append(
-                f"Joints only in source: {', '.join(sorted(joints_only_source))}"
-            )
+            diff_lines.append(f"Joints only in source: {', '.join(sorted(joints_only_source))}")
         if joints_only_target:
-            diff_lines.append(
-                f"Joints only in working: {', '.join(sorted(joints_only_target))}"
-            )
+            diff_lines.append(f"Joints only in working: {', '.join(sorted(joints_only_target))}")
 
         # Show in dialog
         diff_dialog = QDialog(self)
@@ -1153,9 +1129,7 @@ class StealComponentDialog(QDialog):
 
         # Include related checkbox (for links)
         if comp_type == "link":
-            self.include_materials = QLabel(
-                "Note: Referenced materials will also be copied"
-            )
+            self.include_materials = QLabel("Note: Referenced materials will also be copied")
             layout.addWidget(self.include_materials)
 
         # Buttons

@@ -234,9 +234,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         def torque_func(t: float) -> tuple[float, float]:  # noqa: ARG001
             return float(self._tau[0]), float(self._tau[1])
 
-        deriv = equations_of_motion(
-            self._state, self.time, self._pendulum_params, torque_func
-        )
+        deriv = equations_of_motion(self._state, self.time, self._pendulum_params, torque_func)
 
         # RK4 integration
         k1 = deriv

@@ -39,9 +39,7 @@ class MockRecorder(RecorderInterface):
             return self.times, getattr(self, field_name)
         return self.times, np.array([])
 
-    def get_counterfactual_series(
-        self, field_name: str
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def get_counterfactual_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Return counterfactual data series."""
         return self.times, np.zeros_like(self.times)
 

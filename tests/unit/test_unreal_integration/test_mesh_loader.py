@@ -211,9 +211,7 @@ class TestMeshSkeleton:
         """Test bone lookup by name."""
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
-            MeshBone(
-                name="shoulder_L", index=1, parent_index=0, local_transform=np.eye(4)
-            ),
+            MeshBone(name="shoulder_L", index=1, parent_index=0, local_transform=np.eye(4)),
         ]
         skeleton = MeshSkeleton(bones=bones)
         assert skeleton.get_bone("shoulder_L") is not None
@@ -224,12 +222,8 @@ class TestMeshSkeleton:
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
             MeshBone(name="spine", index=1, parent_index=0, local_transform=np.eye(4)),
-            MeshBone(
-                name="shoulder_L", index=2, parent_index=1, local_transform=np.eye(4)
-            ),
-            MeshBone(
-                name="shoulder_R", index=3, parent_index=1, local_transform=np.eye(4)
-            ),
+            MeshBone(name="shoulder_L", index=2, parent_index=1, local_transform=np.eye(4)),
+            MeshBone(name="shoulder_R", index=3, parent_index=1, local_transform=np.eye(4)),
         ]
         skeleton = MeshSkeleton(bones=bones)
         children = skeleton.get_children(1)  # Children of spine
@@ -286,9 +280,7 @@ class TestLoadedMesh:
         """Test mesh with skeleton."""
         vertices = [MeshVertex(position=np.array([0.0, 0.0, 0.0]))]
         faces = [MeshFace(indices=np.array([0, 0, 0]))]
-        bones = [
-            MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4))
-        ]
+        bones = [MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4))]
         skeleton = MeshSkeleton(bones=bones)
 
         mesh = LoadedMesh(

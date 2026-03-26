@@ -190,9 +190,7 @@ async def get_actuator_panel(
     except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Error getting actuator panel: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Actuator panel error: {str(exc)}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Actuator panel error: {str(exc)}") from exc
 
 
 @router.post(
@@ -269,9 +267,7 @@ async def send_actuator_command(
     except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Error sending actuator command: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Actuator command error: {str(exc)}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Actuator command error: {str(exc)}") from exc
 
 
 @router.post(

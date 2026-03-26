@@ -102,10 +102,7 @@ class TestSimpleRAGStoreQuery:
         result = store.query("neural networks deep learning", top_k=4)
         if result:
             top_doc, _ = result[0]
-            assert (
-                "neural" in top_doc.content.lower()
-                or "learning" in top_doc.content.lower()
-            )
+            assert "neural" in top_doc.content.lower() or "learning" in top_doc.content.lower()
 
     def test_query_empty_store_returns_empty(self) -> None:
         store = SimpleRAGStore()

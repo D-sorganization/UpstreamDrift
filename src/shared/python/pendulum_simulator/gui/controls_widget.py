@@ -330,12 +330,8 @@ class ControlsWidget(ControlsWidgetBase):
         self.chk_limits = QCheckBox("Enable joint limits")
         self.chk_limits.setStyleSheet(STYLE_CHECK)
         layout.addWidget(self.chk_limits)
-        self.inp_theta1_min = LabeledInput(
-            "θ1 min°", "-180", "Min shoulder angle (deg)", lw
-        )
-        self.inp_theta1_max = LabeledInput(
-            "θ1 max°", "180", "Max shoulder angle (deg)", lw
-        )
+        self.inp_theta1_min = LabeledInput("θ1 min°", "-180", "Min shoulder angle (deg)", lw)
+        self.inp_theta1_max = LabeledInput("θ1 max°", "180", "Max shoulder angle (deg)", lw)
         layout.addLayout(_row(self.inp_theta1_min, self.inp_theta1_max))
         self.inp_phi_min = LabeledInput("φ min°", "-90", "Min wrist angle (deg)", lw)
         self.inp_phi_max = LabeledInput("φ max°", "90", "Max wrist angle (deg)", lw)
@@ -456,9 +452,7 @@ class ControlsWidget(ControlsWidgetBase):
         layout = QVBoxLayout(box)
         layout.setContentsMargins(4, 12, 4, 4)
         layout.setSpacing(3)
-        self.inp_tau_shoulder = LabeledInput(
-            "Shoulder", "-25, 10", "τ(t)=c0+c1·t+…", 56
-        )
+        self.inp_tau_shoulder = LabeledInput("Shoulder", "-25, 10", "τ(t)=c0+c1·t+…", 56)
         self.inp_tau_wrist = LabeledInput("Wrist", "0", "τ(t)=c0+c1·t+…", 56)
         layout.addWidget(self.inp_tau_shoulder)
         layout.addWidget(self.inp_tau_wrist)
@@ -572,9 +566,7 @@ class ControlsWidget(ControlsWidgetBase):
             raise ValueError("name must be provided")
         if name not in self.PRESETS:
             return
-        theta1, phi, dth, dph, tau_sh, tau_wr, tend, m1, m2, mClub, L1, L2 = (
-            self.PRESETS[name]
-        )
+        theta1, phi, dth, dph, tau_sh, tau_wr, tend, m1, m2, mClub, L1, L2 = self.PRESETS[name]
         self.inp_theta1.set_value(str(theta1))
         self.inp_phi.set_value(str(phi))
         self.inp_tau_shoulder.set_value(tau_sh)

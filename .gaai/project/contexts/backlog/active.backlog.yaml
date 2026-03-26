@@ -1,0 +1,156 @@
+# GAAI Active Backlog
+# Auto-populated by Discovery daemon from GitHub issues.
+# Rules:
+#   - One item = one Story
+#   - Must have a corresponding artefact with acceptance criteria
+#   - Only Discovery may add items; only Delivery may update status
+
+items:
+
+  - id: GH1957
+    title: "Upgrade Example Notebooks & Scripts to align with recent architectural refactoring"
+    priority: medium
+    status: done
+    completed_at: "2026-03-19T09:26:34-07:00"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2022"
+    pr_number: 2022
+    pr_status: "open"
+    cost_usd: 1.1585
+    github_issue: 1957
+    artefact: .gaai/project/contexts/artefacts/stories/GH1957.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH1956
+    title: "Consolidate GUI Interfaces and ensure strict lazy-loading of engine dependencies"
+    priority: medium
+    status: done
+    completed_at: "2026-03-19T09:27:37-07:00"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2023"
+    pr_number: 2023
+    pr_status: "open"
+    cost_usd: 2.0227
+    github_issue: 1956
+    artefact: .gaai/project/contexts/artefacts/stories/GH1956.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH1953
+    title: "Centralize and implement Screw Axis visualizations across all engines"
+    priority: medium
+    status: done
+    completed_at: "2026-03-19T09:40:27-07:00"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2026"
+    pr_number: 2026
+    pr_status: "open"
+    cost_usd: 2.771
+    github_issue: 1953
+    artefact: .gaai/project/contexts/artefacts/stories/GH1953.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH1949
+    title: "[Testing] 526 source modules have no corresponding test file"
+    priority: medium
+    status: done
+    completed_at: "2026-03-19T16:51:28Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2027"
+    pr_number: 2027
+    pr_status: "open"
+    github_issue: 1949
+    artefact: .gaai/project/contexts/artefacts/stories/GH1949.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH1744
+    title: "test: Raise test coverage from 50% to 70%"
+    priority: medium
+    status: done
+    started_at: "2026-03-19T13:41:04-07:00"
+    completed_at: "2026-03-19T14:47:18-07:00"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2031"
+    pr_number: 2031
+    pr_status: "open"
+    cost_usd: "7.4021
+7.442
+7.4621
+7.48"
+    github_issue: 1744
+    artefact: .gaai/project/contexts/artefacts/stories/GH1744.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH2021
+    title: "Bug: Severe Divergence in Cross-Engine Perturbation Consistency (CV > 1.0)"
+    priority: high
+    status: done
+    completed_at: "2026-03-19T09:40:01-07:00"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2025"
+    pr_number: 2025
+    pr_status: "open"
+    cost_usd: 2.8612
+    github_issue: 2021
+    artefact: .gaai/project/contexts/artefacts/stories/GH2021.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH2020
+    title: "Feature: Cross-Engine Perturbation Comparison Dashboard (GUI/CLI)"
+    priority: medium
+    status: done
+    started_at: "2026-03-19T13:41:07-07:00"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2030"
+    pr_number: 2030
+    pr_status: "open"
+    completed_at: "2026-03-19T13:47:58-07:00"
+    cost_usd: 1.3825
+    github_issue: 2020
+    artefact: .gaai/project/contexts/artefacts/stories/GH2020.story.md
+    dependencies: []
+    created_at: 2026-03-19
+
+  - id: GH2037
+    title: "Fix broken pre-push hook (uses pytest instead of python3 -m pytest)"
+    priority: medium
+    status: done
+    started_at: "2026-03-20T13:04:53Z"
+    completed_at: "2026-03-20T13:16:57Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2041"
+    pr_number: 2041
+    pr_status: "open"
+    github_issue: 2037
+    artefact: .gaai/project/contexts/artefacts/stories/GH2037.story.md
+    dependencies: []
+    created_at: 2026-03-20
+
+  - id: GH2036
+    title: "526 source modules have no corresponding test file"
+    priority: medium
+    status: done
+    started_at: "2026-03-20T13:04:58Z"
+    completed_at: "2026-03-20T13:16:52Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2042"
+    pr_number: 2042
+    pr_status: "open"
+    github_issue: 2036
+    artefact: .gaai/project/contexts/artefacts/stories/GH2036.story.md
+    dependencies: []
+    created_at: 2026-03-20
+
+  - id: GH2035
+    title: "Audit and reduce 310 pytest.skip calls"
+    priority: medium
+    status: refined
+    github_issue: 2035
+    artefact: .gaai/project/contexts/artefacts/stories/GH2035.story.md
+    dependencies: []
+    created_at: 2026-03-20
+
+  - id: GH2034
+    title: "Reduce 1227 type:ignore comments systematically"
+    priority: medium
+    status: refined
+    github_issue: 2034
+    artefact: .gaai/project/contexts/artefacts/stories/GH2034.story.md
+    dependencies: []
+    created_at: 2026-03-20

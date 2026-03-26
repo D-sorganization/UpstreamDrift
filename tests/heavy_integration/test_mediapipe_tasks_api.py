@@ -66,9 +66,7 @@ class TestMediaPipeTasksApi:
         tasks = mp.tasks
         has_vision = hasattr(tasks, "vision")
         has_base = hasattr(tasks, "BaseOptions")
-        assert has_vision or has_base, (
-            f"mp.tasks structure unexpected. Available: {dir(tasks)}"
-        )
+        assert has_vision or has_base, f"mp.tasks structure unexpected. Available: {dir(tasks)}"
 
     def test_pose_landmarker_class_exists(self, mp) -> None:
         """PoseLandmarker class is accessible via mp.tasks.vision."""
@@ -77,9 +75,9 @@ class TestMediaPipeTasksApi:
         tasks = mp.tasks
         if not hasattr(tasks, "vision"):
             pytest.skip("mp.tasks.vision not available in this mediapipe version")
-        assert hasattr(tasks.vision, "PoseLandmarker"), (
-            "PoseLandmarker not found in mp.tasks.vision"
-        )
+        assert hasattr(
+            tasks.vision, "PoseLandmarker"
+        ), "PoseLandmarker not found in mp.tasks.vision"
 
     def test_base_options_instantiable(self, mp) -> None:
         """BaseOptions can be instantiated (model_asset_path not required)."""

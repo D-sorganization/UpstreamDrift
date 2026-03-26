@@ -239,9 +239,7 @@ def test_compute_correlations():
 
 def test_frequency_analysis(sample_data):
     # This might use scipy fallback if shared.python.signal_processing fails or isn't there
-    freqs, psd = sample_data.compute_frequency_analysis(
-        sample_data.joint_positions[:, 0]
-    )
+    freqs, psd = sample_data.compute_frequency_analysis(sample_data.joint_positions[:, 0])
     assert len(freqs) > 0
     assert len(psd) > 0
 
@@ -390,9 +388,7 @@ def test_compute_angular_momentum_metrics():
     assert metrics.peak_lx == 1.0
 
     # Test None
-    analyzer_none = StatisticalAnalyzer(
-        times, np.zeros((N, 1)), np.zeros((N, 1)), np.zeros((N, 1))
-    )
+    analyzer_none = StatisticalAnalyzer(times, np.zeros((N, 1)), np.zeros((N, 1)), np.zeros((N, 1)))
     assert analyzer_none.compute_angular_momentum_metrics() is None
 
 
@@ -488,9 +484,7 @@ def test_compute_swing_profile():
     torques = np.ones((N, 1)) * 100
     vels = np.ones((N, 1)) * 10
 
-    analyzer = StatisticalAnalyzer(
-        times, np.zeros((N, 1)), vels, torques, club_head_speed=speed
-    )
+    analyzer = StatisticalAnalyzer(times, np.zeros((N, 1)), vels, torques, club_head_speed=speed)
 
     profile = analyzer.compute_swing_profile()
     assert profile is not None

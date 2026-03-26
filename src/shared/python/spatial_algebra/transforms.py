@@ -44,9 +44,7 @@ def xlt(r: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     return res
 
 
-def xtrans(
-    e_rot: npt.NDArray[np.float64], r: npt.NDArray[np.float64]
-) -> npt.NDArray[np.float64]:
+def xtrans(e_rot: npt.NDArray[np.float64], r: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """General spatial coordinate transformation (Plücker transform)."""
     e_rot = np.asarray(e_rot)
     r = np.asarray(r).ravel()

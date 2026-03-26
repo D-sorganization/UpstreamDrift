@@ -132,8 +132,8 @@ def compute_system_com(
 
     com = sum(m * pos for m, pos in masses_positions) / total_mass
 
-    if not (com.shape == (2):
-        raise ValueError(), f"Expected shape (2,), got {com.shape}")
+    if not (com.shape == (2,)):
+        raise ValueError(f"Expected shape (2,), got {com.shape}")
     if not (np.all(np.isfinite(com))):
         raise ValueError(f"COM is not finite: {com}")
     return com  # type: ignore[no-any-return]

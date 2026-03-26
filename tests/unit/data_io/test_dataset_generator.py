@@ -36,9 +36,7 @@ class TestParameterRange:
 
     def test_invalid_distribution_raises(self) -> None:
         with pytest.raises(ValueError):
-            ParameterRange(
-                name="x", min_val=0.0, max_val=1.0, distribution="exponential"
-            )
+            ParameterRange(name="x", min_val=0.0, max_val=1.0, distribution="exponential")
 
     def test_uniform_sample_in_range(self) -> None:
         pr = ParameterRange(name="x", min_val=0.0, max_val=1.0, distribution="uniform")

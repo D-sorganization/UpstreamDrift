@@ -196,9 +196,7 @@ class TestInertiaOperations:
         assert scaled.izz == pytest.approx(original.izz * 2.0)
 
     def test_scale_to_mass_preserves_com(self) -> None:
-        original = Inertia(
-            ixx=1.0, iyy=1.0, izz=1.0, mass=2.0, center_of_mass=(1.0, 2.0, 3.0)
-        )
+        original = Inertia(ixx=1.0, iyy=1.0, izz=1.0, mass=2.0, center_of_mass=(1.0, 2.0, 3.0))
         scaled = original.scale_to_mass(4.0)
         assert scaled.center_of_mass == (1.0, 2.0, 3.0)
 
@@ -433,52 +431,33 @@ class TestLinkAndJoint:
         assert joint.limits is None
 
     def test_is_composite(self) -> None:
-        assert Joint(
-            name="j", joint_type=JointType.GIMBAL, parent="a", child="b"
-        ).is_composite()
-        assert Joint(
-            name="j", joint_type=JointType.UNIVERSAL, parent="a", child="b"
-        ).is_composite()
+        assert Joint(name="j", joint_type=JointType.GIMBAL, parent="a", child="b").is_composite()
+        assert Joint(name="j", joint_type=JointType.UNIVERSAL, parent="a", child="b").is_composite()
         assert not Joint(
             name="j", joint_type=JointType.REVOLUTE, parent="a", child="b"
         ).is_composite()
 
     def test_dof_count(self) -> None:
         assert (
-            Joint(
-                name="j", joint_type=JointType.FIXED, parent="a", child="b"
-            ).get_dof_count()
-            == 0
+            Joint(name="j", joint_type=JointType.FIXED, parent="a", child="b").get_dof_count() == 0
         )
         assert (
-            Joint(
-                name="j", joint_type=JointType.REVOLUTE, parent="a", child="b"
-            ).get_dof_count()
+            Joint(name="j", joint_type=JointType.REVOLUTE, parent="a", child="b").get_dof_count()
             == 1
         )
         assert (
-            Joint(
-                name="j", joint_type=JointType.FLOATING, parent="a", child="b"
-            ).get_dof_count()
+            Joint(name="j", joint_type=JointType.FLOATING, parent="a", child="b").get_dof_count()
             == 6
         )
         assert (
-            Joint(
-                name="j", joint_type=JointType.GIMBAL, parent="a", child="b"
-            ).get_dof_count()
-            == 3
+            Joint(name="j", joint_type=JointType.GIMBAL, parent="a", child="b").get_dof_count() == 3
         )
         assert (
-            Joint(
-                name="j", joint_type=JointType.UNIVERSAL, parent="a", child="b"
-            ).get_dof_count()
+            Joint(name="j", joint_type=JointType.UNIVERSAL, parent="a", child="b").get_dof_count()
             == 2
         )
         assert (
-            Joint(
-                name="j", joint_type=JointType.PLANAR, parent="a", child="b"
-            ).get_dof_count()
-            == 3
+            Joint(name="j", joint_type=JointType.PLANAR, parent="a", child="b").get_dof_count() == 3
         )
 
 
@@ -494,9 +473,7 @@ class TestMaterial:
         assert len(mat.color) == 4
 
     def test_material_roundtrip(self) -> None:
-        original = Material(
-            name="custom", color=(0.1, 0.2, 0.3, 0.9), texture="tex.png"
-        )
+        original = Material(name="custom", color=(0.1, 0.2, 0.3, 0.9), texture="tex.png")
         restored = Material.from_dict(original.to_dict())
         assert restored.name == original.name
         assert tuple(restored.color) == original.color

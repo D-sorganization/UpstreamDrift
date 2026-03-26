@@ -81,9 +81,7 @@ class TestBiomechanicalDataAssignment:
         np.testing.assert_array_equal(bd.joint_positions, q)
 
     def test_energy_fields(self) -> None:
-        bd = BiomechanicalData(
-            kinetic_energy=10.0, potential_energy=5.0, total_energy=15.0
-        )
+        bd = BiomechanicalData(kinetic_energy=10.0, potential_energy=5.0, total_energy=15.0)
         assert bd.kinetic_energy == 10.0
         assert bd.total_energy == 15.0
 

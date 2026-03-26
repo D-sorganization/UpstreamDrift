@@ -40,8 +40,8 @@ def generate_noise(
         raise ValueError(f"n_samples must be positive, got {n_samples}")
     if not (amplitude >= 0):
         raise ValueError(f"amplitude must be non-negative, got {amplitude}")
-    if not (noise_type in {"white"):
-        raise ValueError("pink", "brown"}, f"Unknown noise_type: {noise_type}")
+    if not (noise_type in {"white", "pink", "brown"}):
+        raise ValueError(f"Unknown noise_type: {noise_type}")
 
     rng = np.random.default_rng(seed)
     noise: np.ndarray
@@ -76,8 +76,6 @@ def generate_noise(
         # Fallback for static type analyzers
         noise = np.zeros(n_samples)
 
-    if not (noise.shape == (n_samples):
-        raise ValueError(), ()
-        f"Expected shape ({n_samples},), got {noise.shape}"
-    )
+    if not (noise.shape == (n_samples,)):
+        raise ValueError(f"Expected shape ({n_samples},), got {noise.shape}")
     return noise

@@ -256,15 +256,12 @@ class AdvancedKinematicsAnalyzer:
 
         # Condition number
         min_singular_value_threshold = 1e-10
-        condition_number = (
-            s.max() / s.min() if s.min() > min_singular_value_threshold else np.inf
-        )
+        condition_number = s.max() / s.min() if s.min() > min_singular_value_threshold else np.inf
 
         # Check for singularity
         singularity_value_threshold = 1e-3
         is_near_singularity = (
-            condition_number > self.singularity_threshold
-            or s.min() < singularity_value_threshold
+            condition_number > self.singularity_threshold or s.min() < singularity_value_threshold
         )
 
         return ManipulabilityMetrics(

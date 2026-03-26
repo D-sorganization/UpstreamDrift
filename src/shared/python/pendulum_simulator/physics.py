@@ -46,8 +46,8 @@ class PendulumParams:
     Contract:
         - All lengths and masses must be strictly positive (mClub >= 0).
         - Gravity must be non-negative.
-        - Damping coefficients b1, b2 must be non-negative  (N·m·s/rad).
-        - Coulomb friction mu1, mu2 must be non-negative  (N·m peak magnitude).
+        - Damping coefficients b1, b2 must be non-negative  (NÂ·mÂ·s/rad).
+        - Coulomb friction mu1, mu2 must be non-negative  (NÂ·m peak magnitude).
     """
 
     m1: float  # mass of arms (kg), typical ~5.0
@@ -55,33 +55,23 @@ class PendulumParams:
     L1: float  # length of arms (m), typical ~0.65
     L2: float  # length of shaft (m), typical ~1.10
     mClub: float = 0.0  # clubhead mass (kg), typical ~0.20
-    g: float = GRAVITY_MSS  # gravitational acceleration (m/s²)
-    b1: float = 0.0  # viscous damping at shoulder (N·m·s/rad)
-    b2: float = 0.0  # viscous damping at wrist (N·m·s/rad)
-    mu1: float = 0.0  # Coulomb friction at shoulder (N·m)
-    mu2: float = 0.0  # Coulomb friction at wrist (N·m)
+    g: float = GRAVITY_MSS  # gravitational acceleration (m/sÂ²)
+    b1: float = 0.0  # viscous damping at shoulder (NÂ·mÂ·s/rad)
+    b2: float = 0.0  # viscous damping at wrist (NÂ·mÂ·s/rad)
+    mu1: float = 0.0  # Coulomb friction at shoulder (NÂ·m)
+    mu2: float = 0.0  # Coulomb friction at wrist (NÂ·m)
 
     def __post_init__(self) -> None:
-        if not (self.m1 > 0):
-            raise ValueError(f"m1 must be positive, got {self.m1}")
-        if not (self.m2 > 0):
-            raise ValueError(f"m2 must be positive, got {self.m2}")
-        if not (self.L1 > 0):
-            raise ValueError(f"L1 must be positive, got {self.L1}")
-        if not (self.L2 > 0):
-            raise ValueError(f"L2 must be positive, got {self.L2}")
-        if not (self.mClub >= 0):
-            raise ValueError(f"mClub must be non-negative, got {self.mClub}")
-        if not (self.g >= 0):
-            raise ValueError(f"g must be non-negative, got {self.g}")
-        if not (self.b1 >= 0):
-            raise ValueError(f"b1 must be non-negative, got {self.b1}")
-        if not (self.b2 >= 0):
-            raise ValueError(f"b2 must be non-negative, got {self.b2}")
-        if not (self.mu1 >= 0):
-            raise ValueError(f"mu1 must be non-negative, got {self.mu1}")
-        if not (self.mu2 >= 0):
-            raise ValueError(f"mu2 must be non-negative, got {self.mu2}")
+        assert self.m1 > 0, f"m1 must be positive, got {self.m1}"
+        assert self.m2 > 0, f"m2 must be positive, got {self.m2}"
+        assert self.L1 > 0, f"L1 must be positive, got {self.L1}"
+        assert self.L2 > 0, f"L2 must be positive, got {self.L2}"
+        assert self.mClub >= 0, f"mClub must be non-negative, got {self.mClub}"
+        assert self.g >= 0, f"g must be non-negative, got {self.g}"
+        assert self.b1 >= 0, f"b1 must be non-negative, got {self.b1}"
+        assert self.b2 >= 0, f"b2 must be non-negative, got {self.b2}"
+        assert self.mu1 >= 0, f"mu1 must be non-negative, got {self.mu1}"
+        assert self.mu2 >= 0, f"mu2 must be non-negative, got {self.mu2}"
 
 
 @dataclass(frozen=True)
@@ -91,35 +81,31 @@ class JointLimits:
     Contract:
         - For each pair, min < max.
         - stiffness > 0, damping >= 0.
-        - theta1 limits default to ±π (unconstrained).
+        - theta1 limits default to Â±Ï€ (unconstrained).
     """
 
     # Wrist (phi) limits
     phi_min: float = -np.pi / 2  # rad
     phi_max: float = np.pi / 2  # rad
 
-    # Shoulder (theta1) limits — defaults allow full rotation
+    # Shoulder (theta1) limits â€” defaults allow full rotation
     theta1_min: float = -np.pi  # rad
     theta1_max: float = np.pi  # rad
 
     # Shared penalty parameters
-    stiffness: float = 500.0  # N·m/rad
-    damping: float = 20.0  # N·m·s/rad
+    stiffness: float = 500.0  # NÂ·m/rad
+    damping: float = 20.0  # NÂ·mÂ·s/rad
 
     def __post_init__(self) -> None:
-        if not (self.phi_min < self.phi_max):
-            raise ValueError('DbC Blocked: Precondition failed.')
-        if not (self.theta1_min < self.theta1_max):
-            raise ValueError('DbC Blocked: Precondition failed.')
-        if not (self.stiffness > 0):
-            raise ValueError('DbC Blocked: Precondition failed.')
-        if not (self.damping >= 0):
-            raise ValueError('DbC Blocked: Precondition failed.')
+        assert self.phi_min < self.phi_max
+        assert self.theta1_min < self.theta1_max
+        assert self.stiffness > 0
+        assert self.damping >= 0
 
 
 @dataclass(frozen=True)
 class TorqueClamp:
-    """Torque saturation limits (symmetric ± clamp).
+    """Torque saturation limits (symmetric Â± clamp).
 
     Contract:
         - Both limits must be non-zero; abs() is applied automatically.
@@ -128,21 +114,15 @@ class TorqueClamp:
     Closes #1138: accepts negative values via abs() for usability.
     """
 
-    max_torque1: float = float("inf")  # N·m (magnitude, ± symmetric)
-    max_torque2: float = float("inf")  # N·m (magnitude, ± symmetric)
+    max_torque1: float = float("inf")  # NÂ·m (magnitude, Â± symmetric)
+    max_torque2: float = float("inf")  # NÂ·m (magnitude, Â± symmetric)
 
     def __post_init__(self) -> None:
         # Accept negative inputs by taking abs (#1138)
         object.__setattr__(self, "max_torque1", abs(self.max_torque1))
         object.__setattr__(self, "max_torque2", abs(self.max_torque2))
-        if not (self.max_torque1 > 0):
-            raise ValueError(()
-            f"|max_torque1| must be positive, got {self.max_torque1}"
-        )
-        if not (self.max_torque2 > 0):
-            raise ValueError(()
-            f"|max_torque2| must be positive, got {self.max_torque2}"
-        )
+        assert self.max_torque1 > 0, f"|max_torque1| must be positive, got {self.max_torque1}"
+        assert self.max_torque2 > 0, f"|max_torque2| must be positive, got {self.max_torque2}"
 
 
 # Type aliases
@@ -173,8 +153,7 @@ def mass_matrix(phi: float, params: PendulumParams) -> np.ndarray:
     Pre: phi is finite.
     Post: symmetric positive-definite 2x2 matrix.
     """
-    if not (np.isfinite(phi)):
-        raise ValueError(f"phi must be finite, got {phi}")
+    assert np.isfinite(phi), f"phi must be finite, got {phi}"
     native_mass_matrix = _native_backend.double_mass_matrix(phi, params)
     if native_mass_matrix is not None:
         return native_mass_matrix
@@ -188,15 +167,13 @@ def mass_matrix(phi: float, params: PendulumParams) -> np.ndarray:
     M22 = me * L2**2
 
     M = np.array([[M11, M12], [M12, M22]])
-    if not (np.isclose(M[0):
-        raise ValueError(1], M[1, 0]), "Mass matrix must be symmetric")
+    assert np.isclose(M[0, 1], M[1, 0]), "Mass matrix must be symmetric"
     return M
 
 
 def mass_matrix_components(phi: float, params: PendulumParams) -> dict:
     """Return individual terms with physical labels."""
-    if not (phi is not None):
-        raise ValueError("phi must be provided")
+    assert phi is not None, "phi must be provided"
     M = mass_matrix(phi, params)
     return {
         "M11": M[0, 0],
@@ -212,15 +189,12 @@ def mass_matrix_components(phi: float, params: PendulumParams) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def coriolis_vector(
-    phi: float, dtheta1: float, dphi: float, params: PendulumParams
-) -> np.ndarray:
+def coriolis_vector(phi: float, dtheta1: float, dphi: float, params: PendulumParams) -> np.ndarray:
     """Compute the Coriolis/centrifugal force vector C(q, qdot) * qdot.
 
     Pre: all inputs finite.
     """
-    if not (all(np.isfinite(v) for v in [phi):
-        raise ValueError(dtheta1, dphi]))
+    assert all(np.isfinite(v) for v in [phi, dtheta1, dphi])
     native_coriolis = _native_backend.double_coriolis_vector(phi, dtheta1, dphi, params)
     if native_coriolis is not None:
         return native_coriolis
@@ -230,8 +204,7 @@ def coriolis_vector(
     c1 = h * (2.0 * dtheta1 * dphi + dphi**2)
     c2 = -h * dtheta1**2
     result = np.array([c1, c2])
-    if not (all(np.isfinite(result))):
-        raise ValueError(f"Coriolis vector has non-finite values: {result}")
+    assert all(np.isfinite(result)), f"Coriolis vector has non-finite values: {result}"
     return result
 
 
@@ -253,8 +226,7 @@ def gravity_vector(theta1: float, phi: float, params: PendulumParams) -> np.ndar
     G2 = me * g * L2 * np.sin(abs_angle2)
 
     result = np.array([G1, G2])
-    if not (all(np.isfinite(result))):
-        raise ValueError(f"Gravity vector has non-finite values: {result}")
+    assert all(np.isfinite(result)), f"Gravity vector has non-finite values: {result}"
     return result
 
 
@@ -263,21 +235,17 @@ def gravity_vector(theta1: float, phi: float, params: PendulumParams) -> np.ndar
 # ---------------------------------------------------------------------------
 
 
-def friction_torque_vector(
-    dtheta1: float, dphi: float, params: PendulumParams
-) -> np.ndarray:
+def friction_torque_vector(dtheta1: float, dphi: float, params: PendulumParams) -> np.ndarray:
     """Compute dissipative torque vector (viscous + Coulomb).
 
     Pre: dtheta1, dphi finite.
     Post: opposes motion direction.
     """
-    if not (np.isfinite(dtheta1) and np.isfinite(dphi)):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    assert np.isfinite(dtheta1) and np.isfinite(dphi)
     tau_f1 = -params.b1 * dtheta1 - params.mu1 * np.sign(dtheta1)
     tau_f2 = -params.b2 * dphi - params.mu2 * np.sign(dphi)
     result = np.array([tau_f1, tau_f2])
-    if not (all(np.isfinite(result))):
-        raise ValueError(f"Friction torque has non-finite values: {result}")
+    assert all(np.isfinite(result)), f"Friction torque has non-finite values: {result}"
     return result
 
 
@@ -303,17 +271,16 @@ def _hermite_penalty(
     transition : float
         Transition width (rad) over which smoothstep blends from 0 to 1.
     stiffness : float
-        Spring constant (N·m/rad).
+        Spring constant (NÂ·m/rad).
     damping : float
-        Damping coefficient (N·m·s/rad); acts only when velocity pushes further into limit.
+        Damping coefficient (NÂ·mÂ·s/rad); acts only when velocity pushes further into limit.
 
     Returns
     -------
     float
         Non-negative penalty magnitude (caller applies sign based on limit side).
     """
-    if not (pen is not None):
-        raise ValueError("pen must be provided")
+    assert pen is not None, "pen must be provided"
     blend = min(1.0, pen / transition)
     smooth = blend * blend * (3 - 2 * blend)
     return smooth * (stiffness * pen + damping * max(0.0, vel))
@@ -332,22 +299,16 @@ def joint_limit_torque(
     Post: penalty is 0 when angles are within limits.
     Returns shape (2,): [tau_penalty_shoulder, tau_penalty_wrist].
     """
-    if not (np.isfinite(phi) and np.isfinite(dphi)):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    assert np.isfinite(phi) and np.isfinite(dphi)
     transition = 0.05  # rad (~3 degrees)
 
     def _penalty(angle: float, vel: float, lo: float, hi: float) -> float:
         """Compute signed smoothstep penalty for a single DOF."""
-        if not (angle is not None):
-            raise ValueError("angle must be provided")
+        assert angle is not None, "angle must be provided"
         if angle < lo:
-            return _hermite_penalty(
-                lo - angle, -vel, transition, limits.stiffness, limits.damping
-            )
+            return _hermite_penalty(lo - angle, -vel, transition, limits.stiffness, limits.damping)
         if angle > hi:
-            return -_hermite_penalty(
-                angle - hi, vel, transition, limits.stiffness, limits.damping
-            )
+            return -_hermite_penalty(angle - hi, vel, transition, limits.stiffness, limits.damping)
         return 0.0
 
     tau1 = _penalty(theta1, dtheta1, limits.theta1_min, limits.theta1_max)
@@ -390,24 +351,16 @@ class JointLimitsNDOF:
 
     angle_min: np.ndarray  # (n_dof,) in radians
     angle_max: np.ndarray  # (n_dof,) in radians
-    stiffness: float = 500.0  # N·m/rad
-    damping: float = 20.0  # N·m·s/rad
+    stiffness: float = 500.0  # NÂ·m/rad
+    damping: float = 20.0  # NÂ·mÂ·s/rad
 
     def __post_init__(self) -> None:
-        if not (self.angle_min.ndim == 1):
-            raise ValueError("angle_min must be 1D")
-        if not (self.angle_max.ndim == 1):
-            raise ValueError("angle_max must be 1D")
-        if not (self.angle_min.shape == self.angle_max.shape):
-            raise ValueError("Shape mismatch")
-        if not (np.all(self.angle_min < self.angle_max)):
-            raise ValueError(()
-            "min must be < max for all joints"
-        )
-        if not (self.stiffness > 0):
-            raise ValueError(f"stiffness must be positive, got {self.stiffness}")
-        if not (self.damping >= 0):
-            raise ValueError(f"damping must be non-negative, got {self.damping}")
+        assert self.angle_min.ndim == 1, "angle_min must be 1D"
+        assert self.angle_max.ndim == 1, "angle_max must be 1D"
+        assert self.angle_min.shape == self.angle_max.shape, "Shape mismatch"
+        assert np.all(self.angle_min < self.angle_max), "min must be < max for all joints"
+        assert self.stiffness > 0, f"stiffness must be positive, got {self.stiffness}"
+        assert self.damping >= 0, f"damping must be non-negative, got {self.damping}"
 
 
 def joint_limit_torque_ndof(
@@ -422,10 +375,8 @@ def joint_limit_torque_ndof(
     Returns shape (n_dof,).
     """
     n = len(angles)
-    if not (angles.shape == (n):
-        raise ValueError() and velocities.shape == (n,))
-    if not (limits.angle_min.shape == (n):
-        raise ValueError())
+    assert angles.shape == (n,) and velocities.shape == (n,)
+    assert limits.angle_min.shape == (n,)
     transition = 0.05  # rad (~3 degrees)
     result = np.zeros(n)
     for i in range(n):
@@ -456,12 +407,8 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
     Pre: tau.shape == limits.shape, all limits > 0.
     Post: |result[i]| <= limits[i] for all i.
     """
-    if not (tau.shape == limits.shape):
-        raise ValueError(()
-        f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
-    )
-    if not (np.all(limits > 0)):
-        raise ValueError("All limits must be positive")
+    assert tau.shape == limits.shape, f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
+    assert np.all(limits > 0), "All limits must be positive"
     result: np.ndarray = np.clip(tau, -limits, limits)
     return result
 
@@ -481,13 +428,12 @@ def equations_of_motion(
 ) -> State:
     """Compute state derivative: dx/dt = f(x, t).
 
-    M(q)·q̈ = τ_drive + τ_friction + τ_joint_limit − C − G
+    M(q)Â·qÌˆ = Ï„_drive + Ï„_friction + Ï„_joint_limit âˆ’ C âˆ’ G
 
     Pre: state shape (4,), all finite.
     Post: state_dot shape (4,), all finite.
     """
-    if not (state.shape == (4):
-        raise ValueError() and all(np.isfinite(state)))
+    assert state.shape == (4,) and all(np.isfinite(state))
     theta1, phi, dtheta1, dphi = state
 
     M = mass_matrix(phi, params)
@@ -502,9 +448,7 @@ def equations_of_motion(
 
     tau_limits = np.zeros(2)
     if limits is not None:
-        tau_limits = joint_limit_torque(
-            phi, dphi, limits, theta1=theta1, dtheta1=dtheta1
-        )
+        tau_limits = joint_limit_torque(phi, dphi, limits, theta1=theta1, dtheta1=dtheta1)
 
     rhs = tau_drive + tau_friction + tau_limits - C - G
     cond = np.linalg.cond(M)
@@ -513,8 +457,7 @@ def equations_of_motion(
     qddot = np.linalg.solve(M, rhs)
 
     state_dot = np.array([dtheta1, dphi, qddot[0], qddot[1]])
-    if not (all(np.isfinite(state_dot))):
-        raise ValueError(f"Non-finite state_dot: {state_dot}")
+    assert all(np.isfinite(state_dot)), f"Non-finite state_dot: {state_dot}"
     return state_dot
 
 
@@ -526,7 +469,7 @@ def equations_of_motion(
 def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dict:
     """Compute joint positions in world frame. Origin at shoulder.
 
-    Post: ||wrist - shoulder|| ≈ L1, ||tip - wrist|| ≈ L2 (within 1e-9).
+    Post: ||wrist - shoulder|| â‰ˆ L1, ||tip - wrist|| â‰ˆ L2 (within 1e-9).
     """
     native_positions = _native_backend.double_forward_kinematics(theta1, phi, params)
     if native_positions is not None:
@@ -541,12 +484,8 @@ def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dic
     result = {"shoulder": (0.0, 0.0), "wrist": (wx, wy), "tip": (tx, ty)}
     _wrist_dist = np.hypot(wx, wy)
     _tip_dist = np.hypot(tx - wx, ty - wy)
-    if not (abs(_wrist_dist - L1) < 1e-9):
-        raise ValueError(()
-        f"Wrist distance {_wrist_dist:.6f} ≠ L1={L1:.6f}"
-    )
-    if not (abs(_tip_dist - L2) < 1e-9):
-        raise ValueError(f"Tip distance {_tip_dist:.6f} ≠ L2={L2:.6f}")
+    assert abs(_wrist_dist - L1) < 1e-9, f"Wrist distance {_wrist_dist:.6f} â‰  L1={L1:.6f}"
+    assert abs(_tip_dist - L2) < 1e-9, f"Tip distance {_tip_dist:.6f} â‰  L2={L2:.6f}"
     return result
 
 
@@ -560,8 +499,7 @@ def joint_velocities(state: State, params: PendulumParams) -> dict:
 
     Returns dict with 'wrist_speed', 'tip_speed', 'wrist_vel', 'tip_vel'.
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     theta1, phi, dtheta1, dphi = state
     abs_angle2 = theta1 + phi
     dabs2 = dtheta1 + dphi
@@ -589,8 +527,7 @@ def base_force(state: State, qddot: np.ndarray, params: PendulumParams) -> dict:
 
     Returns dict with 'fx', 'fy', 'magnitude'.
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     theta1, phi, dtheta1, dphi = state
     qdd1, qdd2 = qddot
     abs_angle2 = theta1 + phi
@@ -607,28 +544,15 @@ def base_force(state: State, qddot: np.ndarray, params: PendulumParams) -> dict:
     awy = params.L1 * (np.sin(theta1) * qdd1 + np.cos(theta1) * dtheta1**2)
 
     # Tip acceleration (clubhead)
-    atx = awx + params.L2 * (
-        np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2
-    )
-    aty = awy + params.L2 * (
-        np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2
-    )
+    atx = awx + params.L2 * (np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2)
+    aty = awy + params.L2 * (np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2)
 
     # Shaft COM at L2/2 from wrist
-    asx = awx + (params.L2 / 2) * (
-        np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2
-    )
-    asy = awy + (params.L2 / 2) * (
-        np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2
-    )
+    asx = awx + (params.L2 / 2) * (np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2)
+    asy = awy + (params.L2 / 2) * (np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2)
 
     fx = params.m1 * ax1 + params.m2 * asx + params.mClub * atx
-    fy = (
-        params.m1 * ay1
-        + params.m2 * asy
-        + params.mClub * aty
-        - (params.m1 + me) * params.g
-    )
+    fy = params.m1 * ay1 + params.m2 * asy + params.mClub * aty - (params.m1 + me) * params.g
 
     return {
         "fx": float(fx),
@@ -648,8 +572,7 @@ def ztcf_accelerations(
     limits: JointLimits | None = None,
 ) -> np.ndarray:
     """Compute accelerations under zero driving torque."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     theta1, phi, dtheta1, dphi = state
     M = mass_matrix(phi, params)
     C = coriolis_vector(phi, dtheta1, dphi, params)
@@ -674,8 +597,7 @@ def control_vector(
 
     Returns dict with 'cvx', 'cvy', 'magnitude'.
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     qddot_ztcf = ztcf_accelerations(state, params, limits)
     f_actual = base_force(state, qddot_actual, params)
     f_ztcf = base_force(state, qddot_ztcf, params)
@@ -689,12 +611,9 @@ def control_vector(
 # ---------------------------------------------------------------------------
 
 
-def linear_accelerations(
-    state: State, qddot: np.ndarray, params: PendulumParams
-) -> dict:
+def linear_accelerations(state: State, qddot: np.ndarray, params: PendulumParams) -> dict:
     """Compute linear accelerations of joints in world coordinates."""
-    if not (state.shape == (4):
-        raise ValueError() and qddot.shape == (2,))
+    assert state.shape == (4,) and qddot.shape == (2,)
     theta1, phi, dtheta1, dphi = state
     ddtheta1, ddphi = qddot
     L1, L2 = params.L1, params.L2
@@ -712,8 +631,7 @@ def linear_accelerations(
 
 def net_joint_forces(state: State, qddot: np.ndarray, params: PendulumParams) -> dict:
     """Compute net joint forces (proximal on distal) in world coordinates."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     acc = linear_accelerations(state, qddot, params)
     g_vec = np.array([0.0, -params.g])
     me = _m2eff(params)
@@ -736,8 +654,7 @@ def net_joint_forces(state: State, qddot: np.ndarray, params: PendulumParams) ->
 
 def kinetic_energy(state: State, params: PendulumParams) -> float:
     """Compute total kinetic energy T = 0.5 * qdot^T M qdot."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .physics_base import kinetic_energy_from_M
 
     _, phi, dtheta1, dphi = state
@@ -748,8 +665,7 @@ def kinetic_energy(state: State, params: PendulumParams) -> float:
 
 def potential_energy(state: State, params: PendulumParams) -> float:
     """Compute gravitational potential energy (zero at shoulder height)."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     theta1, phi = state[0], state[1]
     me = _m2eff(params)
     abs_angle2 = theta1 + phi
@@ -761,10 +677,7 @@ def potential_energy(state: State, params: PendulumParams) -> float:
 
 def total_energy(state: State, params: PendulumParams) -> float:
     """Total mechanical energy E = T + V."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .physics_base import total_energy_from_parts
 
-    return total_energy_from_parts(
-        kinetic_energy(state, params), potential_energy(state, params)
-    )
+    return total_energy_from_parts(kinetic_energy(state, params), potential_energy(state, params))

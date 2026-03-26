@@ -65,9 +65,7 @@ class TestLayoutPersistence(unittest.TestCase):
         with open(self.config_file, encoding="utf-8") as f:
             loaded_data = json.load(f)
 
-        self.assertEqual(
-            loaded_data, self.sample_layout, "Loaded data should match saved data"
-        )
+        self.assertEqual(loaded_data, self.sample_layout, "Loaded data should match saved data")
 
     def test_model_order_validation(self):
         """Test model order validation logic."""
@@ -90,9 +88,7 @@ class TestLayoutPersistence(unittest.TestCase):
 
         # The constant should point to a valid path structure
         self.assertIsInstance(CONFIG_DIR, Path)
-        self.assertTrue(
-            str(CONFIG_DIR).endswith("launcher"), "Should end with launcher directory"
-        )
+        self.assertTrue(str(CONFIG_DIR).endswith("launcher"), "Should end with launcher directory")
 
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_layout_save_load_integration(self):
@@ -138,9 +134,7 @@ class TestLayoutPersistence(unittest.TestCase):
 
         # Verify data integrity
         self.assertEqual(loaded_data["model_order"], mock_launcher_state["model_order"])
-        self.assertEqual(
-            loaded_data["selected_model"], mock_launcher_state["selected_model"]
-        )
+        self.assertEqual(loaded_data["selected_model"], mock_launcher_state["selected_model"])
         self.assertEqual(loaded_data["window_geometry"]["x"], mock_launcher_state["x"])
         self.assertEqual(
             loaded_data["options"]["live_visualization"],
@@ -186,9 +180,7 @@ class TestLayoutErrorHandling(unittest.TestCase):
         SEC-007: Replaced tempfile.mktemp with NamedTemporaryFile to prevent TOCTOU attacks.
         """
         # Use NamedTemporaryFile with delete=False for explicit cleanup control
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as temp_file:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
             temp_path = Path(temp_file.name)
             # Write invalid JSON
             temp_file.write("{ invalid json content")

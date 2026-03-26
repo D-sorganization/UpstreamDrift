@@ -26,9 +26,7 @@ class AnalysisTab(QtWidgets.QWidget):
         top_layout.addWidget(self.combo_marker_analysis)
 
         self.button_recompute_stats = QtWidgets.QPushButton("Recompute stats")
-        self.button_recompute_stats.setToolTip(
-            "Recalculate statistics for the selected marker"
-        )
+        self.button_recompute_stats.setToolTip("Recalculate statistics for the selected marker")
         self.button_recompute_stats.clicked.connect(self.update_panel)
         top_layout.addWidget(self.button_recompute_stats)
 

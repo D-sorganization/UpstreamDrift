@@ -24,9 +24,7 @@ class PhysicalConstant(float):
     ) -> "PhysicalConstant":
         return float.__new__(cls, value)
 
-    def __init__(
-        self, value: float, unit: str, source: str, description: str = ""
-    ) -> None:
+    def __init__(self, value: float, unit: str, source: str, description: str = "") -> None:
         if not (value is not None):
             raise ValueError("value must be provided")
         if not (value is not None):
@@ -51,12 +49,8 @@ SPATIAL_LIN_DIM: int = 3
 SPATIAL_ANG_DIM: int = 3
 
 # Physical constants - SI units
-GRAVITY_M_S2 = PhysicalConstant(
-    9.80665, "m/s^2", "NIST CODATA 2018", "Standard gravity"
-)
-SPEED_OF_LIGHT_M_S = PhysicalConstant(
-    299792458, "m/s", "SI Definition", "Speed of light in vacuum"
-)
+GRAVITY_M_S2 = PhysicalConstant(9.80665, "m/s^2", "NIST CODATA 2018", "Standard gravity")
+SPEED_OF_LIGHT_M_S = PhysicalConstant(299792458, "m/s", "SI Definition", "Speed of light in vacuum")
 AIR_DENSITY_SEA_LEVEL_KG_M3 = PhysicalConstant(
     1.225, "kg/m^3", "ISA Standard Atmosphere", "Air density at sea level, 15C"
 )
@@ -122,16 +116,10 @@ DRIVER_LOFT_TYPICAL_DEG = PhysicalConstant(
     10.5, "degrees", "Modern Trade Average", "Typical driver loft"
 )
 IRON_LOFT_RANGE_DEG = (
-    PhysicalConstant(
-        18.0, "degrees", "Modern Trade Range", "Minimum typical iron loft"
-    ),
-    PhysicalConstant(
-        64.0, "degrees", "Modern Trade Range", "Maximum typical iron loft"
-    ),
+    PhysicalConstant(18.0, "degrees", "Modern Trade Range", "Minimum typical iron loft"),
+    PhysicalConstant(64.0, "degrees", "Modern Trade Range", "Maximum typical iron loft"),
 )
-IRON_7_LOFT_DEG = PhysicalConstant(
-    34.0, "degrees", "Modern Trade Average", "Standard 7-iron loft"
-)
+IRON_7_LOFT_DEG = PhysicalConstant(34.0, "degrees", "Modern Trade Average", "Standard 7-iron loft")
 PUTTER_LOFT_DEG = PhysicalConstant(3.0, "degrees", "Standard", "Standard putter loft")
 
 # Clubhead MOI — Typical driver head about CG (perpendicular to face)
@@ -141,30 +129,20 @@ DRIVER_MOI_KG_M2 = PhysicalConstant(
 
 # Course conditions
 GREEN_SPEED_STIMP = PhysicalConstant(10.0, "ft", "USGA Stimpmeter", "Fast green speed")
-ROUGH_HEIGHT_MM = PhysicalConstant(
-    25.0, "mm", "Standard Maintenance", "Medium rough height"
-)
-BUNKER_DEPTH_MM = PhysicalConstant(
-    100.0, "mm", "Standard Construction", "Standard bunker depth"
-)
+ROUGH_HEIGHT_MM = PhysicalConstant(25.0, "mm", "Standard Maintenance", "Medium rough height")
+BUNKER_DEPTH_MM = PhysicalConstant(100.0, "mm", "Standard Construction", "Standard bunker depth")
 
 # Atmospheric conditions (Standard)
 TEMPERATURE_C = PhysicalConstant(20.0, "C", "Standard", "Standard temperature")
-PRESSURE_HPA = PhysicalConstant(
-    1013.25, "hPa", "Standard", "Standard atmospheric pressure"
-)
+PRESSURE_HPA = PhysicalConstant(1013.25, "hPa", "Standard", "Standard atmospheric pressure")
 HUMIDITY_PERCENT = PhysicalConstant(50.0, "%", "Standard", "Standard relative humidity")
 
 # Conversion factors (exact)
 MPS_TO_KPH = PhysicalConstant(3.6, "(km/h)/(m/s)", "Exact", "m/s to km/h")
 MPS_TO_MPH = PhysicalConstant(2.23694, "mph/(m/s)", "NIST", "m/s to mph")
 MPH_TO_MPS = PhysicalConstant(0.44704, "(m/s)/mph", "NIST", "mph to m/s")
-DEG_TO_RAD = PhysicalConstant(
-    math.pi / 180, "rad/deg", "Mathematical", "Degrees to radians"
-)
-RAD_TO_DEG = PhysicalConstant(
-    180 / math.pi, "deg/rad", "Mathematical", "Radians to degrees"
-)
+DEG_TO_RAD = PhysicalConstant(math.pi / 180, "rad/deg", "Mathematical", "Degrees to radians")
+RAD_TO_DEG = PhysicalConstant(180 / math.pi, "deg/rad", "Mathematical", "Radians to degrees")
 KG_TO_LB = PhysicalConstant(2.20462262185, "lb/kg", "NIST", "Kilograms to pounds")
 M_TO_FT = PhysicalConstant(3.28084, "ft/m", "NIST", "Meters to feet")
 FT_TO_M = PhysicalConstant(0.3048, "m/ft", "NIST", "Feet to meters")
@@ -177,15 +155,9 @@ YARDS_TO_METERS = YARD_TO_M  # Alias for compatibility
 GRAPHITE_DENSITY_KG_M3 = PhysicalConstant(
     1750, "kg/m^3", "Materials Handbook", "Typical golf shaft graphite"
 )
-STEEL_DENSITY_KG_M3 = PhysicalConstant(
-    7850, "kg/m^3", "Materials Handbook", "Carbon steel"
-)
-TITANIUM_DENSITY_KG_M3 = PhysicalConstant(
-    4506, "kg/m^3", "Materials Handbook", "Ti-6Al-4V alloy"
-)
-ALUMINUM_DENSITY_KG_M3 = PhysicalConstant(
-    2700, "kg/m^3", "Materials Handbook", "6061-T6 aluminum"
-)
+STEEL_DENSITY_KG_M3 = PhysicalConstant(7850, "kg/m^3", "Materials Handbook", "Carbon steel")
+TITANIUM_DENSITY_KG_M3 = PhysicalConstant(4506, "kg/m^3", "Materials Handbook", "Ti-6Al-4V alloy")
+ALUMINUM_DENSITY_KG_M3 = PhysicalConstant(2700, "kg/m^3", "Materials Handbook", "6061-T6 aluminum")
 
 # Aerodynamic coefficients
 MAGNUS_COEFFICIENT = PhysicalConstant(
@@ -228,18 +200,12 @@ FOREARM_MASS_KG = PhysicalConstant(
 UPPER_ARM_MASS_KG = PhysicalConstant(
     2.5, "kg", _SRC_WINTER_2009, "Average upper arm mass (3.7% body mass)"
 )
-TORSO_MASS_KG = PhysicalConstant(
-    35.0, "kg", _SRC_WINTER_2009, "Average torso mass (52% body mass)"
-)
+TORSO_MASS_KG = PhysicalConstant(35.0, "kg", _SRC_WINTER_2009, "Average torso mass (52% body mass)")
 
 # Segment lengths (average adult male, 1.75m height)
 HAND_LENGTH_M = PhysicalConstant(0.19, "m", _SRC_ANTHROPOMETRY, "Average hand length")
-FOREARM_LENGTH_M = PhysicalConstant(
-    0.27, "m", _SRC_ANTHROPOMETRY, "Average forearm length"
-)
-UPPER_ARM_LENGTH_M = PhysicalConstant(
-    0.30, "m", _SRC_ANTHROPOMETRY, "Average upper arm length"
-)
+FOREARM_LENGTH_M = PhysicalConstant(0.27, "m", _SRC_ANTHROPOMETRY, "Average forearm length")
+UPPER_ARM_LENGTH_M = PhysicalConstant(0.30, "m", _SRC_ANTHROPOMETRY, "Average upper arm length")
 
 # Segment radii for collision geometry
 TORSO_RADIUS_M = PhysicalConstant(

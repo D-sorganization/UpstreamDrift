@@ -218,11 +218,11 @@ class SwingComparisonDialog(QDialog):
         if not (len(preset_names) >= 2):
             raise ValueError("Need at least 2 presets to compare")
         if not (callable(get_coeffs_for_preset)):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (callable(simulate_fn)):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (callable(extract_fn)):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
 
         self._preset_names = preset_names
         self._get_coeffs = get_coeffs_for_preset
@@ -373,8 +373,7 @@ class SwingComparisonDialog(QDialog):
         )
 
         jobs = [
-            (name, self._get_coeffs(name), self._simulate_fn, self._extract_fn)
-            for name in selected
+            (name, self._get_coeffs(name), self._simulate_fn, self._extract_fn) for name in selected
         ]
         self._total_trials = len(selected) * config.n_trials
         self._completed_trials = 0

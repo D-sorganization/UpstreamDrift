@@ -37,9 +37,7 @@ class TestScatterToGrid:
 
     def test_too_few_points_raises(self) -> None:
         with pytest.raises((ValueError, Exception)):
-            scatter_to_grid(
-                np.array([1.0, 2.0]), np.array([1.0, 2.0]), np.array([1.0, 2.0])
-            )
+            scatter_to_grid(np.array([1.0, 2.0]), np.array([1.0, 2.0]), np.array([1.0, 2.0]))
 
 
 class TestCorrelationMatrix:

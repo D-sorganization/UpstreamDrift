@@ -134,9 +134,7 @@ class FinancialModelCalculator:
             results.annual_feedstock_tons * parameters.byproduct_yield_factor
         )
 
-        results.product_revenue = (
-            results.annual_product_tons * parameters.product_price_per_ton
-        )
+        results.product_revenue = results.annual_product_tons * parameters.product_price_per_ton
         results.byproduct_revenue = (
             results.annual_byproduct_tons * parameters.byproduct_revenue_per_ton
         )
@@ -217,18 +215,14 @@ class FinancialModelCalculator:
     ) -> None:
         """Compute per-ton unit economics and return metrics."""
         if results.annual_feedstock_tons > 0:
-            results.revenue_per_ton = (
-                results.total_revenue / results.annual_feedstock_tons
-            )
+            results.revenue_per_ton = results.total_revenue / results.annual_feedstock_tons
             results.variable_cost_per_ton = (
                 results.total_variable_costs / results.annual_feedstock_tons
             )
             results.total_cost_per_ton = (
                 results.total_variable_costs + results.total_fixed_costs
             ) / results.annual_feedstock_tons
-            results.margin_per_ton = (
-                results.revenue_per_ton - results.total_cost_per_ton
-            )
+            results.margin_per_ton = results.revenue_per_ton - results.total_cost_per_ton
         else:
             results.revenue_per_ton = 0.0
             results.variable_cost_per_ton = 0.0
@@ -263,13 +257,13 @@ class FinancialModelCalculator:
         """Calculate comprehensive financial model."""
         # DbC preconditions
         if not (parameters.total_capital_investment >= 0):
-            raise ValueError(()
-            f"Capital investment must be non-negative, got {parameters.total_capital_investment}"
-        )
+            raise ValueError(
+                f"Capital investment must be non-negative, got {parameters.total_capital_investment}"
+            )
         if not (parameters.operating_days_per_year >= 0):
-            raise ValueError(()
-            f"Operating days must be non-negative, got {parameters.operating_days_per_year}"
-        )
+            raise ValueError(
+                f"Operating days must be non-negative, got {parameters.operating_days_per_year}"
+            )
 
         self.parameters = parameters
         results = FinancialResults()
@@ -312,8 +306,7 @@ class FinancialModelCalculator:
             projection = {
                 "year": year,
                 "total_revenue": year_results.total_revenue,
-                "total_costs": year_results.total_variable_costs
-                + year_results.total_fixed_costs,
+                "total_costs": year_results.total_variable_costs + year_results.total_fixed_costs,
                 "ebitda": year_results.ebitda,
                 "net_income": year_results.net_income,
                 "cash_flow": year_results.net_income + year_results.depreciation,

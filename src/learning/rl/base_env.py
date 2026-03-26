@@ -72,8 +72,7 @@ class RoboticsGymEnv:
         """
         if not GYMNASIUM_AVAILABLE:
             raise ImportError(
-                "gymnasium is required for RL environments. "
-                "Install with: pip install gymnasium"
+                "gymnasium is required for RL environments. " "Install with: pip install gymnasium"
             )
 
         self.engine = engine

@@ -62,8 +62,7 @@ class TestUIFeatureParity:
         if pyqt_launcher.exists():
             content = pyqt_launcher.read_text()
             has_controls = any(
-                term in content.lower()
-                for term in ["start", "stop", "pause", "run", "simulate"]
+                term in content.lower() for term in ["start", "stop", "pause", "run", "simulate"]
             )
             assert has_controls, "Simulation controls missing from PyQt UI"
 

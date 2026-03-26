@@ -96,9 +96,7 @@ class TestStrokeParameters:
         )
 
         # Effective directions should differ
-        assert not np.allclose(
-            square.effective_direction, open_face.effective_direction
-        )
+        assert not np.allclose(square.effective_direction, open_face.effective_direction)
 
 
 class TestPutterStroke:
@@ -272,10 +270,7 @@ class TestPutterStroke:
         soft_insert = PutterStroke(insert_type="polymer")
 
         # Metal typically has higher COR
-        assert (
-            metal_face.coefficient_of_restitution
-            > soft_insert.coefficient_of_restitution
-        )
+        assert metal_face.coefficient_of_restitution > soft_insert.coefficient_of_restitution
 
     def test_compute_launch_velocity(self, putter: PutterStroke) -> None:
         """Should compute launch velocity from impact parameters."""
@@ -355,22 +350,16 @@ class TestStrokeParametersPresets:
 
     def test_lag_putt_preset(self) -> None:
         """Lag putt should be gentle."""
-        params = StrokeParameters.create_preset(
-            "lag_putt", direction=np.array([1.0, 0.0])
-        )
+        params = StrokeParameters.create_preset("lag_putt", direction=np.array([1.0, 0.0]))
         assert params.speed < 2.0  # Gentle speed
 
     def test_aggressive_putt_preset(self) -> None:
         """Aggressive putt should be firm."""
-        params = StrokeParameters.create_preset(
-            "aggressive", direction=np.array([1.0, 0.0])
-        )
+        params = StrokeParameters.create_preset("aggressive", direction=np.array([1.0, 0.0]))
         assert params.speed > 2.5  # Firm speed
 
     def test_practice_stroke_preset(self) -> None:
         """Practice stroke with controlled speed."""
-        params = StrokeParameters.create_preset(
-            "practice", direction=np.array([1.0, 0.0])
-        )
+        params = StrokeParameters.create_preset("practice", direction=np.array([1.0, 0.0]))
         assert params.speed > 0
         assert params.face_angle == 0.0  # Square face

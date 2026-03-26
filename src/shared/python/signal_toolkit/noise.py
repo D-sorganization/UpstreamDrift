@@ -257,14 +257,10 @@ class NoiseGenerator:
         # Add some harmonics for realism
         values = amplitude * np.sin(2 * np.pi * frequency * t)
         values += (
-            PERIODIC_NOISE_2ND_HARMONIC
-            * amplitude
-            * np.sin(2 * np.pi * 2 * frequency * t)
+            PERIODIC_NOISE_2ND_HARMONIC * amplitude * np.sin(2 * np.pi * 2 * frequency * t)
         )  # 2nd harmonic
         values += (
-            PERIODIC_NOISE_3RD_HARMONIC
-            * amplitude
-            * np.sin(2 * np.pi * 3 * frequency * t)
+            PERIODIC_NOISE_3RD_HARMONIC * amplitude * np.sin(2 * np.pi * 3 * frequency * t)
         )  # 3rd harmonic
 
         return values

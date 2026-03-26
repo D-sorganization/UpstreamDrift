@@ -87,9 +87,7 @@ def _init_video_pipeline() -> Any:
             e,
         )
     except OSError as e:
-        logger.warning(
-            "Video pipeline failed to initialize (camera/device issue): %s", e
-        )
+        logger.warning("Video pipeline failed to initialize (camera/device issue): %s", e)
     except RuntimeError as e:
         logger.warning("Video pipeline runtime initialization failed: %s", e)
     return None

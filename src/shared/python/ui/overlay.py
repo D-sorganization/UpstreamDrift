@@ -58,9 +58,7 @@ class OverlayWidget(QWidget):
 
         self.status_label = QLabel("Run Overlay Active")
         self.status_label.setStyleSheet(Styles.OVERLAY_STATUS)
-        self.status_label.setSizePolicy(
-            QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum
-        )
+        self.status_label.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
         top_bar.addWidget(self.status_label)
         top_bar.addStretch()
 

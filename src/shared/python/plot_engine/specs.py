@@ -18,9 +18,9 @@ class SeriesStyle(BaseModel):
     color: str | None = None
     line_style: Literal["solid", "dashed", "dotted", "dashdot"] = "solid"
     line_width: float = 1.5
-    marker: Literal[
-        "none", "circle", "square", "triangle", "diamond", "cross", "plus", "star"
-    ] = "none"
+    marker: Literal["none", "circle", "square", "triangle", "diamond", "cross", "plus", "star"] = (
+        "none"
+    )
     marker_size: float = 6.0
     opacity: float = Field(default=1.0, ge=0.0, le=1.0)
     display_mode: Literal["line", "scatter", "line+scatter"] = "line"
@@ -88,9 +88,9 @@ class SurfacePlotSpec(PlotSpec):
     opacity: float = Field(default=0.8, ge=0.0, le=1.0)
     show_wireframe: bool = False
     show_scatter: bool = True
-    interpolation: Literal[
-        "linear", "cubic", "nearest", "multiquadric", "inverse", "gaussian"
-    ] = "linear"
+    interpolation: Literal["linear", "cubic", "nearest", "multiquadric", "inverse", "gaussian"] = (
+        "linear"
+    )
 
 
 class ContourPlotSpec(PlotSpec):

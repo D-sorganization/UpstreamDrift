@@ -58,9 +58,7 @@ def validate_script_path(script_path: Path, suite_root: Path) -> None:
 
         # Ensure script is within suite directory
         if not str(abs_script).startswith(str(abs_suite_root)):
-            raise SecureSubprocessError(
-                f"Script path outside suite directory: {abs_script}"
-            )
+            raise SecureSubprocessError(f"Script path outside suite directory: {abs_script}")
 
         # Check if script is in allowed directory
         relative_path = abs_script.relative_to(abs_suite_root)
@@ -144,11 +142,7 @@ def secure_popen(
     if len(cmd) >= 2 and suite_root:
         script_arg = cmd[1]
         # Check if it looks like a script path
-        if (
-            script_arg.endswith((".py", ".m"))
-            or "/" in script_arg
-            or "\\" in script_arg
-        ):
+        if script_arg.endswith((".py", ".m")) or "/" in script_arg or "\\" in script_arg:
             try:
                 script_path = Path(script_arg)
                 if not script_path.is_absolute():
@@ -166,9 +160,7 @@ def secure_popen(
         if suite_root:
             suite_root_abs = suite_root.resolve()
             if not cwd_path.is_relative_to(suite_root_abs):
-                raise SecureSubprocessError(
-                    f"Working directory outside suite: {cwd_path}"
-                )
+                raise SecureSubprocessError(f"Working directory outside suite: {cwd_path}")
 
     logger.info(f"Launching secure subprocess: {' '.join(validated_cmd)}")
 
@@ -216,11 +208,7 @@ def secure_run(
     if len(cmd) >= 2 and suite_root:
         script_arg = cmd[1]
         # Check if it looks like a script path
-        if (
-            script_arg.endswith((".py", ".m"))
-            or "/" in script_arg
-            or "\\" in script_arg
-        ):
+        if script_arg.endswith((".py", ".m")) or "/" in script_arg or "\\" in script_arg:
             try:
                 script_path = Path(script_arg)
                 if not script_path.is_absolute():
@@ -238,9 +226,7 @@ def secure_run(
         if suite_root:
             suite_root_abs = suite_root.resolve()
             if not cwd_path.is_relative_to(suite_root_abs):
-                raise SecureSubprocessError(
-                    f"Working directory outside suite: {cwd_path}"
-                )
+                raise SecureSubprocessError(f"Working directory outside suite: {cwd_path}")
 
     logger.info(f"Running secure subprocess: {' '.join(validated_cmd)}")
 

@@ -42,15 +42,10 @@ def angular_power_at(
     Postconditions:
         Returns a finite float.
     """
-    if not (np.isfinite(joint_torque)):
-        raise ValueError(f"torque must be finite, got {joint_torque}")
-    if not (np.isfinite(angular_velocity)):
-        raise ValueError(()
-        f"omega must be finite, got {angular_velocity}"
-    )
+    assert np.isfinite(joint_torque), f"torque must be finite, got {joint_torque}"
+    assert np.isfinite(angular_velocity), f"omega must be finite, got {angular_velocity}"
     result = float(joint_torque * angular_velocity)
-    if not (np.isfinite(result)):
-        raise ValueError(f"angular power is non-finite: {result}")
+    assert np.isfinite(result), f"angular power is non-finite: {result}"
     return result
 
 
@@ -58,7 +53,7 @@ def linear_power_at(
     force: np.ndarray,
     velocity: np.ndarray,
 ) -> float:
-    """Instantaneous linear power at a joint (F · v).
+    """Instantaneous linear power at a joint (F Â· v).
 
     Preconditions:
         force and velocity are shape (2,) finite arrays.
@@ -67,17 +62,12 @@ def linear_power_at(
     """
     force = np.asarray(force, dtype=float)
     velocity = np.asarray(velocity, dtype=float)
-    if not (force.shape == (2):
-        raise ValueError(), f"force must be shape (2,), got {force.shape}")
-    if not (velocity.shape == (2):
-        raise ValueError(), f"velocity must be shape (2,), got {velocity.shape}")
-    if not (np.all(np.isfinite(force))):
-        raise ValueError(f"force must be finite: {force}")
-    if not (np.all(np.isfinite(velocity))):
-        raise ValueError(f"velocity must be finite: {velocity}")
+    assert force.shape == (2,), f"force must be shape (2,), got {force.shape}"
+    assert velocity.shape == (2,), f"velocity must be shape (2,), got {velocity.shape}"
+    assert np.all(np.isfinite(force)), f"force must be finite: {force}"
+    assert np.all(np.isfinite(velocity)), f"velocity must be finite: {velocity}"
     result = float(np.dot(force, velocity))
-    if not (np.isfinite(result)):
-        raise ValueError(f"linear power is non-finite: {result}")
+    assert np.isfinite(result), f"linear power is non-finite: {result}"
     return result
 
 
@@ -106,20 +96,15 @@ def angular_power_series(
     """
     torques = np.asarray(torques, dtype=float)
     angular_velocities = np.asarray(angular_velocities, dtype=float)
-    if not (torques.ndim == 1):
-        raise ValueError(f"torques must be 1-D, got {torques.ndim}-D")
-    if not (torques.shape == angular_velocities.shape):
-        raise ValueError(()
-        f"Shape mismatch: {torques.shape} vs {angular_velocities.shape}"
-    )
-    if not (np.all(np.isfinite(torques))):
-        raise ValueError("torques must be all finite")
-    if not (np.all(np.isfinite(angular_velocities))):
-        raise ValueError("velocities must be all finite")
+    assert torques.ndim == 1, f"torques must be 1-D, got {torques.ndim}-D"
+    assert (
+        torques.shape == angular_velocities.shape
+    ), f"Shape mismatch: {torques.shape} vs {angular_velocities.shape}"
+    assert np.all(np.isfinite(torques)), "torques must be all finite"
+    assert np.all(np.isfinite(angular_velocities)), "velocities must be all finite"
 
     result: np.ndarray = torques * angular_velocities
-    if not (np.all(np.isfinite(result))):
-        raise ValueError("angular power series has non-finite values")
+    assert np.all(np.isfinite(result)), "angular power series has non-finite values"
     return result
 
 
@@ -143,22 +128,13 @@ def linear_power_series(
     """
     forces = np.asarray(forces, dtype=float)
     velocities = np.asarray(velocities, dtype=float)
-    if not (forces.ndim == 2 and forces.shape[1] == 2):
-        raise ValueError(()
-        f"forces must be (N,2), got {forces.shape}"
-    )
-    if not (forces.shape == velocities.shape):
-        raise ValueError(()
-        f"Shape mismatch: {forces.shape} vs {velocities.shape}"
-    )
-    if not (np.all(np.isfinite(forces))):
-        raise ValueError("forces must be finite")
-    if not (np.all(np.isfinite(velocities))):
-        raise ValueError("velocities must be finite")
+    assert forces.ndim == 2 and forces.shape[1] == 2, f"forces must be (N,2), got {forces.shape}"
+    assert forces.shape == velocities.shape, f"Shape mismatch: {forces.shape} vs {velocities.shape}"
+    assert np.all(np.isfinite(forces)), "forces must be finite"
+    assert np.all(np.isfinite(velocities)), "velocities must be finite"
 
     result: np.ndarray = np.sum(forces * velocities, axis=1)
-    if not (np.all(np.isfinite(result))):
-        raise ValueError("linear power series has non-finite values")
+    assert np.all(np.isfinite(result)), "linear power series has non-finite values"
     return result
 
 
@@ -178,20 +154,16 @@ def angular_work_series(
     """
     power = angular_power_series(torques, angular_velocities)
     time = np.asarray(time, dtype=float)
-    if not (time.shape == power.shape):
-        raise ValueError(f"Shape mismatch: {time.shape} vs {power.shape}")
-    if not (np.all(np.isfinite(time))):
-        raise ValueError("time must be finite")
+    assert time.shape == power.shape, f"Shape mismatch: {time.shape} vs {power.shape}"
+    assert np.all(np.isfinite(time)), "time must be finite"
     if time.size > 1:
-        if not (np.all(np.diff(time) > 0)):
-            raise ValueError("time must be strictly increasing")
+        assert np.all(np.diff(time) > 0), "time must be strictly increasing"
 
     work = np.zeros_like(power)
     if power.size > 1:
         work[1:] = np.cumsum(0.5 * (power[:-1] + power[1:]) * np.diff(time))
 
-    if not (np.all(np.isfinite(work))):
-        raise ValueError("angular work has non-finite values")
+    assert np.all(np.isfinite(work)), "angular work has non-finite values"
     return work
 
 
@@ -202,7 +174,7 @@ def linear_work_series(
 ) -> np.ndarray:
     """Cumulative linear work via trapezoidal integration.
 
-    W(t) = integral_0^t F(s) · v(s) ds
+    W(t) = integral_0^t F(s) Â· v(s) ds
 
     Preconditions:
         forces, velocities shape (N,2); time shape (N,); all finite.
@@ -211,15 +183,13 @@ def linear_work_series(
     """
     power = linear_power_series(forces, velocities)
     time = np.asarray(time, dtype=float)
-    if not (time.shape == power.shape):
-        raise ValueError(f"Shape mismatch: {time.shape} vs {power.shape}")
+    assert time.shape == power.shape, f"Shape mismatch: {time.shape} vs {power.shape}"
 
     work = np.zeros_like(power)
     if power.size > 1:
         work[1:] = np.cumsum(0.5 * (power[:-1] + power[1:]) * np.diff(time))
 
-    if not (np.all(np.isfinite(work))):
-        raise ValueError("linear work has non-finite values")
+    assert np.all(np.isfinite(work)), "linear work has non-finite values"
     return work
 
 
@@ -238,23 +208,16 @@ def angular_impulse_series(
     """
     torques = np.asarray(torques, dtype=float)
     time = np.asarray(time, dtype=float)
-    if not (torques.ndim == 1):
-        raise ValueError(f"torques must be 1-D, got {torques.ndim}-D")
-    if not (torques.shape == time.shape):
-        raise ValueError(()
-        f"Shape mismatch: {torques.shape} vs {time.shape}"
-    )
-    if not (np.all(np.isfinite(torques))):
-        raise ValueError("torques must be finite")
-    if not (np.all(np.isfinite(time))):
-        raise ValueError("time must be finite")
+    assert torques.ndim == 1, f"torques must be 1-D, got {torques.ndim}-D"
+    assert torques.shape == time.shape, f"Shape mismatch: {torques.shape} vs {time.shape}"
+    assert np.all(np.isfinite(torques)), "torques must be finite"
+    assert np.all(np.isfinite(time)), "time must be finite"
 
     impulse = np.zeros_like(torques)
     if torques.size > 1:
         impulse[1:] = np.cumsum(0.5 * (torques[:-1] + torques[1:]) * np.diff(time))
 
-    if not (np.all(np.isfinite(impulse))):
-        raise ValueError("angular impulse has non-finite values")
+    assert np.all(np.isfinite(impulse)), "angular impulse has non-finite values"
     return impulse
 
 
@@ -273,14 +236,8 @@ def linear_impulse_series(
     """
     forces = np.asarray(forces, dtype=float)
     time = np.asarray(time, dtype=float)
-    if not (forces.ndim == 2 and forces.shape[1] == 2):
-        raise ValueError(()
-        f"forces must be (N,2), got {forces.shape}"
-    )
-    if not (forces.shape[0] == time.shape[0]):
-        raise ValueError(()
-        f"Row mismatch: {forces.shape[0]} vs {time.shape[0]}"
-    )
+    assert forces.ndim == 2 and forces.shape[1] == 2, f"forces must be (N,2), got {forces.shape}"
+    assert forces.shape[0] == time.shape[0], f"Row mismatch: {forces.shape[0]} vs {time.shape[0]}"
 
     dt = np.diff(time)
     impulse = np.zeros_like(forces)
@@ -288,8 +245,7 @@ def linear_impulse_series(
         avg = 0.5 * (forces[:-1] + forces[1:])
         impulse[1:] = np.cumsum(avg * dt[:, np.newaxis], axis=0)
 
-    if not (np.all(np.isfinite(impulse))):
-        raise ValueError("linear impulse has non-finite values")
+    assert np.all(np.isfinite(impulse)), "linear impulse has non-finite values"
     return impulse
 
 
@@ -326,8 +282,7 @@ def compute_all_dynamics(
         angular_work, linear_work,
         angular_impulse, linear_impulse
     """
-    if not (time is not None):
-        raise ValueError("time must be provided")
+    assert time is not None, "time must be provided"
     logger.debug("Computing all dynamics quantities for %d timesteps", len(time))
 
     return {

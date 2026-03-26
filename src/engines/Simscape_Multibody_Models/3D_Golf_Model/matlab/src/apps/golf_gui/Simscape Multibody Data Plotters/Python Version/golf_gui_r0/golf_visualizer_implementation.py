@@ -156,24 +156,12 @@ class DataProcessor:
             butt=self._safe_extract_point(datasets["BASEQ"], frame_idx, "Butt"),
             clubhead=self._safe_extract_point(datasets["BASEQ"], frame_idx, "Clubhead"),
             midpoint=self._safe_extract_point(datasets["BASEQ"], frame_idx, "MidPoint"),
-            left_wrist=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "LeftWrist"
-            ),
-            left_elbow=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "LeftElbow"
-            ),
-            left_shoulder=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "LeftShoulder"
-            ),
-            right_wrist=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "RightWrist"
-            ),
-            right_elbow=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "RightElbow"
-            ),
-            right_shoulder=self._safe_extract_point(
-                datasets["BASEQ"], frame_idx, "RightShoulder"
-            ),
+            left_wrist=self._safe_extract_point(datasets["BASEQ"], frame_idx, "LeftWrist"),
+            left_elbow=self._safe_extract_point(datasets["BASEQ"], frame_idx, "LeftElbow"),
+            left_shoulder=self._safe_extract_point(datasets["BASEQ"], frame_idx, "LeftShoulder"),
+            right_wrist=self._safe_extract_point(datasets["BASEQ"], frame_idx, "RightWrist"),
+            right_elbow=self._safe_extract_point(datasets["BASEQ"], frame_idx, "RightElbow"),
+            right_shoulder=self._safe_extract_point(datasets["BASEQ"], frame_idx, "RightShoulder"),
             hub=self._safe_extract_point(datasets["BASEQ"], frame_idx, "Hub"),
             forces={
                 "BASEQ": self._safe_extract_vector(
@@ -201,9 +189,7 @@ class DataProcessor:
         self.cache[frame_idx] = frame_data
         return frame_data
 
-    def _safe_extract_point(
-        self, dataset: np.ndarray, frame_idx: int, column: str
-    ) -> np.ndarray:
+    def _safe_extract_point(self, dataset: np.ndarray, frame_idx: int, column: str) -> np.ndarray:
         """Safely extract 3D point with fallbacks"""
         if not (dataset is not None):
             raise ValueError("dataset must be provided")
@@ -217,9 +203,7 @@ class DataProcessor:
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
-    def _safe_extract_vector(
-        self, dataset: np.ndarray, frame_idx: int, column: str
-    ) -> np.ndarray:
+    def _safe_extract_vector(self, dataset: np.ndarray, frame_idx: int, column: str) -> np.ndarray:
         """Safely extract 3D vector with fallbacks"""
         if not (dataset is not None):
             raise ValueError("dataset must be provided")
@@ -780,9 +764,7 @@ class OpenGLRenderer:
                 and np.isfinite(force).all()
                 and np.linalg.norm(force) > 1e-6
             ):
-                scaled_force = (
-                    force * config.vector_scale / self.max_force_magnitude * 0.3
-                )
+                scaled_force = force * config.vector_scale / self.max_force_magnitude * 0.3
                 self._render_arrow(
                     frame_data.midpoint,
                     scaled_force,
@@ -797,9 +779,7 @@ class OpenGLRenderer:
                 and np.isfinite(torque).all()
                 and np.linalg.norm(torque) > 1e-6
             ):
-                scaled_torque = (
-                    torque * config.vector_scale / self.max_torque_magnitude * 0.2
-                )
+                scaled_torque = torque * config.vector_scale / self.max_torque_magnitude * 0.2
                 torque_pos = frame_data.midpoint + np.array([0.1, 0, 0])
                 self._render_arrow(
                     torque_pos,
@@ -865,10 +845,7 @@ class OpenGLRenderer:
             raise ValueError("frame_data must be provided")
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
-        if not (
-            np.isfinite(frame_data.butt).all()
-            and np.isfinite(frame_data.clubhead).all()
-        ):
+        if not (np.isfinite(frame_data.butt).all() and np.isfinite(frame_data.clubhead).all()):
             return
         self._render_cylinder_between_points(
             frame_data.butt,
@@ -920,9 +897,7 @@ class OpenGLRenderer:
             view_matrix,
             proj_matrix,
         )
-        self._render_arrow_head(
-            end_pos, vector, color, opacity, view_matrix, proj_matrix
-        )
+        self._render_arrow_head(end_pos, vector, color, opacity, view_matrix, proj_matrix)
 
     def _render_arrow_head(
         self,
@@ -1020,21 +995,15 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         if self.datasets is None or self.num_frames == 0:
             self.ctx.clear(0.1, 0.2, 0.3)
             return
-        frame_data = self.data_processor.extract_frame_data(
-            self.current_frame, self.datasets
-        )
+        frame_data = self.data_processor.extract_frame_data(self.current_frame, self.datasets)
         view_matrix = self._calculate_view_matrix()
         proj_matrix = self._calculate_projection_matrix()
-        self.renderer.render_frame(
-            frame_data, self.render_config, view_matrix, proj_matrix
-        )
+        self.renderer.render_frame(frame_data, self.render_config, view_matrix, proj_matrix)
         frame_time = time.time() - start_time
         self.frame_times.append(frame_time)
         if len(self.frame_times) > 60:
             self.frame_times.pop(0)
-        self.fps = (
-            len(self.frame_times) / sum(self.frame_times) if self.frame_times else 0
-        )
+        self.fps = len(self.frame_times) / sum(self.frame_times) if self.frame_times else 0
 
     def resizeGL(self, width, height) -> None:
         """Handle window resize"""
@@ -1043,9 +1012,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
     def load_data(self, baseq_file: str, ztcfq_file: str, delta_file: str) -> None:
         """Load golf swing data"""
         try:
-            datasets = self.data_processor.load_matlab_data(
-                baseq_file, ztcfq_file, delta_file
-            )
+            datasets = self.data_processor.load_matlab_data(baseq_file, ztcfq_file, delta_file)
             self.datasets = {
                 "BASEQ": datasets[0],
                 "ZTCFQ": datasets[1],
@@ -1190,9 +1157,7 @@ class ModernGolfVisualizerApp(QMainWindow):
         for dataset in ["BASEQ", "ZTCFQ", "DELTAQ"]:
             cb = QCheckBox(f"{dataset} Forces")
             cb.setChecked(True)
-            cb.stateChanged.connect(
-                lambda state, ds=dataset: self._toggle_forces(ds, state)
-            )
+            cb.stateChanged.connect(lambda state, ds=dataset: self._toggle_forces(ds, state))
             forces_layout.addWidget(cb)
             self.force_checkboxes[dataset] = cb
         layout.addWidget(forces_group)

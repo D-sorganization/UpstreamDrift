@@ -48,9 +48,7 @@ class TestCrossEngineValidator:
         state1 = np.array([1.0, 2.0, 3.0])
         state2 = np.array([1.001, 2.001, 3.001])  # 1e-3 deviation (exceeds 1e-6)
 
-        result = validator.compare_states(
-            "MuJoCo", state1, "Drake", state2, metric="position"
-        )
+        result = validator.compare_states("MuJoCo", state1, "Drake", state2, metric="position")
 
         assert not result.passed
         assert result.max_deviation > 1e-6
@@ -68,9 +66,7 @@ class TestCrossEngineValidator:
         state1 = np.array([1.0, 2.0, 3.0])
         state2 = np.array([1.0, 2.0])  # Different shape
 
-        result = validator.compare_states(
-            "MuJoCo", state1, "Drake", state2, metric="position"
-        )
+        result = validator.compare_states("MuJoCo", state1, "Drake", state2, metric="position")
 
         assert not result.passed
         assert result.max_deviation == np.inf

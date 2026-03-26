@@ -240,9 +240,7 @@ class IconLoadingButton(QWidget):
 
         # Button
         self._button = QPushButton(f"{self._icon}  {self._original_text}")
-        self._button.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
-        )
+        self._button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         if THEME_AVAILABLE:
             self._button.setFont(get_qfont(size=Sizes.BASE, weight=Weights.SEMIBOLD))
 

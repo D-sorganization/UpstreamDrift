@@ -87,9 +87,7 @@ class ComparativePlotter:
         )
 
         ax1.set_ylabel(ylabel, fontsize=10, fontweight="bold")
-        ax1.set_title(
-            title or f"Comparison: {field_name}", fontsize=12, fontweight="bold"
-        )
+        ax1.set_title(title or f"Comparison: {field_name}", fontsize=12, fontweight="bold")
         ax1.legend(loc="best")
         ax1.grid(True, alpha=0.3)
         ax1.set_xlim(0, 100)
@@ -117,9 +115,7 @@ class ComparativePlotter:
         ax2.axhline(0, color="k", alpha=0.3, linestyle="-")
 
         # Add correlation stats
-        stats_text = (
-            f"Correlation: {aligned.correlation:.3f}\nRMS Diff: {aligned.rms_error:.3f}"
-        )
+        stats_text = f"Correlation: {aligned.correlation:.3f}\nRMS Diff: {aligned.rms_error:.3f}"
         ax1.text(
             0.02,
             0.95,
@@ -158,12 +154,8 @@ class ComparativePlotter:
             ax = fig.add_subplot(111)
 
         # Get aligned data for position and velocity
-        pos_aligned = self.analyzer.align_signals(
-            "joint_positions", joint_idx=joint_idx
-        )
-        vel_aligned = self.analyzer.align_signals(
-            "joint_velocities", joint_idx=joint_idx
-        )
+        pos_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx)
+        vel_aligned = self.analyzer.align_signals("joint_velocities", joint_idx=joint_idx)
 
         if pos_aligned is None or vel_aligned is None:
             ax.text(0.5, 0.5, "Data not available", ha="center", va="center")
@@ -204,9 +196,7 @@ class ComparativePlotter:
 
         ax.set_xlabel(f"{joint_name} Angle (deg)", fontsize=11, fontweight="bold")
         ax.set_ylabel(f"{joint_name} Velocity (deg/s)", fontsize=11, fontweight="bold")
-        ax.set_title(
-            f"Phase Diagram Comparison: {joint_name}", fontsize=12, fontweight="bold"
-        )
+        ax.set_title(f"Phase Diagram Comparison: {joint_name}", fontsize=12, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
 
@@ -234,12 +224,8 @@ class ComparativePlotter:
             raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
-        pos1_aligned = self.analyzer.align_signals(
-            "joint_positions", joint_idx=joint_idx_1
-        )
-        pos2_aligned = self.analyzer.align_signals(
-            "joint_positions", joint_idx=joint_idx_2
-        )
+        pos1_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx_1)
+        pos2_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx_2)
 
         if pos1_aligned is None or pos2_aligned is None:
             ax = fig.add_subplot(111)
@@ -283,12 +269,8 @@ class ComparativePlotter:
             s=50,
         )
 
-        ax.set_xlabel(
-            f"Joint {joint_idx_1} Angle (deg)", fontsize=11, fontweight="bold"
-        )
-        ax.set_ylabel(
-            f"Joint {joint_idx_2} Angle (deg)", fontsize=11, fontweight="bold"
-        )
+        ax.set_xlabel(f"Joint {joint_idx_1} Angle (deg)", fontsize=11, fontweight="bold")
+        ax.set_ylabel(f"Joint {joint_idx_2} Angle (deg)", fontsize=11, fontweight="bold")
         ax.set_title(title, fontsize=12, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
@@ -586,9 +568,7 @@ class ComparativePlotter:
 
         ax.set_xlabel("Mean of two measures", fontsize=12, fontweight="bold")
         ax.set_ylabel("Difference (A - B)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            title or f"Bland-Altman: {field_name}", fontsize=14, fontweight="bold"
-        )
+        ax.set_title(title or f"Bland-Altman: {field_name}", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
         fig.tight_layout()

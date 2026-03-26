@@ -82,9 +82,7 @@ class ChatService:
                         AnthropicAdapter,
                     )
 
-                    self._adapter = AnthropicAdapter(
-                        api_key=api_key, model=settings.model
-                    )
+                    self._adapter = AnthropicAdapter(api_key=api_key, model=settings.model)
             elif settings.provider == AIProvider.GEMINI:
                 api_key = get_api_key(AIProvider.GEMINI)
                 if api_key:
@@ -97,14 +95,10 @@ class ChatService:
             if self._adapter:
                 logger.info("ChatService loaded adapter: %s", settings.provider.name)
             else:
-                logger.warning(
-                    "ChatService: no adapter configured, falling back to Ollama"
-                )
+                logger.warning("ChatService: no adapter configured, falling back to Ollama")
                 self._fallback_to_ollama()
         except ImportError as e:
-            logger.warning(
-                "ChatService: failed to load settings (%s), falling back to Ollama", e
-            )
+            logger.warning("ChatService: failed to load settings (%s), falling back to Ollama", e)
             self._fallback_to_ollama()
 
     def _fallback_to_ollama(self) -> None:
@@ -310,14 +304,10 @@ class ChatService:
                         "session_id": sid,
                         "message_count": len(ctx.messages),
                         "created_at": (
-                            ctx.messages[0].timestamp.isoformat()
-                            if ctx.messages
-                            else ""
+                            ctx.messages[0].timestamp.isoformat() if ctx.messages else ""
                         ),
                         "last_active": (
-                            ctx.messages[-1].timestamp.isoformat()
-                            if ctx.messages
-                            else ""
+                            ctx.messages[-1].timestamp.isoformat() if ctx.messages else ""
                         ),
                         "engine_contexts": engines,
                     }
@@ -352,9 +342,7 @@ class ChatService:
         """Evict sessions exceeding TTL or max count."""
         now = time.monotonic()
         expired = [
-            sid
-            for sid, ts in self._timestamps.items()
-            if now - ts > self.SESSION_TTL_SECONDS
+            sid for sid, ts in self._timestamps.items() if now - ts > self.SESSION_TTL_SECONDS
         ]
         for sid in expired:
             self._sessions.pop(sid, None)

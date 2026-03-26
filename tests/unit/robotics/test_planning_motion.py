@@ -218,9 +218,7 @@ class TestRRTPlanner:
         assert result.success
         assert len(result.path) >= 2
         assert np.allclose(result.path[0], q_start)
-        assert (
-            np.linalg.norm(result.path[-1] - q_goal) <= planner._config.goal_tolerance
-        )
+        assert np.linalg.norm(result.path[-1] - q_goal) <= planner._config.goal_tolerance
 
     def test_plan_invalid_start(self, collision_checker: MockCollisionChecker) -> None:
         """Test planning with invalid start configuration."""
@@ -249,9 +247,7 @@ class TestRRTPlanner:
     def test_plan_with_obstacle(self) -> None:
         """Test planning around obstacle."""
         # Add obstacle between start and goal
-        collision_checker = MockCollisionChecker(
-            obstacles=[(np.array([1.0, 1.0]), 0.3)]
-        )
+        collision_checker = MockCollisionChecker(obstacles=[(np.array([1.0, 1.0]), 0.3)])
 
         config = RRTConfig(
             max_iterations=2000,

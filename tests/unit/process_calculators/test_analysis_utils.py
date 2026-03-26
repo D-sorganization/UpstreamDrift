@@ -55,9 +55,7 @@ class TestEvaluateOutput:
         assert isinstance(comp, dict)
 
     def test_overrides_applied(self) -> None:
-        value, _, _ = evaluate_output(
-            _StubEngine(), {}, 10.0, "power", overrides={"x": 1}
-        )
+        value, _, _ = evaluate_output(_StubEngine(), {}, 10.0, "power", overrides={"x": 1})
         # power = manual_hhv * 2 = 10 * 2 = 20
         assert value == pytest.approx(20.0)
 

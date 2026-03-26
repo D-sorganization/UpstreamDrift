@@ -127,9 +127,7 @@ class TestForceLengthPassivePostconditions(unittest.TestCase):
         prev = 0.0
         for l_norm in np.linspace(1.01, 2.0, 20):
             fp = model.force_length_passive(float(l_norm))
-            self.assertGreaterEqual(
-                fp, prev, f"Passive force not monotonic at l_norm={l_norm}"
-            )
+            self.assertGreaterEqual(fp, prev, f"Passive force not monotonic at l_norm={l_norm}")
             prev = fp
 
 
@@ -238,15 +236,12 @@ class TestComputeForcePostconditions(unittest.TestCase):
         for activation in [0.0, 0.3, 0.6, 1.0]:
             for l_CE in [0.10, 0.15, 0.20]:
                 for v_CE in [-0.5, 0.0, 0.5]:
-                    state = MuscleState(
-                        activation=activation, l_CE=l_CE, v_CE=v_CE, l_MT=0.35
-                    )
+                    state = MuscleState(activation=activation, l_CE=l_CE, v_CE=v_CE, l_MT=0.35)
                     force = model.compute_force(state)
                     self.assertGreaterEqual(
                         force,
                         0.0,
-                        f"Force={force} < 0 for a={activation}, "
-                        f"l_CE={l_CE}, v_CE={v_CE}",
+                        f"Force={force} < 0 for a={activation}, " f"l_CE={l_CE}, v_CE={v_CE}",
                     )
 
     def test_force_increases_with_activation(self) -> None:
@@ -255,9 +250,7 @@ class TestComputeForcePostconditions(unittest.TestCase):
         model = self._make_model()
         forces = []
         for activation in np.linspace(0.0, 1.0, 10):
-            state = MuscleState(
-                activation=float(activation), l_CE=0.15, v_CE=0.0, l_MT=0.35
-            )
+            state = MuscleState(activation=float(activation), l_CE=0.15, v_CE=0.0, l_MT=0.35)
             forces.append(model.compute_force(state))
 
         # Force should be non-decreasing with activation

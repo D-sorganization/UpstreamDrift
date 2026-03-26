@@ -258,9 +258,7 @@ def test_validate_energy_balance(basic_pre_state, default_impact_params) -> None
     model = RigidBodyImpactModel()
     post_state = model.solve(basic_pre_state, default_impact_params)
 
-    analysis = validate_energy_balance(
-        basic_pre_state, post_state, default_impact_params
-    )
+    analysis = validate_energy_balance(basic_pre_state, post_state, default_impact_params)
 
     assert analysis["total_ke_pre"] > 0
     assert analysis["total_ke_post"] > 0
@@ -269,15 +267,9 @@ def test_validate_energy_balance(basic_pre_state, default_impact_params) -> None
 
 def test_create_impact_model() -> None:
     """Test factory function."""
-    assert isinstance(
-        create_impact_model(ImpactModelType.RIGID_BODY), RigidBodyImpactModel
-    )
-    assert isinstance(
-        create_impact_model(ImpactModelType.SPRING_DAMPER), SpringDamperImpactModel
-    )
-    assert isinstance(
-        create_impact_model(ImpactModelType.FINITE_TIME), FiniteTimeImpactModel
-    )
+    assert isinstance(create_impact_model(ImpactModelType.RIGID_BODY), RigidBodyImpactModel)
+    assert isinstance(create_impact_model(ImpactModelType.SPRING_DAMPER), SpringDamperImpactModel)
+    assert isinstance(create_impact_model(ImpactModelType.FINITE_TIME), FiniteTimeImpactModel)
 
     with pytest.raises(ValueError):
         # Use a type annotation to tell mypy we're testing invalid input

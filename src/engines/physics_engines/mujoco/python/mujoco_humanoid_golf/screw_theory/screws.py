@@ -53,10 +53,10 @@ def screw_axis(axis: np.ndarray, point: np.ndarray, pitch: float = 0.0) -> np.nd
     axis = np.asarray(axis).flatten()
     point = np.asarray(point).flatten()
 
-    if not (axis.shape == (3):
-        raise ValueError(), f"axis must be 3x1, got shape {axis.shape}")
-    if not (point.shape == (3):
-        raise ValueError(), f"point must be 3x1, got shape {point.shape}")
+    if not (axis.shape == (3,)):
+        raise ValueError(f"axis must be 3x1, got shape {axis.shape}")
+    if not (point.shape == (3,)):
+        raise ValueError(f"point must be 3x1, got shape {point.shape}")
 
     # Normalize axis direction
     omega = axis / np.linalg.norm(axis)

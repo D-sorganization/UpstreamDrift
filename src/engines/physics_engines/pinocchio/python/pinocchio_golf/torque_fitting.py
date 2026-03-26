@@ -43,9 +43,7 @@ def evaluate_torque_poly(
 
 def main() -> None:
     """Fit a polynomial to torque-time CSV data and plot results."""
-    parser = argparse.ArgumentParser(
-        description="Fit polynomial to torque vs time data."
-    )
+    parser = argparse.ArgumentParser(description="Fit polynomial to torque vs time data.")
     parser.add_argument("csv", help="CSV file with columns t, tau")
     parser.add_argument(
         "-d", "--degree", type=int, default=6, help="Polynomial degree (default: 6)"

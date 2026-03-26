@@ -101,9 +101,7 @@ class TestFinancialModelCalculator:
     def test_revenue_greater_than_costs_yields_positive_income(self) -> None:
         calc = FinancialModelCalculator()
         # High product price should give positive net income
-        result = calc.calculate_financial_model(
-            _make_params(product_price_per_ton=2000.0)
-        )
+        result = calc.calculate_financial_model(_make_params(product_price_per_ton=2000.0))
         assert result.ebitda > 0.0
 
     def test_unit_metrics_computed(self) -> None:

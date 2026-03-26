@@ -79,13 +79,9 @@ class ConservationMonitor:
     def __post_init__(self) -> None:
         """Validate constructor arguments (DbC preconditions)."""
         if self.max_drift_pct <= 0:
-            raise ValueError(
-                f"max_drift_pct must be positive, got {self.max_drift_pct}"
-            )
+            raise ValueError(f"max_drift_pct must be positive, got {self.max_drift_pct}")
         if self.critical_drift_pct <= 0:
-            raise ValueError(
-                f"critical_drift_pct must be positive, got {self.critical_drift_pct}"
-            )
+            raise ValueError(f"critical_drift_pct must be positive, got {self.critical_drift_pct}")
         if self.critical_drift_pct <= self.max_drift_pct:
             raise ValueError(
                 f"critical_drift_pct ({self.critical_drift_pct}) must be greater "
@@ -160,9 +156,7 @@ class ConservationMonitor:
             ...     drift_pct = monitor.check_and_warn()  # Warns if drift > 1%
         """
         if self.E_initial is None:
-            raise StateError(
-                "ConservationMonitor not initialized. Call initialize() first."
-            )
+            raise StateError("ConservationMonitor not initialized. Call initialize() first.")
 
         snapshot = self.get_energy_snapshot()
         E_current = snapshot.total
@@ -253,9 +247,7 @@ class ConservationMonitor:
             significant (slow motion), this approximation is poor.
         """
         if self.E_initial is None:
-            raise StateError(
-                "ConservationMonitor not initialized. Call initialize() first."
-            )
+            raise StateError("ConservationMonitor not initialized. Call initialize() first.")
 
         snapshot = self.get_energy_snapshot()
         E_current = snapshot.total

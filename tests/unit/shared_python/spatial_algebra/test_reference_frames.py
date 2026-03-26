@@ -64,9 +64,7 @@ class TestReferenceFrames:
 
         # Edge cases
         fit_instantaneous_swing_plane(np.zeros(3), grip_pos, club_pos)
-        fit_instantaneous_swing_plane(
-            club_vel, np.array([1, 0, 0]), np.array([1, 0, 0])
-        )
+        fit_instantaneous_swing_plane(club_vel, np.array([1, 0, 0]), np.array([1, 0, 0]))
         fit_instantaneous_swing_plane(
             np.array([1, 0, 0]), np.array([0, 0, -1]), np.array([1, 0, 0])
         )

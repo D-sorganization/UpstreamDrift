@@ -29,11 +29,9 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 logger = get_logger(__name__)
 
 # Context variable for request-scoped tracing
-_request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "request_id", default=""
-)
-_trace_context_var: contextvars.ContextVar[TraceContext | None] = (
-    contextvars.ContextVar("trace_context", default=None)
+_request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="")
+_trace_context_var: contextvars.ContextVar[TraceContext | None] = contextvars.ContextVar(
+    "trace_context", default=None
 )
 
 # Header name for correlation ID

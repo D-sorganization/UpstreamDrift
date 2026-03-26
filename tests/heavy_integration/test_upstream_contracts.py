@@ -96,9 +96,7 @@ class TestPinocchioEngine:
 
         # Prove FK produced a valid SE3 placement
         placement = data.oMi[joint_id]
-        assert placement.isIdentity(prec=1e-6), (
-            "FK at neutral config should be identity"
-        )
+        assert placement.isIdentity(prec=1e-6), "FK at neutral config should be identity"
 
 
 @pytest.mark.live_simulation
@@ -184,9 +182,7 @@ class TestMediaPipeIntegration:
         if hasattr(mp, "solutions") and hasattr(mp.solutions, "pose"):
             # Legacy API
             mp_pose = mp.solutions.pose
-            with mp_pose.Pose(
-                static_image_mode=True, min_detection_confidence=0.5
-            ) as pose:
+            with mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5) as pose:
                 fake_frame = np.ones((100, 100, 3), dtype=np.uint8) * 255
                 results = pose.process(fake_frame)
                 assert results is not None, "MediaPipe returned None results object"
@@ -194,9 +190,9 @@ class TestMediaPipeIntegration:
             # New Tasks API (mediapipe >= 0.10)
             # Just verify the tasks module loads and has PoseLandmarker
             tasks = mp.tasks
-            assert hasattr(tasks, "vision") or hasattr(tasks, "BaseOptions"), (
-                f"mp.tasks has unexpected structure: {dir(tasks)}"
-            )
+            assert hasattr(tasks, "vision") or hasattr(
+                tasks, "BaseOptions"
+            ), f"mp.tasks has unexpected structure: {dir(tasks)}"
         else:
             pytest.skip(
                 f"MediaPipe installed but has unexpected API. "

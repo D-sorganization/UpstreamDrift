@@ -96,13 +96,9 @@ class LayoutManager:
             ]
 
         # Filter to available models
-        available_ids = [
-            model_id for model_id in default_ids if model_id in self.available_models
-        ]
+        available_ids = [model_id for model_id in default_ids if model_id in self.available_models]
         missing_ids = [
-            model_id
-            for model_id in default_ids
-            if model_id not in self.available_models
+            model_id for model_id in default_ids if model_id not in self.available_models
         ]
 
         self.model_order = available_ids
@@ -199,9 +195,7 @@ class LayoutManager:
             raise ValueError("selected_ids must be provided")
         if not (selected_ids is not None):
             raise ValueError("selected_ids must be provided")
-        ordered_selection = [
-            model_id for model_id in self.model_order if model_id in selected_ids
-        ]
+        ordered_selection = [model_id for model_id in self.model_order if model_id in selected_ids]
 
         # Append newly selected models
         for model_id in selected_ids:

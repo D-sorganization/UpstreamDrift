@@ -37,25 +37,19 @@ class TestRunMultiParameterAnalysis:
     def test_returns_dict(self) -> None:
         p1 = np.array([1.0, 2.0])
         p2 = np.array([10.0, 20.0])
-        result = run_multi_parameter_analysis(
-            _StubEngine(), _make_analysis_params(), 0.0, p1, p2
-        )
+        result = run_multi_parameter_analysis(_StubEngine(), _make_analysis_params(), 0.0, p1, p2)
         assert isinstance(result, dict)
 
     def test_has_output_values_key(self) -> None:
         p1 = np.array([1.0, 2.0])
         p2 = np.array([10.0])
-        result = run_multi_parameter_analysis(
-            _StubEngine(), _make_analysis_params(), 0.0, p1, p2
-        )
+        result = run_multi_parameter_analysis(_StubEngine(), _make_analysis_params(), 0.0, p1, p2)
         assert "output_values" in result
 
     def test_output_shape_matches_grid(self) -> None:
         p1 = np.array([1.0, 2.0, 3.0])
         p2 = np.array([10.0, 20.0])
-        result = run_multi_parameter_analysis(
-            _StubEngine(), _make_analysis_params(), 0.0, p1, p2
-        )
+        result = run_multi_parameter_analysis(_StubEngine(), _make_analysis_params(), 0.0, p1, p2)
         assert result["output_values"].shape == (3, 2)
 
     def test_param_names_in_result(self) -> None:
@@ -70,18 +64,14 @@ class TestRunMultiParameterAnalysis:
     def test_param_values_in_result(self) -> None:
         p1 = np.array([1.0, 2.0])
         p2 = np.array([10.0])
-        result = run_multi_parameter_analysis(
-            _StubEngine(), _make_analysis_params(), 0.0, p1, p2
-        )
+        result = run_multi_parameter_analysis(_StubEngine(), _make_analysis_params(), 0.0, p1, p2)
         np.testing.assert_array_equal(result["param1_values"], p1)
         np.testing.assert_array_equal(result["param2_values"], p2)
 
     def test_correct_output_values(self) -> None:
         p1 = np.array([1.0, 2.0])
         p2 = np.array([10.0, 20.0])
-        result = run_multi_parameter_analysis(
-            _StubEngine(), _make_analysis_params(), 0.0, p1, p2
-        )
+        result = run_multi_parameter_analysis(_StubEngine(), _make_analysis_params(), 0.0, p1, p2)
         # output[i,j] = p1[i] + p2[j]
         vals = result["output_values"]
         assert vals[0, 0] == pytest.approx(11.0)

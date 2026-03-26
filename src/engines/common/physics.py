@@ -406,9 +406,7 @@ class BallPhysics:
         """
         self.ball = ball or BallProperties()
         self.aero = AerodynamicsCalculator(self.ball, air)
-        self.gravity = (
-            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY])
-        )
+        self.gravity = gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY])
 
     @precondition(
         lambda self, velocity, spin: velocity.shape == (3,),

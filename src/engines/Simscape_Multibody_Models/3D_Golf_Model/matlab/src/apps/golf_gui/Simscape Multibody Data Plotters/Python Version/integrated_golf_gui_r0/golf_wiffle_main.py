@@ -498,19 +498,13 @@ class WiffleGolfMainWindow(QMainWindow):
 
         # Update visualizer data based on selection
         if ball_type == "ProV1":
-            self.visualizer_widget.load_data(
-                self.baseq_data, self.ztcfq_data, self.deltaq_data
-            )
+            self.visualizer_widget.load_data(self.baseq_data, self.ztcfq_data, self.deltaq_data)
         elif ball_type == "Wiffle":
             # Swap BASEQ and ZTCFQ to show Wiffle as primary
-            self.visualizer_widget.load_data(
-                self.ztcfq_data, self.baseq_data, self.deltaq_data
-            )
+            self.visualizer_widget.load_data(self.ztcfq_data, self.baseq_data, self.deltaq_data)
         elif ball_type == "Difference":
             # Show difference data
-            self.visualizer_widget.load_data(
-                self.deltaq_data, self.baseq_data, self.ztcfq_data
-            )
+            self.visualizer_widget.load_data(self.deltaq_data, self.baseq_data, self.ztcfq_data)
 
     def _on_visibility_changed(self) -> None:
         """Handle visibility checkbox changes"""
@@ -549,9 +543,7 @@ class WiffleGolfMainWindow(QMainWindow):
         # Get current file path
         if hasattr(self, "file_path_label"):
             current_file = self.file_path_label.text()
-            if current_file.startswith("Loaded:") or current_file.startswith(
-                "Loading:"
-            ):
+            if current_file.startswith("Loaded:") or current_file.startswith("Loading:"):
                 # Extract file path from previous load
                 # This is a simplified approach - in practice you'd store the path
                 self._load_excel_file()
@@ -641,8 +633,7 @@ class WiffleGolfMainWindow(QMainWindow):
             # Update status bar with frame info
             time_val = self.baseq_data.iloc[frame_idx]["Time"]
             self.statusBar().showMessage(
-                f"Frame {frame_idx + 1}, Time: {time_val:.3f}s, "
-                f"Distance: {distance:.3f}m"
+                f"Frame {frame_idx + 1}, Time: {time_val:.3f}s, " f"Distance: {distance:.3f}m"
             )
 
         except (ValueError, TypeError, RuntimeError):
@@ -683,14 +674,10 @@ class WiffleGolfMainWindow(QMainWindow):
                 comparison_data["Diff_CHz"] = self.deltaq_data["CHz"]
 
                 comparison_data.to_csv(file_path, index=False)
-                QMessageBox.information(
-                    self, "Export Complete", f"Data exported to {file_path}"
-                )
+                QMessageBox.information(self, "Export Complete", f"Data exported to {file_path}")
 
             except (RuntimeError, ValueError, OSError) as e:
-                QMessageBox.critical(
-                    self, "Export Error", f"Error exporting data: {str(e)}"
-                )
+                QMessageBox.critical(self, "Export Error", f"Error exporting data: {str(e)}")
 
     def _show_about(self) -> None:
         """Show about dialog"""
@@ -711,8 +698,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _apply_modern_style(self) -> None:
         """Apply modern styling to the application"""
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QMainWindow {
                 background-color: #f0f0f0;
             }
@@ -760,8 +746,7 @@ class WiffleGolfMainWindow(QMainWindow):
                 width: 18px;
                 height: 18px;
             }
-        """
-        )
+        """)
 
 
 def main() -> None:

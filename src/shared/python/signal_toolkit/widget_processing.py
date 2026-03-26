@@ -185,9 +185,7 @@ class ProcessingMixin(_Base):
                 params_str = self.fit_custom_params.text()
                 if expr and params_str:
                     params = [p.strip() for p in params_str.split(",")]
-                    result = fitter.fit_custom_expression(
-                        self.current_signal, expr, params
-                    )
+                    result = fitter.fit_custom_expression(self.current_signal, expr, params)
                 else:
                     return
             else:
@@ -375,9 +373,7 @@ class ProcessingMixin(_Base):
                     window += 1
 
                 if design == "Moving Average":
-                    self.current_signal = apply_moving_average(
-                        self.current_signal, window
-                    )
+                    self.current_signal = apply_moving_average(self.current_signal, window)
                 elif design == "Savitzky-Golay":
                     self.current_signal = apply_savgol(self.current_signal, window, 3)
                 elif design == "Median":
@@ -385,17 +381,13 @@ class ProcessingMixin(_Base):
                         apply_median_filter,
                     )
 
-                    self.current_signal = apply_median_filter(
-                        self.current_signal, window
-                    )
+                    self.current_signal = apply_median_filter(self.current_signal, window)
                 elif design == "Gaussian":
                     from .filters import (
                         apply_gaussian_smoothing,
                     )
 
-                    self.current_signal = apply_gaussian_smoothing(
-                        self.current_signal, window / 3
-                    )
+                    self.current_signal = apply_gaussian_smoothing(self.current_signal, window / 3)
             else:
                 # IIR filters
                 fs = self.current_signal.fs
@@ -634,7 +626,6 @@ class ProcessingMixin(_Base):
         self.original_signal = signal.copy()
         self._update_plot()
         self._log(
-            f"Loaded external signal: {signal.name or 'unnamed'} "
-            f"({signal.n_samples} samples)"
+            f"Loaded external signal: {signal.name or 'unnamed'} " f"({signal.n_samples} samples)"
         )
         self.signal_updated.emit(signal)

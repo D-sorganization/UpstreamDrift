@@ -58,9 +58,7 @@ def test_mujoco_pendulum_accuracy():
     i_sphere = 0.4 * 1.0 * (0.1**2)
     total_inertia = i_rod + i_sphere  # 1.004
 
-    analytical = AnalyticalPendulum(
-        length=1.0, mass=1.0, g=GRAVITY_M_S2, inertia=total_inertia
-    )
+    analytical = AnalyticalPendulum(length=1.0, mass=1.0, g=GRAVITY_M_S2, inertia=total_inertia)
 
     # 3. Initial Conditions
     # Release from 90 degrees (horizontal)
@@ -96,9 +94,7 @@ def test_mujoco_pendulum_accuracy():
     logger.info(f"Max Energy Error (MuJoCo): {max_energy_error:.6f} J")
 
     # Allow small numerical integration error
-    assert max_energy_error < 0.01, (
-        f"MuJoCo pendulum drifted! Max error: {max_energy_error}"
-    )
+    assert max_energy_error < 0.01, f"MuJoCo pendulum drifted! Max error: {max_energy_error}"
 
 
 def test_drake_pendulum_accuracy():

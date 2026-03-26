@@ -27,9 +27,7 @@ class OverviewTab(QtWidgets.QWidget):
         self.table_metadata.setHorizontalHeaderLabels(["Field", "Value"])
         header = self.table_metadata.horizontalHeader()
         if header is not None:
-            header.setSectionResizeMode(
-                0, QtWidgets.QHeaderView.ResizeMode.ResizeToContents
-            )
+            header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
             header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table_metadata)
 

@@ -29,9 +29,7 @@ class LogPanel(_QtWidgets.QTextEdit if _QtWidgets else object):  # type: ignore[
         """Initialize the log panel."""
         super().__init__()
         self.setReadOnly(True)
-        self.setStyleSheet(
-            "background:#111; color:#0F0; font-family:Consolas; font-size:12px;"
-        )
+        self.setStyleSheet("background:#111; color:#0F0; font-family:Consolas; font-size:12px;")
 
 
 class SignalBlocker:

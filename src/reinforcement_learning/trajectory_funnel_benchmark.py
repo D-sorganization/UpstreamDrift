@@ -16,8 +16,7 @@ class TrajectoryFunnelBenchmark:
     """
 
     def __init__(self, mode="transverse"):
-        if not (mode in [):
-            raise ValueError('DbC Blocked: Precondition failed.')
+        assert mode in [
             "transverse",
             "setpoint",
         ], "Mode must be 'transverse' or 'setpoint'"
@@ -28,25 +27,19 @@ class TrajectoryFunnelBenchmark:
         Classical control approach: Drive Euclidean distance to the destination to zero.
         Ignores path geometry, heavily penalizes phase asynchrony.
         """
-        if not (current_state is not None):
-            raise ValueError("current_state must be provided")
-        if not (current_state is not None):
-            raise ValueError("current_state must be provided")
+        assert current_state is not None, "current_state must be provided"
+        assert current_state is not None, "current_state must be provided"
         error = current_state - target_state
         return -np.sum(error**2)
 
-    def trajectory_funnel_reward(
-        self, current_state, reference_trajectory, current_phase
-    ):
+    def trajectory_funnel_reward(self, current_state, reference_trajectory, current_phase):
         """
         Geometric approach: Reward confinement to the trajectory tube (orbital stability).
         Uses transverse deviations and allows phase slippage.
         """
         # Find the geometrically closest point on the reference trajectory manifold
-        if not (current_state is not None):
-            raise ValueError("current_state must be provided")
-        if not (current_state is not None):
-            raise ValueError("current_state must be provided")
+        assert current_state is not None, "current_state must be provided"
+        assert current_state is not None, "current_state must be provided"
         distances = np.linalg.norm(reference_trajectory - current_state, axis=1)
         transverse_distance = np.min(distances)
         projected_phase_idx = np.argmin(distances)

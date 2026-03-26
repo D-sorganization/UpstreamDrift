@@ -57,9 +57,7 @@ def calculate_syngas_water(request: SyngasWaterRequest) -> SyngasWaterResponse:
         risk_assessment=CondensationRiskOut(
             temperature_margin_c=_sanitize(float(risk["temperature_margin_c"])),
             condensation_risk=str(risk["condensation_risk"]),
-            recommended_temperature_c=_sanitize(
-                float(risk["recommended_temperature_c"])
-            ),
+            recommended_temperature_c=_sanitize(float(risk["recommended_temperature_c"])),
         ),
     )
 
@@ -94,9 +92,7 @@ def _fallback_calculate(request: SyngasWaterRequest) -> SyngasWaterResponse:
 
     # Dew point via inverse Antoine
     pp = mole_frac * request.pressure_bar
-    dew_c = (
-        B / (A - math.log10(max(pp * 1e5 / 133.322, 1e-10))) - C if pp > 0 else -273.15
-    )
+    dew_c = B / (A - math.log10(max(pp * 1e5 / 133.322, 1e-10))) - C if pp > 0 else -273.15
 
     margin = request.temperature_c - dew_c
     if margin < 0:

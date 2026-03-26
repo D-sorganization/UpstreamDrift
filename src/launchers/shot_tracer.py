@@ -372,17 +372,13 @@ class MultiModelShotTracerWidget(QWidget):
             positions = result.to_position_array()
             color = TRAJECTORY_COLORS[i % len(TRAJECTORY_COLORS)]
 
-            line = gl.GLLinePlotItem(
-                pos=positions, color=color, width=3, antialias=True
-            )
+            line = gl.GLLinePlotItem(pos=positions, color=color, width=3, antialias=True)
             self.gl_widget.addItem(line)
             self.trajectory_plots[model_name] = line
 
         # Adjust camera to fit all trajectories
         if self.results:
-            all_positions = np.vstack(
-                [r.to_position_array() for r in self.results.values()]
-            )
+            all_positions = np.vstack([r.to_position_array() for r in self.results.values()])
             max_x = np.max(all_positions[:, 0])
             self.gl_widget.setCameraPosition(
                 distance=max(200, max_x * 1.2), elevation=20, azimuth=45
@@ -397,15 +393,9 @@ class MultiModelShotTracerWidget(QWidget):
 
             self.results_table.setItem(row, 0, QTableWidgetItem(model_name))
             self.results_table.setItem(row, 1, QTableWidgetItem(f"{carry_yd:.1f}"))
-            self.results_table.setItem(
-                row, 2, QTableWidgetItem(f"{result.max_height:.1f}")
-            )
-            self.results_table.setItem(
-                row, 3, QTableWidgetItem(f"{result.flight_time:.2f}")
-            )
-            self.results_table.setItem(
-                row, 4, QTableWidgetItem(f"{result.landing_angle:.1f}")
-            )
+            self.results_table.setItem(row, 2, QTableWidgetItem(f"{result.max_height:.1f}"))
+            self.results_table.setItem(row, 3, QTableWidgetItem(f"{result.flight_time:.2f}"))
+            self.results_table.setItem(row, 4, QTableWidgetItem(f"{result.landing_angle:.1f}"))
 
         self.results_table.resizeColumnsToContents()
 
@@ -451,8 +441,7 @@ def main() -> None:
     app.setStyle("Fusion")
 
     # Apply dark theme
-    app.setStyleSheet(
-        """
+    app.setStyleSheet("""
         QMainWindow, QWidget {
             background-color: #2b2b2b;
             color: #ffffff;
@@ -504,8 +493,7 @@ def main() -> None:
             padding: 5px;
             border: 1px solid #555;
         }
-        """
-    )
+        """)
 
     window = MultiModelShotTracerWindow()
     window.show()

@@ -109,9 +109,7 @@ class TestGenderInterpolation:
         data = DE_LEVA_DATA.get_segment_data("thigh", gender_factor=0.3)
         male = DE_LEVA_DATA.male["thigh"]
         female = DE_LEVA_DATA.female["thigh"]
-        expected_length = female.length_ratio + 0.3 * (
-            male.length_ratio - female.length_ratio
-        )
+        expected_length = female.length_ratio + 0.3 * (male.length_ratio - female.length_ratio)
         assert data.length_ratio == pytest.approx(expected_length)
 
     def test_unknown_segment_returns_default(self) -> None:
@@ -257,9 +255,7 @@ class TestSegmentNameMapping:
     """Test get_anthropometry_key mapping."""
 
     def test_left_right_map_to_same(self) -> None:
-        assert get_anthropometry_key("left_upper_arm") == get_anthropometry_key(
-            "right_upper_arm"
-        )
+        assert get_anthropometry_key("left_upper_arm") == get_anthropometry_key("right_upper_arm")
         assert get_anthropometry_key("left_foot") == get_anthropometry_key("right_foot")
 
     def test_direct_name_passthrough(self) -> None:

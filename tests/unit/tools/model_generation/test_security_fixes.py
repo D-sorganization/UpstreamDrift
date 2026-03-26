@@ -59,9 +59,7 @@ class TestAPIKeyAuthentication:
 
     def test_no_env_key_means_no_auth_required(self):
         """When MODEL_GEN_API_KEY is not set, requests pass through."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
             resp = api.handle_request(self._health_request())
@@ -87,9 +85,7 @@ class TestCORSHeaders:
 
     def test_cors_headers_present_in_response(self):
         """Responses should include CORS headers."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
             resp = api.handle_request(self._health_request())
@@ -111,12 +107,8 @@ class TestCORSHeaders:
 
     def test_cors_configurable_origins(self):
         """CORS origins should be configurable via env var."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
-        env_overrides["MODEL_GEN_CORS_ORIGINS"] = (
-            "https://example.com,https://app.example.com"
-        )
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
+        env_overrides["MODEL_GEN_CORS_ORIGINS"] = "https://example.com,https://app.example.com"
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
             resp = api.handle_request(self._health_request())
@@ -143,9 +135,7 @@ class TestRateLimiting:
 
     def test_rate_limit_allows_under_threshold(self):
         """Requests under the limit should succeed."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
         env_overrides["MODEL_GEN_RATE_LIMIT"] = "5"
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
@@ -155,9 +145,7 @@ class TestRateLimiting:
 
     def test_rate_limit_blocks_over_threshold(self):
         """Requests over the limit should get 429."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
         env_overrides["MODEL_GEN_RATE_LIMIT"] = "3"
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
@@ -202,9 +190,7 @@ class TestInputValidation:
 
     def test_generate_humanoid_accepts_valid_body(self):
         """Valid body should not cause validation error."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
             with patch(
@@ -236,9 +222,7 @@ class TestErrorResponseSanitization:
 
     def test_production_error_no_stack_trace(self):
         """In production mode, 500 errors should not contain traceback info."""
-        env_overrides = {
-            k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
-        }
+        env_overrides = {k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"}
         env_overrides["MODEL_GEN_ENV"] = "production"
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
@@ -260,9 +244,7 @@ class TestErrorResponseSanitization:
     def test_development_error_may_contain_details(self):
         """In development mode, errors may contain details."""
         env_overrides = {
-            k: v
-            for k, v in os.environ.items()
-            if k not in ("MODEL_GEN_API_KEY", "MODEL_GEN_ENV")
+            k: v for k, v in os.environ.items() if k not in ("MODEL_GEN_API_KEY", "MODEL_GEN_ENV")
         }
         with patch.dict(os.environ, env_overrides, clear=True):
             api = self._make_api()
@@ -288,18 +270,14 @@ class TestURLValidation:
     def test_https_url_allowed(self):
         from security.security_utils import validate_url_scheme
 
-        result = validate_url_scheme(
-            "https://example.com/model.urdf", allowed_schemes=("https",)
-        )
+        result = validate_url_scheme("https://example.com/model.urdf", allowed_schemes=("https",))
         assert result == "https://example.com/model.urdf"
 
     def test_http_url_blocked_when_only_https_allowed(self):
         from security.security_utils import validate_url_scheme
 
         with pytest.raises(ValueError, match="not allowed"):
-            validate_url_scheme(
-                "http://example.com/model.urdf", allowed_schemes=("https",)
-            )
+            validate_url_scheme("http://example.com/model.urdf", allowed_schemes=("https",))
 
     def test_ftp_url_blocked(self):
         from security.security_utils import validate_url_scheme
@@ -473,9 +451,7 @@ class TestSMPLXVertexValidation:
             SMPLXMeshGenerator,
         )
 
-        with patch(
-            "humanoid_character_builder.generators.mesh_generator.logger"
-        ) as mock_logger:
+        with patch("humanoid_character_builder.generators.mesh_generator.logger") as mock_logger:
             SMPLXMeshGenerator.load_part_segmentation(Path("/nonexistent/path"))
             mock_logger.warning.assert_called()
             # The warning should mention fallback or hardcoded

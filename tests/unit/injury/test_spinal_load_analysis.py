@@ -103,12 +103,8 @@ class TestSpinalRiskLevel:
 
 class TestClassConstants:
     def test_compression_thresholds(self) -> None:
-        assert (
-            SpinalLoadAnalyzer.COMPRESSION_SAFE < SpinalLoadAnalyzer.COMPRESSION_CAUTION
-        )
-        assert (
-            SpinalLoadAnalyzer.COMPRESSION_CAUTION < SpinalLoadAnalyzer.COMPRESSION_HIGH
-        )
+        assert SpinalLoadAnalyzer.COMPRESSION_SAFE < SpinalLoadAnalyzer.COMPRESSION_CAUTION
+        assert SpinalLoadAnalyzer.COMPRESSION_CAUTION < SpinalLoadAnalyzer.COMPRESSION_HIGH
 
     def test_shear_thresholds(self) -> None:
         assert SpinalLoadAnalyzer.SHEAR_SAFE < SpinalLoadAnalyzer.SHEAR_CAUTION

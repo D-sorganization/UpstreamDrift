@@ -83,21 +83,19 @@ class TestMassMatrix:
     def test_symmetric(self, default_dynamics: DoublePendulumDynamics) -> None:
         for theta2 in [0.0, math.pi / 4, -math.pi / 3, math.pi / 2]:
             M = default_dynamics.mass_matrix(theta2)
-            assert M[0][1] == pytest.approx(M[1][0], rel=1e-12), (
-                f"M not symmetric at theta2={theta2}"
-            )
+            assert M[0][1] == pytest.approx(
+                M[1][0], rel=1e-12
+            ), f"M not symmetric at theta2={theta2}"
 
     def test_positive_definite(self, default_dynamics: DoublePendulumDynamics) -> None:
         for theta2 in np.linspace(-math.pi, math.pi, 20):
             M = np.array(default_dynamics.mass_matrix(theta2))
             eigenvalues = np.linalg.eigvalsh(M)
-            assert np.all(eigenvalues > 0), (
-                f"M not positive-definite at theta2={theta2:.3f}: {eigenvalues}"
-            )
+            assert np.all(
+                eigenvalues > 0
+            ), f"M not positive-definite at theta2={theta2:.3f}: {eigenvalues}"
 
-    def test_diagonal_dominant_at_zero(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_diagonal_dominant_at_zero(self, default_dynamics: DoublePendulumDynamics) -> None:
         """At theta2=0 (segments aligned), coupling is maximised."""
         M = np.array(default_dynamics.mass_matrix(0.0))
         # M11 > |M12| by construction (positive-definite condition)
@@ -106,14 +104,11 @@ class TestMassMatrix:
     def test_m22_constant(self, default_dynamics: DoublePendulumDynamics) -> None:
         """M22 = I2 is independent of configuration."""
         m22_vals = [
-            default_dynamics.mass_matrix(t)[1][1]
-            for t in np.linspace(-math.pi, math.pi, 10)
+            default_dynamics.mass_matrix(t)[1][1] for t in np.linspace(-math.pi, math.pi, 10)
         ]
         assert max(m22_vals) == pytest.approx(min(m22_vals), rel=1e-12)
 
-    def test_coupling_zero_at_pi_half(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_coupling_zero_at_pi_half(self, default_dynamics: DoublePendulumDynamics) -> None:
         """At theta2 = ±π/2, the cross-inertia M12 is minimised."""
         M_pi2 = np.array(default_dynamics.mass_matrix(math.pi / 2))
         M_0 = np.array(default_dynamics.mass_matrix(0.0))
@@ -131,9 +126,7 @@ class TestCoriolisVector:
         assert c1 == pytest.approx(0.0, abs=1e-15)
         assert c2 == pytest.approx(0.0, abs=1e-15)
 
-    def test_antisymmetry_omega2(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_antisymmetry_omega2(self, default_dynamics: DoublePendulumDynamics) -> None:
         """Reversing omega2 should reverse c1 (not c2 in general)."""
         c1_pos, _ = default_dynamics.coriolis_vector(0.3, 1.0, 0.5)
         c1_neg, _ = default_dynamics.coriolis_vector(0.3, 1.0, -0.5)
@@ -143,9 +136,7 @@ class TestCoriolisVector:
     def test_returns_finite(self, default_dynamics: DoublePendulumDynamics) -> None:
         for _ in range(30):
             theta2, omega1, omega2 = np.random.uniform(-3.0, 3.0, 3)
-            c1, c2 = default_dynamics.coriolis_vector(
-                float(theta2), float(omega1), float(omega2)
-            )
+            c1, c2 = default_dynamics.coriolis_vector(float(theta2), float(omega1), float(omega2))
             assert math.isfinite(c1) and math.isfinite(c2)
 
 
@@ -155,17 +146,13 @@ class TestCoriolisVector:
 
 
 class TestGravityVector:
-    def test_zero_at_vertical_equilibrium(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_zero_at_vertical_equilibrium(self, default_dynamics: DoublePendulumDynamics) -> None:
         """At theta1=0, theta2=0 (hanging), gravity torques are zero."""
         g1, g2 = default_dynamics.gravity_vector(0.0, 0.0)
         assert g1 == pytest.approx(0.0, abs=1e-12)
         assert g2 == pytest.approx(0.0, abs=1e-12)
 
-    def test_nonzero_at_horizontal(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_nonzero_at_horizontal(self, default_dynamics: DoublePendulumDynamics) -> None:
         g1, g2 = default_dynamics.gravity_vector(math.pi / 2, 0.0)
         assert abs(g1) > 0.01
 
@@ -185,9 +172,7 @@ class TestDampingVector:
         d1, d2 = default_dynamics.damping_vector(0.0, 0.0)
         assert d1 == pytest.approx(0.0) and d2 == pytest.approx(0.0)
 
-    def test_proportional_to_velocity(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_proportional_to_velocity(self, default_dynamics: DoublePendulumDynamics) -> None:
         d1_v1, _ = default_dynamics.damping_vector(1.0, 0.0)
         d1_v2, _ = default_dynamics.damping_vector(2.0, 0.0)
         assert d1_v2 == pytest.approx(2 * d1_v1, rel=1e-10)
@@ -210,9 +195,7 @@ class TestDerivatives:
         derivs = default_dynamics.derivatives(0.0, state)
         assert len(derivs) == 4
 
-    def test_velocity_passthrough(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_velocity_passthrough(self, default_dynamics: DoublePendulumDynamics) -> None:
         state = DoublePendulumState(0.0, 0.0, 1.5, -0.7)
         dtheta1, dtheta2, _, _ = default_dynamics.derivatives(0.0, state)
         assert dtheta1 == pytest.approx(state.omega1)
@@ -234,9 +217,7 @@ class TestDerivatives:
 
 
 class TestRK4Step:
-    def test_small_step_near_equilibrium(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_small_step_near_equilibrium(self, default_dynamics: DoublePendulumDynamics) -> None:
         state0 = DoublePendulumState(0.01, 0.0, 0.0, 0.0)
         state1 = default_dynamics.step(0.0, state0, dt=0.001)
         # Near equilibrium small perturbation: angle barely changes
@@ -314,9 +295,7 @@ class TestInverseDynamics:
         assert tau1 == pytest.approx(0.0, abs=1e-12)
         assert tau2 == pytest.approx(0.0, abs=1e-12)
 
-    def test_roundtrip_with_derivatives(
-        self, default_dynamics: DoublePendulumDynamics
-    ) -> None:
+    def test_roundtrip_with_derivatives(self, default_dynamics: DoublePendulumDynamics) -> None:
         """Inverse dynamics of the actual acceleration should match applied torques."""
         state = DoublePendulumState(0.3, -0.2, 1.0, 0.5)
         # Set explicit forcing

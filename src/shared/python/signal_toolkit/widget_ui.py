@@ -572,9 +572,7 @@ class UISetupMixin(_Base):
 
         # Apply saturation button
         self.apply_sat_btn = QPushButton("Apply Saturation")
-        self.apply_sat_btn.setStyleSheet(
-            "background-color: #0078d4; font-weight: bold;"
-        )
+        self.apply_sat_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
         layout.addWidget(self.apply_sat_btn)
 
         # Preview checkbox
@@ -743,9 +741,7 @@ class UISetupMixin(_Base):
 
         # Apply filter button
         self.apply_filter_btn = QPushButton("Apply Filter")
-        self.apply_filter_btn.setStyleSheet(
-            "background-color: #0078d4; font-weight: bold;"
-        )
+        self.apply_filter_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
         layout.addWidget(self.apply_filter_btn)
 
         self.show_freq_response_btn = QPushButton("Show Frequency Response")
@@ -805,9 +801,7 @@ class UISetupMixin(_Base):
 
         # Add noise button
         self.add_noise_btn = QPushButton("Add Noise")
-        self.add_noise_btn.setStyleSheet(
-            "background-color: #0078d4; font-weight: bold;"
-        )
+        self.add_noise_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
         layout.addWidget(self.add_noise_btn)
 
         self.reset_signal_btn = QPushButton("Reset to Original")
@@ -883,9 +877,7 @@ class UISetupMixin(_Base):
     def _setup_connections(self) -> None:
         """Setup signal-slot connections."""
         # Generation
-        self.signal_type_combo.currentIndexChanged.connect(
-            self.param_stack.setCurrentIndex
-        )
+        self.signal_type_combo.currentIndexChanged.connect(self.param_stack.setCurrentIndex)
         self.generate_btn.clicked.connect(self._generate_signal)
 
         # Fitting

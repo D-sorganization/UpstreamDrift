@@ -7,9 +7,11 @@ tensors of common geometric primitives.
 
 from __future__ import annotations
 
+import functools
 import math
 
 
+@functools.lru_cache(maxsize=512)
 def box_inertia(
     mass: float,
     size_x: float,
@@ -48,6 +50,7 @@ def box_inertia(
     }
 
 
+@functools.lru_cache(maxsize=512)
 def cylinder_inertia(
     mass: float,
     radius: float,
@@ -107,6 +110,7 @@ def cylinder_inertia(
     }
 
 
+@functools.lru_cache(maxsize=512)
 def sphere_inertia(mass: float, radius: float) -> dict[str, float]:
     """
     Compute inertia tensor for a solid sphere.
@@ -136,6 +140,7 @@ def sphere_inertia(mass: float, radius: float) -> dict[str, float]:
     }
 
 
+@functools.lru_cache(maxsize=512)
 def capsule_inertia(
     mass: float,
     radius: float,
@@ -222,6 +227,7 @@ def capsule_inertia(
     }
 
 
+@functools.lru_cache(maxsize=512)
 def ellipsoid_inertia(
     mass: float,
     a: float,
@@ -261,6 +267,7 @@ def ellipsoid_inertia(
     }
 
 
+@functools.lru_cache(maxsize=512)
 def hollow_cylinder_inertia(
     mass: float,
     inner_radius: float,
@@ -320,6 +327,7 @@ def hollow_cylinder_inertia(
     }
 
 
+@functools.lru_cache(maxsize=512)
 def cone_inertia(
     mass: float,
     radius: float,

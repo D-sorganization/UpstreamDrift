@@ -320,9 +320,7 @@ class JointTableWidget(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem(lower))
             self.table.setItem(row, 5, QTableWidgetItem(upper))
 
-            axis_str = (
-                f"({joint.axis[0]:.1f}, {joint.axis[1]:.1f}, {joint.axis[2]:.1f})"
-            )
+            axis_str = f"({joint.axis[0]:.1f}, {joint.axis[1]:.1f}, {joint.axis[2]:.1f})"
             self.table.setItem(row, 6, QTableWidgetItem(axis_str))
 
             movable = "Yes" if joint.is_movable() else "No"
@@ -702,9 +700,7 @@ class JointManipulatorWidget(QWidget):
         self.editor_panel.load_joints(self.joints)
 
         movable = sum(1 for j in self.joints.values() if j.is_movable())
-        self.status_label.setText(
-            f"Loaded {len(self.joints)} joints ({movable} movable)"
-        )
+        self.status_label.setText(f"Loaded {len(self.joints)} joints ({movable} movable)")
 
     def _populate_sliders(self) -> None:
         """Populate the sliders container."""
@@ -727,9 +723,7 @@ class JointManipulatorWidget(QWidget):
 
             slider_widget = JointSliderWidget(joint)
             slider_widget.value_changed.connect(self._on_joint_value_changed)
-            self.sliders_layout.insertWidget(
-                self.sliders_layout.count() - 1, slider_widget
-            )
+            self.sliders_layout.insertWidget(self.sliders_layout.count() - 1, slider_widget)
 
     def _on_filter_changed(self, filter_text: str) -> None:
         """Handle filter change."""
@@ -818,10 +812,7 @@ class JointManipulatorWidget(QWidget):
             item = self.sliders_layout.itemAt(i)
             if item and item.widget():
                 widget = item.widget()
-                if (
-                    isinstance(widget, JointSliderWidget)
-                    and widget.joint.name in positions
-                ):
+                if isinstance(widget, JointSliderWidget) and widget.joint.name in positions:
                     widget.set_value(positions[widget.joint.name])
 
     def get_urdf_content(self) -> str:

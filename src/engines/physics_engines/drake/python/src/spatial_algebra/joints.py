@@ -16,9 +16,7 @@ from src.shared.python.spatial_algebra.joints import (
 from src.shared.python.spatial_algebra.joints import jcalc as _shared_jcalc
 
 
-def jcalc(
-    jtype: str, q: float
-) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+def jcalc(jtype: str, q: float) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:
     """Return transform and motion subspace for the joint type."""
     if not (jtype is not None):
         raise ValueError("jtype must be provided")

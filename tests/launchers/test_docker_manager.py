@@ -58,9 +58,7 @@ def test_docker_build_thread_invalid_context():
 @patch.object(Path, "exists", return_value=True)
 def test_docker_build_thread_success(mock_exists, mock_popen):
     context = Path("/fake/context")
-    thread = DockerBuildThread(
-        target_stage="all", image_name="test_image", context_path=context
-    )
+    thread = DockerBuildThread(target_stage="all", image_name="test_image", context_path=context)
 
     mock_process = MagicMock()
     mock_process.returncode = 0
@@ -84,9 +82,7 @@ def test_docker_build_thread_success(mock_exists, mock_popen):
 @patch.object(Path, "exists", return_value=True)
 def test_docker_build_thread_failure(mock_exists, mock_popen):
     context = Path("/fake/context")
-    thread = DockerBuildThread(
-        target_stage="all", image_name="test_image", context_path=context
-    )
+    thread = DockerBuildThread(target_stage="all", image_name="test_image", context_path=context)
 
     mock_process = MagicMock()
     mock_process.returncode = 1
@@ -106,9 +102,7 @@ def test_docker_build_thread_failure(mock_exists, mock_popen):
 @patch.object(Path, "exists", return_value=True)
 def test_docker_build_thread_linux(mock_exists, mock_popen):
     context = Path("/fake/context")
-    thread = DockerBuildThread(
-        target_stage="all", image_name="test_image", context_path=context
-    )
+    thread = DockerBuildThread(target_stage="all", image_name="test_image", context_path=context)
 
     mock_process = MagicMock()
     mock_process.returncode = 0
@@ -132,9 +126,7 @@ def test_docker_build_thread_linux(mock_exists, mock_popen):
 @patch.object(Path, "exists", return_value=True)
 def test_docker_build_thread_empty_line(mock_exists, mock_popen):
     context = Path("/fake/context")
-    thread = DockerBuildThread(
-        target_stage="all", image_name="test_image", context_path=context
-    )
+    thread = DockerBuildThread(target_stage="all", image_name="test_image", context_path=context)
 
     mock_process = MagicMock()
     mock_process.returncode = 0
@@ -160,9 +152,7 @@ def test_docker_build_thread_empty_line(mock_exists, mock_popen):
 @patch.object(Path, "exists", return_value=True)
 def test_docker_build_thread_exception(mock_exists, mock_popen):
     context = Path("/fake/context")
-    thread = DockerBuildThread(
-        target_stage="all", image_name="test_image", context_path=context
-    )
+    thread = DockerBuildThread(target_stage="all", image_name="test_image", context_path=context)
 
     mock_finished = MagicMock()
     thread.finished_signal.connect(mock_finished)

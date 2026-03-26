@@ -145,9 +145,7 @@ class OpenAIAdapter(BaseAgentAdapter):
                 ) from e
         return self._client
 
-    @precondition(
-        lambda message: bool(message.strip()), "message must not be empty or blank"
-    )
+    @precondition(lambda message: bool(message.strip()), "message must not be empty or blank")
     def send_message(
         self,
         message: str,
@@ -245,13 +243,9 @@ class OpenAIAdapter(BaseAgentAdapter):
                                     "index": tc.index,
                                     "id": tc.id,
                                     "function": {
-                                        "name": (
-                                            tc.function.name if tc.function else None
-                                        ),
+                                        "name": (tc.function.name if tc.function else None),
                                         "arguments": (
-                                            tc.function.arguments
-                                            if tc.function
-                                            else None
+                                            tc.function.arguments if tc.function else None
                                         ),
                                     },
                                 }
@@ -321,9 +315,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             )
 
         except AIProviderError:
-            return False, (
-                "openai package not installed. Install with: pip install openai"
-            )
+            return False, ("openai package not installed. Install with: pip install openai")
         except (RuntimeError, ValueError, OSError) as e:
             error_str = str(e).lower()
             if "authentication" in error_str or "api key" in error_str:

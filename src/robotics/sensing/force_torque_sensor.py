@@ -119,16 +119,11 @@ class ForceTorqueSensor(ContractChecker):
         """Define class invariants for ForceTorqueSensor."""
         return [
             (
-                lambda: (
-                    self._tare_offset is not None and self._tare_offset.shape == (6,)
-                ),
+                lambda: (self._tare_offset is not None and self._tare_offset.shape == (6,)),
                 "Tare offset must be a 6D vector",
             ),
             (
-                lambda: (
-                    self._config.force_noise_std >= 0
-                    and self._config.torque_noise_std >= 0
-                ),
+                lambda: (self._config.force_noise_std >= 0 and self._config.torque_noise_std >= 0),
                 "Noise standard deviations must be non-negative",
             ),
             (

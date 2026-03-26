@@ -56,9 +56,7 @@ def test_load_drake_missing(tmp_path: object) -> None:
     try:
         # Force ImportError when 'pydrake' is imported
         original_import = (
-            __builtins__.__import__
-            if hasattr(__builtins__, "__import__")
-            else __import__
+            __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
         )
 
         def side_effect(name, *args, **kwargs):

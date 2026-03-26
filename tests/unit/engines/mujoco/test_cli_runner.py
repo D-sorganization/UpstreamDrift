@@ -54,9 +54,7 @@ def test_execute_run_produces_summary_and_outputs(tmp_path: Path) -> None:
         import mujoco
 
         # Try to create a simple model to verify MuJoCo is working
-        test_xml = (
-            "<mujoco><worldbody><body><geom size='0.1'/></body></worldbody></mujoco>"
-        )
+        test_xml = "<mujoco><worldbody><body><geom size='0.1'/></body></worldbody></mujoco>"
         mujoco.MjModel.from_xml_string(test_xml)
     except (ImportError, RuntimeError, OSError, ValueError) as e:
         pytest.skip(f"MuJoCo not available or not properly initialized: {e}")

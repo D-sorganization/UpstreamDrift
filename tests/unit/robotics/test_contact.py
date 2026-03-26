@@ -276,9 +276,7 @@ class TestLinearizeFrictionCone:
         for f in inside_forces:
             # Should satisfy A @ f <= b (approximately, due to linearization)
             violations = A @ f - b
-            assert np.all(violations <= 1e-6), (
-                f"Force {f} should be inside linearized cone"
-            )
+            assert np.all(violations <= 1e-6), f"Force {f} should be inside linearized cone"
 
     def test_compute_friction_cone_constraint(self) -> None:
         """Test compute_friction_cone_constraint returns complete info."""
@@ -401,9 +399,7 @@ class TestGraspAnalysis:
         G = compute_grasp_matrix(simple_grasp)
         assert G.shape == (6, 6)  # 6 wrench dims, 2 contacts * 3 force dims
 
-    def test_grasp_matrix_with_object_frame(
-        self, simple_grasp: list[ContactState]
-    ) -> None:
+    def test_grasp_matrix_with_object_frame(self, simple_grasp: list[ContactState]) -> None:
         """Test grasp matrix with explicit object frame."""
         G = compute_grasp_matrix(
             simple_grasp,
@@ -426,9 +422,7 @@ class TestGraspAnalysis:
         # typically has force closure, but the detection algorithm
         # may require tuning
 
-    def test_force_closure_three_finger(
-        self, three_finger_grasp: list[ContactState]
-    ) -> None:
+    def test_force_closure_three_finger(self, three_finger_grasp: list[ContactState]) -> None:
         """Test force closure for three-finger grasp."""
         has_closure, quality = check_force_closure(three_finger_grasp)
 
@@ -440,9 +434,7 @@ class TestGraspAnalysis:
         # A symmetric three-finger grasp is well-suited for force closure
         # The heuristic check should at least detect full rank
 
-    def test_grasp_quality_min_singular_value(
-        self, three_finger_grasp: list[ContactState]
-    ) -> None:
+    def test_grasp_quality_min_singular_value(self, three_finger_grasp: list[ContactState]) -> None:
         """Test grasp quality computation."""
         quality = compute_grasp_quality(
             three_finger_grasp,
@@ -450,9 +442,7 @@ class TestGraspAnalysis:
         )
         assert quality > 0
 
-    def test_grasp_quality_isotropy(
-        self, three_finger_grasp: list[ContactState]
-    ) -> None:
+    def test_grasp_quality_isotropy(self, three_finger_grasp: list[ContactState]) -> None:
         """Test grasp isotropy metric."""
         isotropy = compute_grasp_quality(
             three_finger_grasp,

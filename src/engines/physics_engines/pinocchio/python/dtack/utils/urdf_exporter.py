@@ -102,9 +102,7 @@ class URDFExporter:
         lines.append("</robot>")
         return "\n".join(lines)
 
-    def _generate_segment_urdf(
-        self, segment: dict[str, typing.Any], parent_name: str
-    ) -> list[str]:
+    def _generate_segment_urdf(self, segment: dict[str, typing.Any], parent_name: str) -> list[str]:
         """Generate URDF for a segment.
 
         Handles revolute, universal (2 revolute), and gimbal (3 revolute) joints.
@@ -130,16 +128,12 @@ class URDFExporter:
         if joint_type == "gimbal":
             # Gimbal joint: 3 revolute joints (Z, Y, X axes)
             lines.extend(
-                self._generate_gimbal_joint(
-                    parent_name, seg_name, joint, segment, joint_origin
-                )
+                self._generate_gimbal_joint(parent_name, seg_name, joint, segment, joint_origin)
             )
         elif joint_type == "universal":
             # Universal joint: 2 revolute joints (perpendicular axes)
             lines.extend(
-                self._generate_universal_joint(
-                    parent_name, seg_name, joint, segment, joint_origin
-                )
+                self._generate_universal_joint(parent_name, seg_name, joint, segment, joint_origin)
             )
         elif joint_type == "fixed":
             lines.extend(
@@ -429,8 +423,7 @@ class URDFExporter:
         return [
             "    <inertial>",
             '      <mass value="0.001"/>',
-            '      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" '
-            'iyz="0" izz="0.0001"/>',
+            '      <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" ' 'iyz="0" izz="0.0001"/>',
             "    </inertial>",
         ]
 
@@ -513,9 +506,7 @@ class URDFExporter:
         elif geom_type in ("cylinder", "capsule"):
             size = geom.get("size", [0.1, 0.1])
             lines.append("      <geometry>")
-            lines.append(
-                f'        <cylinder radius="{size[0]}" length="{size[1] * 2}"/>'
-            )
+            lines.append(f'        <cylinder radius="{size[0]}" length="{size[1] * 2}"/>')
             lines.append("      </geometry>")
 
         rgba = geom.get("visual_rgba", [0.5, 0.5, 0.5, 1.0])

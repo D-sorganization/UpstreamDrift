@@ -40,9 +40,7 @@ class MockRecorder(RecorderInterface):
         self.kinetic_energy = self.club_head_speed**2
 
         # Angular momentum (3D vector)
-        self.angular_momentum = np.column_stack(
-            [self.signal, self.signal * 0.5, self.signal * 0.3]
-        )
+        self.angular_momentum = np.column_stack([self.signal, self.signal * 0.5, self.signal * 0.3])
 
         # Center of pressure (3D position)
         self.cop_position = np.column_stack(
@@ -203,9 +201,7 @@ def test_dataclasses() -> None:
     ],
     ids=["insufficient_data", "invalid_joint_index", "zero_correlation"],
 )
-def test_edge_cases_alignment(
-    setup_fn, field, joint_idx, expect_none, expect_corr
-) -> None:
+def test_edge_cases_alignment(setup_fn, field, joint_idx, expect_none, expect_corr) -> None:
     """Test edge cases in signal alignment."""
     rec_a = MockRecorder()
     rec_b = MockRecorder()
@@ -258,9 +254,7 @@ def test_generate_full_report() -> None:
     """Test comprehensive report generation with all metrics."""
     rec_a = MockRecorder(amplitude=10.0)
     rec_b = MockRecorder(amplitude=8.0)
-    analyzer = ComparativeSwingAnalyzer(
-        rec_a, rec_b, name_a="Pro Swing", name_b="Amateur Swing"
-    )
+    analyzer = ComparativeSwingAnalyzer(rec_a, rec_b, name_a="Pro Swing", name_b="Amateur Swing")
 
     report = analyzer.generate_comparison_report()
 
@@ -321,13 +315,9 @@ def test_angular_momentum_comparison() -> None:
     report = analyzer.generate_comparison_report()
 
     # Find angular momentum metric
-    am_metric = next(
-        (m for m in report["metrics"] if "Angular Momentum" in m.name), None
-    )
+    am_metric = next((m for m in report["metrics"] if "Angular Momentum" in m.name), None)
     assert am_metric is not None
-    assert (
-        am_metric.value_a > am_metric.value_b
-    )  # Higher amplitude = higher angular momentum
+    assert am_metric.value_a > am_metric.value_b  # Higher amplitude = higher angular momentum
 
 
 def test_cop_path_length_comparison() -> None:

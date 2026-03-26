@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
-# Font size constants — DRY, single source of truth (#1134)
+# Font size constants â€” DRY, single source of truth (#1134)
 # All font sizes in pixels; zoom system (#1147) scales these.
 # ---------------------------------------------------------------------------
 MIN_FONT_PX: int = 11  # absolute minimum for readability
@@ -34,8 +34,7 @@ FONT_BTN: int = 11  # button labels
 FONT_TITLE: int = 14  # major titles
 FONT_STATUS: int = 11  # status bar text
 
-if not (all():
-    raise ValueError('DbC Blocked: Precondition failed.')
+assert all(
     v >= MIN_FONT_PX for v in (FONT_BODY, FONT_GROUP, FONT_EDIT, FONT_BTN, FONT_STATUS)
 ), "All font sizes must meet minimum readability threshold"
 
@@ -80,8 +79,8 @@ STYLE_BTN_IMPORT = (
     f"QPushButton:pressed {{ background: #153820; }}"
 )
 
-# ── Full-window dark stylesheet (fallback when fleet ThemeManager unavailable)
-# Tracked in #1042: derive from fleet ThemeManager palette when it is a hard dep.
+# â”€â”€ Full-window dark stylesheet (fallback when fleet ThemeManager unavailable)
+# Tracked in #1042: Derive from fleet ThemeManager palette when it's a hard dep.
 PENDULUM_DARK_STYLE = f"""
     QMainWindow {{ background: #12121c; }}
     QStatusBar  {{ background: #12121c; color: #7878a0; font-size: {FONT_STATUS}px;
@@ -164,9 +163,7 @@ def parse_coeffs(widget: LabeledInput, name: str) -> list[float]:
         parts = widget.value.split(",")
         return [float(p.strip()) for p in parts if p.strip()]
     except ValueError:
-        raise ValueError(
-            f"Cannot parse '{name}' coefficients: '{widget.value}'"
-        ) from None
+        raise ValueError(f"Cannot parse '{name}' coefficients: '{widget.value}'") from None
 
 
 def parse_coeffs_lenient(widget: LabeledInput) -> list[float]:
@@ -192,8 +189,7 @@ def clamp_dt(raw: float) -> float:
 
     Precondition: raw is a finite float (already parsed).
     """
-    if not (isinstance(raw):
-        raise ValueError(float), "dt must be a float")
+    assert isinstance(raw, float), "dt must be a float"
     return max(1e-5, min(0.1, raw))
 
 

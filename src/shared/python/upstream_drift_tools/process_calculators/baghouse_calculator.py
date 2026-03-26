@@ -193,8 +193,7 @@ class BaghouseCalculator:
         }
 
         mw_avg = sum(
-            frac * mw_data.get(species, MW_DEFAULT_KG)
-            for species, frac in composition.items()
+            frac * mw_data.get(species, MW_DEFAULT_KG) for species, frac in composition.items()
         )
 
         if mw_avg > 0:
@@ -260,9 +259,7 @@ class BaghouseCalculator:
                     pressure=pressure_pa,
                     composition=composition,
                 )
-                outlet_props = self.thermo_calc.calculate_stream_properties(
-                    outlet_stream
-                )
+                outlet_props = self.thermo_calc.calculate_stream_properties(outlet_stream)
                 return (
                     convert(outlet_temp_k, "K", "C"),
                     outlet_props.acfm_flow,
@@ -274,9 +271,7 @@ class BaghouseCalculator:
         # Simplified path
         cp_mass = self._estimate_cp_ideal(composition)
         temp_drop = (
-            heat_loss_w / (gas_flow_kg_s * cp_mass)
-            if gas_flow_kg_s > 0 and cp_mass > 0
-            else 0.0
+            heat_loss_w / (gas_flow_kg_s * cp_mass) if gas_flow_kg_s > 0 and cp_mass > 0 else 0.0
         )
         outlet_temp_k = max(inlet_temp_k - temp_drop, 0.0)
         flow_acfm, flow_scfm = self._estimate_volume_flow(
@@ -301,22 +296,16 @@ class BaghouseCalculator:
              carbon_only_fill_hours, ash_only_fill_hours)
         """
         if not (solid_carbon_in_kg_hr is not None):
-            raise ValueError(()
-            "solid_carbon_in_kg_hr must be provided"
-        )
+            raise ValueError("solid_carbon_in_kg_hr must be provided")
         if not (solid_carbon_in_kg_hr is not None):
-            raise ValueError(()
-            "solid_carbon_in_kg_hr must be provided"
-        )
+            raise ValueError("solid_carbon_in_kg_hr must be provided")
         carbon_removed = solid_carbon_in_kg_hr * carbon_removal_efficiency
         ash_removed = ash_in_kg_hr * ash_removal_efficiency
         total_solids = carbon_removed + ash_removed
         drum_cap = solid_density_kg_m3 * drum_volume_m3
 
         fill_hrs = drum_cap / total_solids if total_solids > 0 else float("inf")
-        fill_days = (
-            fill_hrs / HOURS_PER_DAY if fill_hrs != float("inf") else float("inf")
-        )
+        fill_days = fill_hrs / HOURS_PER_DAY if fill_hrs != float("inf") else float("inf")
         c_fill = drum_cap / carbon_removed if carbon_removed > 0 else float("inf")
         a_fill = drum_cap / ash_removed if ash_removed > 0 else float("inf")
 
@@ -372,19 +361,15 @@ class BaghouseCalculator:
         if not (pressure_pa > 0):
             raise ValueError(f"Pressure must be positive, got {pressure_pa}")
         if not (0 <= carbon_removal_efficiency <= 1):
-            raise ValueError(()
-            f"Carbon removal efficiency must be 0-1, got {carbon_removal_efficiency}"
-        )
+            raise ValueError(
+                f"Carbon removal efficiency must be 0-1, got {carbon_removal_efficiency}"
+            )
         if not (0 <= ash_removal_efficiency <= 1):
-            raise ValueError(()
-            f"Ash removal efficiency must be 0-1, got {ash_removal_efficiency}"
-        )
+            raise ValueError(f"Ash removal efficiency must be 0-1, got {ash_removal_efficiency}")
         if not (drum_volume_m3 > 0):
             raise ValueError(f"Drum volume must be positive, got {drum_volume_m3}")
         if not (solid_density_kg_m3 > 0):
-            raise ValueError(()
-            f"Solid density must be positive, got {solid_density_kg_m3}"
-        )
+            raise ValueError(f"Solid density must be positive, got {solid_density_kg_m3}")
 
         outlet_temp_c, flow_acfm, flow_scfm = self._calculate_outlet_thermal(
             gas_flow_kg_s,
@@ -414,9 +399,7 @@ class BaghouseCalculator:
         air_to_cloth = flow_acfm / bag_area_ft2 if bag_area_ft2 > 0 else 0.0
 
         ash_stream_comp = {
-            "carbon_fraction": (
-                carbon_removed / total_solids if total_solids > 0 else 0.0
-            ),
+            "carbon_fraction": (carbon_removed / total_solids if total_solids > 0 else 0.0),
             "ash_fraction": (ash_removed / total_solids if total_solids > 0 else 0.0),
         }
 

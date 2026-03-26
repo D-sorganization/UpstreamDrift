@@ -63,10 +63,7 @@ class PowerWorkMetricsMixin:
         if joint_idx in self._work_metrics_cache:
             return self._work_metrics_cache[joint_idx]
 
-        if (
-            joint_idx >= self.joint_torques.shape[1]
-            or joint_idx >= self.joint_velocities.shape[1]
-        ):
+        if joint_idx >= self.joint_torques.shape[1] or joint_idx >= self.joint_velocities.shape[1]:
             return None
 
         torque = self.joint_torques[:, joint_idx]
@@ -141,10 +138,7 @@ class PowerWorkMetricsMixin:
             raise ValueError("joint_idx must be provided")
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if (
-            joint_idx >= self.joint_torques.shape[1]
-            or joint_idx >= self.joint_velocities.shape[1]
-        ):
+        if joint_idx >= self.joint_torques.shape[1] or joint_idx >= self.joint_velocities.shape[1]:
             return None
 
         torque = self.joint_torques[:, joint_idx]
@@ -322,10 +316,7 @@ class PowerWorkMetricsMixin:
             raise ValueError("joint_idx must be provided")
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if (
-            joint_idx >= self.joint_positions.shape[1]
-            or joint_idx >= self.joint_torques.shape[1]
-        ):
+        if joint_idx >= self.joint_positions.shape[1] or joint_idx >= self.joint_torques.shape[1]:
             return None
 
         angles = self.joint_positions[:, joint_idx]
@@ -377,10 +368,7 @@ class PowerWorkMetricsMixin:
             raise ValueError("joint_idx must be provided")
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if (
-            joint_idx >= self.joint_positions.shape[1]
-            or joint_idx >= self.joint_torques.shape[1]
-        ):
+        if joint_idx >= self.joint_positions.shape[1] or joint_idx >= self.joint_torques.shape[1]:
             return np.array([]), np.array([]), np.array([])
 
         angles = self.joint_positions[:, joint_idx]

@@ -227,22 +227,16 @@ class SwingModificationRecommender:
 
             if ("shear" in name_lower or "compression" in name_lower) and score > 30:
                 applicable_mods.append((self.MODIFICATIONS["stabilize_spine"], score))
-                applicable_mods.append(
-                    (self.MODIFICATIONS["slow_transition"], score * 0.8)
-                )
+                applicable_mods.append((self.MODIFICATIONS["slow_transition"], score * 0.8))
 
             if "elbow" in name_lower and score > 30:
-                applicable_mods.append(
-                    (self.MODIFICATIONS["maintain_wrist_cock"], score)
-                )
+                applicable_mods.append((self.MODIFICATIONS["maintain_wrist_cock"], score))
 
             if "hip" in name_lower and score > 40:
                 applicable_mods.append((self.MODIFICATIONS["weight_forward"], score))
 
             if "shoulder" in name_lower and score > 40:
-                applicable_mods.append(
-                    (self.MODIFICATIONS["reduce_backswing"], score * 0.7)
-                )
+                applicable_mods.append((self.MODIFICATIONS["reduce_backswing"], score * 0.7))
 
         return applicable_mods
 
@@ -275,17 +269,11 @@ class SwingModificationRecommender:
             plan.secondary_modifications = [mod for mod, _ in applicable_mods[1:3]]
 
         all_mods = [
-            m
-            for m in [plan.primary_modification] + plan.secondary_modifications
-            if m is not None
+            m for m in [plan.primary_modification] + plan.secondary_modifications if m is not None
         ]
 
-        plan.estimated_total_risk_reduction = (
-            sum(m.expected_risk_reduction for m in all_mods) * 0.7
-        )
-        plan.estimated_performance_change = sum(
-            m.expected_performance_impact for m in all_mods
-        )
+        plan.estimated_total_risk_reduction = sum(m.expected_risk_reduction for m in all_mods) * 0.7
+        plan.estimated_performance_change = sum(m.expected_performance_impact for m in all_mods)
 
         num_changes = len(all_mods)
         if num_changes == 1:

@@ -389,9 +389,7 @@ class ModelExplorerWindow(QMainWindow):
 
         # Status bar
         self._status_label = QLabel("Ready")
-        self._status_label.setStyleSheet(
-            f"color: {CATPPUCCIN_MOCHA['subtext0']}; padding: 4px;"
-        )
+        self._status_label.setStyleSheet(f"color: {CATPPUCCIN_MOCHA['subtext0']}; padding: 4px;")
         main_layout.addWidget(self._status_label)
 
     # -- Top Bar --
@@ -527,9 +525,7 @@ class ModelExplorerWindow(QMainWindow):
 
         self.links_table = QTableWidget()
         self.links_table.setColumnCount(4)
-        self.links_table.setHorizontalHeaderLabels(
-            ["Name", "Mass (kg)", "Geometry", "Material"]
-        )
+        self.links_table.setHorizontalHeaderLabels(["Name", "Mass (kg)", "Geometry", "Material"])
         header = self.links_table.horizontalHeader()
         if header:
             header.setStretchLastSection(True)
@@ -544,9 +540,7 @@ class ModelExplorerWindow(QMainWindow):
 
         self.joints_table = QTableWidget()
         self.joints_table.setColumnCount(5)
-        self.joints_table.setHorizontalHeaderLabels(
-            ["Name", "Type", "Parent", "Child", "Axis"]
-        )
+        self.joints_table.setHorizontalHeaderLabels(["Name", "Type", "Parent", "Child", "Axis"])
         header = self.joints_table.horizontalHeader()
         if header:
             header.setStretchLastSection(True)
@@ -592,9 +586,7 @@ class ModelExplorerWindow(QMainWindow):
         if model_id:
             self._loader.set_default_model(model_id)
             self._status_label.setText(f"Default model set to: {model_id}")
-            self._status_label.setStyleSheet(
-                f"color: {CATPPUCCIN_MOCHA['green']}; padding: 4px;"
-            )
+            self._status_label.setStyleSheet(f"color: {CATPPUCCIN_MOCHA['green']}; padding: 4px;")
             # Refresh list to update bold indicator
             self._populate_model_list(self.category_combo.currentData() or "")
 
@@ -625,9 +617,7 @@ class ModelExplorerWindow(QMainWindow):
         if not (key is not None):
             raise ValueError("key must be provided")
         self._loader.save_preferences()
-        self._status_label.setText(
-            f"Display: {key} {'enabled' if checked else 'disabled'}"
-        )
+        self._status_label.setText(f"Display: {key} {'enabled' if checked else 'disabled'}")
 
     # -- Display Updates --
 
@@ -641,9 +631,7 @@ class ModelExplorerWindow(QMainWindow):
 
         if not result.success:
             self._status_label.setText(f"Load failed: {result.error}")
-            self._status_label.setStyleSheet(
-                f"color: {CATPPUCCIN_MOCHA['red']}; padding: 4px;"
-            )
+            self._status_label.setStyleSheet(f"color: {CATPPUCCIN_MOCHA['red']}; padding: 4px;")
             return
 
         model = result.model
@@ -661,17 +649,13 @@ class ModelExplorerWindow(QMainWindow):
 
         root = model.get_root_link()
         self.info_labels["root_link"].setText(root.name if root else "N/A")
-        self.info_labels["source"].setText(
-            str(result.source_path) if result.source_path else "N/A"
-        )
+        self.info_labels["source"].setText(str(result.source_path) if result.source_path else "N/A")
 
         # Links table
         self.links_table.setRowCount(len(model.links))
         for row, link in enumerate(model.links):
             self.links_table.setItem(row, 0, QTableWidgetItem(link.name))
-            self.links_table.setItem(
-                row, 1, QTableWidgetItem(f"{link.inertia.mass:.4f}")
-            )
+            self.links_table.setItem(row, 1, QTableWidgetItem(f"{link.inertia.mass:.4f}"))
             geom_str = "-"
             if link.visual_geometry:
                 geom_str = link.visual_geometry.geometry_type.value
@@ -704,12 +688,9 @@ class ModelExplorerWindow(QMainWindow):
 
         # Status
         self._status_label.setText(
-            f"Loaded: {model.name} "
-            f"({len(model.links)} links, {len(model.joints)} joints)"
+            f"Loaded: {model.name} " f"({len(model.links)} links, {len(model.joints)} joints)"
         )
-        self._status_label.setStyleSheet(
-            f"color: {CATPPUCCIN_MOCHA['green']}; padding: 4px;"
-        )
+        self._status_label.setStyleSheet(f"color: {CATPPUCCIN_MOCHA['green']}; padding: 4px;")
 
 
 def main() -> int:

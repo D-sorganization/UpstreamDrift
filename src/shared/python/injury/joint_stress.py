@@ -180,10 +180,8 @@ class JointStressAnalyzer:
             handedness: 'right' or 'left' handed golfer
             height: Height in m (optional)
         """
-        if not (body_weight is not None):
-            raise ValueError("body_weight must be provided")
-        if not (body_weight is not None):
-            raise ValueError("body_weight must be provided")
+        assert body_weight is not None, "body_weight must be provided"
+        assert body_weight is not None, "body_weight must be provided"
         self.body_weight = body_weight
         self.body_weight_N = body_weight * GRAVITY_M_S2
         self.handedness = handedness
@@ -212,10 +210,8 @@ class JointStressAnalyzer:
         Returns:
             Dictionary mapping joint names to JointStressResult
         """
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
+        assert joint_angles is not None, "joint_angles must be provided"
+        assert joint_angles is not None, "joint_angles must be provided"
         results = {}
 
         # Analyze each joint pair
@@ -258,10 +254,8 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze hip joint stress."""
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
+        assert joint_angles is not None, "joint_angles must be provided"
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="hip", side=side, time=time)
         n_frames = len(time)
 
@@ -307,10 +301,8 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze shoulder joint stress."""
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
+        assert joint_angles is not None, "joint_angles must be provided"
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="shoulder", side=side, time=time)
         n_frames = len(time)
 
@@ -340,9 +332,7 @@ class JointStressAnalyzer:
         multiplier = 1.2 if side == JointSide.TRAIL else 1.0
         result.risk_score = min(100, max_rc_loading * multiplier)
 
-        result.rom_utilization = min(
-            100, np.max(np.abs(np.degrees(horizontal))) / 180 * 100
-        )
+        result.rom_utilization = min(100, np.max(np.abs(np.degrees(horizontal))) / 180 * 100)
 
         return result
 
@@ -355,10 +345,8 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze elbow joint stress (golfer's elbow risk)."""
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
+        assert joint_angles is not None, "joint_angles must be provided"
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="elbow", side=side, time=time)
         n_frames = len(time)
 
@@ -399,17 +387,13 @@ class JointStressAnalyzer:
         side: JointSide,
     ) -> JointStressResult:
         """Analyze wrist joint stress (TFCC and hamate risk)."""
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
+        assert joint_angles is not None, "joint_angles must be provided"
+        assert joint_angles is not None, "joint_angles must be provided"
         result = JointStressResult(joint_name="wrist", side=side, time=time)
         n_frames = len(time)
 
         # Get wrist angles
-        cock = joint_angles.get(
-            "wrist_cock", np.zeros(n_frames)
-        )  # Ulnar/radial deviation
+        cock = joint_angles.get("wrist_cock", np.zeros(n_frames))  # Ulnar/radial deviation
         rotation = joint_angles.get("wrist_rotation", np.zeros(n_frames))
 
         # Get velocity for impact stress estimation
@@ -452,10 +436,8 @@ class JointStressAnalyzer:
 
     def get_summary(self, results: dict[str, JointStressResult]) -> dict[str, object]:
         """Get a summary of all joint stress results."""
-        if not (results is not None):
-            raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
+        assert results is not None, "results must be provided"
+        assert results is not None, "results must be provided"
         summary: dict[str, object] = {
             "highest_risk_joint": "",
             "highest_risk_score": 0.0,
@@ -471,25 +453,20 @@ class JointStressAnalyzer:
                 summary["highest_risk_score"] = result.risk_score
                 summary["highest_risk_joint"] = name
             if result.risk_score > 50:
-                if not (isinstance(summary["joints_at_risk"]):
-                    raise ValueError(list))
+                assert isinstance(summary["joints_at_risk"], list)
                 summary["joints_at_risk"].append(name)
             if result.impingement_risk:
-                if not (isinstance(summary["recommendations"]):
-                    raise ValueError(list))
+                assert isinstance(summary["recommendations"], list)
                 summary["recommendations"].append(
                     f"{name}: Impingement risk detected - consider ROM exercises"
                 )
             if result.overload_risk:
-                if not (isinstance(summary["recommendations"]):
-                    raise ValueError(list))
+                assert isinstance(summary["recommendations"], list)
                 summary["recommendations"].append(
                     f"{name}: Overload risk - reduce intensity or modify technique"
                 )
 
-        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(
-            risk_scores
-        )
+        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(risk_scores)
 
         return summary
 
@@ -517,16 +494,13 @@ if __name__ == "__main__":
     joint_torques = {k: 30 * np.gradient(v, dt) for k, v in joint_velocities.items()}
 
     # Analyze all joints
-    results = analyzer.analyze_all_joints(
-        joint_angles, joint_velocities, joint_torques, time
-    )
+    results = analyzer.analyze_all_joints(joint_angles, joint_velocities, joint_torques, time)
 
     for _name, _result in results.items():
         pass
 
     summary = analyzer.get_summary(results)
     recommendations = summary["recommendations"]
-    if not (isinstance(recommendations):
-        raise ValueError(list))
+    assert isinstance(recommendations, list)
     for _rec in recommendations:
         pass

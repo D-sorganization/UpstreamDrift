@@ -41,32 +41,20 @@ logger = logging.getLogger(__name__)
 # Water properties constants
 STANDARD_ATMOSPHERIC_PRESSURE: float = 101325.0  # [Pa] Standard atmospheric pressure
 BOILING_TEMPERATURE_WATER: float = 373.15  # [K] Boiling temperature of water at 1 atm
-LIQUID_WATER_PRESSURE_THRESHOLD: float = (
-    101325.0  # [Pa] Pressure threshold for liquid water
-)
-SPECIFIC_GAS_CONSTANT_WATER: float = (
-    461.5  # [J/kg-K] Specific gas constant for water vapor
-)
+LIQUID_WATER_PRESSURE_THRESHOLD: float = 101325.0  # [Pa] Pressure threshold for liquid water
+SPECIFIC_GAS_CONSTANT_WATER: float = 461.5  # [J/kg-K] Specific gas constant for water vapor
 LIQUID_WATER_SPECIFIC_HEAT: float = 4186.0  # [J/kg-K] Specific heat of liquid water
 VAPOR_ENTHALPY_REFERENCE: float = 2500.0  # [kJ/kg] Reference enthalpy for water vapor
 VAPOR_ENTHALPY_SLOPE: float = 1.9  # [kJ/kg-K] Enthalpy slope for water vapor
-VAPOR_SPECIFIC_HEAT_CP: float = (
-    1.9  # [kJ/kg-K] Specific heat at constant pressure for vapor
-)
-VAPOR_SPECIFIC_HEAT_CV: float = (
-    1.4  # [kJ/kg-K] Specific heat at constant volume for vapor
-)
+VAPOR_SPECIFIC_HEAT_CP: float = 1.9  # [kJ/kg-K] Specific heat at constant pressure for vapor
+VAPOR_SPECIFIC_HEAT_CV: float = 1.4  # [kJ/kg-K] Specific heat at constant volume for vapor
 
 # Vapor entropy constants for simplified calculations
-VAPOR_ENTROPY_REFERENCE: float = (
-    8000.0  # [J/kg-K] Reference entropy for vapor calculations
-)
+VAPOR_ENTROPY_REFERENCE: float = 8000.0  # [J/kg-K] Reference entropy for vapor calculations
 VAPOR_ENTROPY_SLOPE: float = 2000.0  # [J/kg-K] Entropy slope for vapor calculations
 
 # Temperature conversion constants
-FAHRENHEIT_TO_CELSIUS_OFFSET: float = (
-    32  # [°F] Temperature offset for Fahrenheit to Celsius
-)
+FAHRENHEIT_TO_CELSIUS_OFFSET: float = 32  # [°F] Temperature offset for Fahrenheit to Celsius
 FAHRENHEIT_TO_CELSIUS_SCALE: float = 5 / 9  # [dimensionless] Scale factor for F to C
 CELSIUS_TO_FAHRENHEIT_SCALE: float = 9 / 5  # [dimensionless] Scale factor for C to F
 
@@ -77,9 +65,7 @@ MAX_TEMPERATURE_UI_K: float = 647.15  # [K] Maximum temperature for UI (374°C)
 # Numerical convergence parameters
 NEWTON_RAPHSON_TOLERANCE: float = 1e-6  # [dimensionless] Tolerance for Newton-Raphson
 NEWTON_RAPHSON_DERIVATIVE_TOLERANCE: float = 1e-10  # [dimensionless] Min derivative tol
-NEWTON_RAPHSON_MAX_ITERATIONS: int = (
-    10  # [dimensionless] Max iterations for Newton-Raphson
-)
+NEWTON_RAPHSON_MAX_ITERATIONS: int = 10  # [dimensionless] Max iterations for Newton-Raphson
 NEWTON_RAPHSON_STEP_SIZE: float = 0.1  # [°C] Step size for numerical derivative
 
 # Antoine equation constants for water vapor pressure (valid 1-100°C)
@@ -96,19 +82,11 @@ BUCK_C: float = 234.5  # [°C] Buck equation constant C
 BUCK_D: float = 257.14  # [°C] Buck equation constant D
 
 # Unit conversion constants
-MMHG_TO_PASCAL_FACTOR: float = (
-    133.322  # [Pa/mmHg] Conversion factor from mmHg to Pascal
-)
-PASCAL_TO_MMHG_FACTOR: float = (
-    0.00750062  # [mmHg/Pa] Conversion factor from Pascal to mmHg
-)
-MBAR_TO_KPA_FACTOR: float = (
-    10.0  # [mbar/kPa] Conversion factor from mbar to kPa (1 mbar = 0.1 kPa)
-)
+MMHG_TO_PASCAL_FACTOR: float = 133.322  # [Pa/mmHg] Conversion factor from mmHg to Pascal
+PASCAL_TO_MMHG_FACTOR: float = 0.00750062  # [mmHg/Pa] Conversion factor from Pascal to mmHg
+MBAR_TO_KPA_FACTOR: float = 10.0  # [mbar/kPa] Conversion factor from mbar to kPa (1 mbar = 0.1 kPa)
 KPA_TO_PA_FACTOR: float = 1000.0  # [Pa/kPa] Conversion factor from kPa to Pascal
-KELVIN_TO_CELSIUS_OFFSET: float = (
-    273.15  # [K] Temperature offset for Kelvin to Celsius conversion
-)
+KELVIN_TO_CELSIUS_OFFSET: float = 273.15  # [K] Temperature offset for Kelvin to Celsius conversion
 
 # Thermodynamic constants
 CRITICAL_TEMPERATURE_WATER: float = 647.15  # [K] Critical temperature of water
@@ -117,27 +95,17 @@ TRIPLE_POINT_TEMPERATURE: float = 273.16  # [K] Triple point temperature of wate
 TRIPLE_POINT_PRESSURE: float = 611.657  # [Pa] Triple point pressure of water
 
 # Default values
-DEFAULT_DEW_POINT_TEMPERATURE_CELSIUS: float = (
-    25.0  # [°C] Default dew point temperature
-)
+DEFAULT_DEW_POINT_TEMPERATURE_CELSIUS: float = 25.0  # [°C] Default dew point temperature
 DEFAULT_QUALITY: float = 0.5  # [dimensionless] Default quality for two-phase region
 
 # Fallback constants for error handling
-FALLBACK_ATMOSPHERIC_PRESSURE: float = (
-    101325.0  # [Pa] Standard atmospheric pressure (1 atm)
-)
-FALLBACK_BOILING_TEMPERATURE: float = (
-    373.15  # [K] Boiling temperature of water at 1 atm (100°C)
-)
+FALLBACK_ATMOSPHERIC_PRESSURE: float = 101325.0  # [Pa] Standard atmospheric pressure (1 atm)
+FALLBACK_BOILING_TEMPERATURE: float = 373.15  # [K] Boiling temperature of water at 1 atm (100°C)
 
 # State selection constants
 SUPERHEATED_STATE: int = 0  # Superheated steam (T & P) - dimensionless identifier
-SATURATED_FROM_TEMP_STATE: int = (
-    1  # Saturated steam from temperature - dimensionless identifier
-)
-SATURATED_FROM_PRESSURE_STATE: int = (
-    2  # Saturated steam from pressure - dimensionless identifier
-)
+SATURATED_FROM_TEMP_STATE: int = 1  # Saturated steam from temperature - dimensionless identifier
+SATURATED_FROM_PRESSURE_STATE: int = 2  # Saturated steam from pressure - dimensionless identifier
 
 
 @dataclass
@@ -286,9 +254,7 @@ class SteamCalculationEngine:
 
         # DbC postcondition: enthalpy and entropy should be finite
         if not (np.isfinite(result.enthalpy)):
-            raise ValueError(()
-            f"Enthalpy must be finite, got {result.enthalpy}"
-        )
+            raise ValueError(f"Enthalpy must be finite, got {result.enthalpy}")
         return result
 
     def calculate_saturated_properties_from_temperature(
@@ -307,9 +273,7 @@ class SteamCalculationEngine:
             return self._calculate_saturated_simplified_from_temp(temperature)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(
-                "Saturated steam calculation from temperature failed: %s", e
-            )
+            logger.exception("Saturated steam calculation from temperature failed: %s", e)
             return self._calculate_saturated_simplified_from_temp(temperature)
 
     def calculate_saturated_properties_from_pressure(
@@ -331,9 +295,7 @@ class SteamCalculationEngine:
             logger.exception("Saturated steam calculation from pressure failed: %s", e)
             return self._calculate_saturated_simplified_from_pressure(pressure)
 
-    def calculate_water_vapor_pressure(
-        self, temperature: float, method: str = "buck"
-    ) -> float:
+    def calculate_water_vapor_pressure(self, temperature: float, method: str = "buck") -> float:
         """
         Calculate water vapor pressure using various correlations
         """
@@ -402,9 +364,7 @@ class SteamCalculationEngine:
         # Fallback to Buck equation
         return self._buck_equation(temperature_c)
 
-    def calculate_dew_point(
-        self, partial_pressure_pa: float, total_pressure_pa: float
-    ) -> float:
+    def calculate_dew_point(self, partial_pressure_pa: float, total_pressure_pa: float) -> float:
         """
         Calculate dew point temperature from partial pressure
         """
@@ -444,9 +404,7 @@ class SteamCalculationEngine:
             logger.exception("Dew point calculation failed: %s", e)
             return DEFAULT_DEW_POINT_TEMPERATURE_CELSIUS
 
-    def _calculate_saturated_coolprop_from_temp(
-        self, temperature: float
-    ) -> SteamProperties:
+    def _calculate_saturated_coolprop_from_temp(self, temperature: float) -> SteamProperties:
         """Calculate saturated steam properties from temperature using CoolProp"""
         try:
             # Get saturation pressure from CoolProp
@@ -456,14 +414,10 @@ class SteamCalculationEngine:
             return self._calculate_coolprop_properties(temperature, pressure)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(
-                "CoolProp saturated calculation from temperature failed: %s", e
-            )
+            logger.exception("CoolProp saturated calculation from temperature failed: %s", e)
             return self._calculate_saturated_simplified_from_temp(temperature)
 
-    def _calculate_saturated_coolprop_from_pressure(
-        self, pressure: float
-    ) -> SteamProperties:
+    def _calculate_saturated_coolprop_from_pressure(self, pressure: float) -> SteamProperties:
         """Calculate saturated steam properties from pressure using CoolProp"""
         try:
             # Get saturation temperature from CoolProp
@@ -473,14 +427,10 @@ class SteamCalculationEngine:
             return self._calculate_coolprop_properties(temperature, pressure)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(
-                "CoolProp saturated calculation from pressure failed: %s", e
-            )
+            logger.exception("CoolProp saturated calculation from pressure failed: %s", e)
             return self._calculate_saturated_simplified_from_pressure(pressure)
 
-    def _calculate_saturated_cantera_from_temp(
-        self, temperature: float
-    ) -> SteamProperties:
+    def _calculate_saturated_cantera_from_temp(self, temperature: float) -> SteamProperties:
         """Calculate saturated steam properties from temperature using Cantera"""
         try:
             # Set state to saturated conditions at given temperature
@@ -493,14 +443,10 @@ class SteamCalculationEngine:
             return self._calculate_cantera_properties(temperature, pressure)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(
-                "Cantera saturated calculation from temperature failed: %s", e
-            )
+            logger.exception("Cantera saturated calculation from temperature failed: %s", e)
             return self._calculate_saturated_simplified_from_temp(temperature)
 
-    def _calculate_saturated_cantera_from_pressure(
-        self, pressure: float
-    ) -> SteamProperties:
+    def _calculate_saturated_cantera_from_pressure(self, pressure: float) -> SteamProperties:
         """Calculate saturated steam properties from pressure using Cantera"""
         try:
             # Set state to saturated conditions at given pressure
@@ -513,14 +459,10 @@ class SteamCalculationEngine:
             return self._calculate_cantera_properties(temperature, pressure)
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(
-                "Cantera saturated calculation from pressure failed: %s", e
-            )
+            logger.exception("Cantera saturated calculation from pressure failed: %s", e)
             return self._calculate_saturated_simplified_from_pressure(pressure)
 
-    def _calculate_saturated_simplified_from_temp(
-        self, temperature: float
-    ) -> SteamProperties:
+    def _calculate_saturated_simplified_from_temp(self, temperature: float) -> SteamProperties:
         """Calculate saturated steam properties from temperature using simplified correlations"""
         # Antoine equation for water vapor pressure (valid 1-100°C)
         # log10(P_mmHg) = A - B/(T_K - C) where C is for temperature in Kelvin
@@ -543,9 +485,7 @@ class SteamCalculationEngine:
         # Calculate properties at saturation
         return self._calculate_simplified_properties(temperature, pressure)
 
-    def _calculate_saturated_simplified_from_pressure(
-        self, pressure: float
-    ) -> SteamProperties:
+    def _calculate_saturated_simplified_from_pressure(self, pressure: float) -> SteamProperties:
         """Calculate saturated steam properties from pressure using simplified correlations"""
         # Inverse Antoine equation to find temperature from pressure
         if not (pressure is not None):
@@ -598,9 +538,7 @@ class SteamCalculationEngine:
             logger.exception("Saturation temperature calculation failed: %s", e)
             return FALLBACK_BOILING_TEMPERATURE
 
-    def _calculate_cantera_properties(
-        self, temperature: float, pressure: float
-    ) -> SteamProperties:
+    def _calculate_cantera_properties(self, temperature: float, pressure: float) -> SteamProperties:
         """Calculate steam properties using Cantera"""
         if self.water is None:
             raise RuntimeError("Cantera water object is not initialized")
@@ -640,14 +578,10 @@ class SteamCalculationEngine:
 
             # Derived advanced properties (approximations)
             R_specific = 461.5
-            compressibility_factor = (
-                pressure * (1 / density) / (R_specific * temperature)
-            )
+            compressibility_factor = pressure * (1 / density) / (R_specific * temperature)
             specific_heat_ratio = cp / cv if cv else None
             prandtl_number = (
-                (cp * dynamic_viscosity / thermal_conductivity)
-                if thermal_conductivity
-                else None
+                (cp * dynamic_viscosity / thermal_conductivity) if thermal_conductivity else None
             )
 
             return SteamProperties(
@@ -690,12 +624,8 @@ class SteamCalculationEngine:
             cp = PropsSI("Cpmass", "T", temperature, "P", pressure, "Water")
             cv = PropsSI("Cvmass", "T", temperature, "P", pressure, "Water")
             speed_of_sound = PropsSI("A", "T", temperature, "P", pressure, "Water")
-            thermal_conductivity = PropsSI(
-                "L", "T", temperature, "P", pressure, "Water"
-            )
-            dynamic_viscosity = PropsSI(
-                "VISCOSITY", "T", temperature, "P", pressure, "Water"
-            )
+            thermal_conductivity = PropsSI("L", "T", temperature, "P", pressure, "Water")
+            dynamic_viscosity = PropsSI("VISCOSITY", "T", temperature, "P", pressure, "Water")
             kinematic_viscosity = dynamic_viscosity / density
 
             derived = self._compute_derived_properties(
@@ -783,13 +713,9 @@ class SteamCalculationEngine:
             raise ValueError("cp must be provided")
         r_specific = 461.5  # J/kg-K for water
         return {
-            "compressibility_factor": (
-                pressure * specific_volume / (r_specific * temperature)
-            ),
+            "compressibility_factor": (pressure * specific_volume / (r_specific * temperature)),
             "prandtl_number": (
-                (cp * dynamic_viscosity / thermal_conductivity)
-                if thermal_conductivity
-                else None
+                (cp * dynamic_viscosity / thermal_conductivity) if thermal_conductivity else None
             ),
             "specific_heat_ratio": cp / cv if cv else None,
         }
@@ -835,9 +761,7 @@ class SteamCalculationEngine:
             T_sat_1atm = 373.15  # K
             if temperature < T_sat_1atm and pressure > 50000:  # Likely liquid
                 density = 1000.0  # kg/m³
-                enthalpy = 4186.0 * (
-                    temperature - 273.15
-                )  # Approximate liquid enthalpy
+                enthalpy = 4186.0 * (temperature - 273.15)  # Approximate liquid enthalpy
                 entropy = 4186.0 * np.log(temperature / 273.15)  # Approximate
                 cp = 4186.0  # J/kg-K
                 cv = 4186.0  # J/kg-K
@@ -892,9 +816,7 @@ class SteamCalculationEngine:
                 kinematic_viscosity=kinematic_viscosity,
                 quality=quality,
                 phase=phase,
-                compressibility_factor=pressure
-                * specific_volume
-                / (461.5 * temperature),
+                compressibility_factor=pressure * specific_volume / (461.5 * temperature),
                 prandtl_number=cp * dynamic_viscosity / thermal_conductivity,
                 specific_heat_ratio=cp / cv if cv else None,
             )

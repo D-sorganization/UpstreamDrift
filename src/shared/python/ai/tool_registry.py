@@ -185,11 +185,7 @@ class Tool:
 
         # Check enum constraints
         for param in self.parameters:
-            if (
-                param.enum
-                and param.name in arguments
-                and arguments[param.name] not in param.enum
-            ):
+            if param.enum and param.name in arguments and arguments[param.name] not in param.enum:
                 errors.append(
                     f"Invalid value for {param.name}: {arguments[param.name]}. "
                     f"Must be one of: {param.enum}"
@@ -544,6 +540,6 @@ def get_global_registry() -> ToolRegistry:
         _registry_holder["instance"] = ToolRegistry()
 
     registry = _registry_holder["instance"]
-    if not (registry is not None  # Ensure it is not None for mypy):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    if not (registry is not None):  # Ensure it is not None for mypy
+        raise ValueError("DbC Blocked: Precondition failed.")
     return registry

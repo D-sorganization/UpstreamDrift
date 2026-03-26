@@ -124,8 +124,7 @@ class VisualizationWidget(QWidget):
 
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.info_label.setStyleSheet(
-            """
+        self.info_label.setStyleSheet("""
 
             QLabel {
 
@@ -139,14 +138,11 @@ class VisualizationWidget(QWidget):
 
             }
 
-        """
-        )
+        """)
 
         layout.addWidget(self.info_label)
 
-    def update_visualization(
-        self, urdf_content: str, urdf_path: str | None = None
-    ) -> None:
+    def update_visualization(self, urdf_content: str, urdf_path: str | None = None) -> None:
         """Update the 3D visualization with new URDF content.
 
 
@@ -199,18 +195,14 @@ class VisualizationWidget(QWidget):
                         )
 
             else:
-                self.info_label.setText(
-                    f"Links: {link_count} | Joints: {joint_count} (Grid View)"
-                )
+                self.info_label.setText(f"Links: {link_count} | Joints: {joint_count} (Grid View)")
 
                 self.gl_widget.update()
 
         else:
             self.info_label.setText("No URDF content loaded")
 
-        logger.info(
-            f"Visualization updated with URDF content ({len(urdf_content)} characters)"
-        )
+        logger.info(f"Visualization updated with URDF content ({len(urdf_content)} characters)")
 
     def clear(self) -> None:
         """Clear the visualization."""

@@ -477,12 +477,9 @@ class MotionCapturePlotter(QMainWindow):
 
             df = pd.read_csv(filename)
             logger.debug(
-                f"Successfully loaded CSV with {len(df)} rows "
-                f"and {len(df.columns)} columns"
+                f"Successfully loaded CSV with {len(df)} rows " f"and {len(df.columns)} columns"
             )
-            logger.info(
-                f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds"
-            )
+            logger.info(f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds")
 
             joint_positions = self._simscape_joint_position_definitions()
             available_joints = self._find_available_joints(joint_positions, df.columns)
@@ -521,9 +518,7 @@ class MotionCapturePlotter(QMainWindow):
 
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Error loading Simscape CSV file: {str(e)}")
-            QMessageBox.critical(
-                self, "Error", f"Failed to load Simscape CSV file: {str(e)}"
-            )
+            QMessageBox.critical(self, "Error", f"Failed to load Simscape CSV file: {str(e)}")
 
     def print_data_debug(self, sheet_name) -> None:
         """Print debug information about the loaded data."""
@@ -533,30 +528,17 @@ class MotionCapturePlotter(QMainWindow):
                 logger.debug(f"\n=== Data Debug for {sheet_name} ===")
                 logger.info(f"Number of frames: {len(data)}")
                 logger.info(
-                    f"Time range: {data['time'].min():.3f} to "
-                    f"{data['time'].max():.3f} seconds"
+                    f"Time range: {data['time'].min():.3f} to " f"{data['time'].max():.3f} seconds"
                 )
                 logger.info("Mid-Hands Position ranges:")
-                logger.info(
-                    f"  X: {data['mid_X'].min():.3f} to {data['mid_X'].max():.3f}"
-                )
-                logger.info(
-                    f"  Y: {data['mid_Y'].min():.3f} to {data['mid_Y'].max():.3f}"
-                )
-                logger.info(
-                    f"  Z: {data['mid_Z'].min():.3f} to {data['mid_Z'].max():.3f}"
-                )
+                logger.info(f"  X: {data['mid_X'].min():.3f} to {data['mid_X'].max():.3f}")
+                logger.info(f"  Y: {data['mid_Y'].min():.3f} to {data['mid_Y'].max():.3f}")
+                logger.info(f"  Z: {data['mid_Z'].min():.3f} to {data['mid_Z'].max():.3f}")
 
                 logger.info("Club Head Position ranges:")
-                logger.info(
-                    f"  X: {data['club_X'].min():.3f} to {data['club_X'].max():.3f}"
-                )
-                logger.info(
-                    f"  Y: {data['club_Y'].min():.3f} to {data['club_Y'].max():.3f}"
-                )
-                logger.info(
-                    f"  Z: {data['club_Z'].min():.3f} to {data['club_Z'].max():.3f}"
-                )
+                logger.info(f"  X: {data['club_X'].min():.3f} to {data['club_X'].max():.3f}")
+                logger.info(f"  Y: {data['club_Y'].min():.3f} to {data['club_Y'].max():.3f}")
+                logger.info(f"  Z: {data['club_Z'].min():.3f} to {data['club_Z'].max():.3f}")
 
                 # Calculate total position ranges
                 mid_range = np.max(
@@ -578,18 +560,11 @@ class MotionCapturePlotter(QMainWindow):
                 logger.info(f"Club Head motion range: {club_range:.3f}")
 
                 logger.info("Data Analysis:")
+                logger.info("  This data contains both mid-hands and club head positions")
+                logger.info("  Using actual measured positions instead of calculated ones")
+                logger.info("  Original data in inches, converted to meters for visualization")
                 logger.info(
-                    "  This data contains both mid-hands and club head positions"
-                )
-                logger.info(
-                    "  Using actual measured positions instead of calculated ones"
-                )
-                logger.info(
-                    "  Original data in inches, converted to meters for visualization"
-                )
-                logger.info(
-                    "  Direction cosines (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) "
-                    "are unitless"
+                    "  Direction cosines (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) " "are unitless"
                 )
                 logger.info("  Motion scaling applied to make visualization clearer")
                 logger.info("=" * 40)
@@ -741,9 +716,7 @@ class MotionCapturePlotter(QMainWindow):
         if self.show_motion_capture and self.swing_data:
             # Find the first available swing data
             available_swings = list(self.swing_data.keys())
-            if available_swings and self.current_frame < len(
-                self.swing_data[available_swings[0]]
-            ):
+            if available_swings and self.current_frame < len(self.swing_data[available_swings[0]]):
                 motion_data = self.swing_data[available_swings[0]]
                 frame_data = motion_data.iloc[self.current_frame]
                 self.visualize_motion_capture_data(frame_data, motion_data)
@@ -760,9 +733,7 @@ class MotionCapturePlotter(QMainWindow):
                 self.visualize_simscape_data(frame_data, simscape_data)
 
         # Update info text with combined data
-        self.update_info_text(
-            None
-        )  # Pass None since we're handling multiple data sources
+        self.update_info_text(None)  # Pass None since we're handling multiple data sources
 
         # Redraw canvas
         self.canvas.draw()
@@ -831,8 +802,7 @@ class MotionCapturePlotter(QMainWindow):
             raise ValueError("frame_data must be provided")
         mid_hands = np.array(
             [
-                -frame_data["mid_X"]
-                * self.motion_scale,  # Flip X for right-handed swing
+                -frame_data["mid_X"] * self.motion_scale,  # Flip X for right-handed swing
                 frame_data["mid_Y"] * self.motion_scale,
                 frame_data["mid_Z"] * self.motion_scale,
             ]
@@ -840,8 +810,7 @@ class MotionCapturePlotter(QMainWindow):
 
         club_head = np.array(
             [
-                -frame_data["club_X"]
-                * self.motion_scale,  # Flip X for right-handed swing
+                -frame_data["club_X"] * self.motion_scale,  # Flip X for right-handed swing
                 frame_data["club_Y"] * self.motion_scale,
                 frame_data["club_Z"] * self.motion_scale,
             ]
@@ -917,9 +886,7 @@ class MotionCapturePlotter(QMainWindow):
         x_head = head_size * np.outer(np.cos(u), np.sin(v)) + club_head_pos[0]
         y_head = head_size * np.outer(np.sin(u), np.sin(v)) + club_head_pos[1]
         z_head = head_size * np.outer(np.ones(np.size(u)), np.cos(v)) + club_head_pos[2]
-        self.ax.plot_surface(
-            x_head, y_head, z_head, color="darkgray", alpha=0.9, label="Club Head"
-        )
+        self.ax.plot_surface(x_head, y_head, z_head, color="darkgray", alpha=0.9, label="Club Head")
 
         # Calculate and draw club face normal vector
         shaft_direction = club_head_pos - grip_pos
@@ -994,16 +961,9 @@ class MotionCapturePlotter(QMainWindow):
         ball_radius = 0.021  # Standard golf ball radius
         u_ball = np.linspace(0, 2 * np.pi, 12)
         v_ball = np.linspace(0, np.pi, 12)
-        x_ball = (
-            ball_radius * np.outer(np.cos(u_ball), np.sin(v_ball)) + ball_position[0]
-        )
-        y_ball = (
-            ball_radius * np.outer(np.sin(u_ball), np.sin(v_ball)) + ball_position[1]
-        )
-        z_ball = (
-            ball_radius * np.outer(np.ones(np.size(u_ball)), np.cos(v_ball))
-            + ball_position[2]
-        )
+        x_ball = ball_radius * np.outer(np.cos(u_ball), np.sin(v_ball)) + ball_position[0]
+        y_ball = ball_radius * np.outer(np.sin(u_ball), np.sin(v_ball)) + ball_position[1]
+        z_ball = ball_radius * np.outer(np.ones(np.size(u_ball)), np.cos(v_ball)) + ball_position[2]
         self.ax.plot_surface(
             x_ball,
             y_ball,
@@ -1041,9 +1001,7 @@ class MotionCapturePlotter(QMainWindow):
 
         # Draw joint markers
         for _, position in joints.items():
-            self.ax.scatter(
-                position[0], position[1], position[2], color="black", s=50, alpha=0.8
-            )
+            self.ax.scatter(position[0], position[1], position[2], color="black", s=50, alpha=0.8)
 
     def _draw_simscape_trajectory_paths(self, joints, data) -> None:
         """Draw club head and hands trajectory paths for Simscape data.
@@ -1057,16 +1015,11 @@ class MotionCapturePlotter(QMainWindow):
             raise ValueError("joints must be provided")
         if not (joints is not None):
             raise ValueError("joints must be provided")
-        if (
-            self.trajectory_check.isChecked()
-            and len(data) > 1
-            and "club_head" in joints
-        ):
+        if self.trajectory_check.isChecked() and len(data) > 1 and "club_head" in joints:
             club_trajectory = np.array(
                 [
                     [
-                        -row["club_head_X"]
-                        * self.motion_scale,  # Flip X for right-handed swing
+                        -row["club_head_X"] * self.motion_scale,  # Flip X for right-handed swing
                         row["club_head_Y"] * self.motion_scale,
                         row["club_head_Z"] * self.motion_scale,
                     ]
@@ -1090,8 +1043,7 @@ class MotionCapturePlotter(QMainWindow):
             hands_trajectory = np.array(
                 [
                     [
-                        -row["left_hand_X"]
-                        * self.motion_scale,  # Flip X for right-handed swing
+                        -row["left_hand_X"] * self.motion_scale,  # Flip X for right-handed swing
                         row["left_hand_Y"] * self.motion_scale,
                         row["left_hand_Z"] * self.motion_scale,
                     ]
@@ -1135,11 +1087,7 @@ class MotionCapturePlotter(QMainWindow):
         }
 
         for segment_key, checkbox in self.segment_traces.items():
-            if (
-                checkbox.isChecked()
-                and f"{segment_key}_X" in frame_data
-                and len(data) > 1
-            ):
+            if checkbox.isChecked() and f"{segment_key}_X" in frame_data and len(data) > 1:
                 # Create trajectory for this segment
                 segment_trajectory = np.array(
                     [
@@ -1219,9 +1167,7 @@ class MotionCapturePlotter(QMainWindow):
         # Show motion capture data if available
         if self.show_motion_capture and self.swing_data:
             available_swings = list(self.swing_data.keys())
-            if available_swings and self.current_frame < len(
-                self.swing_data[available_swings[0]]
-            ):
+            if available_swings and self.current_frame < len(self.swing_data[available_swings[0]]):
                 motion_data = self.swing_data[available_swings[0]]
                 motion_frame = motion_data.iloc[self.current_frame]
                 info += "Motion Capture Data:\n"

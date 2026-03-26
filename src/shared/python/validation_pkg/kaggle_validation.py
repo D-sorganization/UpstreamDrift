@@ -365,9 +365,7 @@ if __name__ == "__main__":
     stats = get_dataset_statistics(clean)
     logger.info("\nDataset Statistics:")
     for col, col_stats in stats.items():
-        logger.info(
-            f"  {col}: mean={col_stats['mean']:.1f}, std={col_stats['std']:.1f}"
-        )
+        logger.info(f"  {col}: mean={col_stats['mean']:.1f}, std={col_stats['std']:.1f}")
 
     # Validate all models
     logger.info("\nValidating models against Kaggle dataset...")

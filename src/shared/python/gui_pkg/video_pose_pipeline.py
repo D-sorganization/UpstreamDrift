@@ -107,9 +107,7 @@ class VideoPosePipeline:
 
                 self.estimator = OpenPoseEstimator()
             else:
-                raise ValueError(
-                    f"Unknown estimator type: {self.config.estimator_type}"
-                )
+                raise ValueError(f"Unknown estimator type: {self.config.estimator_type}")
 
             if self.estimator is not None:
                 self.estimator.load_model()
@@ -165,9 +163,7 @@ class VideoPosePipeline:
         filtered_results = self._filter_by_quality(pose_results)
 
         # Calculate quality metrics
-        quality_metrics = self._calculate_quality_metrics(
-            pose_results, filtered_results
-        )
+        quality_metrics = self._calculate_quality_metrics(pose_results, filtered_results)
 
         # Create result
         result = VideoProcessingResult(
@@ -208,9 +204,7 @@ class VideoPosePipeline:
         results = []
 
         for i, video_path in enumerate(video_paths):
-            logger.info(
-                f"Processing batch {i + 1}/{len(video_paths)}: {video_path.name}"
-            )
+            logger.info(f"Processing batch {i + 1}/{len(video_paths)}: {video_path.name}")
 
             try:
                 result = self.process_video(video_path, output_dir)
@@ -245,9 +239,7 @@ class VideoPosePipeline:
         from src.shared.python.data_io.marker_mapping import RegistrationResult
 
         # Convert pose keypoints to marker format
-        marker_positions, marker_names, timestamps = self._convert_poses_to_markers(
-            pose_results
-        )
+        marker_positions, marker_names, timestamps = self._convert_poses_to_markers(pose_results)
 
         if len(marker_positions) == 0:
             logger.warning("No marker data extracted from poses")
@@ -367,11 +359,7 @@ class VideoPosePipeline:
         if not (pose_results is not None):
             raise ValueError("pose_results must be provided")
         if not self.config.outlier_detection:
-            return [
-                r
-                for r in pose_results
-                if r.confidence >= self.config.min_frame_confidence
-            ]
+            return [r for r in pose_results if r.confidence >= self.config.min_frame_confidence]
 
         # Filter by confidence first
         confident_results = [
@@ -575,20 +563,14 @@ class VideoPosePipeline:
 
             # Export using output manager
             output_path = output_dir / f"{base_name}_poses.{self.config.output_format}"
-            self.output_manager.save_simulation_results(
-                data_to_export, str(output_path)
-            )
+            self.output_manager.save_simulation_results(data_to_export, str(output_path))
 
         # Export quality metrics separately
         if self.config.export_quality_metrics:
             metrics_path = output_dir / f"{base_name}_quality.json"
-            self.output_manager.save_simulation_results(
-                result.quality_metrics, str(metrics_path)
-            )
+            self.output_manager.save_simulation_results(result.quality_metrics, str(metrics_path))
 
-    def _export_batch_summary(
-        self, results: list[VideoProcessingResult], output_dir: Path
-    ) -> None:
+    def _export_batch_summary(self, results: list[VideoProcessingResult], output_dir: Path) -> None:
         """Export summary of batch processing results."""
         if not (results is not None):
             raise ValueError("results must be provided")
@@ -602,16 +584,10 @@ class VideoPosePipeline:
             "aggregate_metrics": {
                 "total_frames": sum(r.total_frames for r in results),
                 "total_valid_frames": sum(r.valid_frames for r in results),
-                "average_confidence": float(
-                    np.mean([r.average_confidence for r in results])
-                ),
+                "average_confidence": float(np.mean([r.average_confidence for r in results])),
                 "average_valid_ratio": float(
                     np.mean(
-                        [
-                            r.valid_frames / r.total_frames
-                            for r in results
-                            if r.total_frames > 0
-                        ]
+                        [r.valid_frames / r.total_frames for r in results if r.total_frames > 0]
                     )
                 ),
             },

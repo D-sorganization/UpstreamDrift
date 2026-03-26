@@ -232,9 +232,7 @@ class TestTrajectoryAnalysisPerformance(unittest.TestCase):
             accelerations = np.zeros((n_steps, model.nv))
 
             start = time.perf_counter()
-            results = analyzer.analyze_trajectory(
-                times, positions, velocities, accelerations
-            )
+            results = analyzer.analyze_trajectory(times, positions, velocities, accelerations)
             elapsed = time.perf_counter() - start
 
             self.assertEqual(len(results), n_steps)

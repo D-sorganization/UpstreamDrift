@@ -62,9 +62,7 @@ def test_drake_iaa() -> None:
 
         from pydrake.all import MultibodyPlant
 
-        if isinstance(MultibodyPlant, MagicMock) or hasattr(
-            MultibodyPlant, "assert_called"
-        ):
+        if isinstance(MultibodyPlant, MagicMock) or hasattr(MultibodyPlant, "assert_called"):
             pytest.skip("Drake is mocked")
 
         from engines.physics_engines.drake.python.src.induced_acceleration import (

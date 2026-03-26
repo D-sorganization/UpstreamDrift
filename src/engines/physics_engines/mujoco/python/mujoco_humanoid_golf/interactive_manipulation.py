@@ -699,11 +699,7 @@ class InteractiveManipulator:
         Returns:
             List of body IDs with active constraints
         """
-        return [
-            body_id
-            for body_id, constraint in self.constraints.items()
-            if constraint.active
-        ]
+        return [body_id for body_id, constraint in self.constraints.items() if constraint.active]
 
     # -------- Pose Library --------
 

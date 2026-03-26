@@ -22,6 +22,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -46,6 +47,16 @@ except ImportError:
         OpenSimModelLoadError,
         OpenSimNotInstalledError,
     )
+
+try:
+    from src.shared.python.screw_theory.ui import (
+        ScrewVisualizationTab as _ScrewVisualizationTab,
+    )
+
+    _SCREW_VIZ_AVAILABLE = True
+except ImportError:
+    _ScrewVisualizationTab = None  # type: ignore[assignment, misc]
+    _SCREW_VIZ_AVAILABLE = False
 
 
 class OpenSimGolfGUI(QMainWindow):
@@ -184,16 +195,23 @@ class OpenSimGolfGUI(QMainWindow):
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
+        # Tab widget: Simulation | Screw Kinematics
+        self._tabs = QTabWidget()
+
+        # ── Simulation tab ─────────────────────────────────────────────
+        sim_tab = QWidget()
+        sim_layout = QVBoxLayout(sim_tab)
+
         # Header
         header = QLabel("OpenSim Golf Simulation")
         header.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(header)
+        sim_layout.addWidget(header)
 
         # Status (no more "Demo Fallback" - only real status)
         self.lbl_status = QLabel("Status: Initializing...")
         self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.lbl_status)
+        sim_layout.addWidget(self.lbl_status)
 
         # Controls
         controls = QHBoxLayout()
@@ -223,17 +241,28 @@ class OpenSimGolfGUI(QMainWindow):
         )
         controls.addWidget(self.btn_help)
 
-        layout.addLayout(controls)
+        sim_layout.addLayout(controls)
 
         # Visualization (Matplotlib)
         self.fig = Figure(figsize=(5, 4), dpi=100)
         self.canvas = FigureCanvas(self.fig)
-        layout.addWidget(self.canvas)
+        sim_layout.addWidget(self.canvas)
 
         # Result Details
         self.lbl_details = QLabel("No simulation data.")
         self.lbl_details.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.lbl_details)
+        sim_layout.addWidget(self.lbl_details)
+
+        self._tabs.addTab(sim_tab, "Simulation")
+
+        # ── Screw Kinematics tab ───────────────────────────────────────
+        if _SCREW_VIZ_AVAILABLE and _ScrewVisualizationTab is not None:
+            self._screw_viz_tab = _ScrewVisualizationTab()
+            self._tabs.addTab(self._screw_viz_tab, "Screw Kinematics")
+        else:
+            self._screw_viz_tab = None  # type: ignore[assignment]
+
+        layout.addWidget(self._tabs)
 
     def _load_model_dialog(self) -> None:
         """Open file dialog to select an OpenSim model."""
@@ -301,12 +330,8 @@ class OpenSimGolfGUI(QMainWindow):
 
         # Plot 2: Joint Torques
         ax2 = self.fig.add_subplot(222)
-        ax2.plot(
-            self.result.time, self.result.joint_torques[:, 0], label="Shoulder Torque"
-        )
-        ax2.plot(
-            self.result.time, self.result.joint_torques[:, 1], label="Wrist Torque"
-        )
+        ax2.plot(self.result.time, self.result.joint_torques[:, 0], label="Shoulder Torque")
+        ax2.plot(self.result.time, self.result.joint_torques[:, 1], label="Wrist Torque")
         ax2.set_title("Joint Torques (Nm)")
         ax2.legend()
         ax2.grid(True)

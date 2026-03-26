@@ -91,9 +91,7 @@ def _get_engine_ids() -> list[str]:
 class TestEngineInterfaceCompliance:
     """Verify that each engine class defines the core dynamics methods."""
 
-    def test_has_required_methods(
-        self, module_path: str, class_name: str, deps: list[str]
-    ) -> None:
+    def test_has_required_methods(self, module_path: str, class_name: str, deps: list[str]) -> None:
         """Engine class must have all required dynamics methods."""
         mod = _try_import(module_path, deps)
         cls = getattr(mod, class_name, None)
@@ -108,9 +106,7 @@ class TestEngineInterfaceCompliance:
 
         assert not missing, f"{class_name} is missing methods: {', '.join(missing)}"
 
-    def test_methods_are_callable(
-        self, module_path: str, class_name: str, deps: list[str]
-    ) -> None:
+    def test_methods_are_callable(self, module_path: str, class_name: str, deps: list[str]) -> None:
         """All required methods must be callable (not class attributes)."""
         mod = _try_import(module_path, deps)
         cls = getattr(mod, class_name, None)
@@ -120,9 +116,7 @@ class TestEngineInterfaceCompliance:
         for method_name in REQUIRED_METHODS:
             attr = getattr(cls, method_name, None)
             if attr is not None:
-                assert callable(attr), (
-                    f"{class_name}.{method_name} exists but is not callable"
-                )
+                assert callable(attr), f"{class_name}.{method_name} exists but is not callable"
 
     def test_get_capabilities_returns_dataclass(
         self, module_path: str, class_name: str, deps: list[str]
@@ -133,9 +127,7 @@ class TestEngineInterfaceCompliance:
         if cls is None:
             pytest.skip(f"{class_name} not found in {module_path}")
 
-        assert hasattr(cls, "get_capabilities"), (
-            f"{class_name} must implement get_capabilities()"
-        )
+        assert hasattr(cls, "get_capabilities"), f"{class_name} must implement get_capabilities()"
 
     def test_contact_forces_not_abstract(
         self, module_path: str, class_name: str, deps: list[str]
@@ -153,9 +145,9 @@ class TestEngineInterfaceCompliance:
         method = getattr(cls, "compute_contact_forces", None)
         assert method is not None
         # Should NOT be abstract (base provides default)
-        assert not getattr(method, "__isabstractmethod__", False), (
-            f"{class_name}.compute_contact_forces should not be abstract"
-        )
+        assert not getattr(
+            method, "__isabstractmethod__", False
+        ), f"{class_name}.compute_contact_forces should not be abstract"
 
 
 class TestCapabilitySerialization:

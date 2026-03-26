@@ -221,17 +221,18 @@ class PopOutChart:
         from PyQt6.QtCore import Qt
         from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
 
-        self._window = QMainWindow(self._parent)
-        self._window.setWindowTitle(self._title)
-        self._window.setMinimumSize(700, 450)
-        self._window.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
+        win = QMainWindow(self._parent)
+        self._window = win
+        win.setWindowTitle(self._title)
+        win.setMinimumSize(700, 450)
+        win.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         canvas = FigureCanvasQTAgg(self._fig)
         central = QWidget()
         lay = QVBoxLayout(central)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(canvas)
-        self._window.setCentralWidget(central)
-        self._window.show()
+        win.setCentralWidget(central)
+        win.show()
 
         logger.info("Opened pop-out chart: %s", self._title)

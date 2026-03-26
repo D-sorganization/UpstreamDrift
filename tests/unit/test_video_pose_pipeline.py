@@ -121,15 +121,11 @@ def test_process_video_success(pipeline, mock_cv2):
 def test_filter_by_quality(pipeline):
     """Test quality filtering logic."""
     results = [
-        PoseEstimationResult(
-            joint_angles={}, confidence=0.9, timestamp=0.0, raw_keypoints={}
-        ),
+        PoseEstimationResult(joint_angles={}, confidence=0.9, timestamp=0.0, raw_keypoints={}),
         PoseEstimationResult(
             joint_angles={}, confidence=0.1, timestamp=0.1, raw_keypoints={}
         ),  # Low confidence
-        PoseEstimationResult(
-            joint_angles={}, confidence=0.8, timestamp=0.2, raw_keypoints={}
-        ),
+        PoseEstimationResult(joint_angles={}, confidence=0.8, timestamp=0.2, raw_keypoints={}),
     ]
 
     filtered = pipeline._filter_by_quality(results)

@@ -3,7 +3,7 @@ Joint moment and torque vector calculations for pendulum models.
 
 Computes three quantities at each joint (proximal-on-distal convention):
     1. Applied joint torque (the motor/muscle torque)
-    2. Moment of net force (cross product of position × force)
+    2. Moment of net force (cross product of position Ã— force)
     3. Total moment (applied torque + moment of net force)
 
 All functions are pure, stateless, and model-agnostic where possible.
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def cross_2d(r: np.ndarray, f: np.ndarray) -> float:
-    """Compute 2-D cross product r × f (scalar, positive = CCW).
+    """Compute 2-D cross product r Ã— f (scalar, positive = CCW).
 
     Preconditions:
         r, f are shape (2,) and finite.
@@ -33,17 +33,12 @@ def cross_2d(r: np.ndarray, f: np.ndarray) -> float:
     """
     r = np.asarray(r, dtype=float)
     f = np.asarray(f, dtype=float)
-    if not (r.shape == (2):
-        raise ValueError(), f"r must be shape (2,), got {r.shape}")
-    if not (f.shape == (2):
-        raise ValueError(), f"f must be shape (2,), got {f.shape}")
-    if not (np.all(np.isfinite(r))):
-        raise ValueError(f"r must be finite: {r}")
-    if not (np.all(np.isfinite(f))):
-        raise ValueError(f"f must be finite: {f}")
+    assert r.shape == (2,), f"r must be shape (2,), got {r.shape}"
+    assert f.shape == (2,), f"f must be shape (2,), got {f.shape}"
+    assert np.all(np.isfinite(r)), f"r must be finite: {r}"
+    assert np.all(np.isfinite(f)), f"f must be finite: {f}"
     result = float(r[0] * f[1] - r[1] * f[0])
-    if not (np.isfinite(result)):
-        raise ValueError(f"cross product is non-finite: {result}")
+    assert np.isfinite(result), f"cross product is non-finite: {result}"
     return result
 
 
@@ -59,18 +54,15 @@ def moment_of_force(
 ) -> float:
     """Moment of the net joint force about the distal segment's COM.
 
-    M = r × F where r = distal_com - joint_position.
+    M = r Ã— F where r = distal_com - joint_position.
 
     Preconditions:
         All arrays shape (2,), finite.
     Postconditions:
-        Returns finite float (N·m, positive = CCW).
+        Returns finite float (NÂ·m, positive = CCW).
     """
-    if not (joint_position is not None):
-        raise ValueError("joint_position must be provided")
-    r = np.asarray(distal_com_position, dtype=float) - np.asarray(
-        joint_position, dtype=float
-    )
+    assert joint_position is not None, "joint_position must be provided"
+    r = np.asarray(distal_com_position, dtype=float) - np.asarray(joint_position, dtype=float)
     return cross_2d(r, np.asarray(net_force, dtype=float))
 
 
@@ -87,12 +79,10 @@ def total_moment_at_joint(
     Postconditions:
         Returns finite float.
     """
-    if not (np.isfinite(applied_torque)):
-        raise ValueError(f"torque must be finite, got {applied_torque}")
+    assert np.isfinite(applied_torque), f"torque must be finite, got {applied_torque}"
     m_force = moment_of_force(joint_position, distal_com_position, net_force)
     result = applied_torque + m_force
-    if not (np.isfinite(result)):
-        raise ValueError(f"total moment is non-finite: {result}")
+    assert np.isfinite(result), f"total moment is non-finite: {result}"
     return result
 
 
@@ -126,8 +116,7 @@ def double_pendulum_moments(
         shoulder_applied_torque, shoulder_moment_of_force, shoulder_total_moment,
         wrist_applied_torque, wrist_moment_of_force, wrist_total_moment.
     """
-    if not (positions is not None):
-        raise ValueError("positions must be provided")
+    assert positions is not None, "positions must be provided"
     shoulder = np.array(positions["shoulder"])
     wrist = np.array(positions["wrist"])
     tip = np.array(positions["tip"])
@@ -141,9 +130,7 @@ def double_pendulum_moments(
 
     # Shoulder: moment about arm COM
     m_shoulder = moment_of_force(shoulder, arm_com, f_shoulder)
-    total_shoulder = total_moment_at_joint(
-        applied_torques[0], shoulder, arm_com, f_shoulder
-    )
+    total_shoulder = total_moment_at_joint(applied_torques[0], shoulder, arm_com, f_shoulder)
 
     # Wrist: moment about shaft COM
     m_wrist = moment_of_force(wrist, shaft_com, f_wrist)
@@ -185,8 +172,7 @@ def triple_pendulum_moments(
     -------
     dict with applied_torque, moment_of_force, total_moment for each joint.
     """
-    if not (positions is not None):
-        raise ValueError("positions must be provided")
+    assert positions is not None, "positions must be provided"
     joints = ["shoulder", "elbow", "wrist"]
     endpoints = ["elbow", "wrist", "tip"]
 
@@ -239,13 +225,10 @@ def golfer_pendulum_moments(
     Contract
     --------
     Pre:  len(applied_torques) >= 7 and all required keys present in positions/forces.
-    Post: Returns dict with 21 keys (3 per joint × 7 joints), all finite.
+    Post: Returns dict with 21 keys (3 per joint Ã— 7 joints), all finite.
     """
-    if not (len(applied_torques) >= 7):
-        raise ValueError(()
-        f"Need >= 7 applied torques, got {len(applied_torques)}"
-    )
-    # Joint → distal endpoint pairs (joint connects to next link's endpoint)
+    assert len(applied_torques) >= 7, f"Need >= 7 applied torques, got {len(applied_torques)}"
+    # Joint â†’ distal endpoint pairs (joint connects to next link's endpoint)
     joints = ["hub", "rs", "re", "rh", "ls", "le", "lh"]
     endpoints = ["rs", "re", "rh", "club_tip", "le", "lh", "club_tip"]
 
@@ -256,7 +239,7 @@ def golfer_pendulum_moments(
         f_raw = joint_forces.get(jname)
 
         if j_pos_raw is None or e_pos_raw is None or f_raw is None:
-            # Missing data — store zeros
+            # Missing data â€” store zeros
             result[f"{jname}_applied_torque"] = applied_torques[i]
             result[f"{jname}_moment_of_force"] = 0.0
             result[f"{jname}_total_moment"] = applied_torques[i]
@@ -309,10 +292,8 @@ def torque_arrow_direction(
         Start and end points in world coordinates.
     """
     joint_position = np.asarray(joint_position, dtype=float)
-    if not (joint_position.shape == (2):
-        raise ValueError())
-    if not (np.isfinite(torque_value)):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    assert joint_position.shape == (2,)
+    assert np.isfinite(torque_value)
 
     if abs(torque_value) < 1e-10:
         return joint_position.copy(), joint_position.copy()

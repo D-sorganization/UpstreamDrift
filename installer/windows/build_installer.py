@@ -158,18 +158,10 @@ def create_installer_info() -> None:
 
 def main() -> None:
     """Main build process."""
-    parser = argparse.ArgumentParser(
-        description="Build Golf Modeling Suite Windows installer"
-    )
-    parser.add_argument(
-        "--clean", action="store_true", help="Clean build directories first"
-    )
-    parser.add_argument(
-        "--skip-deps", action="store_true", help="Skip dependency installation"
-    )
-    parser.add_argument(
-        "--exe-only", action="store_true", help="Build executable only (no MSI)"
-    )
+    parser = argparse.ArgumentParser(description="Build Golf Modeling Suite Windows installer")
+    parser.add_argument("--clean", action="store_true", help="Clean build directories first")
+    parser.add_argument("--skip-deps", action="store_true", help="Skip dependency installation")
+    parser.add_argument("--exe-only", action="store_true", help="Build executable only (no MSI)")
 
     args = parser.parse_args()
 

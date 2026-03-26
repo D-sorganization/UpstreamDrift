@@ -45,9 +45,7 @@ def predict_temperature_profile(
         raise ValueError("t_span must be provided")
 
     def rhs(t: float, y: Any) -> Any:
-        return _heating_ode(
-            t, y, thermal_mass, heat_loss_coeff, ambient_temp, power_func
-        )
+        return _heating_ode(t, y, thermal_mass, heat_loss_coeff, ambient_temp, power_func)
 
     sol = solve_ivp(rhs, t_span, [initial_temp], t_eval=t_eval, vectorized=False)
     return sol.t, sol.y[0]

@@ -116,9 +116,7 @@ class TestValidateInputs:
         converter = MyoConverter()
 
         # Should not raise any exception
-        converter._validate_inputs(
-            temp_osim_file, temp_geometry_folder, temp_output_folder
-        )
+        converter._validate_inputs(temp_osim_file, temp_geometry_folder, temp_output_folder)
 
         # Output folder should be created
         assert temp_output_folder.exists()
@@ -127,17 +125,13 @@ class TestValidateInputs:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_missing_osim_file(
-        self, mock_check, temp_geometry_folder, temp_output_folder
-    ):
+    def test_missing_osim_file(self, mock_check, temp_geometry_folder, temp_output_folder):
         """Test validation with missing osim file."""
         converter = MyoConverter()
         missing_file = Path("/nonexistent/model.osim")
 
         with pytest.raises(FileNotFoundError, match="OpenSim model file not found"):
-            converter._validate_inputs(
-                missing_file, temp_geometry_folder, temp_output_folder
-            )
+            converter._validate_inputs(missing_file, temp_geometry_folder, temp_output_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
@@ -152,17 +146,13 @@ class TestValidateInputs:
         wrong_file.touch()
 
         with pytest.raises(ValueError, match="Expected .osim file"):
-            converter._validate_inputs(
-                wrong_file, temp_geometry_folder, temp_output_folder
-            )
+            converter._validate_inputs(wrong_file, temp_geometry_folder, temp_output_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_invalid_xml(
-        self, mock_check, tmp_path, temp_geometry_folder, temp_output_folder
-    ):
+    def test_invalid_xml(self, mock_check, tmp_path, temp_geometry_folder, temp_output_folder):
         """Test validation with invalid XML file."""
         converter = MyoConverter()
 
@@ -171,9 +161,7 @@ class TestValidateInputs:
         invalid_file.write_text("This is not XML")
 
         with pytest.raises(ValueError, match="Failed to parse OpenSim XML"):
-            converter._validate_inputs(
-                invalid_file, temp_geometry_folder, temp_output_folder
-            )
+            converter._validate_inputs(invalid_file, temp_geometry_folder, temp_output_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
@@ -192,9 +180,7 @@ class TestValidateInputs:
         tree.write(wrong_root_file)
 
         with pytest.raises(ValueError, match="Invalid OpenSim file"):
-            converter._validate_inputs(
-                wrong_root_file, temp_geometry_folder, temp_output_folder
-            )
+            converter._validate_inputs(wrong_root_file, temp_geometry_folder, temp_output_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
@@ -263,65 +249,49 @@ class TestHandleConversionError:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_geometry_error_handling(
-        self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    def test_geometry_error_handling(self, mock_check, temp_osim_file, temp_geometry_folder):
         """Test handling of geometry-related errors."""
         converter = MyoConverter()
         error = Exception("mesh file not found")
 
         with pytest.raises(RuntimeError, match="geometry/mesh issues"):
-            converter._handle_conversion_error(
-                error, temp_osim_file, temp_geometry_folder
-            )
+            converter._handle_conversion_error(error, temp_osim_file, temp_geometry_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_muscle_error_handling(
-        self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    def test_muscle_error_handling(self, mock_check, temp_osim_file, temp_geometry_folder):
         """Test handling of muscle-related errors."""
         converter = MyoConverter()
         error = Exception("muscle path point invalid")
 
         with pytest.raises(RuntimeError, match="muscle configuration"):
-            converter._handle_conversion_error(
-                error, temp_osim_file, temp_geometry_folder
-            )
+            converter._handle_conversion_error(error, temp_osim_file, temp_geometry_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_constraint_error_handling(
-        self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    def test_constraint_error_handling(self, mock_check, temp_osim_file, temp_geometry_folder):
         """Test handling of constraint-related errors."""
         converter = MyoConverter()
         error = Exception("constraint violation detected")
 
         with pytest.raises(RuntimeError, match="constraints"):
-            converter._handle_conversion_error(
-                error, temp_osim_file, temp_geometry_folder
-            )
+            converter._handle_conversion_error(error, temp_osim_file, temp_geometry_folder)
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_generic_error_handling(
-        self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    def test_generic_error_handling(self, mock_check, temp_osim_file, temp_geometry_folder):
         """Test handling of generic errors."""
         converter = MyoConverter()
         error = Exception("unknown error occurred")
 
         with pytest.raises(RuntimeError, match="Model conversion failed"):
-            converter._handle_conversion_error(
-                error, temp_osim_file, temp_geometry_folder
-            )
+            converter._handle_conversion_error(error, temp_osim_file, temp_geometry_folder)
 
 
 class TestLoadConvertedModelKeyframe:
@@ -405,9 +375,7 @@ class TestValidateConversion:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_validation_passes_when_files_exist(
-        self, mock_check, temp_osim_file, tmp_path
-    ):
+    def test_validation_passes_when_files_exist(self, mock_check, temp_osim_file, tmp_path):
         """Test validation passes when both files exist."""
         converter = MyoConverter()
         mujoco_xml = tmp_path / "converted.xml"

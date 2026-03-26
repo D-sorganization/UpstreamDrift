@@ -291,13 +291,11 @@ class TopographyData:
 
         # Central difference
         dzdx = (
-            self.get_elevation_at(pos + [delta, 0])
-            - self.get_elevation_at(pos - [delta, 0])
+            self.get_elevation_at(pos + [delta, 0]) - self.get_elevation_at(pos - [delta, 0])
         ) / (2 * delta)
 
         dzdy = (
-            self.get_elevation_at(pos + [0, delta])
-            - self.get_elevation_at(pos - [0, delta])
+            self.get_elevation_at(pos + [0, delta]) - self.get_elevation_at(pos - [0, delta])
         ) / (2 * delta)
 
         return np.array([dzdx, dzdy])
@@ -377,9 +375,7 @@ class TopographyData:
 
         return topo
 
-    def _load_numpy(
-        self, filepath: Path, width: float | None, height: float | None
-    ) -> None:
+    def _load_numpy(self, filepath: Path, width: float | None, height: float | None) -> None:
         """Load from NumPy file."""
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
@@ -399,9 +395,7 @@ class TopographyData:
 
         self.set_heightmap(heightmap, smooth=False)
 
-    def _load_csv(
-        self, filepath: Path, width: float | None, height: float | None
-    ) -> None:
+    def _load_csv(self, filepath: Path, width: float | None, height: float | None) -> None:
         """Load from CSV file with x, y, elevation columns."""
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
@@ -416,11 +410,7 @@ class TopographyData:
                 # Try different column name conventions
                 x = float(row.get("x", row.get("X", row.get("easting", 0))))
                 y = float(row.get("y", row.get("Y", row.get("northing", 0))))
-                z = float(
-                    row.get(
-                        "elevation", row.get("z", row.get("Z", row.get("height", 0)))
-                    )
-                )
+                z = float(row.get("elevation", row.get("z", row.get("Z", row.get("height", 0)))))
                 points.append(ElevationPoint(x=x, y=y, z=z))
 
         self.set_contour_points(points)
@@ -431,9 +421,7 @@ class TopographyData:
         if height is not None:
             self._bounds.max_y = self._bounds.min_y + height
 
-    def _load_json(
-        self, filepath: Path, width: float | None, height: float | None
-    ) -> None:
+    def _load_json(self, filepath: Path, width: float | None, height: float | None) -> None:
         """Load from JSON file."""
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
@@ -462,9 +450,7 @@ class TopographyData:
         if height is not None:
             self._bounds.max_y = self._bounds.min_y + height
 
-    def _load_geotiff(
-        self, filepath: Path, width: float | None, height: float | None
-    ) -> None:
+    def _load_geotiff(self, filepath: Path, width: float | None, height: float | None) -> None:
         """Load from GeoTIFF file."""
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
@@ -495,9 +481,7 @@ class TopographyData:
 
         self.set_heightmap(heightmap, smooth=False)
 
-    def _load_image(
-        self, filepath: Path, width: float | None, height: float | None
-    ) -> None:
+    def _load_image(self, filepath: Path, width: float | None, height: float | None) -> None:
         """Load from image file (grayscale as elevation)."""
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
@@ -562,9 +546,7 @@ class TopographyData:
             raise ValueError("filepath must be provided")
         import csv
 
-        heightmap = (
-            self._heightmap if self._heightmap is not None else self.to_heightmap()
-        )
+        heightmap = self._heightmap if self._heightmap is not None else self.to_heightmap()
         ny, nx = heightmap.shape
 
         x_coords = np.linspace(self._bounds.min_x, self._bounds.max_x, nx)
@@ -583,9 +565,7 @@ class TopographyData:
             raise ValueError("filepath must be provided")
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
-        heightmap = (
-            self._heightmap if self._heightmap is not None else self.to_heightmap()
-        )
+        heightmap = self._heightmap if self._heightmap is not None else self.to_heightmap()
 
         data = {
             "bounds": {
@@ -650,9 +630,7 @@ class TopographyData:
         Returns:
             Dictionary with min, max, mean, std elevation
         """
-        heightmap = (
-            self._heightmap if self._heightmap is not None else self.to_heightmap(50)
-        )
+        heightmap = self._heightmap if self._heightmap is not None else self.to_heightmap(50)
 
         return {
             "min_elevation": float(np.min(heightmap)),
@@ -682,9 +660,7 @@ def create_flat_terrain(
         raise ValueError("width must be provided")
     if not (width is not None):
         raise ValueError("width must be provided")
-    topo = TopographyData(
-        bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
-    )
+    topo = TopographyData(bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height))
     heightmap = np.full((10, 10), elevation)
     topo.set_heightmap(heightmap, smooth=False)
     return topo
@@ -713,9 +689,7 @@ def create_sloped_terrain(
         raise ValueError("width must be provided")
     if not (width is not None):
         raise ValueError("width must be provided")
-    topo = TopographyData(
-        bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
-    )
+    topo = TopographyData(bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height))
 
     # Normalize direction
     slope_dir = slope_direction / np.linalg.norm(slope_direction)
@@ -755,9 +729,7 @@ def create_undulating_terrain(
         raise ValueError("width must be provided")
     if not (width is not None):
         raise ValueError("width must be provided")
-    topo = TopographyData(
-        bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
-    )
+    topo = TopographyData(bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height))
 
     resolution = 100
     x = np.linspace(0, width, resolution)

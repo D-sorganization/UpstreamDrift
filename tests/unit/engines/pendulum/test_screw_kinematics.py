@@ -40,9 +40,7 @@ class TestPositionComputation:
             p = sk.compute_arm_tip_position(theta)
             assert abs(np.linalg.norm(p) - sk._l1) < 1e-9
 
-    def test_clubhead_at_rest_points_straight_down(
-        self, sk: PendulumScrewKinematics
-    ) -> None:
+    def test_clubhead_at_rest_points_straight_down(self, sk: PendulumScrewKinematics) -> None:
         """At θ1=θ2=0 the clubhead is L1+L2 below the shoulder."""
         p = sk.compute_clubhead_position(0.0, 0.0)
         assert abs(p[0]) < 1e-10
@@ -65,9 +63,7 @@ class TestTwistComputation:
         twist = sk.compute_twist(q, v, sk.BODY_ARM_TIP)
         assert isinstance(twist, Twist)
 
-    def test_arm_tip_angular_velocity_matches_omega1(
-        self, sk: PendulumScrewKinematics
-    ) -> None:
+    def test_arm_tip_angular_velocity_matches_omega1(self, sk: PendulumScrewKinematics) -> None:
         """Arm tip angular velocity must equal ω1 (about z)."""
         q = np.array([0.3, 0.0])
         v = np.array([2.5, 0.0])
@@ -85,9 +81,7 @@ class TestTwistComputation:
         twist = sk.compute_twist(q, v, sk.BODY_CLUBHEAD)
         assert abs(twist.angular[2] - 3.0) < 1e-10
 
-    def test_linear_velocity_perpendicular_to_radius(
-        self, sk: PendulumScrewKinematics
-    ) -> None:
+    def test_linear_velocity_perpendicular_to_radius(self, sk: PendulumScrewKinematics) -> None:
         """For pure rotation the linear velocity must be ⊥ to the position vector."""
         q = np.array([math.pi / 4, 0.0])
         v = np.array([1.0, 0.0])
@@ -102,18 +96,14 @@ class TestTwistComputation:
 
 
 class TestScrewAxis:
-    def test_screw_axis_returns_screw_axis_instance(
-        self, sk: PendulumScrewKinematics
-    ) -> None:
+    def test_screw_axis_returns_screw_axis_instance(self, sk: PendulumScrewKinematics) -> None:
         q = np.array([0.2, 0.3])
         v = np.array([1.0, 0.5])
         twist = sk.compute_twist(q, v, sk.BODY_ARM_TIP)
         screw = sk.compute_screw_axis(twist)
         assert isinstance(screw, ScrewAxis)
 
-    def test_rotating_pendulum_screw_axis_direction_is_z(
-        self, sk: PendulumScrewKinematics
-    ) -> None:
+    def test_rotating_pendulum_screw_axis_direction_is_z(self, sk: PendulumScrewKinematics) -> None:
         """For planar rotation the ISA must be along ±ẑ."""
         q = np.array([0.4, 0.0])
         v = np.array([3.0, 0.0])
@@ -131,9 +121,7 @@ class TestScrewAxis:
         screw = sk.compute_screw_axis(twist)
         assert screw.is_singular
 
-    def test_pure_rotation_pitch_is_near_zero(
-        self, sk: PendulumScrewKinematics
-    ) -> None:
+    def test_pure_rotation_pitch_is_near_zero(self, sk: PendulumScrewKinematics) -> None:
         """Planar rotation has zero pitch (no translation along axis)."""
         q = np.array([math.pi / 3, 0.0])
         v = np.array([2.0, 0.0])

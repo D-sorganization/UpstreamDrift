@@ -29,9 +29,7 @@ def _make_mock_engine(
     engine.get_com_position.return_value = (
         com_pos if com_pos is not None else np.array([0.0, 0.0, 1.0])
     )
-    engine.get_com_velocity.return_value = (
-        com_vel if com_vel is not None else np.zeros(3)
-    )
+    engine.get_com_velocity.return_value = com_vel if com_vel is not None else np.zeros(3)
     engine.get_total_mass.return_value = mass
     return engine
 

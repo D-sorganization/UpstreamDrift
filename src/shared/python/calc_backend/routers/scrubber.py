@@ -58,9 +58,7 @@ def calculate_scrubber(request: ScrubberRequest) -> ScrubberResponse:
         )
         # Gas viscosity calculated for reference but not directly needed by
         # the column-sizing functions called below.
-        _ = calculate_gas_viscosity(
-            request.gas_temperature_k, request.gas_molecular_weight
-        )
+        _ = calculate_gas_viscosity(request.gas_temperature_k, request.gas_molecular_weight)
 
         # Liquid mass flux (assume per unit area ~ liquid_flow / column area, start with 1 m2)
         liquid_mass_flux = request.liquid_flow_kg_hr / 3600.0  # kg/s per m2 placeholder
@@ -94,11 +92,7 @@ def calculate_scrubber(request: ScrubberRequest) -> ScrubberResponse:
             column_result.get("design_velocity_m_s", 0.0), "design_velocity_m_s"
         ),
         column_diameter_m=_as_float(column_result.get("diameter_m", 0.0), "diameter_m"),
-        column_diameter_ft=_as_float(
-            column_result.get("diameter_ft", 0.0), "diameter_ft"
-        ),
-        cross_section_m2=_as_float(
-            column_result.get("cross_section_m2", 0.0), "cross_section_m2"
-        ),
+        column_diameter_ft=_as_float(column_result.get("diameter_ft", 0.0), "diameter_ft"),
+        cross_section_m2=_as_float(column_result.get("cross_section_m2", 0.0), "cross_section_m2"),
         caustic_requirement=caustic_result,
     )

@@ -63,15 +63,11 @@ class TestFilterDesigner:
         assert spec.filter_type == FilterType.HIGHPASS
 
     def test_butterworth_bandpass(self, fs: float) -> None:
-        spec = FilterDesigner.butterworth(
-            FilterType.BANDPASS, cutoff=(10.0, 80.0), fs=fs
-        )
+        spec = FilterDesigner.butterworth(FilterType.BANDPASS, cutoff=(10.0, 80.0), fs=fs)
         assert spec.filter_type == FilterType.BANDPASS
 
     def test_butterworth_bandstop(self, fs: float) -> None:
-        spec = FilterDesigner.butterworth(
-            FilterType.BANDSTOP, cutoff=(45.0, 55.0), fs=fs
-        )
+        spec = FilterDesigner.butterworth(FilterType.BANDSTOP, cutoff=(45.0, 55.0), fs=fs)
         assert spec.filter_type == FilterType.BANDSTOP
 
     def test_butterworth_notch(self, fs: float) -> None:
@@ -124,22 +120,16 @@ class TestFilterSpec:
 class TestApplyFilter:
     """Tests for apply_filter function."""
 
-    def test_lowpass_removes_hf(
-        self, noisy_sine: Signal, butter_lowpass: FilterSpec
-    ) -> None:
+    def test_lowpass_removes_hf(self, noisy_sine: Signal, butter_lowpass: FilterSpec) -> None:
         filtered = apply_filter(noisy_sine, butter_lowpass)
         assert filtered.values.shape == noisy_sine.values.shape
         assert "filter_type" in filtered.metadata
 
-    def test_causal_filtering(
-        self, noisy_sine: Signal, butter_lowpass: FilterSpec
-    ) -> None:
+    def test_causal_filtering(self, noisy_sine: Signal, butter_lowpass: FilterSpec) -> None:
         filtered = apply_filter(noisy_sine, butter_lowpass, zero_phase=False)
         assert filtered.values.shape == noisy_sine.values.shape
 
-    def test_filtered_name(
-        self, noisy_sine: Signal, butter_lowpass: FilterSpec
-    ) -> None:
+    def test_filtered_name(self, noisy_sine: Signal, butter_lowpass: FilterSpec) -> None:
         filtered = apply_filter(noisy_sine, butter_lowpass)
         assert "_filtered" in filtered.name
 
@@ -211,9 +201,7 @@ class TestSmoothingFunctions:
         assert smoothed.values.shape == noisy_sine.values.shape
         assert smoothed.values[0] == noisy_sine.values[0]
 
-    def test_apply_exponential_smoothing_invalid_alpha(
-        self, noisy_sine: Signal
-    ) -> None:
+    def test_apply_exponential_smoothing_invalid_alpha(self, noisy_sine: Signal) -> None:
         with pytest.raises((ValueError, AssertionError)):
             apply_exponential_smoothing(noisy_sine, alpha=0.0)
 

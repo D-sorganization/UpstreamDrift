@@ -481,9 +481,7 @@ class TestPhysicsValidation:
 
     def test_backspin_adds_lift(self) -> None:
         """Test backspin produces upward lift."""
-        no_spin = LaunchConditions(
-            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=0.0
-        )
+        no_spin = LaunchConditions(velocity=60.0, launch_angle=math.radians(12.0), spin_rate=0.0)
         with_spin = LaunchConditions(
             velocity=60.0, launch_angle=math.radians(12.0), spin_rate=3000.0
         )
@@ -501,12 +499,8 @@ class TestPhysicsValidation:
 
     def test_higher_velocity_longer_distance(self) -> None:
         """Test higher velocity produces longer carry."""
-        slow = LaunchConditions(
-            velocity=40.0, launch_angle=math.radians(12.0), spin_rate=2500.0
-        )
-        fast = LaunchConditions(
-            velocity=70.0, launch_angle=math.radians(12.0), spin_rate=2500.0
-        )
+        slow = LaunchConditions(velocity=40.0, launch_angle=math.radians(12.0), spin_rate=2500.0)
+        fast = LaunchConditions(velocity=70.0, launch_angle=math.radians(12.0), spin_rate=2500.0)
 
         sim = EnhancedBallFlightSimulator()
 
@@ -520,9 +514,7 @@ class TestPhysicsValidation:
 
     def test_gravity_only_parabolic(self) -> None:
         """Test gravity-only trajectory is approximately parabolic."""
-        launch = LaunchConditions(
-            velocity=50.0, launch_angle=math.radians(45.0), spin_rate=0.0
-        )
+        launch = LaunchConditions(velocity=50.0, launch_angle=math.radians(45.0), spin_rate=0.0)
 
         # Disable all aerodynamics
         config = AerodynamicsConfig(enabled=False)

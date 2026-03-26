@@ -141,18 +141,14 @@ class RobNealDataViewer:
         )
 
         # Draw hands position
-        self.viewer["club/hands"].set_object(
-            g.Sphere(0.02), g.MeshBasicMaterial(color=0x0000FF)
-        )
+        self.viewer["club/hands"].set_object(g.Sphere(0.02), g.MeshBasicMaterial(color=0x0000FF))
         # Construct proper homogeneous transformation matrix for hands position
         hands_transform = np.eye(4)
         hands_transform[:3, 3] = midhands_xyz
         self.viewer["club/hands"].set_transform(hands_transform)
 
         # Draw clubface position
-        self.viewer["club/face"].set_object(
-            g.Sphere(0.03), g.MeshBasicMaterial(color=0xFF0000)
-        )
+        self.viewer["club/face"].set_object(g.Sphere(0.03), g.MeshBasicMaterial(color=0xFF0000))
         # Construct proper homogeneous transformation matrix for clubface position
         clubface_transform = np.eye(4)
         clubface_transform[:3, 3] = clubface_xyz

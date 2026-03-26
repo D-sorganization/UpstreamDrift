@@ -80,9 +80,7 @@ class TestMeshcatPinocchioIntegration:
             pytest.skip("pinocchio stub installed")
 
         # Check for MeshcatVisualizer in pinocchio.visualize
-        if not hasattr(pin, "visualize") or not hasattr(
-            pin.visualize, "MeshcatVisualizer"
-        ):
+        if not hasattr(pin, "visualize") or not hasattr(pin.visualize, "MeshcatVisualizer"):
             pytest.skip("pinocchio.visualize.MeshcatVisualizer not available")
 
         model = pin.Model()

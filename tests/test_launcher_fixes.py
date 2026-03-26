@@ -89,9 +89,7 @@ class TestEngineManager(unittest.TestCase):
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
-    @patch(
-        "src.shared.python.engine_core.engine_manager.EngineManager.get_probe_result"
-    )
+    @patch("src.shared.python.engine_core.engine_manager.EngineManager.get_probe_result")
     def test_probe_system(self, mock_get_result: MagicMock) -> None:
         """Test engine probe system."""
         from src.shared.python.engine_core.engine_manager import EngineType
@@ -221,9 +219,7 @@ class TestDraggableModelCard(unittest.TestCase):
         card.dropEvent(event)
 
         # Verify swap was called
-        self.mock_launcher._swap_models.assert_called_once_with(
-            "source_model", "test_model"
-        )
+        self.mock_launcher._swap_models.assert_called_once_with("source_model", "test_model")
         event.acceptProposedAction.assert_called_once()
 
 
@@ -365,9 +361,7 @@ class TestDockerConfiguration(unittest.TestCase):
         dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
         content = dockerfile_path.read_text()
         # Should use a pinned version, not :latest
-        self.assertIn(
-            "continuumio/miniconda3:", content, "Should use miniconda3 base image"
-        )
+        self.assertIn("continuumio/miniconda3:", content, "Should use miniconda3 base image")
         self.assertNotIn(
             "continuumio/miniconda3:latest",
             content,
@@ -380,9 +374,7 @@ class TestMuJoCoModule(unittest.TestCase):
 
     def test_mujoco_module_exists(self) -> None:
         """Test that MuJoCo humanoid golf module exists."""
-        mujoco_path = Path(
-            "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf"
-        )
+        mujoco_path = Path("src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf")
         self.assertTrue(mujoco_path.exists(), "MuJoCo module directory should exist")
 
         main_file = mujoco_path / "__main__.py"
@@ -390,9 +382,7 @@ class TestMuJoCoModule(unittest.TestCase):
 
     def test_mujoco_module_structure(self) -> None:
         """Test MuJoCo module has required components."""
-        mujoco_path = Path(
-            "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf"
-        )
+        mujoco_path = Path("src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf")
 
         required_files = [
             "__init__.py",
@@ -401,9 +391,7 @@ class TestMuJoCoModule(unittest.TestCase):
 
         for file_name in required_files:
             file_path = mujoco_path / file_name
-            self.assertTrue(
-                file_path.exists(), f"Required file {file_name} should exist"
-            )
+            self.assertTrue(file_path.exists(), f"Required file {file_name} should exist")
 
     def test_mujoco_module_name_in_handler(self) -> None:
         """Test that the module name in model handlers is correct."""
@@ -422,9 +410,7 @@ class TestMuJoCoModule(unittest.TestCase):
         call_args = mock_process_manager.launch_module.call_args
         module_name = call_args.kwargs.get(
             "module_name",
-            call_args[1].get(
-                "module_name", call_args[0][1] if len(call_args[0]) > 1 else None
-            ),
+            call_args[1].get("module_name", call_args[0][1] if len(call_args[0]) > 1 else None),
         )
         self.assertFalse(
             module_name.endswith(".main"),

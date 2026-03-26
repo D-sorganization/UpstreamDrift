@@ -118,9 +118,7 @@ def test_create_installer_info(tmp_path, monkeypatch):
 @patch("installer.windows.build_installer.check_prerequisites", return_value=True)
 @patch("installer.windows.build_installer.clean_build_dirs")
 @patch("installer.windows.build_installer.install_dependencies", return_value=True)
-@patch(
-    "installer.windows.build_installer.detect_physics_engines", return_value=["mujoco"]
-)
+@patch("installer.windows.build_installer.detect_physics_engines", return_value=["mujoco"])
 @patch("installer.windows.build_installer.build_executable", return_value=True)
 @patch("installer.windows.build_installer.build_msi", return_value=True)
 @patch("installer.windows.build_installer.create_installer_info")

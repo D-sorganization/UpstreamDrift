@@ -467,9 +467,7 @@ class LinearFitter:
         y = signal.values
 
         # Use numpy's polyfit for linear regression
-        coeffs, residuals_sum, rank, singular, rcond = np.polyfit(
-            t, y, deg=1, full=True
-        )
+        coeffs, residuals_sum, rank, singular, rcond = np.polyfit(t, y, deg=1, full=True)
 
         slope, intercept = coeffs
         fitted_values = slope * t + intercept

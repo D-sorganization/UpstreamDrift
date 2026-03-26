@@ -35,9 +35,7 @@ class SimulationMixin:
             if urdf_dir is not None and urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
                     name = urdf_file.stem.replace("_", " ").title()
-                    self.available_models.append(
-                        {"name": f"URDF: {name}", "path": str(urdf_file)}
-                    )
+                    self.available_models.append({"name": f"URDF: {name}", "path": str(urdf_file)})
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to scan URDF models: {e}")
 
@@ -202,9 +200,7 @@ class SimulationMixin:
         idx_q = self.model.joints[i].idx_q
         idx = int(idx_q)
 
-        slider.valueChanged.connect(
-            lambda val, s=spin, k=idx: self._on_slider(val, s, k)
-        )
+        slider.valueChanged.connect(lambda val, s=spin, k=idx: self._on_slider(val, s, k))
         spin.valueChanged.connect(lambda val, s=slider, k=idx: self._on_spin(val, s, k))
 
         r_layout.addWidget(slider)
@@ -237,9 +233,7 @@ class SimulationMixin:
 
                 slider_idx += 1
 
-    def _on_slider(
-        self: PinocchioGUI, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
-    ) -> None:
+    def _on_slider(self: PinocchioGUI, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int) -> None:
         if not (val is not None):
             raise ValueError("val must be provided")
         if not (val is not None):
@@ -249,9 +243,7 @@ class SimulationMixin:
             spin.setValue(angle)
         self._update_q(idx, angle)
 
-    def _on_spin(
-        self: PinocchioGUI, val: float, slider: QtWidgets.QSlider, idx: int
-    ) -> None:
+    def _on_spin(self: PinocchioGUI, val: float, slider: QtWidgets.QSlider, idx: int) -> None:
         with SignalBlocker(slider):
             slider.setValue(int(val * SLIDER_SCALE))
         self._update_q(idx, val)
@@ -293,13 +285,13 @@ class SimulationMixin:
     def _record_frame(self: PinocchioGUI) -> None:
         """Capture and record a single frame of simulation state."""
         if not (self.model is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.data is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.q is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.v is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         tau = np.zeros(self.model.nv)
 
         pin.computeKineticEnergy(self.model, self.data, self.q, self.v)
@@ -327,9 +319,9 @@ class SimulationMixin:
     ) -> tuple[np.ndarray | None, np.ndarray | None]:
         """Resolve club head frame and return its pose/velocity."""
         if not (self.model is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         if not (self.data is not None):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
 
         club_id = -1
         for fid in range(self.model.nframes):

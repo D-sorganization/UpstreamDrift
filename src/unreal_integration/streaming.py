@@ -549,9 +549,7 @@ class UnrealStreamingServer:
             # In a real implementation, this would start the WebSocket server
             # For now, we just transition to RUNNING
             self._state = StreamingState.RUNNING
-            logger.info(
-                f"Streaming server started on {self.config.host}:{self.config.port}"
-            )
+            logger.info(f"Streaming server started on {self.config.host}:{self.config.port}")
         except (RuntimeError, TypeError, ValueError) as e:
             self._state = StreamingState.ERROR
             logger.error(f"Failed to start streaming server: {e}")

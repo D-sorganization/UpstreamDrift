@@ -53,9 +53,7 @@ from src.shared.python.ai.types import (  # noqa: E402
 @pytest.fixture
 def adapter():
     """Provide a configured OllamaAdapter."""
-    return OllamaAdapter(
-        host="http://localhost:11434", model="llama3.1:8b", timeout=10.0
-    )
+    return OllamaAdapter(host="http://localhost:11434", model="llama3.1:8b", timeout=10.0)
 
 
 def test_init_defaults():
@@ -97,9 +95,7 @@ def test_capabilities(adapter):
     assert caps.provider_name == "ollama"
     assert "llama3" in caps.model_name
     assert ProviderCapability.STREAMING in caps.supported
-    assert (
-        ProviderCapability.FUNCTION_CALLING in caps.supported
-    )  # Because llama3 is in the name
+    assert ProviderCapability.FUNCTION_CALLING in caps.supported  # Because llama3 is in the name
 
     adapter2 = OllamaAdapter(model="deepseek-coder:33b")
     caps2 = adapter2.capabilities
@@ -215,9 +211,7 @@ def test_send_message_with_tools(mock_get_client, adapter):
     mock_response.json.return_value = {
         "message": {
             "content": "Let me check...",
-            "tool_calls": [
-                {"function": {"name": "get_weather", "arguments": {"c": "oslo"}}}
-            ],
+            "tool_calls": [{"function": {"name": "get_weather", "arguments": {"c": "oslo"}}}],
         },
     }
     mock_client.post.return_value = mock_response

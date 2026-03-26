@@ -69,8 +69,8 @@ def _zero_torque_qddot_double(state: np.ndarray, params: PendulumParams) -> np.n
     -------
     qddot : np.ndarray  shape (2,)  — [ddtheta1, ddphi]
     """
-    if not (state.shape == (4):
-        raise ValueError(), f"Double state must be shape (4,), got {state.shape}")
+    if not (state.shape == (4,)):
+        raise ValueError(f"Double state must be shape (4,), got {state.shape}")
     if not (np.all(np.isfinite(state))):
         raise ValueError("State contains non-finite values")
 
@@ -117,8 +117,8 @@ def zero_torque_joint_forces_double(
     --------------
     All returned force components are finite.
     """
-    if not (state.shape == (4):
-        raise ValueError(), f"Expected state shape (4,), got {state.shape}")
+    if not (state.shape == (4,)):
+        raise ValueError(f"Expected state shape (4,), got {state.shape}")
     if not (np.all(np.isfinite(state))):
         raise ValueError("State must be finite")
 
@@ -128,9 +128,7 @@ def zero_torque_joint_forces_double(
     # Postcondition: all outputs finite
     for key, (fx, fy) in forces.items():
         if not (np.isfinite(fx) and np.isfinite(fy)):
-            raise ValueError(()
-            f"Non-finite zero-torque force at {key}: ({fx}, {fy})"
-        )
+            raise ValueError(f"Non-finite zero-torque force at {key}: ({fx}, {fy})")
     return forces
 
 
@@ -139,9 +137,7 @@ def zero_torque_joint_forces_double(
 # ---------------------------------------------------------------------------
 
 
-def _zero_torque_qddot_triple(
-    state: np.ndarray, params: TriplePendulumParams
-) -> np.ndarray:
+def _zero_torque_qddot_triple(state: np.ndarray, params: TriplePendulumParams) -> np.ndarray:
     """Compute angular accel under zero driving torque for triple pendulum.
 
     Preconditions
@@ -152,8 +148,8 @@ def _zero_torque_qddot_triple(
     -------
     qddot : np.ndarray  shape (3,)  — [ddtheta1, ddphi1, ddphi2]
     """
-    if not (state.shape == (6):
-        raise ValueError(), f"Triple state must be shape (6,), got {state.shape}")
+    if not (state.shape == (6,)):
+        raise ValueError(f"Triple state must be shape (6,), got {state.shape}")
     if not (np.all(np.isfinite(state))):
         raise ValueError("State contains non-finite values")
 
@@ -186,8 +182,8 @@ def zero_torque_joint_forces_triple(
     -------
     dict with keys 'shoulder', 'wrist1', 'wrist2' — each (fx, fy) in Newtons.
     """
-    if not (state.shape == (6):
-        raise ValueError(), f"Expected state shape (6,), got {state.shape}")
+    if not (state.shape == (6,)):
+        raise ValueError(f"Expected state shape (6,), got {state.shape}")
     if not (np.all(np.isfinite(state))):
         raise ValueError("State must be finite")
 
@@ -196,7 +192,5 @@ def zero_torque_joint_forces_triple(
 
     for key, (fx, fy) in forces.items():
         if not (np.isfinite(fx) and np.isfinite(fy)):
-            raise ValueError(()
-            f"Non-finite zero-torque force at {key}: ({fx}, {fy})"
-        )
+            raise ValueError(f"Non-finite zero-torque force at {key}: ({fx}, {fy})")
     return forces

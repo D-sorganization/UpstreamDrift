@@ -45,9 +45,7 @@ class DashboardRenderer(BaseRenderer):
         if len(times) > 0 and len(speeds) > 0:
             speeds_mph = speeds * 2.23694
             ax.plot(times, speeds_mph, linewidth=2, color=self.colors["primary"])
-            ax.fill_between(
-                times, 0, speeds_mph, alpha=0.3, color=self.colors["primary"]
-            )
+            ax.fill_between(times, 0, speeds_mph, alpha=0.3, color=self.colors["primary"])
             ax.set_title(
                 f"Club Speed (Peak: {np.max(speeds_mph):.1f} mph)",
                 fontsize=11,
@@ -69,9 +67,7 @@ class DashboardRenderer(BaseRenderer):
         times_pe, pe = self.data.get_series("potential_energy")
         if len(times_ke) > 0:
             ax.plot(times_ke, ke, label="KE", linewidth=2, color=self.colors["primary"])
-            ax.plot(
-                times_pe, pe, label="PE", linewidth=2, color=self.colors["secondary"]
-            )
+            ax.plot(times_pe, pe, label="PE", linewidth=2, color=self.colors["secondary"])
             ax.set_title("Energy", fontsize=11, fontweight="bold")
             ax.set_xlabel("Time (s)", fontsize=9)
             ax.set_ylabel("Energy (J)", fontsize=9)

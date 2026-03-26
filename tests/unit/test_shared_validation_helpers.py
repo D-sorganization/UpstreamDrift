@@ -48,27 +48,19 @@ class TestValidationHelpers:
         threshold = 10.0
 
         # Valid case
-        validate_magnitude(
-            small_array, "test", threshold, "units", ValidationLevel.STRICT
-        )
+        validate_magnitude(small_array, "test", threshold, "units", ValidationLevel.STRICT)
 
         # STRICT raises error
         with pytest.raises(PhysicsValidationError, match="implausibly large values"):
-            validate_magnitude(
-                large_array, "test", threshold, "units", ValidationLevel.STRICT
-            )
+            validate_magnitude(large_array, "test", threshold, "units", ValidationLevel.STRICT)
 
         # STANDARD warns
         with pytest.warns(UserWarning, match="implausibly large values"):
-            validate_magnitude(
-                large_array, "test", threshold, "units", ValidationLevel.STANDARD
-            )
+            validate_magnitude(large_array, "test", threshold, "units", ValidationLevel.STANDARD)
 
         # PERMISSIVE warns
         with pytest.warns(UserWarning, match="implausibly large values"):
-            validate_magnitude(
-                large_array, "test", threshold, "units", ValidationLevel.PERMISSIVE
-            )
+            validate_magnitude(large_array, "test", threshold, "units", ValidationLevel.PERMISSIVE)
 
     def test_validate_joint_state(self):
         """Test validate_joint_state function."""
@@ -116,9 +108,7 @@ class TestValidationHelpers:
         # High acceleration
         huge_acc = np.array([MAX_CARTESIAN_ACCELERATION_M_S2 * 2, 0, 0])
         with pytest.raises(PhysicsValidationError):
-            validate_cartesian_state(
-                acceleration=huge_acc, level=ValidationLevel.STRICT
-            )
+            validate_cartesian_state(acceleration=huge_acc, level=ValidationLevel.STRICT)
 
     def test_validate_model_parameters(self):
         """Test validate_model_parameters function."""

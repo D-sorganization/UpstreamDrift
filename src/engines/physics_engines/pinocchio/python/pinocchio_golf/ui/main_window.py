@@ -111,14 +111,10 @@ class PinocchioGUI(
     def _load_default_model(self) -> None:
         """Load the default golfer model if available."""
         # Use relative path from this file's directory
-        default_urdf = (
-            Path(__file__).parent / "../../../models/generated/golfer.urdf"
-        ).resolve()
+        default_urdf = (Path(__file__).parent / "../../../models/generated/golfer.urdf").resolve()
 
         if default_urdf.exists():
-            self.available_models.insert(
-                0, {"name": "Default: Golfer", "path": str(default_urdf)}
-            )
+            self.available_models.insert(0, {"name": "Default: Golfer", "path": str(default_urdf)})
             self.load_urdf(str(default_urdf))
         else:
             self.available_models.insert(0, {"name": "Select Model...", "path": None})

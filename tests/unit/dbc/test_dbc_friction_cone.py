@@ -214,8 +214,7 @@ class TestProjectToFrictionCone(unittest.TestCase):
         projected = project_to_friction_cone(f, cone)
         # Either zero or on cone surface
         self.assertTrue(
-            cone.contains(projected, tolerance=1e-5)
-            or np.linalg.norm(projected) < 1e-10
+            cone.contains(projected, tolerance=1e-5) or np.linalg.norm(projected) < 1e-10
         )
 
     def test_projected_force_finite(self) -> None:

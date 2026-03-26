@@ -166,9 +166,7 @@ class TestBasicStatsMixin:
         assert host.find_club_head_speed_peak() is None
 
     def test_find_club_head_speed_peak_empty(self) -> None:
-        host = BasicStatsHost(
-            times=np.arange(10, dtype=float), club_head_speed=np.array([])
-        )
+        host = BasicStatsHost(times=np.arange(10, dtype=float), club_head_speed=np.array([]))
         assert host.find_club_head_speed_peak() is None
 
 

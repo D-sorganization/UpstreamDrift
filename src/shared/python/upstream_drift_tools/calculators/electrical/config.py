@@ -45,9 +45,7 @@ class ElectrodeConfig:
     bath_temperature: float = 1350.0  # °C
 
     # Electrical parameters
-    k_factors: dict[str, float] = field(
-        default_factory=lambda: {"K_tt": 1.0, "K_vert": 1.0}
-    )
+    k_factors: dict[str, float] = field(default_factory=lambda: {"K_tt": 1.0, "K_vert": 1.0})
     electrode_depths: np.ndarray = field(default_factory=lambda: np.zeros(3))
     phase_voltages: np.ndarray = field(default_factory=lambda: np.ones(3) * 100.0)
     phase_currents: np.ndarray = field(default_factory=lambda: np.zeros(3))

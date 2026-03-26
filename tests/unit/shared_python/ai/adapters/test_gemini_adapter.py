@@ -37,9 +37,7 @@ def test_init_missing_package():
     """Test behavior when the gemini package is missing."""
     with (
         patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", False),
-        pytest.raises(
-            ImportError, match="google-generativeai package is not installed"
-        ),
+        pytest.raises(ImportError, match="google-generativeai package is not installed"),
     ):
         GeminiAdapter("api-key")
 
@@ -110,9 +108,7 @@ def test_build_chat_session():
     ctx.messages = [
         Message(role="user", content="msg 1"),
         Message(role="assistant", content="msg 2"),
-        Message(
-            role="tool", content="msg 3"
-        ),  # should map to 'model' internally as fallback
+        Message(role="tool", content="msg 3"),  # should map to 'model' internally as fallback
     ]
 
     adapter._build_chat_session(ctx)

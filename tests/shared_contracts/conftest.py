@@ -12,20 +12,12 @@ def _is_truthy(value: str | None) -> bool:
 def _candidate_tools_roots() -> list[Path]:
     repo_root = Path(__file__).resolve().parents[2]
     candidates = [
-        (
-            Path(os.environ["TOOLS_REPO_ROOT"])
-            if os.environ.get("TOOLS_REPO_ROOT")
-            else None
-        ),
+        (Path(os.environ["TOOLS_REPO_ROOT"]) if os.environ.get("TOOLS_REPO_ROOT") else None),
         repo_root / "_tools_dep",
         repo_root / "vendor" / "ud-tools",
         repo_root.parent / "Tools",
     ]
-    return [
-        candidate.resolve()
-        for candidate in candidates
-        if candidate and candidate.exists()
-    ]
+    return [candidate.resolve() for candidate in candidates if candidate and candidate.exists()]
 
 
 def _tools_python_paths(tools_root: Path) -> list[Path]:

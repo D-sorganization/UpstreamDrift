@@ -208,9 +208,7 @@ class GolfVisualizerMainWindow(QMainWindow):
             )
             return
 
-        dialog = VideoExportDialog(
-            self, tab.opengl_widget.renderer, tab.frame_processor
-        )
+        dialog = VideoExportDialog(self, tab.opengl_widget.renderer, tab.frame_processor)
         dialog.exec()
 
     def _reset_camera(self) -> None:
@@ -241,21 +239,13 @@ class GolfVisualizerMainWindow(QMainWindow):
 
     def _toggle_face_normal(self, state) -> None:
         """Toggle face normal visibility."""
-        if (
-            hasattr(self, "gl_widget")
-            and self.gl_widget
-            and self.gl_widget.current_render_config
-        ):
+        if hasattr(self, "gl_widget") and self.gl_widget and self.gl_widget.current_render_config:
             self.gl_widget.current_render_config.show_face_normal = bool(state)
             self.gl_widget.update()
 
     def _toggle_ball(self, state) -> None:
         """Toggle ball visibility."""
-        if (
-            hasattr(self, "gl_widget")
-            and self.gl_widget
-            and self.gl_widget.current_render_config
-        ):
+        if hasattr(self, "gl_widget") and self.gl_widget and self.gl_widget.current_render_config:
             self.gl_widget.current_render_config.show_ball = bool(state)
             self.gl_widget.update()
 

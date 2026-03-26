@@ -34,9 +34,7 @@ class MuJoCoInducedAccelerationAnalyzer:
         self._jacp = np.zeros((3, self.model.nv))
         self._jacr = np.zeros((3, self.model.nv))
 
-    def compute_components(
-        self, tau_app: np.ndarray | None = None
-    ) -> InducedAccelerationResult:
+    def compute_components(self, tau_app: np.ndarray | None = None) -> InducedAccelerationResult:
         """Compute acceleration components induced by different forces.
 
         Decomposes Euler-Lagrange equation: M(q)qdd + C(q,qd)qd + G(q) = tau + J^T f_c
@@ -99,9 +97,7 @@ class MuJoCoInducedAccelerationAnalyzer:
         tau_vec = tau_app if tau_app is not None else self.data.qfrc_actuator
 
         # Stack RHS vectors into a matrix (nv, 4)
-        rhs_stack = np.column_stack(
-            (-term_G, -term_C, tau_vec, self.data.qfrc_constraint)
-        )
+        rhs_stack = np.column_stack((-term_G, -term_C, tau_vec, self.data.qfrc_constraint))
 
         # Solve M * results = rhs_stack
         # This performs one LU/Cholesky decomposition instead of 4

@@ -148,9 +148,7 @@ class HumanoidModel:
         self.root_link_name = root_link_name
 
         # Build tree structure
-        self.children_map: dict[str, list[GeneratedJoint]] = {
-            name: [] for name in links
-        }
+        self.children_map: dict[str, list[GeneratedJoint]] = {name: [] for name in links}
         self.joint_map: dict[str, GeneratedJoint] = {j.name: j for j in joints}
 
         for joint in joints:
@@ -255,9 +253,7 @@ class HumanoidModel:
             # Fallback: find lowest links
             sorted_links = sorted(
                 self.links.keys(),
-                key=lambda name: (
-                    transforms[name][2, 3] if name in transforms else float("inf")
-                ),
+                key=lambda name: (transforms[name][2, 3] if name in transforms else float("inf")),
             )
             feet_links = sorted_links[:2]  # Take lowest 2
 
@@ -305,9 +301,7 @@ class HumanoidModel:
         # Just use COM
         return [list(link.origin_xyz)]
 
-    def _compute_box_footprint(
-        self, size: tuple[float, float, float]
-    ) -> list[list[float]]:
+    def _compute_box_footprint(self, size: tuple[float, float, float]) -> list[list[float]]:
         """Compute footprint points for box geometry (8 corners)."""
         if not (size is not None):
             raise ValueError("size must be provided")
@@ -321,9 +315,7 @@ class HumanoidModel:
                     footprint.append([dx, dy, dz])
         return footprint
 
-    def _compute_cylinder_footprint(
-        self, radius: float, length: float
-    ) -> list[list[float]]:
+    def _compute_cylinder_footprint(self, radius: float, length: float) -> list[list[float]]:
         """Compute footprint points for cylinder/capsule geometry."""
         if not (radius is not None):
             raise ValueError("radius must be provided")
@@ -331,12 +323,8 @@ class HumanoidModel:
             raise ValueError("radius must be provided")
         footprint = []
         for theta in [0, np.pi / 2, np.pi, 3 * np.pi / 2]:
-            footprint.append(
-                [radius * np.cos(theta), radius * np.sin(theta), -length / 2]
-            )
-            footprint.append(
-                [radius * np.cos(theta), radius * np.sin(theta), length / 2]
-            )
+            footprint.append([radius * np.cos(theta), radius * np.sin(theta), -length / 2])
+            footprint.append([radius * np.cos(theta), radius * np.sin(theta), length / 2])
         return footprint
 
     def _create_support_polygon_from_points(

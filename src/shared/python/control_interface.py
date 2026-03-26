@@ -222,9 +222,7 @@ class ControlInterface:
                 strategy = ControlStrategy(strategy.lower())
             except ValueError:
                 valid = [s.value for s in ControlStrategy]
-                raise ValueError(
-                    f"Unknown strategy '{strategy}'. Valid: {valid}"
-                ) from None
+                raise ValueError(f"Unknown strategy '{strategy}'. Valid: {valid}") from None
 
         self._state.strategy = strategy
         self._state.integral_error = np.zeros(self._n_v)
@@ -251,8 +249,7 @@ class ControlInterface:
             raise ValueError(f"Expected {self._n_v} torques, got {len(torques)}")
         if not np.all(np.isfinite(torques)):
             raise ValueError(
-                "DbC precondition violated: torques must be finite "
-                f"(no NaN/Inf). Got: {torques}"
+                "DbC precondition violated: torques must be finite " f"(no NaN/Inf). Got: {torques}"
             )
 
         # Clip to torque limits
@@ -278,8 +275,7 @@ class ControlInterface:
         """
         if not np.isfinite(torque):
             raise ValueError(
-                "DbC precondition violated: torque must be finite "
-                f"(no NaN/Inf). Got: {torque}"
+                "DbC precondition violated: torque must be finite " f"(no NaN/Inf). Got: {torque}"
             )
         idx = self._resolve_joint_index(joint)
         limit = self._joint_info[idx].torque_limit
@@ -319,14 +315,11 @@ class ControlInterface:
             kd_arr = np.full(self._n_v, kd) if np.isscalar(kd) else np.asarray(kd)
             if not np.all(kd_arr >= 0):
                 raise ValueError(
-                    f"DbC precondition violated: kd must be non-negative (>= 0). "
-                    f"Got: {kd_arr}"
+                    f"DbC precondition violated: kd must be non-negative (>= 0). " f"Got: {kd_arr}"
                 )
             self._state.kd = kd_arr
         if ki is not None:
-            self._state.ki = (
-                np.full(self._n_v, ki) if np.isscalar(ki) else np.asarray(ki)
-            )
+            self._state.ki = np.full(self._n_v, ki) if np.isscalar(ki) else np.asarray(ki)
 
     def set_target_positions(self, positions: np.ndarray | list[float]) -> None:
         """Set target positions for tracking controllers (PD, PID, etc.).
@@ -594,11 +587,7 @@ class ControlInterface:
             wbc = WholeBodyController(self.engine)
             # Use custom params for task configuration
             solution = wbc.solve()
-            return (
-                solution.torques
-                if hasattr(solution, "torques")
-                else np.zeros(self._n_v)
-            )
+            return solution.torques if hasattr(solution, "torques") else np.zeros(self._n_v)
         except ImportError as e:
             logger.debug("WBC not available, using computed torque: %s", e)
             return self._compute_computed_torque(q, v)
@@ -617,9 +606,7 @@ class ControlInterface:
         if not (torques is not None):
             raise ValueError("torques must be provided")
         for ji in self._joint_info:
-            torques[ji.index] = np.clip(
-                torques[ji.index], -ji.torque_limit, ji.torque_limit
-            )
+            torques[ji.index] = np.clip(torques[ji.index], -ji.torque_limit, ji.torque_limit)
         return torques
 
     def _resolve_joint_index(self, joint: int | str) -> int:

@@ -179,9 +179,7 @@ def analytical_constraint_jacobian(q: np.ndarray, p: GolferParams) -> np.ndarray
 
     # Constraint 4: along-club distance = grip_sep
     # Phi[3] = (lh - rh) · club_dir - (grip_left - grip_right)
-    Phi_q[3, :] = club_dir[0] * (J_lh[0, :] - J_rh[0, :]) + club_dir[1] * (
-        J_lh[1, :] - J_rh[1, :]
-    )
+    Phi_q[3, :] = club_dir[0] * (J_lh[0, :] - J_rh[0, :]) + club_dir[1] * (J_lh[1, :] - J_rh[1, :])
 
     # d(club_dir)/dq_7: club_dir = (sin(th_club), -cos(th_club))
     # d/dq_7: (cos(th_club), sin(th_club))
@@ -251,9 +249,7 @@ def linear_accelerations(
     return result
 
 
-def net_joint_forces(
-    q: np.ndarray, qdot: np.ndarray, qddot: np.ndarray, p: GolferParams
-) -> dict:
+def net_joint_forces(q: np.ndarray, qdot: np.ndarray, qddot: np.ndarray, p: GolferParams) -> dict:
     """Compute net force at each joint using Newton's second law.
 
     F = m * a - m * g_vec for each point mass.

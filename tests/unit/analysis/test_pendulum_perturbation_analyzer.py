@@ -166,9 +166,7 @@ def test_perturb_torque_different_seeds_differ(
 ) -> None:
     # Use non-zero coefficients so noise makes a measurable difference
     analyzer_with_profile.set_base_torque_profile({"coeffs": [[1.0, 2.0], [3.0, 4.0]]})
-    config = PerturbationConfig(
-        n_trials=3, noise_amplitude=0.5, noise_type="white", seed=1
-    )
+    config = PerturbationConfig(n_trials=3, noise_amplitude=0.5, noise_type="white", seed=1)
     r3 = analyzer_with_profile.perturb_torque(config, seed=0)
     r4 = analyzer_with_profile.perturb_torque(config, seed=999)
     flat3 = [c for joint in r3["coeffs"] for c in joint]
@@ -367,9 +365,7 @@ def test_run_batch_requires_profile_set(
 def test_run_batch_zero_amplitude_high_success_rate(
     analyzer_with_profile: PendulumPerturbationAnalyzer,
 ) -> None:
-    config = PerturbationConfig(
-        n_trials=5, noise_amplitude=0.0, noise_type="white", seed=0
-    )
+    config = PerturbationConfig(n_trials=5, noise_amplitude=0.0, noise_type="white", seed=0)
     result = analyzer_with_profile.run_batch(config)
     assert result.success_rate == 1.0
 
@@ -378,9 +374,7 @@ def test_run_batch_reproducible_with_seed(
     analyzer: PendulumPerturbationAnalyzer,
 ) -> None:
     profile = {"coeffs": [[1.0, 0.5, 0.0, 0.0], [0.5, 1.0, 0.0, 0.0]]}
-    config = PerturbationConfig(
-        n_trials=3, noise_amplitude=0.05, noise_type="white", seed=77
-    )
+    config = PerturbationConfig(n_trials=3, noise_amplitude=0.05, noise_type="white", seed=77)
     analyzer.set_base_torque_profile(profile)
     r1 = analyzer.run_batch(config)
     analyzer.set_base_torque_profile(profile)

@@ -64,8 +64,7 @@ class UISetupMixin:
 
         self.tabs = QTabWidget()
 
-        self.tabs.setStyleSheet(
-            """
+        self.tabs.setStyleSheet("""
 
             QTabWidget::pane { border: 1px solid #444; background: #2b2b2b; }
 
@@ -75,8 +74,7 @@ class UISetupMixin:
 
             QTabBar::tab:hover { background: #444; }
 
-        """
-        )
+        """)
 
         self.setup_sim_tab()
 
@@ -159,9 +157,7 @@ class UISetupMixin:
 
         self.combo_control.currentTextChanged.connect(self.on_control_mode_changed)
 
-        self.combo_control.setCurrentText(
-            str(getattr(self.config, "control_mode", "pd"))
-        )
+        self.combo_control.setCurrentText(str(getattr(self.config, "control_mode", "pd")))
 
         settings_layout.addWidget(self.combo_control, 0, 1)
 
@@ -222,9 +218,7 @@ class UISetupMixin:
 
         btn_browse_save = QPushButton("Browse")
 
-        btn_browse_save.clicked.connect(
-            lambda: self.browse_file(self.txt_save_path, save=True)
-        )
+        btn_browse_save.clicked.connect(lambda: self.browse_file(self.txt_save_path, save=True))
 
         state_layout.addWidget(btn_browse_save, 1, 2)
 
@@ -354,9 +348,7 @@ class UISetupMixin:
         self.slider_weight.setRange(50, 200)
         self.slider_weight.setValue(int(self.config.weight_percent))
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
-        self.slider_weight.valueChanged.connect(
-            lambda v: self.lbl_weight_val.setText(f"{v}%")
-        )
+        self.slider_weight.valueChanged.connect(lambda v: self.lbl_weight_val.setText(f"{v}%"))
         dim_layout.addWidget(self.slider_weight, 1, 1)
         dim_layout.addWidget(self.lbl_weight_val, 1, 2)
 

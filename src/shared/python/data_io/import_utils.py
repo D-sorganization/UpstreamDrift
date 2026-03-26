@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 """Import utilities for checking module availability and versions.
 
 This module provides reusable import patterns for dependency checking.
@@ -29,7 +33,7 @@ def ensure_imports(*modules: str) -> dict[str, bool]:
     Example:
         available = ensure_imports("numpy", "matplotlib", "torch")
         if not available["torch"]:
-            print("PyTorch not available")
+            logger.info("PyTorch not available")
     """
     results = {}
 
@@ -131,7 +135,7 @@ def get_module_version(module_name: str) -> str | None:
 
     Example:
         version = get_module_version("numpy")
-        print(f"NumPy version: {version}")
+        logger.info(f"NumPy version: {version}")
     """
     try:
         module = __import__(module_name)
@@ -172,13 +176,9 @@ def check_minimum_version(
         return False
 
     try:
-        meets_requirement = version.parse(current_version) >= version.parse(
-            minimum_version
-        )
+        meets_requirement = version.parse(current_version) >= version.parse(minimum_version)
         if meets_requirement:
-            logger.debug(
-                f"{module_name} {current_version} meets minimum {minimum_version}"
-            )
+            logger.debug(f"{module_name} {current_version} meets minimum {minimum_version}")
         else:
             logger.warning(
                 f"{module_name} {current_version} does not meet minimum {minimum_version}"

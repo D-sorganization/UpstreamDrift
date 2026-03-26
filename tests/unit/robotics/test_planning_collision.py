@@ -372,9 +372,7 @@ class TestPrimitiveDistance:
         ],
         ids=["separated", "touching", "overlapping"],
     )
-    def test_sphere_sphere_distance(
-        self, center_b: np.ndarray, expected_distance: float
-    ) -> None:
+    def test_sphere_sphere_distance(self, center_b: np.ndarray, expected_distance: float) -> None:
         """Test distance between sphere pairs at varying separation."""
         sphere_a = Sphere(center=np.array([0.0, 0.0, 0.0]), radius=1.0)
         sphere_b = Sphere(center=center_b, radius=1.0)
@@ -651,11 +649,7 @@ class TestCollisionChecker:
         result = checker.compute_distance(q)
 
         # Should return some distance (bodies are separated)
-        assert (
-            result.distance > 0
-            or result.distance == float("inf")
-            or result.closest_pair is None
-        )
+        assert result.distance > 0 or result.distance == float("inf") or result.closest_pair is None
 
     def test_compute_distance_with_environment(
         self,

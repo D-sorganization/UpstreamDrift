@@ -28,16 +28,12 @@ def parse_checks(values: list[str] | None) -> dict[str, str]:
     checks: dict[str, str] = {}
     for value in values:
         if "=" not in value:
-            raise ValueError(
-                f"Invalid check {value!r}; expected format name=module.path"
-            )
+            raise ValueError(f"Invalid check {value!r}; expected format name=module.path")
         name, module_path = value.split("=", 1)
         name = name.strip()
         module_path = module_path.strip()
         if not name or not module_path:
-            raise ValueError(
-                f"Invalid check {value!r}; both name and module path are required"
-            )
+            raise ValueError(f"Invalid check {value!r}; both name and module path are required")
         checks[name] = module_path
     return checks
 

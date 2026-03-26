@@ -116,9 +116,7 @@ def test_update_context_read_error(qapp):
 
     with patch.object(dock, "_get_doc_file", return_value=mock_path):
         dock.update_context("some_id")
-        assert (
-            "Failed to load documentation: Read failed" in dock.text_area.toPlainText()
-        )
+        assert "Failed to load documentation: Read failed" in dock.text_area.toPlainText()
 
 
 def test_update_context_no_file(qapp):

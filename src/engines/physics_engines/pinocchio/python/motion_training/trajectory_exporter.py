@@ -100,9 +100,7 @@ class TrajectoryExporter:
 
         format = format.lower()
         if format not in self.SUPPORTED_FORMATS:
-            raise ValueError(
-                f"Unsupported format: {format}. Supported: {self.SUPPORTED_FORMATS}"
-            )
+            raise ValueError(f"Unsupported format: {format}. Supported: {self.SUPPORTED_FORMATS}")
 
         exporters = {
             "mujoco": self._export_mujoco,
@@ -121,9 +119,7 @@ class TrajectoryExporter:
             source_file=str(self.trajectory.events if self.trajectory else ""),
             model_name=self.model_name,
             num_frames=self.num_frames,
-            duration=(
-                float(self.times[-1] - self.times[0]) if len(self.times) > 0 else 0.0
-            ),
+            duration=(float(self.times[-1] - self.times[0]) if len(self.times) > 0 else 0.0),
             timestep=float(self.timestep),
             num_dof=self.num_dof,
             convergence_rate=self.ik_result.convergence_rate,

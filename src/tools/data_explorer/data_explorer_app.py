@@ -89,9 +89,7 @@ def load_dataset(filepath: Path) -> dict[str, Any]:
     elif suffix == ".json":
         info["columns"] = _get_json_keys(filepath)
 
-    logger.info(
-        "Loaded dataset: %s (%s, %d bytes)", filepath.name, suffix, info["size_bytes"]
-    )
+    logger.info("Loaded dataset: %s (%s, %d bytes)", filepath.name, suffix, info["size_bytes"])
     return info
 
 

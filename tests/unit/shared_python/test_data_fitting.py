@@ -202,9 +202,7 @@ def test_convert_poses_to_markers() -> None:
     # 3D case with target
     poses3d = np.array([[1.0, 2.0, 3.0]])
     names3d = ["left_shoulder"]
-    markers3d, mn3d = convert_poses_to_markers(
-        poses3d, names3d, target_markers=["RSHO"]
-    )
+    markers3d, mn3d = convert_poses_to_markers(poses3d, names3d, target_markers=["RSHO"])
     assert len(markers3d) == 0
 
 
@@ -222,18 +220,14 @@ class TestA3FittingPipeline:
         timestamps = np.array([0.0, 0.1])
         names = ["pelvis", "trunk"]
 
-        report = self.pipeline.fit_from_markers(
-            marker_data, names, timestamps, 70.0, "subj1"
-        )
+        report = self.pipeline.fit_from_markers(marker_data, names, timestamps, 70.0, "subj1")
         assert report.subject_id == "subj1"
         assert len(report.segment_params) > 0
 
     def test_export_report(self, tmp_path) -> None:
         marker_data = np.array([[[0, 0, 0], [1, 0, 0]]])
         timestamps = np.array([0.0])
-        report = self.pipeline.fit_from_markers(
-            marker_data, ["pelvis", "trunk"], timestamps, 70.0
-        )
+        report = self.pipeline.fit_from_markers(marker_data, ["pelvis", "trunk"], timestamps, 70.0)
         out_file = tmp_path / "report.json"
         self.pipeline.export_report(report, out_file, format="json")
         assert out_file.exists()

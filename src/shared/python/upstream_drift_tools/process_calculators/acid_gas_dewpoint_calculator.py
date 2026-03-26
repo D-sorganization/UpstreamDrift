@@ -89,7 +89,7 @@ except ImportError:
     BASE_CALCULATOR_AVAILABLE = False
 
     # Fallback to QWidget if BaseCalculatorWidget is not available
-    class BaseCalculatorWidget(QWidget):  # type: ignore[no-redef]
+    class BaseCalculatorWidget(QWidget):  # type: ignore
         def __init__(self, *args: Any, **kwargs: Any) -> None:
             QWidget.__init__(self, *args, **kwargs)
 
@@ -327,14 +327,12 @@ class AcidGasDewpointCalculator:
             Vapor pressure in Pa
         """
         # DbC preconditions
-        if not (isinstance(temperature_c):
-            raise ValueError((int, float)), ()
-            f"temperature_c must be numeric, got {type(temperature_c).__name__}"
-        )
-        if not (isinstance(component):
-            raise ValueError(str) and len(component) > 0, ()
-            "component must be a non-empty string"
-        )
+        assert isinstance(
+            temperature_c, (int, float)
+        ), f"temperature_c must be numeric, got {type(temperature_c).__name__}"
+        assert (
+            isinstance(component, str) and len(component) > 0
+        ), "component must be a non-empty string"
 
         if component not in self.antoine_constants:
             msg = f"Unknown component: {component}"
@@ -389,9 +387,7 @@ class AcidGasDewpointCalculator:
                 return float(chem.Psat)
             except ImportError as e:  # pragma: no cover - fallback
                 logger.warning("Thermo vapor pressure failed: %s; using Antoine", e)
-                return self.calculate_vapor_pressure(
-                    temperature_c, component, "antoine"
-                )
+                return self.calculate_vapor_pressure(temperature_c, component, "antoine")
 
         elif method == "coolprop":
             if not COOLPROP_AVAILABLE or PropsSI is None:
@@ -407,9 +403,7 @@ class AcidGasDewpointCalculator:
                 TypeError,
             ) as e:  # pragma: no cover - fallback
                 logger.warning("CoolProp vapor pressure failed: %s; using Antoine", e)
-                return self.calculate_vapor_pressure(
-                    temperature_c, component, "antoine"
-                )
+                return self.calculate_vapor_pressure(temperature_c, component, "antoine")
 
         else:
             msg = f"Unknown method: {method}"
@@ -432,9 +426,7 @@ class AcidGasDewpointCalculator:
             Dewpoint temperature in Celsius
         """
         if partial_pressure_pa <= 0:
-            raise ValueError(
-                f"partial_pressure_pa must be > 0, got {partial_pressure_pa}"
-            )
+            raise ValueError(f"partial_pressure_pa must be > 0, got {partial_pressure_pa}")
 
         if component not in self.antoine_constants:
             raise ValueError(
@@ -479,10 +471,8 @@ class AcidGasDewpointCalculator:
         self, partial_pressures: dict[str, float], total_pressure_pa: float
     ) -> dict[str, float]:
         """Calculate dewpoints for each component in the mixture."""
-        if not (partial_pressures is not None):
-            raise ValueError("partial_pressures must be provided")
-        if not (partial_pressures is not None):
-            raise ValueError("partial_pressures must be provided")
+        assert partial_pressures is not None, "partial_pressures must be provided"
+        assert partial_pressures is not None, "partial_pressures must be provided"
         dewpoints = {}
         for component, partial_pa in partial_pressures.items():
             if partial_pa > 0:
@@ -495,16 +485,14 @@ class AcidGasDewpointCalculator:
 
     def _assess_condensation_risk(self, margin: float) -> str:
         """Categorize condensation risk based on safety margin."""
-        if not (margin is not None):
-            raise ValueError("margin must be provided")
-        if not (margin is not None):
-            raise ValueError("margin must be provided")
+        assert margin is not None, "margin must be provided"
+        assert margin is not None, "margin must be provided"
         if np.isnan(margin):
             return "Unknown"
         if margin < 0:
             return "HIGH - Condensation occurring"
         if margin < 10:
-            return "MEDIUM - Within 10°C of dewpoint"
+            return "MEDIUM - Within 10Â°C of dewpoint"
         if margin < 30:
             return "LOW - Safe margin"
         return "VERY LOW - Large safety margin"
@@ -544,7 +532,7 @@ class AcidGasDewpointCalculator:
         # Validate conditions
         warnings = []
         if not (-100 <= temperature_c <= 400):
-            warnings.append("Temperature outside recommended range (-100 to 400°C)")
+            warnings.append("Temperature outside recommended range (-100 to 400Â°C)")
         if not (0.1 <= pressure_bar <= 300):
             warnings.append("Pressure outside recommended range (0.1 to 300 bar)")
 
@@ -561,9 +549,7 @@ class AcidGasDewpointCalculator:
         # 3. Overall dewpoint determination
         valid_dewpoints = {k: v for k, v in dewpoints.items() if not np.isnan(v)}
         if valid_dewpoints:
-            limiting_component = max(
-                valid_dewpoints.keys(), key=lambda k: valid_dewpoints[k]
-            )
+            limiting_component = max(valid_dewpoints.keys(), key=lambda k: valid_dewpoints[k])
             overall_dewpoint = valid_dewpoints[limiting_component]
         else:
             overall_dewpoint = np.nan
@@ -571,11 +557,7 @@ class AcidGasDewpointCalculator:
             warnings.append("Could not calculate dewpoint for any component")
 
         # 4. Risk assessment
-        margin = (
-            temperature_c - overall_dewpoint
-            if not np.isnan(overall_dewpoint)
-            else np.nan
-        )
+        margin = temperature_c - overall_dewpoint if not np.isnan(overall_dewpoint) else np.nan
         condensation_risk = self._assess_condensation_risk(margin)
 
         # 5. Compile sources
@@ -631,10 +613,8 @@ class AcidGasDewpointCalculator:
         Returns:
             DataFrame with temperature and dewpoint data
         """
-        if not (pressure_bar is not None):
-            raise ValueError("pressure_bar must be provided")
-        if not (pressure_bar is not None):
-            raise ValueError("pressure_bar must be provided")
+        assert pressure_bar is not None, "pressure_bar must be provided"
+        assert pressure_bar is not None, "pressure_bar must be provided"
         temperatures = np.linspace(temp_range[0], temp_range[1], num_points)
         results = []
 
@@ -703,18 +683,14 @@ def quick_dewpoint_calculation(
     Returns:
         Dictionary with key results
     """
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
+    assert temperature_c is not None, "temperature_c must be provided"
+    assert temperature_c is not None, "temperature_c must be provided"
     calc = AcidGasDewpointCalculator()
     composition = AcidGasComposition(
         h2o=h2o_fraction, hf=hf_fraction, hcl=hcl_fraction, h2s=h2s_fraction
     )
 
-    result = calc.calculate_dewpoint_mixture(
-        temperature_c, pressure_bar, composition, method
-    )
+    result = calc.calculate_dewpoint_mixture(temperature_c, pressure_bar, composition, method)
 
     return {
         "overall_dewpoint_c": result.overall_dewpoint_c,
@@ -744,14 +720,10 @@ def estimate_condensation_risk(
     Returns:
         Risk assessment dictionary
     """
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
-    if not (temperature_c is not None):
-        raise ValueError("temperature_c must be provided")
+    assert temperature_c is not None, "temperature_c must be provided"
+    assert temperature_c is not None, "temperature_c must be provided"
     calc = AcidGasDewpointCalculator()
-    result = calc.calculate_dewpoint_mixture(
-        temperature_c, pressure_bar, composition, method
-    )
+    result = calc.calculate_dewpoint_mixture(temperature_c, pressure_bar, composition, method)
 
     margin = result.dewpoint_margin_c
 
@@ -849,7 +821,7 @@ if GUI_AVAILABLE:
             self.temp_input = QDoubleSpinBox()
             self.temp_input.setRange(-100, 400)
             self.temp_input.setValue(150)
-            self.temp_input.setSuffix(" °C")
+            self.temp_input.setSuffix(" Â°C")
             input_layout.addWidget(QLabel("Temperature:"), 0, 0)
             input_layout.addWidget(self.temp_input, 0, 1)
 
@@ -910,12 +882,10 @@ if GUI_AVAILABLE:
 
         def display_result(self, result: DewpointResult) -> None:
             """Format and display results in the UI."""
-            if not (result is not None):
-                raise ValueError("result must be provided")
-            if not (result is not None):
-                raise ValueError("result must be provided")
+            assert result is not None, "result must be provided"
+            assert result is not None, "result must be provided"
             text = (
-                f"<b>Input:</b> T = {result.temperature_c:.2f} °C, "
+                f"<b>Input:</b> T = {result.temperature_c:.2f} Â°C, "
                 f"P = {result.pressure_bar:.2f} bar<br>"
             )
             text += (
@@ -925,15 +895,15 @@ if GUI_AVAILABLE:
                 f"H2S={result.composition.h2s:.4f}<br>"
             )
             text += (
-                f"<b>Dewpoints (°C):</b> H2O={result.h2o_dewpoint_c:.2f}, "
+                f"<b>Dewpoints (Â°C):</b> H2O={result.h2o_dewpoint_c:.2f}, "
                 f"HF={result.hf_dewpoint_c:.2f}, HCl={result.hcl_dewpoint_c:.2f}, "
                 f"H2S={result.h2s_dewpoint_c:.2f}<br>"
             )
             text += (
-                f"<b>Overall Dewpoint:</b> {result.overall_dewpoint_c:.2f} °C "
+                f"<b>Overall Dewpoint:</b> {result.overall_dewpoint_c:.2f} Â°C "
                 f"({result.limiting_component})<br>"
             )
-            text += f"<b>Dewpoint Margin:</b> {result.dewpoint_margin_c:.2f} °C<br>"
+            text += f"<b>Dewpoint Margin:</b> {result.dewpoint_margin_c:.2f} Â°C<br>"
             text += f"<b>Condensation Risk:</b> {result.condensation_risk}<br>"
             if result.warnings:
                 text += f"<b>Warnings:</b> {'; '.join(result.warnings)}<br>"

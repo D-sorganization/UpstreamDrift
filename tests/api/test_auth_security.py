@@ -8,9 +8,7 @@ import pytest
 from fastapi import HTTPException
 
 # Patch environment variable before importing security module
-os.environ["GOLF_API_SECRET_KEY"] = (
-    "super-secret-test-key-must-be-at-least-thirty-two-bytes-long"
-)
+os.environ["GOLF_API_SECRET_KEY"] = "super-secret-test-key-must-be-at-least-thirty-two-bytes-long"
 
 from src.api.auth.models import User, UserRole
 from src.api.auth.security import (

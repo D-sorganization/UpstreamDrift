@@ -132,9 +132,7 @@ async def load_engine_lazy(
         workflow = EngineWorkflowAdapter(engine_manager)
         result = workflow.load(engine_name)
         if not result.ok:
-            raise HTTPException(
-                status_code=result.status_code, detail=result.payload["detail"]
-            )
+            raise HTTPException(status_code=result.status_code, detail=result.payload["detail"])
         return result.payload
     except HTTPException:
         raise
@@ -159,17 +157,13 @@ async def load_engine(
     workflow = EngineWorkflowAdapter(engine_manager)
     engine_enum = workflow.parse_engine_identifier(engine_type)
     if engine_enum is None:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown engine type: {engine_type}"
-        )
+        raise HTTPException(status_code=400, detail=f"Unknown engine type: {engine_type}")
 
     try:
         # Use switch_engine which is the public API for loading engines
         success = engine_manager.switch_engine(engine_enum)
         if not success:
-            raise HTTPException(
-                status_code=400, detail=f"Failed to load engine: {engine_type}"
-            )
+            raise HTTPException(status_code=400, detail=f"Failed to load engine: {engine_type}")
 
         engine = engine_manager.get_active_physics_engine()
 
@@ -192,9 +186,7 @@ async def load_engine(
         }
 
     except ImportError as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Error loading engine: {str(exc)}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Error loading engine: {str(exc)}") from exc
 
 
 @router.post("/engines/{engine_type}/unload")
@@ -213,9 +205,7 @@ async def unload_engine(
     workflow = EngineWorkflowAdapter(engine_manager)
     result = workflow.unload(engine_type)
     if not result.ok:
-        raise HTTPException(
-            status_code=result.status_code, detail=result.payload["detail"]
-        )
+        raise HTTPException(status_code=result.status_code, detail=result.payload["detail"])
     return result.payload
 
 
@@ -253,9 +243,7 @@ async def get_engine_capabilities(
     try:
         engine_enum = EngineType(engine_type.lower())
     except ValueError as exc:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown engine type: {engine_type}"
-        ) from exc
+        raise HTTPException(status_code=400, detail=f"Unknown engine type: {engine_type}") from exc
 
     # Check if this engine is currently loaded to get live capabilities
     current = engine_manager.get_current_engine()

@@ -90,9 +90,7 @@ def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path):
         WorkflowDiagnosticContext,
     )
 
-    with WorkflowDiagnosticContext(
-        dump_dir=str(tmp_path), workflow_name="c3d_ingestion"
-    ) as ctx:
+    with WorkflowDiagnosticContext(dump_dir=str(tmp_path), workflow_name="c3d_ingestion") as ctx:
         reader = C3DDataReader(mock_c3d_file)
         meta = reader.get_metadata()
         ctx.record_state(

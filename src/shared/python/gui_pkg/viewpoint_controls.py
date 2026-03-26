@@ -563,9 +563,7 @@ class ViewpointController:
         if look_at is None:
             look_at = self.golfer_position + np.array([0.0, 0.0, 1.0])
 
-        self.current_camera = create_custom_camera(
-            azimuth_deg, elevation_deg, distance, look_at
-        )
+        self.current_camera = create_custom_camera(azimuth_deg, elevation_deg, distance, look_at)
         self.transition_in_progress = False
         return self.current_camera
 
@@ -633,9 +631,5 @@ class ViewpointController:
             ViewportLayout for rendering
         """
         if presets is None:
-            return create_standard_2x2_layout(
-                self.golfer_position, self.target_direction
-            )
-        return create_multiview_layout(
-            presets, self.golfer_position, self.target_direction
-        )
+            return create_standard_2x2_layout(self.golfer_position, self.target_direction)
+        return create_multiview_layout(presets, self.golfer_position, self.target_direction)

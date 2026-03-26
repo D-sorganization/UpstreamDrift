@@ -22,9 +22,7 @@ router = APIRouter()
 
 @router.get("/export/{task_id}")
 @precondition(
-    lambda task_id, format="json", task_manager=None: (
-        task_id is not None and len(task_id) > 0
-    ),
+    lambda task_id, format="json", task_manager=None: (task_id is not None and len(task_id) > 0),
     "Task ID must be a non-empty string",
 )
 async def export_results(

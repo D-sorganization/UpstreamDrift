@@ -44,9 +44,7 @@ def update_upstream_drift() -> bool:
 
         try:
             logger.info("🚀 Running: %s", " ".join(cmd))
-            logger.info(
-                "📦 This should be quick since we're just adding one package..."
-            )
+            logger.info("📦 This should be quick since we're just adding one package...")
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)
 
@@ -93,8 +91,7 @@ def test_updated_environment() -> bool:
                 "upstream-drift:engine",
                 "python",
                 "-c",
-                "import defusedxml.ElementTree; "
-                "print('✅ defusedxml.ElementTree available')",
+                "import defusedxml.ElementTree; " "print('✅ defusedxml.ElementTree available')",
             ],
             capture_output=True,
             text=True,
@@ -153,18 +150,12 @@ def main() -> int:
         test_success = test_updated_environment()
 
         if test_success:
-            logger.info(
-                "\n🎉 Success! The upstream-drift now has all required dependencies."
-            )
+            logger.info("\n🎉 Success! The upstream-drift now has all required dependencies.")
             logger.info("💡 You can now run MuJoCo, Drake, and Pinocchio simulations!")
         else:
-            logger.error(
-                "\n⚠️  Update completed but tests failed. Check the output above."
-            )
+            logger.error("\n⚠️  Update completed but tests failed. Check the output above.")
     else:
-        logger.error(
-            "\n💥 Failed to update upstream-drift. Check error messages above."
-        )
+        logger.error("\n💥 Failed to update upstream-drift. Check error messages above.")
 
     return 0 if success else 1
 

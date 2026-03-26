@@ -48,9 +48,7 @@ class SimulationRequest(BaseModel):
         - timestep (if given) must be in [1e-6, 0.1] seconds
     """
 
-    engine_type: str = Field(
-        ..., description="Physics engine to use (mujoco, drake, etc.)"
-    )
+    engine_type: str = Field(..., description="Physics engine to use (mujoco, drake, etc.)")
     model_path: str | None = Field(None, description="Path to model file")
     duration: float = Field(
         1.0,
@@ -67,12 +65,8 @@ class SimulationRequest(BaseModel):
     initial_state: dict[str, Any] | None = Field(
         None, description="Initial joint positions/velocities"
     )
-    control_inputs: list[dict[str, Any]] | None = Field(
-        None, description="Control sequence"
-    )
-    analysis_config: dict[str, Any] | None = Field(
-        None, description="Analysis configuration"
-    )
+    control_inputs: list[dict[str, Any]] | None = Field(None, description="Control sequence")
+    analysis_config: dict[str, Any] | None = Field(None, description="Analysis configuration")
 
     @field_validator("engine_type")
     @classmethod
@@ -105,13 +99,9 @@ class AnalysisRequest(BaseModel):
         - export_format must be a supported format
     """
 
-    analysis_type: str = Field(
-        ..., description="Type of analysis (kinematics, kinetics, etc.)"
-    )
+    analysis_type: str = Field(..., description="Type of analysis (kinematics, kinetics, etc.)")
     data_source: str = Field(..., description="Source of data (simulation, c3d, video)")
-    parameters: dict[str, Any] = Field(
-        default_factory=dict, description="Analysis parameters"
-    )
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Analysis parameters")
     export_format: str = Field("json", description="Output format")
 
     @field_validator("analysis_type")
@@ -121,8 +111,7 @@ class AnalysisRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_ANALYSIS_TYPES:
             raise ValueError(
-                f"Unknown analysis_type '{v}'. "
-                f"Valid types: {sorted(VALID_ANALYSIS_TYPES)}"
+                f"Unknown analysis_type '{v}'. " f"Valid types: {sorted(VALID_ANALYSIS_TYPES)}"
             )
         return normalized
 
@@ -133,8 +122,7 @@ class AnalysisRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_EXPORT_FORMATS:
             raise ValueError(
-                f"Unsupported export_format '{v}'. "
-                f"Supported: {sorted(VALID_EXPORT_FORMATS)}"
+                f"Unsupported export_format '{v}'. " f"Supported: {sorted(VALID_EXPORT_FORMATS)}"
             )
         return normalized
 
@@ -143,12 +131,8 @@ class VideoAnalysisRequest(BaseModel):
     """Request model for video-based pose estimation."""
 
     estimator_type: str = Field("mediapipe", description="Pose estimator to use")
-    min_confidence: float = Field(
-        0.5, description="Minimum confidence threshold", ge=0, le=1
-    )
-    enable_temporal_smoothing: bool = Field(
-        True, description="Enable temporal smoothing"
-    )
+    min_confidence: float = Field(0.5, description="Minimum confidence threshold", ge=0, le=1)
+    enable_temporal_smoothing: bool = Field(True, description="Enable temporal smoothing")
     max_frames: int | None = Field(None, description="Maximum frames to process")
     export_keypoints: bool = Field(True, description="Export raw keypoints")
     export_joint_angles: bool = Field(True, description="Export computed joint angles")
@@ -160,9 +144,7 @@ class ModelFittingRequest(BaseModel):
     model_path: str = Field(..., description="Path to biomechanical model")
     data_path: str = Field(..., description="Path to experimental data (C3D, etc.)")
     fitting_method: str = Field("least_squares", description="Fitting algorithm")
-    parameters: dict[str, Any] = Field(
-        default_factory=dict, description="Fitting parameters"
-    )
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Fitting parameters")
 
 
 # ──────────────────────────────────────────────────────────────
@@ -194,18 +176,12 @@ class ActuatorUpdateRequest(BaseModel):
     See issue #1209
     """
 
-    strategy: str | None = Field(
-        None, description="Control strategy (pd, pid, zero, etc.)"
-    )
+    strategy: str | None = Field(None, description="Control strategy (pd, pid, zero, etc.)")
     torques: list[float] | None = Field(None, description="Per-joint torque values")
-    kp: float | list[float] | None = Field(
-        None, description="Proportional gain(s)", gt=0
-    )
+    kp: float | list[float] | None = Field(None, description="Proportional gain(s)", gt=0)
     kd: float | list[float] | None = Field(None, description="Derivative gain(s)", gt=0)
     ki: float | list[float] | None = Field(None, description="Integral gain(s)", ge=0)
-    target_positions: list[float] | None = Field(
-        None, description="Target joint positions (rad)"
-    )
+    target_positions: list[float] | None = Field(None, description="Target joint positions (rad)")
     target_velocities: list[float] | None = Field(
         None, description="Target joint velocities (rad/s)"
     )
@@ -219,8 +195,7 @@ class ActuatorUpdateRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_CONTROL_STRATEGIES:
             raise ValueError(
-                f"Unknown strategy '{v}'. "
-                f"Valid strategies: {sorted(VALID_CONTROL_STRATEGIES)}"
+                f"Unknown strategy '{v}'. " f"Valid strategies: {sorted(VALID_CONTROL_STRATEGIES)}"
             )
         return normalized
 
@@ -261,9 +236,7 @@ class CameraPresetRequest(BaseModel):
         """Precondition: preset must be a recognized camera preset."""
         normalized = v.lower().strip()
         if normalized not in VALID_CAMERA_PRESETS:
-            raise ValueError(
-                f"Unknown preset '{v}'. Valid presets: {sorted(VALID_CAMERA_PRESETS)}"
-            )
+            raise ValueError(f"Unknown preset '{v}'. Valid presets: {sorted(VALID_CAMERA_PRESETS)}")
         return normalized
 
 
@@ -282,9 +255,7 @@ class TrajectoryRecordRequest(BaseModel):
         """Precondition: action must be start, stop, or export."""
         normalized = v.lower().strip()
         if normalized not in {"start", "stop", "export"}:
-            raise ValueError(
-                f"Unknown action '{v}'. Valid actions: start, stop, export"
-            )
+            raise ValueError(f"Unknown action '{v}'. Valid actions: start, stop, export")
         return normalized
 
 
@@ -319,8 +290,7 @@ class DataExportRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_EXPORT_DOWNLOAD_FORMATS:
             raise ValueError(
-                f"Unsupported format '{v}'. "
-                f"Supported: {sorted(VALID_EXPORT_DOWNLOAD_FORMATS)}"
+                f"Unsupported format '{v}'. " f"Supported: {sorted(VALID_EXPORT_DOWNLOAD_FORMATS)}"
             )
         return normalized
 
@@ -410,9 +380,7 @@ class ForceOverlayRequest(BaseModel):
         normalized = [ft.lower().strip() for ft in v]
         for ft in normalized:
             if ft not in VALID_FORCE_TYPES:
-                raise ValueError(
-                    f"Unknown force type '{ft}'. Valid: {sorted(VALID_FORCE_TYPES)}"
-                )
+                raise ValueError(f"Unknown force type '{ft}'. Valid: {sorted(VALID_FORCE_TYPES)}")
         return normalized
 
 
@@ -426,12 +394,8 @@ class ActuatorCommandRequest(BaseModel):
     See issue #1198
     """
 
-    actuator_index: int = Field(
-        ..., description="Index of the actuator to command", ge=0
-    )
-    value: float = Field(
-        ..., description="Command value (meaning depends on control_type)"
-    )
+    actuator_index: int = Field(..., description="Index of the actuator to command", ge=0)
+    value: float = Field(..., description="Command value (meaning depends on control_type)")
     control_type: str = Field(
         "constant",
         description="Control type: constant, polynomial, pd_gains, trajectory",
@@ -448,8 +412,7 @@ class ActuatorCommandRequest(BaseModel):
         normalized = v.lower().strip()
         if normalized not in VALID_ACTUATOR_CONTROL_TYPES:
             raise ValueError(
-                f"Unknown control_type '{v}'. "
-                f"Valid: {sorted(VALID_ACTUATOR_CONTROL_TYPES)}"
+                f"Unknown control_type '{v}'. " f"Valid: {sorted(VALID_ACTUATOR_CONTROL_TYPES)}"
             )
         return normalized
 
@@ -495,12 +458,8 @@ class AIPJsonRpcRequest(BaseModel):
 
     jsonrpc: str = Field("2.0", description="JSON-RPC version (must be 2.0)")
     method: str = Field(..., description="RPC method name")
-    params: dict[str, Any] | list[Any] | None = Field(
-        None, description="Method parameters"
-    )
-    id: int | str | None = Field(
-        None, description="Request ID (null for notifications)"
-    )
+    params: dict[str, Any] | list[Any] | None = Field(None, description="Method parameters")
+    id: int | str | None = Field(None, description="Request ID (null for notifications)")
 
     @field_validator("jsonrpc")
     @classmethod

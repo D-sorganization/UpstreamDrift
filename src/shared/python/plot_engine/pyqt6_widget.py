@@ -129,9 +129,7 @@ class PlotWidget(QWidget):
         }
         filter_str = ext_map.get(fmt, "All Files (*)")
 
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Export Plot", f"plot.{fmt}", filter_str
-        )
+        path, _ = QFileDialog.getSaveFileName(self, "Export Plot", f"plot.{fmt}", filter_str)
         if not path:
             return
 

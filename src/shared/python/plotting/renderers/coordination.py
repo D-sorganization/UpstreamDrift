@@ -64,9 +64,7 @@ class CoordinationRenderer(BaseRenderer):
         ax.set_ylabel("Coupling Angle (deg)", fontsize=12, fontweight="bold")
         ax.set_ylim(0, 360)
         ax.set_yticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
-        ax.set_title(
-            title or "Coordination Variability", fontsize=14, fontweight="bold"
-        )
+        ax.set_title(title or "Coordination Variability", fontsize=14, fontweight="bold")
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
 
@@ -189,9 +187,7 @@ class CoordinationRenderer(BaseRenderer):
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Relative Phase (deg)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            title or "Continuous Relative Phase", fontsize=14, fontweight="bold"
-        )
+        ax.set_title(title or "Continuous Relative Phase", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
@@ -222,9 +218,7 @@ class CoordinationRenderer(BaseRenderer):
             color=self.colors["primary"],
             linewidth=2,
         )
-        ax.plot(
-            times2, data2, label="Student", color=self.colors["secondary"], linewidth=2
-        )
+        ax.plot(times2, data2, label="Student", color=self.colors["secondary"], linewidth=2)
 
         step = max(1, len(path) // 50)
         for idx in range(0, len(path), step):
@@ -348,9 +342,7 @@ class CoordinationRenderer(BaseRenderer):
 
         ax.set_xlabel("log(r)", fontsize=12, fontweight="bold")
         ax.set_ylabel("log(C(r))", fontsize=12, fontweight="bold")
-        ax.set_title(
-            "Correlation Sum (Grassberger-Procaccia)", fontsize=14, fontweight="bold"
-        )
+        ax.set_title("Correlation Sum (Grassberger-Procaccia)", fontsize=14, fontweight="bold")
         ax.grid(True, alpha=0.3, which="both", linestyle="--")
         fig.tight_layout()
 
@@ -457,9 +449,7 @@ class CoordinationRenderer(BaseRenderer):
                 ax.plot(times, vel_norm, label=name, color=color, linewidth=2)
 
                 if analyzer_result:
-                    peak_info = next(
-                        (p for p in analyzer_result.peaks if p.name == name), None
-                    )
+                    peak_info = next((p for p in analyzer_result.peaks if p.name == name), None)
                     if peak_info:
                         ax.plot(
                             peak_info.time,
@@ -630,9 +620,7 @@ class CoordinationRenderer(BaseRenderer):
 
         ax.set_xlabel("X-Factor (degrees)", fontsize=12, fontweight="bold")
         ax.set_ylabel("X-Factor Velocity (deg/s)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            "X-Factor Stretch-Shortening Cycle", fontsize=14, fontweight="bold"
-        )
+        ax.set_title("X-Factor Stretch-Shortening Cycle", fontsize=14, fontweight="bold")
         ax.grid(True, alpha=0.3, linestyle="--")
         ax.axhline(0, color="k", linestyle="-", alpha=0.3)
         ax.legend(loc="best")
@@ -650,9 +638,7 @@ class CoordinationRenderer(BaseRenderer):
             raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
-        if not hasattr(synergy_result, "weights") or not hasattr(
-            synergy_result, "activations"
-        ):
+        if not hasattr(synergy_result, "weights") or not hasattr(synergy_result, "activations"):
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "Invalid SynergyResult object", ha="center", va="center")
             return
@@ -660,15 +646,11 @@ class CoordinationRenderer(BaseRenderer):
         n_synergies = synergy_result.n_synergies
         n_muscles = synergy_result.weights.shape[0]
 
-        gs = fig.add_gridspec(
-            n_synergies, 2, width_ratios=[1, 2], hspace=0.4, wspace=0.3
-        )
+        gs = fig.add_gridspec(n_synergies, 2, width_ratios=[1, 2], hspace=0.4, wspace=0.3)
 
         times, _ = self.data.get_series("joint_positions")
         if len(times) != synergy_result.activations.shape[1]:
-            times = np.linspace(
-                times[0], times[-1], synergy_result.activations.shape[1]
-            )
+            times = np.linspace(times[0], times[-1], synergy_result.activations.shape[1])
 
         colors = [
             self.colors["primary"],
@@ -679,9 +661,7 @@ class CoordinationRenderer(BaseRenderer):
             self.colors["senary"],
         ]
 
-        muscle_names = synergy_result.muscle_names or [
-            f"M{i}" for i in range(n_muscles)
-        ]
+        muscle_names = synergy_result.muscle_names or [f"M{i}" for i in range(n_muscles)]
 
         for i in range(n_synergies):
             color = colors[i % len(colors)]
@@ -710,9 +690,7 @@ class CoordinationRenderer(BaseRenderer):
             if i == n_synergies - 1:
                 ax_h.set_xlabel("Time (s)", fontsize=10)
 
-            ax_h.set_title(
-                f"Synergy {i + 1} Activation", fontsize=10, fontweight="bold"
-            )
+            ax_h.set_title(f"Synergy {i + 1} Activation", fontsize=10, fontweight="bold")
             ax_h.grid(True, alpha=0.3)
 
         fig.suptitle(
@@ -833,9 +811,7 @@ class CoordinationRenderer(BaseRenderer):
 
         if len(w_times) == 0:
             ax = fig.add_subplot(111)
-            ax.text(
-                0.5, 0.5, "Insufficient data for correlation", ha="center", va="center"
-            )
+            ax.text(0.5, 0.5, "Insufficient data for correlation", ha="center", va="center")
             return
 
         ax = fig.add_subplot(111)
@@ -876,9 +852,7 @@ class CoordinationRenderer(BaseRenderer):
         activations = synergy_result.activations
         if activations.shape[0] <= max(dim1, dim2):
             ax = fig.add_subplot(111)
-            ax.text(
-                0.5, 0.5, "Not enough synergies extracted", ha="center", va="center"
-            )
+            ax.text(0.5, 0.5, "Not enough synergies extracted", ha="center", va="center")
             return
 
         times, _ = self.data.get_series("joint_positions")

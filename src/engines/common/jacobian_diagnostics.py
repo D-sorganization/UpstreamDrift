@@ -352,13 +352,9 @@ def diagnose_task_points(
         Map of body_name -> JacobianDiagnostics
     """
     if not (engine_compute_jacobian is not None):
-        raise ValueError(()
-        "engine_compute_jacobian must be provided"
-    )
+        raise ValueError("engine_compute_jacobian must be provided")
     if not (engine_compute_jacobian is not None):
-        raise ValueError(()
-        "engine_compute_jacobian must be provided"
-    )
+        raise ValueError("engine_compute_jacobian must be provided")
     if task_points is None:
         task_points = GOLF_TASK_POINTS
 

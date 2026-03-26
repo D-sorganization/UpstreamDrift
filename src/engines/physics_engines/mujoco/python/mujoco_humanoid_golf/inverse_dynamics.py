@@ -42,9 +42,7 @@ class InverseDynamicsResult:
     """Result of inverse dynamics computation."""
 
     joint_torques: np.ndarray  # [nv] - Required joint torques
-    constraint_forces: np.ndarray | None = (
-        None  # Constraint forces (if parallel mechanism)
-    )
+    constraint_forces: np.ndarray | None = None  # Constraint forces (if parallel mechanism)
 
     # Force decomposition
     inertial_torques: np.ndarray | None = None  # Ma term
@@ -229,14 +227,10 @@ class InverseDynamicsSolver:
         tau_primary = primary_result.joint_torques  # Total generalized force
 
         # 2. Compute Jacobian for Primary Task
-        body_id = mujoco.mj_name2id(
-            self.model, mujoco.mjtObj.mjOBJ_BODY, primary_body_name
-        )
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, primary_body_name)
         if body_id == -1:
             # Fallback or error? For now log warning and treat as no task
-            logger.warning(
-                f"Primary body '{primary_body_name}' not found. Using pure posture."
-            )
+            logger.warning(f"Primary body '{primary_body_name}' not found. Using pure posture.")
             J_primary = np.zeros((3, self.model.nv))
         else:
             jacp = np.zeros((3, self.model.nv))
@@ -322,9 +316,7 @@ class InverseDynamicsSolver:
         mujoco.mj_solveM(self.model, self._perturb_data, a_t)
 
         total = a_g + a_c + a_t
-        return InducedAccelerationResult(
-            gravity=a_g, velocity=a_c, control=a_t, total=total
-        )
+        return InducedAccelerationResult(gravity=a_g, velocity=a_c, control=a_t, total=total)
 
     @precondition(
         lambda self, qpos, qvel, ctrl: len(qpos) > 0,
@@ -441,9 +433,7 @@ class InverseDynamicsSolver:
         full_result = self.compute_required_torques(qpos, qvel, qacc)
 
         # Create selection matrix for actuated joints
-        actuated_joints = [
-            i for i in range(self.model.nv) if i not in constrained_joints
-        ]
+        actuated_joints = [i for i in range(self.model.nv) if i not in constrained_joints]
 
         # Extract actuated torques
         full_result.joint_torques[actuated_joints]
@@ -482,21 +472,9 @@ class InverseDynamicsSolver:
 
         # Provide defaults for None values
         nv = len(result.joint_torques)
-        inertial = (
-            result.inertial_torques
-            if result.inertial_torques is not None
-            else np.zeros(nv)
-        )
-        coriolis = (
-            result.coriolis_torques
-            if result.coriolis_torques is not None
-            else np.zeros(nv)
-        )
-        gravity = (
-            result.gravity_torques
-            if result.gravity_torques is not None
-            else np.zeros(nv)
-        )
+        inertial = result.inertial_torques if result.inertial_torques is not None else np.zeros(nv)
+        coriolis = result.coriolis_torques if result.coriolis_torques is not None else np.zeros(nv)
+        gravity = result.gravity_torques if result.gravity_torques is not None else np.zeros(nv)
 
         return ForceDecomposition(
             total=result.joint_torques,
@@ -653,8 +631,7 @@ class InverseDynamicsSolver:
         # Mechanical advantage (ratio of output to input)
         if result.inertial_torques is not None:
             inertial_ratio = float(
-                np.linalg.norm(result.inertial_torques)
-                / (np.linalg.norm(torques) + 1e-10),
+                np.linalg.norm(result.inertial_torques) / (np.linalg.norm(torques) + 1e-10),
             )
         else:
             inertial_ratio = 0.0
@@ -662,8 +639,7 @@ class InverseDynamicsSolver:
         # Gravity compensation ratio
         if result.gravity_torques is not None:
             gravity_ratio = float(
-                np.linalg.norm(result.gravity_torques)
-                / (np.linalg.norm(torques) + 1e-10),
+                np.linalg.norm(result.gravity_torques) / (np.linalg.norm(torques) + 1e-10),
             )
         else:
             gravity_ratio = 0.0
@@ -671,8 +647,7 @@ class InverseDynamicsSolver:
         # Coriolis ratio (ideally small)
         if result.coriolis_torques is not None:
             coriolis_ratio = float(
-                np.linalg.norm(result.coriolis_torques)
-                / (np.linalg.norm(torques) + 1e-10),
+                np.linalg.norm(result.coriolis_torques) / (np.linalg.norm(torques) + 1e-10),
             )
         else:
             coriolis_ratio = 0.0
@@ -776,8 +751,7 @@ def _validate_inverse_dynamics_export_inputs(
     for i, result in enumerate(results):
         if not isinstance(result, InverseDynamicsResult):
             raise TypeError(
-                f"results[{i}] is {type(result).__name__}, "
-                f"expected InverseDynamicsResult"
+                f"results[{i}] is {type(result).__name__}, " f"expected InverseDynamicsResult"
             )
 
     nv = len(results[0].joint_torques)
@@ -810,15 +784,9 @@ def _build_inverse_dynamics_csv_row(
     row: list[float] = [time_val]
     for i in range(nv):
         row.append(result.joint_torques[i])
-        row.append(
-            result.inertial_torques[i] if result.inertial_torques is not None else 0.0
-        )
-        row.append(
-            result.coriolis_torques[i] if result.coriolis_torques is not None else 0.0
-        )
-        row.append(
-            result.gravity_torques[i] if result.gravity_torques is not None else 0.0
-        )
+        row.append(result.inertial_torques[i] if result.inertial_torques is not None else 0.0)
+        row.append(result.coriolis_torques[i] if result.coriolis_torques is not None else 0.0)
+        row.append(result.gravity_torques[i] if result.gravity_torques is not None else 0.0)
     row.append(result.residual_norm)
     return row
 
@@ -972,8 +940,7 @@ class InverseDynamicsAnalyzer:
         stats2 = swing2_data["statistics"]
 
         return {
-            "coriolis_power_diff": stats2["peak_coriolis_power"]
-            - stats1["peak_coriolis_power"],
+            "coriolis_power_diff": stats2["peak_coriolis_power"] - stats1["peak_coriolis_power"],
             "torque_diff": stats2["max_joint_torque"] - stats1["max_joint_torque"],
             "duration_diff": stats2["duration"] - stats1["duration"],
         }

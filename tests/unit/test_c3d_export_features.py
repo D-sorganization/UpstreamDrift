@@ -51,9 +51,7 @@ class TestCaptureExportFeatures:
             mock_cwd.return_value = Path(tmp_path).resolve()
             yield mock_cwd
 
-    def test_security_prevents_directory_traversal(
-        self, mock_reader, sample_dataframe, tmp_path
-    ):
+    def test_security_prevents_directory_traversal(self, mock_reader, sample_dataframe, tmp_path):
         """Ensure attempts to write outside the project root are blocked."""
         with patch("pathlib.Path.cwd") as mock_cwd:
             mock_root = Path(tmp_path) / "project_root"
@@ -76,9 +74,7 @@ class TestCaptureExportFeatures:
         safe_path = tmp_path / "safe_export.csv"
 
         # Should not raise
-        result = mock_reader._export_dataframe(
-            sample_dataframe, str(safe_path), file_format="csv"
-        )
+        result = mock_reader._export_dataframe(sample_dataframe, str(safe_path), file_format="csv")
         assert result == safe_path
 
     def test_csv_metadata_sidecar_creation(
@@ -87,9 +83,7 @@ class TestCaptureExportFeatures:
         """Verify _meta.json sidecar is created for CSV exports."""
         output_path = tmp_path / "export.csv"
 
-        mock_reader._export_dataframe(
-            sample_dataframe, str(output_path), file_format="csv"
-        )
+        mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="csv")
 
         # Check main file
         assert output_path.exists()
@@ -113,9 +107,7 @@ class TestCaptureExportFeatures:
         """Verify JSON export uses the envelope pattern."""
         output_path = tmp_path / "export.json"
 
-        mock_reader._export_dataframe(
-            sample_dataframe, str(output_path), file_format="json"
-        )
+        mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="json")
 
         with open(output_path) as f:
             data = json.load(f)
@@ -131,18 +123,14 @@ class TestCaptureExportFeatures:
         """Verify NPZ export includes metadata in the archive."""
         output_path = tmp_path / "export.npz"
 
-        mock_reader._export_dataframe(
-            sample_dataframe, str(output_path), file_format="npz"
-        )
+        mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="npz")
 
         with np.load(output_path) as archive:
             assert "_metadata" in archive
             meta = json.loads(str(archive["_metadata"]))
             assert meta["schema_version"] == SCHEMA_VERSION
 
-    def test_telemetry_logging(
-        self, mock_reader, sample_dataframe, mock_project_root, tmp_path
-    ):
+    def test_telemetry_logging(self, mock_reader, sample_dataframe, mock_project_root, tmp_path):
         """Verify execution time is logged."""
         with patch("c3d_reader.log_execution_time") as mock_log_ctx:
             # Setup context manager mock
@@ -151,9 +139,7 @@ class TestCaptureExportFeatures:
             mock_ctx_instance.__enter__.return_value = None
 
             output_path = tmp_path / "telemetry_test.csv"
-            mock_reader._export_dataframe(
-                sample_dataframe, str(output_path), file_format="csv"
-            )
+            mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="csv")
 
             mock_log_ctx.assert_called_once()
             args, _ = mock_log_ctx.call_args

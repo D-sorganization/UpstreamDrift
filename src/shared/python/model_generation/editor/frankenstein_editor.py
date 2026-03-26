@@ -436,9 +436,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
             new_link = Link.from_dict(link.to_dict())
             new_link.name = name_map[link.name]
             if new_link.visual_material:
-                new_link.visual_material.name = (
-                    prefix + new_link.visual_material.name + suffix
-                )
+                new_link.visual_material.name = prefix + new_link.visual_material.name + suffix
             model.links.append(new_link)
             created_links.append(new_link.name)
 
@@ -706,9 +704,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
                 return candidate
             counter += 1
 
-    def register_rename_callback(
-        self, callback: Callable[[str, str, str], None]
-    ) -> None:
+    def register_rename_callback(self, callback: Callable[[str, str, str], None]) -> None:
         """
         Register a callback for rename events.
 

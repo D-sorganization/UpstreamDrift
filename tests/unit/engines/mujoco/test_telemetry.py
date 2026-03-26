@@ -23,9 +23,7 @@ def mock_mujoco_model_data() -> tuple:
     model.actuator_trnid = np.array(
         [[0, 0], [1, 0]]
     )  # Actuator 0 -> Joint 0, Actuator 1 -> Joint 1
-    model.actuator_trntype = np.array(
-        [mujoco.mjtTrn.mjTRN_JOINT, mujoco.mjtTrn.mjTRN_JOINT]
-    )
+    model.actuator_trntype = np.array([mujoco.mjtTrn.mjTRN_JOINT, mujoco.mjtTrn.mjTRN_JOINT])
     model.jnt_dofadr = np.array([0, 1])
 
     data = MagicMock(spec=mujoco.MjData)

@@ -115,9 +115,7 @@ def discover_routes(
         try:
             module = importlib.import_module(full_module_path)
         except ImportError:
-            logger.warning(
-                "Failed to import route module %s — skipping", full_module_path
-            )
+            logger.warning("Failed to import route module %s — skipping", full_module_path)
             continue
 
         router = getattr(module, "router", None)

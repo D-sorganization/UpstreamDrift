@@ -51,9 +51,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             # Should have identified some muscles
             assert len(analyzer.muscle_names) > 0, "No muscles found"
-            logger.info(
-                f"Found {len(analyzer.muscle_names)} muscles: {analyzer.muscle_names}"
-            )
+            logger.info(f"Found {len(analyzer.muscle_names)} muscles: {analyzer.muscle_names}")
 
         except Exception as e:  # noqa: BLE001
             logger.warning(f"MyoSuite environment test failed: {e}")
@@ -177,9 +175,7 @@ class TestMyoSuiteMuscleAnalyzer:
             non_zero_count = sum(1 for a in induced.values() if not np.allclose(a, 0.0))
             assert non_zero_count > 0, "All induced accelerations are zero"
 
-            logger.info(
-                f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}"
-            )
+            logger.info(f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}")
 
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Induced acceleration test failed: {e}")
@@ -218,9 +214,7 @@ class TestMyoSuiteMuscleAnalyzer:
             logger.info("Analysis complete:")
             logger.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")
             logger.info(f"  Total torque: {analysis.total_muscle_torque}")
-            logger.info(
-                f"  Activation power: {list(analysis.activation_power.values())[:3]}"
-            )
+            logger.info(f"  Activation power: {list(analysis.activation_power.values())[:3]}")
 
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Comprehensive analysis failed: {e}")
@@ -383,15 +377,10 @@ class TestMyoSuiteEngine:
             logger.info(f"Set {muscle_name} activation to 0.8")
 
             # Verify it was set (by checking control vector)
-            if (
-                hasattr(analyzer, "muscle_actuator_ids")
-                and analyzer.muscle_actuator_ids
-            ):
+            if hasattr(analyzer, "muscle_actuator_ids") and analyzer.muscle_actuator_ids:
                 actuator_id = analyzer.muscle_actuator_ids[0]
                 ctrl_value = engine.sim.data.ctrl[actuator_id]
-                assert 0.7 <= ctrl_value <= 0.9, (
-                    f"Activation not set correctly: {ctrl_value}"
-                )
+                assert 0.7 <= ctrl_value <= 0.9, f"Activation not set correctly: {ctrl_value}"
 
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Activation setting test failed: {e}")

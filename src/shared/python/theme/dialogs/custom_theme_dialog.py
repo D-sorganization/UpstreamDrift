@@ -231,9 +231,7 @@ class CustomThemeDialog(QDialog):
         form_layout.addRow("Theme name:", self.theme_name_edit)
 
         self.base_theme_combo = QComboBox()
-        self.base_theme_combo.currentIndexChanged.connect(
-            self._handle_base_theme_changed
-        )
+        self.base_theme_combo.currentIndexChanged.connect(self._handle_base_theme_changed)
         form_layout.addRow("Base theme:", self.base_theme_combo)
         main_layout.addLayout(form_layout)
 
@@ -264,8 +262,7 @@ class CustomThemeDialog(QDialog):
         main_layout.addWidget(self.apply_checkbox)
 
         button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save
-            | QDialogButtonBox.StandardButton.Cancel
+            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
         )
         button_box.accepted.connect(self._handle_accept)
         button_box.rejected.connect(self.reject)
@@ -373,9 +370,7 @@ class CustomThemeDialog(QDialog):
             try:
                 colours[key] = editor.get_colour()
             except ValueError as exc:
-                QMessageBox.warning(
-                    self, "Invalid colour", f"{self.COLOR_LABELS[key]}: {exc}"
-                )
+                QMessageBox.warning(self, "Invalid colour", f"{self.COLOR_LABELS[key]}: {exc}")
                 editor.line_edit.setFocus()
                 return False
 

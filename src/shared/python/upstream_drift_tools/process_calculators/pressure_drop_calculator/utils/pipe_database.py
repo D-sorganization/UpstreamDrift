@@ -307,9 +307,7 @@ def get_pipe_spec(
     """
     key = (nominal_size, schedule)
     if key not in STEEL_PIPE_DIMENSIONS:
-        raise ValueError(
-            f'Pipe size {nominal_size}" Schedule {schedule} not found in database'
-        )
+        raise ValueError(f'Pipe size {nominal_size}" Schedule {schedule} not found in database')
 
     od, wall, id_val = STEEL_PIPE_DIMENSIONS[key]
 

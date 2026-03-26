@@ -178,9 +178,7 @@ class TestDockerThreads:
 
         thread.result.emit.assert_called_with(False)
 
-    @pytest.mark.xfail(
-        reason="HelpDialog Qt construction crashes worker in CI", strict=False
-    )
+    @pytest.mark.xfail(reason="HelpDialog Qt construction crashes worker in CI", strict=False)
     @patch("pathlib.Path.read_text", return_value="# Help")
     @patch("pathlib.Path.exists", return_value=True)
     def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module):

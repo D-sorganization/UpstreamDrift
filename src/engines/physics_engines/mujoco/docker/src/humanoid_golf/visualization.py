@@ -56,9 +56,7 @@ class TrajectoryTracer:
             body_name: Body whose desired path is being stored.
             positions: Sequence of (3,) world-frame positions.
         """
-        self._desired_traces[body_name] = [
-            np.asarray(p, dtype=np.float64) for p in positions
-        ]
+        self._desired_traces[body_name] = [np.asarray(p, dtype=np.float64) for p in positions]
 
     def get_desired_trace(self, body_name: str) -> list[np.ndarray]:
         """Return the desired reference trajectory for a body."""

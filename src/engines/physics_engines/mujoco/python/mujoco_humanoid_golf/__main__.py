@@ -103,9 +103,7 @@ class MainWindow(QtWidgets.QMainWindow):
         buttons_layout.addWidget(self.reset_btn)
         control_layout.addWidget(buttons_group)
 
-    def _setup_actuator_scroll_area(
-        self, control_layout: QtWidgets.QVBoxLayout
-    ) -> None:
+    def _setup_actuator_scroll_area(self, control_layout: QtWidgets.QVBoxLayout) -> None:
         """Create the scrollable area for actuator control sliders."""
         if not (control_layout is not None):
             raise ValueError("control_layout must be provided")
@@ -302,13 +300,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 groups["Legs"].append(name)
             elif "spine" in name_lower:
                 groups["Torso/Spine"].append(name)
-            elif name.startswith("L Scap") or (
-                "scap" in name_lower and name.startswith("L")
-            ):
+            elif name.startswith("L Scap") or ("scap" in name_lower and name.startswith("L")):
                 groups["Left Scapula"].append(name)
-            elif name.startswith("R Scap") or (
-                "scap" in name_lower and name.startswith("R")
-            ):
+            elif name.startswith("R Scap") or ("scap" in name_lower and name.startswith("R")):
                 groups["Right Scapula"].append(name)
             elif name.startswith("L "):
                 groups["Left Arm"].append(name)

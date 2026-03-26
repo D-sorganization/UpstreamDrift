@@ -198,7 +198,7 @@ def _load_analyzer(engine_name: str, **kwargs: Any) -> Any:
     analyzer instance or raises ImportError / ValueError.
     """
     if not (engine_name in SUPPORTED_ENGINES):
-        raise ValueError(()
+        raise ValueError(
         f"Unsupported engine: {engine_name!r}.  Choose from {SUPPORTED_ENGINES}"
     )
 
@@ -287,7 +287,7 @@ class CrossEnginePerturbationRunner:
 
         for name in engines:
             if not (name in SUPPORTED_ENGINES):
-                raise ValueError(()
+                raise ValueError(
                 f"Unknown engine: {name!r}.  Supported: {SUPPORTED_ENGINES}"
             )
 
@@ -342,7 +342,7 @@ class CrossEnginePerturbationRunner:
         CrossEngineReport
         """
         if not (self._profile is not None):
-            raise ValueError(()
+            raise ValueError(
             "set_profile() must be called before run_all()"
         )
 
@@ -391,7 +391,7 @@ class CrossEnginePerturbationRunner:
         Pre:  engine_name in SUPPORTED_ENGINES.
         """
         if not (self._profile is not None):
-            raise ValueError(()
+            raise ValueError(
             "set_profile() must be called before run_single()"
         )
         if not (engine_name in SUPPORTED_ENGINES):

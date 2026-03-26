@@ -155,9 +155,7 @@ def _delta_robot_equality_xml(forearm_length: float) -> str:
     return "\n".join(lines)
 
 
-def generate_delta_robot_xml(
-    base_radius: float = 2.0, platform_radius: float = 0.5
-) -> str:
+def generate_delta_robot_xml(base_radius: float = 2.0, platform_radius: float = 0.5) -> str:
     """Generate a 3-DOF Delta parallel robot (high-speed pick-and-place).
 
     Parameters
@@ -417,9 +415,7 @@ def _stewart_actuator_xml() -> str:
     return "\n".join(lines)
 
 
-def generate_stewart_platform_xml(
-    base_radius: float = 1.5, platform_radius: float = 0.8
-) -> str:
+def generate_stewart_platform_xml(base_radius: float = 1.5, platform_radius: float = 0.8) -> str:
     """Generate a Stewart platform (6-DOF parallel manipulator).
 
     Parameters

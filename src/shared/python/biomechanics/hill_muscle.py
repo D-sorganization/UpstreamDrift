@@ -117,9 +117,7 @@ class HillMuscleModel:
             return 0.0
         # Typical exponential passive curve
         k_passive = 4.0
-        return float(
-            (np.exp(k_passive * (l_norm - 1.0)) - 1.0) / (np.exp(k_passive) - 1.0)
-        )
+        return float((np.exp(k_passive * (l_norm - 1.0)) - 1.0) / (np.exp(k_passive) - 1.0))
 
     def force_velocity(self, v_norm: float) -> float:
         """Force-velocity relationship (Hill's Hyperbola).
@@ -248,9 +246,7 @@ if __name__ == "__main__":
 
     logger.info("Biceps muscle force test:")
     logger.info(f"  Activation: {state.activation * 100:.0f}%")
-    logger.info(
-        f"  Fiber length: {state.l_CE:.3f} m (opt: {biceps_params.l_opt:.3f} m)"
-    )
+    logger.info(f"  Fiber length: {state.l_CE:.3f} m (opt: {biceps_params.l_opt:.3f} m)")
     logger.info(f"  Fiber velocity: {state.v_CE:.3f} m/s")
     logger.info(f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)")
     logger.info(f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%")

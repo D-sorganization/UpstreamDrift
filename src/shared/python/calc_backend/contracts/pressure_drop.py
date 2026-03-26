@@ -10,15 +10,11 @@ class PressureDropRequest(BaseModel):
 
     pipe_diameter_m: float = Field(..., gt=0, description="Pipe inner diameter [m]")
     pipe_length_m: float = Field(..., gt=0, description="Pipe length [m]")
-    roughness_m: float = Field(
-        default=0.000045, ge=0, description="Pipe wall roughness [m]"
-    )
+    roughness_m: float = Field(default=0.000045, ge=0, description="Pipe wall roughness [m]")
     flow_rate_kg_s: float = Field(..., gt=0, description="Mass flow rate [kg/s]")
     temperature_k: float = Field(..., gt=0, description="Gas temperature [K]")
     pressure_pa: float = Field(..., gt=0, description="Gas pressure [Pa]")
-    molecular_weight_kg_mol: float = Field(
-        ..., gt=0, description="Molecular weight [kg/mol]"
-    )
+    molecular_weight_kg_mol: float = Field(..., gt=0, description="Molecular weight [kg/mol]")
 
 
 class PressureDropResponse(BaseModel):

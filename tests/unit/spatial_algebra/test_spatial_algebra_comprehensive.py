@@ -468,9 +468,7 @@ class TestJcalc:
             ("Pz", S_PZ),
         ],
     )
-    def test_motion_subspace(
-        self, jtype: str, expected_s: npt.NDArray[np.float64]
-    ) -> None:
+    def test_motion_subspace(self, jtype: str, expected_s: npt.NDArray[np.float64]) -> None:
         _, s, _ = jcalc(jtype, 0.5)
         np.testing.assert_array_equal(s, expected_s)
 

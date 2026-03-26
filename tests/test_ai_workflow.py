@@ -105,17 +105,13 @@ class TestAIWorkflowEngine:
         engine.register_workflow(wf)
 
         context = MagicMock(spec=ConversationContext)
-        execution = engine.start_workflow(
-            "tool_wf", context, initial_state={"existing": "data"}
-        )
+        execution = engine.start_workflow("tool_wf", context, initial_state={"existing": "data"})
 
         # Execute
         result = engine.execute_next_step(execution)
 
         assert result.status == StepStatus.COMPLETED
-        mock_tool_registry.execute.assert_called_with(
-            "my_tool", {"existing": "data", "arg": 1}
-        )
+        mock_tool_registry.execute.assert_called_with("my_tool", {"existing": "data", "arg": 1})
 
     def test_step_condition_skip(self, engine):
         """Test skipping a step based on condition."""
@@ -132,9 +128,7 @@ class TestAIWorkflowEngine:
         engine.register_workflow(wf)
 
         context = MagicMock(spec=ConversationContext)
-        execution = engine.start_workflow(
-            "cond_wf", context, initial_state={"run_me": False}
-        )
+        execution = engine.start_workflow("cond_wf", context, initial_state={"run_me": False})
 
         result = engine.execute_next_step(execution)
         assert result.status == StepStatus.SKIPPED

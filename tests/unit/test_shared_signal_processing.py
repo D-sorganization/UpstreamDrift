@@ -28,9 +28,7 @@ class TestSignalProcessing:
         self.fs = 1000.0  # 1 kHz sampling
         self.t = np.arange(0, 1.0, 1 / self.fs)
         # Create a signal with 10 Hz and 50 Hz components
-        self.signal = np.sin(2 * np.pi * 10 * self.t) + 0.5 * np.sin(
-            2 * np.pi * 50 * self.t
-        )
+        self.signal = np.sin(2 * np.pi * 10 * self.t) + 0.5 * np.sin(2 * np.pi * 50 * self.t)
 
     def test_compute_psd_logic(self):
         """Test PSD computation logic (peaks)."""
@@ -53,9 +51,7 @@ class TestSignalProcessing:
 
     def test_compute_psd_mock(self):
         """Test PSD computation using mock to verify call arguments."""
-        with patch(
-            "src.shared.python.signal_toolkit.signal_processing.welch"
-        ) as mock_welch:
+        with patch("src.shared.python.signal_toolkit.signal_processing.welch") as mock_welch:
             rng = np.random.default_rng(42)
             mock_welch.return_value = (np.arange(129), rng.random(129))
             freqs, psd = compute_psd(self.signal, self.fs, nperseg=256)
@@ -76,9 +72,7 @@ class TestSignalProcessing:
     def test_compute_spectrogram_mock(self):
         """Test Spectrogram computation using mock."""
         data = np.sin(2 * np.pi * 20 * self.t + 2 * np.pi * 40 * self.t**2)
-        with patch(
-            "src.shared.python.signal_toolkit.signal_processing.spectrogram"
-        ) as mock_spec:
+        with patch("src.shared.python.signal_toolkit.signal_processing.spectrogram") as mock_spec:
             rng = np.random.default_rng(42)
             mock_spec.return_value = (
                 np.arange(10),
@@ -146,9 +140,7 @@ class TestSignalProcessing:
         assert xwt.shape == (10, len(self.signal))
         # Self-XWT should have real positive diagonal if it was correlation matrix but here it is elementwise product of CWTs
         # XWT = W1 * conj(W2). If W1=W2, then W1*conj(W1) = |W1|^2 which is real and non-negative
-        assert np.all(
-            np.abs(np.imag(xwt)) < 1e-10
-        )  # imaginary part should be close to 0
+        assert np.all(np.abs(np.imag(xwt)) < 1e-10)  # imaginary part should be close to 0
         assert np.all(np.real(xwt) >= -1e-10)
 
     def test_compute_jerk(self):
@@ -192,9 +184,7 @@ class TestSignalProcessing:
 
         dist = compute_dtw_distance(s1, s2)
         assert dist >= 0
-        assert dist < np.linalg.norm(
-            s1 - s2[: len(s1)]
-        )  # DTW should be smaller than Euclidean
+        assert dist < np.linalg.norm(s1 - s2[: len(s1)])  # DTW should be smaller than Euclidean
 
         # Test with Numba disabled (mocking it if necessary, but tricky since it imports at top level)
         # We can test logic by trusting it runs whatever version is available.

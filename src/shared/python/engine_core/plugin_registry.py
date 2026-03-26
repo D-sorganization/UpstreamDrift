@@ -209,9 +209,7 @@ class EngineLifecycle:
             try:
                 engine.shutdown()
             except (RuntimeError, OSError, AttributeError):
-                logger.warning(
-                    "Engine shutdown failed for %s", engine_type, exc_info=True
-                )
+                logger.warning("Engine shutdown failed for %s", engine_type, exc_info=True)
 
     def shutdown_all(self) -> None:
         """Shut down all tracked engines.
@@ -249,9 +247,7 @@ def discover_entry_point_plugins() -> list[dict[str, Any]]:
             if isinstance(plugin_info, dict) and "engine_type" in plugin_info:
                 results.append(plugin_info)
             else:
-                logger.warning(
-                    "Entry point %s did not return a valid plugin dict", ep.name
-                )
+                logger.warning("Entry point %s did not return a valid plugin dict", ep.name)
         except (ImportError, AttributeError, TypeError, RuntimeError):
             logger.warning("Failed to load engine plugin %s", ep.name, exc_info=True)
 

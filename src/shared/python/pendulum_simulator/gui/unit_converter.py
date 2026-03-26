@@ -76,10 +76,10 @@ _UNIT_OPTIONS: dict[UnitCategory, list[tuple[str, float]]] = {
         ("lb", _KG_PER_LB),
     ],
     UnitCategory.TORQUE: [
-        ("N·m", 1.0),
-        ("lbf·in", _NM_PER_LBFIN),
-        ("lbf·ft", _NM_PER_LBFFT),
-        ("kgf·m", _NM_PER_KGFM),
+        ("NÂ·m", 1.0),
+        ("lbfÂ·in", _NM_PER_LBFIN),
+        ("lbfÂ·ft", _NM_PER_LBFFT),
+        ("kgfÂ·m", _NM_PER_KGFM),
     ],
     UnitCategory.FORCE: [
         ("N", 1.0),
@@ -93,21 +93,21 @@ _UNIT_OPTIONS: dict[UnitCategory, list[tuple[str, float]]] = {
     UnitCategory.ANGULAR_VELOCITY: [
         ("rad/s", 1.0),
         ("deg/s", _RAD_PER_DEG),
-        ("rpm", 0.10471975511965978),  # 2π/60
+        ("rpm", 0.10471975511965978),  # 2Ï€/60
     ],
     UnitCategory.STIFFNESS: [
-        ("N·m/rad", 1.0),
-        ("lbf·in/rad", _NM_PER_LBFIN),
-        ("lbf·ft/rad", _NM_PER_LBFFT),
+        ("NÂ·m/rad", 1.0),
+        ("lbfÂ·in/rad", _NM_PER_LBFIN),
+        ("lbfÂ·ft/rad", _NM_PER_LBFFT),
     ],
     UnitCategory.ENERGY: [
         ("J", 1.0),
-        ("ft·lbf", _J_PER_FTLBF),
+        ("ftÂ·lbf", _J_PER_FTLBF),
         ("cal", 4.184),
     ],
     UnitCategory.POWER: [
         ("W", 1.0),
-        ("ft·lbf/s", _W_PER_FTLBFS),
+        ("ftÂ·lbf/s", _W_PER_FTLBFS),
         ("hp", 745.69987158227022),
     ],
     UnitCategory.LINEAR_VELOCITY: [
@@ -128,23 +128,23 @@ _PRESETS: dict[str, dict[UnitCategory, str]] = {
     "Imperial": {
         UnitCategory.LENGTH: "in",
         UnitCategory.MASS: "lb",
-        UnitCategory.TORQUE: "lbf·in",
+        UnitCategory.TORQUE: "lbfÂ·in",
         UnitCategory.FORCE: "lbf",
         UnitCategory.ANGLE: "deg",
         UnitCategory.ANGULAR_VELOCITY: "deg/s",
-        UnitCategory.STIFFNESS: "lbf·in/rad",
-        UnitCategory.ENERGY: "ft·lbf",
-        UnitCategory.POWER: "ft·lbf/s",
+        UnitCategory.STIFFNESS: "lbfÂ·in/rad",
+        UnitCategory.ENERGY: "ftÂ·lbf",
+        UnitCategory.POWER: "ftÂ·lbf/s",
         UnitCategory.LINEAR_VELOCITY: "ft/s",
     },
     "Engineering": {
         UnitCategory.LENGTH: "cm",
         UnitCategory.MASS: "kg",
-        UnitCategory.TORQUE: "N·m",
+        UnitCategory.TORQUE: "NÂ·m",
         UnitCategory.FORCE: "N",
         UnitCategory.ANGLE: "deg",
         UnitCategory.ANGULAR_VELOCITY: "deg/s",
-        UnitCategory.STIFFNESS: "N·m/rad",
+        UnitCategory.STIFFNESS: "NÂ·m/rad",
         UnitCategory.ENERGY: "J",
         UnitCategory.POWER: "W",
         UnitCategory.LINEAR_VELOCITY: "m/s",
@@ -178,8 +178,7 @@ class UnitPreferences:
 
         Pre: preset_name in _PRESETS.
         """
-        if not (preset_name in _PRESETS):
-            raise ValueError(f"Unknown preset: {preset_name}")
+        assert preset_name in _PRESETS, f"Unknown preset: {preset_name}"
         self.selections = dict(_PRESETS[preset_name])
         logger.info("Applied unit preset: %s", preset_name)
 
@@ -193,10 +192,9 @@ class UnitPreferences:
         Pre: unit_label must be a valid option for the category.
         """
         valid = [label for label, _ in _UNIT_OPTIONS[category]]
-        if not (unit_label in valid):
-            raise ValueError(()
-            f"Invalid unit '{unit_label}' for {category.value}. Valid: {valid}"
-        )
+        assert (
+            unit_label in valid
+        ), f"Invalid unit '{unit_label}' for {category.value}. Valid: {valid}"
         self.selections[category] = unit_label
 
     def save_to_qsettings(self, settings: Any) -> None:
@@ -233,8 +231,7 @@ def _get_factor(category: UnitCategory, unit_label: str) -> float:
     """
     for label, factor in _UNIT_OPTIONS[category]:
         if label == unit_label:
-            if not (factor > 0):
-                raise ValueError('DbC Blocked: Precondition failed.')
+            assert factor > 0
             return factor
     raise KeyError(f"Unknown unit '{unit_label}' for {category.value}")
 
@@ -245,8 +242,7 @@ def to_si(value: float, category: UnitCategory, prefs: UnitPreferences) -> float
     Pre: value is finite.
     Post: result is in SI.
     """
-    if not (value is not None):
-        raise ValueError("value must be provided")
+    assert value is not None, "value must be provided"
     unit = prefs.get_unit(category)
     factor = _get_factor(category, unit)
     return value * factor
@@ -258,8 +254,7 @@ def from_si(value: float, category: UnitCategory, prefs: UnitPreferences) -> flo
     Pre: value is finite.
     Post: result is in current display units.
     """
-    if not (value is not None):
-        raise ValueError("value must be provided")
+    assert value is not None, "value must be provided"
     unit = prefs.get_unit(category)
     factor = _get_factor(category, unit)
     return value / factor
@@ -343,4 +338,4 @@ class UnitConverter:
 
     @property
     def angle_unit(self) -> str:
-        return "°"
+        return "Â°"

@@ -87,8 +87,7 @@ class Task:
 
         if self.target.shape != (self._task_dim,):
             raise ValueError(
-                f"Target shape {self.target.shape} doesn't match "
-                f"Jacobian rows {self._task_dim}"
+                f"Target shape {self.target.shape} doesn't match " f"Jacobian rows {self._task_dim}"
             )
 
         # Validate weight if provided
@@ -249,11 +248,7 @@ def create_posture_task(
     jacobian = np.eye(n_v)[mask]
 
     # Handle quaternion joints (n_q > n_v case)
-    q_error = (
-        q_target[:n_v] - q_current[:n_v]
-        if len(q_current) > n_v
-        else q_target - q_current
-    )
+    q_error = q_target[:n_v] - q_current[:n_v] if len(q_current) > n_v else q_target - q_current
     v_target = np.zeros(n_v)
 
     error_p = q_error[mask]

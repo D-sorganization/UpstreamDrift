@@ -84,9 +84,7 @@ class TestToSi:
     def test_inches_to_m(self) -> None:
         prefs = UnitPreferences()
         prefs.set_unit(UnitCategory.LENGTH, "in")
-        assert to_si(39.3701, UnitCategory.LENGTH, prefs) == pytest.approx(
-            1.0, rel=1e-4
-        )
+        assert to_si(39.3701, UnitCategory.LENGTH, prefs) == pytest.approx(1.0, rel=1e-4)
 
     def test_deg_to_rad(self) -> None:
         prefs = UnitPreferences()

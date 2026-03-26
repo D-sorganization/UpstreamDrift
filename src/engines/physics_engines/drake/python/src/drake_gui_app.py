@@ -150,9 +150,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
 
         # Model Management
         self.current_urdf_path: str | None = None
-        self.available_models: list[dict] = [
-            {"name": "Default Golf Model", "path": None}
-        ]
+        self.available_models: list[dict] = [{"name": "Default Golf Model", "path": None}]
         self._scan_urdf_models()
 
         # Initialize Simulation
@@ -201,9 +199,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
             if urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
                     name = urdf_file.stem.replace("_", " ").title()
-                    self.available_models.append(
-                        {"name": f"URDF: {name}", "path": str(urdf_file)}
-                    )
+                    self.available_models.append({"name": f"URDF: {name}", "path": str(urdf_file)})
         except (FileNotFoundError, OSError) as e:
             LOGGER.error(f"Failed to scan URDF models: {e}")
 
@@ -234,9 +230,7 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
             self._build_custom_urdf_diagram(self.current_urdf_path)
         else:
             params = GolfModelParams()
-            self.diagram, self.plant, _ = build_golf_swing_diagram(
-                params, meshcat=self.meshcat
-            )
+            self.diagram, self.plant, _ = build_golf_swing_diagram(params, meshcat=self.meshcat)
 
         if self.diagram is None:
             builder = DiagramBuilder()

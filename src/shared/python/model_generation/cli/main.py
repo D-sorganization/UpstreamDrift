@@ -117,9 +117,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
             if not output_path:
                 logger.info(result.urdf_string)
 
-            logger.info(
-                f"Converted {len(result.links)} links, {len(result.joints)} joints"
-            )
+            logger.info(f"Converted {len(result.links)} links, {len(result.joints)} joints")
 
         elif args.from_format == "mjcf" and args.to_format == "urdf":
             from model_generation.converters.mjcf_converter import MJCFConverter
@@ -140,9 +138,7 @@ def cmd_convert(args: argparse.Namespace) -> int:
                 logger.info(mjcf_string)
 
         else:
-            logger.error(
-                f"Unsupported conversion: {args.from_format} -> {args.to_format}"
-            )
+            logger.error(f"Unsupported conversion: {args.from_format} -> {args.to_format}")
             return 1
 
     except ImportError as e:
@@ -429,9 +425,7 @@ def cmd_library_import_github(args: argparse.Namespace) -> int:
 
     # Handle popular libraries
     if args.popular:
-        urls = [
-            f"https://github.com/{repo}" for repo in GitHubImporter.POPULAR_REPOSITORIES
-        ]
+        urls = [f"https://github.com/{repo}" for repo in GitHubImporter.POPULAR_REPOSITORIES]
         results = importer.import_from_urls(urls)
 
     elif args.url:
@@ -463,9 +457,7 @@ def cmd_library_import_github(args: argparse.Namespace) -> int:
         logger.info(json.dumps(output, indent=2))
     else:
         for r in results:
-            status_icon = (
-                "✓" if r.status == "success" else "✗" if r.status == "failed" else "?"
-            )
+            status_icon = "✓" if r.status == "success" else "✗" if r.status == "failed" else "?"
             logger.info(f"{status_icon} {r.name or r.source_url}: {r.status}")
             if r.description:
                 logger.info(f"  {r.description}")
@@ -617,9 +609,7 @@ def _add_core_subparsers(subparsers: argparse._SubParsersAction) -> None:
     gen_parser.add_argument("--height", type=float, help="Model height in meters")
     gen_parser.add_argument("--mass", type=float, help="Total mass in kg")
     gen_parser.add_argument("--proportions", help="Proportions as JSON")
-    gen_parser.add_argument(
-        "--humanoid", action="store_true", help="Generate humanoid model"
-    )
+    gen_parser.add_argument("--humanoid", action="store_true", help="Generate humanoid model")
     gen_parser.set_defaults(func=cmd_generate)
 
     conv_parser = subparsers.add_parser(
@@ -644,26 +634,18 @@ def _add_core_subparsers(subparsers: argparse._SubParsersAction) -> None:
     conv_parser.add_argument("-n", "--name", help="Override robot name")
     conv_parser.set_defaults(func=cmd_convert)
 
-    val_parser = subparsers.add_parser(
-        "validate", aliases=["val"], help="Validate URDF file"
-    )
+    val_parser = subparsers.add_parser("validate", aliases=["val"], help="Validate URDF file")
     val_parser.add_argument("input", help="URDF file to validate")
     val_parser.add_argument("--json", action="store_true", help="Output as JSON")
-    val_parser.add_argument(
-        "--errors-only", action="store_true", help="Show only errors"
-    )
-    val_parser.add_argument(
-        "--show-info", action="store_true", help="Show info-level messages"
-    )
+    val_parser.add_argument("--errors-only", action="store_true", help="Show only errors")
+    val_parser.add_argument("--show-info", action="store_true", help="Show info-level messages")
     val_parser.set_defaults(func=cmd_validate)
 
     diff_parser = subparsers.add_parser("diff", help="Compare two URDF files")
     diff_parser.add_argument("file_a", help="First file")
     diff_parser.add_argument("file_b", help="Second file")
     diff_parser.add_argument("--json", action="store_true", help="Output as JSON")
-    diff_parser.add_argument(
-        "-s", "--side-by-side", action="store_true", help="Side-by-side view"
-    )
+    diff_parser.add_argument("-s", "--side-by-side", action="store_true", help="Side-by-side view")
     diff_parser.add_argument(
         "--fail-on-diff",
         action="store_true",
@@ -679,9 +661,7 @@ def _add_core_subparsers(subparsers: argparse._SubParsersAction) -> None:
 
 def _add_library_subparsers(subparsers: argparse._SubParsersAction) -> None:
     """Register library management subcommands."""
-    lib_parser = subparsers.add_parser(
-        "library", aliases=["lib"], help="Model library operations"
-    )
+    lib_parser = subparsers.add_parser("library", aliases=["lib"], help="Model library operations")
     lib_subparsers = lib_parser.add_subparsers(dest="lib_command")
 
     lib_list = lib_subparsers.add_parser("list", help="List models")
@@ -703,9 +683,7 @@ def _add_library_subparsers(subparsers: argparse._SubParsersAction) -> None:
     )
     lib_download.add_argument("model_id", help="Model ID")
     lib_download.add_argument("-o", "--output", help="Output file path")
-    lib_download.add_argument(
-        "-f", "--force", action="store_true", help="Force re-download"
-    )
+    lib_download.add_argument("-f", "--force", action="store_true", help="Force re-download")
     lib_download.set_defaults(func=cmd_library_download)
 
     lib_import = lib_subparsers.add_parser(
@@ -713,23 +691,17 @@ def _add_library_subparsers(subparsers: argparse._SubParsersAction) -> None:
     )
     lib_import.add_argument("--query", help="Search query")
     lib_import.add_argument("--url", help="GitHub URL")
-    lib_import.add_argument(
-        "--popular", action="store_true", help="Import from popular libraries"
-    )
+    lib_import.add_argument("--popular", action="store_true", help="Import from popular libraries")
     lib_import.add_argument("--min-stars", type=int, default=10, help="Minimum stars")
     lib_import.add_argument("--limit", type=int, default=10, help="Max results")
-    lib_import.add_argument(
-        "--dry-run", action="store_true", help="Search without importing"
-    )
+    lib_import.add_argument("--dry-run", action="store_true", help="Search without importing")
     lib_import.add_argument("--json", action="store_true", help="Output as JSON")
     lib_import.set_defaults(func=cmd_library_import_github)
 
 
 def _add_utility_subparsers(subparsers: argparse._SubParsersAction) -> None:
     """Register utility subcommands (compose, inertia)."""
-    compose_parser = subparsers.add_parser(
-        "compose", help="Compose model from multiple sources"
-    )
+    compose_parser = subparsers.add_parser("compose", help="Compose model from multiple sources")
     compose_parser.add_argument(
         "-s",
         "--sources",
@@ -747,9 +719,7 @@ def _add_utility_subparsers(subparsers: argparse._SubParsersAction) -> None:
     )
     compose_parser.set_defaults(func=cmd_edit_compose)
 
-    inertia_parser = subparsers.add_parser(
-        "inertia", help="Calculate inertia for primitive shapes"
-    )
+    inertia_parser = subparsers.add_parser("inertia", help="Calculate inertia for primitive shapes")
     inertia_parser.add_argument(
         "shape",
         choices=["box", "cylinder", "sphere", "capsule"],
@@ -772,12 +742,8 @@ def create_parser() -> argparse.ArgumentParser:
         prog="model-gen",
         description="URDF Model Generation and Manipulation Tools",
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose output"
-    )
-    parser.add_argument(
-        "-q", "--quiet", action="store_true", help="Suppress non-error output"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress non-error output")
     parser.add_argument("--version", action="version", version="model-gen 1.0.0")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

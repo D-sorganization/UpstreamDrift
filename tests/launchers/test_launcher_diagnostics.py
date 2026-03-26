@@ -81,9 +81,7 @@ def test_check_models_yaml_missing(mock_exists):
 def test_check_models_yaml_valid(mock_exists):
     diag = LauncherDiagnostics()
 
-    valid_data = {
-        "models": [{"id": id} for id in LauncherDiagnostics.EXPECTED_TILE_IDS]
-    }
+    valid_data = {"models": [{"id": id} for id in LauncherDiagnostics.EXPECTED_TILE_IDS]}
 
     with patch("builtins.open", mock_open(read_data=yaml.dump(valid_data))):
         res = diag.check_models_yaml()
@@ -135,9 +133,7 @@ def test_check_model_registry_success(mock_registry_class):
     mock_registry_class.return_value = mock_registry
 
     # Mock getting all expected models
-    mock_models = [
-        MagicMock(id=id, name="Test") for id in LauncherDiagnostics.EXPECTED_TILE_IDS
-    ]
+    mock_models = [MagicMock(id=id, name="Test") for id in LauncherDiagnostics.EXPECTED_TILE_IDS]
     mock_registry.get_all_models.return_value = mock_models
 
     res = diag.check_model_registry()
@@ -411,9 +407,7 @@ def test_generate_recommendations():
     res2 = DiagnosticResult("model_registry", "fail", "msg", {})
     res3 = DiagnosticResult("pyqt6_availability", "fail", "msg", {})
     res4 = DiagnosticResult("asset_files", "fail", "msg", {})
-    res5 = DiagnosticResult(
-        "layout_config", "warning", "msg", {"missing_from_saved": ["drake"]}
-    )
+    res5 = DiagnosticResult("layout_config", "warning", "msg", {"missing_from_saved": ["drake"]})
     res6 = DiagnosticResult("asset_files", "warning", "msg", {})
 
     diag.results.extend([res1, res2, res3, res4, res5, res6])

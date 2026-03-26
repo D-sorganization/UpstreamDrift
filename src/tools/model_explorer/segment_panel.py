@@ -385,9 +385,7 @@ class SegmentPanel(QWidget):
         self.segment_list.currentItemChanged.connect(self._on_segment_selected)
         self.type_combo.currentTextChanged.connect(self._on_type_changed)
 
-    def _on_segment_selected(
-        self, current: QListWidgetItem, previous: QListWidgetItem
-    ) -> None:
+    def _on_segment_selected(self, current: QListWidgetItem, previous: QListWidgetItem) -> None:
         """Handle segment selection.
 
         Args:
@@ -576,9 +574,7 @@ class SegmentPanel(QWidget):
             raise ValueError("segment_name must be provided")
         if not (segment_name is not None):
             raise ValueError("segment_name must be provided")
-        segment = next(
-            (seg for seg in self.segments if seg["name"] == segment_name), None
-        )
+        segment = next((seg for seg in self.segments if seg["name"] == segment_name), None)
         if not segment:
             return
 

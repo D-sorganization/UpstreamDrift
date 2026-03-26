@@ -120,9 +120,7 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         step_size = dt if dt is not None else 0.01
 
         # The dynamics step returns a NEW state object (functional style)
-        self._pendulum_state = self.dynamics.step(
-            self.time, self._pendulum_state, step_size
-        )
+        self._pendulum_state = self.dynamics.step(self.time, self._pendulum_state, step_size)
         self.time += step_size
 
     def forward(self) -> None:

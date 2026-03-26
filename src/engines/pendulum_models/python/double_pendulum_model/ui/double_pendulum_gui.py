@@ -138,9 +138,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         if not (parent is not None):
             raise ValueError("parent must be provided")
         self.fig = Figure(figsize=(9, 9), dpi=100, facecolor="white")
-        self.ax: Axes3D = typing.cast(
-            Axes3D, self.fig.add_subplot(111, projection="3d")
-        )
+        self.ax: Axes3D = typing.cast(Axes3D, self.fig.add_subplot(111, projection="3d"))
         self.ax.set_xlabel("X (m)", fontsize=10)
         self.ax.set_ylabel("Y (m)", fontsize=10)
         self.ax.set_zlabel("Z (m)", fontsize=10)
@@ -151,9 +149,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         self.ax.set_zlim((-1, 1))
 
         self.canvas = FigureCanvasTkAgg(self.fig, parent)
-        self.canvas.get_tk_widget().pack(
-            side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5)
-        )
+        self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
         self.canvas.draw()
 
     def _setup_controls(self, parent: tk.Widget) -> None:
@@ -167,9 +163,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         panel_frame.pack_propagate(False)  # noqa: FBT003
 
         canvas_scroll = tk.Canvas(panel_frame, bg="white", highlightthickness=0)
-        scrollbar = tk.Scrollbar(
-            panel_frame, orient="vertical", command=canvas_scroll.yview
-        )
+        scrollbar = tk.Scrollbar(panel_frame, orient="vertical", command=canvas_scroll.yview)
         scrollable_frame = tk.Frame(canvas_scroll, bg="white")
 
         scrollable_frame.bind(
@@ -206,9 +200,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         canvas_scroll.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-    def _add_labeled_row(
-        self, parent: tk.Widget, row: int, config: UIEntryConfig
-    ) -> tk.Entry:
+    def _add_labeled_row(self, parent: tk.Widget, row: int, config: UIEntryConfig) -> tk.Entry:
         """Add a labeled entry row to the control panel."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
@@ -217,9 +209,7 @@ class DoublePendulumApp(PendulumRendererMixin):
         frame = tk.Frame(parent, bg="white")
         frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=2)
 
-        label_widget = tk.Label(
-            frame, text=config.label, bg="white", width=20, anchor="w"
-        )
+        label_widget = tk.Label(frame, text=config.label, bg="white", width=20, anchor="w")
         label_widget.pack(side=tk.LEFT, padx=(0, 5))
 
         entry = tk.Entry(frame, width=12)
@@ -482,13 +472,11 @@ class DoublePendulumApp(PendulumRendererMixin):
 
         granularity_frame = tk.Frame(parent, bg="white")
         granularity_frame.grid(row=row, column=0, columnspan=2, sticky="w", pady=2)
-        tk.Label(
-            granularity_frame, text="Granularity (every N steps):", bg="white"
-        ).pack(side=tk.LEFT, padx=(20, 5))
-        self.granularity_var = tk.StringVar(value="1")
-        granularity_entry = tk.Entry(
-            granularity_frame, textvariable=self.granularity_var, width=8
+        tk.Label(granularity_frame, text="Granularity (every N steps):", bg="white").pack(
+            side=tk.LEFT, padx=(20, 5)
         )
+        self.granularity_var = tk.StringVar(value="1")
+        granularity_entry = tk.Entry(granularity_frame, textvariable=self.granularity_var, width=8)
         granularity_entry.pack(side=tk.LEFT)
         granularity_entry.bind("<KeyRelease>", lambda _e: self._on_granularity_change())
         row += 1
@@ -718,13 +706,9 @@ class DoublePendulumApp(PendulumRendererMixin):
             raise ValueError("user_inputs must be provided")
         com_ratio = user_inputs.upper_com_ratio
         if abs(com_ratio - 0.5) < COM_TOLERANCE:
-            return (
-                (1.0 / 12.0) * user_inputs.upper_mass_kg * user_inputs.upper_length_m**2
-            )
+            return (1.0 / 12.0) * user_inputs.upper_mass_kg * user_inputs.upper_length_m**2
 
-        uniform_inertia = (
-            (1.0 / 12.0) * user_inputs.upper_mass_kg * user_inputs.upper_length_m**2
-        )
+        uniform_inertia = (1.0 / 12.0) * user_inputs.upper_mass_kg * user_inputs.upper_length_m**2
         com_offset_factor = 1.0 + 3.0 * (com_ratio - 0.5) ** 2
         return uniform_inertia * com_offset_factor
 
@@ -762,9 +746,7 @@ class DoublePendulumApp(PendulumRendererMixin):
             forcing = compile_forcing_functions(
                 user_inputs.shoulder_expression, user_inputs.wrist_expression
             )
-            self.dynamics = DoublePendulumDynamics(
-                parameters=parameters, forcing_functions=forcing
-            )
+            self.dynamics = DoublePendulumDynamics(parameters=parameters, forcing_functions=forcing)
 
             # Update state with new parameters
             # If simulation is running and angles change, pause to avoid physically
@@ -778,17 +760,12 @@ class DoublePendulumApp(PendulumRendererMixin):
                 # Check if angles actually changed
                 old_theta1 = math.degrees(self.state.theta1)
                 old_theta2 = math.degrees(self.state.theta2)
-                old_phi = (
-                    math.degrees(self.state.phi) if hasattr(self.state, "phi") else 0.0
-                )
+                old_phi = math.degrees(self.state.phi) if hasattr(self.state, "phi") else 0.0
 
                 angles_changed = (
-                    abs(old_theta1 - user_inputs.shoulder_angle_deg)
-                    > ANGLE_TOLERANCE_DEG
-                    or abs(old_theta2 - user_inputs.wrist_angle_deg)
-                    > ANGLE_TOLERANCE_DEG
-                    or abs(old_phi - user_inputs.out_of_plane_angle_deg)
-                    > ANGLE_TOLERANCE_DEG
+                    abs(old_theta1 - user_inputs.shoulder_angle_deg) > ANGLE_TOLERANCE_DEG
+                    or abs(old_theta2 - user_inputs.wrist_angle_deg) > ANGLE_TOLERANCE_DEG
+                    or abs(old_phi - user_inputs.out_of_plane_angle_deg) > ANGLE_TOLERANCE_DEG
                 )
 
                 if angles_changed:
@@ -815,11 +792,7 @@ class DoublePendulumApp(PendulumRendererMixin):
                     omega1=self.state.omega1,
                     omega2=self.state.omega2,
                     phi=math.radians(user_inputs.out_of_plane_angle_deg),
-                    omega_phi=(
-                        self.state.omega_phi
-                        if hasattr(self.state, "omega_phi")
-                        else 0.0
-                    ),
+                    omega_phi=(self.state.omega_phi if hasattr(self.state, "omega_phi") else 0.0),
                 )
 
             self._draw_pendulum_3d()

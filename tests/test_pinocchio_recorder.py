@@ -31,9 +31,7 @@ def test_pinocchio_recorder_basic():
     v = np.zeros(6)
     tau = np.zeros(6)
 
-    recorder.record_frame(
-        time=0.1, q=q, v=v, tau=tau, kinetic_energy=10.0, potential_energy=5.0
-    )
+    recorder.record_frame(time=0.1, q=q, v=v, tau=tau, kinetic_energy=10.0, potential_energy=5.0)
 
     assert recorder.get_num_frames() == 1
 

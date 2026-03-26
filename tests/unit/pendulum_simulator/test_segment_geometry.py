@@ -95,9 +95,7 @@ class TestTaperedCylinderCrossSection:
 
     def test_assertion_on_zero_radius(self) -> None:
         with pytest.raises(AssertionError):
-            tapered_cylinder_cross_section(
-                np.array([0.0, 0.0]), np.array([1.0, 0.0]), 0.0, 0.1
-            )
+            tapered_cylinder_cross_section(np.array([0.0, 0.0]), np.array([1.0, 0.0]), 0.0, 0.1)
 
     def test_degenerate_fallback(self) -> None:
         start = np.array([0.5, 0.5])

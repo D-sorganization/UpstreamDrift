@@ -64,9 +64,7 @@ class TargetTrajectory:
         t0, t1 = self.time_series[idx - 1], self.time_series[idx]
         alpha = (t - t0) / (t1 - t0)
 
-        return self.positions[idx - 1] + alpha * (
-            self.positions[idx] - self.positions[idx - 1]
-        )
+        return self.positions[idx - 1] + alpha * (self.positions[idx] - self.positions[idx - 1])
 
     def get_velocity_at_time(self, t: float) -> np.ndarray | None:
         """Interpolate velocity at a specific time."""
@@ -86,9 +84,7 @@ class TargetTrajectory:
         t0, t1 = self.time_series[idx - 1], self.time_series[idx]
         alpha = (t - t0) / (t1 - t0)
 
-        return self.velocities[idx - 1] + alpha * (
-            self.velocities[idx] - self.velocities[idx - 1]
-        )
+        return self.velocities[idx - 1] + alpha * (self.velocities[idx] - self.velocities[idx - 1])
 
     def get_phase_position(self, phase: str) -> np.ndarray | None:
         """Get position at a specific phase."""
@@ -237,9 +233,7 @@ class ClubTargetManager:
         )
 
         self._trajectories[traj_name] = trajectory
-        logger.info(
-            "Added trajectory '%s' with %d frames", traj_name, trajectory.num_frames
-        )
+        logger.info("Added trajectory '%s' with %d frames", traj_name, trajectory.num_frames)
 
         return traj_name
 
@@ -437,17 +431,11 @@ class ClubTargetManager:
         if trajectory is None:
             trajectory = self.get_active_trajectory()
 
-        if (
-            trajectory is None
-            or trajectory.velocities is None
-            or not self._show_velocity_vectors
-        ):
+        if trajectory is None or trajectory.velocities is None or not self._show_velocity_vectors:
             return None
 
         # Subsample for rendering
-        indices = np.linspace(
-            0, len(trajectory.time_series) - 1, num_vectors, dtype=int
-        )
+        indices = np.linspace(0, len(trajectory.time_series) - 1, num_vectors, dtype=int)
 
         origins = trajectory.positions[indices]
         directions = trajectory.velocities[indices] * scale
@@ -512,9 +500,7 @@ class ClubTargetManager:
         # Normalized time (0-1 through swing)
         t_start = trajectory.time_series[0]
         t_end = trajectory.time_series[-1]
-        normalized_time = (
-            (current_time - t_start) / (t_end - t_start) if t_end > t_start else 0.0
-        )
+        normalized_time = (current_time - t_start) / (t_end - t_start) if t_end > t_start else 0.0
         normalized_time = np.clip(normalized_time, 0.0, 1.0)
 
         result = {

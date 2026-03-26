@@ -80,16 +80,12 @@ class TestDrakeInducedAcceleration:
         mock_plant.CalcMassMatrixViaInverseDynamics.assert_called_with(context)
         mock_plant.CalcGravityGeneralizedForces.assert_called_with(context)
         mock_plant.CalcInverseDynamics.assert_called_once()
-        called_context, called_vdot, called_forces = (
-            mock_plant.CalcInverseDynamics.call_args.args
-        )
+        called_context, called_vdot, called_forces = mock_plant.CalcInverseDynamics.call_args.args
         assert called_context is context
         np.testing.assert_allclose(called_vdot, np.zeros(2))
         assert called_forces is mock_plant.MakeMultibodyForces.return_value
 
-    def test_compute_components_with_non_identity_mass(
-        self, analyzer, mock_plant
-    ) -> None:
+    def test_compute_components_with_non_identity_mass(self, analyzer, mock_plant) -> None:
         """Test compute_components with non-identity mass matrix."""
         context = MagicMock()
 

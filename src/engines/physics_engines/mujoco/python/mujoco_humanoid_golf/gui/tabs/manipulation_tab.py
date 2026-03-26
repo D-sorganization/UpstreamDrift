@@ -77,21 +77,13 @@ class ManipulationTab(QtWidgets.QWidget):
         self.enable_drag_cb.stateChanged.connect(self.on_drag_enabled_changed)
         drag_layout.addWidget(self.enable_drag_cb)
 
-        self.maintain_orientation_cb = QtWidgets.QCheckBox(
-            "Maintain Orientation While Dragging"
-        )
-        self.maintain_orientation_cb.stateChanged.connect(
-            self.on_maintain_orientation_changed
-        )
+        self.maintain_orientation_cb = QtWidgets.QCheckBox("Maintain Orientation While Dragging")
+        self.maintain_orientation_cb.stateChanged.connect(self.on_maintain_orientation_changed)
         drag_layout.addWidget(self.maintain_orientation_cb)
 
-        self.nullspace_posture_cb = QtWidgets.QCheckBox(
-            "Use Nullspace Posture Optimization"
-        )
+        self.nullspace_posture_cb = QtWidgets.QCheckBox("Use Nullspace Posture Optimization")
         self.nullspace_posture_cb.setChecked(True)
-        self.nullspace_posture_cb.stateChanged.connect(
-            self.on_nullspace_posture_changed
-        )
+        self.nullspace_posture_cb.stateChanged.connect(self.on_nullspace_posture_changed)
         drag_layout.addWidget(self.nullspace_posture_cb)
 
         return drag_group
@@ -107,25 +99,19 @@ class ManipulationTab(QtWidgets.QWidget):
         self.trans_x = QtWidgets.QDoubleSpinBox()
         self.trans_x.setRange(-10, 10)
         self.trans_x.setSingleStep(0.01)
-        self.trans_x.valueChanged.connect(
-            lambda v: self.on_manual_transform("pos", 0, v)
-        )
+        self.trans_x.valueChanged.connect(lambda v: self.on_manual_transform("pos", 0, v))
         pos_layout.addWidget(self.trans_x)
 
         self.trans_y = QtWidgets.QDoubleSpinBox()
         self.trans_y.setRange(-10, 10)
         self.trans_y.setSingleStep(0.01)
-        self.trans_y.valueChanged.connect(
-            lambda v: self.on_manual_transform("pos", 1, v)
-        )
+        self.trans_y.valueChanged.connect(lambda v: self.on_manual_transform("pos", 1, v))
         pos_layout.addWidget(self.trans_y)
 
         self.trans_z = QtWidgets.QDoubleSpinBox()
         self.trans_z.setRange(-10, 10)
         self.trans_z.setSingleStep(0.01)
-        self.trans_z.valueChanged.connect(
-            lambda v: self.on_manual_transform("pos", 2, v)
-        )
+        self.trans_z.valueChanged.connect(lambda v: self.on_manual_transform("pos", 2, v))
         pos_layout.addWidget(self.trans_z)
         transform_layout.addLayout(pos_layout)
 
@@ -134,23 +120,17 @@ class ManipulationTab(QtWidgets.QWidget):
         rot_layout.addWidget(QtWidgets.QLabel("Rot:"))
         self.trans_roll = QtWidgets.QDoubleSpinBox()  # X
         self.trans_roll.setRange(-180, 180)
-        self.trans_roll.valueChanged.connect(
-            lambda v: self.on_manual_transform("rot", 0, v)
-        )
+        self.trans_roll.valueChanged.connect(lambda v: self.on_manual_transform("rot", 0, v))
         rot_layout.addWidget(self.trans_roll)
 
         self.trans_pitch = QtWidgets.QDoubleSpinBox()  # Y
         self.trans_pitch.setRange(-180, 180)
-        self.trans_pitch.valueChanged.connect(
-            lambda v: self.on_manual_transform("rot", 1, v)
-        )
+        self.trans_pitch.valueChanged.connect(lambda v: self.on_manual_transform("rot", 1, v))
         rot_layout.addWidget(self.trans_pitch)
 
         self.trans_yaw = QtWidgets.QDoubleSpinBox()  # Z
         self.trans_yaw.setRange(-180, 180)
-        self.trans_yaw.valueChanged.connect(
-            lambda v: self.on_manual_transform("rot", 2, v)
-        )
+        self.trans_yaw.valueChanged.connect(lambda v: self.on_manual_transform("rot", 2, v))
         rot_layout.addWidget(self.trans_yaw)
         transform_layout.addLayout(rot_layout)
 
@@ -261,9 +241,7 @@ class ManipulationTab(QtWidgets.QWidget):
         save_layout.addWidget(self.pose_name_input)
 
         self.save_pose_btn = QtWidgets.QPushButton("Save Pose")
-        self.save_pose_btn.setToolTip(
-            "Save the current body configuration to the library"
-        )
+        self.save_pose_btn.setToolTip("Save the current body configuration to the library")
         self.save_pose_btn.clicked.connect(self.on_save_pose)
         save_layout.addWidget(self.save_pose_btn)
         return save_layout
@@ -647,14 +625,10 @@ class ManipulationTab(QtWidgets.QWidget):
             self,
             "Confirm Deletion",
             f"Are you sure you want to delete pose '{pose_name}'?",
-            QtWidgets.QMessageBox.StandardButton.Yes
-            | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
         )
 
-        if (
-            reply == QtWidgets.QMessageBox.StandardButton.Yes
-            and manipulator.delete_pose(pose_name)
-        ):
+        if reply == QtWidgets.QMessageBox.StandardButton.Yes and manipulator.delete_pose(pose_name):
             self.update_pose_list()
             logger.info("Pose '%s' deleted successfully", pose_name)
             if self.main_window.statusBar():

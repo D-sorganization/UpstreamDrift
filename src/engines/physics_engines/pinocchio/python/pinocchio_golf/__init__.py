@@ -1,5 +1,6 @@
-"""Pinocchio-based golf simulation engine package.
+"""Pinocchio golf simulation package.
 
-Provides kinematics, dynamics, and visualization components for the
-Pinocchio physics engine integration in the UpstreamDrift golf pipeline.
+Provides the Pinocchio-based physics analysis tools for golf swing
+simulation, including GUI components, analysis controllers, and
+visualization mixins.
 """

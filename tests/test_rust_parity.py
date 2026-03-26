@@ -49,9 +49,9 @@ class TestParityRK4:
             t += dt
 
         expected = math.exp(-1.0)  # 0.36787944...
-        assert abs(y - expected) < 1e-8, (
-            f"Python RK4 should match exp(-1), got {y}, expected {expected}"
-        )
+        assert (
+            abs(y - expected) < 1e-8
+        ), f"Python RK4 should match exp(-1), got {y}, expected {expected}"
 
     def test_integrator_config_consistency(self) -> None:
         """IntegratorConfig from adapter should have valid defaults."""
@@ -77,9 +77,9 @@ class TestParityContactModel:
         v_out = -cor * v_in
 
         # Energy conservation: |v_out| == |v_in|
-        assert abs(abs(v_out) - abs(v_in)) < 1e-10, (
-            f"Elastic collision should preserve speed: in={v_in}, out={v_out}"
-        )
+        assert (
+            abs(abs(v_out) - abs(v_in)) < 1e-10
+        ), f"Elastic collision should preserve speed: in={v_in}, out={v_out}"
 
     def test_inelastic_collision_python(self) -> None:
         """Python inelastic collision (COR<1) should lose energy."""
@@ -90,9 +90,7 @@ class TestParityContactModel:
 
         # Energy ratio = COR^2
         ke_ratio = (v_out_normal / v_in) ** 2
-        assert abs(ke_ratio - cor**2) < 1e-10, (
-            f"KE ratio should be COR^2={cor**2}, got {ke_ratio}"
-        )
+        assert abs(ke_ratio - cor**2) < 1e-10, f"KE ratio should be COR^2={cor**2}, got {ke_ratio}"
 
     def test_contact_params_consistency(self) -> None:
         """ContactParameters from adapter should have valid defaults."""
@@ -142,9 +140,7 @@ class TestParityMathPrimitives:
         a, b, t = 10.0, 20.0, 0.3
         py_lerp = a + t * (b - a)
 
-        assert abs(py_lerp - 13.0) < 1e-10, (
-            f"lerp(10, 20, 0.3) should be 13.0, got {py_lerp}"
-        )
+        assert abs(py_lerp - 13.0) < 1e-10, f"lerp(10, 20, 0.3) should be 13.0, got {py_lerp}"
 
     def test_clamp_parity(self) -> None:
         """Clamping: Python vs Rust."""

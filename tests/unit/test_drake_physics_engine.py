@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
-    DRAKE_AVAILABLE,
     skip_if_unavailable,
 )
 
@@ -25,11 +24,13 @@ _DRAKE_ENGINE_MODULES = [
     "src.engines.physics_engines.drake.python.drake_physics_engine",
 ]
 
-if DRAKE_AVAILABLE:
+try:
     from pydrake.all import DiagramBuilder, Parser
     from pydrake.geometry import SceneGraph
     from pydrake.systems.analysis import Simulator
     from pydrake.systems.framework import Context
+except ImportError:
+    pass
 
 # MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
 _PLANT_SPEC_ATTRS = [

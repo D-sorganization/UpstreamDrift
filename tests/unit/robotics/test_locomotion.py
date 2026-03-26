@@ -520,9 +520,7 @@ class TestFootstepPlan:
         """Test iterating over plan."""
         footsteps = [
             Footstep(np.zeros(3), np.array([1, 0, 0, 0]), "left", step_index=0),
-            Footstep(
-                np.array([0.3, 0, 0]), np.array([1, 0, 0, 0]), "right", step_index=1
-            ),
+            Footstep(np.array([0.3, 0, 0]), np.array([1, 0, 0, 0]), "right", step_index=1),
         ]
         plan = FootstepPlan(footsteps=footsteps)
 
@@ -601,9 +599,7 @@ class TestFootstepPlanner:
 
         # Steps should progress forward
         for i in range(1, len(plan.footsteps)):
-            assert (
-                plan.footsteps[i].position[0] > plan.footsteps[i - 1].position[0] - 0.1
-            )
+            assert plan.footsteps[i].position[0] > plan.footsteps[i - 1].position[0] - 0.1
 
     def test_plan_from_velocity_with_rotation(self) -> None:
         """Test planning with rotational velocity."""

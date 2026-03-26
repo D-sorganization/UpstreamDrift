@@ -30,8 +30,7 @@ def test_local_server_logs_ui_missing(monkeypatch, tmp_path, caplog) -> None:
 
     assert local_server._startup_metrics["ui_path"] == str(missing_ui_path)
     assert any(
-        "UI build not found" in message
-        for message in local_server._startup_metrics["errors"]
+        "UI build not found" in message for message in local_server._startup_metrics["errors"]
     )
     assert any("UI build not found" in record.message for record in caplog.records)
 
@@ -63,9 +62,7 @@ def test_local_app_registers_versioned_routes(monkeypatch, tmp_path) -> None:
     app = local_server.create_local_app()
     route_paths = [getattr(r, "path", "") for r in app.routes if hasattr(r, "path")]
     versioned = [p for p in route_paths if p.startswith("/api/v1/")]
-    assert len(versioned) > 0, (
-        f"No /api/v1/ routes found. Registered paths: {route_paths[:20]}"
-    )
+    assert len(versioned) > 0, f"No /api/v1/ routes found. Registered paths: {route_paths[:20]}"
 
 
 def test_local_app_keeps_legacy_routes(monkeypatch, tmp_path) -> None:
@@ -86,12 +83,8 @@ def test_local_app_keeps_legacy_routes(monkeypatch, tmp_path) -> None:
     app = local_server.create_local_app()
     route_paths = [getattr(r, "path", "") for r in app.routes if hasattr(r, "path")]
     # Legacy routes start with /api/ but NOT /api/v1/
-    legacy = [
-        p for p in route_paths if p.startswith("/api/") and not p.startswith("/api/v1/")
-    ]
-    assert len(legacy) > 0, (
-        f"No legacy /api/ routes found. Registered paths: {route_paths[:20]}"
-    )
+    legacy = [p for p in route_paths if p.startswith("/api/") and not p.startswith("/api/v1/")]
+    assert len(legacy) > 0, f"No legacy /api/ routes found. Registered paths: {route_paths[:20]}"
 
 
 def test_local_app_description_mentions_versioning(monkeypatch, tmp_path) -> None:

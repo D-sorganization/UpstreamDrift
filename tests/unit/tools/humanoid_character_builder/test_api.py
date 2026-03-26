@@ -114,9 +114,7 @@ class TestCharacterBuilder:
         assert params.body_fat_factor < 0.2
 
     def test_create_from_preset_with_overrides(self) -> None:
-        params = CharacterBuilder.create_from_preset(
-            "athletic", height_m=1.90, mass_kg=90.0
-        )
+        params = CharacterBuilder.create_from_preset("athletic", height_m=1.90, mass_kg=90.0)
 
         assert params.height_m == 1.90
         assert params.mass_kg == 90.0

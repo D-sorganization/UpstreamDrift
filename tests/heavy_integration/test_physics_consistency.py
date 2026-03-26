@@ -52,9 +52,7 @@ class TestPendulumAnalytical:
 
         np.testing.assert_allclose(M, M.T, atol=1e-12)
         eigenvalues = np.linalg.eigvalsh(M)
-        assert all(ev > 0 for ev in eigenvalues), (
-            f"M not positive definite: eigs={eigenvalues}"
-        )
+        assert all(ev > 0 for ev in eigenvalues), f"M not positive definite: eigs={eigenvalues}"
 
     def test_mass_matrix_varies_with_configuration(self) -> None:
         """Mass matrix should change with joint angles (coupled inertia)."""
@@ -233,9 +231,7 @@ class TestCrossEngineConsistency:
 
         qacc_mj = mujoco_pendulum.engine.compute_drift_acceleration()
         qacc_pin = pinocchio_pendulum.engine.compute_drift_acceleration()
-        np.testing.assert_allclose(
-            qacc_mj, qacc_pin, atol=TOLERANCE_ACCELERATION_RAD_S2
-        )
+        np.testing.assert_allclose(qacc_mj, qacc_pin, atol=TOLERANCE_ACCELERATION_RAD_S2)
 
         dt = 0.001
         for _ in range(100):
@@ -295,9 +291,7 @@ class TestCrossEngineConsistency:
 
             M = eng.engine.compute_mass_matrix()
             assert M.shape[0] == M.shape[1], f"{eng.name}: M not square"
-            np.testing.assert_allclose(
-                M, M.T, atol=1e-10, err_msg=f"{eng.name}: M not symmetric"
-            )
+            np.testing.assert_allclose(M, M.T, atol=1e-10, err_msg=f"{eng.name}: M not symmetric")
             eigs = np.linalg.eigvalsh(M)
             assert all(e > 0 for e in eigs), f"{eng.name}: M not positive definite"
 

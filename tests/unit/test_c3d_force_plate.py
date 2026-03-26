@@ -181,9 +181,7 @@ class TestForcePlateDataframe:
         analog_df = pd.DataFrame(
             {
                 "sample": np.repeat(sample_indices, 6),
-                "channel": np.tile(
-                    ["Fx1", "Fy1", "Fz1", "Mx1", "My1", "Mz1"], n_samples
-                ),
+                "channel": np.tile(["Fx1", "Fy1", "Fz1", "Mx1", "My1", "Mz1"], n_samples),
                 "value": np.concatenate(
                     [np.column_stack([fx1, fy1, fz1, mx1, my1, mz1]).flatten()]
                 ),
@@ -194,9 +192,7 @@ class TestForcePlateDataframe:
 
         return reader
 
-    def test_force_plate_dataframe_basic(
-        self, mock_reader_with_data: C3DDataReader
-    ) -> None:
+    def test_force_plate_dataframe_basic(self, mock_reader_with_data: C3DDataReader) -> None:
         """Test basic force plate dataframe extraction."""
         df = mock_reader_with_data.force_plate_dataframe(include_time=False)
 
@@ -210,9 +206,7 @@ class TestForcePlateDataframe:
         assert "mz" in df.columns
         assert len(df) == 100  # 100 samples
 
-    def test_force_plate_dataframe_with_time(
-        self, mock_reader_with_data: C3DDataReader
-    ) -> None:
+    def test_force_plate_dataframe_with_time(self, mock_reader_with_data: C3DDataReader) -> None:
         """Test force plate dataframe includes time column."""
         df = mock_reader_with_data.force_plate_dataframe(include_time=True)
 
@@ -235,9 +229,7 @@ class TestForcePlateDataframe:
         assert np.all(np.isfinite(df["cop_y"]))
         assert np.all(np.isfinite(df["cop_z"]))
 
-    def test_cop_nan_when_no_contact(
-        self, mock_reader_with_data: C3DDataReader
-    ) -> None:
+    def test_cop_nan_when_no_contact(self, mock_reader_with_data: C3DDataReader) -> None:
         """Test COP is NaN when vertical force is too small."""
         reader = mock_reader_with_data
 
@@ -246,9 +238,7 @@ class TestForcePlateDataframe:
         analog_df = pd.DataFrame(
             {
                 "sample": np.repeat(np.arange(n_samples), 6),
-                "channel": np.tile(
-                    ["Fx1", "Fy1", "Fz1", "Mx1", "My1", "Mz1"], n_samples
-                ),
+                "channel": np.tile(["Fx1", "Fy1", "Fz1", "Mx1", "My1", "Mz1"], n_samples),
                 "value": np.tile([10.0, 20.0, 5.0, 1.0, 2.0, 0.5], n_samples),
                 # Fz=5N is below 10N threshold
             }
@@ -261,17 +251,13 @@ class TestForcePlateDataframe:
         assert np.all(np.isnan(df["cop_x"]))
         assert np.all(np.isnan(df["cop_y"]))
 
-    def test_specific_plate_extraction(
-        self, mock_reader_with_data: C3DDataReader
-    ) -> None:
+    def test_specific_plate_extraction(self, mock_reader_with_data: C3DDataReader) -> None:
         """Test extracting data for a specific plate number."""
         df = mock_reader_with_data.force_plate_dataframe(plate_number=1)
 
         assert all(df["plate"] == 1)
 
-    def test_invalid_plate_number_raises(
-        self, mock_reader_with_data: C3DDataReader
-    ) -> None:
+    def test_invalid_plate_number_raises(self, mock_reader_with_data: C3DDataReader) -> None:
         """Test that requesting an invalid plate raises ValueError."""
         with pytest.raises(ValueError, match="Force plate 99 not found"):
             mock_reader_with_data.force_plate_dataframe(plate_number=99)

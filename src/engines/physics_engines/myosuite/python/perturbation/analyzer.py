@@ -343,7 +343,7 @@ class MyoSuitePerturbationAnalyzer:
         Post: returned dict has 'coeffs' with same shape as base.
         """
         if not (self._base_coeffs is not None):
-            raise ValueError(()
+            raise ValueError(
             "set_base_torque_profile() must be called before perturb_torque()"
         )
         perturbed = perturb_torque_coeffs(
@@ -363,10 +363,8 @@ class MyoSuitePerturbationAnalyzer:
         Pre: sim_result is a MyoSuiteSimResult with n_steps >= 2.
         Post: all MANDATORY_METRICS present; all values finite.
         """
-        if not (isinstance(sim_result):
-            raise ValueError(MyoSuiteSimResult), ()
-            f"sim_result must be MyoSuiteSimResult, got {type(sim_result)}"
-        )
+        if not isinstance(sim_result, MyoSuiteSimResult):
+            raise ValueError("f"sim_result must be MyoSuiteSimResult, got {type(sim_result)}")
         if not (sim_result.n_steps >= 2):
             raise ValueError("Simulation must have >= 2 steps")
 
@@ -422,7 +420,7 @@ class MyoSuitePerturbationAnalyzer:
               as keys (scalar metrics only).
         """
         if not (self._base_coeffs is not None):
-            raise ValueError(()
+            raise ValueError(
             "set_base_torque_profile() must be called before run_batch()"
         )
         t_start = time.monotonic()

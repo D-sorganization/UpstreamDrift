@@ -131,16 +131,12 @@ class TestWorkflowEngine:
         engine.register_workflow(wf)
 
         # Case 1: Skip
-        exe = engine.start_workflow(
-            "cond_wf", Context("u1"), initial_state={"run_me": False}
-        )
+        exe = engine.start_workflow("cond_wf", Context("u1"), initial_state={"run_me": False})
         res = engine.execute_next_step(exe)
         assert res.status == StepStatus.SKIPPED
 
         # Case 2: Run
-        exe2 = engine.start_workflow(
-            "cond_wf", Context("u1"), initial_state={"run_me": True}
-        )
+        exe2 = engine.start_workflow("cond_wf", Context("u1"), initial_state={"run_me": True})
         res2 = engine.execute_next_step(exe2)
         assert res2.status == StepStatus.COMPLETED
 
@@ -152,16 +148,7 @@ class TestWorkflowEngine:
             educational_content={"beginner": "Learn X", "expert": "Review Y"},
         )
 
-        assert (
-            engine.get_step_educational_content(step, ExpertiseLevel.BEGINNER)
-            == "Learn X"
-        )
-        assert (
-            engine.get_step_educational_content(step, ExpertiseLevel.EXPERT)
-            == "Review Y"
-        )
+        assert engine.get_step_educational_content(step, ExpertiseLevel.BEGINNER) == "Learn X"
+        assert engine.get_step_educational_content(step, ExpertiseLevel.EXPERT) == "Review Y"
         # Fallback
-        assert (
-            engine.get_step_educational_content(step, ExpertiseLevel.INTERMEDIATE)
-            == "Learn X"
-        )
+        assert engine.get_step_educational_content(step, ExpertiseLevel.INTERMEDIATE) == "Learn X"

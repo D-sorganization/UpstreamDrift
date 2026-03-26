@@ -17,9 +17,7 @@ def cleanup() -> None:
 
     # 2. Delete duplicate matlab_quality_check.py
     quality_checks = list(root.rglob("matlab_quality_check.py"))
-    canonical_path = (
-        root / "tools/matlab_utilities/scripts/matlab_quality_check.py"
-    ).resolve()
+    canonical_path = (root / "tools/matlab_utilities/scripts/matlab_quality_check.py").resolve()
 
     for f in quality_checks:
         if f.resolve() == canonical_path:

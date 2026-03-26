@@ -17,15 +17,11 @@ class FinancialRequest(BaseModel):
         default=0.85, ge=0, le=1, description="Capacity utilization (0-1)"
     )
     # Revenue
-    product_price_per_ton: float = Field(
-        default=0.0, ge=0, description="Product price [$/ton]"
-    )
+    product_price_per_ton: float = Field(default=0.0, ge=0, description="Product price [$/ton]")
     byproduct_revenue_per_ton: float = Field(
         default=0.0, ge=0, description="Byproduct revenue [$/ton]"
     )
-    byproduct_yield_factor: float = Field(
-        default=0.0, ge=0, description="Byproduct yield factor"
-    )
+    byproduct_yield_factor: float = Field(default=0.0, ge=0, description="Byproduct yield factor")
     # Variable costs ($/ton feedstock)
     feedstock_cost_per_ton: float = Field(default=0.0, ge=0)
     labor_cost_per_ton: float = Field(default=0.0, ge=0)

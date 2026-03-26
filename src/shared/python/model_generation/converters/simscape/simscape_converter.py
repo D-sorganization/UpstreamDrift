@@ -275,9 +275,7 @@ class SimscapeToURDFConverter:
             self._infer_links_from_joints(model, result, body_to_link)
 
         # Add world frame as base link if needed
-        if not any(
-            link.name == "world" or link.name == "base_link" for link in result.links
-        ):
+        if not any(link.name == "world" or link.name == "base_link" for link in result.links):
             base_link = Link(
                 name="base_link",
                 inertia=Inertia(ixx=0.001, iyy=0.001, izz=0.001, mass=0.001),
@@ -288,9 +286,7 @@ class SimscapeToURDFConverter:
 
         # Convert joint blocks
         for joint_block in model.get_joint_blocks():
-            joint = self._convert_joint_block(
-                joint_block, model, body_to_link, connection_map
-            )
+            joint = self._convert_joint_block(joint_block, model, body_to_link, connection_map)
             if joint:
                 result.joints.append(joint)
 
@@ -312,9 +308,7 @@ class SimscapeToURDFConverter:
         )
         result.materials["default_material"] = default_material
 
-    def _build_connection_map(
-        self, model: SimscapeModel
-    ) -> dict[str, list[tuple[str, str]]]:
+    def _build_connection_map(self, model: SimscapeModel) -> dict[str, list[tuple[str, str]]]:
         """Build a map of block connections."""
         # Maps block name to list of (connected_block, port) tuples
         if not (model is not None):
@@ -327,9 +321,7 @@ class SimscapeToURDFConverter:
             # Forward connection
             if conn.source_block not in connection_map:
                 connection_map[conn.source_block] = []
-            connection_map[conn.source_block].append(
-                (conn.dest_block, conn.source_port)
-            )
+            connection_map[conn.source_block].append((conn.dest_block, conn.source_port))
 
             # Reverse connection
             if conn.dest_block not in connection_map:
@@ -406,9 +398,7 @@ class SimscapeToURDFConverter:
             raise ValueError("block must be provided")
         if not (block is not None):
             raise ValueError("block must be provided")
-        inertia_param = block.parameters.get("Inertia") or block.parameters.get(
-            "MomentOfInertia"
-        )
+        inertia_param = block.parameters.get("Inertia") or block.parameters.get("MomentOfInertia")
 
         if inertia_param:
             # Parse inertia matrix [ixx iyy izz ixy ixz iyz] or similar
@@ -418,9 +408,7 @@ class SimscapeToURDFConverter:
                 ixy = values[3] if len(values) > 3 else 0.0
                 ixz = values[4] if len(values) > 4 else 0.0
                 iyz = values[5] if len(values) > 5 else 0.0
-                return Inertia(
-                    ixx=ixx, iyy=iyy, izz=izz, ixy=ixy, ixz=ixz, iyz=iyz, mass=mass
-                )
+                return Inertia(ixx=ixx, iyy=iyy, izz=izz, ixy=ixy, ixz=ixz, iyz=iyz, mass=mass)
 
         # Calculate from geometry
         geometry = self._get_geometry(block)
@@ -491,9 +479,7 @@ class SimscapeToURDFConverter:
         if geometry.geometry_type == GeometryType.BOX:
             return Inertia.from_box(mass, *geometry.dimensions[:3])
         if geometry.geometry_type == GeometryType.CYLINDER:
-            return Inertia.from_cylinder(
-                mass, geometry.dimensions[0], geometry.dimensions[1]
-            )
+            return Inertia.from_cylinder(mass, geometry.dimensions[0], geometry.dimensions[1])
         if geometry.geometry_type == GeometryType.SPHERE:
             return Inertia.from_sphere(mass, geometry.dimensions[0])
         return Inertia(ixx=0.01, iyy=0.01, izz=0.01, mass=mass)
@@ -768,9 +754,7 @@ class SimscapeToURDFConverter:
         if not (result is not None):
             raise ValueError("result must be provided")
         child_links = {j.child for j in result.joints}
-        root_candidates = [
-            link.name for link in result.links if link.name not in child_links
-        ]
+        root_candidates = [link.name for link in result.links if link.name not in child_links]
 
         if len(root_candidates) <= 1:
             return  # One or zero roots is fine
@@ -791,9 +775,7 @@ class SimscapeToURDFConverter:
                     origin=Origin(),
                 )
                 result.joints.append(joint)
-                result.warnings.append(
-                    f"Connected orphan link '{link_name}' to '{root_link}'"
-                )
+                result.warnings.append(f"Connected orphan link '{link_name}' to '{root_link}'")
 
     def _sanitize_name(self, name: str) -> str:
         """Sanitize name for URDF (no special characters)."""

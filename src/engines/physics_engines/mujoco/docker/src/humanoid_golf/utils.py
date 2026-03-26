@@ -320,9 +320,7 @@ def _attach_club(root, h_scale, w_scale, params, two_handed) -> None:
         if lhand:
             # Site on Club (attached to rhand)
             # Locate it where left hand should be (slightly above right hand?)
-            rhand.add(
-                "site", name="club_grip_site", pos=[0, 0.05 * w_scale, -0.15 * h_scale]
-            )
+            rhand.add("site", name="club_grip_site", pos=[0, 0.05 * w_scale, -0.15 * h_scale])
 
             # Site on Left Hand (palm center)
             lhand.add("site", name="lhand_grip_site", pos=[0, 0, -0.05 * h_scale])

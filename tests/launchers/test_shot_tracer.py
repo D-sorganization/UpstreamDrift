@@ -21,9 +21,7 @@ def mock_flight_models():
         reference = "Mock Ref"
 
     with (
-        patch(
-            "src.launchers.shot_tracer.FlightModelType", [MockModelType]
-        ) as ModelTypeMock,
+        patch("src.launchers.shot_tracer.FlightModelType", [MockModelType]) as ModelTypeMock,
         patch("src.launchers.shot_tracer.FlightModelRegistry") as RegistryMock,
     ):
         RegistryMock.get_model.return_value = MockModel()

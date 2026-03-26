@@ -20,9 +20,7 @@ class WGSReactorRequest(BaseModel):
         ge=0,
         description="Feed rate [kmol/hr] (0 = skip reactor sizing)",
     )
-    catalyst_type: str = Field(
-        default="HTS", description="Catalyst type label for sizing lookup"
-    )
+    catalyst_type: str = Field(default="HTS", description="Catalyst type label for sizing lookup")
 
 
 class WGSEquilibriumOut(BaseModel):

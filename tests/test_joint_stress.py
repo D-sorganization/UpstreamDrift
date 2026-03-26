@@ -50,12 +50,8 @@ class TestJointStressAnalyzer:
     def test_hip_impingement_risk(self, analyzer, mock_data):
         """Test hip impingement logic."""
         # High internal rotation + flexion
-        mock_data["joint_angles"]["hip_lead_rotation"] = np.radians(
-            np.full(20, 50.0)
-        )  # 50 deg
-        mock_data["joint_angles"]["hip_lead_flexion"] = np.radians(
-            np.full(20, 110.0)
-        )  # 110 deg
+        mock_data["joint_angles"]["hip_lead_rotation"] = np.radians(np.full(20, 50.0))  # 50 deg
+        mock_data["joint_angles"]["hip_lead_flexion"] = np.radians(np.full(20, 110.0))  # 110 deg
 
         result = analyzer.analyze_hip(
             mock_data["joint_angles"],

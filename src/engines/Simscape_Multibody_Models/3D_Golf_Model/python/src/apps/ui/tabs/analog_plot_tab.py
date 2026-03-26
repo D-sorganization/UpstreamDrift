@@ -19,9 +19,7 @@ class AnalogPlotTab(QtWidgets.QWidget):
 
         left_panel = QtWidgets.QVBoxLayout()
         self.list_analog = QtWidgets.QListWidget()
-        self.list_analog.setSelectionMode(
-            QtWidgets.QAbstractItemView.SelectionMode.SingleSelection
-        )
+        self.list_analog.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.list_analog.itemSelectionChanged.connect(self.update_plot)
         left_panel.addWidget(QtWidgets.QLabel("Analog channels:"))
         left_panel.addWidget(self.list_analog)

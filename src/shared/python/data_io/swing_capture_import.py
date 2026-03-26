@@ -191,9 +191,7 @@ class SwingCaptureImporter:
     """
 
     @precondition(
-        lambda self, marker_mapping=None, target_frame_rate=200.0: (
-            target_frame_rate > 0
-        ),
+        lambda self, marker_mapping=None, target_frame_rate=200.0: (target_frame_rate > 0),
         "Target frame rate must be positive",
     )
     def __init__(
@@ -332,9 +330,7 @@ class SwingCaptureImporter:
 
         # Infer joint names from header
         joint_names = (
-            header[1:]
-            if len(header) > 1
-            else [f"joint_{i}" for i in range(positions.shape[1])]
+            header[1:] if len(header) > 1 else [f"joint_{i}" for i in range(positions.shape[1])]
         )
 
         # Compute velocities via finite differences
@@ -390,9 +386,7 @@ class SwingCaptureImporter:
         times = np.array(data["times"], dtype=np.float64)
         positions = np.array(data["positions"], dtype=np.float64)
 
-        joint_names = data.get(
-            "joint_names", [f"joint_{i}" for i in range(positions.shape[1])]
-        )
+        joint_names = data.get("joint_names", [f"joint_{i}" for i in range(positions.shape[1])])
 
         if "velocities" in data:
             velocities = np.array(data["velocities"], dtype=np.float64)
@@ -459,9 +453,7 @@ class SwingCaptureImporter:
         if not (marker_data is not None):
             raise ValueError("marker_data must be provided")
         n_frames = marker_data.n_frames
-        marker_name_to_idx = {
-            name: idx for idx, name in enumerate(marker_data.marker_names)
-        }
+        marker_name_to_idx = {name: idx for idx, name in enumerate(marker_data.marker_names)}
 
         joint_names = []
         joint_angles = []
@@ -494,9 +486,7 @@ class SwingCaptureImporter:
             joint_angles.append(angles)
 
         if not joint_angles:
-            logger.warning(
-                "No marker-to-joint mappings matched. Using raw marker positions."
-            )
+            logger.warning("No marker-to-joint mappings matched. Using raw marker positions.")
             n_markers = marker_data.n_markers
             joint_names = [f"marker_{name}_x" for name in marker_data.marker_names]
             joint_angles = [marker_data.positions[:, i, 0] for i in range(n_markers)]  # type: ignore[misc]
@@ -525,15 +515,11 @@ class SwingCaptureImporter:
         )
 
     @precondition(
-        lambda self, positions, velocities, times, source_rate, target_rate: (
-            source_rate > 0
-        ),
+        lambda self, positions, velocities, times, source_rate, target_rate: (source_rate > 0),
         "Source frame rate must be positive",
     )
     @precondition(
-        lambda self, positions, velocities, times, source_rate, target_rate: (
-            target_rate > 0
-        ),
+        lambda self, positions, velocities, times, source_rate, target_rate: (target_rate > 0),
         "Target frame rate must be positive",
     )
     def _resample(
@@ -570,14 +556,10 @@ class SwingCaptureImporter:
         new_velocities = np.zeros((n_new_frames, velocities.shape[1]))
 
         for j in range(positions.shape[1]):
-            f_pos = interp1d(
-                times, positions[:, j], kind="cubic", fill_value="extrapolate"
-            )
+            f_pos = interp1d(times, positions[:, j], kind="cubic", fill_value="extrapolate")
             new_positions[:, j] = f_pos(new_times)
 
-            f_vel = interp1d(
-                times, velocities[:, j], kind="cubic", fill_value="extrapolate"
-            )
+            f_vel = interp1d(times, velocities[:, j], kind="cubic", fill_value="extrapolate")
             new_velocities[:, j] = f_vel(new_times)
 
         return new_positions, new_velocities, new_times

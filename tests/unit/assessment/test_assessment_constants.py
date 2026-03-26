@@ -22,9 +22,7 @@ class TestCategories:
         assert len(CATEGORIES) > 0
 
     def test_keys_are_uppercase_letters(self) -> None:
-        assert all(
-            isinstance(k, str) and len(k) == 1 and k.isupper() for k in CATEGORIES
-        )
+        assert all(isinstance(k, str) and len(k) == 1 and k.isupper() for k in CATEGORIES)
 
     def test_values_are_strings(self) -> None:
         assert all(isinstance(v, str) for v in CATEGORIES.values())

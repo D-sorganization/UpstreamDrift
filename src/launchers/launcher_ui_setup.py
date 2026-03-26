@@ -154,9 +154,7 @@ class LauncherUISetupMixin:
         action_console.setCheckable(True)
         action_console.setChecked(False)
         action_console.setShortcut("Ctrl+`")
-        action_console.triggered.connect(
-            lambda checked: self._console_dock.setVisible(checked)
-        )
+        action_console.triggered.connect(lambda checked: self._console_dock.setVisible(checked))
         view_menu.addAction(action_console)
         self._action_console = action_console
 
@@ -235,9 +233,7 @@ class LauncherUISetupMixin:
         # Execution Mode Label
         self.lbl_execution_mode = QLabel("Mode: Local (Windows)")
         self.lbl_execution_mode.setStyleSheet(Styles.EXEC_MODE_WARNING)
-        self.lbl_execution_mode.setToolTip(
-            "Current execution environment (Local, Docker, or WSL)"
-        )
+        self.lbl_execution_mode.setToolTip("Current execution environment (Local, Docker, or WSL)")
         top_bar.addWidget(self.lbl_execution_mode)
 
         top_bar.addStretch()
@@ -492,9 +488,7 @@ class LauncherUISetupMixin:
             self.content_splitter.setCollapsible(1, True)
             self.ai_panel.setMaximumWidth(0)
             self.ai_panel.settings_requested.connect(self._open_ai_settings)
-            self.ai_panel.close_requested.connect(
-                lambda: self.toggle_ai_assistant(False)
-            )
+            self.ai_panel.close_requested.connect(lambda: self.toggle_ai_assistant(False))
             self._sync_chat_session()
         except ImportError as e:
             logger.error(f"Failed to initialize AI panel: {e}")
@@ -511,14 +505,14 @@ class LauncherUISetupMixin:
 
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(
+                req, timeout=2
+            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None
 
-            session_file = (
-                Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
-            )
+            session_file = Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
             session_file.parent.mkdir(parents=True, exist_ok=True)
             if session_id:
                 session_file.write_text(session_id, encoding="utf-8")

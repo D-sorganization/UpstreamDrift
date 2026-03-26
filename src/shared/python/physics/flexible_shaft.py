@@ -248,9 +248,7 @@ def compute_mass_profile(
     mass_per_length = np.zeros(n_stations)
 
     for i in range(n_stations):
-        A = compute_section_area(
-            properties.outer_diameter[i], properties.wall_thickness[i]
-        )
+        A = compute_section_area(properties.outer_diameter[i], properties.wall_thickness[i])
         mass_per_length[i] = properties.density * A
 
     return mass_per_length
@@ -526,10 +524,7 @@ class ModalShaftModel(ShaftModel):
 
             # Damped harmonic oscillator: q'' + 2ζωq' + ω²q = 0
             # Semi-implicit Euler
-            acc = (
-                -2 * zeta * omega * self.modal_velocities[i]
-                - omega**2 * self.modal_coords[i]
-            )
+            acc = -2 * zeta * omega * self.modal_velocities[i] - omega**2 * self.modal_coords[i]
             self.modal_velocities[i] += acc * dt
             self.modal_coords[i] += self.modal_velocities[i] * dt
 
@@ -600,8 +595,7 @@ class FiniteElementShaftModel(ShaftModel):
         self._apply_boundary_conditions()
 
         logger.info(
-            f"FE shaft initialized: {self.n_elements} elements, "
-            f"{self.n_free_dof} free DOFs"
+            f"FE shaft initialized: {self.n_elements} elements, " f"{self.n_free_dof} free DOFs"
         )
 
     def _create_elements(self) -> None:
@@ -922,9 +916,7 @@ class FiniteElementShaftModel(ShaftModel):
 
         return frequencies
 
-    def compute_static_solution(
-        self, load_position: float, load_force: float
-    ) -> ShaftState:
+    def compute_static_solution(self, load_position: float, load_force: float) -> ShaftState:
         """Compute static deflection under point load.
 
         Args:

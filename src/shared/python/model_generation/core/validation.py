@@ -141,9 +141,7 @@ class Validator:
         lambda result: isinstance(result, ValidationResult),
         "Result must be ValidationResult type",
     )
-    def validate_mass(
-        cls, mass: float, component: str | None = None
-    ) -> ValidationResult:
+    def validate_mass(cls, mass: float, component: str | None = None) -> ValidationResult:
         """
         Validate mass value.
 
@@ -276,9 +274,7 @@ class Validator:
 
     @classmethod
     @precondition(lambda joint: joint is not None, "Joint cannot be None")
-    @precondition(
-        lambda link_names: link_names is not None, "Link names cannot be None"
-    )
+    @precondition(lambda link_names: link_names is not None, "Link names cannot be None")
     @postcondition(lambda result: result is not None, "Must return ValidationResult")
     def validate_joint(cls, joint: Joint, link_names: set[str]) -> ValidationResult:
         """
@@ -356,9 +352,7 @@ class Validator:
     @precondition(lambda links: links is not None, "Links list cannot be None")
     @precondition(lambda joints: joints is not None, "Joints list cannot be None")
     @postcondition(lambda result: result is not None, "Must return ValidationResult")
-    def validate_hierarchy(
-        cls, links: list[Link], joints: list[Joint]
-    ) -> ValidationResult:
+    def validate_hierarchy(cls, links: list[Link], joints: list[Joint]) -> ValidationResult:
         """
         Validate link-joint hierarchy.
 
@@ -477,9 +471,7 @@ class Validator:
         path.add(start)
 
         for joint in joints:
-            if joint.parent == start and cls._has_cycle(
-                joint.child, visited, path, joints
-            ):
+            if joint.parent == start and cls._has_cycle(joint.child, visited, path, joints):
                 return True
 
         path.remove(start)

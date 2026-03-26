@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 """Configuration utilities for eliminating configuration loading duplication.
 
 This module provides reusable configuration loading and validation patterns.
@@ -398,7 +402,7 @@ def validate_config(
             optional_keys=["timestep", "gravity"]
         )
         if not valid:
-            print(f"Missing keys: {missing}")
+            logger.info(f"Missing keys: {missing}")
     """
     if not (config is not None):
         raise ValueError("config must be provided")

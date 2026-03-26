@@ -186,9 +186,7 @@ class PinocchioPoseEditor(BasePoseEditor):
         if self._v is not None:
             self._state.joint_velocities = self._v.copy()
 
-        logger.info(
-            "Initialized %d joints for Pinocchio pose editing", len(self._joint_info)
-        )
+        logger.info("Initialized %d joints for Pinocchio pose editing", len(self._joint_info))
 
     def _categorize_joint(self, name: str) -> str:
         """Categorize a joint into a group based on its name."""
@@ -198,9 +196,7 @@ class PinocchioPoseEditor(BasePoseEditor):
             raise ValueError("name must be provided")
         name_lower = name.lower()
 
-        if any(
-            x in name_lower for x in ["shoulder", "humerus", "elbow", "wrist", "arm"]
-        ):
+        if any(x in name_lower for x in ["shoulder", "humerus", "elbow", "wrist", "arm"]):
             if "l" in name_lower[:2]:
                 return "Left Arm"
             else:
@@ -213,8 +209,7 @@ class PinocchioPoseEditor(BasePoseEditor):
                 return "Right Leg"
 
         if any(
-            x in name_lower
-            for x in ["spine", "back", "torso", "trunk", "lowerback", "upperback"]
+            x in name_lower for x in ["spine", "back", "torso", "trunk", "lowerback", "upperback"]
         ):
             return "Spine"
 
@@ -247,9 +242,7 @@ class PinocchioPoseEditor(BasePoseEditor):
                 if info.num_positions == 1:
                     return float(self._q[info.position_index])
                 else:
-                    return self._q[
-                        info.position_index : info.position_index + info.num_positions
-                    ]
+                    return self._q[info.position_index : info.position_index + info.num_positions]
 
         return 0.0
 
@@ -267,9 +260,7 @@ class PinocchioPoseEditor(BasePoseEditor):
                 if info.num_positions == 1:
                     self._q[info.position_index] = float(value)
                 else:
-                    self._q[
-                        info.position_index : info.position_index + info.num_positions
-                    ] = value
+                    self._q[info.position_index : info.position_index + info.num_positions] = value
 
                 self._state.joint_positions = self._q.copy()
                 self._notify("pose_changed", self._q)

@@ -42,7 +42,7 @@ from .physics_golfer import (
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 
-# Re-export from shared utility for backwards compatibility (DRY — #1041)
+# Re-export from shared utility for backwards compatibility (DRY â€” #1041)
 from .torque_utils import make_polynomial_torque  # noqa: F401
 
 _log = logging.getLogger(__name__)
@@ -70,45 +70,37 @@ class GolferSimulationResult(TrajectoryResultMixin):
 
     def q_at(self, idx: int) -> np.ndarray:
         """Generalized coordinates at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return self.states[idx, :N_DOF]
 
     def qdot_at(self, idx: int) -> np.ndarray:
         """Generalized velocities at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return self.states[idx, N_DOF:]
 
     def mass_matrix_at(self, idx: int) -> np.ndarray:
-        """8×8 mass matrix at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        """8Ã—8 mass matrix at time index."""
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return mass_matrix(self.q_at(idx), self.params)  # type: ignore[no-any-return]
 
     def positions_at(self, idx: int) -> dict:
         """Forward kinematics at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return forward_kinematics(self.q_at(idx), self.params)  # type: ignore[no-any-return]
 
-    def torques_at(
-        self, idx: int
-    ) -> tuple[float, float, float, float, float, float, float]:
+    def torques_at(self, idx: int) -> tuple[float, float, float, float, float, float, float]:
         """Applied driving torques at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return self.torque_func(self.t[idx])
 
     def accelerations_at(self, idx: int) -> np.ndarray:
         """Joint accelerations at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return constrained_accelerations(
             self.states[idx], self.t[idx], self.params, self.torque_func
@@ -116,8 +108,7 @@ class GolferSimulationResult(TrajectoryResultMixin):
 
     def joint_forces_at(self, idx: int) -> dict:
         """Net joint forces at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         q = self.q_at(idx)
         qdot = self.qdot_at(idx)
@@ -126,38 +117,31 @@ class GolferSimulationResult(TrajectoryResultMixin):
 
     def constraint_forces_at(self, idx: int) -> np.ndarray:
         """Lagrange multiplier (constraint) forces at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
-        return constraint_forces(
-            self.states[idx], self.t[idx], self.params, self.torque_func
-        )
+        return constraint_forces(self.states[idx], self.t[idx], self.params, self.torque_func)
 
     def constraint_violation_at(self, idx: int) -> float:
         """Constraint violation magnitude at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return constraint_violation(self.states[idx], self.params)
 
     def coriolis_at(self, idx: int) -> np.ndarray:
         """Coriolis/centrifugal torques at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return coriolis_matrix(self.q_at(idx), self.qdot_at(idx), self.params)  # type: ignore[no-any-return]
 
     def gravity_at(self, idx: int) -> np.ndarray:
         """Gravitational torques at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return gravity_vector(self.q_at(idx), self.params)  # type: ignore[no-any-return]
 
     def energy_at(self, idx: int) -> dict:
         """Energy decomposition at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         state = self.states[idx]
         result = {
@@ -170,8 +154,7 @@ class GolferSimulationResult(TrajectoryResultMixin):
 
     def friction_torques_at(self, idx: int) -> np.ndarray:
         """Friction torques at time index."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return friction_torque_vector(self.qdot_at(idx), self.params)  # type: ignore[no-any-return]
 
@@ -181,8 +164,7 @@ class GolferSimulationResult(TrajectoryResultMixin):
         Overrides the base to spread the 7-joint torque_func output over the
         full N_DOF=8 vector before adding friction.
         """
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         tau_drive = np.zeros(N_DOF)
         tau_drive[:7] = self.torque_func(self.t[idx])
@@ -219,10 +201,10 @@ def run_simulation(
     initial_state : np.ndarray, shape (16,)
     t_end : float
     torque_func : callable
-    dt : float — output time step
-    method : str — ODE solver method
-    rtol, atol : float — solver tolerances
-    alpha, beta : float — Baumgarte stabilization gains
+    dt : float â€” output time step
+    method : str â€” ODE solver method
+    rtol, atol : float â€” solver tolerances
+    alpha, beta : float â€” Baumgarte stabilization gains
     torque_limits : np.ndarray, shape (7,), optional
         Per-joint torque saturation limits.
     limits : JointLimitsNDOF, optional
@@ -232,16 +214,12 @@ def run_simulation(
     -------
     GolferSimulationResult
     """
-    if not (initial_state.shape == (2 * N_DOF):
-        raise ValueError(), ()
-        f"Initial state shape must be ({2 * N_DOF},), got {initial_state.shape}"
-    )
-    if not (np.all(np.isfinite(initial_state))):
-        raise ValueError("Initial state must be finite")
-    if not (t_end > 0):
-        raise ValueError(f"t_end must be positive, got {t_end}")
-    if not (0 < dt < t_end):
-        raise ValueError(f"dt must be in (0, t_end), got {dt}")
+    assert initial_state.shape == (
+        2 * N_DOF,
+    ), f"Initial state shape must be ({2 * N_DOF},), got {initial_state.shape}"
+    assert np.all(np.isfinite(initial_state)), "Initial state must be finite"
+    assert t_end > 0, f"t_end must be positive, got {t_end}"
+    assert 0 < dt < t_end, f"dt must be in (0, t_end), got {dt}"
 
     # Merge clamp kwarg (from SimulationPanel) with torque_limits (legacy)
     effective_torque_limits = torque_limits if torque_limits is not None else clamp
@@ -255,11 +233,8 @@ def run_simulation(
     _max_violation: list[float] = [0.0]
 
     def ode_rhs(t: float, y: np.ndarray) -> np.ndarray:
-        if not (t is not None):
-            raise ValueError("t must be provided")
-        dydt = equations_of_motion(
-            y, t, params, torque_func, alpha, beta, effective_torque_limits
-        )
+        assert t is not None, "t must be provided"
+        dydt = equations_of_motion(y, t, params, torque_func, alpha, beta, effective_torque_limits)
         # Apply joint limit penalty torques if enabled
         if limits is not None:
             from .physics import joint_limit_torque_ndof
@@ -310,8 +285,7 @@ def run_simulation(
         torque_func=torque_func,
     )
 
-    if not (result.n_steps >= 2):
-        raise ValueError("Simulation must produce at least 2 time points")
+    assert result.n_steps >= 2, "Simulation must produce at least 2 time points"
 
     # Postcondition: constraint drift must remain bounded.
     max_viol = _max_violation[0]

@@ -47,27 +47,19 @@ class TestFilterDesignerPreconditions(unittest.TestCase):
 
     def test_butterworth_order_must_be_positive(self) -> None:
         with self.assertRaises(PreconditionError):
-            FilterDesigner.butterworth(
-                FilterType.LOWPASS, cutoff=100.0, fs=1000.0, order=0
-            )
+            FilterDesigner.butterworth(FilterType.LOWPASS, cutoff=100.0, fs=1000.0, order=0)
 
     def test_butterworth_fs_must_be_positive(self) -> None:
         with self.assertRaises(PreconditionError):
-            FilterDesigner.butterworth(
-                FilterType.LOWPASS, cutoff=100.0, fs=0.0, order=4
-            )
+            FilterDesigner.butterworth(FilterType.LOWPASS, cutoff=100.0, fs=0.0, order=4)
 
     def test_butterworth_negative_fs_rejected(self) -> None:
         with self.assertRaises(PreconditionError):
-            FilterDesigner.butterworth(
-                FilterType.LOWPASS, cutoff=100.0, fs=-500.0, order=4
-            )
+            FilterDesigner.butterworth(FilterType.LOWPASS, cutoff=100.0, fs=-500.0, order=4)
 
     def test_butterworth_valid_design(self) -> None:
         """Positive order and fs should succeed."""
-        filt = FilterDesigner.butterworth(
-            FilterType.LOWPASS, cutoff=100.0, fs=1000.0, order=4
-        )
+        filt = FilterDesigner.butterworth(FilterType.LOWPASS, cutoff=100.0, fs=1000.0, order=4)
         self.assertEqual(filt.order, 4)
         self.assertEqual(filt.fs, 1000.0)
 

@@ -22,9 +22,7 @@ class ODESolverRequest(BaseModel):
     )
     t_start: float = Field(default=0.0, ge=0, description="Start time")
     t_end: float = Field(default=20.0, gt=0, description="End time")
-    num_points: int = Field(
-        default=100, ge=10, le=10000, description="Number of output points"
-    )
+    num_points: int = Field(default=100, ge=10, le=10000, description="Number of output points")
 
 
 class ODEVariableSummary(BaseModel):
@@ -41,9 +39,7 @@ class ODESolverResponse(BaseModel):
     """Response model for ODE solver."""
 
     times: list[float]
-    solutions: dict[str, list[float]] = Field(
-        description="Variable name to list of values mapping"
-    )
+    solutions: dict[str, list[float]] = Field(description="Variable name to list of values mapping")
     variable_summaries: list[ODEVariableSummary]
     success: bool = True
     message: str = "Solution computed successfully"

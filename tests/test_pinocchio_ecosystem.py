@@ -130,9 +130,7 @@ class TestPinocchioEcosystem(unittest.TestCase):
             self.assertIsNotNone(data, "Pinocchio data should be created")
 
             # Test that the objects have the expected type names
-            self.assertEqual(
-                type(model).__name__, "Model", "Should be a Pinocchio Model"
-            )
+            self.assertEqual(type(model).__name__, "Model", "Should be a Pinocchio Model")
             self.assertEqual(type(data).__name__, "Data", "Should be a Pinocchio Data")
 
             # Pink should be able to work with Pinocchio models
@@ -198,9 +196,7 @@ class TestPinocchioConstants(unittest.TestCase):
             from src.shared.python.core.constants import PINOCCHIO_LAUNCHER_SCRIPT
 
             self.assertIsInstance(PINOCCHIO_LAUNCHER_SCRIPT, Path)
-            expected_path = (
-                "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
-            )
+            expected_path = "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
             self.assertEqual(PINOCCHIO_LAUNCHER_SCRIPT.as_posix(), expected_path)
 
         except ImportError as e:

@@ -8,9 +8,6 @@ def test_import():
     try:
         import src.engines.physics_engines.pinocchio.python.dtack.backends.pink_backend
 
-        assert (
-            src.engines.physics_engines.pinocchio.python.dtack.backends.pink_backend
-            is not None
-        )
+        assert src.engines.physics_engines.pinocchio.python.dtack.backends.pink_backend is not None
     except (ImportError, AttributeError) as e:
         pytest.skip(f"Missing dependencies or import error: {e}")

@@ -99,9 +99,7 @@ class PINKBackend:
             velocity = pink.solve_ik(self.configuration, task_list, dt, solver=solver)
 
             # Integrate to get new q
-            q_next: npt.NDArray[np.float64] = pin.integrate(
-                self.robot.model, q_init, velocity * dt
-            )
+            q_next: npt.NDArray[np.float64] = pin.integrate(self.robot.model, q_init, velocity * dt)
 
             # Update internal configuration for next step consistency
             # if this object persists state?

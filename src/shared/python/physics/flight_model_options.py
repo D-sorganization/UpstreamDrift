@@ -48,9 +48,7 @@ def compute_spin_decay(omega_initial: float, time: float, decay_rate: float) -> 
 
 
 @functools.lru_cache(maxsize=256)
-def compute_air_density_at_altitude(
-    sea_level_density: float, altitude_m: float
-) -> float:
+def compute_air_density_at_altitude(sea_level_density: float, altitude_m: float) -> float:
     """Compute air density at altitude using barometric formula. Cached for performance.
 
     Uses simplified isothermal atmosphere model.

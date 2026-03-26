@@ -46,9 +46,7 @@ class TestCatmullRomSmooth:
 
     def test_zero_n_sub_raises(self) -> None:
         with pytest.raises(AssertionError):
-            catmull_rom_smooth(
-                [(0.0, 0.0), (1.0, 1.0), (2.0, 0.0), (3.0, 1.0)], n_sub=0
-            )
+            catmull_rom_smooth([(0.0, 0.0), (1.0, 1.0), (2.0, 0.0), (3.0, 1.0)], n_sub=0)
 
     def test_straight_line_stays_straight(self) -> None:
         # For a straight line, Catmull-Rom should stay on the line

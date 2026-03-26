@@ -31,9 +31,7 @@ def _make_swing_mixin(n: int = 200, n_joints: int = 4) -> object:
     obj.compute_range_of_motion = SwingMetricsMixin.compute_range_of_motion.__get__(obj)
     obj.compute_tempo = SwingMetricsMixin.compute_tempo.__get__(obj)
     obj.compute_x_factor = SwingMetricsMixin.compute_x_factor.__get__(obj)
-    obj.compute_x_factor_stretch = SwingMetricsMixin.compute_x_factor_stretch.__get__(
-        obj
-    )
+    obj.compute_x_factor_stretch = SwingMetricsMixin.compute_x_factor_stretch.__get__(obj)
     return obj
 
 
@@ -53,9 +51,7 @@ def _make_phase_mixin(n: int = 200) -> object:
     obj._smooth_speed = PhaseDetectionMixin._smooth_speed
     obj._find_key_events = PhaseDetectionMixin._find_key_events
     obj._build_phase_definitions = PhaseDetectionMixin._build_phase_definitions
-    obj._create_phases_from_definitions = (
-        PhaseDetectionMixin._create_phases_from_definitions
-    )
+    obj._create_phases_from_definitions = PhaseDetectionMixin._create_phases_from_definitions
     return obj
 
 

@@ -86,9 +86,7 @@ class IndexedAcceleration:
 
         # Choose tolerance based on magnitude (heuristic for joint vs task space)
         tolerance = (
-            atol_task_space
-            if np.mean(np.abs(measured_acceleration)) > 1.0
-            else atol_joint_space
+            atol_task_space if np.mean(np.abs(measured_acceleration)) > 1.0 else atol_joint_space
         )
 
         if max_error > tolerance:
@@ -132,12 +130,8 @@ class IndexedAcceleration:
         return {
             "gravity": float(100.0 * np.linalg.norm(self.gravity) / total_magnitude),
             "coriolis": float(100.0 * np.linalg.norm(self.coriolis) / total_magnitude),
-            "applied_torque": float(
-                100.0 * np.linalg.norm(self.applied_torque) / total_magnitude
-            ),
-            "constraint": float(
-                100.0 * np.linalg.norm(self.constraint) / total_magnitude
-            ),
+            "applied_torque": float(100.0 * np.linalg.norm(self.applied_torque) / total_magnitude),
+            "constraint": float(100.0 * np.linalg.norm(self.constraint) / total_magnitude),
             "external": float(100.0 * np.linalg.norm(self.external) / total_magnitude),
         }
 

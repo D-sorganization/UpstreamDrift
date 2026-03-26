@@ -43,9 +43,7 @@ class TestDashboardModulesDoNotEagerlyImportEngines:
     """Importing dashboard modules must not pull in heavy engine packages."""
 
     @pytest.mark.parametrize("dashboard_module", _DASHBOARD_MODULES)
-    def test_importing_dashboard_does_not_load_engine_packages(
-        self, dashboard_module: str
-    ) -> None:
+    def test_importing_dashboard_does_not_load_engine_packages(self, dashboard_module: str) -> None:
         """Importing a dashboard module must not trigger engine package imports."""
         # Remove the module (and any cached import) so we get a fresh import
         sys.modules.pop(dashboard_module, None)
@@ -88,6 +86,6 @@ class TestDashboardModulesHaveCallableMain:
     @pytest.mark.parametrize("dashboard_module", _DASHBOARD_MODULES)
     def test_main_is_callable(self, dashboard_module: str) -> None:
         mod = importlib.import_module(dashboard_module)
-        assert callable(getattr(mod, "main", None)), (
-            f"{dashboard_module} does not expose a callable main()"
-        )
+        assert callable(
+            getattr(mod, "main", None)
+        ), f"{dashboard_module} does not expose a callable main()"

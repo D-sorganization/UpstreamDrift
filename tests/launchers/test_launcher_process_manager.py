@@ -81,9 +81,7 @@ def test_write_log_line(mock_open_file, mock_datetime, manager):
     mock_datetime.datetime.now.return_value.strftime.return_value = "2023"
     manager._write_log_line("TestApp", "Hello")
 
-    mock_open_file.assert_called_once_with(
-        manager._log_file_path, "a", encoding="utf-8"
-    )
+    mock_open_file.assert_called_once_with(manager._log_file_path, "a", encoding="utf-8")
     mock_open_file().write.assert_called_once_with("[2023] [TestApp] Hello\n")
 
 
@@ -156,9 +154,7 @@ def test_launch_script_unified(mock_secure_popen, mock_validate, manager):
 @patch(_VALIDATE_SCRIPT)
 @patch("subprocess.Popen")
 @patch(_SECURE_POPEN)
-def test_launch_script_separate_term(
-    mock_secure_popen, mock_popen, mock_validate, manager
-):
+def test_launch_script_separate_term(mock_secure_popen, mock_popen, mock_validate, manager):
     manager.use_separate_terminals = True
 
     # Use PosixPath so Path() construction succeeds on Linux even when
@@ -225,9 +221,7 @@ def test_launch_in_wsl(mock_popen, manager):
 @patch("subprocess.Popen")
 def test_launch_module_in_wsl(mock_popen, manager):
     with patch("os.name", "posix"):
-        res = manager.launch_module_in_wsl(
-            "my_module", cwd=PureWindowsPath("C:\\fake\\cwd")
-        )
+        res = manager.launch_module_in_wsl("my_module", cwd=PureWindowsPath("C:\\fake\\cwd"))
         assert res is True
         mock_popen.assert_called_once()
 
@@ -335,9 +329,7 @@ def test_launch_script_keep_terminal(mock_popen, mock_validate, manager):
 @patch(_VALIDATE_SCRIPT)
 @patch(_SECURE_POPEN, side_effect=OSError("Boom"))
 def test_launch_script_oserror(mock_secure_popen, mock_validate, manager):
-    res = manager.launch_script(
-        "Test", PureWindowsPath("script.py"), PureWindowsPath(".")
-    )
+    res = manager.launch_script("Test", PureWindowsPath("script.py"), PureWindowsPath("."))
     assert res is None
 
 
@@ -349,9 +341,7 @@ def test_launch_module_keep_terminal(mock_popen, manager):
         patch.dict("os.environ", {}),
     ):
         # Windows separate-terminal path still uses subprocess.Popen directly
-        manager.launch_module(
-            "Test", "my_module", PureWindowsPath("."), keep_terminal_open=True
-        )
+        manager.launch_module("Test", "my_module", PureWindowsPath("."), keep_terminal_open=True)
         assert "& pause" in mock_popen.call_args[0][0]
 
 
@@ -391,9 +381,7 @@ def test_launch_module_in_wsl_oserror(mock_popen, manager):
 def test_cleanup_processes_fallback(mock_kill, manager):
     mock_proc = MagicMock()
     mock_proc.poll.return_value = None
-    mock_proc.wait.side_effect = __import__("subprocess").TimeoutExpired(
-        cmd="", timeout=5
-    )
+    mock_proc.wait.side_effect = __import__("subprocess").TimeoutExpired(cmd="", timeout=5)
 
     manager.running_processes = {"proc": mock_proc}
     mock_kill.return_value = False  # Trigger fallback
@@ -577,16 +565,12 @@ def test_launch_module_separate_terminals(mock_popen, mock_secure_popen, manager
 
     with patch("src.launchers.launcher_process_manager.os.name", "nt"):
         # Windows separate-terminal path still uses subprocess.Popen directly
-        manager.launch_module(
-            "Test", "my_module", PureWindowsPath("."), keep_terminal_open=False
-        )
+        manager.launch_module("Test", "my_module", PureWindowsPath("."), keep_terminal_open=False)
         assert "cmd /c" in mock_popen.call_args[0][0]
 
     with patch("os.name", "posix"):
         # Non-Windows separate-terminal path uses secure_popen
-        manager.launch_module(
-            "Test", "my_module", PureWindowsPath("."), keep_terminal_open=False
-        )
+        manager.launch_module("Test", "my_module", PureWindowsPath("."), keep_terminal_open=False)
         cmd_arg = mock_secure_popen.call_args[0][0]
         assert cmd_arg[1] == "-m"
 

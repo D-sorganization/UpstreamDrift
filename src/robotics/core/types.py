@@ -117,9 +117,7 @@ class ContactState:
     def __post_init__(self) -> None:
         """Validate invariants after construction."""
         # Convert to numpy arrays if needed (for frozen dataclass)
-        object.__setattr__(
-            self, "position", np.asarray(self.position, dtype=np.float64)
-        )
+        object.__setattr__(self, "position", np.asarray(self.position, dtype=np.float64))
         object.__setattr__(self, "normal", np.asarray(self.normal, dtype=np.float64))
         object.__setattr__(
             self, "friction_force", np.asarray(self.friction_force, dtype=np.float64)
@@ -131,9 +129,7 @@ class ContactState:
         if self.normal.shape != (3,):
             raise ValueError(f"normal must be (3,), got {self.normal.shape}")
         if self.friction_force.shape != (3,):
-            raise ValueError(
-                f"friction_force must be (3,), got {self.friction_force.shape}"
-            )
+            raise ValueError(f"friction_force must be (3,), got {self.friction_force.shape}")
 
         # Validate values
         if self.penetration < 0:
@@ -141,9 +137,7 @@ class ContactState:
         if self.normal_force < 0:
             raise ValueError(f"normal_force must be >= 0, got {self.normal_force}")
         if self.friction_coefficient < 0:
-            raise ValueError(
-                f"friction_coefficient must be >= 0, got {self.friction_coefficient}"
-            )
+            raise ValueError(f"friction_coefficient must be >= 0, got {self.friction_coefficient}")
 
         # Normalize normal vector
         norm = np.linalg.norm(self.normal)
@@ -200,9 +194,7 @@ class ContactState:
             penetration=self.penetration,
             normal_force=normal_force,
             friction_force=(
-                friction_force.copy()
-                if friction_force is not None
-                else self.friction_force.copy()
+                friction_force.copy() if friction_force is not None else self.friction_force.copy()
             ),
             friction_coefficient=self.friction_coefficient,
             contact_type=self.contact_type,
@@ -241,15 +233,11 @@ class TaskDescriptor:
 
     def __post_init__(self) -> None:
         """Validate task descriptor."""
-        object.__setattr__(
-            self, "jacobian", np.asarray(self.jacobian, dtype=np.float64)
-        )
+        object.__setattr__(self, "jacobian", np.asarray(self.jacobian, dtype=np.float64))
         object.__setattr__(self, "target", np.asarray(self.target, dtype=np.float64))
 
         if self.weight is not None:
-            object.__setattr__(
-                self, "weight", np.asarray(self.weight, dtype=np.float64)
-            )
+            object.__setattr__(self, "weight", np.asarray(self.weight, dtype=np.float64))
 
         # Validate dimensions
         if self.jacobian.ndim != 2:
@@ -258,8 +246,7 @@ class TaskDescriptor:
         task_dim = self.jacobian.shape[0]
         if self.target.shape != (task_dim,):
             raise ValueError(
-                f"target shape {self.target.shape} doesn't match "
-                f"jacobian rows {task_dim}"
+                f"target shape {self.target.shape} doesn't match " f"jacobian rows {task_dim}"
             )
 
     @property
@@ -293,12 +280,8 @@ class FootstepTarget:
 
     def __post_init__(self) -> None:
         """Validate footstep target."""
-        object.__setattr__(
-            self, "position", np.asarray(self.position, dtype=np.float64)
-        )
-        object.__setattr__(
-            self, "orientation", np.asarray(self.orientation, dtype=np.float64)
-        )
+        object.__setattr__(self, "position", np.asarray(self.position, dtype=np.float64))
+        object.__setattr__(self, "orientation", np.asarray(self.orientation, dtype=np.float64))
 
         if self.position.shape != (3,):
             raise ValueError(f"position must be (3,), got {self.position.shape}")
@@ -433,13 +416,10 @@ class IMUReading(SensorReading):
 
         if self.linear_acceleration.shape != (3,):
             raise ValueError(
-                f"linear_acceleration must be (3,), "
-                f"got {self.linear_acceleration.shape}"
+                f"linear_acceleration must be (3,), " f"got {self.linear_acceleration.shape}"
             )
         if self.angular_velocity.shape != (3,):
-            raise ValueError(
-                f"angular_velocity must be (3,), got {self.angular_velocity.shape}"
-            )
+            raise ValueError(f"angular_velocity must be (3,), got {self.angular_velocity.shape}")
 
         if self.orientation is not None:
             object.__setattr__(
@@ -448,6 +428,4 @@ class IMUReading(SensorReading):
                 np.asarray(self.orientation, dtype=np.float64),
             )
             if self.orientation.shape != (4,):
-                raise ValueError(
-                    f"orientation must be (4,), got {self.orientation.shape}"
-                )
+                raise ValueError(f"orientation must be (4,), got {self.orientation.shape}")

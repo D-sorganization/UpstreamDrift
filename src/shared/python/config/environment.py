@@ -29,6 +29,7 @@ Usage:
 
 from __future__ import annotations
 
+import functools
 import os
 from typing import TypeVar
 
@@ -287,6 +288,7 @@ def get_env_list(
     return items
 
 
+@functools.cache
 def get_environment() -> str:
     """Get the current deployment environment.
 
@@ -410,10 +412,7 @@ def get_api_port(default: int = 8000) -> int:
     Returns:
         Port number.
     """
-    return (
-        get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
-        or default
-    )
+    return get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535) or default
 
 
 def get_log_level(default: str = "INFO") -> str:
@@ -451,6 +450,7 @@ def require_env(name: str) -> str:
     return result
 
 
+@functools.cache
 def is_docker() -> bool:
     """Check if running inside a Docker container.
 
@@ -465,6 +465,7 @@ def is_docker() -> bool:
     )
 
 
+@functools.cache
 def is_wsl() -> bool:
     """Check if running in Windows Subsystem for Linux (WSL).
 
@@ -494,10 +495,7 @@ def get_golf_port(default: int = 8000) -> int:
     Returns:
         Port number.
     """
-    return (
-        get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
-        or default
-    )
+    return get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535) or default
 
 
 def get_golf_suite_mode(default: str = "local") -> str:
@@ -521,9 +519,7 @@ def is_auth_disabled() -> bool:
     Returns:
         True if authentication checks should be skipped.
     """
-    return get_golf_suite_mode() == "local" or get_env_bool(
-        "GOLF_AUTH_DISABLED", default=False
-    )
+    return get_golf_suite_mode() == "local" or get_env_bool("GOLF_AUTH_DISABLED", default=False)
 
 
 def get_golf_ui_dist() -> str | None:

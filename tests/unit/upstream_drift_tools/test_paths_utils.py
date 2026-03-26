@@ -25,9 +25,7 @@ class TestGetRepoRoot:
     def test_returned_path_has_pyproject_toml(self) -> None:
         root = get_repo_root()
         # The repo root should have one of the marker files
-        has_marker = any(
-            (root / m).exists() for m in (".git", "pyproject.toml", "tools.json")
-        )
+        has_marker = any((root / m).exists() for m in (".git", "pyproject.toml", "tools.json"))
         assert has_marker
 
     def test_explicit_start_path_from_repo_subdir(self) -> None:

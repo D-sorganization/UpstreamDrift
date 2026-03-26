@@ -122,9 +122,7 @@ class TestAnalysisRequestPreconditions:
     def test_valid_export_format(self) -> None:
         """All valid export formats are accepted."""
         for fmt in VALID_EXPORT_FORMATS:
-            req = AnalysisRequest(
-                analysis_type="kinematics", data_source="sim", export_format=fmt
-            )
+            req = AnalysisRequest(analysis_type="kinematics", data_source="sim", export_format=fmt)
             assert req.export_format == fmt
 
     def test_invalid_export_format_rejected(self) -> None:
@@ -250,6 +248,4 @@ class TestRegistryModelConsistency:
         for vt in VALID_ENGINE_TYPES:
             if vt in aliases:
                 continue
-            assert vt in registry_values, (
-                f"'{vt}' in VALID_ENGINE_TYPES but not in EngineType enum"
-            )
+            assert vt in registry_values, f"'{vt}' in VALID_ENGINE_TYPES but not in EngineType enum"

@@ -49,15 +49,11 @@ def get_repo_root() -> Path:
         else:
             if pyproject_candidate is not None:
                 _path_cache["repo_root"] = pyproject_candidate
-                logger.debug(
-                    f"Repository root (via pyproject.toml): {_path_cache['repo_root']}"
-                )
+                logger.debug(f"Repository root (via pyproject.toml): {_path_cache['repo_root']}")
             else:
                 # Fallback: assume standard structure
                 _path_cache["repo_root"] = Path(__file__).resolve().parents[3]
-                logger.warning(
-                    f"Could not find .git, using fallback: {_path_cache['repo_root']}"
-                )
+                logger.warning(f"Could not find .git, using fallback: {_path_cache['repo_root']}")
 
     return _path_cache["repo_root"]  # type: ignore[return-value]
 
@@ -283,14 +279,7 @@ def get_simscape_model_path(model_name: str = "3D_Golf_Model") -> Path:
         simscape_path = get_simscape_model_path()
         custom_path = get_simscape_model_path("Custom_Model")
     """
-    return (
-        get_src_root()
-        / "engines"
-        / "Simscape_Multibody_Models"
-        / model_name
-        / "python"
-        / "src"
-    )
+    return get_src_root() / "engines" / "Simscape_Multibody_Models" / model_name / "python" / "src"
 
 
 def get_pinocchio_python_root() -> Path:

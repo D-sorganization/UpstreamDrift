@@ -164,9 +164,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
     def _setup_stats_label(self) -> None:
         """Create the statistics display label."""
-        self.lbl_stats = QtWidgets.QLabel(
-            "Mean: 0.00 | Std: 0.00 | Min: 0.00 | Max: 0.00"
-        )
+        self.lbl_stats = QtWidgets.QLabel("Mean: 0.00 | Std: 0.00 | Min: 0.00 | Max: 0.00")
         self.lbl_stats.setStyleSheet("font-family: monospace;")
         self._main_layout.addWidget(self.lbl_stats)
 
@@ -207,9 +205,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.chk_compute.setToolTip(
             "Enable real-time computation for advanced metrics (ZTCF, etc). May affect performance."
         )
-        self.chk_compute.setStatusTip(
-            "Enable or disable real-time computation of advanced metrics"
-        )
+        self.chk_compute.setStatusTip("Enable or disable real-time computation of advanced metrics")
         self.chk_compute.stateChanged.connect(self.toggle_computation)
 
     def _setup_comparison_controls(self, layout: QtWidgets.QHBoxLayout) -> None:
@@ -305,9 +301,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             raise ValueError("layout must be provided")
         self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
         self.btn_snapshot.setToolTip("Copy current plot to clipboard")
-        self.btn_snapshot.setStatusTip(
-            "Capture the current plot image to the clipboard"
-        )
+        self.btn_snapshot.setStatusTip("Capture the current plot image to the clipboard")
         self.btn_snapshot.setAccessibleName("Snapshot Button")
         self.btn_snapshot.clicked.connect(self.copy_snapshot)
         layout.addWidget(self.btn_snapshot)
@@ -341,9 +335,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Try to get joint names from the engine
         joint_names = []
-        if hasattr(self.recorder, "engine") and hasattr(
-            self.recorder.engine, "get_joint_names"
-        ):
+        if hasattr(self.recorder, "engine") and hasattr(self.recorder.engine, "get_joint_names"):
             try:
                 joint_names = self.recorder.engine.get_joint_names()
             except (ValueError, RuntimeError, AttributeError):
@@ -739,9 +731,7 @@ class LivePlotWidget(QtWidgets.QWidget):
                 label = (
                     dim_label
                     if n_dims == 1
-                    else f"{dim_label} {i}"
-                    if plot_mode != "Norm"
-                    else "Norm"
+                    else f"{dim_label} {i}" if plot_mode != "Norm" else "Norm"
                 )
                 if plot_mode == "All Dimensions":
                     label = f"Dim {i}"
@@ -790,11 +780,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             self.ax2.clear()
             self.line_objects2 = []
             for i in range(n_dims2):
-                label2 = (
-                    f"{self.comparison_label} {i}"
-                    if n_dims2 > 1
-                    else self.comparison_label
-                )
+                label2 = f"{self.comparison_label} {i}" if n_dims2 > 1 else self.comparison_label
                 if plot_mode == "Single Dimension":
                     label2 = f"{self.comparison_label} {dim_label2}"
                 elif plot_mode == "Norm":
@@ -931,9 +917,7 @@ class ControlPanel(QtWidgets.QGroupBox):
             return
 
         self.btn_start = QtWidgets.QPushButton("Start")
-        self.btn_start.setIcon(
-            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
-        )
+        self.btn_start.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay))
         self.btn_start.setToolTip("Start simulation playback (Ctrl+R)")
         self.btn_start.setShortcut(QtGui.QKeySequence("Ctrl+R"))
         self.btn_start.setStatusTip("Start the simulation")
@@ -941,9 +925,7 @@ class ControlPanel(QtWidgets.QGroupBox):
         layout.addWidget(self.btn_start)
 
         self.btn_pause = QtWidgets.QPushButton("Pause")
-        self.btn_pause.setIcon(
-            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause)
-        )
+        self.btn_pause.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause))
         self.btn_pause.setToolTip("Pause/Resume simulation (Space)")
         self.btn_pause.setShortcut(QtGui.QKeySequence("Space"))
         self.btn_pause.setStatusTip("Pause or resume the simulation")
@@ -952,9 +934,7 @@ class ControlPanel(QtWidgets.QGroupBox):
         layout.addWidget(self.btn_pause)
 
         self.btn_stop = QtWidgets.QPushButton("Stop")
-        self.btn_stop.setIcon(
-            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
-        )
+        self.btn_stop.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop))
         self.btn_stop.setToolTip("Stop simulation (S)")
         self.btn_stop.setStatusTip("Stop the simulation and reset time")
         self.btn_stop.setShortcut("S")
@@ -962,9 +942,7 @@ class ControlPanel(QtWidgets.QGroupBox):
         layout.addWidget(self.btn_stop)
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
-        self.btn_reset.setIcon(
-            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
-        )
+        self.btn_reset.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload))
         self.btn_reset.setToolTip("Reset simulation (R)")
         self.btn_reset.setStatusTip("Reset the simulation to initial state")
         self.btn_reset.setShortcut("R")
@@ -972,7 +950,5 @@ class ControlPanel(QtWidgets.QGroupBox):
         layout.addWidget(self.btn_reset)
 
         # Space shortcut for toggle playback (Start/Pause)
-        self.shortcut_space = QtGui.QShortcut(
-            QtGui.QKeySequence(QtCore.Qt.Key.Key_Space), self
-        )
+        self.shortcut_space = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Space), self)
         self.shortcut_space.activated.connect(self.toggle_playback_requested.emit)

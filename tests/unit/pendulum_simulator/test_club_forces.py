@@ -88,9 +88,7 @@ class TestEquivalentCouple:
         assert result == pytest.approx(5.0)
 
     def test_returns_float(self) -> None:
-        result = equivalent_couple(
-            np.zeros(2), np.zeros(2), np.zeros(2), np.zeros(2), np.zeros(2)
-        )
+        result = equivalent_couple(np.zeros(2), np.zeros(2), np.zeros(2), np.zeros(2), np.zeros(2))
         assert isinstance(result, float)
 
     def test_zero_forces_zero_couple(self) -> None:

@@ -133,9 +133,7 @@ def main():
     critical_gaps = load_completist_data()
 
     scores = calculate_scores(general_data, critical_gaps, pragmatic_issues)
-    recommendations = generate_recommendations(
-        general_data, critical_gaps, pragmatic_issues
-    )
+    recommendations = generate_recommendations(general_data, critical_gaps, pragmatic_issues)
 
     # Generate Markdown
     md = [
@@ -161,9 +159,7 @@ def main():
 
     # Append General Assessment Summary
     md.append("### General Assessment (Categories A-O)")
-    md.append(
-        "See individual `docs/assessments/Assessment_X_Category.md` files for details."
-    )
+    md.append("See individual `docs/assessments/Assessment_X_Category.md` files for details.")
     md.append("")
 
     # Reconstruct the table from general data
@@ -178,9 +174,7 @@ def main():
     # Append Completist Details
     md.append("### Completist Audit")
     md.append(f"- **Critical Gaps**: {critical_gaps}")
-    md.append(
-        "- See `docs/assessments/completist/COMPLETIST_LATEST.md` for full report."
-    )
+    md.append("- See `docs/assessments/completist/COMPLETIST_LATEST.md` for full report.")
     md.append("")
 
     # Append Pragmatic Details

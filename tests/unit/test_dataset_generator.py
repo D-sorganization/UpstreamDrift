@@ -79,9 +79,7 @@ class TestParameterRange:
     def test_uniform_sampling(self) -> None:
         """Postcondition: sampled values are within range."""
         rng = np.random.default_rng(42)
-        pr = ParameterRange(
-            name="test", min_val=-1.0, max_val=1.0, distribution="uniform"
-        )
+        pr = ParameterRange(name="test", min_val=-1.0, max_val=1.0, distribution="uniform")
         for _ in range(100):
             val = pr.sample(rng)
             assert -1.0 <= val <= 1.0
@@ -89,9 +87,7 @@ class TestParameterRange:
     def test_normal_sampling_clipped(self) -> None:
         """Postcondition: normal samples are clipped to range."""
         rng = np.random.default_rng(42)
-        pr = ParameterRange(
-            name="test", min_val=0.0, max_val=1.0, distribution="normal"
-        )
+        pr = ParameterRange(name="test", min_val=0.0, max_val=1.0, distribution="normal")
         for _ in range(100):
             val = pr.sample(rng)
             assert 0.0 <= val <= 1.0
@@ -281,9 +277,7 @@ class TestDatasetGenerator:
         for s1, s2 in zip(dataset1.samples, dataset2.samples, strict=True):
             np.testing.assert_array_almost_equal(s1.positions, s2.positions)
 
-    def test_generate_with_position_variation(
-        self, generator: DatasetGenerator
-    ) -> None:
+    def test_generate_with_position_variation(self, generator: DatasetGenerator) -> None:
         """Test that initial positions are varied between samples."""
         config = GeneratorConfig(
             num_samples=5,
@@ -296,9 +290,7 @@ class TestDatasetGenerator:
         # Check that initial positions differ between samples
         initial_positions = [s.positions[0] for s in dataset.samples]
         # At least some should differ
-        all_same = all(
-            np.allclose(initial_positions[0], ip) for ip in initial_positions[1:]
-        )
+        all_same = all(np.allclose(initial_positions[0], ip) for ip in initial_positions[1:])
         assert not all_same, "Expected varied initial positions"
 
     def test_generate_with_custom_ranges(self, generator: DatasetGenerator) -> None:
@@ -318,9 +310,7 @@ class TestDatasetGenerator:
             q0 = sample.positions[0]
             assert np.all(np.abs(q0) <= 0.1 + 1e-10)
 
-    def test_generate_with_multiple_control_profiles(
-        self, generator: DatasetGenerator
-    ) -> None:
+    def test_generate_with_multiple_control_profiles(self, generator: DatasetGenerator) -> None:
         """Test generation with multiple control profiles."""
         config = GeneratorConfig(
             num_samples=5,
@@ -328,9 +318,7 @@ class TestDatasetGenerator:
             timestep=0.01,
             control_profiles=[
                 ControlProfile(name="zero"),
-                ControlProfile(
-                    name="rand", profile_type="random", parameters={"scale": 0.5}
-                ),
+                ControlProfile(name="rand", profile_type="random", parameters={"scale": 0.5}),
             ],
         )
         dataset = generator.generate(config)

@@ -50,9 +50,7 @@ class PinocchioSwingPlaneAnalyzer:
         if len(positions) < 3:
             raise ValueError("At least 3 positions required for plane analysis")
 
-        self.logger.info(
-            f"Analyzing swing plane from {len(positions)} trajectory points"
-        )
+        self.logger.info(f"Analyzing swing plane from {len(positions)} trajectory points")
 
         # Use shared analyzer
         metrics = self.analyzer.analyze(positions)

@@ -46,8 +46,7 @@ class EnergyValidationResult:
     def __str__(self) -> str:
         status = "PASS" if self.passes else "FAIL"
         return (
-            f"Energy Conservation [{status}]: "
-            f"Error={self.relative_error:.2e} (threshold=1e-3)"
+            f"Energy Conservation [{status}]: " f"Error={self.relative_error:.2e} (threshold=1e-3)"
         )
 
 
@@ -63,8 +62,7 @@ class JacobianValidationResult:
     def __str__(self) -> str:
         status = "PASS" if self.passes else "FAIL"
         return (
-            f"Jacobian Validation [{status}]: "
-            f"Error={self.jacobian_error:.2e} (threshold=1e-06)"
+            f"Jacobian Validation [{status}]: " f"Error={self.jacobian_error:.2e} (threshold=1e-06)"
         )
 
 
@@ -109,8 +107,7 @@ class PhysicsValidator:
             import mujoco
         except ImportError as e:
             raise ImportError(
-                "MuJoCo is required for physics validation. "
-                "Install with: pip install mujoco"
+                "MuJoCo is required for physics validation. " "Install with: pip install mujoco"
             ) from e
 
         self.model = model
@@ -141,9 +138,7 @@ class PhysicsValidator:
         self._mujoco.mj_forward(self.model, self._scratch_data)
 
         # Prefer MuJoCo-native energy computation when available.
-        if hasattr(self._mujoco, "mj_energyPos") and hasattr(
-            self._mujoco, "mj_energyVel"
-        ):
+        if hasattr(self._mujoco, "mj_energyPos") and hasattr(self._mujoco, "mj_energyVel"):
             self._mujoco.mj_energyPos(self.model, self._scratch_data)
             self._mujoco.mj_energyVel(self.model, self._scratch_data)
             kinetic_energy = float(self._scratch_data.energy[1])
@@ -285,9 +280,7 @@ class PhysicsValidator:
         if common_dofs == 0:
             work_applied = 0.0
         else:
-            work_applied = float(
-                np.dot(torques[:common_dofs], qvel_avg[:common_dofs]) * dt
-            )
+            work_applied = float(np.dot(torques[:common_dofs], qvel_avg[:common_dofs]) * dt)
 
         # Energy balance
         dE = E_next - E_t

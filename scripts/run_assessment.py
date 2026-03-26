@@ -53,9 +53,7 @@ def _assess_hygiene() -> tuple[list[str], int]:
         f"- Ruff check: {_CHECK + ' passed' if ruff['exit_code'] == 0 else _CROSS + ' issues found'}",
         f"- Black formatting: {_CHECK + ' formatted' if black['exit_code'] == 0 else _CROSS + ' needs formatting'}",
     ]
-    penalty = (0 if ruff["exit_code"] == 0 else 2) + (
-        0 if black["exit_code"] == 0 else 1
-    )
+    penalty = (0 if ruff["exit_code"] == 0 else 2) + (0 if black["exit_code"] == 0 else 1)
     return findings, 10 - penalty
 
 
@@ -93,18 +91,19 @@ def _assess_unsupported(py_files: list) -> tuple[list[str], int | None]:
     return findings, None
 
 
-def _format_report(
-    assessment_id: str, name: str, findings: list[str], score: int | None
-) -> str:
+def _format_report(assessment_id: str, name: str, findings: list[str], score: int | None) -> str:
     """Format an assessment report as markdown."""
-    if not (isinstance(assessment_id):
-        raise ValueError(str), "assessment_id must be a string")
-    if not (isinstance(name):
-        raise ValueError(str), "name must be a string")
-    if not (isinstance(findings):
-        raise ValueError(list), "findings must be a list")
-    if not (score is None or isinstance(score):
-        raise ValueError(int), "score must be None or an int")
+    if not isinstance(assessment_id, str):
+
+        raise ValueError("assessment_id must be a string")
+    if not isinstance(name, str):
+
+        raise ValueError("name must be a string")
+    if not isinstance(findings, list):
+
+        raise ValueError("findings must be a list")
+    if not (score is None or isinstance(score, int)):
+        raise ValueError("score must be None or an int")
 
     if score is not None:
         score = max(0, min(10, score))
@@ -126,10 +125,12 @@ def _format_report(
 
 def run_assessment(assessment_id: str, output_path: Path) -> int:
     """Run a specific assessment and generate report."""
-    if not (isinstance(assessment_id):
-        raise ValueError(str), "assessment_id must be a string")
-    if not (isinstance(output_path):
-        raise ValueError(Path), "output_path must be a Path object")
+    if not isinstance(assessment_id, str):
+
+        raise ValueError("assessment_id must be a string")
+    if not isinstance(output_path, Path):
+
+        raise ValueError("output_path must be a Path object")
 
     assessment = ASSESSMENTS.get(
         assessment_id, {"name": "General", "description": "Manual review required"}

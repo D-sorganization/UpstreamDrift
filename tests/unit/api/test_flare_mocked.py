@@ -24,9 +24,7 @@ client = TestClient(_app)
 @pytest.fixture
 def mock_calculator():
     """Mock the FlareCalculator securely from Tools."""
-    with patch(
-        "upstream_drift_tools.process_calculators.FlareCalculator"
-    ) as mock_class:
+    with patch("upstream_drift_tools.process_calculators.FlareCalculator") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
         yield mock_instance
@@ -76,9 +74,7 @@ def test_calculate_flare_success(mock_calculator) -> None:
 
 def test_calculate_flare_error_handling(mock_calculator) -> None:
     """Verify that arithmetic errors gracefully map to 422 errors through the router boundary."""
-    mock_calculator.calculate_flare_size.side_effect = ValueError(
-        "Flow must be positive"
-    )
+    mock_calculator.calculate_flare_size.side_effect = ValueError("Flow must be positive")
 
     payload = {
         "total_flow_kg_hr": 2000.0,

@@ -80,9 +80,7 @@ class TestSeriesExpansion:
             assert result.radius_of_convergence > 0
 
     def test_analyze_convergence_sin(self, se: SeriesExpansion) -> None:
-        analysis = se.analyze_convergence(
-            np.sin, center=0.0, x_test=1.0, tolerance=1e-6
-        )
+        analysis = se.analyze_convergence(np.sin, center=0.0, x_test=1.0, tolerance=1e-6)
         assert "convergent" in analysis
         assert "errors_by_term" in analysis
         assert len(analysis["errors_by_term"]) > 0

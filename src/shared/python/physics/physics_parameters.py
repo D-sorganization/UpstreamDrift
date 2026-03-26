@@ -346,9 +346,7 @@ class PhysicsParameterRegistry:
         Returns:
             List of parameters in category
         """
-        return [
-            param for param in self.parameters.values() if param.category == category
-        ]
+        return [param for param in self.parameters.values() if param.category == category]
 
     def get_all_categories(self) -> list[ParameterCategory]:
         """Get all parameter categories.
@@ -464,8 +462,8 @@ def get_parameter_registry() -> PhysicsParameterRegistry:
         _registry_holder["instance"] = PhysicsParameterRegistry()
 
     registry = _registry_holder["instance"]
-    if not (registry is not None  # Ensure it is not None for mypy):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    if not (registry is not None):  # Ensure it is not None for mypy
+        raise ValueError("DbC Blocked: Precondition failed.")
     return registry
 
 

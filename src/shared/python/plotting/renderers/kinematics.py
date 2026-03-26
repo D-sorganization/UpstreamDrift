@@ -298,9 +298,7 @@ class KinematicsRenderer(BaseRenderer):
             raise ValueError("fig must be provided")
         if len(dimensions) != 3:
             ax = fig.add_subplot(111)
-            ax.text(
-                0.5, 0.5, "Must specify exactly 3 dimensions", ha="center", va="center"
-            )
+            ax.text(0.5, 0.5, "Must specify exactly 3 dimensions", ha="center", va="center")
             return
 
         cond_type, cond_idx, cond_val = section_condition
@@ -454,11 +452,7 @@ class KinematicsRenderer(BaseRenderer):
             unit = (
                 "deg"
                 if dt == "position"
-                else "deg/s"
-                if dt == "velocity"
-                else "Nm"
-                if dt == "torque"
-                else ""
+                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
             )
             labels.append(f"{name} {dt[:3]} ({unit})")
 
@@ -499,9 +493,7 @@ class KinematicsRenderer(BaseRenderer):
         return times, np.asarray(data_full)
 
     @staticmethod
-    def _build_delay_embedding(
-        x: np.ndarray, delay: int, embedding_dim: int
-    ) -> np.ndarray:
+    def _build_delay_embedding(x: np.ndarray, delay: int, embedding_dim: int) -> np.ndarray:
         """Construct time-delay embedding vectors from a 1D signal.
 
         Args:
@@ -590,9 +582,7 @@ class KinematicsRenderer(BaseRenderer):
                 s=10,
                 alpha=0.6,
             )
-            ax.plot(
-                vectors[:, 0], vectors[:, 1], color="gray", alpha=0.2, linewidth=0.5
-            )
+            ax.plot(vectors[:, 0], vectors[:, 1], color="gray", alpha=0.2, linewidth=0.5)
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
 

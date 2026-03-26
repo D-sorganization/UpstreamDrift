@@ -309,9 +309,7 @@ class TestBallRollPhysics:
             spin=np.zeros(3),
         )
 
-        trajectory = physics_with_green.simulate_putt(
-            initial_state, max_time=30.0, dt=0.01
-        )
+        trajectory = physics_with_green.simulate_putt(initial_state, max_time=30.0, dt=0.01)
 
         # Should have trajectory data
         assert len(trajectory["positions"]) > 1

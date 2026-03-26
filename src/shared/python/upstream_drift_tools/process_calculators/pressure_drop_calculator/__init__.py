@@ -238,19 +238,13 @@ class PressureDropCalculator:
         if not (pipe_diameter_m is not None):
             raise ValueError("pipe_diameter_m must be provided")
         Z = 1.0
-        density = (pressure_pa * molecular_weight_kg_mol) / (
-            Z * R_UNIVERSAL * temperature_k
-        )
+        density = (pressure_pa * molecular_weight_kg_mol) / (Z * R_UNIVERSAL * temperature_k)
 
         # Estimate viscosity using Sutherland's formula
         T_ref = 291.15  # K
         mu_ref = 1.827e-5  # Pa·s
         S = 120  # K
-        viscosity = (
-            mu_ref
-            * ((T_ref + S) / (temperature_k + S))
-            * (temperature_k / T_ref) ** 1.5
-        )
+        viscosity = mu_ref * ((T_ref + S) / (temperature_k + S)) * (temperature_k / T_ref) ** 1.5
 
         # Calculate volumetric flow and velocity
         vol_flow = flow_rate_kg_s / density if density > 0 else 0.0
@@ -258,9 +252,7 @@ class PressureDropCalculator:
         velocity = vol_flow / area if area > 0 else 0.0
 
         # Calculate Reynolds number
-        Re = (
-            (density * velocity * pipe_diameter_m) / viscosity if viscosity > 0 else 0.0
-        )
+        Re = (density * velocity * pipe_diameter_m) / viscosity if viscosity > 0 else 0.0
 
         # Calculate friction factor
         rel_roughness = roughness_m / pipe_diameter_m if pipe_diameter_m > 0 else 0.0
@@ -281,9 +273,7 @@ class PressureDropCalculator:
         # Calculate pressure drop (Darcy-Weisbach)
         if pipe_diameter_m > 0:
             pressure_drop_pa = (
-                friction_factor
-                * (pipe_length_m / pipe_diameter_m)
-                * (density * velocity**2 / 2)
+                friction_factor * (pipe_length_m / pipe_diameter_m) * (density * velocity**2 / 2)
             )
         else:
             pressure_drop_pa = 0.0

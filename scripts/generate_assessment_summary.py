@@ -92,9 +92,7 @@ def _calculate_weighted_score(
         else:
             group_scores[group_name] = 0.0
 
-    overall_score = (
-        total_weighted_score / total_weight_used if total_weight_used > 0 else 0.0
-    )
+    overall_score = total_weighted_score / total_weight_used if total_weight_used > 0 else 0.0
     return overall_score, group_scores
 
 
@@ -125,7 +123,9 @@ Repository assessment completed across {len(scores)} categories.
     for group_name, group_info in groups.items():
         score = group_scores.get(group_name, 0.0)
         cats = ", ".join(group_info["cats"])
-        md_content += f"| **{group_name}** | {group_info['weight'] * 100:.0f}% | {score:.1f} | {cats} |\n"
+        md_content += (
+            f"| **{group_name}** | {group_info['weight'] * 100:.0f}% | {score:.1f} | {cats} |\n"
+        )
 
     md_content += """
 ### Individual Category Scores
@@ -216,8 +216,7 @@ def generate_summary(
     logger.info(f"[OK] Markdown summary saved to {output_md}")
 
     category_scores_json = {
-        code: {"score": scores.get(code, 0.0), "name": name}
-        for code, name in categories.items()
+        code: {"score": scores.get(code, 0.0), "name": name} for code, name in categories.items()
     }
     json_data = {
         "timestamp": datetime.now().isoformat(),
@@ -238,9 +237,7 @@ def generate_summary(
 def main():
     """Parse CLI arguments and generate assessment summary."""
     parser = argparse.ArgumentParser(description="Generate assessment summary")
-    parser.add_argument(
-        "--input", nargs="+", type=Path, required=True, help="Input reports"
-    )
+    parser.add_argument("--input", nargs="+", type=Path, required=True, help="Input reports")
     parser.add_argument("--output", required=True, type=Path, help="Output MD")
     parser.add_argument("--json-output", required=True, type=Path, help="Output JSON")
 

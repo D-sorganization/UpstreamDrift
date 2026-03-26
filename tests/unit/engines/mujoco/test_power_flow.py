@@ -41,9 +41,7 @@ def simple_pendulum_model() -> mujoco.MjModel:
 class TestPowerFlowBasics:
     """Test basic power flow calculations."""
 
-    def test_power_is_torque_times_velocity(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_power_is_torque_times_velocity(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test P =τ · ω."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -56,9 +54,9 @@ class TestPowerFlowBasics:
 
         # P = τ · ω = 3.0 * 2.0 = 6.0 Watts
         expected_power = 6.0
-        assert abs(result.joint_powers[0] - expected_power) < 1e-6, (
-            f"Expected power {expected_power}, got {result.joint_powers[0]}"
-        )
+        assert (
+            abs(result.joint_powers[0] - expected_power) < 1e-6
+        ), f"Expected power {expected_power}, got {result.joint_powers[0]}"
 
     @pytest.mark.parametrize(
         "tau_val,expect_positive",
@@ -82,17 +80,15 @@ class TestPowerFlowBasics:
         result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
 
         if expect_positive:
-            assert result.joint_powers[0] > 0, (
-                "Power should be positive when torque and velocity are aligned"
-            )
+            assert (
+                result.joint_powers[0] > 0
+            ), "Power should be positive when torque and velocity are aligned"
         else:
-            assert result.joint_powers[0] < 0, (
-                "Power should be negative when torque opposes velocity"
-            )
+            assert (
+                result.joint_powers[0] < 0
+            ), "Power should be negative when torque opposes velocity"
 
-    def test_zero_velocity_gives_zero_power(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_zero_velocity_gives_zero_power(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test P = 0 when velocity is zero."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -104,17 +100,13 @@ class TestPowerFlowBasics:
         result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
 
         # v = 0 → P = 0 regardless of torque
-        assert abs(result.joint_powers[0]) < 1e-10, (
-            "Power should be zero when velocity is zero"
-        )
+        assert abs(result.joint_powers[0]) < 1e-10, "Power should be zero when velocity is zero"
 
 
 class TestWorkCalculations:
     """Test work calculations and decomposition."""
 
-    def test_work_equals_power_times_time(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_work_equals_power_times_time(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test W = P · dt."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -128,13 +120,11 @@ class TestWorkCalculations:
 
         # W = P · dt = 6.0 * 0.1 = 0.6 Joules
         expected_work = 6.0 * 0.1
-        assert abs(result.joint_work_total[0] - expected_work) < 1e-6, (
-            f"Expected work {expected_work}, got {result.joint_work_total[0]}"
-        )
+        assert (
+            abs(result.joint_work_total[0] - expected_work) < 1e-6
+        ), f"Expected work {expected_work}, got {result.joint_work_total[0]}"
 
-    def test_work_decomposition_sums_to_total(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_work_decomposition_sums_to_total(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test that drift + control work equals total work."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -158,17 +148,15 @@ class TestWorkCalculations:
 
         # Work components should sum to total
         work_sum = result.joint_work_drift[0] + result.joint_work_control[0]
-        assert abs(result.joint_work_total[0] - work_sum) < 1e-6, (
-            "Drift + control work should equal total work"
-        )
+        assert (
+            abs(result.joint_work_total[0] - work_sum) < 1e-6
+        ), "Drift + control work should equal total work"
 
 
 class TestEnergyCalculations:
     """Test segment energy calculations."""
 
-    def test_kinetic_energy_at_rest_is_zero(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_kinetic_energy_at_rest_is_zero(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test KE = 0 when velocity is zero."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -211,9 +199,7 @@ class TestEnergyCalculations:
 
         # If PE is computed, higher position should have >= PE
         # Note: PE may be zero if mj_forward not called internally
-        assert pe_high >= pe_low, (
-            f"Higher position should have PE >= lower: {pe_high} vs {pe_low}"
-        )
+        assert pe_high >= pe_low, f"Higher position should have PE >= lower: {pe_high} vs {pe_low}"
 
     def test_total_mechanical_energy_is_ke_plus_pe(
         self, simple_pendulum_model: mujoco.MjModel
@@ -232,9 +218,9 @@ class TestEnergyCalculations:
         total_pe = np.sum(result.segment_potential_energy)
         expected_me = total_ke + total_pe
 
-        assert abs(result.total_mechanical_energy - expected_me) < 1e-6, (
-            "Total ME should equal KE + PE"
-        )
+        assert (
+            abs(result.total_mechanical_energy - expected_me) < 1e-6
+        ), "Total ME should equal KE + PE"
 
 
 class TestSystemPowerMetrics:
@@ -255,13 +241,11 @@ class TestSystemPowerMetrics:
 
         # Single joint with positive power
         expected_power_in = 3.0 * 2.0  # 6.0 W
-        assert abs(result.power_in - expected_power_in) < 1e-6, (
-            f"Expected power_in {expected_power_in}, got {result.power_in}"
-        )
+        assert (
+            abs(result.power_in - expected_power_in) < 1e-6
+        ), f"Expected power_in {expected_power_in}, got {result.power_in}"
 
-    def test_power_dissipation_from_damping(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_power_dissipation_from_damping(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test power dissipation calculation."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -275,17 +259,15 @@ class TestSystemPowerMetrics:
         # Damping = 0.1, velocity = 2.0
         # P_diss = b * ω² = 0.1 * 4.0 = 0.4 W
         expected_diss = 0.1 * 2.0**2
-        assert abs(result.power_dissipation - expected_diss) < 1e-6, (
-            f"Expected dissipation {expected_diss}, got {result.power_dissipation}"
-        )
+        assert (
+            abs(result.power_dissipation - expected_diss) < 1e-6
+        ), f"Expected dissipation {expected_diss}, got {result.power_dissipation}"
 
 
 class TestTrajectoryAnalysis:
     """Test trajectory-level analysis."""
 
-    def test_trajectory_analysis_length(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_trajectory_analysis_length(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test trajectory analysis returns correct number of results."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -296,9 +278,7 @@ class TestTrajectoryAnalysis:
         qacc_traj = -np.sin(times).reshape(-1, 1)
         tau_traj = np.ones((N, 1))
 
-        results = analyzer.analyze_trajectory(
-            times, qpos_traj, qvel_traj, qacc_traj, tau_traj
-        )
+        results = analyzer.analyze_trajectory(times, qpos_traj, qvel_traj, qacc_traj, tau_traj)
 
         assert len(results) == N, f"Expected {N} results, got {len(results)}"
         assert all(isinstance(r, PowerFlowResult) for r in results)
@@ -307,9 +287,7 @@ class TestTrajectoryAnalysis:
 class TestInterSegmentTransfer:
     """Test inter-segment power transfer analysis."""
 
-    def test_inter_segment_transfer_structure(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_inter_segment_transfer_structure(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test inter-segment transfer returns correct structure."""
         analyzer = PowerFlowAnalyzer(simple_pendulum_model)
 
@@ -337,10 +315,7 @@ class TestInterSegmentTransfer:
 
         # First transfer should be world body
         world_transfer = transfers[0]
-        assert (
-            world_transfer.segment_name == "world"
-            or world_transfer.parent_name == "world"
-        )
+        assert world_transfer.segment_name == "world" or world_transfer.parent_name == "world"
 
 
 @pytest.mark.integration
@@ -355,8 +330,6 @@ class TestPowerFlowPhysics:
 
         # total mechanical energy remains constant
 
-    def test_work_matches_energy_change(
-        self, simple_pendulum_model: mujoco.MjModel
-    ) -> None:
+    def test_work_matches_energy_change(self, simple_pendulum_model: mujoco.MjModel) -> None:
         """Test W = ΔE for simple case."""
         pytest.skip("Requires time integration - implement in follow-up")

@@ -89,9 +89,7 @@ class TestWorkflowStep:
         assert s.timeout == 300.0
 
     def test_custom_on_failure(self) -> None:
-        s = WorkflowStep(
-            id="s1", name="S", description="D", on_failure=RecoveryStrategy.ABORT
-        )
+        s = WorkflowStep(id="s1", name="S", description="D", on_failure=RecoveryStrategy.ABORT)
         assert s.on_failure == RecoveryStrategy.ABORT
 
 
@@ -115,9 +113,7 @@ class TestWorkflowExecution:
         )
         assert exe.get_current_step_result() is None
 
-    def test_get_current_step_result_with_results(
-        self, context: ConversationContext
-    ) -> None:
+    def test_get_current_step_result_with_results(self, context: ConversationContext) -> None:
         exe = WorkflowExecution(
             execution_id="e1",
             workflow_id="wf1",
@@ -386,9 +382,7 @@ class TestExecuteNextStep:
         result = engine.execute_next_step(exe)
         assert result.status == StepStatus.COMPLETED
 
-    def test_validation_passes(
-        self, engine: WorkflowEngine, context: ConversationContext
-    ) -> None:
+    def test_validation_passes(self, engine: WorkflowEngine, context: ConversationContext) -> None:
         wf = Workflow(id="wf3", name="WF3", description="D")
         wf.add_step(
             WorkflowStep(
@@ -447,9 +441,7 @@ class TestExecuteNextStep:
 
 
 class TestGetProgress:
-    def test_progress_at_start(
-        self, engine: WorkflowEngine, context: ConversationContext
-    ) -> None:
+    def test_progress_at_start(self, engine: WorkflowEngine, context: ConversationContext) -> None:
         wf = _make_workflow(num_steps=4)
         engine.register_workflow(wf)
         exe = engine.start_workflow("wf1", context)

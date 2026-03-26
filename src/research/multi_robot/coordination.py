@@ -294,9 +294,7 @@ class FormationController:
         total_error = 0.0
 
         leader_pos = leader_pose[:3]
-        leader_quat = (
-            leader_pose[3:7] if len(leader_pose) >= 7 else np.array([1, 0, 0, 0])
-        )
+        leader_quat = leader_pose[3:7] if len(leader_pose) >= 7 else np.array([1, 0, 0, 0])
         R = self._quat_to_rotation(leader_quat)
 
         for i, robot_id in enumerate(self.robots):
@@ -366,9 +364,7 @@ class CooperativeManipulation:
         if grasp_normals is None:
             # Default: normals pointing inward to object center
             center = np.mean(grasp_points, axis=0)
-            self._grasp_normals = [
-                (center - p) / np.linalg.norm(center - p) for p in grasp_points
-            ]
+            self._grasp_normals = [(center - p) / np.linalg.norm(center - p) for p in grasp_points]
         else:
             self._grasp_normals = grasp_normals
 
@@ -394,9 +390,7 @@ class CooperativeManipulation:
         G = np.zeros((6, 3 * n_contacts))
 
         object_pos = object_pose[:3]
-        object_quat = (
-            object_pose[3:7] if len(object_pose) >= 7 else np.array([1, 0, 0, 0])
-        )
+        object_quat = object_pose[3:7] if len(object_pose) >= 7 else np.array([1, 0, 0, 0])
 
         # Rotation matrix
         w, x, y, z = object_quat
@@ -456,13 +450,9 @@ class CooperativeManipulation:
             List of force vectors for each contact.
         """
         if not (desired_object_wrench is not None):
-            raise ValueError(()
-            "desired_object_wrench must be provided"
-        )
+            raise ValueError("desired_object_wrench must be provided")
         if not (desired_object_wrench is not None):
-            raise ValueError(()
-            "desired_object_wrench must be provided"
-        )
+            raise ValueError("desired_object_wrench must be provided")
         G = self.compute_grasp_matrix(object_pose)
         n_contacts = len(self._grasp_points)
 
@@ -513,15 +503,9 @@ class CooperativeManipulation:
         pos_end = object_goal_pose[:3]
 
         quat_start = (
-            object_current_pose[3:7]
-            if len(object_current_pose) >= 7
-            else np.array([1, 0, 0, 0])
+            object_current_pose[3:7] if len(object_current_pose) >= 7 else np.array([1, 0, 0, 0])
         )
-        quat_end = (
-            object_goal_pose[3:7]
-            if len(object_goal_pose) >= 7
-            else np.array([1, 0, 0, 0])
-        )
+        quat_end = object_goal_pose[3:7] if len(object_goal_pose) >= 7 else np.array([1, 0, 0, 0])
 
         for t in range(n_steps):
             # Smooth interpolation parameter

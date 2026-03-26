@@ -162,9 +162,7 @@ class PlotGenerator:
         self.config = config or PlotConfig()
 
         if not MATPLOTLIB_AVAILABLE:
-            logger.warning(
-                "matplotlib not available. Plot generation will be disabled."
-            )
+            logger.warning("matplotlib not available. Plot generation will be disabled.")
 
     def generate_standard_plots(
         self,
@@ -444,9 +442,7 @@ class PlotGenerator:
         fig, ax = plt.subplots(figsize=self.config.figsize)
 
         for name, energy_arr in data.energies.items():
-            if isinstance(energy_arr, np.ndarray) and len(energy_arr) == len(
-                data.times
-            ):
+            if isinstance(energy_arr, np.ndarray) and len(energy_arr) == len(data.times):
                 ax.plot(data.times, energy_arr, label=name.capitalize(), linewidth=1.0)
 
         prefix = f"{self.config.title_prefix} " if self.config.title_prefix else ""
@@ -482,9 +478,7 @@ class PlotGenerator:
             if i >= len(axes):
                 break
             ax = axes[i]
-            name = (
-                data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
-            )
+            name = data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
             ax.plot(data.positions[:, idx], data.velocities[:, idx], linewidth=0.5)
             ax.set_title(f"{name}")
             ax.set_xlabel("Position (rad)")
@@ -529,9 +523,7 @@ class PlotGenerator:
         fig, ax = plt.subplots(figsize=self.config.figsize)
         labels = ["Fx", "Fy", "Fz"]
         for i in range(min(3, data.contact_forces.shape[1])):
-            ax.plot(
-                data.times, data.contact_forces[:, i], label=labels[i], linewidth=0.8
-            )
+            ax.plot(data.times, data.contact_forces[:, i], label=labels[i], linewidth=0.8)
 
         # Plot magnitude
         magnitude = np.linalg.norm(data.contact_forces[:, :3], axis=1)
@@ -574,21 +566,15 @@ class PlotGenerator:
 
         for i, idx in enumerate(indices):
             ax = axes[i]
-            name = (
-                data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
-            )
-            ax.plot(
-                data.times, data.drift_accelerations[:, idx], label="Drift", alpha=0.8
-            )
+            name = data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
+            ax.plot(data.times, data.drift_accelerations[:, idx], label="Drift", alpha=0.8)
             ax.plot(
                 data.times,
                 data.control_accelerations[:, idx],
                 label="Control",
                 alpha=0.8,
             )
-            total = (
-                data.drift_accelerations[:, idx] + data.control_accelerations[:, idx]
-            )
+            total = data.drift_accelerations[:, idx] + data.control_accelerations[:, idx]
             ax.plot(data.times, total, label="Total", linestyle="--", alpha=0.6)
             ax.set_ylabel(f"{name}\n(rad/s²)")
             ax.legend(loc="upper right", fontsize="x-small")
@@ -618,9 +604,7 @@ class PlotGenerator:
 
         fig, ax = plt.subplots(figsize=self.config.figsize)
         for idx in indices:
-            name = (
-                data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
-            )
+            name = data.joint_names[idx] if idx < len(data.joint_names) else f"Joint {idx}"
             ax.plot(data.times, power[:, idx], label=name, linewidth=0.8)
 
         prefix = f"{self.config.title_prefix} " if self.config.title_prefix else ""

@@ -154,11 +154,7 @@ class SwingMetrics:
             self.total_distance_meters = self.total_distance_yards * 0.9144
 
         # Compute smash factor if not provided
-        if (
-            self.smash_factor == 0
-            and self.club_head_speed_mph > 0
-            and self.ball_speed_mph > 0
-        ):
+        if self.smash_factor == 0 and self.club_head_speed_mph > 0 and self.ball_speed_mph > 0:
             self.smash_factor = self.ball_speed_mph / self.club_head_speed_mph
 
     def to_dict(self) -> dict[str, float]:

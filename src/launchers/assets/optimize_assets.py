@@ -131,12 +131,8 @@ def analyze_assets(assets_dir: Path) -> list[dict]:
 def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Optimize image assets")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Show what would be done"
-    )
-    parser.add_argument(
-        "--aggressive", action="store_true", help="Use aggressive compression"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be done")
+    parser.add_argument("--aggressive", action="store_true", help="Use aggressive compression")
     args = parser.parse_args()
 
     if not check_dependencies():

@@ -88,8 +88,8 @@ class TestSizeWgsReactor:
 
 class TestPrepareInitialMoles:
     def test_co_and_steam_ratio(self) -> None:
-        n_CO_0, n_H2O_0, n_CO2_0, n_H2_0, n_total_0 = (
-            WGSReactorEngine._prepare_initial_moles({"CO": 1.0}, steam_ratio=1.0)
+        n_CO_0, n_H2O_0, n_CO2_0, n_H2_0, n_total_0 = WGSReactorEngine._prepare_initial_moles(
+            {"CO": 1.0}, steam_ratio=1.0
         )
         assert n_CO_0 == 1.0
         # H2O = 0 + 1.0*1.0 = 1.0
@@ -103,7 +103,5 @@ class TestPrepareInitialMoles:
         assert abs(n_total_0 - 1.7) < 1e-10
 
     def test_empty_composition_zero_moles(self) -> None:
-        _, _, _, _, n_total_0 = WGSReactorEngine._prepare_initial_moles(
-            {}, steam_ratio=0.0
-        )
+        _, _, _, _, n_total_0 = WGSReactorEngine._prepare_initial_moles({}, steam_ratio=0.0)
         assert n_total_0 == 0.0

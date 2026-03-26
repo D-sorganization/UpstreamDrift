@@ -28,18 +28,12 @@ def _make_mixin(n: int = 500, n_joints: int = 3, dt: float = 0.01) -> object:
     obj.joint_velocities = rng.standard_normal((n, n_joints))
 
     # Bind real methods
-    obj.compute_permutation_entropy = (
-        NonlinearDynamicsMixin.compute_permutation_entropy.__get__(obj)
-    )
-    obj.compute_sample_entropy = NonlinearDynamicsMixin.compute_sample_entropy.__get__(
+    obj.compute_permutation_entropy = NonlinearDynamicsMixin.compute_permutation_entropy.__get__(
         obj
     )
-    obj.compute_fractal_dimension = (
-        NonlinearDynamicsMixin.compute_fractal_dimension.__get__(obj)
-    )
-    obj.estimate_lyapunov_exponent = (
-        NonlinearDynamicsMixin.estimate_lyapunov_exponent.__get__(obj)
-    )
+    obj.compute_sample_entropy = NonlinearDynamicsMixin.compute_sample_entropy.__get__(obj)
+    obj.compute_fractal_dimension = NonlinearDynamicsMixin.compute_fractal_dimension.__get__(obj)
+    obj.estimate_lyapunov_exponent = NonlinearDynamicsMixin.estimate_lyapunov_exponent.__get__(obj)
     return obj
 
 
@@ -80,9 +74,7 @@ class TestPermutationEntropyContracts(unittest.TestCase):
     def test_random_signal_higher_entropy(self) -> None:
         obj = _make_mixin()
         rng = np.random.default_rng(42)
-        result = obj.compute_permutation_entropy(
-            rng.standard_normal(500), order=3, delay=1
-        )
+        result = obj.compute_permutation_entropy(rng.standard_normal(500), order=3, delay=1)
         self.assertGreater(result, 0.0)
 
 
@@ -177,9 +169,7 @@ class TestLyapunovExponentContracts(unittest.TestCase):
 
     def test_short_data_returns_zero(self) -> None:
         obj = _make_mixin()
-        result = obj.estimate_lyapunov_exponent(
-            np.array([1.0, 2.0]), tau=1, dim=3, window=10
-        )
+        result = obj.estimate_lyapunov_exponent(np.array([1.0, 2.0]), tau=1, dim=3, window=10)
         self.assertEqual(result, 0.0)
 
 

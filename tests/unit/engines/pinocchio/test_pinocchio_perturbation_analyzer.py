@@ -33,8 +33,7 @@ from src.shared.python.perturbation.config import PerturbationConfig
 # ---------------------------------------------------------------------------
 
 _GOLFER_URDF = (
-    Path(__file__).parents[5]
-    / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+    Path(__file__).parents[5] / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
 )
 
 _SMALL_CONFIG = PerturbationConfig(
@@ -147,9 +146,7 @@ class TestPerturbCoeffsByMode:
 
 
 class TestPinocchioSimResult:
-    def _make_sim_result(
-        self, n: int = 5, nq: int = 7, nv: int = 6
-    ) -> PinocchioSimResult:
+    def _make_sim_result(self, n: int = 5, nq: int = 7, nv: int = 6) -> PinocchioSimResult:
         t = np.linspace(0.0, 1.0, n)
         q = np.zeros((n, nq))
         v = np.zeros((n, nv))
@@ -197,9 +194,7 @@ try:
 except ImportError:
     _PINOCCHIO_AVAILABLE = False
 
-_skip_no_pinocchio = pytest.mark.skipif(
-    not _PINOCCHIO_AVAILABLE, reason="pinocchio not installed"
-)
+_skip_no_pinocchio = pytest.mark.skipif(not _PINOCCHIO_AVAILABLE, reason="pinocchio not installed")
 
 
 @pytest.fixture(scope="module")
@@ -350,8 +345,6 @@ class TestRunBatch:
 
     def test_zero_amplitude_full_success(self, analyzer, simple_profile) -> None:  # type: ignore[no-untyped-def]
         analyzer.set_base_torque_profile(simple_profile)
-        config = PerturbationConfig(
-            n_trials=3, noise_amplitude=0.0, noise_type="white", seed=0
-        )
+        config = PerturbationConfig(n_trials=3, noise_amplitude=0.0, noise_type="white", seed=0)
         result = analyzer.run_batch(config)
         assert result.success_rate == 1.0

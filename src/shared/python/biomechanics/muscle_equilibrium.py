@@ -252,9 +252,7 @@ class EquilibriumSolver:
 
         # Solve for future fiber length
         try:
-            l_CE_next = self.solve_fiber_length(
-                l_MT_next, activation, v_CE=0.0, initial_guess=l_CE
-            )
+            l_CE_next = self.solve_fiber_length(l_MT_next, activation, v_CE=0.0, initial_guess=l_CE)
 
             # Finite difference velocity
             v_CE = (l_CE_next - l_CE) / dt
@@ -321,9 +319,7 @@ def compute_equilibrium_state(
     solver = EquilibriumSolver(muscle)
 
     # Solve for fiber length
-    l_CE = solver.solve_fiber_length(
-        l_MT, activation, v_CE=0.0, initial_guess=initial_l_CE
-    )
+    l_CE = solver.solve_fiber_length(l_MT, activation, v_CE=0.0, initial_guess=initial_l_CE)
 
     # Solve for fiber velocity
     if abs(v_MT) > 1e-10:

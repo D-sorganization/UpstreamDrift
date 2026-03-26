@@ -126,9 +126,7 @@ def _normalize_prefixed_volume_unit(unit: str) -> str:
 def _volume_unit_to_m3_per_s(unit: str) -> float:
     """Resolve volumetric unit factor to m³/s."""
     normalized = _normalize_prefixed_volume_unit(unit)
-    _require_known_unit(
-        normalized, VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S, "volumetric flow"
-    )
+    _require_known_unit(normalized, VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S, "volumetric flow")
     return VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S[normalized]
 
 
@@ -327,9 +325,7 @@ def volumetric_actual_to_mass(
         raise ValueError("vol_flow must be provided")
     _require_finite(vol_flow, "vol_flow")
     _require_positive_finite(density, "density")
-    _require_known_unit(
-        vol_unit, VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S, "volumetric flow"
-    )
+    _require_known_unit(vol_unit, VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S, "volumetric flow")
     _require_known_unit(mass_unit, MASS_FLOW_CONVERSIONS, "mass flow")
 
     # Convert to m³/s
@@ -378,9 +374,7 @@ def mass_to_volumetric_actual(
     _require_finite(mass_flow, "mass_flow")
     _require_positive_finite(density, "density")
     _require_known_unit(mass_unit, MASS_FLOW_CONVERSIONS, "mass flow")
-    _require_known_unit(
-        vol_unit, VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S, "volumetric flow"
-    )
+    _require_known_unit(vol_unit, VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S, "volumetric flow")
 
     # Convert to kg/s
     kg_per_s = mass_flow * MASS_FLOW_CONVERSIONS[mass_unit]
@@ -502,9 +496,7 @@ def mass_to_standard_volumetric(
     return result
 
 
-def scfm_to_acfm(
-    scfm: float, temperature: float, pressure: float, standard: str = "SCFM"
-) -> float:
+def scfm_to_acfm(scfm: float, temperature: float, pressure: float, standard: str = "SCFM") -> float:
     """Convert SCFM to ACFM (Actual Cubic Feet per Minute).
 
     ACFM = SCFM × (T_actual/T_std) × (P_std/P_actual)
@@ -544,9 +536,7 @@ def scfm_to_acfm(
     return acfm
 
 
-def acfm_to_scfm(
-    acfm: float, temperature: float, pressure: float, standard: str = "SCFM"
-) -> float:
+def acfm_to_scfm(acfm: float, temperature: float, pressure: float, standard: str = "SCFM") -> float:
     """Convert ACFM to SCFM.
 
     SCFM = ACFM × (T_std/T_actual) × (P_actual/P_std)
@@ -622,14 +612,10 @@ def convert_flow_rate_to_mass(
         mol_per_s = value * MOLAR_FLOW_CONVERSIONS[from_unit]
         return (mol_per_s * molecular_weight) / 1000.0
     if _is_standard_volumetric_unit(from_unit):
-        return standard_volumetric_to_mass(
-            value, from_unit, molecular_weight, standard, "kg/s"
-        )
+        return standard_volumetric_to_mass(value, from_unit, molecular_weight, standard, "kg/s")
     if _is_actual_volumetric_unit(from_unit):
         if density is None:
-            raise ValueError(
-                f"Density required for actual volumetric flow unit '{from_unit}'"
-            )
+            raise ValueError(f"Density required for actual volumetric flow unit '{from_unit}'")
         return volumetric_actual_to_mass(value, from_unit, density, "kg/s")
     raise ValueError(f"Unknown or unsupported flow rate unit: {from_unit}")
 
@@ -641,14 +627,10 @@ def _is_standard_volumetric_unit(unit: str) -> bool:
 
 def _is_actual_volumetric_unit(unit: str) -> bool:
     """Return True when unit is an actual-condition volumetric flow unit."""
-    return (
-        unit.upper() in {"ACFM", "CFM"} or unit in VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S
-    )
+    return unit.upper() in {"ACFM", "CFM"} or unit in VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S
 
 
-def _standard_density(
-    pressure_pa: float, molecular_weight: float, temperature_k: float
-) -> float:
+def _standard_density(pressure_pa: float, molecular_weight: float, temperature_k: float) -> float:
     """Calculate standard density with ideal gas law."""
     return (pressure_pa * molecular_weight) / (R_UNIVERSAL * temperature_k)
 
@@ -695,9 +677,7 @@ if __name__ == "__main__":
     T_actual = 800  # K (~527°C)
     P_actual = 5e5  # Pa (5 bar)
     acfm = scfm_to_acfm(scfm, T_actual, P_actual, "SCFM")
-    logger.info(
-        f"{scfm} SCFM @ {T_actual}K, {P_actual / 1e5:.0f} bar = {acfm:.0f} ACFM"
-    )
+    logger.info(f"{scfm} SCFM @ {T_actual}K, {P_actual / 1e5:.0f} bar = {acfm:.0f} ACFM")
 
     # Example 5: Universal converter
     logger.info("\nExample 5: Universal converter")

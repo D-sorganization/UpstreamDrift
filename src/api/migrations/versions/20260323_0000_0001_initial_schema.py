@@ -107,9 +107,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f("ix_api_keys_id"), "api_keys", ["id"], unique=False)
     op.create_index(op.f("ix_api_keys_key_hash"), "api_keys", ["key_hash"], unique=True)
-    op.create_index(
-        op.f("ix_api_keys_key_prefix"), "api_keys", ["key_prefix"], unique=False
-    )
+    op.create_index(op.f("ix_api_keys_key_prefix"), "api_keys", ["key_prefix"], unique=False)
     op.create_index(op.f("ix_api_keys_user_id"), "api_keys", ["user_id"], unique=False)
 
     # --- sessions --------------------------------------------------------

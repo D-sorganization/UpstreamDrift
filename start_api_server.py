@@ -85,9 +85,7 @@ def print_server_info(host: str, port: int) -> None:
     logger.info(f"   Docs: http://localhost:{port}/docs")
     logger.info(f"   Host: {host}:{port}")
     if not os.getenv("GOLF_ADMIN_PASSWORD"):
-        logger.warning(
-            "⚠️  GOLF_ADMIN_PASSWORD not set - see logs for generated password."
-        )
+        logger.warning("⚠️  GOLF_ADMIN_PASSWORD not set - see logs for generated password.")
 
 
 def main() -> int:

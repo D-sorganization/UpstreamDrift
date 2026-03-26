@@ -14,9 +14,7 @@ class TestEngineModelCompatibility:
             pytest.skip("MuJoCo not installed")
 
         # Check for sample URDF files
-        urdf_paths = list(
-            Path("src/engines/physics_engines/mujoco/models").glob("**/*.urdf")
-        )
+        urdf_paths = list(Path("src/engines/physics_engines/mujoco/models").glob("**/*.urdf"))
         if not urdf_paths:
             urdf_paths = list(Path("src/shared/models").glob("**/*.urdf"))
 

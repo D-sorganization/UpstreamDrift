@@ -70,6 +70,4 @@ class TestGenerateSecureKeyCommand:
         result = generate_secure_key_command()
         # Should contain some reference to generating a key
         lower = result.lower()
-        assert any(
-            word in lower for word in ["python", "token", "secret", "key", "openssl"]
-        )
+        assert any(word in lower for word in ["python", "token", "secret", "key", "openssl"])

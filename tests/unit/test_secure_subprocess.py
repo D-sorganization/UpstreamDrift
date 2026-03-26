@@ -119,9 +119,7 @@ class TestSecureSubprocess(unittest.TestCase):
         mock_result = MagicMock()
         mock_run.return_value = mock_result
 
-        result = secure_run(
-            ["python", "--version"], timeout=5.0, suite_root=self.suite_root
-        )
+        result = secure_run(["python", "--version"], timeout=5.0, suite_root=self.suite_root)
 
         self.assertEqual(result, mock_result)
         mock_run.assert_called_once()

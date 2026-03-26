@@ -46,14 +46,10 @@ class TestOutputManager(unittest.TestCase):
         data = {"col1": [1, 2, 3], "col2": [4, 5, 6]}
         df = pd.DataFrame(data)
 
-        path = self.manager.save_simulation_results(
-            df, "test_csv", format_type=OutputFormat.CSV
-        )
+        path = self.manager.save_simulation_results(df, "test_csv", format_type=OutputFormat.CSV)
 
         self.assertTrue(path.exists())
-        loaded_df = self.manager.load_simulation_results(
-            path.stem, format_type=OutputFormat.CSV
-        )
+        loaded_df = self.manager.load_simulation_results(path.stem, format_type=OutputFormat.CSV)
         assert isinstance(loaded_df, pd.DataFrame)
         pd.testing.assert_frame_equal(df, loaded_df)
 
@@ -66,9 +62,7 @@ class TestOutputManager(unittest.TestCase):
         )
 
         self.assertTrue(path.exists())
-        loaded_data = self.manager.load_simulation_results(
-            path.stem, format_type=OutputFormat.JSON
-        )
+        loaded_data = self.manager.load_simulation_results(path.stem, format_type=OutputFormat.JSON)
         self.assertEqual(loaded_data, data)
 
     def test_save_load_pickle(self):
@@ -92,9 +86,7 @@ class TestOutputManager(unittest.TestCase):
             data, "test_numpy_json", format_type=OutputFormat.JSON
         )
 
-        loaded_data = self.manager.load_simulation_results(
-            path.stem, format_type=OutputFormat.JSON
-        )
+        loaded_data = self.manager.load_simulation_results(path.stem, format_type=OutputFormat.JSON)
 
         # The loaded data should be the same structure as saved
         self.assertEqual(loaded_data["array"], [1, 2, 3])  # type: ignore[call-overload]
@@ -118,9 +110,7 @@ class TestOutputManager(unittest.TestCase):
     def test_export_analysis_report_html(self):
         """Test exporting HTML report."""
         data = {"summary": "test", "value": 123}
-        path = self.manager.export_analysis_report(
-            data, "test_report", format_type="html"
-        )
+        path = self.manager.export_analysis_report(data, "test_report", format_type="html")
 
         self.assertTrue(path.exists())
         with open(path) as f:

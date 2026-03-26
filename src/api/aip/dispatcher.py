@@ -78,9 +78,7 @@ class MethodRegistry:
         self._methods: dict[str, Callable[..., Any]] = {}
         self._descriptions: dict[str, str] = {}
 
-    def register(
-        self, name: str, handler: Callable[..., Any], description: str = ""
-    ) -> None:
+    def register(self, name: str, handler: Callable[..., Any], description: str = "") -> None:
         """Register a method handler.
 
         Args:

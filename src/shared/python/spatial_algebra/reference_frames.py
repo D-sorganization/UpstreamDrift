@@ -236,15 +236,12 @@ def fit_functional_swing_plane(
     half_window = window_s / 2.0
 
     # Find points within the fitting window
-    mask = (timestamps >= impact_time - half_window) & (
-        timestamps <= impact_time + half_window
-    )
+    mask = (timestamps >= impact_time - half_window) & (timestamps <= impact_time + half_window)
     window_points = clubhead_trajectory[mask]
 
     if len(window_points) < 3:
         logger.warning(
-            f"Only {len(window_points)} points in FSP window. "
-            "Using all available points."
+            f"Only {len(window_points)} points in FSP window. " "Using all available points."
         )
         window_points = clubhead_trajectory
 

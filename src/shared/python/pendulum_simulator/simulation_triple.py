@@ -34,7 +34,7 @@ from .physics_triple import (
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 
-# Re-export from shared utility for backwards compatibility (DRY — #1041)
+# Re-export from shared utility for backwards compatibility (DRY â€” #1041)
 from .torque_utils import make_polynomial_torque  # noqa: F401
 
 # ---------------------------------------------------------------------------
@@ -55,15 +55,13 @@ class TripleSimulationResult(TrajectoryResultMixin):
         self._validate_trajectory(expected_state_width=6)
 
     def mass_matrix_at(self, idx: int) -> dict:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         s = self.states[idx]
         return mass_matrix_components(s[1], s[2], self.params)
 
     def positions_at(self, idx: int) -> dict:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         s = self.states[idx]
         return forward_kinematics(s[0], s[1], s[2], self.params)
@@ -73,38 +71,33 @@ class TripleSimulationResult(TrajectoryResultMixin):
         return self.torque_func(self.t[idx])
 
     def accelerations_at(self, idx: int) -> np.ndarray:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         state_dot = equations_of_motion(
             self.states[idx], self.t[idx], self.params, self.torque_func
         )
-        return state_dot[3:]  # type: ignore[index]
+        return state_dot[3:]
 
     def joint_forces_at(self, idx: int) -> dict:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         qddot = self.accelerations_at(idx)
         return net_joint_forces(self.states[idx], qddot, self.params)
 
     def coriolis_at(self, idx: int) -> np.ndarray:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         s = self.states[idx]
         return coriolis_vector(s[1], s[2], s[3], s[4], s[5], self.params)
 
     def gravity_at(self, idx: int) -> np.ndarray:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         s = self.states[idx]
         return gravity_vector(s[0], s[1], s[2], self.params)
 
     def energy_at(self, idx: int) -> dict:
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         state = self.states[idx]
         result = {
@@ -120,10 +113,9 @@ class TripleSimulationResult(TrajectoryResultMixin):
 
         Returns
         -------
-        np.ndarray, shape (3,)  [N·m]
+        np.ndarray, shape (3,)  [NÂ·m]
         """
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
+        assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         s = self.states[idx]
         return friction_torque_vector(s[3], s[4], s[5], self.params)
@@ -159,7 +151,7 @@ def run_simulation(
     -----------------
     - ``DOP853`` is an 8th-order Runge-Kutta method that is fast for
       non-stiff problems while being accurate enough for chaotic systems.
-    - ``max_step`` is intentionally NOT set here — letting the solver
+    - ``max_step`` is intentionally NOT set here â€” letting the solver
       choose an adaptive step is ~10-50x faster than forcing ``dt`` as
       the maximum step size.
     - The output is resampled to a uniform ``t_eval`` grid at spacing ``dt``
@@ -169,23 +161,18 @@ def run_simulation(
       visualisation-quality results.  Use tighter values only when
       quantitative energy conservation is required.
     """
-    if not (initial_state.shape == (6):
-        raise ValueError(), ()
-        f"Initial state shape must be (6,), got {initial_state.shape}"
-    )
-    if not (all(np.isfinite(initial_state))):
-        raise ValueError("Initial state must be finite")
-    if not (t_end > 0):
-        raise ValueError(f"t_end must be positive, got {t_end}")
-    if not (0 < dt < t_end):
-        raise ValueError(f"dt must be in (0, t_end), got {dt}")
+    assert initial_state.shape == (
+        6,
+    ), f"Initial state shape must be (6,), got {initial_state.shape}"
+    assert all(np.isfinite(initial_state)), "Initial state must be finite"
+    assert t_end > 0, f"t_end must be positive, got {t_end}"
+    assert 0 < dt < t_end, f"dt must be in (0, t_end), got {dt}"
 
     # Merge clamp kwarg (from SimulationPanel) with torque_limits (legacy)
     effective_torque_limits = torque_limits if torque_limits is not None else clamp
 
     def ode_rhs(t: float, y: np.ndarray) -> np.ndarray:
-        if not (t is not None):
-            raise ValueError("t must be provided")
+        assert t is not None, "t must be provided"
         dydt = equations_of_motion(y, t, params, torque_func, effective_torque_limits)
         # Apply joint limit penalty torques if enabled (#1151)
         if limits is not None:
@@ -203,7 +190,7 @@ def run_simulation(
                 qddot_correction = np.linalg.solve(M, tau_limit)
             except np.linalg.LinAlgError:
                 qddot_correction = np.linalg.lstsq(M, tau_limit, rcond=None)[0]
-            dydt[3:] += qddot_correction  # type: ignore[index]
+            dydt[3:] += qddot_correction
         return dydt
 
     t, states = integrate_ode(
@@ -214,7 +201,7 @@ def run_simulation(
         method=method,
         rtol=rtol,
         atol=atol,
-        # max_step deliberately omitted — adaptive step is much faster
+        # max_step deliberately omitted â€” adaptive step is much faster
     )
 
     result = TripleSimulationResult(
@@ -224,6 +211,5 @@ def run_simulation(
         torque_func=torque_func,
     )
 
-    if not (result.n_steps >= 2):
-        raise ValueError("Simulation must produce at least 2 time points")
+    assert result.n_steps >= 2, "Simulation must produce at least 2 time points"
     return result

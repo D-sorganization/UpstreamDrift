@@ -64,9 +64,7 @@ class SwingComparator:
         self.ref = self._ensure_analyzer(reference_data)
         self.student = self._ensure_analyzer(student_data)
 
-    def _ensure_analyzer(
-        self, data: dict[str, Any] | StatisticalAnalyzer
-    ) -> StatisticalAnalyzer:
+    def _ensure_analyzer(self, data: dict[str, Any] | StatisticalAnalyzer) -> StatisticalAnalyzer:
         if isinstance(data, StatisticalAnalyzer):
             return data
         # Assume dict
@@ -158,9 +156,7 @@ class SwingComparator:
             normalized_distance=norm_dist,
             similarity_score=score,
         )
-        ensure(
-            result.distance >= 0, "DTW distance must be non-negative", result.distance
-        )
+        ensure(result.distance >= 0, "DTW distance must be non-negative", result.distance)
         ensure(
             0.0 <= result.similarity_score <= 100.0,
             "similarity_score must be in [0, 100]",
@@ -224,10 +220,7 @@ class SwingComparator:
                 )
 
         # Club head speed
-        if (
-            self.ref.club_head_speed is not None
-            and self.student.club_head_speed is not None
-        ):
+        if self.ref.club_head_speed is not None and self.student.club_head_speed is not None:
             ref_chs = float(np.max(self.ref.club_head_speed))
             stu_chs = float(np.max(self.student.club_head_speed))
             diff = stu_chs - ref_chs

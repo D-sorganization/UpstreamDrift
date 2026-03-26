@@ -152,9 +152,7 @@ class MeshExtractor:
     """Extracts mesh information from URDF files."""
 
     @staticmethod
-    def extract_meshes(
-        urdf_content: str, urdf_path: Path | None = None
-    ) -> list[MeshReference]:
+    def extract_meshes(urdf_content: str, urdf_path: Path | None = None) -> list[MeshReference]:
         """Extract all mesh references from a URDF.
 
         Args:
@@ -185,9 +183,7 @@ class MeshExtractor:
                 if geometry is not None:
                     mesh = geometry.find("mesh")
                     if mesh is not None:
-                        ref = MeshReference.from_element(
-                            mesh, link_name, "visual", urdf_dir
-                        )
+                        ref = MeshReference.from_element(mesh, link_name, "visual", urdf_dir)
                         meshes.append(ref)
 
             # Collision meshes
@@ -196,9 +192,7 @@ class MeshExtractor:
                 if geometry is not None:
                     mesh = geometry.find("mesh")
                     if mesh is not None:
-                        ref = MeshReference.from_element(
-                            mesh, link_name, "collision", urdf_dir
-                        )
+                        ref = MeshReference.from_element(mesh, link_name, "collision", urdf_dir)
                         meshes.append(ref)
 
         return meshes
@@ -257,9 +251,7 @@ class MeshBrowserPanel(QWidget):
         # Mesh table
         self.table = QTableWidget()
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels(
-            ["Mesh File", "Link", "Type", "Size", "Status"]
-        )
+        self.table.setHorizontalHeaderLabels(["Mesh File", "Link", "Type", "Size", "Status"])
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
@@ -365,9 +357,7 @@ class MeshBrowserPanel(QWidget):
 
         # Update summary
         unique = len(MeshExtractor.get_unique_mesh_files(self.meshes))
-        self.summary_label.setText(
-            f"Total references: {len(self.meshes)} | Unique files: {unique}"
-        )
+        self.summary_label.setText(f"Total references: {len(self.meshes)} | Unique files: {unique}")
 
         if missing_count > 0:
             self.missing_label.setText(f"Missing: {missing_count}")
@@ -492,12 +482,8 @@ class CopyMeshDialog(QDialog):
         return {
             "target_link": self.link_combo.currentText(),
             "context": self.context_combo.currentText(),
-            "copy_file": (
-                self.copy_file_check.isChecked() if self.copy_file_check else False
-            ),
-            "mesh_subdir": (
-                self.mesh_subdir_edit.text() if self.mesh_subdir_edit else "meshes"
-            ),
+            "copy_file": (self.copy_file_check.isChecked() if self.copy_file_check else False),
+            "mesh_subdir": (self.mesh_subdir_edit.text() if self.mesh_subdir_edit else "meshes"),
         }
 
 
@@ -584,9 +570,7 @@ class MeshBrowserWidget(QWidget):
         details = f"File: {mesh.filename}\n"
         details += f"Link: {mesh.link_name}\n"
         details += f"Type: {mesh.context}\n"
-        details += (
-            f"Scale: ({mesh.scale[0]:.2f}, {mesh.scale[1]:.2f}, {mesh.scale[2]:.2f})\n"
-        )
+        details += f"Scale: ({mesh.scale[0]:.2f}, {mesh.scale[1]:.2f}, {mesh.scale[2]:.2f})\n"
         details += f"Exists: {'Yes' if mesh.exists else 'No'}\n"
         if mesh.exists:
             details += f"Size: {mesh.format_size()}\n"
@@ -625,9 +609,7 @@ class MeshBrowserWidget(QWidget):
             return
 
         # Show configuration dialog
-        dialog = CopyMeshDialog(
-            mesh, target_links, self.right_panel.get_urdf_path(), self
-        )
+        dialog = CopyMeshDialog(mesh, target_links, self.right_panel.get_urdf_path(), self)
 
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
@@ -688,12 +670,8 @@ class MeshBrowserWidget(QWidget):
 
             # Add origin
             origin = ET.SubElement(context_elem, "origin")
-            origin.set(
-                "xyz", f"{mesh.origin_xyz[0]} {mesh.origin_xyz[1]} {mesh.origin_xyz[2]}"
-            )
-            origin.set(
-                "rpy", f"{mesh.origin_rpy[0]} {mesh.origin_rpy[1]} {mesh.origin_rpy[2]}"
-            )
+            origin.set("xyz", f"{mesh.origin_xyz[0]} {mesh.origin_xyz[1]} {mesh.origin_xyz[2]}")
+            origin.set("rpy", f"{mesh.origin_rpy[0]} {mesh.origin_rpy[1]} {mesh.origin_rpy[2]}")
 
             # Add geometry with mesh
             geometry = ET.SubElement(context_elem, "geometry")
@@ -701,9 +679,7 @@ class MeshBrowserWidget(QWidget):
             mesh_elem.set("filename", new_filename)
 
             if mesh.scale != (1.0, 1.0, 1.0):
-                mesh_elem.set(
-                    "scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}"
-                )
+                mesh_elem.set("scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}")
 
         # Generate new URDF
         ET.indent(root, space="  ")
@@ -762,9 +738,7 @@ class MeshBrowserWidget(QWidget):
                 mesh_elem.set("filename", mesh.filename)
 
                 if mesh.scale != (1.0, 1.0, 1.0):
-                    mesh_elem.set(
-                        "scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}"
-                    )
+                    mesh_elem.set("scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}")
 
                 copied_count += 1
 
@@ -774,9 +748,7 @@ class MeshBrowserWidget(QWidget):
 
         self.right_panel.load_content(new_content, self.right_panel.get_urdf_path())
         self.urdf_modified.emit(new_content)
-        self.status_label.setText(
-            f"Copied {copied_count} of {len(unique_meshes)} meshes"
-        )
+        self.status_label.setText(f"Copied {copied_count} of {len(unique_meshes)} meshes")
 
     def _on_swap(self) -> None:
         """Swap the source and target models."""

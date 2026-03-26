@@ -44,7 +44,7 @@ def adjoint_transform(T: np.ndarray) -> np.ndarray:
         Chapter 3: Rigid-Body Motions, Section 3.3.3
 
     Example:
-        >>> # Create transformation: 90° rotation about z, translate [1;0;0]
+        >>> # Create transformation: 90Â° rotation about z, translate [1;0;0]
         >>> T = np.array([[0, -1, 0, 1],
         ...               [1,  0, 0, 0],
         ...               [0,  0, 1, 0],
@@ -58,8 +58,7 @@ def adjoint_transform(T: np.ndarray) -> np.ndarray:
         >>> V_a = Ad @ V_b
     """
     t_transform = np.asarray(T)
-    if not (t_transform.shape == (4):
-        raise ValueError(4), f"T must be 4x4, got shape {t_transform.shape}")
+    assert t_transform.shape == (4, 4), f"T must be 4x4, got shape {t_transform.shape}"
 
     # Extract rotation and position
     r_rot = t_transform[:3, :3]

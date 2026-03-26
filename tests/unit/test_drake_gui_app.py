@@ -208,13 +208,9 @@ class TestDrakeInducedAccelerationAnalyzer:
         assert "zvcf_torque" in result
 
         # ztcf_accel = M^-1 @ (-bias)
-        np.testing.assert_array_almost_equal(
-            result["ztcf_accel"], np.array([-0.5, -1.0])
-        )
+        np.testing.assert_array_almost_equal(result["ztcf_accel"], np.array([-0.5, -1.0]))
         # zvcf_torque = -tau_g
-        np.testing.assert_array_almost_equal(
-            result["zvcf_torque"], np.array([0.0, 9.81])
-        )
+        np.testing.assert_array_almost_equal(result["zvcf_torque"], np.array([0.0, 9.81]))
 
     def test_compute_specific_control_singular_mass_uses_pinv(self) -> None:
         """Test pinv fallback for singular mass matrix."""
@@ -227,9 +223,7 @@ class TestDrakeInducedAccelerationAnalyzer:
         analyzer = DrakeInducedAccelerationAnalyzer(plant)
 
         # Singular matrix - rank 1
-        plant.CalcMassMatrixViaInverseDynamics.return_value = np.array(
-            [[1.0, 0.0], [0.0, 0.0]]
-        )
+        plant.CalcMassMatrixViaInverseDynamics.return_value = np.array([[1.0, 0.0], [0.0, 0.0]])
         tau = np.array([2.0, 0.0])
         result = analyzer.compute_specific_control(context, tau)
 
@@ -314,15 +308,9 @@ class TestDrakeRecorder:
             angular_momentum=np.array([0.7, 0.8, 0.9]),
         )
 
-        np.testing.assert_array_almost_equal(
-            rec.club_head_pos_history[0], [0.1, 0.2, 0.3]
-        )
-        np.testing.assert_array_almost_equal(
-            rec.com_position_history[0], [0.4, 0.5, 0.6]
-        )
-        np.testing.assert_array_almost_equal(
-            rec.angular_momentum_history[0], [0.7, 0.8, 0.9]
-        )
+        np.testing.assert_array_almost_equal(rec.club_head_pos_history[0], [0.1, 0.2, 0.3])
+        np.testing.assert_array_almost_equal(rec.com_position_history[0], [0.4, 0.5, 0.6])
+        np.testing.assert_array_almost_equal(rec.angular_momentum_history[0], [0.7, 0.8, 0.9])
 
     def test_record_without_optional_data_uses_zeros(self) -> None:
         """Test record() fills zeros when optional data is None."""

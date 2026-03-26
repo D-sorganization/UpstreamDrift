@@ -73,12 +73,8 @@ class HumanoidConfigTab(QWidget):
         super().__init__(parent)
 
         # Paths
-        self._mujoco_dir = (
-            Path(__file__).resolve().parent.parent.parent.parent  # mujoco/python
-        )
-        self.config_path = (
-            self._mujoco_dir / "docker" / "src" / "simulation_config.json"
-        )
+        self._mujoco_dir = Path(__file__).resolve().parent.parent.parent.parent  # mujoco/python
+        self.config_path = self._mujoco_dir / "docker" / "src" / "simulation_config.json"
 
         # State
         self.config_manager = ConfigurationManager(self.config_path)
@@ -140,9 +136,7 @@ class HumanoidConfigTab(QWidget):
         settings_layout.addWidget(QLabel("Control Mode:"), 0, 0)
         self.combo_control = QComboBox()
         self.combo_control.addItems(["pd", "lqr", "poly"])
-        self.combo_control.setCurrentText(
-            str(getattr(self.config, "control_mode", "pd"))
-        )
+        self.combo_control.setCurrentText(str(getattr(self.config, "control_mode", "pd")))
         self.combo_control.currentTextChanged.connect(self._on_control_mode_changed)
         settings_layout.addWidget(self.combo_control, 0, 1)
 
@@ -186,9 +180,7 @@ class HumanoidConfigTab(QWidget):
         self.txt_save_path = QLineEdit(self.config.save_state_path)
         state_layout.addWidget(self.txt_save_path, 1, 1)
         btn_browse_save = QPushButton("Browse")
-        btn_browse_save.clicked.connect(
-            lambda: self._browse_file(self.txt_save_path, save=True)
-        )
+        btn_browse_save.clicked.connect(lambda: self._browse_file(self.txt_save_path, save=True))
         state_layout.addWidget(btn_browse_save, 1, 2)
 
         state_group.setLayout(state_layout)
@@ -288,9 +280,7 @@ class HumanoidConfigTab(QWidget):
         self.slider_weight.setRange(50, 200)
         self.slider_weight.setValue(int(self.config.weight_percent))
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
-        self.slider_weight.valueChanged.connect(
-            lambda v: self.lbl_weight_val.setText(f"{v}%")
-        )
+        self.slider_weight.valueChanged.connect(lambda v: self.lbl_weight_val.setText(f"{v}%"))
         dim_layout.addWidget(self.slider_weight, 1, 1)
         dim_layout.addWidget(self.lbl_weight_val, 1, 2)
 
@@ -510,9 +500,7 @@ class HumanoidConfigTab(QWidget):
         try:
             import importlib.util
 
-            target_file = (
-                self._mujoco_dir / "mujoco_humanoid_golf" / "polynomial_generator.py"
-            )
+            target_file = self._mujoco_dir / "mujoco_humanoid_golf" / "polynomial_generator.py"
             if not target_file.exists():
                 raise FileNotFoundError(f"File not found: {target_file}")
 
@@ -598,9 +586,7 @@ class HumanoidConfigTab(QWidget):
         else:
             cmd = ["docker", "run"]
 
-        cmd.extend(
-            ["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/docker/src"]
-        )
+        cmd.extend(["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/docker/src"])
 
         if self.config.live_view:
             if is_windows:
@@ -713,13 +699,9 @@ class HumanoidConfigTab(QWidget):
 
     def _browse_file(self, line_edit: QLineEdit, save: bool = False) -> None:
         if save:
-            path, _ = QFileDialog.getSaveFileName(
-                self, "Save State", "", "JSON State (*.json)"
-            )
+            path, _ = QFileDialog.getSaveFileName(self, "Save State", "", "JSON State (*.json)")
         else:
-            path, _ = QFileDialog.getOpenFileName(
-                self, "Load State", "", "JSON State (*.json)"
-            )
+            path, _ = QFileDialog.getOpenFileName(self, "Load State", "", "JSON State (*.json)")
         if path:
             line_edit.setText(path)
 

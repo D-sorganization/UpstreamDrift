@@ -203,9 +203,7 @@ class ManualBuilder(BaseURDFBuilder):
             names_to_remove = {name} | descendants
 
             # Remove links
-            self._links = [
-                link for link in self._links if link.name not in names_to_remove
-            ]
+            self._links = [link for link in self._links if link.name not in names_to_remove]
 
             # Remove joints
             self._joints = [
@@ -216,9 +214,7 @@ class ManualBuilder(BaseURDFBuilder):
         else:
             # Just remove this link and joints connecting to it
             self._links = [link for link in self._links if link.name != name]
-            self._joints = [
-                j for j in self._joints if j.parent != name and j.child != name
-            ]
+            self._joints = [j for j in self._joints if j.parent != name and j.child != name]
 
         return self
 
@@ -306,9 +302,7 @@ class ManualBuilder(BaseURDFBuilder):
             # Mirror collision origin
             new_xyz = list(link.collision_origin.xyz)
             new_xyz[axis_idx] = -new_xyz[axis_idx]
-            link.collision_origin = Origin(
-                xyz=tuple(new_xyz), rpy=link.collision_origin.rpy
-            )
+            link.collision_origin = Origin(xyz=tuple(new_xyz), rpy=link.collision_origin.rpy)
 
             # Mirror COM
             new_com = list(link.inertia.center_of_mass)
@@ -337,9 +331,7 @@ class ManualBuilder(BaseURDFBuilder):
 
         # Toggle handedness
         self._handedness = (
-            Handedness.LEFT
-            if self._handedness == Handedness.RIGHT
-            else Handedness.RIGHT
+            Handedness.LEFT if self._handedness == Handedness.RIGHT else Handedness.RIGHT
         )
 
         return self

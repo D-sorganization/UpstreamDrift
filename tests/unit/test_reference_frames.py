@@ -111,15 +111,9 @@ class TestInstantaneousSwingPlane:
         plane = fit_instantaneous_swing_plane(velocity, grip, clubhead)
 
         # Check orthogonality
-        np.testing.assert_allclose(
-            np.dot(plane.normal, plane.in_plane_x), 0.0, atol=1e-10
-        )
-        np.testing.assert_allclose(
-            np.dot(plane.normal, plane.in_plane_y), 0.0, atol=1e-10
-        )
-        np.testing.assert_allclose(
-            np.dot(plane.in_plane_x, plane.in_plane_y), 0.0, atol=1e-10
-        )
+        np.testing.assert_allclose(np.dot(plane.normal, plane.in_plane_x), 0.0, atol=1e-10)
+        np.testing.assert_allclose(np.dot(plane.normal, plane.in_plane_y), 0.0, atol=1e-10)
+        np.testing.assert_allclose(np.dot(plane.in_plane_x, plane.in_plane_y), 0.0, atol=1e-10)
 
 
 class TestFunctionalSwingPlane:
@@ -137,9 +131,7 @@ class TestFunctionalSwingPlane:
             ]
         )
 
-        fsp = fit_functional_swing_plane(
-            trajectory, t, impact_time=0.5, window_ms=1000.0
-        )
+        fsp = fit_functional_swing_plane(trajectory, t, impact_time=0.5, window_ms=1000.0)
 
         assert fsp.fitting_rmse < 1e-10
 
@@ -156,9 +148,7 @@ class TestFunctionalSwingPlane:
             ]
         )
 
-        fsp = fit_functional_swing_plane(
-            trajectory, t, impact_time=0.5, window_ms=1000.0
-        )
+        fsp = fit_functional_swing_plane(trajectory, t, impact_time=0.5, window_ms=1000.0)
 
         # Helix will have non-zero deviation from best-fit plane
         assert fsp.fitting_rmse > 0.001  # Should be measurable
@@ -188,9 +178,7 @@ class TestWrenchDecomposition:
             grip_axis=np.array([1.0, 0.0, 0.0]),
         )
 
-    def test_vertical_force_is_out_of_plane(
-        self, horizontal_swing_plane: SwingPlaneFrame
-    ) -> None:
+    def test_vertical_force_is_out_of_plane(self, horizontal_swing_plane: SwingPlaneFrame) -> None:
         """Vertical force should be entirely out-of-plane for horizontal plane."""
         wrench = WrenchInFrame(
             force=np.array([0.0, 0.0, 100.0]),
@@ -203,9 +191,7 @@ class TestWrenchDecomposition:
         np.testing.assert_allclose(decomp["force_out_of_plane"], 100.0, atol=1e-10)
         np.testing.assert_allclose(decomp["force_in_plane"], 0.0, atol=1e-10)
 
-    def test_horizontal_force_is_in_plane(
-        self, horizontal_swing_plane: SwingPlaneFrame
-    ) -> None:
+    def test_horizontal_force_is_in_plane(self, horizontal_swing_plane: SwingPlaneFrame) -> None:
         """Horizontal force should be entirely in-plane for horizontal plane."""
         wrench = WrenchInFrame(
             force=np.array([50.0, 50.0, 0.0]),
@@ -217,9 +203,7 @@ class TestWrenchDecomposition:
 
         np.testing.assert_allclose(decomp["force_out_of_plane"], 0.0, atol=1e-10)
         expected_in_plane = np.sqrt(50**2 + 50**2)
-        np.testing.assert_allclose(
-            decomp["force_in_plane"], expected_in_plane, atol=1e-10
-        )
+        np.testing.assert_allclose(decomp["force_in_plane"], expected_in_plane, atol=1e-10)
 
 
 class TestReferenceFrameTransformer:

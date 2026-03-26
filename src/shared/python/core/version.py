@@ -4,9 +4,7 @@ __version__ = "1.0.0"
 __version_info__ = (1, 0, 0)
 
 __title__ = "UpstreamDrift"
-__description__ = (
-    "Professional biomechanical analysis platform for physics-based modeling"
-)
+__description__ = "Professional biomechanical analysis platform for physics-based modeling"
 __author__ = "UpstreamDrift Team"
 __author_email__ = "support@upstreamdrift.dev"
 __license__ = "MIT"

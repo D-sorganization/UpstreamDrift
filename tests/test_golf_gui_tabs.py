@@ -238,9 +238,7 @@ class TestGolfGuiTabs(unittest.TestCase):
         # Layout structure: Control Panel, Visualizer, Status Bar
         self.assertEqual(len(tab.layout.widgets), 3)
         self.assertIsInstance(tab.layout.widgets[0], golf_gui_application.QGroupBox)
-        self.assertIsInstance(
-            tab.layout.widgets[1], golf_gui_application.GolfVisualizerWidget
-        )
+        self.assertIsInstance(tab.layout.widgets[1], golf_gui_application.GolfVisualizerWidget)
         self.assertIsInstance(tab.layout.widgets[2], golf_gui_application.QLabel)
 
     def test_comparison_tab_structure(self):

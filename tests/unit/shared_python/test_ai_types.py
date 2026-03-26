@@ -32,9 +32,7 @@ def test_expertise_level_comparison():
 
 
 def test_provider_capabilities():
-    caps = frozenset(
-        [ProviderCapability.FUNCTION_CALLING, ProviderCapability.STREAMING]
-    )
+    caps = frozenset([ProviderCapability.FUNCTION_CALLING, ProviderCapability.STREAMING])
     provider = ProviderCapabilities(supported=caps, max_tokens=1000, model_name="gpt-4")
 
     assert provider.has_capability(ProviderCapability.FUNCTION_CALLING) is True
@@ -52,9 +50,7 @@ def test_message_dict():
     assert "tool_call_id" not in d
 
     tc = ToolCall.create("my_tool", {"arg": "val"})
-    msg2 = Message(
-        role="assistant", content="doing it", tool_calls=[tc], tool_call_id="tc_123"
-    )
+    msg2 = Message(role="assistant", content="doing it", tool_calls=[tc], tool_call_id="tc_123")
     d2 = msg2.to_dict()
     assert len(d2["tool_calls"]) == 1
     assert d2["tool_calls"][0]["name"] == "my_tool"

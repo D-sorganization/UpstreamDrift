@@ -50,21 +50,20 @@ def cylinder_cross_section(
 
     Parameters
     ----------
-    start : np.ndarray, shape (2,) — proximal end
-    end : np.ndarray, shape (2,) — distal end
-    radius : float — cylinder radius
+    start : np.ndarray, shape (2,) â€” proximal end
+    end : np.ndarray, shape (2,) â€” distal end
+    radius : float â€” cylinder radius
 
     Returns
     -------
-    np.ndarray, shape (4, 2) — corner vertices in CCW order
+    np.ndarray, shape (4, 2) â€” corner vertices in CCW order
 
     Design by Contract
     ------------------
     Pre:  radius > 0
     Post: output shape is (4, 2)
     """
-    if not (radius > 0):
-        raise ValueError(f"radius must be positive, got {radius}")
+    assert radius > 0, f"radius must be positive, got {radius}"
 
     direction = end - start
     length = np.linalg.norm(direction)
@@ -81,7 +80,7 @@ def cylinder_cross_section(
 
     # Unit normal perpendicular to segment direction
     d_hat = direction / length
-    normal = np.array([-d_hat[1], d_hat[0]])  # 90° rotation
+    normal = np.array([-d_hat[1], d_hat[0]])  # 90Â° rotation
 
     offset = normal * radius
     corners = np.array(
@@ -93,8 +92,7 @@ def cylinder_cross_section(
         ]
     )
 
-    if not (corners.shape == (4):
-        raise ValueError(2))
+    assert corners.shape == (4, 2)
     return corners
 
 
@@ -110,10 +108,10 @@ def ellipsoid_cross_section(
     Parameters
     ----------
     centre : np.ndarray, shape (2,)
-    semi_a : float — semi-axis along the segment direction
-    semi_b : float — semi-axis perpendicular to segment
-    angle : float — rotation angle (radians, CCW from x-axis)
-    n_points : int — number of polygon vertices
+    semi_a : float â€” semi-axis along the segment direction
+    semi_b : float â€” semi-axis perpendicular to segment
+    angle : float â€” rotation angle (radians, CCW from x-axis)
+    n_points : int â€” number of polygon vertices
 
     Returns
     -------
@@ -124,12 +122,9 @@ def ellipsoid_cross_section(
     Pre:  semi_a > 0, semi_b > 0, n_points >= 3
     Post: output shape is (n_points, 2)
     """
-    if not (semi_a > 0):
-        raise ValueError(f"semi_a must be positive, got {semi_a}")
-    if not (semi_b > 0):
-        raise ValueError(f"semi_b must be positive, got {semi_b}")
-    if not (n_points >= 3):
-        raise ValueError(f"n_points must be >= 3, got {n_points}")
+    assert semi_a > 0, f"semi_a must be positive, got {semi_a}"
+    assert semi_b > 0, f"semi_b must be positive, got {semi_b}"
+    assert n_points >= 3, f"n_points must be >= 3, got {n_points}"
 
     t = np.linspace(0, 2 * np.pi, n_points, endpoint=False)
     # Unrotated ellipse
@@ -143,8 +138,7 @@ def ellipsoid_cross_section(
     y_rot = sin_a * x + cos_a * y + centre[1]
 
     pts = np.column_stack([x_rot, y_rot])
-    if not (pts.shape == (n_points):
-        raise ValueError(2))
+    assert pts.shape == (n_points, 2)
     return pts
 
 
@@ -158,22 +152,21 @@ def tapered_cylinder_cross_section(
 
     Parameters
     ----------
-    start : np.ndarray, shape (2,) — proximal (thicker) end
-    end : np.ndarray, shape (2,) — distal (thinner) end
-    radius_start : float — radius at start
-    radius_end : float — radius at end
+    start : np.ndarray, shape (2,) â€” proximal (thicker) end
+    end : np.ndarray, shape (2,) â€” distal (thinner) end
+    radius_start : float â€” radius at start
+    radius_end : float â€” radius at end
 
     Returns
     -------
-    np.ndarray, shape (4, 2) — trapezoid vertices
+    np.ndarray, shape (4, 2) â€” trapezoid vertices
 
     Design by Contract
     ------------------
     Pre:  radius_start > 0, radius_end > 0
     Post: output shape is (4, 2)
     """
-    if not (radius_start > 0 and radius_end > 0):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    assert radius_start > 0 and radius_end > 0
 
     direction = end - start
     length = np.linalg.norm(direction)
@@ -192,8 +185,7 @@ def tapered_cylinder_cross_section(
         ]
     )
 
-    if not (corners.shape == (4):
-        raise ValueError(2))
+    assert corners.shape == (4, 2)
     return corners
 
 
@@ -212,18 +204,17 @@ def project_3d_to_2d(
 
     Parameters
     ----------
-    point_3d : np.ndarray, shape (3,) — (x, y, z)
-    tilt : float — tilt angle in radians (rotation about x-axis)
-    azimuth : float — azimuth angle in radians (rotation about y-axis)
-    return_depth : bool — if True, also return the depth value
+    point_3d : np.ndarray, shape (3,) â€” (x, y, z)
+    tilt : float â€” tilt angle in radians (rotation about x-axis)
+    azimuth : float â€” azimuth angle in radians (rotation about y-axis)
+    return_depth : bool â€” if True, also return the depth value
 
     Returns
     -------
-    np.ndarray, shape (2,) — projected (x, y)
+    np.ndarray, shape (2,) â€” projected (x, y)
     or tuple (np.ndarray shape (2,), float depth) if return_depth=True
     """
-    if not (point_3d is not None):
-        raise ValueError("point_3d must be provided")
+    assert point_3d is not None, "point_3d must be provided"
     x, y, z = point_3d
 
     # Apply azimuth rotation (about y-axis)
@@ -275,26 +266,24 @@ def depth_sort_segments(
 def auto_radius_from_mass(mass: float, length: float, scale: float = 0.02) -> float:
     """Compute a reasonable visual radius from segment mass and length.
 
-    radius = scale * sqrt(mass / length) — heuristic for visual appeal.
+    radius = scale * sqrt(mass / length) â€” heuristic for visual appeal.
 
     Parameters
     ----------
-    mass : float — segment mass (kg)
-    length : float — segment length (m)
-    scale : float — visual scaling factor
+    mass : float â€” segment mass (kg)
+    length : float â€” segment length (m)
+    scale : float â€” visual scaling factor
 
     Returns
     -------
-    float — radius in metres
+    float â€” radius in metres
 
     Design by Contract
     ------------------
     Pre:  mass > 0, length > 0, scale > 0
     Post: result > 0
     """
-    if not (mass > 0 and length > 0 and scale > 0):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    assert mass > 0 and length > 0 and scale > 0
     r = scale * np.sqrt(mass / length)
-    if not (r > 0):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    assert r > 0
     return float(r)

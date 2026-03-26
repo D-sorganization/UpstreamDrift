@@ -21,31 +21,21 @@ class TestEngineManager(unittest.TestCase):
         self.mock_root = Path("/mock/root")
 
         # Patch engine probes individually
-        self.mujoco_patcher = patch(
-            "src.shared.python.engine_core.engine_probes.MuJoCoProbe"
-        )
+        self.mujoco_patcher = patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe")
         self.mock_mujoco_probe_cls = self.mujoco_patcher.start()
         self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
 
-        self.drake_patcher = patch(
-            "src.shared.python.engine_core.engine_probes.DrakeProbe"
-        )
+        self.drake_patcher = patch("src.shared.python.engine_core.engine_probes.DrakeProbe")
         self.mock_drake_probe_cls = self.drake_patcher.start()
         self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = True
 
-        self.pinocchio_patcher = patch(
-            "src.shared.python.engine_core.engine_probes.PinocchioProbe"
-        )
+        self.pinocchio_patcher = patch("src.shared.python.engine_core.engine_probes.PinocchioProbe")
         self.mock_pinocchio_probe_cls = self.pinocchio_patcher.start()
 
-        self.pendulum_patcher = patch(
-            "src.shared.python.engine_core.engine_probes.PendulumProbe"
-        )
+        self.pendulum_patcher = patch("src.shared.python.engine_core.engine_probes.PendulumProbe")
         self.mock_pendulum_probe_cls = self.pendulum_patcher.start()
 
-        self.matlab_patcher = patch(
-            "src.shared.python.engine_core.engine_probes.MatlabProbe"
-        )
+        self.matlab_patcher = patch("src.shared.python.engine_core.engine_probes.MatlabProbe")
         self.mock_matlab_probe_cls = self.matlab_patcher.start()
 
         # Patch setup_logging
@@ -84,12 +74,8 @@ class TestEngineManager(unittest.TestCase):
 
         manager._discover_engines()
 
-        self.assertEqual(
-            manager.engine_status[EngineType.MUJOCO], EngineStatus.AVAILABLE
-        )
-        self.assertEqual(
-            manager.engine_status[EngineType.DRAKE], EngineStatus.UNAVAILABLE
-        )
+        self.assertEqual(manager.engine_status[EngineType.MUJOCO], EngineStatus.AVAILABLE)
+        self.assertEqual(manager.engine_status[EngineType.DRAKE], EngineStatus.UNAVAILABLE)
 
     def test_switch_engine_success(self):
         """Test successful engine switch."""
@@ -116,14 +102,10 @@ class TestEngineManager(unittest.TestCase):
         manager = EngineManager(self.mock_root)
         manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-        with patch.object(
-            manager, "_load_engine", side_effect=GolfModelingError("Fail")
-        ):
+        with patch.object(manager, "_load_engine", side_effect=GolfModelingError("Fail")):
             success = manager.switch_engine(EngineType.MUJOCO)
             self.assertFalse(success)
-            self.assertEqual(
-                manager.engine_status[EngineType.MUJOCO], EngineStatus.ERROR
-            )
+            self.assertEqual(manager.engine_status[EngineType.MUJOCO], EngineStatus.ERROR)
 
     def test_load_mujoco_engine_details(self):
         """Test detailed steps of loading MuJoCo engine."""
@@ -165,9 +147,7 @@ class TestEngineManager(unittest.TestCase):
             # Use the actual method that exists in EngineManager
             manager._load_engine(EngineType.MUJOCO)
             # Check that the engine was loaded successfully
-            self.assertEqual(
-                manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
-            )
+            self.assertEqual(manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED)
             self.assertIsNotNone(manager.active_physics_engine)
 
     def test_get_engine_info(self):

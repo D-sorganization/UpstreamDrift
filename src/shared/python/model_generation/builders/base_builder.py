@@ -243,13 +243,11 @@ class BaseURDFBuilder(ABC):
         for joint in self._joints:
             if joint.parent not in link_name_set:
                 raise InvariantError(
-                    f"Joint '{joint.name}' references non-existent "
-                    f"parent link '{joint.parent}'"
+                    f"Joint '{joint.name}' references non-existent " f"parent link '{joint.parent}'"
                 )
             if joint.child not in link_name_set:
                 raise InvariantError(
-                    f"Joint '{joint.name}' references non-existent "
-                    f"child link '{joint.child}'"
+                    f"Joint '{joint.name}' references non-existent " f"child link '{joint.child}'"
                 )
 
     def validate(self) -> ValidationResult:
@@ -280,9 +278,7 @@ class BaseURDFBuilder(ABC):
         from model_generation.builders.urdf_writer import URDFWriter
 
         writer = URDFWriter(pretty_print=pretty_print)
-        return writer.write(
-            self._robot_name, self._links, self._joints, self._materials
-        )
+        return writer.write(self._robot_name, self._links, self._joints, self._materials)
 
     def save(self, path: str | Path, pretty_print: bool = True) -> Path:
         """

@@ -282,9 +282,7 @@ class CollisionChecker:
             return False
 
         # Broad phase: AABB check
-        if self._config.use_broad_phase and not self._aabb_overlap(
-            geom_a, geom_b, margin
-        ):
+        if self._config.use_broad_phase and not self._aabb_overlap(geom_a, geom_b, margin):
             return False
 
         # Narrow phase: Actual distance check
@@ -406,9 +404,7 @@ class CollisionChecker:
                     if not query.should_check_pair(env_pair):
                         continue
 
-                    dist, pa, pb = self._compute_body_environment_distance(
-                        body_name, env_prim
-                    )
+                    dist, pa, pb = self._compute_body_environment_distance(body_name, env_prim)
                     if dist < min_distance:
                         min_distance = dist
                         closest_pair = env_pair

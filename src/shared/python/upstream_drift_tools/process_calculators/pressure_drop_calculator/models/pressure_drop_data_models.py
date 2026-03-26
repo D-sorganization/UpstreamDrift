@@ -149,9 +149,7 @@ class PressureDropInputs:
             if self.pipe_diameter > 10:  # 10 m seems unreasonable
                 logger.warning(f"Large pipe diameter: {self.pipe_diameter} m")
             if self.inlet_pressure > 100e5:  # 100 bar
-                logger.warning(
-                    f"High inlet pressure: {self.inlet_pressure / 1e5:.1f} bar"
-                )
+                logger.warning(f"High inlet pressure: {self.inlet_pressure / 1e5:.1f} bar")
 
             return True, "All validations passed"
 

@@ -135,9 +135,7 @@ class AnalysisMixin:
         try:
             import importlib.util
 
-            target_file = (
-                self.current_dir / "mujoco_humanoid_golf" / "polynomial_generator.py"
-            )
+            target_file = self.current_dir / "mujoco_humanoid_golf" / "polynomial_generator.py"
 
             if not target_file.exists():
                 raise FileNotFoundError(f"File not found: {target_file}")
@@ -310,14 +308,10 @@ class AnalysisMixin:
         if not (line_edit is not None):
             raise ValueError("line_edit must be provided")
         if save:
-            path, _ = QFileDialog.getSaveFileName(
-                self, "Save State", "", "JSON State (*.json)"
-            )
+            path, _ = QFileDialog.getSaveFileName(self, "Save State", "", "JSON State (*.json)")
 
         else:
-            path, _ = QFileDialog.getOpenFileName(
-                self, "Load State", "", "JSON State (*.json)"
-            )
+            path, _ = QFileDialog.getOpenFileName(self, "Load State", "", "JSON State (*.json)")
 
         if path:
             line_edit.setText(path)
@@ -488,9 +482,7 @@ class AnalysisMixin:
             if not ok or not joint:
                 return
 
-            times, g_vals, c_vals, t_vals, tot_vals = self._read_iaa_data(
-                csv_path, joint
-            )
+            times, g_vals, c_vals, t_vals, tot_vals = self._read_iaa_data(csv_path, joint)
 
             if not times:
                 return

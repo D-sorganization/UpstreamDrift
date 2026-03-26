@@ -36,9 +36,7 @@ def linear_signal(t200: np.ndarray) -> Signal:
 
 @pytest.fixture
 def decay_signal(t200: np.ndarray) -> Signal:
-    return SignalGenerator.exponential(
-        t200, amplitude=5.0, decay_rate=1.5, name="decay"
-    )
+    return SignalGenerator.exponential(t200, amplitude=5.0, decay_rate=1.5, name="decay")
 
 
 class TestSinusoidFitter:
@@ -52,9 +50,7 @@ class TestSinusoidFitter:
         assert result.success
 
     def test_estimate_initial_params(self, t200: np.ndarray, sine_2hz: Signal) -> None:
-        amp, freq, phase, offset = SinusoidFitter.estimate_initial_params(
-            t200, sine_2hz.values
-        )
+        amp, freq, phase, offset = SinusoidFitter.estimate_initial_params(t200, sine_2hz.values)
         assert amp > 0
         assert freq > 0
 

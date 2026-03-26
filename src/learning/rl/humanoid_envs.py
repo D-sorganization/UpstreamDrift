@@ -107,9 +107,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
                 q = np.zeros(self._n_joints)
             # Add noise
             if self.obs_config.position_noise_std > 0:
-                q = q + self.np_random.normal(
-                    0, self.obs_config.position_noise_std, q.shape
-                )
+                q = q + self.np_random.normal(0, self.obs_config.position_noise_std, q.shape)
             obs_parts.append(q)
 
         # Joint velocities
@@ -120,9 +118,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
                 qd = np.zeros(self._n_joints)
             # Add noise
             if self.obs_config.velocity_noise_std > 0:
-                qd = qd + self.np_random.normal(
-                    0, self.obs_config.velocity_noise_std, qd.shape
-                )
+                qd = qd + self.np_random.normal(0, self.obs_config.velocity_noise_std, qd.shape)
             obs_parts.append(qd)
 
         # Joint torques
@@ -182,9 +178,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         reward -= self.reward_config.compute_energy_penalty(torques)
 
         # Smoothness penalty
-        reward -= self.reward_config.compute_smoothness_penalty(
-            action, self._prev_action
-        )
+        reward -= self.reward_config.compute_smoothness_penalty(action, self._prev_action)
 
         # Potential shaping
         if self.reward_config.use_potential_shaping:

@@ -75,15 +75,12 @@ class GenericPhysicsRecorder:
         """
         if self.current_idx >= self.current_capacity:
             # Calculate new capacity
-            new_capacity = min(
-                int(self.current_capacity * self.growth_factor), self.max_samples
-            )
+            new_capacity = min(int(self.current_capacity * self.growth_factor), self.max_samples)
 
             if new_capacity <= self.current_capacity:
                 # Hit max_samples limit
                 logger.warning(
-                    f"Recorder buffer full at {self.max_samples} samples. "
-                    "Stopping recording."
+                    f"Recorder buffer full at {self.max_samples} samples. " "Stopping recording."
                 )
                 self.is_recording = False
                 return
@@ -143,10 +140,7 @@ class GenericPhysicsRecorder:
             logger.debug("Allocated Drift buffer dynamically.")
 
         # Allocate Control if missing
-        if (
-            self.analysis_config["track_total_control"]
-            and self.data["control_accel"] is None
-        ):
+        if self.analysis_config["track_total_control"] and self.data["control_accel"] is None:
             self.data["control_accel"] = np.zeros((self.max_samples, nv))
             logger.debug("Allocated Control buffer dynamically.")
 
@@ -154,9 +148,7 @@ class GenericPhysicsRecorder:
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
         for idx in sources:
             if idx not in self.data["induced_accelerations"]:
-                self.data["induced_accelerations"][idx] = np.zeros(
-                    (self.max_samples, nv)
-                )
+                self.data["induced_accelerations"][idx] = np.zeros((self.max_samples, nv))
                 logger.debug(f"Allocated Induced Accel buffer for source {idx}.")
 
     def _reset_buffers(self) -> None:
@@ -336,22 +328,13 @@ class GenericPhysicsRecorder:
             try:
                 self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
             except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(
-                    "Failed to compute drift acceleration at frame %d: %s", idx, e
-                )
+                logger.warning("Failed to compute drift acceleration at frame %d: %s", idx, e)
 
-        if (
-            self.analysis_config["track_total_control"]
-            and self.data["control_accel"] is not None
-        ):
+        if self.analysis_config["track_total_control"] and self.data["control_accel"] is not None:
             try:
-                self.data["control_accel"][idx] = (
-                    self.engine.compute_control_acceleration(tau)
-                )
+                self.data["control_accel"][idx] = self.engine.compute_control_acceleration(tau)
             except (ValueError, RuntimeError, AttributeError) as e:
-                logger.warning(
-                    "Failed to compute control acceleration at frame %d: %s", idx, e
-                )
+                logger.warning("Failed to compute control acceleration at frame %d: %s", idx, e)
 
         self._record_induced_accelerations(idx, tau, M)
 
@@ -373,9 +356,7 @@ class GenericPhysicsRecorder:
                             M_inv[:, src_idx] * tau[src_idx]
                         )
             except (ValueError, TypeError, RuntimeError) as e:
-                logger.warning(
-                    "Failed to compute induced accelerations at frame %d: %s", idx, e
-                )
+                logger.warning("Failed to compute induced accelerations at frame %d: %s", idx, e)
         elif sources:
             for src_idx in sources:
                 if src_idx in self.data["induced_accelerations"]:

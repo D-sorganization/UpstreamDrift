@@ -118,19 +118,14 @@ class TestComputeFlexion:
         proximal = np.array([0.0, 1.0, 0.0])
         joint = np.array([0.0, 0.0, 0.0])
         distal = np.array([0.0, -1.0, 0.0])
-        assert (
-            pytest.approx(_compute_flexion(proximal, joint, distal), abs=1e-6) == np.pi
-        )
+        assert pytest.approx(_compute_flexion(proximal, joint, distal), abs=1e-6) == np.pi
 
     def test_right_angle(self) -> None:
         """A 90-degree bend."""
         proximal = np.array([0.0, 1.0, 0.0])
         joint = np.array([0.0, 0.0, 0.0])
         distal = np.array([1.0, 0.0, 0.0])
-        assert (
-            pytest.approx(_compute_flexion(proximal, joint, distal), abs=1e-6)
-            == np.pi / 2
-        )
+        assert pytest.approx(_compute_flexion(proximal, joint, distal), abs=1e-6) == np.pi / 2
 
 
 # ===================================================================
@@ -194,9 +189,7 @@ class TestComputeJointAnglesOpenPose:
     """Tests for joint angle computation with OpenPose keypoints."""
 
     def test_all_angles_with_mapping(self, openpose_keypoints: dict) -> None:
-        angles = compute_joint_angles(
-            openpose_keypoints, keypoint_mapping=OPENPOSE_TO_CANONICAL
-        )
+        angles = compute_joint_angles(openpose_keypoints, keypoint_mapping=OPENPOSE_TO_CANONICAL)
         assert "right_elbow_flexion" in angles
         assert "left_shoulder_flexion" in angles
         assert "trunk_rotation" in angles
@@ -208,15 +201,11 @@ class TestComputeJointAnglesOpenPose:
     ) -> None:
         """Same pose should give same angles regardless of naming."""
         mp_angles = compute_joint_angles(mediapipe_keypoints)
-        op_angles = compute_joint_angles(
-            openpose_keypoints, keypoint_mapping=OPENPOSE_TO_CANONICAL
-        )
+        op_angles = compute_joint_angles(openpose_keypoints, keypoint_mapping=OPENPOSE_TO_CANONICAL)
 
         for key in mp_angles:
             assert key in op_angles, f"OpenPose missing {key}"
-            np.testing.assert_allclose(
-                mp_angles[key], op_angles[key], atol=1e-10, err_msg=key
-            )
+            np.testing.assert_allclose(mp_angles[key], op_angles[key], atol=1e-10, err_msg=key)
 
 
 # ===================================================================
@@ -309,16 +298,12 @@ class TestFitQuality:
     """Tests for fit quality grading."""
 
     def test_excellent_fit(self) -> None:
-        result = compute_fit_quality(
-            r_squared=0.995, condition_number=50.0, rms_error=0.001
-        )
+        result = compute_fit_quality(r_squared=0.995, condition_number=50.0, rms_error=0.001)
         assert result["r_squared_grade"] == "excellent"
         assert result["condition_well_posed"] is True
 
     def test_poor_fit(self) -> None:
-        result = compute_fit_quality(
-            r_squared=0.80, condition_number=1e8, rms_error=0.5
-        )
+        result = compute_fit_quality(r_squared=0.80, condition_number=1e8, rms_error=0.5)
         assert result["r_squared_grade"] == "poor"
         assert result["condition_well_posed"] is False
 

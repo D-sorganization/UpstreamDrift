@@ -144,9 +144,7 @@ class ComparativeSwingAnalyzer:
             correlation=correlation,
         )
 
-    def compare_scalars(
-        self, metric_name: str, val_a: float, val_b: float
-    ) -> ComparisonMetric:
+    def compare_scalars(self, metric_name: str, val_a: float, val_b: float) -> ComparisonMetric:
         """Create comparison metric for two scalar values.
 
         Args:
@@ -216,9 +214,7 @@ class ComparativeSwingAnalyzer:
         _, ke_b = self.recorder_b.get_time_series("kinetic_energy")
         if len(ke_a) > 0 and len(ke_b) > 0:
             metrics.append(
-                self.compare_scalars(
-                    "Max Kinetic Energy", float(np.max(ke_a)), float(np.max(ke_b))
-                )
+                self.compare_scalars("Max Kinetic Energy", float(np.max(ke_a)), float(np.max(ke_b)))
             )
 
         # Add angular momentum comparison
@@ -230,9 +226,7 @@ class ComparativeSwingAnalyzer:
             # Compare max magnitude
             max_am_a = float(np.max(np.linalg.norm(am_a, axis=1)))
             max_am_b = float(np.max(np.linalg.norm(am_b, axis=1)))
-            metrics.append(
-                self.compare_scalars("Max Angular Momentum", max_am_a, max_am_b)
-            )
+            metrics.append(self.compare_scalars("Max Angular Momentum", max_am_a, max_am_b))
 
         # Add CoP path length comparison
         _, cop_a = self.recorder_a.get_time_series("cop_position")
@@ -246,9 +240,7 @@ class ComparativeSwingAnalyzer:
                 return float(np.sum(np.linalg.norm(np.diff(c[:, :2], axis=0), axis=1)))
 
             metrics.append(
-                self.compare_scalars(
-                    "CoP Path Length", path_len(cop_a), path_len(cop_b)
-                )
+                self.compare_scalars("CoP Path Length", path_len(cop_a), path_len(cop_b))
             )
 
         report = {"swing_a": self.name_a, "swing_b": self.name_b, "metrics": metrics}

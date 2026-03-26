@@ -236,9 +236,7 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
     )
 
     # Phase 2: Backward pass - compute composite inertias
-    ic_composite = _crba_backward_pass(
-        nb, model_parent, model_inertia, xup, xup_T, tmp_6x6, xj_buf
-    )
+    ic_composite = _crba_backward_pass(nb, model_parent, model_inertia, xup, xup_T, tmp_6x6, xj_buf)
 
     # Phase 3: Compute mass matrix from composite inertias
     return _crba_mass_matrix(

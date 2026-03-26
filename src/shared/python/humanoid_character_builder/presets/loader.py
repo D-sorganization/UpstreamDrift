@@ -176,8 +176,7 @@ def load_body_preset(
 
     if preset_name_lower not in _BUILTIN_PRESETS:
         raise ValueError(
-            f"Unknown preset: {preset_name}. "
-            f"Available presets: {', '.join(PRESET_NAMES)}"
+            f"Unknown preset: {preset_name}. " f"Available presets: {', '.join(PRESET_NAMES)}"
         )
 
     preset_data = _BUILTIN_PRESETS[preset_name_lower].copy()

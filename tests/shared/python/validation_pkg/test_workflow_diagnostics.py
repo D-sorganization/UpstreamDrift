@@ -11,9 +11,7 @@ def test_workflow_diagnostic_context_success(tmp_path: Path) -> None:
     dump_dir = tmp_path / "dumps"
     dump_dir.mkdir()
 
-    with WorkflowDiagnosticContext(
-        dump_dir=str(dump_dir), workflow_name="test_success"
-    ) as ctx:
+    with WorkflowDiagnosticContext(dump_dir=str(dump_dir), workflow_name="test_success") as ctx:
         ctx.record_state("step1", {"data": 42})
         ctx.record_state("step2", {"result": "ok"})
         # No exception raised
@@ -30,9 +28,7 @@ def test_workflow_diagnostic_context_failure(tmp_path: Path) -> None:
 
     raised = False
     try:
-        with WorkflowDiagnosticContext(
-            dump_dir=str(dump_dir), workflow_name="test_failure"
-        ) as ctx:
+        with WorkflowDiagnosticContext(dump_dir=str(dump_dir), workflow_name="test_failure") as ctx:
             ctx.record_state("step_A", {"status": "started"})
             ctx.record_state("step_B", {"value": 100})
             raise RuntimeError("Intentional workflow failure")

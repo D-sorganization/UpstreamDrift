@@ -190,12 +190,8 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         overlay_layout = QtWidgets.QVBoxLayout(overlay_group)
 
         # Enable toggle
-        self.chk_show_target = QtWidgets.QCheckBox(
-            "Show Target Trajectory in Visualization"
-        )
-        self.chk_show_target.setToolTip(
-            "Display the target player's swing path in the 3D view"
-        )
+        self.chk_show_target = QtWidgets.QCheckBox("Show Target Trajectory in Visualization")
+        self.chk_show_target.setToolTip("Display the target player's swing path in the 3D view")
         self.chk_show_target.toggled.connect(self._on_target_toggled)
         overlay_layout.addWidget(self.chk_show_target)
 
@@ -326,9 +322,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
                 "Install with: pip install pandas openpyxl",
             )
         except (RuntimeError, TypeError, AttributeError) as e:
-            QtWidgets.QMessageBox.critical(
-                self, "Load Error", f"Failed to load club data:\n{e}"
-            )
+            QtWidgets.QMessageBox.critical(self, "Load Error", f"Failed to load club data:\n{e}")
 
     def _filter_clubs(self, type_filter: str | None = None) -> None:
         """Filter displayed clubs by type."""
@@ -360,12 +354,8 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _update_club_details(self, club: Any) -> None:
         """Update club details display."""
-        self.lbl_club_length.setText(
-            f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)"
-        )
-        self.lbl_club_mass.setText(
-            f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)"
-        )
+        self.lbl_club_length.setText(f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)")
+        self.lbl_club_mass.setText(f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)")
         self.lbl_club_loft.setText(f"{club.loft_degrees:.1f}\u00b0")
         self.lbl_club_lie.setText(f"{club.lie_angle_degrees:.1f}\u00b0")
         self.lbl_club_moi.setText(f"{club.moment_of_inertia:.0f} g\u00b7cm\u00b2")
@@ -427,9 +417,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
             logger.info("Loaded %d players from %s", len(self._players), file_path)
 
         except ImportError as e:
-            QtWidgets.QMessageBox.critical(
-                self, "Load Error", f"Failed to load player data:\n{e}"
-            )
+            QtWidgets.QMessageBox.critical(self, "Load Error", f"Failed to load player data:\n{e}")
 
     def _load_trajectory_file(self, file_path: str, player_name: str) -> None:
         """Load trajectory from a file."""
@@ -448,9 +436,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
             logger.info("Loaded trajectory for %s from %s", player_name, file_path)
 
         except ImportError as e:
-            QtWidgets.QMessageBox.critical(
-                self, "Load Error", f"Failed to load trajectory:\n{e}"
-            )
+            QtWidgets.QMessageBox.critical(self, "Load Error", f"Failed to load trajectory:\n{e}")
 
     def _on_player_changed(
         self,
@@ -474,9 +460,7 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         self.lbl_club_speed.setText(
             f"{m.club_head_speed_mph:.1f} mph ({m.club_head_speed_ms:.1f} m/s)"
         )
-        self.lbl_ball_speed.setText(
-            f"{m.ball_speed_mph:.1f} mph ({m.ball_speed_ms:.1f} m/s)"
-        )
+        self.lbl_ball_speed.setText(f"{m.ball_speed_mph:.1f} mph ({m.ball_speed_ms:.1f} m/s)")
         self.lbl_launch_angle.setText(f"{m.launch_angle_degrees:.1f}\u00b0")
         self.lbl_spin_rate.setText(f"{m.spin_rate_rpm:.0f} rpm")
         self.lbl_carry.setText(

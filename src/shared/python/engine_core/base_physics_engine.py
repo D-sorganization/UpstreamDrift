@@ -210,9 +210,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
 
         # Verify postconditions
         if not (self._is_initialized):
-            raise ValueError(()
-            "Postcondition: engine must be initialized after load"
-        )
+            raise ValueError("Postcondition: engine must be initialized after load")
         if not (self.model is not None):
             raise ValueError("Postcondition: model must be loaded")
 
@@ -252,9 +250,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
 
         # Verify postconditions
         if not (self._is_initialized):
-            raise ValueError(()
-            "Postcondition: engine must be initialized after load"
-        )
+            raise ValueError("Postcondition: engine must be initialized after load")
         if not (self.model is not None):
             raise ValueError("Postcondition: model must be loaded")
 
@@ -350,9 +346,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                 self.state.q = np.asarray(args[0]).copy()
                 self.state.v = np.asarray(args[1]).copy()
         else:
-            raise TypeError(
-                f"set_state expects EngineState or (q, v), got {len(args)} args"
-            )
+            raise TypeError(f"set_state expects EngineState or (q, v), got {len(args)} args")
 
     def get_time(self) -> float:
         """Get current simulation time.

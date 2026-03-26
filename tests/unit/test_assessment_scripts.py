@@ -10,9 +10,7 @@ class TestAssessmentScripts(unittest.TestCase):
     def test_extract_score_from_report(self):
         # Create a dummy report file
         dummy_report = Path("dummy_report.md")
-        dummy_report.write_text(
-            "# Assessment: Test\n\n**Grade**: 8.5/10\n", encoding="utf-8"
-        )
+        dummy_report.write_text("# Assessment: Test\n\n**Grade**: 8.5/10\n", encoding="utf-8")
         try:
             score = extract_score_from_report(dummy_report)
             self.assertEqual(score, 8.5)

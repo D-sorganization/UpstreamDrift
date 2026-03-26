@@ -52,6 +52,4 @@ async def analyze_biomechanics(
     except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Analysis error: %s", exc)
-        raise HTTPException(
-            status_code=500, detail=f"Analysis failed: {str(exc)}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(exc)}") from exc

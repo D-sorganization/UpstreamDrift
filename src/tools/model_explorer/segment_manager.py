@@ -16,9 +16,7 @@ class SegmentManager:
         self.parallel_chains: list[dict] = []  # For parallel kinematic chains
 
     @precondition(
-        lambda self, segment_data: (
-            segment_data is not None and isinstance(segment_data, dict)
-        ),
+        lambda self, segment_data: (segment_data is not None and isinstance(segment_data, dict)),
         "Segment data must be a non-None dictionary",
     )
     @precondition(
@@ -81,9 +79,7 @@ class SegmentManager:
         # Remove from parent's children list
         parent = self.segments[name].get("parent")
         if parent and parent in self.hierarchy:
-            self.hierarchy[parent] = [
-                child for child in self.hierarchy[parent] if child != name
-            ]
+            self.hierarchy[parent] = [child for child in self.hierarchy[parent] if child != name]
 
         # Remove segment
         del self.segments[name]
@@ -95,9 +91,7 @@ class SegmentManager:
         logger.info(f"Removed segment: {name}")
 
     @precondition(
-        lambda self, segment_data: (
-            segment_data is not None and isinstance(segment_data, dict)
-        ),
+        lambda self, segment_data: (segment_data is not None and isinstance(segment_data, dict)),
         "Segment data must be a non-None dictionary",
     )
     @precondition(
@@ -253,9 +247,7 @@ class SegmentManager:
         return errors
 
     @precondition(
-        lambda self, chain_data: (
-            chain_data is not None and isinstance(chain_data, dict)
-        ),
+        lambda self, chain_data: (chain_data is not None and isinstance(chain_data, dict)),
         "Chain data must be a non-None dictionary",
     )
     @precondition(
@@ -284,9 +276,7 @@ class SegmentManager:
         # Validate all segments exist
         for segment_name in segments:
             if segment_name not in self.segments:
-                raise ValueError(
-                    f"Segment '{segment_name}' in parallel chain does not exist"
-                )
+                raise ValueError(f"Segment '{segment_name}' in parallel chain does not exist")
 
         self.parallel_chains.append(chain_data.copy())
         logger.info(f"Created parallel chain: {chain_data['name']}")
@@ -340,9 +330,7 @@ class SegmentManager:
         "Engine must be one of: 'mujoco', 'drake', 'pinocchio'",
     )
     @postcondition(
-        lambda result: (
-            result is not None and isinstance(result, dict) and "engine" in result
-        ),
+        lambda result: (result is not None and isinstance(result, dict) and "engine" in result),
         "Export result must be a dictionary containing an 'engine' key",
     )
     def export_for_engine(self, engine: str) -> dict:

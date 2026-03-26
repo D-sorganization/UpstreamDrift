@@ -137,9 +137,7 @@ class TestInjuryRiskScorer:
 
         # Add high risk factors
         scorer.risk_factors = [
-            RiskFactor(
-                "spinal_compression", 8.0, 4.0, 6.0, modifiable=True
-            ),  # High score
+            RiskFactor("spinal_compression", 8.0, 4.0, 6.0, modifiable=True),  # High score
             RiskFactor("elbow_stress", 60.0, 25.0, 50.0, modifiable=True),  # High score
         ]
         report.overall_risk_level = RiskLevel.HIGH
@@ -151,8 +149,7 @@ class TestInjuryRiskScorer:
         assert any("spinal compression" in r.lower() for r in report.recommendations)
         assert any("elbow" in r.lower() for r in report.recommendations)
         assert any(
-            "consult" in r.lower() and "professional" in r.lower()
-            for r in report.recommendations
+            "consult" in r.lower() and "professional" in r.lower() for r in report.recommendations
         )
 
     def test_full_scoring_pipeline(

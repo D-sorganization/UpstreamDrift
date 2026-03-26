@@ -98,9 +98,7 @@ class MyoSuiteMuscleAnalyzer:
         self.muscle_actuator_ids = self._identify_muscle_actuators()
         self.muscle_names = self._get_muscle_names()
 
-        logger.info(
-            f"MyoSuite analyzer found {len(self.muscle_names)} muscle actuators"
-        )
+        logger.info(f"MyoSuite analyzer found {len(self.muscle_names)} muscle actuators")
 
     def _identify_muscle_actuators(self) -> list[int]:
         """Identify which actuators are muscles (vs motors/torques).
@@ -147,9 +145,7 @@ class MyoSuiteMuscleAnalyzer:
 
         try:
             for actuator_id in self.muscle_actuator_ids:
-                name = mujoco.mj_id2name(
-                    self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id
-                )
+                name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id)
                 if name:
                     names.append(name)
                 else:
@@ -546,9 +542,7 @@ class MyoSuiteGripModel:
                 grip_activations[muscle_name] = activations[idx]
 
         total_grip_force = sum(grip_forces.values())
-        mean_activation = (
-            np.mean(list(grip_activations.values())) if grip_activations else 0.0
-        )
+        mean_activation = np.mean(list(grip_activations.values())) if grip_activations else 0.0
 
         # Validation: MVC grip force 200-800 N (Section K1)
         within_mvc_range = MIN_MVC_GRIP_N <= total_grip_force <= MAX_MVC_GRIP_N

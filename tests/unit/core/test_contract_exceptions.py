@@ -24,9 +24,7 @@ class TestContractViolationError:
         assert "x must be positive" in str(err)
 
     def test_message_contains_function_name(self) -> None:
-        err = ContractViolationError(
-            "Postcondition", "bad result", function_name="my_func"
-        )
+        err = ContractViolationError("Postcondition", "bad result", function_name="my_func")
         assert "my_func" in str(err)
 
     def test_message_contains_details(self) -> None:

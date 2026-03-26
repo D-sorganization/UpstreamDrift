@@ -148,9 +148,7 @@ class MotionDataLoader:
             if path.exists():
                 return self.load_excel_data(str(path))
 
-        raise FileNotFoundError(
-            "Wiffle_ProV1 Excel file not found in any expected location"
-        )
+        raise FileNotFoundError("Wiffle_ProV1 Excel file not found in any expected location")
 
     def load_from_file(self, filepath: str) -> dict[str, pd.DataFrame]:
         """
@@ -182,12 +180,8 @@ class MotionDataLoader:
 
         try:
             # Read both sheets
-            prov1_data = pd.read_excel(
-                filepath_path, sheet_name=self.config.prov1_sheet
-            )
-            wiffle_data = pd.read_excel(
-                filepath_path, sheet_name=self.config.wiffle_sheet
-            )
+            prov1_data = pd.read_excel(filepath_path, sheet_name=self.config.prov1_sheet)
+            wiffle_data = pd.read_excel(filepath_path, sheet_name=self.config.wiffle_sheet)
 
             logger.info("[OK] Loaded ProV1 data: %s", prov1_data.shape)
             logger.info("[OK] Loaded Wiffle data: %s", wiffle_data.shape)
@@ -214,9 +208,7 @@ class MotionDataLoader:
             logger.info("[OK] Extracted time data from column 1 for %s", sheet_name)
             return pd.to_numeric(data_df.iloc[:, 1], errors="coerce")
 
-        logger.info(
-            "[WARN] No Time column found in %s, creating linear time", sheet_name
-        )
+        logger.info("[WARN] No Time column found in %s, creating linear time", sheet_name)
         return pd.Series(np.linspace(0, 1, len(data_df)))
 
     def _extract_clubhead_position(self, data_df, processed_data, sheet_name) -> None:
@@ -227,24 +219,16 @@ class MotionDataLoader:
         # Check for position columns by index (more reliable than name matching)
         if len(data_df.columns) >= 16:
             # Use the first set of X, Y, Z (columns 2, 3, 4)
-            processed_data["clubhead_x"] = pd.to_numeric(
-                data_df.iloc[:, 2], errors="coerce"
-            )
-            processed_data["clubhead_y"] = pd.to_numeric(
-                data_df.iloc[:, 3], errors="coerce"
-            )
-            processed_data["clubhead_z"] = pd.to_numeric(
-                data_df.iloc[:, 4], errors="coerce"
-            )
+            processed_data["clubhead_x"] = pd.to_numeric(data_df.iloc[:, 2], errors="coerce")
+            processed_data["clubhead_y"] = pd.to_numeric(data_df.iloc[:, 3], errors="coerce")
+            processed_data["clubhead_z"] = pd.to_numeric(data_df.iloc[:, 4], errors="coerce")
 
             logger.info(
-                f"[OK] Extracted position data from columns 2-4 (Mid-hands) "
-                f"for {sheet_name}"
+                f"[OK] Extracted position data from columns 2-4 (Mid-hands) " f"for {sheet_name}"
             )
         else:
             logger.info(
-                f"[WARN] Insufficient columns in {sheet_name}, "
-                f"using first 3 numeric columns"
+                f"[WARN] Insufficient columns in {sheet_name}, " f"using first 3 numeric columns"
             )
             numeric_cols = data_df.select_dtypes(include=[np.number]).columns
             if len(numeric_cols) >= 3:
@@ -259,8 +243,7 @@ class MotionDataLoader:
                 )
             else:
                 logger.info(
-                    f"[WARN] Insufficient numeric columns in {sheet_name}, "
-                    f"creating dummy data"
+                    f"[WARN] Insufficient numeric columns in {sheet_name}, " f"creating dummy data"
                 )
                 processed_data["clubhead_x"] = np.linspace(0, 1, len(processed_data))
                 processed_data["clubhead_y"] = np.linspace(0, 1, len(processed_data))
@@ -282,9 +265,9 @@ class MotionDataLoader:
 
         # Normalize time if requested
         if self.config.normalize_time:
-            processed_data["time"] = (
-                processed_data["time"] - processed_data["time"].min()
-            ) / (processed_data["time"].max() - processed_data["time"].min())
+            processed_data["time"] = (processed_data["time"] - processed_data["time"].min()) / (
+                processed_data["time"].max() - processed_data["time"].min()
+            )
 
         # Filter noise if requested
         if self.config.filter_noise:
@@ -312,9 +295,7 @@ class MotionDataLoader:
         # Row 3+: Actual data
 
         if len(df) < 3:
-            logger.info(
-                "[WARN] Insufficient rows in %s, creating dummy data", sheet_name
-            )
+            logger.info("[WARN] Insufficient rows in %s, creating dummy data", sheet_name)
             return self._create_dummy_data(100)
 
         # Extract headers from row 2 (index 2)
@@ -343,9 +324,7 @@ class MotionDataLoader:
 
         return processed_data
 
-    def _create_body_part_estimates(
-        self, processed_data: pd.DataFrame, sheet_name: str
-    ) -> None:
+    def _create_body_part_estimates(self, processed_data: pd.DataFrame, sheet_name: str) -> None:
         """Create reasonable estimates for body parts based on clubhead position"""
         # This is a simplified biomechanical model
         # In a real application, you'd want more sophisticated modeling
@@ -414,8 +393,7 @@ class MotionDataLoader:
         processed_data["hub_z"] = ch_z_array + 0.47
 
         logger.info(
-            f"[CALC] Created body part estimates for {sheet_name} "
-            f"based on clubhead position"
+            f"[CALC] Created body part estimates for {sheet_name} " f"based on clubhead position"
         )
 
     def _create_dummy_data(self, num_frames: int) -> pd.DataFrame:
@@ -445,15 +423,15 @@ class MotionDataLoader:
             "right_shoulder",
             "hub",
         ]:
-            processed_data[f"{pos}_x"] = processed_data[
-                "clubhead_x"
-            ] + np.random.normal(0, 0.1, num_frames)
-            processed_data[f"{pos}_y"] = processed_data[
-                "clubhead_y"
-            ] + np.random.normal(0, 0.1, num_frames)
-            processed_data[f"{pos}_z"] = processed_data[
-                "clubhead_z"
-            ] + np.random.normal(0, 0.1, num_frames)
+            processed_data[f"{pos}_x"] = processed_data["clubhead_x"] + np.random.normal(
+                0, 0.1, num_frames
+            )
+            processed_data[f"{pos}_y"] = processed_data["clubhead_y"] + np.random.normal(
+                0, 0.1, num_frames
+            )
+            processed_data[f"{pos}_z"] = processed_data["clubhead_z"] + np.random.normal(
+                0, 0.1, num_frames
+            )
 
         return processed_data
 
@@ -630,20 +608,14 @@ class MotionDataLoader:
 
                 if prov1_col in prov1_df.columns and wiffle_col in wiffle_df.columns:
                     # Interpolate wiffle data to match prov1 time points
-                    wiffle_interp = np.interp(
-                        common_time, wiffle_df["time"], wiffle_df[wiffle_col]
-                    )
+                    wiffle_interp = np.interp(common_time, wiffle_df["time"], wiffle_df[wiffle_col])
                     diff = _to_numpy(prov1_df[prov1_col]) - wiffle_interp
 
                     # Store in DELTAQ format
-                    gui_col = (
-                        f"{component.upper().replace('_', '')[:2]}{axis[-1].upper()}"
-                    )
+                    gui_col = f"{component.upper().replace('_', '')[:2]}{axis[-1].upper()}"
                     deltaq_data[gui_col] = diff
                 else:
-                    deltaq_data[
-                        f"{component.upper().replace('_', '')[:2]}{axis[-1].upper()}"
-                    ] = 0.0
+                    deltaq_data[f"{component.upper().replace('_', '')[:2]}{axis[-1].upper()}"] = 0.0
 
         return deltaq_data
 

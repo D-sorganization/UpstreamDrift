@@ -1,5 +1,5 @@
 """
-Shared physics utilities for all pendulum models (DRY — #C1).
+Shared physics utilities for all pendulum models (DRY â€” #C1).
 
 Consolidates duplicated calculations across physics.py, physics_triple.py,
 and golfer_*.py into generic N-DOF functions.
@@ -41,15 +41,11 @@ def kinetic_energy_from_M(M: np.ndarray, qdot: np.ndarray) -> float:
         Result is finite and >= 0 (up to floating-point noise).
     """
     n = qdot.shape[0]
-    if not (M.shape == (n):
-        raise ValueError(n), f"M shape {M.shape} vs qdot shape {qdot.shape}")
-    if not (np.all(np.isfinite(M))):
-        raise ValueError("Mass matrix has non-finite values")
-    if not (np.all(np.isfinite(qdot))):
-        raise ValueError("Velocity has non-finite values")
+    assert M.shape == (n, n), f"M shape {M.shape} vs qdot shape {qdot.shape}"
+    assert np.all(np.isfinite(M)), "Mass matrix has non-finite values"
+    assert np.all(np.isfinite(qdot)), "Velocity has non-finite values"
     T = float(0.5 * qdot @ M @ qdot)
-    if not (np.isfinite(T)):
-        raise ValueError(f"Kinetic energy is non-finite: {T}")
+    assert np.isfinite(T), f"Kinetic energy is non-finite: {T}"
     return T
 
 
@@ -64,10 +60,8 @@ def total_energy_from_parts(kinetic: float, potential: float) -> float:
     Pre: both finite.
     Post: result finite.
     """
-    if not (np.isfinite(kinetic)):
-        raise ValueError(f"Kinetic energy non-finite: {kinetic}")
-    if not (np.isfinite(potential)):
-        raise ValueError(f"Potential energy non-finite: {potential}")
+    assert np.isfinite(kinetic), f"Kinetic energy non-finite: {kinetic}"
+    assert np.isfinite(potential), f"Potential energy non-finite: {potential}"
     return kinetic + potential
 
 
@@ -87,29 +81,25 @@ def friction_torque_ndof(
 
     Parameters
     ----------
-    qdot : shape (n,) — generalized velocities.
-    viscous_coeffs : shape (n,) — viscous damping per DOF.
-    coulomb_coeffs : shape (n,) or None — Coulomb friction per DOF.
+    qdot : shape (n,) â€” generalized velocities.
+    viscous_coeffs : shape (n,) â€” viscous damping per DOF.
+    coulomb_coeffs : shape (n,) or None â€” Coulomb friction per DOF.
 
     Pre: all finite, shapes match.
     Post: opposes motion direction element-wise.
     """
     n = qdot.shape[0]
-    if not (viscous_coeffs.shape == (n):
-        raise ValueError(), ()
-        f"viscous shape {viscous_coeffs.shape} vs qdot {qdot.shape}"
-    )
-    if not (np.all(np.isfinite(qdot))):
-        raise ValueError("qdot has non-finite values")
+    assert viscous_coeffs.shape == (
+        n,
+    ), f"viscous shape {viscous_coeffs.shape} vs qdot {qdot.shape}"
+    assert np.all(np.isfinite(qdot)), "qdot has non-finite values"
 
     tau: npt.NDArray[np.float64] = np.asarray(-viscous_coeffs * qdot, dtype=np.float64)
     if coulomb_coeffs is not None:
-        if not (coulomb_coeffs.shape == (n):
-            raise ValueError())
+        assert coulomb_coeffs.shape == (n,)
         tau -= coulomb_coeffs * np.sign(qdot)
 
-    if not (np.all(np.isfinite(tau))):
-        raise ValueError(f"Friction torque non-finite: {tau}")
+    assert np.all(np.isfinite(tau)), f"Friction torque non-finite: {tau}"
     return tau
 
 
@@ -123,20 +113,16 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    tau : shape (n,) — torque vector.
-    limits : shape (n,) — per-DOF saturation limits (positive).
+    tau : shape (n,) â€” torque vector.
+    limits : shape (n,) â€” per-DOF saturation limits (positive).
 
     Pre: shapes match, limits > 0 or inf.
     Post: |result[i]| <= limits[i].
     """
     n = tau.shape[0]
-    if not (limits.shape == (n):
-        raise ValueError(), f"limits shape {limits.shape} vs tau {tau.shape}")
-    if not (np.all(limits > 0)):
-        raise ValueError("Torque limits must be positive")
-    result: npt.NDArray[np.float64] = np.asarray(
-        np.clip(tau, -limits, limits), dtype=np.float64
-    )
+    assert limits.shape == (n,), f"limits shape {limits.shape} vs tau {tau.shape}"
+    assert np.all(limits > 0), "Torque limits must be positive"
+    result: npt.NDArray[np.float64] = np.asarray(np.clip(tau, -limits, limits), dtype=np.float64)
     return result
 
 
@@ -163,7 +149,7 @@ def chain_positions(
 
     Returns
     -------
-    np.ndarray, shape (n, 2) — endpoint of each segment.
+    np.ndarray, shape (n, 2) â€” endpoint of each segment.
 
     Convention: angle 0 = straight down.
         x += -L * sin(angle)
@@ -176,10 +162,7 @@ def chain_positions(
     convention y-up (positive cosine), matching the existing physics modules.
     """
     n = absolute_angles.shape[0]
-    if not (lengths.shape == (n):
-        raise ValueError(), ()
-        f"lengths {lengths.shape} vs angles {absolute_angles.shape}"
-    )
+    assert lengths.shape == (n,), f"lengths {lengths.shape} vs angles {absolute_angles.shape}"
 
     positions = np.zeros((n, 2))
     x, y = origin
@@ -211,19 +194,17 @@ def potential_energy_chain(
 
     Parameters
     ----------
-    absolute_angles : shape (n,) — absolute angle of each segment.
-    lengths : shape (n,) — length of each segment.
-    masses : shape (n,) — point mass at the end of each segment.
-    g : float — gravitational acceleration.
+    absolute_angles : shape (n,) â€” absolute angle of each segment.
+    lengths : shape (n,) â€” length of each segment.
+    masses : shape (n,) â€” point mass at the end of each segment.
+    g : float â€” gravitational acceleration.
 
     Pre: all finite, shapes match, g >= 0.
     Post: result finite.
     """
     n = absolute_angles.shape[0]
-    if not (lengths.shape == (n):
-        raise ValueError() and masses.shape == (n,))
-    if not (g >= 0):
-        raise ValueError(f"g must be non-negative, got {g}")
+    assert lengths.shape == (n,) and masses.shape == (n,)
+    assert g >= 0, f"g must be non-negative, got {g}"
 
     # Cumulative mass from tip backwards: mass_below[i] = sum(masses[i:])
     # Each segment i contributes: -mass_below_i * g * L_i * cos(angle_i)
@@ -234,8 +215,7 @@ def potential_energy_chain(
         mass_below = float(np.sum(masses[i:]))
         V -= mass_below * g * lengths[i] * np.cos(absolute_angles[i])
 
-    if not (np.isfinite(V)):
-        raise ValueError(f"Potential energy non-finite: {V}")
+    assert np.isfinite(V), f"Potential energy non-finite: {V}"
     return V
 
 
@@ -245,7 +225,7 @@ def potential_energy_chain(
 
 
 def hermite_smoothstep(x: float) -> float:
-    """3rd-order Hermite smoothstep: f(x) = 3x² - 2x³ for x in [0,1].
+    """3rd-order Hermite smoothstep: f(x) = 3xÂ² - 2xÂ³ for x in [0,1].
 
     Pre: 0 <= x <= 1.
     Post: 0 <= result <= 1, monotonically increasing.

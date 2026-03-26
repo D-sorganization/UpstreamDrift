@@ -219,9 +219,7 @@ def linearize_friction_cone(
 
 
 @precondition(
-    lambda contact_normal, contact_position, friction_coeff, num_faces: (
-        friction_coeff >= 0
-    ),
+    lambda contact_normal, contact_position, friction_coeff, num_faces: (friction_coeff >= 0),
     "Friction coefficient must be non-negative",
 )
 def compute_friction_cone_constraint(
@@ -255,9 +253,7 @@ def compute_friction_cone_constraint(
     contact_normal = contact_normal / np.linalg.norm(contact_normal)
 
     # Linearize friction cone
-    A_friction, b_friction = linearize_friction_cone(
-        friction_coeff, contact_normal, num_faces
-    )
+    A_friction, b_friction = linearize_friction_cone(friction_coeff, contact_normal, num_faces)
 
     # Add non-negative normal force constraint: -n^T @ f <= 0
     A_normal = -contact_normal.reshape(1, 3)
@@ -360,9 +356,7 @@ def _project_to_cone_surface(
     edge_dir = np.cos(cone_angle) * cone.normal + np.sin(cone_angle) * t_dir
 
     # Project force onto this direction
-    proj = np.dot(
-        np.array([f_n, f_t_mag]), np.array([np.cos(cone_angle), np.sin(cone_angle)])
-    )
+    proj = np.dot(np.array([f_n, f_t_mag]), np.array([np.cos(cone_angle), np.sin(cone_angle)]))
 
     if proj <= 0:
         return np.zeros(3)

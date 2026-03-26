@@ -22,9 +22,7 @@ from ..models.responses import AnalysisResponse
 
 logger = get_logger(__name__)
 
-VALID_ANALYSIS_TYPES = frozenset(
-    {"kinematics", "kinetics", "energetics", "swing_sequence"}
-)
+VALID_ANALYSIS_TYPES = frozenset({"kinematics", "kinetics", "energetics", "swing_sequence"})
 
 
 class AnalysisService:
@@ -119,9 +117,7 @@ class AnalysisService:
                 export_path="",
             )
 
-    async def _analyze_kinematics(
-        self, request: AnalysisRequest, engine: Any
-    ) -> dict[str, Any]:
+    async def _analyze_kinematics(self, request: AnalysisRequest, engine: Any) -> dict[str, Any]:
         """Perform kinematic analysis (positions, velocities, accelerations).
 
         Extracts joint kinematics from the physics engine or provided data.
@@ -190,9 +186,7 @@ class AnalysisService:
 
         return result
 
-    async def _analyze_kinetics(
-        self, request: AnalysisRequest, engine: Any
-    ) -> dict[str, Any]:
+    async def _analyze_kinetics(self, request: AnalysisRequest, engine: Any) -> dict[str, Any]:
         """Perform kinetic analysis (forces, torques, moments).
 
         Extracts joint kinetics from the physics engine or provided data.
@@ -250,9 +244,7 @@ class AnalysisService:
 
         return result
 
-    async def _analyze_energetics(
-        self, request: AnalysisRequest, engine: Any
-    ) -> dict[str, Any]:
+    async def _analyze_energetics(self, request: AnalysisRequest, engine: Any) -> dict[str, Any]:
         """Perform energetic analysis (energy, power, work).
 
         Computes energy metrics from the physics engine state.
@@ -288,9 +280,7 @@ class AnalysisService:
                     if total is not None:
                         result["total_energy"] = float(total)
                 else:
-                    result["total_energy"] = (
-                        result["kinetic_energy"] + result["potential_energy"]
-                    )
+                    result["total_energy"] = result["kinetic_energy"] + result["potential_energy"]
 
                 # Get power if available
                 if hasattr(engine, "get_actuator_powers"):

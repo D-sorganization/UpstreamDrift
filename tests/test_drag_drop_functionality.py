@@ -56,9 +56,7 @@ class TestDragDropFunctionality(unittest.TestCase):
         # "argument of type 'Mock' is not iterable" when DraggableModelCard
         # does ``"mujoco" in model_id`` inside setup_ui().
         self.mock_models = [
-            _make_mock_model(
-                f"test_model_{i}", f"Test Model {i}", f"Test Description {i}"
-            )
+            _make_mock_model(f"test_model_{i}", f"Test Model {i}", f"Test Description {i}")
             for i in range(3)
         ]
 
@@ -149,9 +147,7 @@ class TestDragDropFunctionality(unittest.TestCase):
         card.dropEvent(event)
 
         # Verify swap called
-        self.mock_launcher._swap_models.assert_called_with(
-            "source_model", "target_model"
-        )
+        self.mock_launcher._swap_models.assert_called_with("source_model", "target_model")
         # Verify event accepted
         self.assertTrue(event.isAccepted())
 
@@ -527,9 +523,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         for file_name in required_files:
             file_path = urdf_dir / file_name
-            self.assertTrue(
-                file_path.exists(), f"Required file {file_name} should exist"
-            )
+            self.assertTrue(file_path.exists(), f"Required file {file_name} should exist")
 
     def test_urdf_generator_engine_support(self) -> None:
         """Test that URDF generator supports multiple engines."""
@@ -554,9 +548,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         except ImportError as e:
             self.skipTest(f"URDF generator not available: {e}")
 
-    @unittest.skip(
-        "Pre-existing: hangs due to QMainWindow init without proper QApplication setup"
-    )
+    @unittest.skip("Pre-existing: hangs due to QMainWindow init without proper QApplication setup")
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_urdf_generator_launch_method(self) -> None:
         """Test URDF generator launch method."""

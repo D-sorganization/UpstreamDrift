@@ -33,9 +33,7 @@ class MotionCaptureFrame:
     time: float
     marker_positions: dict[str, np.ndarray]  # marker_name -> position [3]
     marker_velocities: dict[str, np.ndarray] | None = None
-    body_orientations: dict[str, np.ndarray] | None = (
-        None  # body_name -> quaternion [4]
-    )
+    body_orientations: dict[str, np.ndarray] | None = None  # body_name -> quaternion [4]
     joint_angles: np.ndarray | None = None  # If available from mocap system
 
 
@@ -540,9 +538,9 @@ class MotionCaptureProcessor:
         if method == "finite_difference":
             # Central differences
             velocities = np.zeros_like(positions)
-            velocities[1:-1] = (positions[2:] - positions[:-2]) / (
-                times[2:] - times[:-2]
-            )[:, np.newaxis]
+            velocities[1:-1] = (positions[2:] - positions[:-2]) / (times[2:] - times[:-2])[
+                :, np.newaxis
+            ]
             velocities[0] = (positions[1] - positions[0]) / (times[1] - times[0])
             velocities[-1] = (positions[-1] - positions[-2]) / (times[-1] - times[-2])
 
@@ -577,13 +575,11 @@ class MotionCaptureProcessor:
             raise ValueError("times must be provided")
         if method == "finite_difference":
             accelerations = np.zeros_like(velocities)
-            accelerations[1:-1] = (velocities[2:] - velocities[:-2]) / (
-                times[2:] - times[:-2]
-            )[:, np.newaxis]
+            accelerations[1:-1] = (velocities[2:] - velocities[:-2]) / (times[2:] - times[:-2])[
+                :, np.newaxis
+            ]
             accelerations[0] = (velocities[1] - velocities[0]) / (times[1] - times[0])
-            accelerations[-1] = (velocities[-1] - velocities[-2]) / (
-                times[-1] - times[-2]
-            )
+            accelerations[-1] = (velocities[-1] - velocities[-2]) / (times[-1] - times[-2])
 
         elif method == "spline":
             accelerations = np.zeros_like(velocities)
@@ -694,8 +690,7 @@ class MotionCaptureValidator:
             if marker_name in frame.marker_positions:
                 if (
                     last_frame >= 0
-                    and (frame.time - mocap_sequence.frames[last_frame].time)
-                    > gap_threshold
+                    and (frame.time - mocap_sequence.frames[last_frame].time) > gap_threshold
                 ):
                     gaps.append((last_frame, i))
                 last_frame = i
@@ -755,9 +750,7 @@ class MotionCaptureValidator:
             raise ValueError("mocap_sequence must be provided")
         total_frames = len(mocap_sequence.frames)
         visible_frames = sum(
-            1
-            for frame in mocap_sequence.frames
-            if marker_name in frame.marker_positions
+            1 for frame in mocap_sequence.frames if marker_name in frame.marker_positions
         )
 
         visibility_percentage = 100.0 * visible_frames / total_frames

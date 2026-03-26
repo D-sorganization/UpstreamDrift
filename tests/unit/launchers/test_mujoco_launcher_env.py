@@ -51,9 +51,7 @@ class TestMujocoLauncherEnv:
         )
 
         env = MujocoUnifiedLauncher._get_launch_env()
-        mujoco_path = str(
-            REPO_ROOT / "src" / "engines" / "physics_engines" / "mujoco" / "python"
-        )
+        mujoco_path = str(REPO_ROOT / "src" / "engines" / "physics_engines" / "mujoco" / "python")
         assert mujoco_path in env["PYTHONPATH"]
 
     def test_get_launch_env_preserves_existing_pythonpath(self):

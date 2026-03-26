@@ -137,9 +137,7 @@ class ParsedModel:
             name=self.name,
             links=[Link.from_dict(link.to_dict()) for link in self.links],
             joints=[Joint.from_dict(j.to_dict()) for j in self.joints],
-            materials={
-                k: Material.from_dict(v.to_dict()) for k, v in self.materials.items()
-            },
+            materials={k: Material.from_dict(v.to_dict()) for k, v in self.materials.items()},
             original_xml=self.original_xml,
             source_path=self.source_path,
             warnings=self.warnings.copy(),
@@ -291,9 +289,7 @@ class URDFParser:
             )
             if result.returncode == 0:
                 return result.stdout
-            logger.warning(
-                f"xacro processing failed (exit {result.returncode}): {result.stderr}"
-            )
+            logger.warning(f"xacro processing failed (exit {result.returncode}): {result.stderr}")
             return None
         except FileNotFoundError:
             logger.warning("xacro CLI tool not found. Install with: pip install xacro")
@@ -317,9 +313,7 @@ class URDFParser:
         visual_geometry, visual_origin, visual_material = self._parse_link_visual(
             elem, materials, base_path
         )
-        collision_geometry, collision_origin = self._parse_link_collision(
-            elem, base_path
-        )
+        collision_geometry, collision_origin = self._parse_link_collision(elem, base_path)
 
         return Link(
             name=name,
@@ -449,9 +443,7 @@ class URDFParser:
             logger.warning(f"Unknown joint type '{joint_type_str}', using fixed")
             return JointType.FIXED
 
-    def _parse_joint_parent_child(
-        self, elem: ET.Element, joint_name: str
-    ) -> tuple[str, str]:
+    def _parse_joint_parent_child(self, elem: ET.Element, joint_name: str) -> tuple[str, str]:
         """Parse parent and child link names from joint element."""
         parent_elem = elem.find("parent")
         child_elem = elem.find("child")
@@ -580,9 +572,7 @@ class URDFParser:
         if cylinder_elem is not None:
             radius = float(cylinder_elem.get("radius", 0.05))
             length = float(cylinder_elem.get("length", 0.1))
-            return Geometry(
-                geometry_type=GeometryType.CYLINDER, dimensions=(radius, length)
-            )
+            return Geometry(geometry_type=GeometryType.CYLINDER, dimensions=(radius, length))
 
         # Sphere
         sphere_elem = elem.find("sphere")

@@ -2,9 +2,8 @@
 
 Launches the Unified Dashboard with the Pinocchio Physics Engine.
 
-The Pinocchio engine package is deferred to inside ``main()`` so that
-importing this module does NOT trigger pinocchio package loading.  This
-satisfies the lazy-loading requirement from Guideline Issue #1956.
+The Pinocchio physics engine import is deferred to ``main()`` to ensure strict
+lazy-loading: importing this module does not trigger the Pinocchio dependency chain.
 """
 
 from src.shared.python.dashboard.launcher import launch_dashboard
@@ -12,7 +11,6 @@ from src.shared.python.dashboard.launcher import launch_dashboard
 
 def main() -> None:
     """Main entry point."""
-    # Deferred import: only loads pinocchio when this launcher is actually invoked
     from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: PLC0415
         PinocchioPhysicsEngine,
     )

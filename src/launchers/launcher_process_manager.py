@@ -167,9 +167,7 @@ class ProcessManager:
                 lines = self._log_file_path.read_text(
                     encoding="utf-8", errors="replace"
                 ).splitlines()
-                self._log_file_path.write_text(
-                    "\n".join(lines[-500:]) + "\n", encoding="utf-8"
-                )
+                self._log_file_path.write_text("\n".join(lines[-500:]) + "\n", encoding="utf-8")
         except (RuntimeError, ValueError, OSError) as e:
             logger.debug("Could not init log file: %s", e)
 
@@ -379,9 +377,7 @@ class ProcessManager:
                 repo_root_str = str(self.repo_root)
                 src_dir_str = str(self.repo_root / "src")
 
-                current_paths = (
-                    current_pythonpath.split(";") if current_pythonpath else []
-                )
+                current_paths = current_pythonpath.split(";") if current_pythonpath else []
                 paths_to_add = []
                 if repo_root_str not in current_paths:
                     paths_to_add.append(repo_root_str)
@@ -538,9 +534,7 @@ class ProcessManager:
 
         # Validate module name: must be a dotted Python identifier.
         if not _MODULE_NAME_RE.match(module_name):
-            logger.error(
-                "WSL module launch rejected: invalid module name %r", module_name
-            )
+            logger.error("WSL module launch rejected: invalid module name %r", module_name)
             return False
 
         work_dir = project_dir

@@ -33,39 +33,24 @@ def deep_analyze_matlab_file(filename) -> bool:
 
             logger.info(f"\nKey: {key}")
             logger.debug(f"  Type: {type(value)}")
-            logger.debug(
-                f"  Shape: {value.shape if hasattr(value, 'shape') else 'N/A'}"
-            )
-            logger.debug(
-                f"  Dtype: {value.dtype if hasattr(value, 'dtype') else 'N/A'}"
-            )
+            logger.debug(f"  Shape: {value.shape if hasattr(value, 'shape') else 'N/A'}")
+            logger.debug(f"  Dtype: {value.dtype if hasattr(value, 'dtype') else 'N/A'}")
 
             if isinstance(value, np.ndarray):
                 if value.dtype.names:  # Structured array
                     logger.info(f"  Structured array with fields: {value.dtype.names}")
                     for field_name in value.dtype.names:
                         field_data = value[field_name]
-                        shape_info = (
-                            field_data.shape if hasattr(field_data, "shape") else "N/A"
-                        )
-                        logger.info(
-                            f"    {field_name}: {type(field_data)}, shape {shape_info}"
-                        )
+                        shape_info = field_data.shape if hasattr(field_data, "shape") else "N/A"
+                        logger.info(f"    {field_name}: {type(field_data)}, shape {shape_info}")
 
                         # If it's an object array, try to explore further
-                        if hasattr(
-                            field_data, "dtype"
-                        ) and field_data.dtype == np.dtype("O"):
-                            logger.info(
-                                f"      Object array with {len(field_data)} elements"
-                            )
+                        if hasattr(field_data, "dtype") and field_data.dtype == np.dtype("O"):
+                            logger.info(f"      Object array with {len(field_data)} elements")
                             for i, obj in enumerate(field_data[:3]):  # Show first 3
-                                obj_shape = (
-                                    obj.shape if hasattr(obj, "shape") else "N/A"
-                                )
+                                obj_shape = obj.shape if hasattr(obj, "shape") else "N/A"
                                 logger.info(
-                                    f"        Element {i}: {type(obj)}, "
-                                    f"shape {obj_shape}"
+                                    f"        Element {i}: {type(obj)}, " f"shape {obj_shape}"
                                 )
                                 if hasattr(obj, "dtype"):
                                     logger.debug(f"        Dtype: {obj.dtype}")
@@ -84,8 +69,7 @@ def deep_analyze_matlab_file(filename) -> bool:
                     logger.info("  Numeric array")
                     if value.size > 0:
                         logger.info(
-                            f"    Min: {value.min()}, Max: {value.max()}, "
-                            f"Mean: {value.mean()}"
+                            f"    Min: {value.min()}, Max: {value.max()}, " f"Mean: {value.mean()}"
                         )
                         if value.ndim <= 2 and value.size <= 20:
                             logger.info(f"    Data: {value}")
@@ -120,29 +104,22 @@ def extract_actual_data(filename) -> np.ndarray | None:
                     field_data = value[field_name]
                     logger.info(f"  Field '{field_name}': {type(field_data)}")
 
-                    if hasattr(field_data, "dtype") and field_data.dtype == np.dtype(
-                        "O"
-                    ):
+                    if hasattr(field_data, "dtype") and field_data.dtype == np.dtype("O"):
                         # Object array - this might contain the actual data
                         logger.info(f"    Object array with {len(field_data)} elements")
 
                         for i, obj in enumerate(field_data):
                             if hasattr(obj, "shape") and len(obj.shape) == 2:
                                 logger.info(f"      Element {i}: shape {obj.shape}")
-                                if (
-                                    obj.shape[1] > 10
-                                ):  # Many columns suggest signal data
+                                if obj.shape[1] > 10:  # Many columns suggest signal data
                                     logger.info("        This looks like signal data!")
-                                    logger.info(
-                                        "        Sample (first 3 rows, first 5 cols):"
-                                    )
+                                    logger.info("        Sample (first 3 rows, first 5 cols):")
                                     logger.info(f"        {obj[:3, :5]}")
 
                                     # Check if this has the expected structure
                                     if obj.shape[0] > 100:  # Many time points
                                         logger.info(
-                                            "        ✅ This appears to be "
-                                            "the main dataset!"
+                                            "        ✅ This appears to be " "the main dataset!"
                                         )
                                         return obj
 
@@ -186,9 +163,7 @@ def main() -> None:
             data = extract_actual_data(filename)
             if data is not None:
                 extracted_data[filename] = data
-                logger.info(
-                    f"✅ Successfully extracted data from {filename}: {data.shape}"
-                )
+                logger.info(f"✅ Successfully extracted data from {filename}: {data.shape}")
             else:
                 logger.info(f"❌ Could not extract data from {filename}")
 
@@ -207,9 +182,7 @@ def main() -> None:
         logger.info("\n🎉 RECOMMENDATIONS:")
         logger.info("1. The data structure is compatible with signal bus logging")
         logger.info("2. The GUI should be able to handle this data format")
-        logger.info(
-            "3. Consider adding a data extraction function to handle this structure"
-        )
+        logger.info("3. Consider adding a data extraction function to handle this structure")
         logger.info("4. Test the GUI with this data to verify compatibility")
 
     else:

@@ -306,8 +306,7 @@ class TestCrossEngineMassMatrix:
         eig_pinocchio = np.linalg.eigvalsh(M_pinocchio)
 
         assert np.all(eig_mujoco > 0), (
-            f"MuJoCo mass matrix not positive definite: "
-            f"min eigenvalue = {eig_mujoco.min():.2e}"
+            f"MuJoCo mass matrix not positive definite: " f"min eigenvalue = {eig_mujoco.min():.2e}"
         )
 
         assert np.all(eig_pinocchio > 0), (
@@ -492,9 +491,7 @@ class TestCrossEngineIntegration:
         # Tolerance is 20% — different engines, different inertia derivations.
         # The internal-consistency checks below (1e-10) verify that each engine
         # is self-consistent; this check only verifies cross-engine plausibility.
-        rel_error = abs(tau_mj_direct[0] - tau_pin_direct[0]) / (
-            abs(tau_pin_direct[0]) + 1e-10
-        )
+        rel_error = abs(tau_mj_direct[0] - tau_pin_direct[0]) / (abs(tau_pin_direct[0]) + 1e-10)
 
         assert rel_error < 0.2, (
             f"Equation of motion mismatch: "

@@ -106,9 +106,7 @@ def _absolute_angles(theta_hub: float, relative_angles: list[float]) -> list[flo
     return result
 
 
-def forward_kinematics(
-    q: np.ndarray, p: GolferParams
-) -> dict[str, tuple[float, float]]:
+def forward_kinematics(q: np.ndarray, p: GolferParams) -> dict[str, tuple[float, float]]:
     """Compute all joint positions in world frame.
 
     Parameters
@@ -128,8 +126,8 @@ def forward_kinematics(
 
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
-    if not (q.shape == (N_DOF):
-        raise ValueError(), f"q must have shape ({N_DOF},), got {q.shape}")
+    if not (q.shape == (N_DOF,)):
+        raise ValueError(f"q must have shape ({N_DOF},), got {q.shape}")
 
     th_hub = q[0]
     alpha_rs, alpha_re, alpha_rh = q[1], q[2], q[3]

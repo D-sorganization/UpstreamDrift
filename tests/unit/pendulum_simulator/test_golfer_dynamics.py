@@ -154,9 +154,7 @@ class TestAnalyticalFkJacobians:
     def test_shapes_are_2_by_ndof(self) -> None:
         result = analytical_fk_jacobians(_Q, _P)
         for key, J in result.items():
-            assert J.shape == (2, N_DOF), (
-                f"Key {key}: expected (2, {N_DOF}), got {J.shape}"
-            )
+            assert J.shape == (2, N_DOF), f"Key {key}: expected (2, {N_DOF}), got {J.shape}"
 
     def test_finite_values(self) -> None:
         result = analytical_fk_jacobians(_Q, _P)

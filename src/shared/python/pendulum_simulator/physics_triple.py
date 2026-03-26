@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -37,8 +36,8 @@ class TriplePendulumParams:
     Contract:
         - All lengths and masses must be strictly positive.
         - Gravity must be non-negative.
-        - Damping coefficients b1, b2, b3 must be non-negative  (N·m·s/rad).
-        - Coulomb friction mu1, mu2, mu3 must be non-negative  (N·m peak magnitude).
+        - Damping coefficients b1, b2, b3 must be non-negative  (NÂ·mÂ·s/rad).
+        - Coulomb friction mu1, mu2, mu3 must be non-negative  (NÂ·m peak magnitude).
     """
 
     m1: float  # mass of segment 1 (kg)
@@ -49,46 +48,33 @@ class TriplePendulumParams:
     L3: float  # length of segment 3 (m)
     g: float = GRAVITY_MSS  # gravitational acceleration (m/s^2)
     # --- Dissipative parameters (default 0 = no losses) ---
-    b1: float = 0.0  # viscous damping at joint 1 (N·m·s/rad)
-    b2: float = 0.0  # viscous damping at joint 2 (N·m·s/rad)
-    b3: float = 0.0  # viscous damping at joint 3 (N·m·s/rad)
-    mu1: float = 0.0  # Coulomb friction at joint 1 (N·m, constant magnitude)
-    mu2: float = 0.0  # Coulomb friction at joint 2 (N·m, constant magnitude)
-    mu3: float = 0.0  # Coulomb friction at joint 3 (N·m, constant magnitude)
+    b1: float = 0.0  # viscous damping at joint 1 (NÂ·mÂ·s/rad)
+    b2: float = 0.0  # viscous damping at joint 2 (NÂ·mÂ·s/rad)
+    b3: float = 0.0  # viscous damping at joint 3 (NÂ·mÂ·s/rad)
+    mu1: float = 0.0  # Coulomb friction at joint 1 (NÂ·m, constant magnitude)
+    mu2: float = 0.0  # Coulomb friction at joint 2 (NÂ·m, constant magnitude)
+    mu3: float = 0.0  # Coulomb friction at joint 3 (NÂ·m, constant magnitude)
     # --- Scapula offset (#1152) ---
     scapula_offset_rad: float = 0.0  # angular offset of hub anchor (rad)
 
     def __post_init__(self) -> None:
-        if not (self.m1 > 0):
-            raise ValueError(f"m1 must be positive, got {self.m1}")
-        if not (self.m2 > 0):
-            raise ValueError(f"m2 must be positive, got {self.m2}")
-        if not (self.m3 > 0):
-            raise ValueError(f"m3 must be positive, got {self.m3}")
-        if not (self.L1 > 0):
-            raise ValueError(f"L1 must be positive, got {self.L1}")
-        if not (self.L2 > 0):
-            raise ValueError(f"L2 must be positive, got {self.L2}")
-        if not (self.L3 > 0):
-            raise ValueError(f"L3 must be positive, got {self.L3}")
-        if not (self.g >= 0):
-            raise ValueError(f"g must be non-negative, got {self.g}")
-        if not (self.b1 >= 0):
-            raise ValueError(f"b1 must be non-negative, got {self.b1}")
-        if not (self.b2 >= 0):
-            raise ValueError(f"b2 must be non-negative, got {self.b2}")
-        if not (self.b3 >= 0):
-            raise ValueError(f"b3 must be non-negative, got {self.b3}")
-        if not (self.mu1 >= 0):
-            raise ValueError(f"mu1 must be non-negative, got {self.mu1}")
-        if not (self.mu2 >= 0):
-            raise ValueError(f"mu2 must be non-negative, got {self.mu2}")
-        if not (self.mu3 >= 0):
-            raise ValueError(f"mu3 must be non-negative, got {self.mu3}")
+        assert self.m1 > 0, f"m1 must be positive, got {self.m1}"
+        assert self.m2 > 0, f"m2 must be positive, got {self.m2}"
+        assert self.m3 > 0, f"m3 must be positive, got {self.m3}"
+        assert self.L1 > 0, f"L1 must be positive, got {self.L1}"
+        assert self.L2 > 0, f"L2 must be positive, got {self.L2}"
+        assert self.L3 > 0, f"L3 must be positive, got {self.L3}"
+        assert self.g >= 0, f"g must be non-negative, got {self.g}"
+        assert self.b1 >= 0, f"b1 must be non-negative, got {self.b1}"
+        assert self.b2 >= 0, f"b2 must be non-negative, got {self.b2}"
+        assert self.b3 >= 0, f"b3 must be non-negative, got {self.b3}"
+        assert self.mu1 >= 0, f"mu1 must be non-negative, got {self.mu1}"
+        assert self.mu2 >= 0, f"mu2 must be non-negative, got {self.mu2}"
+        assert self.mu3 >= 0, f"mu3 must be non-negative, got {self.mu3}"
 
 
 # Type alias: state vector [theta1, phi1, phi2, dtheta1, dphi1, dphi2]
-State: TypeAlias = npt.NDArray[np.float64]  # shape (6,)
+State = npt.NDArray[np.float64]  # shape (6,)
 
 # Torque function signature: (t) -> (tau1, tau2, tau3)
 TorqueFunc = Callable[[float], tuple[float, float, float]]
@@ -121,10 +107,8 @@ def mass_matrix(phi1: float, phi2: float, params: TriplePendulumParams) -> np.nd
     -------
     M : np.ndarray, shape (3, 3)
     """
-    if not (np.isfinite(phi1)):
-        raise ValueError(f"phi1 must be finite, got {phi1}")
-    if not (np.isfinite(phi2)):
-        raise ValueError(f"phi2 must be finite, got {phi2}")
+    assert np.isfinite(phi1), f"phi1 must be finite, got {phi1}"
+    assert np.isfinite(phi2), f"phi2 must be finite, got {phi2}"
     native_mass_matrix = _native_backend.triple_mass_matrix(phi1, phi2, params)
     if native_mass_matrix is not None:
         return native_mass_matrix
@@ -178,25 +162,19 @@ def mass_matrix(phi1: float, phi2: float, params: TriplePendulumParams) -> np.nd
     # Postcondition: symmetry
     for i in range(3):
         for j in range(3):
-            if not (np.isclose(M[i):
-                raise ValueError(j], M[j, i]), ()
-                f"Mass matrix not symmetric at [{i},{j}]"
-            )
+            assert np.isclose(M[i, j], M[j, i]), f"Mass matrix not symmetric at [{i},{j}]"
 
     return M
 
 
-def mass_matrix_components(
-    phi1: float, phi2: float, params: TriplePendulumParams
-) -> dict:
+def mass_matrix_components(phi1: float, phi2: float, params: TriplePendulumParams) -> dict:
     """Return individual mass matrix terms with labels.
 
     Returns
     -------
     dict with keys M11..M33 and M_full.
     """
-    if not (phi1 is not None):
-        raise ValueError("phi1 must be provided")
+    assert phi1 is not None, "phi1 must be provided"
     M = mass_matrix(phi1, phi2, params)
     return {
         "M11": M[0, 0],
@@ -250,10 +228,9 @@ def coriolis_vector(
     -------
     C_qdot : np.ndarray, shape (3,)
     """
-    if not (all(np.isfinite(v) for v in [phi1):
-        raise ValueError(phi2, dtheta1, dphi1, dphi2]), ()
-        "All inputs must be finite"
-    )
+    assert all(
+        np.isfinite(v) for v in [phi1, phi2, dtheta1, dphi1, dphi2]
+    ), "All inputs must be finite"
     native_coriolis = _native_backend.triple_coriolis_vector(
         phi1, phi2, dtheta1, dphi1, dphi2, params
     )
@@ -280,8 +257,7 @@ def coriolis_vector(
     c3 = -(h13 + h23) * dtheta1**2 - h23 * (2.0 * dtheta1 + dphi1) * dphi1
 
     result = np.array([c1, c2, c3])
-    if not (all(np.isfinite(result))):
-        raise ValueError(f"Coriolis vector has non-finite values: {result}")
+    assert all(np.isfinite(result)), f"Coriolis vector has non-finite values: {result}"
     return result
 
 
@@ -333,8 +309,7 @@ def gravity_vector(
     G3 = m3 * g * L3 * np.sin(abs_angle3)
 
     result = np.array([G1, G2, G3])
-    if not (all(np.isfinite(result))):
-        raise ValueError(f"Gravity vector has non-finite values: {result}")
+    assert all(np.isfinite(result)), f"Gravity vector has non-finite values: {result}"
     return result
 
 
@@ -361,22 +336,18 @@ def friction_torque_vector(
 
     Returns
     -------
-    tau_f : np.ndarray, shape (3,)  [N·m]
+    tau_f : np.ndarray, shape (3,)  [NÂ·m]
     """
-    if not (np.isfinite(dtheta1)):
-        raise ValueError(f"dtheta1 must be finite, got {dtheta1}")
-    if not (np.isfinite(dphi1)):
-        raise ValueError(f"dphi1 must be finite, got {dphi1}")
-    if not (np.isfinite(dphi2)):
-        raise ValueError(f"dphi2 must be finite, got {dphi2}")
+    assert np.isfinite(dtheta1), f"dtheta1 must be finite, got {dtheta1}"
+    assert np.isfinite(dphi1), f"dphi1 must be finite, got {dphi1}"
+    assert np.isfinite(dphi2), f"dphi2 must be finite, got {dphi2}"
 
     tau_f1 = -params.b1 * dtheta1 - params.mu1 * np.sign(dtheta1)
     tau_f2 = -params.b2 * dphi1 - params.mu2 * np.sign(dphi1)
     tau_f3 = -params.b3 * dphi2 - params.mu3 * np.sign(dphi2)
 
     result = np.array([tau_f1, tau_f2, tau_f3])
-    if not (all(np.isfinite(result))):
-        raise ValueError(f"Friction torque has non-finite values: {result}")
+    assert all(np.isfinite(result)), f"Friction torque has non-finite values: {result}"
     return result
 
 
@@ -418,10 +389,8 @@ def equations_of_motion(
     -------
     state_dot : np.ndarray, shape (6,)
     """
-    if not (state.shape == (6):
-        raise ValueError(), f"State must have shape (6,), got {state.shape}")
-    if not (all(np.isfinite(state))):
-        raise ValueError(f"State values must be finite: {state}")
+    assert state.shape == (6,), f"State must have shape (6,), got {state.shape}"
+    assert all(np.isfinite(state)), f"State values must be finite: {state}"
 
     theta1, phi1, phi2, dtheta1, dphi1, dphi2 = state
 
@@ -446,10 +415,7 @@ def equations_of_motion(
 
     state_dot = np.array([dtheta1, dphi1, dphi2, qddot[0], qddot[1], qddot[2]])
 
-    if not (all(np.isfinite(state_dot))):
-        raise ValueError(()
-        f"State derivative has non-finite values: {state_dot}"
-    )
+    assert all(np.isfinite(state_dot)), f"State derivative has non-finite values: {state_dot}"
     return state_dot
 
 
@@ -481,11 +447,8 @@ def forward_kinematics(
     dict with 'hub', 'shoulder', 'wrist1', 'wrist2', 'tip' as (x, y) tuples.
     The shoulder is displaced from the hub by the scapula offset (#1152).
     """
-    if not (theta1 is not None):
-        raise ValueError("theta1 must be provided")
-    native_positions = _native_backend.triple_forward_kinematics(
-        theta1, phi1, phi2, params
-    )
+    assert theta1 is not None, "theta1 must be provided"
+    native_positions = _native_backend.triple_forward_kinematics(theta1, phi1, phi2, params)
     if native_positions is not None:
         return native_positions
 
@@ -526,19 +489,15 @@ def forward_kinematics(
     }
 
 
-def linear_accelerations(
-    state: State, qddot: np.ndarray, params: TriplePendulumParams
-) -> dict:
+def linear_accelerations(state: State, qddot: np.ndarray, params: TriplePendulumParams) -> dict:
     """Compute linear accelerations of joints in world coordinates.
 
     Returns
     -------
     dict with keys: 'wrist1', 'wrist2', 'tip' as (ax, ay) tuples.
     """
-    if not (state.shape == (6):
-        raise ValueError(), f"State must have shape (6,), got {state.shape}")
-    if not (qddot.shape == (3):
-        raise ValueError(), f"qddot must have shape (3,), got {qddot.shape}")
+    assert state.shape == (6,), f"State must have shape (6,), got {state.shape}"
+    assert qddot.shape == (3,), f"qddot must have shape (3,), got {qddot.shape}"
 
     theta1, phi1, phi2, dtheta1, dphi1, dphi2 = state
     ddtheta1, ddphi1, ddphi2 = qddot
@@ -568,17 +527,14 @@ def linear_accelerations(
     }
 
 
-def net_joint_forces(
-    state: State, qddot: np.ndarray, params: TriplePendulumParams
-) -> dict:
+def net_joint_forces(state: State, qddot: np.ndarray, params: TriplePendulumParams) -> dict:
     """Compute net joint forces (proximal on distal) in world coordinates.
 
     Returns
     -------
     dict with keys: 'shoulder', 'wrist1', 'wrist2' as (fx, fy) tuples.
     """
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     acc = linear_accelerations(state, qddot, params)
     g_vec = np.array([0.0, -params.g])
 
@@ -605,8 +561,7 @@ def net_joint_forces(
 
 def kinetic_energy(state: State, params: TriplePendulumParams) -> float:
     """Compute total kinetic energy T = 0.5 * qdot^T M qdot."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .physics_base import kinetic_energy_from_M
 
     theta1, phi1, phi2, dtheta1, dphi1, dphi2 = state
@@ -617,8 +572,7 @@ def kinetic_energy(state: State, params: TriplePendulumParams) -> float:
 
 def potential_energy(state: State, params: TriplePendulumParams) -> float:
     """Compute total potential energy."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     theta1, phi1, phi2, _, _, _ = state
 
     m1, m2, m3 = params.m1, params.m2, params.m3
@@ -632,9 +586,7 @@ def potential_energy(state: State, params: TriplePendulumParams) -> float:
     V = (
         -m1 * g * L1 * np.cos(theta1)
         - m2 * g * (L1 * np.cos(theta1) + L2 * np.cos(abs_angle2))
-        - m3
-        * g
-        * (L1 * np.cos(theta1) + L2 * np.cos(abs_angle2) + L3 * np.cos(abs_angle3))
+        - m3 * g * (L1 * np.cos(theta1) + L2 * np.cos(abs_angle2) + L3 * np.cos(abs_angle3))
     )
 
     return float(V)
@@ -642,10 +594,7 @@ def potential_energy(state: State, params: TriplePendulumParams) -> float:
 
 def total_energy(state: State, params: TriplePendulumParams) -> float:
     """Compute total energy E = T + V."""
-    if not (state is not None):
-        raise ValueError("state must be provided")
+    assert state is not None, "state must be provided"
     from .physics_base import total_energy_from_parts
 
-    return total_energy_from_parts(
-        kinetic_energy(state, params), potential_energy(state, params)
-    )
+    return total_energy_from_parts(kinetic_energy(state, params), potential_energy(state, params))

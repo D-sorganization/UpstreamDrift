@@ -524,18 +524,14 @@ class ElevationMap:
 
         # Central differences where possible
         if ix > 0 and ix < n_cols - 1:
-            dzdx = (self.data[iy, ix + 1] - self.data[iy, ix - 1]) / (
-                2 * self.resolution
-            )
+            dzdx = (self.data[iy, ix + 1] - self.data[iy, ix - 1]) / (2 * self.resolution)
         elif ix == 0:
             dzdx = (self.data[iy, ix + 1] - self.data[iy, ix]) / self.resolution
         else:
             dzdx = (self.data[iy, ix] - self.data[iy, ix - 1]) / self.resolution
 
         if iy > 0 and iy < n_rows - 1:
-            dzdy = (self.data[iy + 1, ix] - self.data[iy - 1, ix]) / (
-                2 * self.resolution
-            )
+            dzdy = (self.data[iy + 1, ix] - self.data[iy - 1, ix]) / (2 * self.resolution)
         elif iy == 0:
             dzdy = (self.data[iy + 1, ix] - self.data[iy, ix]) / self.resolution
         else:
@@ -754,9 +750,7 @@ class TerrainRegion:
         return False
 
     @staticmethod
-    def _point_in_polygon(
-        x: float, y: float, vertices: list[tuple[float, float]]
-    ) -> bool:
+    def _point_in_polygon(x: float, y: float, vertices: list[tuple[float, float]]) -> bool:
         """Ray casting algorithm for point-in-polygon test."""
         if not (x is not None):
             raise ValueError("x must be provided")
@@ -770,9 +764,7 @@ class TerrainRegion:
             xi, yi = vertices[i]
             xj, yj = vertices[j]
 
-            if ((yi > y) != (yj > y)) and (
-                x < (xj - xi) * (y - yi) / (yj - yi + 1e-10) + xi
-            ):
+            if ((yi > y) != (yj > y)) and (x < (xj - xi) * (y - yi) / (yj - yi + 1e-10) + xi):
                 inside = not inside
             j = i
 

@@ -130,9 +130,7 @@ class TestTopographyDataHeightmap:
         assert abs(grad[0]) < 0.1  # nearly flat
         assert abs(grad[1]) < 0.1
 
-    def test_sloped_elevation_increases_with_x(
-        self, sloped_topo: TopographyData
-    ) -> None:
+    def test_sloped_elevation_increases_with_x(self, sloped_topo: TopographyData) -> None:
         z0 = sloped_topo.get_elevation_at(np.array([0.0, 5.0]))
         z5 = sloped_topo.get_elevation_at(np.array([5.0, 5.0]))
         z10 = sloped_topo.get_elevation_at(np.array([10.0, 5.0]))
@@ -215,9 +213,7 @@ class TestTopographyDataContourPoints:
         topo.set_contour_points(points)
         return topo
 
-    def test_is_loaded_after_set_contour_points(
-        self, contour_topo: TopographyData
-    ) -> None:
+    def test_is_loaded_after_set_contour_points(self, contour_topo: TopographyData) -> None:
         assert contour_topo.is_loaded
 
     def test_elevation_at_known_point(self, contour_topo: TopographyData) -> None:
@@ -277,9 +273,7 @@ class TestFactoryFunctions:
         assert z0 > z50
 
     def test_create_undulating_terrain_has_variation(self) -> None:
-        topo = create_undulating_terrain(
-            width=100.0, height=100.0, amplitude=2.0, wavelength=20.0
-        )
+        topo = create_undulating_terrain(width=100.0, height=100.0, amplitude=2.0, wavelength=20.0)
         result = topo.sample_uniform(20, 20)
         # Undulating terrain should have some variance (not flat)
         assert np.std(result) > 0.1

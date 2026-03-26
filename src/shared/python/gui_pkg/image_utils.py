@@ -28,9 +28,7 @@ logger = get_logger(__name__)
 def ensure_pillow() -> None:
     """Ensure Pillow is installed."""
     if not PILLOW_AVAILABLE:
-        raise ImportError(
-            "Pillow (PIL) is not installed. Install with: pip install Pillow"
-        )
+        raise ImportError("Pillow (PIL) is not installed. Install with: pip install Pillow")
 
 
 def auto_crop_to_content(img: Image.Image, padding: int = 50) -> Image.Image:
@@ -114,9 +112,7 @@ def enhance_icon_source(
     return img
 
 
-def create_optimized_icon(
-    img: Image.Image, size: int, mode: str = "standard"
-) -> Image.Image:
+def create_optimized_icon(img: Image.Image, size: int, mode: str = "standard") -> Image.Image:
     """Create a sharp icon at the specified size with adaptive sharpening.
 
     Args:
@@ -148,9 +144,7 @@ def create_optimized_icon(
         final = working_img.resize((size, size), Image.Resampling.LANCZOS)
 
         if size <= 16:
-            final = final.filter(
-                ImageFilter.UnsharpMask(radius=0.2, percent=300, threshold=0)
-            )
+            final = final.filter(ImageFilter.UnsharpMask(radius=0.2, percent=300, threshold=0))
             final = final.filter(ImageFilter.SHARPEN).filter(ImageFilter.SHARPEN)
             return ImageEnhance.Contrast(final).enhance(1.4)
         if size <= 32:
@@ -179,13 +173,9 @@ def create_optimized_icon(
         ).filter(ImageFilter.SHARPEN)
         resized = ImageEnhance.Contrast(resized).enhance(1.2)
     elif size <= 64:
-        resized = resized.filter(
-            ImageFilter.UnsharpMask(radius=0.5, percent=150, threshold=2)
-        )
+        resized = resized.filter(ImageFilter.UnsharpMask(radius=0.5, percent=150, threshold=2))
     elif size <= 256:
-        resized = resized.filter(
-            ImageFilter.UnsharpMask(radius=1.0, percent=100, threshold=3)
-        )
+        resized = resized.filter(ImageFilter.UnsharpMask(radius=1.0, percent=100, threshold=3))
     return resized
 
 

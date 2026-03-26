@@ -153,9 +153,7 @@ class ModelGenerationAPI:
             except ValueError:
                 logger.warning("Invalid MODEL_GEN_RATE_LIMIT value: %s", rate_limit_str)
 
-        self._is_production: bool = (
-            os.environ.get("MODEL_GEN_ENV", "").lower() == "production"
-        )
+        self._is_production: bool = os.environ.get("MODEL_GEN_ENV", "").lower() == "production"
 
         # In-memory sliding window rate limiter: client_ip -> list[timestamp]
         self._rate_limit_windows: dict[str, list[float]] = {}
@@ -348,17 +346,13 @@ class ModelGenerationAPI:
         if self._rate_limit is None:
             return None
 
-        client_ip = (
-            request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
-        )
+        client_ip = request.headers.get("X-Forwarded-For", "unknown").split(",")[0].strip()
         now = time.time()
         window_start = now - 60.0  # 1-minute sliding window
 
         # Prune old entries
         timestamps = self._rate_limit_windows.setdefault(client_ip, [])
-        self._rate_limit_windows[client_ip] = [
-            ts for ts in timestamps if ts > window_start
-        ]
+        self._rate_limit_windows[client_ip] = [ts for ts in timestamps if ts > window_start]
 
         if len(self._rate_limit_windows[client_ip]) >= self._rate_limit:
             return APIResponse.error("Rate limit exceeded. Try again later.", 429)
@@ -379,9 +373,7 @@ class ModelGenerationAPI:
             raise ValueError("response must be provided")
         origin = self._cors_origins.split(",")[0].strip() if self._cors_origins else ""
         response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Methods"] = (
-            "GET, POST, PUT, DELETE, OPTIONS"
-        )
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
         response.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key"
 
     def _add_security_headers(self, response: APIResponse) -> None:
@@ -393,9 +385,7 @@ class ModelGenerationAPI:
         response.headers["Content-Security-Policy"] = "default-src 'self'"
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
     def handle_request(self, request: APIRequest) -> APIResponse:
         """Handle an API request."""
@@ -453,9 +443,7 @@ class ModelGenerationAPI:
                     self._add_cors_headers(response)
                     return response
 
-        response = APIResponse.not_found(
-            f"No route for {request.method.value} {request.path}"
-        )
+        response = APIResponse.not_found(f"No route for {request.method.value} {request.path}")
         self._add_security_headers(response)
         self._add_cors_headers(response)
         return response
@@ -633,10 +621,7 @@ class ModelGenerationAPI:
             "urdf": result.urdf_string,
         }
 
-        if (
-            request.query_params.get("download") == "true"
-            and result.urdf_string is not None
-        ):
+        if request.query_params.get("download") == "true" and result.urdf_string is not None:
             return APIResponse.file(result.urdf_string, f"{result.robot_name}.urdf")
 
         return APIResponse.ok(response_data)
@@ -737,9 +722,7 @@ class ModelGenerationAPI:
         return APIResponse.ok(
             {
                 "valid": not has_errors,
-                "error_count": sum(
-                    1 for m in messages if m.severity == ValidationSeverity.ERROR
-                ),
+                "error_count": sum(1 for m in messages if m.severity == ValidationSeverity.ERROR),
                 "warning_count": sum(
                     1 for m in messages if m.severity == ValidationSeverity.WARNING
                 ),
@@ -826,9 +809,7 @@ class ModelGenerationAPI:
 
             elif shape == "cylinder":
                 if len(dimensions) != 2:
-                    return APIResponse.error(
-                        "Cylinder requires 2 dimensions (radius, length)"
-                    )
+                    return APIResponse.error("Cylinder requires 2 dimensions (radius, length)")
                 inertia = Inertia.from_cylinder(mass, dimensions[0], dimensions[1])
 
             elif shape == "sphere":
@@ -838,9 +819,7 @@ class ModelGenerationAPI:
 
             elif shape == "capsule":
                 if len(dimensions) != 2:
-                    return APIResponse.error(
-                        "Capsule requires 2 dimensions (radius, length)"
-                    )
+                    return APIResponse.error("Capsule requires 2 dimensions (radius, length)")
                 inertia = Inertia.from_capsule(mass, dimensions[0], dimensions[1])
 
             else:

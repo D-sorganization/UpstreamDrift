@@ -43,9 +43,7 @@ logger = logging.getLogger(__name__)
 class ThemeListItem(QListWidgetItem):
     """Custom list item for themes with additional metadata."""
 
-    def __init__(
-        self, theme_name: str, is_builtin: bool = False, is_current: bool = False
-    ):
+    def __init__(self, theme_name: str, is_builtin: bool = False, is_current: bool = False):
         if not (theme_name is not None):
             raise ValueError("theme_name must be provided")
         if not (theme_name is not None):
@@ -435,9 +433,7 @@ class ThemeManagerDialog(QDialog):
                     logger.info(f"Exported theme {item.theme_name} to {filename}")
 
                 except (PermissionError, OSError) as e:
-                    QMessageBox.critical(
-                        self, "Export Error", f"Failed to export theme: {e}"
-                    )
+                    QMessageBox.critical(self, "Export Error", f"Failed to export theme: {e}")
                     logger.exception("Failed to export theme")
 
     def _import_theme(self) -> None:
@@ -494,9 +490,7 @@ class ThemeManagerDialog(QDialog):
                 logger.info(f"Imported theme {theme_name} from {filename}")
 
             except (PermissionError, OSError) as e:
-                QMessageBox.critical(
-                    self, "Import Error", f"Failed to import theme: {e}"
-                )
+                QMessageBox.critical(self, "Import Error", f"Failed to import theme: {e}")
                 logger.exception("Failed to import theme")
 
     def _on_theme_created(self, theme_name: str) -> None:

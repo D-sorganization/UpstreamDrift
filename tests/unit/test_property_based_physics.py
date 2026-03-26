@@ -35,18 +35,12 @@ from src.shared.python.physics.ball_flight_physics import (
 # ---------------------------------------------------------------------------
 
 # Finite, reasonable floats (avoiding extreme values that blow up physics)
-reasonable_float = st.floats(
-    min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False
-)
-positive_float = st.floats(
-    min_value=1e-6, max_value=1e6, allow_nan=False, allow_infinity=False
-)
+reasonable_float = st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False)
+positive_float = st.floats(min_value=1e-6, max_value=1e6, allow_nan=False, allow_infinity=False)
 small_positive_float = st.floats(
     min_value=1e-6, max_value=100.0, allow_nan=False, allow_infinity=False
 )
-angle_rad = st.floats(
-    min_value=-math.pi, max_value=math.pi, allow_nan=False, allow_infinity=False
-)
+angle_rad = st.floats(min_value=-math.pi, max_value=math.pi, allow_nan=False, allow_infinity=False)
 
 # 3-component vectors with reasonable magnitudes
 vec3_reasonable = st.tuples(
@@ -58,15 +52,9 @@ vec3_reasonable = st.tuples(
 # Non-zero velocity vectors (minimum speed above drag threshold)
 nonzero_velocity = (
     st.tuples(
-        st.floats(
-            min_value=-100.0, max_value=100.0, allow_nan=False, allow_infinity=False
-        ),
-        st.floats(
-            min_value=-100.0, max_value=100.0, allow_nan=False, allow_infinity=False
-        ),
-        st.floats(
-            min_value=-100.0, max_value=100.0, allow_nan=False, allow_infinity=False
-        ),
+        st.floats(min_value=-100.0, max_value=100.0, allow_nan=False, allow_infinity=False),
+        st.floats(min_value=-100.0, max_value=100.0, allow_nan=False, allow_infinity=False),
+        st.floats(min_value=-100.0, max_value=100.0, allow_nan=False, allow_infinity=False),
     )
     .filter(lambda t: math.sqrt(t[0] ** 2 + t[1] ** 2 + t[2] ** 2) > 1.0)
     .map(lambda t: np.array(t))
@@ -95,9 +83,7 @@ class TestBallFlightProperties:
     @given(
         velocity=nonzero_velocity,
     )
-    @settings(
-        max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_gravity_always_pulls_downward(self, velocity: np.ndarray) -> None:
         """Property: gravity force z-component is always negative."""
         sim = BallFlightSimulator()
@@ -116,9 +102,7 @@ class TestBallFlightProperties:
     @given(
         velocity=nonzero_velocity,
     )
-    @settings(
-        max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_drag_force_opposes_velocity(self, velocity: np.ndarray) -> None:
         """Property: drag force opposes the velocity direction.
 
@@ -139,9 +123,7 @@ class TestBallFlightProperties:
 
         # Drag should oppose relative velocity (zero wind => relative = velocity)
         dot = float(np.dot(drag, velocity))
-        assert dot <= 1e-10, (
-            f"Drag should oppose velocity: dot={dot}, drag={drag}, vel={velocity}"
-        )
+        assert dot <= 1e-10, f"Drag should oppose velocity: dot={dot}, drag={drag}, vel={velocity}"
 
     @given(
         velocity=nonzero_velocity,
@@ -150,9 +132,7 @@ class TestBallFlightProperties:
             min_value=1000.0, max_value=10000.0, allow_nan=False, allow_infinity=False
         ),
     )
-    @settings(
-        max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_magnus_force_perpendicular_to_spin_and_velocity(
         self,
         velocity: np.ndarray,
@@ -198,12 +178,8 @@ class TestBallFlightProperties:
     @given(
         velocity=nonzero_velocity,
     )
-    @settings(
-        max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
-    def test_zero_wind_zero_spin_drag_antiparallel_to_velocity(
-        self, velocity: np.ndarray
-    ) -> None:
+    @settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+    def test_zero_wind_zero_spin_drag_antiparallel_to_velocity(self, velocity: np.ndarray) -> None:
         """Property: with zero wind and zero spin, drag is anti-parallel to velocity."""
         sim = BallFlightSimulator(
             env=EnvironmentalConditions(wind_velocity=np.zeros(3)),
@@ -235,9 +211,7 @@ class TestBallFlightProperties:
             min_value=0.5, max_value=3.0, allow_nan=False, allow_infinity=False
         ),
     )
-    @settings(
-        max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=100, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_forces_scale_with_air_density(
         self, velocity: np.ndarray, density_factor: float
     ) -> None:
@@ -273,9 +247,9 @@ class TestBallFlightProperties:
             return
 
         ratio = drag_scaled_mag / drag_base_mag
-        assert abs(ratio - density_factor) < 0.01, (
-            f"Drag should scale by {density_factor}, got ratio {ratio}"
-        )
+        assert (
+            abs(ratio - density_factor) < 0.01
+        ), f"Drag should scale by {density_factor}, got ratio {ratio}"
 
 
 # ============================================================================
@@ -288,16 +262,10 @@ class TestPhaseDetectionProperties:
 
     @given(
         n_points=st.integers(min_value=50, max_value=500),
-        duration=st.floats(
-            min_value=0.5, max_value=5.0, allow_nan=False, allow_infinity=False
-        ),
+        duration=st.floats(min_value=0.5, max_value=5.0, allow_nan=False, allow_infinity=False),
     )
-    @settings(
-        max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
-    def test_detected_phases_cover_entire_time_range(
-        self, n_points: int, duration: float
-    ) -> None:
+    @settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+    def test_detected_phases_cover_entire_time_range(self, n_points: int, duration: float) -> None:
         """Property: detected phases cover the full time range (no gaps)."""
         from src.shared.python.analysis.phase_detection import PhaseDetectionMixin
 
@@ -318,25 +286,19 @@ class TestPhaseDetectionProperties:
 
         # Check that first phase starts at or before time[0]
         first_start = phases[0].start_time
-        assert first_start <= times[0] + 1e-10, (
-            f"First phase start {first_start} should be <= {times[0]}"
-        )
+        assert (
+            first_start <= times[0] + 1e-10
+        ), f"First phase start {first_start} should be <= {times[0]}"
 
         # Check that last phase ends at or after the last time
         last_end = phases[-1].end_time
-        assert last_end >= times[-1] - 1e-10, (
-            f"Last phase end {last_end} should be >= {times[-1]}"
-        )
+        assert last_end >= times[-1] - 1e-10, f"Last phase end {last_end} should be >= {times[-1]}"
 
     @given(
         n_points=st.integers(min_value=50, max_value=500),
-        duration=st.floats(
-            min_value=0.5, max_value=5.0, allow_nan=False, allow_infinity=False
-        ),
+        duration=st.floats(min_value=0.5, max_value=5.0, allow_nan=False, allow_infinity=False),
     )
-    @settings(
-        max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_phase_boundaries_monotonically_increasing(
         self, n_points: int, duration: float
     ) -> None:
@@ -362,16 +324,10 @@ class TestPhaseDetectionProperties:
 
     @given(
         n_points=st.integers(min_value=50, max_value=500),
-        duration=st.floats(
-            min_value=0.5, max_value=5.0, allow_nan=False, allow_infinity=False
-        ),
+        duration=st.floats(min_value=0.5, max_value=5.0, allow_nan=False, allow_infinity=False),
     )
-    @settings(
-        max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
-    def test_each_phase_has_nonnegative_duration(
-        self, n_points: int, duration: float
-    ) -> None:
+    @settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow])
+    def test_each_phase_has_nonnegative_duration(self, n_points: int, duration: float) -> None:
         """Property: every detected phase has non-negative duration."""
         from src.shared.python.analysis.phase_detection import PhaseDetectionMixin
 
@@ -387,12 +343,12 @@ class TestPhaseDetectionProperties:
         phases = detector.detect_swing_phases()
 
         for phase in phases:
-            assert phase.duration >= 0.0, (
-                f"Phase '{phase.name}' has negative duration: {phase.duration}"
-            )
-            assert phase.end_time >= phase.start_time, (
-                f"Phase '{phase.name}' end_time={phase.end_time} < start_time={phase.start_time}"
-            )
+            assert (
+                phase.duration >= 0.0
+            ), f"Phase '{phase.name}' has negative duration: {phase.duration}"
+            assert (
+                phase.end_time >= phase.start_time
+            ), f"Phase '{phase.name}' end_time={phase.end_time} < start_time={phase.start_time}"
 
 
 # ============================================================================
@@ -404,14 +360,10 @@ class TestSwingOptimizerConfigProperties:
     """Property-based tests for SwingOptimizer configuration invariants."""
 
     @given(
-        flexibility=st.floats(
-            min_value=0.5, max_value=2.0, allow_nan=False, allow_infinity=False
-        ),
+        flexibility=st.floats(min_value=0.5, max_value=2.0, allow_nan=False, allow_infinity=False),
         n_nodes=st.integers(min_value=10, max_value=100),
     )
-    @settings(
-        max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_bounds_lower_leq_upper(self, flexibility: float, n_nodes: int) -> None:
         """Property: optimization bounds always have lower <= upper."""
         from src.shared.python.optimization.swing_optimizer import (
@@ -429,26 +381,20 @@ class TestSwingOptimizerConfigProperties:
         bounds = optimizer._get_bounds()
 
         for i, (lo, hi) in enumerate(bounds):
-            assert lo <= hi, (
-                f"Bound index {i}: lower={lo} > upper={hi} (flexibility={flexibility})"
-            )
+            assert lo <= hi, f"Bound index {i}: lower={lo} > upper={hi} (flexibility={flexibility})"
 
     @given(
         # flexibility_factor >= 1.0 ensures scaled bounds encompass the raw
         # joint limits used by _generate_initial_guess.  Values < 1.0 shrink
         # the bounds below the raw ROM, which the guess generator does not
         # account for -- that is a known upstream limitation.
-        flexibility=st.floats(
-            min_value=1.0, max_value=2.0, allow_nan=False, allow_infinity=False
-        ),
+        flexibility=st.floats(min_value=1.0, max_value=2.0, allow_nan=False, allow_infinity=False),
         n_nodes=st.integers(min_value=10, max_value=100),
         backswing_frac=st.floats(
             min_value=0.2, max_value=0.8, allow_nan=False, allow_infinity=False
         ),
     )
-    @settings(
-        max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=50, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     def test_initial_guess_within_bounds(
         self, flexibility: float, n_nodes: int, backswing_frac: float
     ) -> None:
@@ -478,17 +424,15 @@ class TestSwingOptimizerConfigProperties:
         x0 = optimizer._generate_initial_guess()
         bounds = optimizer._get_bounds()
 
-        assert len(x0) == len(bounds), (
-            f"Initial guess length {len(x0)} != bounds length {len(bounds)}"
-        )
+        assert len(x0) == len(
+            bounds
+        ), f"Initial guess length {len(x0)} != bounds length {len(bounds)}"
 
         n_angle_vars = len(optimizer.JOINTS) * n_nodes
         # Angle portion: must be strictly within joint-limit bounds
         for i in range(n_angle_vars):
             lo, hi = bounds[i]
-            assert lo - 1e-6 <= x0[i] <= hi + 1e-6, (
-                f"Angle x0[{i}]={x0[i]} not in [{lo}, {hi}]"
-            )
+            assert lo - 1e-6 <= x0[i] <= hi + 1e-6, f"Angle x0[{i}]={x0[i]} not in [{lo}, {hi}]"
 
 
 # ============================================================================
@@ -503,9 +447,9 @@ class TestPhysicalConstantsProperties:
         """Property: gravity is within the expected range (9.7 to 9.9 m/s^2)."""
         g = float(physics_constants.GRAVITY_M_S2)
         assert 9.7 < g < 9.9, f"Gravity={g} outside expected range [9.7, 9.9]"
-        assert g == pytest.approx(9.80665, abs=1e-5), (
-            f"Gravity={g} should be standard gravity 9.80665"
-        )
+        assert g == pytest.approx(
+            9.80665, abs=1e-5
+        ), f"Gravity={g} should be standard gravity 9.80665"
 
     def test_all_physical_constants_positive_and_finite(self) -> None:
         """Property: all physical constants defined via PhysicalConstant are positive and finite."""
@@ -520,24 +464,17 @@ class TestPhysicalConstantsProperties:
                 constants_checked += 1
 
         # Ensure we actually checked a meaningful number of constants
-        assert constants_checked >= 10, (
-            f"Only checked {constants_checked} constants; expected at least 10"
-        )
+        assert (
+            constants_checked >= 10
+        ), f"Only checked {constants_checked} constants; expected at least 10"
 
     def test_precomputed_floats_match_source_constants(self) -> None:
         """Property: pre-computed float values match their source constants."""
         assert pytest.approx(float(physics_constants.GRAVITY_M_S2)) == GRAVITY_FLOAT
+        assert pytest.approx(float(physics_constants.GOLF_BALL_MASS_KG)) == GOLF_BALL_MASS_FLOAT
+        assert pytest.approx(float(physics_constants.GOLF_BALL_RADIUS_M)) == GOLF_BALL_RADIUS_FLOAT
         assert (
-            pytest.approx(float(physics_constants.GOLF_BALL_MASS_KG))
-            == GOLF_BALL_MASS_FLOAT
-        )
-        assert (
-            pytest.approx(float(physics_constants.GOLF_BALL_RADIUS_M))
-            == GOLF_BALL_RADIUS_FLOAT
-        )
-        assert (
-            pytest.approx(float(physics_constants.GOLF_BALL_DIAMETER_M))
-            == GOLF_BALL_DIAMETER_FLOAT
+            pytest.approx(float(physics_constants.GOLF_BALL_DIAMETER_M)) == GOLF_BALL_DIAMETER_FLOAT
         )
         assert (
             pytest.approx(float(physics_constants.GOLF_BALL_MOMENT_OF_INERTIA_KG_M2))
@@ -554,21 +491,19 @@ class TestPhysicalConstantsProperties:
         # Cross-sectional area = pi * r^2
         r = float(physics_constants.GOLF_BALL_RADIUS_M)
         expected_area = math.pi * r * r
-        assert float(
-            physics_constants.GOLF_BALL_CROSS_SECTIONAL_AREA_M2
-        ) == pytest.approx(expected_area, rel=1e-6)
+        assert float(physics_constants.GOLF_BALL_CROSS_SECTIONAL_AREA_M2) == pytest.approx(
+            expected_area, rel=1e-6
+        )
 
         # Moment of inertia for solid sphere = 2/5 * m * r^2
         m = float(physics_constants.GOLF_BALL_MASS_KG)
         expected_moi = (2.0 / 5.0) * m * r * r
-        assert float(
-            physics_constants.GOLF_BALL_MOMENT_OF_INERTIA_KG_M2
-        ) == pytest.approx(expected_moi, rel=1e-6)
+        assert float(physics_constants.GOLF_BALL_MOMENT_OF_INERTIA_KG_M2) == pytest.approx(
+            expected_moi, rel=1e-6
+        )
 
     @given(
-        value=st.floats(
-            min_value=0.01, max_value=1e4, allow_nan=False, allow_infinity=False
-        ),
+        value=st.floats(min_value=0.01, max_value=1e4, allow_nan=False, allow_infinity=False),
     )
     @settings(max_examples=50, deadline=None)
     def test_conversion_factor_roundtrip(self, value: float) -> None:
@@ -578,17 +513,17 @@ class TestPhysicalConstantsProperties:
 
         # deg -> rad -> deg should roundtrip
         roundtripped = value * deg_to_rad * rad_to_deg
-        assert roundtripped == pytest.approx(value, rel=1e-10), (
-            f"DEG->RAD->DEG roundtrip: {value} -> {roundtripped}"
-        )
+        assert roundtripped == pytest.approx(
+            value, rel=1e-10
+        ), f"DEG->RAD->DEG roundtrip: {value} -> {roundtripped}"
 
         ft_to_m = float(physics_constants.FT_TO_M)
         m_to_ft = float(physics_constants.M_TO_FT)
 
         roundtripped_ft = value * ft_to_m * m_to_ft
-        assert roundtripped_ft == pytest.approx(value, rel=1e-6), (
-            f"FT->M->FT roundtrip: {value} -> {roundtripped_ft}"
-        )
+        assert roundtripped_ft == pytest.approx(
+            value, rel=1e-6
+        ), f"FT->M->FT roundtrip: {value} -> {roundtripped_ft}"
 
 
 # ============================================================================
@@ -623,9 +558,7 @@ class TestRRTPlannerProperties:
         ndof=st.integers(min_value=2, max_value=6),
         seed=st.integers(min_value=0, max_value=10000),
     )
-    @settings(
-        max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @pytest.mark.slow
     def test_path_start_equals_requested_start(self, ndof: int, seed: int) -> None:
         """Property: planned path starts at the requested start point."""
@@ -664,9 +597,7 @@ class TestRRTPlannerProperties:
         ndof=st.integers(min_value=2, max_value=6),
         seed=st.integers(min_value=0, max_value=10000),
     )
-    @settings(
-        max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @pytest.mark.slow
     def test_path_end_within_goal_tolerance(self, ndof: int, seed: int) -> None:
         """Property: planned path end is within goal tolerance of the goal."""
@@ -695,17 +626,15 @@ class TestRRTPlannerProperties:
 
         if result.success:
             end_dist = float(np.linalg.norm(result.path[-1] - q_goal))
-            assert end_dist <= goal_tol + 1e-10, (
-                f"Path end distance to goal {end_dist} exceeds tolerance {goal_tol}"
-            )
+            assert (
+                end_dist <= goal_tol + 1e-10
+            ), f"Path end distance to goal {end_dist} exceeds tolerance {goal_tol}"
 
     @given(
         ndof=st.integers(min_value=2, max_value=6),
         seed=st.integers(min_value=0, max_value=10000),
     )
-    @settings(
-        max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow]
-    )
+    @settings(max_examples=30, deadline=None, suppress_health_check=[HealthCheck.too_slow])
     @pytest.mark.slow
     def test_consecutive_points_within_step_size(self, ndof: int, seed: int) -> None:
         """Property: consecutive path points are within step_size of each other."""

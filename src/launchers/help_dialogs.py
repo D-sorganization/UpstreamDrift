@@ -89,9 +89,7 @@ class LayoutManagerDialog(QDialog):
             item = QListWidgetItem(f"{model.name} — {model.description}")
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(
-                Qt.CheckState.Checked
-                if model.id in active_models
-                else Qt.CheckState.Unchecked
+                Qt.CheckState.Checked if model.id in active_models else Qt.CheckState.Unchecked
             )
             item.setData(Qt.ItemDataRole.UserRole, model.id)
             self.list_widget.addItem(item)
@@ -158,9 +156,7 @@ class ContextHelpDock(QDockWidget):
             except (RuntimeError, ValueError, OSError) as e:
                 self.text_area.setText(f"Failed to load documentation: {e}")
         else:
-            self.text_area.setMarkdown(
-                f"### {model_id}\n\nNo specific documentation available."
-            )
+            self.text_area.setMarkdown(f"### {model_id}\n\nNo specific documentation available.")
 
     def _get_doc_file(self, model_id: str) -> Path | None:
         if not (model_id is not None):

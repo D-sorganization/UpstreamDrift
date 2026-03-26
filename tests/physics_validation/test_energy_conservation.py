@@ -118,13 +118,9 @@ def test_pinocchio_energy_check():
 
     if parent_frame is not None and parent_frame < model.nframes:
         try:
-            model.addBodyFrame(
-                "particle", joint_id, pinocchio.SE3.Identity(), parent_frame
-            )
+            model.addBodyFrame("particle", joint_id, pinocchio.SE3.Identity(), parent_frame)
         except ValueError:
-            logger.warning(
-                "Could not add body frame 'particle'; continuing without it."
-            )
+            logger.warning("Could not add body frame 'particle'; continuing without it.")
     else:
         logger.warning("No valid parent frame found; skipping addBodyFrame.")
 

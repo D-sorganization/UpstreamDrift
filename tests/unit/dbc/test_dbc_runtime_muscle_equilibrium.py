@@ -124,9 +124,7 @@ class TestSolveFiberVelocityPreconditions(unittest.TestCase):
         muscle = _make_muscle()
         solver = EquilibriumSolver(muscle)
         with self.assertRaises((ValueError, Exception)):
-            solver.solve_fiber_velocity(
-                l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.1, dt=0.0
-            )
+            solver.solve_fiber_velocity(l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.1, dt=0.0)
 
     def test_negative_dt_raises(self) -> None:
         from src.shared.python.biomechanics.muscle_equilibrium import (
@@ -136,9 +134,7 @@ class TestSolveFiberVelocityPreconditions(unittest.TestCase):
         muscle = _make_muscle()
         solver = EquilibriumSolver(muscle)
         with self.assertRaises((ValueError, Exception)):
-            solver.solve_fiber_velocity(
-                l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.1, dt=-0.001
-            )
+            solver.solve_fiber_velocity(l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.1, dt=-0.001)
 
     def test_zero_l_CE_raises(self) -> None:
         from src.shared.python.biomechanics.muscle_equilibrium import (
@@ -148,9 +144,7 @@ class TestSolveFiberVelocityPreconditions(unittest.TestCase):
         muscle = _make_muscle()
         solver = EquilibriumSolver(muscle)
         with self.assertRaises((ValueError, Exception)):
-            solver.solve_fiber_velocity(
-                l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.0, dt=0.001
-            )
+            solver.solve_fiber_velocity(l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=0.0, dt=0.001)
 
     def test_negative_l_CE_raises(self) -> None:
         from src.shared.python.biomechanics.muscle_equilibrium import (
@@ -160,9 +154,7 @@ class TestSolveFiberVelocityPreconditions(unittest.TestCase):
         muscle = _make_muscle()
         solver = EquilibriumSolver(muscle)
         with self.assertRaises((ValueError, Exception)):
-            solver.solve_fiber_velocity(
-                l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=-0.1, dt=0.001
-            )
+            solver.solve_fiber_velocity(l_MT=0.37, v_MT=0.01, activation=0.5, l_CE=-0.1, dt=0.001)
 
 
 class TestComputeEquilibriumStatePreconditions(unittest.TestCase):
@@ -174,9 +166,7 @@ class TestComputeEquilibriumStatePreconditions(unittest.TestCase):
         )
 
         muscle = _make_muscle()
-        l_CE, v_CE = compute_equilibrium_state(
-            muscle, l_MT=0.37, v_MT=0.0, activation=0.5
-        )
+        l_CE, v_CE = compute_equilibrium_state(muscle, l_MT=0.37, v_MT=0.0, activation=0.5)
         self.assertGreater(l_CE, 0)
         self.assertTrue(np.isfinite(l_CE))
         self.assertTrue(np.isfinite(v_CE))
@@ -206,9 +196,7 @@ class TestComputeEquilibriumStatePreconditions(unittest.TestCase):
         )
 
         muscle = _make_muscle()
-        l_CE, v_CE = compute_equilibrium_state(
-            muscle, l_MT=0.37, v_MT=0.01, activation=0.5
-        )
+        l_CE, v_CE = compute_equilibrium_state(muscle, l_MT=0.37, v_MT=0.01, activation=0.5)
         self.assertGreater(l_CE, 0)
         self.assertTrue(np.isfinite(l_CE))
         self.assertTrue(np.isfinite(v_CE))

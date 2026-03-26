@@ -89,9 +89,7 @@ def test_get_golf_main_absolute_import():
 def test_get_golf_main_relative_success(clean_sys_modules):
     with (
         patch("src.launchers.unified_launcher.golf_main", create=True) as mock_main,
-        patch.dict(
-            "sys.modules", {"src.launchers.golf_launcher": MagicMock(main=mock_main)}
-        ),
+        patch.dict("sys.modules", {"src.launchers.golf_launcher": MagicMock(main=mock_main)}),
     ):
         main_func = _get_golf_main()
         assert main_func == mock_main
@@ -168,9 +166,7 @@ def test_get_golf_main_module_no_main():
             "src.launchers.unified_launcher.importlib.import_module",
             return_value=mock_mod,
         ),
-        pytest.raises(
-            ImportError
-        ),  # The third fallback will fail with ImportError again
+        pytest.raises(ImportError),  # The third fallback will fail with ImportError again
     ):
         _get_golf_main()
 
@@ -378,9 +374,7 @@ def test_unified_launcher_get_version_shared_python():
             # If not importable, we just mock sys.modules without previous state
             mock_mod = MagicMock()
             mock_mod.__version__ = "1.2.5"
-            with patch.dict(
-                "sys.modules", {"shared": MagicMock(), "shared.python": mock_mod}
-            ):
+            with patch.dict("sys.modules", {"shared": MagicMock(), "shared.python": mock_mod}):
                 launcher = UnifiedLauncher()
                 assert launcher.get_version() == "1.2.5"
 
@@ -407,9 +401,7 @@ def test_unified_launcher_get_version_pyproject_toml():
             patch("src.launchers.unified_launcher.Path") as mock_path,
         ):
             mock_file = MagicMock()
-            mock_path.return_value.parent.parent.parent.__truediv__.return_value = (
-                mock_file
-            )
+            mock_path.return_value.parent.parent.parent.__truediv__.return_value = mock_file
             mock_file.open.return_value.__enter__.return_value = MagicMock()
 
             launcher = UnifiedLauncher()
@@ -437,9 +429,7 @@ def test_unified_launcher_pyproject_toml_error():
             patch("src.launchers.unified_launcher.Path") as mock_path,
         ):
             mock_file = MagicMock()
-            mock_path.return_value.parent.parent.parent.__truediv__.return_value = (
-                mock_file
-            )
+            mock_path.return_value.parent.parent.parent.__truediv__.return_value = mock_file
             mock_file.open.return_value.__enter__.return_value = MagicMock()
             launcher = UnifiedLauncher()
             assert launcher.get_version() == "1.0.0-beta"
@@ -458,9 +448,7 @@ def test_unified_launcher_get_version_hardcoded():
         if "shared.python" in sys.modules:
             del sys.modules["shared.python"]
 
-        with patch.dict(
-            "sys.modules", {"tomllib": None, "tomli": None, "shared.python": None}
-        ):
+        with patch.dict("sys.modules", {"tomllib": None, "tomli": None, "shared.python": None}):
             launcher = UnifiedLauncher()
             assert launcher.get_version() == "1.0.0-beta"
 

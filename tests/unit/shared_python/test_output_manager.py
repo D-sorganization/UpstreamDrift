@@ -44,9 +44,7 @@ def test_save_load_csv(temp_output_dir) -> None:
     assert path.exists()
     assert path.suffix == ".csv"
 
-    loaded = temp_output_dir.load_simulation_results(
-        "test_data", OutputFormat.CSV, engine="mujoco"
-    )
+    loaded = temp_output_dir.load_simulation_results("test_data", OutputFormat.CSV, engine="mujoco")
     pd.testing.assert_frame_equal(df, loaded)
 
 

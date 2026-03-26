@@ -58,8 +58,7 @@ class TestClampParity:
         rust_result = float(upstream_physics.clamp(value, lo, hi))
         py_result = self._python_clamp(value, lo, hi)
         assert rust_result == py_result, (
-            f"Mismatch: clamp({value}, {lo}, {hi}) → "
-            f"Rust={rust_result}, Python={py_result}"
+            f"Mismatch: clamp({value}, {lo}, {hi}) → " f"Rust={rust_result}, Python={py_result}"
         )
 
 
@@ -91,9 +90,9 @@ class TestLerpParity:
         """Rust lerp must match Python lerp within 1 ULP."""
         rust_result = float(upstream_physics.lerp(a, b, t))
         py_result = self._python_lerp(a, b, t)
-        assert abs(rust_result - py_result) < 1e-15, (
-            f"Mismatch: lerp({a}, {b}, {t}) → Rust={rust_result}, Python={py_result}"
-        )
+        assert (
+            abs(rust_result - py_result) < 1e-15
+        ), f"Mismatch: lerp({a}, {b}, {t}) → Rust={rust_result}, Python={py_result}"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

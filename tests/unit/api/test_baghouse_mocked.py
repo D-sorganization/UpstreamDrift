@@ -24,9 +24,7 @@ client = TestClient(_app)
 @pytest.fixture
 def mock_calculator():
     """Mock the BaghouseCalculator securely from Tools."""
-    with patch(
-        "upstream_drift_tools.process_calculators.BaghouseCalculator"
-    ) as mock_class:
+    with patch("upstream_drift_tools.process_calculators.BaghouseCalculator") as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
         yield mock_instance

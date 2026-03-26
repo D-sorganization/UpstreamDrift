@@ -46,9 +46,7 @@ class TestLauncherIntegration(unittest.TestCase):
 
         for file_name in required_files:
             file_path = urdf_dir / file_name
-            self.assertTrue(
-                file_path.exists(), f"Required file {file_name} should exist"
-            )
+            self.assertTrue(file_path.exists(), f"Required file {file_name} should exist")
 
     def test_shared_modules_importable(self):
         """Test that shared modules can be imported."""

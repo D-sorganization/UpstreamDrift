@@ -103,13 +103,9 @@ class BasicStatsMixin:
                 time=float(self.times[peak_idx]),
                 index=int(peak_idx),
                 prominence=(
-                    float(properties["prominences"][i])
-                    if "prominences" in properties
-                    else None
+                    float(properties["prominences"][i]) if "prominences" in properties else None
                 ),
-                width=(
-                    float(properties["widths"][i]) if "widths" in properties else None
-                ),
+                width=(float(properties["widths"][i]) if "widths" in properties else None),
             )
             peak_list.append(peak_info)
 

@@ -64,13 +64,9 @@ class TestEllipsoidComputation:
         # Radii should be singular values of J
         # J = [[1, 0], [0, 2], [0, 0]]
         # SVD gives singular values [2.0, 1.0]
-        np.testing.assert_allclose(
-            sorted(ellipsoid.radii, reverse=True), [2.0, 1.0], atol=1e-10
-        )
+        np.testing.assert_allclose(sorted(ellipsoid.radii, reverse=True), [2.0, 1.0], atol=1e-10)
 
-    def test_force_ellipsoid_has_inverse_radii(
-        self, mock_engine: PhysicsEngine
-    ) -> None:
+    def test_force_ellipsoid_has_inverse_radii(self, mock_engine: PhysicsEngine) -> None:
         """Force ellipsoid radii should be inverse of velocity radii."""
         vel_ellipsoid = compute_velocity_ellipsoid(mock_engine, "test_body")
         force_ellipsoid = compute_force_ellipsoid(mock_engine, "test_body")

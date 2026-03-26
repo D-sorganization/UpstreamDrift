@@ -28,9 +28,7 @@ def main() -> None:
     # 200 steps = 4 seconds approx
     for _ in range(200):
         # Generate a random action
-        action = np.random.uniform(
-            action_spec.minimum, action_spec.maximum, size=action_spec.shape
-        )
+        action = np.random.uniform(action_spec.minimum, action_spec.maximum, size=action_spec.shape)
 
         # Step the environment
         env.step(action)

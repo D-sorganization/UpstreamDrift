@@ -33,8 +33,8 @@ def _get_education_system() -> EducationSystem:
         _education_holder["instance"] = EducationSystem()
 
     system = _education_holder["instance"]
-    if not (system is not None  # Ensure it is not None for mypy):
-        raise ValueError('DbC Blocked: Precondition failed.')
+    if not (system is not None):  # Ensure it is not None for mypy
+        raise ValueError("DbC Blocked: Precondition failed.")
     return system
 
 

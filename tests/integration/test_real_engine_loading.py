@@ -83,9 +83,7 @@ class TestEngineManagerIntegration:
             # If status says available, path must exist
             status = manager.get_engine_status(engine_type)
             if status == EngineStatus.AVAILABLE or status == EngineStatus.LOADED:
-                assert path.exists(), (
-                    f"{engine_type} marked as {status} but path doesn't exist"
-                )
+                assert path.exists(), f"{engine_type} marked as {status} but path doesn't exist"
 
 
 @pytest.mark.skipif(not SIMPLE_ARM_URDF.exists(), reason="Test asset missing")
@@ -119,9 +117,7 @@ class TestMuJoCoEngineIntegration:
         - Loads actual URDF file
         - Verifies real physics engine behavior
         """
-        module_name = (
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
-        )
+        module_name = "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
 
         # Ensure we are using the REAL engine module, not one cached with Mocks
         # Instead of reload (dangerous), we remove from sys.modules to force fresh import
@@ -154,9 +150,7 @@ class TestMuJoCoEngineIntegration:
         GOOD PRACTICE: Tests actual physics simulation, not mocks.
         Verifies that state changes over time as expected.
         """
-        module_name = (
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
-        )
+        module_name = "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
 
         # Ensure we get the clean import
         sys.modules.pop(module_name, None)
@@ -253,9 +247,7 @@ class TestCrossEngineConsistency:
         for name, engine in available_engines.items():
             if hasattr(engine, "model"):
                 # MuJoCo-style
-                dof_counts[name] = (
-                    engine.model.nq if hasattr(engine.model, "nq") else None
-                )
+                dof_counts[name] = engine.model.nq if hasattr(engine.model, "nq") else None
             elif hasattr(engine, "plant"):
                 # Drake-style
                 dof_counts[name] = engine.plant.num_positions()
@@ -273,6 +265,6 @@ class TestCrossEngineConsistency:
         if len(valid_dofs) >= 2:
             # All engines should agree on DOF count
             dof_values = list(valid_dofs.values())
-            assert all(d == dof_values[0] for d in dof_values), (
-                f"Engines disagree on DOFs: {valid_dofs}"
-            )
+            assert all(
+                d == dof_values[0] for d in dof_values
+            ), f"Engines disagree on DOFs: {valid_dofs}"

@@ -30,9 +30,7 @@ def _make_mixin(n: int = 200, n_joints: int = 3) -> object:
     obj.joint_velocities = rng.standard_normal((n, n_joints))
     obj.joint_torques = rng.standard_normal((n, n_joints))
 
-    obj.compute_coupling_angles = (
-        CoordinationMetricsMixin.compute_coupling_angles.__get__(obj)
-    )
+    obj.compute_coupling_angles = CoordinationMetricsMixin.compute_coupling_angles.__get__(obj)
     obj.compute_coordination_metrics = (
         CoordinationMetricsMixin.compute_coordination_metrics.__get__(obj)
     )
@@ -40,11 +38,9 @@ def _make_mixin(n: int = 200, n_joints: int = 3) -> object:
     obj.compute_continuous_relative_phase = (
         CoordinationMetricsMixin.compute_continuous_relative_phase.__get__(obj)
     )
-    obj.compute_correlations = CoordinationMetricsMixin.compute_correlations.__get__(
+    obj.compute_correlations = CoordinationMetricsMixin.compute_correlations.__get__(obj)
+    obj.compute_rolling_correlation = CoordinationMetricsMixin.compute_rolling_correlation.__get__(
         obj
-    )
-    obj.compute_rolling_correlation = (
-        CoordinationMetricsMixin.compute_rolling_correlation.__get__(obj)
     )
     return obj
 

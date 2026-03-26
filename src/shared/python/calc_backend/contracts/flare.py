@@ -8,9 +8,7 @@ from pydantic import BaseModel, Field
 class FlareRequest(BaseModel):
     """Request model for flare size calculation."""
 
-    total_flow_kg_hr: float = Field(
-        ..., gt=0, description="Total gas flow rate [kg/hr]"
-    )
+    total_flow_kg_hr: float = Field(..., gt=0, description="Total gas flow rate [kg/hr]")
     gas_composition: dict[str, float] = Field(
         ...,
         description=(
@@ -48,6 +46,4 @@ class FlareResponse(BaseModel):
 
     design: FlareDesignOut
     radiation_zones: RadiationZonesOut
-    combustion_efficiency: float = Field(
-        description="Estimated combustion efficiency (0-1)"
-    )
+    combustion_efficiency: float = Field(description="Estimated combustion efficiency (0-1)")

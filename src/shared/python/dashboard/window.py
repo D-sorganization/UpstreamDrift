@@ -174,9 +174,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout(parent)
 
         self.btn_compute = QtWidgets.QPushButton("Compute Analysis (Post-Hoc)")
-        self.btn_compute.setToolTip(
-            "Run expensive post-hoc analysis algorithms (ZTCF, etc)"
-        )
+        self.btn_compute.setToolTip("Run expensive post-hoc analysis algorithms (ZTCF, etc)")
         self.btn_compute.clicked.connect(self.compute_analysis)
         layout.addWidget(self.btn_compute)
 
@@ -313,22 +311,14 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             "Power Flow": lambda: self.plotter.plot_power_flow(fig),
             "Joint Power Curves": lambda: self.plotter.plot_joint_power_curves(fig),
             "Impulse Accumulation": lambda: self.plotter.plot_impulse_accumulation(fig),
-            "Phase Diagram (Joint 0)": lambda: self.plotter.plot_phase_diagram(
-                fig, joint_idx=0
-            ),
+            "Phase Diagram (Joint 0)": lambda: self.plotter.plot_phase_diagram(fig, joint_idx=0),
             "Chaos Analysis (Lyapunov)": lambda: self.plotter.plot_lyapunov_exponent(
                 fig, joint_idx=0
             ),
-            "Stability Diagram (CoM vs CoP)": lambda: (
-                self.plotter.plot_stability_diagram(fig)
-            ),
+            "Stability Diagram (CoM vs CoP)": lambda: (self.plotter.plot_stability_diagram(fig)),
             "CoP Trajectory": lambda: self.plotter.plot_cop_trajectory(fig),
-            "GRF Butterfly Diagram": lambda: self.plotter.plot_grf_butterfly_diagram(
-                fig
-            ),
-            "Club Head Trajectory (3D)": lambda: self.plotter.plot_club_head_trajectory(
-                fig
-            ),
+            "GRF Butterfly Diagram": lambda: self.plotter.plot_grf_butterfly_diagram(fig),
+            "Club Head Trajectory (3D)": lambda: self.plotter.plot_club_head_trajectory(fig),
             "Summary Dashboard": lambda: self.plotter.plot_summary_dashboard(fig),
         }
 
@@ -403,9 +393,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             joint_positions=np.asarray(positions),
             joint_velocities=np.asarray(velocities),
             joint_torques=np.asarray(torques),
-            club_head_speed=(
-                np.asarray(club_speed) if club_speed is not None else None
-            ),
+            club_head_speed=(np.asarray(club_speed) if club_speed is not None else None),
         )
         dna = analyzer.compute_swing_profile()
         if dna:
@@ -455,13 +443,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                     self.analysis_canvas.fig, "dual", metric_idx=0
                 )
             elif analysis_type == "Induced Acceleration (Gravity)":
-                self.plotter.plot_induced_acceleration(
-                    self.analysis_canvas.fig, "gravity"
-                )
+                self.plotter.plot_induced_acceleration(self.analysis_canvas.fig, "gravity")
             elif analysis_type == "Induced Acceleration (Control)":
-                self.plotter.plot_induced_acceleration(
-                    self.analysis_canvas.fig, "control"
-                )
+                self.plotter.plot_induced_acceleration(self.analysis_canvas.fig, "control")
             elif analysis_type == "Club Induced Acceleration Breakdown":
                 self.plotter.plot_club_induced_acceleration(
                     self.analysis_canvas.fig, breakdown_mode=True

@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 """
 Video Analyzer for Golf Swing Analysis
 
@@ -19,8 +23,8 @@ Usage:
     results = analyzer.analyze_video("swing.mp4")
 
     # Get swing metrics
-    print(f"Tempo: {results.tempo_ratio:.2f}")
-    print(f"X-Factor: {results.x_factor:.1f}°")
+    logger.info(f"Tempo: {results.tempo_ratio:.2f}")
+    logger.info(f"X-Factor: {results.x_factor:.1f}°")
 """
 
 from .analyzer import SwingAnalyzer

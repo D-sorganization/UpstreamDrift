@@ -188,8 +188,7 @@ class MotionVisualizer:
         x_mat = mcg.MeshBasicMaterial(color=0xFF0000)
         self.viewer[f"{name}/x"].set_object(x_cyl, x_mat)
         self.viewer[f"{name}/x"].set_transform(
-            mctf.rotation_matrix(np.pi / 2, [0, 1, 0])
-            @ mctf.translation_matrix([size / 2, 0, 0])
+            mctf.rotation_matrix(np.pi / 2, [0, 1, 0]) @ mctf.translation_matrix([size / 2, 0, 0])
         )
 
         # Y axis (green)
@@ -197,17 +196,14 @@ class MotionVisualizer:
         y_mat = mcg.MeshBasicMaterial(color=0x00FF00)
         self.viewer[f"{name}/y"].set_object(y_cyl, y_mat)
         self.viewer[f"{name}/y"].set_transform(
-            mctf.rotation_matrix(-np.pi / 2, [1, 0, 0])
-            @ mctf.translation_matrix([0, size / 2, 0])
+            mctf.rotation_matrix(-np.pi / 2, [1, 0, 0]) @ mctf.translation_matrix([0, size / 2, 0])
         )
 
         # Z axis (blue)
         z_cyl = mcg.Cylinder(size, 0.002)
         z_mat = mcg.MeshBasicMaterial(color=0x0000FF)
         self.viewer[f"{name}/z"].set_object(z_cyl, z_mat)
-        self.viewer[f"{name}/z"].set_transform(
-            mctf.translation_matrix([0, 0, size / 2])
-        )
+        self.viewer[f"{name}/z"].set_transform(mctf.translation_matrix([0, 0, size / 2]))
 
         if transform is not None:
             self.viewer[name].set_transform(transform)
@@ -352,9 +348,7 @@ class MotionVisualizer:
                 opacity=s.left_hand_color[3],
             )
             self.viewer["targets/left_hand"].set_object(left_sphere, left_mat)
-            self.viewer["targets/left_hand"].set_transform(
-                mctf.translation_matrix(left_pos)
-            )
+            self.viewer["targets/left_hand"].set_transform(mctf.translation_matrix(left_pos))
 
             # Right hand target
             right_sphere = mcg.Sphere(s.hand_target_radius)
@@ -364,9 +358,7 @@ class MotionVisualizer:
                 opacity=s.right_hand_color[3],
             )
             self.viewer["targets/right_hand"].set_object(right_sphere, right_mat)
-            self.viewer["targets/right_hand"].set_transform(
-                mctf.translation_matrix(right_pos)
-            )
+            self.viewer["targets/right_hand"].set_transform(mctf.translation_matrix(right_pos))
 
     def display_humanoid(self, q: NDArray[np.float64]) -> None:
         """Display humanoid at given configuration."""
@@ -397,9 +389,7 @@ class MotionVisualizer:
         if trajectory.frames:
             self.add_club_at_frame(trajectory.frames[0])
 
-        logger.info(
-            "Playing %s frames at %sx speed", trajectory.num_frames, s.playback_speed
-        )
+        logger.info("Playing %s frames at %sx speed", trajectory.num_frames, s.playback_speed)
         logger.info("Press Ctrl+C to stop")
 
         try:
@@ -459,9 +449,7 @@ class MotionVisualizer:
         if trajectory.num_frames <= num_frames_to_show:
             indices: list[int] | np.ndarray = list(range(trajectory.num_frames))
         else:
-            indices = np.linspace(
-                0, trajectory.num_frames - 1, num_frames_to_show
-            ).astype(int)
+            indices = np.linspace(0, trajectory.num_frames - 1, num_frames_to_show).astype(int)
 
         for i, idx in enumerate(indices):
             frame = trajectory.frames[idx]
@@ -592,9 +580,7 @@ class MatplotlibVisualizer:
                 frame = trajectory.get_event_frame(event_name)
                 if frame:
                     pos = frame.grip_position
-                    ax.plot(
-                        [pos[0]], [pos[1]], [pos[2]], marker, markersize=15, label=label
-                    )
+                    ax.plot([pos[0]], [pos[1]], [pos[2]], marker, markersize=15, label=label)
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
@@ -651,9 +637,7 @@ class MatplotlibVisualizer:
         axes[0].grid(True)
 
         # Combined error
-        combined = np.array(ik_result.left_hand_errors) + np.array(
-            ik_result.right_hand_errors
-        )
+        combined = np.array(ik_result.left_hand_errors) + np.array(ik_result.right_hand_errors)
         axes[1].plot(times, combined, "b-", label="Total Error")
         axes[1].set_xlabel("Time (s)")
         axes[1].set_ylabel("Combined Error (m)")

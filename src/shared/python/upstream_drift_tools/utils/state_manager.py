@@ -280,9 +280,7 @@ class StateManager:
                                 },
                             )
                     except (PermissionError, OSError) as e:
-                        logger.warning(
-                            "Could not read state file %s: %s", state_file, e
-                        )
+                        logger.warning("Could not read state file %s: %s", state_file, e)
                         continue
 
             # Sort by creation date (newest first)

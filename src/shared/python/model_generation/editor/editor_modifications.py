@@ -206,17 +206,13 @@ class ModificationMixin:
 
         # Remove all joints connected to subtree
         model.joints = [
-            j
-            for j in model.joints
-            if j.parent not in subtree and j.child not in subtree
+            j for j in model.joints if j.parent not in subtree and j.child not in subtree
         ]
 
         # Also remove joint connecting subtree to parent
         model.joints = [j for j in model.joints if j.child != root_link]
 
-        logger.info(
-            f"Deleted subtree '{root_link}' ({len(subtree)} links) from '{model_id}'"
-        )
+        logger.info(f"Deleted subtree '{root_link}' ({len(subtree)} links) from '{model_id}'")
         return True
 
     @precondition(
@@ -738,9 +734,7 @@ class ModificationMixin:
         """
         _VALID_AXES = {"x", "y", "z"}
         if mirror_axis not in _VALID_AXES:
-            raise ValueError(
-                f"mirror_axis must be one of {_VALID_AXES}, got '{mirror_axis}'"
-            )
+            raise ValueError(f"mirror_axis must be one of {_VALID_AXES}, got '{mirror_axis}'")
 
         if not self.copy_subtree(model_id, root_link):
             return []
@@ -789,9 +783,7 @@ class ModificationMixin:
         axis_idx = {"x": 0, "y": 1, "z": 2}[mirror_axis]
 
         created_links = self._mirror_links(links, name_map, axis_idx, model)
-        self._mirror_joints(
-            joints, links, name_map, axis_idx, parent, mirror_name, model
-        )
+        self._mirror_joints(joints, links, name_map, axis_idx, parent, mirror_name, model)
 
         logger.info(f"Created mirrored subtree with {len(created_links)} links")
         return created_links

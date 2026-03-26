@@ -98,7 +98,7 @@ jobs:
           # - CVE-2024-23342 (ecdsa): No fix version available
           # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
           # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
-          # - CVE-2026-4539 (pygments): No fix version available
+          # - CVE-2026-4539 (pygments): No fix version available at time of writing
           pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539
 
       # SECURITY: Bandit static security analysis (Issue #782)

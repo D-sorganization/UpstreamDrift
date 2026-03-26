@@ -236,9 +236,7 @@ class GolfSplashScreen(QSplashScreen):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
 
-        text_primary, text_secondary, accent, bg_bar, text_quaternary = (
-            self._resolve_theme_colors()
-        )
+        text_primary, text_secondary, accent, bg_bar, text_quaternary = self._resolve_theme_colors()
 
         self._draw_logo_and_title(painter, text_primary, text_secondary)
         self._draw_progress_bar(painter, accent, bg_bar)
@@ -252,9 +250,7 @@ class GolfSplashScreen(QSplashScreen):
             raise ValueError("message must be provided")
         self.loading_message = message
         self.progress = progress
-        self.showMessage(
-            message, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter
-        )
+        self.showMessage(message, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter)
         self.repaint()
         QApplication.processEvents()
 
@@ -302,9 +298,7 @@ class AsyncStartupWorker(QThread):
                 logger.debug("Docker not available or timed out")
 
             self.progress_signal.emit("Ready", 100)
-            self.msleep(
-                500
-            )  # QThread.msleep: non-blocking within the Qt thread scheduler
+            self.msleep(500)  # QThread.msleep: non-blocking within the Qt thread scheduler
             self.finished_signal.emit(self.results)
         except ImportError as e:
             logger.error(f"Startup failed: {e}")

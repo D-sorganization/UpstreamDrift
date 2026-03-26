@@ -190,9 +190,7 @@ class SwingAnimator:
         lines: dict[str, Any] = {}
         points: dict[str, Any] = {}
         for name in body_data:
-            (line,) = ax.plot(
-                [], [], [], linewidth=1.5, color=cfg.actual_color, label=name
-            )
+            (line,) = ax.plot([], [], [], linewidth=1.5, color=cfg.actual_color, label=name)
             (pt,) = ax.plot([], [], [], "o", markersize=5, color=cfg.actual_color)
             lines[name] = line
             points[name] = pt

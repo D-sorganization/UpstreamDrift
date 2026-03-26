@@ -59,9 +59,7 @@ class StabilityRenderer(BaseRenderer):
             label="CoM-CoP Dist (m)",
         )
         ax1.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
-        ax1.set_ylabel(
-            "Distance (m)", fontsize=12, fontweight="bold", color=self.colors["primary"]
-        )
+        ax1.set_ylabel("Distance (m)", fontsize=12, fontweight="bold", color=self.colors["primary"])
         ax1.tick_params(axis="y", labelcolor=self.colors["primary"])
 
         ax2 = ax1.twinx()
@@ -156,9 +154,7 @@ class StabilityRenderer(BaseRenderer):
 
         ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Y Position (m)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            "Center of Pressure Velocity Field", fontsize=14, fontweight="bold"
-        )
+        ax.set_title("Center of Pressure Velocity Field", fontsize=14, fontweight="bold")
         ax.axis("equal")
         fig.colorbar(q, ax=ax, label="Time (s)")
         fig.tight_layout()
@@ -268,9 +264,7 @@ class StabilityRenderer(BaseRenderer):
 
         if len(times) == 0 or vectors.shape[1] < 3 or positions.shape[1] < 3:
             ax = fig.add_subplot(111)
-            ax.text(
-                0.5, 0.5, "Invalid dimensions or empty data", ha="center", va="center"
-            )
+            ax.text(0.5, 0.5, "Invalid dimensions or empty data", ha="center", va="center")
             return
 
         ax = fig.add_subplot(111, projection="3d")
@@ -383,9 +377,7 @@ class StabilityRenderer(BaseRenderer):
         )
 
         name = self.data.get_joint_name(joint_idx)
-        ax.set_title(
-            f"Local Stability (Divergence Rate): {name}", fontsize=14, fontweight="bold"
-        )
+        ax.set_title(f"Local Stability (Divergence Rate): {name}", fontsize=14, fontweight="bold")
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Divergence Rate (1/s)", fontsize=12, fontweight="bold")
         ax.grid(True, alpha=0.3, linestyle="--")

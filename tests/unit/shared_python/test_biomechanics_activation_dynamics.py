@@ -106,9 +106,7 @@ class TestUpdate:
             a = dyn.update(u=1.0, a=a, dt=0.001)
         assert a > 0.9  # Nearly fully activated after 100 ms
 
-    def test_activation_falls_after_excitation_removed(
-        self, dyn: ActivationDynamics
-    ) -> None:
+    def test_activation_falls_after_excitation_removed(self, dyn: ActivationDynamics) -> None:
         a = 1.0  # Start fully activated
         for _ in range(200):
             a = dyn.update(u=0.0, a=a, dt=0.001)

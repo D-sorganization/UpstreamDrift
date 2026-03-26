@@ -61,7 +61,6 @@ maturin develop                                   # build Rust extensions locall
 
 ## Known Constraints
 
-- **Pre-push hook is broken** (calls `pytest` not `python3 -m pytest`). Use `git push --no-verify`.
 - **Branch naming:** `fix/issue-XXXX-description`
 - **Remote:** origin URL references `Golf_Modeling_Suite.git`
 - Rust builds: `maturin develop` for local dev; CI handles wheel builds

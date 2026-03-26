@@ -38,15 +38,11 @@ class TestAcidGasDewpointRequest:
 
     def test_fraction_over_1_rejected(self) -> None:
         with pytest.raises(ValidationError):
-            AcidGasDewpointRequest(
-                temperature_c=100.0, pressure_bar=1.0, h2o_fraction=1.5
-            )
+            AcidGasDewpointRequest(temperature_c=100.0, pressure_bar=1.0, h2o_fraction=1.5)
 
     def test_fraction_negative_rejected(self) -> None:
         with pytest.raises(ValidationError):
-            AcidGasDewpointRequest(
-                temperature_c=100.0, pressure_bar=1.0, hcl_fraction=-0.01
-            )
+            AcidGasDewpointRequest(temperature_c=100.0, pressure_bar=1.0, hcl_fraction=-0.01)
 
     def test_custom_fractions(self) -> None:
         req = AcidGasDewpointRequest(

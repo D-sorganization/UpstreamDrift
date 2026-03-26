@@ -279,9 +279,9 @@ class BasePendulumWidget(QWidget):
         if not isinstance(event, QMouseEvent):
             return
         if event.button() == Qt.MouseButton.LeftButton:
-            if hasattr(
-                self, "_handle_zoom_button_click"
-            ) and self._handle_zoom_button_click(event.pos()):
+            if hasattr(self, "_handle_zoom_button_click") and self._handle_zoom_button_click(
+                event.pos()
+            ):
                 return
             self._drag_start = event.pos()
             self._drag_pan_start = (self._pan_x, self._pan_y)
@@ -351,7 +351,7 @@ class BasePendulumWidget(QWidget):
         h_scale = usable_h / total_len
         result = max(30.0, min(w_scale, h_scale))
         if not (result >= 30.0):
-            raise ValueError('DbC Blocked: Precondition failed.')
+            raise ValueError("DbC Blocked: Precondition failed.")
         return result
 
     def _world_to_pixel(self, x_world: float, y_world: float) -> QPointF:
@@ -493,9 +493,7 @@ class BasePendulumWidget(QWidget):
         painter.setFont(QFont("Monospace", 8))
         painter.drawText(label_pos, f"tilt {tilt_deg:.1f}°")
 
-    def _draw_ball(
-        self, painter: QPainter, x: float, y: float, radius_m: float = 0.0214
-    ) -> None:
+    def _draw_ball(self, painter: QPainter, x: float, y: float, radius_m: float = 0.0214) -> None:
         """Draw a golf ball at the given world coordinates.
 
         Pre: radius_m > 0
@@ -580,9 +578,7 @@ class BasePendulumWidget(QWidget):
 
         return catmull_rom_smooth(points, n_sub)
 
-    def _draw_joint(
-        self, painter: QPainter, pos: QPointF, radius: float, color: QColor
-    ) -> None:
+    def _draw_joint(self, painter: QPainter, pos: QPointF, radius: float, color: QColor) -> None:
         """Draw a joint marker with glow effect.
 
         Pre: radius > 0

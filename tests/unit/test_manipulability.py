@@ -85,9 +85,7 @@ class TestCheckJacobianConditioning:
         # Should still return kappa but not log warning
         assert kappa > SINGULARITY_WARNING_THRESHOLD
         # No warning should be logged
-        singularity_warnings = [
-            r for r in caplog.records if "singularity" in r.message.lower()
-        ]
+        singularity_warnings = [r for r in caplog.records if "singularity" in r.message.lower()]
         assert len(singularity_warnings) == 0
 
     def test_empty_jacobian(self, caplog):
@@ -391,9 +389,7 @@ class TestPhysicalRealism:
         # Simplified 2-link planar arm at full extension
         # J = [[-L1-L2, -L2], [0, 0]]  (y-velocity is zero)
         L1, L2 = 1.0, 0.5
-        J = np.array(
-            [[-L1 - L2, -L2], [1e-10, 1e-10]]  # Near-zero, simulating extension
-        )
+        J = np.array([[-L1 - L2, -L2], [1e-10, 1e-10]])  # Near-zero, simulating extension
 
         kappa = check_jacobian_conditioning(J, "extended_arm", warn=False)
 

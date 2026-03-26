@@ -274,10 +274,7 @@ class SwingOptimizer:
 
         for _knot in range(self.num_knot_points):
             for joint_idx in range(self.model.njnt):
-                if (
-                    self.constraints.joint_position_limits
-                    and self.model.jnt_limited[joint_idx]
-                ):
+                if self.constraints.joint_position_limits and self.model.jnt_limited[joint_idx]:
                     q_min = self.model.jnt_range[joint_idx, 0]
                     q_max = self.model.jnt_range[joint_idx, 1]
                 else:
@@ -367,17 +364,14 @@ class SwingOptimizer:
         if self.objectives.target_ball_position is not None:
             distance_error = float(
                 np.linalg.norm(
-                    metrics["final_club_position"]
-                    - self.objectives.target_ball_position,
+                    metrics["final_club_position"] - self.objectives.target_ball_position,
                 ),
             )
             objective += self.objectives.weight_accuracy * distance_error
 
         return objective
 
-    def _interpolate_trajectory(
-        self, trajectory: np.ndarray
-    ) -> tuple[np.ndarray, float, int]:
+    def _interpolate_trajectory(self, trajectory: np.ndarray) -> tuple[np.ndarray, float, int]:
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         if not (trajectory is not None):
@@ -450,9 +444,7 @@ class SwingOptimizer:
             raise ValueError("club_speeds must be provided")
         if not (club_speeds is not None):
             raise ValueError("club_speeds must be provided")
-        peak_club_speed = (
-            float(max(float(s) for s in club_speeds)) if club_speeds else 0.0
-        )
+        peak_club_speed = float(max(float(s) for s in club_speeds)) if club_speeds else 0.0
         total_energy = np.sum(np.abs(controls) * np.abs(velocities[:, : self.model.nu]))
         final_club_position = club_positions[-1] if club_positions else np.zeros(3)
 
@@ -492,9 +484,7 @@ class SwingOptimizer:
             self.data.qpos[:] = trajectory_interp[step]
 
             if step < num_steps - 1:
-                desired_vel = (
-                    trajectory_interp[step + 1] - trajectory_interp[step]
-                ) / dt
+                desired_vel = (trajectory_interp[step + 1] - trajectory_interp[step]) / dt
             else:
                 desired_vel = np.zeros(self.model.nv)
 
@@ -725,9 +715,7 @@ class MotionPrimitiveLibrary:
             weights = np.ones(len(names)) / len(names)
 
         # Get primitives
-        primitives = [
-            self.primitives[name] for name in names if name in self.primitives
-        ]
+        primitives = [self.primitives[name] for name in names if name in self.primitives]
 
         if not primitives:
             return None

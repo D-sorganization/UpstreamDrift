@@ -121,9 +121,7 @@ class TestActuatorControlsExceptionLogging:
         with caplog.at_level(logging.WARNING):
             _get_actuator_info(manager)
 
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
+        warning_messages = [r.message for r in caplog.records if r.levelno >= logging.WARNING]
         # The joint-limits handler must now produce a warning, not silently pass
         assert any(
             "joint" in m.lower() or "limit" in m.lower() for m in warning_messages
@@ -143,9 +141,7 @@ class TestAIPMethodsExceptionLogging:
             manager.get_active_engine.return_value = engine
         return {"engine_manager": manager}
 
-    def test_simulation_status_failure_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_simulation_status_failure_logs_warning(self, caplog: pytest.LogCaptureFixture) -> None:
         """simulation.status handler must log a warning on engine error."""
         from src.api.aip.methods import _simulation_status
 
@@ -154,16 +150,10 @@ class TestAIPMethodsExceptionLogging:
             result = _simulation_status(_context=ctx)
 
         assert result["running"] is False
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _simulation_status, got none"
-        )
+        warning_messages = [r.message for r in caplog.records if r.levelno >= logging.WARNING]
+        assert len(warning_messages) > 0, "Expected a warning log from _simulation_status, got none"
 
-    def test_model_query_failure_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_model_query_failure_logs_warning(self, caplog: pytest.LogCaptureFixture) -> None:
         """model.query handler must log a warning on engine error."""
         from src.api.aip.methods import _model_query
 
@@ -178,16 +168,10 @@ class TestAIPMethodsExceptionLogging:
             result = _model_query(property_name="joints", _context=ctx)
 
         assert result.get("data") is None
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _model_query, got none"
-        )
+        warning_messages = [r.message for r in caplog.records if r.levelno >= logging.WARNING]
+        assert len(warning_messages) > 0, "Expected a warning log from _model_query, got none"
 
-    def test_analysis_metrics_failure_logs_warning(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_analysis_metrics_failure_logs_warning(self, caplog: pytest.LogCaptureFixture) -> None:
         """analysis.metrics handler must log a warning on engine error."""
         from src.api.aip.methods import _analysis_metrics
 
@@ -201,12 +185,8 @@ class TestAIPMethodsExceptionLogging:
             result = _analysis_metrics(_context=ctx)
 
         assert "sim_time" in result
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert len(warning_messages) > 0, (
-            "Expected a warning log from _analysis_metrics, got none"
-        )
+        warning_messages = [r.message for r in caplog.records if r.levelno >= logging.WARNING]
+        assert len(warning_messages) > 0, "Expected a warning log from _analysis_metrics, got none"
 
 
 class TestPhysicsRouteExceptionLogging:
@@ -226,20 +206,16 @@ class TestPhysicsRouteExceptionLogging:
             except ValueError as exc:
                 physics_logger.warning("compute_gravity_forces unavailable: %s", exc)
 
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert any("gravity" in m for m in warning_messages), (
-            f"Expected gravity warning, got: {warning_messages}"
-        )
+        warning_messages = [r.message for r in caplog.records if r.levelno >= logging.WARNING]
+        assert any(
+            "gravity" in m for m in warning_messages
+        ), f"Expected gravity warning, got: {warning_messages}"
 
 
 class TestDataExplorerExceptionLogging:
     """Handlers in src/api/routes/data_explorer.py must log on errors."""
 
-    def test_list_datasets_file_error_logged(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_list_datasets_file_error_logged(self, caplog: pytest.LogCaptureFixture) -> None:
         """OS errors reading file metadata during dataset listing should be logged."""
         from src.api.routes.data_explorer import router
 
@@ -256,13 +232,9 @@ class TestDataExplorerExceptionLogging:
             try:
                 float("not-a-number")
             except ValueError as exc:
-                test_logger.debug(
-                    "Numeric filter parse failed, treating as non-match: %s", exc
-                )
+                test_logger.debug("Numeric filter parse failed, treating as non-match: %s", exc)
 
-        debug_messages = [
-            r.message for r in caplog.records if r.levelno == logging.DEBUG
-        ]
+        debug_messages = [r.message for r in caplog.records if r.levelno == logging.DEBUG]
         assert any(
             "filter" in m.lower() or "parse" in m.lower() for m in debug_messages
         ), f"Expected debug log for numeric parse failure, got: {debug_messages}"
@@ -285,20 +257,16 @@ class TestDatasetRouteExceptionLogging:
                     "Swing phase detection failed, phases will be omitted: %s", exc
                 )
 
-        warning_messages = [
-            r.message for r in caplog.records if r.levelno >= logging.WARNING
-        ]
-        assert any("phase" in m.lower() for m in warning_messages), (
-            f"Expected phase-detection warning, got: {warning_messages}"
-        )
+        warning_messages = [r.message for r in caplog.records if r.levelno >= logging.WARNING]
+        assert any(
+            "phase" in m.lower() for m in warning_messages
+        ), f"Expected phase-detection warning, got: {warning_messages}"
 
 
 class TestDiagnosticsExceptionLogging:
     """Handlers in src/api/diagnostics.py must log on errors."""
 
-    def test_check_dependencies_import_error_logged(
-        self, caplog: pytest.LogCaptureFixture
-    ) -> None:
+    def test_check_dependencies_import_error_logged(self, caplog: pytest.LogCaptureFixture) -> None:
         """ImportError when checking dependencies must be logged at DEBUG level."""
         logger_name = "src.api.diagnostics"
         with caplog.at_level(logging.DEBUG, logger=logger_name):
@@ -308,10 +276,7 @@ class TestDiagnosticsExceptionLogging:
             except ImportError as exc:
                 diag_logger.debug("Optional dependency not available: %s", exc)
 
-        debug_messages = [
-            r.message for r in caplog.records if r.levelno == logging.DEBUG
-        ]
+        debug_messages = [r.message for r in caplog.records if r.levelno == logging.DEBUG]
         assert any(
-            "dependency" in m.lower() or "nonexistent" in m.lower()
-            for m in debug_messages
+            "dependency" in m.lower() or "nonexistent" in m.lower() for m in debug_messages
         ), f"Expected debug log for missing dependency, got: {debug_messages}"

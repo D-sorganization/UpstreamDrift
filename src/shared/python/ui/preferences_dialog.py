@@ -92,9 +92,7 @@ class UserPreferences:
         if PREFS_FILE.exists():
             try:
                 data = json.loads(PREFS_FILE.read_text())
-                return cls(
-                    **{k: v for k, v in data.items() if k in cls.__dataclass_fields__}
-                )
+                return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
             except (ValueError, KeyError, json.JSONDecodeError) as e:
                 logger.warning(f"Failed to load preferences: {e}")
         return cls()
@@ -157,9 +155,7 @@ class PreferencesDialog(QDialog):
         buttons.rejected.connect(self.reject)
         if apply_btn := buttons.button(QDialogButtonBox.StandardButton.Apply):
             apply_btn.clicked.connect(self._on_apply)
-        if restore_btn := buttons.button(
-            QDialogButtonBox.StandardButton.RestoreDefaults
-        ):
+        if restore_btn := buttons.button(QDialogButtonBox.StandardButton.RestoreDefaults):
             restore_btn.clicked.connect(self._on_restore_defaults)
 
         layout.addWidget(buttons)

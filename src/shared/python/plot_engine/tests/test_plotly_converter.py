@@ -171,9 +171,7 @@ class TestTrendlines:
                     name="d",
                     x=[0.0, 1.0, 2.0],
                     y=[0.0, 1.0, 2.0],
-                    trendline=TrendlineSpec(
-                        type="linear", show_equation=True, show_r_squared=True
-                    ),
+                    trendline=TrendlineSpec(type="linear", show_equation=True, show_r_squared=True),
                 ),
             ],
         )
@@ -332,11 +330,7 @@ class TestHeatmap:
 class TestHistogram:
     def test_basic_histogram(self, converter):
         spec = HistogramSpec(
-            series=[
-                SeriesData(
-                    name="d", x=list(range(100)), y=[float(i) for i in range(100)]
-                )
-            ],
+            series=[SeriesData(name="d", x=list(range(100)), y=[float(i) for i in range(100)])],
             bins=20,
         )
         result = converter.convert(spec)

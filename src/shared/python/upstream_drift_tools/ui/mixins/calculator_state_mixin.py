@@ -481,9 +481,7 @@ class CalculatorStateMixin:
         except (ValueError, ZeroDivisionError, OverflowError, TypeError):
             return False
 
-    def load_calculator_state(
-        self, state_name: str | None = None
-    ) -> dict[str, Any] | None:
+    def load_calculator_state(self, state_name: str | None = None) -> dict[str, Any] | None:
         """Load calculator state
 
         Args:
@@ -664,9 +662,7 @@ class CalculatorStateMixin:
 
         menu.exec(cast(QWidget, self).mapToGlobal(position))
 
-    def show_widget_context_menu(
-        self, position: Any, widget_info: dict[str, Any]
-    ) -> None:
+    def show_widget_context_menu(self, position: Any, widget_info: dict[str, Any]) -> None:
         """Show context menu for a specific widget"""
         if not (widget_info is not None):
             raise ValueError("widget_info must be provided")

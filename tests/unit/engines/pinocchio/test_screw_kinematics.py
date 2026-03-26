@@ -91,8 +91,7 @@ class TestWithMockedPinocchio:
         mock_pin.getFrameJacobian.return_value = mock_J
 
         with patch(
-            "src.engines.physics_engines.pinocchio.python"
-            ".pinocchio_screw_kinematics.pin",
+            "src.engines.physics_engines.pinocchio.python" ".pinocchio_screw_kinematics.pin",
             mock_pin,
             create=True,
         ):
@@ -103,9 +102,7 @@ class TestWithMockedPinocchio:
         assert twist.angular.shape == (3,)
         assert twist.linear.shape == (3,)
 
-    def test_compute_twist_raises_for_unknown_frame(
-        self, sk: PinocchioScrewKinematics
-    ) -> None:
+    def test_compute_twist_raises_for_unknown_frame(self, sk: PinocchioScrewKinematics) -> None:
         # Make getFrameId return an index >= nframes → unknown frame
         sk.model.getFrameId.return_value = 999  # >= nframes=3
 
@@ -114,8 +111,7 @@ class TestWithMockedPinocchio:
 
         with (
             patch(
-                "src.engines.physics_engines.pinocchio.python"
-                ".pinocchio_screw_kinematics.pin",
+                "src.engines.physics_engines.pinocchio.python" ".pinocchio_screw_kinematics.pin",
                 mock_pin,
                 create=True,
             ),
@@ -123,9 +119,7 @@ class TestWithMockedPinocchio:
         ):
             sk.compute_twist(np.zeros(3), np.zeros(3), "ghost_frame")
 
-    def test_compute_screw_axis_returns_screw_axis(
-        self, sk: PinocchioScrewKinematics
-    ) -> None:
+    def test_compute_screw_axis_returns_screw_axis(self, sk: PinocchioScrewKinematics) -> None:
         twist = Twist(
             angular=np.array([0.0, 0.0, 2.0]),
             linear=np.array([0.1, 0.2, 0.0]),
@@ -136,9 +130,7 @@ class TestWithMockedPinocchio:
         assert isinstance(screw, ScrewAxis)
         assert not screw.is_singular
 
-    def test_analyze_key_points_skips_missing_frames(
-        self, sk: PinocchioScrewKinematics
-    ) -> None:
+    def test_analyze_key_points_skips_missing_frames(self, sk: PinocchioScrewKinematics) -> None:
         q = np.zeros(3)
         v = np.zeros(3)
 
@@ -154,8 +146,7 @@ class TestWithMockedPinocchio:
         mock_pin.getFrameJacobian.return_value = mock_J
 
         with patch(
-            "src.engines.physics_engines.pinocchio.python"
-            ".pinocchio_screw_kinematics.pin",
+            "src.engines.physics_engines.pinocchio.python" ".pinocchio_screw_kinematics.pin",
             mock_pin,
             create=True,
         ):
@@ -164,9 +155,7 @@ class TestWithMockedPinocchio:
         assert "good" in results
         assert "bad" not in results
 
-    def test_visualize_screw_axis_segment_length(
-        self, sk: PinocchioScrewKinematics
-    ) -> None:
+    def test_visualize_screw_axis_segment_length(self, sk: PinocchioScrewKinematics) -> None:
         screw = ScrewAxis(
             axis_direction=np.array([0.0, 0.0, 1.0]),
             axis_point=np.array([0.0, 0.0, 0.0]),

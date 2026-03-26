@@ -93,16 +93,12 @@ def test_run_inverse_dynamics():
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
-    res = reg.execute(
-        "run_inverse_dynamics", {"file_path": "test.c3d", "engine": "mujoco"}
-    )
+    res = reg.execute("run_inverse_dynamics", {"file_path": "test.c3d", "engine": "mujoco"})
     assert res.success is True
     assert res.result["success"] is True
     assert res.result["engine"] == "mujoco"
 
-    res_bad = reg.execute(
-        "run_inverse_dynamics", {"file_path": "test.c3d", "engine": "bad_engine"}
-    )
+    res_bad = reg.execute("run_inverse_dynamics", {"file_path": "test.c3d", "engine": "bad_engine"})
     assert res_bad.result["success"] is False
 
 
@@ -124,9 +120,7 @@ def test_explain_concept():
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
-    res = reg.execute(
-        "explain_concept", {"term": "inverse_dynamics", "expertise_level": 3}
-    )
+    res = reg.execute("explain_concept", {"term": "inverse_dynamics", "expertise_level": 3})
     assert res.success is True
     assert res.result["term"] == "inverse_dynamics"
     assert "M(q)q" in res.result["explanation"]

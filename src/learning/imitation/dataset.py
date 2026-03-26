@@ -113,9 +113,7 @@ class Demonstration:
             joint_velocities=self.joint_velocities[indices],
             actions=self.actions[indices] if self.actions is not None else None,
             end_effector_poses=(
-                self.end_effector_poses[indices]
-                if self.end_effector_poses is not None
-                else None
+                self.end_effector_poses[indices] if self.end_effector_poses is not None else None
             ),
             contact_states=(
                 [self.contact_states[i] for i in indices]
@@ -163,9 +161,7 @@ class Demonstration:
             joint_velocities=np.array(data["joint_velocities"]),
             actions=np.array(data["actions"]) if "actions" in data else None,
             end_effector_poses=(
-                np.array(data["end_effector_poses"])
-                if "end_effector_poses" in data
-                else None
+                np.array(data["end_effector_poses"]) if "end_effector_poses" in data else None
             ),
             contact_states=data.get("contact_states"),
             task_id=data.get("task_id"),
@@ -445,9 +441,7 @@ class DemonstrationDataset:
             return {"n_demonstrations": 0}
 
         all_positions = np.concatenate([d.joint_positions for d in self.demonstrations])
-        all_velocities = np.concatenate(
-            [d.joint_velocities for d in self.demonstrations]
-        )
+        all_velocities = np.concatenate([d.joint_velocities for d in self.demonstrations])
 
         return {
             "n_demonstrations": len(self.demonstrations),

@@ -53,9 +53,7 @@ def get_simulation_service(request: Request) -> SimulationService:
     """
     service = getattr(request.app.state, "simulation_service", None)
     if service is None:
-        raise HTTPException(
-            status_code=503, detail="Simulation service not initialized"
-        )
+        raise HTTPException(status_code=503, detail="Simulation service not initialized")
     return service  # type: ignore[no-any-return]
 
 

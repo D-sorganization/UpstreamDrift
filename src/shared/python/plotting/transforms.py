@@ -44,6 +44,10 @@ class DataManager:
             "joint_positions",
             "joint_velocities",
             "joint_torques",
+            "joint_forces",
+            "ztcf_joint_forces",
+            "ztcf_accelerations",
+            "force_delta",
             "kinetic_energy",
             "potential_energy",
             "total_energy",
@@ -121,9 +125,7 @@ class DataManager:
 
         # If perfect match
         if data_dim == len(self.joint_names):
-            return (
-                self.joint_names[idx] if idx < len(self.joint_names) else f"DoF {idx}"
-            )
+            return self.joint_names[idx] if idx < len(self.joint_names) else f"DoF {idx}"
 
         # If mismatch, align from the end (assuming base is at the start)
         offset = max(0, data_dim - len(self.joint_names))

@@ -346,9 +346,7 @@ class GRFAnalyzer:
         """
         require(golfer_com is not None, "golfer_com must be provided")
         self.golfer_com_trajectory = golfer_com
-        self.system_com_trajectory = (
-            system_com if system_com is not None else golfer_com
-        )
+        self.system_com_trajectory = system_com if system_com is not None else golfer_com
 
     def compute_impulse_metrics(
         self,
@@ -589,9 +587,7 @@ def validate_grf_cross_engine(
     if len(forces_a) == len(forces_b):
         force_diff = np.abs(forces_a - forces_b)
         force_rel_diff = force_diff / (np.maximum(forces_a, forces_b) + 1e-10)
-        results["force_magnitude"] = bool(
-            np.all(force_rel_diff < GRF_MAGNITUDE_TOLERANCE)
-        )
+        results["force_magnitude"] = bool(np.all(force_rel_diff < GRF_MAGNITUDE_TOLERANCE))
     else:
         logger.warning("GRF data lengths differ, skipping force comparison")
         results["force_magnitude"] = False
@@ -604,26 +600,16 @@ def validate_grf_cross_engine(
         results["cop_position"] = False
 
     # Angular impulse comparison
-    impulse_a = compute_angular_impulse(
-        grf_a.forces, grf_a.cops, grf_a.timestamps, np.zeros(3)
-    )
-    impulse_b = compute_angular_impulse(
-        grf_b.forces, grf_b.cops, grf_b.timestamps, np.zeros(3)
-    )
+    impulse_a = compute_angular_impulse(grf_a.forces, grf_a.cops, grf_a.timestamps, np.zeros(3))
+    impulse_b = compute_angular_impulse(grf_b.forces, grf_b.cops, grf_b.timestamps, np.zeros(3))
 
     impulse_diff = np.abs(impulse_a - impulse_b)
-    impulse_rel_diff = impulse_diff / (
-        np.maximum(np.abs(impulse_a), np.abs(impulse_b)) + 1e-10
-    )
-    results["angular_impulse"] = bool(
-        np.all(impulse_rel_diff < ANGULAR_IMPULSE_TOLERANCE)
-    )
+    impulse_rel_diff = impulse_diff / (np.maximum(np.abs(impulse_a), np.abs(impulse_b)) + 1e-10)
+    results["angular_impulse"] = bool(np.all(impulse_rel_diff < ANGULAR_IMPULSE_TOLERANCE))
 
     # Log results
     for metric, passed in results.items():
         status = "✓ PASS" if passed else "✗ FAIL"
-        logger.info(
-            f"GRF Cross-Engine [{engine_name_a} vs {engine_name_b}] {metric}: {status}"
-        )
+        logger.info(f"GRF Cross-Engine [{engine_name_a} vs {engine_name_b}] {metric}: {status}")
 
     return results

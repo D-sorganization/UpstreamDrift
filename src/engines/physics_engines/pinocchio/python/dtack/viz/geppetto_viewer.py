@@ -53,9 +53,7 @@ class GeppettoViewer:
             logger.warning("Failed to connect to Geppetto server: %s", e)
             logger.info("Start Geppetto server with: gepetto-gui")
 
-    def load_model(
-        self, model: pin.Model, visual_model: pin.GeometryModel | None = None
-    ) -> None:
+    def load_model(self, model: pin.Model, visual_model: pin.GeometryModel | None = None) -> None:
         """Load Pinocchio model into viewer.
 
         Args:

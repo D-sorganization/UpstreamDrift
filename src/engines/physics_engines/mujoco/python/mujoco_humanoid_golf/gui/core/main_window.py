@@ -80,9 +80,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
                 with open(style_path) as f:
                     self.setStyleSheet(f.read())
             else:
-                logger.warning(
-                    "Stylesheet not found: %s; using default Qt styling", style_path
-                )
+                logger.warning("Stylesheet not found: %s; using default Qt styling", style_path)
         except ImportError:
             logger.exception("Failed to load stylesheet, using default Qt styling")
 
@@ -150,9 +148,7 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
 
         if hasattr(self.controls_tab, "chk_live_analysis"):
-            self.controls_tab.chk_live_analysis.toggled.connect(
-                self.on_live_analysis_toggled
-            )
+            self.controls_tab.chk_live_analysis.toggled.connect(self.on_live_analysis_toggled)
 
         self.physics_tab.model_changed.connect(
             lambda n, c: self.manipulability_tab.on_model_loaded()
@@ -538,7 +534,6 @@ class AdvancedGolfAnalysisWindow(SimulationGUIBase, AdvancedGuiMethodsMixin):
         """Return joint names from the MuJoCo model."""
         if self.sim_widget.model is not None:
             return [
-                self.sim_widget.get_joint_name(i)
-                for i in range(self.sim_widget.get_num_joints())
+                self.sim_widget.get_joint_name(i) for i in range(self.sim_widget.get_num_joints())
             ]
         return []

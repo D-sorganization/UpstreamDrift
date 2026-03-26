@@ -112,9 +112,7 @@ class PoseEditorState:
             selected_body_name=self.selected_body_name,
             ik_enabled=self.ik_enabled,
             ik_target_position=(
-                self.ik_target_position.copy()
-                if self.ik_target_position is not None
-                else None
+                self.ik_target_position.copy() if self.ik_target_position is not None else None
             ),
             ik_target_body=self.ik_target_body,
             constrained_bodies=self.constrained_bodies.copy(),

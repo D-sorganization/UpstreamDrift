@@ -132,10 +132,7 @@ def _check_module_import() -> bool:
             "upstream-drift:engine",
             "python",
             "-c",
-            (
-                "from mujoco_golf_pendulum import urdf_io; "
-                "print('urdf_io imported successfully')"
-            ),
+            ("from mujoco_golf_pendulum import urdf_io; " "print('urdf_io imported successfully')"),
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         logger.info(f"✓ {result.stdout.strip()}")

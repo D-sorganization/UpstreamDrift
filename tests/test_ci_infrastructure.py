@@ -259,6 +259,4 @@ class TestPyprojectTomlConsistency:
 
         deps = data["project"]["dependencies"]
         # Check that structlog is in the dependencies
-        assert any("structlog" in dep for dep in deps), (
-            "structlog must be in core dependencies"
-        )
+        assert any("structlog" in dep for dep in deps), "structlog must be in core dependencies"

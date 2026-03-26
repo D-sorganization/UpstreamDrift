@@ -105,12 +105,8 @@ class DrakeVisualizationMixin:
 
     def _sync_eval_context(self: Any) -> None:
         plant_context = self.plant.GetMyContextFromRoot(self.context)
-        self.plant.SetPositions(
-            self.eval_context, self.plant.GetPositions(plant_context)
-        )
-        self.plant.SetVelocities(
-            self.eval_context, self.plant.GetVelocities(plant_context)
-        )
+        self.plant.SetPositions(self.eval_context, self.plant.GetPositions(plant_context))
+        self.plant.SetVelocities(self.eval_context, self.plant.GetVelocities(plant_context))
 
     def _draw_torque_vectors(self: Any) -> None:
         tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)
@@ -393,12 +389,7 @@ class DrakeVisualizationMixin:
 
     def _draw_ellipsoids(self: Any) -> None:
         """Draw force/mobility ellipsoids using Meshcat."""
-        if (
-            not self.meshcat
-            or not self.manip_analyzer
-            or not self.context
-            or not self.plant
-        ):
+        if not self.meshcat or not self.manip_analyzer or not self.context or not self.plant:
             return
 
         # We'll use a specific path prefix
@@ -542,9 +533,7 @@ class DrakeVisualizationMixin:
         self.recorder.induced_accelerations["total"] = list(total_arr)
 
         if spec_induced:
-            self.recorder.induced_accelerations["control"] = list(
-                np.array(spec_induced)
-            )
+            self.recorder.induced_accelerations["control"] = list(np.array(spec_induced))
 
         joint_idx = 0
         if g_induced_arr.shape[1] > 2:
@@ -586,9 +575,7 @@ class DrakeVisualizationMixin:
         try:
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
 
-            for q, v in zip(
-                self.recorder.q_history, self.recorder.v_history, strict=False
-            ):
+            for q, v in zip(self.recorder.q_history, self.recorder.v_history, strict=False):
                 self.plant.SetPositions(self.eval_context, q)
                 self.plant.SetVelocities(self.eval_context, v)
 
@@ -728,9 +715,7 @@ class DrakeVisualizationMixin:
         ax2.text(0.5, 0.5, "CoP Data Not Available in Drake", ha="center", va="center")
 
         ax3 = fig.add_subplot(gs[1, :])
-        ax3.text(
-            0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center"
-        )
+        ax3.text(0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center")
 
         plt.tight_layout()
         plt.show()

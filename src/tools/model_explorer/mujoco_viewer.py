@@ -135,8 +135,7 @@ class URDFToMJCFConverter:
                 if mass_elem is not None:
                     mass = mass_elem.get("value", "1.0")
                     mjcf_parts.append(
-                        f'      <inertial pos="0 0 0" mass="{mass}" '
-                        f'diaginertia="0.1 0.1 0.1"/>'
+                        f'      <inertial pos="0 0 0" mass="{mass}" ' f'diaginertia="0.1 0.1 0.1"/>'
                     )
             else:
                 # Default inertial
@@ -281,9 +280,7 @@ class MuJoCoOffscreenRenderer:
 
                 # Create renderer with compatible dimensions
                 # Note: MuJoCo Renderer takes (model, height, width) not (model, width, height)
-                self._renderer = mujoco.Renderer(
-                    self._model, render_height, render_width
-                )
+                self._renderer = mujoco.Renderer(self._model, render_height, render_width)
 
                 # Initialize persistent camera for efficiency
                 self._camera = mujoco.MjvCamera()
@@ -591,8 +588,7 @@ class MuJoCoViewerWidget(QWidget):
 
         # Create toggle group with visual separator
         toggle_frame = QFrame()
-        toggle_frame.setStyleSheet(
-            """
+        toggle_frame.setStyleSheet("""
             QFrame {
                 background-color: #3a3a3a;
                 border-radius: 4px;
@@ -610,8 +606,7 @@ class MuJoCoViewerWidget(QWidget):
                 background-color: #4a9eff;
                 border-radius: 2px;
             }
-        """
-        )
+        """)
         toggle_layout = QHBoxLayout(toggle_frame)
         toggle_layout.setContentsMargins(4, 2, 4, 2)
         toggle_layout.setSpacing(8)
@@ -651,15 +646,13 @@ class MuJoCoViewerWidget(QWidget):
         self._viewport = QLabel()
         self._viewport.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._viewport.setMinimumSize(320, 240)
-        self._viewport.setStyleSheet(
-            """
+        self._viewport.setStyleSheet("""
             QLabel {
                 background-color: #2a2a2a;
                 border: 1px solid #444;
                 border-radius: 4px;
             }
-        """
-        )
+        """)
         self._viewport.setMouseTracking(True)
         layout.addWidget(self._viewport, stretch=1)
 
@@ -670,9 +663,7 @@ class MuJoCoViewerWidget(QWidget):
 
         # Headless fallback with clear messaging
         if not MUJOCO_AVAILABLE:
-            self._status_label.setText(
-                "⚠️ MuJoCo not installed - running in headless mode"
-            )
+            self._status_label.setText("⚠️ MuJoCo not installed - running in headless mode")
             self._disable_toggles()
             self._update_headless_placeholder()
 
@@ -694,8 +685,7 @@ class MuJoCoViewerWidget(QWidget):
 
     def _update_headless_placeholder(self) -> None:
         """Show a clear headless fallback message."""
-        self._viewport.setStyleSheet(
-            """
+        self._viewport.setStyleSheet("""
             QLabel {
                 background-color: #1a1a2e;
                 border: 2px dashed #4a4a6a;
@@ -703,8 +693,7 @@ class MuJoCoViewerWidget(QWidget):
                 color: #8888aa;
                 font-size: 14px;
             }
-        """
-        )
+        """)
         self._viewport.setText(
             "🖥️ Headless Mode\n\n"
             "MuJoCo is not installed.\n"
@@ -719,9 +708,7 @@ class MuJoCoViewerWidget(QWidget):
         """Show a placeholder message."""
         self._viewport.setText(message)
 
-    def update_visualization(
-        self, urdf_content: str, urdf_path: str | None = None
-    ) -> None:
+    def update_visualization(self, urdf_content: str, urdf_path: str | None = None) -> None:
         """Update visualization with new URDF content.
 
         Args:
@@ -767,9 +754,7 @@ class MuJoCoViewerWidget(QWidget):
         link_count = urdf_content.count("<link")
         joint_count = urdf_content.count("<joint")
         if success:
-            self._status_label.setText(
-                f"✓ Model loaded: {link_count} links, {joint_count} joints"
-            )
+            self._status_label.setText(f"✓ Model loaded: {link_count} links, {joint_count} joints")
         else:
             self._status_label.setText("⚠️ Failed to load model")
 
@@ -812,9 +797,7 @@ class MuJoCoViewerWidget(QWidget):
 
                     # Simple check: diagonal elements should be positive
                     if ixx <= 0 or iyy <= 0 or izz <= 0:
-                        errors.append(
-                            f"Link '{link_name}': Non-positive inertia diagonal"
-                        )
+                        errors.append(f"Link '{link_name}': Non-positive inertia diagonal")
 
         # Check joint axes
         for joint in root.findall(".//joint"):
@@ -827,9 +810,7 @@ class MuJoCoViewerWidget(QWidget):
                 norm = sum(x * x for x in axis) ** 0.5
 
                 if abs(norm - 1.0) > 0.01:
-                    errors.append(
-                        f"Joint '{joint_name}': Axis not normalized (|axis|={norm:.3f})"
-                    )
+                    errors.append(f"Joint '{joint_name}': Axis not normalized (|axis|={norm:.3f})")
 
         return errors
 
@@ -957,9 +938,7 @@ class MuJoCoViewerWidget(QWidget):
             # Convert to MJCF and save to temp file
             mjcf_content = URDFToMJCFConverter.convert(self._urdf_content)
 
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".xml", delete=False
-            ) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False) as f:
                 f.write(mjcf_content)
                 temp_path = f.name
 

@@ -159,9 +159,7 @@ def migrate_api_keys(
     user_ids = [r.user_id for r in api_records]
     users = db_session.query(User).filter(User.id.in_(user_ids)).all()
     user_map: dict[int, User] = {int(u.id): u for u in users}  # type: ignore[arg-type]
-    logger.info(
-        f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)"
-    )
+    logger.info(f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)")
 
     # Store results in separate lists to break taint chain
     metadata_results: list[dict[str, Any]] = []
@@ -288,9 +286,7 @@ def main() -> int:
         if not args.dry_run:
             logger.warning("\n⚠️  WARNING: This is a ONE-WAY migration!")
             logger.warning("Old API keys will be PERMANENTLY INVALIDATED")
-            logger.warning(
-                "New keys will be generated and must be distributed to users\n"
-            )
+            logger.warning("New keys will be generated and must be distributed to users\n")
 
             response = input("Proceed with migration? (yes/no): ")
             if response.lower() != "yes":
@@ -299,9 +295,7 @@ def main() -> int:
 
         # Perform migration
         logger.info("\nStarting migration...")
-        metadata_results, raw_secrets = migrate_api_keys(
-            db_session, dry_run=args.dry_run
-        )
+        metadata_results, raw_secrets = migrate_api_keys(db_session, dry_run=args.dry_run)
 
         if not metadata_results:
             logger.info("No items to migrate")

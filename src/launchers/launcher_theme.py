@@ -33,16 +33,12 @@ class LauncherThemeMixin:
 
             # Map extended color names to actual theme keys with fallbacks
             bg_elevated = colors.get("bg_elevated", colors.get("group_bg", "#2D2D2D"))
-            border_default = colors.get(
-                "border_default", colors.get("border", "#555555")
-            )
+            border_default = colors.get("border_default", colors.get("border", "#555555"))
             bg_highlight = colors.get("bg_highlight", colors.get("input_bg", "#3D3D3D"))
             border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
-            self.setStyleSheet(
-                manager.get_current_stylesheet()
-                + f"""
+            self.setStyleSheet(manager.get_current_stylesheet() + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -60,8 +56,7 @@ class LauncherThemeMixin:
                 QLabel#CardDescription {{
                     color: {text_sec};
                 }}
-            """
-            )
+            """)
         except (ImportError, AttributeError):
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
@@ -144,9 +139,7 @@ class LauncherThemeMixin:
                 action = QAction(name, self)
                 action.setCheckable(True)
                 action.setChecked(manager.get_current_theme_name() == name)
-                action.triggered.connect(
-                    lambda checked, p=preset: manager.change_theme(p.value)
-                )
+                action.triggered.connect(lambda checked, p=preset: manager.change_theme(p.value))
                 group.addAction(action)
                 theme_menu.addAction(action)
                 self._theme_actions.append(action)
@@ -160,9 +153,7 @@ class LauncherThemeMixin:
                     action = QAction(theme_name, self)
                     action.setCheckable(True)
                     action.setChecked(manager.get_current_theme_name() == theme_name)
-                    action.triggered.connect(
-                        lambda checked, n=theme_name: manager.change_theme(n)
-                    )
+                    action.triggered.connect(lambda checked, n=theme_name: manager.change_theme(n))
                     group.addAction(action)
                     theme_menu.addAction(action)
                     self._theme_actions.append(action)
@@ -175,9 +166,7 @@ class LauncherThemeMixin:
                     action = QAction(cname, self)
                     action.setCheckable(True)
                     action.setChecked(manager.get_current_theme_name() == cname)
-                    action.triggered.connect(
-                        lambda checked, n=cname: manager.change_theme(n)
-                    )
+                    action.triggered.connect(lambda checked, n=cname: manager.change_theme(n))
                     group.addAction(action)
                     theme_menu.addAction(action)
                     self._theme_actions.append(action)
@@ -252,9 +241,7 @@ class LauncherThemeMixin:
                 action = QAction(style_name, self)
                 action.setCheckable(True)
                 action.setChecked(current_plot == style_name)
-                action.triggered.connect(
-                    lambda checked, s=style_name: self._set_plot_theme(s)
-                )
+                action.triggered.connect(lambda checked, s=style_name: self._set_plot_theme(s))
                 group.addAction(action)
                 plot_menu.addAction(action)
         except ImportError:

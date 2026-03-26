@@ -102,9 +102,7 @@ def run_multi_parameter_analysis_parallel(
 
     # Create list of all grid points to evaluate
     tasks = [
-        (i, j, p1, p2)
-        for i, p1 in enumerate(param1_values)
-        for j, p2 in enumerate(param2_values)
+        (i, j, p1, p2) for i, p1 in enumerate(param1_values) for j, p2 in enumerate(param2_values)
     ]
 
     # Parallel execution using ProcessPoolExecutor

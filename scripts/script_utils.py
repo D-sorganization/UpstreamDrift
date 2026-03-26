@@ -86,9 +86,7 @@ def find_python_files(root: Path | str = ".") -> list[Path]:
         "dist",
     }
 
-    return [
-        f for f in root_path.glob("**/*.py") if not any(p in f.parts for p in excluded)
-    ]
+    return [f for f in root_path.glob("**/*.py") if not any(p in f.parts for p in excluded)]
 
 
 def count_test_files(root: Path | str = ".") -> int:
@@ -148,13 +146,10 @@ def run_command(
         FileNotFoundError: If the command is not found
 
     """
-    if not (cmd):
-        raise ValueError("cmd must be provided")
-    if not (isinstance(cmd):
-        raise ValueError(list), "cmd must be a list")
+    assert cmd, "cmd must be provided"
+    assert isinstance(cmd, list), "cmd must be a list"
     if cwd is not None:
-        if not (isinstance(cwd):
-            raise ValueError((Path, str)), "cwd must be a Path or str")
+        assert isinstance(cwd, (Path, str)), "cwd must be a Path or str"
 
     if logger:
         logger.debug(f"Running command: {' '.join(cmd)}")
@@ -190,13 +185,10 @@ def run_pytest(
     logger: logging.Logger | None = None,
 ) -> bool:
     """Run pytest with consistent configuration."""
-    if not (path is not None):
-        raise ValueError("path must be provided")
-    if not (isinstance(verbose):
-        raise ValueError(bool), "verbose must be a bool")
+    assert path is not None, "path must be provided"
+    assert isinstance(verbose, bool), "verbose must be a bool"
     if markers is not None:
-        if not (isinstance(markers):
-            raise ValueError(str), "markers must be a str")
+        assert isinstance(markers, str), "markers must be a str"
 
     if logger:
         logger.info(f"Running tests in {path}...")

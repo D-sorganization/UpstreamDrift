@@ -169,13 +169,9 @@ class GolferParams:
         if not (self.d_ls >= 0):
             raise ValueError(f"d_ls must be non-negative, got {self.d_ls}")
         if not (self.grip_right >= 0):
-            raise ValueError(()
-            f"grip_right must be non-negative, got {self.grip_right}"
-        )
+            raise ValueError(f"grip_right must be non-negative, got {self.grip_right}")
         if not (self.grip_left >= 0):
-            raise ValueError(()
-            f"grip_left must be non-negative, got {self.grip_left}"
-        )
+            raise ValueError(f"grip_left must be non-negative, got {self.grip_left}")
         if not (self.grip_right <= self.L_club):
             raise ValueError("grip_right must be ≤ L_club")
         if not (self.grip_left <= self.L_club):
@@ -183,9 +179,7 @@ class GolferParams:
         if not (self.g >= 0):
             raise ValueError(f"g must be non-negative, got {self.g}")
         if not (self.m_clubhead >= 0):
-            raise ValueError(()
-            f"m_clubhead must be non-negative, got {self.m_clubhead}"
-        )
+            raise ValueError(f"m_clubhead must be non-negative, got {self.m_clubhead}")
 
         for name in ["b_hub", "b_rs", "b_re", "b_rh", "b_ls", "b_le", "b_lh"]:
             val = getattr(self, name)

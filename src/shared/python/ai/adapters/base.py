@@ -246,9 +246,7 @@ class BaseAgentAdapter(ABC):
             raise ValueError("tools must be provided")
         if not (tools is not None):
             raise ValueError("tools must be provided")
-        tool_descriptions = "\n".join(
-            f"- {tool.name}: {tool.description}" for tool in tools
-        )
+        tool_descriptions = "\n".join(f"- {tool.name}: {tool.description}" for tool in tools)
 
         return (
             f"You are an AI assistant for the Golf Modeling Suite, a research-grade "
