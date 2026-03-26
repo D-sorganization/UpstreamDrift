@@ -121,8 +121,10 @@ def generate_slider_crank_xml(
     orientation : str
         "horizontal" or "vertical" slider direction
     """
-    assert crank_length is not None, "crank_length must be provided"
-    assert crank_length is not None, "crank_length must be provided"
+    if not (crank_length is not None):
+        raise ValueError("crank_length must be provided")
+    if not (crank_length is not None):
+        raise ValueError("crank_length must be provided")
     slider_axis = "1 0 0" if orientation == "horizontal" else "0 0 1"
     slider_start = -rod_length - crank_length
     slider_end = rod_length + crank_length

@@ -69,8 +69,10 @@ class MotionCaptureSequence:
         Returns:
             Tuple of (times [N], positions [N x 3])
         """
-        assert marker_name is not None, "marker_name must be provided"
-        assert marker_name is not None, "marker_name must be provided"
+        if not (marker_name is not None):
+            raise ValueError("marker_name must be provided")
+        if not (marker_name is not None):
+            raise ValueError("marker_name must be provided")
         times = []
         positions = []
 
@@ -168,8 +170,10 @@ class MotionCaptureLoader:
         Returns:
             MotionCaptureSequence
         """
-        assert filepath is not None, "filepath must be provided"
-        assert filepath is not None, "filepath must be provided"
+        if not (filepath is not None):
+            raise ValueError("filepath must be provided")
+        if not (filepath is not None):
+            raise ValueError("filepath must be provided")
         data = np.loadtxt(filepath, delimiter=",", skiprows=1)
 
         # Parse header for marker names if not provided
@@ -292,8 +296,10 @@ class MotionRetargeting:
             data: MuJoCo data
             marker_set: Marker set configuration
         """
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.model = model
         self.data = data
         self.marker_set = marker_set
@@ -329,8 +335,10 @@ class MotionRetargeting:
         Returns:
             Tuple of (times [N], joint_trajectories [N x nv], success_flags [N])
         """
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
         if use_markers is None:
             use_markers = list(self.marker_to_body_id.keys())
 
@@ -377,8 +385,10 @@ class MotionRetargeting:
             Tuple of (joint_config, success)
         """
         # Multi-target IK: minimize error to all marker positions
-        assert frame is not None, "frame must be provided"
-        assert frame is not None, "frame must be provided"
+        if not (frame is not None):
+            raise ValueError("frame must be provided")
+        if not (frame is not None):
+            raise ValueError("frame must be provided")
         q = q_init.copy()
 
         for _iteration in range(max_iterations):
@@ -452,8 +462,10 @@ class MotionRetargeting:
         Returns:
             Dictionary of marker_name -> error (m)
         """
-        assert frame is not None, "frame must be provided"
-        assert frame is not None, "frame must be provided"
+        if not (frame is not None):
+            raise ValueError("frame must be provided")
+        if not (frame is not None):
+            raise ValueError("frame must be provided")
         self.data.qpos[:] = q
         mujoco.mj_forward(self.model, self.data)
 
@@ -490,8 +502,10 @@ class MotionCaptureProcessor:
             Filtered positions [N x 3] or [N x nv]
         """
         # Design filter
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         nyquist = sampling_rate / 2.0
         normalized_cutoff = cutoff_frequency / nyquist
         b, a = butter(4, normalized_cutoff, btype="low")
@@ -519,8 +533,10 @@ class MotionCaptureProcessor:
         Returns:
             Velocities [N x d]
         """
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         if method == "finite_difference":
             # Central differences
             velocities = np.zeros_like(positions)
@@ -555,8 +571,10 @@ class MotionCaptureProcessor:
         Returns:
             Accelerations [N x d]
         """
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         if method == "finite_difference":
             accelerations = np.zeros_like(velocities)
             accelerations[1:-1] = (velocities[2:] - velocities[:-2]) / (
@@ -593,8 +611,10 @@ class MotionCaptureProcessor:
         Returns:
             Resampled trajectory [M x d]
         """
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         resampled = np.zeros((len(new_times), trajectory.shape[1]))
 
         for i in range(trajectory.shape[1]):
@@ -626,8 +646,10 @@ class MotionCaptureProcessor:
             Tuple of (normalized_times [M], normalized_trajectory [M x d])
         """
         # Normalize time to [0, 1]
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         normalized_times = np.linspace(0, 1, num_samples)
 
         # Time normalize original
@@ -661,8 +683,10 @@ class MotionCaptureValidator:
         Returns:
             List of (start_frame, end_frame) for gaps
         """
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
         gaps = []
         last_frame = -1
 
@@ -692,8 +716,10 @@ class MotionCaptureValidator:
         Returns:
             Dictionary with velocity statistics or error message
         """
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
         times, positions = mocap_sequence.get_marker_trajectory(marker_name)
 
         if len(times) < 2:
@@ -723,8 +749,10 @@ class MotionCaptureValidator:
         Returns:
             Visibility statistics
         """
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
-        assert mocap_sequence is not None, "mocap_sequence must be provided"
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
+        if not (mocap_sequence is not None):
+            raise ValueError("mocap_sequence must be provided")
         total_frames = len(mocap_sequence.frames)
         visible_frames = sum(
             1

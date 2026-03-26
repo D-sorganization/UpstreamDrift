@@ -8,8 +8,9 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 
 class TestAdvancedAnalysis:
-    @pytest.mark.skip(
-        reason="compute_poincare_map not yet implemented in StatisticalAnalyzer"
+    @pytest.mark.xfail(
+        reason="compute_poincare_map not yet implemented in StatisticalAnalyzer",
+        strict=False,
     )
     def test_compute_poincare_map(self) -> None:
         # Create a simple periodic signal: sin(t), cos(t)
@@ -58,8 +59,9 @@ class TestAdvancedAnalysis:
         assert len(points_pos) == 2
         assert np.allclose(points_pos[:, 0], -1.0, atol=0.01)
 
-    @pytest.mark.skip(
-        reason="compute_lyapunov_divergence not yet implemented in StatisticalAnalyzer"
+    @pytest.mark.xfail(
+        reason="compute_lyapunov_divergence not yet implemented in StatisticalAnalyzer",
+        strict=False,
     )
     def test_compute_lyapunov_divergence(self) -> None:
         # Generate some data

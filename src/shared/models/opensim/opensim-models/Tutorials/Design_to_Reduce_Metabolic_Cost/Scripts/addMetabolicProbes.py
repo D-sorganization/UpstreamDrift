@@ -33,7 +33,6 @@
 # muscle are obtained from a text file; all other probe parameters are
 # defined below.
 
-
 # Get a handle to the current model loaded in the GUI.
 oldModel = getCurrentModel()
 

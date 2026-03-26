@@ -46,8 +46,8 @@ class PendulumParams:
     Contract:
         - All lengths and masses must be strictly positive (mClub >= 0).
         - Gravity must be non-negative.
-        - Damping coefficients b1, b2 must be non-negative  (N·m·s/rad).
-        - Coulomb friction mu1, mu2 must be non-negative  (N·m peak magnitude).
+        - Damping coefficients b1, b2 must be non-negative  (NÂ·mÂ·s/rad).
+        - Coulomb friction mu1, mu2 must be non-negative  (NÂ·m peak magnitude).
     """
 
     m1: float  # mass of arms (kg), typical ~5.0
@@ -55,11 +55,11 @@ class PendulumParams:
     L1: float  # length of arms (m), typical ~0.65
     L2: float  # length of shaft (m), typical ~1.10
     mClub: float = 0.0  # clubhead mass (kg), typical ~0.20
-    g: float = GRAVITY_MSS  # gravitational acceleration (m/s²)
-    b1: float = 0.0  # viscous damping at shoulder (N·m·s/rad)
-    b2: float = 0.0  # viscous damping at wrist (N·m·s/rad)
-    mu1: float = 0.0  # Coulomb friction at shoulder (N·m)
-    mu2: float = 0.0  # Coulomb friction at wrist (N·m)
+    g: float = GRAVITY_MSS  # gravitational acceleration (m/sÂ²)
+    b1: float = 0.0  # viscous damping at shoulder (NÂ·mÂ·s/rad)
+    b2: float = 0.0  # viscous damping at wrist (NÂ·mÂ·s/rad)
+    mu1: float = 0.0  # Coulomb friction at shoulder (NÂ·m)
+    mu2: float = 0.0  # Coulomb friction at wrist (NÂ·m)
 
     def __post_init__(self) -> None:
         assert self.m1 > 0, f"m1 must be positive, got {self.m1}"
@@ -81,20 +81,20 @@ class JointLimits:
     Contract:
         - For each pair, min < max.
         - stiffness > 0, damping >= 0.
-        - theta1 limits default to ±π (unconstrained).
+        - theta1 limits default to Â±Ï€ (unconstrained).
     """
 
     # Wrist (phi) limits
     phi_min: float = -np.pi / 2  # rad
     phi_max: float = np.pi / 2  # rad
 
-    # Shoulder (theta1) limits — defaults allow full rotation
+    # Shoulder (theta1) limits â€” defaults allow full rotation
     theta1_min: float = -np.pi  # rad
     theta1_max: float = np.pi  # rad
 
     # Shared penalty parameters
-    stiffness: float = 500.0  # N·m/rad
-    damping: float = 20.0  # N·m·s/rad
+    stiffness: float = 500.0  # NÂ·m/rad
+    damping: float = 20.0  # NÂ·mÂ·s/rad
 
     def __post_init__(self) -> None:
         assert self.phi_min < self.phi_max
@@ -105,7 +105,7 @@ class JointLimits:
 
 @dataclass(frozen=True)
 class TorqueClamp:
-    """Torque saturation limits (symmetric ± clamp).
+    """Torque saturation limits (symmetric Â± clamp).
 
     Contract:
         - Both limits must be non-zero; abs() is applied automatically.
@@ -114,8 +114,8 @@ class TorqueClamp:
     Closes #1138: accepts negative values via abs() for usability.
     """
 
-    max_torque1: float = float("inf")  # N·m (magnitude, ± symmetric)
-    max_torque2: float = float("inf")  # N·m (magnitude, ± symmetric)
+    max_torque1: float = float("inf")  # NÂ·m (magnitude, Â± symmetric)
+    max_torque2: float = float("inf")  # NÂ·m (magnitude, Â± symmetric)
 
     def __post_init__(self) -> None:
         # Accept negative inputs by taking abs (#1138)
@@ -279,9 +279,9 @@ def _hermite_penalty(
     transition : float
         Transition width (rad) over which smoothstep blends from 0 to 1.
     stiffness : float
-        Spring constant (N·m/rad).
+        Spring constant (NÂ·m/rad).
     damping : float
-        Damping coefficient (N·m·s/rad); acts only when velocity pushes further into limit.
+        Damping coefficient (NÂ·mÂ·s/rad); acts only when velocity pushes further into limit.
 
     Returns
     -------
@@ -363,8 +363,8 @@ class JointLimitsNDOF:
 
     angle_min: np.ndarray  # (n_dof,) in radians
     angle_max: np.ndarray  # (n_dof,) in radians
-    stiffness: float = 500.0  # N·m/rad
-    damping: float = 20.0  # N·m·s/rad
+    stiffness: float = 500.0  # NÂ·m/rad
+    damping: float = 20.0  # NÂ·mÂ·s/rad
 
     def __post_init__(self) -> None:
         assert self.angle_min.ndim == 1, "angle_min must be 1D"
@@ -444,7 +444,7 @@ def equations_of_motion(
 ) -> State:
     """Compute state derivative: dx/dt = f(x, t).
 
-    M(q)·q̈ = τ_drive + τ_friction + τ_joint_limit − C − G
+    M(q)Â·qÌˆ = Ï„_drive + Ï„_friction + Ï„_joint_limit âˆ’ C âˆ’ G
 
     Pre: state shape (4,), all finite.
     Post: state_dot shape (4,), all finite.
@@ -487,7 +487,7 @@ def equations_of_motion(
 def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dict:
     """Compute joint positions in world frame. Origin at shoulder.
 
-    Post: ||wrist - shoulder|| ≈ L1, ||tip - wrist|| ≈ L2 (within 1e-9).
+    Post: ||wrist - shoulder|| â‰ˆ L1, ||tip - wrist|| â‰ˆ L2 (within 1e-9).
     """
     native_positions = _native_backend.double_forward_kinematics(theta1, phi, params)
     if native_positions is not None:
@@ -503,9 +503,9 @@ def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dic
     _wrist_dist = np.hypot(wx, wy)
     _tip_dist = np.hypot(tx - wx, ty - wy)
     assert abs(_wrist_dist - L1) < 1e-9, (
-        f"Wrist distance {_wrist_dist:.6f} ≠ L1={L1:.6f}"
+        f"Wrist distance {_wrist_dist:.6f} â‰  L1={L1:.6f}"
     )
-    assert abs(_tip_dist - L2) < 1e-9, f"Tip distance {_tip_dist:.6f} ≠ L2={L2:.6f}"
+    assert abs(_tip_dist - L2) < 1e-9, f"Tip distance {_tip_dist:.6f} â‰  L2={L2:.6f}"
     return result
 
 

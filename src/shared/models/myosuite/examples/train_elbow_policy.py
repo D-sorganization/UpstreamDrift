@@ -16,6 +16,7 @@ Usage:
 """
 
 import argparse
+import contextlib
 import logging
 import sys
 
@@ -64,8 +65,10 @@ def train_policy(
     Returns:
         Trained SAC model.
     """
-    assert env is not None, "env must be provided"
-    assert env is not None, "env must be provided"
+    if not (env is not None):
+        raise ValueError("env must be provided")
+    if not (env is not None):
+        raise ValueError("env must be provided")
     logger.info("Training SAC policy for %d timesteps...", total_timesteps)
     logger.info("=" * 60)
 
@@ -113,8 +116,10 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
         env: Gym environment.
         n_episodes: Number of evaluation episodes.
     """
-    assert model is not None, "model must be provided"
-    assert model is not None, "model must be provided"
+    if not (model is not None):
+        raise ValueError("model must be provided")
+    if not (model is not None):
+        raise ValueError("model must be provided")
     logger.info("Evaluating policy for %d episodes...", n_episodes)
     logger.info("=" * 60)
 
@@ -134,10 +139,8 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
             step += 1
 
             # Visualize (if display available)
-            try:
+            with contextlib.suppress(RuntimeError, OSError, AttributeError):
                 env.mj_render()
-            except (RuntimeError, OSError, AttributeError):
-                pass
 
         logger.info(
             "Episode %d: Steps=%d, Reward=%.2f", episode + 1, step, total_reward

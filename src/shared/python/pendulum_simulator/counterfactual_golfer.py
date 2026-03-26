@@ -50,7 +50,7 @@ def zero_torque_joint_forces(
 
     Returns
     -------
-    dict with joint name → (fx, fy) tuples.
+    dict with joint name â†’ (fx, fy) tuples.
     """
     assert state.shape == (2 * N_DOF,)
     assert np.all(np.isfinite(state))

@@ -542,7 +542,7 @@ class PendulumWidget(BasePendulumWidget):
             radius = int(15 + 25 * abs(tau) / max_tau)
 
             # Arc parameters: torque sign determines direction
-            start_angle = 30 * 16  # 30° in 1/16 degree units for Qt
+            start_angle = 30 * 16  # 30Â° in 1/16 degree units for Qt
             span = int(np.sign(tau) * 240 * 16 * abs(tau) / max_tau)
 
             pen = QPen(self.COLOR_TORQUE, 2.5)
@@ -568,7 +568,7 @@ class PendulumWidget(BasePendulumWidget):
             painter.setFont(QFont("Monospace", 7))
             painter.drawText(
                 QPointF(center.x() + radius + 3, center.y() - 2),
-                f"τ={tau:.1f}",
+                f"Ï„={tau:.1f}",
             )
 
     def _draw_moment_of_force(self, painter: QPainter) -> None:
@@ -625,7 +625,7 @@ class PendulumWidget(BasePendulumWidget):
                     painter.setFont(QFont("Monospace", 7))
                     painter.drawText(
                         QPointF(center.x() - 30, center.y() + 18),
-                        f"ΣM={total:.2f}",
+                        f"Î£M={total:.2f}",
                     )
 
             if self._show_moment_of_force:
@@ -636,7 +636,7 @@ class PendulumWidget(BasePendulumWidget):
 
                 y_offset = 0
                 for label, val, color in [
-                    ("τ_a", tau_applied, self.COLOR_TORQUE),
+                    ("Ï„_a", tau_applied, self.COLOR_TORQUE),
                     ("M_g", tau_grav, self.COLOR_MOMENT),
                 ]:
                     if abs(val) > 1e-10:
@@ -725,7 +725,7 @@ class PendulumWidget(BasePendulumWidget):
                         label="F",
                     )
                 else:
-                    # Degenerate (singular) — draw a line along the major
+                    # Degenerate (singular) â€” draw a line along the major
                     # mobility axis to show the direction of force capability
                     # (#1133: force ellipsoid at wrist always visible)
                     mob = ell["mob_semi_axes"]
@@ -741,7 +741,7 @@ class PendulumWidget(BasePendulumWidget):
                     )
                     painter.setFont(QFont("Monospace", 7))
                     painter.drawText(
-                        QPointF(cx_px + dx_line + 4, cy_px + dy_line), "F∞"
+                        QPointF(cx_px + dx_line + 4, cy_px + dy_line), "Fâˆž"
                     )
 
     def _draw_ellipse_axes(

@@ -143,8 +143,10 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             dpi: int = 100,
         ) -> None:
             """Initialize the canvas."""
-            assert width is not None, "width must be provided"
-            assert width is not None, "width must be provided"
+            if not (width is not None):
+                raise ValueError("width must be provided")
+            if not (width is not None):
+                raise ValueError("width must be provided")
             fig = Figure(figsize=(width, height), dpi=dpi)
             self.axes = fig.add_subplot(111)
             super().__init__(fig)
@@ -197,9 +199,9 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                 self.setStyleSheet(DARK_STYLESHEET)
 
             # State
-            self.current_signal: Signal | None = None  # type: ignore
-            self.original_signal: Signal | None = None  # type: ignore
-            self.derivative_signal: Signal | None = None  # type: ignore
+            self.current_signal: Signal | None = None  # type: ignore[assignment]
+            self.original_signal: Signal | None = None  # type: ignore[assignment]
+            self.derivative_signal: Signal | None = None  # type: ignore[assignment]
             self.integral_signal: Signal | None = None
             self.joint_names: list[str] = []
 

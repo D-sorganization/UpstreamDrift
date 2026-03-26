@@ -38,7 +38,7 @@ The physics engine demonstrates a solid foundation in basic projectile motion an
 **Finding 2.1: Missing Shaft Torsional Dynamics**
 *   **File:** `src/shared/python/physics/flexible_shaft.py`
 *   **Issue:** The Euler-Bernoulli beam model accounts for bending but explicitly excludes torsion (twisting).
-*   **Actual Implementation:** `TODO: Implement Torsional Dynamics`.
+*   **Actual Implementation:** `TRACKED_TASK: Implement Torsional Dynamics`.
 *   **Impact:** Unable to model "spine alignment" effects or the clubface closing rate variations due to shaft torque, which is a primary driver of left/right dispersion.
 *   **Recommended Fix:** Add torsional degrees of freedom to the Finite Element model.
 

@@ -33,11 +33,12 @@ def check_import(
     Returns:
         Tuple of (success, message)
     """
-    assert isinstance(display_name, str), "display_name must be a string"
-    assert import_path is None or isinstance(import_path, str), (
-        "import_path must be None or string"
-    )
-    assert isinstance(version_attr, str), "version_attr must be a string"
+    if not isinstance(display_name, str):
+        raise ValueError("display_name must be a string")
+    if not (import_path is None or isinstance(import_path, str)):
+        raise ValueError("import_path must be None or string")
+    if not isinstance(version_attr, str):
+        raise ValueError("version_attr must be a string")
 
     module_path = import_path or display_name
     try:

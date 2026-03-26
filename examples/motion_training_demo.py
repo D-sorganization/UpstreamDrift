@@ -94,24 +94,16 @@ def parse_args():
 
 def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: Path):
     """Run trajectory analysis and generate plots."""
-    assert trajectory_path is not None, "trajectory_path required"
-    assert sheet_name, "sheet_name required"
-    assert output_dir is not None, "output_dir required"
+    if not (trajectory_path is not None):
+        raise ValueError("trajectory_path required")
+    if not (sheet_name):
+        raise ValueError("sheet_name required")
+    if not (output_dir is not None):
+        raise ValueError("output_dir required")
     from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
-    print("\n=== Trajectory Analysis ===")
     parser = ClubTrajectoryParser(trajectory_path)
     trajectory = parser.parse(sheet_name=sheet_name)
-
-    print(f"Loaded trajectory: {trajectory.num_frames} frames")
-    print(f"Duration: {trajectory.duration:.3f} seconds")
-    events = trajectory.events
-    print("Events:")
-    print(f"  Address (A): frame {events.address}")
-    print(f"  Top (T): frame {events.top}")
-    print(f"  Impact (I): frame {events.impact}")
-    print(f"  Finish (F): frame {events.finish}")
-    print(f"  Club head speed: {events.club_head_speed} mph")
 
     # Generate 3D plot
     try:
@@ -121,46 +113,44 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
         fig = viz.plot_trajectory_3d(trajectory)
         output_dir.mkdir(parents=True, exist_ok=True)
         fig.savefig(output_dir / "trajectory_3d.png", dpi=150)
-        print(f"\nSaved trajectory plot to: {output_dir / 'trajectory_3d.png'}")
 
         import matplotlib.pyplot as plt
 
         plt.show()
-    except ImportError as e:
-        print(f"Matplotlib not available: {e}")
+    except ImportError:
+        pass
 
     return trajectory
 
 
 def _parse_and_subsample(trajectory_path, sheet_name, subsample):
-    assert trajectory_path is not None, "trajectory_path required"
-    assert sheet_name, "sheet_name required"
-    assert subsample > 0, "subsample must be positive"
+    if not (trajectory_path is not None):
+        raise ValueError("trajectory_path required")
+    if not (sheet_name):
+        raise ValueError("sheet_name required")
+    if not (subsample > 0):
+        raise ValueError("subsample must be positive")
     from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
-    print("\n[1/5] Parsing club trajectory...")
     parser = ClubTrajectoryParser(trajectory_path)
     trajectory = parser.parse(sheet_name=sheet_name)
-    print(
-        f"      Loaded {trajectory.num_frames} frames, {trajectory.duration:.2f}s duration",
-    )
 
     if subsample > 1:
         trajectory.frames = trajectory.frames[::subsample]
-        print(f"      Subsampled to {trajectory.num_frames} frames (1/{subsample})")
 
     return trajectory
 
 
 def _init_and_solve_ik(urdf_path, trajectory):
-    assert urdf_path is not None, "urdf_path required"
-    assert trajectory is not None, "trajectory required"
+    if not (urdf_path is not None):
+        raise ValueError("urdf_path required")
+    if not (trajectory is not None):
+        raise ValueError("trajectory required")
     from motion_training.dual_hand_ik_solver import (
         IKSolverSettings,
         create_ik_solver,
     )
 
-    print("\n[2/5] Initializing IK solver...")
     settings = IKSolverSettings(
         dt=0.01,
         max_iterations=50,
@@ -172,47 +162,33 @@ def _init_and_solve_ik(urdf_path, trajectory):
             urdf_path=urdf_path,
             settings=settings,
         )
-        solver_model = solver.model
-        print(f"      Model DOF: {solver_model.nq}")
-    except Exception as e:
-        print(f"      Error loading model: {e}")
-        print("      Try running with --plot-only to skip IK")
+    except Exception as e:  # noqa: BLE001, F841
         return None
-
-    print("\n[3/5] Solving inverse kinematics...")
-    print("      This may take a while for large trajectories...")
 
     ik_result = solver.solve_trajectory(trajectory, verbose=True)
 
-    print(f"\n      Convergence rate: {ik_result.convergence_rate * 100:.1f}%")
-    print(
-        f"      Mean position errors: "
-        f"L={sum(ik_result.left_hand_errors) / len(ik_result.left_hand_errors) * 1000:.2f}mm, "
-        f"R={sum(ik_result.right_hand_errors) / len(ik_result.right_hand_errors) * 1000:.2f}mm",
-    )
     return ik_result
 
 
 def _export_results(ik_result, trajectory, output_dir):
-    assert ik_result is not None, "ik_result required"
-    assert trajectory is not None, "trajectory required"
-    assert output_dir is not None, "output_dir required"
+    if not (ik_result is not None):
+        raise ValueError("ik_result required")
+    if not (trajectory is not None):
+        raise ValueError("trajectory required")
+    if not (output_dir is not None):
+        raise ValueError("output_dir required")
     from motion_training.trajectory_exporter import TrajectoryExporter
 
-    print("\n[4/5] Exporting results...")
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     exporter = TrajectoryExporter(ik_result, trajectory)
 
-    mujoco_path = exporter.export(output_dir / "swing_trajectory", format="mujoco")
-    print(f"      MuJoCo: {mujoco_path}")
+    exporter.export(output_dir / "swing_trajectory", format="mujoco")
 
-    csv_path = exporter.export(output_dir / "swing_trajectory", format="csv")
-    print(f"      CSV: {csv_path}")
+    exporter.export(output_dir / "swing_trajectory", format="csv")
 
-    npz_path = exporter.export(output_dir / "swing_trajectory", format="npz")
-    print(f"      NPZ: {npz_path}")
+    exporter.export(output_dir / "swing_trajectory", format="npz")
 
     try:
         from motion_training.motion_visualizer import MatplotlibVisualizer
@@ -228,36 +204,30 @@ def _export_results(ik_result, trajectory, output_dir):
         fig = viz.plot_joint_trajectories(ik_result)
         fig.savefig(output_dir / "joint_trajectories.png", dpi=150)
 
-        print(f"      Plots: {output_dir}/*.png")
-
         import matplotlib.pyplot as plt
 
         plt.close("all")
     except ImportError:
-        print("      Matplotlib not available for plots")
+        pass
 
 
 def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback):
     if visualize:
-        print("\n[5/5] Launching visualization...")
         try:
             from motion_training.motion_visualizer import MotionVisualizer
 
             motion_viz = MotionVisualizer(urdf_path=urdf_path)
-            viewer = motion_viz.viewer
-            print(f"      Open in browser: {viewer.url()}")
 
             if playback:
-                print("      Press Ctrl+C to stop playback")
                 motion_viz.play_motion(trajectory, ik_result)
             else:
                 motion_viz.show_static_trajectory(trajectory, ik_result)
                 input("      Press Enter to exit...")
 
-        except ImportError as e:
-            print(f"      Visualization not available: {e}")
+        except ImportError:
+            pass
     else:
-        print("\n[5/5] Visualization skipped (use --visualize to enable)")
+        pass
 
 
 def run_ik_demo(
@@ -270,13 +240,14 @@ def run_ik_demo(
     playback: bool = False,
 ):
     """Run the full IK demo."""
-    assert trajectory_path is not None, "trajectory_path required"
-    assert sheet_name, "sheet_name required"
-    assert urdf_path is not None, "urdf_path required"
-    assert output_dir is not None, "output_dir required"
-    print("\n" + "=" * 60)
-    print("Motion Training Demo")
-    print("=" * 60)
+    if not (trajectory_path is not None):
+        raise ValueError("trajectory_path required")
+    if not (sheet_name):
+        raise ValueError("sheet_name required")
+    if not (urdf_path is not None):
+        raise ValueError("urdf_path required")
+    if not (output_dir is not None):
+        raise ValueError("output_dir required")
 
     trajectory = _parse_and_subsample(trajectory_path, sheet_name, subsample)
 
@@ -286,11 +257,6 @@ def run_ik_demo(
 
     _export_results(ik_result, trajectory, output_dir)
     _run_visualization(urdf_path, trajectory, ik_result, visualize, playback)
-
-    print("\n" + "=" * 60)
-    print("Demo complete!")
-    print(f"Results saved to: {output_dir}")
-    print("=" * 60)
 
     return ik_result
 
@@ -304,7 +270,6 @@ def main():
     output_dir = Path(args.output)
 
     if not trajectory_path.exists():
-        print(f"Error: Trajectory file not found: {trajectory_path}")
         sys.exit(1)
 
     if args.plot_only:

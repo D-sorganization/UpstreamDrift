@@ -67,8 +67,10 @@ class DifferentiableEngine:
             engine: Physics engine to wrap.
             backend: Autodiff backend ("jax", "torch", "numpy").
         """
-        assert engine is not None, "engine must be provided"
-        assert engine is not None, "engine must be provided"
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
         self.engine = engine
         self._backend = AutodiffBackend(backend)
 
@@ -102,8 +104,10 @@ class DifferentiableEngine:
         Returns:
             State trajectory (T+1, n_x).
         """
-        assert initial_state is not None, "initial_state must be provided"
-        assert initial_state is not None, "initial_state must be provided"
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
         T = len(controls)
         trajectory = np.zeros((T + 1, self._n_x))
         trajectory[0] = initial_state
@@ -161,8 +165,10 @@ class DifferentiableEngine:
         Returns:
             Gradient of loss w.r.t. controls (T, n_u).
         """
-        assert initial_state is not None, "initial_state must be provided"
-        assert initial_state is not None, "initial_state must be provided"
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
         eps = 1e-5
         T, n_u = controls.shape
         gradient = np.zeros_like(controls)
@@ -190,8 +196,10 @@ class DifferentiableEngine:
         v: NDArray[np.floating],
         torques: NDArray[np.floating],
     ) -> None:
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         if hasattr(self.engine, "set_joint_positions"):
             self.engine.set_joint_positions(q)
         if hasattr(self.engine, "set_joint_velocities"):
@@ -205,8 +213,10 @@ class DifferentiableEngine:
         v: NDArray[np.floating],
         dt: float,
     ) -> NDArray[np.floating]:
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         if hasattr(self.engine, "step"):
             self.engine.step(dt)
 
@@ -228,8 +238,10 @@ class DifferentiableEngine:
         control: NDArray[np.floating],
         dt: float,
     ) -> NDArray[np.floating]:
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         q = state[: self._n_q]
         v = state[self._n_q :]
         self._set_engine_state(q, v, control)
@@ -243,8 +255,10 @@ class DifferentiableEngine:
         dt: float,
         eps: float,
     ) -> NDArray[np.floating]:
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         A = np.zeros((self._n_x, self._n_x))
         for i in range(self._n_x):
             state_plus = state.copy()
@@ -267,8 +281,10 @@ class DifferentiableEngine:
         dt: float,
         eps: float,
     ) -> NDArray[np.floating]:
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         q = state[: self._n_q]
         v = state[self._n_q :]
         B = np.zeros((self._n_x, self._n_u))
@@ -298,8 +314,10 @@ class DifferentiableEngine:
         Returns:
             Tuple of (df/dx, df/du) Jacobians.
         """
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         eps = 1e-5
         x_next = self._compute_nominal_next_state(state, control, dt)
         A = self._compute_state_jacobian(state, control, x_next, dt, eps)
@@ -331,8 +349,10 @@ class DifferentiableEngine:
             Optimization result.
         """
         # Initialize controls
-        assert initial_state is not None, "initial_state must be provided"
-        assert initial_state is not None, "initial_state must be provided"
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
         controls = np.zeros((horizon, self._n_u))
 
         # Define loss function
@@ -417,8 +437,10 @@ class ContactDifferentiableEngine(DifferentiableEngine):
             contact_method: "smoothed", "randomized", or "stochastic".
             smoothing_factor: Smoothing parameter.
         """
-        assert engine is not None, "engine must be provided"
-        assert engine is not None, "engine must be provided"
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
         super().__init__(engine)
         self.contact_method = contact_method
         self.smoothing_factor = smoothing_factor
@@ -441,8 +463,10 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         Returns:
             Smoothed gradient.
         """
-        assert initial_state is not None, "initial_state must be provided"
-        assert initial_state is not None, "initial_state must be provided"
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
         if self.contact_method == "randomized":
             # Randomized smoothing: average gradients with noise
             n_samples = 10
@@ -507,8 +531,10 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         Returns:
             Optimization result.
         """
-        assert initial_state is not None, "initial_state must be provided"
-        assert initial_state is not None, "initial_state must be provided"
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
         original_smoothing = self.smoothing_factor
 
         schedule = self._pad_contact_schedule(contact_schedule, horizon)
@@ -578,8 +604,10 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         original_smoothing: float,
         contact_smoothing_multiplier: float,
     ) -> tuple[NDArray[np.floating], float, float, int]:
-        assert initial_state is not None, "initial_state must be provided"
-        assert initial_state is not None, "initial_state must be provided"
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
+        if not (initial_state is not None):
+            raise ValueError("initial_state must be provided")
         m = np.zeros_like(controls)
         v = np.zeros_like(controls)
         beta1, beta2 = 0.9, 0.999

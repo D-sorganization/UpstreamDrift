@@ -23,7 +23,8 @@ def catmull_rom_smooth(
     If fewer than 4 points are provided, the input is returned unchanged
     (not enough control points for Catmull-Rom).
     """
-    assert n_sub >= 1, f"n_sub must be >= 1, got {n_sub}"
+    if not (n_sub >= 1):
+        raise ValueError(f"n_sub must be >= 1, got {n_sub}")
     n = len(points)
     if n < 4:
         return points

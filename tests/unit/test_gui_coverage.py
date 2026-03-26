@@ -40,7 +40,7 @@ def _load_model_or_skip(widget, xml_string: str) -> None:
     """
     try:
         widget.load_model_from_xml(xml_string)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         # mujoco.FatalError (gladLoadGL) or RuntimeError from renderer init
         if "gladLoadGL" in str(exc) or "OpenGL" in str(exc):
             pytest.skip(f"MuJoCo GL unavailable (headless environment): {exc}")
@@ -54,7 +54,7 @@ def qapp():
         pytest.skip("PyQt6 not available")
     try:
         app = get_qapp()
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         pytest.skip(f"Qt initialisation failed (headless environment?): {exc}")
     yield app
 

@@ -54,8 +54,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Tuple of (times, divergence_rates)
         """
-        assert joint_idx is not None, "joint_idx must be provided"
-        assert joint_idx is not None, "joint_idx must be provided"
+        if not (joint_idx is not None):
+            raise ValueError("joint_idx must be provided")
+        if not (joint_idx is not None):
+            raise ValueError("joint_idx must be provided")
         if data_type == "position":
             data = self.joint_positions[:, joint_idx]
         else:
@@ -130,8 +132,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Binary recurrence matrix (N, N).
         """
-        assert threshold_ratio is not None, "threshold_ratio must be provided"
-        assert threshold_ratio is not None, "threshold_ratio must be provided"
+        if not (threshold_ratio is not None):
+            raise ValueError("threshold_ratio must be provided")
+        if not (threshold_ratio is not None):
+            raise ValueError("threshold_ratio must be provided")
         if (
             self.joint_positions.shape[1] == 0
             or self.joint_velocities.shape[1] == 0
@@ -199,8 +203,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Binary recurrence matrix (N, N)
         """
-        assert joint_idx_1 is not None, "joint_idx_1 must be provided"
-        assert joint_idx_1 is not None, "joint_idx_1 must be provided"
+        if not (joint_idx_1 is not None):
+            raise ValueError("joint_idx_1 must be provided")
+        if not (joint_idx_1 is not None):
+            raise ValueError("joint_idx_1 must be provided")
         s1 = np.column_stack(
             (
                 self.joint_positions[:, joint_idx_1],
@@ -239,8 +245,10 @@ class NonlinearDynamicsMixin:
         Returns:
             RQAMetrics object or None
         """
-        assert recurrence_matrix is not None, "recurrence_matrix must be provided"
-        assert recurrence_matrix is not None, "recurrence_matrix must be provided"
+        if not (recurrence_matrix is not None):
+            raise ValueError("recurrence_matrix must be provided")
+        if not (recurrence_matrix is not None):
+            raise ValueError("recurrence_matrix must be provided")
         if recurrence_matrix.size == 0:
             return None
 
@@ -302,8 +310,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Estimated Correlation Dimension
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         N = len(data)
         M = N - (dim - 1) * tau
         if M < 20:
@@ -365,8 +375,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Estimated LLE (nats/s)
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         require(tau >= 1, "tau must be >= 1", tau)
         require(dim >= 1, "dim must be >= 1", dim)
         require(window >= 1, "window must be >= 1", window)
@@ -460,8 +472,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Entropy value (bits)
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         require(order >= 2, "permutation order must be >= 2", order)
         require(delay >= 1, "delay must be >= 1", delay)
 
@@ -518,8 +532,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Sample Entropy value
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         require(m >= 1, "template length m must be >= 1", m)
         require(r > 0, "tolerance r must be positive", r)
 
@@ -571,8 +587,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Tuple of (scales, entropy_values)
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         mse_values = []
         scales = np.arange(1, max_scale + 1)
 
@@ -621,8 +639,10 @@ class NonlinearDynamicsMixin:
         Returns:
             Fractal dimension (HFD) approx between 1.0 and 2.0
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         require(k_max >= 1, "k_max must be >= 1", k_max)
 
         N = len(data)

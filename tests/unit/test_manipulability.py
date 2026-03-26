@@ -392,8 +392,8 @@ class TestPhysicalRealism:
         # J = [[-L1-L2, -L2], [0, 0]]  (y-velocity is zero)
         L1, L2 = 1.0, 0.5
         J = np.array(
-            [[-L1 - L2, -L2], [1e-10, 1e-10]]  # Near-zero, simulating extension
-        )
+            [[-L1 - L2, -L2], [1e-10, 1e-10]]
+        )  # Near-zero, simulating extension
 
         kappa = check_jacobian_conditioning(J, "extended_arm", warn=False)
 

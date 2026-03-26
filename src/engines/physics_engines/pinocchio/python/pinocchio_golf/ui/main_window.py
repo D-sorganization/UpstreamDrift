@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pinocchio as pin  # type: ignore
+import pinocchio as pin  # type: ignore[import-untyped]
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import (
@@ -33,8 +33,8 @@ try:
     MESHCAT_AVAILABLE = True
 except ImportError:
     MESHCAT_AVAILABLE = False
-    g = None  # type: ignore
-    viz = None  # type: ignore
+    g = None  # type: ignore[assignment]
+    viz = None  # type: ignore[assignment]
 
 if MESHCAT_AVAILABLE:
     from pinocchio.visualize import MeshcatVisualizer
@@ -129,8 +129,10 @@ class PinocchioGUI(
 
     def log_write(self, text: str) -> None:
         """Append a message to the UI log panel and logger."""
-        assert text is not None, "text must be provided"
-        assert text is not None, "text must be provided"
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
+            raise ValueError("text must be provided")
         if hasattr(self, "log"):
             self.log.append(text)
         logger.info(text)

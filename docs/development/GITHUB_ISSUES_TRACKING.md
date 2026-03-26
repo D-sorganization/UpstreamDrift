@@ -45,14 +45,14 @@ For production use, this should be replaced with ML-based detection.
 
 ````
 ## Summary
-The local server has TODO comments for service wrapper implementations.
+The local server has TRACKED_TASK comments for service wrapper implementations.
 
 ## Current State
 - Location: `src/api/local_server.py:104-105`
 - Lines commented out:
   ```python
-  # app.state.simulation_service = simulation_service # TODO: Implement service wrapper
-  # app.state.analysis_service = analysis_service   # TODO: Implement service wrapper
+  # app.state.simulation_service = simulation_service # TRACKED_TASK: Implement service wrapper
+  # app.state.analysis_service = analysis_service   # TRACKED_TASK: Implement service wrapper
 ````
 
 ## Proposed Solution

@@ -207,8 +207,10 @@ class SwingCaptureImporter:
             marker_mapping: Custom marker-to-joint mapping. Uses default if None.
             target_frame_rate: Target frame rate for resampled output.
         """
-        assert target_frame_rate is not None, "target_frame_rate must be provided"
-        assert target_frame_rate is not None, "target_frame_rate must be provided"
+        if not (target_frame_rate is not None):
+            raise ValueError("target_frame_rate must be provided")
+        if not (target_frame_rate is not None):
+            raise ValueError("target_frame_rate must be provided")
         self.marker_mapping = marker_mapping or DEFAULT_GOLF_MAPPING
         self.target_frame_rate = target_frame_rate
 
@@ -422,8 +424,10 @@ class SwingCaptureImporter:
         Returns:
             Angle in radians, or 0.0 if vectors are degenerate.
         """
-        assert positions is not None, "positions must be provided"
-        assert positions is not None, "positions must be provided"
+        if not (positions is not None):
+            raise ValueError("positions must be provided")
+        if not (positions is not None):
+            raise ValueError("positions must be provided")
         p1 = positions[frame, marker_indices[0]]
         p2 = positions[frame, marker_indices[1]]  # vertex
         p3 = positions[frame, marker_indices[2]]
@@ -450,8 +454,10 @@ class SwingCaptureImporter:
         Returns:
             JointTrajectory with computed joint angles.
         """
-        assert marker_data is not None, "marker_data must be provided"
-        assert marker_data is not None, "marker_data must be provided"
+        if not (marker_data is not None):
+            raise ValueError("marker_data must be provided")
+        if not (marker_data is not None):
+            raise ValueError("marker_data must be provided")
         n_frames = marker_data.n_frames
         marker_name_to_idx = {
             name: idx for idx, name in enumerate(marker_data.marker_names)
@@ -550,8 +556,10 @@ class SwingCaptureImporter:
         Returns:
             Tuple of (resampled_positions, resampled_velocities, new_times).
         """
-        assert positions is not None, "positions must be provided"
-        assert positions is not None, "positions must be provided"
+        if not (positions is not None):
+            raise ValueError("positions must be provided")
+        if not (positions is not None):
+            raise ValueError("positions must be provided")
         from scipy.interpolate import interp1d
 
         duration = times[-1] - times[0]
@@ -587,8 +595,10 @@ class SwingCaptureImporter:
             SwingPhaseLabels with frame indices for each phase.
         """
         # Use total angular velocity as a proxy for swing phase detection
-        assert trajectory is not None, "trajectory must be provided"
-        assert trajectory is not None, "trajectory must be provided"
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
         total_velocity = np.sum(np.abs(trajectory.velocities), axis=1)
 
         n_frames = trajectory.n_frames
@@ -643,8 +653,10 @@ class SwingCaptureImporter:
         Returns:
             Dictionary with demonstration data ready for DemonstrationDataset.
         """
-        assert trajectories is not None, "trajectories must be provided"
-        assert trajectories is not None, "trajectories must be provided"
+        if not (trajectories is not None):
+            raise ValueError("trajectories must be provided")
+        if not (trajectories is not None):
+            raise ValueError("trajectories must be provided")
         demonstrations = []
 
         for traj in trajectories:
@@ -698,8 +710,10 @@ class SwingCaptureImporter:
         Returns:
             Path to the exported file.
         """
-        assert trajectory is not None, "trajectory must be provided"
-        assert trajectory is not None, "trajectory must be provided"
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 

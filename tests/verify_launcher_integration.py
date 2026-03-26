@@ -20,30 +20,24 @@ def verify_launcher_init():
 
         # We don't want to actually show it or start the event loop
         launcher = GolfLauncher()
-        print("Launcher initialized successfully")
 
         # Check if tabs exist
         if hasattr(launcher, "main_tabs"):
             main_tabs = launcher.main_tabs
             assert main_tabs is not None, "main_tabs must not be None"
             tab_count = main_tabs.count()
-            print(f"Tabs found: {tab_count}")
             for i in range(tab_count):
-                tab_text = main_tabs.tabText(i)
-                print(f"  Tab {i}: {tab_text}")
+                main_tabs.tabText(i)
         else:
-            print("ERROR: main_tabs not found")
             return False
 
         if hasattr(launcher, "data_processor"):
-            print("DataProcessorWidget integrated successfully")
+            pass
         else:
-            print("ERROR: data_processor not found")
             return False
 
         return True
-    except Exception as e:
-        print(f"FAILED to initialize launcher: {e}")
+    except Exception as e:  # noqa: BLE001, F841
         import traceback
 
         traceback.print_exc()

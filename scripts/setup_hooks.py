@@ -22,9 +22,12 @@ logger = logging.getLogger(__name__)
 
 def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
-    assert cmd is not None, "cmd must be provided"
-    assert isinstance(cmd, list), "cmd must be a list"
-    assert isinstance(check, bool), "check must be a boolean"
+    if not (cmd is not None):
+        raise ValueError("cmd must be provided")
+    if not isinstance(cmd, list):
+        raise ValueError("cmd must be a list")
+    if not isinstance(check, bool):
+        raise ValueError("check must be a boolean")
     logger.info("  Running: %s", " ".join(cmd))
     return subprocess.run(cmd, check=check, capture_output=True, text=True)
 
@@ -56,10 +59,33 @@ def install_hooks() -> None:
 
 
 def install_push_hooks() -> None:
-    """Install pre-push hooks."""
+    """Install pre-push hooks using a Python wrapper for cross-platform compatibility.
+
+    Replaces the bare ``pytest`` call (which fails on Windows/venvs) with a
+    ``python -m pytest`` invocation so the correct environment's pytest is always used.
+    Fixes: https://github.com/D-sorganization/UpstreamDrift/issues/2037
+    """
     logger.info("\n[3/4] Installing pre-push hooks...")
-    run_command(["pre-commit", "install", "--hook-type", "pre-push"])
-    logger.info("  pre-push hooks installed")
+    hook_src = Path("scripts/pre_push_hook.py")
+    hook_dst = Path(".git/hooks/pre-push")
+
+    if not hook_src.exists():
+        logger.warning("  pre_push_hook.py not found — skipping pre-push hook install")
+        return
+
+    hook_content = (
+        "#!/bin/sh\n"
+        f'"{sys.executable}" "$(git rev-parse --show-toplevel)/scripts/pre_push_hook.py"\n'
+    )
+    hook_dst.write_text(hook_content)
+    # Make executable on Unix
+    if sys.platform != "win32":
+        import stat
+
+        hook_dst.chmod(
+            hook_dst.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
+        )
+    logger.info("  pre-push hook installed (uses python -m pytest)")
 
 
 def install_dev_dependencies() -> None:

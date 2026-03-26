@@ -231,6 +231,6 @@
 - **REVERSIBILITY** [MAJOR]: Hardcoded API Key
   - Secrets in code
   - Files: C:\Users\diete\Repositories\UpstreamDrift\src\shared\python\ai\adapters\openai_adapter.py
-- **QUALITY** [MINOR]: High TODO count (16)
+- **QUALITY** [MINOR]: High TRACKED_TASK count (16)
   - Accumulated technical debt
   - Files: C:\Users\diete\Repositories\UpstreamDrift\scripts\analyze_completist_data.py, C:\Users\diete\Repositories\UpstreamDrift\scripts\generate_todo_fixme_register.py, C:\Users\diete\Repositories\UpstreamDrift\scripts\pragmatic_programmer_review.py

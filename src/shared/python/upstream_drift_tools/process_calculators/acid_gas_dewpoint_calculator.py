@@ -498,7 +498,7 @@ class AcidGasDewpointCalculator:
         if margin < 0:
             return "HIGH - Condensation occurring"
         if margin < 10:
-            return "MEDIUM - Within 10°C of dewpoint"
+            return "MEDIUM - Within 10Â°C of dewpoint"
         if margin < 30:
             return "LOW - Safe margin"
         return "VERY LOW - Large safety margin"
@@ -538,7 +538,7 @@ class AcidGasDewpointCalculator:
         # Validate conditions
         warnings = []
         if not (-100 <= temperature_c <= 400):
-            warnings.append("Temperature outside recommended range (-100 to 400°C)")
+            warnings.append("Temperature outside recommended range (-100 to 400Â°C)")
         if not (0.1 <= pressure_bar <= 300):
             warnings.append("Pressure outside recommended range (0.1 to 300 bar)")
 
@@ -837,7 +837,7 @@ if GUI_AVAILABLE:
             self.temp_input = QDoubleSpinBox()
             self.temp_input.setRange(-100, 400)
             self.temp_input.setValue(150)
-            self.temp_input.setSuffix(" °C")
+            self.temp_input.setSuffix(" Â°C")
             input_layout.addWidget(QLabel("Temperature:"), 0, 0)
             input_layout.addWidget(self.temp_input, 0, 1)
 
@@ -901,7 +901,7 @@ if GUI_AVAILABLE:
             assert result is not None, "result must be provided"
             assert result is not None, "result must be provided"
             text = (
-                f"<b>Input:</b> T = {result.temperature_c:.2f} °C, "
+                f"<b>Input:</b> T = {result.temperature_c:.2f} Â°C, "
                 f"P = {result.pressure_bar:.2f} bar<br>"
             )
             text += (
@@ -911,15 +911,15 @@ if GUI_AVAILABLE:
                 f"H2S={result.composition.h2s:.4f}<br>"
             )
             text += (
-                f"<b>Dewpoints (°C):</b> H2O={result.h2o_dewpoint_c:.2f}, "
+                f"<b>Dewpoints (Â°C):</b> H2O={result.h2o_dewpoint_c:.2f}, "
                 f"HF={result.hf_dewpoint_c:.2f}, HCl={result.hcl_dewpoint_c:.2f}, "
                 f"H2S={result.h2s_dewpoint_c:.2f}<br>"
             )
             text += (
-                f"<b>Overall Dewpoint:</b> {result.overall_dewpoint_c:.2f} °C "
+                f"<b>Overall Dewpoint:</b> {result.overall_dewpoint_c:.2f} Â°C "
                 f"({result.limiting_component})<br>"
             )
-            text += f"<b>Dewpoint Margin:</b> {result.dewpoint_margin_c:.2f} °C<br>"
+            text += f"<b>Dewpoint Margin:</b> {result.dewpoint_margin_c:.2f} Â°C<br>"
             text += f"<b>Condensation Risk:</b> {result.condensation_risk}<br>"
             if result.warnings:
                 text += f"<b>Warnings:</b> {'; '.join(result.warnings)}<br>"

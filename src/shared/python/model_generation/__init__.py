@@ -325,8 +325,10 @@ def quick_build(
     Example:
         result = quick_build(height_m=1.80, output_path="./humanoid.urdf")
     """
-    assert height_m is not None, "height_m must be provided"
-    assert height_m is not None, "height_m must be provided"
+    if not (height_m is not None):
+        raise ValueError("height_m must be provided")
+    if not (height_m is not None):
+        raise ValueError("height_m must be provided")
     from pathlib import Path
 
     from model_generation.builders.parametric_builder import ParametricBuilder

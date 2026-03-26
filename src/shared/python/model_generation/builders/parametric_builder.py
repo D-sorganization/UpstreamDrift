@@ -88,8 +88,10 @@ class ParametricBuilder(BaseURDFBuilder):
             robot_name: Name for the robot element
             config: Builder configuration
         """
-        assert robot_name is not None, "robot_name must be provided"
-        assert robot_name is not None, "robot_name must be provided"
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
         super().__init__(robot_name)
         self._config = config or ParametricConfig()
         self._inertia_calc = InertiaCalculator(default_mode=self._config.inertia_mode)
@@ -240,8 +242,10 @@ class ParametricBuilder(BaseURDFBuilder):
         width: float,
     ) -> tuple[Geometry, Inertia]:
         """Create geometry and inertia for a segment based on shape type."""
-        assert geometry_type is not None, "geometry_type must be provided"
-        assert geometry_type is not None, "geometry_type must be provided"
+        if not (geometry_type is not None):
+            raise ValueError("geometry_type must be provided")
+        if not (geometry_type is not None):
+            raise ValueError("geometry_type must be provided")
         if geometry_type == GeometryType.CAPSULE:
             radius = width / 2
             cyl_length = max(0.01, length - 2 * radius)
@@ -278,8 +282,10 @@ class ParametricBuilder(BaseURDFBuilder):
         origin_offset: tuple[float, float, float],
     ) -> None:
         """Create a joint connecting a segment to its parent."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         joint_name = f"{parent}_to_{name}"
         limits = None
         if joint_limits and joint_type == JointType.REVOLUTE:
@@ -368,8 +374,10 @@ class ParametricBuilder(BaseURDFBuilder):
     ) -> dict[str, float]:
         """Add torso segments (pelvis, lumbar, thorax)."""
         # Pelvis (root)
-        assert get_mass is not None, "get_mass must be provided"
-        assert get_mass is not None, "get_mass must be provided"
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
         self.add_segment(
             name="pelvis",
             parent=None,
@@ -425,8 +433,10 @@ class ParametricBuilder(BaseURDFBuilder):
         segment_heights: dict[str, float],
     ) -> None:
         """Add head and neck segments."""
-        assert get_mass is not None, "get_mass must be provided"
-        assert get_mass is not None, "get_mass must be provided"
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
         thorax_height = segment_heights["thorax"]
 
         # Neck
@@ -463,8 +473,10 @@ class ParametricBuilder(BaseURDFBuilder):
         segment_heights: dict[str, float],
     ) -> None:
         """Add arm segments (shoulder, upper arm, forearm, hand) for both sides."""
-        assert get_mass is not None, "get_mass must be provided"
-        assert get_mass is not None, "get_mass must be provided"
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
         thorax_height = segment_heights["thorax"]
         shoulder_width = (
             self._height_m * 0.23 * self._proportions.get("shoulder_width_factor", 1.0)
@@ -486,8 +498,10 @@ class ParametricBuilder(BaseURDFBuilder):
     ) -> None:
         """Add segments for a single arm."""
         # Shoulder
-        assert side is not None, "side must be provided"
-        assert side is not None, "side must be provided"
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
+            raise ValueError("side must be provided")
         self.add_segment(
             name=f"{side}_shoulder",
             parent="thorax",
@@ -549,8 +563,10 @@ class ParametricBuilder(BaseURDFBuilder):
         segment_heights: dict[str, float],
     ) -> None:
         """Add leg segments (thigh, shin, foot) for both sides."""
-        assert get_mass is not None, "get_mass must be provided"
-        assert get_mass is not None, "get_mass must be provided"
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
         pelvis_height = segment_heights["pelvis"]
         hip_width = (
             self._height_m * 0.1 * self._proportions.get("hip_width_factor", 1.0)
@@ -572,8 +588,10 @@ class ParametricBuilder(BaseURDFBuilder):
     ) -> None:
         """Add segments for a single leg."""
         # Thigh
-        assert side is not None, "side must be provided"
-        assert side is not None, "side must be provided"
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
+            raise ValueError("side must be provided")
         self.add_segment(
             name=f"{side}_thigh",
             parent="pelvis",

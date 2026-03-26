@@ -112,12 +112,13 @@ def _probe_engine(
     except ImportError as e:
         _engine_status_cache[name] = EngineStatus.NOT_INSTALLED
         _engine_error_cache[name] = e
-    except Exception as e:
-        # Any other exception during load means it's broken
+    except (OSError, RuntimeError, AttributeError, TypeError) as e:
+        # Non-ImportError failures during engine load (e.g. missing shared libs,
+        # DLL errors on Windows, broken C extensions, or bad package state).
         if is_broken_check is None or is_broken_check(e):
             _engine_status_cache[name] = EngineStatus.BROKEN
             _engine_error_cache[name] = e
-            logger.warning(f"{import_name} loading failed: {e}")
+            logger.warning("%s loading failed: %s", import_name, e)
         else:
             _engine_status_cache[name] = EngineStatus.NOT_INSTALLED
             _engine_error_cache[name] = e
@@ -282,7 +283,8 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F], F]:
     """Decorator to skip test/function if engine is not available."""
-    assert engine_name is not None, "engine_name must be provided"
+    if not (engine_name is not None):
+        raise ValueError("engine_name must be provided")
 
     def decorator(func: F) -> F:
         @functools.wraps(func)

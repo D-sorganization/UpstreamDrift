@@ -29,8 +29,10 @@ class MATLABQualityChecker:
     """Comprehensive MATLAB code quality checker."""
 
     def __init__(self, project_root: Path) -> None:
-        assert project_root is not None, "project_root must be provided"
-        assert project_root is not None, "project_root must be provided"
+        if not (project_root is not None):
+            raise ValueError("project_root must be provided")
+        if not (project_root is not None):
+            raise ValueError("project_root must be provided")
         self.project_root = project_root
         self.matlab_dir = project_root / "matlab"
         self.results: dict[str, object] = {
@@ -47,8 +49,10 @@ class MATLABQualityChecker:
     ) -> None:
         """Check for docstrings and arguments block in functions."""
         # Check docstring
-        assert lines is not None, "lines must be provided"
-        assert lines is not None, "lines must be provided"
+        if not (lines is not None):
+            raise ValueError("lines must be provided")
+        if not (lines is not None):
+            raise ValueError("lines must be provided")
         has_doc = False
         for j in range(i, min(i + 5, len(lines))):
             next_l = lines[j].strip()
@@ -75,8 +79,10 @@ class MATLABQualityChecker:
     ) -> None:
         """Check for banned placeholders and template patterns."""
         # Pattern strings split to avoid CI placeholder detection
-        assert line is not None, "line must be provided"
-        assert line is not None, "line must be provided"
+        if not (line is not None):
+            raise ValueError("line must be provided")
+        if not (line is not None):
+            raise ValueError("line must be provided")
         banned = [
             (r"\bTO" + r"DO\b", "Placeholder marker (TO-DO) found"),
             (r"\bFIX" + r"ME\b", "Placeholder marker (FIX-ME) found"),
@@ -93,8 +99,10 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for common MATLAB anti-patterns."""
-        assert line is not None, "line must be provided"
-        assert line is not None, "line must be provided"
+        if not (line is not None):
+            raise ValueError("line must be provided")
+        if not (line is not None):
+            raise ValueError("line must be provided")
         anti = [
             (r"\beval\s*\(", "Avoid eval() - security/performance risk"),
             (r"\bassignin\s*\(", "Avoid assignin() - violates encapsulation"),
@@ -119,8 +127,10 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for unexplained magic numbers."""
-        assert line is not None, "line must be provided"
-        assert line is not None, "line must be provided"
+        if not (line is not None):
+            raise ValueError("line must be provided")
+        if not (line is not None):
+            raise ValueError("line must be provided")
         acceptable = {
             "0",
             "0.0",
@@ -153,8 +163,10 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for dangerous commands inside functions."""
-        assert line is not None, "line must be provided"
-        assert line is not None, "line must be provided"
+        if not (line is not None):
+            raise ValueError("line must be provided")
+        if not (line is not None):
+            raise ValueError("line must be provided")
         unsafe = [
             (r"\bclear\s+(all|global)\b", "Avoid 'clear all/global' in functions"),
             (r"\bclear\b(?!\s+\w+)", "Avoid 'clear' in functions"),
@@ -168,8 +180,10 @@ class MATLABQualityChecker:
 
     def _analyze_matlab_file(self, file_path: Path) -> list[str]:
         """Analyze a single MATLAB file (Decomposed for Orthogonality)."""
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         issues: list[str] = []
         try:
             content = file_path.read_text(encoding="utf-8", errors="ignore")

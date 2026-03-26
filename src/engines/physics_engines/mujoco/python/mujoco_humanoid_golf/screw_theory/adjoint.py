@@ -44,7 +44,7 @@ def adjoint_transform(T: np.ndarray) -> np.ndarray:
         Chapter 3: Rigid-Body Motions, Section 3.3.3
 
     Example:
-        >>> # Create transformation: 90° rotation about z, translate [1;0;0]
+        >>> # Create transformation: 90Â° rotation about z, translate [1;0;0]
         >>> T = np.array([[0, -1, 0, 1],
         ...               [1,  0, 0, 0],
         ...               [0,  0, 1, 0],

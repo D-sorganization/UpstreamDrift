@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -37,4 +39,4 @@ class ChatHistoryResponse(BaseModel):
     """Full message history for a session."""
 
     session_id: str
-    messages: list[dict]
+    messages: list[dict[str, Any]]

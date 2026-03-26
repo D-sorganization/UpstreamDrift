@@ -1,3 +1,7 @@
+# Merge conflict artifacts
+*.ours
+*.theirs
+
 # Python
 __pycache__/
 *.py[cod]
@@ -74,6 +78,7 @@ ruff_report*.txt
 quality_report*.txt
 black_report*.txt
 coverage.xml
+coverage.json
 htmlcov/
 
 # Test output debris (prevent accumulation at root)

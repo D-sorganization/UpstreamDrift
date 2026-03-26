@@ -5,7 +5,7 @@ Scope: review of .github/workflows and recent git history (last 50 commits).
 
 ## 1. Current workflow automation snapshot
 
-- CI Standard: quality gate (ruff, black, mypy, TODO/FIXME check, pip-audit, MATLAB quality report), tests with xvfb, cross-engine unit test, optional codecov.
+- CI Standard: quality gate (ruff, black, mypy, TRACKED_TASK/TRACKED_DEFECT check, pip-audit, MATLAB quality report), tests with xvfb, cross-engine unit test, optional codecov.
 - Nightly Cross-Engine Validation: scheduled, runs integration tests with deviation thresholds, opens issues on errors or warnings, uploads artifacts.
 - Critical Files Guard: ensures root critical files exist and blocks deletions.
 - Auto-Update PRs: auto-rebase PRs on main.
@@ -70,7 +70,7 @@ Observations:
 - Add a Claude Skills section: list available skills, triggers, and safety rules.
 - Reduce duplication by linking to .github/copilot-instructions.md for generic guardrails; keep AGENTS.md focused on repo-specific rules.
 - Provide a single "quality check" command (script or Makefile) to avoid drift in lint/test instructions.
-- Document TODO/FIXME policy as "must map to a GitHub issue ID" to align with CI placeholder checks.
+- Document TRACKED_TASK/TRACKED_DEFECT policy as "must map to a GitHub issue ID" to align with CI placeholder checks.
 
 ## 6. Suggested next steps
 

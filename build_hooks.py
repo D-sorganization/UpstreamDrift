@@ -16,8 +16,10 @@ class UIBuildHook(BuildHookInterface):
 
     def initialize(self, version: str, build_data: dict) -> None:
         """Initialize build hook."""
-        assert version, "Version parameter must not be empty"
-        assert build_data is not None, "Build data dictionary must be provided"
+        if not (version):
+            raise ValueError("Version parameter must not be empty")
+        if not (build_data is not None):
+            raise ValueError("Build data dictionary must be provided")
 
         ui_dir = Path(self.root) / "ui"
         dist_dir = ui_dir / "dist"

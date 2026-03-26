@@ -65,8 +65,10 @@ class LauncherSimulationMixin:
             Tuple of (success, error_message). If success is True, error_message is empty.
         """
         # Map model types to their required imports
-        assert model_type is not None, "model_type must be provided"
-        assert model_type is not None, "model_type must be provided"
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
         dependency_checks = {
             "custom_humanoid": ("mujoco", "MuJoCo"),
             "custom_dashboard": ("mujoco", "MuJoCo"),
@@ -88,13 +90,13 @@ import sys
 import os
 try:
     import {module_name}
-    print("OK")
+    sys.stdout.write("OK\\n")
 except ImportError as e:
-    print(f"ImportError: {{e}}")
+    sys.stdout.write(f"ImportError: {{e}}\\n")
 except OSError as e:
-    print(f"OSError: {{e}}")
+    sys.stdout.write(f"OSError: {{e}}\\n")
 except (RuntimeError, TypeError, AttributeError) as e:
-    print(f"Error: {{type(e).__name__}}: {{e}}")
+    sys.stdout.write(f"Error: {{type(e).__name__}}: {{e}}\\n")
 """
         try:
             result = subprocess.run(
@@ -116,8 +118,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
 
     def _show_dependency_error(self, model_name: str, error_msg: str) -> None:
         """Show a dialog with dependency error information and suggestions."""
-        assert model_name is not None, "model_name must be provided"
-        assert model_name is not None, "model_name must be provided"
+        if not (model_name is not None):
+            raise ValueError("model_name must be provided")
+        if not (model_name is not None):
+            raise ValueError("model_name must be provided")
         detailed_msg = f"Cannot launch {model_name}.\n\n{error_msg}\n\n"
 
         if "DLL" in error_msg or "OSError" in error_msg:
@@ -137,8 +141,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
         QMessageBox.warning(self, "Dependency Error", detailed_msg)
 
     def _try_launch_special_app(self, model_id: str) -> bool:
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         if "urdf_generator" in model_id or "model_explorer" in model_id:
             self._launch_urdf_generator()
             return True
@@ -217,7 +223,17 @@ except (RuntimeError, TypeError, AttributeError) as e:
                 self.lbl_status.setText(f"* {model.name} Running")
                 self.lbl_status.setStyleSheet(Styles.STATUS_SUCCESS)
             else:
-                self.show_toast(f"Failed to launch {model.name}", "error")
+                # Diagnostic: log why launch failed for debugging silent failures
+                logger.error(
+                    "Launch failed for %s (type=%s, path=%s, handler=%s)",
+                    model.name,
+                    model.type,
+                    getattr(model, "path", "N/A"),
+                    type(handler).__name__,
+                )
+                self.show_toast(
+                    f"Failed to launch {model.name} — check console", "error"
+                )
                 self.lbl_status.setText("* Launch Error")
                 self.lbl_status.setStyleSheet(Styles.STATUS_ERROR)
         elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
@@ -267,8 +283,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
     )
     def _launch_generic_mjcf(self, path: Path) -> None:
         """Launch generic MJCF file in passive viewer."""
-        assert path is not None, "path must be provided"
-        assert path is not None, "path must be provided"
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
+            raise ValueError("path must be provided")
         import mujoco
         import mujoco.viewer
 
@@ -307,8 +325,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
         Delegates to DockerLauncher for container orchestration while
         handling UI feedback (prompts, status updates, error dialogs).
         """
-        assert repo_path is not None, "repo_path must be provided"
-        assert repo_path is not None, "repo_path must be provided"
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
         from src.launchers.launcher_process_manager import start_vcxsrv
 
         try:
@@ -388,8 +408,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
         If WSL mode is enabled, launches the script in WSL2 Ubuntu environment.
         """
         # Check if WSL mode is enabled
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:
@@ -433,8 +455,10 @@ except (RuntimeError, TypeError, AttributeError) as e:
         If WSL mode is enabled, launches in WSL2 Ubuntu environment.
         """
         # Check if WSL mode is enabled
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
         if use_wsl:

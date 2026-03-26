@@ -17,8 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
-from src.shared.python.signal_toolkit.calculus import (
+from signal_toolkit.calculus import (
     DifferentiationMethod,
     Differentiator,
     Integrator,
@@ -26,8 +25,8 @@ from src.shared.python.signal_toolkit.calculus import (
     compute_integral,
     compute_tangent_line,
 )
-from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
-from src.shared.python.signal_toolkit.filters import (
+from signal_toolkit.core import Signal, SignalGenerator
+from signal_toolkit.filters import (
     FilterDesigner,
     FilterType,
     apply_filter,
@@ -35,25 +34,25 @@ from src.shared.python.signal_toolkit.filters import (
     apply_moving_average,
     apply_savgol,
 )
-from src.shared.python.signal_toolkit.fitting import (
+from signal_toolkit.fitting import (
     ExponentialFitter,
     FunctionFitter,
     LinearFitter,
     PolynomialFitter,
     SinusoidFitter,
 )
-from src.shared.python.signal_toolkit.io import (
+from signal_toolkit.io import (
     SignalExporter,
     SignalImporter,
 )
-from src.shared.python.signal_toolkit.limits import (
+from signal_toolkit.limits import (
     SaturationMode,
     apply_deadband,
     apply_hysteresis,
     apply_rate_limiter,
     apply_saturation,
 )
-from src.shared.python.signal_toolkit.noise import (
+from signal_toolkit.noise import (
     DisturbanceSimulator,
     NoiseGenerator,
     NoiseType,

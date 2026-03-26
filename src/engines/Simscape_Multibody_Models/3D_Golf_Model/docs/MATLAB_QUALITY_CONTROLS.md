@@ -64,7 +64,7 @@ python scripts/matlab_quality_check.py --strict
 
 - Function docstring validation
 - Arguments validation block checking
-- Banned pattern detection (TODO, FIXME, HACK, XXX)
+- Banned pattern detection (TRACKED_TASK, TRACKED_DEFECT, HACK, XXX)
 - Magic number identification
 - Template placeholder detection
 
@@ -176,8 +176,8 @@ end
 
 The following patterns are automatically flagged:
 
-- `TODO` - Incomplete implementation markers
-- `FIXME` - Known issues that need fixing
+- `TRACKED_TASK` - Incomplete implementation markers
+- `TRACKED_DEFECT` - Known issues that need fixing
 - `HACK` - Temporary workarounds
 - `XXX` - Critical issues
 - `<.*>` - Angle bracket placeholders

@@ -149,7 +149,8 @@ class RequestTracer:
         Returns:
             Response with tracing headers added
         """
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         import time
 
         # Extract or generate correlation ID
@@ -246,7 +247,8 @@ def traced_log(
         message: Log message
         **kwargs: Additional fields to include in log
     """
-    assert level is not None, "level must be provided"
+    if not (level is not None):
+        raise ValueError("level must be provided")
     extra = dict(kwargs)
 
     # Inject trace context

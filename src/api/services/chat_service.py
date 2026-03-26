@@ -15,7 +15,7 @@ from collections import OrderedDict
 from collections.abc import AsyncIterator
 from datetime import timezone
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import InvalidRequestError
@@ -282,7 +282,7 @@ class ChatService:
                 ctx.add_assistant_message(complete_response)
                 self._persist_session(session_id)
 
-    def get_session_history(self, session_id: str) -> list[dict]:
+    def get_session_history(self, session_id: str) -> list[dict[str, Any]]:
         """Return message history for a session."""
         with self._lock:
             ctx = self._sessions.get(session_id)
@@ -297,7 +297,7 @@ class ChatService:
                 for msg in ctx.messages
             ]
 
-    def list_sessions(self) -> list[dict]:
+    def list_sessions(self) -> list[dict[str, Any]]:
         """List all active sessions."""
         with self._lock:
             result = []

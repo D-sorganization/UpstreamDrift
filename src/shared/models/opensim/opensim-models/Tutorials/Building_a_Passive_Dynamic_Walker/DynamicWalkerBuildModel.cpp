@@ -62,11 +62,11 @@ int main() {
     osimModel.addBody(platform);
 
     /*
-            // Section A.1 TODO: Create the Pelvis and set the coordinate
+            // Section A.1 DEFERRED: Create the Pelvis and set the coordinate
     properties
 
 
-            // Section A.2 TODO: Create the LeftThigh, LeftShank, RightThigh and
+            // Section A.2 DEFERRED: Create the LeftThigh, LeftShank, RightThigh and
     RightShank bodies double thighLength = 0.40, shankLength = 0.435;
 
 
@@ -86,14 +86,14 @@ int main() {
     ContactSphere(contactSphereRadius, rightHipLocationInPelvis, *pelvis,
     "RHipContact"); osimModel.addContactGeometry(rightHipContact);
 
-            // Section B.1 TODO: Add ContactSphere to the left hip, the knee,
+            // Section B.1 DEFERRED: Add ContactSphere to the left hip, the knee,
     and the foot points
                     // ********** BEGIN CODE **********
 
 
                     // **********  END CODE  **********
 
-            // Section B.2 TODO: Add HuntCrossleyForces
+            // Section B.2 DEFERRED: Add HuntCrossleyForces
                     // Define contact parameters for all the spheres
                     double stiffness = 1E7, dissipation = 0.1, staticFriction =
     0.6, dynamicFriction = 0.4, viscosity = 0.01;
@@ -111,7 +111,7 @@ int main() {
                     //Add Force
                     osimModel.addForce(rightHipForce);
 
-            // Section B.2 TODO: Add HuntCrossleyForces betweeen the remaining
+            // Section B.2 DEFERRED: Add HuntCrossleyForces betweeen the remaining
     ContactSpheres
                     // ********** BEGIN CODE **********
 
@@ -119,7 +119,7 @@ int main() {
                     // **********  END CODE  **********
 
 
-            // Section C.1 TODO: Construct CoordinateLimitForces for the Hip and
+            // Section C.1 DEFERRED: Construct CoordinateLimitForces for the Hip and
     Knee
                     // ********** BEGIN CODE **********
 

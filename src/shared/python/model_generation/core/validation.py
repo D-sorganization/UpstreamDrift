@@ -72,8 +72,10 @@ class ValidationResult:
         details: dict | None = None,
     ) -> None:
         """Add an error to the result."""
-        assert code is not None, "code must be provided"
-        assert code is not None, "code must be provided"
+        if not (code is not None):
+            raise ValueError("code must be provided")
+        if not (code is not None):
+            raise ValueError("code must be provided")
         self.errors.append(ValidationError(code, message, component, details))
         self.is_valid = False
 
@@ -89,8 +91,10 @@ class ValidationResult:
 
     def merge(self, other: ValidationResult) -> None:
         """Merge another validation result into this one."""
-        assert other is not None, "other must be provided"
-        assert other is not None, "other must be provided"
+        if not (other is not None):
+            raise ValueError("other must be provided")
+        if not (other is not None):
+            raise ValueError("other must be provided")
         self.errors.extend(other.errors)
         self.warnings.extend(other.warnings)
         if not other.is_valid:
@@ -150,8 +154,10 @@ class Validator:
         Returns:
             ValidationResult
         """
-        assert mass is not None, "mass must be provided"
-        assert mass is not None, "mass must be provided"
+        if not (mass is not None):
+            raise ValueError("mass must be provided")
+        if not (mass is not None):
+            raise ValueError("mass must be provided")
         result = ValidationResult(is_valid=True)
 
         if mass <= 0:
@@ -186,8 +192,10 @@ class Validator:
         Returns:
             ValidationResult
         """
-        assert inertia is not None, "inertia must be provided"
-        assert inertia is not None, "inertia must be provided"
+        if not (inertia is not None):
+            raise ValueError("inertia must be provided")
+        if not (inertia is not None):
+            raise ValueError("inertia must be provided")
         result = ValidationResult(is_valid=True)
 
         # Check mass
@@ -250,8 +258,10 @@ class Validator:
         Returns:
             ValidationResult
         """
-        assert link is not None, "link must be provided"
-        assert link is not None, "link must be provided"
+        if not (link is not None):
+            raise ValueError("link must be provided")
+        if not (link is not None):
+            raise ValueError("link must be provided")
         result = ValidationResult(is_valid=True)
 
         # Validate inertia
@@ -281,8 +291,10 @@ class Validator:
         Returns:
             ValidationResult
         """
-        assert joint is not None, "joint must be provided"
-        assert joint is not None, "joint must be provided"
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
         result = ValidationResult(is_valid=True)
 
         # Check parent exists
@@ -363,8 +375,10 @@ class Validator:
         Returns:
             ValidationResult
         """
-        assert links is not None, "links must be provided"
-        assert links is not None, "links must be provided"
+        if not (links is not None):
+            raise ValueError("links must be provided")
+        if not (links is not None):
+            raise ValueError("links must be provided")
         result = ValidationResult(is_valid=True)
 
         link_names = [link.name for link in links]
@@ -380,8 +394,10 @@ class Validator:
         cls, result: ValidationResult, names: list[str], entity_type: str
     ) -> None:
         """Check for duplicate names in a list."""
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         seen: set[str] = set()
         for name in names:
             if name in seen:
@@ -399,8 +415,10 @@ class Validator:
         joints: list[Joint],
     ) -> None:
         """Check for valid root link configuration."""
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         children = {j.child for j in joints}
         roots = link_name_set - children
 
@@ -423,8 +441,10 @@ class Validator:
         joints: list[Joint],
     ) -> None:
         """Check for circular dependencies using DFS."""
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         visited: set[str] = set()
 
         for link_name in link_names:
@@ -444,8 +464,10 @@ class Validator:
         joints: list[Joint],
     ) -> bool:
         """Detect if there's a cycle starting from the given node."""
-        assert start is not None, "start must be provided"
-        assert start is not None, "start must be provided"
+        if not (start is not None):
+            raise ValueError("start must be provided")
+        if not (start is not None):
+            raise ValueError("start must be provided")
         if start in path:
             return True
         if start in visited:
@@ -484,8 +506,10 @@ class Validator:
         Returns:
             ValidationResult
         """
-        assert links is not None, "links must be provided"
-        assert links is not None, "links must be provided"
+        if not (links is not None):
+            raise ValueError("links must be provided")
+        if not (links is not None):
+            raise ValueError("links must be provided")
         result = ValidationResult(is_valid=True)
 
         # Validate hierarchy

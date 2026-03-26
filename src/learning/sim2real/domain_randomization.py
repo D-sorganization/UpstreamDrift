@@ -93,8 +93,10 @@ class DomainRandomizer:
             engine: Physics engine instance.
             config: Randomization configuration.
         """
-        assert engine is not None, "engine must be provided"
-        assert engine is not None, "engine must be provided"
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
         self.engine = engine
         self.config = config or DomainRandomizationConfig()
         self.nominal_params = self._store_nominal_params()
@@ -260,8 +262,10 @@ class DomainRandomizer:
         Returns:
             Delayed action to actually apply.
         """
-        assert action is not None, "action must be provided"
-        assert action is not None, "action must be provided"
+        if not (action is not None):
+            raise ValueError("action must be provided")
+        if not (action is not None):
+            raise ValueError("action must be provided")
         if not self.config.randomize_delays or self._action_delay == 0:
             return self._apply_action_noise(action)
 
@@ -283,8 +287,10 @@ class DomainRandomizer:
         Returns:
             Noisy action.
         """
-        assert action is not None, "action must be provided"
-        assert action is not None, "action must be provided"
+        if not (action is not None):
+            raise ValueError("action must be provided")
+        if not (action is not None):
+            raise ValueError("action must be provided")
         if not self.config.randomize_noise or self.config.action_noise_std == 0:
             return action
 
@@ -302,8 +308,10 @@ class DomainRandomizer:
         Returns:
             Delayed and noisy observation.
         """
-        assert observation is not None, "observation must be provided"
-        assert observation is not None, "observation must be provided"
+        if not (observation is not None):
+            raise ValueError("observation must be provided")
+        if not (observation is not None):
+            raise ValueError("observation must be provided")
         if not self.config.randomize_delays or self._observation_delay == 0:
             return self._apply_observation_noise(observation)
 
@@ -327,8 +335,10 @@ class DomainRandomizer:
         Returns:
             Noisy observation.
         """
-        assert observation is not None, "observation must be provided"
-        assert observation is not None, "observation must be provided"
+        if not (observation is not None):
+            raise ValueError("observation must be provided")
+        if not (observation is not None):
+            raise ValueError("observation must be provided")
         if not self.config.randomize_noise or self.config.observation_noise_std == 0:
             return observation
 
@@ -356,8 +366,10 @@ class DomainRandomizer:
         Returns:
             List of randomization dictionaries.
         """
-        assert batch_size is not None, "batch_size must be provided"
-        assert batch_size is not None, "batch_size must be provided"
+        if not (batch_size is not None):
+            raise ValueError("batch_size must be provided")
+        if not (batch_size is not None):
+            raise ValueError("batch_size must be provided")
         configs = []
         for _i in range(batch_size):
             config = self.randomize(seed=int(self._rng.integers(0, 2**31)))

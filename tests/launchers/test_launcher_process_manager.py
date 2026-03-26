@@ -19,6 +19,10 @@ from src.launchers.launcher_process_manager import (  # noqa: E402
     start_vcxsrv,
 )
 
+# Convenience patch targets used by launch_script / launch_module tests
+_SECURE_POPEN = "src.launchers.launcher_process_manager.secure_popen"
+_VALIDATE_SCRIPT = "src.launchers.launcher_process_manager.validate_script_path"
+
 
 @pytest.fixture
 def manager():
@@ -129,12 +133,13 @@ def test_stream_output(manager):
     manager._emit_output.assert_any_call("TestApp", "[exited with code 0]")
 
 
-@patch("subprocess.Popen")
-def test_launch_script_unified(mock_popen, manager):
+@patch(_VALIDATE_SCRIPT)
+@patch(_SECURE_POPEN)
+def test_launch_script_unified(mock_secure_popen, mock_validate, manager):
     manager.use_separate_terminals = False
 
     mock_proc = MagicMock()
-    mock_popen.return_value = mock_proc
+    mock_secure_popen.return_value = mock_proc
 
     with patch("threading.Thread") as mock_thread:
         res = manager.launch_script(
@@ -143,49 +148,70 @@ def test_launch_script_unified(mock_popen, manager):
 
         assert res == mock_proc
         assert manager.running_processes["Test"] == mock_proc
+        mock_secure_popen.assert_called_once()
         mock_thread.assert_called_once()
         mock_thread().start.assert_called_once()
 
 
+@patch(_VALIDATE_SCRIPT)
 @patch("subprocess.Popen")
-def test_launch_script_separate_term(mock_popen, manager):
+@patch(_SECURE_POPEN)
+def test_launch_script_separate_term(
+    mock_secure_popen, mock_popen, mock_validate, manager
+):
     manager.use_separate_terminals = True
 
-    script_path = PureWindowsPath("/fake/script.py")
-    cwd_path = PureWindowsPath("/fake/cwd")
+    # Use PosixPath so Path() construction succeeds on Linux even when
+    # os.name is patched to "nt" inside the module under test.
+    script_path = Path("/fake/script.py")
+    cwd_path = Path("/fake/cwd")
     with patch("src.launchers.launcher_process_manager.os.name", "nt"):
+        # Windows separate-terminal path still uses subprocess.Popen directly
         manager.launch_script("Test", script_path, cwd_path)
         mock_popen.assert_called_once()
         assert "cmd /c" in mock_popen.call_args[0][0]
 
     mock_popen.reset_mock()
+    mock_secure_popen.reset_mock()
 
     with patch("os.name", "posix"):
-        manager.launch_script(
-            "Test", PureWindowsPath("/fake/script.py"), PureWindowsPath("/fake/cwd")
-        )
-        mock_popen.assert_called_once()
+        # Non-Windows separate-terminal path uses secure_popen
+        manager.launch_script("Test", Path("/fake/script.py"), Path("/fake/cwd"))
+        mock_secure_popen.assert_called_once()
+        cmd_arg = mock_secure_popen.call_args[0][0]
         assert (
-            "python" in mock_popen.call_args[0][0][0]
-            or "sys.executable" in mock_popen.call_args[0][0][0]
-            or str(mock_popen.call_args[0][0][0]).endswith("python.exe")
+            "python" in cmd_arg[0]
+            or "sys.executable" in cmd_arg[0]
+            or str(cmd_arg[0]).endswith("python.exe")
         )
 
 
-@patch("subprocess.Popen")
-def test_launch_module_unified(mock_popen, manager):
+@patch(_SECURE_POPEN)
+def test_launch_module_unified(mock_secure_popen, manager):
     manager.use_separate_terminals = False
 
     with patch("threading.Thread"):
         res = manager.launch_module("Test", "my_module", PureWindowsPath("/fake/cwd"))
-        mock_popen.assert_called_once()
+        mock_secure_popen.assert_called_once()
         assert res is not None
 
 
-@patch("subprocess.Popen", side_effect=OSError("Boom"))
-def test_launch_module_oserror(mock_popen, manager):
+@patch(_SECURE_POPEN, side_effect=OSError("Boom"))
+def test_launch_module_oserror(mock_secure_popen, manager):
     res = manager.launch_module("Test", "my_module", PureWindowsPath("/fake/cwd"))
     assert res is None
+
+
+def test_launch_module_invalid_name(manager):
+    """Module names with shell metacharacters must be rejected."""
+    res = manager.launch_module("Test", "bad; rm -rf /", PureWindowsPath("/fake/cwd"))
+    assert res is None
+
+
+def test_launch_module_in_wsl_invalid_name(manager):
+    """WSL module launch with shell-injectable name must be rejected."""
+    res = manager.launch_module_in_wsl("bad$(whoami)")
+    assert res is False
 
 
 @patch("subprocess.Popen")
@@ -292,8 +318,9 @@ def test_stream_output_runtime_error(manager):
     manager._stream_output("TestApp", mock_proc)  # Should catch exception
 
 
+@patch(_VALIDATE_SCRIPT)
 @patch("subprocess.Popen")
-def test_launch_script_keep_terminal(mock_popen, manager):
+def test_launch_script_keep_terminal(mock_popen, mock_validate, manager):
     manager.use_separate_terminals = True
     with patch("src.launchers.launcher_process_manager.os.name", "nt"):
         manager.launch_script(
@@ -305,8 +332,9 @@ def test_launch_script_keep_terminal(mock_popen, manager):
         assert "& pause" in mock_popen.call_args[0][0]
 
 
-@patch("subprocess.Popen", side_effect=OSError("Boom"))
-def test_launch_script_oserror(mock_popen, manager):
+@patch(_VALIDATE_SCRIPT)
+@patch(_SECURE_POPEN, side_effect=OSError("Boom"))
+def test_launch_script_oserror(mock_secure_popen, mock_validate, manager):
     res = manager.launch_script(
         "Test", PureWindowsPath("script.py"), PureWindowsPath(".")
     )
@@ -320,7 +348,7 @@ def test_launch_module_keep_terminal(mock_popen, manager):
         patch("src.launchers.launcher_process_manager.os.name", "nt"),
         patch.dict("os.environ", {}),
     ):
-        # We need to simulate the env stuff in launch_module
+        # Windows separate-terminal path still uses subprocess.Popen directly
         manager.launch_module(
             "Test", "my_module", PureWindowsPath("."), keep_terminal_open=True
         )
@@ -447,7 +475,10 @@ def test_get_subprocess_env_already_exists(manager):
     repo_str = str(manager.repo_root)
     src_str = str(manager.repo_root / "src")
 
-    with patch.dict("os.environ", {"PYTHONPATH": f"{repo_str}{os.pathsep}{src_str}"}):
+    with (
+        patch.dict("os.environ", {"PYTHONPATH": f"{repo_str}{os.pathsep}{src_str}"}),
+        patch("os.path.isdir", return_value=False),
+    ):
         env = manager.get_subprocess_env()
         # Should not append them twice
         assert env["PYTHONPATH"] == f"{repo_str}{os.pathsep}{src_str}"
@@ -486,8 +517,8 @@ def test_stream_output_no_streams(manager):
     manager._emit_output.assert_called_once_with("TestApp", "[exited with code 0]")
 
 
-@patch("subprocess.Popen")
-def test_launch_module_unified_nt_pythonpath(mock_popen, manager):
+@patch(_SECURE_POPEN)
+def test_launch_module_unified_nt_pythonpath(mock_secure_popen, manager):
     manager.use_separate_terminals = False
 
     repo_str = str(manager.repo_root)
@@ -498,7 +529,7 @@ def test_launch_module_unified_nt_pythonpath(mock_popen, manager):
         manager.launch_module(
             "Test", "my_module", PureWindowsPath("."), env={"PYTHONPATH": "some_other"}
         )
-        env_passed = mock_popen.call_args[1]["env"]
+        env_passed = mock_secure_popen.call_args[1]["env"]
         assert repo_str in env_passed["PYTHONPATH"]
         assert src_str in env_passed["PYTHONPATH"]
         assert "some_other" in env_passed["PYTHONPATH"]
@@ -510,7 +541,7 @@ def test_launch_module_unified_nt_pythonpath(mock_popen, manager):
             PureWindowsPath("."),
             env={"PYTHONPATH": f"{repo_str};{src_str}"},
         )
-        env_passed = mock_popen.call_args[1]["env"]
+        env_passed = mock_secure_popen.call_args[1]["env"]
         # Shouldn't duplicate
         assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str}"
 
@@ -521,7 +552,7 @@ def test_launch_module_unified_nt_pythonpath(mock_popen, manager):
             PureWindowsPath("."),
             env={"PYTHONPATH": f"{repo_str};foo"},
         )
-        env_passed = mock_popen.call_args[1]["env"]
+        env_passed = mock_secure_popen.call_args[1]["env"]
         assert env_passed["PYTHONPATH"] == f"{src_str};{repo_str};foo"
 
         # True, False branch
@@ -531,29 +562,33 @@ def test_launch_module_unified_nt_pythonpath(mock_popen, manager):
             PureWindowsPath("."),
             env={"PYTHONPATH": f"{src_str};foo"},
         )
-        env_passed = mock_popen.call_args[1]["env"]
+        env_passed = mock_secure_popen.call_args[1]["env"]
         assert env_passed["PYTHONPATH"] == f"{repo_str};{src_str};foo"
 
     with patch("os.name", "posix"):
         manager.launch_module("Test", "my_module", PureWindowsPath("."))
-        assert mock_popen.called
+        assert mock_secure_popen.called
 
 
+@patch(_SECURE_POPEN)
 @patch("subprocess.Popen")
-def test_launch_module_separate_terminals(mock_popen, manager):
+def test_launch_module_separate_terminals(mock_popen, mock_secure_popen, manager):
     manager.use_separate_terminals = True
 
     with patch("src.launchers.launcher_process_manager.os.name", "nt"):
+        # Windows separate-terminal path still uses subprocess.Popen directly
         manager.launch_module(
             "Test", "my_module", PureWindowsPath("."), keep_terminal_open=False
         )
         assert "cmd /c" in mock_popen.call_args[0][0]
 
     with patch("os.name", "posix"):
+        # Non-Windows separate-terminal path uses secure_popen
         manager.launch_module(
             "Test", "my_module", PureWindowsPath("."), keep_terminal_open=False
         )
-        assert mock_popen.call_args[0][0][1] == "-m"
+        cmd_arg = mock_secure_popen.call_args[0][0]
+        assert cmd_arg[1] == "-m"
 
 
 @patch("src.launchers.launcher_process_manager.is_vcxsrv_running", return_value=False)

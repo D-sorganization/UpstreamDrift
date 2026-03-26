@@ -25,16 +25,20 @@ class TrajectoryTracer:
     """Manages trajectory traces for bodies in the simulation."""
 
     def __init__(self, max_points: int = 1000) -> None:
-        assert max_points is not None, "max_points must be provided"
-        assert max_points is not None, "max_points must be provided"
+        if not (max_points is not None):
+            raise ValueError("max_points must be provided")
+        if not (max_points is not None):
+            raise ValueError("max_points must be provided")
         self.traces: dict[str, deque] = {}
         self.max_points = max_points
         self._desired_traces: dict[str, list[np.ndarray]] = {}
 
     def add_point(self, body_name: str, position: np.ndarray) -> None:
         """Append a position sample to a body's trajectory trace."""
-        assert body_name is not None, "body_name must be provided"
-        assert body_name is not None, "body_name must be provided"
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
         if body_name not in self.traces:
             self.traces[body_name] = deque(maxlen=self.max_points)
         self.traces[body_name].append(np.asarray(position, dtype=np.float64).copy())
@@ -152,8 +156,10 @@ def _init_arrow_geom(
 
     Uses ``mujoco.mjv_initGeom`` which is available in MuJoCo >= 2.3.
     """
-    assert start is not None, "start must be provided"
-    assert start is not None, "start must be provided"
+    if not (start is not None):
+        raise ValueError("start must be provided")
+    if not (start is not None):
+        raise ValueError("start must be provided")
     import mujoco
 
     start = np.asarray(start, dtype=np.float64)
@@ -208,8 +214,10 @@ def _init_sphere_geom(
     rgba: np.ndarray | list[float],
 ) -> None:
     """Populate a ``mjvGeom`` as a sphere at *pos*."""
-    assert pos is not None, "pos must be provided"
-    assert pos is not None, "pos must be provided"
+    if not (pos is not None):
+        raise ValueError("pos must be provided")
+    if not (pos is not None):
+        raise ValueError("pos must be provided")
     import mujoco
 
     size = np.array([radius, 0.0, 0.0])
@@ -251,8 +259,10 @@ def add_visualization_overlays(
         tracer: ``TrajectoryTracer`` instance accumulating body paths.
     """
 
-    assert config is not None, "config must be provided"
-    assert config is not None, "config must be provided"
+    if not (config is not None):
+        raise ValueError("config must be provided")
+    if not (config is not None):
+        raise ValueError("config must be provided")
     show_forces = config.get("show_contact_forces", True)
     show_torques = config.get("show_joint_torques", True)
     show_tracers = config.get("show_tracers", True)
@@ -330,8 +340,10 @@ def _add_friction_arrow(
     start: Any,
     force_scale: float,
 ) -> None:
-    assert add_geom is not None, "add_geom must be provided"
-    assert add_geom is not None, "add_geom must be provided"
+    if not (add_geom is not None):
+        raise ValueError("add_geom must be provided")
+    if not (add_geom is not None):
+        raise ValueError("add_geom must be provided")
     fric_len = min(contact["friction_force"] * force_scale, 0.3)
     n = np.asarray(direction, dtype=np.float64)
     if abs(n[0]) < 0.9:
@@ -428,8 +440,10 @@ def create_force_arrow_geom(
     color: list[float],
 ) -> dict:
     """Return a plain dict describing a force arrow (engine-agnostic)."""
-    assert position is not None, "position must be provided"
-    assert position is not None, "position must be provided"
+    if not (position is not None):
+        raise ValueError("position must be provided")
+    if not (position is not None):
+        raise ValueError("position must be provided")
     direction = np.asarray(direction, dtype=np.float64)
     direction = direction / (np.linalg.norm(direction) + 1e-8)
     length = min(magnitude / 100.0, 0.5)
@@ -450,8 +464,10 @@ def create_trace_line_geom(
     radius: float = 0.002,
 ) -> list[dict]:
     """Return a list of line-segment dicts for a trajectory trace."""
-    assert points is not None, "points must be provided"
-    assert points is not None, "points must be provided"
+    if not (points is not None):
+        raise ValueError("points must be provided")
+    if not (points is not None):
+        raise ValueError("points must be provided")
     segments = []
     for i in range(len(points) - 1):
         segments.append(

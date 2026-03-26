@@ -118,8 +118,10 @@ class RealTimeController:
             control_frequency: Control loop frequency in Hz.
             communication_type: Communication protocol.
         """
-        assert control_frequency is not None, "control_frequency must be provided"
-        assert control_frequency is not None, "control_frequency must be provided"
+        if not (control_frequency is not None):
+            raise ValueError("control_frequency must be provided")
+        if not (control_frequency is not None):
+            raise ValueError("control_frequency must be provided")
         self.control_frequency = control_frequency
         self.dt = 1.0 / control_frequency
         self.comm_type = CommunicationType(communication_type)
@@ -149,6 +151,9 @@ class RealTimeController:
         self._state_lock = threading.Lock()
         self._command_lock = threading.Lock()
 
+        # Event signalled whenever a new state reading is stored
+        self._state_event = threading.Event()
+
     @property
     def is_connected(self) -> bool:
         """Check if connected to robot."""
@@ -168,8 +173,10 @@ class RealTimeController:
         Returns:
             True if connection successful.
         """
-        assert robot_config is not None, "robot_config must be provided"
-        assert robot_config is not None, "robot_config must be provided"
+        if not (robot_config is not None):
+            raise ValueError("robot_config must be provided")
+        if not (robot_config is not None):
+            raise ValueError("robot_config must be provided")
         self._config = robot_config
 
         try:
@@ -291,6 +298,8 @@ class RealTimeController:
 
                 with self._state_lock:
                     self._last_state = state
+                self._state_event.set()
+                self._state_event.clear()
 
                 # Compute control
                 if self._control_callback is not None:
@@ -383,8 +392,10 @@ class RealTimeController:
         Args:
             command: Control command to send.
         """
-        assert command is not None, "command must be provided"
-        assert command is not None, "command must be provided"
+        if not (command is not None):
+            raise ValueError("command must be provided")
+        if not (command is not None):
+            raise ValueError("command must be provided")
         if self.comm_type == CommunicationType.SIMULATION:
             # Simulated: command is "sent"
             return
@@ -496,15 +507,18 @@ class RealTimeController:
         Returns:
             Robot state or None if timeout.
         """
-        assert timeout is not None, "timeout must be provided"
-        assert timeout is not None, "timeout must be provided"
+        if not (timeout is not None):
+            raise ValueError("timeout must be provided")
         start = time.perf_counter()
-        initial_state = self._last_state
+        with self._state_lock:
+            initial_state = self._last_state
 
-        while time.perf_counter() - start < timeout:
+        remaining = timeout
+        while remaining > 0:
+            self._state_event.wait(timeout=remaining)
             with self._state_lock:
                 if self._last_state is not initial_state:
                     return self._last_state
-            time.sleep(0.001)
+            remaining = timeout - (time.perf_counter() - start)
 
         return None

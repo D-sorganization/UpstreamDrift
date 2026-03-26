@@ -19,8 +19,10 @@ def _heating_ode(
     power_func: Callable[[float], float],
 ) -> Sequence[float]:
     """ODE for simple vessel heating."""
-    assert t is not None, "t must be provided"
-    assert t is not None, "t must be provided"
+    if not (t is not None):
+        raise ValueError("t must be provided")
+    if not (t is not None):
+        raise ValueError("t must be provided")
     q_in = power_func(t)
     dTdt = (q_in - heat_loss_coeff * (y[0] - ambient_temp)) / thermal_mass
     return [dTdt]
@@ -37,8 +39,10 @@ def predict_temperature_profile(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Predict temperature profile for a heated vessel."""
 
-    assert t_span is not None, "t_span must be provided"
-    assert t_span is not None, "t_span must be provided"
+    if not (t_span is not None):
+        raise ValueError("t_span must be provided")
+    if not (t_span is not None):
+        raise ValueError("t_span must be provided")
 
     def rhs(t: float, y: Any) -> Any:
         return _heating_ode(
@@ -60,8 +64,10 @@ def fit_heating_parameters(
 ) -> tuple[float, float]:
     """Fit thermal_mass and heat_loss_coeff to observed data."""
 
-    assert times is not None, "times must be provided"
-    assert times is not None, "times must be provided"
+    if not (times is not None):
+        raise ValueError("times must be provided")
+    if not (times is not None):
+        raise ValueError("times must be provided")
 
     def model(t: Any, thermal_mass: float, heat_loss_coeff: float) -> np.ndarray:
         """Model method.
@@ -69,8 +75,10 @@ def fit_heating_parameters(
         Returns:
             None
         """
-        assert thermal_mass is not None, "thermal_mass must be provided"
-        assert thermal_mass is not None, "thermal_mass must be provided"
+        if not (thermal_mass is not None):
+            raise ValueError("thermal_mass must be provided")
+        if not (thermal_mass is not None):
+            raise ValueError("thermal_mass must be provided")
         _, temps = predict_temperature_profile(
             (t[0], t[-1]),
             t,

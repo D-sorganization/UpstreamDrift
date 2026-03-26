@@ -2,7 +2,7 @@
 
 ## Executive Summary
 - **Critical Gaps**: 416
-- **Feature Gaps (TODO)**: 88
+- **Feature Gaps (TRACKED_TASK)**: 88
 - **Technical Debt**: 32
 - **Documentation Gaps**: 520
 
@@ -11,8 +11,8 @@
 ```mermaid
 pie title Completion Status
     "Impl Gaps (Critical)" : 416
-    "Feature Requests (TODO)" : 88
-    "Technical Debt (FIXME)" : 32
+    "Feature Requests (TRACKED_TASK)" : 88
+    "Technical Debt (TRACKED_DEFECT)" : 32
     "Doc Gaps" : 520
 ```
 
@@ -83,77 +83,77 @@ pie title Issues by Module
 ## Feature Gap Matrix
 | Module | Feature Gap | Type |
 |---|---|---|
-| `./REVIEW_SUMMARY.txt` | 4. TODO/FIXME blocker too aggressive (doesn't allow issue references) | TODO |
-| `./scripts/refresh_completist_data.py` | "TODO\|FIXME\|XXX\|HACK\|TEMP", | TODO |
-| `./scripts/pragmatic_programmer_review.py` | """Report high TODO counts as a technical debt indicator.""" | TODO |
-| `./scripts/pragmatic_programmer_review.py` | if "TODO" in content: | TODO |
-| `./scripts/pragmatic_programmer_review.py` | "title": f"High TODO count ({len(todos)})", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | ["rg", "-n", "TODO\|FIXME", "src", "tests", "scripts"], | TODO |
-| `./scripts/generate_todo_fixme_register.py` | "# TODO/FIXME Debt Register", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | "This register is generated from inline TODO/FIXME markers.", | TODO |
-| `./scripts/generate_todo_fixme_register.py` | marker = "TODO" if "TODO" in text else "FIXME" | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - Placeholder (TODO/FIXME) blocker | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. **TODO/FIXME check is blocking:** CI fails if any TODOs found | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. TODO/FIXME blocker is too aggressive | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - **Fix:** Update check to allow `TODO #123` format | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | echo "::error::Orphaned placeholders. Link to GitHub issues: # TODO #123" | TODO |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - [ ] Fix TODO/FIXME check to allow references: `# TODO #123` | TODO |
-| `./tests/tools/test_code_quality_check.py` | lines = ["# TODO: fix this", "def test():", "    ...  ", "    pass"] | TODO |
-| `./tests/tools/test_code_quality_check.py` | assert any("TODO placeholder" in t for t in types) | TODO |
-| `./tests/tools/test_code_quality_check.py` | lines = ["# TODO: internal marker"] | TODO |
-| `./tests/tools/test_code_quality_check.py` | f.write_text("# TODO: fix this\n") | TODO |
-| `./tests/tools/test_code_quality_check.py` | assert any("TODO" in i[1] for i in issues) | TODO |
-| `./vendor/ud-tools/drafts/Jules-Code-Quality-Reviewer.yml` | 5. **Placeholders**: Identify placeholder code (TODO, FIXME, NotImplemented, pass statements) | TODO |
-| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | stats["todos"] += content.count("TODO") | TODO |
-| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | grades["O"] = (max(0, score_o), f"Technical Debt (TODO+FIXME): {debt}") | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | - **Markers**: 445 `TODO` and 140 `FIXME` markers indicate significant unfinished work. | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | -   445 `TODO` markers. | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | -   Convert valid `TODO` items into GitHub Issues. | TODO |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | f.write("    - **Issue**: 445 `TODO` markers.\n") | TODO |
-| `./vendor/ud-tools/scripts/generate_fresh_assessments.py` | stats["todos"] += content.count("TODO") | TODO |
-| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | if "TODO" in content: | TODO |
-| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | "title": f"High TODO count ({len(todos)})", | TODO |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | Path("script.m"), "% TODO: fix this", 5, issues | TODO |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | assert "TODO" in issues[0] | TODO |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | "% TODO", | TODO |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | """m-file with TODO must produce at least one issue.""" | TODO |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | (matlab / "dirty.m").write_text("function y = foo(x)\n% TODO: fix\ny = x;\nend\n") | TODO |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | "function bad()\n% TODO: fill in\nglobal myVar\neval('x+1');\nend\n" | TODO |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | lines = ["# TODO: fix this eventually"] | TODO |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | assert "TODO" in issues[0][1] | TODO |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | lines = ["# TODO: something"] | TODO |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | f.write_text("# TODO: clean me up\n", encoding="utf-8") | TODO |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - **NEVER USE PLACEHOLDERS** → No `TODO`, `FIXME`, `...`, `pass`, `NotImplementedError`, `<your-valu | TODO |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - [X] Zero TODO/FIXME/pass in diff | TODO |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | # TODO: implement this properly | TODO |
-| `./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/script_generator.py` | f"{prefix}# TODO: Implement custom operation", | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | swingType: SwingType.UNKNOWN, // TODO: Implement swing type detection | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | armHang: 'good', // TODO: Implement arm hang detection | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts` | // TODO: Parse and validate RGB values | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TODO: Move fps to client-side config or use from video metadata | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TODO(#663): Save to database when backend API is available. | TODO |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TODO(#663): Save pose data to database when backend API is available. | TODO |
+| `./REVIEW_SUMMARY.txt` | 4. TRACKED_TASK/TRACKED_DEFECT blocker too aggressive (doesn't allow issue references) | TRACKED_TASK |
+| `./scripts/refresh_completist_data.py` | "TRACKED_TASK\|TRACKED_DEFECT\|XXX\|HACK\|TEMP", | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py` | """Report high TRACKED_TASK counts as a technical debt indicator.""" | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py` | if "TRACKED_TASK" in content: | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py` | "title": f"High TRACKED_TASK count ({len(todos)})", | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | ["rg", "-n", "TRACKED_TASK\|TRACKED_DEFECT", "src", "tests", "scripts"], | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | "# TRACKED_TASK/TRACKED_DEFECT Debt Register", | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | "This register is generated from inline TRACKED_TASK/TRACKED_DEFECT markers.", | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py` | marker = "TRACKED_TASK" if "TRACKED_TASK" in text else "TRACKED_DEFECT" | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - Placeholder (TRACKED_TASK/TRACKED_DEFECT) blocker | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. **TRACKED_TASK/TRACKED_DEFECT check is blocking:** CI fails if any TODOs found | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. TRACKED_TASK/TRACKED_DEFECT blocker is too aggressive | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - **Fix:** Update check to allow `TRACKED_TASK #123` format | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | echo "::error::Orphaned placeholders. Link to GitHub issues: # TRACKED_TASK #123" | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - [ ] Fix TRACKED_TASK/TRACKED_DEFECT check to allow references: `# TRACKED_TASK #123` | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | lines = ["# TRACKED_TASK: fix this", "def test():", "    ...  ", "    pass"] | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | assert any("TRACKED_TASK placeholder" in t for t in types) | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | lines = ["# TRACKED_TASK: internal marker"] | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | f.write_text("# TRACKED_TASK: fix this\n") | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py` | assert any("TRACKED_TASK" in i[1] for i in issues) | TRACKED_TASK |
+| `./vendor/ud-tools/drafts/Jules-Code-Quality-Reviewer.yml` | 5. **Placeholders**: Identify placeholder code (TRACKED_TASK, TRACKED_DEFECT, NotImplemented, pass statements) | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | stats["todos"] += content.count("TRACKED_TASK") | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | grades["O"] = (max(0, score_o), f"Technical Debt (TRACKED_TASK+TRACKED_DEFECT): {debt}") | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py` | - **Markers**: 445 `TRACKED_TASK` and 140 `TRACKED_DEFECT` markers indicate significant unfinished work. | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py` | -   445 `TRACKED_TASK` markers. | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py` | -   Convert valid `TRACKED_TASK` items into GitHub Issues. | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py` | f.write("    - **Issue**: 445 `TRACKED_TASK` markers.\n") | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_fresh_assessments.py` | stats["todos"] += content.count("TRACKED_TASK") | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | if "TRACKED_TASK" in content: | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | "title": f"High TRACKED_TASK count ({len(todos)})", | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | Path("script.m"), "% TRACKED_TASK: fix this", 5, issues | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | assert "TRACKED_TASK" in issues[0] | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | "% TRACKED_TASK", | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | """m-file with TRACKED_TASK must produce at least one issue.""" | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | (matlab / "dirty.m").write_text("function y = foo(x)\n% TRACKED_TASK: fix\ny = x;\nend\n") | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | "function bad()\n% TRACKED_TASK: fill in\nglobal myVar\neval('x+1');\nend\n" | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | lines = ["# TRACKED_TASK: fix this eventually"] | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | assert "TRACKED_TASK" in issues[0][1] | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | lines = ["# TRACKED_TASK: something"] | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | f.write_text("# TRACKED_TASK: clean me up\n", encoding="utf-8") | TRACKED_TASK |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - **NEVER USE PLACEHOLDERS** → No `TRACKED_TASK`, `TRACKED_DEFECT`, `...`, `pass`, `NotImplementedError`, `<your-valu | TRACKED_TASK |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - [X] Zero TRACKED_TASK/TRACKED_DEFECT/pass in diff | TRACKED_TASK |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | # TRACKED_TASK: implement this properly | TRACKED_TASK |
+| `./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/script_generator.py` | f"{prefix}# TRACKED_TASK: Implement custom operation", | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | swingType: SwingType.UNKNOWN, // TRACKED_TASK: Implement swing type detection | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | armHang: 'good', // TRACKED_TASK: Implement arm hang detection | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts` | // TRACKED_TASK: Parse and validate RGB values | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TRACKED_TASK: Move fps to client-side config or use from video metadata | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TRACKED_TASK(#663): Save to database when backend API is available. | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TRACKED_TASK(#663): Save pose data to database when backend API is available. | TRACKED_TASK |
 
 ## Technical Debt Register
 | File | Line | Issue | Type |
 |---|---|---|---|
 | `./full_collect.txt` | 4666 | Postcondition: All codes follow GMS-XXX-NNN format. | XXX |
 | `./full_collect.txt` | 17580 | Every error code must follow GMS-XXX-NNN pattern. | XXX |
-| `./tests/tools/test_code_quality_check.py` | 83 | lines = ["# FIXME: broken logic"] | FIXME |
-| `./tests/tools/test_code_quality_check.py` | 85 | assert any("FIXME" in i[1] for i in issues) | FIXME |
+| `./tests/tools/test_code_quality_check.py` | 83 | lines = ["# TRACKED_DEFECT: broken logic"] | TRACKED_DEFECT |
+| `./tests/tools/test_code_quality_check.py` | 85 | assert any("TRACKED_DEFECT" in i[1] for i in issues) | TRACKED_DEFECT |
 | `./tests/unit/utils/test_error_codes.py` | 39 | """Every error code must follow GMS-XXX-NNN pattern.""" | XXX |
 | `./tests/unit/utils/test_error_codes.py` | 42 | assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN" | XXX |
 | `./tests/unit/api/test_error_codes.py` | 36 | """Postcondition: All codes follow GMS-XXX-NNN format.""" | XXX |
-| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | 143 | stats["fixmes"] += content.count("FIXME") | FIXME |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | 214 | -   140 `FIXME` markers. | FIXME |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | 217 | -   Audit all `FIXME` items and resolve high-priority ones. | FIXME |
-| `./vendor/ud-tools/scripts/generate_fresh_assessments.py` | 121 | stats["fixmes"] += content.count("FIXME") | FIXME |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | 95 | Path("script.m"), "% FIXME: broken", 3, issues | FIXME |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | 97 | assert any("FIXME" in i for i in issues) | FIXME |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 320 | (r"\bFIXME\b", "FIXME placeholder found"), | FIXME |
+| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | 143 | stats["fixmes"] += content.count("TRACKED_DEFECT") | TRACKED_DEFECT |
+| `./vendor/ud-tools/scripts/generate_assessments.py` | 214 | -   140 `TRACKED_DEFECT` markers. | TRACKED_DEFECT |
+| `./vendor/ud-tools/scripts/generate_assessments.py` | 217 | -   Audit all `TRACKED_DEFECT` items and resolve high-priority ones. | TRACKED_DEFECT |
+| `./vendor/ud-tools/scripts/generate_fresh_assessments.py` | 121 | stats["fixmes"] += content.count("TRACKED_DEFECT") | TRACKED_DEFECT |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | 95 | Path("script.m"), "% TRACKED_DEFECT: broken", 3, issues | TRACKED_DEFECT |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | 97 | assert any("TRACKED_DEFECT" in i for i in issues) | TRACKED_DEFECT |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 320 | (r"\bFIXME\b", "TRACKED_DEFECT placeholder found"), | TRACKED_DEFECT |
 | `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 321 | (r"\bHACK\b", "HACK comment found"), | HACK |
 | `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 322 | (r"\bXXX\b", "XXX comment found"), | XXX |
-| `./vendor/ud-tools/src/tools/quality_utils.py` | 51 | "Angle bracket FIXME placeholder", | FIXME |
+| `./vendor/ud-tools/src/tools/quality_utils.py` | 51 | "Angle bracket TRACKED_DEFECT placeholder", | TRACKED_DEFECT |
 | `./pytest_collect_out.txt` | 4666 | Postcondition: All codes follow GMS-XXX-NNN format. | XXX |
 | `./pytest_collect_out.txt` | 17420 | Every error code must follow GMS-XXX-NNN pattern. | XXX |
 | `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /* HACK: Temporary fix for CONF-15412 */ | HACK |
@@ -174,10 +174,10 @@ pie title Issues by Module
 Prioritized by Impact (High) and Complexity (Low).
 | Priority | File | Issue | Metrics (I/C/C) |
 |---|---|---|---|
-| 1 | `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
-| 2 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
-| 3 | `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
-| 4 | `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | 5/2/3 |
+| 1 | `./src/engines/pendulum_models/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
+| 2 | `./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
+| 3 | `./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
+| 4 | `./src/engines/physics_engines/drake/tools/matlab_utilities/README.md` | - TRACKED_TASK, TRACKED_DEFECT, HACK, XXX placeholders | 5/2/3 |
 | 5 | `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | render | 5/3/4 |
 | 6 | `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | to_image | 5/3/4 |
 | 7 | `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | convert | 5/3/4 |

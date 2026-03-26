@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------
-# Font size constants — DRY, single source of truth (#1134)
+# Font size constants â€” DRY, single source of truth (#1134)
 # All font sizes in pixels; zoom system (#1147) scales these.
 # ---------------------------------------------------------------------------
 MIN_FONT_PX: int = 11  # absolute minimum for readability

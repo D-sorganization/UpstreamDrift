@@ -333,7 +333,6 @@ class TestGolfSuiteLauncher:
             golf_suite_launcher.PYQT6_AVAILABLE = True
 
             # Print for debug (captured in verbose output if needed)
-            print(f"DEBUG: PYQT6_AVAILABLE={golf_suite_launcher.PYQT6_AVAILABLE}")
 
             golf_suite_launcher.main()
 

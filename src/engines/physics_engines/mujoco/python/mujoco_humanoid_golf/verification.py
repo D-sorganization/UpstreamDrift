@@ -46,8 +46,10 @@ class EnergyMonitor:
     """
 
     def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.model = model
         self.data = data
         self.history: list[EnergyState] = []
@@ -106,8 +108,10 @@ class EnergyMonitor:
             passed (bool): True if energy drift is within tolerance.
             drift (float): Energy error magnitude (Joules).
         """
-        assert tolerance is not None, "tolerance must be provided"
-        assert tolerance is not None, "tolerance must be provided"
+        if not (tolerance is not None):
+            raise ValueError("tolerance must be provided")
+        if not (tolerance is not None):
+            raise ValueError("tolerance must be provided")
         if not self.history:
             return True, 0.0
 
@@ -149,8 +153,10 @@ class JacobianTester:
     """
 
     def __init__(self, model: mujoco.MjModel) -> None:
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.model = model
         # Use a private MjData to avoid side effects (Phase 1 Fix)
         self.data = mujoco.MjData(model)

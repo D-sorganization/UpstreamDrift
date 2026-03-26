@@ -44,9 +44,12 @@ def find_importers(
     Returns list of (filepath, line_number, line_content) tuples.
     Excludes the shim file itself and __pycache__ dirs.
     """
-    assert isinstance(shim_name, str), "shim_name must be a string"
-    assert isinstance(search_dirs, list), "search_dirs must be a list"
-    assert isinstance(exclude_path, Path), "exclude_path must be a Path object"
+    if not isinstance(shim_name, str):
+        raise ValueError("shim_name must be a string")
+    if not isinstance(search_dirs, list):
+        raise ValueError("search_dirs must be a list")
+    if not isinstance(exclude_path, Path):
+        raise ValueError("exclude_path must be a Path object")
 
     results: list[tuple[Path, int, str]] = []
     pattern = re.compile(
@@ -91,9 +94,12 @@ def rewrite_import(
 
     Returns True if changes were made.
     """
-    assert isinstance(filepath, Path), "filepath must be a Path object"
-    assert isinstance(shim_name, str), "shim_name must be a string"
-    assert isinstance(real_subpath, str), "real_subpath must be a string"
+    if not isinstance(filepath, Path):
+        raise ValueError("filepath must be a Path object")
+    if not isinstance(shim_name, str):
+        raise ValueError("shim_name must be a string")
+    if not isinstance(real_subpath, str):
+        raise ValueError("real_subpath must be a string")
 
     content = filepath.read_text(encoding="utf-8")
     original = content
@@ -120,8 +126,10 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
 
     Returns a summary dict.
     """
-    assert isinstance(shim_path, Path), "shim_path must be a Path object"
-    assert isinstance(dry_run, bool), "dry_run must be a boolean"
+    if not isinstance(shim_path, Path):
+        raise ValueError("shim_path must be a Path object")
+    if not isinstance(dry_run, bool):
+        raise ValueError("dry_run must be a boolean")
 
     shim_name = shim_path.stem
     real_subpath = get_shim_mapping(shim_path)
@@ -168,7 +176,8 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
 
     if dry_run:
         fc1 = result["files_changed"]
-        assert isinstance(fc1, list)
+        if not isinstance(fc1, list):
+            raise ValueError(f"Expected list, got {type(fc1).__name__}")
         for fpath, lineno, line in real_importers:
             fc1.append(f"  {fpath.relative_to(REPO_ROOT)}:{lineno}: {line.strip()}")
         return result
@@ -222,9 +231,7 @@ def main() -> None:
         importers = find_importers(shim_path.stem, search_dirs, shim_path)
         if len(importers) > max_imports:
             if dry_run:
-                print(
-                    f"SKIP {shim_path.stem} ({len(importers)} imports > {max_imports})"
-                )
+                pass
             continue
 
         result = process_shim(shim_path, dry_run=dry_run)
@@ -232,22 +239,13 @@ def main() -> None:
         if result["status"] == "not_a_shim":
             continue
 
-        prefix = "DRY" if dry_run else "OK"
-        print(
-            f"[{prefix}] {result['shim']} -> {result['real_path']} "
-            f"({result['importers']} imports)"
-        )
         if result.get("files_changed"):
-            for f in result["files_changed"]:
-                print(f"     {f}")
+            for _f in result["files_changed"]:
+                pass
 
         if not dry_run and result["status"] == "removed":
             total_removed += 1
             total_imports_updated += result["importers"]
-
-    print(f"\n{'DRY RUN - ' if dry_run else ''}Summary:")
-    print(f"  Shims removed: {total_removed}")
-    print(f"  Imports updated: {total_imports_updated}")
 
 
 if __name__ == "__main__":

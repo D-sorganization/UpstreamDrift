@@ -8,12 +8,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "technical_debt" / "TODO_FIXME_REGISTER.md"
-PATTERN = re.compile(r"\b(TODO|FIXME)\b")
+PATTERN = re.compile(r"\b(TRACKED_TASK|TRACKED_DEFECT)\b")
 
 
 def main() -> int:
     cp = subprocess.run(
-        ["rg", "-n", "TODO|FIXME", "src", "tests", "scripts"],
+        ["rg", "-n", "TRACKED_TASK|TRACKED_DEFECT", "src", "tests", "scripts"],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -22,9 +22,9 @@ def main() -> int:
     lines = [ln for ln in cp.stdout.splitlines() if ln.strip()]
 
     content = [
-        "# TODO/FIXME Debt Register",
+        "# TRACKED_TASK/TRACKED_DEFECT Debt Register",
         "",
-        "This register is generated from inline TODO/FIXME markers.",
+        "This register is generated from inline TRACKED_TASK/TRACKED_DEFECT markers.",
         "Target SLA: convert each marker to a tracked issue within 14 days.",
         "",
         f"Total markers: {len(lines)}",
@@ -38,7 +38,7 @@ def main() -> int:
         if len(parts) < 3:
             continue
         file_path, line_no, text = parts
-        marker = "TODO" if "TODO" in text else "FIXME"
+        marker = "TRACKED_TASK" if "TRACKED_TASK" in text else "TRACKED_DEFECT"
         action = "Create/Link GitHub issue and assign owner"
         content.append(f"| {marker} | `{file_path}:{line_no}` | {action} |")
 

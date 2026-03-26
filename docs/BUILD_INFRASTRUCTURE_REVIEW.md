@@ -309,7 +309,7 @@ exclude = '''
    - File size budget check
    - Module size budget check
    - Print statement blocker
-   - Placeholder (TODO/FIXME) blocker
+   - Placeholder (TRACKED_TASK/TRACKED_DEFECT) blocker
    - Security audit (pip-audit)
    - Bandit security scan
    - Code quality check
@@ -322,7 +322,7 @@ exclude = '''
    - CVE-2024-23342 (ecdsa) - No fix available
    - CVE-2026-0994 (protobuf) - Transitive from dm_control
    - CVE-2026-1703 (pip) - Not fixable in runner
-3. **TODO/FIXME check is blocking:** CI fails if any TODOs found
+3. **TRACKED_TASK/TRACKED_DEFECT check is blocking:** CI fails if any TODOs found
 4. **Missing:** No pytest execution in the snippet shown
 5. **Missing:** No docker build validation
 6. **Inconsistency:** Uses `mypy==1.13.0` but lock files have `mypy==1.19.1`
@@ -338,9 +338,9 @@ exclude = '''
    - Tests may not be running in CI at all!
    - **Recommendation:** Add pytest job
 
-3. TODO/FIXME blocker is too aggressive
+3. TRACKED_TASK/TRACKED_DEFECT blocker is too aggressive
    - Modern practice: TODOs with issue numbers allowed
-   - **Fix:** Update check to allow `TODO #123` format
+   - **Fix:** Update check to allow `TRACKED_TASK #123` format
 
 **WARNINGS:**
 1. No test matrix (only 3.11, no 3.10/3.12 despite pyproject.toml supporting both)
@@ -730,16 +730,16 @@ jobs:
       - name: Verify No Orphaned Placeholders
         run: |
           violations=$(
-            grep -rn "TODO\|FIXME" . \
+            grep -rn "TRACKED_TASK\|TRACKED_DEFECT" . \
               --exclude-dir=.git \
               --exclude-dir=.mypy_cache \
               --exclude="*.pyc" \
-            | grep -v "# TODO #[0-9]" \
-            | grep -v "# FIXME #[0-9]"
+            | grep -v "# TRACKED_TASK #[0-9]" \
+            | grep -v "# TRACKED_DEFECT #[0-9]"
           )
           if [ -n "$violations" ]; then
             echo "$violations"
-            echo "::error::Orphaned placeholders. Link to GitHub issues: # TODO #123"
+            echo "::error::Orphaned placeholders. Link to GitHub issues: # TRACKED_TASK #123"
             exit 1
           fi
 ```
@@ -875,7 +875,7 @@ if __name__ == "__main__":
 ### Week 2 - CI/CD Improvements
 - [ ] Add pytest execution to ci-standard.yml
 - [ ] Add python version matrix (3.10, 3.11, 3.12)
-- [ ] Fix TODO/FIXME check to allow references: `# TODO #123`
+- [ ] Fix TRACKED_TASK/TRACKED_DEFECT check to allow references: `# TRACKED_TASK #123`
 - [ ] Add coverage reporting step
 - [ ] Verify all hooks run in CI (don't skip)
 

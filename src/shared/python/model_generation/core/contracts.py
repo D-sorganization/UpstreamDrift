@@ -5,11 +5,16 @@ at ``src/shared/python/contracts.py`` for backward compatibility.
 
 All contract enforcement, decorators, exceptions, convenience functions,
 and condition predicates are defined in the single source of truth.
+
+.. note::
+    Import directly from ``src.shared.python.contracts`` for new code.
+    This shim exists only for backward compatibility within the
+    ``model_generation`` package.
 """
 
 from __future__ import annotations
 
-from contracts import (  # noqa: F401
+from src.shared.python.contracts import (  # noqa: F401
     CONTRACTS_ENABLED,
     ContractViolationError,
     InvariantError,
@@ -28,7 +33,7 @@ from contracts import (  # noqa: F401
     require_unit_vector,
     set_contracts_enabled,
 )
-from contracts import (
+from src.shared.python.contracts import (
     class_invariant as invariant,
 )
 

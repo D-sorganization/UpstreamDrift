@@ -74,8 +74,10 @@ class UnrealDataFrame:
         validate: bool = False,
     ) -> UnrealDataFrame:
         """Create new UnrealDataFrame with optional validation."""
-        assert timestamp is not None, "timestamp must be provided"
-        assert timestamp is not None, "timestamp must be provided"
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
         instance = object.__new__(cls)
         return instance
 
@@ -106,8 +108,10 @@ class UnrealDataFrame:
             environment: Environmental conditions.
             validate: If True, validate inputs.
         """
-        assert timestamp is not None, "timestamp must be provided"
-        assert timestamp is not None, "timestamp must be provided"
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
         if validate:
             if timestamp < 0:
                 raise ValueError("timestamp must be non-negative")
@@ -178,8 +182,10 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        assert d is not None, "d must be provided"
-        assert d is not None, "d must be provided"
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
+            raise ValueError("d must be provided")
         joints = {
             name: JointState.from_dict(js_dict)
             for name, js_dict in d.get("joints", {}).items()
@@ -225,8 +231,10 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        assert json_str is not None, "json_str must be provided"
-        assert json_str is not None, "json_str must be provided"
+        if not (json_str is not None):
+            raise ValueError("json_str must be provided")
+        if not (json_str is not None):
+            raise ValueError("json_str must be provided")
         d = json.loads(json_str)
         return cls.from_dict(d, validate=validate)
 
@@ -256,8 +264,10 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         joints: dict[str, JointState] = {}
 
         # Create joint states from physics state

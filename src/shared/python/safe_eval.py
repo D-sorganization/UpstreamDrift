@@ -33,15 +33,12 @@ import numpy as np
 try:
     from src.shared.python.contracts import require  # noqa: I001
 except ImportError:
-    try:
-        from contracts import require  # type: ignore[no-redef]  # noqa: I001
-    except ImportError:
 
-        def require(condition: bool, *args: object) -> None:  # type: ignore[misc]
-            """Fallback require() when contracts module is unavailable."""
-            if not condition:
-                msg = args[0] if args else "Precondition violated"
-                raise AssertionError(msg)
+    def require(condition: bool, *args: object) -> None:  # type: ignore[misc]
+        """Fallback require() when contracts module is unavailable."""
+        if not condition:
+            msg = args[0] if args else "Precondition violated"
+            raise AssertionError(msg)
 
 
 __all__ = [
@@ -238,14 +235,16 @@ def safe_eval(
     Any
         Result of the expression evaluation.
     """
-    assert expression is not None, "expression must be provided"
-    assert expression is not None, "expression must be provided"
+    if not (expression is not None):
+        raise ValueError("expression must be provided")
+    if not (expression is not None):
+        raise ValueError("expression must be provided")
     if allowed_names is None:
         allowed_names = set(namespace.keys())
 
     tree = validate_expression(expression, allowed_names)
     code = compile(tree, "<safe_eval>", "eval")
-    return eval(code, {"__builtins__": {}}, namespace)  # noqa: S307
+    return eval(code, {"__builtins__": {}}, namespace)  # noqa: S307  # nosec B307 - AST validated by validate_expression before eval
 
 
 def safe_eval_math(
@@ -266,8 +265,10 @@ def safe_eval_math(
         If True, use numpy math functions (array-safe).  Otherwise use
         scalar ``math`` module functions.
     """
-    assert expression is not None, "expression must be provided"
-    assert expression is not None, "expression must be provided"
+    if not (expression is not None):
+        raise ValueError("expression must be provided")
+    if not (expression is not None):
+        raise ValueError("expression must be provided")
     base = dict(NUMPY_MATH_NAMESPACE if use_numpy else SCALAR_MATH_NAMESPACE)
     if variables:
         base.update(variables)

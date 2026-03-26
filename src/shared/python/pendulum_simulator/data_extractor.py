@@ -238,5 +238,6 @@ def extract_series(
         raise KeyError(f"Unknown series key: {key!r}")
     desc, unit, extractor = _DOUBLE_SERIES[key]
     values = extractor(result)
-    assert values.ndim == 1, f"Expected 1-D array, got shape {values.shape}"
+    if not (values.ndim == 1):
+        raise ValueError(f"Expected 1-D array, got shape {values.shape}")
     return values, desc, unit

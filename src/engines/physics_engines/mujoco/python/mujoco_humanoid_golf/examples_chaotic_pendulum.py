@@ -77,8 +77,10 @@ class ChaoticPendulumController(abc.ABC):
 
     def apply_control(self, base_force: float, pendulum_torque: float) -> None:
         """Apply control inputs to the system."""
-        assert base_force is not None, "base_force must be provided"
-        assert base_force is not None, "base_force must be provided"
+        if not (base_force is not None):
+            raise ValueError("base_force must be provided")
+        if not (base_force is not None):
+            raise ValueError("base_force must be provided")
         self.data.ctrl[0] = base_force
         self.data.ctrl[1] = pendulum_torque
 
@@ -88,8 +90,10 @@ class FreeOscillationDemo(ChaoticPendulumController):
 
     def __init__(self, model: Any, data: Any, initial_angle: float = np.pi / 6) -> None:
         """Docstring for __init__."""
-        assert initial_angle is not None, "initial_angle must be provided"
-        assert initial_angle is not None, "initial_angle must be provided"
+        if not (initial_angle is not None):
+            raise ValueError("initial_angle must be provided")
+        if not (initial_angle is not None):
+            raise ValueError("initial_angle must be provided")
         super().__init__(model, data)
         self.initial_angle = initial_angle
 
@@ -100,8 +104,10 @@ class FreeOscillationDemo(ChaoticPendulumController):
 
     def control(self, time: float) -> tuple[float, float]:
         """No active control - free oscillation."""
-        assert time is not None, "time must be provided"
-        assert time is not None, "time must be provided"
+        if not (time is not None):
+            raise ValueError("time must be provided")
+        if not (time is not None):
+            raise ValueError("time must be provided")
         return 0.0, 0.0
 
 
@@ -116,8 +122,10 @@ class ResonanceDrivenDemo(ChaoticPendulumController):
         forcing_amp: float = 15.0,
     ) -> None:
         """Docstring for __init__."""
-        assert forcing_freq is not None, "forcing_freq must be provided"
-        assert forcing_freq is not None, "forcing_freq must be provided"
+        if not (forcing_freq is not None):
+            raise ValueError("forcing_freq must be provided")
+        if not (forcing_freq is not None):
+            raise ValueError("forcing_freq must be provided")
         super().__init__(model, data)
         self.forcing_freq = forcing_freq  # Hz
         self.forcing_amp = forcing_amp  # Newtons
@@ -129,8 +137,10 @@ class ResonanceDrivenDemo(ChaoticPendulumController):
 
     def control(self, time: float) -> tuple[float, float]:
         """Apply sinusoidal forcing at specified frequency."""
-        assert time is not None, "time must be provided"
-        assert time is not None, "time must be provided"
+        if not (time is not None):
+            raise ValueError("time must be provided")
+        if not (time is not None):
+            raise ValueError("time must be provided")
         base_force = self.forcing_amp * np.sin(2 * np.pi * self.forcing_freq * time)
         pendulum_torque = 0.0  # No direct pendulum control
         return base_force, pendulum_torque
@@ -148,8 +158,10 @@ class PIDStabilizationDemo(ChaoticPendulumController):
         kd: float = 15.0,
     ) -> None:
         """Docstring for __init__."""
-        assert kp is not None, "kp must be provided"
-        assert kp is not None, "kp must be provided"
+        if not (kp is not None):
+            raise ValueError("kp must be provided")
+        if not (kp is not None):
+            raise ValueError("kp must be provided")
         super().__init__(model, data)
         self.kp = kp
         self.ki = ki
@@ -168,8 +180,10 @@ class PIDStabilizationDemo(ChaoticPendulumController):
 
     def control(self, time: float) -> tuple[float, float]:
         """PID control to stabilize at upright (θ = π)."""
-        assert time is not None, "time must be provided"
-        assert time is not None, "time must be provided"
+        if not (time is not None):
+            raise ValueError("time must be provided")
+        if not (time is not None):
+            raise ValueError("time must be provided")
         _, theta, _, _theta_dot = self.get_state()
 
         # Normalize angle to [-π, π]
@@ -211,8 +225,10 @@ class SwingUpControlDemo(ChaoticPendulumController):
         k_stab: float = 50.0,
     ) -> None:
         """Docstring for __init__."""
-        assert k_swingup is not None, "k_swingup must be provided"
-        assert k_swingup is not None, "k_swingup must be provided"
+        if not (k_swingup is not None):
+            raise ValueError("k_swingup must be provided")
+        if not (k_swingup is not None):
+            raise ValueError("k_swingup must be provided")
         super().__init__(model, data)
         self.k_swingup = k_swingup
         self.k_stab = k_stab
@@ -225,8 +241,10 @@ class SwingUpControlDemo(ChaoticPendulumController):
 
     def control(self, time: float) -> tuple[float, float]:
         """Energy-based swing-up with stabilization."""
-        assert time is not None, "time must be provided"
-        assert time is not None, "time must be provided"
+        if not (time is not None):
+            raise ValueError("time must be provided")
+        if not (time is not None):
+            raise ValueError("time must be provided")
         _, theta, _, theta_dot = self.get_state()
 
         # Target energy (upright position)
@@ -267,8 +285,10 @@ class ChaosExplorationDemo(ChaoticPendulumController):
         initial_angle: float = 0.5,
     ) -> None:
         """Docstring for __init__."""
-        assert forcing_freq is not None, "forcing_freq must be provided"
-        assert forcing_freq is not None, "forcing_freq must be provided"
+        if not (forcing_freq is not None):
+            raise ValueError("forcing_freq must be provided")
+        if not (forcing_freq is not None):
+            raise ValueError("forcing_freq must be provided")
         super().__init__(model, data)
         self.forcing_freq = forcing_freq
         self.forcing_amp = forcing_amp
@@ -281,8 +301,10 @@ class ChaosExplorationDemo(ChaoticPendulumController):
 
     def control(self, time: float) -> tuple[float, float]:
         """Apply strong forcing to induce chaos."""
-        assert time is not None, "time must be provided"
-        assert time is not None, "time must be provided"
+        if not (time is not None):
+            raise ValueError("time must be provided")
+        if not (time is not None):
+            raise ValueError("time must be provided")
         base_force = self.forcing_amp * np.sin(2 * np.pi * self.forcing_freq * time)
         pendulum_torque = 0.0
         return base_force, pendulum_torque
@@ -303,8 +325,10 @@ def run_simulation(
     Note:
         Uses the model's internal timestep (model.opt.timestep) for simulation.
     """
-    assert controller is not None, "controller must be provided"
-    assert controller is not None, "controller must be provided"
+    if not (controller is not None):
+        raise ValueError("controller must be provided")
+    if not (controller is not None):
+        raise ValueError("controller must be provided")
     controller.reset()
 
     # Use model's internal timestep to ensure synchronization
@@ -359,8 +383,10 @@ def plot_results(
     results: dict[str, np.ndarray], title: str = "Chaotic Pendulum Simulation"
 ) -> None:
     """Plot simulation results."""
-    assert results is not None, "results must be provided"
-    assert results is not None, "results must be provided"
+    if not (results is not None):
+        raise ValueError("results must be provided")
+    if not (results is not None):
+        raise ValueError("results must be provided")
     _fig, axes = plt.subplots(3, 2, figsize=(14, 10))
 
     # Time series: angle
@@ -525,8 +551,10 @@ def _create_sensitivity_controllers() -> tuple:
 
 
 def _plot_angle_comparison(ax, results1, results2) -> None:
-    assert ax is not None, "ax must be provided"
-    assert ax is not None, "ax must be provided"
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
     ax.plot(
         results1["time"],
         results1["theta"],
@@ -548,8 +576,10 @@ def _plot_angle_comparison(ax, results1, results2) -> None:
 
 
 def _plot_trajectory_divergence(ax, results1, results2) -> None:
-    assert ax is not None, "ax must be provided"
-    assert ax is not None, "ax must be provided"
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
     angle_diff = np.abs(results1["theta"] - results2["theta"])
     ax.semilogy(results1["time"], angle_diff)
     ax.set_ylabel("Absolute Angle Difference (rad)")
@@ -559,8 +589,10 @@ def _plot_trajectory_divergence(ax, results1, results2) -> None:
 
 
 def _plot_phase_portraits_comparison(ax, results1, results2) -> None:
-    assert ax is not None, "ax must be provided"
-    assert ax is not None, "ax must be provided"
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
     ax.plot(
         results1["theta"],
         results1["theta_dot"],
@@ -582,8 +614,10 @@ def _plot_phase_portraits_comparison(ax, results1, results2) -> None:
 
 
 def _plot_velocity_comparison(ax, results1, results2) -> None:
-    assert ax is not None, "ax must be provided"
-    assert ax is not None, "ax must be provided"
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
     ax.plot(
         results1["time"],
         results1["theta_dot"],

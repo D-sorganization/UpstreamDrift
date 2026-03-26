@@ -99,8 +99,10 @@ class SensitiveDataFilter(logging.Filter):
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
-        assert record is not None, "record must be provided"
-        assert record is not None, "record must be provided"
+        if not (record is not None):
+            raise ValueError("record must be provided")
+        if not (record is not None):
+            raise ValueError("record must be provided")
         if record.args:
             # Format the message first so we can redact the result
             record.msg = str(record.msg) % record.args
@@ -123,8 +125,10 @@ def _structlog_redact_sensitive(
     _logger: Any, _method: str, event_dict: dict[str, Any]
 ) -> dict[str, Any]:
     """Structlog processor that redacts sensitive key-value pairs."""
-    assert _method is not None, "_method must be provided"
-    assert _method is not None, "_method must be provided"
+    if not (_method is not None):
+        raise ValueError("_method must be provided")
+    if not (_method is not None):
+        raise ValueError("_method must be provided")
     sensitive_keys = {
         "password",
         "passwd",
@@ -173,8 +177,10 @@ def _configure_structlog(
     dev_mode: bool,
 ) -> None:
     """Wire up structlog processors and configure the library."""
-    assert level is not None, "level must be provided"
-    assert level is not None, "level must be provided"
+    if not (level is not None):
+        raise ValueError("level must be provided")
+    if not (level is not None):
+        raise ValueError("level must be provided")
     if not _STRUCTLOG_AVAILABLE or _structlog_state["configured"]:
         return
 
@@ -251,8 +257,10 @@ def _resolve_format_string(
     Returns:
         The resolved format string.
     """
-    assert use_detailed_format is not None, "use_detailed_format must be provided"
-    assert use_detailed_format is not None, "use_detailed_format must be provided"
+    if not (use_detailed_format is not None):
+        raise ValueError("use_detailed_format must be provided")
+    if not (use_detailed_format is not None):
+        raise ValueError("use_detailed_format must be provided")
     if format_string:
         return format_string
     if use_detailed_format:
@@ -285,8 +293,10 @@ def _build_basic_config_kwargs(
     Returns:
         Dictionary of kwargs ready for ``logging.basicConfig``.
     """
-    assert log_level is not None, "log_level must be provided"
-    assert log_level is not None, "log_level must be provided"
+    if not (log_level is not None):
+        raise ValueError("log_level must be provided")
+    if not (log_level is not None):
+        raise ValueError("log_level must be provided")
     config_kwargs: dict = {
         "level": log_level,
         "format": fmt,
@@ -331,8 +341,10 @@ def _quiet_noisy_libraries(
         quiet_libraries: Explicit list of library names to quiet.
         use_qt_handler: When True, automatically quiets matplotlib/PIL.
     """
-    assert use_qt_handler is not None, "use_qt_handler must be provided"
-    assert use_qt_handler is not None, "use_qt_handler must be provided"
+    if not (use_qt_handler is not None):
+        raise ValueError("use_qt_handler must be provided")
+    if not (use_qt_handler is not None):
+        raise ValueError("use_qt_handler must be provided")
     default_quiet: list[str] = []
     if use_qt_handler:
         default_quiet.extend(["matplotlib", "matplotlib.font_manager", "PIL"])
@@ -537,8 +549,10 @@ def add_file_handler(
         logger = get_logger(__name__)
         add_file_handler(logger, "debug.log", LogLevel.DEBUG)
     """
-    assert filename is not None, "filename must be provided"
-    assert filename is not None, "filename must be provided"
+    if not (filename is not None):
+        raise ValueError("filename must be provided")
+    if not (filename is not None):
+        raise ValueError("filename must be provided")
     if logger is None:
         logger = logging.getLogger()
 
@@ -589,8 +603,10 @@ def add_rotating_file_handler(
             backup_count=3,
         )
     """
-    assert filename is not None, "filename must be provided"
-    assert filename is not None, "filename must be provided"
+    if not (filename is not None):
+        raise ValueError("filename must be provided")
+    if not (filename is not None):
+        raise ValueError("filename must be provided")
     if logger is None:
         logger = logging.getLogger()
 

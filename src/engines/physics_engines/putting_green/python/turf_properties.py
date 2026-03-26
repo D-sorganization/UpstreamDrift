@@ -177,7 +177,8 @@ class TurfProperties:
 
         # Adjust for height of cut (longer grass = more friction)
         # Note: height_of_cut_mm is guaranteed non-None after __post_init__
-        assert self.height_of_cut_mm is not None
+        if not (self.height_of_cut_mm is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
         height_factor = 1.0 + 0.05 * (self.height_of_cut_mm - 3.0) / 2.0
 
         return base_friction * height_factor
@@ -199,8 +200,10 @@ class TurfProperties:
         Returns:
             Multiplier for friction adjustment (-1 to +1)
         """
-        assert velocity_direction is not None, "velocity_direction must be provided"
-        assert velocity_direction is not None, "velocity_direction must be provided"
+        if not (velocity_direction is not None):
+            raise ValueError("velocity_direction must be provided")
+        if not (velocity_direction is not None):
+            raise ValueError("velocity_direction must be provided")
         if np.linalg.norm(velocity_direction) < 1e-10:
             return 0.0
 
@@ -220,8 +223,10 @@ class TurfProperties:
         Returns:
             Deceleration vector [m/s²] (opposing motion)
         """
-        assert velocity is not None, "velocity must be provided"
-        assert velocity is not None, "velocity must be provided"
+        if not (velocity is not None):
+            raise ValueError("velocity must be provided")
+        if not (velocity is not None):
+            raise ValueError("velocity must be provided")
         speed = np.linalg.norm(velocity)
         if speed < 1e-10:
             return np.zeros(2)
@@ -269,7 +274,8 @@ class TurfProperties:
         # Apply small cross-grain velocity component
         # Effect is proportional to grain strength and inversely to speed
         # Note: grain_strength is guaranteed non-None after __post_init__
-        assert self.grain_strength is not None
+        if not (self.grain_strength is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
         curve_amount = self.grain_strength * 0.01 / (1.0 + speed)
         return velocity + curve_amount * cross_grain * speed
 

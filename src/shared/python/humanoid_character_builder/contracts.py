@@ -5,16 +5,21 @@ at ``src/shared/python/contracts.py`` for backward compatibility.
 
 All contract enforcement, decorators, and exceptions are defined
 in the single source of truth.
+
+.. note::
+    Import directly from ``src.shared.python.contracts`` for new code.
+    This shim exists only for backward compatibility within the
+    ``humanoid_character_builder`` package.
 """
 
 from __future__ import annotations
 
-from contracts import (  # noqa: F401
+from src.shared.python.contracts import (  # noqa: F401
     ContractViolationError,
     postcondition,
     precondition,
 )
-from contracts import (
+from src.shared.python.contracts import (
     class_invariant as invariant,
 )
 

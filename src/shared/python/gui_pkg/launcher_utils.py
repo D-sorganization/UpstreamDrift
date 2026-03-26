@@ -54,8 +54,10 @@ def check_python_dependencies(
     Returns:
         True if all modules are available (or installed), False otherwise.
     """
-    assert required_modules is not None, "required_modules must be provided"
-    assert required_modules is not None, "required_modules must be provided"
+    if not (required_modules is not None):
+        raise ValueError("required_modules must be provided")
+    if not (required_modules is not None):
+        raise ValueError("required_modules must be provided")
     missing = []
     for module in required_modules:
         if importlib.util.find_spec(module) is None:
@@ -134,8 +136,10 @@ def ensure_environment_var(
     Returns:
         The current or default value of the environment variable.
     """
-    assert name is not None, "name must be provided"
-    assert name is not None, "name must be provided"
+    if not (name is not None):
+        raise ValueError("name must be provided")
+    if not (name is not None):
+        raise ValueError("name must be provided")
     value = os.getenv(name)
     if value:
         return value

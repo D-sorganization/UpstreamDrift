@@ -323,7 +323,11 @@ class TestSecurityHeaders:
         # CORS preflight should succeed for allowed origin
         assert (
             "access-control-allow-origin" in response.headers
-            or response.status_code in [200, 405]
+            or response.status_code
+            in [
+                200,
+                405,
+            ]
         )
 
     def test_cors_rejects_disallowed_origin(self, client: TestClient) -> None:

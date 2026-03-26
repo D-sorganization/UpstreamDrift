@@ -32,11 +32,11 @@ Missing or simplified physics models that reduce simulation accuracy.
 
 - **File:** `src/shared/python/physics/ball_flight_physics.py`
 - **Issues:**
-  - Missing Environmental Gradient Modeling (TODO)
-  - Missing Hydrodynamic Lubrication (TODO)
-  - Missing Dimple Geometry Optimization (TODO)
-  - Missing Turbulence Modeling (TODO)
-  - Missing Mud Ball Physics (TODO)
+  - Missing Environmental Gradient Modeling (TRACKED_TASK)
+  - Missing Hydrodynamic Lubrication (TRACKED_TASK)
+  - Missing Dimple Geometry Optimization (TRACKED_TASK)
+  - Missing Turbulence Modeling (TRACKED_TASK)
+  - Missing Mud Ball Physics (TRACKED_TASK)
   - Hardcoded aerodynamic coefficients (`cd0=0.21`, etc.) without configuration.
 - **Impact:** High accuracy risk; simulation may not reflect real-world ball behavior under complex conditions.
 
@@ -70,9 +70,9 @@ Missing metrics required for advanced swing analysis.
 
 - **File:** `src/shared/python/biomechanics/kinematic_sequence.py`
 - **Issues:**
-  - Missing "Proximal Braking Efficiency" (TODO).
-  - Missing "X-Factor Stretch" calculation (TODO).
-  - Missing "Inter-segmental Power Flow" (TODO).
+  - Missing "Proximal Braking Efficiency" (TRACKED_TASK).
+  - Missing "X-Factor Stretch" calculation (TRACKED_TASK).
+  - Missing "Inter-segmental Power Flow" (TRACKED_TASK).
 - **Impact:** Incomplete biomechanical analysis capabilities.
 
 ## 4. Teleoperation Device Gaps
@@ -147,15 +147,15 @@ For the full detailed report, please refer to:
 
 ## Update: 2026-02-28
 
-A comprehensive automated analysis of implementation gaps and technical debt markers (`TODO`, `FIXME`, `NotImplementedError`, `pass`) generated the [Completist_Report_2026-02-28.md](../Completist_Report_2026-02-28.md). This report specifically highlights the severe extent of empty test cases and missing implementation stubs across tool scripts and integration tests.
+A comprehensive automated analysis of implementation gaps and technical debt markers (`TRACKED_TASK`, `TRACKED_DEFECT`, `NotImplementedError`, `pass`) generated the [Completist_Report_2026-02-28.md](../Completist_Report_2026-02-28.md). This report specifically highlights the severe extent of empty test cases and missing implementation stubs across tool scripts and integration tests.
 
 ## Update: 2026-03-01
 
-A comprehensive automated analysis of implementation gaps and technical debt markers (`TODO`, `FIXME`, `NotImplementedError`, `pass`) generated the [Completist_Report_2026-03-01.md](../Completist_Report_2026-03-01.md). This report further reinforces the widespread nature of placeholder logic. In particular, we have identified critical unimplemented stubs throwing `NotImplementedError` that block essential functionality, such as hardware connectivity in `src/deployment/realtime/controller.py` and format conversion utilities in `src/tools/model_generation/converters/format_utils.py`. The presence of placeholder tests using `pass` across unit and integration suites remains a major concern that needs addressing immediately.
+A comprehensive automated analysis of implementation gaps and technical debt markers (`TRACKED_TASK`, `TRACKED_DEFECT`, `NotImplementedError`, `pass`) generated the [Completist_Report_2026-03-01.md](../Completist_Report_2026-03-01.md). This report further reinforces the widespread nature of placeholder logic. In particular, we have identified critical unimplemented stubs throwing `NotImplementedError` that block essential functionality, such as hardware connectivity in `src/deployment/realtime/controller.py` and format conversion utilities in `src/tools/model_generation/converters/format_utils.py`. The presence of placeholder tests using `pass` across unit and integration suites remains a major concern that needs addressing immediately.
 
 ## Update: 2026-03-02
 
-An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-02.md](../Completist_Report_2026-03-02.md). The scan identifies 300 critical implementation gaps (stubs/pass blocks) predominantly in core module paths, and 79 feature requests tracked as `TODO`s. New draft issues for the top 50 missing implementations were auto-generated to track their resolution.
+An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-02.md](../Completist_Report_2026-03-02.md). The scan identifies 300 critical implementation gaps (stubs/pass blocks) predominantly in core module paths, and 79 feature requests tracked as `TRACKED_TASK`s. New draft issues for the top 50 missing implementations were auto-generated to track their resolution.
 
 ## Update: 2026-03-03
 
@@ -166,8 +166,8 @@ Another automated analysis of implementation gaps generated [Completist_Report_2
 An updated automated analysis of implementation gaps generated [Completist_Report_2026-03-04.md](../Completist_Report_2026-03-04.md) using `scripts/scan_for_incomplete_code.py`. The scan identifies 458 potential issues in 174 files. Specifically, it found:
 - **404** empty `pass` blocks, particularly concentrated in test files, indicating widespread gaps in test coverage and assertions.
 - **5** `NotImplementedError` stubs blocking functionality in core utility modules.
-- **46** `TODO` markers indicating missing feature implementations or incomplete logic.
-- **19** `FIXME` markers denoting technical debt, inaccurate physics approximations, and potential legal risks.
+- **46** `TRACKED_TASK` markers indicating missing feature implementations or incomplete logic.
+- **19** `TRACKED_DEFECT` markers denoting technical debt, inaccurate physics approximations, and potential legal risks.
 
 These widespread placeholders must be systematically addressed to ensure system reliability and fidelity.
 

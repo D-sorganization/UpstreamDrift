@@ -15,6 +15,8 @@ from __future__ import annotations
 
 import datetime
 import os
+import re
+import shlex
 import subprocess
 import sys
 import threading
@@ -23,6 +25,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+    validate_script_path,
+)
 from src.shared.python.security.subprocess_utils import kill_process_tree
 
 if TYPE_CHECKING:
@@ -53,6 +60,10 @@ VCXSRV_PATHS = [
     Path("C:/Program Files (x86)/VcXsrv/vcxsrv.exe"),
 ]
 
+# Allowlist for Python module names passed to -m flag.
+# Matches dotted identifiers such as "my_pkg.sub_module".
+_MODULE_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*$")
+
 
 class ProcessManager:
     """Manages subprocess lifecycle for the Golf Launcher.
@@ -82,8 +93,10 @@ class ProcessManager:
             use_separate_terminals: If True, each engine opens its own
                 console window (legacy behaviour).
         """
-        assert repo_root is not None, "repo_root must be provided"
-        assert repo_root is not None, "repo_root must be provided"
+        if not (repo_root is not None):
+            raise ValueError("repo_root must be provided")
+        if not (repo_root is not None):
+            raise ValueError("repo_root must be provided")
         self.repo_root = repo_root
         self.running_processes: dict[str, Popen[bytes]] = {}
         self.output_callback = output_callback
@@ -109,11 +122,29 @@ class ProcessManager:
         separator = ";" if os.name == "nt" else ":"
         current_paths = existing_path.split(separator) if existing_path else []
 
+        shared_python = str(self.repo_root / "src" / "shared" / "python")
+        mujoco_python = str(
+            self.repo_root / "src" / "engines" / "physics_engines" / "mujoco" / "python"
+        )
+        # Include conda site-packages for opensim/pinocchio if available.
+        # Use os.path to avoid WindowsPath instantiation issues on Linux.
+        conda_sp = os.path.join(
+            os.path.expanduser("~"),
+            "miniconda3",
+            "lib",
+            "python3.10",
+            "site-packages",
+        )
+
+        # repo_root and src are always added (required for imports).
+        # Optional extras are only added when the directory exists.
         paths_to_add = []
-        if repo_root_str not in current_paths:
-            paths_to_add.append(repo_root_str)
-        if src_dir not in current_paths:
-            paths_to_add.append(src_dir)
+        for p in [repo_root_str, src_dir]:
+            if p not in current_paths:
+                paths_to_add.append(p)
+        for p in [shared_python, mujoco_python, conda_sp]:
+            if p not in current_paths and os.path.isdir(p):
+                paths_to_add.append(p)
 
         if paths_to_add:
             new_paths = separator.join(paths_to_add)
@@ -158,8 +189,10 @@ class ProcessManager:
 
     def _emit_output(self, name: str, line: str) -> None:
         """Route a line of process output to callback, logger, and log file."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         self._write_log_line(name, line)
         if self.output_callback is not None:
             self.output_callback(name, line)
@@ -173,8 +206,10 @@ class ProcessManager:
         containers) that still need their output captured in the unified
         console and log file.
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         self.running_processes[name] = process
         t = threading.Thread(
             target=self._stream_output,
@@ -189,8 +224,10 @@ class ProcessManager:
 
         Runs in a daemon thread so the main GUI thread is never blocked.
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         try:
             if process.stdout:
                 for raw_line in iter(process.stdout.readline, b""):
@@ -235,13 +272,31 @@ class ProcessManager:
         try:
             process_env = env or self.get_subprocess_env()
 
+            # Validate script path to prevent path-traversal / injection.
+            validate_script_path(script_path, self.repo_root)
+
+            # Diagnostic: log full launch details for debugging silent failures
+            logger.info(
+                "Launching script %s: cmd=[%s, %s], cwd=%s, PYTHONPATH=%s",
+                name,
+                sys.executable,
+                script_path,
+                cwd,
+                process_env.get("PYTHONPATH", "<unset>")[:300],
+            )
+
             if self.use_separate_terminals:
-                # Legacy: each engine gets its own console window
+                # Legacy: each engine gets its own console window.
+                # On Windows we must pass a string to open a new console but
+                # quote both the interpreter and script paths so that spaces
+                # and other shell-significant characters cannot inject commands.
                 if os.name == "nt":
+                    exe_q = shlex.quote(sys.executable)
+                    script_q = shlex.quote(str(script_path))
                     if keep_terminal_open:
-                        cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
+                        cmd_str = f'cmd /k "{exe_q} {script_q} & pause"'
                     else:
-                        cmd_str = f'cmd /c ""{sys.executable}" "{script_path}""'
+                        cmd_str = f'cmd /c "{exe_q} {script_q}"'
                     process = subprocess.Popen(
                         cmd_str,
                         cwd=str(cwd),
@@ -249,16 +304,18 @@ class ProcessManager:
                         creationflags=CREATE_NEW_CONSOLE,
                     )
                 else:
-                    process = subprocess.Popen(
+                    process = secure_popen(
                         [sys.executable, str(script_path)],
-                        cwd=str(cwd),
+                        cwd=cwd,
+                        suite_root=self.repo_root,
                         env=process_env,
                     )
             else:
                 # Unified console: capture output via pipes
-                process = subprocess.Popen(
+                process = secure_popen(
                     [sys.executable, str(script_path)],
-                    cwd=str(cwd),
+                    cwd=cwd,
+                    suite_root=self.repo_root,
                     env=process_env,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -277,7 +334,12 @@ class ProcessManager:
             logger.info(f"Launched {name} (PID: {process.pid})")
             return process
 
-        except (FileNotFoundError, PermissionError, OSError) as e:
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
@@ -306,6 +368,12 @@ class ProcessManager:
         try:
             process_env = env or self.get_subprocess_env()
 
+            # Validate module name: must be a dotted Python identifier.
+            if not _MODULE_NAME_RE.match(module_name):
+                raise SecureSubprocessError(
+                    f"Invalid module name (potential injection): {module_name!r}"
+                )
+
             if os.name == "nt":
                 current_pythonpath = process_env.get("PYTHONPATH", "")
                 repo_root_str = str(self.repo_root)
@@ -327,15 +395,28 @@ class ProcessManager:
                         else ";".join(paths_to_add)
                     )
 
+            # Diagnostic: log full launch details for debugging silent failures
+            logger.info(
+                "Launching module %s: cmd=[%s, -m, %s], cwd=%s, PYTHONPATH=%s",
+                name,
+                sys.executable,
+                module_name,
+                cwd,
+                process_env.get("PYTHONPATH", "<unset>")[:300],
+            )
+
             if self.use_separate_terminals:
-                # Legacy: each engine gets its own console window
+                # Legacy: each engine gets its own console window.
+                # On Windows we must pass a string to open a new console but
+                # quote the interpreter path so spaces cannot inject commands.
+                # module_name has already been validated against the allowlist
+                # regex so it is safe to interpolate directly.
                 if os.name == "nt":
+                    exe_q = shlex.quote(sys.executable)
                     if keep_terminal_open:
-                        cmd_str = (
-                            f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
-                        )
+                        cmd_str = f'cmd /k "{exe_q} -m {module_name} & pause"'
                     else:
-                        cmd_str = f'cmd /c ""{sys.executable}" -m {module_name}"'
+                        cmd_str = f'cmd /c "{exe_q} -m {module_name}"'
                     process = subprocess.Popen(
                         cmd_str,
                         cwd=str(cwd),
@@ -343,16 +424,18 @@ class ProcessManager:
                         creationflags=CREATE_NEW_CONSOLE,
                     )
                 else:
-                    process = subprocess.Popen(
+                    process = secure_popen(
                         [sys.executable, "-m", module_name],
-                        cwd=str(cwd),
+                        cwd=cwd,
+                        suite_root=self.repo_root,
                         env=process_env,
                     )
             else:
                 # Unified console: capture output via pipes
-                process = subprocess.Popen(
+                process = secure_popen(
                     [sys.executable, "-m", module_name],
-                    cwd=str(cwd),
+                    cwd=cwd,
+                    suite_root=self.repo_root,
                     env=process_env,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
@@ -370,7 +453,12 @@ class ProcessManager:
             logger.info(f"Launched module {name} (PID: {process.pid})")
             return process
 
-        except (FileNotFoundError, PermissionError, OSError) as e:
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
@@ -389,18 +477,25 @@ class ProcessManager:
             True if launch succeeded, False otherwise.
         """
         # Convert Windows path to WSL path
-        assert script_path is not None, "script_path must be provided"
-        assert script_path is not None, "script_path must be provided"
+        if not (script_path is not None):
+            raise ValueError("script_path must be provided")
+        if not (script_path is not None):
+            raise ValueError("script_path must be provided")
         wsl_script_path = self._convert_to_wsl_path(script_path)
 
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{project_dir}"
-python "{wsl_script_path}"
-"""
+        # Use shlex.quote to prevent injection of shell metacharacters in the
+        # paths that are interpolated into the bash -c script.
+        quoted_project_dir = shlex.quote(project_dir)
+        quoted_wsl_script = shlex.quote(wsl_script_path)
+
+        wsl_cmd = (
+            "source ~/miniforge3/etc/profile.d/conda.sh\n"
+            "conda activate golf_suite\n"
+            'export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"\n'
+            f"export PYTHONPATH={quoted_project_dir}:$PYTHONPATH\n"
+            f"cd {quoted_project_dir}\n"
+            f"python {quoted_wsl_script}\n"
+        )
 
         cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
 
@@ -436,20 +531,36 @@ python "{wsl_script_path}"
             True if launch succeeded, False otherwise.
         """
         # Determine working directory
-        assert module_name is not None, "module_name must be provided"
-        assert module_name is not None, "module_name must be provided"
+        if not (module_name is not None):
+            raise ValueError("module_name must be provided")
+        if not (module_name is not None):
+            raise ValueError("module_name must be provided")
+
+        # Validate module name: must be a dotted Python identifier.
+        if not _MODULE_NAME_RE.match(module_name):
+            logger.error(
+                "WSL module launch rejected: invalid module name %r", module_name
+            )
+            return False
+
         work_dir = project_dir
         if cwd:
             work_dir = self._convert_to_wsl_path(str(cwd))
 
-        wsl_cmd = f"""
-source ~/miniforge3/etc/profile.d/conda.sh
-conda activate golf_suite
-export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{work_dir}"
-python -m {module_name}
-"""
+        # Use shlex.quote to prevent injection of shell metacharacters in the
+        # paths that are interpolated into the bash -c script.
+        # module_name has already been validated against the allowlist regex.
+        quoted_project_dir = shlex.quote(project_dir)
+        quoted_work_dir = shlex.quote(work_dir)
+
+        wsl_cmd = (
+            "source ~/miniforge3/etc/profile.d/conda.sh\n"
+            "conda activate golf_suite\n"
+            'export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"\n'
+            f"export PYTHONPATH={quoted_project_dir}:$PYTHONPATH\n"
+            f"cd {quoted_work_dir}\n"
+            f"python -m {module_name}\n"
+        )
 
         cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
 
@@ -477,8 +588,10 @@ python -m {module_name}
         Returns:
             WSL-style path string.
         """
-        assert windows_path is not None, "windows_path must be provided"
-        assert windows_path is not None, "windows_path must be provided"
+        if not (windows_path is not None):
+            raise ValueError("windows_path must be provided")
+        if not (windows_path is not None):
+            raise ValueError("windows_path must be provided")
         if len(windows_path) > 1 and windows_path[1] == ":":
             drive = windows_path[0].lower()
             path_part = windows_path[2:].replace("\\", "/")
@@ -514,8 +627,10 @@ python -m {module_name}
         Returns:
             True if the process is running, False otherwise.
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name not in self.running_processes:
             return False
         return self.running_processes[name].poll() is None

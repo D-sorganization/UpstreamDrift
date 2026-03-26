@@ -40,7 +40,7 @@ except (ImportError, ModuleNotFoundError):
     # bcrypt is not installed
     BCRYPT_AVAILABLE = False
     bcrypt_lib = None  # type: ignore[misc,assignment]
-except Exception:
+except Exception as e:  # noqa: BLE001, F841
     # bcrypt failed to load (native library issue)
     BCRYPT_AVAILABLE = False
     import bcrypt as bcrypt_lib  # type: ignore[no-redef]
@@ -144,8 +144,9 @@ class TestBcryptAPIKeyVerification:
         assert cost_factor >= 12, f"Bcrypt cost factor {cost_factor} is too low"
 
     @requires_bcrypt
-    @pytest.mark.skip(
-        reason="APIKey model lacks prefix_hash column (schema migration needed)"
+    @pytest.mark.xfail(
+        reason="APIKey model lacks prefix_hash column (schema migration needed)",
+        strict=False,
     )
     async def test_api_key_verification_integration(self) -> None:
         """Test full API key verification flow."""
@@ -320,7 +321,7 @@ class TestPasswordSecurity:
                 # This should generate a random password but NOT log it
                 try:
                     database.init_db()
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     # Catch and log expected errors for this specific logging test
                     logging.getLogger(__name__).debug(
                         f"Caught expected init_db error: {e}"

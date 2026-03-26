@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
 from src.shared.python.physics.impact_model import (
-    GOLF_BALL_MASS,
     FiniteTimeImpactModel,
     ImpactModelType,
     ImpactParameters,
@@ -49,12 +49,12 @@ def test_rigid_body_impact_conservation(basic_pre_state, default_impact_params) 
     # Check momentum conservation
     p_initial = (
         basic_pre_state.clubhead_mass * basic_pre_state.clubhead_velocity
-        + GOLF_BALL_MASS * basic_pre_state.ball_velocity
+        + GOLF_BALL_MASS_KG * basic_pre_state.ball_velocity
     )
 
     p_final = (
         basic_pre_state.clubhead_mass * post_state.clubhead_velocity
-        + GOLF_BALL_MASS * post_state.ball_velocity
+        + GOLF_BALL_MASS_KG * post_state.ball_velocity
     )
 
     np.testing.assert_allclose(p_initial, p_final, atol=1e-5)

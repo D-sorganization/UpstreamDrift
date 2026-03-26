@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v6
@@ -43,16 +43,23 @@ jobs:
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
       - name: Lint
-        run: ruff check src scripts tests
+        run: ruff check .
 
       # Use ruff format (consistent with pre-commit hooks) - ruff format is
       # a strict superset of black's style; running both causes conflicts.
+      # Runs on full repo (.) to catch formatting issues outside src/scripts/tests.
       - name: Check Formatting (ruff)
-        run: ruff format --check src scripts tests
+        run: ruff format --check .
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -e .[dev]
+      # Baseline mypy check across all of src/
       - run: mypy src --config-file pyproject.toml
+      # Strict mypy for the fully-annotated API layer (issue #2105).
+      # --follow-imports=silent applies strict rules only to src/api/ files,
+      # not to their transitive dependencies (which have pre-existing issues).
+      - name: MyPy Strict (src/api)
+        run: mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
 
       - name: Dependency Direction Fitness Check
         run: python3 scripts/check_dependency_direction.py
@@ -62,6 +69,9 @@ jobs:
 
       - name: Module Size Budget Check
         run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
+
+      - name: Heavy Test Dependency Parity Check
+        run: python3 scripts/check_heavy_dep_parity.py
 
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
@@ -92,12 +102,15 @@ jobs:
           pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539
 
       # SECURITY: Bandit static security analysis (Issue #782)
+      # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
       - name: Bandit Security Scan
         run: |
-          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1 || true)"
+          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1)"
+          exit_code=$?
           echo "$bandit_output"
           echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
           echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
+          exit $exit_code
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
@@ -125,7 +138,7 @@ jobs:
       matrix:
         python: ["3.11"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -180,6 +193,7 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
+            --cov-fail-under=10 \
             --tb=short \
             -v
 
@@ -203,7 +217,7 @@ jobs:
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
           echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
@@ -217,9 +231,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Checkout Tools Hub
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -263,7 +277,7 @@ jobs:
       run:
         working-directory: ./ui
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
@@ -299,7 +313,7 @@ jobs:
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: matlab-actions/setup-matlab@v2
       - uses: matlab-actions/run-command@v2
         with:
@@ -317,7 +331,7 @@ jobs:
     runs-on: ubuntu-latest
     if: false # DISABLED - No Arduino components in this project
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with: { python-version: "3.11" }
       - run: pip install platformio
@@ -335,7 +349,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -380,7 +394,7 @@ jobs:
       # Clone Tools repo for tools-core dependency
       - name: Checkout Tools (tools-core dependency)
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -395,7 +409,7 @@ jobs:
 
       - name: Cache Cargo registry and build
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry

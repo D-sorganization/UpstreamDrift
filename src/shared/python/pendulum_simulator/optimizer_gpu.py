@@ -188,7 +188,7 @@ def optimize_torque_profile(
     assert n_iterations >= 1, f"n_iterations must be >= 1, got {n_iterations}"
     assert learning_rate > 0, f"learning_rate must be positive, got {learning_rate}"
     assert t_end > 0, f"t_end must be positive, got {t_end}"
-    # Initialize: 7 joints × n_coeffs_per_joint
+    # Initialize: 7 joints Ã— n_coeffs_per_joint
     key = jax.random.PRNGKey(seed)
     torque_coeffs = jax.random.normal(key, (7, n_coeffs_per_joint)) * 0.1
     torque_coeffs = torque_coeffs.reshape(-1)  # Flatten to 1D for optimization

@@ -146,8 +146,6 @@ class TestInjuryRiskScorer:
 
         scorer._generate_recommendations(report)
 
-        print(f"Recommendations: {report.recommendations}")
-
         assert len(report.recommendations) > 0
         # Should have specific recommendations + general advice
         assert any("spinal compression" in r.lower() for r in report.recommendations)

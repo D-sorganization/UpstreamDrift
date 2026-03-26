@@ -57,7 +57,7 @@ try:
     from .fleet_adapter import fleet_to_theme_colors as _f2tc
 
     DARK_THEME = _f2tc("Dark")
-except Exception:
+except Exception as e:  # noqa: BLE001, F841
     # Ultimate fallback: minimal SimpleNamespace if fleet adapter is unavailable
     _dark = BUILTIN_THEMES.get("Dark", {})
     DARK_THEME = _NS(  # type: ignore[assignment]
@@ -117,6 +117,49 @@ except ImportError:
     ThemeManagerDialog = None  # type: ignore[assignment, misc]
     ThemePreviewWidget = None  # type: ignore[assignment, misc]
 
+# ---------------------------------------------------------------------------
+# Backward-compatible aliases for launcher code that references the old API.
+# ThemePreset was replaced by string-based theme names; apply_golf_suite_style
+# was inlined into the theme manager.  These shims keep existing callers working.
+# ---------------------------------------------------------------------------
+import enum as _enum
+
+
+class ThemePreset(_enum.Enum):
+    """Legacy enum mapping to string theme names."""
+
+    DARK = "Dark"
+    LIGHT = "Light"
+    HIGH_CONTRAST = "High Contrast"
+    MONOKAI = "Monokai"
+    DRACULA = "Dracula"
+    ONE_DARK = "One Dark"
+
+
+def apply_golf_suite_style() -> None:
+    """Apply matplotlib styling consistent with the current theme.
+
+    Safe no-op if matplotlib is unavailable.
+    """
+    try:
+        import matplotlib as _mpl
+
+        _mpl.rcParams.update(
+            {
+                "figure.facecolor": "#1a1d23",
+                "axes.facecolor": "#22252d",
+                "axes.edgecolor": "#3a3d45",
+                "text.color": "#cccccc",
+                "xtick.color": "#aaaaaa",
+                "ytick.color": "#aaaaaa",
+                "grid.color": "#333333",
+                "grid.alpha": 0.3,
+            }
+        )
+    except ImportError:
+        pass
+
+
 __all__ = [
     # Protocols (no PyQt6 dependency)
     "StylesheetGenerator",
@@ -153,4 +196,7 @@ __all__ = [
     # Stylesheet generation
     "generate_minimal_stylesheet",
     "generate_stylesheet",
+    # Legacy compatibility
+    "ThemePreset",
+    "apply_golf_suite_style",
 ]

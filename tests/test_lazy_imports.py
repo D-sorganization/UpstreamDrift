@@ -40,4 +40,3 @@ def test_lazy_imports_engine_manager():
 
 if __name__ == "__main__":
     test_lazy_imports_engine_manager()
-    print("Lazy import test passed.")

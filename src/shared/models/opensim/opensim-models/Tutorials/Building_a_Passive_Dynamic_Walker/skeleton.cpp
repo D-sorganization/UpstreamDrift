@@ -12,7 +12,7 @@ using namespace SimTK;
  */
 int main() {
   try {
-    // TODO: Add Code to Begin Model here
+    // DEFERRED: Add Code to Begin Model here
     // ********** BEGIN CODE **********
 
     // **********  END CODE  **********

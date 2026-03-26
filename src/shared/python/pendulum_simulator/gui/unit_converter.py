@@ -76,10 +76,10 @@ _UNIT_OPTIONS: dict[UnitCategory, list[tuple[str, float]]] = {
         ("lb", _KG_PER_LB),
     ],
     UnitCategory.TORQUE: [
-        ("N·m", 1.0),
-        ("lbf·in", _NM_PER_LBFIN),
-        ("lbf·ft", _NM_PER_LBFFT),
-        ("kgf·m", _NM_PER_KGFM),
+        ("NÂ·m", 1.0),
+        ("lbfÂ·in", _NM_PER_LBFIN),
+        ("lbfÂ·ft", _NM_PER_LBFFT),
+        ("kgfÂ·m", _NM_PER_KGFM),
     ],
     UnitCategory.FORCE: [
         ("N", 1.0),
@@ -93,21 +93,21 @@ _UNIT_OPTIONS: dict[UnitCategory, list[tuple[str, float]]] = {
     UnitCategory.ANGULAR_VELOCITY: [
         ("rad/s", 1.0),
         ("deg/s", _RAD_PER_DEG),
-        ("rpm", 0.10471975511965978),  # 2π/60
+        ("rpm", 0.10471975511965978),  # 2Ï€/60
     ],
     UnitCategory.STIFFNESS: [
-        ("N·m/rad", 1.0),
-        ("lbf·in/rad", _NM_PER_LBFIN),
-        ("lbf·ft/rad", _NM_PER_LBFFT),
+        ("NÂ·m/rad", 1.0),
+        ("lbfÂ·in/rad", _NM_PER_LBFIN),
+        ("lbfÂ·ft/rad", _NM_PER_LBFFT),
     ],
     UnitCategory.ENERGY: [
         ("J", 1.0),
-        ("ft·lbf", _J_PER_FTLBF),
+        ("ftÂ·lbf", _J_PER_FTLBF),
         ("cal", 4.184),
     ],
     UnitCategory.POWER: [
         ("W", 1.0),
-        ("ft·lbf/s", _W_PER_FTLBFS),
+        ("ftÂ·lbf/s", _W_PER_FTLBFS),
         ("hp", 745.69987158227022),
     ],
     UnitCategory.LINEAR_VELOCITY: [
@@ -128,23 +128,23 @@ _PRESETS: dict[str, dict[UnitCategory, str]] = {
     "Imperial": {
         UnitCategory.LENGTH: "in",
         UnitCategory.MASS: "lb",
-        UnitCategory.TORQUE: "lbf·in",
+        UnitCategory.TORQUE: "lbfÂ·in",
         UnitCategory.FORCE: "lbf",
         UnitCategory.ANGLE: "deg",
         UnitCategory.ANGULAR_VELOCITY: "deg/s",
-        UnitCategory.STIFFNESS: "lbf·in/rad",
-        UnitCategory.ENERGY: "ft·lbf",
-        UnitCategory.POWER: "ft·lbf/s",
+        UnitCategory.STIFFNESS: "lbfÂ·in/rad",
+        UnitCategory.ENERGY: "ftÂ·lbf",
+        UnitCategory.POWER: "ftÂ·lbf/s",
         UnitCategory.LINEAR_VELOCITY: "ft/s",
     },
     "Engineering": {
         UnitCategory.LENGTH: "cm",
         UnitCategory.MASS: "kg",
-        UnitCategory.TORQUE: "N·m",
+        UnitCategory.TORQUE: "NÂ·m",
         UnitCategory.FORCE: "N",
         UnitCategory.ANGLE: "deg",
         UnitCategory.ANGULAR_VELOCITY: "deg/s",
-        UnitCategory.STIFFNESS: "N·m/rad",
+        UnitCategory.STIFFNESS: "NÂ·m/rad",
         UnitCategory.ENERGY: "J",
         UnitCategory.POWER: "W",
         UnitCategory.LINEAR_VELOCITY: "m/s",
@@ -338,4 +338,4 @@ class UnitConverter:
 
     @property
     def angle_unit(self) -> str:
-        return "°"
+        return "Â°"

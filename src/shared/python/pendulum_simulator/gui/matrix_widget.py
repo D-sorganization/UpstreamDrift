@@ -52,7 +52,8 @@ class MatrixWidget(MatrixWidgetBase):
 
     def _draw_coupling_ratio(self, painter: QPainter, mc: dict, y: int) -> int:
         """Draw the ratio |M12/M11| as a bar and percentage."""
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         ratio = abs(mc["M12"]) / mc["M11"] if mc["M11"] > 1e-12 else 0.0
         ratio = min(ratio, 1.0)
 

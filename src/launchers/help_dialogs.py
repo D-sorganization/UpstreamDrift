@@ -61,8 +61,10 @@ class LayoutManagerDialog(QDialog):
         active_models: list[str],
         parent: QWidget | None,
     ) -> None:
-        assert available_models is not None, "available_models must be provided"
-        assert available_models is not None, "available_models must be provided"
+        if not (available_models is not None):
+            raise ValueError("available_models must be provided")
+        if not (available_models is not None):
+            raise ValueError("available_models must be provided")
         super().__init__(parent)
         self.setWindowTitle("Customize Launcher Tiles")
         self.resize(520, 520)
@@ -161,8 +163,10 @@ class ContextHelpDock(QDockWidget):
             )
 
     def _get_doc_file(self, model_id: str) -> Path | None:
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         docs_dir = REPOS_ROOT / "docs" / "engines"
 
         if "mujoco" in model_id:

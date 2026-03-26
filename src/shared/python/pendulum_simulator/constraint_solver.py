@@ -200,7 +200,7 @@ def constraint_forces(
 
     Returns
     -------
-    lambda_vec : np.ndarray, shape (4,) — constraint forces
+    lambda_vec : np.ndarray, shape (4,) â€” constraint forces
     """
     assert state is not None, "state must be provided"
     _, lambda_forces = _solve_constrained_dynamics(
@@ -286,7 +286,7 @@ def constraint_violation(state: State, params: GolferParams) -> float:
 
     Returns
     -------
-    float — ||Phi(q)||_2
+    float â€” ||Phi(q)||_2
     """
     assert state is not None, "state must be provided"
     q = state[:N_DOF]

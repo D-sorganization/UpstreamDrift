@@ -72,7 +72,8 @@ def constrained_eom_jax(
     state_dot : JaxArray, shape (16,)
         [qdot, qddot]
     """
-    assert t is not None, "t must be provided"
+    if not (t is not None):
+        raise ValueError("t must be provided")
     params, torque_coeffs, alpha, beta = args
 
     q = state[:N_DOF]
@@ -152,7 +153,8 @@ def _constraint_acceleration_bias_jax(
     -------
     gamma : JaxArray, shape (4,)
     """
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     eps = 1e-7
     Phi_q_0 = constraint_jacobian_jax(q, p)
 
@@ -199,7 +201,8 @@ def run_single_simulation_jax(
     sol : diffrax.Solution
         Solution object with .ts (time points) and .ys (state at each time)
     """
-    assert params is not None, "params must be provided"
+    if not (params is not None):
+        raise ValueError("params must be provided")
     term = ODETerm(constrained_eom_jax)
     solver = Dopri5()
     saveat = SaveAt(ts=jnp.arange(0.0, t_end + dt / 2, dt))
@@ -255,7 +258,8 @@ def run_batch_simulations(
     """
     # Note: diffrax doesn't support vmap directly within jit,
     # so this is a wrapper that should be called without jit for batching
-    assert params is not None, "params must be provided"
+    if not (params is not None):
+        raise ValueError("params must be provided")
     solutions = []
     for i in range(initial_states.shape[0]):
         sol = run_single_simulation_jax(

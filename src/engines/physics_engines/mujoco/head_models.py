@@ -332,8 +332,10 @@ def _extract_club_config(club_type: str) -> dict[str, Any]:
 def _generate_grip_xml(
     club_type: str, num_segments: int, config: dict[str, Any]
 ) -> list[str]:
-    assert club_type is not None, "club_type must be provided"
-    assert club_type is not None, "club_type must be provided"
+    if not (club_type is not None):
+        raise ValueError("club_type must be provided")
+    if not (club_type is not None):
+        raise ValueError("club_type must be provided")
     grip_length = config["grip_length"]
     grip_radius = config["grip_radius"]
     grip_mass = config["grip_mass"]
@@ -359,8 +361,10 @@ def _generate_shaft_segments_xml(
     seg_length: float,
     seg_mass: float,
 ) -> list[str]:
-    assert num_segments is not None, "num_segments must be provided"
-    assert num_segments is not None, "num_segments must be provided"
+    if not (num_segments is not None):
+        raise ValueError("num_segments must be provided")
+    if not (num_segments is not None):
+        raise ValueError("num_segments must be provided")
     grip_length = config["grip_length"]
     shaft_radius = config["shaft_radius"]
     flex_stiffness = config["flex_stiffness"]
@@ -410,8 +414,10 @@ def _generate_clubhead_xml(
     config: dict[str, Any],
     seg_length: float,
 ) -> list[str]:
-    assert num_segments is not None, "num_segments must be provided"
-    assert num_segments is not None, "num_segments must be provided"
+    if not (num_segments is not None):
+        raise ValueError("num_segments must be provided")
+    if not (num_segments is not None):
+        raise ValueError("num_segments must be provided")
     head_mass = config["head_mass"]
     club_loft = config["club_loft"]
     head_size = config["head_size"]

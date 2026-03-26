@@ -37,7 +37,7 @@ from .physics import (
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 
-# Re-export from shared utility for backwards compatibility (DRY — #1041)
+# Re-export from shared utility for backwards compatibility (DRY â€” #1041)
 from .torque_utils import make_polynomial_torque  # noqa: F401
 
 # ---------------------------------------------------------------------------

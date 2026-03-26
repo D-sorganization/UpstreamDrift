@@ -28,6 +28,24 @@ from ..models.responses import (
 )
 from ..utils.path_validation import validate_model_path
 
+
+def _sanitize_for_json(obj: Any) -> Any:
+    """Recursively convert numpy arrays and other non-JSON types to native Python."""
+    import numpy as np
+
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize_for_json(v) for v in obj]
+    return obj
+
+
 router = APIRouter()
 
 
@@ -43,7 +61,8 @@ async def get_engines(
     _user: Any = Depends(OptionalAuth(auto_error=False)),
 ) -> EngineListResponse:
     """Get status of all available physics engines."""
-    assert engine_manager is not None, "engine_manager must be provided"
+    if not (engine_manager is not None):
+        raise ValueError("engine_manager must be provided")
     engines = []
     available_engines = engine_manager.get_available_engines()
     current_engine = engine_manager.get_current_engine()
@@ -161,7 +180,9 @@ async def load_engine(
 
         state = None
         if engine and hasattr(engine, "get_state"):
-            state = engine.get_state()
+            raw_state = engine.get_state()
+            # Convert numpy arrays to lists for JSON serialization
+            state = _sanitize_for_json(raw_state) if raw_state else None
 
         return {
             "status": "loaded",
@@ -227,7 +248,8 @@ async def get_engine_capabilities(
     Raises:
         HTTPException: If engine type is invalid or engine cannot be queried.
     """
-    assert engine_type is not None, "engine_type must be provided"
+    if not (engine_type is not None):
+        raise ValueError("engine_type must be provided")
     try:
         engine_enum = EngineType(engine_type.lower())
     except ValueError as exc:

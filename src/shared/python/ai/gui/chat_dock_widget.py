@@ -61,8 +61,10 @@ class ChatMessageBubble(QFrame):
     """Compact message bubble for chat display."""
 
     def __init__(self, role: str, content: str, parent: QWidget | None = None) -> None:
-        assert role is not None, "role must be provided"
-        assert role is not None, "role must be provided"
+        if not (role is not None):
+            raise ValueError("role must be provided")
+        if not (role is not None):
+            raise ValueError("role must be provided")
         super().__init__(parent)
         self._role = role
         self._content = content
@@ -94,15 +96,19 @@ class ChatMessageBubble(QFrame):
 
     def set_content(self, text: str) -> None:
         """Replace the content text."""
-        assert text is not None, "text must be provided"
-        assert text is not None, "text must be provided"
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
+            raise ValueError("text must be provided")
         self._content = text
         self._content_label.setText(text)
 
     def append_content(self, text: str) -> None:
         """Append text to existing content."""
-        assert text is not None, "text must be provided"
-        assert text is not None, "text must be provided"
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
+            raise ValueError("text must be provided")
         self._content += text
         self._content_label.setText(self._content)
 
@@ -130,8 +136,10 @@ class ChatDockWidget(QDockWidget):
         session_id: str | None = None,
         parent: QWidget | None = None,
     ) -> None:
-        assert engine_context is not None, "engine_context must be provided"
-        assert engine_context is not None, "engine_context must be provided"
+        if not (engine_context is not None):
+            raise ValueError("engine_context must be provided")
+        if not (engine_context is not None):
+            raise ValueError("engine_context must be provided")
         super().__init__("AI Chat", parent)
         self._engine_context = engine_context
         self._server_url = server_url.rstrip("/")
@@ -250,8 +258,10 @@ class ChatDockWidget(QDockWidget):
 
     def _on_message(self, raw: str) -> None:
         """Handle incoming WebSocket message."""
-        assert raw is not None, "raw must be provided"
-        assert raw is not None, "raw must be provided"
+        if not (raw is not None):
+            raise ValueError("raw must be provided")
+        if not (raw is not None):
+            raise ValueError("raw must be provided")
         try:
             data = json.loads(raw)
         except (json.JSONDecodeError, TypeError):
@@ -324,8 +334,10 @@ class ChatDockWidget(QDockWidget):
 
     def _add_bubble(self, role: str, content: str) -> ChatMessageBubble:
         """Add a message bubble to the scroll area."""
-        assert role is not None, "role must be provided"
-        assert role is not None, "role must be provided"
+        if not (role is not None):
+            raise ValueError("role must be provided")
+        if not (role is not None):
+            raise ValueError("role must be provided")
         bubble = ChatMessageBubble(role, content)
         # Insert before the stretch item at the end
         count = self._message_layout.count()
@@ -336,8 +348,10 @@ class ChatDockWidget(QDockWidget):
     def _populate_history(self, messages: list[dict]) -> None:
         """Clear and rebuild message bubbles from history."""
         # Remove existing bubbles (keep the stretch)
-        assert messages is not None, "messages must be provided"
-        assert messages is not None, "messages must be provided"
+        if not (messages is not None):
+            raise ValueError("messages must be provided")
+        if not (messages is not None):
+            raise ValueError("messages must be provided")
         while self._message_layout.count() > 1:
             item = self._message_layout.takeAt(0)
             if item is not None:
@@ -365,8 +379,10 @@ class ChatDockWidget(QDockWidget):
 
     def closeEvent(self, event) -> None:  # type: ignore[override]
         """Clean up WebSocket on close."""
-        assert event is not None, "event must be provided"
-        assert event is not None, "event must be provided"
+        if not (event is not None):
+            raise ValueError("event must be provided")
+        if not (event is not None):
+            raise ValueError("event must be provided")
         self._reconnect_timer.stop()
         if self._socket:
             self._socket.close()

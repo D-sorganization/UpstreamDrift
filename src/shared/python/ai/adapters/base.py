@@ -199,8 +199,10 @@ class BaseAgentAdapter(ABC):
         Returns:
             List of message dictionaries for the provider.
         """
-        assert context is not None, "context must be provided"
-        assert context is not None, "context must be provided"
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
+            raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
         # Add conversation history
@@ -240,8 +242,10 @@ class BaseAgentAdapter(ABC):
         Returns:
             System prompt string.
         """
-        assert tools is not None, "tools must be provided"
-        assert tools is not None, "tools must be provided"
+        if not (tools is not None):
+            raise ValueError("tools must be provided")
+        if not (tools is not None):
+            raise ValueError("tools must be provided")
         tool_descriptions = "\n".join(
             f"- {tool.name}: {tool.description}" for tool in tools
         )

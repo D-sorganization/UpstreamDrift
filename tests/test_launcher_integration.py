@@ -68,7 +68,7 @@ class TestLauncherIntegration(unittest.TestCase):
             self.assertIsNotNone(config_manager)
             self.assertIsNotNone(engine_manager)
             self.assertIsNotNone(process_worker)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # If instantiation fails due to missing files, that's expected in tests
             self.assertTrue(True, f"Modules imported successfully: {e}")
 
@@ -92,11 +92,11 @@ class TestLauncherIntegration(unittest.TestCase):
 
             for expected in expected_engines:
                 if expected in engine_names:
-                    print(f"[OK] Found engine: {expected}")
+                    pass
                 else:
-                    print(f"[WARN] Engine not found: {expected}")
+                    pass
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.fail(f"Engine discovery failed: {e}")
 
     def test_grid_constants(self):
@@ -131,11 +131,10 @@ class TestLauncherIntegration(unittest.TestCase):
                 result = manager.export_for_engine(engine)
                 self.assertIsInstance(result, dict)
                 self.assertEqual(result["engine"], engine)
-                print(f"[OK] {engine} export working")
 
         except ImportError as e:
             self.skipTest(f"URDF generator not available: {e}")
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.fail(f"URDF generator engine support test failed: {e}")
 
     def test_dockerfile_configuration(self):
@@ -184,19 +183,15 @@ class TestLauncherCommands(unittest.TestCase):
                                 "failed to launch",
                             ]
                         ):
-                            print(
-                                f"[WARN] Engine {engine} not ready (expected in some environments)"
-                            )
+                            pass
                         else:
                             self.fail(f"Engine {engine} launch failed: {result.stderr}")
                     else:
-                        print(f"[OK] Engine {engine} launch command working")
+                        pass
 
                 except subprocess.TimeoutExpired:
                     # Timeout is good - means GUI started and didn't crash immediately
-                    print(
-                        f"[OK] Engine {engine} launch initiated (timeout as expected)"
-                    )
+                    pass
 
 
 if __name__ == "__main__":

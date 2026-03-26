@@ -108,7 +108,8 @@ class _TrigCache:
     )
 
     def __init__(self, q: np.ndarray) -> None:
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
         th_hub = q[0]
         self.sin_hub = np.sin(th_hub)
         self.cos_hub = np.cos(th_hub)
@@ -137,7 +138,8 @@ def _hub_and_shoulder_jacobians(
     p: GolferParams, tc: _TrigCache
 ) -> dict[str, np.ndarray]:
     """Compute Jacobians for hub, right shoulder, and left shoulder."""
-    assert p is not None, "p must be provided"
+    if not (p is not None):
+        raise ValueError("p must be provided")
     J_hub = np.zeros((2, N_DOF))
     J_hub[0, 0] = -p.L_hub * tc.cos_hub
     J_hub[1, 0] = -p.L_hub * tc.sin_hub
@@ -161,7 +163,8 @@ def _right_arm_chain_jacobian(
     Returns (J_re, J_rh) and also the RH Jacobian which is reused by club.
     """
     # RE (right elbow): depends on q[0], q[1]
-    assert p is not None, "p must be provided"
+    if not (p is not None):
+        raise ValueError("p must be provided")
     J_re = np.zeros((2, N_DOF))
     J_re[0, 0] = -p.L_hub * tc.cos_hub - p.d_rs * tc.sin_hub + p.L_r_upper * tc.cos_rs
     J_re[1, 0] = -p.L_hub * tc.sin_hub + p.d_rs * tc.cos_hub + p.L_r_upper * tc.sin_rs
@@ -195,7 +198,8 @@ def _left_arm_chain_jacobian(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute Jacobians for LE, LH along the left arm kinematic chain."""
     # LE (left elbow): depends on q[0], q[4]
-    assert p is not None, "p must be provided"
+    if not (p is not None):
+        raise ValueError("p must be provided")
     J_le = np.zeros((2, N_DOF))
     J_le[0, 0] = -p.L_hub * tc.cos_hub + p.d_ls * tc.sin_hub + p.L_l_upper * tc.cos_ls
     J_le[1, 0] = -p.L_hub * tc.sin_hub - p.d_ls * tc.cos_hub + p.L_l_upper * tc.sin_ls
@@ -229,7 +233,8 @@ def _club_jacobians(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute Jacobians for club COM and club tip, reusing the RH Jacobian."""
     # Club COM: RH chain + club angle
-    assert p is not None, "p must be provided"
+    if not (p is not None):
+        raise ValueError("p must be provided")
     coeff_com_x = 0.5 * p.L_club - p.grip_right
     coeff_com_y = -0.5 * (p.L_club - 2 * p.grip_right)
 
@@ -476,7 +481,8 @@ def potential_energy(state: State, p: GolferParams) -> float:
 
 def total_energy(state: State, p: GolferParams) -> float:
     """Compute E = T + V from full state."""
-    assert state is not None, "state must be provided"
+    if not (state is not None):
+        raise ValueError("state must be provided")
     from .physics_base import total_energy_from_parts
 
     q = state[:N_DOF]

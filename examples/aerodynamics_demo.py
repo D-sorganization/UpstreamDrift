@@ -26,9 +26,12 @@ from src.shared.python.physics.aerodynamics import (  # noqa: E402
 
 def _report_forces(engine: AerodynamicsEngine, speed_ms: float, label: str) -> None:
     """Print force components for a ball travelling at *speed_ms* m/s."""
-    assert engine is not None, "Engine must be provided"
-    assert speed_ms >= 0.0, "Speed must be non-negative"
-    assert label, "Label must not be empty"
+    if not (engine is not None):
+        raise ValueError("Engine must be provided")
+    if not (speed_ms >= 0.0):
+        raise ValueError("Speed must be non-negative")
+    if not (label):
+        raise ValueError("Label must not be empty")
 
     velocity = np.array([speed_ms, 0.0, 0.0])
     spin = np.array([0.0, 300.0, 0.0])  # ~2 870 rpm back-spin
@@ -36,18 +39,10 @@ def _report_forces(engine: AerodynamicsEngine, speed_ms: float, label: str) -> N
     forces = engine.compute_forces(velocity, spin)
     import numpy.linalg as npla
 
-    drag_n = float(npla.norm(forces["drag"]))
-    lift_n = float(npla.norm(forces["lift"]))
-    magnus_n = float(npla.norm(forces["magnus"]))
-    total_n = float(npla.norm(forces["total"]))
-
-    print(
-        f"{label:30s}  speed={speed_ms:5.1f} m/s"
-        f"  drag={drag_n:6.3f} N"
-        f"  lift={lift_n:6.3f} N"
-        f"  magnus={magnus_n:6.3f} N"
-        f"  total={total_n:6.3f} N"
-    )
+    float(npla.norm(forces["drag"]))
+    float(npla.norm(forces["lift"]))
+    float(npla.norm(forces["magnus"]))
+    float(npla.norm(forces["total"]))
 
 
 def main() -> None:
@@ -60,17 +55,11 @@ def main() -> None:
     drag_only_cfg = AerodynamicsConfig(lift_enabled=False, magnus_enabled=False)
     engine_drag = AerodynamicsEngine(config=drag_only_cfg)
 
-    print("Aerodynamic force breakdown")
-    print("=" * 90)
-
     for speed in (20.0, 40.0, 60.0, 70.0):
         _report_forces(engine_full, speed, "full (drag+lift+magnus)")
         _report_forces(engine_drag, speed, "drag-only")
-        print()
 
     # Show Reynolds-number correction effect at low vs high speed
-    print("Reynolds number correction comparison (70 m/s)")
-    print("-" * 60)
     for reynolds in (True, False):
         cfg = AerodynamicsConfig(reynolds_correction_enabled=reynolds)
         engine = AerodynamicsEngine(config=cfg)

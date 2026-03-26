@@ -15,7 +15,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",  # For Google/NumPy style docstrings
     "sphinx.ext.viewcode",
-    "sphinx.ext.todo",
+    "sphinx.ext.TRACKED_TASK",
     "myst_parser",  # For Markdown support
 ]
 

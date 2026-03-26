@@ -1,4 +1,20 @@
-"""API configuration defaults and environment overrides."""
+"""API configuration defaults and environment overrides.
+
+Configuration precedence (highest to lowest):
+  1. Environment variables (ALLOWED_HOSTS, CORS_ORIGINS, API_HOST, API_PORT)
+  2. Defaults defined in this module
+
+For server host/port the canonical accessors live in
+``src.shared.python.config.environment`` (``get_api_host``, ``get_api_port``).
+This module re-exports them for backward compatibility with existing callers
+in ``src/api/server.py``.
+
+See also:
+  - ``src/config/interim_config.yaml`` -- YAML defaults for CORS origins,
+    trusted hosts, rate-limiting (not loaded at runtime; documents intent)
+  - ``src/shared/python/config/environment.py`` -- canonical env-var accessors
+  - ``src/shared/python/security/env_validator.py`` -- startup validator
+"""
 
 from __future__ import annotations
 
@@ -49,6 +65,11 @@ def get_cors_origins() -> list[str]:
 
 
 # Server configuration
+# NOTE: These functions read API_HOST / API_PORT (legacy env var names).
+# The canonical env vars defined in src.shared.python.config.environment are
+# GOLF_API_HOST and GOLF_API_PORT.  A future cleanup task should migrate callers
+# to the shared accessors (get_api_host / get_api_port) and retire API_HOST /
+# API_PORT -- see issue #2068.
 DEFAULT_SERVER_HOST = "127.0.0.1"
 DEFAULT_SERVER_PORT = 8000
 
@@ -75,13 +96,13 @@ def get_server_port() -> int:
         Server port number.
 
     Raises:
-        ValueError: If API_PORT is not a valid integer.
+        ValueError: If API_PORT is not a valid integer or out of range.
     """
     port_str = os.getenv("API_PORT", str(DEFAULT_SERVER_PORT))
     try:
         port = int(port_str)
         if not (1 <= port <= 65535):
-            raise ValueError(f"Port must be between 1 and 65535, got {port}")
+            raise ValueError(f"Invalid API_PORT value: {port_str!r}")
         return port
     except ValueError as e:
         raise ValueError(f"Invalid API_PORT value: {port_str!r}") from e

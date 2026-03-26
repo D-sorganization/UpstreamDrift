@@ -41,8 +41,6 @@ class ModelLoaderThread(QtCore.QThread):
     finished_loading = QtCore.pyqtSignal(object, object, str)
 
     def __init__(self, xml_content: str, is_file: bool = False) -> None:
-        assert xml_content is not None, "xml_content must be provided"
-        assert xml_content is not None, "xml_content must be provided"
         super().__init__()
         self.xml_content = xml_content
         self.is_file = is_file
@@ -143,8 +141,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         fps: int = 60,
     ) -> None:
         """Initialize the simulation widget."""
-        assert width is not None, "width must be provided"
-        assert width is not None, "width must be provided"
         super().__init__(parent)
         self.setMinimumSize(width, height)
 
@@ -220,8 +216,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def load_model_async(self, xml_source: str, is_file: bool = False) -> None:
         """Load a MuJoCo model asynchronously to prevent UI freeze."""
-        assert xml_source is not None, "xml_source must be provided"
-        assert xml_source is not None, "xml_source must be provided"
         if self.loader_thread and self.loader_thread.isRunning():
             logger.warning("Model loading already in progress.")
             return
@@ -238,8 +232,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def _on_model_loaded_async(self, model: Any, data: Any, error_msg: str) -> None:
         """Handle completion of async model loading."""
-        assert error_msg is not None, "error_msg must be provided"
-        assert error_msg is not None, "error_msg must be provided"
         if error_msg:
             logger.error("Async load failed: %s", error_msg)
             self.label.setText(f"Error loading model: {error_msg}")
@@ -294,8 +286,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def load_model_from_xml(self, xml_string: str) -> None:
         """(Legacy/Sync) Load a MuJoCo model from an MJCF XML string."""
-        assert xml_string is not None, "xml_string must be provided"
-        assert xml_string is not None, "xml_string must be provided"
         self.timer.stop()
         try:
             new_model = mujoco.MjModel.from_xml_string(xml_string)
@@ -307,8 +297,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def load_model_from_file(self, xml_path: str) -> None:
         """(Legacy/Sync) Load from file."""
-        assert xml_path is not None, "xml_path must be provided"
-        assert xml_path is not None, "xml_path must be provided"
         self.timer.stop()
         try:
             if not os.path.isabs(xml_path):
@@ -480,8 +468,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_joint_qpos(self, joint_name: str, value: float) -> None:
         """Set qpos for a specific 1-DOF joint directly (Kinematic Mode)."""
-        assert joint_name is not None, "joint_name must be provided"
-        assert joint_name is not None, "joint_name must be provided"
         if self.model is None or self.data is None:
             return
 
@@ -493,106 +479,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self.data.qpos[qpos_adr] = value
         mujoco.mj_forward(self.model, self.data)
         self._render_once()
-
-    def get_state(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Get a copy of the current simulation state (qpos, qvel, ctrl)."""
-        if self.data is None:
-            return np.array([]), np.array([]), np.array([])
-        return (
-            self.data.qpos.copy(),
-            self.data.qvel.copy(),
-            self.data.ctrl.copy(),
-        )
-
-    def set_state_and_forward(
-        self, qpos: np.ndarray, qvel: np.ndarray, ctrl: np.ndarray
-    ) -> None:
-        """Set simulation state and run forward kinematics."""
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
-        if self.model is None or self.data is None:
-            return
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        self.data.ctrl[:] = ctrl
-        mujoco.mj_forward(self.model, self.data)
-
-    # -------- Facades --------
-    def has_model(self) -> bool:
-        return self.model is not None
-
-    def get_num_bodies(self) -> int:
-        return self.model.nbody if self.model else 0
-
-    def get_num_joints(self) -> int:
-        return self.model.njnt if self.model else 0
-
-    def get_num_geoms(self) -> int:
-        return self.model.ngeom if self.model else 0
-
-    def get_joint_name(self, index: int) -> str | None:
-        if self.model is None or index < 0 or index >= self.model.njnt:
-            return None
-        return mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, index)
-
-    def get_geom_rgba(self, index: int) -> np.ndarray | None:
-        if self.model is None or index < 0 or index >= self.model.ngeom:
-            return None
-        return self.model.geom_rgba[index].copy()
-
-    def set_geom_rgba(self, index: int, rgba: np.ndarray) -> None:
-        if self.model is not None and 0 <= index < self.model.ngeom:
-            self.model.geom_rgba[index] = rgba
-
-    def get_time(self) -> float:
-        return self.data.time if self.data else 0.0
-
-    def get_camera_azimuth(self) -> float:
-        return self.camera.azimuth if self.camera else 0.0
-
-    def get_camera_elevation(self) -> float:
-        return self.camera.elevation if self.camera else 0.0
-
-    def get_camera_distance(self) -> float:
-        return self.camera.distance if self.camera else 0.0
-
-    def get_camera_lookat(self):
-        return self.camera.lookat if self.camera else None
-
-    def connect_timer(self, slot) -> None:
-        if self.timer:
-            self.timer.timeout.connect(slot)
-
-    def connect_loading_signals(self, start_slot, finish_slot) -> None:
-        self.loading_started.connect(start_slot)
-        self.loading_finished.connect(finish_slot)
-
-    def get_pixmap(self):
-        if hasattr(self, "label") and self.label:
-            return self.label.pixmap()
-        return None
-
-    def open_meshcat_browser(self):
-        if hasattr(self, "meshcat_adapter") and self.meshcat_adapter:
-            self.meshcat_adapter.open_browser()
-
-    def get_num_actuators(self) -> int:
-        return self.model.nu if self.model else 0
-
-    def get_body_name(self, body_id: int) -> str | None:
-        if self.model is None:
-            return None
-        return mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
-
-    def get_actuator_name(self, actuator_id: int) -> str | None:
-        if self.model is None:
-            return None
-        return mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id)
-
-    def get_body_id(self, body_name: str) -> int:
-        if self.model is None:
-            return -1
-        return mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
 
     # -------- Control interface --------
 
@@ -622,17 +508,12 @@ class MuJoCoSimWidget(  # type: ignore[misc]
             return False
         return bool(self.control_system.num_actuators == self.model.nu)
 
-    def is_running(self) -> bool:
-        return self.running
-
     def set_running(self, running: bool) -> None:
         """Enable or disable the simulation stepping loop."""
         self.running = running
 
     def set_camera(self, camera_name: str) -> None:
         """Set the active camera view."""
-        assert camera_name is not None, "camera_name must be provided"
-        assert camera_name is not None, "camera_name must be provided"
         self.camera_name = camera_name
         presets = {
             "side": (90.0, -20.0, 3.0),
@@ -654,8 +535,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, enabled: bool, scale: float | None = None
     ) -> None:
         """Toggle torque vector overlay and optionally set scale."""
-        assert enabled is not None, "enabled must be provided"
-        assert enabled is not None, "enabled must be provided"
         self.show_torque_vectors = enabled
         if scale is not None:
             self.torque_scale = scale
@@ -667,8 +546,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         screw: bool = False,
     ) -> None:
         """Toggle live overlay of Euler angles, quaternions, and screw axis."""
-        assert euler is not None, "euler must be provided"
-        assert euler is not None, "euler must be provided"
         self.show_live_euler = euler
         self.show_live_quat = quat
         self.show_live_screw = screw
@@ -679,8 +556,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, enabled: bool, scale: float | None = None
     ) -> None:
         """Toggle force vector overlay and optionally set scale."""
-        assert enabled is not None, "enabled must be provided"
-        assert enabled is not None, "enabled must be provided"
         self.show_force_vectors = enabled
         if scale is not None:
             self.force_scale = scale
@@ -689,8 +564,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         self, mobility_enabled: bool, force_enabled: bool
     ) -> None:
         """Toggle mobility and force ellipsoid overlays."""
-        assert mobility_enabled is not None, "mobility_enabled must be provided"
-        assert mobility_enabled is not None, "mobility_enabled must be provided"
         self.show_mobility_ellipsoid = mobility_enabled
         self.show_force_ellipsoid = force_enabled
 
@@ -701,8 +574,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         show_reference: bool | None = None,
     ) -> None:
         """Toggle swing plane and trajectory overlay rendering."""
-        assert show_plane is not None, "show_plane must be provided"
-        assert show_plane is not None, "show_plane must be provided"
         self.show_swing_plane = show_plane
         self.show_club_trajectory = show_trajectory
         if show_reference is not None:
@@ -831,8 +702,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
         cf_type: str,
     ) -> None:
         """Configure induced acceleration and counterfactual overlays."""
-        assert induced_enabled is not None, "induced_enabled must be provided"
-        assert induced_enabled is not None, "induced_enabled must be provided"
         self.show_induced_vectors = induced_enabled
         self.induced_vector_source = induced_source
         self.show_cf_vectors = cf_enabled
@@ -840,8 +709,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_contact_force_visualization(self, enabled: bool) -> None:
         """Toggle native MuJoCo contact force rendering."""
-        assert enabled is not None, "enabled must be provided"
-        assert enabled is not None, "enabled must be provided"
         self.show_contact_forces = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled
@@ -908,8 +775,6 @@ class MuJoCoSimWidget(  # type: ignore[misc]
 
     def set_body_color(self, body_name: str, rgba: list[float]) -> None:
         """Set the RGBA color of all geoms belonging to a body."""
-        assert body_name is not None, "body_name must be provided"
-        assert body_name is not None, "body_name must be provided"
         if self.model is None:
             return
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)

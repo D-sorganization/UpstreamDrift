@@ -248,7 +248,7 @@ class GolferPendulumWidget(BasePendulumWidget):
         club_base = self._world_to_pixel(*pos["club_base"])
         club_tip = self._world_to_pixel(*pos["club_tip"])
 
-        # Standoff (origin -> hub) — massless, COM offset adjustment
+        # Standoff (origin -> hub) â€” massless, COM offset adjustment
         pen = QPen(self.COLOR_HUB, 4)
         pen.setCapStyle(Qt.PenCapStyle.RoundCap)
         painter.setPen(pen)
@@ -580,7 +580,7 @@ class GolferPendulumWidget(BasePendulumWidget):
     # ------------------------------------------------------------------
     # Info and placeholder
     # ------------------------------------------------------------------
-    # Ellipsoid drawing (#1200 — N-DOF force/mobility ellipsoids)
+    # Ellipsoid drawing (#1200 â€” N-DOF force/mobility ellipsoids)
     # ------------------------------------------------------------------
 
     def _draw_ellipsoids_at_frame(self, painter: QPainter) -> None:
@@ -654,7 +654,7 @@ class GolferPendulumWidget(BasePendulumWidget):
                         label="F",
                     )
                 else:
-                    # Degenerate (singular) — draw direction line with label
+                    # Degenerate (singular) â€” draw direction line with label
                     mob = ell["mob_semi_axes"]
                     line_len = float(mob[0]) * force_scale * 0.5
                     line_len = max(10.0, min(line_len, 200.0))

@@ -54,8 +54,10 @@ class PlotlyConverter:
         Returns:
             Dict with "data" (list of traces) and "layout" keys.
         """
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         if isinstance(spec, SurfacePlotSpec):
             return self._surface(spec)
         if isinstance(spec, ContourPlotSpec):
@@ -71,8 +73,10 @@ class PlotlyConverter:
     # ── Type-specific converters ─────────────────────────────────────────────
 
     def _line_scatter(self, spec: PlotSpec) -> dict[str, Any]:
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         traces = []
         for series in spec.series:
             traces.append(self._series_trace(series))
@@ -84,8 +88,10 @@ class PlotlyConverter:
         return {"data": traces, "layout": self._build_layout(spec)}
 
     def _surface(self, spec: SurfacePlotSpec) -> dict[str, Any]:
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         trace: dict[str, Any] = {
             "type": "surface",
             "z": spec.z_data,
@@ -124,8 +130,10 @@ class PlotlyConverter:
         return {"data": traces, "layout": layout}
 
     def _contour(self, spec: ContourPlotSpec) -> dict[str, Any]:
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         trace_type = "contour"
         trace: dict[str, Any] = {
             "type": trace_type,
@@ -148,8 +156,10 @@ class PlotlyConverter:
         return {"data": [trace], "layout": self._build_layout(spec)}
 
     def _heatmap(self, spec: HeatmapSpec) -> dict[str, Any]:
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         trace: dict[str, Any] = {
             "type": "heatmap",
             "z": spec.z_data,
@@ -172,8 +182,10 @@ class PlotlyConverter:
         return {"data": [trace], "layout": self._build_layout(spec)}
 
     def _histogram(self, spec: HistogramSpec) -> dict[str, Any]:
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         traces = []
         for series in spec.series:
             trace: dict[str, Any] = {
@@ -197,8 +209,10 @@ class PlotlyConverter:
         return {"data": traces, "layout": layout}
 
     def _filter_comparison(self, spec: FilterComparisonSpec) -> dict[str, Any]:
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         traces = []
 
         for series in spec.original_series:
@@ -253,8 +267,10 @@ class PlotlyConverter:
         name_prefix: str = "",
     ) -> dict[str, Any]:
         """Convert a SeriesData to a Plotly trace."""
-        assert series is not None, "series must be provided"
-        assert series is not None, "series must be provided"
+        if not (series is not None):
+            raise ValueError("series must be provided")
+        if not (series is not None):
+            raise ValueError("series must be provided")
         style = series.style
         mode = self._display_mode_to_plotly(style.display_mode)
 
@@ -292,8 +308,10 @@ class PlotlyConverter:
 
     def _trendline_trace(self, series: SeriesData) -> dict[str, Any] | None:
         """Compute trendline and return as a trace."""
-        assert series is not None, "series must be provided"
-        assert series is not None, "series must be provided"
+        if not (series is not None):
+            raise ValueError("series must be provided")
+        if not (series is not None):
+            raise ValueError("series must be provided")
         if series.trendline is None:
             return None
 
@@ -333,8 +351,10 @@ class PlotlyConverter:
 
     def _build_layout(self, spec: PlotSpec) -> dict[str, Any]:
         """Build Plotly layout dict from spec."""
-        assert spec is not None, "spec must be provided"
-        assert spec is not None, "spec must be provided"
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
+        if not (spec is not None):
+            raise ValueError("spec must be provided")
         layout: dict[str, Any] = {
             "title": {"text": spec.title} if spec.title else None,
             "width": spec.width,

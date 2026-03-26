@@ -55,7 +55,7 @@ def linear_power_at(
     force: np.ndarray,
     velocity: np.ndarray,
 ) -> float:
-    """Instantaneous linear power at a joint (F · v).
+    """Instantaneous linear power at a joint (F Â· v).
 
     Preconditions:
         force and velocity are shape (2,) finite arrays.
@@ -180,7 +180,7 @@ def linear_work_series(
 ) -> np.ndarray:
     """Cumulative linear work via trapezoidal integration.
 
-    W(t) = integral_0^t F(s) · v(s) ds
+    W(t) = integral_0^t F(s) Â· v(s) ds
 
     Preconditions:
         forces, velocities shape (N,2); time shape (N,); all finite.

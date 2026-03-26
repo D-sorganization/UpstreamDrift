@@ -226,7 +226,7 @@ class TestCrossEngineValidationIntegration:
                     a_ztcf = eng.engine.compute_ztcf(q_test, v_test)
                     if a_ztcf.size > 0:
                         ztcf_accels[eng.name] = a_ztcf
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"ZTCF failed for {eng.name}: {e}")
 
         if len(ztcf_accels) < 2:
@@ -278,7 +278,7 @@ class TestCrossEngineValidationIntegration:
                     a_zvcf = eng.engine.compute_zvcf(q_test)
                     if a_zvcf.size > 0:
                         zvcf_accels[eng.name] = a_zvcf
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     logger.warning(f"ZVCF failed for {eng.name}: {e}")
 
         if len(zvcf_accels) < 2:

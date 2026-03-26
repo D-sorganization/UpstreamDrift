@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..core.physics_constants import GRAVITY_M_S2
@@ -152,6 +153,20 @@ def compute_linear_impulse(
     Returns:
         Linear impulse vector [N·s] (3,)
     """
+    forces = np.asarray(forces)
+    timestamps = np.asarray(timestamps)
+    require(
+        forces.ndim == 2 and forces.shape[1] == 3,
+        "forces must be an (N, 3) array",
+        forces.shape,
+    )
+    require(timestamps.ndim == 1, "timestamps must be a 1-D array", timestamps.shape)
+    require(
+        len(forces) == len(timestamps),
+        "forces and timestamps must have the same length",
+        (len(forces), len(timestamps)),
+    )
+
     if len(forces) < 2:
         return np.zeros(3)
 
@@ -189,6 +204,32 @@ def compute_angular_impulse(
     Returns:
         Angular impulse vector [N·m·s] (3,)
     """
+    forces = np.asarray(forces)
+    cops = np.asarray(cops)
+    timestamps = np.asarray(timestamps)
+    reference_point = np.asarray(reference_point)
+    require(
+        forces.ndim == 2 and forces.shape[1] == 3,
+        "forces must be an (N, 3) array",
+        forces.shape,
+    )
+    require(
+        cops.ndim == 2 and cops.shape[1] == 3,
+        "cops must be an (N, 3) array",
+        cops.shape,
+    )
+    require(timestamps.ndim == 1, "timestamps must be a 1-D array", timestamps.shape)
+    require(
+        len(forces) == len(timestamps) == len(cops),
+        "forces, cops, and timestamps must have the same length",
+        (len(forces), len(cops), len(timestamps)),
+    )
+    require(
+        reference_point.shape == (3,),
+        "reference_point must be a (3,) vector",
+        reference_point.shape,
+    )
+
     if len(forces) < 2:
         return np.zeros(3)
 
@@ -232,9 +273,11 @@ def compute_cop_from_grf(
     Returns:
         COP position [m] (3,)
     """
+    force = np.asarray(force)
+    moment = np.asarray(moment)
+    require(force.shape == (3,), "force must be a (3,) vector", force.shape)
+    require(moment.shape == (3,), "moment must be a (3,) vector", moment.shape)
     # Avoid division by zero for small vertical forces
-    assert force is not None, "force must be provided"
-    assert force is not None, "force must be provided"
     min_vertical_force = 10.0  # [N] threshold
     fz = force[2]
 
@@ -301,8 +344,7 @@ class GRFAnalyzer:
             golfer_com: Golfer COM positions over time [m] (N, 3)
             system_com: Golfer+club system COM positions over time [m] (N, 3)
         """
-        assert golfer_com is not None, "golfer_com must be provided"
-        assert golfer_com is not None, "golfer_com must be provided"
+        require(golfer_com is not None, "golfer_com must be provided")
         self.golfer_com_trajectory = golfer_com
         self.system_com_trajectory = (
             system_com if system_com is not None else golfer_com
@@ -454,8 +496,7 @@ def extract_grf_from_contacts(
     Returns:
         GroundReactionForce at current simulation time
     """
-    assert engine is not None, "engine must be provided"
-    assert engine is not None, "engine must be provided"
+    require(engine is not None, "engine must be provided")
     total_force = np.zeros(3)
     total_moment = np.zeros(3)
     total_weighted_pos = np.zeros(3)
@@ -537,8 +578,8 @@ def validate_grf_cross_engine(
     Returns:
         Dictionary of validation results per metric
     """
-    assert grf_a is not None, "grf_a must be provided"
-    assert grf_a is not None, "grf_a must be provided"
+    require(grf_a is not None, "grf_a must be provided")
+    require(grf_b is not None, "grf_b must be provided")
     results = {}
 
     # Force magnitude comparison

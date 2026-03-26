@@ -25,6 +25,10 @@ from typing import Protocol
 
 import numpy as np
 
+from src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer import (
+    PendulumPerturbationAnalyzer as PendulumPerturbationAnalyzer,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,10 +59,10 @@ def generate_noise(
 
     Parameters
     ----------
-    noise_type : str — 'white', 'pink', or 'brown'
-    n_samples : int — number of samples
-    amplitude : float — standard deviation of the output signal
-    seed : int, optional — for reproducibility
+    noise_type : str â€” 'white', 'pink', or 'brown'
+    n_samples : int â€” number of samples
+    amplitude : float â€” standard deviation of the output signal
+    seed : int, optional â€” for reproducibility
 
     Returns
     -------
@@ -177,6 +181,7 @@ def perturb_torque_coeffs(
     noise_amplitude: float,
     noise_type: str = "white",
     seed: int | None = None,
+    perturb_mode: str = "additive",
 ) -> list[list[float]]:
     """Perturb polynomial torque coefficients with noise.
 
@@ -185,14 +190,14 @@ def perturb_torque_coeffs(
 
     Parameters
     ----------
-    coeffs : list of lists — per-joint polynomial coefficients
-    noise_amplitude : float — amplitude of the perturbation
-    noise_type : str — noise colour
+    coeffs : list of lists â€” per-joint polynomial coefficients
+    noise_amplitude : float â€” amplitude of the perturbation
+    noise_type : str â€” noise colour
     seed : int, optional
 
     Returns
     -------
-    list of lists — perturbed coefficients (same shape as input)
+    list of lists â€” perturbed coefficients (same shape as input)
 
     Design by Contract
     ------------------
@@ -237,10 +242,10 @@ class PerturbationConfig:
 
     Attributes
     ----------
-    n_trials : int — number of Monte Carlo simulations
-    noise_type : str — 'white', 'pink', or 'brown'
-    noise_amplitude : float — perturbation amplitude (relative to peak torque)
-    seed : int, optional — base seed for reproducibility
+    n_trials : int â€” number of Monte Carlo simulations
+    noise_type : str â€” 'white', 'pink', or 'brown'
+    noise_amplitude : float â€” perturbation amplitude (relative to peak torque)
+    seed : int, optional â€” base seed for reproducibility
     """
 
     n_trials: int = 100
@@ -326,7 +331,7 @@ def batch_perturb_and_simulate(
 
     Parameters
     ----------
-    base_coeffs : list of lists — nominal polynomial torque coefficients
+    base_coeffs : list of lists â€” nominal polynomial torque coefficients
     config : PerturbationConfig
     simulate_fn : callable(coeffs) -> result
         Function that takes perturbed coefficients and returns a simulation result.
@@ -336,7 +341,7 @@ def batch_perturb_and_simulate(
 
     Returns
     -------
-    list of dicts — one per trial, each from extract_fn
+    list of dicts â€” one per trial, each from extract_fn
 
     Design by Contract
     ------------------

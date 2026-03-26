@@ -120,7 +120,7 @@ class TestDragDropFunctionality(unittest.TestCase):
             if isinstance(x_val, int):
                 self.assertEqual(x_val, 10)
                 self.assertEqual(y_val, 10)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Fallback for when Mock is behaving unexpectedly (common in heavy patch envs)
             print(f"Warning: Mock behavior check failed: {e}")  # noqa: T201
 
@@ -424,7 +424,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             try:
                 launcher._launch_c3d_viewer()
                 success = True
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 # Only fail if it's not a security validation error
                 if "Security validation failed" not in str(e):
                     self.fail(f"Unexpected exception in _launch_c3d_viewer: {e}")
@@ -548,7 +548,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
                     result = manager.export_for_engine(engine)
                     self.assertIsInstance(result, dict)
                     self.assertEqual(result["engine"], engine)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     self.fail(f"Engine {engine} export failed: {e}")
 
         except ImportError as e:
@@ -597,7 +597,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
                 launcher._launch_urdf_generator()
                 # If we get here without exception, the test passes
                 success = True
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 # Only fail if it's not a security validation error
                 if "Security validation failed" not in str(e):
                     self.fail(f"Unexpected exception in _launch_urdf_generator: {e}")

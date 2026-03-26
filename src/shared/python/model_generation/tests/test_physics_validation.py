@@ -35,7 +35,7 @@ class MockInertial:
     """Mock inertial for testing."""
 
     mass: float = 1.0
-    origin: MockOrigin = None  # type: ignore
+    origin: MockOrigin = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if self.origin is None:
@@ -53,8 +53,8 @@ class MockGeometry:
 class MockCollision:
     """Mock collision for testing."""
 
-    geometry: MockGeometry = None  # type: ignore
-    origin: MockOrigin = None  # type: ignore
+    geometry: MockGeometry = None  # type: ignore[assignment]
+    origin: MockOrigin = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if self.geometry is None:
@@ -68,8 +68,8 @@ class MockLink:
     """Mock link for testing."""
 
     name: str
-    inertial: MockInertial = None  # type: ignore
-    collision: MockCollision = None  # type: ignore
+    inertial: MockInertial = None  # type: ignore[assignment]
+    collision: MockCollision = None  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         if self.inertial is None:
@@ -185,7 +185,7 @@ class TestCollisionCheck:
     def test_no_collision(self, validator: PhysicsValidator) -> None:
         """Test links without collision geometry."""
         link = MockLink(name="link1")
-        link.collision = None  # type: ignore
+        link.collision = None  # type: ignore[assignment]
         result = validator.check_collision_geometry([link])  # type: ignore[list-item]
 
         assert not result.has_self_intersection

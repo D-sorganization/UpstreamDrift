@@ -20,12 +20,13 @@ Regression logic is isolated in ``fit_regression()`` for reuse.
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from PyQt6.QtWidgets import QWidget
+    from matplotlib.axes import Axes
+    from PyQt6.QtWidgets import QMainWindow, QWidget
 
 logger = logging.getLogger(__name__)
 
@@ -72,8 +73,10 @@ def fit_regression(
     Pre: len(x) == len(y), degree >= 0, degree <= 10.
     Post: x_fit and y_fit have same length; len(coeffs) == degree + 1.
     """
-    assert len(x) == len(y), f"x and y must have same length: {len(x)} vs {len(y)}"
-    assert 0 <= degree <= 10, f"Degree must be 0–10, got {degree}"
+    if not (len(x) == len(y)):
+        raise ValueError(f"x and y must have same length: {len(x)} vs {len(y)}")
+    if not (0 <= degree <= 10):
+        raise ValueError(f"Degree must be 0–10, got {degree}")
 
     coeffs = np.polyfit(x, y, degree)
     x_fit = np.linspace(x.min(), x.max(), max(200, len(x)))
@@ -105,9 +108,9 @@ class PopOutChart:
         self._ylabel = ""
         self._title = ""
         self._fig: Figure | None = None
-        self._ax: object | None = None
-        self._canvas: object | None = None
-        self._window: object | None = None
+        self._ax: Axes | None = None
+        self._canvas: Any | None = None
+        self._window: QMainWindow | None = None
         self._regression: tuple[np.ndarray, np.ndarray, int, np.ndarray] | None = None
         self._regression_label: str = ""
 
@@ -123,7 +126,8 @@ class PopOutChart:
 
         Pre: x and y have same length, both finite.
         """
-        assert len(x) == len(y), "x and y must have same length"
+        if not (len(x) == len(y)):
+            raise ValueError("x and y must have same length")
         self._x = np.asarray(x)
         self._y = np.asarray(y)
         self._xlabel = xlabel
@@ -135,7 +139,8 @@ class PopOutChart:
 
         Returns (x_fit, y_fit) or None if no data.
         """
-        assert degree is not None, "degree must be provided"
+        if not (degree is not None):
+            raise ValueError("degree must be provided")
         if self._x is None or self._y is None:
             return None
         x_fit, y_fit, coeffs = fit_regression(self._x, self._y, degree)

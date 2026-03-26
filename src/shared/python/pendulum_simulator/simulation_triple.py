@@ -34,7 +34,7 @@ from .physics_triple import (
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 
-# Re-export from shared utility for backwards compatibility (DRY — #1041)
+# Re-export from shared utility for backwards compatibility (DRY â€” #1041)
 from .torque_utils import make_polynomial_torque  # noqa: F401
 
 # ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@ class TripleSimulationResult(TrajectoryResultMixin):
 
         Returns
         -------
-        np.ndarray, shape (3,)  [N·m]
+        np.ndarray, shape (3,)  [NÂ·m]
         """
         assert idx is not None, "idx must be provided"
         self._check_idx(idx)
@@ -151,7 +151,7 @@ def run_simulation(
     -----------------
     - ``DOP853`` is an 8th-order Runge-Kutta method that is fast for
       non-stiff problems while being accurate enough for chaotic systems.
-    - ``max_step`` is intentionally NOT set here — letting the solver
+    - ``max_step`` is intentionally NOT set here â€” letting the solver
       choose an adaptive step is ~10-50x faster than forcing ``dt`` as
       the maximum step size.
     - The output is resampled to a uniform ``t_eval`` grid at spacing ``dt``
@@ -201,7 +201,7 @@ def run_simulation(
         method=method,
         rtol=rtol,
         atol=atol,
-        # max_step deliberately omitted — adaptive step is much faster
+        # max_step deliberately omitted â€” adaptive step is much faster
     )
 
     result = TripleSimulationResult(

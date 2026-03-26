@@ -180,7 +180,7 @@ The Golf Modeling Suite is an ambitious, well-architected platform that consolid
 | Issue                                    | Occurrences | Files Affected      |
 | ---------------------------------------- | ----------- | ------------------- |
 | `except Exception as e:` (broad catches) | 40+         | 8+ files            |
-| TODO/FIXME comments unresolved           | 25+         | Various             |
+| TRACKED_TASK/TRACKED_DEFECT comments unresolved           | 25+         | Various             |
 | Methods >100 lines (complexity)          | 6+          | golf_launcher.py    |
 | Type suppressions (`# type: ignore`)     | 25+         | Various             |
 | Print statements (should be logging)     | 10+         | Examples, utilities |

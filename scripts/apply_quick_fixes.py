@@ -27,8 +27,6 @@ def add_missing_init_files():
 
     fixed_count = 0
 
-    print("Scanning for missing __init__.py files...")
-
     for root_rel in target_roots:
         root_path = repo_root / root_rel
         if not root_path.exists():
@@ -66,12 +64,9 @@ def add_missing_init_files():
                 try:
                     with open(init_path, "w") as f:
                         f.write('"""\nAuto-generated __init__.py\n"""\n')
-                    print(f"Fixed: Created {init_path}")
                     fixed_count += 1
-                except (OSError, PermissionError) as e:
-                    print(f"Error creating {init_path}: {e}")
-
-    print(f"\nTotal fixed: {fixed_count} missing __init__.py files.")
+                except (OSError, PermissionError):
+                    pass
 
 
 if __name__ == "__main__":

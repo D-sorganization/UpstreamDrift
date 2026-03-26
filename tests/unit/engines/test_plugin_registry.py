@@ -186,7 +186,7 @@ class TestPluginRegistryThreadSafety:
             try:
                 reg = EngineRegistration(engine_type=engine_type, factory=_stub_factory)
                 registry.register(reg)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 errors.append(e)
 
         threads = [
@@ -212,7 +212,7 @@ class TestPluginRegistryThreadSafety:
                 for _ in range(100):
                     registry.get(EngineType.PENDULUM)
                     registry.all_types()
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 errors.append(e)
 
         def writer() -> None:
@@ -222,7 +222,7 @@ class TestPluginRegistryThreadSafety:
                         engine_type=EngineType.PENDULUM, factory=_stub_factory
                     )
                     registry.register(new_reg)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 errors.append(e)
 
         threads = [threading.Thread(target=reader) for _ in range(4)]

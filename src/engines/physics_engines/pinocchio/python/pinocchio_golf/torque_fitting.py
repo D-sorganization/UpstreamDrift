@@ -32,8 +32,10 @@ def evaluate_torque_poly(
     coeffs: npt.NDArray[np.float64], t: npt.ArrayLike
 ) -> npt.NDArray[np.float64]:
     """Evaluate a fitted torque polynomial at the given times."""
-    assert coeffs is not None, "coeffs must be provided"
-    assert coeffs is not None, "coeffs must be provided"
+    if not (coeffs is not None):
+        raise ValueError("coeffs must be provided")
+    if not (coeffs is not None):
+        raise ValueError("coeffs must be provided")
     t_arr = np.asarray(t, dtype=np.float64)
     result = np.polyval(coeffs, t_arr)
     return np.asarray(result, dtype=np.float64)

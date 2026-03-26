@@ -39,8 +39,10 @@ class ModelRegistry(ContractChecker):
         Args:
             config_path: Path to the YAML configuration file.
         """
-        assert config_path is not None, "config_path must be provided"
-        assert config_path is not None, "config_path must be provided"
+        if not (config_path is not None):
+            raise ValueError("config_path must be provided")
+        if not (config_path is not None):
+            raise ValueError("config_path must be provided")
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
         self._load_registry()

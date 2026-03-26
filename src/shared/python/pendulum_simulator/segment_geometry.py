@@ -50,13 +50,13 @@ def cylinder_cross_section(
 
     Parameters
     ----------
-    start : np.ndarray, shape (2,) — proximal end
-    end : np.ndarray, shape (2,) — distal end
-    radius : float — cylinder radius
+    start : np.ndarray, shape (2,) â€” proximal end
+    end : np.ndarray, shape (2,) â€” distal end
+    radius : float â€” cylinder radius
 
     Returns
     -------
-    np.ndarray, shape (4, 2) — corner vertices in CCW order
+    np.ndarray, shape (4, 2) â€” corner vertices in CCW order
 
     Design by Contract
     ------------------
@@ -80,7 +80,7 @@ def cylinder_cross_section(
 
     # Unit normal perpendicular to segment direction
     d_hat = direction / length
-    normal = np.array([-d_hat[1], d_hat[0]])  # 90° rotation
+    normal = np.array([-d_hat[1], d_hat[0]])  # 90Â° rotation
 
     offset = normal * radius
     corners = np.array(
@@ -108,10 +108,10 @@ def ellipsoid_cross_section(
     Parameters
     ----------
     centre : np.ndarray, shape (2,)
-    semi_a : float — semi-axis along the segment direction
-    semi_b : float — semi-axis perpendicular to segment
-    angle : float — rotation angle (radians, CCW from x-axis)
-    n_points : int — number of polygon vertices
+    semi_a : float â€” semi-axis along the segment direction
+    semi_b : float â€” semi-axis perpendicular to segment
+    angle : float â€” rotation angle (radians, CCW from x-axis)
+    n_points : int â€” number of polygon vertices
 
     Returns
     -------
@@ -152,14 +152,14 @@ def tapered_cylinder_cross_section(
 
     Parameters
     ----------
-    start : np.ndarray, shape (2,) — proximal (thicker) end
-    end : np.ndarray, shape (2,) — distal (thinner) end
-    radius_start : float — radius at start
-    radius_end : float — radius at end
+    start : np.ndarray, shape (2,) â€” proximal (thicker) end
+    end : np.ndarray, shape (2,) â€” distal (thinner) end
+    radius_start : float â€” radius at start
+    radius_end : float â€” radius at end
 
     Returns
     -------
-    np.ndarray, shape (4, 2) — trapezoid vertices
+    np.ndarray, shape (4, 2) â€” trapezoid vertices
 
     Design by Contract
     ------------------
@@ -204,14 +204,14 @@ def project_3d_to_2d(
 
     Parameters
     ----------
-    point_3d : np.ndarray, shape (3,) — (x, y, z)
-    tilt : float — tilt angle in radians (rotation about x-axis)
-    azimuth : float — azimuth angle in radians (rotation about y-axis)
-    return_depth : bool — if True, also return the depth value
+    point_3d : np.ndarray, shape (3,) â€” (x, y, z)
+    tilt : float â€” tilt angle in radians (rotation about x-axis)
+    azimuth : float â€” azimuth angle in radians (rotation about y-axis)
+    return_depth : bool â€” if True, also return the depth value
 
     Returns
     -------
-    np.ndarray, shape (2,) — projected (x, y)
+    np.ndarray, shape (2,) â€” projected (x, y)
     or tuple (np.ndarray shape (2,), float depth) if return_depth=True
     """
     assert point_3d is not None, "point_3d must be provided"
@@ -266,17 +266,17 @@ def depth_sort_segments(
 def auto_radius_from_mass(mass: float, length: float, scale: float = 0.02) -> float:
     """Compute a reasonable visual radius from segment mass and length.
 
-    radius = scale * sqrt(mass / length) — heuristic for visual appeal.
+    radius = scale * sqrt(mass / length) â€” heuristic for visual appeal.
 
     Parameters
     ----------
-    mass : float — segment mass (kg)
-    length : float — segment length (m)
-    scale : float — visual scaling factor
+    mass : float â€” segment mass (kg)
+    length : float â€” segment length (m)
+    scale : float â€” visual scaling factor
 
     Returns
     -------
-    float — radius in metres
+    float â€” radius in metres
 
     Design by Contract
     ------------------

@@ -59,8 +59,10 @@ class JointState:
         validate: bool = False,
     ) -> JointState:
         """Create new JointState with optional validation."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         instance = object.__new__(cls)
         return instance
 
@@ -134,8 +136,10 @@ class JointState:
         Returns:
             New JointState instance.
         """
-        assert d is not None, "d must be provided"
-        assert d is not None, "d must be provided"
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
+            raise ValueError("d must be provided")
         return cls(
             name=d["name"],
             position=Vector3.from_dict(d["position"]),
@@ -196,8 +200,10 @@ class ForceVector:
         validate: bool = False,
     ) -> ForceVector:
         """Create new ForceVector with optional validation."""
-        assert origin is not None, "origin must be provided"
-        assert origin is not None, "origin must be provided"
+        if not (origin is not None):
+            raise ValueError("origin must be provided")
+        if not (origin is not None):
+            raise ValueError("origin must be provided")
         instance = object.__new__(cls)
         return instance
 
@@ -275,8 +281,10 @@ class ForceVector:
         Returns:
             New ForceVector instance.
         """
-        assert d is not None, "d must be provided"
-        assert d is not None, "d must be provided"
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
+            raise ValueError("d must be provided")
         color = tuple(d["color"]) if "color" in d else None
         return cls(
             origin=Vector3.from_dict(d["origin"]),
@@ -284,7 +292,7 @@ class ForceVector:
             magnitude=float(d["magnitude"]),
             force_type=d.get("force_type", "force"),
             joint_name=d.get("joint_name"),
-            color=color,  # type: ignore
+            color=color,  # type: ignore[arg-type]
             scale_factor=d.get("scale_factor", 1.0),
             validate=validate,
         )

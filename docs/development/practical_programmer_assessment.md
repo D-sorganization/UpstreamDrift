@@ -55,7 +55,7 @@ This assessment evaluates the UpstreamDrift repository against eight core princi
   - Evidence: `src/shared/python/contracts.py`, `src/shared/python/engine_manager.py`, `src/shared/python/logging_config.py`, ...(98 total)
 - **`VALID_ENGINE_TYPES` duplicated between API and engine registry.** `src/api/models/requests.py:8-19` defines a hardcoded set of valid engine types. `src/shared/python/engine_core/engine_registry.py` defines `EngineType` enum with the same values. These can drift. [MAJOR]
 - **`VALID_EXPORT_FORMATS` defined in two places:** `src/api/config.py:16` (`{"json"}`) and `src/api/models/requests.py:34` (`{"json", "csv", "mat", "hdf5", "c3d"}`). They disagree. This is a DRY violation that causes incorrect behavior: the request model validates formats the config rejects. [MAJOR]
-- 65 remaining TODO/FIXME/HACK comments represent deferred knowledge that should be in GitHub issues, not source comments.
+- 65 remaining TRACKED_TASK/TRACKED_DEFECT/HACK comments represent deferred knowledge that should be in GitHub issues, not source comments.
 
 **Score rationale:** Up from 52 to 65 because the decoupling effort genuinely reduced structural duplication. Held back by the 98 shims and two clear data definition duplications.
 

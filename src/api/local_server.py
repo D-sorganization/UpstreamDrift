@@ -4,6 +4,10 @@ Local-first API server for Golf Modeling Suite.
 Runs entirely on localhost with NO authentication required.
 This is the default mode - free, offline, no accounts needed.
 
+API Versioning (#2070):
+    All routes are served under ``/api/v1/`` for forward compatibility.
+    Legacy ``/api/`` routes are also registered for backward compatibility.
+
 Diagnostic Features:
 - /api/diagnostics - JSON diagnostic report
 - /api/diagnostics/html - Browser-friendly diagnostic page
@@ -61,6 +65,10 @@ logger = logging.getLogger(__name__)
 
 logger = get_logger(__name__)
 
+# API versioning constants (#2070)
+API_VERSION = "v1"
+API_PREFIX = f"/api/{API_VERSION}"
+
 
 # Track startup metrics for diagnostics
 _startup_metrics: dict[str, Any] = {
@@ -103,7 +111,22 @@ def _configure_cors(app: FastAPI) -> None:
 
 
 def _register_api_routers(app: FastAPI) -> None:
-    """Register all API route routers on the app."""
+    """Register all API route routers on the app.
+
+    Routes are mounted at both the versioned prefix (``/api/v1/``) and the
+    legacy prefix (``/api/``) to maintain backward compatibility (#2070).
+    """
+    # Versioned routes: /api/v1/... (canonical, forward-compatible)
+    app.include_router(engines.router, prefix=API_PREFIX, tags=["Engines"])
+    app.include_router(simulation.router, prefix=API_PREFIX, tags=["Simulation"])
+    app.include_router(
+        simulation_ws.router, prefix=API_PREFIX, tags=["Simulation WebSocket"]
+    )
+    app.include_router(chat_ws.router, prefix=API_PREFIX, tags=["Chat"])
+    app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
+    app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
+
+    # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
     app.include_router(simulation.router, prefix="/api", tags=["Simulation"])
     app.include_router(
@@ -150,7 +173,9 @@ def _find_logo_file(logo_name: str) -> Path | None:
     return None
 
 
-def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
+def _find_tile_in_manifest(
+    tile_id: str,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
     """Find a tile by ID in the launcher manifest.
 
     Args:
@@ -176,7 +201,7 @@ def _find_tile_in_manifest(tile_id: str) -> tuple[dict | None, dict | None]:
 
 
 def _execute_tile_launch(
-    tile_id: str, tile: dict, launcher_service: Any
+    tile_id: str, tile: dict[str, Any], launcher_service: Any
 ) -> dict[str, Any] | JSONResponse:
     """Execute the launch of a tile using the appropriate handler.
 
@@ -188,7 +213,8 @@ def _execute_tile_launch(
     Returns:
         Success dict or JSONResponse with error details.
     """
-    assert tile_id is not None, "tile_id must be provided"
+    if not (tile_id is not None):
+        raise ValueError("tile_id must be provided")
     model_type = tile.get("type", "")
     repo_path = Path(__file__).parent.parent.parent
     logger.info(
@@ -201,7 +227,7 @@ def _execute_tile_launch(
     class _TileModel:
         """Minimal model object compatible with handler.launch()."""
 
-        def __init__(self, data: dict) -> None:
+        def __init__(self, data: dict[str, Any]) -> None:
             for k, v in data.items():
                 setattr(self, k, v)
 
@@ -307,7 +333,8 @@ def _register_health_and_diagnostic_endpoints(
 ) -> None:
     """Register health check and diagnostic endpoints."""
 
-    assert app is not None, "app must be provided"
+    if not (app is not None):
+        raise ValueError("app must be provided")
 
     @app.get("/api/health")
     async def health_check() -> dict[str, Any]:
@@ -398,7 +425,8 @@ def _mount_assets_directory(app: FastAPI, ui_path: Path) -> None:
         app: The FastAPI application instance.
         ui_path: Path to the UI build directory.
     """
-    assert app is not None, "app must be provided"
+    if not (app is not None):
+        raise ValueError("app must be provided")
     assets_path = ui_path / "assets"
     if assets_path.exists():
         app.mount(
@@ -419,7 +447,8 @@ def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
         app: The FastAPI application instance.
         ui_path: Path to the UI build directory.
     """
-    assert app is not None, "app must be provided"
+    if not (app is not None):
+        raise ValueError("app must be provided")
     index_html = ui_path / "index.html"
     if index_html.exists():
         from fastapi.responses import FileResponse
@@ -427,7 +456,8 @@ def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
         @app.get("/{full_path:path}")
         async def serve_spa(request: Request, full_path: str) -> Any:
             """Serve the SPA index.html for all non-API routes."""
-            assert request is not None, "request must be provided"
+            if not (request is not None):
+                raise ValueError("request must be provided")
             if full_path.startswith("api/"):
                 return JSONResponse(
                     status_code=404,
@@ -537,7 +567,8 @@ def _register_error_page_catch_all(app: FastAPI) -> None:
         request: Request, full_path: str
     ) -> HTMLResponse | JSONResponse:
         """Serve a helpful error page when UI is not built."""
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         if full_path.startswith("api/"):
             return JSONResponse(
                 status_code=404,
@@ -565,11 +596,20 @@ def _mount_static_files_and_spa(app: FastAPI) -> None:
 
 
 def create_local_app() -> FastAPI:
-    """Create FastAPI app configured for local use."""
+    """Create FastAPI app configured for local use.
 
+    Routes are registered at both ``/api/v1/`` (versioned, canonical) and
+    ``/api/`` (legacy, deprecated) for backward compatibility (#2070).
+    """
     app = FastAPI(
         title="Golf Modeling Suite",
-        description="Local physics simulation for golf biomechanics",
+        description=(
+            "Local physics simulation for golf biomechanics.\n\n"
+            "## Versioning\n"
+            f"Current API version: **{API_VERSION}**. "
+            f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
+            "Legacy `/api/` routes are maintained for backward compatibility."
+        ),
         version="2.0.0",
         docs_url="/api/docs",  # Swagger UI available locally
         redoc_url="/api/redoc",
@@ -611,7 +651,6 @@ def create_local_app() -> FastAPI:
 def print_logo_animated() -> None:
     """Print the Upstream Drift logo with scroll animation."""
     import sys
-    import time
 
     # ANSI escape codes
     ORANGE = "\033[38;5;208m"
@@ -638,7 +677,7 @@ def print_logo_animated() -> None:
         for line in logo:
             logger.info("    %s%s%s", ORANGE, line, RESET)
             sys.stdout.flush()
-            time.sleep(0.03)  # Scroll effect
+            # Scroll effect delay removed: time.sleep() blocks async/GUI contexts
     except UnicodeEncodeError:
         logger.info("    %sUPSTREAM DRIFT%s", ORANGE, RESET)
     logger.info("")
@@ -646,7 +685,8 @@ def print_logo_animated() -> None:
 
 def print_matrix_status(message: str, indent: int = 4) -> None:
     """Print status message in matrix green style."""
-    assert message is not None, "message must be provided"
+    if not (message is not None):
+        raise ValueError("message must be provided")
     GREEN = "\033[38;5;46m"  # Bright matrix green
     RESET = "\033[0m"
     logger.info("%s%s>%s %s%s%s", " " * indent, GREEN, RESET, GREEN, message, RESET)
@@ -654,7 +694,8 @@ def print_matrix_status(message: str, indent: int = 4) -> None:
 
 def print_server_info(host: str, port: int) -> None:
     """Print server info box."""
-    assert host is not None, "host must be provided"
+    if not (host is not None):
+        raise ValueError("host must be provided")
     CYAN = "\033[38;5;51m"
     RESET = "\033[0m"
 
@@ -682,7 +723,6 @@ def print_server_info(host: str, port: int) -> None:
 
 def main() -> None:
     """Launch local server with auto-open browser."""
-    import time
     import webbrowser
     from threading import Timer
 
@@ -700,13 +740,10 @@ def main() -> None:
 
     port = get_golf_port(default=8000)
 
-    # Print startup info in matrix green
+    # Print startup info in matrix green (no artificial delays -- cosmetic sleeps removed)
     print_matrix_status("Loading physics engine manager...")
-    time.sleep(0.1)
     print_matrix_status("Registering API routes...")
-    time.sleep(0.1)
     print_matrix_status("Configuring static file server...")
-    time.sleep(0.1)
     print_matrix_status(f"Server ready on port {port}")
     logger.info("")
 

@@ -156,8 +156,10 @@ class ForceVectorRenderer:
         Returns:
             List of RenderData for each force.
         """
-        assert forces is not None, "forces must be provided"
-        assert forces is not None, "forces must be provided"
+        if not (forces is not None):
+            raise ValueError("forces must be provided")
+        if not (forces is not None):
+            raise ValueError("forces must be provided")
         results: list[RenderData] = []
 
         for force in forces:
@@ -179,8 +181,10 @@ class ForceVectorRenderer:
             RenderData with arrow geometry.
         """
         # Calculate arrow dimensions
-        assert force is not None, "force must be provided"
-        assert force is not None, "force must be provided"
+        if not (force is not None):
+            raise ValueError("force must be provided")
+        if not (force is not None):
+            raise ValueError("force must be provided")
         scale = self.config.force_scale * force.scale_factor
         arrow_length = force.magnitude * scale
         arrow_head_length = min(0.1, arrow_length * 0.3)
@@ -236,8 +240,10 @@ class ForceVectorRenderer:
         Returns:
             RenderData with arc geometry.
         """
-        assert force is not None, "force must be provided"
-        assert force is not None, "force must be provided"
+        if not (force is not None):
+            raise ValueError("force must be provided")
+        if not (force is not None):
+            raise ValueError("force must be provided")
         scale = self.config.torque_scale * force.scale_factor
         arc_radius = 0.1  # 10 cm base radius
         arc_segments = 16
@@ -324,8 +330,10 @@ class TrajectoryRenderer:
         Returns:
             RenderData with trajectory geometry.
         """
-        assert points is not None, "points must be provided"
-        assert points is not None, "points must be provided"
+        if not (points is not None):
+            raise ValueError("points must be provided")
+        if not (points is not None):
+            raise ValueError("points must be provided")
         if not points:
             return RenderData(
                 visualization_type=VisualizationType.TRAJECTORY_LINE,
@@ -384,8 +392,10 @@ class TrajectoryRenderer:
         Returns:
             List of RenderData for trajectory and markers.
         """
-        assert points is not None, "points must be provided"
-        assert points is not None, "points must be provided"
+        if not (points is not None):
+            raise ValueError("points must be provided")
+        if not (points is not None):
+            raise ValueError("points must be provided")
         results: list[RenderData] = []
 
         # Main trajectory
@@ -425,8 +435,10 @@ class HUDDataProvider:
         Args:
             units: Unit system ("metric" or "imperial").
         """
-        assert units is not None, "units must be provided"
-        assert units is not None, "units must be provided"
+        if not (units is not None):
+            raise ValueError("units must be provided")
+        if not (units is not None):
+            raise ValueError("units must be provided")
         self.units = units
         self._conversion_factors = {
             "metric": {"speed": 1.0, "distance": 1.0, "angle": 1.0},
@@ -449,8 +461,10 @@ class HUDDataProvider:
         Returns:
             Dictionary of panel_key -> panel_data.
         """
-        assert metrics is not None, "metrics must be provided"
-        assert metrics is not None, "metrics must be provided"
+        if not (metrics is not None):
+            raise ValueError("metrics must be provided")
+        if not (metrics is not None):
+            raise ValueError("metrics must be provided")
         speed_unit = "mph" if self.units == "imperial" else "m/s"
         deg = "\u00b0"
 
@@ -508,8 +522,10 @@ class HUDDataProvider:
         Returns:
             Dictionary of HUD display data.
         """
-        assert timestamp is not None, "timestamp must be provided"
-        assert timestamp is not None, "timestamp must be provided"
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
         conv = self._conversion_factors[self.units]
 
         hud: dict[str, Any] = {
@@ -533,8 +549,10 @@ class HUDDataProvider:
         Returns:
             Formatted string.
         """
-        assert panel_data is not None, "panel_data must be provided"
-        assert panel_data is not None, "panel_data must be provided"
+        if not (panel_data is not None):
+            raise ValueError("panel_data must be provided")
+        if not (panel_data is not None):
+            raise ValueError("panel_data must be provided")
         fmt = panel_data.get("format", "{}")
         value = panel_data.get("value", 0)
         unit = panel_data.get("unit", "")

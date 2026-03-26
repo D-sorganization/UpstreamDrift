@@ -1,6 +1,7 @@
 # Issue: [OpenSim] Perturbation Analysis: Core Module Implementation
 
 ## Labels
+
 `perturbation-analysis`, `physics-engine`, `opensim`, `phase-1`
 
 ## Summary
@@ -21,6 +22,7 @@ Neural excitation → Muscle activation → Muscle force → Joint torque → Mo
 
 This redundancy (many muscles per joint) means the same joint torque can arise from
 different muscle activation patterns. Perturbation analysis at the muscle level reveals:
+
 - Which muscle activation patterns are more robust to neural noise
 - How muscle co-contraction affects movement consistency
 - Whether physiological movement strategies are inherently more stable
@@ -33,12 +35,14 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 ## Requirements
 
 ### Core Protocol Implementation
+
 - [ ] Create `src/engines/physics_engines/opensim/python/perturbation/analyzer.py`
 - [ ] Implement `OpenSimPerturbationAnalyzer` class conforming to `PerturbationAnalyzer` protocol
 - [ ] Use `OpenSimPhysicsEngine` for musculoskeletal simulation
 - [ ] Support .osim model loading via existing engine infrastructure
 
 ### Torque Profile Handling (Dual Mode)
+
 - [ ] **Joint torque mode** (for parity):
   - Polynomial coefficients per joint
   - Time-series joint torque arrays
@@ -51,6 +55,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] Map joint names to OpenSim coordinate indices
 
 ### Perturbation at Muscle Level
+
 - [ ] Additive noise on excitation: `e_perturbed = clamp(e_base + amp × noise, 0, 1)`
 - [ ] Multiplicative noise: `e_perturbed = clamp(e_base × (1 + amp × noise), 0, 1)`
 - [ ] Per-muscle independent noise
@@ -58,11 +63,13 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] Respect physiological bounds (excitation ∈ [0, 1])
 
 ### Perturbation at Joint Level
+
 - [ ] Same additive/multiplicative as other engines
 - [ ] Applied via `prescribedForce` or reserve actuators
 - [ ] Enables direct comparison with non-musculoskeletal engines
 
 ### Simulation Loop
+
 - [ ] Reset model state before each trial
 - [ ] Set initial coordinates and speeds
 - [ ] Apply perturbed excitations/torques via OpenSim controllers
@@ -71,6 +78,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] Handle simulation failures (muscle equilibrium divergence, etc.)
 
 ### Metric Extraction
+
 - [ ] Compute all mandatory metrics per §4.2 of guidelines
 - [ ] Use OpenSim's `BodyKinematics` analysis for end-effector tracking
 - [ ] Add OpenSim-specific optional metrics:
@@ -83,6 +91,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
   - `tendon_slack_length_sensitivity` — how tendon properties affect outcome
 
 ### Statistics & Reporting
+
 - [ ] Use shared `MetricStatistics` and `variability_summary()` from shared module
 - [ ] Compute Robustness Score
 - [ ] Separate RS for joint-level and muscle-level perturbation
@@ -90,6 +99,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] Include muscle-level statistics in export
 
 ### Comparison
+
 - [ ] Implement `compare_profiles()` for two excitation/torque profiles
 - [ ] Compare joint-level consistency vs muscle-level consistency
 - [ ] Mann-Whitney U test per metric
@@ -97,6 +107,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] "Robustness cost" metric: RS × metabolic_cost trade-off
 
 ### Testing
+
 - [ ] Unit test: zero-amplitude → identical results (CV=0)
 - [ ] Unit test: seed reproducibility
 - [ ] Unit test: monotonicity (amplitude ↑ → CV ↑)
@@ -105,7 +116,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] Integration test: full batch on arm26 or gait model
 - [ ] Integration test: muscle-level vs joint-level perturbation comparison
 - [ ] Validation test: match pendulum engine results on equivalent 2-DOF model
-  (joint torque mode only)
+      (joint torque mode only)
 
 ## Acceptance Criteria
 
@@ -119,6 +130,7 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - All tests pass
 
 ## Parity Checklist
+
 - [ ] Implements `PerturbationAnalyzer` protocol
 - [ ] Supports white, pink, and brown noise
 - [ ] Supports additive and multiplicative perturbation
@@ -132,10 +144,12 @@ expensive but robust) vs one using minimal activation (efficient but sensitive).
 - [ ] JSON export compatible with cross-engine comparison schema
 
 ## Dependencies
+
 - Issue #006: Pendulum reference implementation (for shared utilities)
 - `src/shared/python/perturbation/` shared module must exist
 
 ## References
+
 - Guidelines: `docs/perturbation_analysis_parity_guidelines.md`
 - OpenSim engine: `src/engines/physics_engines/opensim/python/opensim_physics_engine.py`
 - OpenSim muscle analysis: `src/engines/physics_engines/opensim/python/muscle_analysis.py`

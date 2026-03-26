@@ -61,7 +61,7 @@ class TestMuJoCoIntegration:
             assert model.nq >= 1, "Should have at least 1 position DOF"
             assert model.nv >= 1, "Should have at least 1 velocity DOF"
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"MuJoCo URDF loading not supported: {e}")
 
     @pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo not installed")
@@ -86,7 +86,7 @@ class TestMuJoCoIntegration:
                     "Pendulum should be oscillating, not diverging"
                 )
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             pytest.skip(f"MuJoCo simulation test skipped: {e}")
 
 

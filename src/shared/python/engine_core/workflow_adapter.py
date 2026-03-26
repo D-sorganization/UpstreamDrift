@@ -58,8 +58,10 @@ class EngineWorkflowAdapter:
 
     def probe(self, engine_name: str) -> EngineWorkflowResult:
         """Probe availability for a named engine."""
-        assert engine_name is not None, "engine_name must be provided"
-        assert engine_name is not None, "engine_name must be provided"
+        if not (engine_name is not None):
+            raise ValueError("engine_name must be provided")
+        if not (engine_name is not None):
+            raise ValueError("engine_name must be provided")
         engine_type = self.resolve_engine(engine_name)
         if engine_type is None:
             return EngineWorkflowResult(
@@ -80,8 +82,10 @@ class EngineWorkflowAdapter:
 
     def load(self, engine_name: str) -> EngineWorkflowResult:
         """Load a named engine through EngineManager."""
-        assert engine_name is not None, "engine_name must be provided"
-        assert engine_name is not None, "engine_name must be provided"
+        if not (engine_name is not None):
+            raise ValueError("engine_name must be provided")
+        if not (engine_name is not None):
+            raise ValueError("engine_name must be provided")
         engine_type = self.resolve_engine(engine_name)
         if engine_type is None:
             return EngineWorkflowResult(
@@ -111,8 +115,10 @@ class EngineWorkflowAdapter:
 
     def unload(self, engine_name: str) -> EngineWorkflowResult:
         """Unload currently active engine when it matches the target."""
-        assert engine_name is not None, "engine_name must be provided"
-        assert engine_name is not None, "engine_name must be provided"
+        if not (engine_name is not None):
+            raise ValueError("engine_name must be provided")
+        if not (engine_name is not None):
+            raise ValueError("engine_name must be provided")
         engine_type = self.parse_engine_identifier(engine_name)
         if engine_type is None:
             return EngineWorkflowResult(

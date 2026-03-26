@@ -1,6 +1,6 @@
 ---
 name: lint
-description: Run linting tools (ruff, black, mypy) and fix placeholder/TODO statements
+description: Run linting tools (ruff, black, mypy) and fix placeholder/TRACKED_TASK statements
 ---
 
 # Lint Skill
@@ -30,12 +30,12 @@ Run comprehensive linting and code quality checks on the codebase.
 4. **Find and fix placeholder statements**:
 
    - Search for `pass` statements that should have implementations
-   - Search for `TODO`, `FIXME`, `XXX`, `HACK` comments
+   - Search for `TRACKED_TASK`, `TRACKED_DEFECT`, `XXX`, `HACK` comments
    - Search for `NotImplementedError` that should be implemented
    - Search for `...` (ellipsis) placeholders in function bodies
 
    ```bash
-   grep -rn "TODO\|FIXME\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
+   grep -rn "TRACKED_TASK\|TRACKED_DEFECT\|XXX\|HACK\|NotImplementedError\|pass$" --include="*.py" .
    ```
 
 5. **Fix any issues found**:

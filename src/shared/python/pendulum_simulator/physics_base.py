@@ -1,5 +1,5 @@
 """
-Shared physics utilities for all pendulum models (DRY — #C1).
+Shared physics utilities for all pendulum models (DRY â€” #C1).
 
 Consolidates duplicated calculations across physics.py, physics_triple.py,
 and golfer_*.py into generic N-DOF functions.
@@ -81,9 +81,9 @@ def friction_torque_ndof(
 
     Parameters
     ----------
-    qdot : shape (n,) — generalized velocities.
-    viscous_coeffs : shape (n,) — viscous damping per DOF.
-    coulomb_coeffs : shape (n,) or None — Coulomb friction per DOF.
+    qdot : shape (n,) â€” generalized velocities.
+    viscous_coeffs : shape (n,) â€” viscous damping per DOF.
+    coulomb_coeffs : shape (n,) or None â€” Coulomb friction per DOF.
 
     Pre: all finite, shapes match.
     Post: opposes motion direction element-wise.
@@ -113,8 +113,8 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
 
     Parameters
     ----------
-    tau : shape (n,) — torque vector.
-    limits : shape (n,) — per-DOF saturation limits (positive).
+    tau : shape (n,) â€” torque vector.
+    limits : shape (n,) â€” per-DOF saturation limits (positive).
 
     Pre: shapes match, limits > 0 or inf.
     Post: |result[i]| <= limits[i].
@@ -151,7 +151,7 @@ def chain_positions(
 
     Returns
     -------
-    np.ndarray, shape (n, 2) — endpoint of each segment.
+    np.ndarray, shape (n, 2) â€” endpoint of each segment.
 
     Convention: angle 0 = straight down.
         x += -L * sin(angle)
@@ -198,10 +198,10 @@ def potential_energy_chain(
 
     Parameters
     ----------
-    absolute_angles : shape (n,) — absolute angle of each segment.
-    lengths : shape (n,) — length of each segment.
-    masses : shape (n,) — point mass at the end of each segment.
-    g : float — gravitational acceleration.
+    absolute_angles : shape (n,) â€” absolute angle of each segment.
+    lengths : shape (n,) â€” length of each segment.
+    masses : shape (n,) â€” point mass at the end of each segment.
+    g : float â€” gravitational acceleration.
 
     Pre: all finite, shapes match, g >= 0.
     Post: result finite.
@@ -229,7 +229,7 @@ def potential_energy_chain(
 
 
 def hermite_smoothstep(x: float) -> float:
-    """3rd-order Hermite smoothstep: f(x) = 3x² - 2x³ for x in [0,1].
+    """3rd-order Hermite smoothstep: f(x) = 3xÂ² - 2xÂ³ for x in [0,1].
 
     Pre: 0 <= x <= 1.
     Post: 0 <= result <= 1, monotonically increasing.

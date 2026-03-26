@@ -60,6 +60,8 @@ def test_apply_theme_system(qapp):
     launcher = DummyLauncher()
 
     mock_manager = MagicMock()
+    # Expose themeChanged as a mock Qt signal with .connect()
+    mock_manager.themeChanged = MagicMock()
 
     with (
         patch(
@@ -71,9 +73,8 @@ def test_apply_theme_system(qapp):
     ):
         launcher._apply_theme_system()
 
-        mock_manager.load_saved_theme.assert_called_once()
         mock_apply.assert_called_once()
-        mock_manager.on_theme_changed.assert_called_once()
+        mock_manager.themeChanged.connect.assert_called_once()
         assert launcher._theme_manager == mock_manager
 
 
@@ -100,7 +101,7 @@ def test_on_theme_changed(mock_apply, qapp):
     launcher._theme_actions = [action_1, action_2]
 
     with patch("src.shared.python.theme.ThemeManager.instance") as mock_instance:
-        mock_instance().theme_name = "Dark"
+        mock_instance().get_current_theme_name.return_value = "Dark"
         launcher._on_theme_changed({})
 
     mock_apply.assert_called_once()
@@ -113,7 +114,8 @@ def test_on_theme_changed(mock_apply, qapp):
     # Test no selected_model
     launcher.update_launch_button = MagicMock()
     launcher.selected_model = None
-    with patch("src.shared.python.theme.ThemeManager.instance"):
+    with patch("src.shared.python.theme.ThemeManager.instance") as mock_instance2:
+        mock_instance2().get_current_theme_name.return_value = "Dark"
         launcher._on_theme_changed({})
 
     launcher.update_launch_button.assert_called_once()
@@ -124,22 +126,22 @@ def test_setup_theme_menu_and_plot(qapp):
     menu = QMenu()
 
     mock_manager = MagicMock()
-    mock_manager.theme_name = "Dark"
-    # Include an exact duplicate of a preset, and an independent one
-    mock_manager.get_available_fleet_themes.return_value = ["Fleet1", "Dark"]
+    mock_manager.get_current_theme_name.return_value = "Dark"
+    # get_available_themes returns all built-in themes (including extras beyond presets)
+    mock_manager.get_available_themes.return_value = [
+        "Dark",
+        "Light",
+        "High Contrast",
+        "Monokai",
+    ]
     mock_manager.get_custom_theme_names.return_value = ["Custom1"]
 
     with (
         patch(
             "src.shared.python.theme.ThemeManager.instance", return_value=mock_manager
         ),
-        patch("src.shared.python.theme.ThemePreset", create=True) as MockPreset,
         patch("matplotlib.pyplot.style.available", ["_classic", "classic", "ggplot"]),
     ):
-        MockPreset.DARK = "Dark"
-        MockPreset.LIGHT = "Light"
-        MockPreset.HIGH_CONTRAST = "HC"
-
         launcher._setup_theme_menu(menu)
 
     actions = menu.actions()
@@ -148,10 +150,11 @@ def test_setup_theme_menu_and_plot(qapp):
     # Check if we built _theme_actions
     assert hasattr(launcher, "_theme_actions")
     names = [a.text() for a in launcher._theme_actions]
-    assert "Fleet1" in names
+    # "Monokai" is an extra theme beyond the core 3 presets
+    assert "Monokai" in names
     assert "Custom1" in names
 
-    # Test import import error for ThemeManager
+    # Test import error for ThemeManager
     with patch(
         "src.shared.python.theme.ThemeManager.instance", side_effect=ImportError("Boom")
     ):
@@ -167,7 +170,8 @@ def test_setup_theme_menu_empty_lists(qapp):
 
     with patch("src.shared.python.theme.ThemeManager.instance") as mock_inst:
         mock_manager = mock_inst.return_value
-        mock_manager.get_available_fleet_themes.return_value = []
+        mock_manager.get_current_theme_name.return_value = "Dark"
+        mock_manager.get_available_themes.return_value = []
         mock_manager.get_custom_theme_names.return_value = []
 
         with patch.object(menu, "addMenu", return_value=None):

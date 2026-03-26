@@ -21,6 +21,9 @@ logger = get_logger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
 
+_ERR_CONDITION_REQUIRED = "condition must be provided"
+_ERR_STATE_CHECK_REQUIRED = "state_check must be provided"
+
 
 def precondition(
     condition: Callable[..., bool],
@@ -53,18 +56,20 @@ def precondition(
         def sqrt(x: float) -> float:
             return math.sqrt(x)
     """
-    assert condition is not None, "condition must be provided"
-    assert condition is not None, "condition must be provided"
+    if not (condition is not None):
+        raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the function with precondition checking logic."""
-        if not enabled or get_contract_level() == ContractLevel.OFF:
-            return func
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """Execute precondition check before calling the wrapped function."""
+            # Check level at call time so runtime changes to contract level take effect
+            if not enabled or get_contract_level() == ContractLevel.OFF:
+                return func(*args, **kwargs)
+
             # Bind arguments to get named parameters
             sig = inspect.signature(func)
             try:
@@ -127,18 +132,20 @@ def postcondition(
         def compute_acceleration(self) -> np.ndarray:
             ...
     """
-    assert condition is not None, "condition must be provided"
-    assert condition is not None, "condition must be provided"
+    if not (condition is not None):
+        raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the function with postcondition checking logic."""
-        if not enabled or get_contract_level() == ContractLevel.OFF:
-            return func
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             """Execute the wrapped function and verify its postcondition."""
+            # Check level at call time so runtime changes to contract level take effect
+            if not enabled or get_contract_level() == ContractLevel.OFF:
+                return func(*args, **kwargs)
+
             result = func(*args, **kwargs)
 
             # Evaluate the postcondition
@@ -193,19 +200,21 @@ def require_state(
         def step(self, dt: float) -> None:
             ...
     """
-    assert state_check is not None, "state_check must be provided"
-    assert state_check is not None, "state_check must be provided"
+    if not (state_check is not None):
+        raise ValueError(_ERR_STATE_CHECK_REQUIRED)
     from .exceptions import StateError
     from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the method with state validation logic."""
-        if get_contract_level() == ContractLevel.OFF:
-            return func
 
         @functools.wraps(func)
         def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
             """Verify required object state before executing the wrapped method."""
+            # Check level at call time so runtime changes to contract level take effect
+            if get_contract_level() == ContractLevel.OFF:
+                return func(self, *args, **kwargs)
+
             if not state_check(self):
                 operation = operation_desc or func.__name__
                 current_level = get_contract_level()

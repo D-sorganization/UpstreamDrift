@@ -8,8 +8,8 @@ assignees: physics-team
 The `flexible_shaft.py` module currently implements a Finite Element beam model based on Euler-Bernoulli theory, which models bending (flex) but explicitly excludes torsion (twisting).
 
 ```python
-# TODO: Implement Torsional Dynamics (current Euler-Bernoulli beam model ignores torsional twisting).
-# TODO: Support Asymmetric Cross-Sections (modeling spine alignment and manufacturing tolerances).
+# TRACKED_TASK: Implement Torsional Dynamics (current Euler-Bernoulli beam model ignores torsional twisting).
+# TRACKED_TASK: Support Asymmetric Cross-Sections (modeling spine alignment and manufacturing tolerances).
 ```
 
 ## Impact

@@ -27,7 +27,7 @@ int main() {
     // Define the acceleration of gravity
     osimModel.setGravity(Vec3(0, -9.80665, 0));
 
-    // TODO: Add Code to Begin Model here
+    // DEFERRED: Add Code to Begin Model here
     // Section: Create the Platform
     double mass = 1;
 
@@ -97,7 +97,7 @@ int main() {
     // define the joint
     CoordinateSet &pelvisJointCoords = pelvisToPlatform->upd_CoordinateSet();
 
-    // TODO: Set the coordinate properties
+    // DEFERRED: Set the coordinate properties
     // ********** BEGIN CODE **********
 
     // **********  END CODE  **********

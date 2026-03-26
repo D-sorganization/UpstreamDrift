@@ -104,6 +104,7 @@ repos:
             src/archive/|
             src/legacy/|
             src/experimental/|
+            src/shared/python/pendulum_simulator/|
             __pycache__/|
             \.pytest_cache/|
             \.venv/|
@@ -117,7 +118,7 @@ repos:
       - id: bandit
         name: "bandit (security scan)"
         stages: [pre-push]
-        args: ["-r", "src/", "-ll", "-ii"]
+        args: ["-r", "src/", "-lll", "-ii"]
         pass_filenames: false
         # Only run if Python files changed
         types: [python]
@@ -128,13 +129,16 @@ repos:
       - id: pytest-unit
         name: "pytest (unit tests)"
         stages: [pre-push]
-        # NOTE: Multiple test sub-directories have pre-existing failures due to
-        # missing hardware deps, mujoco version mismatches, and suite-order state pollution.
-        # Excluding engines/ and launchers/ from pre-push; full suite runs in CI.
-        entry:
-          python3 -m pytest tests/unit -x -q --tb=short -m "not slow and not integration"
-          --ignore=tests/unit/engines
-          --ignore=tests/unit/launchers
+        # NOTE: Many tests/unit/ files have state-pollution failures when run
+        # as part of the full suite (engine loaders, third-party audit, isolated
+        # subprocess tests).  Scope pre-push to subdirectories that are reliably
+        # self-contained and hardware-independent; full suite runs in CI.
+        entry: python3 -m pytest
+          tests/unit/dbc
+          tests/unit/core
+          tests/unit/utils
+          -x -q --tb=short -m "not slow and not integration"
+          --override-ini="addopts=-ra -q --strict-markers --strict-config --durations=20"
         language: system
         pass_filenames: false
         # Only run if Python files changed

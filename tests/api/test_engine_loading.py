@@ -66,7 +66,9 @@ class TestEngineProbing:
 class TestEngineLoading:
     """Test engine loading functionality."""
 
-    @pytest.mark.skip(reason="Engine Python modules not installed in test environment")
+    @pytest.mark.xfail(
+        reason="Engine Python modules not installed in test environment", strict=False
+    )
     @pytest.mark.parametrize(
         "engine_name",
         [
@@ -86,17 +88,23 @@ class TestEngineLoading:
         assert "version" in data
         assert "capabilities" in data
 
+    @pytest.mark.xfail(
+        reason="Engine Python modules not installed in test environment", strict=False
+    )
     @pytest.mark.parametrize(
         "engine_name",
         [
-            "myosuite",  # Not installed yet
+            "myosuite",
         ],
     )
-    def test_load_unavailable_engine(self, client, engine_name: str) -> None:
-        """Test loading unavailable engine fails gracefully."""
+    def test_load_myosuite_engine(self, client, engine_name: str) -> None:
+        """Test loading myosuite engine (path fixed: myosim -> myosuite)."""
         response = client.post(f"/api/engines/{engine_name}/load")
-        # Should return error status
-        assert response.status_code in [400, 500]
+        assert response.status_code == 200, f"Failed to load {engine_name}"
+
+        data = response.json()
+        assert data["status"] == "loaded"
+        assert data["engine"] == engine_name
 
     def test_load_unknown_engine(self, client) -> None:
         """Test loading unknown engine returns 400."""
@@ -137,7 +145,9 @@ class TestSimulationStart:
         """Fixture to ensure MuJoCo is loaded."""
         client.post("/api/engines/mujoco/load")
 
-    @pytest.mark.skip(reason="MuJoCo Python module not installed in test environment")
+    @pytest.mark.xfail(
+        reason="MuJoCo Python module not installed in test environment", strict=False
+    )
     def test_start_simulation_with_mujoco(self, client, loaded_mujoco: None) -> None:
         """Test starting a simulation with MuJoCo engine."""
         response = client.post(
@@ -178,8 +188,9 @@ class TestPuttingGreenEngine:
         assert data["status"] == "loaded"
         assert data["engine"] == "putting_green"
 
-    @pytest.mark.skip(
-        reason="Proper Putting Green implementation pending (Issue #1136)"
+    @pytest.mark.xfail(
+        reason="Proper Putting Green implementation pending (Issue #1136)",
+        strict=False,
     )
     def test_putting_green_simulation(self, client) -> None:
         """Test Putting Green simulation (will be implemented in #1136)."""

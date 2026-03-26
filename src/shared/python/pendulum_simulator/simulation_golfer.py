@@ -42,7 +42,7 @@ from .physics_golfer import (
 from .simulation_core import integrate_ode
 from .simulation_result_base import TrajectoryResultMixin
 
-# Re-export from shared utility for backwards compatibility (DRY — #1041)
+# Re-export from shared utility for backwards compatibility (DRY â€” #1041)
 from .torque_utils import make_polynomial_torque  # noqa: F401
 
 _log = logging.getLogger(__name__)
@@ -81,7 +81,7 @@ class GolferSimulationResult(TrajectoryResultMixin):
         return self.states[idx, N_DOF:]
 
     def mass_matrix_at(self, idx: int) -> np.ndarray:
-        """8×8 mass matrix at time index."""
+        """8Ã—8 mass matrix at time index."""
         assert idx is not None, "idx must be provided"
         self._check_idx(idx)
         return mass_matrix(self.q_at(idx), self.params)  # type: ignore[no-any-return]
@@ -205,10 +205,10 @@ def run_simulation(
     initial_state : np.ndarray, shape (16,)
     t_end : float
     torque_func : callable
-    dt : float — output time step
-    method : str — ODE solver method
-    rtol, atol : float — solver tolerances
-    alpha, beta : float — Baumgarte stabilization gains
+    dt : float â€” output time step
+    method : str â€” ODE solver method
+    rtol, atol : float â€” solver tolerances
+    alpha, beta : float â€” Baumgarte stabilization gains
     torque_limits : np.ndarray, shape (7,), optional
         Per-joint torque saturation limits.
     limits : JointLimitsNDOF, optional

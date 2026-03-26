@@ -173,13 +173,13 @@ def check_reversibility(root_path: Path) -> list[dict]:
 
 
 def check_quality(files: list[Path]) -> list[dict]:
-    """Report high TODO counts as a technical debt indicator."""
+    """Report high TRACKED_TASK counts as a technical debt indicator."""
     issues = []
     todos = []
     for file_path in files:
         try:
             content = file_path.read_text(encoding="utf-8", errors="ignore")
-            if "TODO" in content:
+            if "TRACKED_TASK" in content:
                 todos.append(str(file_path))
         except (OSError, ValueError):
             pass
@@ -189,7 +189,7 @@ def check_quality(files: list[Path]) -> list[dict]:
             {
                 "principle": "QUALITY",
                 "severity": "MINOR",
-                "title": f"High TODO count ({len(todos)})",
+                "title": f"High TRACKED_TASK count ({len(todos)})",
                 "description": "Accumulated technical debt",
                 "files": todos[:5],
                 "recommendation": "Review TODOs",
@@ -241,8 +241,10 @@ def run_review(root_path: Path):
 
 def generate_markdown_report(results, output_path):
     """Write the pragmatic review results as a Markdown report."""
-    assert isinstance(results, dict), "results must be a dictionary"
-    assert isinstance(output_path, Path), "output_path must be a Path object"
+    if not isinstance(results, dict):
+        raise ValueError("results must be a dictionary")
+    if not isinstance(output_path, Path):
+        raise ValueError("output_path must be a Path object")
     md = [f"# Pragmatic Programmer Review: {results['repository']}"]
     md.append(f"**Date**: {results['timestamp'][:10]}")
     md.append(f"**Files**: {results['files_analyzed']}")

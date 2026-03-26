@@ -62,7 +62,7 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
      - `ruff check`
      - `black --check` (line length 88)
      - `mypy`
-     - TODO/FIXME grep
+     - TRACKED_TASK/TRACKED_DEFECT grep
      - `pip-audit`
      - MATLAB quality check (non-blocking)
      - pytest (+ cross-engine validation)
@@ -85,7 +85,7 @@ This document summarizes how the repository guidance (AGENTS.md and related agen
 - Linting: `ruff check .`
 - Formatting: `black --check .`
 - Type checking: `mypy . --config-file pyproject.toml`
-- Placeholder detection: grep TODO/FIXME (blocking)
+- Placeholder detection: grep TRACKED_TASK/TRACKED_DEFECT (blocking)
 - Security: `pip-audit` (blocking)
 - MATLAB quality check: `tools/matlab_utilities/scripts/matlab_quality_check.py` (non-blocking)
 - Tests: pytest + cross-engine validation + Codecov (if token present)

@@ -1,7 +1,7 @@
 """Unit tests for core module (logging and exceptions).
 
 TEST-001: Added test coverage for core.py (previously 0% coverage).
-OBS-001: Added tests for new structured logging functionality.
+Issue #2061: Updated to reflect stdlib-only logging in _core.py.
 """
 
 import logging
@@ -92,20 +92,59 @@ class TestLegacyLogging:
         assert len(logger2.handlers) == initial_handlers  # No duplicate handlers
 
 
-class TestStructuredLogging:
-    """Test structured logging with structlog."""
+class TestGetLogger:
+    """Test get_logger returns a stdlib Logger.
 
-    def setup_method(self) -> None:
-        """Reset structured logging configuration before each test."""
-        # Reset the global configuration flag
-        import src.shared.python.core as core_module
+    Issue #2061: _core.get_logger now returns logging.Logger (stdlib) instead
+    of a structlog BoundLogger.  This makes logging consistent with the rest of
+    the codebase which uses stdlib logging directly.  Structured-logging
+    configuration (including optional structlog processors) is handled by
+    logging_pkg.logging_config.setup_logging() at application start-up.
+    """
 
-        core_module._structured_logging_configured = False
+    def test_get_logger_returns_stdlib_logger(self) -> None:
+        """Test get_logger returns a stdlib Logger instance."""
+        logger = get_logger("test_module")
+        assert isinstance(logger, logging.Logger)
+
+    def test_get_logger_name(self) -> None:
+        """Test get_logger assigns the correct name."""
+        logger = get_logger("specific_name")
+        assert logger.name == "specific_name"
+
+    def test_get_logger_has_standard_methods(self) -> None:
+        """Test logger has the standard logging methods."""
+        logger = get_logger("test_methods")
+        assert callable(logger.debug)
+        assert callable(logger.info)
+        assert callable(logger.warning)
+        assert callable(logger.error)
+        assert callable(logger.critical)
+
+    def test_get_logger_multiple_calls_same_instance(self) -> None:
+        """Test that get_logger returns the same instance for the same name."""
+        logger1 = get_logger("same_name")
+        logger2 = get_logger("same_name")
+        assert logger1 is logger2
+
+    def test_get_logger_different_names_different_instances(self) -> None:
+        """Test that different names return different loggers."""
+        logger1 = get_logger("module_a")
+        logger2 = get_logger("module_b")
+        assert logger1 is not logger2
+
+
+class TestSetupStructuredLogging:
+    """Test setup_structured_logging delegates correctly.
+
+    Issue #2061: setup_structured_logging now delegates to
+    logging_pkg.logging_config.setup_logging() rather than configuring
+    structlog directly.
+    """
 
     def test_setup_structured_logging_basic(self) -> None:
-        """Test basic setup_structured_logging call."""
+        """Test basic setup_structured_logging call does not raise."""
         setup_structured_logging()
-        # Should not raise any exceptions
 
     def test_setup_structured_logging_with_dev_mode(self) -> None:
         """Test setup with development mode enabled."""
@@ -123,7 +162,6 @@ class TestStructuredLogging:
         """Test setup with custom log level."""
         setup_structured_logging(level=logging.DEBUG)
         logger = get_logger("test_level")
-        # Logger should be created without errors
         assert logger is not None
 
     def test_setup_structured_logging_idempotent(self) -> None:
@@ -133,41 +171,34 @@ class TestStructuredLogging:
         logger = get_logger("test_idempotent_struct")
         assert logger is not None
 
-    def test_get_logger_returns_structlog_logger(self) -> None:
-        """Test get_logger returns a structlog BoundLogger."""
-        logger = get_logger("test_module")
-        # Check that it has structlog's bind method
-        assert hasattr(logger, "bind")
 
-    def test_get_logger_auto_configures(self) -> None:
-        """Test get_logger auto-configures if not already configured."""
-        # Don't call setup_structured_logging first
-        logger = get_logger("test_auto_config")
-        assert logger is not None
-        assert hasattr(logger, "bind")
+class TestLoggingCompatibility:
+    """Test compatibility between legacy and get_logger-based logging."""
 
-    def test_logger_supports_structured_data(self) -> None:
-        """Test logger can handle keyword arguments."""
-        logger = get_logger("test_structured")
-        # Should not raise exceptions
-        logger.info("test_event", key1="value1", key2=42, key3=True)
+    def test_both_functions_return_loggers(self) -> None:
+        """Test that setup_logging and get_logger both return Logger instances."""
+        legacy_logger = setup_logging("legacy_module")
+        stdlib_logger = get_logger("stdlib_module")
 
-    def test_logger_bind_creates_context(self) -> None:
-        """Test logger.bind creates logger with persistent context."""
-        logger = get_logger("test_bind")
-        bound_logger = logger.bind(request_id="test-123", user="alice")
-        assert bound_logger is not None
-        # Should not raise when logging
-        bound_logger.info("test_event", action="test")
+        assert isinstance(legacy_logger, logging.Logger)
+        assert isinstance(stdlib_logger, logging.Logger)
 
-    def test_logger_different_levels(self) -> None:
-        """Test logger supports different log levels."""
-        logger = get_logger("test_levels")
-        # Should not raise exceptions
-        logger.debug("debug_event", level="debug")
-        logger.info("info_event", level="info")
-        logger.warning("warning_event", level="warning")
-        logger.error("error_event", level="error")
+    def test_loggers_log_without_error(self) -> None:
+        """Test that loggers from both sources can log without error."""
+        legacy_logger = setup_logging("legacy_compat")
+        stdlib_logger = get_logger("stdlib_compat")
+
+        # Both should work
+        legacy_logger.info("Legacy log message")
+        stdlib_logger.info("stdlib log message")
+
+    def test_same_module_name_same_logger(self) -> None:
+        """Test using same module name with both APIs returns same logger."""
+        legacy = setup_logging("test_module_compat")
+        stdlib = get_logger("test_module_compat")
+
+        # Both APIs return the same underlying stdlib logger
+        assert legacy is stdlib
 
     def test_logger_exception_logging(self) -> None:
         """Test logger can log exceptions."""
@@ -180,38 +211,9 @@ class TestStructuredLogging:
 
     def test_multiple_loggers_independent(self) -> None:
         """Test that multiple loggers are independent."""
-        logger1 = get_logger("module1")
-        logger2 = get_logger("module2")
+        logger1 = get_logger("module1_compat")
+        logger2 = get_logger("module2_compat")
 
         # Both should work independently
-        logger1.info("event1", module="module1")
-        logger2.info("event2", module="module2")
-
-    def test_structured_logging_processors_configured(self) -> None:
-        """Test that processors are properly configured."""
-        setup_structured_logging(dev_mode=True)
-        # Verify structlog is configured (doesn't raise)
-        logger = get_logger("test_processors")
-        logger.info("test", timestamp=True, caller=True)
-
-
-class TestLoggingCompatibility:
-    """Test compatibility between legacy and structured logging."""
-
-    def test_both_logging_systems_coexist(self) -> None:
-        """Test that legacy and structured logging can coexist."""
-        legacy_logger = setup_logging("legacy_module")
-        structured_logger = get_logger("structured_module")
-
-        # Both should work
-        legacy_logger.info("Legacy log message")
-        structured_logger.info("structured_event", key="value")
-
-    def test_same_module_name_different_loggers(self) -> None:
-        """Test using same module name with both systems."""
-        legacy = setup_logging("test_module_compat")
-        structured = get_logger("test_module_compat")
-
-        # Should not interfere with each other
-        legacy.info("Legacy message")
-        structured.info("structured_message", type="structured")
+        logger1.info("event1")
+        logger2.info("event2")

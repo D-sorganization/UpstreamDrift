@@ -66,10 +66,12 @@ class MatrixWidgetBase(QWidget):
           - result is not None
           - result has n_steps >= 1
         """
-        assert result is not None, f"{self.__class__.__name__}: result must not be None"
-        assert result.n_steps >= 1, (
-            f"{self.__class__.__name__}: result must have at least one time step"
-        )
+        if not (result is not None):
+            raise ValueError(f"{self.__class__.__name__}: result must not be None")
+        if not (result.n_steps >= 1):
+            raise ValueError(
+                f"{self.__class__.__name__}: result must have at least one time step"
+            )
         self._result = result
         self._current_idx = 0
         logger.debug(
@@ -87,7 +89,8 @@ class MatrixWidgetBase(QWidget):
         Post:
           - _current_idx is clamped to [0, n_steps-1]
         """
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         if self._result is None:
             return
         self._current_idx = max(0, min(idx, self._result.n_steps - 1))
@@ -102,7 +105,8 @@ class MatrixWidgetBase(QWidget):
 
     def paintEvent(self, event: object) -> None:
         """Render the widget. Orchestrates sections and delegates to helpers."""
-        assert event is not None, "event must be provided"
+        if not (event is not None):
+            raise ValueError("event must be provided")
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(self.rect(), self.COLOR_BG)
@@ -208,7 +212,8 @@ class MatrixWidgetBase(QWidget):
         Returns:
             New y cursor position
         """
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         painter.setPen(self.COLOR_TEXT)
         font = QFont("Sans", 11, QFont.Weight.Bold)
         painter.setFont(font)
@@ -228,7 +233,8 @@ class MatrixWidgetBase(QWidget):
         Returns:
             New y cursor position after matrix and legend
         """
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         rows, cols = self.get_matrix_size()
         entries = self.get_matrix_entries(mc)
         _ = self.get_column_labels()  # reserved for future DOF labels in matrix
@@ -305,7 +311,8 @@ class MatrixWidgetBase(QWidget):
         Returns:
             New y cursor position
         """
-        assert self._result is not None
+        if not (self._result is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
         idx = self._current_idx
         tau = self._result.torques_at(idx)
         G = self._result.gravity_at(idx)
@@ -350,7 +357,8 @@ class MatrixWidgetBase(QWidget):
         Returns:
             New y cursor position
         """
-        assert self._result is not None
+        if not (self._result is not None):
+            raise ValueError("DbC Blocked: Precondition failed.")
         e = self._result.energy_at(self._current_idx)
         painter.setFont(QFont("Monospace", 10))
         lines = [

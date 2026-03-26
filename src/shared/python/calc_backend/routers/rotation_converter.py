@@ -65,7 +65,7 @@ def compute_rotation(request: RotationConverterRequest) -> RotationConverterResp
             rot = Rotation.from_rotation_matrix(request.value)
         else:
             raise ValueError(f"Unknown representation type: {request.type}")
-    except Exception as exc:
+    except (ValueError, TypeError, ArithmeticError) as exc:
         raise HTTPException(
             status_code=422, detail=f"Invalid rotation input: {exc}"
         ) from exc
@@ -78,7 +78,7 @@ def compute_rotation(request: RotationConverterRequest) -> RotationConverterResp
         try:
             eul = list(rot.as_euler(request.euler_convention))
             conv = request.euler_convention
-        except Exception:
+        except (ValueError, KeyError):
             eul = list(rot.as_euler("xyz"))
             conv = "xyz"
 
@@ -100,7 +100,7 @@ def compute_rotation(request: RotationConverterRequest) -> RotationConverterResp
 
         return RotationConverterResponse(representations=rep_model)
 
-    except Exception as exc:
+    except (AttributeError, TypeError, ArithmeticError) as exc:
         raise HTTPException(
             status_code=500, detail=f"Failed building outputs: {exc}"
         ) from exc
@@ -123,7 +123,7 @@ def compute_reference_frame_conversion(
         )
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
-    except Exception as error:
+    except (TypeError, ArithmeticError, AttributeError) as error:
         raise HTTPException(
             status_code=500,
             detail="Failed to compute reference-frame conversion.",

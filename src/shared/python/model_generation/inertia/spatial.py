@@ -178,8 +178,10 @@ def urdf_to_spatial_inertia(
     Returns:
         6x6 spatial inertia matrix
     """
-    assert mass is not None, "mass must be provided"
-    assert mass is not None, "mass must be provided"
+    if not (mass is not None):
+        raise ValueError("mass must be provided")
+    if not (mass is not None):
+        raise ValueError("mass must be provided")
     I_com = np.array(
         [
             [ixx, ixy, ixz],

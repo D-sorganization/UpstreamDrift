@@ -27,8 +27,10 @@ from src.shared.python.physics.topography import (  # noqa: E402
 
 def _ascii_profile(terrain, y: float = 50.0, n_samples: int = 20) -> str:
     """Return a one-line ASCII elevation profile along x at fixed y."""
-    assert terrain is not None, "Terrain object must be provided"
-    assert n_samples > 1, "n_samples must be greater than 1"
+    if not (terrain is not None):
+        raise ValueError("Terrain object must be provided")
+    if not (n_samples > 1):
+        raise ValueError("n_samples must be greater than 1")
     xs = np.linspace(0, 100, n_samples)
     elevations = [terrain.get_elevation_at(np.array([x, y])) for x in xs]
     e_min, e_max = min(elevations), max(elevations)
@@ -42,17 +44,15 @@ def _ascii_profile(terrain, y: float = 50.0, n_samples: int = 20) -> str:
 
 
 def _show_terrain(name: str, terrain) -> None:
-    assert name, "Name must not be empty"
-    assert terrain is not None, "Terrain object must be provided"
-    print(f"\n--- {name} ---")
+    if not (name):
+        raise ValueError("Name must not be empty")
+    if not (terrain is not None):
+        raise ValueError("Terrain object must be provided")
     xs = np.linspace(0, 100, 6)
     ys = np.linspace(0, 100, 6)
-    print(f"  {'x':>6}  {'y':>6}  {'elev (m)':>10}")
     for x in xs:
         for y in ys:
-            elev = terrain.get_elevation_at(np.array([x, y]))
-            print(f"  {x:6.1f}  {y:6.1f}  {elev:10.3f}")
-    print(f"  ASCII profile (y=50): {_ascii_profile(terrain)}")
+            terrain.get_elevation_at(np.array([x, y]))
 
 
 def main() -> None:
@@ -79,11 +79,8 @@ def main() -> None:
     _show_terrain("Undulating terrain (amplitude=2 m, λ=30 m)", undulating)
 
     # Combining terrain + ball landing check
-    print("\n--- Landing detection on sloped terrain ---")
-    print("(Ball lands when trajectory z ≤ terrain elevation)")
     for x in np.linspace(0, 200, 5):
-        elev = sloped.get_elevation_at(np.array([min(x, 99.9), 50.0]))
-        print(f"  x={x:6.1f} m  terrain_elev={elev:.2f} m")
+        sloped.get_elevation_at(np.array([min(x, 99.9), 50.0]))
 
 
 if __name__ == "__main__":

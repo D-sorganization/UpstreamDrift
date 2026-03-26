@@ -15,11 +15,11 @@ ControlsWidget, ControlsWidgetTriple, and ControlsWidgetGolfer:
 
 Subclasses implement:
 - PRESETS class attribute
-- _build_model_sections(layout) — add model-specific parameter sections
-- _apply_preset(name) — fill inputs from preset data
-- get_params() — parse inputs into simulation parameter dict
-- _get_joint_names() — return list of joint names for signal toolkit
-- _get_torque_inputs() — return mapping of joint name → LabeledInput
+- _build_model_sections(layout) â€” add model-specific parameter sections
+- _apply_preset(name) â€” fill inputs from preset data
+- get_params() â€” parse inputs into simulation parameter dict
+- _get_joint_names() â€” return list of joint names for signal toolkit
+- _get_torque_inputs() â€” return mapping of joint name â†’ LabeledInput
 """
 
 from __future__ import annotations
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
 
 
 # ---------------------------------------------------------------------------
-# Button style constants (DRY — shared across all models)
+# Button style constants (DRY â€” shared across all models)
 # ---------------------------------------------------------------------------
 
 STYLE_BTN_RUN = (
@@ -88,11 +88,11 @@ class ControlsWidgetBase(QWidget):
     - Implement ``_build_model_sections(layout)`` to add model-specific UI.
     - Implement ``_apply_preset(name)`` to populate inputs from preset data.
     - Implement ``get_params()`` to parse and return simulation parameters.
-    - Implement ``_get_joint_names()`` → list[str] for signal toolkit dialog.
-    - Implement ``_get_torque_inputs()`` → dict[str, LabeledInput].
+    - Implement ``_get_joint_names()`` â†’ list[str] for signal toolkit dialog.
+    - Implement ``_get_torque_inputs()`` â†’ dict[str, LabeledInput].
     """
 
-    # ── Common signals (identical across all three widgets) ──────────
+    # â”€â”€ Common signals (identical across all three widgets) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     run_requested = pyqtSignal()
     reset_requested = pyqtSignal()
     play_toggled = pyqtSignal(bool)
@@ -151,7 +151,7 @@ class ControlsWidgetBase(QWidget):
         existing signal connections (play_toggled, frame_changed, etc.)
         continue to work.  Controls are driven from the ToolStrip.
         """
-        # Run/Reset buttons — may already exist if subclass called
+        # Run/Reset buttons â€” may already exist if subclass called
         # _build_run_reset_buttons().  Create as hidden fallbacks so
         # SimulationPanel._on_run can always reference btn_run/btn_reset.
         if not hasattr(self, "btn_run"):
@@ -184,7 +184,7 @@ class ControlsWidgetBase(QWidget):
         Parameters
         ----------
         joint_labels : list of display labels, one per joint
-        defaults : list of default max torque values (N·m)
+        defaults : list of default max torque values (NÂ·m)
 
         Creates:
             self.chk_clamp : QCheckBox
@@ -203,7 +203,7 @@ class ControlsWidgetBase(QWidget):
         layout.addWidget(self.chk_clamp)
         self.clamp_inputs: list[_LI] = []
         for label, default in zip(joint_labels, defaults, strict=False):
-            inp = _LI(f"Max |τ {label}|", str(default), f"Max {label} torque ±(N·m)")
+            inp = _LI(f"Max |Ï„ {label}|", str(default), f"Max {label} torque Â±(NÂ·m)")
             layout.addWidget(inp)
             self.clamp_inputs.append(inp)
         return box
@@ -246,14 +246,14 @@ class ControlsWidgetBase(QWidget):
             row_layout = QHBoxLayout()
             row_layout.setContentsMargins(0, 0, 0, 0)
             row_layout.setSpacing(4)
-            inp_min = _LI(f"{label} min°", str(lo), f"Min {label} angle (deg)", 70)
-            inp_max = _LI(f"{label} max°", str(hi), f"Max {label} angle (deg)", 70)
+            inp_min = _LI(f"{label} minÂ°", str(lo), f"Min {label} angle (deg)", 70)
+            inp_max = _LI(f"{label} maxÂ°", str(hi), f"Max {label} angle (deg)", 70)
             row_layout.addWidget(inp_min, stretch=1)
             row_layout.addWidget(inp_max, stretch=1)
             layout.addLayout(row_layout)
             self.limit_min_inputs.append(inp_min)
             self.limit_max_inputs.append(inp_max)
-        self.inp_limit_k = _LI("K (N·m/rad)", "500", "Penalty stiffness", 70)
+        self.inp_limit_k = _LI("K (NÂ·m/rad)", "500", "Penalty stiffness", 70)
         layout.addWidget(self.inp_limit_k)
         return box
 
@@ -322,9 +322,9 @@ class ControlsWidgetBase(QWidget):
         layout = QVBoxLayout(box)
         layout.setContentsMargins(4, 12, 4, 4)
         layout.setSpacing(4)
-        # Gravity is always on (#1209) — no checkbox needed
+        # Gravity is always on (#1209) â€” no checkbox needed
 
-        self.chk_forces = QCheckBox("↗  Show force vectors")
+        self.chk_forces = QCheckBox("â†—  Show force vectors")
         self.chk_forces.setChecked(False)
         self.chk_forces.setStyleSheet(STYLE_CHECK)
         self.chk_forces.toggled.connect(self.forces_changed.emit)
@@ -333,8 +333,8 @@ class ControlsWidgetBase(QWidget):
         return box
 
     def _build_funcgen_button(self) -> QPushButton:
-        """Build a "Signal Toolkit…" button.  Shared across all models."""
-        btn = QPushButton("📈 Signal Toolkit…")
+        """Build a "Signal Toolkitâ€¦" button.  Shared across all models."""
+        btn = QPushButton("ðŸ“ˆ Signal Toolkitâ€¦")
         btn.setToolTip("Design a waveform and import as torque coefficients")
         btn.setStyleSheet(STYLE_BTN_FUNCGEN)
         btn.clicked.connect(self._open_function_generator)
@@ -411,7 +411,7 @@ class ControlsWidgetBase(QWidget):
         return self.chk_forces.isChecked()
 
     # ------------------------------------------------------------------
-    # Abstract interface — subclasses must implement
+    # Abstract interface â€” subclasses must implement
     # ------------------------------------------------------------------
 
     @abc.abstractmethod
@@ -446,7 +446,7 @@ class ControlsWidgetBase(QWidget):
 
     @abc.abstractmethod
     def _get_torque_inputs(self) -> dict[str, LabeledInput]:
-        """Return mapping of joint name → torque input widget.
+        """Return mapping of joint name â†’ torque input widget.
 
         Returns
         -------

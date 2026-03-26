@@ -3,7 +3,7 @@ Joint moment and torque vector calculations for pendulum models.
 
 Computes three quantities at each joint (proximal-on-distal convention):
     1. Applied joint torque (the motor/muscle torque)
-    2. Moment of net force (cross product of position × force)
+    2. Moment of net force (cross product of position Ã— force)
     3. Total moment (applied torque + moment of net force)
 
 All functions are pure, stateless, and model-agnostic where possible.
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def cross_2d(r: np.ndarray, f: np.ndarray) -> float:
-    """Compute 2-D cross product r × f (scalar, positive = CCW).
+    """Compute 2-D cross product r Ã— f (scalar, positive = CCW).
 
     Preconditions:
         r, f are shape (2,) and finite.
@@ -54,12 +54,12 @@ def moment_of_force(
 ) -> float:
     """Moment of the net joint force about the distal segment's COM.
 
-    M = r × F where r = distal_com - joint_position.
+    M = r Ã— F where r = distal_com - joint_position.
 
     Preconditions:
         All arrays shape (2,), finite.
     Postconditions:
-        Returns finite float (N·m, positive = CCW).
+        Returns finite float (NÂ·m, positive = CCW).
     """
     assert joint_position is not None, "joint_position must be provided"
     r = np.asarray(distal_com_position, dtype=float) - np.asarray(
@@ -229,12 +229,12 @@ def golfer_pendulum_moments(
     Contract
     --------
     Pre:  len(applied_torques) >= 7 and all required keys present in positions/forces.
-    Post: Returns dict with 21 keys (3 per joint × 7 joints), all finite.
+    Post: Returns dict with 21 keys (3 per joint Ã— 7 joints), all finite.
     """
     assert len(applied_torques) >= 7, (
         f"Need >= 7 applied torques, got {len(applied_torques)}"
     )
-    # Joint → distal endpoint pairs (joint connects to next link's endpoint)
+    # Joint â†’ distal endpoint pairs (joint connects to next link's endpoint)
     joints = ["hub", "rs", "re", "rh", "ls", "le", "lh"]
     endpoints = ["rs", "re", "rh", "club_tip", "le", "lh", "club_tip"]
 
@@ -245,7 +245,7 @@ def golfer_pendulum_moments(
         f_raw = joint_forces.get(jname)
 
         if j_pos_raw is None or e_pos_raw is None or f_raw is None:
-            # Missing data — store zeros
+            # Missing data â€” store zeros
             result[f"{jname}_applied_torque"] = applied_torques[i]
             result[f"{jname}_moment_of_force"] = 0.0
             result[f"{jname}_total_moment"] = applied_torques[i]

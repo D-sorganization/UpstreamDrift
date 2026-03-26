@@ -43,7 +43,7 @@ import json
 import logging
 import subprocess
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -150,7 +150,7 @@ def get_github_sha(api_url: str) -> str:
         req = urllib.request.Request(
             api_url, headers={"Accept": "application/vnd.github.v3+json"}
         )
-        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310
+        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310  # nosec B310 - GitHub API URL from trusted constant api_url
             data = json.loads(resp.read())
             return str(data.get("sha", "<no-sha>"))
     except Exception as exc:  # noqa: BLE001
@@ -263,23 +263,15 @@ def main(argv: list[str] | None = None) -> int:
         results.append(status)
 
     if args.json:
-        print(json.dumps([asdict(r) for r in results], indent=2))
+        pass
     else:
-        print("\n=== Vendor Submodule Freshness Report ===\n")
-        for r in results:
-            print(r.message)
-        print()
+        for _r in results:
+            pass
 
     stale_count = sum(1 for r in results if not r.is_current)
 
     if stale_count > 0 and not args.json:
-        print(
-            f"⚠️  {stale_count} submodule(s) are behind upstream.\n"
-            "   Run the following to update:\n"
-            "   git submodule update --remote vendor/ud-tools\n"
-            "   git add vendor/ud-tools\n"
-            '   git commit -m "chore: sync vendor/ud-tools to latest Tools main"\n'
-        )
+        pass
 
     if args.fail_on_stale and stale_count > 0:
         return 1

@@ -141,8 +141,10 @@ class StatisticalAnalyzer(
             angular_momentum: System angular momentum (N, 3) [optional]
             joint_accelerations: Joint accelerations (N, nv) [optional]
         """
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         self.times = times
         self.joint_positions = joint_positions
         self.joint_velocities = joint_velocities

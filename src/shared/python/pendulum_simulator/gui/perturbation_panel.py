@@ -29,6 +29,7 @@ import logging
 from collections.abc import Callable
 from typing import Any
 
+import numpy as np
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -43,8 +44,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from ..perturbation.config import PerturbationConfig, PerturbationSummary
 from ..perturbation_analysis import (
-    PerturbationConfig,
+    PendulumPerturbationAnalyzer,
     variability_summary,
 )
 
@@ -126,7 +128,8 @@ class _PerturbWorker(QObject):
         simulate_fn: Callable,
         extract_fn: Callable,
     ) -> None:
-        assert base_coeffs is not None, "base_coeffs must be provided"
+        if not (base_coeffs is not None):
+            raise ValueError("base_coeffs must be provided")
         super().__init__()
         self._base_coeffs = base_coeffs
         self._config = config
@@ -138,30 +141,12 @@ class _PerturbWorker(QObject):
         self._cancelled = True
 
     def run(self) -> None:
-        """Run all trials, emitting progress after each."""
-        from ..perturbation_analysis import perturb_torque_coeffs
-
-        results = []
-        base_seed = self._config.seed if self._config.seed is not None else 0
-        for i in range(self._config.n_trials):
-            if self._cancelled:
-                break
-            trial_seed = base_seed + i
-            try:
-                perturbed = perturb_torque_coeffs(
-                    self._base_coeffs,
-                    noise_amplitude=self._config.noise_amplitude,
-                    noise_type=self._config.noise_type,
-                    seed=trial_seed,
-                )
-                sim_result = self._simulate_fn(perturbed)
-                metrics = self._extract_fn(sim_result)
-                results.append(metrics)
-            except (ValueError, RuntimeError, FloatingPointError, AssertionError):
-                logger.warning("Trial %d failed, skipping", i, exc_info=True)
-            self.progress.emit(i + 1)
-
-        self.finished.emit(results)
+        """Run all trials using the protocol analyzer."""
+        analyzer = PendulumPerturbationAnalyzer(self._simulate_fn, self._extract_fn)  # type: ignore[arg-type]
+        analyzer.set_base_torque_profile(self._base_coeffs)
+        summary: PerturbationSummary = analyzer.run_batch(self._config)
+        self.progress.emit(summary.config.n_trials)
+        self.finished.emit([summary])
 
 
 # ---------------------------------------------------------------------------
@@ -216,8 +201,10 @@ class PerturbationPanel(QWidget):
             Extracts {'tip_speed_final': float, 'tip_position_final': array}
             from a simulation result.
         """
-        assert simulate_fn is not None, "simulate_fn must not be None"
-        assert extract_fn is not None, "extract_fn must not be None"
+        if not (simulate_fn is not None):
+            raise ValueError("simulate_fn must not be None")
+        if not (extract_fn is not None):
+            raise ValueError("extract_fn must not be None")
         self._simulate_fn = simulate_fn
         self._extract_fn = extract_fn
         self._run_btn.setEnabled(True)
@@ -251,6 +238,14 @@ class PerturbationPanel(QWidget):
         self._noise_combo.addItems(["white", "pink", "brown"])
         row1.addWidget(self._noise_combo)
         lay.addLayout(row1)
+
+        # Mode
+        row_mode = QHBoxLayout()
+        row_mode.addWidget(QLabel("Mode:"))
+        self._mode_combo = QComboBox()
+        self._mode_combo.addItems(["additive", "multiplicative", "both"])
+        row_mode.addWidget(self._mode_combo)
+        lay.addLayout(row_mode)
 
         # Amplitude
         row2 = QHBoxLayout()
@@ -321,7 +316,7 @@ class PerturbationPanel(QWidget):
         lay.setSpacing(2)
 
         self._result_labels: dict[str, QLabel] = {}
-        for key in ("Mean", "Std", "CV", "Min", "Max", "Trials"):
+        for key in ("Mode", "Mean", "Std", "CV", "Min", "Max", "Score", "Trials"):
             row = QHBoxLayout()
             row.addWidget(QLabel(f"{key}:"))
             lbl = QLabel("—")
@@ -352,14 +347,17 @@ class PerturbationPanel(QWidget):
     # ------------------------------------------------------------------
 
     def _on_run(self) -> None:
-        assert self._simulate_fn is not None, "simulate_fn not set"
-        assert self._extract_fn is not None, "extract_fn not set"
+        if not (self._simulate_fn is not None):
+            raise ValueError("simulate_fn not set")
+        if not (self._extract_fn is not None):
+            raise ValueError("extract_fn not set")
 
         seed_val = self._seed_spin.value()
         config = PerturbationConfig(
             n_trials=self._trials_spin.value(),
             noise_type=self._noise_combo.currentText(),
             noise_amplitude=self._amp_spin.value(),
+            perturb_mode=self._mode_combo.currentText(),
             seed=seed_val if seed_val > 0 else None,
         )
 
@@ -408,14 +406,16 @@ class PerturbationPanel(QWidget):
         self._status_label.setText("Cancelling…")
 
     def _on_progress(self, trial: int) -> None:
-        assert trial is not None, "trial must be provided"
+        if not (trial is not None):
+            raise ValueError("trial must be provided")
         n = getattr(self, "_n_trials", 1)
         pct = int(100 * trial / max(n, 1))
         self._progress.setValue(pct)
         self._status_label.setText(f"Trial {trial} / {n}")
 
     def _on_finished(self, results: list) -> None:
-        assert results is not None, "results must be provided"
+        if not (results is not None):
+            raise ValueError("results must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
         if not results:
@@ -428,7 +428,8 @@ class PerturbationPanel(QWidget):
         self._status_label.setText(f"Done — {summary['n_trials']} trials completed")
 
     def _on_error(self, msg: str) -> None:
-        assert msg is not None, "msg must be provided"
+        if not (msg is not None):
+            raise ValueError("msg must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
         self._status_label.setText(f"Error: {msg}")
@@ -438,19 +439,50 @@ class PerturbationPanel(QWidget):
     # Result display helpers
     # ------------------------------------------------------------------
 
-    def _display_summary(self, summary: dict) -> None:
-        assert summary is not None, "summary must be provided"
-        mean = summary["tip_speed_mean"]
-        std = summary["tip_speed_std"]
-        cv = summary["tip_speed_cv"]
-        mn = summary["tip_speed_min"]
-        mx = summary["tip_speed_max"]
-        n = summary["n_trials"]
+    def _display_summary(self, summary: PerturbationSummary) -> None:
+        if not (summary is not None):
+            raise ValueError("summary must be provided")
+
+        if "end_effector_speed_final" in summary.metrics:
+            stats = summary.metrics["end_effector_speed_final"]
+            mean = (
+                float(stats.mean)
+                if np.isscalar(stats.mean) or getattr(stats.mean, "ndim", 1) == 0
+                else 0.0
+            )
+            std = (
+                float(stats.std)
+                if np.isscalar(stats.std) or getattr(stats.std, "ndim", 1) == 0
+                else 0.0
+            )
+            cv = (
+                float(stats.cv)
+                if np.isscalar(stats.cv) or getattr(stats.cv, "ndim", 1) == 0
+                else 0.0
+            )
+            mn = (
+                float(stats.min_val)
+                if np.isscalar(stats.min_val) or getattr(stats.min_val, "ndim", 1) == 0
+                else 0.0
+            )
+            mx = (
+                float(stats.max_val)
+                if np.isscalar(stats.max_val) or getattr(stats.max_val, "ndim", 1) == 0
+                else 0.0
+            )
+        else:
+            mean = std = cv = mn = mx = 0.0
+
+        score = summary.robustness_score
+        n = summary.config.n_trials
+
+        self._result_labels["Mode"].setText(summary.config.perturb_mode)
         self._result_labels["Mean"].setText(f"{mean:.3f} m/s")
         self._result_labels["Std"].setText(f"{std:.3f} m/s")
         self._result_labels["CV"].setText(f"{cv * 100:.2f} %")
         self._result_labels["Min"].setText(f"{mn:.3f} m/s")
         self._result_labels["Max"].setText(f"{mx:.3f} m/s")
+        self._result_labels["Score"].setText(f"{score:.3f}")
         self._result_labels["Trials"].setText(str(n))
 
     def _clear_results(self) -> None:
@@ -458,7 +490,8 @@ class PerturbationPanel(QWidget):
             lbl.setText("—")
 
     def _update_histogram(self, speeds: list[float]) -> None:
-        assert speeds is not None, "speeds must be provided"
+        if not (speeds is not None):
+            raise ValueError("speeds must be provided")
         self._ax.clear()
         self._ax.set_facecolor("#1a1a2e")
         self._ax.hist(speeds, bins=20, color="#5555b0", edgecolor="#303070")
@@ -491,7 +524,8 @@ class PerturbationPanel(QWidget):
             Returns the per-joint polynomial coefficient lists for the
             currently loaded simulation.
         """
-        assert callable(fn), "fn must be callable"
+        if not (callable(fn)):
+            raise ValueError("fn must be callable")
         self._get_coeffs_fn = fn
 
     def set_preset_source(
@@ -508,8 +542,10 @@ class PerturbationPanel(QWidget):
         get_coeffs_fn : callable(name) -> list[list[float]]
             Returns the polynomial coefficient lists for a named preset.
         """
-        assert callable(get_names_fn), "get_names_fn must be callable"
-        assert callable(get_coeffs_fn), "get_coeffs_fn must be callable"
+        if not (callable(get_names_fn)):
+            raise ValueError("get_names_fn must be callable")
+        if not (callable(get_coeffs_fn)):
+            raise ValueError("get_coeffs_fn must be callable")
         self._get_preset_names_fn = get_names_fn
         self._get_coeffs_for_preset_fn = get_coeffs_fn
         self._compare_btn.setEnabled(True)

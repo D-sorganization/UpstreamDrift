@@ -36,8 +36,8 @@ class TriplePendulumParams:
     Contract:
         - All lengths and masses must be strictly positive.
         - Gravity must be non-negative.
-        - Damping coefficients b1, b2, b3 must be non-negative  (N·m·s/rad).
-        - Coulomb friction mu1, mu2, mu3 must be non-negative  (N·m peak magnitude).
+        - Damping coefficients b1, b2, b3 must be non-negative  (NÂ·mÂ·s/rad).
+        - Coulomb friction mu1, mu2, mu3 must be non-negative  (NÂ·m peak magnitude).
     """
 
     m1: float  # mass of segment 1 (kg)
@@ -48,12 +48,12 @@ class TriplePendulumParams:
     L3: float  # length of segment 3 (m)
     g: float = GRAVITY_MSS  # gravitational acceleration (m/s^2)
     # --- Dissipative parameters (default 0 = no losses) ---
-    b1: float = 0.0  # viscous damping at joint 1 (N·m·s/rad)
-    b2: float = 0.0  # viscous damping at joint 2 (N·m·s/rad)
-    b3: float = 0.0  # viscous damping at joint 3 (N·m·s/rad)
-    mu1: float = 0.0  # Coulomb friction at joint 1 (N·m, constant magnitude)
-    mu2: float = 0.0  # Coulomb friction at joint 2 (N·m, constant magnitude)
-    mu3: float = 0.0  # Coulomb friction at joint 3 (N·m, constant magnitude)
+    b1: float = 0.0  # viscous damping at joint 1 (NÂ·mÂ·s/rad)
+    b2: float = 0.0  # viscous damping at joint 2 (NÂ·mÂ·s/rad)
+    b3: float = 0.0  # viscous damping at joint 3 (NÂ·mÂ·s/rad)
+    mu1: float = 0.0  # Coulomb friction at joint 1 (NÂ·m, constant magnitude)
+    mu2: float = 0.0  # Coulomb friction at joint 2 (NÂ·m, constant magnitude)
+    mu3: float = 0.0  # Coulomb friction at joint 3 (NÂ·m, constant magnitude)
     # --- Scapula offset (#1152) ---
     scapula_offset_rad: float = 0.0  # angular offset of hub anchor (rad)
 
@@ -340,7 +340,7 @@ def friction_torque_vector(
 
     Returns
     -------
-    tau_f : np.ndarray, shape (3,)  [N·m]
+    tau_f : np.ndarray, shape (3,)  [NÂ·m]
     """
     assert np.isfinite(dtheta1), f"dtheta1 must be finite, got {dtheta1}"
     assert np.isfinite(dphi1), f"dphi1 must be finite, got {dphi1}"

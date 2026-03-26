@@ -3,8 +3,6 @@ Engine Manager for Golf Modeling Suite.
 
 This module provides unified management of different physics engines
 including MuJoCo, Drake, Pinocchio, OpenSim, MATLAB models, and pendulum models.
-
-OBS-001: Migrated to structured logging with structlog for better observability.
 """
 
 from collections.abc import Callable
@@ -79,7 +77,14 @@ class EngineManager(ContractChecker):
         if suite_root is None:
             suite_root = get_src_root()
         self.suite_root = Path(suite_root)
-        self.engines_root = self.suite_root / "engines"
+        # Engines live under src/engines. When suite_root is the repo root
+        # (not src/), prefer src/engines which has the complete engine set.
+        src_engines = self.suite_root / "src" / "engines"
+        direct_engines = self.suite_root / "engines"
+        if src_engines.exists():
+            self.engines_root = src_engines
+        else:
+            self.engines_root = direct_engines
 
         self.current_engine: EngineType | None = None
         self.active_physics_engine: PhysicsEngine | None = None
@@ -91,7 +96,7 @@ class EngineManager(ContractChecker):
             EngineType.DRAKE: (self.engines_root / "physics_engines" / "drake"),
             EngineType.PINOCCHIO: (self.engines_root / "physics_engines" / "pinocchio"),
             EngineType.OPENSIM: (self.engines_root / "physics_engines" / "opensim"),
-            EngineType.MYOSIM: (self.engines_root / "physics_engines" / "myosim"),
+            EngineType.MYOSIM: (self.engines_root / "physics_engines" / "myosuite"),
             EngineType.MATLAB_2D: (
                 self.engines_root / "Simscape_Multibody_Models" / "2D_Golf_Model"
             ),
@@ -177,8 +182,10 @@ class EngineManager(ContractChecker):
     )
     def switch_engine(self, engine_type: EngineType) -> bool:
         """Switch to a different physics engine."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         if engine_type not in self.engine_status:
             logger.error(f"Unknown engine type: {engine_type}")
             return False
@@ -203,25 +210,25 @@ class EngineManager(ContractChecker):
             if engine_path.exists():
                 self.engine_status[engine_type] = EngineStatus.AVAILABLE
                 logger.info(
-                    "engine_discovered",
-                    engine=engine_type.value,
-                    path=str(engine_path),
-                    status="available",
+                    "engine_discovered engine=%s path=%s status=available",
+                    engine_type.value,
+                    engine_path,
                 )
             else:
                 self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
                 logger.warning(
-                    "engine_not_found",
-                    engine=engine_type.value,
-                    path=str(engine_path),
-                    status="unavailable",
+                    "engine_not_found engine=%s path=%s status=unavailable",
+                    engine_type.value,
+                    engine_path,
                 )
 
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
-        logger.info("engine_loading_started", engine=engine_type.value)
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        logger.info("engine_loading_started engine=%s", engine_type.value)
         self.engine_status[engine_type] = EngineStatus.LOADING
         self.active_physics_engine = None
 
@@ -243,9 +250,8 @@ class EngineManager(ContractChecker):
 
             self.engine_status[engine_type] = EngineStatus.LOADED
             logger.info(
-                "engine_loaded_successfully",
-                engine=engine_type.value,
-                status="loaded",
+                "engine_loaded_successfully engine=%s status=loaded",
+                engine_type.value,
             )
 
         except GolfModelingError:
@@ -254,26 +260,26 @@ class EngineManager(ContractChecker):
         except (ImportError, OSError, RuntimeError, ValueError, TypeError) as e:
             self.engine_status[engine_type] = EngineStatus.ERROR
             logger.error(
-                "engine_load_failed",
-                engine=engine_type.value,
-                error=str(e),
+                "engine_load_failed engine=%s error=%s",
+                engine_type.value,
+                e,
                 exc_info=True,
             )
             raise EngineLaunchError(engine_type.value, reason=str(e)) from e
 
     def _load_matlab_engine(self, engine_type: EngineType) -> None:
         """Load MATLAB engine type."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         self.active_physics_engine = None
         try:
             import matlab.engine
 
             logger.info(
-                "matlab_engine_starting",
-                engine=engine_type.value,
-                timeout_seconds=60,
-                note="This may take 30-60 seconds",
+                "matlab_engine_starting engine=%s timeout_seconds=60 (This may take 30-60 seconds)",
+                engine_type.value,
             )
             # REL-001: Add timeout to prevent infinite hangs
             engine = matlab.engine.start_matlab(timeout=60.0)
@@ -288,15 +294,14 @@ class EngineManager(ContractChecker):
             self._matlab_engine = engine
             self._matlab_model_dir = model_dir
             logger.info(
-                "matlab_engine_loaded",
-                engine=engine_type.value,
-                model_dir=str(model_dir),
+                "matlab_engine_loaded engine=%s model_dir=%s",
+                engine_type.value,
+                model_dir,
             )
 
         except ImportError as e:
             logger.error(
-                "matlab_engine_import_failed",
-                error="MATLAB Engine for Python not installed",
+                "matlab_engine_import_failed: MATLAB Engine for Python not installed",
                 exc_info=True,
             )
             raise GolfModelingError("MATLAB Engine for Python not installed.") from e
@@ -306,10 +311,10 @@ class EngineManager(ContractChecker):
         if self._matlab_engine is not None:
             try:
                 self._matlab_engine.quit()
-                logger.info("matlab_engine_shutdown", status="success")
+                logger.info("matlab_engine_shutdown status=success")
             except (RuntimeError, OSError) as e:
                 logger.warning(
-                    "matlab_engine_shutdown_failed", error=str(e), exc_info=True
+                    "matlab_engine_shutdown_failed error=%s", e, exc_info=True
                 )
             self._matlab_engine = None
 
@@ -337,8 +342,10 @@ class EngineManager(ContractChecker):
 
     def validate_engine_configuration(self, engine_type: EngineType) -> bool:
         """Validate engine configuration."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         if engine_type not in self.engine_status:
             return False
 
@@ -369,8 +376,10 @@ class EngineManager(ContractChecker):
 
     def get_probe_result(self, engine_type: EngineType) -> Any:
         """Return the probe result for a specific engine, probing first if needed."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         if not self.probe_results:
             self.probe_all_engines()
         return self.probe_results.get(engine_type)

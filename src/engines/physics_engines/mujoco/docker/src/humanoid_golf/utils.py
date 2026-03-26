@@ -8,7 +8,7 @@ MuJoCo humanoid golf simulation backend.
 from __future__ import annotations
 
 import logging
-import os
+from pathlib import Path
 
 import dm_control.suite
 import numpy as np
@@ -60,13 +60,13 @@ PANTS_PARTS = [
 
 def get_cmu_xml_path() -> str:
     """Locate the CMU Humanoid XML file within dm_control."""
-    suite_dir = os.path.dirname(dm_control.suite.__file__)
-    xml_path = os.path.join(suite_dir, "humanoid_CMU.xml")
-    if not os.path.exists(xml_path):
+    suite_dir = Path(dm_control.suite.__file__).parent
+    xml_path = suite_dir / "humanoid_CMU.xml"
+    if not xml_path.exists():
         raise FileNotFoundError(
             f"Could not find 'humanoid_CMU.xml' at expected location: {xml_path}"
         )
-    return xml_path
+    return str(xml_path)
 
 
 def get_actuator_indices(physics) -> dict[str, int]:
@@ -85,13 +85,13 @@ def _load_cmu_mjcf() -> mjcf.RootElement:
     with open(xml_path) as f:
         xml_string = f.read()
 
-    suite_dir = os.path.dirname(xml_path)
-    common_dir = os.path.join(suite_dir, "common")
+    suite_dir = Path(xml_path).parent
+    common_dir = suite_dir / "common"
 
     assets = {}
     for filename in ["skybox.xml", "visual.xml", "materials.xml"]:
-        path = os.path.join(common_dir, filename)
-        if os.path.exists(path):
+        path = common_dir / filename
+        if path.exists():
             with open(path, "rb") as f:
                 assets[f"./common/{filename}"] = f.read()
 
@@ -100,8 +100,10 @@ def _load_cmu_mjcf() -> mjcf.RootElement:
 
 
 def _scale_model_positions(root, height_scale) -> None:
-    assert root is not None, "root must be provided"
-    assert root is not None, "root must be provided"
+    if not (root is not None):
+        raise ValueError("root must be provided")
+    if not (root is not None):
+        raise ValueError("root must be provided")
     for body in root.find_all("body"):
         pos = getattr(body, "pos", None)
         if pos is not None:
@@ -161,8 +163,10 @@ def load_humanoid_with_props(
     """
     Load the CMU humanoid with updated props and features.
     """
-    assert target_height is not None, "target_height must be provided"
-    assert target_height is not None, "target_height must be provided"
+    if not (target_height is not None):
+        raise ValueError("target_height must be provided")
+    if not (target_height is not None):
+        raise ValueError("target_height must be provided")
     root = _load_cmu_mjcf()
 
     height_scale = target_height / 1.56
@@ -191,8 +195,10 @@ def load_humanoid_with_props(
 
 def _add_face_features(root, h_scale, w_scale) -> None:
     """Add facial features like nose and mouth."""
-    assert root is not None, "root must be provided"
-    assert root is not None, "root must be provided"
+    if not (root is not None):
+        raise ValueError("root must be provided")
+    if not (root is not None):
+        raise ValueError("root must be provided")
     head = root.find("body", "head")
     if not head:
         return
@@ -274,8 +280,10 @@ def _add_articulated_fingers(root, h_scale, w_scale) -> None:
 
 def _attach_club(root, h_scale, w_scale, params, two_handed) -> None:
     """Attach the golf club to the model."""
-    assert root is not None, "root must be provided"
-    assert root is not None, "root must be provided"
+    if not (root is not None):
+        raise ValueError("root must be provided")
+    if not (root is not None):
+        raise ValueError("root must be provided")
     rhand = root.find("body", "rhand")
     if not rhand:
         return
@@ -335,8 +343,10 @@ def _attach_club(root, h_scale, w_scale, params, two_handed) -> None:
 def customize_visuals(physics, config=None) -> None:
     """Apply colors and visual tweaks."""
     # Defaults
-    assert physics is not None, "physics must be provided"
-    assert physics is not None, "physics must be provided"
+    if not (physics is not None):
+        raise ValueError("physics must be provided")
+    if not (physics is not None):
+        raise ValueError("physics must be provided")
     colors = {
         "shirt": [0.6, 0.6, 0.6, 1.0],
         "pants": [0.4, 0.2, 0.0, 1.0],

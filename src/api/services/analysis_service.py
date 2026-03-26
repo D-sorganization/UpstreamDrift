@@ -126,7 +126,8 @@ class AnalysisService:
 
         Extracts joint kinematics from the physics engine or provided data.
         """
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         result: dict[str, Any] = {
             "analysis_type": "kinematics",
             "joint_angles": [],
@@ -196,7 +197,8 @@ class AnalysisService:
 
         Extracts joint kinetics from the physics engine or provided data.
         """
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         result: dict[str, Any] = {
             "analysis_type": "kinetics",
             "joint_torques": [],
@@ -255,7 +257,8 @@ class AnalysisService:
 
         Computes energy metrics from the physics engine state.
         """
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         result: dict[str, Any] = {
             "analysis_type": "energetics",
             "kinetic_energy": 0.0,
@@ -319,7 +322,8 @@ class AnalysisService:
         Analyzes the golf swing phases and transitions.
         """
         # Standard golf swing phases
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         SWING_PHASES = [
             "address",
             "takeaway",
@@ -386,13 +390,14 @@ class AnalysisService:
 
         return result
 
-    def _detect_swing_phase(self, state: dict) -> str | None:
+    def _detect_swing_phase(self, state: dict[str, Any]) -> str | None:
         """Detect current swing phase from engine state.
 
         Simple heuristic-based phase detection. For production use,
         this should be replaced with ML-based detection.
         """
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
         if not state:
             return None
 
@@ -408,7 +413,7 @@ class AnalysisService:
         if data is None:
             return []
         if isinstance(data, np.ndarray):
-            return list(data.tolist())  # type: ignore[no-any-return]
+            return list(data.tolist())
         if isinstance(data, (list, tuple)):
             return list(data)
         if isinstance(data, (int, float)):

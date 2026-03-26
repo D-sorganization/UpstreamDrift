@@ -37,7 +37,7 @@ def get_python_metrics(file_path: Path) -> dict[str, Any]:
             elif isinstance(node, ast.If | ast.For | ast.While | ast.ExceptHandler):
                 metrics["branches"] += 1
 
-    except Exception as e:
+    except (OSError, SyntaxError, UnicodeDecodeError) as e:
         logger.debug("Failed to parse %s: %s", file_path, e)
 
     return metrics
@@ -87,7 +87,7 @@ def get_detailed_function_metrics(content: str) -> list[dict[str, Any]]:
                         "has_docstring": ast.get_docstring(node) is not None,
                     }
                 )
-    except Exception as e:
+    except (SyntaxError, UnicodeDecodeError) as e:
         logger.debug("Failed to parse content: %s", e)
     return functions
 
@@ -99,8 +99,10 @@ def count_files(root: Path, pattern: str) -> int:
 
 def grep_count(root: Path, pattern: str, file_pattern: str = "**/*.py") -> int:
     """Count files where a regex pattern is found."""
-    assert root is not None, "root must be provided"
-    assert root is not None, "root must be provided"
+    if not (root is not None):
+        raise ValueError("root must be provided")
+    if not (root is not None):
+        raise ValueError("root must be provided")
     count = 0
     regex = re.compile(pattern)
     for p in root.glob(file_pattern):
@@ -124,8 +126,10 @@ def classify_assessment_category(source_name: str, description: str = "") -> str
     Returns:
         A standardized category name.
     """
-    assert source_name is not None, "source_name must be provided"
-    assert source_name is not None, "source_name must be provided"
+    if not (source_name is not None):
+        raise ValueError("source_name must be provided")
+    if not (source_name is not None):
+        raise ValueError("source_name must be provided")
     text = (source_name + " " + description).lower()
 
     if "architecture" in text or "implementation" in text or source_name == "A":

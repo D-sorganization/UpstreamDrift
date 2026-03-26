@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+from typing import Any
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
@@ -16,8 +17,8 @@ class SimulationFrame(BaseModel):
     """Single frame of simulation data."""
 
     time: float
-    state: dict
-    analysis: dict | None = None
+    state: dict[str, Any]
+    analysis: dict[str, Any] | None = None
 
 
 async def _load_simulation_engine(
@@ -35,7 +36,8 @@ async def _load_simulation_engine(
     Returns:
         The active physics engine, or None if loading failed.
     """
-    assert engine_manager is not None, "engine_manager must be provided"
+    if not (engine_manager is not None):
+        raise ValueError("engine_manager must be provided")
     require(
         engine_type is not None and len(engine_type.strip()) > 0,
         "Engine type must be a non-empty string",
@@ -97,7 +99,7 @@ async def _wait_for_resume_or_stop(websocket: WebSocket) -> bool:
 async def _run_simulation_loop(
     websocket: WebSocket,
     engine: object,
-    config: dict,
+    config: dict[str, Any],
 ) -> tuple[int, float]:
     """Execute the simulation loop, streaming frames to the client.
 
@@ -109,7 +111,8 @@ async def _run_simulation_loop(
     Returns:
         Tuple of (frame_count, time_elapsed).
     """
-    assert websocket is not None, "websocket must be provided"
+    if not (websocket is not None):
+        raise ValueError("websocket must be provided")
     duration = config.get("duration", 3.0)
     timestep = config.get("timestep", 0.002)
 
@@ -148,7 +151,7 @@ async def _run_simulation_loop(
             if hasattr(engine, "get_state"):
                 state = engine.get_state()
 
-            frame_data: dict = {
+            frame_data: dict[str, Any] = {
                 "frame": frame,
                 "time": round(time_elapsed, 4),
                 "state": state,
@@ -187,7 +190,8 @@ async def simulation_stream(
 
     No authentication required in local mode.
     """
-    assert websocket is not None, "websocket must be provided"
+    if not (websocket is not None):
+        raise ValueError("websocket must be provided")
     await websocket.accept()
 
     # Access engine manager from app state

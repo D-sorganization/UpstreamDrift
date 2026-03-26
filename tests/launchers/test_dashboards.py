@@ -1,19 +1,10 @@
 """Tests for various dashboard launchers."""
 
-import sys  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
+import sys
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
-    DrakePhysicsEngine,
-)
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
-    MuJoCoPhysicsEngine,
-)
-from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: E402
-    PinocchioPhysicsEngine,
-)
 from src.launchers.drake_dashboard import main as drake_main  # noqa: E402
 from src.launchers.matlab_launcher_unified import MatlabLauncher  # noqa: E402
 from src.launchers.matlab_launcher_unified import main as matlab_main  # noqa: E402
@@ -24,19 +15,19 @@ from src.launchers.pinocchio_dashboard import main as pinocchio_main  # noqa: E4
 def test_mujoco_dashboard_main():
     with patch("src.launchers.mujoco_dashboard.launch_dashboard") as mock_launch:
         mujoco_main()
-        mock_launch.assert_called_once_with(
-            engine_class=MuJoCoPhysicsEngine,
-            title="MuJoCo Golf Analysis Dashboard (Unified)",
-        )
+        mock_launch.assert_called_once()
+        _, kwargs = mock_launch.call_args
+        assert kwargs["engine_class"].__name__ == "MuJoCoPhysicsEngine"
+        assert kwargs["title"] == "MuJoCo Golf Analysis Dashboard (Unified)"
 
 
 def test_pinocchio_dashboard_main():
     with patch("src.launchers.pinocchio_dashboard.launch_dashboard") as mock_launch:
         pinocchio_main()
-        mock_launch.assert_called_once_with(
-            engine_class=PinocchioPhysicsEngine,
-            title="Pinocchio Golf Analysis Dashboard",
-        )
+        mock_launch.assert_called_once()
+        _, kwargs = mock_launch.call_args
+        assert kwargs["engine_class"].__name__ == "PinocchioPhysicsEngine"
+        assert kwargs["title"] == "Pinocchio Golf Analysis Dashboard"
 
 
 @pytest.mark.xfail(
@@ -60,11 +51,11 @@ def test_drake_dashboard_main_no_args():
 
         mock_qapp.assert_called_once()
         mock_dialog.setNameFilter.assert_called_with("Model Files (*.urdf *.sdf *.xml)")
-        mock_launch.assert_called_once_with(
-            engine_class=DrakePhysicsEngine,
-            title="Drake Golf Analysis Dashboard",
-            model_path="fake_model.urdf",
-        )
+        mock_launch.assert_called_once()
+        _, kwargs = mock_launch.call_args
+        assert kwargs["engine_class"].__name__ == "DrakePhysicsEngine"
+        assert kwargs["title"] == "Drake Golf Analysis Dashboard"
+        assert kwargs["model_path"] == "fake_model.urdf"
 
 
 @pytest.mark.xfail(
@@ -83,11 +74,10 @@ def test_drake_dashboard_main_no_args_dialog_canceled():
         mock_dialog.exec.return_value = False
 
         drake_main()
-        mock_launch.assert_called_once_with(
-            engine_class=DrakePhysicsEngine,
-            title="Drake Golf Analysis Dashboard",
-            model_path=None,
-        )
+        mock_launch.assert_called_once()
+        _, kwargs = mock_launch.call_args
+        assert kwargs["engine_class"].__name__ == "DrakePhysicsEngine"
+        assert kwargs["model_path"] is None
 
 
 @pytest.mark.xfail(
@@ -107,11 +97,10 @@ def test_drake_dashboard_main_no_args_dialog_no_selection():
         mock_dialog.selectedFiles.return_value = []
 
         drake_main()
-        mock_launch.assert_called_once_with(
-            engine_class=DrakePhysicsEngine,
-            title="Drake Golf Analysis Dashboard",
-            model_path=None,
-        )
+        mock_launch.assert_called_once()
+        _, kwargs = mock_launch.call_args
+        assert kwargs["engine_class"].__name__ == "DrakePhysicsEngine"
+        assert kwargs["model_path"] is None
 
 
 @pytest.mark.xfail(
@@ -124,11 +113,10 @@ def test_drake_dashboard_main_with_args():
         patch("src.launchers.drake_dashboard.launch_dashboard") as mock_launch,
     ):
         drake_main()
-        mock_launch.assert_called_once_with(
-            engine_class=DrakePhysicsEngine,
-            title="Drake Golf Analysis Dashboard",
-            model_path="my_model.urdf",
-        )
+        mock_launch.assert_called_once()
+        _, kwargs = mock_launch.call_args
+        assert kwargs["engine_class"].__name__ == "DrakePhysicsEngine"
+        assert kwargs["model_path"] == "my_model.urdf"
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)

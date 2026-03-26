@@ -140,11 +140,11 @@ class TestRigidBodyImpactPostconditions(unittest.TestCase):
 
     def test_momentum_conservation(self) -> None:
         """Linear momentum must be conserved."""
-        from src.shared.python.physics.impact_model import GOLF_BALL_MASS
+        from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
 
         pre = _make_pre_state()
         result = self._solve()
-        m_ball = GOLF_BALL_MASS
+        m_ball = GOLF_BALL_MASS_KG
         m_club = pre.clubhead_mass
 
         p_before = m_club * pre.clubhead_velocity + m_ball * pre.ball_velocity
@@ -361,7 +361,7 @@ class TestTrajectoryPostconditions(unittest.TestCase):
         launch = LaunchConditions(velocity=velocity, launch_angle=angle)
         try:
             return sim.simulate_trajectory(launch, max_time=8.0, dt=0.01)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             if "TypingError" in type(e).__name__ or "nopython" in str(e):
                 self.skipTest(f"Numba JIT incompatibility (pre-existing): {e}")
             raise
