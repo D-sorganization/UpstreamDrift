@@ -129,11 +129,15 @@ class MotionCaptureTab(QWidget):
             # Load data using the existing MotionDataLoader
             loader = MotionDataLoader()
             excel_data = loader.load_data()  # Load the Excel data first
-            baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(excel_data)
+            baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(
+                excel_data
+            )  # noqa: E501
 
             # Create frame processor with config
             config = RenderConfig()
-            self.frame_processor = FrameProcessor((baseq_data, ztcfq_data, deltaq_data), config)
+            self.frame_processor = FrameProcessor(
+                (baseq_data, ztcfq_data, deltaq_data), config
+            )  # noqa: E501
 
             # Load into smooth playback controller
             self.playback_controller.load_frame_processor(self.frame_processor)
@@ -144,7 +148,9 @@ class MotionCaptureTab(QWidget):
             self.frame_label.setText(f"Frame: 0/{total_frames}")
 
             # Initialize visualization
-            self.opengl_widget.load_data_from_dataframes((baseq_data, ztcfq_data, deltaq_data))
+            self.opengl_widget.load_data_from_dataframes(
+                (baseq_data, ztcfq_data, deltaq_data)
+            )  # noqa: E501
 
             self.status_label.setText(
                 f"Loaded {swing_type} data successfully - Smooth playback ready!"
@@ -182,7 +188,9 @@ class MotionCaptureTab(QWidget):
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        total_frames = len(self.frame_processor.time_vector) if self.frame_processor else 0
+        total_frames = (
+            len(self.frame_processor.time_vector) if self.frame_processor else 0
+        )  # noqa: E501
 
         # Update frame label with fractional position for smooth display
         self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
@@ -268,7 +276,9 @@ class SimulinkModelTab(QWidget):
         # Data selection
         layout.addWidget(QLabel("Model Source:"), 0, 0)
         self.model_combo = QComboBox()
-        self.model_combo.addItems(["Simscape Multibody", "MuJoCo", "Drake", "Pinocchio"])
+        self.model_combo.addItems(
+            ["Simscape Multibody", "MuJoCo", "Drake", "Pinocchio"]
+        )  # noqa: E501
         layout.addWidget(self.model_combo, 0, 1)
 
         # Load button
@@ -323,11 +333,15 @@ class SimulinkModelTab(QWidget):
             # Load data using the existing MotionDataLoader (proxy for now)
             loader = MotionDataLoader()
             excel_data = loader.load_data()
-            baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(excel_data)
+            baseq_data, ztcfq_data, deltaq_data = loader.convert_to_gui_format(
+                excel_data
+            )  # noqa: E501
 
             # Create frame processor with config
             config = RenderConfig()
-            self.frame_processor = FrameProcessor((baseq_data, ztcfq_data, deltaq_data), config)
+            self.frame_processor = FrameProcessor(
+                (baseq_data, ztcfq_data, deltaq_data), config
+            )  # noqa: E501
 
             # Load into smooth playback controller
             self.playback_controller.load_frame_processor(self.frame_processor)
@@ -338,7 +352,9 @@ class SimulinkModelTab(QWidget):
             self.frame_label.setText(f"Frame: 0/{total_frames}")
 
             # Initialize visualization
-            self.opengl_widget.load_data_from_dataframes((baseq_data, ztcfq_data, deltaq_data))
+            self.opengl_widget.load_data_from_dataframes(
+                (baseq_data, ztcfq_data, deltaq_data)
+            )  # noqa: E501
 
             self.status_label.setText(f"Loaded {model_source} data successfully")
 
@@ -368,7 +384,9 @@ class SimulinkModelTab(QWidget):
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        total_frames = len(self.frame_processor.time_vector) if self.frame_processor else 0
+        total_frames = (
+            len(self.frame_processor.time_vector) if self.frame_processor else 0
+        )  # noqa: E501
         self.frame_label.setText(f"Frame: {position:.1f}/{total_frames}")
         self.frame_slider.blockSignals(True)
         self.frame_slider.setValue(int(position))
@@ -449,7 +467,9 @@ class ComparisonTab(QWidget):
 
         # Metrics Panel
         self.metrics_label = QLabel("Comparison Metrics: Load data to begin analysis")
-        self.metrics_label.setStyleSheet("font-weight: bold; color: #333; padding: 5px;")
+        self.metrics_label.setStyleSheet(
+            "font-weight: bold; color: #333; padding: 5px;"
+        )  # noqa: E501
         layout.addWidget(self.metrics_label)
 
         self.setLayout(layout)
@@ -494,14 +514,18 @@ class ComparisonTab(QWidget):
             excel_data1 = loader1.load_data()
             baseq1, ztcfq1, deltaq1 = loader1.convert_to_gui_format(excel_data1)
             config1 = RenderConfig()
-            self.frame_processor_mocap = FrameProcessor((baseq1, ztcfq1, deltaq1), config1)
+            self.frame_processor_mocap = FrameProcessor(
+                (baseq1, ztcfq1, deltaq1), config1
+            )  # noqa: E501
 
             # Load Data 2 (Model) - Reusing same loader for prototype
             loader2 = MotionDataLoader()
             excel_data2 = loader2.load_data()
             baseq2, ztcfq2, deltaq2 = loader2.convert_to_gui_format(excel_data2)
             config2 = RenderConfig()
-            self.frame_processor_model = FrameProcessor((baseq2, ztcfq2, deltaq2), config2)
+            self.frame_processor_model = FrameProcessor(
+                (baseq2, ztcfq2, deltaq2), config2
+            )  # noqa: E501
 
             # Initialize visualizers
             self.mocap_widget.load_data_from_dataframes((baseq1, ztcfq1, deltaq1))
@@ -568,7 +592,9 @@ class ComparisonTab(QWidget):
 
         frame_low = self.frame_processor_model.get_frame_data(low_idx)
         frame_high = self.frame_processor_model.get_frame_data(high_idx)
-        frame_data_model = SmoothPlaybackController._lerp_frame_data(frame_low, frame_high, t)
+        frame_data_model = SmoothPlaybackController._lerp_frame_data(
+            frame_low, frame_high, t
+        )  # noqa: E501
 
         # Update Model View
         if self.model_widget.renderer:
@@ -579,4 +605,6 @@ class ComparisonTab(QWidget):
         mp2 = frame_data_model.midpoint
         if np.isfinite(mp1).all() and np.isfinite(mp2).all():
             dist = np.linalg.norm(mp1 - mp2)
-            self.metrics_label.setText(f"Comparison Metrics | Midpoint Error: {dist:.4f} m")
+            self.metrics_label.setText(
+                f"Comparison Metrics | Midpoint Error: {dist:.4f} m"
+            )  # noqa: E501

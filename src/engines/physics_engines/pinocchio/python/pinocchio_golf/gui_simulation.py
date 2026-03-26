@@ -41,7 +41,9 @@ class SimulationMixin:
         if not (checked is not None):
             raise ValueError("checked must be provided")
         self.is_running = not self.is_running
-        self.btn_run.setText("Pause Simulation" if self.is_running else "Run Simulation")
+        self.btn_run.setText(
+            "Pause Simulation" if self.is_running else "Run Simulation"
+        )  # noqa: E501
         self.btn_run.setChecked(self.is_running)
 
     def _reset_simulation(self: Any) -> None:
@@ -71,7 +73,9 @@ class SimulationMixin:
             self.btn_record.setText("Stop Recording")
         else:
             self.recorder.stop_recording()
-            self.log_write(f"Recording stopped. Frames: {self.recorder.get_num_frames()}")
+            self.log_write(
+                f"Recording stopped. Frames: {self.recorder.get_num_frames()}"
+            )  # noqa: E501
             self.btn_record.setText("Record")
 
     def _game_loop(self: Any) -> None:

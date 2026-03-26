@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Generic recorder for PhysicsEngine compatible simulations.
 
 Records state, control, and derived quantities for analysis and plotting.

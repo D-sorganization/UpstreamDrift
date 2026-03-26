@@ -63,7 +63,9 @@ def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:
         # Rodrigues' formula for rotation matrix
         # R = I + sin(theta)*omega_hat + (1-cos(theta))*omega_hat^2
         r_rot = (
-            np.eye(3) + np.sin(theta) * omega_hat + (1 - np.cos(theta)) * (omega_hat @ omega_hat)
+            np.eye(3)
+            + np.sin(theta) * omega_hat
+            + (1 - np.cos(theta)) * (omega_hat @ omega_hat)  # noqa: E501
         )
 
         # Position component (Proposition 3.14 in Lynch & Park)

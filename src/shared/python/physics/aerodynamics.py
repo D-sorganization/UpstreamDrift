@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Aerodynamics module for golf ball flight simulation.
 
 This module provides sophisticated, tunable aerodynamic models that can be

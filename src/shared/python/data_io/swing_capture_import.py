@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Golf Swing Capture Import for Reinforcement Learning.
 
 Provides an easy interface for importing golf swing motion capture data (C3D, CSV, JSON)

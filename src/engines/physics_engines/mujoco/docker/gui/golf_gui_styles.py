@@ -86,7 +86,9 @@ class StyleMixin:
     @staticmethod
     def _configure_frame_styles(style: ttk.Style, colors: dict[str, str]) -> None:
         style.configure("Modern.TFrame", background=colors["bg"])
-        style.configure("Card.TFrame", background=colors["select_bg"], relief="flat", borderwidth=1)
+        style.configure(
+            "Card.TFrame", background=colors["select_bg"], relief="flat", borderwidth=1
+        )  # noqa: E501
 
     @staticmethod
     def _configure_label_styles(style: ttk.Style, colors: dict[str, str]) -> None:
@@ -116,10 +118,16 @@ class StyleMixin:
     @staticmethod
     def _configure_button_styles(style: ttk.Style) -> None:
         style.configure("Modern.TButton", font=("Segoe UI", 10), padding=[15, 8])
-        style.configure("Primary.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10])
-        style.configure("Success.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10])
+        style.configure(
+            "Primary.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10]
+        )  # noqa: E501
+        style.configure(
+            "Success.TButton", font=("Segoe UI", 11, "bold"), padding=[20, 10]
+        )  # noqa: E501
         style.configure("Warning.TButton", font=("Segoe UI", 10), padding=[15, 8])
-        style.configure("Danger.TButton", font=("Segoe UI", 11, "bold"), padding=[15, 8])
+        style.configure(
+            "Danger.TButton", font=("Segoe UI", 11, "bold"), padding=[15, 8]
+        )  # noqa: E501
 
     @staticmethod
     def _configure_widget_styles(style: ttk.Style, colors: dict[str, str]) -> None:

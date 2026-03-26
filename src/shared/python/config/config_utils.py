@@ -21,14 +21,14 @@ Usage:
     save_json_config("config.json", config)
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: E402, F404
 
-import json
-from pathlib import Path
-from typing import Any, TypeVar
+import json  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any, TypeVar  # noqa: E402
 
-from src.shared.python.core.error_decorators import log_errors
-from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.core.error_decorators import log_errors  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 

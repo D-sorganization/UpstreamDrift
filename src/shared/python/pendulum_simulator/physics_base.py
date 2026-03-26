@@ -89,9 +89,9 @@ def friction_torque_ndof(
     Post: opposes motion direction element-wise.
     """
     n = qdot.shape[0]
-    assert viscous_coeffs.shape == (
-        n,
-    ), f"viscous shape {viscous_coeffs.shape} vs qdot {qdot.shape}"
+    assert viscous_coeffs.shape == (n,), (
+        f"viscous shape {viscous_coeffs.shape} vs qdot {qdot.shape}"
+    )
     assert np.all(np.isfinite(qdot)), "qdot has non-finite values"
 
     tau: npt.NDArray[np.float64] = np.asarray(-viscous_coeffs * qdot, dtype=np.float64)
@@ -122,7 +122,9 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
     n = tau.shape[0]
     assert limits.shape == (n,), f"limits shape {limits.shape} vs tau {tau.shape}"
     assert np.all(limits > 0), "Torque limits must be positive"
-    result: npt.NDArray[np.float64] = np.asarray(np.clip(tau, -limits, limits), dtype=np.float64)
+    result: npt.NDArray[np.float64] = np.asarray(
+        np.clip(tau, -limits, limits), dtype=np.float64
+    )
     return result
 
 
@@ -162,7 +164,9 @@ def chain_positions(
     convention y-up (positive cosine), matching the existing physics modules.
     """
     n = absolute_angles.shape[0]
-    assert lengths.shape == (n,), f"lengths {lengths.shape} vs angles {absolute_angles.shape}"
+    assert lengths.shape == (n,), (
+        f"lengths {lengths.shape} vs angles {absolute_angles.shape}"
+    )
 
     positions = np.zeros((n, 2))
     x, y = origin

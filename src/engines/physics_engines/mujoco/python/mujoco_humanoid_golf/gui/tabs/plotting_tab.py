@@ -107,7 +107,9 @@ class PlottingTab(QtWidgets.QWidget):
         # We will populate this dynamically or allow text input?
         # For now, let's add a text input for actuator name
         self.induced_actuator_edit = QtWidgets.QLineEdit()
-        self.induced_actuator_edit.setPlaceholderText("Specific Actuator Name (optional)")
+        self.induced_actuator_edit.setPlaceholderText(
+            "Specific Actuator Name (optional)"
+        )  # noqa: E501
         ind_layout.addRow("Source:", self.induced_source_combo)
         ind_layout.addRow("Or Actuator:", self.induced_actuator_edit)
         self.settings_stack.addWidget(self.induced_widget)
@@ -128,7 +130,9 @@ class PlottingTab(QtWidgets.QWidget):
         plot_layout.addWidget(self.generate_plot_btn)
 
         self.btn_advanced_dialog = QtWidgets.QPushButton("Open Advanced Analysis...")
-        self.btn_advanced_dialog.clicked.connect(self.main_window.show_advanced_plots_dialog)
+        self.btn_advanced_dialog.clicked.connect(
+            self.main_window.show_advanced_plots_dialog
+        )
         self.btn_advanced_dialog.setStyleSheet(Styles.BTN_ADVANCED_ANALYSIS)
         plot_layout.addWidget(self.btn_advanced_dialog)
 
@@ -153,7 +157,9 @@ class PlottingTab(QtWidgets.QWidget):
         import mujoco
 
         for i in range(self.sim_widget.get_num_joints()):
-            name = mujoco.mj_id2name(self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i)
+            name = mujoco.mj_id2name(
+                self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
+            )  # noqa: E501
             if name:
                 self.joint_select_combo.addItem(name)
             else:

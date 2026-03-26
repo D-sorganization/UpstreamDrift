@@ -46,7 +46,12 @@ class PinocchioVisualizationMixin:
     """
 
     def _update_viewer(self: Any) -> None:
-        if self.model is None or self.data is None or self.q is None or self.viz is None:
+        if (
+            self.model is None
+            or self.data is None
+            or self.q is None
+            or self.viz is None
+        ):  # noqa: E501
             return
 
         # Update Visuals via Pinocchio Visualizer
@@ -85,7 +90,9 @@ class PinocchioVisualizationMixin:
 
         joint_id = self.model.njoints - 1
         pin.computeJointJacobians(self.model, self.data, self.q)
-        J = pin.getJointJacobian(self.model, self.data, joint_id, pin.ReferenceFrame.LOCAL)
+        J = pin.getJointJacobian(
+            self.model, self.data, joint_id, pin.ReferenceFrame.LOCAL
+        )  # noqa: E501
 
         try:
             s = np.linalg.svd(J, compute_uv=False)
@@ -129,7 +136,10 @@ class PinocchioVisualizationMixin:
 
                     pos = res.velocity_ellipsoid.center
 
-                    if self.chk_mobility.isChecked() and res.mobility_matrix is not None:
+                    if (
+                        self.chk_mobility.isChecked()
+                        and res.mobility_matrix is not None
+                    ):  # noqa: E501
                         path_name = f"{res.body_name}/mobility"
                         radii = res.velocity_ellipsoid.radii
                         self._draw_ellipsoid_meshcat(
@@ -140,7 +150,10 @@ class PinocchioVisualizationMixin:
                             0x00FF00,
                         )
 
-                    if self.chk_force_ellip.isChecked() and res.force_matrix is not None:
+                    if (
+                        self.chk_force_ellip.isChecked()
+                        and res.force_matrix is not None
+                    ):  # noqa: E501
                         path_name = f"{res.body_name}/force"
                         radii = res.force_ellipsoid.radii
                         self._draw_ellipsoid_meshcat(
@@ -280,7 +293,12 @@ class PinocchioVisualizationMixin:
 
     def _draw_cf_vectors(self: Any) -> None:
         """Draw Counterfactual vectors."""
-        if self.model is None or self.data is None or self.viewer is None or self.latest_cf is None:
+        if (
+            self.model is None
+            or self.data is None
+            or self.viewer is None
+            or self.latest_cf is None
+        ):  # noqa: E501
             return
 
         cf_type = self.combo_cf.currentText()
@@ -342,7 +360,9 @@ class PinocchioVisualizationMixin:
 
             transform = self.data.oMf[i]
             homogeneous_matrix = transform.homogeneous
-            self.viewer[f"overlays/frames/{frame.name}"].set_transform(homogeneous_matrix)
+            self.viewer[f"overlays/frames/{frame.name}"].set_transform(
+                homogeneous_matrix
+            )
 
     def _draw_coms(self: Any) -> None:
         if self.model is None or self.data is None or self.viewer is None:
@@ -369,7 +389,9 @@ class PinocchioVisualizationMixin:
                 for frame in self.model.frames:
                     if frame.name == "universe":
                         continue
-                    self.viewer[f"overlays/frames/{frame.name}"].set_object(g.triad(scale=0.1))
+                    self.viewer[f"overlays/frames/{frame.name}"].set_object(
+                        g.triad(scale=0.1)
+                    )
             self._update_viewer()
 
     def _toggle_coms(self: Any, checked: bool) -> None:  # noqa: FBT001

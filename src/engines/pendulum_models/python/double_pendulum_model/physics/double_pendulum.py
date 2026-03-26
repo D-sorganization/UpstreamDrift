@@ -158,7 +158,10 @@ class ExpressionFunction:
             if isinstance(node, ast.Name):
                 # Allow names that are functions (they appear as Call.func too)
                 name = node.id
-                if name not in self._VALID_VARIABLE_NAMES and name not in allowed_func_names:
+                if (
+                    name not in self._VALID_VARIABLE_NAMES
+                    and name not in allowed_func_names
+                ):
                     raise ValueError(f"Use of unknown variable '{name}'")
 
     def __call__(self, t: float, state: DoublePendulumState) -> float:
@@ -218,7 +221,9 @@ class LowerSegmentProperties:
     def center_of_mass_distance(self) -> float:
         """Compute mass-weighted center of mass distance from grip."""
         shaft_com = self.length_m * self.shaft_com_ratio
-        weighted_sum = shaft_com * self.shaft_mass_kg + self.length_m * self.clubhead_mass_kg
+        weighted_sum = (
+            shaft_com * self.shaft_mass_kg + self.length_m * self.clubhead_mass_kg
+        )
         return weighted_sum / self.total_mass
 
     @property
@@ -229,13 +234,17 @@ class LowerSegmentProperties:
         shaft_com_position = self.length_m * self.shaft_com_ratio
         shaft_offset = (shaft_com_position - self.center_of_mass_distance) ** 2
         clubhead_offset = (self.length_m - self.center_of_mass_distance) ** 2
-        parallel_axis = self.shaft_mass_kg * shaft_offset + self.clubhead_mass_kg * clubhead_offset
+        parallel_axis = (
+            self.shaft_mass_kg * shaft_offset + self.clubhead_mass_kg * clubhead_offset
+        )
         return shaft_inertia_com + parallel_axis
 
     @property
     def inertia_about_proximal_joint(self) -> float:
         """Compute inertia about the proximal joint via parallel axis."""
-        return self.inertia_about_com + self.total_mass * self.center_of_mass_distance**2
+        return (
+            self.inertia_about_com + self.total_mass * self.center_of_mass_distance**2
+        )
 
 
 @dataclass
@@ -254,7 +263,9 @@ class DoublePendulumParameters:
     @classmethod
     def default(cls) -> DoublePendulumParameters:
         """Create parameters with default golf-swing segment properties."""
-        upper_inertia = DEFAULT_ARM_INERTIA_SCALING * DEFAULT_ARM_MASS_KG * DEFAULT_ARM_LENGTH_M**2
+        upper_inertia = (
+            DEFAULT_ARM_INERTIA_SCALING * DEFAULT_ARM_MASS_KG * DEFAULT_ARM_LENGTH_M**2
+        )
         upper_segment = SegmentProperties(
             length_m=DEFAULT_ARM_LENGTH_M,
             mass_kg=DEFAULT_ARM_MASS_KG,
@@ -312,7 +323,8 @@ class DoublePendulumDynamics:
     def __init__(
         self,
         parameters: DoublePendulumParameters | None = None,
-        forcing_functions: tuple[Callable[[float, DoublePendulumState], float], ...] | None = None,
+        forcing_functions: tuple[Callable[[float, DoublePendulumState], float], ...]
+        | None = None,
     ) -> None:
         self.parameters = parameters or DoublePendulumParameters.default()
         self._cache_parameters()
@@ -355,7 +367,9 @@ class DoublePendulumDynamics:
         m22 = i2
         return ((m11, m12), (m12, m22))
 
-    def coriolis_vector(self, theta2: float, omega1: float, omega2: float) -> tuple[float, float]:
+    def coriolis_vector(
+        self, theta2: float, omega1: float, omega2: float
+    ) -> tuple[float, float]:
         """Compute Coriolis and centripetal force vector."""
         if not (theta2 is not None):
             raise ValueError("theta2 must be provided")
@@ -383,7 +397,9 @@ class DoublePendulumDynamics:
         lc2 = self._lc2
         # Project gravity is dynamic (depends on flags)
         g = self.parameters.projected_gravity
-        g1 = (m1 * lc1 + m2 * l1) * g * math.sin(theta1) + m2 * lc2 * g * math.sin(theta1 + theta2)
+        g1 = (m1 * lc1 + m2 * l1) * g * math.sin(theta1) + m2 * lc2 * g * math.sin(
+            theta1 + theta2
+        )
         g2 = m2 * lc2 * g * math.sin(theta1 + theta2)
         return g1, g2
 
@@ -438,7 +454,9 @@ class DoublePendulumDynamics:
         )
         return f, control_matrix
 
-    def applied_torques(self, t: float, state: DoublePendulumState) -> tuple[float, float]:
+    def applied_torques(
+        self, t: float, state: DoublePendulumState
+    ) -> tuple[float, float]:
         """Evaluate user-defined forcing functions at the given state."""
         if not (t is not None):
             raise ValueError("t must be provided")
@@ -502,7 +520,9 @@ class DoublePendulumDynamics:
         acc2 = inv_m[1][0] * (tau1 - c1 - g1 - d1) + inv_m[1][1] * (tau2 - c2 - g2 - d2)
         return state.omega1, state.omega2, acc1, acc2
 
-    def step(self, t: float, state: DoublePendulumState, dt: float) -> DoublePendulumState:
+    def step(
+        self, t: float, state: DoublePendulumState, dt: float
+    ) -> DoublePendulumState:
         """Advance the state by one RK4 integration step."""
 
         if not (t is not None):
@@ -555,7 +575,9 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
+def compile_forcing_functions(
+    shoulder_expression: str, wrist_expression: str
+) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:

@@ -21,7 +21,9 @@ logger = get_logger(__name__)
 class ManipulabilityTab(QtWidgets.QWidget):
     """Tab for manipulating and visualizing force/mobility matrices."""
 
-    def __init__(self, sim_widget: Any, parent: QtWidgets.QWidget | None = None) -> None:
+    def __init__(
+        self, sim_widget: Any, parent: QtWidgets.QWidget | None = None
+    ) -> None:  # noqa: E501
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.analyzer: ManipulabilityAnalyzer | None = None
@@ -88,7 +90,9 @@ class ManipulabilityTab(QtWidgets.QWidget):
         # SimWidget usually runs on main thread. We can use self.sim_widget.data
         # provided we are careful not to perturb it during a step.
         # Best practice: use the widget's provided data which is synchronized.
-        self.analyzer = ManipulabilityAnalyzer(self.sim_widget.model, self.sim_widget.data)
+        self.analyzer = ManipulabilityAnalyzer(
+            self.sim_widget.model, self.sim_widget.data
+        )  # noqa: E501
 
         # Populate Body Checkboxes
         self._populate_body_checkboxes()
@@ -142,7 +146,9 @@ class ManipulabilityTab(QtWidgets.QWidget):
         # But if we uncheck a body, we should hide it.
         # For simplicity, we might iterate all *checked* bodies.
 
-        active_bodies = [name for name, chk in self.body_checkboxes.items() if chk.isChecked()]
+        active_bodies = [
+            name for name, chk in self.body_checkboxes.items() if chk.isChecked()
+        ]  # noqa: E501
 
         if not active_bodies:
             if meshcat:

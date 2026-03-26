@@ -72,7 +72,9 @@ class ForceVectorRenderer(BaseRenderer):
             title: Plot title.
         """
         assert fig is not None, "fig must be provided"
-        positions, forces = self._resolve_force_data(positions, forces, frame_idx, "joint_forces")
+        positions, forces = self._resolve_force_data(
+            positions, forces, frame_idx, "joint_forces"
+        )
         self._render_quiver_overlay(
             fig,
             positions=positions,
@@ -150,9 +152,9 @@ class ForceVectorRenderer(BaseRenderer):
         total_forces = np.asarray(total_forces)
         ztcf_forces = np.asarray(ztcf_forces)
 
-        assert (
-            total_forces.shape == ztcf_forces.shape
-        ), f"Shape mismatch: total {total_forces.shape} vs ztcf {ztcf_forces.shape}"
+        assert total_forces.shape == ztcf_forces.shape, (
+            f"Shape mismatch: total {total_forces.shape} vs ztcf {ztcf_forces.shape}"
+        )
 
         delta = total_forces - ztcf_forces
         self._render_quiver_overlay(

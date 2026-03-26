@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Ball Rolling Physics for Putting Simulation.
 
 This module implements the physics of a golf ball rolling on a putting surface,

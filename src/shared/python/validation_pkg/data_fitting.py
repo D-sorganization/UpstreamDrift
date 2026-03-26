@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Data fitting and parameter estimation for golf biomechanics (Guideline A3).
 
 This module implements the A3 pipeline per project design guidelines:

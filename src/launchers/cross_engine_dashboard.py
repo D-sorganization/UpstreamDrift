@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Cross-Engine Perturbation Comparison Dashboard.
 
 Addresses GH2020: provides a PyQt6 interactive dashboard (and optional CLI)
@@ -473,7 +477,9 @@ def _build_qt_window() -> object:
 
         def _on_run(self) -> None:
             """Build config, run comparison, update charts."""
-            selected = [name for name, cb in self._engine_checks.items() if cb.isChecked()]
+            selected = [
+                name for name, cb in self._engine_checks.items() if cb.isChecked()
+            ]
             if not selected:
                 self._status_label.setText("Select at least one engine")
                 logger.warning("No engines selected for comparison")

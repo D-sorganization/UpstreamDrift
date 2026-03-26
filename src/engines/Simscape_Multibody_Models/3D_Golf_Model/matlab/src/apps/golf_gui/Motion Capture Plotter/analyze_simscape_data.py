@@ -20,7 +20,9 @@ def _load_csv_data(csv_file) -> pd.DataFrame | None:
     """
     try:
         df = pd.read_csv(csv_file)
-        logger.info(f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns")
+        logger.info(
+            f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns"
+        )  # noqa: E501
         logger.info("Time range: %s to %s seconds", df["time"].min(), df["time"].max())
         logger.info("")
         return df
@@ -260,7 +262,9 @@ def _log_data_sample(df, available_segments) -> None:
     if available_segments:
         sample_cols = []
         for segment_cols in available_segments.values():
-            sample_cols.extend(segment_cols[:3])  # Take first 3 columns from each segment
+            sample_cols.extend(
+                segment_cols[:3]
+            )  # Take first 3 columns from each segment  # noqa: E501
 
         # Remove duplicates and limit to reasonable number
         sample_cols = list(set(sample_cols))[:15]

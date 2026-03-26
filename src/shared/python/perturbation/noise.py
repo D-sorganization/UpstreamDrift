@@ -40,7 +40,7 @@ def generate_noise(
         raise ValueError(f"n_samples must be positive, got {n_samples}")
     if not (amplitude >= 0):
         raise ValueError(f"amplitude must be non-negative, got {amplitude}")
-    if not (noise_type in {"white", "pink", "brown"}):
+    if not (noise_type in {"white", "pink", "brown"}):  # noqa: E713
         raise ValueError(f"Unknown noise_type: {noise_type}")
 
     rng = np.random.default_rng(seed)

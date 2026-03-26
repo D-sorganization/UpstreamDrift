@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Unified unit conversion service used across the application."""
 
 from __future__ import annotations
@@ -103,7 +107,9 @@ class UnitConversionService:
 
     def _init_tables(self) -> None:
         """Initialize conversion tables from constants."""
-        self.category_map = {category: dict(table) for category, table in CATEGORY_TABLES.items()}
+        self.category_map = {
+            category: dict(table) for category, table in CATEGORY_TABLES.items()
+        }
         self.length_factors = self.category_map["length"]
         self.volume_factors = self.category_map["volume"]
         self.mass_factors = self.category_map["mass"]
@@ -156,13 +162,19 @@ class UnitConversionService:
         from_category, to_category = self._resolve_categories(
             from_unit, to_unit, from_unit_norm, to_unit_norm
         )
-        self._ensure_compatible_categories(from_unit, to_unit, from_category, to_category)
-        warnings = self._collect_conversion_warnings(value, from_category, from_unit_norm)
+        self._ensure_compatible_categories(
+            from_unit, to_unit, from_category, to_category
+        )
+        warnings = self._collect_conversion_warnings(
+            value, from_category, from_unit_norm
+        )
         converted = self._dispatch_conversion(
             value, from_unit_norm, to_unit_norm, from_category, kwargs
         )
         warnings.extend(
-            self._user_unit_warnings(from_category, to_category, from_unit_norm, to_unit_norm)
+            self._user_unit_warnings(
+                from_category, to_category, from_unit_norm, to_unit_norm
+            )
         )
         return ConversionResult(converted, from_unit, to_unit, warnings=warnings)
 
@@ -194,7 +206,9 @@ class UnitConversionService:
         self, from_unit: str, to_unit: str, from_category: str, to_category: str
     ) -> None:
         """Validate category compatibility for conversion."""
-        if from_category != to_category and {from_category, to_category} != {"temperature"}:
+        if from_category != to_category and {from_category, to_category} != {
+            "temperature"
+        }:
             msg = f"Cannot convert from {from_unit} to {to_unit}"
             raise IncompatibleUnitsError(msg)
 
@@ -233,7 +247,9 @@ class UnitConversionService:
                 temperature=kwargs.get("temperature"),
                 pressure=kwargs.get("pressure"),
                 gas_type=kwargs.get("gas_type", "air"),
-                standard_condition=kwargs.get("standard_condition", StandardCondition.SCFM_60F),
+                standard_condition=kwargs.get(
+                    "standard_condition", StandardCondition.SCFM_60F
+                ),
             )
         msg = f"Unsupported unit category for {from_unit_norm}"
         raise UnknownUnitError(msg)
@@ -303,7 +319,9 @@ class UnitConversionService:
             return "gas_flow"
         return None
 
-    def _validate_value(self, value: float, category: str, unit: str | None = None) -> list[str]:
+    def _validate_value(
+        self, value: float, category: str, unit: str | None = None
+    ) -> list[str]:
         """Validate input value against physical constraints."""
         if not (value is not None):
             raise ValueError("value must be provided")
@@ -337,7 +355,9 @@ class UnitConversionService:
         """Convert temperature value."""
         try:
             return convert_temperature(value, from_unit, to_unit)
-        except ValueError as exc:  # pragma: no cover - converted to domain-specific error
+        except (
+            ValueError
+        ) as exc:  # pragma: no cover - converted to domain-specific error
             msg = str(exc)
             raise UnknownUnitError(msg) from exc
 
@@ -418,7 +438,9 @@ class UnitConversionService:
         pressure: float | None,
     ) -> None:
         """Validate required inputs when ACFM is involved."""
-        if (from_unit == "ACFM" or to_unit == "ACFM") and (temperature is None or pressure is None):
+        if (from_unit == "ACFM" or to_unit == "ACFM") and (
+            temperature is None or pressure is None
+        ):
             msg = "Temperature and pressure are required for ACFM conversions"
             raise ValueError(msg)
 
@@ -433,14 +455,20 @@ class UnitConversionService:
     ) -> float:
         """Convert gas flow value to STP-normalized m³/hr."""
         if from_unit == "SCFM":
-            return scfm_to_standard_m3_per_hour(value, standard_condition, StandardCondition.STP)
+            return scfm_to_standard_m3_per_hour(
+                value, standard_condition, StandardCondition.STP
+            )
         if from_unit == "ACFM":
             if not (temperature is not None):
                 raise ValueError("DbC Blocked: Precondition failed.")
             if not (pressure is not None):
                 raise ValueError("DbC Blocked: Precondition failed.")
-            scfm = actual_to_standard_flow(value, temperature, pressure, standard_condition)
-            return scfm_to_standard_m3_per_hour(scfm, standard_condition, StandardCondition.STP)
+            scfm = actual_to_standard_flow(
+                value, temperature, pressure, standard_condition
+            )
+            return scfm_to_standard_m3_per_hour(
+                scfm, standard_condition, StandardCondition.STP
+            )
         if from_unit in {"Nm3/hr", "Nm³/hr"}:
             return value
         if from_unit in self.mass_flow_factors:
@@ -471,7 +499,9 @@ class UnitConversionService:
             scfm = standard_m3_per_hour_to_scfm(
                 m3_hr_std, StandardCondition.STP, standard_condition
             )
-            return standard_to_actual_flow(scfm, temperature, pressure, standard_condition)
+            return standard_to_actual_flow(
+                scfm, temperature, pressure, standard_condition
+            )
         if to_unit in {"Nm3/hr", "Nm³/hr"}:
             return m3_hr_std
         if to_unit in self.mass_flow_factors:
@@ -531,7 +561,9 @@ class UnitConversionService:
         std_temp, std_pressure_pa, _ = standard_condition.value
         temperature = actual_temp_K or std_temp
         pressure_pa = (
-            actual_pressure_kPa * 1000.0 if actual_pressure_kPa is not None else std_pressure_pa
+            actual_pressure_kPa * 1000.0
+            if actual_pressure_kPa is not None
+            else std_pressure_pa
         )
 
         result = self._convert_gas_flow(
@@ -572,7 +604,9 @@ class UnitConversionService:
             return value
         self._ensure_known_heating_unit(from_key, from_unit)
         self._ensure_known_heating_unit(to_key, to_unit)
-        mj_per_kg = self._heating_to_mj_per_kg(value, from_key, from_unit, gas_density_stp)
+        mj_per_kg = self._heating_to_mj_per_kg(
+            value, from_key, from_unit, gas_density_stp
+        )
         return self._heating_from_mj_per_kg(mj_per_kg, to_key, to_unit, gas_density_stp)
 
     def _ensure_known_heating_unit(self, unit_key: str, raw_unit: str) -> None:
@@ -623,7 +657,9 @@ class UnitConversionService:
         msg = f"Conversion to {to_unit} not implemented"
         raise ValueError(msg)
 
-    def _require_gas_density(self, gas_density_stp: float | None, unit_name: str) -> float:
+    def _require_gas_density(
+        self, gas_density_stp: float | None, unit_name: str
+    ) -> float:
         """Require gas density for volumetric heating value conversions."""
         if gas_density_stp is None:
             msg = f"Gas density required for {unit_name} conversion"
@@ -649,7 +685,9 @@ class UnitConversionService:
         to_key = to_unit.lower()
         if from_key == to_key:
             return value
-        molecular_weight = self._resolve_molecular_weight(from_key, to_key, molecular_weight)
+        molecular_weight = self._resolve_molecular_weight(
+            from_key, to_key, molecular_weight
+        )
         self._ensure_known_concentration_unit(from_key, from_unit)
         self._ensure_known_concentration_unit(to_key, to_unit)
         mg_nm3_value = self._tar_to_mg_nm3(
@@ -835,10 +873,14 @@ class UnitConversionService:
             if category == "heating_value":
                 return {"heating_value": list(self.heating_value_conversions.keys())}
             if category == "tar_concentration":
-                return {"tar_concentration": list(self.concentration_conversions.keys())}
+                return {
+                    "tar_concentration": list(self.concentration_conversions.keys())
+                }
             if category == "performance":
                 return {
-                    "performance": [u for units in self.performance_units.values() for u in units]
+                    "performance": [
+                        u for units in self.performance_units.values() for u in units
+                    ]
                 }
             return {}
 
@@ -849,7 +891,9 @@ class UnitConversionService:
         result["gas_flow"] = ["SCFM", "ACFM", "Nm3/hr", "Nm³/hr"]
         result["heating_value"] = list(self.heating_value_conversions.keys())
         result["tar_concentration"] = list(self.concentration_conversions.keys())
-        result["performance"] = [u for units in self.performance_units.values() for u in units]
+        result["performance"] = [
+            u for units in self.performance_units.values() for u in units
+        ]
         return result
 
 

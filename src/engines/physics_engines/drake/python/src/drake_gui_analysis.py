@@ -365,7 +365,9 @@ class AnalysisMixin:
         ax2.text(0.5, 0.5, "CoP Data Not Available in Drake", ha="center", va="center")
 
         ax3 = fig.add_subplot(gs[1, :])
-        ax3.text(0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center")
+        ax3.text(
+            0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center"
+        )  # noqa: E501
 
         plt.tight_layout()
         plt.show()

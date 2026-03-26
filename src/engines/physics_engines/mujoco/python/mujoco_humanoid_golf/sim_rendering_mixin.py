@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
 """MuJoCo sim widget rendering mixin.
 
 Extracts frame rendering, overlay compositing, force/torque/induced/CF
@@ -91,7 +95,9 @@ class SimRenderingMixin:
         # Add force/torque/accel overlays
         rgb = self._add_force_torque_overlays(rgb)
 
-        if self.manipulator is not None and (self.show_selected_body or self.show_constraints):
+        if self.manipulator is not None and (
+            self.show_selected_body or self.show_constraints
+        ):  # noqa: E501
             rgb = self._add_manipulation_overlays(rgb)
 
         if self.show_club_trajectory or self.show_swing_plane:
@@ -159,7 +165,9 @@ class SimRenderingMixin:
             return rgb
 
         selected_id = (
-            getattr(self.manipulator, "selected_body_id", None) if self.manipulator else None
+            getattr(self.manipulator, "selected_body_id", None)
+            if self.manipulator
+            else None  # noqa: E501
         )
         if selected_id is None or selected_id < 0:
             return rgb
@@ -206,7 +214,8 @@ class SimRenderingMixin:
 
         if getattr(self, "show_live_quat", False):
             msg = (
-                f"Quat (w,x,y,z): [{quat[0]:.2f}, " f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"
+                f"Quat (w,x,y,z): [{quat[0]:.2f}, "
+                f"{quat[1]:.2f}, {quat[2]:.2f}, {quat[3]:.2f}]"  # noqa: E501
             )
             cv2.putText(
                 img,
@@ -262,7 +271,9 @@ class SimRenderingMixin:
             except (AttributeError, TypeError) as exc:
                 logger.debug("Background colour update failed: %s", exc)
 
-    def set_background_color(self: Any, sky_color: Any = None, ground_color: Any = None) -> None:
+    def set_background_color(
+        self: Any, sky_color: Any = None, ground_color: Any = None
+    ) -> None:  # noqa: E501
         """Set sky and ground background colors for the scene."""
         if sky_color is not None:
             self.sky_color = np.array(sky_color, dtype=np.float32)

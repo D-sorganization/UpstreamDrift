@@ -132,7 +132,9 @@ class DrakeManipulabilityAnalyzer:
             return False
         return True
 
-    def _build_result_for_body(self, context: Context, name, body, radii_v, eigvecs_v, cond):
+    def _build_result_for_body(
+        self, context: Context, name, body, radii_v, eigvecs_v, cond
+    ):  # noqa: E501
         if not (context is not None):
             raise ValueError("context must be provided")
         if not (context is not None):
@@ -193,7 +195,9 @@ class DrakeManipulabilityAnalyzer:
             except np.linalg.LinAlgError:
                 continue
 
-            res = self._build_result_for_body(context, name, body, radii_v, eigvecs_v, cond)
+            res = self._build_result_for_body(
+                context, name, body, radii_v, eigvecs_v, cond
+            )  # noqa: E501
             results.append(res)
 
         return results

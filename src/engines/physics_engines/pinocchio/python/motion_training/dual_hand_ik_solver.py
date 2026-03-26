@@ -271,8 +271,12 @@ class DualHandIKSolver:
             left_current = self.data.oMf[self.left_hand_frame_id]
             right_current = self.data.oMf[self.right_hand_frame_id]
 
-            left_error = np.linalg.norm(left_current.translation - left_target.translation)
-            right_error = np.linalg.norm(right_current.translation - right_target.translation)
+            left_error = np.linalg.norm(
+                left_current.translation - left_target.translation
+            )  # noqa: E501
+            right_error = np.linalg.norm(
+                right_current.translation - right_target.translation
+            )  # noqa: E501
 
             # Check convergence
             if left_error < s.position_tolerance and right_error < s.position_tolerance:
@@ -552,4 +556,6 @@ def create_ik_solver(
         return DualHandIKSolver(urdf_path, left_hand_frame, right_hand_frame, settings)
     else:
         logger.info("Pink not available, using fallback damped least-squares solver")
-        return DualHandIKSolverFallback(urdf_path, left_hand_frame, right_hand_frame, settings)
+        return DualHandIKSolverFallback(
+            urdf_path, left_hand_frame, right_hand_frame, settings
+        )  # noqa: E501

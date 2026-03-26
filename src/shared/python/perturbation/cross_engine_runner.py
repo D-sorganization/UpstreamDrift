@@ -197,10 +197,10 @@ def _load_analyzer(engine_name: str, **kwargs: Any) -> Any:
     -------
     analyzer instance or raises ImportError / ValueError.
     """
-    if not (engine_name in SUPPORTED_ENGINES):
+    if not (engine_name in SUPPORTED_ENGINES):  # noqa: E713
         raise ValueError(
-        f"Unsupported engine: {engine_name!r}.  Choose from {SUPPORTED_ENGINES}"
-    )
+            f"Unsupported engine: {engine_name!r}.  Choose from {SUPPORTED_ENGINES}"
+        )
 
     entry = _ENGINE_LOADER_MAP[engine_name]
     module_path, cls_name = entry.split("|")
@@ -286,10 +286,10 @@ class CrossEnginePerturbationRunner:
             engines = list(SUPPORTED_ENGINES)
 
         for name in engines:
-            if not (name in SUPPORTED_ENGINES):
+            if not (name in SUPPORTED_ENGINES):  # noqa: E713
                 raise ValueError(
-                f"Unknown engine: {name!r}.  Supported: {SUPPORTED_ENGINES}"
-            )
+                    f"Unknown engine: {name!r}.  Supported: {SUPPORTED_ENGINES}"
+                )
 
         self._engines = engines
         self._profile = profile
@@ -304,9 +304,9 @@ class CrossEnginePerturbationRunner:
         ------------------
         Pre: profile is a dict with 'coeffs' key.
         """
-        if not (isinstance(profile):
-            raise ValueError(dict), f"profile must be a dict, got {type(profile)}")
-        if not ("coeffs" in profile):
+        if not isinstance(profile, dict):
+            raise ValueError(f"profile must be a dict, got {type(profile)}")
+        if not ("coeffs" in profile):  # noqa: E713
             raise ValueError("'coeffs' key missing from profile")
         self._profile = profile
 
@@ -342,9 +342,7 @@ class CrossEnginePerturbationRunner:
         CrossEngineReport
         """
         if not (self._profile is not None):
-            raise ValueError(
-            "set_profile() must be called before run_all()"
-        )
+            raise ValueError("set_profile() must be called before run_all()")
 
         t_wall_start = time.monotonic()
         summaries: dict[str, PerturbationSummary] = {}
@@ -363,7 +361,7 @@ class CrossEnginePerturbationRunner:
                     summary.success_rate * 100,
                     summary.execution_time_sec,
                 )
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001, F841
                 logger.warning("Engine '%s' failed", engine_name, exc_info=True)
                 failed_engines.append(engine_name)
 
@@ -391,10 +389,8 @@ class CrossEnginePerturbationRunner:
         Pre:  engine_name in SUPPORTED_ENGINES.
         """
         if not (self._profile is not None):
-            raise ValueError(
-            "set_profile() must be called before run_single()"
-        )
-        if not (engine_name in SUPPORTED_ENGINES):
+            raise ValueError("set_profile() must be called before run_single()")
+        if not (engine_name in SUPPORTED_ENGINES):  # noqa: E713
             raise ValueError(f"Unknown engine: {engine_name!r}")
         analyzer = self._get_or_load_analyzer(engine_name)
         analyzer.set_base_torque_profile(self._profile)

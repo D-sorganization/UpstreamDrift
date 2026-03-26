@@ -65,9 +65,13 @@ def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     tau_control = data.qfrc_actuator.copy()
     # Check shape
     if tau_control.shape[0] != nv:
-        logger.warning("WARNING: tau_control shape %s != nv %s. Resizing.", tau_control.shape, nv)
+        logger.warning(
+            "WARNING: tau_control shape %s != nv %s. Resizing.", tau_control.shape, nv
+        )  # noqa: E501
         tmp = np.zeros(nv, dtype=np.float64)
-        tmp[: min(nv, tau_control.shape[0])] = tau_control[: min(nv, tau_control.shape[0])]
+        tmp[: min(nv, tau_control.shape[0])] = tau_control[
+            : min(nv, tau_control.shape[0])
+        ]  # noqa: E501
         tau_control = tmp
 
     # Now solve M * a = F

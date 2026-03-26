@@ -62,7 +62,9 @@ def moment_of_force(
         Returns finite float (NÂ·m, positive = CCW).
     """
     assert joint_position is not None, "joint_position must be provided"
-    r = np.asarray(distal_com_position, dtype=float) - np.asarray(joint_position, dtype=float)
+    r = np.asarray(distal_com_position, dtype=float) - np.asarray(
+        joint_position, dtype=float
+    )
     return cross_2d(r, np.asarray(net_force, dtype=float))
 
 
@@ -130,7 +132,9 @@ def double_pendulum_moments(
 
     # Shoulder: moment about arm COM
     m_shoulder = moment_of_force(shoulder, arm_com, f_shoulder)
-    total_shoulder = total_moment_at_joint(applied_torques[0], shoulder, arm_com, f_shoulder)
+    total_shoulder = total_moment_at_joint(
+        applied_torques[0], shoulder, arm_com, f_shoulder
+    )
 
     # Wrist: moment about shaft COM
     m_wrist = moment_of_force(wrist, shaft_com, f_wrist)
@@ -227,7 +231,9 @@ def golfer_pendulum_moments(
     Pre:  len(applied_torques) >= 7 and all required keys present in positions/forces.
     Post: Returns dict with 21 keys (3 per joint Ã— 7 joints), all finite.
     """
-    assert len(applied_torques) >= 7, f"Need >= 7 applied torques, got {len(applied_torques)}"
+    assert len(applied_torques) >= 7, (
+        f"Need >= 7 applied torques, got {len(applied_torques)}"
+    )
     # Joint â†’ distal endpoint pairs (joint connects to next link's endpoint)
     joints = ["hub", "rs", "re", "rh", "ls", "le", "lh"]
     endpoints = ["rs", "re", "rh", "club_tip", "le", "lh", "club_tip"]

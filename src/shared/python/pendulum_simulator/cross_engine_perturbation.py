@@ -106,9 +106,13 @@ class CrossEngineSimConfig:
         if self.t_end <= 0:
             raise ValueError(f"t_end must be positive, got {self.t_end}")
         if self.t_end <= self.dt:
-            raise ValueError(f"t_end ({self.t_end}) must be greater than dt ({self.dt})")
+            raise ValueError(
+                f"t_end ({self.t_end}) must be greater than dt ({self.dt})"
+            )
         if self.noise_amplitude < 0:
-            raise ValueError(f"noise_amplitude must be non-negative, got {self.noise_amplitude}")
+            raise ValueError(
+                f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
+            )
         if self.n_trials <= 0:
             raise ValueError(f"n_trials must be positive, got {self.n_trials}")
 
@@ -202,7 +206,9 @@ class CrossEnginePerturbationRunner:
 
     def __init__(self, config: CrossEngineSimConfig) -> None:
         if not isinstance(config, CrossEngineSimConfig):
-            raise TypeError(f"config must be a CrossEngineSimConfig, got {type(config).__name__}")
+            raise TypeError(
+                f"config must be a CrossEngineSimConfig, got {type(config).__name__}"
+            )
         self._config = config
         self._engines: dict[str, SteppableEngine] = {}
 
@@ -268,7 +274,9 @@ class CrossEnginePerturbationRunner:
         elif profile.ndim == 2:
             profile_2d = profile
         else:
-            raise ValueError(f"base_torque_profile must be 1-D or 2-D, got {profile.ndim}-D")
+            raise ValueError(
+                f"base_torque_profile must be 1-D or 2-D, got {profile.ndim}-D"
+            )
         if profile_2d.shape[0] != expected_steps:
             raise ValueError(
                 f"base_torque_profile has {profile_2d.shape[0]} steps, "
@@ -372,7 +380,9 @@ class CrossEnginePerturbationRunner:
         if not result.metrics_per_trial:
             return
         energies = np.array([m.total_energy_final for m in result.metrics_per_trial])
-        speeds = np.array([m.end_effector_speed_final for m in result.metrics_per_trial])
+        speeds = np.array(
+            [m.end_effector_speed_final for m in result.metrics_per_trial]
+        )
         peaks = np.array([m.peak_end_effector_speed for m in result.metrics_per_trial])
 
         result.mean_total_energy_final = float(np.mean(energies))
@@ -474,7 +484,9 @@ class CrossEnginePerturbationRunner:
                 rmse_dict[name] = 0.0
                 continue
             trial_rmses: list[float] = []
-            n_trials = min(len(result.metrics_per_trial), len(baseline_result.metrics_per_trial))
+            n_trials = min(
+                len(result.metrics_per_trial), len(baseline_result.metrics_per_trial)
+            )
             for i in range(n_trials):
                 q_base = baseline_result.metrics_per_trial[i].trajectory_q
                 q_cmp = result.metrics_per_trial[i].trajectory_q
@@ -486,6 +498,8 @@ class CrossEnginePerturbationRunner:
                     diff = q_base[:min_steps] - q_cmp[:min_steps]
                 rmse = float(np.sqrt(np.mean(diff**2)))
                 trial_rmses.append(rmse)
-            rmse_dict[name] = float(np.mean(trial_rmses)) if trial_rmses else float("nan")
+            rmse_dict[name] = (
+                float(np.mean(trial_rmses)) if trial_rmses else float("nan")
+            )
 
         return rmse_dict

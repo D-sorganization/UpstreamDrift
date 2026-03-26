@@ -72,11 +72,15 @@ def fig() -> Figure:
 class TestPlotJointForceVectors:
     """Tests for total joint force vector plotting."""
 
-    def test_creates_axes_on_figure(self, renderer: ForceVectorRenderer, fig: Figure) -> None:
+    def test_creates_axes_on_figure(
+        self, renderer: ForceVectorRenderer, fig: Figure
+    ) -> None:
         renderer.plot_joint_force_vectors(fig, frame_idx=0)
         assert len(fig.get_axes()) > 0
 
-    def test_with_explicit_data(self, renderer: ForceVectorRenderer, fig: Figure) -> None:
+    def test_with_explicit_data(
+        self, renderer: ForceVectorRenderer, fig: Figure
+    ) -> None:
         positions = np.array([[0, 0, 0], [1, 0, 0], [2, 0, 0]], dtype=float)
         forces = np.array([[10, 0, 0], [0, 20, 0], [0, 0, 30]], dtype=float)
         renderer.plot_joint_force_vectors(fig, positions=positions, forces=forces)
@@ -89,7 +93,9 @@ class TestPlotJointForceVectors:
         positions = np.array([[0, 0, 0]], dtype=float)
         forces = np.array([[100, 0, 0]], dtype=float)
         # Should not raise with different scales
-        renderer.plot_joint_force_vectors(fig, positions=positions, forces=forces, scale=0.001)
+        renderer.plot_joint_force_vectors(
+            fig, positions=positions, forces=forces, scale=0.001
+        )
         assert len(fig.get_axes()) > 0
 
     def test_none_figure_raises(self, renderer: ForceVectorRenderer) -> None:
@@ -109,10 +115,14 @@ class TestPlotZTCFForceVectors:
         renderer.plot_ztcf_force_vectors(fig, frame_idx=0)
         assert len(fig.get_axes()) > 0
 
-    def test_with_explicit_data(self, renderer: ForceVectorRenderer, fig: Figure) -> None:
+    def test_with_explicit_data(
+        self, renderer: ForceVectorRenderer, fig: Figure
+    ) -> None:
         positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=float)
         ztcf_forces = np.array([[5, 3, 0], [2, 8, 0]], dtype=float)
-        renderer.plot_ztcf_force_vectors(fig, positions=positions, ztcf_forces=ztcf_forces)
+        renderer.plot_ztcf_force_vectors(
+            fig, positions=positions, ztcf_forces=ztcf_forces
+        )
         assert len(fig.get_axes()) == 1
 
 
@@ -133,7 +143,9 @@ class TestPlotForceDeltaVectors:
         )
         assert len(fig.get_axes()) > 0
 
-    def test_mismatched_shapes_handled(self, renderer: ForceVectorRenderer, fig: Figure) -> None:
+    def test_mismatched_shapes_handled(
+        self, renderer: ForceVectorRenderer, fig: Figure
+    ) -> None:
         """Mismatched total/ztcf shapes should raise or show error."""
         positions = np.array([[0, 0, 0]], dtype=float)
         total = np.array([[10, 20, 0]], dtype=float)
@@ -152,7 +164,9 @@ class TestPlotForceDeltaVectors:
 class TestPlotForceDecomposition:
     """Tests for combined total/ZTCF/delta decomposition subplot."""
 
-    def test_creates_three_subplots(self, renderer: ForceVectorRenderer, fig: Figure) -> None:
+    def test_creates_three_subplots(
+        self, renderer: ForceVectorRenderer, fig: Figure
+    ) -> None:
         positions = np.array([[0, 0, 0], [1, 0, 0]], dtype=float)
         total = np.array([[10, 20, 0], [30, 40, 0]], dtype=float)
         ztcf = np.array([[3, 5, 0], [10, 15, 0]], dtype=float)
@@ -162,7 +176,9 @@ class TestPlotForceDecomposition:
         # Should have 3 subplots: total, ztcf, delta
         assert len(fig.get_axes()) == 3
 
-    def test_empty_data_shows_message(self, renderer: ForceVectorRenderer, fig: Figure) -> None:
+    def test_empty_data_shows_message(
+        self, renderer: ForceVectorRenderer, fig: Figure
+    ) -> None:
         renderer.plot_force_decomposition(
             fig,
             positions=np.empty((0, 3)),

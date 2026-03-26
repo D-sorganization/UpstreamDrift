@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
 """Drake Perturbation Analyzer — PerturbationAnalyzer protocol for Drake (#1979).
 
 Implements the ``PerturbationAnalyzer`` protocol for Drake's ``MultibodyPlant``
@@ -298,8 +302,8 @@ class DrakePerturbationAnalyzer:
         Pre: profile is a dict with 'coeffs' key.
         Post: self._base_coeffs is set and self._nominal_result is cached.
         """
-        if not (isinstance(profile):
-            raise ValueError(dict), f"profile must be a dict, got {type(profile)}")
+        if not isinstance(profile, dict):
+            raise ValueError(f"profile must be a dict, got {type(profile)}")
         if not ("coeffs" in profile):
             raise ValueError("'coeffs' key missing from profile")
         coeffs = profile["coeffs"]
@@ -348,7 +352,7 @@ class DrakePerturbationAnalyzer:
         Post: all MANDATORY_METRICS present; all values finite.
         """
         if not isinstance(sim_result, DrakeSimResult):
-            raise ValueError("f"sim_result must be DrakeSimResult, got {type(sim_result)}")
+            raise ValueError("f"sim_result must be DrakeSimResult, got {type(sim_result)}")  # noqa: E501
         if not (sim_result.n_steps >= 2):
             raise ValueError("Simulation must have >= 2 steps")
 

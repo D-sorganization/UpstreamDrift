@@ -76,9 +76,7 @@ STYLE_BTN_FUNCGEN = (
     "QPushButton:hover{background:#32326a;}"
 )
 
-STYLE_COMBO = (
-    "background:#2a2a38;color:#e0e0f0;border:1px solid #505068;border-radius:3px;padding:4px;"
-)
+STYLE_COMBO = "background:#2a2a38;color:#e0e0f0;border:1px solid #505068;border-radius:3px;padding:4px;"
 
 
 class ControlsWidgetBase(QWidget):
@@ -242,7 +240,9 @@ class ControlsWidgetBase(QWidget):
         layout.addWidget(self.chk_limits)
         self.limit_min_inputs: list[_LI] = []
         self.limit_max_inputs: list[_LI] = []
-        for label, lo, hi in zip(joint_labels, min_defaults, max_defaults, strict=False):
+        for label, lo, hi in zip(
+            joint_labels, min_defaults, max_defaults, strict=False
+        ):
             row_layout = QHBoxLayout()
             row_layout.setContentsMargins(0, 0, 0, 0)
             row_layout.setSpacing(4)
@@ -266,7 +266,10 @@ class ControlsWidgetBase(QWidget):
 
         if not hasattr(self, "chk_clamp") or not self.chk_clamp.isChecked():
             return None
-        return [parse_float(inp, f"Max torque {i}") for i, inp in enumerate(self.clamp_inputs)]
+        return [
+            parse_float(inp, f"Max torque {i}")
+            for i, inp in enumerate(self.clamp_inputs)
+        ]
 
     def _parse_joint_limits(self) -> tuple[list[float], list[float], float] | None:
         """Parse joint limit values.
@@ -278,10 +281,12 @@ class ControlsWidgetBase(QWidget):
         if not hasattr(self, "chk_limits") or not self.chk_limits.isChecked():
             return None
         mins = [
-            np.radians(parse_float(inp, f"Min {i}")) for i, inp in enumerate(self.limit_min_inputs)
+            np.radians(parse_float(inp, f"Min {i}"))
+            for i, inp in enumerate(self.limit_min_inputs)
         ]
         maxs = [
-            np.radians(parse_float(inp, f"Max {i}")) for i, inp in enumerate(self.limit_max_inputs)
+            np.radians(parse_float(inp, f"Max {i}"))
+            for i, inp in enumerate(self.limit_max_inputs)
         ]
         k = parse_float(self.inp_limit_k, "Limit K")
         return mins, maxs, k
@@ -356,7 +361,9 @@ class ControlsWidgetBase(QWidget):
         inputs = self._get_torque_inputs()
         key = joint.lower()
         valid_keys = {k.lower() for k in inputs}
-        assert key in valid_keys, f"Unknown joint '{joint}', expected one of {valid_keys}"
+        assert key in valid_keys, (
+            f"Unknown joint '{joint}', expected one of {valid_keys}"
+        )
         assert len(coeffs) >= 1, "Coefficients list must not be empty"
 
         coeffs_str = ", ".join(f"{c:.4g}" for c in coeffs)
@@ -384,9 +391,9 @@ class ControlsWidgetBase(QWidget):
 
     def set_slider_value(self, val: int) -> None:
         """Pre: 0 <= val <= slider.maximum()"""
-        assert (
-            0 <= val <= self.slider.maximum()
-        ), f"Slider value {val} out of range [0, {self.slider.maximum()}]"
+        assert 0 <= val <= self.slider.maximum(), (
+            f"Slider value {val} out of range [0, {self.slider.maximum()}]"
+        )
         self.slider.blockSignals(True)
         self.slider.setValue(val)
         self.slider.blockSignals(False)

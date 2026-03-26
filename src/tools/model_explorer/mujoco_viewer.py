@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 # mypy: ignore-errors
 # MuJoCo types are dynamically imported and mypy cannot resolve them statically
 """MuJoCo-based 3D visualization for URDF preview.

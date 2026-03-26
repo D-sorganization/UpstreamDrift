@@ -456,7 +456,9 @@ def run_example() -> None:
     )
 
     # Compute natural torque trajectory
-    t_samples, tau_nat_traj = compute_tau_natural_trajectory(sol, lambda t, x: u_pd(t, x))
+    t_samples, tau_nat_traj = compute_tau_natural_trajectory(
+        sol, lambda t, x: u_pd(t, x)
+    )  # noqa: E501
 
     # Simple console output
     logger.info("Simulation completed.")

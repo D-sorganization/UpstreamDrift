@@ -119,7 +119,9 @@ class EnergyMonitor:
         current = self.history[-1]
 
         # Theoretical Energy = Initial Total + Work Input
-        predicted_total = initial.total + (current.mechanical_work - initial.mechanical_work)
+        predicted_total = initial.total + (
+            current.mechanical_work - initial.mechanical_work
+        )  # noqa: E501
 
         # Actual Energy
         actual_total = current.total
@@ -159,7 +161,9 @@ class JacobianTester:
         # Use a private MjData to avoid side effects (Phase 1 Fix)
         self.data = mujoco.MjData(model)
 
-    def check_body_jacobian(self, body_name: str, qpos: np.ndarray, epsilon: float = 1e-6) -> float:
+    def check_body_jacobian(
+        self, body_name: str, qpos: np.ndarray, epsilon: float = 1e-6
+    ) -> float:  # noqa: E501
         """Compare analytical body Jacobian vs finite difference.
 
         Args:
@@ -181,7 +185,9 @@ class JacobianTester:
         # 2. Analytical Jacobian (Reference)
         jacp_analytical = np.zeros((3, self.model.nv))
         jacr_analytical = np.zeros((3, self.model.nv))
-        mujoco.mj_jacBody(self.model, self.data, jacp_analytical, jacr_analytical, body_id)
+        mujoco.mj_jacBody(
+            self.model, self.data, jacp_analytical, jacr_analytical, body_id
+        )  # noqa: E501
 
         # 3. Finite Difference Jacobian
         jacp_fd = np.zeros((3, self.model.nv))

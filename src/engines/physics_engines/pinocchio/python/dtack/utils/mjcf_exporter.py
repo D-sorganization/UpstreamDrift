@@ -66,7 +66,8 @@ class MJCFExporter:
 
         # Options
         lines.append(
-            f'  <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}" ' 'integrator="RK4"/>'
+            f'  <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}" '
+            'integrator="RK4"/>'  # noqa: E501
         )
 
         # Visual
@@ -78,14 +79,16 @@ class MJCFExporter:
         # Worldbody
         lines.append("  <worldbody>")
         lines.append(
-            '    <geom name="floor" type="plane" size="10 10 0.1" ' 'rgba="0.8 0.8 0.8 1"/>'
+            '    <geom name="floor" type="plane" size="10 10 0.1" '
+            'rgba="0.8 0.8 0.8 1"/>'  # noqa: E501
         )
 
         # Root body
         root = self.spec["root"]
         root_pos = root.get("position", [0.0, 0.0, 0.9])
         lines.append(
-            f'    <body name="{root["name"]}" ' f'pos="{root_pos[0]} {root_pos[1]} {root_pos[2]}">'
+            f'    <body name="{root["name"]}" '
+            f'pos="{root_pos[0]} {root_pos[1]} {root_pos[2]}">'  # noqa: E501
         )
         lines.extend(self._generate_body_geom(root))
         lines.extend(self._generate_segments_mjcf(root["name"]))
@@ -139,7 +142,9 @@ class MJCFExporter:
                 lines.append(f'{indent}  <joint name="{seg_name}_joint" type="fixed"/>')
 
             # Geometry
-            lines.extend([indent + "  " + line for line in self._generate_body_geom(segment)])
+            lines.extend(
+                [indent + "  " + line for line in self._generate_body_geom(segment)]
+            )  # noqa: E501
 
             # Recursive children
             lines.extend(self._generate_segments_mjcf(seg_name, depth + 1))

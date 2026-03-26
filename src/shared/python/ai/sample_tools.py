@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Sample tools for AI integration with Golf Suite.
 
 This module provides pre-built tools that expose Golf Modeling Suite

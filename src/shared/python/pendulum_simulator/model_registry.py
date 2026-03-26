@@ -71,7 +71,9 @@ def register_model(name: str, config: ModelConfig) -> None:
     Pre: name is a non-empty string. config is a ModelConfig.
     Post: model is retrievable via get_model(name).
     """
-    assert name and isinstance(name, str), f"Model name must be non-empty string, got {name!r}"
+    assert name and isinstance(name, str), (
+        f"Model name must be non-empty string, got {name!r}"
+    )
     assert isinstance(config, ModelConfig), f"Expected ModelConfig, got {type(config)}"
     if name in _registry:
         logger.warning("Overwriting existing model registration: %s", name)
@@ -87,7 +89,9 @@ def get_model(name: str) -> ModelConfig:
     Raises: KeyError if not found.
     """
     if name not in _registry:
-        raise KeyError(f"Model {name!r} not registered. Available: {list(_registry.keys())}")
+        raise KeyError(
+            f"Model {name!r} not registered. Available: {list(_registry.keys())}"
+        )
     return _registry[name]
 
 

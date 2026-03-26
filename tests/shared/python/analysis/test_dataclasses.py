@@ -77,7 +77,9 @@ class TestMethodCitation:
 
     def test_frozen_raises_on_mutation(self) -> None:
         c = MethodCitation(name="X", authors="A", year=2000, title="T")
-        with pytest.raises((dataclasses.FrozenInstanceError, TypeError, AttributeError)):
+        with pytest.raises(
+            (dataclasses.FrozenInstanceError, TypeError, AttributeError)
+        ):
             c.name = "Y"  # type: ignore[misc]
 
 
@@ -311,7 +313,9 @@ class TestValidateTimingCrossEngine:
         t_a = np.array([0.0])
         t_b = np.array([0.1])
         assert validate_timing_cross_engine(t_a, t_b, tolerance_s=0.2)["passed"] is True
-        assert validate_timing_cross_engine(t_a, t_b, tolerance_s=0.05)["passed"] is False
+        assert (
+            validate_timing_cross_engine(t_a, t_b, tolerance_s=0.05)["passed"] is False
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -346,5 +350,9 @@ class TestValidateAngleCrossEngine:
     def test_custom_tolerance(self) -> None:
         a_a = np.array([0.0])
         a_b = np.array([5.0])
-        assert validate_angle_cross_engine(a_a, a_b, tolerance_deg=10.0)["passed"] is True
-        assert validate_angle_cross_engine(a_a, a_b, tolerance_deg=3.0)["passed"] is False
+        assert (
+            validate_angle_cross_engine(a_a, a_b, tolerance_deg=10.0)["passed"] is True
+        )
+        assert (
+            validate_angle_cross_engine(a_a, a_b, tolerance_deg=3.0)["passed"] is False
+        )

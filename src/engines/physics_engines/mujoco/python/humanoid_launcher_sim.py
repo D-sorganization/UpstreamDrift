@@ -85,7 +85,9 @@ class SimulationMixin:
         abs_repo_path = str(self.repo_path.resolve())
         cmd, mount_path = self._get_docker_base_cmd(abs_repo_path)
 
-        cmd.extend(["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/docker/src"])
+        cmd.extend(
+            ["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/docker/src"]
+        )  # noqa: E501
 
         self._append_display_env(cmd)
 
@@ -141,13 +143,18 @@ class SimulationMixin:
         elif code == 139:
             self.log(f"Simulation failed with code {code} (Segmentation Fault).")
 
-            self.log("⚠️ COMMON CAUSE: X11 Display Server not found or " "configured incorrectly.")
+            self.log(
+                "⚠️ COMMON CAUSE: X11 Display Server not found or "
+                "configured incorrectly."
+            )  # noqa: E501
 
             self.log("1. Ensure VcXsrv (XLaunch) is running.")
 
             self.log("2. Ensure 'Disable access control' is CHECKED in VcXsrv.")
 
-            self.log("3. If you don't need the live GUI, uncheck 'Live Interactive View'.")
+            self.log(
+                "3. If you don't need the live GUI, uncheck 'Live Interactive View'."
+            )  # noqa: E501
 
         else:
             self.log(f"Simulation failed with code {code}.")

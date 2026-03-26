@@ -48,7 +48,10 @@ class DRYRefactorer:
             original_content = content
 
             # Check if file already uses get_logger
-            if "from src.shared.python.logging_pkg.logging_config import get_logger" in content:
+            if (
+                "from src.shared.python.logging_pkg.logging_config import get_logger"
+                in content
+            ):
                 return False
 
             # Pattern 1: logger = logging.getLogger(__name__)
@@ -96,7 +99,9 @@ class DRYRefactorer:
             if content != original_content:
                 file_path.write_text(content, encoding="utf-8")
                 self.changes_made += 1
-                logger.info(f"✓ Refactored logging in {file_path.relative_to(self.repo_root)}")
+                logger.info(
+                    f"✓ Refactored logging in {file_path.relative_to(self.repo_root)}"
+                )
                 return True
 
             return False
@@ -129,11 +134,16 @@ class DRYRefactorer:
                     content = re.sub(pattern, replacement, content)
                     needs_import = True
 
-            if needs_import and "from src.shared.python.data_io.path_utils import" not in content:
+            if (
+                needs_import
+                and "from src.shared.python.data_io.path_utils import" not in content
+            ):
                 # Add import after other imports
                 import_line = "\nfrom src.shared.python.data_io.path_utils import get_repo_root, get_src_root\n"
                 # Find last import statement
-                import_match = list(re.finditer(r"^(?:from|import) .+$", content, re.MULTILINE))
+                import_match = list(
+                    re.finditer(r"^(?:from|import) .+$", content, re.MULTILINE)
+                )
                 if import_match:
                     last_import = import_match[-1]
                     insert_pos = last_import.end()
@@ -142,7 +152,9 @@ class DRYRefactorer:
             if content != original_content:
                 file_path.write_text(content, encoding="utf-8")
                 self.changes_made += 1
-                logger.info(f"✓ Refactored paths in {file_path.relative_to(self.repo_root)}")
+                logger.info(
+                    f"✓ Refactored paths in {file_path.relative_to(self.repo_root)}"
+                )
                 return True
 
             return False
@@ -167,28 +179,38 @@ class DRYRefactorer:
             # Pattern 2: if not QApplication.instance(): cls.app = QApplication(...) else: cls.app = QApplication.instance()
             pattern2 = r"if not (?:QApplication|QtWidgets\.QApplication)\.instance\(\):\s*\n\s+(?:cls\.)?app = (?:QApplication|QtWidgets\.QApplication)\([^\)]*\)\s*\n\s+else:\s*\n\s+(?:cls\.)?app = (?:cast\([^,]+,\s*)?(?:QApplication|QtWidgets\.QApplication)\.instance\(\)\)?"
 
-            has_pattern = bool(re.search(pattern1, content)) or bool(re.search(pattern2, content))
+            has_pattern = bool(re.search(pattern1, content)) or bool(
+                re.search(pattern2, content)
+            )
 
             if not has_pattern:
                 return False
 
             # Replace patterns with get_qapp()
             content = re.sub(pattern1, r"\1app = get_qapp()", content)
-            content = re.sub(pattern2, r"app = get_qapp()  # Simplified with utility", content)
+            content = re.sub(
+                pattern2, r"app = get_qapp()  # Simplified with utility", content
+            )
 
             # Add import if not present
             if "from src.shared.python.gui_pkg.gui_utils import" not in content:
                 # Find PyQt6 imports
-                pyqt_import = re.search(r"^from PyQt6\.QtWidgets import.*$", content, re.MULTILINE)
+                pyqt_import = re.search(
+                    r"^from PyQt6\.QtWidgets import.*$", content, re.MULTILINE
+                )
                 if pyqt_import:
                     insert_pos = pyqt_import.end()
-                    import_line = "\nfrom src.shared.python.gui_pkg.gui_utils import get_qapp\n"
+                    import_line = (
+                        "\nfrom src.shared.python.gui_pkg.gui_utils import get_qapp\n"
+                    )
                     content = content[:insert_pos] + import_line + content[insert_pos:]
 
             if content != original_content:
                 file_path.write_text(content, encoding="utf-8")
                 self.changes_made += 1
-                logger.info(f"✓ Refactored QApplication in {file_path.relative_to(self.repo_root)}")
+                logger.info(
+                    f"✓ Refactored QApplication in {file_path.relative_to(self.repo_root)}"
+                )
                 return True
 
             return False
@@ -197,10 +219,11 @@ class DRYRefactorer:
             logger.error(f"Failed to refactor QApplication in {file_path}: {e}")
             return False
 
-    def process_directory(self, directory: Path, refactor_func: Callable[[Path], bool]) -> int:
+    def process_directory(
+        self, directory: Path, refactor_func: Callable[[Path], bool]
+    ) -> int:
         """Process all Python files in directory with given refactor function."""
         if not isinstance(directory, Path):
-
             raise ValueError("directory must be a Path object")
         if not (callable(refactor_func)):
             raise ValueError("refactor_func must be callable")
@@ -220,7 +243,10 @@ class DRYRefactorer:
             original_content = content
 
             # Check if file already uses validation_utils
-            if "from src.shared.python.validation_pkg.validation_utils import" in content:
+            if (
+                "from src.shared.python.validation_pkg.validation_utils import"
+                in content
+            ):
                 return False
 
             # Pattern: if array.shape != expected_shape: raise ValueError
@@ -245,8 +271,12 @@ class DRYRefactorer:
             for match in reversed(matches):  # Reverse to maintain positions
                 array_name = match.group(1)
                 shape = match.group(2)
-                replacement = f'validate_array_shape({array_name}, ({shape}), "{array_name}")'
-                content = content[: match.start()] + replacement + content[match.end() :]
+                replacement = (
+                    f'validate_array_shape({array_name}, ({shape}), "{array_name}")'
+                )
+                content = (
+                    content[: match.start()] + replacement + content[match.end() :]
+                )
 
             if content != original_content:
                 file_path.write_text(content, encoding="utf-8")
@@ -297,7 +327,9 @@ class DRYRefactorer:
 
             if needs_import:
                 # Add import after pathlib import
-                pathlib_import = re.search(r"^from pathlib import Path$", content, re.MULTILINE)
+                pathlib_import = re.search(
+                    r"^from pathlib import Path$", content, re.MULTILINE
+                )
                 if pathlib_import:
                     insert_pos = pathlib_import.end()
                     import_line = (
@@ -341,7 +373,9 @@ def refactor_logging_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_logging_imports)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_logging_imports
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 1 complete: {total_changes} files refactored")
@@ -366,7 +400,9 @@ def refactor_paths_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_path_patterns)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_path_patterns
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 2 complete: {total_changes} files refactored")
@@ -390,7 +426,9 @@ def refactor_qapp_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_qapp_patterns)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_qapp_patterns
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 3 complete: {total_changes} files refactored")
@@ -414,7 +452,9 @@ def refactor_array_validation_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_array_validation)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_array_validation
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 4 complete: {total_changes} files refactored")
@@ -438,7 +478,9 @@ def refactor_path_resolution_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_path_resolution)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_path_resolution
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 5 complete: {total_changes} files refactored")
@@ -447,7 +489,9 @@ def refactor_path_resolution_phase(repo_root: Path) -> int:
 
 def main() -> int:
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Refactor DRY and orthogonality violations")
+    parser = argparse.ArgumentParser(
+        description="Refactor DRY and orthogonality violations"
+    )
     parser.add_argument(
         "--phase",
         choices=["all", "logging", "paths", "qapp", "validation", "pathres"],

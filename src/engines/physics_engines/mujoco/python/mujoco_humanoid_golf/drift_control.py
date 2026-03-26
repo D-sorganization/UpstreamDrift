@@ -199,9 +199,9 @@ class DriftControlDecomposer:
             raise ValueError("qpos must be provided")
         qacc_full = self._compute_full_acceleration(qpos, qvel, ctrl)
 
-        qacc_drift, _, qacc_drift_gravity, qacc_drift_velocity = self._compute_drift_acceleration(
-            qpos, qvel
-        )
+        qacc_drift, _, qacc_drift_gravity, qacc_drift_velocity = (
+            self._compute_drift_acceleration(qpos, qvel)
+        )  # noqa: E501
 
         qacc_control = qacc_full - qacc_drift
         qacc_control_actuation = qacc_control.copy()

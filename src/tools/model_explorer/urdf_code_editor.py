@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """URDF Code Editor with XML syntax highlighting and validation.
 
 Provides a code editor experience for viewing and editing URDF/XML files

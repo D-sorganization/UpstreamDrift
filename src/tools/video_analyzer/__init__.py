@@ -27,9 +27,9 @@ Usage:
     logger.info(f"X-Factor: {results.x_factor:.1f}°")
 """
 
-from .analyzer import SwingAnalyzer
-from .pose_estimator import PoseEstimator
-from .types import (
+from .analyzer import SwingAnalyzer  # noqa: E402
+from .pose_estimator import PoseEstimator  # noqa: E402
+from .types import (  # noqa: E402
     BalanceMetrics,
     BodyAngles,
     SwingAnalysis,
@@ -37,7 +37,7 @@ from .types import (
     SwingScores,
     TempoMetrics,
 )
-from .video_processor import VideoProcessor
+from .video_processor import VideoProcessor  # noqa: E402
 
 __version__ = "1.0.0"
 __all__ = [

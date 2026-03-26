@@ -194,7 +194,9 @@ def parse_simscape_csv(filename: str) -> pd.DataFrame:
         ValueError: If no valid joint position data is found.
     """
     df = pd.read_csv(filename)
-    logger.debug(f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns")
+    logger.debug(
+        f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns"
+    )  # noqa: E501
     logger.info(f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds")
 
     joint_positions = get_simscape_joint_positions()

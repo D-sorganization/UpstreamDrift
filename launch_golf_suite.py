@@ -77,7 +77,6 @@ def route_launch(args: argparse.Namespace) -> None:
     if not (args is not None):
         raise ValueError("Parsed arguments must be provided")
     if not isinstance(args, argparse.Namespace):
-
         raise ValueError("args must be a Namespace object")
 
     engine_arg = getattr(args, "engine", None)

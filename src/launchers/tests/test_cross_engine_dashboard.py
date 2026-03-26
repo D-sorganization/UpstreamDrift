@@ -55,7 +55,9 @@ class TestCrossEngineSimConfig:
 
     def test_custom_values(self) -> None:
         """Custom values must be stored correctly."""
-        cfg = CrossEngineSimConfig(t_end=2.0, dt=0.005, noise_amplitude=0.5, n_trials=5, seed=7)
+        cfg = CrossEngineSimConfig(
+            t_end=2.0, dt=0.005, noise_amplitude=0.5, n_trials=5, seed=7
+        )
         assert cfg.t_end == pytest.approx(2.0)
         assert cfg.dt == pytest.approx(0.005)
         assert cfg.noise_amplitude == pytest.approx(0.5)

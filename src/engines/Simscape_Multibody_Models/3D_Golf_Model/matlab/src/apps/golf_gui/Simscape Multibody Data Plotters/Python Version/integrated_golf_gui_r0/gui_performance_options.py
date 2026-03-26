@@ -61,7 +61,9 @@ class PerformanceOptionsDialog:
         title_label.grid(row=0, column=0, columnspan=2, pady=(0, 20))
 
         # Simscape Results Explorer option
-        self.simscape_var = tk.BooleanVar(value=self.settings["disable_simscape_results"])
+        self.simscape_var = tk.BooleanVar(
+            value=self.settings["disable_simscape_results"]
+        )  # noqa: E501
         simscape_check = ttk.Checkbutton(
             main_frame,
             text="Disable Simscape Results Explorer",
@@ -73,10 +75,13 @@ class PerformanceOptionsDialog:
         # Info label for Simscape option
         self.simscape_info = ttk.Label(
             main_frame,
-            text="✅ Provides ~5% speed improvement\n" "   Reduces memory usage during simulation",
+            text="✅ Provides ~5% speed improvement\n"
+            "   Reduces memory usage during simulation",  # noqa: E501
             foreground="green",
         )
-        self.simscape_info.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(0, 15))
+        self.simscape_info.grid(
+            row=2, column=0, columnspan=2, sticky=tk.W, pady=(0, 15)
+        )  # noqa: E501
 
         # Memory optimization option
         self.memory_var = tk.BooleanVar(value=self.settings["optimize_memory"])
@@ -113,7 +118,9 @@ class PerformanceOptionsDialog:
         ok_button = ttk.Button(button_frame, text="OK", command=self.ok_clicked)
         ok_button.grid(row=0, column=0, padx=(0, 10))
 
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=self.cancel_clicked)
+        cancel_button = ttk.Button(
+            button_frame, text="Cancel", command=self.cancel_clicked
+        )  # noqa: E501
         cancel_button.grid(row=0, column=1)
 
         # Initialize info display
@@ -129,7 +136,8 @@ class PerformanceOptionsDialog:
             )
         else:
             self.simscape_info.config(
-                text="⚠️  Simscape Results Explorer enabled\n" "   May slow down simulation",
+                text="⚠️  Simscape Results Explorer enabled\n"
+                "   May slow down simulation",  # noqa: E501
                 foreground="orange",
             )
 
@@ -169,7 +177,9 @@ def generate_matlab_performance_script(settings) -> str:
     script_lines.append("")
 
     if settings["disable_simscape_results"]:
-        script_lines.append("% Disable Simscape Results Explorer for better performance")
+        script_lines.append(
+            "% Disable Simscape Results Explorer for better performance"
+        )  # noqa: E501
         script_lines.append("set_param(gcs, 'SimscapeLogType', 'none');")
         script_lines.append("")
 

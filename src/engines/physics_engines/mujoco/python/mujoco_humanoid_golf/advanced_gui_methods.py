@@ -85,7 +85,9 @@ class AdvancedGuiMethodsMixin:
         def set_color_contain(name_part: str, rgba: list) -> None:
             """Set RGBA color for all geoms whose name contains a string."""
             for i in range(self.sim_widget.get_num_geoms()):
-                name = mujoco.mj_id2name(self.sim_widget.model, mujoco.mjtObj.mjOBJ_GEOM, i)
+                name = mujoco.mj_id2name(
+                    self.sim_widget.model, mujoco.mjtObj.mjOBJ_GEOM, i
+                )  # noqa: E501
                 if name and name_part in name:
                     self.sim_widget.set_geom_rgba(i, rgba)
 
@@ -139,7 +141,9 @@ class AdvancedGuiMethodsMixin:
         except ImportError:
             from PyQt6 import QtWidgets
 
-            QtWidgets.QMessageBox.warning(None, "Error", "Matplotlib or shared modules not found.")
+            QtWidgets.QMessageBox.warning(
+                None, "Error", "Matplotlib or shared modules not found."
+            )  # noqa: E501
             return
 
         if not hasattr(self, "sim_widget"):
@@ -192,7 +196,9 @@ class AdvancedGuiMethodsMixin:
             "Power Flow",
         )
         tab_widget.addTab(
-            self._create_kinematic_sequence_tab(plotter, recorder, Figure, FigureCanvasQTAgg),
+            self._create_kinematic_sequence_tab(
+                plotter, recorder, Figure, FigureCanvasQTAgg
+            ),  # noqa: E501
             "Kinematic Sequence",
         )
         tab_widget.addTab(
@@ -202,17 +208,23 @@ class AdvancedGuiMethodsMixin:
             "Coordination",
         )
         tab_widget.addTab(
-            self._create_work_loop_tab(plotter, analyzer, torso_idx, Figure, FigureCanvasQTAgg),
+            self._create_work_loop_tab(
+                plotter, analyzer, torso_idx, Figure, FigureCanvasQTAgg
+            ),  # noqa: E501
             "Work Loop",
         )
         tab_widget.addTab(
-            self._create_ssc_tab(plotter, pelvis_idx, torso_idx, Figure, FigureCanvasQTAgg),
+            self._create_ssc_tab(
+                plotter, pelvis_idx, torso_idx, Figure, FigureCanvasQTAgg
+            ),  # noqa: E501
             "Stretch-Shortening",
         )
 
         dialog.exec()
 
-    def _prepare_analysis_data(self, recorder, np_mod, analyzer_cls, plotter_cls) -> tuple:
+    def _prepare_analysis_data(
+        self, recorder, np_mod, analyzer_cls, plotter_cls
+    ) -> tuple:  # noqa: E501
         """Prepare analyzer, report, plotter, and radar metrics from recorded data."""
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
@@ -292,7 +304,9 @@ class AdvancedGuiMethodsMixin:
 
         return pelvis_idx, torso_idx
 
-    def _create_swing_profile_tab(self, plotter, metrics, fig_cls, canvas_cls) -> QWidget:
+    def _create_swing_profile_tab(
+        self, plotter, metrics, fig_cls, canvas_cls
+    ) -> QWidget:  # noqa: E501
         """Create the Swing Profile (radar chart) tab widget."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
@@ -348,7 +362,9 @@ class AdvancedGuiMethodsMixin:
             ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
         return widget
 
-    def _create_kinematic_sequence_tab(self, plotter, recorder, fig_cls, canvas_cls) -> QWidget:
+    def _create_kinematic_sequence_tab(
+        self, plotter, recorder, fig_cls, canvas_cls
+    ) -> QWidget:  # noqa: E501
         """Create the Kinematic Sequence tab widget."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
@@ -400,7 +416,9 @@ class AdvancedGuiMethodsMixin:
                 )
                 if ks_data:
                     ks_result = ks_analyzer.analyze(ks_data, ks_times)
-                    plotter.plot_kinematic_sequence(fig, segment_indices, analyzer_result=ks_result)
+                    plotter.plot_kinematic_sequence(
+                        fig, segment_indices, analyzer_result=ks_result
+                    )  # noqa: E501
                 else:
                     plotter.plot_kinematic_sequence(fig, segment_indices)
             else:
@@ -450,7 +468,9 @@ class AdvancedGuiMethodsMixin:
                     ax=ax1,
                 )
 
-                coupling_angles = analyzer.compute_coupling_angles(pelvis_idx, torso_idx)
+                coupling_angles = analyzer.compute_coupling_angles(
+                    pelvis_idx, torso_idx
+                )  # noqa: E501
                 plotter.plot_coupling_angle(
                     fig,
                     coupling_angles,
@@ -476,7 +496,9 @@ class AdvancedGuiMethodsMixin:
 
         return widget
 
-    def _create_work_loop_tab(self, plotter, analyzer, torso_idx, fig_cls, canvas_cls) -> QWidget:
+    def _create_work_loop_tab(
+        self, plotter, analyzer, torso_idx, fig_cls, canvas_cls
+    ) -> QWidget:  # noqa: E501
         """Create the Work Loop (Energetics) tab widget."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
@@ -513,7 +535,9 @@ class AdvancedGuiMethodsMixin:
 
         return widget
 
-    def _create_ssc_tab(self, plotter, pelvis_idx, torso_idx, fig_cls, canvas_cls) -> QWidget:
+    def _create_ssc_tab(
+        self, plotter, pelvis_idx, torso_idx, fig_cls, canvas_cls
+    ) -> QWidget:  # noqa: E501
         """Create the Stretch-Shortening Cycle (X-Factor) tab widget."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")

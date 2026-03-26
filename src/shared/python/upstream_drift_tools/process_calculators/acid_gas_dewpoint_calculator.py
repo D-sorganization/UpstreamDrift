@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 #!/usr/bin/env python3
 """
 Acid Gas Dewpoint Calculator for Syngas Applications
@@ -327,12 +331,12 @@ class AcidGasDewpointCalculator:
             Vapor pressure in Pa
         """
         # DbC preconditions
-        assert isinstance(
-            temperature_c, (int, float)
-        ), f"temperature_c must be numeric, got {type(temperature_c).__name__}"
-        assert (
-            isinstance(component, str) and len(component) > 0
-        ), "component must be a non-empty string"
+        assert isinstance(temperature_c, (int, float)), (
+            f"temperature_c must be numeric, got {type(temperature_c).__name__}"
+        )
+        assert isinstance(component, str) and len(component) > 0, (
+            "component must be a non-empty string"
+        )
 
         if component not in self.antoine_constants:
             msg = f"Unknown component: {component}"
@@ -387,7 +391,9 @@ class AcidGasDewpointCalculator:
                 return float(chem.Psat)
             except ImportError as e:  # pragma: no cover - fallback
                 logger.warning("Thermo vapor pressure failed: %s; using Antoine", e)
-                return self.calculate_vapor_pressure(temperature_c, component, "antoine")
+                return self.calculate_vapor_pressure(
+                    temperature_c, component, "antoine"
+                )
 
         elif method == "coolprop":
             if not COOLPROP_AVAILABLE or PropsSI is None:
@@ -403,7 +409,9 @@ class AcidGasDewpointCalculator:
                 TypeError,
             ) as e:  # pragma: no cover - fallback
                 logger.warning("CoolProp vapor pressure failed: %s; using Antoine", e)
-                return self.calculate_vapor_pressure(temperature_c, component, "antoine")
+                return self.calculate_vapor_pressure(
+                    temperature_c, component, "antoine"
+                )
 
         else:
             msg = f"Unknown method: {method}"
@@ -426,7 +434,9 @@ class AcidGasDewpointCalculator:
             Dewpoint temperature in Celsius
         """
         if partial_pressure_pa <= 0:
-            raise ValueError(f"partial_pressure_pa must be > 0, got {partial_pressure_pa}")
+            raise ValueError(
+                f"partial_pressure_pa must be > 0, got {partial_pressure_pa}"
+            )
 
         if component not in self.antoine_constants:
             raise ValueError(
@@ -549,7 +559,9 @@ class AcidGasDewpointCalculator:
         # 3. Overall dewpoint determination
         valid_dewpoints = {k: v for k, v in dewpoints.items() if not np.isnan(v)}
         if valid_dewpoints:
-            limiting_component = max(valid_dewpoints.keys(), key=lambda k: valid_dewpoints[k])
+            limiting_component = max(
+                valid_dewpoints.keys(), key=lambda k: valid_dewpoints[k]
+            )
             overall_dewpoint = valid_dewpoints[limiting_component]
         else:
             overall_dewpoint = np.nan
@@ -557,7 +569,11 @@ class AcidGasDewpointCalculator:
             warnings.append("Could not calculate dewpoint for any component")
 
         # 4. Risk assessment
-        margin = temperature_c - overall_dewpoint if not np.isnan(overall_dewpoint) else np.nan
+        margin = (
+            temperature_c - overall_dewpoint
+            if not np.isnan(overall_dewpoint)
+            else np.nan
+        )
         condensation_risk = self._assess_condensation_risk(margin)
 
         # 5. Compile sources
@@ -690,7 +706,9 @@ def quick_dewpoint_calculation(
         h2o=h2o_fraction, hf=hf_fraction, hcl=hcl_fraction, h2s=h2s_fraction
     )
 
-    result = calc.calculate_dewpoint_mixture(temperature_c, pressure_bar, composition, method)
+    result = calc.calculate_dewpoint_mixture(
+        temperature_c, pressure_bar, composition, method
+    )
 
     return {
         "overall_dewpoint_c": result.overall_dewpoint_c,
@@ -723,7 +741,9 @@ def estimate_condensation_risk(
     assert temperature_c is not None, "temperature_c must be provided"
     assert temperature_c is not None, "temperature_c must be provided"
     calc = AcidGasDewpointCalculator()
-    result = calc.calculate_dewpoint_mixture(temperature_c, pressure_bar, composition, method)
+    result = calc.calculate_dewpoint_mixture(
+        temperature_c, pressure_bar, composition, method
+    )
 
     margin = result.dewpoint_margin_c
 

@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Pose library with save/load/export/import/interpolate functionality.
 
 Provides a comprehensive pose management system for storing, retrieving,

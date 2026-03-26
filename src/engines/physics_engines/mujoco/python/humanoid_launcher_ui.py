@@ -157,7 +157,9 @@ class UISetupMixin:
 
         self.combo_control.currentTextChanged.connect(self.on_control_mode_changed)
 
-        self.combo_control.setCurrentText(str(getattr(self.config, "control_mode", "pd")))
+        self.combo_control.setCurrentText(
+            str(getattr(self.config, "control_mode", "pd"))
+        )  # noqa: E501
 
         settings_layout.addWidget(self.combo_control, 0, 1)
 
@@ -218,7 +220,9 @@ class UISetupMixin:
 
         btn_browse_save = QPushButton("Browse")
 
-        btn_browse_save.clicked.connect(lambda: self.browse_file(self.txt_save_path, save=True))
+        btn_browse_save.clicked.connect(
+            lambda: self.browse_file(self.txt_save_path, save=True)
+        )  # noqa: E501
 
         state_layout.addWidget(btn_browse_save, 1, 2)
 
@@ -348,7 +352,9 @@ class UISetupMixin:
         self.slider_weight.setRange(50, 200)
         self.slider_weight.setValue(int(self.config.weight_percent))
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
-        self.slider_weight.valueChanged.connect(lambda v: self.lbl_weight_val.setText(f"{v}%"))
+        self.slider_weight.valueChanged.connect(
+            lambda v: self.lbl_weight_val.setText(f"{v}%")
+        )  # noqa: E501
         dim_layout.addWidget(self.slider_weight, 1, 1)
         dim_layout.addWidget(self.lbl_weight_val, 1, 2)
 

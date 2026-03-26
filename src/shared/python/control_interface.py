@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Joint Torque Input / Control Interface (Shared).
 
 Provides a shared interface for joint torque inputs and control strategy management.

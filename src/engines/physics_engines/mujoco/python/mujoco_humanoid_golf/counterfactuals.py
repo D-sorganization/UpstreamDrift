@@ -365,7 +365,9 @@ class CounterfactualAnalyzer:
 
         # Extract data
         observed = np.array([r.observed_acceleration[joint_idx] for r in results])
-        counterfactual = np.array([r.counterfactual_acceleration[joint_idx] for r in results])
+        counterfactual = np.array(
+            [r.counterfactual_acceleration[joint_idx] for r in results]
+        )  # noqa: E501
         delta = np.array([r.delta_acceleration[joint_idx] for r in results])
 
         fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
@@ -390,7 +392,11 @@ class CounterfactualAnalyzer:
         axes[2].legend()
         axes[2].grid(True)
 
-        title = "ZTCF: Torque Attribution" if cf_type == "ztcf" else "ZVCF: Velocity Attribution"
+        title = (
+            "ZTCF: Torque Attribution"
+            if cf_type == "ztcf"
+            else "ZVCF: Velocity Attribution"
+        )  # noqa: E501
         plt.suptitle(f"{title} (Joint {joint_idx})")
         plt.tight_layout()
         plt.show()

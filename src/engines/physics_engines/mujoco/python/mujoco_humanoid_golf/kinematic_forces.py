@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
 """Kinematic-dependent force analysis for golf swing biomechanics.
 
 This module computes motion-dependent forces that can be calculated from
@@ -450,7 +454,9 @@ class KinematicForceAnalyzer:
         # the significantly faster Recursive Newton-Euler algorithm.
         return self.compute_coriolis_forces_rne(qpos, qvel)
 
-    def compute_coriolis_forces_rne(self, qpos: np.ndarray, qvel: np.ndarray) -> np.ndarray:
+    def compute_coriolis_forces_rne(
+        self, qpos: np.ndarray, qvel: np.ndarray
+    ) -> np.ndarray:  # noqa: E501
         """Compute Coriolis forces using analytical RNE (Phase 1).
 
         This method uses MuJoCo's Recursive Newton-Euler (mj_rne) algorithm
@@ -688,7 +694,9 @@ class KinematicForceAnalyzer:
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
 
-        jacp_forward, _ = self._compute_jacobian(self.club_head_id, data=self._perturb_data)
+        jacp_forward, _ = self._compute_jacobian(
+            self.club_head_id, data=self._perturb_data
+        )  # noqa: E501
         jacp_forward = jacp_forward.copy()  # Save copy before buffer reuse
 
         # Compute Jacobian at backward-perturbed state
@@ -696,7 +704,9 @@ class KinematicForceAnalyzer:
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
 
-        jacp_backward, _ = self._compute_jacobian(self.club_head_id, data=self._perturb_data)
+        jacp_backward, _ = self._compute_jacobian(
+            self.club_head_id, data=self._perturb_data
+        )  # noqa: E501
 
         # Second-order central difference
         # Accuracy: O(ε²) - much better than O(ε) forward difference
@@ -856,9 +866,9 @@ class KinematicForceAnalyzer:
             centrifugal, coupling = self.decompose_coriolis_forces(qpos, qvel)
 
             # Club head apparent forces
-            club_coriolis, club_centrifugal, club_apparent = self.compute_club_head_apparent_forces(
-                qpos, qvel, qacc
-            )
+            club_coriolis, club_centrifugal, club_apparent = (
+                self.compute_club_head_apparent_forces(qpos, qvel, qacc)
+            )  # noqa: E501
 
             # Power contributions
             power_dict = self.compute_kinematic_power(qpos, qvel)

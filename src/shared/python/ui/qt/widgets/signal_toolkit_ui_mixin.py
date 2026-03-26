@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Signal Toolkit Widget – UI construction mixin.
 
 Extracts all ``_create_*`` methods that build the left-panel tabs

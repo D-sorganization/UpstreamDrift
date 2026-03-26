@@ -117,7 +117,9 @@ class TestPendulumParams:
         """Positive damping and friction coefficients are accepted."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        p = PendulumParams(m1=5.0, m2=0.3, L1=0.65, L2=1.1, b1=0.1, b2=0.05, mu1=0.2, mu2=0.1)
+        p = PendulumParams(
+            m1=5.0, m2=0.3, L1=0.65, L2=1.1, b1=0.1, b2=0.05, mu1=0.2, mu2=0.1
+        )
         assert p.b1 == 0.1
         assert p.mu1 == 0.2
 
@@ -608,7 +610,9 @@ class TestEquationsOfMotion:
         state_dot = equations_of_motion(rest_state, 0.0, basic_params, zero_torque)
         assert np.all(np.isfinite(state_dot))
 
-    def test_at_rest_zero_initial_acceleration(self, basic_params, rest_state, zero_torque) -> None:
+    def test_at_rest_zero_initial_acceleration(
+        self, basic_params, rest_state, zero_torque
+    ) -> None:
         """At equilibrium (theta1=phi=0) with zero torque, qddot=[0,0]."""
         from src.shared.python.pendulum_simulator.physics import equations_of_motion
 
@@ -628,7 +632,9 @@ class TestEquationsOfMotion:
         )
 
         limits = JointLimits()
-        state_dot = equations_of_motion(rest_state, 0.0, basic_params, zero_torque, limits=limits)
+        state_dot = equations_of_motion(
+            rest_state, 0.0, basic_params, zero_torque, limits=limits
+        )
         assert state_dot.shape == (4,)
 
     def test_with_torque_clamp(self, basic_params, rest_state) -> None:
@@ -642,7 +648,9 @@ class TestEquationsOfMotion:
             return (200.0, 200.0)  # will be clamped
 
         clamp = TorqueClamp(max_torque1=100.0, max_torque2=50.0)
-        state_dot = equations_of_motion(rest_state, 0.0, basic_params, torque, clamp=clamp)
+        state_dot = equations_of_motion(
+            rest_state, 0.0, basic_params, torque, clamp=clamp
+        )
         assert np.all(np.isfinite(state_dot))
 
 

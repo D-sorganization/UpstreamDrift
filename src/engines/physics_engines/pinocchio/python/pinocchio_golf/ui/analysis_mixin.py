@@ -82,7 +82,9 @@ class AnalysisMixin:
             return
 
         if self.recorder.get_num_frames() == 0:
-            QtWidgets.QMessageBox.warning(self, "No Data", "No simulation data recorded yet.")
+            QtWidgets.QMessageBox.warning(
+                self, "No Data", "No simulation data recorded yet."
+            )  # noqa: E501
             return
 
         self.canvas.fig.clear()
@@ -214,7 +216,9 @@ class AnalysisMixin:
                 parts = [float(x) for x in txt.split(",")]
                 if len(parts) == self.model.nv:
                     spec_tau = np.array(parts)
-                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+                    QtWidgets.QApplication.setOverrideCursor(
+                        QtCore.Qt.CursorShape.WaitCursor
+                    )
                     for frame in self.recorder.frames:
                         if frame.joint_positions is not None:
                             a_spec = self.analyzer.compute_specific_control(
@@ -232,7 +236,9 @@ class AnalysisMixin:
         )
 
         if has_specific:
-            times, spec_vals = self.recorder.get_induced_acceleration_series("specific_control")
+            times, spec_vals = self.recorder.get_induced_acceleration_series(
+                "specific_control"
+            )  # noqa: E501
             if len(times) > 0 and spec_vals.size > 0:
                 ax = self.canvas.fig.axes[0]
                 if v_idx < spec_vals.shape[1]:
@@ -269,7 +275,9 @@ class AnalysisMixin:
         self._ensure_analysis_data_populated()
 
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
-        plotter.plot_counterfactual_comparison(self.canvas.fig, "dual", metric_idx=v_idx)
+        plotter.plot_counterfactual_comparison(
+            self.canvas.fig, "dual", metric_idx=v_idx
+        )  # noqa: E501
 
     def _ensure_analysis_data_populated(self: PinocchioGUI) -> None:
         """Populate recorder frames with analysis data if missing."""

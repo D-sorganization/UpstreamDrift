@@ -147,7 +147,9 @@ class PowerFlowAnalyzer:
         joint_work_total = tau * qvel * dt
         return joint_work_drift, joint_work_control, joint_work_total
 
-    def _compute_segment_energies(self, qvel: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def _compute_segment_energies(
+        self, qvel: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:  # noqa: E501
         if not (qvel is not None):
             raise ValueError("qvel must be provided")
         if not (qvel is not None):
@@ -243,9 +245,9 @@ class PowerFlowAnalyzer:
 
         joint_powers = tau * qvel
 
-        joint_work_drift, joint_work_control, joint_work_total = self._compute_work_decomposition(
-            tau, qvel, dt, tau_drift, tau_control
-        )
+        joint_work_drift, joint_work_control, joint_work_total = (
+            self._compute_work_decomposition(tau, qvel, dt, tau_drift, tau_control)
+        )  # noqa: E501
 
         segment_ke, segment_pe = self._compute_segment_energies(qvel)
         total_me = float(np.sum(segment_ke) + np.sum(segment_pe))
@@ -272,7 +274,11 @@ class PowerFlowAnalyzer:
     )
     @precondition(
         lambda self, times, qpos_traj, qvel_traj, qacc_traj, tau_traj: (
-            len(times) == len(qpos_traj) == len(qvel_traj) == len(qacc_traj) == len(tau_traj)
+            len(times)
+            == len(qpos_traj)
+            == len(qvel_traj)
+            == len(qacc_traj)
+            == len(tau_traj)  # noqa: E501
         ),
         "All trajectory arrays must have the same length",
     )
@@ -354,11 +360,15 @@ class PowerFlowAnalyzer:
             parent_id = body.parentid[0]
             parent_name = "world" if parent_id == 0 else self.model.body(parent_id).name
 
-            power_from_parent, power_generation = self._compute_body_joint_power(i, tau, qvel)
+            power_from_parent, power_generation = self._compute_body_joint_power(
+                i, tau, qvel
+            )  # noqa: E501
             power_to_children = self._compute_child_joint_power(i, tau, qvel)
             power_diss = self._compute_joint_dissipation(i, qvel)
 
-            net_balance = power_from_parent - power_to_children - power_generation + power_diss
+            net_balance = (
+                power_from_parent - power_to_children - power_generation + power_diss
+            )  # noqa: E501
 
             transfers.append(
                 InterSegmentTransfer(
@@ -404,7 +414,9 @@ class PowerFlowAnalyzer:
                         power_generation = joint_power
         return power_from_parent, power_generation
 
-    def _compute_child_joint_power(self, body_id: int, tau: np.ndarray, qvel: np.ndarray) -> float:
+    def _compute_child_joint_power(
+        self, body_id: int, tau: np.ndarray, qvel: np.ndarray
+    ) -> float:  # noqa: E501
         """Compute total power transferred to child bodies through their joints.
 
         Args:

@@ -235,7 +235,9 @@ def main() -> None:
         ".ipynb_checkpoints",  # Add checkpoint files to exclusion
         ".Trash",  # Add trash files to exclusion
     }
-    python_files = [f for f in python_files if not any(part in exclude_dirs for part in f.parts)]
+    python_files = [
+        f for f in python_files if not any(part in exclude_dirs for part in f.parts)
+    ]  # noqa: E501
 
     # Exclude quality check scripts from being checked (all variants)
     python_files = [f for f in python_files if not is_quality_check_script(f)]

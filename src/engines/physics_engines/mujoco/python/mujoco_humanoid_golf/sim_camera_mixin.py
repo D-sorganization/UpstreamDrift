@@ -139,7 +139,9 @@ class SimCameraMixin:
                 right = right / (np.linalg.norm(right) + 1e-8)
                 up = np.cross(forward, right)
 
-                self.camera.lookat[:] += -dx * sensitivity * right + dy * sensitivity * up
+                self.camera.lookat[:] += (
+                    -dx * sensitivity * right + dy * sensitivity * up
+                )  # noqa: E501
                 self._render_once()
 
             self.last_mouse_pos = (x, y)
@@ -255,7 +257,9 @@ class SimCameraMixin:
         if action_frame is not None:
             action_frame.setCheckable(True)
             action_frame.setChecked(body_id in self.visible_frames)
-            action_frame.triggered.connect(lambda: self.toggle_frame_visibility(body_id))
+            action_frame.triggered.connect(
+                lambda: self.toggle_frame_visibility(body_id)
+            )  # noqa: E501
 
         action_com = menu.addAction("Show Center of Mass")
         if action_com is not None:

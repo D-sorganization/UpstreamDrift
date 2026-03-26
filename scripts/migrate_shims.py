@@ -45,13 +45,10 @@ def find_importers(
     Excludes the shim file itself and __pycache__ dirs.
     """
     if not isinstance(shim_name, str):
-
         raise ValueError("shim_name must be a string")
     if not isinstance(search_dirs, list):
-
         raise ValueError("search_dirs must be a list")
     if not isinstance(exclude_path, Path):
-
         raise ValueError("exclude_path must be a Path object")
 
     results: list[tuple[Path, int, str]] = []
@@ -98,13 +95,10 @@ def rewrite_import(
     Returns True if changes were made.
     """
     if not isinstance(filepath, Path):
-
         raise ValueError("filepath must be a Path object")
     if not isinstance(shim_name, str):
-
         raise ValueError("shim_name must be a string")
     if not isinstance(real_subpath, str):
-
         raise ValueError("real_subpath must be a string")
 
     content = filepath.read_text(encoding="utf-8")
@@ -133,10 +127,8 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
     Returns a summary dict.
     """
     if not isinstance(shim_path, Path):
-
         raise ValueError("shim_path must be a Path object")
     if not isinstance(dry_run, bool):
-
         raise ValueError("dry_run must be a boolean")
 
     shim_name = shim_path.stem
@@ -196,7 +188,9 @@ def process_shim(shim_path: Path, dry_run: bool = False) -> dict:
         if rewrite_import(fpath, shim_name, real_subpath):
             changed_files.add(fpath)
 
-    result["files_changed"] = [str(f.relative_to(REPO_ROOT)) for f in sorted(changed_files)]
+    result["files_changed"] = [
+        str(f.relative_to(REPO_ROOT)) for f in sorted(changed_files)
+    ]
 
     # Delete shim file
     shim_path.unlink()

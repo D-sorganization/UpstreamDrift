@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Design by Contract (DbC) enforcement for the Tools platform.
 
 This is the **canonical** DbC implementation for ``src/shared/python``.

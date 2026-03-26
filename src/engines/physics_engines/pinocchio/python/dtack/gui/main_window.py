@@ -391,7 +391,9 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         logger.info(f"Running {cf_type} counterfactual...")
 
         # Need real data to run real counterfactuals
-        if (not self.dynamics_engine or not self.recorded_data) and not self.recorded_data:
+        if (
+            not self.dynamics_engine or not self.recorded_data
+        ) and not self.recorded_data:  # noqa: E501
             QtWidgets.QMessageBox.warning(
                 self,
                 "No Data",
@@ -442,10 +444,14 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         # Update Plot
         self.cf_plot_canvas.fig.clear()
         plotter = GolfSwingPlotter(self.recorder)
-        plotter.plot_counterfactual_comparison(self.cf_plot_canvas.fig, cf_type, metric_idx=0)
+        plotter.plot_counterfactual_comparison(
+            self.cf_plot_canvas.fig, cf_type, metric_idx=0
+        )  # noqa: E501
         self.cf_plot_canvas.draw()
 
-        QtWidgets.QMessageBox.information(self, "Success", f"{cf_type.upper()} analysis complete.")
+        QtWidgets.QMessageBox.information(
+            self, "Success", f"{cf_type.upper()} analysis complete."
+        )  # noqa: E501
 
     def _update_results_plot(self) -> None:
         """Update the plot in the Results tab."""
@@ -466,7 +472,10 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
             # Just default to gravity for now, ideally UI lets user pick source
             plotter.plot_induced_acceleration(self.results_canvas.fig, "gravity")
             # Or actuator if available
-            if self.recorded_data and "actuator" in self.recorded_data[0].induced_accelerations:
+            if (
+                self.recorded_data
+                and "actuator" in self.recorded_data[0].induced_accelerations
+            ):  # noqa: E501
                 # Override for demo
                 self.results_canvas.fig.clear()
                 plotter.plot_induced_acceleration(self.results_canvas.fig, "actuator")

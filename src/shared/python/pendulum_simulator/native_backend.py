@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Optional Rust-backed kernels for pendulum simulation.
 
 This module adapts the compiled ``pendulum_core`` extension to the desktop

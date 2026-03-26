@@ -242,10 +242,8 @@ def run_review(root_path: Path):
 def generate_markdown_report(results, output_path):
     """Write the pragmatic review results as a Markdown report."""
     if not isinstance(results, dict):
-
         raise ValueError("results must be a dictionary")
     if not isinstance(output_path, Path):
-
         raise ValueError("output_path must be a Path object")
     md = [f"# Pragmatic Programmer Review: {results['repository']}"]
     md.append(f"**Date**: {results['timestamp'][:10]}")

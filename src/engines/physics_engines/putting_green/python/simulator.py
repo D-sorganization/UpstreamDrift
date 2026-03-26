@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Putting Green Simulator - Main Physics Engine.
 
 This module implements the main PuttingGreenSimulator class that provides

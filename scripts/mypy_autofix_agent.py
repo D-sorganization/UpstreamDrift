@@ -170,7 +170,9 @@ def parse_mypy_output(output: str) -> list[MypyError]:
     """Parse mypy output into structured errors."""
     errors = []
     # Pattern: file.py:line:col: severity: message  [error-code]
-    pattern = re.compile(r"^(.+?):(\d+):(\d+):\s+(error|note):\s+(.+?)(?:\s+\[([^\]]+)\])?\s*$")
+    pattern = re.compile(
+        r"^(.+?):(\d+):(\d+):\s+(error|note):\s+(.+?)(?:\s+\[([^\]]+)\])?\s*$"
+    )
     for line in output.splitlines():
         match = pattern.match(line.strip())
         if match:
@@ -205,7 +207,6 @@ def write_file_lines(filepath: str, lines: list[str]) -> None:
 def has_type_ignore(line: str, code: str | None = None) -> bool:
     """Check if a line already has a type: ignore comment."""
     if not isinstance(line, str):
-
         raise ValueError("line must be a string")
     if not (code is None or isinstance(code, str)):
         raise ValueError("code must be a string or None")
@@ -223,10 +224,8 @@ def has_type_ignore(line: str, code: str | None = None) -> bool:
 def add_type_ignore(line: str, code: str) -> str:
     """Add # type: ignore[code] to a line."""
     if not isinstance(line, str):
-
         raise ValueError("line must be a string")
     if not isinstance(code, str):
-
         raise ValueError("code must be a string")
     stripped = line.rstrip("\n\r")
     # Check if there's already an inline comment
@@ -259,10 +258,8 @@ def fix_callable_as_type(lines: list[str], error: MypyError) -> Fix | None:
     This is a REAL fix, not a suppression.
     """
     if not isinstance(lines, list):
-
         raise ValueError("lines must be a list")
     if not isinstance(error, MypyError):
-
         raise ValueError("error must be MypyError")
     if error.code != "valid-type":
         return None
@@ -307,10 +304,8 @@ def fix_union_attr(lines: list[str], error: MypyError) -> Fix | None:
     This is a REAL fix - adds proper type narrowing.
     """
     if not isinstance(lines, list):
-
         raise ValueError("lines must be a list")
     if not isinstance(error, MypyError):
-
         raise ValueError("error must be MypyError")
     if error.code != "union-attr":
         return None
@@ -372,10 +367,8 @@ def fix_name_not_defined(lines: list[str], error: MypyError) -> Fix | None:
     This is a REAL fix when the name is a known type.
     """
     if not isinstance(lines, list):
-
         raise ValueError("lines must be a list")
     if not isinstance(error, MypyError):
-
         raise ValueError("error must be MypyError")
     if error.code != "name-defined":
         return None
@@ -404,10 +397,8 @@ def fix_import_errors(lines: list[str], error: MypyError) -> Fix | None:
     These are SUPPRESSIONS but acceptable for third-party packages.
     """
     if not isinstance(lines, list):
-
         raise ValueError("lines must be a list")
     if not isinstance(error, MypyError):
-
         raise ValueError("error must be MypyError")
     if error.code not in ("import-untyped", "import-not-found"):
         return None
@@ -437,10 +428,8 @@ def fix_generic_suppression(lines: list[str], error: MypyError) -> Fix | None:
     rather than blanket ignores.
     """
     if not isinstance(lines, list):
-
         raise ValueError("lines must be a list")
     if not isinstance(error, MypyError):
-
         raise ValueError("error must be MypyError")
     # Only suppress specific, well-understood error codes
     suppressible_codes = {
@@ -487,10 +476,8 @@ def _ensure_import(lines: list[str], import_statement: str) -> bool:
     Returns True if import was added.
     """
     if not isinstance(lines, list):
-
         raise ValueError("lines must be a list")
     if not isinstance(import_statement, str):
-
         raise ValueError("import_statement must be a string")
     # Check if already imported
     for line in lines:
@@ -565,16 +552,12 @@ def run_agent(
 ) -> AgentReport:
     """Main agent loop: observe, classify, fix, report."""
     if not isinstance(max_fixes, int):
-
         raise ValueError("max_fixes must be an int")
     if not isinstance(max_files, int):
-
         raise ValueError("max_files must be an int")
     if not isinstance(dry_run, bool):
-
         raise ValueError("dry_run must be a bool")
     if not isinstance(verbose, bool):
-
         raise ValueError("verbose must be a bool")
     if not (config_file is None or isinstance(config_file, str)):
         raise ValueError("config_file must be None or string")

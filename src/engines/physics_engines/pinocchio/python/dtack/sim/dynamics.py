@@ -116,7 +116,9 @@ class DynamicsEngine:
         q_next = pin.integrate(self.model, q, v_next * dt)
         return q_next, v_next
 
-    def compute_induced_acceleration(self, q: np.ndarray, tau_source: np.ndarray) -> np.ndarray:
+    def compute_induced_acceleration(
+        self, q: np.ndarray, tau_source: np.ndarray
+    ) -> np.ndarray:  # noqa: E501
         """Compute acceleration induced solely by a specific torque source.
 
         Equation: a = M(q)^-1 * tau_source

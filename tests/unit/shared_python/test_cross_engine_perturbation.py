@@ -75,7 +75,9 @@ class TestCrossEngineSimConfig:
     @pytest.mark.unit
     def test_custom_config(self) -> None:
         """Custom values should be accepted."""
-        cfg = CrossEngineSimConfig(t_end=2.0, dt=0.005, noise_amplitude=0.5, n_trials=5, seed=7)
+        cfg = CrossEngineSimConfig(
+            t_end=2.0, dt=0.005, noise_amplitude=0.5, n_trials=5, seed=7
+        )
         assert cfg.t_end == pytest.approx(2.0)
         assert cfg.dt == pytest.approx(0.005)
 

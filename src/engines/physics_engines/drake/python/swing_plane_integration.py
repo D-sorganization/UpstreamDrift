@@ -50,7 +50,9 @@ class DrakeSwingPlaneAnalyzer:
         if len(positions) < 3:
             raise ValueError("At least 3 positions required for plane analysis")
 
-        self.logger.info(f"Analyzing swing plane from {len(positions)} trajectory points")
+        self.logger.info(
+            f"Analyzing swing plane from {len(positions)} trajectory points"
+        )  # noqa: E501
 
         # Use shared analyzer
         metrics = self.analyzer.analyze(positions)
@@ -96,9 +98,13 @@ class DrakeSwingPlaneAnalyzer:
 
             if hasattr(context, "sample_times"):
                 times = context.sample_times()
-                indices = np.linspace(0, len(times) - 1, min(num_samples, len(times)), dtype=int)
+                indices = np.linspace(
+                    0, len(times) - 1, min(num_samples, len(times)), dtype=int
+                )  # noqa: E501
                 for idx in indices:
-                    plant_context = plant.GetMyContextFromRoot(context.value(times[idx]))
+                    plant_context = plant.GetMyContextFromRoot(
+                        context.value(times[idx])
+                    )  # noqa: E501
                     pose = plant.EvalBodyPoseInWorld(plant_context, club_body)
                     positions.append(pose.translation())
             elif hasattr(context, "get_mutable_continuous_state"):
@@ -123,7 +129,9 @@ class DrakeSwingPlaneAnalyzer:
             )
 
         positions_array = np.array(positions)
-        self.logger.info(f"Extracted {len(positions_array)} trajectory points from Drake context")
+        self.logger.info(
+            f"Extracted {len(positions_array)} trajectory points from Drake context"
+        )  # noqa: E501
 
         return self.analyze_trajectory(positions_array)
 
@@ -152,7 +160,8 @@ class DrakeSwingPlaneAnalyzer:
         if not (swing_plane_constraint_weight is not None):
             raise ValueError("swing_plane_constraint_weight must be provided")
         self.logger.info(
-            f"Integrating swing plane constraints with weight " f"{swing_plane_constraint_weight}"
+            f"Integrating swing plane constraints with weight "
+            f"{swing_plane_constraint_weight}"  # noqa: E501
         )
 
         analyzer = self.analyzer

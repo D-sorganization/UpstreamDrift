@@ -15,7 +15,8 @@ class TestMuJoCoDashboardLazyLoading:
     def test_module_importable_without_mujoco_installed(self):
         """mujoco_dashboard can be imported even when the mujoco engine module is absent."""
         engine_module = (
-            "src.engines.physics_engines.mujoco.python" ".mujoco_humanoid_golf.physics_engine"
+            "src.engines.physics_engines.mujoco.python"
+            ".mujoco_humanoid_golf.physics_engine"
         )
         # Remove any cached version of the dashboard module to force a fresh import
         sys.modules.pop("src.launchers.mujoco_dashboard", None)
@@ -30,7 +31,8 @@ class TestMuJoCoDashboardLazyLoading:
     def test_engine_not_imported_at_module_level(self):
         """Importing mujoco_dashboard must not touch the MuJoCo physics engine module."""
         engine_module = (
-            "src.engines.physics_engines.mujoco.python" ".mujoco_humanoid_golf.physics_engine"
+            "src.engines.physics_engines.mujoco.python"
+            ".mujoco_humanoid_golf.physics_engine"
         )
         # Remove cached module so the import is fresh
         sys.modules.pop("src.launchers.mujoco_dashboard", None)
@@ -63,7 +65,9 @@ class TestPinocchioDashboardLazyLoading:
 
     def test_module_importable_without_pinocchio_installed(self):
         """pinocchio_dashboard can be imported even when the pinocchio engine module is absent."""
-        engine_module = "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine"
+        engine_module = (
+            "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine"
+        )
         sys.modules.pop("src.launchers.pinocchio_dashboard", None)
 
         with patch.dict("sys.modules", {engine_module: None}):
@@ -73,7 +77,9 @@ class TestPinocchioDashboardLazyLoading:
 
     def test_engine_not_imported_at_module_level(self):
         """Importing pinocchio_dashboard must not touch the Pinocchio physics engine module."""
-        engine_module = "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine"
+        engine_module = (
+            "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine"
+        )
         sys.modules.pop("src.launchers.pinocchio_dashboard", None)
         sys.modules.pop(engine_module, None)
 

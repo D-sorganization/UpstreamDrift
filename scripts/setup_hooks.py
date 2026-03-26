@@ -25,10 +25,8 @@ def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProce
     if not (cmd is not None):
         raise ValueError("cmd must be provided")
     if not isinstance(cmd, list):
-
         raise ValueError("cmd must be a list")
     if not isinstance(check, bool):
-
         raise ValueError("check must be a boolean")
     logger.info("  Running: %s", " ".join(cmd))
     return subprocess.run(cmd, check=check, capture_output=True, text=True)
@@ -84,7 +82,9 @@ def install_push_hooks() -> None:
     if sys.platform != "win32":
         import stat
 
-        hook_dst.chmod(hook_dst.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+        hook_dst.chmod(
+            hook_dst.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH
+        )
     logger.info("  pre-push hook installed (uses python -m pytest)")
 
 

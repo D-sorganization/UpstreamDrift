@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
 # drake_golf_model.py
 """Drake Golf Model URDF Generator and Diagram Builder."""
 
@@ -66,18 +70,30 @@ class GolfModelParams:
     # [kg] Combined thoracic/lumbar spine mass estimate
     spine_mass: float = 15.0
 
-    scapula_rod: SegmentParams = field(default_factory=lambda: SegmentParams(length=0.12, mass=1.0))
-    upper_arm: SegmentParams = field(default_factory=lambda: SegmentParams(length=0.30, mass=2.0))
-    forearm: SegmentParams = field(default_factory=lambda: SegmentParams(length=0.27, mass=1.5))
-    hand: SegmentParams = field(default_factory=lambda: SegmentParams(length=0.10, mass=0.5))
+    scapula_rod: SegmentParams = field(
+        default_factory=lambda: SegmentParams(length=0.12, mass=1.0)
+    )  # noqa: E501
+    upper_arm: SegmentParams = field(
+        default_factory=lambda: SegmentParams(length=0.30, mass=2.0)
+    )  # noqa: E501
+    forearm: SegmentParams = field(
+        default_factory=lambda: SegmentParams(length=0.27, mass=1.5)
+    )  # noqa: E501
+    hand: SegmentParams = field(
+        default_factory=lambda: SegmentParams(length=0.10, mass=0.5)
+    )  # noqa: E501
 
-    club: SegmentParams = field(default_factory=lambda: SegmentParams(length=1.05, mass=0.40))
+    club: SegmentParams = field(
+        default_factory=lambda: SegmentParams(length=1.05, mass=0.40)
+    )  # noqa: E501
 
     # Distance between hand attachment points along club [m]
     hand_spacing_m: float = 0.0762
 
     # Joint axes
-    hip_axis: npt.NDArray[np.float64] = field(default_factory=lambda: np.array([0.0, 0.0, 1.0]))
+    hip_axis: npt.NDArray[np.float64] = field(
+        default_factory=lambda: np.array([0.0, 0.0, 1.0])
+    )  # noqa: E501
     spine_twist_axis: npt.NDArray[np.float64] = field(
         default_factory=lambda: np.array([0.0, 0.0, 1.0])
     )
@@ -89,11 +105,19 @@ class GolfModelParams:
         default_factory=lambda: np.array([0.0, 1.0, 0.0])
     )
 
-    scap_axis_1: npt.NDArray[np.float64] = field(default_factory=lambda: np.array([1.0, 0.0, 0.0]))
-    scap_axis_2: npt.NDArray[np.float64] = field(default_factory=lambda: np.array([0.0, 1.0, 0.0]))
+    scap_axis_1: npt.NDArray[np.float64] = field(
+        default_factory=lambda: np.array([1.0, 0.0, 0.0])
+    )  # noqa: E501
+    scap_axis_2: npt.NDArray[np.float64] = field(
+        default_factory=lambda: np.array([0.0, 1.0, 0.0])
+    )  # noqa: E501
 
-    wrist_axis_1: npt.NDArray[np.float64] = field(default_factory=lambda: np.array([1.0, 0.0, 0.0]))
-    wrist_axis_2: npt.NDArray[np.float64] = field(default_factory=lambda: np.array([0.0, 1.0, 0.0]))
+    wrist_axis_1: npt.NDArray[np.float64] = field(
+        default_factory=lambda: np.array([1.0, 0.0, 0.0])
+    )  # noqa: E501
+    wrist_axis_2: npt.NDArray[np.float64] = field(
+        default_factory=lambda: np.array([0.0, 1.0, 0.0])
+    )  # noqa: E501
 
     # Shoulder gimbal: yaw -> pitch -> roll
     shoulder_axes: tuple[
@@ -108,7 +132,9 @@ class GolfModelParams:
         )
     )
 
-    elbow_axis: npt.NDArray[np.float64] = field(default_factory=lambda: np.array([0.0, 1.0, 0.0]))
+    elbow_axis: npt.NDArray[np.float64] = field(
+        default_factory=lambda: np.array([0.0, 1.0, 0.0])
+    )  # noqa: E501
 
     # Contact / ground
     ground_friction_mu_static: float = 0.8
@@ -261,11 +287,15 @@ class GolfURDFGenerator:
                 raise ValueError("DbC Blocked: Precondition failed.")
             for tag in ["visual", "collision"]:
                 vis = ET.SubElement(link, tag)
-                ET.SubElement(vis, "origin", xyz=self._np_to_str(com_offset), rpy="0 0 0")
+                ET.SubElement(
+                    vis, "origin", xyz=self._np_to_str(com_offset), rpy="0 0 0"
+                )  # noqa: E501
                 geom = ET.SubElement(vis, "geometry")
 
                 if visual_shape_tag == "box":
-                    ET.SubElement(geom, "box", size=self._np_to_str(visual_params["size"]))
+                    ET.SubElement(
+                        geom, "box", size=self._np_to_str(visual_params["size"])
+                    )  # noqa: E501
                 elif visual_shape_tag == "cylinder":
                     ET.SubElement(
                         geom,
@@ -319,7 +349,9 @@ class GolfURDFGenerator:
         sb_dims = np.array([0.1, 0.1, 0.1])
         I_sb = UnitInertia.SolidBox(sb_dims[0], sb_dims[1], sb_dims[2])
         self.add_link("spine_base", 1.0, I_sb, "box", {"size": sb_dims})
-        self.add_joint("hip_yaw", "revolute", "pelvis", "spine_base", RigidTransform(), p.hip_axis)
+        self.add_joint(
+            "hip_yaw", "revolute", "pelvis", "spine_base", RigidTransform(), p.hip_axis
+        )  # noqa: E501
 
         # Lower Spine
         ls_dims = np.array([0.2, 0.2, p.pelvis_to_shoulders * 0.5])
@@ -412,7 +444,9 @@ class GolfURDFGenerator:
         scap_offset = np.array([0.0, sign * 0.18, 0.10], dtype=np.float64)  # type: ignore[arg-type]
         scap_len = p.scapula_rod.length
 
-        self.add_link(f"{side}_scapula_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01))
+        self.add_link(
+            f"{side}_scapula_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01)
+        )  # noqa: E501
 
         scap_body_offset = np.array([0.0, 0.0, scap_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
         I_scap = UnitInertia.SolidCylinder(
@@ -576,7 +610,9 @@ class GolfURDFGenerator:
         )
 
         # Wrist
-        self.add_link(f"{side}_wrist_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01))
+        self.add_link(
+            f"{side}_wrist_dummy", self.dummy_mass, UnitInertia.SolidSphere(0.01)
+        )  # noqa: E501
 
         hand_len = p.hand.length
         I_hand = UnitInertia.SolidCylinder(
@@ -682,7 +718,9 @@ def add_ground_and_club_contact(
     world_body = plant.world_body()
     X_WG = RigidTransform()
 
-    friction = CoulombFriction(params.ground_friction_mu_static, params.ground_friction_mu_dynamic)
+    friction = CoulombFriction(
+        params.ground_friction_mu_static, params.ground_friction_mu_dynamic
+    )  # noqa: E501
     plant.RegisterCollisionGeometry(
         world_body,
         X_WG,
@@ -767,9 +805,13 @@ def build_golf_swing_diagram(
     # Club Body Center is at +L/2 in Link Frame.
     # Grip Trail is at +spacing in Link Frame.
     # Grip Trail in Body Frame = (+spacing) - (+L/2) = spacing - L/2.
-    p_club_trail = np.array([0.0, 0.0, params.hand_spacing_m - params.club.length / 2.0])
+    p_club_trail = np.array(
+        [0.0, 0.0, params.hand_spacing_m - params.club.length / 2.0]
+    )  # noqa: E501
 
-    plant.AddBallConstraint(body_A=right_hand, p_AP=p_right_hand, body_B=club, p_BQ=p_club_trail)
+    plant.AddBallConstraint(
+        body_A=right_hand, p_AP=p_right_hand, body_B=club, p_BQ=p_club_trail
+    )  # noqa: E501
 
     # Ground
     add_ground_and_club_contact(plant, club, params)

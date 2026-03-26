@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """State Checkpoint/Restore System for Reversibility.
 
 This module provides checkpoint/restore functionality for physics simulations,

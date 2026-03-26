@@ -58,7 +58,9 @@ class _WheelBlockFilter(QObject):
             font = app.font()
             font.setPointSize(self._default_font_pt)
             app.setFont(font)
-            logging.getLogger(__name__).info("Font reset to %dpt", self._default_font_pt)
+            logging.getLogger(__name__).info(
+                "Font reset to %dpt", self._default_font_pt
+            )
 
 
 _LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -93,7 +95,7 @@ __version__ = "0.1.0"
 def main() -> None:
     # Handle --version flag before any GUI initialization
     if "--version" in sys.argv:
-        logger.info(f"pendulum-simulator {__version__}")  # noqa: T201
+        logger.info(f"pendulum-simulator {__version__}")  # noqa: F821, T201
         sys.exit(0)
 
     _configure_logging()

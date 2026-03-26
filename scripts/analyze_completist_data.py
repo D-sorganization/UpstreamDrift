@@ -116,7 +116,12 @@ def analyze_todos() -> tuple[list[Finding], list[Finding]]:
             return None
 
         if re.search(r"\b" + todo_str + r"\b", content):
-            return {"file": filepath, "line": lineno, "text": content, "type": "TRACKED_TASK"}
+            return {
+                "file": filepath,
+                "line": lineno,
+                "text": content,
+                "type": "TRACKED_TASK",
+            }
 
         for m_marker in fixme_markers:
             if re.search(r"\b" + m_marker + r"\b", content):

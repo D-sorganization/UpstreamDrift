@@ -148,12 +148,16 @@ class DockerMixin:
 
                     cmd = ["docker", "build", "-t", "upstream-drift:engine", "."]
                     host.root.after(0, host.log, f"Running: {' '.join(cmd)}")
-                    host.root.after(0, host.log, "Adding defusedxml to upstream-drift...")
+                    host.root.after(
+                        0, host.log, "Adding defusedxml to upstream-drift..."
+                    )  # noqa: E501
 
                     returncode = self._run_docker_build(temp_dir, cmd)
 
                     if returncode == 0:
-                        host.root.after(0, host.log, "upstream-drift updated successfully!")
+                        host.root.after(
+                            0, host.log, "upstream-drift updated successfully!"
+                        )  # noqa: E501
                         host.root.after(
                             0,
                             host.log,
@@ -256,7 +260,9 @@ class DockerMixin:
                     host.root.after(0, host.log, f"Exception in enqueue_output: {e}")
             output_queue.put(None)  # Sentinel
 
-        t = threading.Thread(target=enqueue_output, args=(host.process.stdout, q), daemon=True)
+        t = threading.Thread(
+            target=enqueue_output, args=(host.process.stdout, q), daemon=True
+        )  # noqa: E501
         t.start()
 
         while True:
@@ -293,7 +299,8 @@ class DockerMixin:
                 host.root.after(
                     0,
                     host.log,
-                    "SOLUTION: Missing defusedxml dependency. " "Please rebuild Docker image.",
+                    "SOLUTION: Missing defusedxml dependency. "
+                    "Please rebuild Docker image.",  # noqa: E501
                 )
                 host.root.after(
                     0,
@@ -304,13 +311,15 @@ class DockerMixin:
                 host.root.after(
                     0,
                     host.log,
-                    "SOLUTION: Missing Python dependency. " "Check Dockerfile and rebuild.",
+                    "SOLUTION: Missing Python dependency. "
+                    "Check Dockerfile and rebuild.",  # noqa: E501
                 )
             elif "DISPLAY" in err or "X11" in err:
                 host.root.after(
                     0,
                     host.log,
-                    "SOLUTION: X11/Display issue. " "Try disabling 'Live Interactive View'.",
+                    "SOLUTION: X11/Display issue. "
+                    "Try disabling 'Live Interactive View'.",  # noqa: E501
                 )
 
     def _reset_buttons_state(self) -> None:

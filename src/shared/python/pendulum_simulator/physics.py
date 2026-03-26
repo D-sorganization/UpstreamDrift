@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Double pendulum golf swing physics using Lagrangian formulation with relative coordinates.
 
@@ -121,8 +125,12 @@ class TorqueClamp:
         # Accept negative inputs by taking abs (#1138)
         object.__setattr__(self, "max_torque1", abs(self.max_torque1))
         object.__setattr__(self, "max_torque2", abs(self.max_torque2))
-        assert self.max_torque1 > 0, f"|max_torque1| must be positive, got {self.max_torque1}"
-        assert self.max_torque2 > 0, f"|max_torque2| must be positive, got {self.max_torque2}"
+        assert self.max_torque1 > 0, (
+            f"|max_torque1| must be positive, got {self.max_torque1}"
+        )
+        assert self.max_torque2 > 0, (
+            f"|max_torque2| must be positive, got {self.max_torque2}"
+        )
 
 
 # Type aliases
@@ -189,7 +197,9 @@ def mass_matrix_components(phi: float, params: PendulumParams) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def coriolis_vector(phi: float, dtheta1: float, dphi: float, params: PendulumParams) -> np.ndarray:
+def coriolis_vector(
+    phi: float, dtheta1: float, dphi: float, params: PendulumParams
+) -> np.ndarray:
     """Compute the Coriolis/centrifugal force vector C(q, qdot) * qdot.
 
     Pre: all inputs finite.
@@ -235,7 +245,9 @@ def gravity_vector(theta1: float, phi: float, params: PendulumParams) -> np.ndar
 # ---------------------------------------------------------------------------
 
 
-def friction_torque_vector(dtheta1: float, dphi: float, params: PendulumParams) -> np.ndarray:
+def friction_torque_vector(
+    dtheta1: float, dphi: float, params: PendulumParams
+) -> np.ndarray:
     """Compute dissipative torque vector (viscous + Coulomb).
 
     Pre: dtheta1, dphi finite.
@@ -306,9 +318,13 @@ def joint_limit_torque(
         """Compute signed smoothstep penalty for a single DOF."""
         assert angle is not None, "angle must be provided"
         if angle < lo:
-            return _hermite_penalty(lo - angle, -vel, transition, limits.stiffness, limits.damping)
+            return _hermite_penalty(
+                lo - angle, -vel, transition, limits.stiffness, limits.damping
+            )
         if angle > hi:
-            return -_hermite_penalty(angle - hi, vel, transition, limits.stiffness, limits.damping)
+            return -_hermite_penalty(
+                angle - hi, vel, transition, limits.stiffness, limits.damping
+            )
         return 0.0
 
     tau1 = _penalty(theta1, dtheta1, limits.theta1_min, limits.theta1_max)
@@ -358,7 +374,9 @@ class JointLimitsNDOF:
         assert self.angle_min.ndim == 1, "angle_min must be 1D"
         assert self.angle_max.ndim == 1, "angle_max must be 1D"
         assert self.angle_min.shape == self.angle_max.shape, "Shape mismatch"
-        assert np.all(self.angle_min < self.angle_max), "min must be < max for all joints"
+        assert np.all(self.angle_min < self.angle_max), (
+            "min must be < max for all joints"
+        )
         assert self.stiffness > 0, f"stiffness must be positive, got {self.stiffness}"
         assert self.damping >= 0, f"damping must be non-negative, got {self.damping}"
 
@@ -407,7 +425,9 @@ def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
     Pre: tau.shape == limits.shape, all limits > 0.
     Post: |result[i]| <= limits[i] for all i.
     """
-    assert tau.shape == limits.shape, f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
+    assert tau.shape == limits.shape, (
+        f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
+    )
     assert np.all(limits > 0), "All limits must be positive"
     result: np.ndarray = np.clip(tau, -limits, limits)
     return result
@@ -448,7 +468,9 @@ def equations_of_motion(
 
     tau_limits = np.zeros(2)
     if limits is not None:
-        tau_limits = joint_limit_torque(phi, dphi, limits, theta1=theta1, dtheta1=dtheta1)
+        tau_limits = joint_limit_torque(
+            phi, dphi, limits, theta1=theta1, dtheta1=dtheta1
+        )
 
     rhs = tau_drive + tau_friction + tau_limits - C - G
     cond = np.linalg.cond(M)
@@ -484,7 +506,9 @@ def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dic
     result = {"shoulder": (0.0, 0.0), "wrist": (wx, wy), "tip": (tx, ty)}
     _wrist_dist = np.hypot(wx, wy)
     _tip_dist = np.hypot(tx - wx, ty - wy)
-    assert abs(_wrist_dist - L1) < 1e-9, f"Wrist distance {_wrist_dist:.6f} â‰  L1={L1:.6f}"
+    assert abs(_wrist_dist - L1) < 1e-9, (
+        f"Wrist distance {_wrist_dist:.6f} â‰  L1={L1:.6f}"
+    )
     assert abs(_tip_dist - L2) < 1e-9, f"Tip distance {_tip_dist:.6f} â‰  L2={L2:.6f}"
     return result
 
@@ -544,15 +568,28 @@ def base_force(state: State, qddot: np.ndarray, params: PendulumParams) -> dict:
     awy = params.L1 * (np.sin(theta1) * qdd1 + np.cos(theta1) * dtheta1**2)
 
     # Tip acceleration (clubhead)
-    atx = awx + params.L2 * (np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2)
-    aty = awy + params.L2 * (np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2)
+    atx = awx + params.L2 * (
+        np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2
+    )
+    aty = awy + params.L2 * (
+        np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2
+    )
 
     # Shaft COM at L2/2 from wrist
-    asx = awx + (params.L2 / 2) * (np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2)
-    asy = awy + (params.L2 / 2) * (np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2)
+    asx = awx + (params.L2 / 2) * (
+        np.cos(abs_angle2) * ddabs2 - np.sin(abs_angle2) * dabs2**2
+    )
+    asy = awy + (params.L2 / 2) * (
+        np.sin(abs_angle2) * ddabs2 + np.cos(abs_angle2) * dabs2**2
+    )
 
     fx = params.m1 * ax1 + params.m2 * asx + params.mClub * atx
-    fy = params.m1 * ay1 + params.m2 * asy + params.mClub * aty - (params.m1 + me) * params.g
+    fy = (
+        params.m1 * ay1
+        + params.m2 * asy
+        + params.mClub * aty
+        - (params.m1 + me) * params.g
+    )
 
     return {
         "fx": float(fx),
@@ -611,7 +648,9 @@ def control_vector(
 # ---------------------------------------------------------------------------
 
 
-def linear_accelerations(state: State, qddot: np.ndarray, params: PendulumParams) -> dict:
+def linear_accelerations(
+    state: State, qddot: np.ndarray, params: PendulumParams
+) -> dict:
     """Compute linear accelerations of joints in world coordinates."""
     assert state.shape == (4,) and qddot.shape == (2,)
     theta1, phi, dtheta1, dphi = state
@@ -680,4 +719,6 @@ def total_energy(state: State, params: PendulumParams) -> float:
     assert state is not None, "state must be provided"
     from .physics_base import total_energy_from_parts
 
-    return total_energy_from_parts(kinetic_energy(state, params), potential_energy(state, params))
+    return total_energy_from_parts(
+        kinetic_energy(state, params), potential_energy(state, params)
+    )

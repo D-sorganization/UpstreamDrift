@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Component Library for URDF parts with read-only protection and copy-to-edit.
 
 This module provides a library system where components from existing URDFs

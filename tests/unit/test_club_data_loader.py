@@ -42,7 +42,9 @@ class TestClubSpecification:
         """head_mass_kg is computed from head_mass_grams in __post_init__."""
         from src.shared.python.club_data.loader import ClubSpecification
 
-        club = ClubSpecification(name="Driver", club_type="Driver", head_mass_grams=200.0)
+        club = ClubSpecification(
+            name="Driver", club_type="Driver", head_mass_grams=200.0
+        )
         assert abs(club.head_mass_kg - 0.2) < 1e-9
 
     def test_total_mass_grams_property(self) -> None:
@@ -90,7 +92,9 @@ class TestClubSpecification:
         """from_dict(to_dict()) preserves name and club_type."""
         from src.shared.python.club_data.loader import ClubSpecification
 
-        original = ClubSpecification(name="Driver", club_type="Driver", loft_degrees=9.5)
+        original = ClubSpecification(
+            name="Driver", club_type="Driver", loft_degrees=9.5
+        )
         d = original.to_dict()
         restored = ClubSpecification.from_dict(d)
         assert restored.name == original.name

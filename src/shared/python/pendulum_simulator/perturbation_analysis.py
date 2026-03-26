@@ -107,7 +107,9 @@ def generate_noise(
             f"Unknown noise type: {noise_type!r}. Must be 'white', 'pink', or 'brown'."
         )
 
-    assert noise.shape == (n_samples,), f"Expected shape ({n_samples},), got {noise.shape}"
+    assert noise.shape == (n_samples,), (
+        f"Expected shape ({n_samples},), got {noise.shape}"
+    )
     return noise
 
 
@@ -148,7 +150,9 @@ def perturb_torque_profile(
     Post: output.shape == profile.shape
     """
     if profile.ndim != 1 or len(profile) == 0:
-        raise ValueError(f"profile must be a non-empty 1-D array, got shape {profile.shape}")
+        raise ValueError(
+            f"profile must be a non-empty 1-D array, got shape {profile.shape}"
+        )
     if noise_amplitude < 0:
         raise ValueError(f"noise_amplitude must be non-negative, got {noise_amplitude}")
     if noise_type != "additive":
@@ -246,9 +250,9 @@ class PerturbationConfig:
 
     def __post_init__(self) -> None:
         assert self.n_trials > 0, f"n_trials must be positive, got {self.n_trials}"
-        assert (
-            self.noise_amplitude >= 0
-        ), f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
+        assert self.noise_amplitude >= 0, (
+            f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
+        )
         assert self.noise_type in {
             "white",
             "pink",

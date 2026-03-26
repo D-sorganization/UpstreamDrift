@@ -105,8 +105,12 @@ class UISetupMixin:
         mode_layout = QtWidgets.QHBoxLayout()
         self.mode_combo = QtWidgets.QComboBox()
         self.mode_combo.addItems(["Dynamic (Physics)", "Kinematic (Pose)"])
-        self.mode_combo.setToolTip("Select between physics simulation or manual pose control")
-        self.mode_combo.setStatusTip("Select between physics simulation or manual pose control")
+        self.mode_combo.setToolTip(
+            "Select between physics simulation or manual pose control"
+        )  # noqa: E501
+        self.mode_combo.setStatusTip(
+            "Select between physics simulation or manual pose control"
+        )  # noqa: E501
         self.mode_combo.currentTextChanged.connect(self._on_mode_changed)  # type: ignore[attr-defined]
         mode_layout.addWidget(QtWidgets.QLabel("Mode:"))
         mode_layout.addWidget(self.mode_combo)
@@ -160,7 +164,9 @@ class UISetupMixin:
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
         self.btn_reset.setToolTip("Reset the simulation to the initial state (Ctrl+R)")
-        self.btn_reset.setStatusTip("Reset the simulation to the initial state (Ctrl+R)")
+        self.btn_reset.setStatusTip(
+            "Reset the simulation to the initial state (Ctrl+R)"
+        )  # noqa: E501
         self.btn_reset.setShortcut(QtGui.QKeySequence("Ctrl+R"))
         self.btn_reset.clicked.connect(self._reset_simulation)  # type: ignore[attr-defined]
         dyn_layout.addWidget(self.btn_reset)
@@ -201,7 +207,9 @@ class UISetupMixin:
 
         analysis_layout.addLayout(ind_layout)
 
-        self.btn_counterfactuals = QtWidgets.QPushButton("Show Counterfactuals (ZTCF/ZVCF)")
+        self.btn_counterfactuals = QtWidgets.QPushButton(
+            "Show Counterfactuals (ZTCF/ZVCF)"
+        )  # noqa: E501
         self.btn_counterfactuals.setToolTip(
             "Show Zero Torque (ZTCF) and Zero Velocity (ZVCF) analysis"
         )
@@ -216,7 +224,9 @@ class UISetupMixin:
         analysis_layout.addWidget(self.btn_swing_plane)
 
         self.btn_advanced_plots = QtWidgets.QPushButton("Show Advanced Plots")
-        self.btn_advanced_plots.setToolTip("Show Radar Chart, CoP Field, and Power Flow")
+        self.btn_advanced_plots.setToolTip(
+            "Show Radar Chart, CoP Field, and Power Flow"
+        )  # noqa: E501
         self.btn_advanced_plots.clicked.connect(self._show_advanced_plots)  # type: ignore[attr-defined]
         self.btn_advanced_plots.setEnabled(HAS_MATPLOTLIB)
         analysis_layout.addWidget(self.btn_advanced_plots)
@@ -253,8 +263,12 @@ class UISetupMixin:
         vis_layout = QtWidgets.QVBoxLayout()
 
         self.btn_overlays = QtWidgets.QPushButton("Manage Body Overlays")
-        self.btn_overlays.setToolTip("Toggle visibility of reference frames and centers of mass")
-        self.btn_overlays.setStatusTip("Toggle visibility of reference frames and centers of mass")
+        self.btn_overlays.setToolTip(
+            "Toggle visibility of reference frames and centers of mass"
+        )  # noqa: E501
+        self.btn_overlays.setStatusTip(
+            "Toggle visibility of reference frames and centers of mass"
+        )  # noqa: E501
         self.btn_overlays.clicked.connect(self._show_overlay_dialog)
         vis_layout.addWidget(self.btn_overlays)
 
@@ -279,7 +293,8 @@ class UISetupMixin:
 
         self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
         self.chk_live_analysis.setToolTip(
-            "Compute Induced Accelerations and Counterfactuals in real-time " "(Can slow down sim)"
+            "Compute Induced Accelerations and Counterfactuals in real-time "
+            "(Can slow down sim)"  # noqa: E501
         )
         vis_layout.addWidget(self.chk_live_analysis)
 
@@ -405,7 +420,8 @@ class UISetupMixin:
                 joint_max = JOINT_ANGLE_MAX_RAD
 
             slider.setToolTip(
-                f"Adjust angle for {joint.name()} (radians, " f"{joint_min:.2f} to {joint_max:.2f})"
+                f"Adjust angle for {joint.name()} (radians, "
+                f"{joint_min:.2f} to {joint_max:.2f})"  # noqa: E501
             )
 
             # Spinbox

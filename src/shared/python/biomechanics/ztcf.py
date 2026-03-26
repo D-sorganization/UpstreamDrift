@@ -128,7 +128,9 @@ def compute_ztcf_accelerations(
     --------------
     - Result is finite with shape ``(n,)``.
     """
-    _validate_dynamics_inputs(mass_matrix, coriolis_vector, gravity_vector, friction_vector)
+    _validate_dynamics_inputs(
+        mass_matrix, coriolis_vector, gravity_vector, friction_vector
+    )
 
     n = mass_matrix.shape[0]
     friction = friction_vector if friction_vector is not None else np.zeros(n)

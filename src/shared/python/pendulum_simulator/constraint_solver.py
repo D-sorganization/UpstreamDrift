@@ -107,13 +107,15 @@ def _solve_constrained_dynamics(
 
         tau[:7] = clamp_torque_ndof(tau[:7], torque_limits[:7])
 
-    native_result = _native_backend.golfer_constrained_dynamics(q, qdot, tau, params, alpha, beta)
+    native_result = _native_backend.golfer_constrained_dynamics(
+        q, qdot, tau, params, alpha, beta
+    )
     if native_result is not None:
         qddot, lambda_forces = native_result
         assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
-        assert np.all(
-            np.isfinite(lambda_forces)
-        ), f"Constraint forces have non-finite values: {lambda_forces}"
+        assert np.all(np.isfinite(lambda_forces)), (
+            f"Constraint forces have non-finite values: {lambda_forces}"
+        )
         return qddot, lambda_forces
 
     # Compute dynamic terms
@@ -163,9 +165,9 @@ def _solve_constrained_dynamics(
     lambda_forces = sol[n:]
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
-    assert np.all(
-        np.isfinite(lambda_forces)
-    ), f"Constraint forces have non-finite values: {lambda_forces}"
+    assert np.all(np.isfinite(lambda_forces)), (
+        f"Constraint forces have non-finite values: {lambda_forces}"
+    )
     return qddot, lambda_forces
 
 
@@ -201,7 +203,9 @@ def constraint_forces(
     lambda_vec : np.ndarray, shape (4,) â€” constraint forces
     """
     assert state is not None, "state must be provided"
-    _, lambda_forces = _solve_constrained_dynamics(state, t, params, torque_func, alpha, beta)
+    _, lambda_forces = _solve_constrained_dynamics(
+        state, t, params, torque_func, alpha, beta
+    )
     return lambda_forces
 
 
@@ -264,7 +268,9 @@ def equations_of_motion(
     assert np.all(np.isfinite(state)), f"State has non-finite values: {state}"
 
     qdot = state[N_DOF:]
-    qddot = constrained_accelerations(state, t, params, torque_func, alpha, beta, torque_limits)
+    qddot = constrained_accelerations(
+        state, t, params, torque_func, alpha, beta, torque_limits
+    )
 
     state_dot = np.zeros(2 * N_DOF)
     state_dot[:N_DOF] = qdot
@@ -316,7 +322,9 @@ def project_to_constraints(
     assert max_iter > 0, f"max_iter must be positive, got {max_iter}"
     assert tol > 0, f"tol must be positive, got {tol}"
 
-    native_projection = _native_backend.golfer_project_to_constraints(q, params, max_iter, tol)
+    native_projection = _native_backend.golfer_project_to_constraints(
+        q, params, max_iter, tol
+    )
     if native_projection is not None:
         residual = float(np.linalg.norm(constraint_vector(native_projection, params)))
         if residual < tol:
@@ -329,7 +337,9 @@ def project_to_constraints(
             return q
         Phi_q = constraint_jacobian(q, params)
         # Use pseudoinverse for robustness
-        dq = Phi_q.T @ np.linalg.solve(Phi_q @ Phi_q.T + 1e-12 * np.eye(N_CONSTRAINTS), Phi)
+        dq = Phi_q.T @ np.linalg.solve(
+            Phi_q @ Phi_q.T + 1e-12 * np.eye(N_CONSTRAINTS), Phi
+        )
         q -= dq
 
     residual = float(np.linalg.norm(constraint_vector(q, params)))

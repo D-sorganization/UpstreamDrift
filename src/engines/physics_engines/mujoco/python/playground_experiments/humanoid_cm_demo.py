@@ -22,7 +22,9 @@ logger = get_logger(__name__)
 if DM_CONTROL_AVAILABLE:
     from dm_control import suite
 else:
-    logger.warning("dm_control not found. Please install it via the Dockerfile updates.")
+    logger.warning(
+        "dm_control not found. Please install it via the Dockerfile updates."
+    )  # noqa: E501
 
 if PINOCCHIO_AVAILABLE:
     import pinocchio as pin

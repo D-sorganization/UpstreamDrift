@@ -31,7 +31,9 @@ def main() -> None:
         # Step through the environment
         action_spec = env.action_spec()
         rng = np.random.default_rng()
-        action = rng.uniform(action_spec.minimum, action_spec.maximum, size=action_spec.shape)
+        action = rng.uniform(
+            action_spec.minimum, action_spec.maximum, size=action_spec.shape
+        )  # noqa: E501
         _ = env.step(action)
         logger.info("[SUCCESS] Stepped environment with random action.")
 
