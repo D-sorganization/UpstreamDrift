@@ -162,7 +162,7 @@ def _init_and_solve_ik(urdf_path, trajectory):
             urdf_path=urdf_path,
             settings=settings,
         )
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001, F841
         return None
 
     ik_result = solver.solve_trajectory(trajectory, verbose=True)

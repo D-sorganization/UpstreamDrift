@@ -37,7 +37,7 @@ def verify_launcher_init():
             return False
 
         return True
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001, F841
         import traceback
 
         traceback.print_exc()

@@ -44,7 +44,7 @@ def pytest_configure(config: pytest.Config) -> None:
             resolved_p = str(Path(p).resolve()).lower()
             if resolved_p not in (local_path.lower(), vendored_path.lower()):
                 clean_path.append(p)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001, F841
             clean_path.append(p)
     sys.path = clean_path
 
@@ -72,7 +72,7 @@ def pytest_configure(config: pytest.Config) -> None:
         # pytest_configure runs, creating a stale second module instance.
         for alias in ("contracts", "shared.python.contracts"):
             sys.modules[alias] = canonical_mod
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001, F841
         pass  # Don't block test collection if this fails
 
 
