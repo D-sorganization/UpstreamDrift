@@ -230,10 +230,6 @@ def mock_pyqt(monkeypatch):
         yield
 
 
-@pytest.mark.xfail(
-    reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
-    strict=False,
-)
 class TestGolfLauncherLogic:
     @pytest.fixture(autouse=True)
     def mock_process_manager(self):
@@ -284,6 +280,9 @@ class TestGolfLauncherLogic:
         src.launchers.ui_components.ContextHelpDock = MagicMock()
         yield
 
+    @pytest.mark.skip(
+        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_initialization(self, mock_thread, mock_registry):
@@ -309,6 +308,9 @@ class TestGolfLauncherLogic:
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
 
+    @pytest.mark.skip(
+        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, mock_registry):
@@ -351,6 +353,9 @@ class TestGolfLauncherLogic:
         # The button text should contain the NAME, upper case
         assert "TEST MODEL" in launcher.btn_launch.text()
 
+    @pytest.mark.skip(
+        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
@@ -397,6 +402,9 @@ class TestGolfLauncherLogic:
             idx = args.index("-w")
             assert args[idx + 1] == "/workspace"
 
+    @pytest.mark.skip(
+        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, mock_registry):

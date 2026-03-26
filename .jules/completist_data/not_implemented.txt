@@ -2,19 +2,19 @@
 ./src/api/middleware/error_handler.py:47:            except NotImplementedError as e:
 ./src/api/middleware/error_handler.py:69:        except NotImplementedError as e:
 ./src/launchers/base.py:96:    NotImplementedError at runtime.
-./src/shared/python/engine_core/base_physics_engine.py:404:            except (NotImplementedError, AttributeError):
+./src/shared/python/engine_core/base_physics_engine.py:403:            except (NotImplementedError, AttributeError):
 ./src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
 ./src/engines/physics_engines/opensim/python/opensim_gui.py:271:        except NotImplementedError as e:
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:13654:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
-./scripts/refresh_completist_data.py:66:    # 3. Grep for NotImplementedError
-./scripts/refresh_completist_data.py:67:    run_grep("NotImplementedError", join(DATA_DIR, "not_implemented.txt"))
+./scripts/refresh_completist_data.py:62:    # 3. Grep for NotImplementedError
+./scripts/refresh_completist_data.py:63:    run_grep("NotImplementedError", join(DATA_DIR, "not_implemented.txt"))
 ./scripts/analyze_completist_data.py:213:        "NotImplementedError": 4,
 ./scripts/scan_for_incomplete_code.py:10:        "NotImplementedError": re.compile(r"raise NotImplementedError"),
 ./scripts/verify_backends.py:45:    except NotImplementedError:
-./pyproject.toml:332:    "raise NotImplementedError",
+./pyproject.toml:328:    "raise NotImplementedError",
 ./AGENTS.md:415:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
