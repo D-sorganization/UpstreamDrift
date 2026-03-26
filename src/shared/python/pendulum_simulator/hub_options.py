@@ -47,7 +47,8 @@ def effective_hub_mass(m_hub: float, massless: bool = False) -> float:
     ------------------
     Post: result > 0
     """
-    assert m_hub is not None, "m_hub must be provided"
+    if not (m_hub is not None):
+        raise ValueError("m_hub must be provided")
     if massless:
         return _HUB_MASS_EPSILON
     return m_hub
@@ -126,12 +127,15 @@ def compute_system_com(
     ]
 
     total_mass = sum(m for m, _ in masses_positions)
-    assert total_mass > 0, "Total system mass must be positive"
+    if not (total_mass > 0):
+        raise ValueError("Total system mass must be positive")
 
     com = sum(m * pos for m, pos in masses_positions) / total_mass
 
-    assert com.shape == (2,), f"Expected shape (2,), got {com.shape}"
-    assert np.all(np.isfinite(com)), f"COM is not finite: {com}"
+    if not (com.shape == (2):
+        raise ValueError(), f"Expected shape (2,), got {com.shape}")
+    if not (np.all(np.isfinite(com))):
+        raise ValueError(f"COM is not finite: {com}")
     return com  # type: ignore[no-any-return]
 
 
@@ -153,7 +157,8 @@ def hub_offset_for_com(
     -------
     tuple (dx, dy)
     """
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     com = compute_system_com(q, p)
     # The hub origin is at (0, 0) in world frame
     return (float(com[0]), float(com[1]))

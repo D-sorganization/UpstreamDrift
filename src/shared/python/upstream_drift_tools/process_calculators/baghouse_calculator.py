@@ -57,8 +57,10 @@ except ImportError:
 
     def convert(value: float, from_unit: str, to_unit: str) -> float:
         """Simple temperature conversion fallback."""
-        assert value is not None, "value must be provided"
-        assert value is not None, "value must be provided"
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
+            raise ValueError("value must be provided")
         if from_unit == "K" and to_unit == "C":
             return float(value - CELSIUS_TO_KELVIN_OFFSET)
         if from_unit == "C" and to_unit == "K":
@@ -126,8 +128,10 @@ class BaghouseCalculator:
             Estimated Cp in J/(kg·K)
         """
         # Approximate Cp values at ~500K in J/(mol·K)
-        assert composition is not None, "composition must be provided"
-        assert composition is not None, "composition must be provided"
+        if not (composition is not None):
+            raise ValueError("composition must be provided")
+        if not (composition is not None):
+            raise ValueError("composition must be provided")
         cp_data = {
             "H2": CP_H2_500K,
             "CO": CP_CO_500K,
@@ -173,8 +177,10 @@ class BaghouseCalculator:
             (acfm, scfm) - Actual and standard cubic feet per minute
         """
         # Molecular weights in kg/mol
-        assert mass_flow_kg_s is not None, "mass_flow_kg_s must be provided"
-        assert mass_flow_kg_s is not None, "mass_flow_kg_s must be provided"
+        if not (mass_flow_kg_s is not None):
+            raise ValueError("mass_flow_kg_s must be provided")
+        if not (mass_flow_kg_s is not None):
+            raise ValueError("mass_flow_kg_s must be provided")
         mw_data = {
             "H2": MW_H2_KG,
             "CO": MW_CO_KG,
@@ -224,8 +230,10 @@ class BaghouseCalculator:
         Returns:
             (outlet_temp_c, flow_acfm, flow_scfm)
         """
-        assert gas_flow_kg_s is not None, "gas_flow_kg_s must be provided"
-        assert gas_flow_kg_s is not None, "gas_flow_kg_s must be provided"
+        if not (gas_flow_kg_s is not None):
+            raise ValueError("gas_flow_kg_s must be provided")
+        if not (gas_flow_kg_s is not None):
+            raise ValueError("gas_flow_kg_s must be provided")
         if self.thermo_calc is not None and HAS_THERMO:
             try:
                 stream = GasStream(
@@ -292,10 +300,12 @@ class BaghouseCalculator:
              fill_time_hours, fill_time_days,
              carbon_only_fill_hours, ash_only_fill_hours)
         """
-        assert solid_carbon_in_kg_hr is not None, (
+        if not (solid_carbon_in_kg_hr is not None):
+            raise ValueError(()
             "solid_carbon_in_kg_hr must be provided"
         )
-        assert solid_carbon_in_kg_hr is not None, (
+        if not (solid_carbon_in_kg_hr is not None):
+            raise ValueError(()
             "solid_carbon_in_kg_hr must be provided"
         )
         carbon_removed = solid_carbon_in_kg_hr * carbon_removal_efficiency
@@ -355,17 +365,24 @@ class BaghouseCalculator:
             BaghouseResult object
         """
         # DbC preconditions on physical quantities
-        assert gas_flow_kg_s > 0, f"Gas flow must be positive, got {gas_flow_kg_s}"
-        assert inlet_temp_k > 0, f"Temperature must be positive (K), got {inlet_temp_k}"
-        assert pressure_pa > 0, f"Pressure must be positive, got {pressure_pa}"
-        assert 0 <= carbon_removal_efficiency <= 1, (
+        if not (gas_flow_kg_s > 0):
+            raise ValueError(f"Gas flow must be positive, got {gas_flow_kg_s}")
+        if not (inlet_temp_k > 0):
+            raise ValueError(f"Temperature must be positive (K), got {inlet_temp_k}")
+        if not (pressure_pa > 0):
+            raise ValueError(f"Pressure must be positive, got {pressure_pa}")
+        if not (0 <= carbon_removal_efficiency <= 1):
+            raise ValueError(()
             f"Carbon removal efficiency must be 0-1, got {carbon_removal_efficiency}"
         )
-        assert 0 <= ash_removal_efficiency <= 1, (
+        if not (0 <= ash_removal_efficiency <= 1):
+            raise ValueError(()
             f"Ash removal efficiency must be 0-1, got {ash_removal_efficiency}"
         )
-        assert drum_volume_m3 > 0, f"Drum volume must be positive, got {drum_volume_m3}"
-        assert solid_density_kg_m3 > 0, (
+        if not (drum_volume_m3 > 0):
+            raise ValueError(f"Drum volume must be positive, got {drum_volume_m3}")
+        if not (solid_density_kg_m3 > 0):
+            raise ValueError(()
             f"Solid density must be positive, got {solid_density_kg_m3}"
         )
 

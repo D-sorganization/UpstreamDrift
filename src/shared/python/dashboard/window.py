@@ -41,8 +41,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             engine: The physics engine instance to control and analyze.
             title: Window title.
         """
-        assert engine is not None, "engine must be provided"
-        assert engine is not None, "engine must be provided"
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
         super().__init__()
         self.setWindowTitle(title)
         self.setAccessibleName("Physics Dashboard Main Window")
@@ -115,8 +117,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_plotting_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup standard plotting tab."""
-        assert parent is not None, "parent must be provided"
-        assert parent is not None, "parent must be provided"
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
         # Plot Selector
@@ -163,8 +167,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_analysis_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup advanced analysis tab."""
-        assert parent is not None, "parent must be provided"
-        assert parent is not None, "parent must be provided"
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
         self.btn_compute = QtWidgets.QPushButton("Compute Analysis (Post-Hoc)")
@@ -200,8 +206,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_export_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup export tab."""
-        assert parent is not None, "parent must be provided"
-        assert parent is not None, "parent must be provided"
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
         info_label = QtWidgets.QLabel("Export recorded data to various formats.")
@@ -289,8 +297,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _dispatch_plot(self, plot_type: str) -> None:
         """Dispatch to the appropriate plotter method."""
-        assert plot_type is not None, "plot_type must be provided"
-        assert plot_type is not None, "plot_type must be provided"
+        if not (plot_type is not None):
+            raise ValueError("plot_type must be provided")
+        if not (plot_type is not None):
+            raise ValueError("plot_type must be provided")
         fig = self.static_canvas.fig
 
         simple_plots = {

@@ -76,8 +76,10 @@ class Repository(ABC):
 
     def search(self, query: str) -> list[RepositoryModel]:
         """Search models by name or description."""
-        assert query is not None, "query must be provided"
-        assert query is not None, "query must be provided"
+        if not (query is not None):
+            raise ValueError("query must be provided")
+        if not (query is not None):
+            raise ValueError("query must be provided")
         query_lower = query.lower()
         return [
             m
@@ -103,8 +105,10 @@ class LocalRepository(Repository):
             name: Repository name
             description: Repository description
         """
-        assert path is not None, "path must be provided"
-        assert path is not None, "path must be provided"
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
+            raise ValueError("path must be provided")
         self._path = Path(path)
         self._name = name or self._path.name
         self._description = description
@@ -144,8 +148,10 @@ class LocalRepository(Repository):
         destination: Path,
     ) -> Path | None:
         """Copy model to destination (local copy)."""
-        assert model_path is not None, "model_path must be provided"
-        assert model_path is not None, "model_path must be provided"
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
         import shutil
 
         source = self._path / model_path
@@ -190,8 +196,10 @@ class GitHubRepository(Repository):
             name: Display name
             description: Repository description
         """
-        assert owner is not None, "owner must be provided"
-        assert owner is not None, "owner must be provided"
+        if not (owner is not None):
+            raise ValueError("owner must be provided")
+        if not (owner is not None):
+            raise ValueError("owner must be provided")
         self._owner = owner
         self._repo = repo
         self._branch = branch
@@ -218,8 +226,10 @@ class GitHubRepository(Repository):
         Returns:
             Configured Request object
         """
-        assert url is not None, "url must be provided"
-        assert url is not None, "url must be provided"
+        if not (url is not None):
+            raise ValueError("url must be provided")
+        if not (url is not None):
+            raise ValueError("url must be provided")
         req = urllib.request.Request(url)
         req.add_header("Accept", "application/vnd.github.v3+json")
 
@@ -252,8 +262,10 @@ class GitHubRepository(Repository):
             urllib.error.HTTPError: On non-retryable HTTP errors
             OSError: On network errors after retries exhausted
         """
-        assert url is not None, "url must be provided"
-        assert url is not None, "url must be provided"
+        if not (url is not None):
+            raise ValueError("url must be provided")
+        if not (url is not None):
+            raise ValueError("url must be provided")
         all_results: list = []
         current_url: str | None = url
 
@@ -345,8 +357,10 @@ class GitHubRepository(Repository):
 
     def _scan_directory(self, path: str, depth: int = 0) -> list[RepositoryModel]:
         """Recursively scan directory for URDF files."""
-        assert path is not None, "path must be provided"
-        assert path is not None, "path must be provided"
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
+            raise ValueError("path must be provided")
         if depth > 3:  # Limit recursion
             return []
 
@@ -383,8 +397,10 @@ class GitHubRepository(Repository):
         destination: Path,
     ) -> Path | None:
         """Download model from GitHub."""
-        assert model_path is not None, "model_path must be provided"
-        assert model_path is not None, "model_path must be provided"
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
         destination.mkdir(parents=True, exist_ok=True)
 
         # Download URDF
@@ -410,8 +426,10 @@ class GitHubRepository(Repository):
 
     def _download_meshes(self, model_dir: str, destination: Path) -> None:
         """Download mesh files from model directory."""
-        assert model_dir is not None, "model_dir must be provided"
-        assert model_dir is not None, "model_dir must be provided"
+        if not (model_dir is not None):
+            raise ValueError("model_dir must be provided")
+        if not (model_dir is not None):
+            raise ValueError("model_dir must be provided")
         mesh_dir = f"{model_dir}/meshes"
         api_url = (
             f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{mesh_dir}"
@@ -437,8 +455,10 @@ class GitHubRepository(Repository):
 
     def download_archive(self, destination: Path) -> bool:
         """Download entire repository as archive."""
-        assert destination is not None, "destination must be provided"
-        assert destination is not None, "destination must be provided"
+        if not (destination is not None):
+            raise ValueError("destination must be provided")
+        if not (destination is not None):
+            raise ValueError("destination must be provided")
         archive_url = (
             f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
         )
@@ -474,8 +494,10 @@ class CompositeRepository(Repository):
             name: Display name
             description: Description
         """
-        assert repositories is not None, "repositories must be provided"
-        assert repositories is not None, "repositories must be provided"
+        if not (repositories is not None):
+            raise ValueError("repositories must be provided")
+        if not (repositories is not None):
+            raise ValueError("repositories must be provided")
         self._repositories = repositories
         self._name = name
         self._description = description
@@ -513,8 +535,10 @@ class CompositeRepository(Repository):
     ) -> Path | None:
         """Download from appropriate repository."""
         # Extract repo name from path
-        assert model_path is not None, "model_path must be provided"
-        assert model_path is not None, "model_path must be provided"
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
         parts = model_path.split("/", 1)
         if len(parts) != 2:
             return None

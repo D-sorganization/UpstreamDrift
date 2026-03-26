@@ -108,8 +108,10 @@ def _calculate_layer_cone_volume(
 ) -> float:
     """Differential annular truncated-cone volume for one layer."""
     # Outer frustum at bottom for this layer
-    assert current_radius is not None, "current_radius must be provided"
-    assert current_radius is not None, "current_radius must be provided"
+    if not (current_radius is not None):
+        raise ValueError("current_radius must be provided")
+    if not (current_radius is not None):
+        raise ValueError("current_radius must be provided")
     outer_bottom_r = max(cone_bottom_radius - radius_offset, interior_hole_radius)
     outer_bottom_sq = outer_bottom_r * outer_bottom_r
 
@@ -139,8 +141,10 @@ def _calculate_layer_surface_area(
     display_cone: bool,
 ) -> float:
     """Outer surface area for the Metal Shell layer."""
-    assert current_radius is not None, "current_radius must be provided"
-    assert current_radius is not None, "current_radius must be provided"
+    if not (current_radius is not None):
+        raise ValueError("current_radius must be provided")
+    if not (current_radius is not None):
+        raise ValueError("current_radius must be provided")
     area = 0.0
     if display_cylinder:
         area += (
@@ -168,8 +172,10 @@ def _calculate_interior_void(
     display_cone: bool,
 ) -> float:
     """Interior void volume in cubic inches (cylinder + cone)."""
-    assert last_inner_radius is not None, "last_inner_radius must be provided"
-    assert last_inner_radius is not None, "last_inner_radius must be provided"
+    if not (last_inner_radius is not None):
+        raise ValueError("last_inner_radius must be provided")
+    if not (last_inner_radius is not None):
+        raise ValueError("last_inner_radius must be provided")
     r_sq = last_inner_radius * last_inner_radius
 
     void_cyl = _PI * r_sq * interior_height if display_cylinder else 0.0
@@ -212,8 +218,10 @@ class TRCGeometryEngine:
         Returns:
             Tuple of (LayerResult, new_radius_offset_delta, inner_radius).
         """
-        assert layer is not None, "layer must be provided"
-        assert layer is not None, "layer must be provided"
+        if not (layer is not None):
+            raise ValueError("layer must be provided")
+        if not (layer is not None):
+            raise ValueError("layer must be provided")
         t = layer.thickness
         inner_r = max(current_radius - t, hole_r)
         r_sq = current_radius * current_radius
@@ -278,8 +286,10 @@ class TRCGeometryEngine:
         dimensions: VesselDimensions,
     ) -> None:
         """Compute interior void and final geometry dimensions."""
-        assert results is not None, "results must be provided"
-        assert results is not None, "results must be provided"
+        if not (results is not None):
+            raise ValueError("results must be provided")
+        if not (results is not None):
+            raise ValueError("results must be provided")
         void_in3 = _calculate_interior_void(
             current_radius,
             half_cyl_d,
@@ -308,10 +318,12 @@ class TRCGeometryEngine:
             VesselGeometryResult containing detailed calculations
         """
         # DbC preconditions
-        assert dimensions.cylinder_diameter > 0, (
+        if not (dimensions.cylinder_diameter > 0):
+            raise ValueError(()
             f"cylinder_diameter must be positive, got {dimensions.cylinder_diameter}"
         )
-        assert dimensions.cylinder_height > 0, (
+        if not (dimensions.cylinder_height > 0):
+            raise ValueError(()
             f"cylinder_height must be positive, got {dimensions.cylinder_height}"
         )
 
@@ -385,8 +397,10 @@ class TRCGeometryEngine:
         Returns:
             Residence time in seconds
         """
-        assert volume_ft3 is not None, "volume_ft3 must be provided"
-        assert volume_ft3 is not None, "volume_ft3 must be provided"
+        if not (volume_ft3 is not None):
+            raise ValueError("volume_ft3 must be provided")
+        if not (volume_ft3 is not None):
+            raise ValueError("volume_ft3 must be provided")
         if gas_flow_acfm <= 0:
             return 0.0
 

@@ -25,12 +25,14 @@ def matrix_to_tsv(data: np.ndarray) -> str:
     Pre: data.ndim == 2
     Post: returned string has data.shape[0] lines, each with data.shape[1] tab-separated values.
     """
-    assert data.ndim == 2, f"Expected 2D array, got {data.ndim}D"
+    if not (data.ndim == 2):
+        raise ValueError(f"Expected 2D array, got {data.ndim}D")
     lines = []
     for row in data:
         lines.append("\t".join(f"{v:.6g}" for v in row))
     result = "\n".join(lines)
-    assert result.count("\n") == data.shape[0] - 1
+    if not (result.count("\n") == data.shape[0] - 1):
+        raise ValueError('DbC Blocked: Precondition failed.')
     return result
 
 
@@ -42,8 +44,10 @@ def series_to_tsv(
     Pre: x.shape == y.shape, both 1D
     Post: returned string has len(x)+1 lines (header + data).
     """
-    assert x.ndim == 1 and y.ndim == 1, "Both arrays must be 1D"
-    assert len(x) == len(y), f"Length mismatch: {len(x)} vs {len(y)}"
+    if not (x.ndim == 1 and y.ndim == 1):
+        raise ValueError("Both arrays must be 1D")
+    if not (len(x) == len(y)):
+        raise ValueError(f"Length mismatch: {len(x)} vs {len(y)}")
     header = f"{x_label}\t{y_label}"
     lines = [header]
     for xi, yi in zip(x, y, strict=False):
@@ -57,7 +61,8 @@ def scalar_dict_to_text(d: dict[str, float], title: str = "") -> str:
     Pre: all values are numeric.
     Post: returned string contains one line per key-value pair.
     """
-    assert d is not None, "d must be provided"
+    if not (d is not None):
+        raise ValueError("d must be provided")
     lines = []
     if title:
         lines.append(title)

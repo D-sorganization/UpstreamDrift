@@ -57,8 +57,10 @@ class AdvancedKinematicsAnalyzer:
             model: MuJoCo model structure
             data: MuJoCo data structure
         """
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -89,8 +91,10 @@ class AdvancedKinematicsAnalyzer:
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
-        assert name_pattern is not None, "name_pattern must be provided"
-        assert name_pattern is not None, "name_pattern must be provided"
+        if not (name_pattern is not None):
+            raise ValueError("name_pattern must be provided")
+        if not (name_pattern is not None):
+            raise ValueError("name_pattern must be provided")
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
             if body_name and name_pattern.lower() in body_name.lower():
@@ -113,8 +117,10 @@ class AdvancedKinematicsAnalyzer:
         """
         # MuJoCo 3.3+ may require reshaped arrays
         # Optimized for repeated calls: use np.empty (faster) and avoid try-except
-        assert body_id is not None, "body_id must be provided"
-        assert body_id is not None, "body_id must be provided"
+        if not (body_id is not None):
+            raise ValueError("body_id must be provided")
+        if not (body_id is not None):
+            raise ValueError("body_id must be provided")
         if self._use_shaped_jac:
             jacp = np.empty((3, self.model.nv))
             jacr = np.empty((3, self.model.nv))
@@ -234,8 +240,10 @@ class AdvancedKinematicsAnalyzer:
             ManipulabilityMetrics with comprehensive analysis
         """
         # Compute SVD
-        assert jacobian is not None, "jacobian must be provided"
-        assert jacobian is not None, "jacobian must be provided"
+        if not (jacobian is not None):
+            raise ValueError("jacobian must be provided")
+        if not (jacobian is not None):
+            raise ValueError("jacobian must be provided")
         _U, s, _Vt = svd(jacobian, full_matrices=False)
 
         # Compute metrics
@@ -294,8 +302,10 @@ class AdvancedKinematicsAnalyzer:
             Tuple of (joint_config, success, iterations)
         """
         # Initialize
-        assert target_body_id is not None, "target_body_id must be provided"
-        assert target_body_id is not None, "target_body_id must be provided"
+        if not (target_body_id is not None):
+            raise ValueError("target_body_id must be provided")
+        if not (target_body_id is not None):
+            raise ValueError("target_body_id must be provided")
         q = self.data.qpos.copy() if q_init is None else q_init.copy()
 
         if nullspace_objective is None:
@@ -382,8 +392,10 @@ class AdvancedKinematicsAnalyzer:
         """
         # Compute relative quaternion
         # q_error = q_target * q_current^{-1}
-        assert current_quat is not None, "current_quat must be provided"
-        assert current_quat is not None, "current_quat must be provided"
+        if not (current_quat is not None):
+            raise ValueError("current_quat must be provided")
+        if not (current_quat is not None):
+            raise ValueError("current_quat must be provided")
         q_current_inv = self._quat_conjugate(current_quat)
         q_error = self._quat_multiply(target_quat, q_current_inv)
 
@@ -397,8 +409,10 @@ class AdvancedKinematicsAnalyzer:
 
     def _quat_multiply(self, q1: np.ndarray, q2: np.ndarray) -> np.ndarray:
         """Multiply two quaternions."""
-        assert q1 is not None, "q1 must be provided"
-        assert q1 is not None, "q1 must be provided"
+        if not (q1 is not None):
+            raise ValueError("q1 must be provided")
+        if not (q1 is not None):
+            raise ValueError("q1 must be provided")
         w1, x1, y1, z1 = q1
         w2, x2, y2, z2 = q2
 
@@ -420,8 +434,10 @@ class AdvancedKinematicsAnalyzer:
         Returns:
             Clamped joint configuration
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         q_clamped = q.copy()
 
         for i in range(min(len(q), self.model.njnt)):
@@ -458,8 +474,10 @@ class AdvancedKinematicsAnalyzer:
             Tuple of (center [3], radii [3], axes [3x3])
         """
         # Get Jacobian
-        assert body_id is not None, "body_id must be provided"
-        assert body_id is not None, "body_id must be provided"
+        if not (body_id is not None):
+            raise ValueError("body_id must be provided")
+        if not (body_id is not None):
+            raise ValueError("body_id must be provided")
         jacp, _ = self.compute_body_jacobian(body_id)
 
         # Compute SVD
@@ -488,8 +506,10 @@ class AdvancedKinematicsAnalyzer:
         Returns:
             Tuple of (singular_configs, condition_numbers)
         """
-        assert body_id is not None, "body_id must be provided"
-        assert body_id is not None, "body_id must be provided"
+        if not (body_id is not None):
+            raise ValueError("body_id must be provided")
+        if not (body_id is not None):
+            raise ValueError("body_id must be provided")
         singular_configs = []
         condition_numbers = []
 
@@ -531,8 +551,10 @@ class AdvancedKinematicsAnalyzer:
         Returns:
             Array of configurations [num_samples x nv]
         """
-        assert num_samples is not None, "num_samples must be provided"
-        assert num_samples is not None, "num_samples must be provided"
+        if not (num_samples is not None):
+            raise ValueError("num_samples must be provided")
+        if not (num_samples is not None):
+            raise ValueError("num_samples must be provided")
         configs = []
 
         for _ in range(num_samples):
@@ -564,8 +586,10 @@ class AdvancedKinematicsAnalyzer:
             Nullspace projection matrix [n x n]
         """
         # Use rtol for numerical stability (scipy >= 1.7.0)
-        assert jacobian is not None, "jacobian must be provided"
-        assert jacobian is not None, "jacobian must be provided"
+        if not (jacobian is not None):
+            raise ValueError("jacobian must be provided")
+        if not (jacobian is not None):
+            raise ValueError("jacobian must be provided")
         j_pinv = pinv(jacobian, rtol=1e-3)
         return np.asarray(np.eye(jacobian.shape[1]) - j_pinv @ jacobian)
 
@@ -583,8 +607,10 @@ class AdvancedKinematicsAnalyzer:
             Task-space inertia matrix [m x m]
         """
         # Get mass matrix
-        assert jacobian is not None, "jacobian must be provided"
-        assert jacobian is not None, "jacobian must be provided"
+        if not (jacobian is not None):
+            raise ValueError("jacobian must be provided")
+        if not (jacobian is not None):
+            raise ValueError("jacobian must be provided")
         m_matrix = np.zeros((self.model.nv, self.model.nv))
         mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
 

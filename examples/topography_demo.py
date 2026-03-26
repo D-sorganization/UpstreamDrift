@@ -27,8 +27,10 @@ from src.shared.python.physics.topography import (  # noqa: E402
 
 def _ascii_profile(terrain, y: float = 50.0, n_samples: int = 20) -> str:
     """Return a one-line ASCII elevation profile along x at fixed y."""
-    assert terrain is not None, "Terrain object must be provided"
-    assert n_samples > 1, "n_samples must be greater than 1"
+    if not (terrain is not None):
+        raise ValueError("Terrain object must be provided")
+    if not (n_samples > 1):
+        raise ValueError("n_samples must be greater than 1")
     xs = np.linspace(0, 100, n_samples)
     elevations = [terrain.get_elevation_at(np.array([x, y])) for x in xs]
     e_min, e_max = min(elevations), max(elevations)
@@ -42,8 +44,10 @@ def _ascii_profile(terrain, y: float = 50.0, n_samples: int = 20) -> str:
 
 
 def _show_terrain(name: str, terrain) -> None:
-    assert name, "Name must not be empty"
-    assert terrain is not None, "Terrain object must be provided"
+    if not (name):
+        raise ValueError("Name must not be empty")
+    if not (terrain is not None):
+        raise ValueError("Terrain object must be provided")
     xs = np.linspace(0, 100, 6)
     ys = np.linspace(0, 100, 6)
     for x in xs:

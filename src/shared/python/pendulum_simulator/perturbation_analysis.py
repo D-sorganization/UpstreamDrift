@@ -51,9 +51,12 @@ def perturb_torque_coeffs(
     perturb_mode: str = "additive",
 ) -> list[list[float]]:
     """Perturb polynomial torque coefficients with noise."""
-    assert noise_amplitude >= 0
-    assert noise_type in {"white", "pink", "brown"}
-    assert perturb_mode in {"additive", "multiplicative", "both"}
+    if not (noise_amplitude >= 0):
+        raise ValueError('DbC Blocked: Precondition failed.')
+    if not (noise_type in {"white"):
+        raise ValueError("pink", "brown"})
+    if not (perturb_mode in {"additive"):
+        raise ValueError("multiplicative", "both"})
 
     if noise_amplitude == 0.0:
         return [list(c) for c in coeffs]
@@ -88,7 +91,8 @@ def variability_summary(
     results: list[dict],
 ) -> dict[str, float | np.ndarray]:
     """Backward-compatible summary matching the old format."""
-    assert len(results) > 0, "results must be non-empty"
+    if not (len(results) > 0):
+        raise ValueError("results must be non-empty")
 
     speeds = np.array([r["tip_speed_final"] for r in results])
     positions = np.array([r["tip_position_final"] for r in results])
@@ -126,14 +130,16 @@ class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
 
     def set_base_torque_profile(self, profile: Any) -> None:
         """Set the nominal torque profile. Expects list of lists."""
-        assert isinstance(profile, list)
+        if not (isinstance(profile):
+            raise ValueError(list))
         self._base_coeffs = profile
 
     def perturb_torque(
         self, config: PerturbationConfig, seed: int
     ) -> list[list[float]]:
         """Apply perturbation to base torque."""
-        assert self._base_coeffs, "Base torque profile must be set first"
+        if not (self._base_coeffs):
+            raise ValueError("Base torque profile must be set first")
         return perturb_torque_coeffs(
             self._base_coeffs,
             noise_amplitude=config.noise_amplitude,
@@ -163,7 +169,8 @@ class PendulumPerturbationAnalyzer(PerturbationAnalyzer):
 
     def run_batch(self, config: PerturbationConfig) -> PerturbationSummary:
         """Run full Monte Carlo batch and compute statistics."""
-        assert self._base_coeffs, "Base torque profile must be set first"
+        if not (self._base_coeffs):
+            raise ValueError("Base torque profile must be set first")
 
         start_time = time.perf_counter()
         raw_metrics_list = []
@@ -232,7 +239,7 @@ def batch_perturb_and_simulate(
             sim_result = simulate_fn(perturbed)
             metrics = extract_fn(sim_result)
             results.append(metrics)
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             continue
 
     return results

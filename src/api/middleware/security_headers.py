@@ -14,14 +14,16 @@ async def add_security_headers(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     """Add security headers to all responses."""
-    assert request is not None, "request must be provided"
+    if not (request is not None):
+        raise ValueError("request must be provided")
     response = await call_next(request)
     return add_security_headers_to_response(response, request)
 
 
 def add_security_headers_to_response(response: Response, request: Request) -> Response:
     """Add security headers to a response (used for early-return responses)."""
-    assert response is not None, "response must be provided"
+    if not (response is not None):
+        raise ValueError("response must be provided")
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"

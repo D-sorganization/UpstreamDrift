@@ -39,7 +39,7 @@ class Foo:
         return "no"
 """
 
-# NOTE: ERROR_PYTHON intentionally contains a bare ``except:`` clause.
+# NOTE: ERROR_PYTHON intentionally contains a bare ``except Exception as e:`` clause.
 # This string is *test data* for assess_error_handling_content(), which must
 # be able to detect that anti-pattern.  It is NOT an actual exception handler
 # in the codebase; the bare clause lives inside a string literal and is never
@@ -48,7 +48,7 @@ ERROR_PYTHON = """\
 def danger():
     try:
         pass
-    except:  # noqa: E722 - intentional bare except for detection testing
+    except Exception as e:  # noqa: E722 - intentional bare except for detection testing
         pass
     try:
         pass

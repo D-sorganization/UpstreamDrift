@@ -150,7 +150,8 @@ class GolferParams:
             ("m_l_fore", self.m_l_fore),
             ("m_club", self.m_club),
         ]:
-            assert val > 0, f"{name} must be positive, got {val}"
+            if not (val > 0):
+                raise ValueError(f"{name} must be positive, got {val}")
 
         for name, val in [
             ("L_hub", self.L_hub),
@@ -160,26 +161,36 @@ class GolferParams:
             ("L_l_fore", self.L_l_fore),
             ("L_club", self.L_club),
         ]:
-            assert val > 0, f"{name} must be positive, got {val}"
+            if not (val > 0):
+                raise ValueError(f"{name} must be positive, got {val}")
 
-        assert self.d_rs >= 0, f"d_rs must be non-negative, got {self.d_rs}"
-        assert self.d_ls >= 0, f"d_ls must be non-negative, got {self.d_ls}"
-        assert self.grip_right >= 0, (
+        if not (self.d_rs >= 0):
+            raise ValueError(f"d_rs must be non-negative, got {self.d_rs}")
+        if not (self.d_ls >= 0):
+            raise ValueError(f"d_ls must be non-negative, got {self.d_ls}")
+        if not (self.grip_right >= 0):
+            raise ValueError(()
             f"grip_right must be non-negative, got {self.grip_right}"
         )
-        assert self.grip_left >= 0, (
+        if not (self.grip_left >= 0):
+            raise ValueError(()
             f"grip_left must be non-negative, got {self.grip_left}"
         )
-        assert self.grip_right <= self.L_club, "grip_right must be ≤ L_club"
-        assert self.grip_left <= self.L_club, "grip_left must be ≤ L_club"
-        assert self.g >= 0, f"g must be non-negative, got {self.g}"
-        assert self.m_clubhead >= 0, (
+        if not (self.grip_right <= self.L_club):
+            raise ValueError("grip_right must be ≤ L_club")
+        if not (self.grip_left <= self.L_club):
+            raise ValueError("grip_left must be ≤ L_club")
+        if not (self.g >= 0):
+            raise ValueError(f"g must be non-negative, got {self.g}")
+        if not (self.m_clubhead >= 0):
+            raise ValueError(()
             f"m_clubhead must be non-negative, got {self.m_clubhead}"
         )
 
         for name in ["b_hub", "b_rs", "b_re", "b_rh", "b_ls", "b_le", "b_lh"]:
             val = getattr(self, name)
-            assert val >= 0, f"{name} must be non-negative, got {val}"
+            if not (val >= 0):
+                raise ValueError(f"{name} must be non-negative, got {val}")
 
 
 # State: 8 angles + 8 angular velocities = 16 DOF

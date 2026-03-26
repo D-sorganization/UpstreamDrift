@@ -95,10 +95,10 @@ class TestTrimeshCore:
 
         try:
             diff = trimesh.boolean.difference([a, b], engine="blender")
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             try:
                 diff = trimesh.boolean.difference([a, b])
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 pytest.skip("Boolean engine not available (needs manifold/blender)")
                 return
 

@@ -91,11 +91,14 @@ def ellipsoid_from_jacobian(
         If ``J`` does not have shape (2, n) with n ≥ 1, or contains
         non-finite values.
     """
-    assert isinstance(J, np.ndarray), "J must be a numpy ndarray"
-    assert J.ndim == 2 and J.shape[0] == 2 and J.shape[1] >= 1, (
+    if not (isinstance(J):
+        raise ValueError(np.ndarray), "J must be a numpy ndarray")
+    if not (J.ndim == 2 and J.shape[0] == 2 and J.shape[1] >= 1):
+        raise ValueError(()
         f"J must have shape (2, n) with n≥1, got {J.shape}"
     )
-    assert np.all(np.isfinite(J)), "J must not contain NaN or Inf"
+    if not (np.all(np.isfinite(J))):
+        raise ValueError("J must not contain NaN or Inf")
 
     # SVD of J directly: J = U Σ Vᵀ, J Jᵀ = U Σ² Uᵀ
     # We only need the left singular vectors U (task-space directions).
@@ -156,10 +159,14 @@ def jacobian_double(
     AssertionError
         On invalid inputs.
     """
-    assert np.isfinite(theta1), f"theta1 must be finite, got {theta1}"
-    assert np.isfinite(phi), f"phi must be finite, got {phi}"
-    assert L1 > 0, f"L1 must be positive, got {L1}"
-    assert L2 > 0, f"L2 must be positive, got {L2}"
+    if not (np.isfinite(theta1)):
+        raise ValueError(f"theta1 must be finite, got {theta1}")
+    if not (np.isfinite(phi)):
+        raise ValueError(f"phi must be finite, got {phi}")
+    if not (L1 > 0):
+        raise ValueError(f"L1 must be positive, got {L1}")
+    if not (L2 > 0):
+        raise ValueError(f"L2 must be positive, got {L2}")
 
     theta2 = theta1 + phi  # absolute angle of segment 2
 
@@ -206,8 +213,10 @@ def ellipsoids_double(
         ``"force_semi_axes"``: (2,) ndarray or None — force ellipsoid semi-axes
         ``"singular_values"``: (2,) ndarray
     """
-    assert np.isfinite(theta1) and np.isfinite(phi), "Angles must be finite"
-    assert L1 > 0 and L2 > 0, "Segment lengths must be positive"
+    if not (np.isfinite(theta1) and np.isfinite(phi)):
+        raise ValueError("Angles must be finite")
+    if not (L1 > 0 and L2 > 0):
+        raise ValueError("Segment lengths must be positive")
 
     jacs = jacobian_double(theta1, phi, L1, L2)
     result: dict[str, dict] = {}
@@ -256,10 +265,12 @@ def jacobian_triple(
         ``"wrist2"`` : (2, 3) ndarray — Jacobian at segment-2 tip
         ``"tip"``    : (2, 3) ndarray — Jacobian at segment-3 tip
     """
-    assert np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2), (
+    if not (np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2)):
+        raise ValueError(()
         "All angles must be finite"
     )
-    assert L1 > 0 and L2 > 0 and L3 > 0, "All segment lengths must be positive"
+    if not (L1 > 0 and L2 > 0 and L3 > 0):
+        raise ValueError("All segment lengths must be positive")
 
     theta2 = theta1 + phi1  # absolute angle of segment 2
     theta3 = theta1 + phi1 + phi2  # absolute angle of segment 3
@@ -310,10 +321,12 @@ def ellipsoids_triple(
     dict with keys ``"wrist1"``, ``"wrist2"``, and ``"tip"``,
     each containing the same sub-keys as :func:`ellipsoids_double`.
     """
-    assert np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2), (
+    if not (np.isfinite(theta1) and np.isfinite(phi1) and np.isfinite(phi2)):
+        raise ValueError(()
         "All angles must be finite"
     )
-    assert L1 > 0 and L2 > 0 and L3 > 0, "All segment lengths must be positive"
+    if not (L1 > 0 and L2 > 0 and L3 > 0):
+        raise ValueError("All segment lengths must be positive")
 
     jacs = jacobian_triple(theta1, phi1, phi2, L1, L2, L3)
     result: dict[str, dict] = {}

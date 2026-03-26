@@ -208,7 +208,7 @@ class TestCrossEngineConsistency:
                 mj = MuJoCoPhysicsEngine()
                 mj.load_from_path(str(SIMPLE_ARM_URDF))
                 engines["mujoco"] = mj
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 pass
 
         # Check Drake
@@ -221,7 +221,7 @@ class TestCrossEngineConsistency:
                 dk = DrakePhysicsEngine()
                 dk.load_from_path(str(SIMPLE_ARM_URDF))
                 engines["drake"] = dk  # type: ignore[assignment]
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 pass
 
         # Check Pinocchio
@@ -234,7 +234,7 @@ class TestCrossEngineConsistency:
                 pn = PinocchioPhysicsEngine()
                 pn.load_from_path(str(SIMPLE_ARM_URDF))
                 engines["pinocchio"] = pn  # type: ignore[assignment]
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 pass
 
         if len(engines) < 2:
@@ -264,7 +264,7 @@ class TestCrossEngineConsistency:
                 try:
                     q, _ = engine.get_state()
                     dof_counts[name] = len(q)
-                except Exception:  # noqa: BLE001
+                except Exception as e:  # noqa: BLE001
                     pass
 
         # Filter out None values

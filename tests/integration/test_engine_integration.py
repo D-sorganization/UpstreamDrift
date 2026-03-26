@@ -97,7 +97,7 @@ class TestEngineIntegration:
                         manager.get_engine_status(engine_type)
                         != EngineStatus.UNAVAILABLE
                     )
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 # Some probes may fail if dependencies missing - that's expected
                 pass
 

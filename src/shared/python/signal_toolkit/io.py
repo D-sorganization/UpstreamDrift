@@ -177,8 +177,10 @@ class SignalImporter:
         Returns:
             Signal object.
         """
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         file_path = Path(file_path)
         data = np.load(file_path)
 
@@ -208,8 +210,10 @@ class SignalImporter:
         Returns:
             Signal object.
         """
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         file_path = Path(file_path)
 
         with open(file_path, encoding="utf-8") as f:
@@ -243,8 +247,10 @@ class SignalImporter:
         Returns:
             Signal object.
         """
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         time = np.array(data[time_key])
         values = np.array(data[value_key])
 
@@ -274,8 +280,10 @@ class SignalImporter:
         Returns:
             Signal object.
         """
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         from scipy.io import loadmat
 
         file_path = Path(file_path)
@@ -314,8 +322,10 @@ class SignalExporter:
             include_header: Whether to include header row.
             precision: Number of decimal places.
         """
-        assert signal is not None, "signal must be provided"
-        assert signal is not None, "signal must be provided"
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
         file_path = Path(file_path)
 
         signals = [signal] if isinstance(signal, Signal) else signal
@@ -363,8 +373,10 @@ class SignalExporter:
             file_path: Output file path.
             compressed: Whether to use compressed format.
         """
-        assert signal is not None, "signal must be provided"
-        assert signal is not None, "signal must be provided"
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
         file_path = Path(file_path)
 
         signals = [signal] if isinstance(signal, Signal) else signal
@@ -393,8 +405,10 @@ class SignalExporter:
             precision: Number of decimal places.
             indent: JSON indentation.
         """
-        assert signal is not None, "signal must be provided"
-        assert signal is not None, "signal must be provided"
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
         file_path = Path(file_path)
 
         data = {
@@ -441,8 +455,10 @@ class SignalExporter:
             file_path: Output file path.
             time_var: Variable name for time.
         """
-        assert signal is not None, "signal must be provided"
-        assert signal is not None, "signal must be provided"
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
         from scipy.io import savemat
 
         file_path = Path(file_path)
@@ -643,8 +659,10 @@ class BatchProcessor:
         Returns:
             Dictionary mapping file names to signals.
         """
-        assert pattern is not None, "pattern must be provided"
-        assert pattern is not None, "pattern must be provided"
+        if not (pattern is not None):
+            raise ValueError("pattern must be provided")
+        if not (pattern is not None):
+            raise ValueError("pattern must be provided")
         files = self.find_files(pattern)
         signals = {}
 
@@ -676,8 +694,10 @@ class BatchProcessor:
         Returns:
             Dictionary mapping file names to processed signals.
         """
-        assert processor is not None, "processor must be provided"
-        assert processor is not None, "processor must be provided"
+        if not (processor is not None):
+            raise ValueError("processor must be provided")
+        if not (processor is not None):
+            raise ValueError("processor must be provided")
         files = self.find_files(pattern)
         results = {}
 

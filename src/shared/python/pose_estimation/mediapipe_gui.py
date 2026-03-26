@@ -57,8 +57,10 @@ class _AnalysisWorker(QThread):
         config: dict[str, Any],
         parent: QThread | None = None,
     ) -> None:
-        assert video_path is not None, "video_path must be provided"
-        assert video_path is not None, "video_path must be provided"
+        if not (video_path is not None):
+            raise ValueError("video_path must be provided")
+        if not (video_path is not None):
+            raise ValueError("video_path must be provided")
         super().__init__(parent)
         self._video_path = video_path
         self._config = config
@@ -229,8 +231,10 @@ class MediaPipeGUI(QMainWindow):
 
     def _on_progress(self, current: int, total: int, message: str) -> None:
         """Handle progress updates from the worker thread."""
-        assert current is not None, "current must be provided"
-        assert current is not None, "current must be provided"
+        if not (current is not None):
+            raise ValueError("current must be provided")
+        if not (current is not None):
+            raise ValueError("current must be provided")
         if total > 0:
             pct = min(int((current / total) * 100), 100)
             self.progress.setValue(pct)
@@ -238,8 +242,10 @@ class MediaPipeGUI(QMainWindow):
 
     def _on_finished(self, results: list[Any]) -> None:
         """Handle analysis completion."""
-        assert results is not None, "results must be provided"
-        assert results is not None, "results must be provided"
+        if not (results is not None):
+            raise ValueError("results must be provided")
+        if not (results is not None):
+            raise ValueError("results must be provided")
         self.progress.setValue(100)
         self.log(f"Analysis complete! Processed {len(results)} frames.")
 
@@ -276,8 +282,10 @@ class MediaPipeGUI(QMainWindow):
 
     def _on_error(self, message: str) -> None:
         """Handle analysis errors."""
-        assert message is not None, "message must be provided"
-        assert message is not None, "message must be provided"
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
+            raise ValueError("message must be provided")
         self.log(f"ERROR: {message}")
         self.btn_run.setEnabled(True)
         self.btn_load.setEnabled(True)

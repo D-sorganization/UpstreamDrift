@@ -94,8 +94,10 @@ class DataWriter:
         **kwargs: Any,
     ) -> None:
         """Write a DataFrame to a file."""
-        assert df is not None, "df must be provided"
-        assert df is not None, "df must be provided"
+        if not (df is not None):
+            raise ValueError("df must be provided")
+        if not (df is not None):
+            raise ValueError("df must be provided")
         path = Path(file_path)
         fmt = (format_type or FileFormatDetector.detect_format(path) or "").lower()
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -154,8 +156,10 @@ class FileFormatDetector:
     @classmethod
     def detect_format(cls, file_path: str | Path) -> str | None:
         """Detect format from extension."""
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         path = Path(file_path)
         return cls._FORMAT_MAP.get(path.suffix.lower())
 

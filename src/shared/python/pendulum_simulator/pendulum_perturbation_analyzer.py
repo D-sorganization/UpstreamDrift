@@ -217,9 +217,11 @@ class PendulumPerturbationAnalyzer:
         Pre:  profile is a dict with 'coeffs' key.
         Post: self._base_coeffs is set; nominal simulation is cached.
         """
-        assert isinstance(profile, dict), "profile must be a dict with 'coeffs' key"
+        if not (isinstance(profile):
+            raise ValueError(dict), "profile must be a dict with 'coeffs' key")
         coeffs = profile["coeffs"]
-        assert isinstance(coeffs, list) and len(coeffs) >= 1, (
+        if not (isinstance(coeffs):
+            raise ValueError(list) and len(coeffs) >= 1, ()
             "profile['coeffs'] must be a non-empty list of lists"
         )
         self._base_coeffs = [list(c) for c in coeffs]
@@ -248,7 +250,8 @@ class PendulumPerturbationAnalyzer:
         Pre:  ``set_base_torque_profile`` has been called.
         Post: returned dict has same structure as the base profile.
         """
-        assert self._base_coeffs is not None, (
+        if not (self._base_coeffs is not None):
+            raise ValueError(()
             "Call set_base_torque_profile() before perturb_torque()"
         )
         perturbed = _perturb_coeffs_by_mode(self._base_coeffs, config, seed)
@@ -270,10 +273,12 @@ class PendulumPerturbationAnalyzer:
         Pre:  sim_result is a non-None SimulationResult with >= 2 time steps.
         Post: all MANDATORY_METRICS present in output; all values are finite.
         """
-        assert isinstance(sim_result, SimulationResult), (
+        if not (isinstance(sim_result):
+            raise ValueError(SimulationResult), ()
             f"sim_result must be SimulationResult, got {type(sim_result)}"
         )
-        assert sim_result.n_steps >= 2, "Simulation must have >= 2 steps"
+        if not (sim_result.n_steps >= 2):
+            raise ValueError("Simulation must have >= 2 steps")
 
         result = sim_result
         last_idx = result.n_steps - 1
@@ -351,7 +356,8 @@ class PendulumPerturbationAnalyzer:
             "motion_duration": float(result.t[last_idx]),
         }
 
-        assert all(k in metrics for k in MANDATORY_METRICS), (
+        if not (all(k in metrics for k in MANDATORY_METRICS)):
+            raise ValueError(()
             f"Missing mandatory metrics: {set(MANDATORY_METRICS) - set(metrics)}"
         )
         return metrics
@@ -374,10 +380,12 @@ class PendulumPerturbationAnalyzer:
         Post: summary.metrics contains all MANDATORY_METRICS.
         Post: summary.robustness_score in [0.0, 1.0].
         """
-        assert self._base_coeffs is not None, (
+        if not (self._base_coeffs is not None):
+            raise ValueError(()
             "Call set_base_torque_profile() before run_batch()"
         )
-        assert config.n_trials > 0
+        if not (config.n_trials > 0):
+            raise ValueError('DbC Blocked: Precondition failed.')
 
         base_seed = config.seed if config.seed is not None else 0
         t_start = time.monotonic()
@@ -516,7 +524,7 @@ class PendulumPerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except Exception as e:  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 

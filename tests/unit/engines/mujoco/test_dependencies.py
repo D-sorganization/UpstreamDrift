@@ -53,7 +53,7 @@ def test_rendering_backend() -> None:
         from mujoco import MjRenderContextOffscreen  # noqa: F401
     except ImportError:
         logger.warning("MjRenderContextOffscreen not available (might be old version)")
-    except Exception:  # noqa: BLE001 - GL context init may raise various errors
+    except Exception as e:  # noqa: BLE001 - GL context init may raise various errors
         # It's okay if it fails to initialize in this test,
         # we just want to know if the symbol exists
         pass

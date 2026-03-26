@@ -141,8 +141,10 @@ class PlotConfig:
             ``(fig, ax)`` tuple. *ax* is a single ``Axes`` when
             ``nrows == ncols == 1``, otherwise a numpy array of axes.
         """
-        assert nrows is not None, "nrows must be provided"
-        assert nrows is not None, "nrows must be provided"
+        if not (nrows is not None):
+            raise ValueError("nrows must be provided")
+        if not (nrows is not None):
+            raise ValueError("nrows must be provided")
         if self.style:
             plt.style.use(self.style)
 

@@ -40,8 +40,10 @@ def _build_override_mapping(
 ) -> dict[str, float]:
     """Create a mapping of parameter names to their associated values."""
 
-    assert parameter_names is not None, "parameter_names must be provided"
-    assert parameter_names is not None, "parameter_names must be provided"
+    if not (parameter_names is not None):
+        raise ValueError("parameter_names must be provided")
+    if not (parameter_names is not None):
+        raise ValueError("parameter_names must be provided")
     override = {
         name: value
         for name, value in zip(parameter_names, values, strict=False)
@@ -67,8 +69,10 @@ def _compute_gradient_component(
     Selects forward, backward, or central differencing depending on
     whether the current value lies at a parameter bound.
     """
-    assert index is not None, "index must be provided"
-    assert index is not None, "index must be provided"
+    if not (index is not None):
+        raise ValueError("index must be provided")
+    if not (index is not None):
+        raise ValueError("index must be provided")
     lower = float(cfg["min"])
     upper = float(cfg["max"])
     if np.isclose(lower, upper):
@@ -158,8 +162,10 @@ def _init_adam_state(
     maximize: bool,
 ) -> _AdamState:
     """Extract parameters, build bounds, and initialise Adam moment vectors."""
-    assert analysis_params is not None, "analysis_params must be provided"
-    assert analysis_params is not None, "analysis_params must be provided"
+    if not (analysis_params is not None):
+        raise ValueError("analysis_params must be provided")
+    if not (analysis_params is not None):
+        raise ValueError("analysis_params must be provided")
     parameter_names = [cfg["name"] for cfg in parameter_configs]
     lower_bounds = np.array([cfg["min"] for cfg in parameter_configs], dtype=float)
     upper_bounds = np.array([cfg["max"] for cfg in parameter_configs], dtype=float)
@@ -193,8 +199,10 @@ def _evaluate_and_record(
 
     Returns the (possibly clamped) objective value.
     """
-    assert st is not None, "st must be provided"
-    assert st is not None, "st must be provided"
+    if not (st is not None):
+        raise ValueError("st must be provided")
+    if not (st is not None):
+        raise ValueError("st must be provided")
     overrides = _build_override_mapping(st.parameter_names, st.values.tolist())
     objective, composition, state = evaluate_output(
         engine, st.base_params, manual_hhv, st.output_name, overrides
@@ -235,8 +243,10 @@ def _adam_update(
     epsilon: float,
 ) -> None:
     """Apply one Adam parameter update in-place."""
-    assert st is not None, "st must be provided"
-    assert st is not None, "st must be provided"
+    if not (st is not None):
+        raise ValueError("st must be provided")
+    if not (st is not None):
+        raise ValueError("st must be provided")
     st.m = beta1 * st.m + (1 - beta1) * gradient
     st.v = beta2 * st.v + (1 - beta2) * (gradient**2)
     m_hat = st.m / (1 - beta1**iteration)

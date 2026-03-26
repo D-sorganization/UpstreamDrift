@@ -58,8 +58,10 @@ class URDFModel:
     @classmethod
     def from_file(cls, file_path: Path) -> URDFModel:
         """Load a URDF model from file."""
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         tree = DefusedET.parse(file_path)
         root = tree.getroot()
         return cls.from_element(root, file_path)
@@ -67,8 +69,10 @@ class URDFModel:
     @classmethod
     def from_element(cls, root: ET.Element, file_path: Path | None = None) -> URDFModel:
         """Create model from XML element."""
-        assert root is not None, "root must be provided"
-        assert root is not None, "root must be provided"
+        if not (root is not None):
+            raise ValueError("root must be provided")
+        if not (root is not None):
+            raise ValueError("root must be provided")
         robot_name = root.get("name", "unnamed_robot")
 
         links = {}
@@ -141,8 +145,10 @@ class URDFModel:
         Returns:
             The name used for the link
         """
-        assert link is not None, "link must be provided"
-        assert link is not None, "link must be provided"
+        if not (link is not None):
+            raise ValueError("link must be provided")
+        if not (link is not None):
+            raise ValueError("link must be provided")
         link_copy = copy.deepcopy(link)
         name = new_name or link_copy.get("name") or "unnamed_link"
 
@@ -174,8 +180,10 @@ class URDFModel:
         Returns:
             The name used for the joint
         """
-        assert joint is not None, "joint must be provided"
-        assert joint is not None, "joint must be provided"
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
         joint_copy = copy.deepcopy(joint)
         name = new_name or joint_copy.get("name") or "unnamed_joint"
 
@@ -208,8 +216,10 @@ class URDFModel:
 
     def add_material(self, material: ET.Element) -> str:
         """Add a material to the model."""
-        assert material is not None, "material must be provided"
-        assert material is not None, "material must be provided"
+        if not (material is not None):
+            raise ValueError("material must be provided")
+        if not (material is not None):
+            raise ValueError("material must be provided")
         material_copy = copy.deepcopy(material)
         name = material_copy.get("name", "unnamed_material")
 
@@ -221,8 +231,10 @@ class URDFModel:
 
     def remove_link(self, name: str) -> bool:
         """Remove a link and its connected joints."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name not in self.links:
             return False
 
@@ -246,8 +258,10 @@ class URDFModel:
 
     def remove_joint(self, name: str) -> bool:
         """Remove a joint."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name not in self.joints:
             return False
 
@@ -272,8 +286,10 @@ class ModelPanel(QWidget):
 
     def __init__(self, title: str, parent: QWidget | None = None) -> None:
         """Initialize the model panel."""
-        assert title is not None, "title must be provided"
-        assert title is not None, "title must be provided"
+        if not (title is not None):
+            raise ValueError("title must be provided")
+        if not (title is not None):
+            raise ValueError("title must be provided")
         super().__init__(parent)
         self.title = title
         self.model: URDFModel | None = None
@@ -413,8 +429,10 @@ class ModelPanel(QWidget):
 
     def _on_item_double_clicked(self, item: QTreeWidgetItem, column: int) -> None:
         """Handle double-click for stealing component."""
-        assert item is not None, "item must be provided"
-        assert item is not None, "item must be provided"
+        if not (item is not None):
+            raise ValueError("item must be provided")
+        if not (item is not None):
+            raise ValueError("item must be provided")
         element = item.data(0, Qt.ItemDataRole.UserRole)
         if element is not None:
             comp_type = item.data(1, Qt.ItemDataRole.UserRole) or ""
@@ -446,8 +464,10 @@ class ModelPanel(QWidget):
 
     def _emit_copy(self, item: QTreeWidgetItem) -> None:
         """Emit signal to copy component."""
-        assert item is not None, "item must be provided"
-        assert item is not None, "item must be provided"
+        if not (item is not None):
+            raise ValueError("item must be provided")
+        if not (item is not None):
+            raise ValueError("item must be provided")
         element = item.data(0, Qt.ItemDataRole.UserRole)
         if element is not None:
             comp_type = item.data(1, Qt.ItemDataRole.UserRole) or ""
@@ -456,8 +476,10 @@ class ModelPanel(QWidget):
 
     def _remove_component(self, item: QTreeWidgetItem) -> None:
         """Remove a component from the model."""
-        assert item is not None, "item must be provided"
-        assert item is not None, "item must be provided"
+        if not (item is not None):
+            raise ValueError("item must be provided")
+        if not (item is not None):
+            raise ValueError("item must be provided")
         if not self.model:
             return
 
@@ -554,8 +576,10 @@ class ModelPanel(QWidget):
         Returns:
             The name used, or None if failed
         """
-        assert comp_type is not None, "comp_type must be provided"
-        assert comp_type is not None, "comp_type must be provided"
+        if not (comp_type is not None):
+            raise ValueError("comp_type must be provided")
+        if not (comp_type is not None):
+            raise ValueError("comp_type must be provided")
         if not self.model:
             self.model = URDFModel.create_empty()
 
@@ -689,8 +713,10 @@ class FrankensteinEditor(QWidget):
 
     def _on_copy_to_right(self, comp_type: str, name: str, element: ET.Element) -> None:
         """Copy component from left to right panel."""
-        assert comp_type is not None, "comp_type must be provided"
-        assert comp_type is not None, "comp_type must be provided"
+        if not (comp_type is not None):
+            raise ValueError("comp_type must be provided")
+        if not (comp_type is not None):
+            raise ValueError("comp_type must be provided")
         result = self.right_panel.add_component(comp_type, element)
         if result:
             self.status_label.setText(f"Copied {comp_type} '{name}' as '{result}'")
@@ -751,8 +777,10 @@ class FrankensteinEditor(QWidget):
         Returns:
             Number of components copied
         """
-        assert source_model is not None, "source_model must be provided"
-        assert source_model is not None, "source_model must be provided"
+        if not (source_model is not None):
+            raise ValueError("source_model must be provided")
+        if not (source_model is not None):
+            raise ValueError("source_model must be provided")
         if name_mapping is None:
             name_mapping = {}
 
@@ -977,8 +1005,10 @@ class FrankensteinEditor(QWidget):
         Returns:
             Number of components removed
         """
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         count = 0
 
         # Find child links
@@ -1096,8 +1126,10 @@ class StealComponentDialog(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
-        assert comp_type is not None, "comp_type must be provided"
-        assert comp_type is not None, "comp_type must be provided"
+        if not (comp_type is not None):
+            raise ValueError("comp_type must be provided")
+        if not (comp_type is not None):
+            raise ValueError("comp_type must be provided")
         super().__init__(parent)
         self.setWindowTitle("Copy Component")
         self.setMinimumWidth(350)

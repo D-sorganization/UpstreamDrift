@@ -308,8 +308,10 @@ def save_preset_to_file(
         file_path: Output file path
         format: Output format (yaml or json)
     """
-    assert params is not None, "params must be provided"
-    assert params is not None, "params must be provided"
+    if not (params is not None):
+        raise ValueError("params must be provided")
+    if not (params is not None):
+        raise ValueError("params must be provided")
     import json
 
     import yaml

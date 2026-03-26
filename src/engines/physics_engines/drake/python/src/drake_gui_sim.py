@@ -119,7 +119,8 @@ class SimulationMixin:
 
     def _record_frame(self, context: Any) -> None:
         """Record a single frame of simulation data."""
-        assert self.plant is not None  # type: ignore[attr-defined]  # guaranteed by caller check
+        if not (self.plant is not None  # type: ignore[attr-defined]  # guaranteed by caller check):
+            raise ValueError('DbC Blocked: Precondition failed.')
         plant_context = self.plant.GetMyContextFromRoot(context)  # type: ignore[attr-defined]
         q = self.plant.GetPositions(plant_context)  # type: ignore[attr-defined]
         v = self.plant.GetVelocities(plant_context)  # type: ignore[attr-defined]
@@ -152,7 +153,8 @@ class SimulationMixin:
 
     def _find_club_head_position(self, plant_context: Any) -> np.ndarray:
         """Find and return the club head position in world coordinates."""
-        assert self.plant is not None  # type: ignore[attr-defined]  # guaranteed by caller
+        if not (self.plant is not None  # type: ignore[attr-defined]  # guaranteed by caller):
+            raise ValueError('DbC Blocked: Precondition failed.')
         body_names = ["clubhead", "club_body", "wrist", "hand", "link_7"]
         for name in body_names:
             if self.plant.HasBodyNamed(name):  # type: ignore[attr-defined]
@@ -168,8 +170,10 @@ class SimulationMixin:
     def _on_slider_change(  # type: ignore[no-any-unimported]
         self, val: int, spin: QtWidgets.QDoubleSpinBox, joint_idx: int
     ) -> None:
-        assert val is not None, "val must be provided"
-        assert val is not None, "val must be provided"
+        if not (val is not None):
+            raise ValueError("val must be provided")
+        if not (val is not None):
+            raise ValueError("val must be provided")
         radian = val * SLIDER_TO_RADIAN
         with QtCore.QSignalBlocker(spin):
             spin.setValue(radian)
@@ -184,8 +188,10 @@ class SimulationMixin:
 
     def _update_joint_pos(self, joint_idx: int, angle: float) -> None:
         """Update joint position in plant context."""
-        assert joint_idx is not None, "joint_idx must be provided"
-        assert joint_idx is not None, "joint_idx must be provided"
+        if not (joint_idx is not None):
+            raise ValueError("joint_idx must be provided")
+        if not (joint_idx is not None):
+            raise ValueError("joint_idx must be provided")
         if self.operating_mode != "kinematic":  # type: ignore[attr-defined]
             return
 

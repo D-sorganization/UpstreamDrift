@@ -53,8 +53,10 @@ class MuscleSynergyAnalyzer:
                              Must be non-negative.
             muscle_names: Optional list of muscle names.
         """
-        assert activation_data is not None, "activation_data must be provided"
-        assert activation_data is not None, "activation_data must be provided"
+        if not (activation_data is not None):
+            raise ValueError("activation_data must be provided")
+        if not (activation_data is not None):
+            raise ValueError("activation_data must be provided")
         self.data = np.asarray(activation_data)
         require(
             self.data.ndim == 2,
@@ -207,7 +209,8 @@ class MuscleSynergyAnalyzer:
                 return result
 
         # best_result is guaranteed to be set since limit >= 1
-        assert best_result is not None, "Loop should have set best_result"
+        if not (best_result is not None):
+            raise ValueError("Loop should have set best_result")
         logger.warning(
             f"VAF threshold not met. Best VAF {best_result.vaf:.4f} with {limit} synergies."
         )

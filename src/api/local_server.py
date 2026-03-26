@@ -213,7 +213,8 @@ def _execute_tile_launch(
     Returns:
         Success dict or JSONResponse with error details.
     """
-    assert tile_id is not None, "tile_id must be provided"
+    if not (tile_id is not None):
+        raise ValueError("tile_id must be provided")
     model_type = tile.get("type", "")
     repo_path = Path(__file__).parent.parent.parent
     logger.info(
@@ -332,7 +333,8 @@ def _register_health_and_diagnostic_endpoints(
 ) -> None:
     """Register health check and diagnostic endpoints."""
 
-    assert app is not None, "app must be provided"
+    if not (app is not None):
+        raise ValueError("app must be provided")
 
     @app.get("/api/health")
     async def health_check() -> dict[str, Any]:
@@ -423,7 +425,8 @@ def _mount_assets_directory(app: FastAPI, ui_path: Path) -> None:
         app: The FastAPI application instance.
         ui_path: Path to the UI build directory.
     """
-    assert app is not None, "app must be provided"
+    if not (app is not None):
+        raise ValueError("app must be provided")
     assets_path = ui_path / "assets"
     if assets_path.exists():
         app.mount(
@@ -444,7 +447,8 @@ def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
         app: The FastAPI application instance.
         ui_path: Path to the UI build directory.
     """
-    assert app is not None, "app must be provided"
+    if not (app is not None):
+        raise ValueError("app must be provided")
     index_html = ui_path / "index.html"
     if index_html.exists():
         from fastapi.responses import FileResponse
@@ -452,7 +456,8 @@ def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
         @app.get("/{full_path:path}")
         async def serve_spa(request: Request, full_path: str) -> Any:
             """Serve the SPA index.html for all non-API routes."""
-            assert request is not None, "request must be provided"
+            if not (request is not None):
+                raise ValueError("request must be provided")
             if full_path.startswith("api/"):
                 return JSONResponse(
                     status_code=404,
@@ -562,7 +567,8 @@ def _register_error_page_catch_all(app: FastAPI) -> None:
         request: Request, full_path: str
     ) -> HTMLResponse | JSONResponse:
         """Serve a helpful error page when UI is not built."""
-        assert request is not None, "request must be provided"
+        if not (request is not None):
+            raise ValueError("request must be provided")
         if full_path.startswith("api/"):
             return JSONResponse(
                 status_code=404,
@@ -679,7 +685,8 @@ def print_logo_animated() -> None:
 
 def print_matrix_status(message: str, indent: int = 4) -> None:
     """Print status message in matrix green style."""
-    assert message is not None, "message must be provided"
+    if not (message is not None):
+        raise ValueError("message must be provided")
     GREEN = "\033[38;5;46m"  # Bright matrix green
     RESET = "\033[0m"
     logger.info("%s%s>%s %s%s%s", " " * indent, GREEN, RESET, GREEN, message, RESET)
@@ -687,7 +694,8 @@ def print_matrix_status(message: str, indent: int = 4) -> None:
 
 def print_server_info(host: str, port: int) -> None:
     """Print server info box."""
-    assert host is not None, "host must be provided"
+    if not (host is not None):
+        raise ValueError("host must be provided")
     CYAN = "\033[38;5;51m"
     RESET = "\033[0m"
 

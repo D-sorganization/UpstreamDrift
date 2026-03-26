@@ -52,7 +52,8 @@ def _magnitude_to_color(magnitude: float, max_magnitude: float) -> list[float]:
     Returns:
         RGBA color list.
     """
-    assert magnitude is not None, "magnitude must be provided"
+    if not (magnitude is not None):
+        raise ValueError("magnitude must be provided")
     if max_magnitude <= 0:
         return [0.5, 0.5, 0.5, 1.0]
     t = min(magnitude / max_magnitude, 1.0)
@@ -98,8 +99,10 @@ def _resolve_joint_names(engine: Any, n_joints: int) -> list[str]:
     Returns:
         List of joint name strings.
     """
-    assert n_joints is not None, "n_joints must be provided"
-    assert engine is not None, "engine must be provided"
+    if not (n_joints is not None):
+        raise ValueError("n_joints must be provided")
+    if not (engine is not None):
+        raise ValueError("engine must be provided")
     joint_names: list[str] = []
     if hasattr(engine, "joint_names"):
         joint_names = engine.joint_names
@@ -133,7 +136,8 @@ def _resolve_body_name(joint_names: list[str], index: int) -> str:
     Returns:
         The joint name at the given index, or a generic "joint_N" name.
     """
-    assert joint_names is not None, "joint_names must be provided"
+    if not (joint_names is not None):
+        raise ValueError("joint_names must be provided")
     if index < len(joint_names):
         return joint_names[index]
     return f"joint_{index}"
@@ -169,7 +173,8 @@ def _build_applied_torque_vectors(
     Returns:
         List of ForceVector3D for non-zero applied torques.
     """
-    assert config is not None, "config must be provided"
+    if not (config is not None):
+        raise ValueError("config must be provided")
     if not _should_include_force_type(config, "applied"):
         return []
 
@@ -216,7 +221,8 @@ def _build_gravity_vectors(
     Returns:
         List of ForceVector3D for downward gravity forces.
     """
-    assert config is not None, "config must be provided"
+    if not (config is not None):
+        raise ValueError("config must be provided")
     if not _should_include_force_type(config, "gravity"):
         return []
 
@@ -271,7 +277,8 @@ def _build_force_vectors(
     Returns:
         List of force vectors for rendering.
     """
-    assert engine_manager is not None, "engine_manager must be provided"
+    if not (engine_manager is not None):
+        raise ValueError("engine_manager must be provided")
     engine, state = _extract_engine_state(engine_manager)
     if engine is None:
         return _build_demo_vectors(config)
@@ -410,7 +417,8 @@ async def get_force_overlays(
     Returns:
         Force overlay data with vectors and metadata.
     """
-    assert force_types is not None, "force_types must be provided"
+    if not (force_types is not None):
+        raise ValueError("force_types must be provided")
     config = ForceOverlayRequest(
         enabled=True,
         force_types=force_types.split(","),
@@ -468,7 +476,8 @@ async def update_force_overlay_config(
     Returns:
         Updated force overlay data.
     """
-    assert config is not None, "config must be provided"
+    if not (config is not None):
+        raise ValueError("config must be provided")
     vectors = _build_force_vectors(engine_manager, config)
 
     total_force = sum(v.magnitude for v in vectors if v.force_type != "bias")

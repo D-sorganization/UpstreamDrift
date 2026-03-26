@@ -40,7 +40,8 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
     Returns:
         Configured logger instance
     """
-    assert name is not None, "name must be provided"
+    if not (name is not None):
+        raise ValueError("name must be provided")
     logger = logging.getLogger(name)
     logger.setLevel(level)
 

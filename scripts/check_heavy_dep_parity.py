@@ -121,8 +121,10 @@ def _parse_pip_block(block_lines: list[str], packages: set[str]) -> None:
 
 
 def main() -> int:
-    assert DOCKERFILE.exists(), f"Dockerfile not found: {DOCKERFILE}"
-    assert WORKFLOW.exists(), f"Workflow not found: {WORKFLOW}"
+    if not (DOCKERFILE.exists()):
+        raise ValueError(f"Dockerfile not found: {DOCKERFILE}")
+    if not (WORKFLOW.exists()):
+        raise ValueError(f"Workflow not found: {WORKFLOW}")
 
     dockerfile_text = DOCKERFILE.read_text(encoding="utf-8")
     workflow_text = WORKFLOW.read_text(encoding="utf-8")

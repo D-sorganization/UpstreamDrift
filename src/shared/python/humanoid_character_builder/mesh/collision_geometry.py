@@ -60,8 +60,10 @@ class CollisionGeometry:
 
     def export(self, path: str) -> None:
         """Export collision geometry to file."""
-        assert path is not None, "path must be provided"
-        assert path is not None, "path must be provided"
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
+            raise ValueError("path must be provided")
         if not self.meshes:
             return
 
@@ -86,8 +88,10 @@ class CollisionGeometry:
         Returns:
             CollisionGeometry instance
         """
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         total_verts = sum(
             len(m.vertices) if hasattr(m, "vertices") else 0 for m in result.components
         )
@@ -145,8 +149,10 @@ class CollisionGeometryGenerator:
         Returns:
             CollisionGeometry object containing simplified meshes
         """
-        assert method is not None, "method must be provided"
-        assert method is not None, "method must be provided"
+        if not (method is not None):
+            raise ValueError("method must be provided")
+        if not (method is not None):
+            raise ValueError("method must be provided")
         import time
 
         start_time = time.time()
@@ -178,8 +184,10 @@ class CollisionGeometryGenerator:
         Returns:
             Dictionary with quality_score and volume_preservation
         """
-        assert generated is not None, "generated must be provided"
-        assert generated is not None, "generated must be provided"
+        if not (generated is not None):
+            raise ValueError("generated must be provided")
+        if not (generated is not None):
+            raise ValueError("generated must be provided")
         import trimesh
 
         if not generated:

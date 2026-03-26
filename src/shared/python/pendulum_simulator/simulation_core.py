@@ -70,9 +70,12 @@ def integrate_ode(
     Pre: initial_state is finite, t_end > 0, 0 < dt < t_end.
     Post: t has N >= 2 points, states are all finite.
     """
-    assert np.all(np.isfinite(initial_state)), "Initial state must be finite"
-    assert t_end > 0, f"t_end must be positive, got {t_end}"
-    assert 0 < dt < t_end, f"dt must be in (0, t_end), got {dt}"
+    if not (np.all(np.isfinite(initial_state))):
+        raise ValueError("Initial state must be finite")
+    if not (t_end > 0):
+        raise ValueError(f"t_end must be positive, got {t_end}")
+    if not (0 < dt < t_end):
+        raise ValueError(f"dt must be in (0, t_end), got {dt}")
 
     t_eval = np.arange(0.0, t_end, dt)
 
@@ -95,5 +98,6 @@ def integrate_ode(
     t = sol.t
     states = sol.y.T
 
-    assert len(t) >= 2, "Simulation must produce at least 2 time points"
+    if not (len(t) >= 2):
+        raise ValueError("Simulation must produce at least 2 time points")
     return t, states

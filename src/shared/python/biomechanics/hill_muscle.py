@@ -93,8 +93,10 @@ class HillMuscleModel:
             Force multiplier [0, 1]
         """
         # Width of the force-length curve
-        assert l_norm is not None, "l_norm must be provided"
-        assert l_norm is not None, "l_norm must be provided"
+        if not (l_norm is not None):
+            raise ValueError("l_norm must be provided")
+        if not (l_norm is not None):
+            raise ValueError("l_norm must be provided")
         width = 0.56
         return float(np.exp(-((l_norm - 1.0) ** 2) / width**2))
 
@@ -107,8 +109,10 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, inf)
         """
-        assert l_norm is not None, "l_norm must be provided"
-        assert l_norm is not None, "l_norm must be provided"
+        if not (l_norm is not None):
+            raise ValueError("l_norm must be provided")
+        if not (l_norm is not None):
+            raise ValueError("l_norm must be provided")
         if l_norm <= 1.0:
             return 0.0
         # Typical exponential passive curve
@@ -129,8 +133,10 @@ class HillMuscleModel:
             Force multiplier [0, 1.8]
         """
         # Concentric (shortening)
-        assert v_norm is not None, "v_norm must be provided"
-        assert v_norm is not None, "v_norm must be provided"
+        if not (v_norm is not None):
+            raise ValueError("v_norm must be provided")
+        if not (v_norm is not None):
+            raise ValueError("v_norm must be provided")
         if v_norm < 0:
             # Hill's hyperbola: clamp v_norm to prevent division by zero
             # The denominator (1 - v_norm / 0.25) = 0 when v_norm = 0.25
@@ -151,8 +157,10 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, inf)
         """
-        assert l_tendon_norm is not None, "l_tendon_norm must be provided"
-        assert l_tendon_norm is not None, "l_tendon_norm must be provided"
+        if not (l_tendon_norm is not None):
+            raise ValueError("l_tendon_norm must be provided")
+        if not (l_tendon_norm is not None):
+            raise ValueError("l_tendon_norm must be provided")
         if l_tendon_norm <= 1.0:
             return 0.0
         # Non-linear stiffening region (toe region)
@@ -176,8 +184,10 @@ class HillMuscleModel:
         Returns:
             Force at the tendon [N]
         """
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         require(
             0.0 <= state.activation <= 1.0,
             "activation must be in [0, 1]",

@@ -43,7 +43,7 @@ def scan_for_incomplete_code(root_dir):
                             if filepath not in results:
                                 results[filepath] = []
                             results[filepath].append((i + 1, key, line.strip()))
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 pass
 
     return results

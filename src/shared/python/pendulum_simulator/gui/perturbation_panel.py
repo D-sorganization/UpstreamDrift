@@ -128,7 +128,8 @@ class _PerturbWorker(QObject):
         simulate_fn: Callable,
         extract_fn: Callable,
     ) -> None:
-        assert base_coeffs is not None, "base_coeffs must be provided"
+        if not (base_coeffs is not None):
+            raise ValueError("base_coeffs must be provided")
         super().__init__()
         self._base_coeffs = base_coeffs
         self._config = config
@@ -200,8 +201,10 @@ class PerturbationPanel(QWidget):
             Extracts {'tip_speed_final': float, 'tip_position_final': array}
             from a simulation result.
         """
-        assert simulate_fn is not None, "simulate_fn must not be None"
-        assert extract_fn is not None, "extract_fn must not be None"
+        if not (simulate_fn is not None):
+            raise ValueError("simulate_fn must not be None")
+        if not (extract_fn is not None):
+            raise ValueError("extract_fn must not be None")
         self._simulate_fn = simulate_fn
         self._extract_fn = extract_fn
         self._run_btn.setEnabled(True)
@@ -344,8 +347,10 @@ class PerturbationPanel(QWidget):
     # ------------------------------------------------------------------
 
     def _on_run(self) -> None:
-        assert self._simulate_fn is not None, "simulate_fn not set"
-        assert self._extract_fn is not None, "extract_fn not set"
+        if not (self._simulate_fn is not None):
+            raise ValueError("simulate_fn not set")
+        if not (self._extract_fn is not None):
+            raise ValueError("extract_fn not set")
 
         seed_val = self._seed_spin.value()
         config = PerturbationConfig(
@@ -401,14 +406,16 @@ class PerturbationPanel(QWidget):
         self._status_label.setText("Cancelling…")
 
     def _on_progress(self, trial: int) -> None:
-        assert trial is not None, "trial must be provided"
+        if not (trial is not None):
+            raise ValueError("trial must be provided")
         n = getattr(self, "_n_trials", 1)
         pct = int(100 * trial / max(n, 1))
         self._progress.setValue(pct)
         self._status_label.setText(f"Trial {trial} / {n}")
 
     def _on_finished(self, results: list) -> None:
-        assert results is not None, "results must be provided"
+        if not (results is not None):
+            raise ValueError("results must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
         if not results:
@@ -421,7 +428,8 @@ class PerturbationPanel(QWidget):
         self._status_label.setText(f"Done — {summary['n_trials']} trials completed")
 
     def _on_error(self, msg: str) -> None:
-        assert msg is not None, "msg must be provided"
+        if not (msg is not None):
+            raise ValueError("msg must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
         self._status_label.setText(f"Error: {msg}")
@@ -432,7 +440,8 @@ class PerturbationPanel(QWidget):
     # ------------------------------------------------------------------
 
     def _display_summary(self, summary: PerturbationSummary) -> None:
-        assert summary is not None, "summary must be provided"
+        if not (summary is not None):
+            raise ValueError("summary must be provided")
 
         if "end_effector_speed_final" in summary.metrics:
             stats = summary.metrics["end_effector_speed_final"]
@@ -481,7 +490,8 @@ class PerturbationPanel(QWidget):
             lbl.setText("—")
 
     def _update_histogram(self, speeds: list[float]) -> None:
-        assert speeds is not None, "speeds must be provided"
+        if not (speeds is not None):
+            raise ValueError("speeds must be provided")
         self._ax.clear()
         self._ax.set_facecolor("#1a1a2e")
         self._ax.hist(speeds, bins=20, color="#5555b0", edgecolor="#303070")
@@ -514,7 +524,8 @@ class PerturbationPanel(QWidget):
             Returns the per-joint polynomial coefficient lists for the
             currently loaded simulation.
         """
-        assert callable(fn), "fn must be callable"
+        if not (callable(fn)):
+            raise ValueError("fn must be callable")
         self._get_coeffs_fn = fn
 
     def set_preset_source(
@@ -531,8 +542,10 @@ class PerturbationPanel(QWidget):
         get_coeffs_fn : callable(name) -> list[list[float]]
             Returns the polynomial coefficient lists for a named preset.
         """
-        assert callable(get_names_fn), "get_names_fn must be callable"
-        assert callable(get_coeffs_fn), "get_coeffs_fn must be callable"
+        if not (callable(get_names_fn)):
+            raise ValueError("get_names_fn must be callable")
+        if not (callable(get_coeffs_fn)):
+            raise ValueError("get_coeffs_fn must be callable")
         self._get_preset_names_fn = get_names_fn
         self._get_coeffs_for_preset_fn = get_coeffs_fn
         self._compare_btn.setEnabled(True)

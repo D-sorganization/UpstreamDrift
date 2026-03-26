@@ -167,8 +167,10 @@ class CollisionChecker:
         Returns:
             True if primitive was removed, False if not found.
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name in self._environment_primitives:
             del self._environment_primitives[name]
             return True
@@ -269,8 +271,10 @@ class CollisionChecker:
         margin: float,
     ) -> bool:
         """Check collision between body pair."""
-        assert pair is not None, "pair must be provided"
-        assert pair is not None, "pair must be provided"
+        if not (pair is not None):
+            raise ValueError("pair must be provided")
+        if not (pair is not None):
+            raise ValueError("pair must be provided")
         geom_a = self._engine.get_body_collision_geometry(pair.body_a)
         geom_b = self._engine.get_body_collision_geometry(pair.body_b)
 
@@ -294,8 +298,10 @@ class CollisionChecker:
         margin: float,
     ) -> bool:
         """Check collision between robot body and environment."""
-        assert body_name is not None, "body_name must be provided"
-        assert body_name is not None, "body_name must be provided"
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
         body_geom = self._engine.get_body_collision_geometry(body_name)
         if body_geom is None:
             return False
@@ -317,8 +323,10 @@ class CollisionChecker:
         margin: float,
     ) -> bool:
         """Check if AABBs overlap (with margin)."""
-        assert prim_a is not None, "prim_a must be provided"
-        assert prim_a is not None, "prim_a must be provided"
+        if not (prim_a is not None):
+            raise ValueError("prim_a must be provided")
+        if not (prim_a is not None):
+            raise ValueError("prim_a must be provided")
         min_a, max_a = prim_a.get_aabb()
         min_b, max_b = prim_b.get_aabb()
 
@@ -428,8 +436,10 @@ class CollisionChecker:
         pair: CollisionPair,
     ) -> tuple[float, np.ndarray, np.ndarray]:
         """Compute distance between body pair."""
-        assert pair is not None, "pair must be provided"
-        assert pair is not None, "pair must be provided"
+        if not (pair is not None):
+            raise ValueError("pair must be provided")
+        if not (pair is not None):
+            raise ValueError("pair must be provided")
         geom_a = self._engine.get_body_collision_geometry(pair.body_a)
         geom_b = self._engine.get_body_collision_geometry(pair.body_b)
 
@@ -444,8 +454,10 @@ class CollisionChecker:
         env_primitive: GeometricPrimitive,
     ) -> tuple[float, np.ndarray, np.ndarray]:
         """Compute distance between body and environment primitive."""
-        assert body_name is not None, "body_name must be provided"
-        assert body_name is not None, "body_name must be provided"
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
         body_geom = self._engine.get_body_collision_geometry(body_name)
         if body_geom is None:
             return float("inf"), np.zeros(3), np.zeros(3)
@@ -498,8 +510,10 @@ class CollisionChecker:
             body_a: First body name.
             body_b: Second body name.
         """
-        assert body_a is not None, "body_a must be provided"
-        assert body_a is not None, "body_a must be provided"
+        if not (body_a is not None):
+            raise ValueError("body_a must be provided")
+        if not (body_a is not None):
+            raise ValueError("body_a must be provided")
         pair = CollisionPair(body_a, body_b)
         if pair in self._collision_pairs:
             self._collision_pairs.remove(pair)
@@ -513,8 +527,10 @@ class CollisionChecker:
             body_a: First body name.
             body_b: Second body name.
         """
-        assert body_a is not None, "body_a must be provided"
-        assert body_a is not None, "body_a must be provided"
+        if not (body_a is not None):
+            raise ValueError("body_a must be provided")
+        if not (body_a is not None):
+            raise ValueError("body_a must be provided")
         pair = CollisionPair(body_a, body_b)
         if pair in self._config.disabled_pairs:
             self._config.disabled_pairs.remove(pair)

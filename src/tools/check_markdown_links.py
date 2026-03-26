@@ -32,8 +32,10 @@ def extract_links_from_markdown(content: str) -> list[str]:
 
 def resolve_and_verify_link(link: str, base_dir: Path) -> str | None:
     """Resolve a relative link against a base directory and verify existence."""
-    assert link is not None, "link must be provided"
-    assert link is not None, "link must be provided"
+    if not (link is not None):
+        raise ValueError("link must be provided")
+    if not (link is not None):
+        raise ValueError("link must be provided")
     require(isinstance(link, str), "link must be a string")
     require(isinstance(base_dir, Path), "base_dir must be a Path")
 

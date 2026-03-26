@@ -105,8 +105,10 @@ class OpenAIAdapter(BaseAgentAdapter):
             timeout: Request timeout [s]. Uses OPENAI_TIMEOUT env var or default.
             organization: Organization ID. Uses OPENAI_ORGANIZATION env var if not set.
         """
-        assert api_key is not None, "api_key must be provided"
-        assert api_key is not None, "api_key must be provided"
+        if not (api_key is not None):
+            raise ValueError("api_key must be provided")
+        if not (api_key is not None):
+            raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_openai_model()
         self._timeout = timeout if timeout is not None else get_openai_timeout()
@@ -167,8 +169,10 @@ class OpenAIAdapter(BaseAgentAdapter):
             AIRateLimitError: If rate limit exceeded.
             AITimeoutError: If request times out.
         """
-        assert message is not None, "message must be provided"
-        assert message is not None, "message must be provided"
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
+            raise ValueError("message must be provided")
         client = self._get_client()
 
         # Format messages
@@ -207,8 +211,10 @@ class OpenAIAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        assert message is not None, "message must be provided"
-        assert message is not None, "message must be provided"
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
+            raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message)
         openai_tools = [t.to_openai_format() for t in tools] if tools else None
@@ -340,8 +346,10 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for OpenAI.
         """
-        assert context is not None, "context must be provided"
-        assert context is not None, "context must be provided"
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
+            raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
         # Add system message
@@ -398,8 +406,10 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             System message string.
         """
-        assert context is not None, "context must be provided"
-        assert context is not None, "context must be provided"
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
+            raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
 
         return (

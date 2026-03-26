@@ -94,8 +94,10 @@ class URDFComponent:
         is_library: bool = False,
     ) -> URDFComponent:
         """Create component from XML element."""
-        assert element is not None, "element must be provided"
-        assert element is not None, "element must be provided"
+        if not (element is not None):
+            raise ValueError("element must be provided")
+        if not (element is not None):
+            raise ValueError("element must be provided")
         tag_to_type = {
             "link": ComponentType.LINK,
             "joint": ComponentType.JOINT,
@@ -162,8 +164,10 @@ class ComponentLibrary:
         Returns:
             List of loaded components
         """
-        assert urdf_path is not None, "urdf_path must be provided"
-        assert urdf_path is not None, "urdf_path must be provided"
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
         if not urdf_path.exists():
             logger.error(f"URDF file not found: {urdf_path}")
             return []
@@ -200,8 +204,10 @@ class ComponentLibrary:
         Returns:
             List of loaded components
         """
-        assert urdf_path is not None, "urdf_path must be provided"
-        assert urdf_path is not None, "urdf_path must be provided"
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
         if not urdf_path.exists():
             logger.error(f"URDF file not found: {urdf_path}")
             return []
@@ -241,8 +247,10 @@ class ComponentLibrary:
         Returns:
             The new editable component, or None if not found
         """
-        assert library_key is not None, "library_key must be provided"
-        assert library_key is not None, "library_key must be provided"
+        if not (library_key is not None):
+            raise ValueError("library_key must be provided")
+        if not (library_key is not None):
+            raise ValueError("library_key must be provided")
         if library_key not in self._library_components:
             logger.error(f"Library component not found: {library_key}")
             return None
@@ -313,8 +321,10 @@ class ComponentLibrary:
         Returns:
             Component if found, None otherwise
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if from_library:
             # Search by name in library (could be multiple files)
             for comp in self._library_components.values():
@@ -333,8 +343,10 @@ class ComponentLibrary:
         Returns:
             True if updated successfully
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name not in self._working_components:
             logger.error(f"Working component not found: {name}")
             return False
@@ -357,8 +369,10 @@ class ComponentLibrary:
         Returns:
             True if removed successfully
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name in self._working_components:
             del self._working_components[name]
             logger.info(f"Removed working component: {name}")
@@ -374,8 +388,10 @@ class ComponentLibrary:
         Returns:
             URDF XML string
         """
-        assert robot_name is not None, "robot_name must be provided"
-        assert robot_name is not None, "robot_name must be provided"
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
         root = ET.Element("robot", name=robot_name)
 
         # Sort components: materials first, then links, then joints
@@ -719,15 +735,19 @@ class ComponentLibraryWidget(QWidget):
 
     def load_urdf_to_library(self, urdf_path: Path) -> None:
         """Load a URDF file into the library."""
-        assert urdf_path is not None, "urdf_path must be provided"
-        assert urdf_path is not None, "urdf_path must be provided"
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
         self.library.load_urdf_as_library(urdf_path)
         self._refresh_library_tree()
 
     def load_urdf_to_working(self, urdf_path: Path) -> None:
         """Load a URDF file into the working set."""
-        assert urdf_path is not None, "urdf_path must be provided"
-        assert urdf_path is not None, "urdf_path must be provided"
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
         self.library.load_urdf_as_working(urdf_path)
         self._refresh_working_tree()
 
@@ -741,8 +761,10 @@ class CopyComponentDialog(QDialog):
 
     def __init__(self, original_name: str, parent: QWidget | None = None) -> None:
         """Initialize the dialog."""
-        assert original_name is not None, "original_name must be provided"
-        assert original_name is not None, "original_name must be provided"
+        if not (original_name is not None):
+            raise ValueError("original_name must be provided")
+        if not (original_name is not None):
+            raise ValueError("original_name must be provided")
         super().__init__(parent)
         self.setWindowTitle("Copy Component")
         self.setMinimumWidth(300)

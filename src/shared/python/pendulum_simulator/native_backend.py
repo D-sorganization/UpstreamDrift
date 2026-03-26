@@ -37,7 +37,8 @@ except ImportError as exc:
 
 def _warn_once(call_name: str, exc: Exception) -> None:
     """Warn once per native call site, then fall back to Python."""
-    assert call_name is not None, "call_name must be provided"
+    if not (call_name is not None):
+        raise ValueError("call_name must be provided")
     if call_name in _WARNED_CALLS:
         return
     _WARNED_CALLS.add(call_name)
@@ -56,15 +57,18 @@ def _truncate_q(q: np.ndarray) -> np.ndarray:
     q_arr = np.asarray(q, dtype=float)
     if q_arr.shape[0] > 8:
         q_arr = q_arr[:8]
-    assert q_arr.shape == (8,), f"q must have shape (8,), got {q_arr.shape}"
+    if not (q_arr.shape == (8):
+        raise ValueError(), f"q must have shape (8,), got {q_arr.shape}")
     return q_arr
 
 
 def _vector8(values: np.ndarray, name: str) -> np.ndarray:
     """Normalize a vector argument to a finite length-8 array."""
     arr = np.asarray(values, dtype=float)
-    assert arr.shape == (8,), f"{name} must have shape (8,), got {arr.shape}"
-    assert np.all(np.isfinite(arr)), f"{name} must be finite"
+    if not (arr.shape == (8):
+        raise ValueError(), f"{name} must have shape (8,), got {arr.shape}")
+    if not (np.all(np.isfinite(arr))):
+        raise ValueError(f"{name} must be finite")
     return arr
 
 
@@ -209,7 +213,8 @@ def _to_rust_golfer_params(params: GolferParams) -> Any:
 
 def double_mass_matrix(phi: float, params: PendulumParams) -> np.ndarray | None:
     """Return the native double-pendulum mass matrix, or ``None`` if unavailable."""
-    assert phi is not None, "phi must be provided"
+    if not (phi is not None):
+        raise ValueError("phi must be provided")
     if not double_native_enabled():
         return None
 
@@ -236,7 +241,8 @@ def double_gravity_vector(
     theta1: float, phi: float, params: PendulumParams
 ) -> np.ndarray | None:
     """Return the native double-pendulum gravity vector, or ``None`` if unavailable."""
-    assert theta1 is not None, "theta1 must be provided"
+    if not (theta1 is not None):
+        raise ValueError("theta1 must be provided")
     if not double_native_enabled():
         return None
 
@@ -266,7 +272,8 @@ def double_coriolis_vector(
     params: PendulumParams,
 ) -> np.ndarray | None:
     """Return the native double-pendulum Coriolis vector, or ``None`` if unavailable."""
-    assert phi is not None, "phi must be provided"
+    if not (phi is not None):
+        raise ValueError("phi must be provided")
     if not double_native_enabled():
         return None
 
@@ -296,7 +303,8 @@ def double_forward_kinematics(
     theta1: float, phi: float, params: PendulumParams
 ) -> dict[str, tuple[float, float]] | None:
     """Return native double-pendulum forward kinematics mapped to desktop keys."""
-    assert theta1 is not None, "theta1 must be provided"
+    if not (theta1 is not None):
+        raise ValueError("theta1 must be provided")
     if not double_native_enabled():
         return None
 
@@ -328,7 +336,8 @@ def triple_mass_matrix(
     phi1: float, phi2: float, params: TriplePendulumParams
 ) -> np.ndarray | None:
     """Return the native triple-pendulum mass matrix, or ``None`` if unavailable."""
-    assert phi1 is not None, "phi1 must be provided"
+    if not (phi1 is not None):
+        raise ValueError("phi1 must be provided")
     if not triple_native_enabled():
         return None
 
@@ -355,7 +364,8 @@ def triple_gravity_vector(
     theta1: float, phi1: float, phi2: float, params: TriplePendulumParams
 ) -> np.ndarray | None:
     """Return the native triple-pendulum gravity vector, or ``None`` if unavailable."""
-    assert theta1 is not None, "theta1 must be provided"
+    if not (theta1 is not None):
+        raise ValueError("theta1 must be provided")
     if not triple_native_enabled():
         return None
 
@@ -387,7 +397,8 @@ def triple_coriolis_vector(
     params: TriplePendulumParams,
 ) -> np.ndarray | None:
     """Return the native triple-pendulum Coriolis vector, or ``None`` if unavailable."""
-    assert phi1 is not None, "phi1 must be provided"
+    if not (phi1 is not None):
+        raise ValueError("phi1 must be provided")
     if not triple_native_enabled():
         return None
 
@@ -420,7 +431,8 @@ def triple_forward_kinematics(
     params: TriplePendulumParams,
 ) -> dict[str, tuple[float, float]] | None:
     """Return native triple-pendulum forward kinematics mapped to desktop keys."""
-    assert theta1 is not None, "theta1 must be provided"
+    if not (theta1 is not None):
+        raise ValueError("theta1 must be provided")
     if not triple_native_enabled():
         return None
 
@@ -451,7 +463,8 @@ def triple_forward_kinematics(
 
 def golfer_mass_matrix(q: np.ndarray, params: GolferParams) -> np.ndarray | None:
     """Return the native golfer mass matrix, or ``None`` if disabled/unavailable."""
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     if not golfer_native_enabled():
         return None
 
@@ -476,7 +489,8 @@ def golfer_mass_matrix(q: np.ndarray, params: GolferParams) -> np.ndarray | None
 
 def golfer_gravity_vector(q: np.ndarray, params: GolferParams) -> np.ndarray | None:
     """Return the native golfer gravity vector, or ``None`` if disabled/unavailable."""
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     if not golfer_native_enabled():
         return None
 
@@ -503,7 +517,8 @@ def golfer_forward_kinematics(
     q: np.ndarray, params: GolferParams
 ) -> dict[str, tuple[float, float]] | None:
     """Return native golfer forward kinematics mapped to Python GUI keys."""
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     if not golfer_native_enabled():
         return None
 
@@ -558,7 +573,8 @@ def golfer_constrained_dynamics(
     beta: float,
 ) -> tuple[np.ndarray, np.ndarray] | None:
     """Return native golfer accelerations and multipliers when supported."""
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     if not golfer_native_enabled() or not golfer_native_constraint_dynamics_supported(
         params
     ):
@@ -600,7 +616,8 @@ def golfer_project_to_constraints(
     tol: float,
 ) -> np.ndarray | None:
     """Return native golfer position projection, or ``None`` if unavailable."""
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     if not golfer_native_enabled():
         return None
 
@@ -632,7 +649,8 @@ def golfer_project_velocity(
     params: GolferParams,
 ) -> np.ndarray | None:
     """Return native golfer velocity projection, or ``None`` if unavailable."""
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     if not golfer_native_enabled():
         return None
 
@@ -671,7 +689,8 @@ def batch_evaluate_double(
     Returns a list of ``(max_tip_speed, tip_speed_at_bottom, success)``
     tuples, or ``None`` if the native backend is unavailable.
     """
-    assert params is not None, "params must be provided"
+    if not (params is not None):
+        raise ValueError("params must be provided")
     if _pendulum_core is None or not hasattr(
         _pendulum_core, "py_batch_evaluate_double"
     ):
@@ -713,7 +732,8 @@ def simulate_double(
     is a 2D array of shape ``(N, 4)`` containing ``[q1, q2, qdot1, qdot2]``.
     Returns ``None`` if the native backend is unavailable.
     """
-    assert params is not None, "params must be provided"
+    if not (params is not None):
+        raise ValueError("params must be provided")
     if _pendulum_core is None or not hasattr(_pendulum_core, "py_simulate_double"):
         return None
 

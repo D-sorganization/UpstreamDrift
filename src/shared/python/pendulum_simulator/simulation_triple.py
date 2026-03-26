@@ -55,13 +55,15 @@ class TripleSimulationResult(TrajectoryResultMixin):
         self._validate_trajectory(expected_state_width=6)
 
     def mass_matrix_at(self, idx: int) -> dict:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return mass_matrix_components(s[1], s[2], self.params)
 
     def positions_at(self, idx: int) -> dict:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return forward_kinematics(s[0], s[1], s[2], self.params)
@@ -71,7 +73,8 @@ class TripleSimulationResult(TrajectoryResultMixin):
         return self.torque_func(self.t[idx])
 
     def accelerations_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         state_dot = equations_of_motion(
             self.states[idx], self.t[idx], self.params, self.torque_func
@@ -79,25 +82,29 @@ class TripleSimulationResult(TrajectoryResultMixin):
         return state_dot[3:]  # type: ignore[index]
 
     def joint_forces_at(self, idx: int) -> dict:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         qddot = self.accelerations_at(idx)
         return net_joint_forces(self.states[idx], qddot, self.params)
 
     def coriolis_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return coriolis_vector(s[1], s[2], s[3], s[4], s[5], self.params)
 
     def gravity_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return gravity_vector(s[0], s[1], s[2], self.params)
 
     def energy_at(self, idx: int) -> dict:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         state = self.states[idx]
         result = {
@@ -115,7 +122,8 @@ class TripleSimulationResult(TrajectoryResultMixin):
         -------
         np.ndarray, shape (3,)  [N·m]
         """
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return friction_torque_vector(s[3], s[4], s[5], self.params)
@@ -161,18 +169,23 @@ def run_simulation(
       visualisation-quality results.  Use tighter values only when
       quantitative energy conservation is required.
     """
-    assert initial_state.shape == (6,), (
+    if not (initial_state.shape == (6):
+        raise ValueError(), ()
         f"Initial state shape must be (6,), got {initial_state.shape}"
     )
-    assert all(np.isfinite(initial_state)), "Initial state must be finite"
-    assert t_end > 0, f"t_end must be positive, got {t_end}"
-    assert 0 < dt < t_end, f"dt must be in (0, t_end), got {dt}"
+    if not (all(np.isfinite(initial_state))):
+        raise ValueError("Initial state must be finite")
+    if not (t_end > 0):
+        raise ValueError(f"t_end must be positive, got {t_end}")
+    if not (0 < dt < t_end):
+        raise ValueError(f"dt must be in (0, t_end), got {dt}")
 
     # Merge clamp kwarg (from SimulationPanel) with torque_limits (legacy)
     effective_torque_limits = torque_limits if torque_limits is not None else clamp
 
     def ode_rhs(t: float, y: np.ndarray) -> np.ndarray:
-        assert t is not None, "t must be provided"
+        if not (t is not None):
+            raise ValueError("t must be provided")
         dydt = equations_of_motion(y, t, params, torque_func, effective_torque_limits)
         # Apply joint limit penalty torques if enabled (#1151)
         if limits is not None:
@@ -211,5 +224,6 @@ def run_simulation(
         torque_func=torque_func,
     )
 
-    assert result.n_steps >= 2, "Simulation must produce at least 2 time points"
+    if not (result.n_steps >= 2):
+        raise ValueError("Simulation must produce at least 2 time points")
     return result

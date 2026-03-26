@@ -75,8 +75,10 @@ class NotesStorage:
 
     def restore(self, item_id: str) -> Path | None:
         """Restore a recycled note item back to the project notes file."""
-        assert item_id is not None, "item_id must be provided"
-        assert item_id is not None, "item_id must be provided"
+        if not (item_id is not None):
+            raise ValueError("item_id must be provided")
+        if not (item_id is not None):
+            raise ValueError("item_id must be provided")
         item = self._find_item(item_id)
         if item is None:
             return None
@@ -92,8 +94,10 @@ class NotesStorage:
 
     def purge(self, item_id: str) -> bool:
         """Permanently delete one recycled item by ID."""
-        assert item_id is not None, "item_id must be provided"
-        assert item_id is not None, "item_id must be provided"
+        if not (item_id is not None):
+            raise ValueError("item_id must be provided")
+        if not (item_id is not None):
+            raise ValueError("item_id must be provided")
         item = self._find_item(item_id)
         if item is None:
             return False
@@ -125,8 +129,10 @@ class NotesStorage:
         return [RecycledNoteItem(**item) for item in data]
 
     def _write_index(self, items: list[RecycledNoteItem]) -> None:
-        assert items is not None, "items must be provided"
-        assert items is not None, "items must be provided"
+        if not (items is not None):
+            raise ValueError("items must be provided")
+        if not (items is not None):
+            raise ValueError("items must be provided")
         self.recycle_bin_dir.mkdir(parents=True, exist_ok=True)
         payload = [item.__dict__ for item in items]
         self.recycle_index_path.write_text(
@@ -135,8 +141,10 @@ class NotesStorage:
         )
 
     def _append_index(self, item: RecycledNoteItem) -> None:
-        assert item is not None, "item must be provided"
-        assert item is not None, "item must be provided"
+        if not (item is not None):
+            raise ValueError("item must be provided")
+        if not (item is not None):
+            raise ValueError("item must be provided")
         items = self._read_index()
         items.append(item)
         self._write_index(items)

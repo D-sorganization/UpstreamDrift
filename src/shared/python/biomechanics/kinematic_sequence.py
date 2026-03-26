@@ -105,8 +105,10 @@ class SegmentTimingAnalyzer:
         Returns:
             KinematicSequenceResult object
         """
-        assert segment_velocities is not None, "segment_velocities must be provided"
-        assert segment_velocities is not None, "segment_velocities must be provided"
+        if not (segment_velocities is not None):
+            raise ValueError("segment_velocities must be provided")
+        if not (segment_velocities is not None):
+            raise ValueError("segment_velocities must be provided")
         require(len(times) > 0, "times array must be non-empty")
 
         # 1. Detect peaks for each segment
@@ -172,8 +174,10 @@ class SegmentTimingAnalyzer:
         Returns:
             List of SegmentPeak objects with normalized velocities.
         """
-        assert segment_velocities is not None, "segment_velocities must be provided"
-        assert segment_velocities is not None, "segment_velocities must be provided"
+        if not (segment_velocities is not None):
+            raise ValueError("segment_velocities must be provided")
+        if not (segment_velocities is not None):
+            raise ValueError("segment_velocities must be provided")
         peaks: list[SegmentPeak] = []
         max_overall_velocity = 0.0
 
@@ -217,8 +221,10 @@ class SegmentTimingAnalyzer:
             segment_velocities: Dict mapping segment name to velocity array (1D)
             times: Time array corresponding to velocities
         """
-        assert peaks is not None, "peaks must be provided"
-        assert peaks is not None, "peaks must be provided"
+        if not (peaks is not None):
+            raise ValueError("peaks must be provided")
+        if not (peaks is not None):
+            raise ValueError("peaks must be provided")
         peak_map = {p.name: p for p in peaks}
 
         # Speed Gain -- requires expected_order to identify proximal segments
@@ -288,8 +294,10 @@ class SegmentTimingAnalyzer:
         Returns:
             Tuple of (sequence_consistency, is_valid_sequence).
         """
-        assert peaks is not None, "peaks must be provided"
-        assert peaks is not None, "peaks must be provided"
+        if not (peaks is not None):
+            raise ValueError("peaks must be provided")
+        if not (peaks is not None):
+            raise ValueError("peaks must be provided")
         if not self.expected_order:
             return 0.0, False
 
@@ -338,8 +346,10 @@ class SegmentTimingAnalyzer:
         Returns:
             (segment_velocities, times)
         """
-        assert segment_indices is not None, "segment_indices must be provided"
-        assert segment_indices is not None, "segment_indices must be provided"
+        if not (segment_indices is not None):
+            raise ValueError("segment_indices must be provided")
+        if not (segment_indices is not None):
+            raise ValueError("segment_indices must be provided")
         times, joint_velocities = recorder.get_time_series("joint_velocities")
         joint_velocities = np.asarray(joint_velocities)
 

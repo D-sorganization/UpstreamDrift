@@ -91,8 +91,10 @@ class RRTStarPlanner(MotionPlanner):
             collision_checker: Collision checking interface.
             config: RRT* configuration.
         """
-        assert collision_checker is not None, "collision_checker must be provided"
-        assert collision_checker is not None, "collision_checker must be provided"
+        if not (collision_checker is not None):
+            raise ValueError("collision_checker must be provided")
+        if not (collision_checker is not None):
+            raise ValueError("collision_checker must be provided")
         super().__init__(collision_checker, config or RRTStarConfig())
         self._config: RRTStarConfig = self._config  # type: ignore[assignment]
         self._nodes: list[TreeNode] = []
@@ -113,8 +115,10 @@ class RRTStarPlanner(MotionPlanner):
         Returns:
             PlannerResult with path and statistics.
         """
-        assert q_start is not None, "q_start must be provided"
-        assert q_start is not None, "q_start must be provided"
+        if not (q_start is not None):
+            raise ValueError("q_start must be provided")
+        if not (q_start is not None):
+            raise ValueError("q_start must be provided")
         q_start = np.asarray(q_start)
         q_goal = np.asarray(q_goal)
         self._dimension = len(q_start)
@@ -158,8 +162,10 @@ class RRTStarPlanner(MotionPlanner):
         q_goal: np.ndarray,
         start_time: float,
     ) -> PlannerResult | None:
-        assert q_start is not None, "q_start must be provided"
-        assert q_start is not None, "q_start must be provided"
+        if not (q_start is not None):
+            raise ValueError("q_start must be provided")
+        if not (q_start is not None):
+            raise ValueError("q_start must be provided")
         if not self._is_valid(q_start):
             return PlannerResult(
                 status=PlannerStatus.INVALID_START,
@@ -173,8 +179,10 @@ class RRTStarPlanner(MotionPlanner):
         return None
 
     def _expand_tree_star(self, q_goal: np.ndarray) -> tuple[int, float]:
-        assert q_goal is not None, "q_goal must be provided"
-        assert q_goal is not None, "q_goal must be provided"
+        if not (q_goal is not None):
+            raise ValueError("q_goal must be provided")
+        if not (q_goal is not None):
+            raise ValueError("q_goal must be provided")
         q_rand = self._sample_with_goal_bias(q_goal)
         nearest_idx = self._find_nearest(q_rand)
         q_nearest = self._nodes[nearest_idx].config
@@ -210,8 +218,10 @@ class RRTStarPlanner(MotionPlanner):
         goal_idx: int,
         best_goal_cost: float,
     ) -> tuple[int, float]:
-        assert new_idx is not None, "new_idx must be provided"
-        assert new_idx is not None, "new_idx must be provided"
+        if not (new_idx is not None):
+            raise ValueError("new_idx must be provided")
+        if not (new_idx is not None):
+            raise ValueError("new_idx must be provided")
         q_new = self._nodes[new_idx].config
         dist_to_goal = self._distance(q_new, q_goal)
         if dist_to_goal > self._config.goal_tolerance:
@@ -246,8 +256,10 @@ class RRTStarPlanner(MotionPlanner):
         iterations: int,
         start_time: float,
     ) -> PlannerResult:
-        assert goal_idx is not None, "goal_idx must be provided"
-        assert goal_idx is not None, "goal_idx must be provided"
+        if not (goal_idx is not None):
+            raise ValueError("goal_idx must be provided")
+        if not (goal_idx is not None):
+            raise ValueError("goal_idx must be provided")
         planning_time = time.perf_counter() - start_time
 
         if goal_idx >= 0:
@@ -325,8 +337,10 @@ class RRTStarPlanner(MotionPlanner):
         Returns:
             Index of nearest node.
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         min_dist = float("inf")
         min_idx = 0
 
@@ -347,8 +361,10 @@ class RRTStarPlanner(MotionPlanner):
         Returns:
             List of indices of near nodes.
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         radius = self._compute_rewire_radius()
         near_indices = []
 
@@ -372,8 +388,10 @@ class RRTStarPlanner(MotionPlanner):
         Returns:
             Index of best parent, or -1 if no valid parent.
         """
-        assert q_new is not None, "q_new must be provided"
-        assert q_new is not None, "q_new must be provided"
+        if not (q_new is not None):
+            raise ValueError("q_new must be provided")
+        if not (q_new is not None):
+            raise ValueError("q_new must be provided")
         best_cost = float("inf")
         best_idx = -1
 
@@ -392,8 +410,10 @@ class RRTStarPlanner(MotionPlanner):
 
     def _is_ancestor(self, candidate_idx: int, node_idx: int) -> bool:
         """Check if candidate_idx is an ancestor of node_idx in the tree."""
-        assert candidate_idx is not None, "candidate_idx must be provided"
-        assert candidate_idx is not None, "candidate_idx must be provided"
+        if not (candidate_idx is not None):
+            raise ValueError("candidate_idx must be provided")
+        if not (candidate_idx is not None):
+            raise ValueError("candidate_idx must be provided")
         idx = node_idx
         visited: set[int] = set()
         while idx >= 0:
@@ -412,8 +432,10 @@ class RRTStarPlanner(MotionPlanner):
             new_idx: Index of newly added node.
             near_indices: Indices of near nodes to consider.
         """
-        assert new_idx is not None, "new_idx must be provided"
-        assert new_idx is not None, "new_idx must be provided"
+        if not (new_idx is not None):
+            raise ValueError("new_idx must be provided")
+        if not (new_idx is not None):
+            raise ValueError("new_idx must be provided")
         new_node = self._nodes[new_idx]
 
         for idx in near_indices:
@@ -443,8 +465,10 @@ class RRTStarPlanner(MotionPlanner):
             start_idx: Index of node whose cost was updated.
         """
         # Find all children and update their costs
-        assert start_idx is not None, "start_idx must be provided"
-        assert start_idx is not None, "start_idx must be provided"
+        if not (start_idx is not None):
+            raise ValueError("start_idx must be provided")
+        if not (start_idx is not None):
+            raise ValueError("start_idx must be provided")
         queue = [start_idx]
         while queue:
             current_idx = queue.pop(0)
@@ -468,8 +492,10 @@ class RRTStarPlanner(MotionPlanner):
         Returns:
             List of configurations from start to goal.
         """
-        assert goal_idx is not None, "goal_idx must be provided"
-        assert goal_idx is not None, "goal_idx must be provided"
+        if not (goal_idx is not None):
+            raise ValueError("goal_idx must be provided")
+        if not (goal_idx is not None):
+            raise ValueError("goal_idx must be provided")
         path = []
         idx = goal_idx
         visited: set[int] = set()

@@ -34,16 +34,20 @@ class PerturbationConfig:
     seed: int | None = None
 
     def __post_init__(self) -> None:
-        assert self.n_trials > 0, f"n_trials must be positive, got {self.n_trials}"
-        assert self.noise_amplitude >= 0, (
+        if not (self.n_trials > 0):
+            raise ValueError(f"n_trials must be positive, got {self.n_trials}")
+        if not (self.noise_amplitude >= 0):
+            raise ValueError(()
             f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
         )
-        assert self.noise_type in {
+        if not (self.noise_type in {):
+            raise ValueError('DbC Blocked: Precondition failed.')
             "white",
             "pink",
             "brown",
         }, f"Unknown noise_type: {self.noise_type}"
-        assert self.perturb_mode in {
+        if not (self.perturb_mode in {):
+            raise ValueError('DbC Blocked: Precondition failed.')
             "additive",
             "multiplicative",
             "both",

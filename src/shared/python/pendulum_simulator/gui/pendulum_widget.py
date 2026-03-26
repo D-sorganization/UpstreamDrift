@@ -107,7 +107,8 @@ class PendulumWidget(BasePendulumWidget):
 
         Pre: result is not None
         """
-        assert result is not None, "SimulationResult must not be None"
+        if not (result is not None):
+            raise ValueError("SimulationResult must not be None")
         self._result = result
         self._current_idx = 0
         self._trail.clear()
@@ -179,7 +180,8 @@ class PendulumWidget(BasePendulumWidget):
         back and forth), rebuild the trail from the precomputed tip cache
         so it always shows frames [max(0, idx-TRAIL_LENGTH)..idx].
         """
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         if self._result is None:
             return
         idx = max(0, min(idx, self._result.n_steps - 1))
@@ -210,7 +212,8 @@ class PendulumWidget(BasePendulumWidget):
     # ------------------------------------------------------------------
 
     def paintEvent(self, event: object) -> None:
-        assert event is not None, "event must be provided"
+        if not (event is not None):
+            raise ValueError("event must be provided")
         base_scale = self._compute_base_scale()
         self._pixels_per_meter = base_scale * self._zoom
 
@@ -274,7 +277,8 @@ class PendulumWidget(BasePendulumWidget):
         When 3D mode is enabled (#1155), uses tapered gradient segments.
         Otherwise falls back to flat-line rendering.
         """
-        assert self._result is not None
+        if not (self._result is not None):
+            raise ValueError('DbC Blocked: Precondition failed.')
         pos = self._result.positions_at(self._current_idx)
         shoulder = self._world_to_pixel(*pos["shoulder"])
         tip = self._world_to_pixel(*pos["tip"])
@@ -352,7 +356,8 @@ class PendulumWidget(BasePendulumWidget):
     # ------------------------------------------------------------------
 
     def _draw_info(self, painter: QPainter) -> None:
-        assert self._result is not None
+        if not (self._result is not None):
+            raise ValueError('DbC Blocked: Precondition failed.')
         t = self._result.t[self._current_idx]
         s = self._result.states[self._current_idx]
         theta1_deg = np.degrees(s[0])
@@ -377,7 +382,8 @@ class PendulumWidget(BasePendulumWidget):
             y += 15
 
     def _draw_placeholder(self, painter: QPainter) -> None:
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         painter.setPen(QColor(80, 80, 110))
         painter.setFont(QFont("Sans", 12))
         painter.drawText(
@@ -393,7 +399,8 @@ class PendulumWidget(BasePendulumWidget):
 
     def _draw_force_vectors(self, painter: QPainter, pos: dict) -> None:
         """Draw net force vectors at joints."""
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         if self._result is None or not hasattr(self._result, "joint_forces_at"):
             return
         forces = self._result.joint_forces_at(self._current_idx)
@@ -427,7 +434,8 @@ class PendulumWidget(BasePendulumWidget):
 
     def _draw_zero_torque_force_vectors(self, painter: QPainter, pos: dict) -> None:
         """Draw zero-torque (passive drift) force vectors at each joint."""
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         if self._zero_torque_forces is None or not self._zero_torque_forces:
             return
         forces = self._zero_torque_forces[self._current_idx]
@@ -462,7 +470,8 @@ class PendulumWidget(BasePendulumWidget):
 
     def _draw_arrow(self, painter: QPainter, origin: tuple, end: tuple) -> None:
         """Draw a force/torque vector with a filled triangular arrowhead."""
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         p0 = self._world_to_pixel(origin[0], origin[1])
         p1 = self._world_to_pixel(end[0], end[1])
         painter.drawLine(p0, p1)
@@ -504,7 +513,8 @@ class PendulumWidget(BasePendulumWidget):
         Convention: clockwise = negative, counterclockwise = positive.
         Arc radius scales with torque magnitude.
         """
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         if self._result is None:
             return
         try:
@@ -576,7 +586,8 @@ class PendulumWidget(BasePendulumWidget):
 
         Uses the joint_moments module for proper proximal-on-distal computation.
         """
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         if self._result is None:
             return
         try:
@@ -654,7 +665,8 @@ class PendulumWidget(BasePendulumWidget):
 
     def _draw_ellipsoids_at_frame(self, painter: QPainter) -> None:
         """Compute and draw mobility/force ellipsoids for the current frame."""
-        assert self._result is not None
+        if not (self._result is not None):
+            raise ValueError('DbC Blocked: Precondition failed.')
         state = self._result.states[self._current_idx]
         params = self._result.params
         ppm = self._pixels_per_meter
@@ -762,8 +774,10 @@ class PendulumWidget(BasePendulumWidget):
         Pre: directions.shape == (2, 2)
         Pre: semi_axes_px.shape == (2,)
         """
-        assert directions.shape == (2, 2), "directions must be (2, 2)"
-        assert semi_axes_px.shape == (2,), "semi_axes_px must be (2,)"
+        if not (directions.shape == (2):
+            raise ValueError(2), "directions must be (2, 2)")
+        if not (semi_axes_px.shape == (2):
+            raise ValueError(), "semi_axes_px must be (2,)")
 
         a = float(semi_axes_px[0])
         b = float(semi_axes_px[1])
@@ -796,7 +810,8 @@ class PendulumWidget(BasePendulumWidget):
 
     def _draw_com(self, painter: QPainter) -> None:
         """Draw the combined center of mass of the system."""
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         if self._result is None:
             return
 
@@ -856,7 +871,8 @@ class PendulumWidget(BasePendulumWidget):
 
     def _draw_zoom_controls(self, painter: QPainter) -> None:
         """Draw a small zoom toolbar in the top-right corner."""
-        assert painter is not None, "painter must be provided"
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
         r = self.rect()
         btn_size = 24
         margin = 6
@@ -888,7 +904,8 @@ class PendulumWidget(BasePendulumWidget):
         ]
 
     def _handle_zoom_button_click(self, pos: QPoint) -> bool:
-        assert pos is not None, "pos must be provided"
+        if not (pos is not None):
+            raise ValueError("pos must be provided")
         if not hasattr(self, "_zoom_btn_rects"):
             return False
         for i, rect in enumerate(self._zoom_btn_rects):

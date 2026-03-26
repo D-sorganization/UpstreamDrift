@@ -260,7 +260,8 @@ def net_joint_forces(
 
     Returns dict with joint name → (fx, fy) tuples.
     """
-    assert q is not None, "q must be provided"
+    if not (q is not None):
+        raise ValueError("q must be provided")
     acc = linear_accelerations(q, qdot, qddot, p)
     g_vec = np.array([0.0, -p.g])
 

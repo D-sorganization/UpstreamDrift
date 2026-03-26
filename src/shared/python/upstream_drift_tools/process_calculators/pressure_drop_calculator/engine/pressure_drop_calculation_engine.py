@@ -86,7 +86,8 @@ def friction_factor_laminar(reynolds_number: float) -> float:
         return FRICTION_FACTOR_DEFAULT_LAMINAR  # Default for Re ~ 1000
 
     result = LAMINAR_FRICTION_CONSTANT / reynolds_number
-    assert result > 0, f"Friction factor must be positive, got {result}"
+    if not (result > 0):
+        raise ValueError(f"Friction factor must be positive, got {result}")
     return result
 
 
@@ -121,8 +122,10 @@ def friction_factor_colebrook(
         This is the most accurate correlation but requires iteration.
         The Moody diagram is a graphical representation of this equation.
     """
-    assert reynolds_number is not None, "reynolds_number must be provided"
-    assert reynolds_number is not None, "reynolds_number must be provided"
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -174,8 +177,10 @@ def friction_factor_swamee_jain(
     Note:
         Explicit formula, no iteration required. Excellent for computational efficiency.
     """
-    assert reynolds_number is not None, "reynolds_number must be provided"
-    assert reynolds_number is not None, "reynolds_number must be provided"
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -218,8 +223,10 @@ def friction_factor_churchill(
     Note:
         Single equation valid for all flow regimes. Very useful for transitional flow.
     """
-    assert reynolds_number is not None, "reynolds_number must be provided"
-    assert reynolds_number is not None, "reynolds_number must be provided"
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
     Re = reynolds_number
 
     if Re < 1:
@@ -258,8 +265,10 @@ def friction_factor_haaland(reynolds_number: float, relative_roughness: float) -
         Haaland, S.E. (1983): "Simple and Explicit Formulas for Friction Factor"
         J. Fluids Engineering, 105(1), 89-90
     """
-    assert reynolds_number is not None, "reynolds_number must be provided"
-    assert reynolds_number is not None, "reynolds_number must be provided"
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
+    if not (reynolds_number is not None):
+        raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -322,16 +331,20 @@ def calculate_flow_properties(inputs: PressureDropInputs) -> FlowProperties:
         ValueError: If calculations fail
     """
     # DbC preconditions
-    assert inputs.pipe_diameter > 0, (
+    if not (inputs.pipe_diameter > 0):
+        raise ValueError(()
         f"Pipe diameter must be positive, got {inputs.pipe_diameter}"
     )
-    assert inputs.mass_flow_rate > 0, (
+    if not (inputs.mass_flow_rate > 0):
+        raise ValueError(()
         f"Mass flow rate must be positive, got {inputs.mass_flow_rate}"
     )
-    assert inputs.inlet_temperature > 0, (
+    if not (inputs.inlet_temperature > 0):
+        raise ValueError(()
         f"Inlet temperature must be positive (K), got {inputs.inlet_temperature}"
     )
-    assert inputs.inlet_pressure > 0, (
+    if not (inputs.inlet_pressure > 0):
+        raise ValueError(()
         f"Inlet pressure must be positive, got {inputs.inlet_pressure}"
     )
 
@@ -352,9 +365,12 @@ def calculate_flow_properties(inputs: PressureDropInputs) -> FlowProperties:
     heat_capacity_ratio = gas_props["heat_capacity_ratio"]  # γ = Cp/Cv
 
     # DbC: intermediate invariants on physical properties
-    assert density > 0, f"Gas density must be positive, got {density}"
-    assert viscosity > 0, f"Gas viscosity must be positive, got {viscosity}"
-    assert speed_of_sound > 0, f"Speed of sound must be positive, got {speed_of_sound}"
+    if not (density > 0):
+        raise ValueError(f"Gas density must be positive, got {density}")
+    if not (viscosity > 0):
+        raise ValueError(f"Gas viscosity must be positive, got {viscosity}")
+    if not (speed_of_sound > 0):
+        raise ValueError(f"Speed of sound must be positive, got {speed_of_sound}")
 
     # Calculate flow velocity
     pipe_area = PI * (inputs.pipe_diameter**2) / 4.0
@@ -383,13 +399,16 @@ def calculate_flow_properties(inputs: PressureDropInputs) -> FlowProperties:
     )
 
     # DbC postconditions
-    assert flow_props.velocity > 0, (
+    if not (flow_props.velocity > 0):
+        raise ValueError(()
         f"Flow velocity must be positive, got {flow_props.velocity}"
     )
-    assert flow_props.reynolds_number > 0, (
+    if not (flow_props.reynolds_number > 0):
+        raise ValueError(()
         f"Reynolds number must be positive, got {flow_props.reynolds_number}"
     )
-    assert 0 <= flow_props.mach_number < 50, (
+    if not (0 <= flow_props.mach_number < 50):
+        raise ValueError(()
         f"Mach number out of physical range, got {flow_props.mach_number}"
     )
 
@@ -455,19 +474,25 @@ def calculate_frictional_pressure_drop(
         Darcy, H. (1857), Weisbach, J. (1845): Pipe flow friction equation
     """
     # DbC preconditions
-    assert friction_factor > 0, (
+    if not (friction_factor > 0):
+        raise ValueError(()
         f"friction_factor must be positive, got {friction_factor}"
     )
-    assert length > 0, f"length must be positive, got {length}"
-    assert diameter > 0, f"diameter must be positive, got {diameter}"
-    assert density > 0, f"density must be positive, got {density}"
-    assert velocity > 0, f"velocity must be positive, got {velocity}"
+    if not (length > 0):
+        raise ValueError(f"length must be positive, got {length}")
+    if not (diameter > 0):
+        raise ValueError(f"diameter must be positive, got {diameter}")
+    if not (density > 0):
+        raise ValueError(f"density must be positive, got {density}")
+    if not (velocity > 0):
+        raise ValueError(f"velocity must be positive, got {velocity}")
 
     velocity_head = 0.5 * density * (velocity**2)
     dp_friction = friction_factor * (length / diameter) * velocity_head
 
     # DbC postcondition
-    assert dp_friction >= 0, f"Pressure drop must be non-negative, got {dp_friction}"
+    if not (dp_friction >= 0):
+        raise ValueError(f"Pressure drop must be non-negative, got {dp_friction}")
 
     logger.debug(
         f"Darcy-Weisbach: f={friction_factor:.6f}, L/D={length / diameter:.1f}, ΔP={dp_friction:.1f} Pa"
@@ -499,8 +524,10 @@ def calculate_fitting_pressure_drop(
     Reference:
         Crane TP-410, Chapter 2: Resistance of Valves and Fittings
     """
-    assert fittings is not None, "fittings must be provided"
-    assert fittings is not None, "fittings must be provided"
+    if not (fittings is not None):
+        raise ValueError("fittings must be provided")
+    if not (fittings is not None):
+        raise ValueError("fittings must be provided")
     total_k = 0.0
     velocity_head = 0.5 * density * (velocity**2)
 
@@ -554,8 +581,10 @@ def calculate_elevation_pressure_drop(density: float, elevation_change: float) -
         Positive elevation_change (upward flow) results in positive pressure drop (loss).
         Negative elevation_change (downward flow) results in negative pressure drop (gain).
     """
-    assert density is not None, "density must be provided"
-    assert density is not None, "density must be provided"
+    if not (density is not None):
+        raise ValueError("density must be provided")
+    if not (density is not None):
+        raise ValueError("density must be provided")
     dp_elevation = density * GRAVITY * elevation_change
 
     logger.debug(f"Elevation: Δh={elevation_change:.1f}m, ΔP={dp_elevation:.1f} Pa")
@@ -586,8 +615,10 @@ def _iterate_compressible_pressure(
     Returns:
         Tuple of (converged_P2, is_choked). If choked, P2 is meaningless.
     """
-    assert P1 is not None, "P1 must be provided"
-    assert P1 is not None, "P1 must be provided"
+    if not (P1 is not None):
+        raise ValueError("P1 must be provided")
+    if not (P1 is not None):
+        raise ValueError("P1 must be provided")
     P2 = P2_initial
 
     for iteration in range(max_iterations):
@@ -652,9 +683,12 @@ def calculate_compressible_flow_correction(
         Crane TP-410: Flow of Compressible Fluids in Pipelines
     """
     # DbC preconditions
-    assert diameter > 0, f"diameter must be positive, got {diameter}"
-    assert temperature > 0, f"temperature must be positive (K), got {temperature}"
-    assert molecular_weight > 0, (
+    if not (diameter > 0):
+        raise ValueError(f"diameter must be positive, got {diameter}")
+    if not (temperature > 0):
+        raise ValueError(f"temperature must be positive (K), got {temperature}")
+    if not (molecular_weight > 0):
+        raise ValueError(()
         f"molecular_weight must be positive, got {molecular_weight}"
     )
 
@@ -728,8 +762,10 @@ def calculate_expansion_factor(
         Crane TP-410, Section 2-2: Compressible Flow
         ISO 5167: Measurement of fluid flow
     """
-    assert inlet_pressure is not None, "inlet_pressure must be provided"
-    assert inlet_pressure is not None, "inlet_pressure must be provided"
+    if not (inlet_pressure is not None):
+        raise ValueError("inlet_pressure must be provided")
+    if not (inlet_pressure is not None):
+        raise ValueError("inlet_pressure must be provided")
     if inlet_pressure <= 0 or pressure_drop < 0:
         return 1.0
 
@@ -796,8 +832,10 @@ def calculate_erosional_velocity(
         - Intermittent service: C = 125-150
         - Solid-free service: C = 150-200
     """
-    assert density is not None, "density must be provided"
-    assert density is not None, "density must be provided"
+    if not (density is not None):
+        raise ValueError("density must be provided")
+    if not (density is not None):
+        raise ValueError("density must be provided")
     if service_type == "continuous":
         C = API_14E_C_CONTINUOUS
     elif service_type == "intermittent" or service_type == "non_corrosive":
@@ -848,8 +886,10 @@ class PressureDropCalculationEngine:
         Returns:
             (dp_friction, dp_fittings, dp_elevation, total_k_factor)
         """
-        assert inputs is not None, "inputs must be provided"
-        assert inputs is not None, "inputs must be provided"
+        if not (inputs is not None):
+            raise ValueError("inputs must be provided")
+        if not (inputs is not None):
+            raise ValueError("inputs must be provided")
         dp_friction = calculate_frictional_pressure_drop(
             friction_factor,
             inputs.pipe_length,
@@ -890,8 +930,10 @@ class PressureDropCalculationEngine:
         Returns:
             (total_dp, outlet_pressure, dp_acceleration, warnings)
         """
-        assert inputs is not None, "inputs must be provided"
-        assert inputs is not None, "inputs must be provided"
+        if not (inputs is not None):
+            raise ValueError("inputs must be provided")
+        if not (inputs is not None):
+            raise ValueError("inputs must be provided")
         warnings_list: list[str] = []
         pressure_ratio_initial = dp_incompressible / inputs.inlet_pressure
 

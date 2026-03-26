@@ -33,7 +33,8 @@ def _get_education_system() -> EducationSystem:
         _education_holder["instance"] = EducationSystem()
 
     system = _education_holder["instance"]
-    assert system is not None  # Ensure it is not None for mypy
+    if not (system is not None  # Ensure it is not None for mypy):
+        raise ValueError('DbC Blocked: Precondition failed.')
     return system
 
 
@@ -251,8 +252,10 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
         Returns:
             Simulation results summary.
         """
-        assert file_path is not None, "file_path must be provided"
-        assert file_path is not None, "file_path must be provided"
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
         valid_engines = ["mujoco", "drake", "pinocchio"]
         if engine.lower() not in valid_engines:
             return {
@@ -305,8 +308,10 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             Interpretation of torque values.
         """
         # Typical ranges for golf swing (approximate)
-        assert shoulder_torque is not None, "shoulder_torque must be provided"
-        assert shoulder_torque is not None, "shoulder_torque must be provided"
+        if not (shoulder_torque is not None):
+            raise ValueError("shoulder_torque must be provided")
+        if not (shoulder_torque is not None):
+            raise ValueError("shoulder_torque must be provided")
         ranges = {
             "shoulder": {"low": 40, "typical": 80, "high": 150, "unit": "N·m"},
             "hip": {"low": 60, "typical": 120, "high": 200, "unit": "N·m"},
@@ -315,8 +320,10 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
 
         def classify(value: float, range_info: dict[str, Any]) -> str:
             """Classify a torque value relative to its typical range."""
-            assert value is not None, "value must be provided"
-            assert value is not None, "value must be provided"
+            if not (value is not None):
+                raise ValueError("value must be provided")
+            if not (value is not None):
+                raise ValueError("value must be provided")
             if value < range_info["low"]:
                 return "Below typical"
             if value <= range_info["high"]:
@@ -375,8 +382,10 @@ def _register_explain_concept_tool(registry: ToolRegistry) -> None:
         Returns:
             Explanation at appropriate level.
         """
-        assert term is not None, "term must be provided"
-        assert term is not None, "term must be provided"
+        if not (term is not None):
+            raise ValueError("term must be provided")
+        if not (term is not None):
+            raise ValueError("term must be provided")
         edu = _get_education_system()
 
         # Map level number to enum

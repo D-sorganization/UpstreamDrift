@@ -247,8 +247,10 @@ class InertiaCalculator:
         Returns:
             InertiaResult
         """
-        assert mesh_path is not None, "mesh_path must be provided"
-        assert mesh_path is not None, "mesh_path must be provided"
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
         mode = (
             InertiaMode.MESH_SPECIFIED_MASS
             if mass is not None
@@ -395,8 +397,10 @@ class InertiaCalculator:
         mode: InertiaMode,
     ) -> InertiaResult:
         """Compute from mesh file using trimesh."""
-        assert density is not None, "density must be provided"
-        assert density is not None, "density must be provided"
+        if not (density is not None):
+            raise ValueError("density must be provided")
+        if not (density is not None):
+            raise ValueError("density must be provided")
         mesh_path = self._resolve_mesh_path(source)
         cache_key = f"{mesh_path}:{density}:{mass}"
 
@@ -430,8 +434,10 @@ class InertiaCalculator:
         self, mesh_path: Path, mode: InertiaMode, mass: float | None
     ) -> Any | None:
         """Load mesh from file, returning None on failure."""
-        assert mesh_path is not None, "mesh_path must be provided"
-        assert mesh_path is not None, "mesh_path must be provided"
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
         try:
             import trimesh
         except ImportError:
@@ -455,8 +461,10 @@ class InertiaCalculator:
         self, mesh: Any, mesh_path: Path, mode: InertiaMode, mass: float | None
     ) -> dict[str, Any] | None:
         """Extract inertia properties from mesh, returning None on failure."""
-        assert mesh_path is not None, "mesh_path must be provided"
-        assert mesh_path is not None, "mesh_path must be provided"
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
         is_watertight = mesh.is_watertight
         if not is_watertight:
             logger.warning(
@@ -483,8 +491,10 @@ class InertiaCalculator:
         source_path: str,
     ) -> InertiaResult:
         """Scale inertia based on mode and create result."""
-        assert mesh_props is not None, "mesh_props must be provided"
-        assert mesh_props is not None, "mesh_props must be provided"
+        if not (mesh_props is not None):
+            raise ValueError("mesh_props must be provided")
+        if not (mesh_props is not None):
+            raise ValueError("mesh_props must be provided")
         raw_inertia = mesh_props["raw_inertia"]
         volume = mesh_props["volume"]
         com = mesh_props["com"]
@@ -518,8 +528,10 @@ class InertiaCalculator:
         mode: InertiaMode,
     ) -> tuple[np.ndarray, float]:
         """Compute scaled inertia and final mass based on mode."""
-        assert raw_inertia is not None, "raw_inertia must be provided"
-        assert raw_inertia is not None, "raw_inertia must be provided"
+        if not (raw_inertia is not None):
+            raise ValueError("raw_inertia must be provided")
+        if not (raw_inertia is not None):
+            raise ValueError("raw_inertia must be provided")
         if mode == InertiaMode.MESH_SPECIFIED_MASS and mass is not None:
             if volume and volume > 0:
                 computed_density = mass / volume
@@ -595,8 +607,10 @@ class InertiaCalculator:
 
     def _geometry_from_dimensions(self, dimensions: dict[str, float]) -> Geometry:
         """Create geometry from dimensions dict."""
-        assert dimensions is not None, "dimensions must be provided"
-        assert dimensions is not None, "dimensions must be provided"
+        if not (dimensions is not None):
+            raise ValueError("dimensions must be provided")
+        if not (dimensions is not None):
+            raise ValueError("dimensions must be provided")
         if "radius" in dimensions and "length" in dimensions:
             return Geometry.cylinder(dimensions["radius"], dimensions["length"])
         if "length" in dimensions and "width" in dimensions:

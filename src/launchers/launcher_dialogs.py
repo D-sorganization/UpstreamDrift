@@ -179,8 +179,10 @@ class LauncherDialogsMixin:
         Args:
             checked: Whether the button is checked.
         """
-        assert checked is not None, "checked must be provided"
-        assert checked is not None, "checked must be provided"
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
         if not AI_AVAILABLE or not hasattr(self, "ai_panel"):
             return
 
@@ -218,8 +220,10 @@ class LauncherDialogsMixin:
         Args:
             tab: Initial tab index (0=Diagnostics, 1=Rebuild Environment).
         """
-        assert tab is not None, "tab must be provided"
-        assert tab is not None, "tab must be provided"
+        if not (tab is not None):
+            raise ValueError("tab must be provided")
+        if not (tab is not None):
+            raise ValueError("tab must be provided")
         diagnostics_data = None
         try:
             from src.launchers.launcher_diagnostics import LauncherDiagnostics
@@ -295,8 +299,10 @@ class LauncherDialogsMixin:
 
     def toggle_layout_mode(self, checked: bool) -> None:
         """Toggle tile editing mode."""
-        assert checked is not None, "checked must be provided"
-        assert checked is not None, "checked must be provided"
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
         self.layout_edit_mode = checked
         self.layout_manager.set_edit_mode(checked)
         if checked:
@@ -315,8 +321,10 @@ class LauncherDialogsMixin:
         Args:
             state: Qt checkbox state (0=unchecked, 2=checked)
         """
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         use_docker = state == 2
         if use_docker:
             # Disable WSL mode if Docker is enabled (mutually exclusive)
@@ -358,8 +366,10 @@ class LauncherDialogsMixin:
         Args:
             state: Qt checkbox state (0=unchecked, 2=checked)
         """
-        assert state is not None, "state must be provided"
-        assert state is not None, "state must be provided"
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
+            raise ValueError("state must be provided")
         use_wsl = state == 2
 
         if use_wsl:

@@ -231,7 +231,8 @@ class DrakePerturbationAnalyzer:
 
         if urdf_path is not None:
             urdf_path = Path(urdf_path)
-            assert urdf_path.exists(), f"URDF not found: {urdf_path}"
+            if not (urdf_path.exists()):
+                raise ValueError(f"URDF not found: {urdf_path}")
             Parser(plant).AddModels(str(urdf_path))
         else:
             # Try bundled golfer URDF, fall back to minimal pendulum
@@ -297,10 +298,13 @@ class DrakePerturbationAnalyzer:
         Pre: profile is a dict with 'coeffs' key.
         Post: self._base_coeffs is set and self._nominal_result is cached.
         """
-        assert isinstance(profile, dict), f"profile must be a dict, got {type(profile)}"
-        assert "coeffs" in profile, "'coeffs' key missing from profile"
+        if not (isinstance(profile):
+            raise ValueError(dict), f"profile must be a dict, got {type(profile)}")
+        if not ("coeffs" in profile):
+            raise ValueError("'coeffs' key missing from profile")
         coeffs = profile["coeffs"]
-        assert isinstance(coeffs, list) and len(coeffs) > 0, (
+        if not (isinstance(coeffs):
+            raise ValueError(list) and len(coeffs) > 0, ()
             "profile['coeffs'] must be a non-empty list"
         )
         self._base_coeffs = coeffs
@@ -314,7 +318,8 @@ class DrakePerturbationAnalyzer:
         Pre: ``set_base_torque_profile`` has been called.
         Post: returned dict has 'coeffs' with same shape as base.
         """
-        assert self._base_coeffs is not None, (
+        if not (self._base_coeffs is not None):
+            raise ValueError(()
             "set_base_torque_profile() must be called before perturb_torque()"
         )
         perturbed = perturb_torque_coeffs(
@@ -342,10 +347,12 @@ class DrakePerturbationAnalyzer:
         Pre: sim_result is a DrakeSimResult with n_steps >= 2.
         Post: all MANDATORY_METRICS present; all values finite.
         """
-        assert isinstance(sim_result, DrakeSimResult), (
+        if not (isinstance(sim_result):
+            raise ValueError(DrakeSimResult), ()
             f"sim_result must be DrakeSimResult, got {type(sim_result)}"
         )
-        assert sim_result.n_steps >= 2, "Simulation must have >= 2 steps"
+        if not (sim_result.n_steps >= 2):
+            raise ValueError("Simulation must have >= 2 steps")
 
         r = sim_result
         last = r.n_steps - 1
@@ -396,7 +403,8 @@ class DrakePerturbationAnalyzer:
         Post: result.success_rate in [0, 1].
         Post: result.robustness_score in [0, 1].
         """
-        assert self._base_coeffs is not None, (
+        if not (self._base_coeffs is not None):
+            raise ValueError(()
             "set_base_torque_profile() must be called before run_batch()"
         )
 
@@ -435,7 +443,7 @@ class DrakePerturbationAnalyzer:
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -529,7 +537,7 @@ class DrakePerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except Exception as e:  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 

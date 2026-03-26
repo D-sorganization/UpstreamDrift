@@ -122,7 +122,8 @@ class TorqueHistoryWidget(QWidget):
 
     def _on_plot_theme_changed(self, theme: object) -> None:
         """Update backgrounds when the plot theme changes."""
-        assert theme is not None, "theme must be provided"
+        if not (theme is not None):
+            raise ValueError("theme must be provided")
         if not _HAS_PYQTGRAPH:
             return
         try:
@@ -176,7 +177,8 @@ class TorqueHistoryWidget(QWidget):
 
         Clears any existing plots first.
         """
-        assert n_joints is not None, "n_joints must be provided"
+        if not (n_joints is not None):
+            raise ValueError("n_joints must be provided")
         if not _HAS_PYQTGRAPH:
             return
 
@@ -245,7 +247,8 @@ class TorqueHistoryWidget(QWidget):
             - result has n_steps >= 2.
             - result has torques_at(), friction_torques_at(), total_torques_at().
         """
-        assert result.n_steps >= 2, "Result must have at least 2 time steps"
+        if not (result.n_steps >= 2):
+            raise ValueError("Result must have at least 2 time steps")
         self._result = result
 
         if not _HAS_PYQTGRAPH:
@@ -298,7 +301,8 @@ class TorqueHistoryWidget(QWidget):
         """
         if self._result is None or not _HAS_PYQTGRAPH:
             return
-        assert 0 <= idx < self._result.n_steps
+        if not (0 <= idx < self._result.n_steps):
+            raise ValueError('DbC Blocked: Precondition failed.')
         t_now = self._result.t[idx]
         for cursor in self._cursors:
             cursor.setValue(t_now)

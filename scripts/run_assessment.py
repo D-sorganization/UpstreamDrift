@@ -97,10 +97,14 @@ def _format_report(
     assessment_id: str, name: str, findings: list[str], score: int | None
 ) -> str:
     """Format an assessment report as markdown."""
-    assert isinstance(assessment_id, str), "assessment_id must be a string"
-    assert isinstance(name, str), "name must be a string"
-    assert isinstance(findings, list), "findings must be a list"
-    assert score is None or isinstance(score, int), "score must be None or an int"
+    if not (isinstance(assessment_id):
+        raise ValueError(str), "assessment_id must be a string")
+    if not (isinstance(name):
+        raise ValueError(str), "name must be a string")
+    if not (isinstance(findings):
+        raise ValueError(list), "findings must be a list")
+    if not (score is None or isinstance(score):
+        raise ValueError(int), "score must be None or an int")
 
     if score is not None:
         score = max(0, min(10, score))
@@ -122,8 +126,10 @@ def _format_report(
 
 def run_assessment(assessment_id: str, output_path: Path) -> int:
     """Run a specific assessment and generate report."""
-    assert isinstance(assessment_id, str), "assessment_id must be a string"
-    assert isinstance(output_path, Path), "output_path must be a Path object"
+    if not (isinstance(assessment_id):
+        raise ValueError(str), "assessment_id must be a string")
+    if not (isinstance(output_path):
+        raise ValueError(Path), "output_path must be a Path object")
 
     assessment = ASSESSMENTS.get(
         assessment_id, {"name": "General", "description": "Manual review required"}

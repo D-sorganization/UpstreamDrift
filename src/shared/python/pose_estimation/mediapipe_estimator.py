@@ -113,10 +113,12 @@ class MediaPipeEstimator(PoseEstimator):
             min_tracking_confidence: Minimum confidence for pose tracking
             enable_temporal_smoothing: Whether to apply Kalman filtering
         """
-        assert min_detection_confidence is not None, (
+        if not (min_detection_confidence is not None):
+            raise ValueError(()
             "min_detection_confidence must be provided"
         )
-        assert min_detection_confidence is not None, (
+        if not (min_detection_confidence is not None):
+            raise ValueError(()
             "min_detection_confidence must be provided"
         )
         self.pose_detector: Any | None = None
@@ -285,8 +287,10 @@ class MediaPipeEstimator(PoseEstimator):
         Returns:
             Smoothed keypoints
         """
-        assert keypoints_3d is not None, "keypoints_3d must be provided"
-        assert keypoints_3d is not None, "keypoints_3d must be provided"
+        if not (keypoints_3d is not None):
+            raise ValueError("keypoints_3d must be provided")
+        if not (keypoints_3d is not None):
+            raise ValueError("keypoints_3d must be provided")
         smoothed = {}
 
         for landmark_name, current_pos in keypoints_3d.items():

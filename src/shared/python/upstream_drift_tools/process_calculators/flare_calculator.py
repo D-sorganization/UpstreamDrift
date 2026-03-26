@@ -88,10 +88,14 @@ class FlareCalculator:
             FlareDesign object with calculated parameters
         """
         # DbC preconditions
-        assert total_flow > 0, f"total_flow must be positive, got {total_flow}"
-        assert temperature > 0, f"temperature must be positive (K), got {temperature}"
-        assert pressure > 0, f"pressure must be positive (bar), got {pressure}"
-        assert len(gas_composition) > 0, "gas_composition must not be empty"
+        if not (total_flow > 0):
+            raise ValueError(f"total_flow must be positive, got {total_flow}")
+        if not (temperature > 0):
+            raise ValueError(f"temperature must be positive (K), got {temperature}")
+        if not (pressure > 0):
+            raise ValueError(f"pressure must be positive (bar), got {pressure}")
+        if not (len(gas_composition) > 0):
+            raise ValueError("gas_composition must not be empty")
 
         # Normalize composition to fractions
         total_comp = sum(gas_composition.values())
@@ -168,10 +172,12 @@ class FlareCalculator:
             radiation_intensity=target_radiation,
         )
         # DbC postconditions
-        assert result.height >= FLARE_MIN_HEIGHT, (
+        if not (result.height >= FLARE_MIN_HEIGHT):
+            raise ValueError(()
             f"Flare height must be >= minimum ({FLARE_MIN_HEIGHT}), got {result.height}"
         )
-        assert result.diameter >= 0, (
+        if not (result.diameter >= 0):
+            raise ValueError(()
             f"Flare diameter must be non-negative, got {result.diameter}"
         )
         return result
@@ -185,8 +191,10 @@ class FlareCalculator:
         Returns:
             Dictionary with zone distances (m)
         """
-        assert flare_design is not None, "flare_design must be provided"
-        assert flare_design is not None, "flare_design must be provided"
+        if not (flare_design is not None):
+            raise ValueError("flare_design must be provided")
+        if not (flare_design is not None):
+            raise ValueError("flare_design must be provided")
         zones = {
             "lethal": 0.0,  # 37.5 kW/m²
             "damage": 0.0,  # 12.5 kW/m²
@@ -230,8 +238,10 @@ class FlareCalculator:
             Combustion efficiency (0-1)
         """
         # Simplified efficiency calculation
-        assert gas_composition is not None, "gas_composition must be provided"
-        assert gas_composition is not None, "gas_composition must be provided"
+        if not (gas_composition is not None):
+            raise ValueError("gas_composition must be provided")
+        if not (gas_composition is not None):
+            raise ValueError("gas_composition must be provided")
         efficiency = FLARE_BASE_EFFICIENCY  # Base efficiency
 
         # Normalize factors

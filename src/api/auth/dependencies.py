@@ -64,7 +64,8 @@ async def get_current_user(
 
     # In mypy, SQLAlchemy query results are sometimes ambiguous
     # We assert user is of type User to satisfy mypy
-    assert isinstance(user, User)
+    if not (isinstance(user):
+        raise ValueError(User))
     return user
 
 
@@ -87,7 +88,8 @@ def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
     if not record or not record.is_active:
         return None
 
-    assert isinstance(record, APIKey)
+    if not (isinstance(record):
+        raise ValueError(APIKey))
     return record
 
 
@@ -122,7 +124,8 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
 
     for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
-            assert isinstance(key_candidate, APIKey)
+            if not (isinstance(key_candidate):
+                raise ValueError(APIKey))
             return key_candidate
 
     raise HTTPException(
@@ -140,12 +143,14 @@ def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
             detail="User not found or inactive",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    assert isinstance(user, User)
+    if not (isinstance(user):
+        raise ValueError(User))
     return user
 
 
 def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:
-    assert api_key_record is not None, "api_key_record must be provided"
+    if not (api_key_record is not None):
+        raise ValueError("api_key_record must be provided")
     from datetime import datetime
 
     api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
@@ -163,7 +168,8 @@ async def get_current_user_from_api_key(
     reducing O(n) bcrypt calls to O(1) average case.
     """
 
-    assert credentials is not None, "credentials must be provided"
+    if not (credentials is not None):
+        raise ValueError("credentials must be provided")
     api_key = credentials.credentials
     _validate_api_key_format(api_key)
 
@@ -187,7 +193,8 @@ async def get_current_user_flexible(
 ) -> User:
     """Get current user from either JWT token or API key."""
 
-    assert credentials is not None, "credentials must be provided"
+    if not (credentials is not None):
+        raise ValueError("credentials must be provided")
     token = credentials.credentials
 
     # Try API key first (if it starts with gms_)

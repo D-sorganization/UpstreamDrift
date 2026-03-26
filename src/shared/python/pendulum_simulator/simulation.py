@@ -89,12 +89,14 @@ class SimulationResult(TrajectoryResultMixin):
 
     def torques_at(self, idx: int) -> tuple[float, float]:
         """Get applied torques at time index idx."""
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         return self.torque_func(self.t[idx])
 
     def accelerations_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         state_dot = equations_of_motion(
             self.states[idx],
@@ -107,33 +109,38 @@ class SimulationResult(TrajectoryResultMixin):
         return state_dot[2:]  # type: ignore[index]
 
     def joint_forces_at(self, idx: int) -> dict:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         qddot = self.accelerations_at(idx)
         return net_joint_forces(self.states[idx], qddot, self.params)
 
     def joint_velocities_at(self, idx: int) -> dict:
         """Get linear joint velocities at time index idx."""
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         return joint_velocities(self.states[idx], self.params)
 
     def base_force_at(self, idx: int) -> dict:
         """Get base reaction force at time index idx."""
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         qddot = self.accelerations_at(idx)
         return base_force(self.states[idx], qddot, self.params)
 
     def control_vector_at(self, idx: int) -> dict:
         """Get control vector at time index idx."""
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         qddot = self.accelerations_at(idx)
         return control_vector(self.states[idx], qddot, self.params, self.limits)
 
     def energy_at(self, idx: int) -> dict:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         state = self.states[idx]
         result = {
@@ -145,25 +152,29 @@ class SimulationResult(TrajectoryResultMixin):
         return result
 
     def coriolis_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return coriolis_vector(s[1], s[2], s[3], self.params)
 
     def gravity_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return gravity_vector(s[0], s[1], self.params)
 
     def friction_torques_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         s = self.states[idx]
         return friction_torque_vector(s[2], s[3], self.params)
 
     def total_torques_at(self, idx: int) -> np.ndarray:
-        assert idx is not None, "idx must be provided"
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
         self._check_idx(idx)
         tau_drive = np.array(self.torque_func(self.t[idx]))
         if self.clamp is not None:
@@ -194,9 +205,12 @@ def run_simulation(
     Pre: initial_state shape (4,), finite. t_end > 0. dt in (0, t_end).
     Post: result has >= 2 time points, all finite.
     """
-    assert initial_state.shape == (4,)
-    assert all(np.isfinite(initial_state))
-    assert t_end > 0 and 0 < dt < t_end
+    if not (initial_state.shape == (4):
+        raise ValueError())
+    if not (all(np.isfinite(initial_state))):
+        raise ValueError('DbC Blocked: Precondition failed.')
+    if not (t_end > 0 and 0 < dt < t_end):
+        raise ValueError('DbC Blocked: Precondition failed.')
 
     t, states = None, None
     if (
@@ -255,5 +269,6 @@ def run_simulation(
         clamp=clamp,
     )
 
-    assert result.n_steps >= 2
+    if not (result.n_steps >= 2):
+        raise ValueError('DbC Blocked: Precondition failed.')
     return result

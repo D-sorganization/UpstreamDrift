@@ -113,7 +113,7 @@ def test_pinocchio_energy_check():
         parent_frame = model.getFrameId("particle_joint")
         if parent_frame >= model.nframes:
             parent_frame = 0 if model.nframes > 0 else None
-    except Exception:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
         parent_frame = 0 if model.nframes > 0 else None
 
     if parent_frame is not None and parent_frame < model.nframes:

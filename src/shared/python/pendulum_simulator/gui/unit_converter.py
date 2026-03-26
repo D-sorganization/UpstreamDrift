@@ -178,7 +178,8 @@ class UnitPreferences:
 
         Pre: preset_name in _PRESETS.
         """
-        assert preset_name in _PRESETS, f"Unknown preset: {preset_name}"
+        if not (preset_name in _PRESETS):
+            raise ValueError(f"Unknown preset: {preset_name}")
         self.selections = dict(_PRESETS[preset_name])
         logger.info("Applied unit preset: %s", preset_name)
 
@@ -192,7 +193,8 @@ class UnitPreferences:
         Pre: unit_label must be a valid option for the category.
         """
         valid = [label for label, _ in _UNIT_OPTIONS[category]]
-        assert unit_label in valid, (
+        if not (unit_label in valid):
+            raise ValueError(()
             f"Invalid unit '{unit_label}' for {category.value}. Valid: {valid}"
         )
         self.selections[category] = unit_label
@@ -231,7 +233,8 @@ def _get_factor(category: UnitCategory, unit_label: str) -> float:
     """
     for label, factor in _UNIT_OPTIONS[category]:
         if label == unit_label:
-            assert factor > 0
+            if not (factor > 0):
+                raise ValueError('DbC Blocked: Precondition failed.')
             return factor
     raise KeyError(f"Unknown unit '{unit_label}' for {category.value}")
 
@@ -242,7 +245,8 @@ def to_si(value: float, category: UnitCategory, prefs: UnitPreferences) -> float
     Pre: value is finite.
     Post: result is in SI.
     """
-    assert value is not None, "value must be provided"
+    if not (value is not None):
+        raise ValueError("value must be provided")
     unit = prefs.get_unit(category)
     factor = _get_factor(category, unit)
     return value * factor
@@ -254,7 +258,8 @@ def from_si(value: float, category: UnitCategory, prefs: UnitPreferences) -> flo
     Pre: value is finite.
     Post: result is in current display units.
     """
-    assert value is not None, "value must be provided"
+    if not (value is not None):
+        raise ValueError("value must be provided")
     unit = prefs.get_unit(category)
     factor = _get_factor(category, unit)
     return value / factor

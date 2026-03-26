@@ -152,8 +152,10 @@ class ModelCache:
         Returns:
             CacheEntry if cached and valid, None otherwise
         """
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if entry and entry.local_path.exists():
             # Validate integrity if checksum exists
@@ -199,8 +201,10 @@ class ModelCache:
             Created CacheEntry
         """
         # Check if cleanup needed
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         self._maybe_cleanup()
 
         # Always compute checksum for integrity verification
@@ -239,8 +243,10 @@ class ModelCache:
         Returns:
             True if removed
         """
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if not entry:
             return False
@@ -264,8 +270,10 @@ class ModelCache:
 
     def contains(self, model_id: str) -> bool:
         """Check if model is cached."""
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         return entry is not None and entry.local_path.exists()
 
@@ -279,8 +287,10 @@ class ModelCache:
         Returns:
             True if valid, False if corrupted or missing
         """
-        assert model_id is not None, "model_id must be provided"
-        assert model_id is not None, "model_id must be provided"
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if not entry or not entry.local_path.exists():
             return False
@@ -366,8 +376,10 @@ class ModelCache:
 
     def _compute_checksum(self, path: Path) -> str:
         """Compute SHA-256 checksum of a file."""
-        assert path is not None, "path must be provided"
-        assert path is not None, "path must be provided"
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
+            raise ValueError("path must be provided")
         sha256 = hashlib.sha256()
         with open(path, "rb") as f:
             for chunk in iter(lambda: f.read(8192), b""):
@@ -376,8 +388,10 @@ class ModelCache:
 
     def _get_size(self, path: Path) -> int:
         """Get total size of path (file or directory)."""
-        assert path is not None, "path must be provided"
-        assert path is not None, "path must be provided"
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
+            raise ValueError("path must be provided")
         if path.is_file():
             return path.stat().st_size
         if path.is_dir():

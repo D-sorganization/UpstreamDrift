@@ -182,8 +182,10 @@ class EngineManager(ContractChecker):
     )
     def switch_engine(self, engine_type: EngineType) -> bool:
         """Switch to a different physics engine."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         if engine_type not in self.engine_status:
             logger.error(f"Unknown engine type: {engine_type}")
             return False
@@ -222,8 +224,10 @@ class EngineManager(ContractChecker):
 
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         logger.info("engine_loading_started engine=%s", engine_type.value)
         self.engine_status[engine_type] = EngineStatus.LOADING
         self.active_physics_engine = None
@@ -265,8 +269,10 @@ class EngineManager(ContractChecker):
 
     def _load_matlab_engine(self, engine_type: EngineType) -> None:
         """Load MATLAB engine type."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         self.active_physics_engine = None
         try:
             import matlab.engine
@@ -336,8 +342,10 @@ class EngineManager(ContractChecker):
 
     def validate_engine_configuration(self, engine_type: EngineType) -> bool:
         """Validate engine configuration."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         if engine_type not in self.engine_status:
             return False
 
@@ -368,8 +376,10 @@ class EngineManager(ContractChecker):
 
     def get_probe_result(self, engine_type: EngineType) -> Any:
         """Return the probe result for a specific engine, probing first if needed."""
-        assert engine_type is not None, "engine_type must be provided"
-        assert engine_type is not None, "engine_type must be provided"
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
         if not self.probe_results:
             self.probe_all_engines()
         return self.probe_results.get(engine_type)

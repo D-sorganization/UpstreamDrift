@@ -41,8 +41,10 @@ def apply_plot_theme(
     Returns:
         PlotThemeManager instance for further customization
     """
-    assert settings_app is not None, "settings_app must be provided"
-    assert settings_app is not None, "settings_app must be provided"
+    if not (settings_app is not None):
+        raise ValueError("settings_app must be provided")
+    if not (settings_app is not None):
+        raise ValueError("settings_app must be provided")
     manager = get_plot_theme_manager(settings_app=settings_app)
 
     if theme_name:
@@ -67,8 +69,10 @@ def create_themed_figure(
     Returns:
         Tuple of (Figure, Axes)
     """
-    assert figsize is not None, "figsize must be provided"
-    assert figsize is not None, "figsize must be provided"
+    if not (figsize is not None):
+        raise ValueError("figsize must be provided")
+    if not (figsize is not None):
+        raise ValueError("figsize must be provided")
     import matplotlib.pyplot as plt
 
     manager = get_plot_theme_manager()
@@ -93,8 +97,10 @@ def style_axis(
         ax: Axes to style
         theme_name: Theme to use (None = current theme)
     """
-    assert ax is not None, "ax must be provided"
-    assert ax is not None, "ax must be provided"
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
+    if not (ax is not None):
+        raise ValueError("ax must be provided")
     manager = get_plot_theme_manager()
 
     theme = get_theme(theme_name) if theme_name else manager.current_theme
@@ -175,8 +181,10 @@ class PlotThemeMixin:
         Returns:
             PlotThemeManager instance
         """
-        assert settings_org is not None, "settings_org must be provided"
-        assert settings_org is not None, "settings_org must be provided"
+        if not (settings_org is not None):
+            raise ValueError("settings_org must be provided")
+        if not (settings_org is not None):
+            raise ValueError("settings_org must be provided")
         self._plot_theme_manager = get_plot_theme_manager(
             settings_org=settings_org,
             settings_app=settings_app,
@@ -195,8 +203,10 @@ class PlotThemeMixin:
     def _on_plot_theme_changed_internal(self, theme: PlotTheme) -> None:
         """Internal handler for theme changes."""
         # Apply to matplotlib
-        assert theme is not None, "theme must be provided"
-        assert theme is not None, "theme must be provided"
+        if not (theme is not None):
+            raise ValueError("theme must be provided")
+        if not (theme is not None):
+            raise ValueError("theme must be provided")
         if self._plot_theme_manager:
             self._plot_theme_manager.apply_to_matplotlib()
 
@@ -305,8 +315,10 @@ def setup_plot_theme_for_app(
     Returns:
         PlotThemeManager instance
     """
-    assert add_menu is not None, "add_menu must be provided"
-    assert add_menu is not None, "add_menu must be provided"
+    if not (add_menu is not None):
+        raise ValueError("add_menu must be provided")
+    if not (add_menu is not None):
+        raise ValueError("add_menu must be provided")
     if settings_app is None:
         settings_app = window.__class__.__name__
 

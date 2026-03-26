@@ -72,8 +72,10 @@ class ManualBuilder(BaseURDFBuilder):
             handedness: Default handedness for the model
             validate_on_add: If True, validate each addition immediately
         """
-        assert robot_name is not None, "robot_name must be provided"
-        assert robot_name is not None, "robot_name must be provided"
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
         super().__init__(robot_name)
         self._links: list[Link] = self._links
         self._joints: list[Joint] = self._joints
@@ -160,8 +162,10 @@ class ManualBuilder(BaseURDFBuilder):
         Returns:
             Self for method chaining
         """
-        assert segment_data is not None, "segment_data must be provided"
-        assert segment_data is not None, "segment_data must be provided"
+        if not (segment_data is not None):
+            raise ValueError("segment_data must be provided")
+        if not (segment_data is not None):
+            raise ValueError("segment_data must be provided")
         link = self._link_from_dict(segment_data)
         self.add_link(link)
 
@@ -228,8 +232,10 @@ class ManualBuilder(BaseURDFBuilder):
         Returns:
             Self for method chaining
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         self._joints = [j for j in self._joints if j.name != name]
         return self
 
@@ -284,8 +290,10 @@ class ManualBuilder(BaseURDFBuilder):
         Returns:
             Self for method chaining
         """
-        assert axis is not None, "axis must be provided"
-        assert axis is not None, "axis must be provided"
+        if not (axis is not None):
+            raise ValueError("axis must be provided")
+        if not (axis is not None):
+            raise ValueError("axis must be provided")
         axis_idx = {"x": 0, "y": 1, "z": 2}[axis.lower()]
 
         # Mirror link origins and geometry
@@ -347,8 +355,10 @@ class ManualBuilder(BaseURDFBuilder):
             New ManualBuilder with mirrored model
         """
         # Create copy
-        assert axis is not None, "axis must be provided"
-        assert axis is not None, "axis must be provided"
+        if not (axis is not None):
+            raise ValueError("axis must be provided")
+        if not (axis is not None):
+            raise ValueError("axis must be provided")
         new_builder = ManualBuilder(
             robot_name=self._robot_name,
             handedness=self._handedness,
@@ -409,8 +419,10 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _get_descendants(self, link_name: str) -> set[str]:
         """Get all descendant link names."""
-        assert link_name is not None, "link_name must be provided"
-        assert link_name is not None, "link_name must be provided"
+        if not (link_name is not None):
+            raise ValueError("link_name must be provided")
+        if not (link_name is not None):
+            raise ValueError("link_name must be provided")
         descendants: set[str] = set()
         queue: deque[str] = deque([link_name])
 
@@ -425,8 +437,10 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _link_from_dict(self, data: dict[str, Any]) -> Link:
         """Create Link from dictionary data."""
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         name = data["name"]
 
         # Handle inertia
@@ -491,8 +505,10 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _joint_from_dict(self, data: dict[str, Any]) -> Joint:
         """Create Joint from dictionary data."""
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         name = f"{data['parent']}_to_{data['name']}"
         joint_data = data.get("joint", {})
         geom_data = data.get("geometry", {})
@@ -540,8 +556,10 @@ class ManualBuilder(BaseURDFBuilder):
 
     def _geometry_from_dict(self, data: dict[str, Any]) -> Geometry:
         """Create Geometry from dictionary data."""
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         shape = data.get("shape", "box").lower()
         dims = data.get("dimensions", {})
 

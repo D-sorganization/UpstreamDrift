@@ -201,8 +201,10 @@ class VideoPosePipeline:
         Returns:
             List of VideoProcessingResult objects
         """
-        assert video_paths is not None, "video_paths must be provided"
-        assert video_paths is not None, "video_paths must be provided"
+        if not (video_paths is not None):
+            raise ValueError("video_paths must be provided")
+        if not (video_paths is not None):
+            raise ValueError("video_paths must be provided")
         results = []
 
         for i, video_path in enumerate(video_paths):
@@ -236,8 +238,10 @@ class VideoPosePipeline:
         Returns:
             Registration result with fitted parameters
         """
-        assert pose_results is not None, "pose_results must be provided"
-        assert pose_results is not None, "pose_results must be provided"
+        if not (pose_results is not None):
+            raise ValueError("pose_results must be provided")
+        if not (pose_results is not None):
+            raise ValueError("pose_results must be provided")
         from src.shared.python.data_io.marker_mapping import RegistrationResult
 
         # Convert pose keypoints to marker format
@@ -311,8 +315,10 @@ class VideoPosePipeline:
         self, video_path: Path, max_frames: int
     ) -> list[PoseEstimationResult]:
         """Process video frame by frame (fallback method)."""
-        assert video_path is not None, "video_path must be provided"
-        assert video_path is not None, "video_path must be provided"
+        if not (video_path is not None):
+            raise ValueError("video_path must be provided")
+        if not (video_path is not None):
+            raise ValueError("video_path must be provided")
         results = []
         cap = cv2.VideoCapture(str(video_path))
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -356,8 +362,10 @@ class VideoPosePipeline:
         self, pose_results: list[PoseEstimationResult]
     ) -> list[PoseEstimationResult]:
         """Filter pose results by quality metrics."""
-        assert pose_results is not None, "pose_results must be provided"
-        assert pose_results is not None, "pose_results must be provided"
+        if not (pose_results is not None):
+            raise ValueError("pose_results must be provided")
+        if not (pose_results is not None):
+            raise ValueError("pose_results must be provided")
         if not self.config.outlier_detection:
             return [
                 r
@@ -390,8 +398,10 @@ class VideoPosePipeline:
         # Simple outlier detection based on joint angle deviations
         # Can be enhanced with more sophisticated methods
 
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         if not result.joint_angles:
             return True
 
@@ -423,8 +433,10 @@ class VideoPosePipeline:
         filtered_results: list[PoseEstimationResult],
     ) -> dict[str, Any]:
         """Calculate quality metrics for the processing session."""
-        assert all_results is not None, "all_results must be provided"
-        assert all_results is not None, "all_results must be provided"
+        if not (all_results is not None):
+            raise ValueError("all_results must be provided")
+        if not (all_results is not None):
+            raise ValueError("all_results must be provided")
         if not all_results:
             return {"average_confidence": 0.0, "valid_frame_ratio": 0.0}
 
@@ -458,8 +470,10 @@ class VideoPosePipeline:
                       marker_names [M],
                       timestamps [frames]).
         """
-        assert pose_results is not None, "pose_results must be provided"
-        assert pose_results is not None, "pose_results must be provided"
+        if not (pose_results is not None):
+            raise ValueError("pose_results must be provided")
+        if not (pose_results is not None):
+            raise ValueError("pose_results must be provided")
         from src.shared.python.validation_pkg.data_fitting import (
             convert_poses_to_markers,
         )
@@ -524,8 +538,10 @@ class VideoPosePipeline:
 
     def _export_results(self, result: VideoProcessingResult, output_dir: Path) -> None:
         """Export processing results to files."""
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         ensure_directory(output_dir)
 
         base_name = result.video_path.stem
@@ -574,8 +590,10 @@ class VideoPosePipeline:
         self, results: list[VideoProcessingResult], output_dir: Path
     ) -> None:
         """Export summary of batch processing results."""
-        assert results is not None, "results must be provided"
-        assert results is not None, "results must be provided"
+        if not (results is not None):
+            raise ValueError("results must be provided")
+        if not (results is not None):
+            raise ValueError("results must be provided")
         summary = {
             "batch_info": {
                 "total_videos": len(results),

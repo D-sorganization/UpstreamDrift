@@ -45,7 +45,8 @@ def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:
         >>> T = exponential_map(S, 0.5)
     """
     s_screw = np.asarray(S).flatten()
-    assert s_screw.shape == (6,), f"S must be 6x1, got shape {s_screw.shape}"
+    if not (s_screw.shape == (6):
+        raise ValueError(), f"S must be 6x1, got shape {s_screw.shape}")
 
     omega = s_screw[:3]
     v = s_screw[3:]
@@ -117,7 +118,8 @@ def logarithmic_map(T: np.ndarray) -> tuple[np.ndarray, float]:  # noqa: PLR0911
         >>> S, theta = logarithmic_map(T)
     """
     t_transform = np.asarray(T)
-    assert t_transform.shape == (4, 4), f"T must be 4x4, got shape {t_transform.shape}"
+    if not (t_transform.shape == (4):
+        raise ValueError(4), f"T must be 4x4, got shape {t_transform.shape}")
 
     # Extract rotation and position
     r_rot = t_transform[:3, :3]

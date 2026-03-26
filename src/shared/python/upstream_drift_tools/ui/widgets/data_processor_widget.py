@@ -556,8 +556,10 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
         self.stats_text.setHtml(h)
 
     def _show_table_context_menu(self, pos: QPoint) -> None:
-        assert pos is not None, "pos must be provided"
-        assert pos is not None, "pos must be provided"
+        if not (pos is not None):
+            raise ValueError("pos must be provided")
+        if not (pos is not None):
+            raise ValueError("pos must be provided")
         menu = QMenu()
         action = menu.addAction("Copy Selected")
         if action is not None:

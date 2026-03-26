@@ -63,7 +63,8 @@ def cylinder_cross_section(
     Pre:  radius > 0
     Post: output shape is (4, 2)
     """
-    assert radius > 0, f"radius must be positive, got {radius}"
+    if not (radius > 0):
+        raise ValueError(f"radius must be positive, got {radius}")
 
     direction = end - start
     length = np.linalg.norm(direction)
@@ -92,7 +93,8 @@ def cylinder_cross_section(
         ]
     )
 
-    assert corners.shape == (4, 2)
+    if not (corners.shape == (4):
+        raise ValueError(2))
     return corners
 
 
@@ -122,9 +124,12 @@ def ellipsoid_cross_section(
     Pre:  semi_a > 0, semi_b > 0, n_points >= 3
     Post: output shape is (n_points, 2)
     """
-    assert semi_a > 0, f"semi_a must be positive, got {semi_a}"
-    assert semi_b > 0, f"semi_b must be positive, got {semi_b}"
-    assert n_points >= 3, f"n_points must be >= 3, got {n_points}"
+    if not (semi_a > 0):
+        raise ValueError(f"semi_a must be positive, got {semi_a}")
+    if not (semi_b > 0):
+        raise ValueError(f"semi_b must be positive, got {semi_b}")
+    if not (n_points >= 3):
+        raise ValueError(f"n_points must be >= 3, got {n_points}")
 
     t = np.linspace(0, 2 * np.pi, n_points, endpoint=False)
     # Unrotated ellipse
@@ -138,7 +143,8 @@ def ellipsoid_cross_section(
     y_rot = sin_a * x + cos_a * y + centre[1]
 
     pts = np.column_stack([x_rot, y_rot])
-    assert pts.shape == (n_points, 2)
+    if not (pts.shape == (n_points):
+        raise ValueError(2))
     return pts
 
 
@@ -166,7 +172,8 @@ def tapered_cylinder_cross_section(
     Pre:  radius_start > 0, radius_end > 0
     Post: output shape is (4, 2)
     """
-    assert radius_start > 0 and radius_end > 0
+    if not (radius_start > 0 and radius_end > 0):
+        raise ValueError('DbC Blocked: Precondition failed.')
 
     direction = end - start
     length = np.linalg.norm(direction)
@@ -185,7 +192,8 @@ def tapered_cylinder_cross_section(
         ]
     )
 
-    assert corners.shape == (4, 2)
+    if not (corners.shape == (4):
+        raise ValueError(2))
     return corners
 
 
@@ -214,7 +222,8 @@ def project_3d_to_2d(
     np.ndarray, shape (2,) — projected (x, y)
     or tuple (np.ndarray shape (2,), float depth) if return_depth=True
     """
-    assert point_3d is not None, "point_3d must be provided"
+    if not (point_3d is not None):
+        raise ValueError("point_3d must be provided")
     x, y, z = point_3d
 
     # Apply azimuth rotation (about y-axis)
@@ -283,7 +292,9 @@ def auto_radius_from_mass(mass: float, length: float, scale: float = 0.02) -> fl
     Pre:  mass > 0, length > 0, scale > 0
     Post: result > 0
     """
-    assert mass > 0 and length > 0 and scale > 0
+    if not (mass > 0 and length > 0 and scale > 0):
+        raise ValueError('DbC Blocked: Precondition failed.')
     r = scale * np.sqrt(mass / length)
-    assert r > 0
+    if not (r > 0):
+        raise ValueError('DbC Blocked: Precondition failed.')
     return float(r)

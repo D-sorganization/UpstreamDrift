@@ -60,8 +60,10 @@ class PinocchioScrewKinematics:
                 "pinocchio is not installed. "
                 "Install it to use PinocchioScrewKinematics."
             )
-        assert model is not None, "model must be provided"
-        assert data is not None, "data must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         self.model = model
         self.data = data
 
@@ -95,8 +97,10 @@ class PinocchioScrewKinematics:
             ValueError: If ``frame_name`` is not found in the model.
             ImportError: If pinocchio is not installed.
         """
-        assert q is not None, "q must be provided"
-        assert v is not None, "v must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (v is not None):
+            raise ValueError("v must be provided")
 
         if reference_frame is None:
             reference_frame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
@@ -151,7 +155,8 @@ class PinocchioScrewKinematics:
         Returns:
             Dict mapping frame name → (Twist, ScrewAxis).
         """
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
         results: dict[str, tuple[Twist, ScrewAxis]] = {}
         for name in frame_names:
             try:

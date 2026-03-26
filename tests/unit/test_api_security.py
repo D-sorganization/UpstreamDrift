@@ -40,7 +40,7 @@ except (ImportError, ModuleNotFoundError):
     # bcrypt is not installed
     BCRYPT_AVAILABLE = False
     bcrypt_lib = None  # type: ignore[misc,assignment]
-except Exception:  # noqa: BLE001
+except Exception as e:  # noqa: BLE001
     # bcrypt failed to load (native library issue)
     BCRYPT_AVAILABLE = False
     import bcrypt as bcrypt_lib  # type: ignore[no-redef]

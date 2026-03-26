@@ -74,8 +74,10 @@ Examples:
 
 def route_launch(args: argparse.Namespace) -> None:
     """Route the launch based on parsed arguments."""
-    assert args is not None, "Parsed arguments must be provided"
-    assert isinstance(args, argparse.Namespace), "args must be a Namespace object"
+    if not (args is not None):
+        raise ValueError("Parsed arguments must be provided")
+    if not (isinstance(args):
+        raise ValueError(argparse.Namespace), "args must be a Namespace object")
 
     engine_arg = getattr(args, "engine", None)
     classic_arg = getattr(args, "classic", False)

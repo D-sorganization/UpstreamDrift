@@ -46,8 +46,10 @@ class BackgroundWorker(ABC):
             args: Positional arguments for target
             kwargs: Keyword arguments for target
         """
-        assert target is not None, "target must be provided"
-        assert target is not None, "target must be provided"
+        if not (target is not None):
+            raise ValueError("target must be provided")
+        if not (target is not None):
+            raise ValueError("target must be provided")
         self.target = target
         self.args = args
         self.kwargs = kwargs or {}
@@ -89,8 +91,10 @@ class BackgroundWorker(ABC):
         Returns:
             Self for chaining
         """
-        assert callback is not None, "callback must be provided"
-        assert callback is not None, "callback must be provided"
+        if not (callback is not None):
+            raise ValueError("callback must be provided")
+        if not (callback is not None):
+            raise ValueError("callback must be provided")
         self._on_complete = callback
         return self
 
@@ -103,8 +107,10 @@ class BackgroundWorker(ABC):
         Returns:
             Self for chaining
         """
-        assert callback is not None, "callback must be provided"
-        assert callback is not None, "callback must be provided"
+        if not (callback is not None):
+            raise ValueError("callback must be provided")
+        if not (callback is not None):
+            raise ValueError("callback must be provided")
         self._on_error = callback
         return self
 
@@ -117,8 +123,10 @@ class BackgroundWorker(ABC):
         Returns:
             Self for chaining
         """
-        assert callback is not None, "callback must be provided"
-        assert callback is not None, "callback must be provided"
+        if not (callback is not None):
+            raise ValueError("callback must be provided")
+        if not (callback is not None):
+            raise ValueError("callback must be provided")
         self._on_progress = callback
         return self
 
@@ -163,8 +171,10 @@ class ThreadWorker(BackgroundWorker):
         kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Initialize thread worker."""
-        assert target is not None, "target must be provided"
-        assert target is not None, "target must be provided"
+        if not (target is not None):
+            raise ValueError("target must be provided")
+        if not (target is not None):
+            raise ValueError("target must be provided")
         super().__init__(target, args, kwargs)
         self._thread: threading.Thread | None = None
         self._cancelled = threading.Event()
@@ -224,8 +234,10 @@ class QtWorker(BackgroundWorker):
         Raises:
             RuntimeError: If Qt is not available
         """
-        assert target is not None, "target must be provided"
-        assert target is not None, "target must be provided"
+        if not (target is not None):
+            raise ValueError("target must be provided")
+        if not (target is not None):
+            raise ValueError("target must be provided")
         super().__init__(target, args, kwargs)
 
         try:
@@ -244,8 +256,10 @@ class QtWorker(BackgroundWorker):
                     args: tuple[Any, ...],
                     kwargs: dict[str, Any],
                 ) -> None:
-                    assert target is not None, "target must be provided"
-                    assert target is not None, "target must be provided"
+                    if not (target is not None):
+                        raise ValueError("target must be provided")
+                    if not (target is not None):
+                        raise ValueError("target must be provided")
                     super().__init__()
                     self._target = target
                     self._args = args
@@ -290,8 +304,10 @@ class QtWorker(BackgroundWorker):
 
     def _handle_error(self, error: Exception) -> None:
         """Handle error signal from Qt thread."""
-        assert error is not None, "error must be provided"
-        assert error is not None, "error must be provided"
+        if not (error is not None):
+            raise ValueError("error must be provided")
+        if not (error is not None):
+            raise ValueError("error must be provided")
         self._error = error
         self._invoke_error()
 
@@ -341,8 +357,10 @@ def get_worker_adapter(
     Returns:
         Appropriate BackgroundWorker implementation
     """
-    assert target is not None, "target must be provided"
-    assert target is not None, "target must be provided"
+    if not (target is not None):
+        raise ValueError("target must be provided")
+    if not (target is not None):
+        raise ValueError("target must be provided")
     if force_threading or not is_qt_available():
         return ThreadWorker(target, args, kwargs)
     try:

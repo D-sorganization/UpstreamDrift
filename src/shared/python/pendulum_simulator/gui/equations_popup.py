@@ -1122,7 +1122,8 @@ def show_equations_popup(parent: QWidget | None, topic: EquationTopic) -> QDialo
         QVBoxLayout,
     )
 
-    assert topic in _TOPICS, f"Unknown topic: {topic}"
+    if not (topic in _TOPICS):
+        raise ValueError(f"Unknown topic: {topic}")
     title, html = _TOPICS[topic]
 
     dlg = QDialog(parent)

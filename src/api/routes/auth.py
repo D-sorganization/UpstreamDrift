@@ -192,7 +192,8 @@ async def create_api_key(
     """Create a new API key for the current user."""
 
     # Generate API key
-    assert api_key_data is not None, "api_key_data must be provided"
+    if not (api_key_data is not None):
+        raise ValueError("api_key_data must be provided")
     api_key = security_manager.generate_api_key()
     api_key_hash = security_manager.hash_api_key(api_key)
 
@@ -221,7 +222,8 @@ async def list_api_keys(
 ) -> list[APIKeyResponse]:
     """List all API keys for the current user."""
 
-    assert current_user is not None, "current_user must be provided"
+    if not (current_user is not None):
+        raise ValueError("current_user must be provided")
     api_keys = db.query(APIKey).filter(APIKey.user_id == current_user.id).all()
     return [APIKeyResponse.from_orm(key) for key in api_keys]
 
@@ -267,7 +269,8 @@ async def list_users(
 ) -> list[UserResponse]:
     """List all users (admin only)."""
 
-    assert skip is not None, "skip must be provided"
+    if not (skip is not None):
+        raise ValueError("skip must be provided")
     users = db.query(User).offset(skip).limit(limit).all()
     return [UserResponse.from_orm(user) for user in users]
 

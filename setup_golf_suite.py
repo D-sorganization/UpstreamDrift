@@ -40,10 +40,14 @@ def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
     Returns:
         Optimized PIL Image.
     """
-    assert img is not None, "Image cannot be None"
-    assert size is not None, "size must be provided"
-    assert isinstance(size, int), "size must be an integer"
-    assert size > 0, "size must be strictly positive"
+    if not (img is not None):
+        raise ValueError("Image cannot be None")
+    if not (size is not None):
+        raise ValueError("size must be provided")
+    if not (isinstance(size):
+        raise ValueError(int), "size must be an integer")
+    if not (size > 0):
+        raise ValueError("size must be strictly positive")
 
     from PIL import ImageEnhance, ImageFilter
 
@@ -64,10 +68,14 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
 
     Orthogonality: Decouples image processing from file system management.
     """
-    assert source_path is not None, "Source path must not be None"
-    assert output_path is not None, "Output path must not be None"
-    assert isinstance(source_path, pathlib.Path), "source_path must be a Path object"
-    assert isinstance(output_path, pathlib.Path), "output_path must be a Path object"
+    if not (source_path is not None):
+        raise ValueError("Source path must not be None")
+    if not (output_path is not None):
+        raise ValueError("Output path must not be None")
+    if not (isinstance(source_path):
+        raise ValueError(pathlib.Path), "source_path must be a Path object")
+    if not (isinstance(output_path):
+        raise ValueError(pathlib.Path), "output_path must be a Path object")
 
     if not source_path.exists():
         logger.error(f"Source image not found: {source_path}")
@@ -119,13 +127,20 @@ def create_shortcut_windows(
     description: str,
 ) -> bool:
     """Create a desktop shortcut using PowerShell interaction."""
-    assert target_script, "Target script must not be empty"
-    assert working_dir is not None, "Working directory must be provided"
-    assert icon_path is not None, "Icon path must be provided"
-    assert isinstance(target_script, str), "target_script must be a string"
-    assert isinstance(working_dir, pathlib.Path), "working_dir must be a Path object"
-    assert isinstance(icon_path, pathlib.Path), "icon_path must be a Path object"
-    assert isinstance(description, str), "description must be a string"
+    if not (target_script):
+        raise ValueError("Target script must not be empty")
+    if not (working_dir is not None):
+        raise ValueError("Working directory must be provided")
+    if not (icon_path is not None):
+        raise ValueError("Icon path must be provided")
+    if not (isinstance(target_script):
+        raise ValueError(str), "target_script must be a string")
+    if not (isinstance(working_dir):
+        raise ValueError(pathlib.Path), "working_dir must be a Path object")
+    if not (isinstance(icon_path):
+        raise ValueError(pathlib.Path), "icon_path must be a Path object")
+    if not (isinstance(description):
+        raise ValueError(str), "description must be a string")
 
     python_exe = sys.executable
 

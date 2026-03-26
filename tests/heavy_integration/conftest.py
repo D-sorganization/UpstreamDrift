@@ -28,7 +28,7 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     for item in items:
         try:
             item_path = Path(item.fspath)
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             continue
         if _HEAVY_INTEGRATION_DIR in item_path.parents:
             item.add_marker(marker, append=False)

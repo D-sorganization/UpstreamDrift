@@ -96,8 +96,10 @@ class InverseDynamicsSolver:
             model: MuJoCo model
             data: MuJoCo data
         """
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -161,8 +163,10 @@ class InverseDynamicsSolver:
             InverseDynamicsResult with computed torques
         """
         # Set state (Thread-Safe: use private data)
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
         self._perturb_data.qacc[:] = qacc
@@ -217,8 +221,10 @@ class InverseDynamicsSolver:
         """
         # 1. Compute Primary Task Torques (using standard Inverse Dynamics)
         # Note: This assumes qacc_primary satisfies the task constraints
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         primary_result = self.compute_required_torques(qpos, qvel, qacc_primary)
         tau_primary = primary_result.joint_torques  # Total generalized force
 
@@ -276,15 +282,19 @@ class InverseDynamicsSolver:
         return g_force
 
     def _compute_coriolis_force(self, g_force: np.ndarray) -> np.ndarray:
-        assert g_force is not None, "g_force must be provided"
-        assert g_force is not None, "g_force must be provided"
+        if not (g_force is not None):
+            raise ValueError("g_force must be provided")
+        if not (g_force is not None):
+            raise ValueError("g_force must be provided")
         mujoco.mj_forward(self.model, self._perturb_data)
         bias_force = self._perturb_data.qfrc_bias.copy()
         return bias_force - g_force
 
     def _compute_control_force(self, ctrl: np.ndarray) -> np.ndarray:
-        assert ctrl is not None, "ctrl must be provided"
-        assert ctrl is not None, "ctrl must be provided"
+        if not (ctrl is not None):
+            raise ValueError("ctrl must be provided")
+        if not (ctrl is not None):
+            raise ValueError("ctrl must be provided")
         self._perturb_data.ctrl[:] = 0
         if len(ctrl) == self.model.nu:
             self._perturb_data.ctrl[:] = ctrl
@@ -298,8 +308,10 @@ class InverseDynamicsSolver:
         tau_force: np.ndarray,
     ) -> InducedAccelerationResult:
         # Acc_G = M^-1 * (-G), Acc_C = M^-1 * (-C), Acc_Tau = M^-1 * (tau)
-        assert g_force is not None, "g_force must be provided"
-        assert g_force is not None, "g_force must be provided"
+        if not (g_force is not None):
+            raise ValueError("g_force must be provided")
+        if not (g_force is not None):
+            raise ValueError("g_force must be provided")
         a_g = (-g_force).copy()
         mujoco.mj_solveM(self.model, self._perturb_data, a_g)
 
@@ -342,8 +354,10 @@ class InverseDynamicsSolver:
         Returns:
             InducedAccelerationResult with component accelerations.
         """
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
 
@@ -381,8 +395,10 @@ class InverseDynamicsSolver:
         Returns:
             List of InverseDynamicsResult for each time step
         """
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         results = []
 
         for i in range(len(times)):
@@ -418,8 +434,10 @@ class InverseDynamicsSolver:
             InverseDynamicsResult with partial solution
         """
         # Full inverse dynamics
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         full_result = self.compute_required_torques(qpos, qvel, qacc)
 
         # Create selection matrix for actuated joints
@@ -453,8 +471,10 @@ class InverseDynamicsSolver:
         Returns:
             ForceDecomposition with all components
         """
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         result = self.compute_required_torques(qpos, qvel, qacc)
 
         # Decompose Coriolis into centrifugal
@@ -522,8 +542,10 @@ class InverseDynamicsSolver:
             End-effector force [3]
         """
         # Compute required torques
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         result = self.compute_required_torques(qpos, qvel, qacc)
 
         # Get Jacobian (configuration-dependent, must recompute for each qpos)
@@ -622,8 +644,10 @@ class InverseDynamicsSolver:
         Returns:
             Efficiency metrics
         """
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
+            raise ValueError("result must be provided")
         torques = result.joint_torques
 
         # Mechanical advantage (ratio of output to input)
@@ -677,8 +701,10 @@ class RecursiveNewtonEuler:
             model: MuJoCo model
             data: MuJoCo data
         """
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -700,8 +726,10 @@ class RecursiveNewtonEuler:
         """
         # MuJoCo's internal RNE is very efficient
         # We use MuJoCo's inverse dynamics
-        assert qpos is not None, "qpos must be provided"
-        assert qpos is not None, "qpos must be provided"
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
         self.data.qpos[:] = qpos
         self.data.qvel[:] = qvel
         self.data.qacc[:] = qacc
@@ -775,8 +803,10 @@ def _build_inverse_dynamics_csv_row(
     Returns:
         List of float values for the CSV row.
     """
-    assert result is not None, "result must be provided"
-    assert result is not None, "result must be provided"
+    if not (result is not None):
+        raise ValueError("result must be provided")
+    if not (result is not None):
+        raise ValueError("result must be provided")
     row: list[float] = [time_val]
     for i in range(nv):
         row.append(result.joint_torques[i])
@@ -814,8 +844,10 @@ def export_inverse_dynamics_to_csv(
         FIXED per Assessment A Finding A-007: Added comprehensive input
         validation to prevent malformed CSV output and silent failures.
     """
-    assert times is not None, "times must be provided"
-    assert times is not None, "times must be provided"
+    if not (times is not None):
+        raise ValueError("times must be provided")
+    if not (times is not None):
+        raise ValueError("times must be provided")
     nv = _validate_inverse_dynamics_export_inputs(times, results)
 
     with open(filepath, "w", newline="") as f:
@@ -849,8 +881,10 @@ class InverseDynamicsAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
-        assert model is not None, "model must be provided"
-        assert model is not None, "model must be provided"
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
+            raise ValueError("model must be provided")
         self.id_solver = InverseDynamicsSolver(model, data)
         self.kin_analyzer = KinematicForceAnalyzer(model, data)
 
@@ -877,8 +911,10 @@ class InverseDynamicsAnalyzer:
             Dictionary with comprehensive analysis
         """
         # Kinematic force analysis
-        assert times is not None, "times must be provided"
-        assert times is not None, "times must be provided"
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
+            raise ValueError("times must be provided")
         kinematic_forces = self.kin_analyzer.analyze_trajectory(
             times,
             positions,
@@ -928,8 +964,10 @@ class InverseDynamicsAnalyzer:
         Returns:
             Comparison metrics
         """
-        assert swing1_data is not None, "swing1_data must be provided"
-        assert swing1_data is not None, "swing1_data must be provided"
+        if not (swing1_data is not None):
+            raise ValueError("swing1_data must be provided")
+        if not (swing1_data is not None):
+            raise ValueError("swing1_data must be provided")
         stats1 = swing1_data["statistics"]
         stats2 = swing2_data["statistics"]
 

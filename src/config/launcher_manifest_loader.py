@@ -218,7 +218,8 @@ class LauncherManifest:
         Returns:
             LauncherTile if found, None otherwise
         """
-        assert tile_id is not None, "tile_id must be provided"
+        if not (tile_id is not None):
+            raise ValueError("tile_id must be provided")
         for tile in self.tiles:
             if tile.id == tile_id:
                 return tile

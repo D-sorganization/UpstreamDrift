@@ -127,8 +127,10 @@ class ControlInterface:
             engine: Physics engine with loaded model.
             torque_limits: Per-joint torque limits. Uses default if None.
         """
-        assert engine is not None, "engine must be provided"
-        assert engine is not None, "engine must be provided"
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
         self.engine = engine
         self._n_q, self._n_v = self._get_dimensions()
         self._joint_info = self._build_joint_info(torque_limits)
@@ -211,8 +213,10 @@ class ControlInterface:
         Raises:
             ValueError: If strategy is not recognized.
         """
-        assert strategy is not None, "strategy must be provided"
-        assert strategy is not None, "strategy must be provided"
+        if not (strategy is not None):
+            raise ValueError("strategy must be provided")
+        if not (strategy is not None):
+            raise ValueError("strategy must be provided")
         if isinstance(strategy, str):
             try:
                 strategy = ControlStrategy(strategy.lower())
@@ -349,8 +353,10 @@ class ControlInterface:
         Returns:
             Computed torque vector (n_v,).
         """
-        assert dt is not None, "dt must be provided"
-        assert dt is not None, "dt must be provided"
+        if not (dt is not None):
+            raise ValueError("dt must be provided")
+        if not (dt is not None):
+            raise ValueError("dt must be provided")
         q, v = self.engine.get_state()
         strategy = self._state.strategy
 
@@ -461,8 +467,10 @@ class ControlInterface:
 
         tau = Kp * (q_target - q) + Kd * (v_target - v)
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         q_target = (
             self._state.target_positions
             if self._state.target_positions is not None
@@ -485,8 +493,10 @@ class ControlInterface:
 
         tau = Kp * e + Kd * e_dot + Ki * integral(e)
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         q_target = (
             self._state.target_positions
             if self._state.target_positions is not None
@@ -532,8 +542,10 @@ class ControlInterface:
         tau = M(q) * (a_desired) + C(q,v) + g(q)
         where a_desired = Kp * (q_target - q) + Kd * (v_target - v)
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         q_target = (
             self._state.target_positions
             if self._state.target_positions is not None
@@ -560,8 +572,10 @@ class ControlInterface:
 
         tau = g(q) + Kp * (q_target - q) + Kd * (v_target - v)
         """
-        assert q is not None, "q must be provided"
-        assert q is not None, "q must be provided"
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
+            raise ValueError("q must be provided")
         pd_torques = self._compute_pd(q, v)
         try:
             gravity = self.engine.compute_gravity_forces()
@@ -598,8 +612,10 @@ class ControlInterface:
         Returns:
             Clipped torque values.
         """
-        assert torques is not None, "torques must be provided"
-        assert torques is not None, "torques must be provided"
+        if not (torques is not None):
+            raise ValueError("torques must be provided")
+        if not (torques is not None):
+            raise ValueError("torques must be provided")
         for ji in self._joint_info:
             torques[ji.index] = np.clip(
                 torques[ji.index], -ji.torque_limit, ji.torque_limit

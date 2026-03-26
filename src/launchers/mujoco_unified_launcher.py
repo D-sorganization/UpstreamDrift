@@ -76,8 +76,10 @@ class MujocoUnifiedLauncher(BaseLauncher):
         Args:
             relative_path: Path relative to REPO_ROOT
         """
-        assert relative_path is not None, "relative_path must be provided"
-        assert relative_path is not None, "relative_path must be provided"
+        if not (relative_path is not None):
+            raise ValueError("relative_path must be provided")
+        if not (relative_path is not None):
+            raise ValueError("relative_path must be provided")
         script_path = REPO_ROOT / relative_path
         if not script_path.exists():
             self.show_error("Script Not Found", f"Script not found:\n{script_path}")
@@ -98,8 +100,10 @@ class MujocoUnifiedLauncher(BaseLauncher):
             module_name: Name of the module to run (e.g., "mujoco_humanoid_golf")
             cwd_suffix: Optional path suffix for working directory
         """
-        assert module_name is not None, "module_name must be provided"
-        assert module_name is not None, "module_name must be provided"
+        if not (module_name is not None):
+            raise ValueError("module_name must be provided")
+        if not (module_name is not None):
+            raise ValueError("module_name must be provided")
         cwd = REPO_ROOT
         if cwd_suffix:
             cwd = REPO_ROOT / cwd_suffix

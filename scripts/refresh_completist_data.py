@@ -22,9 +22,12 @@ EXCLUDE_DIRS = [
 
 def run_grep(pattern, output_file, extended_regex=False):
     """Run grep with the given pattern and write results to output_file."""
-    assert isinstance(pattern, str), "pattern must be a string"
-    assert isinstance(output_file, str), "output_file must be a string"
-    assert isinstance(extended_regex, bool), "extended_regex must be a bool"
+    if not (isinstance(pattern):
+        raise ValueError(str), "pattern must be a string")
+    if not (isinstance(output_file):
+        raise ValueError(str), "output_file must be a string")
+    if not (isinstance(extended_regex):
+        raise ValueError(bool), "extended_regex must be a bool")
 
     cmd = ["grep", "-rn"]
     if extended_regex:

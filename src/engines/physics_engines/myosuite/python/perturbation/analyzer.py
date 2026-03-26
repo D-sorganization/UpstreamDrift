@@ -297,7 +297,8 @@ class MyoSuitePerturbationAnalyzer:
 
         if model_path is not None:
             model_path = Path(model_path)
-            assert model_path.exists(), f"Model not found: {model_path}"
+            if not (model_path.exists()):
+                raise ValueError(f"Model not found: {model_path}")
             self._model = mujoco.MjModel.from_xml_path(str(model_path))
         elif model_xml is not None:
             self._model = mujoco.MjModel.from_xml_string(model_xml)
@@ -321,10 +322,13 @@ class MyoSuitePerturbationAnalyzer:
         Pre: profile is a dict with 'coeffs' key.
         Post: self._base_coeffs is set and self._nominal_result is cached.
         """
-        assert isinstance(profile, dict), f"profile must be a dict, got {type(profile)}"
-        assert "coeffs" in profile, "'coeffs' key missing from profile"
+        if not (isinstance(profile):
+            raise ValueError(dict), f"profile must be a dict, got {type(profile)}")
+        if not ("coeffs" in profile):
+            raise ValueError("'coeffs' key missing from profile")
         coeffs = profile["coeffs"]
-        assert isinstance(coeffs, list) and len(coeffs) > 0, (
+        if not (isinstance(coeffs):
+            raise ValueError(list) and len(coeffs) > 0, ()
             "profile['coeffs'] must be a non-empty list"
         )
         self._base_coeffs = coeffs
@@ -338,7 +342,8 @@ class MyoSuitePerturbationAnalyzer:
         Pre: ``set_base_torque_profile`` has been called.
         Post: returned dict has 'coeffs' with same shape as base.
         """
-        assert self._base_coeffs is not None, (
+        if not (self._base_coeffs is not None):
+            raise ValueError(()
             "set_base_torque_profile() must be called before perturb_torque()"
         )
         perturbed = perturb_torque_coeffs(
@@ -358,10 +363,12 @@ class MyoSuitePerturbationAnalyzer:
         Pre: sim_result is a MyoSuiteSimResult with n_steps >= 2.
         Post: all MANDATORY_METRICS present; all values finite.
         """
-        assert isinstance(sim_result, MyoSuiteSimResult), (
+        if not (isinstance(sim_result):
+            raise ValueError(MyoSuiteSimResult), ()
             f"sim_result must be MyoSuiteSimResult, got {type(sim_result)}"
         )
-        assert sim_result.n_steps >= 2, "Simulation must have >= 2 steps"
+        if not (sim_result.n_steps >= 2):
+            raise ValueError("Simulation must have >= 2 steps")
 
         r = sim_result
         last = r.n_steps - 1
@@ -414,7 +421,8 @@ class MyoSuitePerturbationAnalyzer:
         Post: returned ``PerturbationSummary`` has all ``MANDATORY_METRICS``
               as keys (scalar metrics only).
         """
-        assert self._base_coeffs is not None, (
+        if not (self._base_coeffs is not None):
+            raise ValueError(()
             "set_base_torque_profile() must be called before run_batch()"
         )
         t_start = time.monotonic()
@@ -452,7 +460,7 @@ class MyoSuitePerturbationAnalyzer:
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -546,7 +554,7 @@ class MyoSuitePerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except Exception as e:  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 
@@ -666,7 +674,7 @@ class MyoSuitePerturbationAnalyzer:
                         mujoco.mj_energyVel(mj_model, mj_data)
                         pe = float(mj_data.energy[0])
                         ke = float(mj_data.energy[1])
-                    except Exception:  # noqa: BLE001
+                    except Exception as e:  # noqa: BLE001
                         pass
 
             t_list.append(t)

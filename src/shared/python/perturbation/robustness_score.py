@@ -21,5 +21,6 @@ def compute_robustness_score(cv_weighted: float) -> float:
     Pre: cv_weighted >= 0.0
     Post: 0.0 <= result <= 1.0
     """
-    assert cv_weighted >= 0.0, f"cv_weighted must be non-negative, got {cv_weighted}"
+    if not (cv_weighted >= 0.0):
+        raise ValueError(f"cv_weighted must be non-negative, got {cv_weighted}")
     return 1.0 / (1.0 + cv_weighted)

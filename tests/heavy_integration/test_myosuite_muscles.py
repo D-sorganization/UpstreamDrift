@@ -237,7 +237,7 @@ class TestMyoSuiteGripModel:
             # Use hand environment if available
             try:
                 env = gym.make("myoHandPoseRandom-v0")
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 # Fallback to elbow
                 env = gym.make("myoElbowPose1D6MRandom-v0")
 
@@ -271,7 +271,7 @@ class TestMyoSuiteGripModel:
 
             try:
                 env = gym.make("myoHandPoseRandom-v0")
-            except Exception:  # noqa: BLE001
+            except Exception as e:  # noqa: BLE001
                 pytest.skip("Hand model not available")
 
             env.reset()

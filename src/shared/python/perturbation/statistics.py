@@ -59,7 +59,8 @@ def compute_metric_statistics(values: np.ndarray) -> MetricStatistics:
     MetricStatistics
         Computed statistics.
     """
-    assert len(values) > 0, "Cannot compute statistics on empty values"
+    if not (len(values) > 0):
+        raise ValueError("Cannot compute statistics on empty values")
 
     mean = np.mean(values, axis=0)
     std = np.std(values, axis=0)

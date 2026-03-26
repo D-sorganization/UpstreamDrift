@@ -33,8 +33,10 @@ def _crba_forward_pass(
         Tuple of (s_subspace, dof_indices) where s_subspace is a list of
         motion subspace vectors and dof_indices caches active DOF indices.
     """
-    assert nb is not None, "nb must be provided"
-    assert nb is not None, "nb must be provided"
+    if not (nb is not None):
+        raise ValueError("nb must be provided")
+    if not (nb is not None):
+        raise ValueError("nb must be provided")
     s_subspace: list[np.ndarray] = []
     dof_indices: list[int] = []
 
@@ -78,8 +80,10 @@ def _crba_backward_pass(
         Composite inertia array (nb, 6, 6).
     """
     # OPTIMIZATION: Bulk copy to 3D array is faster than list comprehension with copy()
-    assert nb is not None, "nb must be provided"
-    assert nb is not None, "nb must be provided"
+    if not (nb is not None):
+        raise ValueError("nb must be provided")
+    if not (nb is not None):
+        raise ValueError("nb must be provided")
     ic_composite = np.array(model_inertia, dtype=float)
 
     for i in range(nb - 1, -1, -1):
@@ -126,8 +130,10 @@ def _crba_mass_matrix(
     Returns:
         Symmetric positive-definite mass matrix H (nb, nb).
     """
-    assert nb is not None, "nb must be provided"
-    assert nb is not None, "nb must be provided"
+    if not (nb is not None):
+        raise ValueError("nb must be provided")
+    if not (nb is not None):
+        raise ValueError("nb must be provided")
     for i in range(nb):
         idx = dof_indices[i]
         if idx != -1:

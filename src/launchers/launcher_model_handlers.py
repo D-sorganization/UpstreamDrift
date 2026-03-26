@@ -49,8 +49,10 @@ class ModuleHandler:
     def __init__(
         self, model_types: set[str], module_name: str, display_name: str
     ) -> None:
-        assert model_types is not None, "model_types must be provided"
-        assert model_types is not None, "model_types must be provided"
+        if not (model_types is not None):
+            raise ValueError("model_types must be provided")
+        if not (model_types is not None):
+            raise ValueError("model_types must be provided")
         self.model_types = model_types
         self.module_name = module_name
         self.display_name = display_name
@@ -66,8 +68,10 @@ class ModuleHandler:
         process_manager: ProcessManager,
     ) -> bool:
         """Launch the module."""
-        assert repo_path is not None, "repo_path must be provided"
-        assert repo_path is not None, "repo_path must be provided"
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
         process = process_manager.launch_module(
             name=self.display_name,
             module_name=self.module_name,
@@ -90,8 +94,10 @@ class ScriptHandler:
         display_name: str,
         cwd_path: str | None = None,
     ) -> None:
-        assert model_types is not None, "model_types must be provided"
-        assert model_types is not None, "model_types must be provided"
+        if not (model_types is not None):
+            raise ValueError("model_types must be provided")
+        if not (model_types is not None):
+            raise ValueError("model_types must be provided")
         self.model_types = model_types
         self._script_path = script_path
         self.display_name = display_name
@@ -108,8 +114,10 @@ class ScriptHandler:
         process_manager: ProcessManager,
     ) -> bool:
         """Launch the script."""
-        assert repo_path is not None, "repo_path must be provided"
-        assert repo_path is not None, "repo_path must be provided"
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
         script_path = repo_path / self._script_path
         cwd = repo_path / self._cwd_path if self._cwd_path else repo_path
 
@@ -156,8 +164,10 @@ class SpecialAppHandler:
             True if launch succeeded, False otherwise.
         """
         # DBC Precondition: model must have a path
-        assert repo_path is not None, "repo_path must be provided"
-        assert repo_path is not None, "repo_path must be provided"
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             logger.error(
@@ -211,8 +221,10 @@ class PuttingGreenHandler:
         Returns:
             True if launch succeeded, False otherwise.
         """
-        assert repo_path is not None, "repo_path must be provided"
-        assert repo_path is not None, "repo_path must be provided"
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             logger.error("PuttingGreenHandler: model has no path")
@@ -278,8 +290,10 @@ class _SystemFileHandler:
         process_manager: ProcessManager,
     ) -> bool:
         """Open a file with the system default application."""
-        assert repo_path is not None, "repo_path must be provided"
-        assert repo_path is not None, "repo_path must be provided"
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
+        if not (repo_path is not None):
+            raise ValueError("repo_path must be provided")
         model_path = getattr(model, "path", None) or ""
         if not model_path:
             logger.error(
@@ -412,8 +426,10 @@ class ModelHandlerRegistry:
         Returns:
             A handler that can launch the model, or None if not found.
         """
-        assert model_type is not None, "model_type must be provided"
-        assert model_type is not None, "model_type must be provided"
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
         for handler in self._handlers:
             if handler.can_handle(model_type):
                 return handler
@@ -437,8 +453,10 @@ class ModelHandlerRegistry:
         Returns:
             True if launch succeeded, False otherwise.
         """
-        assert model_type is not None, "model_type must be provided"
-        assert model_type is not None, "model_type must be provided"
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
         handler = self.get_handler(model_type)
         if handler is None:
             logger.warning(f"No handler found for model type: {model_type}")

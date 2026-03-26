@@ -194,8 +194,10 @@ class CrossEngineValidator(ContractChecker):
         Returns:
             Tuple of (passed, severity_level).
         """
-        assert max_dev is not None, "max_dev must be provided"
-        assert max_dev is not None, "max_dev must be provided"
+        if not (max_dev is not None):
+            raise ValueError("max_dev must be provided")
+        if not (max_dev is not None):
+            raise ValueError("max_dev must be provided")
         ratio = max_dev / tolerance if tolerance > 0 else float("inf")
 
         if ratio <= 1.0:
@@ -208,8 +210,10 @@ class CrossEngineValidator(ContractChecker):
 
     def _build_message(self, severity: str, max_dev: float, tol: float) -> str:
         """Build appropriate message based on severity."""
-        assert severity is not None, "severity must be provided"
-        assert severity is not None, "severity must be provided"
+        if not (severity is not None):
+            raise ValueError("severity must be provided")
+        if not (severity is not None):
+            raise ValueError("severity must be provided")
         if severity == "PASSED":  # noqa: SIM116
             return ""
         if severity == "WARNING":
@@ -232,8 +236,10 @@ class CrossEngineValidator(ContractChecker):
         engine2_state: np.ndarray,
     ) -> None:
         """Log validation result with appropriate severity level."""
-        assert severity is not None, "severity must be provided"
-        assert severity is not None, "severity must be provided"
+        if not (severity is not None):
+            raise ValueError("severity must be provided")
+        if not (severity is not None):
+            raise ValueError("severity must be provided")
         ratio = max_dev / tol if tol > 0 else float("inf")
         worst_idx = int(np.argmax(deviation))
 
@@ -296,8 +302,10 @@ class CrossEngineValidator(ContractChecker):
         Returns:
             ValidationResult with RMS comparison details
         """
-        assert engine1_name is not None, "engine1_name must be provided"
-        assert engine1_name is not None, "engine1_name must be provided"
+        if not (engine1_name is not None):
+            raise ValueError("engine1_name must be provided")
+        if not (engine1_name is not None):
+            raise ValueError("engine1_name must be provided")
         if engine1_torques.shape != engine2_torques.shape:
             return ValidationResult(
                 passed=False,

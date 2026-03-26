@@ -122,7 +122,7 @@ def _probe_engine_instance(
         actual_loader = loader
         try:
             available_result = availability_check()
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             available_result = False
         is_available = bool(available_result)
         is_broken = False

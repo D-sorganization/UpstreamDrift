@@ -56,7 +56,8 @@ class EngineState:
             nq: Number of position coordinates
             nv: Number of velocity coordinates
         """
-        assert nq is not None, "nq must be provided"
+        if not (nq is not None):
+            raise ValueError("nq must be provided")
         self.q: np.ndarray = np.zeros(nq)  # Positions
         self.v: np.ndarray = np.zeros(nv)  # Velocities
         self.a: np.ndarray = np.zeros(nv)  # Accelerations
@@ -208,10 +209,12 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             self._is_initialized = True
 
         # Verify postconditions
-        assert self._is_initialized, (
+        if not (self._is_initialized):
+            raise ValueError(()
             "Postcondition: engine must be initialized after load"
         )
-        assert self.model is not None, "Postcondition: model must be loaded"
+        if not (self.model is not None):
+            raise ValueError("Postcondition: model must be loaded")
 
         logger.info(f"Successfully loaded model: {self.model_name}")
 
@@ -248,10 +251,12 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             self._is_initialized = True
 
         # Verify postconditions
-        assert self._is_initialized, (
+        if not (self._is_initialized):
+            raise ValueError(()
             "Postcondition: engine must be initialized after load"
         )
-        assert self.model is not None, "Postcondition: model must be loaded"
+        if not (self.model is not None):
+            raise ValueError("Postcondition: model must be loaded")
 
         logger.info("Successfully loaded model from string")
 
@@ -437,8 +442,10 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         Args:
             checkpoint: Checkpoint to restore from.
         """
-        assert checkpoint is not None, "checkpoint must be provided"
-        assert checkpoint is not None, "checkpoint must be provided"
+        if not (checkpoint is not None):
+            raise ValueError("checkpoint must be provided")
+        if not (checkpoint is not None):
+            raise ValueError("checkpoint must be provided")
         if not checkpoint.engine_state:
             return
 
@@ -548,7 +555,9 @@ class SimulationMixin:
         Args:
             dt: Time step size
         """
-        assert dt is not None, "dt must be provided"
-        assert dt is not None, "dt must be provided"
+        if not (dt is not None):
+            raise ValueError("dt must be provided")
+        if not (dt is not None):
+            raise ValueError("dt must be provided")
         self._simulation_time += dt
         self._step_count += 1

@@ -213,8 +213,10 @@ def set_api_key(provider: AIProvider, key: str) -> bool:
     Returns:
         True if successful, False otherwise.
     """
-    assert provider is not None, "provider must be provided"
-    assert provider is not None, "provider must be provided"
+    if not (provider is not None):
+        raise ValueError("provider must be provided")
+    if not (provider is not None):
+        raise ValueError("provider must be provided")
     info = PROVIDER_INFO.get(provider)
     if not info or not info.get("requires_key"):
         return False
@@ -283,8 +285,10 @@ class ProviderConfigWidget(QWidget):
             provider: The provider this widget configures.
             parent: Parent widget.
         """
-        assert provider is not None, "provider must be provided"
-        assert provider is not None, "provider must be provided"
+        if not (provider is not None):
+            raise ValueError("provider must be provided")
+        if not (provider is not None):
+            raise ValueError("provider must be provided")
         super().__init__(parent)
         self._provider = provider
         self._info = PROVIDER_INFO[provider]
@@ -729,8 +733,10 @@ class AISettingsDialog(QDialog):
 
     def _on_provider_changed(self, index: int) -> None:
         """Handle provider selection change."""
-        assert index is not None, "index must be provided"
-        assert index is not None, "index must be provided"
+        if not (index is not None):
+            raise ValueError("index must be provided")
+        if not (index is not None):
+            raise ValueError("index must be provided")
         provider_data = self._provider_combo.itemData(index)
         if provider_data is None or not isinstance(provider_data, AIProvider):
             return

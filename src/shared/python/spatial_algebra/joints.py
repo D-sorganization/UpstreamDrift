@@ -39,8 +39,10 @@ def jcalc(
     Returns:
         (xj_transform, s_subspace, dof_idx)
     """
-    assert jtype is not None, "jtype must be provided"
-    assert jtype is not None, "jtype must be provided"
+    if not (jtype is not None):
+        raise ValueError("jtype must be provided")
+    if not (jtype is not None):
+        raise ValueError("jtype must be provided")
     if out is None:
         xj_transform = np.zeros((6, 6), dtype=np.float64)
     else:

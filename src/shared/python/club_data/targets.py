@@ -51,8 +51,10 @@ class TargetTrajectory:
 
     def get_position_at_time(self, t: float) -> np.ndarray:
         """Interpolate position at a specific time."""
-        assert t is not None, "t must be provided"
-        assert t is not None, "t must be provided"
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
+            raise ValueError("t must be provided")
         if t <= self.time_series[0]:
             return self.positions[0]
         if t >= self.time_series[-1]:
@@ -68,8 +70,10 @@ class TargetTrajectory:
 
     def get_velocity_at_time(self, t: float) -> np.ndarray | None:
         """Interpolate velocity at a specific time."""
-        assert t is not None, "t must be provided"
-        assert t is not None, "t must be provided"
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
+            raise ValueError("t must be provided")
         if self.velocities is None:
             return None
 
@@ -88,8 +92,10 @@ class TargetTrajectory:
 
     def get_phase_position(self, phase: str) -> np.ndarray | None:
         """Get position at a specific phase."""
-        assert phase is not None, "phase must be provided"
-        assert phase is not None, "phase must be provided"
+        if not (phase is not None):
+            raise ValueError("phase must be provided")
+        if not (phase is not None):
+            raise ValueError("phase must be provided")
         idx_map = {
             "address": self.address_idx,
             "top": self.top_idx,
@@ -112,8 +118,10 @@ class TargetTrajectory:
         Returns:
             New TargetTrajectory with resampled data
         """
-        assert num_points is not None, "num_points must be provided"
-        assert num_points is not None, "num_points must be provided"
+        if not (num_points is not None):
+            raise ValueError("num_points must be provided")
+        if not (num_points is not None):
+            raise ValueError("num_points must be provided")
         t_new = np.linspace(self.time_series[0], self.time_series[-1], num_points)
         positions_new = np.zeros((num_points, 3))
         velocities_new = None if self.velocities is None else np.zeros((num_points, 3))
@@ -241,8 +249,10 @@ class ClubTargetManager:
         Args:
             trajectory: TargetTrajectory to add
         """
-        assert trajectory is not None, "trajectory must be provided"
-        assert trajectory is not None, "trajectory must be provided"
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
         self._trajectories[trajectory.name] = trajectory
         logger.info("Added trajectory '%s'", trajectory.name)
 
@@ -255,8 +265,10 @@ class ClubTargetManager:
         Returns:
             True if removed, False if not found
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name in self._trajectories:
             del self._trajectories[name]
             if self._active_trajectory == name:
@@ -301,8 +313,10 @@ class ClubTargetManager:
 
     def set_enabled(self, enabled: bool) -> None:
         """Enable or disable target display."""
-        assert enabled is not None, "enabled must be provided"
-        assert enabled is not None, "enabled must be provided"
+        if not (enabled is not None):
+            raise ValueError("enabled must be provided")
+        if not (enabled is not None):
+            raise ValueError("enabled must be provided")
         self._enabled = enabled
         self._notify_update()
 
@@ -387,8 +401,10 @@ class ClubTargetManager:
         Returns:
             (N, 3) array of positions or None
         """
-        assert num_points is not None, "num_points must be provided"
-        assert num_points is not None, "num_points must be provided"
+        if not (num_points is not None):
+            raise ValueError("num_points must be provided")
+        if not (num_points is not None):
+            raise ValueError("num_points must be provided")
         if trajectory is None:
             trajectory = self.get_active_trajectory()
 
@@ -414,8 +430,10 @@ class ClubTargetManager:
         Returns:
             Tuple of (origins, directions) or None
         """
-        assert num_vectors is not None, "num_vectors must be provided"
-        assert num_vectors is not None, "num_vectors must be provided"
+        if not (num_vectors is not None):
+            raise ValueError("num_vectors must be provided")
+        if not (num_vectors is not None):
+            raise ValueError("num_vectors must be provided")
         if trajectory is None:
             trajectory = self.get_active_trajectory()
 
@@ -478,8 +496,10 @@ class ClubTargetManager:
         Returns:
             Dictionary with error metrics
         """
-        assert current_position is not None, "current_position must be provided"
-        assert current_position is not None, "current_position must be provided"
+        if not (current_position is not None):
+            raise ValueError("current_position must be provided")
+        if not (current_position is not None):
+            raise ValueError("current_position must be provided")
         if trajectory is None:
             trajectory = self.get_active_trajectory()
 

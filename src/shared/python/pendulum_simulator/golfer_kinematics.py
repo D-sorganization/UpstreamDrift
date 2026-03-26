@@ -37,7 +37,8 @@ def _hub_position(theta_hub: float, p: GolferParams) -> tuple[float, float]:
     Reversed direction (#1103): hub extends upward (inside the arm loop)
     to simulate rotation around the combined center of mass.
     """
-    assert theta_hub is not None, "theta_hub must be provided"
+    if not (theta_hub is not None):
+        raise ValueError("theta_hub must be provided")
     x = -p.L_hub * np.sin(theta_hub)
     y = p.L_hub * np.cos(theta_hub)
     return (x, y)
@@ -55,7 +56,8 @@ def _shoulder_position(
     side: +1 for right, -1 for left (perpendicular offset direction).
     """
     # Perpendicular direction to hub standoff (rotated 90° from hub direction)
-    assert hub_xy is not None, "hub_xy must be provided"
+    if not (hub_xy is not None):
+        raise ValueError("hub_xy must be provided")
     perp_x = side * np.cos(theta_hub)
     perp_y = side * np.sin(theta_hub)
     x = hub_xy[0] + d_shoulder * perp_x
@@ -80,7 +82,8 @@ def _chain_endpoint(
     -------
     (x, y) endpoint position
     """
-    assert origin is not None, "origin must be provided"
+    if not (origin is not None):
+        raise ValueError("origin must be provided")
     x, y = origin
     for angle, length in zip(angles_abs, lengths, strict=False):
         x += length * np.sin(angle)
@@ -93,7 +96,8 @@ def _absolute_angles(theta_hub: float, relative_angles: list[float]) -> list[flo
 
     Each relative angle is added cumulatively to the hub angle.
     """
-    assert theta_hub is not None, "theta_hub must be provided"
+    if not (theta_hub is not None):
+        raise ValueError("theta_hub must be provided")
     result = []
     cumulative = theta_hub
     for rel in relative_angles:
@@ -124,7 +128,8 @@ def forward_kinematics(
 
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
-    assert q.shape == (N_DOF,), f"q must have shape ({N_DOF},), got {q.shape}"
+    if not (q.shape == (N_DOF):
+        raise ValueError(), f"q must have shape ({N_DOF},), got {q.shape}")
 
     th_hub = q[0]
     alpha_rs, alpha_re, alpha_rh = q[1], q[2], q[3]

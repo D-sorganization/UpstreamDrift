@@ -65,7 +65,8 @@ def _find_sibling_package(marker_path: str) -> Path | None:
     Pre:  marker_path is a non-empty relative path string.
     Post: returns a valid directory Path or None.
     """
-    assert marker_path, "marker_path must be non-empty"
+    if not (marker_path):
+        raise ValueError("marker_path must be non-empty")
     p = Path(__file__).resolve().parent
     for _ in range(10):
         candidate = p / marker_path
@@ -159,7 +160,8 @@ class MainWindow(QMainWindow):
 
     def wheelEvent(self, event: object) -> None:
         """Ctrl+mousewheel scales all UI fonts (#1147)."""
-        assert event is not None, "event must be provided"
+        if not (event is not None):
+            raise ValueError("event must be provided")
         from PyQt6.QtGui import QWheelEvent
 
         if not isinstance(event, QWheelEvent):
@@ -201,12 +203,14 @@ class MainWindow(QMainWindow):
 
     def _build_menu(self) -> None:
         _mb = self.menuBar()
-        assert _mb is not None
+        if not (_mb is not None):
+            raise ValueError('DbC Blocked: Precondition failed.')
         menubar: QMenuBar = _mb
 
         # View menu
         _view = menubar.addMenu("&View")
-        assert _view is not None
+        if not (_view is not None):
+            raise ValueError('DbC Blocked: Precondition failed.')
         view_menu: QMenu = _view
 
         # Quick theme submenu
@@ -242,7 +246,8 @@ class MainWindow(QMainWindow):
 
         # Help menu
         _help = menubar.addMenu("&Help")
-        assert _help is not None
+        if not (_help is not None):
+            raise ValueError('DbC Blocked: Precondition failed.')
         action_about = QAction("About…", self)
         action_about.triggered.connect(self._show_about)
         _help.addAction(action_about)
@@ -405,7 +410,8 @@ class MainWindow(QMainWindow):
         receive the current overlay toggle states from the toolstrip so
         that forces, ellipsoids, COM, etc. match the checkbox display.
         """
-        assert index is not None, "index must be provided"
+        if not (index is not None):
+            raise ValueError("index must be provided")
         segment_map = {
             0: self._SEGMENTS_DOUBLE,
             1: self._SEGMENTS_TRIPLE,
@@ -534,7 +540,8 @@ class MainWindow(QMainWindow):
             self._theme_manager.themeChanged.connect(self._on_theme_changed)  # type: ignore[union-attr]
 
             # Use shared helper to build a full theme submenu (window first, then parent)
-            assert self._quick_theme_menu is not None
+            if not (self._quick_theme_menu is not None):
+                raise ValueError('DbC Blocked: Precondition failed.')
             if create_theme_menu is not None:
                 create_theme_menu(
                     self,
@@ -600,7 +607,8 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(geom)
 
     def closeEvent(self, event: object) -> None:
-        assert event is not None, "event must be provided"
+        if not (event is not None):
+            raise ValueError("event must be provided")
         settings = QSettings(_SETTINGS_ORG, _SETTINGS_APP)
         settings.setValue("window_geometry", self.saveGeometry())
         self._double_panel.save_layout()

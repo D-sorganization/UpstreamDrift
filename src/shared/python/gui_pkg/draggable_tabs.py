@@ -82,24 +82,30 @@ class DraggableTabWidget(QTabWidget):
 
     def addTab(self, widget: QWidget, *args) -> int:  # type: ignore[override]
         """Override to apply UX enhancements on new tabs."""
-        assert widget is not None, "widget must be provided"
-        assert widget is not None, "widget must be provided"
+        if not (widget is not None):
+            raise ValueError("widget must be provided")
+        if not (widget is not None):
+            raise ValueError("widget must be provided")
         index = super().addTab(widget, *args)
         self._update_tab_ux(index)
         return index
 
     def insertTab(self, index: int, widget: QWidget, *args) -> int:  # type: ignore[override]
         """Override to apply UX enhancements on inserted tabs."""
-        assert index is not None, "index must be provided"
-        assert index is not None, "index must be provided"
+        if not (index is not None):
+            raise ValueError("index must be provided")
+        if not (index is not None):
+            raise ValueError("index must be provided")
         ret_index = super().insertTab(index, widget, *args)
         self._update_tab_ux(ret_index)
         return ret_index
 
     def _update_tab_ux(self, index: int) -> None:
         """Hide close button for core tabs and add tooltip hints."""
-        assert index is not None, "index must be provided"
-        assert index is not None, "index must be provided"
+        if not (index is not None):
+            raise ValueError("index must be provided")
+        if not (index is not None):
+            raise ValueError("index must be provided")
         tab_text = self.tabText(index)
 
         if tab_text in self.core_tabs:
@@ -119,8 +125,10 @@ class DraggableTabWidget(QTabWidget):
 
     def close_tab(self, index: int) -> None:
         """Close a non-core tab (with confirmation)."""
-        assert index is not None, "index must be provided"
-        assert index is not None, "index must be provided"
+        if not (index is not None):
+            raise ValueError("index must be provided")
+        if not (index is not None):
+            raise ValueError("index must be provided")
         if index < 0 or index >= self.count():
             return
 
@@ -154,8 +162,10 @@ class DraggableTabWidget(QTabWidget):
 
     def reopen_closed_tab(self, tab_name: str) -> None:
         """Reopen a previously closed tab by name."""
-        assert tab_name is not None, "tab_name must be provided"
-        assert tab_name is not None, "tab_name must be provided"
+        if not (tab_name is not None):
+            raise ValueError("tab_name must be provided")
+        if not (tab_name is not None):
+            raise ValueError("tab_name must be provided")
         if tab_name not in self.closed_tabs:
             return
         try:
@@ -207,8 +217,10 @@ class DraggableTabWidget(QTabWidget):
 
     def detach_tab(self, index: int, pos: QPoint) -> None:
         """Detach a tab into a separate window."""
-        assert index is not None, "index must be provided"
-        assert index is not None, "index must be provided"
+        if not (index is not None):
+            raise ValueError("index must be provided")
+        if not (index is not None):
+            raise ValueError("index must be provided")
         if index < 0 or index >= self.count():
             return
         widget = self.widget(index)
@@ -232,8 +244,10 @@ class DraggableTabWidget(QTabWidget):
 
     def reattach_tab(self, detached_window: DetachedTabWindow) -> None:
         """Reattach a previously detached tab."""
-        assert detached_window is not None, "detached_window must be provided"
-        assert detached_window is not None, "detached_window must be provided"
+        if not (detached_window is not None):
+            raise ValueError("detached_window must be provided")
+        if not (detached_window is not None):
+            raise ValueError("detached_window must be provided")
         if detached_window not in self.detached_tabs:
             return
         widget, text, icon = self.detached_tabs[detached_window]
@@ -257,8 +271,10 @@ class DraggableTabWidget(QTabWidget):
 
     def _show_tab_context_menu(self, position: QPoint) -> None:
         """Show right-click menu for a tab."""
-        assert position is not None, "position must be provided"
-        assert position is not None, "position must be provided"
+        if not (position is not None):
+            raise ValueError("position must be provided")
+        if not (position is not None):
+            raise ValueError("position must be provided")
         bar = self.tabBar()
         if not bar:
             return
@@ -322,8 +338,10 @@ class DetachedTabWindow(QMainWindow):
         icon: QIcon,
         parent_tab_widget: DraggableTabWidget,
     ) -> None:
-        assert widget is not None, "widget must be provided"
-        assert widget is not None, "widget must be provided"
+        if not (widget is not None):
+            raise ValueError("widget must be provided")
+        if not (widget is not None):
+            raise ValueError("widget must be provided")
         super().__init__()
         self.parent_tab_widget = parent_tab_widget
         self.widget = widget
@@ -385,8 +403,10 @@ class DetachedTabWindow(QMainWindow):
 
     def _show_context_menu(self, position: QPoint) -> None:
         """Right-click context menu for redocking."""
-        assert position is not None, "position must be provided"
-        assert position is not None, "position must be provided"
+        if not (position is not None):
+            raise ValueError("position must be provided")
+        if not (position is not None):
+            raise ValueError("position must be provided")
         menu = QMenu(self)
 
         act = QAction(f"Redock '{self.original_title}'", self)
@@ -431,8 +451,10 @@ class DetachedTabWindow(QMainWindow):
 
     def closeEvent(self, event) -> None:  # type: ignore[override]
         """On close: offer redock instead of losing the tab."""
-        assert event is not None, "event must be provided"
-        assert event is not None, "event must be provided"
+        if not (event is not None):
+            raise ValueError("event must be provided")
+        if not (event is not None):
+            raise ValueError("event must be provided")
         if self.suppress_close_dialog:
             self._trigger_redock()
             event.ignore()

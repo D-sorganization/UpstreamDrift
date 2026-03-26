@@ -26,9 +26,12 @@ from src.shared.python.physics.aerodynamics import (  # noqa: E402
 
 def _report_forces(engine: AerodynamicsEngine, speed_ms: float, label: str) -> None:
     """Print force components for a ball travelling at *speed_ms* m/s."""
-    assert engine is not None, "Engine must be provided"
-    assert speed_ms >= 0.0, "Speed must be non-negative"
-    assert label, "Label must not be empty"
+    if not (engine is not None):
+        raise ValueError("Engine must be provided")
+    if not (speed_ms >= 0.0):
+        raise ValueError("Speed must be non-negative")
+    if not (label):
+        raise ValueError("Label must not be empty")
 
     velocity = np.array([speed_ms, 0.0, 0.0])
     spin = np.array([0.0, 300.0, 0.0])  # ~2 870 rpm back-spin

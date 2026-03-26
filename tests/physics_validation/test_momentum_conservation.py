@@ -134,7 +134,7 @@ def test_pinocchio_momentum_conservation():
         frame_id_1 = model.getFrameId("ball1")
         if frame_id_1 >= model.nframes:
             frame_id_1 = 0
-    except Exception:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
         frame_id_1 = 0
     try:
         model.addBodyFrame("b1", idx1, pinocchio.SE3.Identity(), frame_id_1)
@@ -154,7 +154,7 @@ def test_pinocchio_momentum_conservation():
         frame_id_2 = model.getFrameId("ball2")
         if frame_id_2 >= model.nframes:
             frame_id_2 = 0
-    except Exception:  # noqa: BLE001
+    except Exception as e:  # noqa: BLE001
         frame_id_2 = 0
     try:
         model.addBodyFrame("b2", idx2, pinocchio.SE3.Identity(), frame_id_2)

@@ -367,8 +367,10 @@ class ClubDatabase:
         Args:
             output_path: Output JSON file path
         """
-        assert output_path is not None, "output_path must be provided"
-        assert output_path is not None, "output_path must be provided"
+        if not (output_path is not None):
+            raise ValueError("output_path must be provided")
+        if not (output_path is not None):
+            raise ValueError("output_path must be provided")
         data = {}
         for club_id, spec in cls.CLUBS.items():
             data[club_id] = {
@@ -409,8 +411,10 @@ class ClubDatabase:
             ClubSpecification
         """
         # Start with default values
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         defaults: dict[str, Any] = {
             "length_inches": 40.0,
             "head_mass_grams": 250.0,

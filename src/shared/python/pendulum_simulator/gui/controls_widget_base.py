@@ -192,7 +192,8 @@ class ControlsWidgetBase(QWidget):
         """
         from .controls_widget import LabeledInput as _LI
 
-        assert len(joint_labels) == len(defaults)
+        if not (len(joint_labels) == len(defaults)):
+            raise ValueError('DbC Blocked: Precondition failed.')
         box = QGroupBox("Torque Saturation")
         box.setStyleSheet(STYLE_GROUP)
         layout = QVBoxLayout(box)
@@ -229,7 +230,8 @@ class ControlsWidgetBase(QWidget):
         """
         from .controls_widget import LabeledInput as _LI
 
-        assert len(joint_labels) == len(min_defaults) == len(max_defaults)
+        if not (len(joint_labels) == len(min_defaults) == len(max_defaults)):
+            raise ValueError('DbC Blocked: Precondition failed.')
         box = QGroupBox("Joint Limits")
         box.setStyleSheet(STYLE_GROUP)
         layout = QVBoxLayout(box)
@@ -361,10 +363,12 @@ class ControlsWidgetBase(QWidget):
         inputs = self._get_torque_inputs()
         key = joint.lower()
         valid_keys = {k.lower() for k in inputs}
-        assert key in valid_keys, (
+        if not (key in valid_keys):
+            raise ValueError(()
             f"Unknown joint '{joint}', expected one of {valid_keys}"
         )
-        assert len(coeffs) >= 1, "Coefficients list must not be empty"
+        if not (len(coeffs) >= 1):
+            raise ValueError("Coefficients list must not be empty")
 
         coeffs_str = ", ".join(f"{c:.4g}" for c in coeffs)
         # Find the matching input (case-insensitive)
@@ -379,19 +383,22 @@ class ControlsWidgetBase(QWidget):
     # ------------------------------------------------------------------
 
     def _on_play_toggled(self, checked: bool) -> None:
-        assert checked is not None, "checked must be provided"
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
         self._is_playing = checked
         self.btn_play.setText("Pause" if checked else "Play")
         self.play_toggled.emit(checked)
 
     def set_slider_range(self, max_val: int) -> None:
         """Pre: max_val >= 0"""
-        assert max_val >= 0, f"Slider max must be non-negative, got {max_val}"
+        if not (max_val >= 0):
+            raise ValueError(f"Slider max must be non-negative, got {max_val}")
         self.slider.setRange(0, max_val)
 
     def set_slider_value(self, val: int) -> None:
         """Pre: 0 <= val <= slider.maximum()"""
-        assert 0 <= val <= self.slider.maximum(), (
+        if not (0 <= val <= self.slider.maximum()):
+            raise ValueError(()
             f"Slider value {val} out of range [0, {self.slider.maximum()}]"
         )
         self.slider.blockSignals(True)
@@ -462,7 +469,8 @@ class ControlsWidgetBase(QWidget):
         Subclasses should use this when parsing inputs that might be
         UnitAwareInput or plain LabeledInput widgets.
         """
-        assert widget is not None, "widget must be provided"
+        if not (widget is not None):
+            raise ValueError("widget must be provided")
         from .controls_utils import parse_float
 
         try:

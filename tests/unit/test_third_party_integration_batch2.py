@@ -380,7 +380,7 @@ class TestEngineAvailabilityDeep:
             import pydrake.all  # noqa: F401
 
             assert DRAKE_AVAILABLE
-        except Exception:  # noqa: BLE001
+        except Exception as e:  # noqa: BLE001
             assert not DRAKE_AVAILABLE
 
     def test_mujoco_availability_consistent_with_import(self) -> None:

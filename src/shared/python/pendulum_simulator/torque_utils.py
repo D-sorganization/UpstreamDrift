@@ -50,11 +50,13 @@ def make_polynomial_torque(
     Callable[[float], tuple[float, ...]]
         A function that takes time t and returns a tuple of torques.
     """
-    assert len(coeffs_per_joint) >= 1, "Need at least one joint"
+    if not (len(coeffs_per_joint) >= 1):
+        raise ValueError("Need at least one joint")
 
     polys: list[np.ndarray] = []
     for i, coeffs in enumerate(coeffs_per_joint):
-        assert len(coeffs) >= 1, (
+        if not (len(coeffs) >= 1):
+            raise ValueError(()
             f"Need at least one coefficient for joint {i}, got {len(coeffs)}"
         )
         # Reverse: our convention is [c0, c1, c2, ...] (ascending),

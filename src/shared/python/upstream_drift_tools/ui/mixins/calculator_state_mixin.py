@@ -141,8 +141,10 @@ class CalculatorStateMixin:
             name: Optional name for the splitter
 
         """
-        assert splitter is not None, "splitter must be provided"
-        assert splitter is not None, "splitter must be provided"
+        if not (splitter is not None):
+            raise ValueError("splitter must be provided")
+        if not (splitter is not None):
+            raise ValueError("splitter must be provided")
         if name is None:
             name = f"splitter_{len(self.splitters)}"
 
@@ -188,8 +190,10 @@ class CalculatorStateMixin:
             widget_type: Type of widget for appropriate copy handling
 
         """
-        assert widget_type is not None, "widget_type must be provided"
-        assert widget_type is not None, "widget_type must be provided"
+        if not (widget_type is not None):
+            raise ValueError("widget_type must be provided")
+        if not (widget_type is not None):
+            raise ValueError("widget_type must be provided")
         widget_info = {"widget": widget, "type": widget_type}
 
         self.copyable_widgets.append(widget_info)
@@ -338,8 +342,10 @@ class CalculatorStateMixin:
 
     def restore_input_states(self, states: dict[str, Any]) -> None:
         """Restore input widget states"""
-        assert states is not None, "states must be provided"
-        assert states is not None, "states must be provided"
+        if not (states is not None):
+            raise ValueError("states must be provided")
+        if not (states is not None):
+            raise ValueError("states must be provided")
         self.change_tracking_enabled = False
         try:
             for info in self.input_widgets:
@@ -662,8 +668,10 @@ class CalculatorStateMixin:
         self, position: Any, widget_info: dict[str, Any]
     ) -> None:
         """Show context menu for a specific widget"""
-        assert widget_info is not None, "widget_info must be provided"
-        assert widget_info is not None, "widget_info must be provided"
+        if not (widget_info is not None):
+            raise ValueError("widget_info must be provided")
+        if not (widget_info is not None):
+            raise ValueError("widget_info must be provided")
         menu = QMenu(cast(QWidget, self))
         widget = widget_info["widget"]
 
@@ -716,8 +724,10 @@ class CalculatorStateMixin:
 
     def create_copy_button(self, text: str = "Copy Results") -> Any:
         """Create a copy button for the calculator"""
-        assert text is not None, "text must be provided"
-        assert text is not None, "text must be provided"
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
+            raise ValueError("text must be provided")
         from PyQt6.QtWidgets import QPushButton
 
         copy_btn = QPushButton(text)

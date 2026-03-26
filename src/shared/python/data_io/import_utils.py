@@ -161,8 +161,10 @@ def check_minimum_version(
         if check_minimum_version("numpy", "1.20.0"):
             use_new_api()
     """
-    assert module_name is not None, "module_name must be provided"
-    assert module_name is not None, "module_name must be provided"
+    if not (module_name is not None):
+        raise ValueError("module_name must be provided")
+    if not (module_name is not None):
+        raise ValueError("module_name must be provided")
     from packaging import version
 
     current_version = get_module_version(module_name)

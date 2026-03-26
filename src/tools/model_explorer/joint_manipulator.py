@@ -61,8 +61,10 @@ class JointInfo:
     @classmethod
     def from_element(cls, element: ET.Element) -> JointInfo:
         """Create JointInfo from XML element."""
-        assert element is not None, "element must be provided"
-        assert element is not None, "element must be provided"
+        if not (element is not None):
+            raise ValueError("element must be provided")
+        if not (element is not None):
+            raise ValueError("element must be provided")
         name = element.get("name", "unnamed")
         joint_type = element.get("type", "fixed")
 
@@ -155,8 +157,10 @@ class JointSliderWidget(QWidget):
 
     def __init__(self, joint: JointInfo, parent: QWidget | None = None) -> None:
         """Initialize the joint slider widget."""
-        assert joint is not None, "joint must be provided"
-        assert joint is not None, "joint must be provided"
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
         super().__init__(parent)
         self.joint = joint
         self._setup_ui()
@@ -225,8 +229,10 @@ class JointSliderWidget(QWidget):
 
     def _on_slider_changed(self, value: int) -> None:
         """Handle slider value change."""
-        assert value is not None, "value must be provided"
-        assert value is not None, "value must be provided"
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
+            raise ValueError("value must be provided")
         float_value = value / self.scale
         self.spinbox.blockSignals(True)
         self.spinbox.setValue(float_value)
@@ -236,8 +242,10 @@ class JointSliderWidget(QWidget):
 
     def _on_spinbox_changed(self, value: float) -> None:
         """Handle spinbox value change."""
-        assert value is not None, "value must be provided"
-        assert value is not None, "value must be provided"
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
+            raise ValueError("value must be provided")
         self.slider.blockSignals(True)
         self.slider.setValue(int(value * self.scale))
         self.slider.blockSignals(False)
@@ -293,8 +301,10 @@ class JointTableWidget(QWidget):
 
     def load_joints(self, joints: dict[str, JointInfo]) -> None:
         """Load joints into the table."""
-        assert joints is not None, "joints must be provided"
-        assert joints is not None, "joints must be provided"
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
         self.joints = joints
         self.table.setRowCount(len(joints))
 
@@ -356,8 +366,10 @@ class JointEditorPanel(QWidget):
         Returns:
             Configured QDoubleSpinBox.
         """
-        assert min_val is not None, "min_val must be provided"
-        assert min_val is not None, "min_val must be provided"
+        if not (min_val is not None):
+            raise ValueError("min_val must be provided")
+        if not (min_val is not None):
+            raise ValueError("min_val must be provided")
         spin = QDoubleSpinBox()
         spin.setRange(min_val, max_val)
         spin.setSingleStep(step)
@@ -468,8 +480,10 @@ class JointEditorPanel(QWidget):
 
     def load_joints(self, joints: dict[str, JointInfo]) -> None:
         """Load joints into the combo box."""
-        assert joints is not None, "joints must be provided"
-        assert joints is not None, "joints must be provided"
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
         self.joint_combo.clear()
         self.joint_combo.addItems(joints.keys())
 
@@ -484,8 +498,10 @@ class JointEditorPanel(QWidget):
     )
     def set_joint(self, joint: JointInfo) -> None:
         """Set the joint to edit."""
-        assert joint is not None, "joint must be provided"
-        assert joint is not None, "joint must be provided"
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
         self.current_joint = joint
 
         self.name_edit.setText(joint.name)
@@ -654,8 +670,10 @@ class JointManipulatorWidget(QWidget):
     )
     def load_urdf(self, content: str) -> None:
         """Load URDF content and auto-detect joints."""
-        assert content is not None, "content must be provided"
-        assert content is not None, "content must be provided"
+        if not (content is not None):
+            raise ValueError("content must be provided")
+        if not (content is not None):
+            raise ValueError("content must be provided")
         self.urdf_content = content
         self._on_auto_load()
 
@@ -719,8 +737,10 @@ class JointManipulatorWidget(QWidget):
 
     def _on_joint_value_changed(self, name: str, value: float) -> None:
         """Handle joint value change from slider."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if name in self.joints:
             self.joints[name].current_position = value
 
@@ -752,8 +772,10 @@ class JointManipulatorWidget(QWidget):
 
     def _on_joint_updated(self, name: str, new_element: ET.Element) -> None:
         """Handle joint update from editor."""
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
+            raise ValueError("name must be provided")
         if not self.urdf_content:
             return
 

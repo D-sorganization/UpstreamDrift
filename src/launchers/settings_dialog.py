@@ -75,8 +75,10 @@ class SettingsDialog(QDialog):
         diagnostics_data: dict[str, Any] | None = None,
         initial_tab: int = 0,
     ) -> None:
-        assert initial_tab is not None, "initial_tab must be provided"
-        assert initial_tab is not None, "initial_tab must be provided"
+        if not (initial_tab is not None):
+            raise ValueError("initial_tab must be provided")
+        if not (initial_tab is not None):
+            raise ValueError("initial_tab must be provided")
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.resize(850, 650)
@@ -338,8 +340,10 @@ class SettingsDialog(QDialog):
 
     def _render_diagnostics(self, data: dict[str, Any]) -> None:
         """Render diagnostics results as styled HTML."""
-        assert data is not None, "data must be provided"
-        assert data is not None, "data must be provided"
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
         summary = data.get("summary", {})
         checks = data.get("checks", [])
         runtime = data.get("runtime_state", {})
@@ -354,8 +358,10 @@ class SettingsDialog(QDialog):
         self._diag_browser.setHtml(html)
 
     def _render_diag_summary(self, summary: dict) -> str:
-        assert summary is not None, "summary must be provided"
-        assert summary is not None, "summary must be provided"
+        if not (summary is not None):
+            raise ValueError("summary must be provided")
+        if not (summary is not None):
+            raise ValueError("summary must be provided")
         status = summary.get("status", "unknown").upper()
         passed = summary.get("passed", 0)
         failed = summary.get("failed", 0)
@@ -375,8 +381,10 @@ class SettingsDialog(QDialog):
         """
 
     def _render_diag_checks(self, checks: list) -> str:
-        assert checks is not None, "checks must be provided"
-        assert checks is not None, "checks must be provided"
+        if not (checks is not None):
+            raise ValueError("checks must be provided")
+        if not (checks is not None):
+            raise ValueError("checks must be provided")
         html = "<h3>Check Results</h3><table style='width:100%;'>"
         for check in checks:
             icon = {"pass": "&#9989;", "fail": "&#10060;", "warning": "&#9888;"}.get(
@@ -396,8 +404,10 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_engines(self, checks: list) -> str:
-        assert checks is not None, "checks must be provided"
-        assert checks is not None, "checks must be provided"
+        if not (checks is not None):
+            raise ValueError("checks must be provided")
+        if not (checks is not None):
+            raise ValueError("checks must be provided")
         engine_check = next(
             (c for c in checks if c["name"] == "engine_availability"), None
         )
@@ -441,8 +451,10 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_runtime(self, runtime: dict) -> str:
-        assert runtime is not None, "runtime must be provided"
-        assert runtime is not None, "runtime must be provided"
+        if not (runtime is not None):
+            raise ValueError("runtime must be provided")
+        if not (runtime is not None):
+            raise ValueError("runtime must be provided")
         if not runtime:
             return ""
         html = "<h3>Runtime State</h3><ul>"
@@ -457,8 +469,10 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_recommendations(self, recommendations: list) -> str:
-        assert recommendations is not None, "recommendations must be provided"
-        assert recommendations is not None, "recommendations must be provided"
+        if not (recommendations is not None):
+            raise ValueError("recommendations must be provided")
+        if not (recommendations is not None):
+            raise ValueError("recommendations must be provided")
         if not recommendations:
             return ""
         html = "<h3>Recommendations</h3><ul>"
@@ -517,16 +531,20 @@ class SettingsDialog(QDialog):
         self.build_thread.start()
 
     def _on_build_log(self, line: str) -> None:
-        assert line is not None, "line must be provided"
-        assert line is not None, "line must be provided"
+        if not (line is not None):
+            raise ValueError("line must be provided")
+        if not (line is not None):
+            raise ValueError("line must be provided")
         self.build_console.append(line)
         sb = self.build_console.verticalScrollBar()
         if sb:
             sb.setValue(sb.maximum())
 
     def _on_build_finished(self, success: bool, message: str) -> None:
-        assert success is not None, "success must be provided"
-        assert success is not None, "success must be provided"
+        if not (success is not None):
+            raise ValueError("success must be provided")
+        if not (success is not None):
+            raise ValueError("success must be provided")
         self._btn_build.setEnabled(True)
         self._btn_cancel_build.setEnabled(False)
         if hasattr(self, "_build_timer_id") and self._build_timer_id is not None:

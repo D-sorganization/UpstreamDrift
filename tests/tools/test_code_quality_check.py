@@ -21,7 +21,7 @@ def test_is_legitimate_pass_context():
         "def foo():",
         "    try:",
         "        pass",
-        "    except Exception:",
+        "    except Exception as e:",
         "        pass",
         "class Bar:",
         "    pass",

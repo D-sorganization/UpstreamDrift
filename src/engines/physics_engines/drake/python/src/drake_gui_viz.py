@@ -88,9 +88,12 @@ class VisualizationMixin:
                 self.meshcat.Delete("overlays/vectors/cf")  # type: ignore[attr-defined]
 
     def _sync_eval_context(self) -> None:
-        assert self.plant is not None  # type: ignore[attr-defined]
-        assert self.context is not None  # type: ignore[attr-defined]
-        assert self.eval_context is not None  # type: ignore[attr-defined]
+        if not (self.plant is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
+        if not (self.context is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
+        if not (self.eval_context is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
         plant_context = self.plant.GetMyContextFromRoot(self.context)  # type: ignore[attr-defined]
         self.plant.SetPositions(  # type: ignore[attr-defined]
             self.eval_context,
@@ -102,14 +105,18 @@ class VisualizationMixin:
         )
 
     def _draw_torque_vectors(self) -> None:
-        assert self.plant is not None  # type: ignore[attr-defined]
-        assert self.eval_context is not None  # type: ignore[attr-defined]
+        if not (self.plant is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
+        if not (self.eval_context is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
         tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)  # type: ignore[attr-defined]
         self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
 
     def _draw_gravity_force_vectors(self) -> None:
-        assert self.plant is not None  # type: ignore[attr-defined]
-        assert self.eval_context is not None  # type: ignore[attr-defined]
+        if not (self.plant is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
+        if not (self.eval_context is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
         for i in range(self.plant.num_bodies()):  # type: ignore[attr-defined]
             body = self.plant.get_body(BodyIndex(i))  # type: ignore[attr-defined]
             if body.name() == "world":
@@ -135,7 +142,8 @@ class VisualizationMixin:
                 self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))  # type: ignore[attr-defined, arg-type]
 
     def _resolve_induced_accels(self, analyzer: Any, source: str) -> np.ndarray:
-        assert self.plant is not None  # type: ignore[attr-defined]
+        if not (self.plant is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
         accels = np.zeros(self.plant.num_velocities())  # type: ignore[attr-defined]
 
         if source in ["gravity", "velocity", "total"]:
@@ -175,7 +183,8 @@ class VisualizationMixin:
         self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
     def _draw_counterfactual_vectors(self, analyzer: Any) -> None:
-        assert self.plant is not None  # type: ignore[attr-defined]
+        if not (self.plant is not None  # type: ignore[attr-defined]):
+            raise ValueError('DbC Blocked: Precondition failed.')
         cf_type = self.combo_cf_type.currentText()  # type: ignore[attr-defined]
         res = analyzer.compute_counterfactuals(self.eval_context)  # type: ignore[attr-defined]
 
@@ -219,8 +228,10 @@ class VisualizationMixin:
         scale: float = 0.1,
     ) -> None:
         """Draw vectors at joints (accel, torque, etc)."""
-        assert values is not None, "values must be provided"
-        assert values is not None, "values must be provided"
+        if not (values is not None):
+            raise ValueError("values must be provided")
+        if not (values is not None):
+            raise ValueError("values must be provided")
         if not self.meshcat or self.plant is None:  # type: ignore[attr-defined]
             return
 

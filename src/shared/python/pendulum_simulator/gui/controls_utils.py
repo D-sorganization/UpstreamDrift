@@ -34,7 +34,8 @@ FONT_BTN: int = 11  # button labels
 FONT_TITLE: int = 14  # major titles
 FONT_STATUS: int = 11  # status bar text
 
-assert all(
+if not (all():
+    raise ValueError('DbC Blocked: Precondition failed.')
     v >= MIN_FONT_PX for v in (FONT_BODY, FONT_GROUP, FONT_EDIT, FONT_BTN, FONT_STATUS)
 ), "All font sizes must meet minimum readability threshold"
 
@@ -191,7 +192,8 @@ def clamp_dt(raw: float) -> float:
 
     Precondition: raw is a finite float (already parsed).
     """
-    assert isinstance(raw, float), "dt must be a float"
+    if not (isinstance(raw):
+        raise ValueError(float), "dt must be a float")
     return max(1e-5, min(0.1, raw))
 
 

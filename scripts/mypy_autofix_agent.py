@@ -140,10 +140,12 @@ COMMON_TYPE_IMPORTS = {
 
 def run_mypy(config_file: str | None = None, targets: list[str] | None = None) -> str:
     """Run mypy and return raw output."""
-    assert config_file is None or isinstance(config_file, str), (
+    if not (config_file is None or isinstance(config_file):
+        raise ValueError(str), ()
         "config_file must be a string or None"
     )
-    assert targets is None or isinstance(targets, list), (
+    if not (targets is None or isinstance(targets):
+        raise ValueError(list), ()
         "targets must be a list or None"
     )
     if not targets:
@@ -208,8 +210,10 @@ def write_file_lines(filepath: str, lines: list[str]) -> None:
 
 def has_type_ignore(line: str, code: str | None = None) -> bool:
     """Check if a line already has a type: ignore comment."""
-    assert isinstance(line, str), "line must be a string"
-    assert code is None or isinstance(code, str), "code must be a string or None"
+    if not (isinstance(line):
+        raise ValueError(str), "line must be a string")
+    if not (code is None or isinstance(code):
+        raise ValueError(str), "code must be a string or None")
     if "# type: ignore" in line:
         if code and f"[{code}]" in line:
             return True
@@ -223,8 +227,10 @@ def has_type_ignore(line: str, code: str | None = None) -> bool:
 
 def add_type_ignore(line: str, code: str) -> str:
     """Add # type: ignore[code] to a line."""
-    assert isinstance(line, str), "line must be a string"
-    assert isinstance(code, str), "code must be a string"
+    if not (isinstance(line):
+        raise ValueError(str), "line must be a string")
+    if not (isinstance(code):
+        raise ValueError(str), "code must be a string")
     stripped = line.rstrip("\n\r")
     # Check if there's already an inline comment
     if "# type: ignore" in stripped:
@@ -255,8 +261,10 @@ def fix_callable_as_type(lines: list[str], error: MypyError) -> Fix | None:
 
     This is a REAL fix, not a suppression.
     """
-    assert isinstance(lines, list), "lines must be a list"
-    assert isinstance(error, MypyError), "error must be MypyError"
+    if not (isinstance(lines):
+        raise ValueError(list), "lines must be a list")
+    if not (isinstance(error):
+        raise ValueError(MypyError), "error must be MypyError")
     if error.code != "valid-type":
         return None
     msg_lower = error.message.lower()
@@ -299,8 +307,10 @@ def fix_union_attr(lines: list[str], error: MypyError) -> Fix | None:
 
     This is a REAL fix - adds proper type narrowing.
     """
-    assert isinstance(lines, list), "lines must be a list"
-    assert isinstance(error, MypyError), "error must be MypyError"
+    if not (isinstance(lines):
+        raise ValueError(list), "lines must be a list")
+    if not (isinstance(error):
+        raise ValueError(MypyError), "error must be MypyError")
     if error.code != "union-attr":
         return None
 
@@ -360,8 +370,10 @@ def fix_name_not_defined(lines: list[str], error: MypyError) -> Fix | None:
 
     This is a REAL fix when the name is a known type.
     """
-    assert isinstance(lines, list), "lines must be a list"
-    assert isinstance(error, MypyError), "error must be MypyError"
+    if not (isinstance(lines):
+        raise ValueError(list), "lines must be a list")
+    if not (isinstance(error):
+        raise ValueError(MypyError), "error must be MypyError")
     if error.code != "name-defined":
         return None
 
@@ -388,8 +400,10 @@ def fix_import_errors(lines: list[str], error: MypyError) -> Fix | None:
 
     These are SUPPRESSIONS but acceptable for third-party packages.
     """
-    assert isinstance(lines, list), "lines must be a list"
-    assert isinstance(error, MypyError), "error must be MypyError"
+    if not (isinstance(lines):
+        raise ValueError(list), "lines must be a list")
+    if not (isinstance(error):
+        raise ValueError(MypyError), "error must be MypyError")
     if error.code not in ("import-untyped", "import-not-found"):
         return None
 
@@ -417,8 +431,10 @@ def fix_generic_suppression(lines: list[str], error: MypyError) -> Fix | None:
     Only used when no real fix is available. Uses specific error codes
     rather than blanket ignores.
     """
-    assert isinstance(lines, list), "lines must be a list"
-    assert isinstance(error, MypyError), "error must be MypyError"
+    if not (isinstance(lines):
+        raise ValueError(list), "lines must be a list")
+    if not (isinstance(error):
+        raise ValueError(MypyError), "error must be MypyError")
     # Only suppress specific, well-understood error codes
     suppressible_codes = {
         "assignment",
@@ -463,8 +479,10 @@ def _ensure_import(lines: list[str], import_statement: str) -> bool:
     Inserts after the last existing import from the same module.
     Returns True if import was added.
     """
-    assert isinstance(lines, list), "lines must be a list"
-    assert isinstance(import_statement, str), "import_statement must be a string"
+    if not (isinstance(lines):
+        raise ValueError(list), "lines must be a list")
+    if not (isinstance(import_statement):
+        raise ValueError(str), "import_statement must be a string")
     # Check if already imported
     for line in lines:
         if import_statement in line:
@@ -537,14 +555,20 @@ def run_agent(
     targets: list[str] | None = None,
 ) -> AgentReport:
     """Main agent loop: observe, classify, fix, report."""
-    assert isinstance(max_fixes, int), "max_fixes must be an int"
-    assert isinstance(max_files, int), "max_files must be an int"
-    assert isinstance(dry_run, bool), "dry_run must be a bool"
-    assert isinstance(verbose, bool), "verbose must be a bool"
-    assert config_file is None or isinstance(config_file, str), (
+    if not (isinstance(max_fixes):
+        raise ValueError(int), "max_fixes must be an int")
+    if not (isinstance(max_files):
+        raise ValueError(int), "max_files must be an int")
+    if not (isinstance(dry_run):
+        raise ValueError(bool), "dry_run must be a bool")
+    if not (isinstance(verbose):
+        raise ValueError(bool), "verbose must be a bool")
+    if not (config_file is None or isinstance(config_file):
+        raise ValueError(str), ()
         "config_file must be None or string"
     )
-    assert targets is None or isinstance(targets, list), "targets must be None or list"
+    if not (targets is None or isinstance(targets):
+        raise ValueError(list), "targets must be None or list")
 
     report = AgentReport()
     reasons = report.skipped_reasons
