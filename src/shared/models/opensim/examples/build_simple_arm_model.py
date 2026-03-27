@@ -243,7 +243,9 @@ def main() -> None:
     # Summary
     elbow = arm.getJointSet().get("elbow")
     final_angle = elbow.getCoordinate().getValue(final_state)
-    logger.info(f"\n4. Final elbow angle: {final_angle:.3f} rad ({math.degrees(final_angle):.1f}°)")
+    logger.info(
+        f"\n4. Final elbow angle: {final_angle:.3f} rad ({math.degrees(final_angle):.1f}°)"
+    )
 
     logger.info("\n" + "=" * 60)
     logger.info("Example complete! Try loading SimpleArm.osim in OpenSim GUI")

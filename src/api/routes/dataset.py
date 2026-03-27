@@ -80,15 +80,21 @@ def _require_active_engine(engine_manager: EngineManager) -> PhysicsEngine:
 class DatasetGenerationRequest(BaseModel):
     """Request model for dataset generation."""
 
-    num_samples: int = Field(10, description="Number of simulation runs", ge=1, le=10000)
-    duration: float = Field(2.0, description="Duration per simulation (seconds)", gt=0, le=60)
+    num_samples: int = Field(
+        10, description="Number of simulation runs", ge=1, le=10000
+    )
+    duration: float = Field(
+        2.0, description="Duration per simulation (seconds)", gt=0, le=60
+    )
     timestep: float = Field(0.002, description="Simulation timestep", gt=0, le=0.1)
     seed: int = Field(42, description="Random seed for reproducibility")
     vary_positions: bool = Field(True, description="Randomize initial positions")
     vary_velocities: bool = Field(False, description="Randomize initial velocities")
     record_mass_matrix: bool = Field(True, description="Record inertia matrices")
     record_dynamics: bool = Field(True, description="Record bias/gravity forces")
-    record_drift_control: bool = Field(True, description="Record drift/control decomposition")
+    record_drift_control: bool = Field(
+        True, description="Record drift/control decomposition"
+    )
     export_format: str = Field("hdf5", description="Export format (hdf5, sqlite, csv)")
     output_path: str = Field("output/training_data", description="Output path")
 
@@ -107,7 +113,9 @@ class SwingImportRequest(BaseModel):
     """Request model for swing capture import."""
 
     file_path: str = Field(..., description="Path to capture file (C3D, CSV, JSON)")
-    target_frame_rate: float = Field(200.0, description="Target frame rate for resampling")
+    target_frame_rate: float = Field(
+        200.0, description="Target frame rate for resampling"
+    )
     export_for_rl: bool = Field(True, description="Export trajectory for RL training")
     output_path: str | None = Field(None, description="Output path for RL export")
 
@@ -129,7 +137,9 @@ class ControlStateRequest(BaseModel):
 
     strategy: str = Field("zero", description="Control strategy")
     torques: list[float] | None = Field(None, description="Direct torque values")
-    joint_index: int | None = Field(None, description="Joint index for single-joint control")
+    joint_index: int | None = Field(
+        None, description="Joint index for single-joint control"
+    )
     joint_torque: float | None = Field(None, description="Torque for single joint")
     kp: float | None = Field(None, description="Proportional gain")
     kd: float | None = Field(None, description="Derivative gain")
@@ -141,7 +151,9 @@ class ControlStateRequest(BaseModel):
 class PlotGenerationRequest(BaseModel):
     """Request model for plot generation."""
 
-    plot_types: list[str] | None = Field(None, description="Plot types to generate (None = all)")
+    plot_types: list[str] | None = Field(
+        None, description="Plot types to generate (None = all)"
+    )
     output_dir: str = Field("output/plots", description="Output directory for plots")
     output_format: str = Field("png", description="Image format (png, svg, pdf)")
     dpi: int = Field(150, description="Resolution in DPI")
@@ -195,14 +207,18 @@ async def generate_dataset(
             record_drift_control=request.record_drift_control,
             control_profiles=[
                 ControlProfile(name="zero"),
-                ControlProfile(name="random", profile_type="random", parameters={"scale": 0.5}),
+                ControlProfile(
+                    name="random", profile_type="random", parameters={"scale": 0.5}
+                ),
             ],
         )
 
         generator = DatasetGenerator(engine)
         dataset = generator.generate(config)
 
-        output_path = generator.export(dataset, request.output_path, format=request.export_format)
+        output_path = generator.export(
+            dataset, request.output_path, format=request.export_format
+        )
 
         return DatasetGenerationResponse(
             status="success",
@@ -251,7 +267,8 @@ async def import_swing_capture(
     rl_export_path = None
     if request.export_for_rl:
         output = (
-            request.output_path or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
+            request.output_path
+            or f"output/rl_trajectories/{Path(request.file_path).stem}.json"
         )
         rl_export_path = str(importer.export_for_rl(trajectory, output))
 

@@ -10,7 +10,9 @@ import pytest
 # Handle import of module with invalid identifier (3D_Golf_Model)
 def import_c3d_viewer():
     """Import the C3D viewer module dynamically."""
-    module_name = "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
+    module_name = (
+        "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
+    )
     try:
         return importlib.import_module(module_name)
     except ImportError:

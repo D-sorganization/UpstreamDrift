@@ -163,7 +163,9 @@ def parse_coeffs(widget: LabeledInput, name: str) -> list[float]:
         parts = widget.value.split(",")
         return [float(p.strip()) for p in parts if p.strip()]
     except ValueError:
-        raise ValueError(f"Cannot parse '{name}' coefficients: '{widget.value}'") from None
+        raise ValueError(
+            f"Cannot parse '{name}' coefficients: '{widget.value}'"
+        ) from None
 
 
 def parse_coeffs_lenient(widget: LabeledInput) -> list[float]:

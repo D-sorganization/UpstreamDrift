@@ -145,8 +145,8 @@ class TestKinematicForceAnalyzer:
 
         # May not have club head in simple model
         if analyzer.club_head_id is not None:
-            coriolis, centrifugal, apparent = analyzer.compute_club_head_apparent_forces(
-                qpos, qvel, qacc
+            coriolis, centrifugal, apparent = (
+                analyzer.compute_club_head_apparent_forces(qpos, qvel, qacc)
             )
 
             assert coriolis.shape == (3,)
@@ -168,7 +168,9 @@ class TestKinematicForceAnalyzer:
         velocities = np.array([data.qvel.copy() for _ in range(3)])
         accelerations = np.zeros((3, model.nv))
 
-        results = analyzer.analyze_trajectory(times, positions, velocities, accelerations)
+        results = analyzer.analyze_trajectory(
+            times, positions, velocities, accelerations
+        )
 
         assert len(results) == 3
         assert all(isinstance(r, KinematicForceData) for r in results)

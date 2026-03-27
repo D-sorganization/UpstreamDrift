@@ -140,7 +140,9 @@ def export_to_hdf5(
                         key,
                         data=value,
                         compression=(
-                            compression if value.size > MIN_SIZE_FOR_COMPRESSION else None
+                            compression
+                            if value.size > MIN_SIZE_FOR_COMPRESSION
+                            else None
                         ),
                     )
                 elif isinstance(value, int | float):
@@ -203,15 +205,25 @@ class CaptureExportData:
 
 
 @precondition(
-    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
-        output_path is not None and len(output_path) > 0
-    ),
+    lambda output_path,
+    times,
+    joint_positions,
+    joint_names,
+    forces=None,
+    moments=None,
+    frame_rate=60.0,
+    units=None: (output_path is not None and len(output_path) > 0),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
-        frame_rate > 0
-    ),
+    lambda output_path,
+    times,
+    joint_positions,
+    joint_names,
+    forces=None,
+    moments=None,
+    frame_rate=60.0,
+    units=None: (frame_rate > 0),
     "Frame rate must be positive",
 )
 def export_to_c3d(
@@ -372,7 +384,8 @@ def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
             json_data[k] = v.tolist()
         elif isinstance(v, dict):
             json_data[k] = {
-                sk: sv.tolist() if isinstance(sv, np.ndarray) else sv for sk, sv in v.items()
+                sk: sv.tolist() if isinstance(sv, np.ndarray) else sv
+                for sk, sv in v.items()
             }
         else:
             json_data[k] = v
@@ -409,7 +422,11 @@ def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:
         elif isinstance(v, dict):
             for sub_k, sub_v in v.items():
                 if isinstance(sub_v, np.ndarray) and len(sub_v) == n_times:
-                    full_key = f"{k}_source_{sub_k}" if isinstance(sub_k, int) else f"{k}_{sub_k}"
+                    full_key = (
+                        f"{k}_source_{sub_k}"
+                        if isinstance(sub_k, int)
+                        else f"{k}_{sub_k}"
+                    )
                     if sub_v.ndim == 1:
                         flat_data[full_key] = sub_v
                     elif sub_v.ndim == 2:

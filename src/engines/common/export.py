@@ -361,12 +361,18 @@ class DatasetExporter:
 
             if self._records[0].accelerations is not None:
                 accel = np.array(
-                    [r.accelerations for r in self._records if r.accelerations is not None]
+                    [
+                        r.accelerations
+                        for r in self._records
+                        if r.accelerations is not None
+                    ]
                 )
                 f.create_dataset("accelerations", data=accel)
 
             if self._records[0].forces is not None:
-                forces = np.array([r.forces for r in self._records if r.forces is not None])
+                forces = np.array(
+                    [r.forces for r in self._records if r.forces is not None]
+                )
                 f.create_dataset("forces", data=forces)
 
             # Store metadata as HDF5 attributes

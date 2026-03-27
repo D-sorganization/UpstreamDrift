@@ -13,7 +13,8 @@ import numpy as np
 import pytest
 
 GOLFER_URDF = (
-    Path(__file__).parents[2] / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
+    Path(__file__).parents[2]
+    / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
 )
 
 

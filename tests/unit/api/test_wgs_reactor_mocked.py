@@ -24,7 +24,9 @@ client = TestClient(_app)
 @pytest.fixture
 def mock_engine():
     """Mock the WGSReactorEngine securely from Tools."""
-    with patch("upstream_drift_tools.process_calculators.WGSReactorEngine") as mock_class:
+    with patch(
+        "upstream_drift_tools.process_calculators.WGSReactorEngine"
+    ) as mock_class:
         mock_instance = MagicMock()
         mock_class.return_value = mock_instance
         yield mock_instance
@@ -81,7 +83,9 @@ def test_calculate_wgs_success(mock_engine) -> None:
 
 def test_calculate_wgs_error_handling(mock_engine) -> None:
     """Verify that arithmetic errors gracefully map to 422 errors through the router boundary."""
-    mock_engine.calculate_equilibrium_composition.side_effect = ValueError("Invalid input")
+    mock_engine.calculate_equilibrium_composition.side_effect = ValueError(
+        "Invalid input"
+    )
 
     payload = {
         "inlet_composition": {"CO": 20.0},

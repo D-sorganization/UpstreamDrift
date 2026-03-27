@@ -72,7 +72,9 @@ def _load_themes_from_json() -> dict[str, dict[str, str]] | None:
     Returns:
         Dictionary of theme definitions, or None if JSON not available.
     """
-    json_path = Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
+    json_path = (
+        Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
+    )
     if not json_path.exists():
         return None
 
@@ -99,7 +101,9 @@ def _load_themes_from_json() -> dict[str, dict[str, str]] | None:
 
 def _load_chart_colors_from_json() -> list[str] | None:
     """Load chart colors from themes.json."""
-    json_path = Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
+    json_path = (
+        Path(__file__).parent.parent.parent / "theme-definitions" / "themes.json"
+    )
     if not json_path.exists():
         return None
 
@@ -379,7 +383,9 @@ _HARDCODED_CHART_COLORS: list[str] = [
 ]
 
 # Load from JSON if available, otherwise use hardcoded definitions
-BUILTIN_THEMES: dict[str, dict[str, str]] = _load_themes_from_json() or _HARDCODED_BUILTIN_THEMES
+BUILTIN_THEMES: dict[str, dict[str, str]] = (
+    _load_themes_from_json() or _HARDCODED_BUILTIN_THEMES
+)
 CHART_COLORS: list[str] = _load_chart_colors_from_json() or _HARDCODED_CHART_COLORS
 
 

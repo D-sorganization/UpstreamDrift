@@ -55,7 +55,9 @@ class ModelRegistry(ContractChecker):
                 "models must be a non-None dict",
             ),
             (
-                lambda: (self.config_path is not None and isinstance(self.config_path, Path)),
+                lambda: (
+                    self.config_path is not None and isinstance(self.config_path, Path)
+                ),
                 "config_path must be a valid Path",
             ),
             (
@@ -91,7 +93,9 @@ class ModelRegistry(ContractChecker):
                 return
 
             if "models" not in data:
-                logger.error(f"Invalid registry format: missing 'models' key in {self.config_path}")
+                logger.error(
+                    f"Invalid registry format: missing 'models' key in {self.config_path}"
+                )
                 return
 
             for model_data in data["models"]:

@@ -84,7 +84,9 @@ class TestErrorMetadata:
 
         for code, metadata in ERROR_METADATA.items():
             status = metadata.get("status_code")
-            assert status in valid_status_codes, f"Invalid status code {status} for {code}"
+            assert status in valid_status_codes, (
+                f"Invalid status code {status} for {code}"
+            )
 
     def test_messages_are_non_empty_strings(self):
         """Test that all messages are non-empty strings."""
@@ -117,9 +119,9 @@ class TestErrorMetadata:
             expected_category = code_to_category.get(code_prefix)
 
             if expected_category:
-                assert (
-                    metadata.get("category") == expected_category
-                ), f"Category mismatch for {code}"
+                assert metadata.get("category") == expected_category, (
+                    f"Category mismatch for {code}"
+                )
 
 
 class TestAPIErrorContract:
@@ -269,8 +271,12 @@ class TestAPIError:
         )
 
         with (
-            patch("src.api.utils.error_codes.get_request_id", return_value="req_test123"),
-            patch("src.api.utils.error_codes.get_trace_context", return_value=mock_context),
+            patch(
+                "src.api.utils.error_codes.get_request_id", return_value="req_test123"
+            ),
+            patch(
+                "src.api.utils.error_codes.get_trace_context", return_value=mock_context
+            ),
         ):
             error = APIError(
                 code=ErrorCode.INTERNAL_ERROR,

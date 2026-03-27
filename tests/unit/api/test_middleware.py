@@ -92,7 +92,9 @@ class TestAddSecurityHeaders:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
-        assert result.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        assert (
+            result.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        )
 
     async def test_adds_hsts_for_https(self, mock_request, mock_response):
         """Test adding HSTS header for HTTPS requests."""
@@ -145,7 +147,9 @@ class TestAddSecurityHeadersToResponse:
         assert result.headers.get("X-Content-Type-Options") == "nosniff"
         assert result.headers.get("X-Frame-Options") == "DENY"
         assert result.headers.get("X-XSS-Protection") == "1; mode=block"
-        assert result.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        assert (
+            result.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        )
 
 
 class TestValidateUploadSizeContract:
@@ -167,7 +171,9 @@ class TestValidateUploadSizeContract:
 class TestValidateUploadSize:
     """Functional tests for validate_upload_size middleware."""
 
-    async def test_allows_request_without_content_length(self, mock_request, mock_response):
+    async def test_allows_request_without_content_length(
+        self, mock_request, mock_response
+    ):
         """Test allowing requests without Content-Length header."""
         from src.api.middleware.upload_limits import validate_upload_size
 

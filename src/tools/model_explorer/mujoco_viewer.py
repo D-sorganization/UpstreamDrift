@@ -139,7 +139,8 @@ class URDFToMJCFConverter:
                 if mass_elem is not None:
                     mass = mass_elem.get("value", "1.0")
                     mjcf_parts.append(
-                        f'      <inertial pos="0 0 0" mass="{mass}" ' f'diaginertia="0.1 0.1 0.1"/>'
+                        f'      <inertial pos="0 0 0" mass="{mass}" '
+                        f'diaginertia="0.1 0.1 0.1"/>'
                     )
             else:
                 # Default inertial
@@ -284,7 +285,9 @@ class MuJoCoOffscreenRenderer:
 
                 # Create renderer with compatible dimensions
                 # Note: MuJoCo Renderer takes (model, height, width) not (model, width, height)
-                self._renderer = mujoco.Renderer(self._model, render_height, render_width)
+                self._renderer = mujoco.Renderer(
+                    self._model, render_height, render_width
+                )
 
                 # Initialize persistent camera for efficiency
                 self._camera = mujoco.MjvCamera()
@@ -667,7 +670,9 @@ class MuJoCoViewerWidget(QWidget):
 
         # Headless fallback with clear messaging
         if not MUJOCO_AVAILABLE:
-            self._status_label.setText("⚠️ MuJoCo not installed - running in headless mode")
+            self._status_label.setText(
+                "⚠️ MuJoCo not installed - running in headless mode"
+            )
             self._disable_toggles()
             self._update_headless_placeholder()
 
@@ -712,7 +717,9 @@ class MuJoCoViewerWidget(QWidget):
         """Show a placeholder message."""
         self._viewport.setText(message)
 
-    def update_visualization(self, urdf_content: str, urdf_path: str | None = None) -> None:
+    def update_visualization(
+        self, urdf_content: str, urdf_path: str | None = None
+    ) -> None:
         """Update visualization with new URDF content.
 
         Args:
@@ -758,7 +765,9 @@ class MuJoCoViewerWidget(QWidget):
         link_count = urdf_content.count("<link")
         joint_count = urdf_content.count("<joint")
         if success:
-            self._status_label.setText(f"✓ Model loaded: {link_count} links, {joint_count} joints")
+            self._status_label.setText(
+                f"✓ Model loaded: {link_count} links, {joint_count} joints"
+            )
         else:
             self._status_label.setText("⚠️ Failed to load model")
 
@@ -801,7 +810,9 @@ class MuJoCoViewerWidget(QWidget):
 
                     # Simple check: diagonal elements should be positive
                     if ixx <= 0 or iyy <= 0 or izz <= 0:
-                        errors.append(f"Link '{link_name}': Non-positive inertia diagonal")
+                        errors.append(
+                            f"Link '{link_name}': Non-positive inertia diagonal"
+                        )
 
         # Check joint axes
         for joint in root.findall(".//joint"):
@@ -814,7 +825,9 @@ class MuJoCoViewerWidget(QWidget):
                 norm = sum(x * x for x in axis) ** 0.5
 
                 if abs(norm - 1.0) > 0.01:
-                    errors.append(f"Joint '{joint_name}': Axis not normalized (|axis|={norm:.3f})")
+                    errors.append(
+                        f"Joint '{joint_name}': Axis not normalized (|axis|={norm:.3f})"
+                    )
 
         return errors
 
@@ -942,7 +955,9 @@ class MuJoCoViewerWidget(QWidget):
             # Convert to MJCF and save to temp file
             mjcf_content = URDFToMJCFConverter.convert(self._urdf_content)
 
-            with tempfile.NamedTemporaryFile(mode="w", suffix=".xml", delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".xml", delete=False
+            ) as f:
                 f.write(mjcf_content)
                 temp_path = f.name
 

@@ -15,7 +15,9 @@ class TestMultiMuscle(unittest.TestCase):
         self.mock_muscle = MagicMock(spec=HillMuscleModel)
         self.mock_muscle.params = MuscleParameters(F_max=100.0, l_opt=0.1, l_slack=0.2)
         # Setup compute_force to return a value based on input or fixed
-        self.mock_muscle.compute_force.return_value = 50.0  # Constant force for simplicity
+        self.mock_muscle.compute_force.return_value = (
+            50.0  # Constant force for simplicity
+        )
 
     def test_muscle_group_add_muscle(self) -> None:
         """Test adding muscles to a group."""

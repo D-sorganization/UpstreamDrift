@@ -116,7 +116,9 @@ def validate_timestep(dt: float) -> None:
         )
 
 
-def validate_inertia_matrix(inertia_matrix: np.ndarray, param_name: str = "inertia") -> None:
+def validate_inertia_matrix(
+    inertia_matrix: np.ndarray, param_name: str = "inertia"
+) -> None:
     """Validate inertia matrix is symmetric positive definite.
 
     Physical requirement: Inertia tensor must be SPD (symmetric positive definite).
@@ -151,7 +153,9 @@ def validate_inertia_matrix(inertia_matrix: np.ndarray, param_name: str = "inert
         )
 
     # Check positive definiteness via eigenvalues
-    eigenvalues = np.linalg.eigvalsh(inertia_matrix)  # Hermitian eigenvalues (faster for symmetric)
+    eigenvalues = np.linalg.eigvalsh(
+        inertia_matrix
+    )  # Hermitian eigenvalues (faster for symmetric)
 
     if np.any(eigenvalues <= 0):
         min_eig = eigenvalues.min()
@@ -270,7 +274,9 @@ def validate_physical_bounds(func: F) -> F:
                 validate_mass(float(param_value), param_name)
 
             # Timestep validation
-            if param_name in ("dt", "timestep") and isinstance(param_value, int | float):
+            if param_name in ("dt", "timestep") and isinstance(
+                param_value, int | float
+            ):
                 validate_timestep(float(param_value))
 
             # Inertia validation
@@ -282,7 +288,9 @@ def validate_physical_bounds(func: F) -> F:
                 validate_inertia_matrix(param_value, param_name)
 
             # Friction validation
-            if "friction" in param_name.lower() and isinstance(param_value, int | float):
+            if "friction" in param_name.lower() and isinstance(
+                param_value, int | float
+            ):
                 validate_friction_coefficient(float(param_value), param_name)
 
         # Validate parameters by name — normal and **kwargs parameters

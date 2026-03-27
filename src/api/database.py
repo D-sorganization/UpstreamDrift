@@ -26,7 +26,9 @@ if DATABASE_URL.startswith("sqlite"):
     )
 else:
     # PostgreSQL/other database configuration
-    engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=300, echo=False)
+    engine = create_engine(
+        DATABASE_URL, pool_pre_ping=True, pool_recycle=300, echo=False
+    )
 
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

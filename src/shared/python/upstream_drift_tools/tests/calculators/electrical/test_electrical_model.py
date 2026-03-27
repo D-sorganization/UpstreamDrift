@@ -20,7 +20,9 @@ class TestElectricalModel:
 
     def test_initialization(self, model):
         assert len(model.electrode_positions) == 3
-        np.testing.assert_allclose(model.electrode_positions, [0, 2.094395, 4.18879], rtol=1e-4)
+        np.testing.assert_allclose(
+            model.electrode_positions, [0, 2.094395, 4.18879], rtol=1e-4
+        )
 
     def test_calculate_system_state(self, model):
         depths = np.array([10.0, 10.0, 10.0])

@@ -23,7 +23,9 @@ def _make_instance(n_samples: int = 50, n_joints: int = 3) -> PowerWorkMetricsMi
     obj.joint_velocities = np.column_stack(
         [2 * np.pi * (i + 1) * np.cos(2 * np.pi * (i + 1) * t) for i in range(n_joints)]
     )
-    obj.joint_torques = np.column_stack([np.sin(2 * np.pi * (i + 1) * t) for i in range(n_joints)])
+    obj.joint_torques = np.column_stack(
+        [np.sin(2 * np.pi * (i + 1) * t) for i in range(n_joints)]
+    )
     obj.ground_forces = None
     obj._work_metrics_cache = {}
     return obj

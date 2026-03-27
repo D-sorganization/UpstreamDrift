@@ -107,7 +107,9 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
 
     try:
         active_keys = (
-            db.query(APIKey).filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash).all()
+            db.query(APIKey)
+            .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
+            .all()
         )
     except (RuntimeError, ValueError, OSError):
         # Fallback: prefix_hash column doesn't exist yet (migration pending)
@@ -234,7 +236,9 @@ def check_usage_quota(resource_type: str) -> Callable[[User, Session], User]:
             user_role = UserRole(current_user.role)
             from .models import SUBSCRIPTION_QUOTAS
 
-            quota_limit = getattr(SUBSCRIPTION_QUOTAS[user_role], f"{resource_type}_per_month")
+            quota_limit = getattr(
+                SUBSCRIPTION_QUOTAS[user_role], f"{resource_type}_per_month"
+            )
 
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,

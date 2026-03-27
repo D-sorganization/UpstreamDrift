@@ -158,7 +158,9 @@ def export_plot_data(
             writer = csv.writer(f)
             writer.writerow(list(columns.keys()))
             for row in range(max_rows):
-                writer.writerow([columns[k][row] if row < len(columns[k]) else "" for k in columns])
+                writer.writerow(
+                    [columns[k][row] if row < len(columns[k]) else "" for k in columns]
+                )
     else:
         raise ValueError(f"Unsupported export format: {fmt!r}")
 

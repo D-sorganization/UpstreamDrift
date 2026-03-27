@@ -37,7 +37,9 @@ class ScrewVisualizationTab(QtWidgets.QWidget):
         group = QtWidgets.QGroupBox("Screw Theory Kinematics")
         group_layout = QtWidgets.QVBoxLayout(group)
 
-        self.show_screw_axis_cb = QtWidgets.QCheckBox("Show Instantaneous Screw Axis (ISA) Motion")
+        self.show_screw_axis_cb = QtWidgets.QCheckBox(
+            "Show Instantaneous Screw Axis (ISA) Motion"
+        )
         self.show_screw_axis_cb.setToolTip(
             "Renders the pitch, direction, and center of screw motion for the reference frame."
         )
@@ -50,7 +52,9 @@ class ScrewVisualizationTab(QtWidgets.QWidget):
 
         self.target_body_input = QtWidgets.QLineEdit()
         self.target_body_input.setPlaceholderText("e.g. club_head")
-        self.target_body_input.setToolTip("Name of the reference frame to analyze (ISA).")
+        self.target_body_input.setToolTip(
+            "Name of the reference frame to analyze (ISA)."
+        )
         self.target_body_input.returnPressed.connect(self._on_body_submit)
 
         body_layout.addWidget(self.target_body_input)

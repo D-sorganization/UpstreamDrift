@@ -146,7 +146,9 @@ async def list_datasets() -> DatasetListResponse:
                         if isinstance(data, dict):
                             columns = list(data.keys())
                 except (FileNotFoundError, PermissionError, OSError) as exc:
-                    logger.debug("Could not read columns from %s: %s", filepath.name, exc)
+                    logger.debug(
+                        "Could not read columns from %s: %s", filepath.name, exc
+                    )
 
                 datasets.append(
                     DatasetInfo(
@@ -332,7 +334,9 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
     lambda name, request: name is not None and len(name.strip()) > 0,
     "Dataset name must be a non-empty string",
 )
-async def filter_dataset(name: str, request: DatasetFilterRequest) -> DatasetPreviewResponse:
+async def filter_dataset(
+    name: str, request: DatasetFilterRequest
+) -> DatasetPreviewResponse:
     """Filter a dataset by column value.
 
     See issue #1206
@@ -355,7 +359,9 @@ async def filter_dataset(name: str, request: DatasetFilterRequest) -> DatasetPre
         elif filepath.suffix.lower() == ".json":
             columns, rows = _parse_json_content(content)
         else:
-            raise HTTPException(status_code=400, detail="Filter not supported for this format")
+            raise HTTPException(
+                status_code=400, detail="Filter not supported for this format"
+            )
         fmt = filepath.suffix.lstrip(".")
 
     if request.column not in columns:

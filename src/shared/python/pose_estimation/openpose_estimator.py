@@ -71,7 +71,9 @@ class OpenPoseEstimator(PoseEstimator):
         self._is_loaded = False
 
         if op is None:
-            logger.warning("pyopenpose library not found. OpenPoseEstimator will not function.")
+            logger.warning(
+                "pyopenpose library not found. OpenPoseEstimator will not function."
+            )
 
     def load_model(self, model_path: Path | None = None) -> None:
         """Configure and start the OpenPose wrapper.

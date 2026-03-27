@@ -37,7 +37,8 @@ logger = get_logger(__name__)
 # Log warning if MyoSuite not available
 if not MYOSUITE_AVAILABLE:
     logger.warning(
-        "MyoSuite/gym not available. Neural control disabled. " "Install with: pip install myosuite"
+        "MyoSuite/gym not available. Neural control disabled. "
+        "Install with: pip install myosuite"
     )
 
 
@@ -99,7 +100,9 @@ class MuscleDrivenEnv:
         """
         self.q = np.random.uniform(-np.pi / 4, np.pi / 4)  # Random init
         self.v = 0.0
-        self.muscle_activations = dict.fromkeys(self._get_muscle_names(), 0.01)  # Min activation
+        self.muscle_activations = dict.fromkeys(
+            self._get_muscle_names(), 0.01
+        )  # Min activation
         self.muscle_states = dict.fromkeys(
             self._get_muscle_names(), (0.12, 0.0)
         )  # Default fiber state
@@ -309,7 +312,8 @@ def train_muscle_policy(env: MuscleDrivenEnv, total_timesteps: int = 100000) -> 
 
     except ImportError:
         logger.error(
-            "stable-baselines3 not installed. " "Install with: pip install stable-baselines3"
+            "stable-baselines3 not installed. "
+            "Install with: pip install stable-baselines3"
         )
         return None
 

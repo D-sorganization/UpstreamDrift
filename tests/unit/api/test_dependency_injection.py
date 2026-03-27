@@ -31,7 +31,9 @@ from fastapi.testclient import TestClient  # noqa: E402
 # ---------------------------------------------------------------------------
 
 API_ROUTES_DIR = Path(__file__).parent.parent.parent.parent / "src" / "api" / "routes"
-API_SERVER_FILE = Path(__file__).parent.parent.parent.parent / "src" / "api" / "server.py"
+API_SERVER_FILE = (
+    Path(__file__).parent.parent.parent.parent / "src" / "api" / "server.py"
+)
 
 # Route modules that previously had configure() + module-level globals
 MIGRATED_ROUTE_MODULES = [
@@ -141,7 +143,9 @@ class TestDependencyOverride:
         return mgr
 
     @pytest.fixture
-    def test_app(self, mock_engine_manager: MagicMock, mock_task_manager: MagicMock) -> FastAPI:
+    def test_app(
+        self, mock_engine_manager: MagicMock, mock_task_manager: MagicMock
+    ) -> FastAPI:
         """Create a minimal FastAPI app with dependency overrides."""
         from src.api.dependencies import (
             get_engine_manager,

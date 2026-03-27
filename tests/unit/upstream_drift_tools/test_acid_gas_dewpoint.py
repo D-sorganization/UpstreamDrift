@@ -102,7 +102,10 @@ class TestQuickDewpointCalculation:
     def test_temp_above_dewpoint_no_condensation(self) -> None:
         result = quick_dewpoint_calculation(300.0, 1.0, h2o_fraction=0.01)
         # At high T and low fraction, we expect no condensation
-        assert "low" in str(result["condensation_risk"]).lower() or result["dewpoint_margin_c"] > 0
+        assert (
+            "low" in str(result["condensation_risk"]).lower()
+            or result["dewpoint_margin_c"] > 0
+        )
 
     def test_dewpoint_is_numeric(self) -> None:
         result = quick_dewpoint_calculation(150.0, 2.0, h2o_fraction=0.2)

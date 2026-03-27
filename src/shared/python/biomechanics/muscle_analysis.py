@@ -43,7 +43,9 @@ class SynergyResult:
 class MuscleSynergyAnalyzer:
     """Analyzes muscle synergies from activation data."""
 
-    def __init__(self, activation_data: np.ndarray, muscle_names: list[str] | None = None) -> None:
+    def __init__(
+        self, activation_data: np.ndarray, muscle_names: list[str] | None = None
+    ) -> None:
         """Initialize with activation data.
 
         Args:
@@ -73,9 +75,13 @@ class MuscleSynergyAnalyzer:
             self.data = np.maximum(self.data, 0)
 
         self.n_samples, self.n_muscles = self.data.shape
-        self.muscle_names = muscle_names or [f"Muscle {i}" for i in range(self.n_muscles)]
+        self.muscle_names = muscle_names or [
+            f"Muscle {i}" for i in range(self.n_muscles)
+        ]
 
-    def extract_synergies(self, n_synergies: int, max_iter: int = 1000) -> SynergyResult:
+    def extract_synergies(
+        self, n_synergies: int, max_iter: int = 1000
+    ) -> SynergyResult:
         """Extract a specific number of synergies using NMF.
 
         Factorizes V ≈ W @ H
@@ -122,13 +128,17 @@ class MuscleSynergyAnalyzer:
                 "Install with: pip install scikit-learn"
             )
 
-        model = NMF(n_components=n_synergies, init="nndsvd", max_iter=max_iter, random_state=42)
+        model = NMF(
+            n_components=n_synergies, init="nndsvd", max_iter=max_iter, random_state=42
+        )
 
         # X is (n_samples, n_muscles)
         W_sklearn = model.fit_transform(
             self.data
         )  # (n_samples, n_synergies) -> Temporal profiles (transposed)
-        H_sklearn = model.components_  # (n_synergies, n_muscles) -> Muscle weights (transposed)
+        H_sklearn = (
+            model.components_
+        )  # (n_synergies, n_muscles) -> Muscle weights (transposed)
 
         # Convert to standard notation
         # W (muscle weights) = H_sklearn.T  -> (n_muscles, n_synergies)

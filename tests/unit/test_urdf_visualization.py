@@ -327,7 +327,11 @@ class TestMuJoCoViewerWidget:
         # Status should indicate something happened (loaded or failed)
         status = widget._status_label.text()
         # Either successfully loaded with counts, or shows failure message
-        assert "links" in status.lower() or "loaded" in status.lower() or "failed" in status.lower()
+        assert (
+            "links" in status.lower()
+            or "loaded" in status.lower()
+            or "failed" in status.lower()
+        )
 
     def test_clear(self, qtbot):
         """Test clearing the viewer."""

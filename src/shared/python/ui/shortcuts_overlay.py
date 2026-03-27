@@ -282,7 +282,9 @@ class ShortcutsOverlay(QWidget):
         hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
         content_layout.addWidget(hint)
 
-    def _create_category_section(self, category: str, shortcuts: list[Shortcut]) -> QWidget:
+    def _create_category_section(
+        self, category: str, shortcuts: list[Shortcut]
+    ) -> QWidget:
         """Create a section for a category of shortcuts."""
         if not (category is not None):
             raise ValueError("category must be provided")

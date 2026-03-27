@@ -64,7 +64,10 @@ with patch.dict("sys.modules", module_patches):
     import sys as _sys
 
     for _mod_name in list(_sys.modules.keys()):
-        if "opensim_physics_engine" in _mod_name or "myosuite_physics_engine" in _mod_name:
+        if (
+            "opensim_physics_engine" in _mod_name
+            or "myosuite_physics_engine" in _mod_name
+        ):
             del _sys.modules[_mod_name]
 
     # Patch availability flags so engines initialize with mock modules
@@ -157,13 +160,17 @@ class TestMuJoCoStrict:
             spatial[:3, :], TEST_ANGULAR_VAL, err_msg="Top rows must be angular"
         )
         # Bottom 3 rows -> Linear (1.0)
-        np.testing.assert_allclose(spatial[3:, :], 1.0, err_msg="Bottom rows must be linear")
+        np.testing.assert_allclose(
+            spatial[3:, :], 1.0, err_msg="Bottom rows must be linear"
+        )
 
     def test_get_sensors_implemented(self):
         engine = self.MuJoCoPhysicsEngine()
         assert hasattr(engine, "get_sensors"), "MuJoCo must implement get_sensors"
 
-        engine.model = MagicMock(spec=["nv", "nu", "nsensor", "sensor_adr", "sensor_dim"])
+        engine.model = MagicMock(
+            spec=["nv", "nu", "nsensor", "sensor_adr", "sensor_dim"]
+        )
         engine.data = MagicMock(spec=["sensordata"])
         engine.model.nsensor = 1
         engine.model.sensor_adr = [0]
@@ -227,7 +234,9 @@ class TestMyoSuiteStrict:
     def test_loading_without_sim_raises_and_rolls_back_state(self):
         """MyoSuite should fail fast if the env does not expose a MuJoCo sim."""
         engine = MyoSuitePhysicsEngine()
-        mock_env = MagicMock(spec=["reset", "step", "close", "observation_space", "action_space"])
+        mock_env = MagicMock(
+            spec=["reset", "step", "close", "observation_space", "action_space"]
+        )
         mock_gym.make.return_value = mock_env
 
         with pytest.raises(RuntimeError, match="MuJoCo sim"):

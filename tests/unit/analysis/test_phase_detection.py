@@ -13,7 +13,9 @@ class _Concrete(PhaseDetectionMixin):
         t = np.linspace(0.0, 1.0, n)
         # Simulate club head speed that peaks at ~0.7 seconds
         speed = np.zeros(n)
-        speed += 5.0 * np.exp(-((t - 0.3) ** 2) / 0.005)  # small bump (top of backswing)
+        speed += 5.0 * np.exp(
+            -((t - 0.3) ** 2) / 0.005
+        )  # small bump (top of backswing)
         speed += 30.0 * np.exp(-((t - 0.7) ** 2) / 0.003)  # large peak (impact)
         self.times = t
         self.club_head_speed = speed

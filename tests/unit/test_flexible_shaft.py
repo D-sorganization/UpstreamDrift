@@ -83,7 +83,9 @@ class TestShaftProperties:
         assert standard_shaft.length == pytest.approx(SHAFT_LENGTH_DRIVER)
         assert len(standard_shaft.station_positions) == 11
         assert standard_shaft.station_positions[0] == 0.0
-        assert standard_shaft.station_positions[-1] == pytest.approx(standard_shaft.length)
+        assert standard_shaft.station_positions[-1] == pytest.approx(
+            standard_shaft.length
+        )
 
     def test_taper_direction(self, standard_shaft: ShaftProperties) -> None:
         """Shaft should taper from tip to butt."""
@@ -197,7 +199,9 @@ class TestModalShaftModel:
         freqs = [m.frequency for m in modal_model.modes]
         assert freqs == sorted(freqs)
 
-    def test_first_mode_frequency_reasonable(self, modal_model: ModalShaftModel) -> None:
+    def test_first_mode_frequency_reasonable(
+        self, modal_model: ModalShaftModel
+    ) -> None:
         """First mode frequency should be in typical range (5-20 Hz)."""
         first_freq = modal_model.modes[0].frequency
 
@@ -266,7 +270,9 @@ class TestShaftModelFactory:
         ],
         ids=["rigid", "modal", "finite-element"],
     )
-    def test_creates_correct_model(self, flex_model: ShaftFlexModel, expected_class: type) -> None:
+    def test_creates_correct_model(
+        self, flex_model: ShaftFlexModel, expected_class: type
+    ) -> None:
         """Factory should create the correct model type."""
         model = create_shaft_model(flex_model)
         assert isinstance(model, expected_class)
@@ -299,7 +305,9 @@ class TestFiniteElementShaftModel:
         # 22 total - 2 fixed at node 0 = 20 free DOFs
         assert fe_model.n_free_dof == 20
 
-    def test_stiffness_matrix_symmetric(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_stiffness_matrix_symmetric(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Stiffness matrix should be symmetric."""
         K = fe_model.K
         np.testing.assert_allclose(K, K.T, rtol=1e-10)
@@ -309,12 +317,16 @@ class TestFiniteElementShaftModel:
         M = fe_model.M
         np.testing.assert_allclose(M, M.T, rtol=1e-10)
 
-    def test_stiffness_matrix_positive_definite(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_stiffness_matrix_positive_definite(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Stiffness matrix should be positive definite."""
         eigenvalues = np.linalg.eigvalsh(fe_model.K)
         assert np.all(eigenvalues > 0)
 
-    def test_mass_matrix_positive_definite(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_mass_matrix_positive_definite(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Mass matrix should be positive definite."""
         eigenvalues = np.linalg.eigvalsh(fe_model.M)
         assert np.all(eigenvalues > 0)
@@ -395,7 +407,9 @@ class TestFiniteElementShaftModel:
         # Should match within 5% for uniform beam with fine mesh
         np.testing.assert_allclose(fe_at_stations, analytical, rtol=0.05)
 
-    def test_natural_frequencies_positive(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_natural_frequencies_positive(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Natural frequencies should be positive."""
         frequencies = fe_model.compute_natural_frequencies(n_modes=3)
 
@@ -403,20 +417,26 @@ class TestFiniteElementShaftModel:
         for freq in frequencies:
             assert freq > 0
 
-    def test_natural_frequencies_ascending(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_natural_frequencies_ascending(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Natural frequencies should be in ascending order."""
         frequencies = fe_model.compute_natural_frequencies(n_modes=5)
 
         assert frequencies == sorted(frequencies)
 
-    def test_first_frequency_in_physical_range(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_first_frequency_in_physical_range(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """First natural frequency should be in physical range for golf shaft."""
         frequencies = fe_model.compute_natural_frequencies(n_modes=1)
 
         # Golf shaft first bending mode typically 3-20 Hz
         assert 1 < frequencies[0] < 100
 
-    def test_energy_decays_with_damping(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_energy_decays_with_damping(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """System energy should decay over time due to damping."""
         # Give initial velocity
         fe_model.v = np.ones(fe_model.n_free_dof) * 0.01
@@ -436,7 +456,9 @@ class TestFiniteElementShaftModel:
         # Total energy should have decreased
         assert final_total < initial_ke
 
-    def test_newmark_integration_stable(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_newmark_integration_stable(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Newmark integration should remain stable over many steps."""
         # Apply impulse
         fe_model.apply_load(fe_model.properties.length, np.array([0, 1000.0, 0]))

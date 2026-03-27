@@ -73,8 +73,12 @@ class _AnalysisWorker(QThread):
             )
 
             estimator = MediaPipeEstimator(
-                min_detection_confidence=self._config.get("min_detection_confidence", 0.5),
-                min_tracking_confidence=self._config.get("min_tracking_confidence", 0.5),
+                min_detection_confidence=self._config.get(
+                    "min_detection_confidence", 0.5
+                ),
+                min_tracking_confidence=self._config.get(
+                    "min_tracking_confidence", 0.5
+                ),
                 enable_temporal_smoothing=True,
             )
             estimator.load_model()

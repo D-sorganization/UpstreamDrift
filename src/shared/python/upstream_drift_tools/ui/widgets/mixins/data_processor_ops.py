@@ -118,7 +118,9 @@ class DataProcessorOpsMixin:
             self.data_modified.emit()
             self._set_status(result.message, success=True)
         else:
-            QMessageBox.warning(cast(QWidget, self), "Aggregation Error", result.message)
+            QMessageBox.warning(
+                cast(QWidget, self), "Aggregation Error", result.message
+            )
 
     def _add_column(self) -> None:
         """Add a calculated column."""
@@ -169,7 +171,9 @@ class DataProcessorOpsMixin:
         new_name = self.rename_to.text()
 
         if not new_name:
-            QMessageBox.warning(cast(QWidget, self), "Error", "Please provide a new name.")
+            QMessageBox.warning(
+                cast(QWidget, self), "Error", "Please provide a new name."
+            )
             return
 
         result = self.engine.rename_column(old_name, new_name)
@@ -210,7 +214,9 @@ class DataProcessorOpsMixin:
         degree = self.fit_degree.value()
 
         if not x_col or not y_col:
-            QMessageBox.warning(cast(QWidget, self), "Error", "Please select X and Y columns.")
+            QMessageBox.warning(
+                cast(QWidget, self), "Error", "Please select X and Y columns."
+            )
             return
 
         result = self.engine.fit_curve(x_col, y_col, fit_type, degree)

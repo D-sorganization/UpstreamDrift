@@ -152,7 +152,9 @@ def main() -> int:
     violations = check_rules(src_root, rules_path=args.rules_path, verbose=args.verbose)
 
     if violations:
-        logger.error("FAIL: %d dependency direction violation(s) found:\n", len(violations))
+        logger.error(
+            "FAIL: %d dependency direction violation(s) found:\n", len(violations)
+        )
         for v in violations:
             logger.error("  %s", v)
         logger.error("")

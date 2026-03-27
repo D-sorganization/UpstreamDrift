@@ -227,7 +227,11 @@ class PoseEstimator:
         # Use world landmarks for real-world scale
         for i, lm in enumerate(results.pose_world_landmarks.landmark):
             # Get visibility from regular landmarks
-            vis = results.pose_landmarks.landmark[i].visibility if results.pose_landmarks else 0.5
+            vis = (
+                results.pose_landmarks.landmark[i].visibility
+                if results.pose_landmarks
+                else 0.5
+            )
             landmarks.append(
                 Landmark(
                     x=lm.x,
@@ -291,7 +295,9 @@ class PoseEstimator:
                 if start.visibility > 0.5 and end.visibility > 0.5:
                     start_point = (int(start.x * w), int(start.y * h))
                     end_point = (int(end.x * w), int(end.y * h))
-                    cv2.line(output, start_point, end_point, connection_color, thickness)
+                    cv2.line(
+                        output, start_point, end_point, connection_color, thickness
+                    )
 
         # Draw landmarks
         for landmark in pose_frame.landmarks:

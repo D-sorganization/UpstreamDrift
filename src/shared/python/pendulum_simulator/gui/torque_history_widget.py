@@ -153,7 +153,9 @@ class TorqueHistoryWidget(QWidget):
         self._outer_layout.addWidget(title)
 
         if not _HAS_PYQTGRAPH:
-            fallback = QLabel("Install pyqtgraph for torque plots:\n  pip install pyqtgraph")
+            fallback = QLabel(
+                "Install pyqtgraph for torque plots:\n  pip install pyqtgraph"
+            )
             fallback.setAlignment(Qt.AlignmentFlag.AlignCenter)
             fallback.setStyleSheet("color: #808090; font-size: 11px;")
             self._outer_layout.addWidget(fallback)

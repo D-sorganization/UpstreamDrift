@@ -115,7 +115,9 @@ def jcalc(
         s_subspace = S_PZ
         dof_idx = 5
     else:
-        msg = f"Unsupported joint type: {jtype}. Supported types: Rx, Ry, Rz, Px, Py, Pz"
+        msg = (
+            f"Unsupported joint type: {jtype}. Supported types: Rx, Ry, Rz, Px, Py, Pz"
+        )
         raise ValueError(msg)
 
     return xj_transform, s_subspace, dof_idx

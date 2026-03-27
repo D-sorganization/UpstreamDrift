@@ -116,7 +116,9 @@ class TestDrakeVisualizer:
         assert body_name not in visualizer.visible_frames
         mock_meshcat.Delete.assert_called_with(f"visual_overlays/frames/{body_name}")
 
-    def test_update_frame_transforms(self, visualizer, mock_meshcat, mock_plant) -> None:
+    def test_update_frame_transforms(
+        self, visualizer, mock_meshcat, mock_plant
+    ) -> None:
         """Test updating frame transforms."""
         body_name = "test_body"
         visualizer.visible_frames.add(body_name)
@@ -134,7 +136,9 @@ class TestDrakeVisualizer:
 
         mock_plant.GetBodyByName.assert_called_with(body_name)
         mock_plant.EvalBodyPoseInWorld.assert_called_with(plant_context, body)
-        mock_meshcat.SetTransform.assert_called_with(f"visual_overlays/frames/{body_name}", X_WB)
+        mock_meshcat.SetTransform.assert_called_with(
+            f"visual_overlays/frames/{body_name}", X_WB
+        )
 
     def test_toggle_com_visible(self, visualizer, mock_meshcat) -> None:
         """Test enabling COM visualization."""

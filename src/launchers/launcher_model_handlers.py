@@ -46,7 +46,9 @@ class ModuleHandler:
     DRY replacement for HumanoidMuJoCoHandler and ComprehensiveModelHandler.
     """
 
-    def __init__(self, model_types: set[str], module_name: str, display_name: str) -> None:
+    def __init__(
+        self, model_types: set[str], module_name: str, display_name: str
+    ) -> None:
         if not (model_types is not None):
             raise ValueError("model_types must be provided")
         if not (model_types is not None):

@@ -259,7 +259,9 @@ class BaseLauncher(QMainWindow):
         else:
             self.show_warning("No Action", f"No action defined for {item.name}")
 
-    def build_grid_layout(self, items: list[LaunchItem], columns: int | None = None) -> QGridLayout:
+    def build_grid_layout(
+        self, items: list[LaunchItem], columns: int | None = None
+    ) -> QGridLayout:
         """Build a grid layout of card widgets.
 
         Args:

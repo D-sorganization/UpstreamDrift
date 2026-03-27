@@ -302,7 +302,9 @@ def all_available_pendulum_engines(
     available = [e for e in engines if e.available]
 
     if len(available) < 2:
-        states = ", ".join(f"{e.name}={getattr(e.status, 'value', str(e.status))}" for e in engines)
+        states = ", ".join(
+            f"{e.name}={getattr(e.status, 'value', str(e.status))}" for e in engines
+        )
         pytest.skip(
             f"Need at least 2 engines for cross-validation, got {len(available)} ({states})"
         )
@@ -390,7 +392,9 @@ def compute_accelerations(engines: list[EngineInstance]) -> dict[str, np.ndarray
     return accelerations
 
 
-def skip_if_insufficient_engines(engines: list[EngineInstance], min_count: int = 2) -> None:
+def skip_if_insufficient_engines(
+    engines: list[EngineInstance], min_count: int = 2
+) -> None:
     """Skip test if insufficient engines are available.
 
     Args:
@@ -404,7 +408,9 @@ def skip_if_insufficient_engines(engines: list[EngineInstance], min_count: int =
     assert min_count > 0, "min_count must be positive"
     available = [e for e in engines if e.available]
     if len(available) < min_count:
-        states = ", ".join(f"{e.name}={getattr(e.status, 'value', str(e.status))}" for e in engines)
+        states = ", ".join(
+            f"{e.name}={getattr(e.status, 'value', str(e.status))}" for e in engines
+        )
         pytest.skip(
             f"Need at least {min_count} engines for cross-validation, "
             f"got {len(available)}: {[e.name for e in available]} ({states})"

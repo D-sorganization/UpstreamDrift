@@ -22,9 +22,15 @@ from src.shared.python.spatial_algebra.spatial_vectors import skew  # noqa: E402
 # Hypothesis strategies
 # ---------------------------------------------------------------------------
 
-reasonable_floats = st.floats(min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False)
-positive_floats = st.floats(min_value=1e-6, max_value=1e6, allow_nan=False, allow_infinity=False)
-angles = st.floats(min_value=-2 * np.pi, max_value=2 * np.pi, allow_nan=False, allow_infinity=False)
+reasonable_floats = st.floats(
+    min_value=-1e6, max_value=1e6, allow_nan=False, allow_infinity=False
+)
+positive_floats = st.floats(
+    min_value=1e-6, max_value=1e6, allow_nan=False, allow_infinity=False
+)
+angles = st.floats(
+    min_value=-2 * np.pi, max_value=2 * np.pi, allow_nan=False, allow_infinity=False
+)
 
 
 # ---------------------------------------------------------------------------
@@ -41,7 +47,9 @@ class TestRotationMatrixProperties:
         yaw=angles,
     )
     @settings(max_examples=100)
-    def test_rotation_matrix_is_orthogonal(self, roll: float, pitch: float, yaw: float) -> None:
+    def test_rotation_matrix_is_orthogonal(
+        self, roll: float, pitch: float, yaw: float
+    ) -> None:
         """Rotation matrices should be orthogonal: R @ R.T = I."""
         R = euler_to_rotation_matrix([roll, pitch, yaw])
         identity = R @ R.T
@@ -61,9 +69,15 @@ class TestRotationMatrixProperties:
         np.testing.assert_allclose(np.linalg.det(R), 1.0, atol=1e-10)
 
     @given(
-        roll=st.floats(min_value=-1.5, max_value=1.5, allow_nan=False, allow_infinity=False),
-        pitch=st.floats(min_value=-1.5, max_value=1.5, allow_nan=False, allow_infinity=False),
-        yaw=st.floats(min_value=-np.pi, max_value=np.pi, allow_nan=False, allow_infinity=False),
+        roll=st.floats(
+            min_value=-1.5, max_value=1.5, allow_nan=False, allow_infinity=False
+        ),
+        pitch=st.floats(
+            min_value=-1.5, max_value=1.5, allow_nan=False, allow_infinity=False
+        ),
+        yaw=st.floats(
+            min_value=-np.pi, max_value=np.pi, allow_nan=False, allow_infinity=False
+        ),
     )
     @settings(max_examples=50)
     def test_euler_roundtrip(self, roll: float, pitch: float, yaw: float) -> None:
@@ -85,12 +99,16 @@ class TestRotationMatrixProperties:
         yaw=angles,
     )
     @settings(max_examples=100)
-    def test_rotation_preserves_vector_norm(self, roll: float, pitch: float, yaw: float) -> None:
+    def test_rotation_preserves_vector_norm(
+        self, roll: float, pitch: float, yaw: float
+    ) -> None:
         """Rotating a vector should preserve its length."""
         R = euler_to_rotation_matrix([roll, pitch, yaw])
         v = np.array([1.0, 2.0, 3.0])
         v_rotated = R @ v
-        np.testing.assert_allclose(np.linalg.norm(v_rotated), np.linalg.norm(v), atol=1e-10)
+        np.testing.assert_allclose(
+            np.linalg.norm(v_rotated), np.linalg.norm(v), atol=1e-10
+        )
 
 
 # ---------------------------------------------------------------------------

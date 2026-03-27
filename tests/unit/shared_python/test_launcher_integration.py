@@ -45,7 +45,9 @@ def test_engine_availability_check() -> None:
 @patch("src.shared.python.dashboard.launcher.UnifiedDashboardWindow")
 @patch("src.shared.python.dashboard.launcher.sys.exit")
 @patch("src.shared.python.dashboard.launcher.get_qapp")
-def test_dashboard_launch(mock_get_qapp: Any, mock_exit: Any, mock_window: Any, qapp: Any) -> None:
+def test_dashboard_launch(
+    mock_get_qapp: Any, mock_exit: Any, mock_window: Any, qapp: Any
+) -> None:
     """Test launching the dashboard with a mock engine."""
 
     # Mock valid engine class

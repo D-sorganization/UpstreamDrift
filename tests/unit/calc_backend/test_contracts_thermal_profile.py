@@ -127,7 +127,9 @@ class TestThermalProfileResponse:
 
     def test_with_optional_fields(self) -> None:
         data = [
-            ThermalProfileDataPoint(time_s=0.0, temperature_c=25.0, power_w=5000.0, heat_loss_w=0.0)
+            ThermalProfileDataPoint(
+                time_s=0.0, temperature_c=25.0, power_w=5000.0, heat_loss_w=0.0
+            )
         ]
         resp = ThermalProfileResponse(
             data=data,

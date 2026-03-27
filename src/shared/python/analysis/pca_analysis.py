@@ -121,7 +121,9 @@ class PCAAnalysisMixin:
 
         return result
 
-    def compute_principal_movements(self, n_modes: int = 3) -> tuple[np.ndarray, np.ndarray] | None:
+    def compute_principal_movements(
+        self, n_modes: int = 3
+    ) -> tuple[np.ndarray, np.ndarray] | None:
         """Compute Principal Movements (PMs) from position data.
 
         Wrapper around PCA specifically for position data to analyze
@@ -200,7 +202,9 @@ class PCAAnalysisMixin:
         expected_order = list(segment_indices.keys())
         actual_order = [info.segment_name for info in sequence_info]
 
-        matches = sum(1 for e, a in zip(expected_order, actual_order, strict=False) if e == a)
+        matches = sum(
+            1 for e, a in zip(expected_order, actual_order, strict=False) if e == a
+        )
         efficiency_score = matches / len(expected_order) if expected_order else 0.0
 
         # Postconditions

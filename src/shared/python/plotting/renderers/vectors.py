@@ -314,8 +314,12 @@ class VectorOverlayRenderer(BaseRenderer):
                 )
 
         # Start / end markers
-        ax.scatter(*actual[0, :3], color="#FF4500", s=60, marker="o", zorder=5, label="Start")
-        ax.scatter(*actual[-1, :3], color="#FF4500", s=60, marker="s", zorder=5, label="End")
+        ax.scatter(
+            *actual[0, :3], color="#FF4500", s=60, marker="o", zorder=5, label="Start"
+        )
+        ax.scatter(
+            *actual[-1, :3], color="#FF4500", s=60, marker="s", zorder=5, label="End"
+        )
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")

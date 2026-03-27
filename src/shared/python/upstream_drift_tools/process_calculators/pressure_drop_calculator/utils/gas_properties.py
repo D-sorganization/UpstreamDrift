@@ -45,7 +45,9 @@ class ComponentProperties:
     critical_pressure: float  # Pa
     acentric_factor: float  # dimensionless
     dipole_moment: float  # Debye
-    ideal_gas_cp_coeffs: tuple[float, float, float, float, float]  # Shomate equation coefficients
+    ideal_gas_cp_coeffs: tuple[
+        float, float, float, float, float
+    ]  # Shomate equation coefficients
 
 
 # Comprehensive gas component database
@@ -247,7 +249,9 @@ def calculate_mixture_cp(composition: dict[str, float], temperature: float) -> f
     return cp_mix
 
 
-def calculate_heat_capacity_ratio(composition: dict[str, float], temperature: float) -> float:
+def calculate_heat_capacity_ratio(
+    composition: dict[str, float], temperature: float
+) -> float:
     """Calculate heat capacity ratio (gamma = Cp/Cv) for a gas mixture.
 
     For ideal gases: Cv = Cp - R
@@ -286,10 +290,14 @@ def calculate_heat_capacity_ratio(composition: dict[str, float], temperature: fl
 
     # Physical bounds check
     if gamma < 1.0 or gamma > GAMMA_UPPER_BOUND:
-        logger.warning(f"Calculated gamma = {gamma:.3f} outside physical bounds [1.0, 1.7]")
+        logger.warning(
+            f"Calculated gamma = {gamma:.3f} outside physical bounds [1.0, 1.7]"
+        )
         gamma = max(1.0, min(gamma, GAMMA_UPPER_BOUND))
 
-    logger.debug(f"Heat capacity ratio γ = {gamma:.4f} (Cp = {cp_mix:.1f}, Cv = {cv_mix:.1f})")
+    logger.debug(
+        f"Heat capacity ratio γ = {gamma:.4f} (Cp = {cp_mix:.1f}, Cv = {cv_mix:.1f})"
+    )
     return float(gamma)
 
 
@@ -481,7 +489,9 @@ def calculate_real_gas_density(
         raise ValueError("molecular_weight must be provided")
     if not (molecular_weight is not None):
         raise ValueError("molecular_weight must be provided")
-    density = (pressure * molecular_weight) / (compressibility * R_UNIVERSAL * temperature)
+    density = (pressure * molecular_weight) / (
+        compressibility * R_UNIVERSAL * temperature
+    )
     logger.debug(f"Real gas density = {density:.4f} kg/m³ (Z = {compressibility:.4f})")
     return float(density)
 
@@ -523,7 +533,12 @@ def calculate_pure_gas_viscosity_lucas(
 
     # Dimensionless reduced dipole moment
     if props.critical_temp > 0 and props.critical_pressure > 0:
-        mu_r = 52.46 * (props.dipole_moment**2) * props.critical_pressure / (props.critical_temp**2)
+        mu_r = (
+            52.46
+            * (props.dipole_moment**2)
+            * props.critical_pressure
+            / (props.critical_temp**2)
+        )
     else:
         mu_r = 0.0
 
@@ -559,7 +574,11 @@ def calculate_pure_gas_viscosity_lucas(
 
     # Characteristic viscosity
     mu_low = (
-        0.807 * ((M * T_c) ** 0.5) / ((props.critical_pressure / 1e6) ** (2 / 3)) * eta_low * 1e-7
+        0.807
+        * ((M * T_c) ** 0.5)
+        / ((props.critical_pressure / 1e6) ** (2 / 3))
+        * eta_low
+        * 1e-7
     )
 
     # High pressure correction (simplified)
@@ -794,7 +813,9 @@ def calculate_mixture_viscosity_wilke(
     return mu_mix
 
 
-def calculate_mixture_viscosity_simple(composition: dict[str, float], temperature: float) -> float:
+def calculate_mixture_viscosity_simple(
+    composition: dict[str, float], temperature: float
+) -> float:
     """Calculate mixture viscosity using simple mole-fraction averaging.
 
     Simpler but less accurate than Wilke's method.

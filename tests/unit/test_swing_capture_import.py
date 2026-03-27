@@ -119,7 +119,9 @@ class TestJointTrajectory:
 class TestCSVImport:
     """Tests for CSV file import."""
 
-    def test_import_csv_basic(self, importer: SwingCaptureImporter, sample_csv_file: Path) -> None:
+    def test_import_csv_basic(
+        self, importer: SwingCaptureImporter, sample_csv_file: Path
+    ) -> None:
         """Test basic CSV import."""
         trajectory = importer.import_csv(sample_csv_file)
 
@@ -128,7 +130,9 @@ class TestCSVImport:
         assert trajectory.n_joints == 3
         assert trajectory.joint_names == ["shoulder", "elbow", "wrist"]
 
-    def test_import_csv_values(self, importer: SwingCaptureImporter, sample_csv_file: Path) -> None:
+    def test_import_csv_values(
+        self, importer: SwingCaptureImporter, sample_csv_file: Path
+    ) -> None:
         """Postcondition: imported values are finite."""
         trajectory = importer.import_csv(sample_csv_file)
         assert np.all(np.isfinite(trajectory.positions))
@@ -191,7 +195,9 @@ class TestJSONImport:
 
         importer = SwingCaptureImporter()
         trajectory = importer.import_json(filepath)
-        np.testing.assert_array_equal(trajectory.velocities, [[10, 10], [10, 10], [10, 10]])
+        np.testing.assert_array_equal(
+            trajectory.velocities, [[10, 10], [10, 10], [10, 10]]
+        )
 
     def test_import_json_missing_keys(self, tmp_path: Path) -> None:
         """Precondition: JSON must have required keys."""
@@ -227,7 +233,9 @@ class TestJSONImport:
 class TestUnsupportedFormats:
     """Tests for unsupported file formats."""
 
-    def test_unsupported_format(self, importer: SwingCaptureImporter, tmp_path: Path) -> None:
+    def test_unsupported_format(
+        self, importer: SwingCaptureImporter, tmp_path: Path
+    ) -> None:
         """Precondition: format must be supported."""
         filepath = tmp_path / "data.xyz"
         filepath.touch()
@@ -302,7 +310,9 @@ class TestDemonstrationDataset:
         self, importer: SwingCaptureImporter, sample_trajectory: JointTrajectory
     ) -> None:
         """Test dataset with multiple trajectories."""
-        dataset = importer.build_demonstration_dataset([sample_trajectory, sample_trajectory])
+        dataset = importer.build_demonstration_dataset(
+            [sample_trajectory, sample_trajectory]
+        )
         assert dataset["num_demonstrations"] == 2
 
 

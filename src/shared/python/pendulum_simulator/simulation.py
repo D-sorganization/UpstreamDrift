@@ -210,7 +210,9 @@ def run_simulation(
         qdot0 = initial_state[2:4].tolist()
         t_span = (0.0, t_end)
         max_steps = int(max(t_end / dt * 10, 100000))
-        res = simulate_double(params, q0, qdot0, coeffs, n_coeffs_per_joint, t_span, max_steps)
+        res = simulate_double(
+            params, q0, qdot0, coeffs, n_coeffs_per_joint, t_span, max_steps
+        )
         if res is not None:
             t_res, states_res = res
             if len(t_res) >= 2:

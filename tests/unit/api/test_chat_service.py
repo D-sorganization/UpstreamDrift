@@ -89,7 +89,9 @@ class TestMessageHandling:
     def test_add_message_with_engine_context(self, chat_service):
         """Engine context is stored in session metadata."""
         ctx = chat_service.get_or_create_session(None)
-        chat_service.add_user_message(ctx.session_id, "Help with MuJoCo", engine_context="mujoco")
+        chat_service.add_user_message(
+            ctx.session_id, "Help with MuJoCo", engine_context="mujoco"
+        )
         assert ctx.metadata.get("last_engine") == "mujoco"
 
     def test_add_message_to_nonexistent_session(self, chat_service):

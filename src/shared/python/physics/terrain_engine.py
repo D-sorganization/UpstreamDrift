@@ -464,7 +464,9 @@ class CompressibleTurfModel:
         compression_depth = min(nominal_penetration, max_compression)
 
         # Compression ratio (0 = no compression, 1 = max compression)
-        compression_ratio = compression_depth / max_compression if max_compression > 0 else 0.0
+        compression_ratio = (
+            compression_depth / max_compression if max_compression > 0 else 0.0
+        )
 
         # Effective stiffness (non-linear: increases with compression)
         # Uses progressive stiffening model
@@ -537,7 +539,9 @@ class CompressibleTurfModel:
 
         # Grass resistance (additional resistance from grass blades)
         if material.grass_height_m > 0 and material.turf_density > 0:
-            grass_resistance = 0.1 * material.turf_density * material.grass_height_m * compression
+            grass_resistance = (
+                0.1 * material.turf_density * material.grass_height_m * compression
+            )
             force_magnitude += grass_resistance
 
         return force_magnitude * normal
@@ -860,7 +864,9 @@ def apply_terrain_to_engine(
             restitution=material.restitution,
         )
     else:
-        logger.warning(f"Engine {type(engine).__name__} does not support set_ground_properties")
+        logger.warning(
+            f"Engine {type(engine).__name__} does not support set_ground_properties"
+        )
 
 
 def validate_terrain(
@@ -895,9 +901,13 @@ def validate_terrain(
     # Check patches within bounds
     for i, patch in enumerate(terrain.patches):
         if patch.x_min < elev.origin_x or patch.x_max > elev.origin_x + elev.width:
-            messages.append(f"Patch {i} ({patch.terrain_type.name}) X bounds exceed terrain bounds")
+            messages.append(
+                f"Patch {i} ({patch.terrain_type.name}) X bounds exceed terrain bounds"
+            )
         if patch.y_min < elev.origin_y or patch.y_max > elev.origin_y + elev.length:
-            messages.append(f"Patch {i} ({patch.terrain_type.name}) Y bounds exceed terrain bounds")
+            messages.append(
+                f"Patch {i} ({patch.terrain_type.name}) Y bounds exceed terrain bounds"
+            )
 
     # Resolution warnings
     if warn_low_resolution:

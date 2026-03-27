@@ -143,7 +143,9 @@ class TestLaunchConditions:
     def test_custom_spin_axis(self) -> None:
         """Test custom spin axis is preserved."""
         custom_axis = np.array([0.5, 0.5, 0.0])
-        launch = LaunchConditions(velocity=50.0, launch_angle=0.1, spin_axis=custom_axis)
+        launch = LaunchConditions(
+            velocity=50.0, launch_angle=0.1, spin_axis=custom_axis
+        )
         assert launch.spin_axis is not None
         np.testing.assert_array_almost_equal(launch.spin_axis, custom_axis)
 
@@ -167,10 +169,14 @@ class TestEnvironmentalConditions:
         assert default_environment.gravity == pytest.approx(9.81, abs=0.01)
         assert default_environment.temperature == pytest.approx(15.0)
 
-    def test_default_wind_is_zero(self, default_environment: EnvironmentalConditions) -> None:
+    def test_default_wind_is_zero(
+        self, default_environment: EnvironmentalConditions
+    ) -> None:
         """Test that default wind is zero vector."""
         assert default_environment.wind_velocity is not None
-        np.testing.assert_array_equal(default_environment.wind_velocity, np.array([0.0, 0.0, 0.0]))
+        np.testing.assert_array_equal(
+            default_environment.wind_velocity, np.array([0.0, 0.0, 0.0])
+        )
 
     def test_custom_wind(self) -> None:
         """Test custom wind configuration."""
@@ -244,7 +250,9 @@ class TestTrajectorySimulation:
         trajectory = simulator.simulate_trajectory(driver_launch, max_time=6.0)
         initial_position = trajectory[0].position
 
-        np.testing.assert_array_almost_equal(initial_position, np.array([0.0, 0.0, 0.0]))
+        np.testing.assert_array_almost_equal(
+            initial_position, np.array([0.0, 0.0, 0.0])
+        )
 
     def test_trajectory_descends_to_ground(
         self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
@@ -293,9 +301,13 @@ class TestPhysicsValidation:
         assert final_x > 0  # Moved forward
         assert max_height > 0  # Went up
 
-    def test_higher_launch_angle_higher_flight(self, simulator: BallFlightSimulator) -> None:
+    def test_higher_launch_angle_higher_flight(
+        self, simulator: BallFlightSimulator
+    ) -> None:
         """Test that higher launch angle produces higher trajectory."""
-        low_launch = LaunchConditions(velocity=50.0, launch_angle=math.radians(10.0), spin_rate=0.0)
+        low_launch = LaunchConditions(
+            velocity=50.0, launch_angle=math.radians(10.0), spin_rate=0.0
+        )
         high_launch = LaunchConditions(
             velocity=50.0, launch_angle=math.radians(30.0), spin_rate=0.0
         )
@@ -310,7 +322,9 @@ class TestPhysicsValidation:
 
     def test_backspin_adds_lift(self, simulator: BallFlightSimulator) -> None:
         """Test that backspin produces lift (higher trajectory)."""
-        no_spin = LaunchConditions(velocity=60.0, launch_angle=math.radians(12.0), spin_rate=0.0)
+        no_spin = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=0.0
+        )
         with_spin = LaunchConditions(
             velocity=60.0, launch_angle=math.radians(12.0), spin_rate=3000.0
         )
@@ -505,10 +519,14 @@ class TestTrajectoryAnalysis:
         # For a driver, typically 35-50 degrees
         assert 0 < analysis["landing_angle"] < 90
 
-    def test_calculate_landing_angle_empty(self, simulator: BallFlightSimulator) -> None:
+    def test_calculate_landing_angle_empty(
+        self, simulator: BallFlightSimulator
+    ) -> None:
         assert simulator._calculate_landing_angle([]) == 0.0
 
-    def test_calculate_landing_angle_vertical_drop(self, simulator: BallFlightSimulator) -> None:
+    def test_calculate_landing_angle_vertical_drop(
+        self, simulator: BallFlightSimulator
+    ) -> None:
         # Create a trajectory dropping straight down
         p1 = MagicMock(velocity=np.array([0.0, 0.0, -10.0]))
         p2 = MagicMock(velocity=np.array([0.0, 0.0, -20.0]))
@@ -628,7 +646,9 @@ class TestEdgeCases:
         When launched horizontally from ground level (z=0) with no spin,
         the ball immediately contacts the ground due to gravity.
         """
-        horizontal_launch = LaunchConditions(velocity=50.0, launch_angle=0.0, spin_rate=0.0)
+        horizontal_launch = LaunchConditions(
+            velocity=50.0, launch_angle=0.0, spin_rate=0.0
+        )
         trajectory = simulator.simulate_trajectory(horizontal_launch, max_time=3.0)
 
         # Should have at least one point (the initial state)
@@ -648,7 +668,9 @@ class TestWindEffects:
 
     def test_headwind_reduces_carry(self) -> None:
         """Test that headwind reduces carry distance."""
-        launch = LaunchConditions(velocity=60.0, launch_angle=math.radians(12.0), spin_rate=2500.0)
+        launch = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=2500.0
+        )
 
         no_wind_sim = BallFlightSimulator()
         headwind_sim = BallFlightSimulator(
@@ -667,7 +689,9 @@ class TestWindEffects:
 
     def test_tailwind_increases_carry(self) -> None:
         """Test that tailwind increases carry distance."""
-        launch = LaunchConditions(velocity=60.0, launch_angle=math.radians(12.0), spin_rate=2500.0)
+        launch = LaunchConditions(
+            velocity=60.0, launch_angle=math.radians(12.0), spin_rate=2500.0
+        )
 
         no_wind_sim = BallFlightSimulator()
         tailwind_sim = BallFlightSimulator(

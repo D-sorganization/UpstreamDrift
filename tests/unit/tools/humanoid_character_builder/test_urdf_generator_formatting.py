@@ -51,9 +51,9 @@ class TestPrettyPrintNoXmlDeclaration:
         self, pretty_generator: HumanoidURDFGenerator, default_params: BodyParameters
     ) -> None:
         urdf_xml = pretty_generator.generate(default_params)
-        assert (
-            "<?xml" not in urdf_xml
-        ), "XML declaration must not appear anywhere in pretty_print output"
+        assert "<?xml" not in urdf_xml, (
+            "XML declaration must not appear anywhere in pretty_print output"
+        )
 
 
 class TestPrettyPrintIndentation:
@@ -66,7 +66,9 @@ class TestPrettyPrintIndentation:
         lines = urdf_xml.splitlines()
         # At least some lines should start with spaces (indentation)
         indented_lines = [line for line in lines if line.startswith("  ")]
-        assert len(indented_lines) > 0, "pretty_print output must contain indented lines"
+        assert len(indented_lines) > 0, (
+            "pretty_print output must contain indented lines"
+        )
 
     def test_child_elements_are_indented_under_robot(
         self, pretty_generator: HumanoidURDFGenerator, default_params: BodyParameters
@@ -77,9 +79,9 @@ class TestPrettyPrintIndentation:
         link_lines = [line for line in lines if "<link " in line]
         assert len(link_lines) > 0, "Should have link elements"
         for line in link_lines:
-            assert line.startswith(
-                "  "
-            ), f"<link> element should be indented with 2 spaces, got: {line!r}"
+            assert line.startswith("  "), (
+                f"<link> element should be indented with 2 spaces, got: {line!r}"
+            )
 
 
 class TestPrettyPrintNoBlankLines:
@@ -114,7 +116,9 @@ class TestCompactOutput:
         default_params: BodyParameters,
     ) -> None:
         urdf_xml = compact_generator.generate(default_params)
-        assert "<?xml" not in urdf_xml, "compact output must not contain an XML declaration"
+        assert "<?xml" not in urdf_xml, (
+            "compact output must not contain an XML declaration"
+        )
 
 
 class TestValidXmlOutput:

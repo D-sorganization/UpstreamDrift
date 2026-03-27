@@ -93,7 +93,9 @@ class TestUnifiedLaunchConditions:
         # 15° in radians
         assert abs(launch.launch_angle - math.radians(15.0)) < 0.001
 
-    def test_initial_velocity_vector(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_initial_velocity_vector(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test initial velocity vector computation."""
         velocity = driver_launch.get_initial_velocity()
 
@@ -260,7 +262,9 @@ class TestModelComparison:
         assert len(results) == 7
         assert all(isinstance(r, FlightResult) for r in results.values())
 
-    def test_models_agree_on_direction(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_models_agree_on_direction(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test that all models agree on general trajectory direction."""
         results = compare_models(driver_launch, FlightModelRegistry.get_all_models())
 
@@ -272,7 +276,9 @@ class TestModelComparison:
             # All should have positive flight time
             assert result.flight_time > 0, f"{name} has negative flight time"
 
-    def test_model_outputs_reasonable_range(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_model_outputs_reasonable_range(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test that models produce reasonably similar results."""
         results = compare_models(driver_launch, FlightModelRegistry.get_all_models())
         carries = [r.carry_distance for r in results.values()]
@@ -310,7 +316,9 @@ class TestPhysicalPlausibility:
         # Higher spin should produce more carry on a wedge (more lift)
         assert high_result.carry_distance > low_result.carry_distance
 
-    def test_trajectory_lands_at_ground_level(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_trajectory_lands_at_ground_level(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test that trajectory ends at ground level."""
         for model in FlightModelRegistry.get_all_models():
             result = model.simulate(driver_launch)
@@ -319,13 +327,17 @@ class TestPhysicalPlausibility:
             # Should land at or very close to ground
             assert final_pos[2] <= 0.5, f"{model.name} final height: {final_pos[2]}"
 
-    def test_landing_angle_is_descent(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_landing_angle_is_descent(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test that landing angle is a descent (positive angle down)."""
         for model in FlightModelRegistry.get_all_models():
             result = model.simulate(driver_launch)
 
             # Landing angle should be positive (descending)
-            assert result.landing_angle > 0, f"{model.name} landing: {result.landing_angle}"
+            assert result.landing_angle > 0, (
+                f"{model.name} landing: {result.landing_angle}"
+            )
             # Should be less than 90°
             assert result.landing_angle < 90
 
@@ -338,7 +350,9 @@ class TestPhysicalPlausibility:
 class TestTrajectoryStructure:
     """Tests for trajectory data structure."""
 
-    def test_trajectory_point_properties(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_trajectory_point_properties(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test TrajectoryPoint properties."""
         model = WaterlooPennerModel()
         result = model.simulate(driver_launch)
@@ -352,7 +366,9 @@ class TestTrajectoryStructure:
             assert speed >= 0
             assert point.position[2] >= 0  # Height check
 
-    def test_trajectory_time_monotonic(self, driver_launch: UnifiedLaunchConditions) -> None:
+    def test_trajectory_time_monotonic(
+        self, driver_launch: UnifiedLaunchConditions
+    ) -> None:
         """Test that trajectory time is monotonically increasing."""
         model = WaterlooPennerModel()
         result = model.simulate(driver_launch)

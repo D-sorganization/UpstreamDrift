@@ -80,7 +80,9 @@ def _make_velocity_extractor(key: str) -> Extractor:
 
     def _extract(result: Any) -> np.ndarray:
         n = result.n_steps
-        return np.array([result.joint_velocities_at(i)[key] for i in range(n)], dtype=float)
+        return np.array(
+            [result.joint_velocities_at(i)[key] for i in range(n)], dtype=float
+        )
 
     return _extract
 
@@ -128,7 +130,9 @@ def _make_base_force_extractor(component: str) -> Extractor:
 
     def _extract(result: Any) -> np.ndarray:
         n = result.n_steps
-        return np.array([result.base_force_at(i)[component] for i in range(n)], dtype=float)
+        return np.array(
+            [result.base_force_at(i)[component] for i in range(n)], dtype=float
+        )
 
     return _extract
 

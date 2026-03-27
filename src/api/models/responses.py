@@ -19,12 +19,16 @@ class EngineStatusResponse(BaseModel):
     available: bool = Field(..., description="Whether engine is available")
     loaded: bool = Field(False, description="Whether engine is currently loaded")
     version: str | None = Field(None, description="Engine version if available")
-    capabilities: list[str] = Field(default_factory=list, description="Engine capabilities")
+    capabilities: list[str] = Field(
+        default_factory=list, description="Engine capabilities"
+    )
 
     # Keep for backward compatibility
     engine_type: str = Field(..., description="Engine type identifier (deprecated)")
     status: str = Field(..., description="Current status")
-    is_available: bool = Field(..., description="Whether engine is available (deprecated)")
+    is_available: bool = Field(
+        ..., description="Whether engine is available (deprecated)"
+    )
     description: str = Field("", description="Engine description")
 
 
@@ -40,7 +44,9 @@ class SimulationResponse(BaseModel):
     success: bool = Field(..., description="Whether simulation completed successfully")
     duration: float = Field(..., description="Actual simulation duration", ge=0)
     frames: int = Field(..., description="Number of simulation frames", ge=0)
-    data: dict[str, Any] = Field(..., description="Simulation data (states, controls, etc.)")
+    data: dict[str, Any] = Field(
+        ..., description="Simulation data (states, controls, etc.)"
+    )
     analysis_results: dict[str, Any] | None = Field(
         None, description="Analysis results if requested"
     )
@@ -61,7 +67,9 @@ class VideoAnalysisResponse(BaseModel):
     total_frames: int = Field(..., description="Total frames in video")
     valid_frames: int = Field(..., description="Frames with valid pose detection")
     average_confidence: float = Field(..., description="Average confidence score")
-    quality_metrics: dict[str, Any] = Field(..., description="Quality assessment metrics")
+    quality_metrics: dict[str, Any] = Field(
+        ..., description="Quality assessment metrics"
+    )
     pose_data: list[dict[str, Any]] = Field(..., description="Pose estimation results")
 
 
@@ -76,7 +84,9 @@ class AnalysisResponse(BaseModel):
     analysis_type: str = Field(..., description="Type of analysis performed")
     success: bool = Field(..., description="Whether analysis completed successfully")
     results: dict[str, Any] = Field(..., description="Analysis results")
-    visualizations: list[str] | None = Field(None, description="Generated visualization files")
+    visualizations: list[str] | None = Field(
+        None, description="Generated visualization files"
+    )
     export_path: str | None = Field(None, description="Path to exported results")
 
     @model_validator(mode="after")
@@ -124,8 +134,12 @@ class ActuatorStateResponse(BaseModel):
     n_joints: int = Field(..., description="Number of actuated joints", ge=0)
     joint_names: list[str] = Field(..., description="Names of all joints")
     torques: list[float] = Field(..., description="Current applied torques")
-    target_positions: list[float] | None = Field(None, description="Target positions if set")
-    target_velocities: list[float] | None = Field(None, description="Target velocities if set")
+    target_positions: list[float] | None = Field(
+        None, description="Target positions if set"
+    )
+    target_velocities: list[float] | None = Field(
+        None, description="Target velocities if set"
+    )
     kp: list[float] = Field(..., description="Proportional gains")
     kd: list[float] = Field(..., description="Derivative gains")
     ki: list[float] = Field(..., description="Integral gains")
@@ -145,10 +159,16 @@ class ForceVectorResponse(BaseModel):
     """
 
     sim_time: float = Field(..., description="Current simulation time")
-    gravity_forces: list[float] | None = Field(None, description="Gravity force vector g(q)")
-    contact_forces: list[float] | None = Field(None, description="Ground reaction forces")
+    gravity_forces: list[float] | None = Field(
+        None, description="Gravity force vector g(q)"
+    )
+    contact_forces: list[float] | None = Field(
+        None, description="Ground reaction forces"
+    )
     applied_torques: list[float] = Field(..., description="Currently applied torques")
-    bias_forces: list[float] | None = Field(None, description="Bias forces C(q,v) + g(q)")
+    bias_forces: list[float] | None = Field(
+        None, description="Bias forces C(q,v) + g(q)"
+    )
 
 
 class BiomechanicsMetricsResponse(BaseModel):
@@ -160,11 +180,17 @@ class BiomechanicsMetricsResponse(BaseModel):
     sim_time: float = Field(..., description="Current simulation time")
     club_head_speed: float | None = Field(None, description="Club head speed (m/s)")
     kinetic_energy: float | None = Field(None, description="Total kinetic energy (J)")
-    potential_energy: float | None = Field(None, description="Total potential energy (J)")
+    potential_energy: float | None = Field(
+        None, description="Total potential energy (J)"
+    )
     joint_positions: list[float] = Field(..., description="Current joint positions")
     joint_velocities: list[float] = Field(..., description="Current joint velocities")
-    peak_torque: float | None = Field(None, description="Peak torque across all joints (N*m)")
-    total_torque_magnitude: float | None = Field(None, description="Sum of absolute torques (N*m)")
+    peak_torque: float | None = Field(
+        None, description="Peak torque across all joints (N*m)"
+    )
+    total_torque_magnitude: float | None = Field(
+        None, description="Sum of absolute torques (N*m)"
+    )
 
 
 class CapabilityLevelResponse(BaseModel):
@@ -198,7 +224,9 @@ class ControlFeaturesResponse(BaseModel):
     engine: str = Field(..., description="Engine class name")
     total_features: int = Field(..., description="Total registered features")
     available_features: int = Field(..., description="Available on this engine")
-    categories: list[dict[str, Any]] = Field(..., description="Feature categories with counts")
+    categories: list[dict[str, Any]] = Field(
+        ..., description="Feature categories with counts"
+    )
     features: list[dict[str, Any]] = Field(..., description="Feature descriptors")
 
 
@@ -264,7 +292,9 @@ class URDFLinkGeometry(BaseModel):
     """
 
     link_name: str = Field(..., description="Name of the link")
-    geometry_type: str = Field(..., description="Geometry type: box, cylinder, sphere, or mesh")
+    geometry_type: str = Field(
+        ..., description="Geometry type: box, cylinder, sphere, or mesh"
+    )
     dimensions: dict[str, float] = Field(
         default_factory=dict,
         description="Geometry dimensions (size, radius, length, etc.)",
@@ -322,7 +352,9 @@ class URDFModelResponse(BaseModel):
     """
 
     model_name: str = Field(..., description="Name of the robot model")
-    links: list[URDFLinkGeometry] = Field(..., description="Visual geometries for links")
+    links: list[URDFLinkGeometry] = Field(
+        ..., description="Visual geometries for links"
+    )
     joints: list[URDFJointDescriptor] = Field(..., description="Joint descriptors")
     root_link: str = Field(..., description="Root link name (no parent)")
     urdf_raw: str | None = Field(None, description="Raw URDF XML for advanced clients")
@@ -405,7 +437,9 @@ class BodyPositionResponse(BaseModel):
 
     body_name: str = Field(..., description="Name of the positioned body")
     position: list[float] = Field(..., description="Applied position [x, y, z]")
-    rotation: list[float] = Field(..., description="Applied rotation [roll, pitch, yaw]")
+    rotation: list[float] = Field(
+        ..., description="Applied rotation [roll, pitch, yaw]"
+    )
     status: str = Field(..., description="Status message")
 
 
@@ -442,7 +476,9 @@ class MeasurementToolsResponse(BaseModel):
     See issue #1179
     """
 
-    joint_angles: list[JointAngleDisplay] = Field(..., description="All joint angle displays")
+    joint_angles: list[JointAngleDisplay] = Field(
+        ..., description="All joint angle displays"
+    )
     measurements: list[MeasurementResult] = Field(
         default_factory=list, description="Distance measurements"
     )
@@ -483,7 +519,9 @@ class ForceOverlayResponse(BaseModel):
         default_factory=list, description="All active force vectors"
     )
     total_force_magnitude: float = Field(0.0, description="Sum of all force magnitudes")
-    total_torque_magnitude: float = Field(0.0, description="Sum of all torque magnitudes")
+    total_torque_magnitude: float = Field(
+        0.0, description="Sum of all torque magnitudes"
+    )
     overlay_config: dict[str, Any] = Field(
         default_factory=dict, description="Current overlay configuration"
     )
@@ -544,7 +582,9 @@ class URDFTreeNode(BaseModel):
     node_type: str = Field(..., description="Node type: link, joint, or root")
     parent_id: str | None = Field(None, description="Parent node ID")
     children: list[str] = Field(default_factory=list, description="Child node IDs")
-    properties: dict[str, Any] = Field(default_factory=dict, description="Node-specific properties")
+    properties: dict[str, Any] = Field(
+        default_factory=dict, description="Node-specific properties"
+    )
 
 
 class ModelExplorerResponse(BaseModel):
@@ -572,8 +612,12 @@ class ModelCompareResponse(BaseModel):
     shared_joints: list[str] = Field(
         default_factory=list, description="Joint names present in both models"
     )
-    unique_to_a: list[str] = Field(default_factory=list, description="Joints only in model A")
-    unique_to_b: list[str] = Field(default_factory=list, description="Joints only in model B")
+    unique_to_a: list[str] = Field(
+        default_factory=list, description="Joints only in model A"
+    )
+    unique_to_b: list[str] = Field(
+        default_factory=list, description="Joints only in model B"
+    )
 
 
 class AIPCapability(BaseModel):
@@ -593,10 +637,14 @@ class AIPHandshakeResponse(BaseModel):
     See issue #763
     """
 
-    server_name: str = Field("UpstreamDrift AIP Server", description="Server identifier")
+    server_name: str = Field(
+        "UpstreamDrift AIP Server", description="Server identifier"
+    )
     protocol_version: str = Field("2.0", description="JSON-RPC version")
     capabilities: list[AIPCapability] = Field(..., description="Available capabilities")
-    supported_methods: list[str] = Field(..., description="All supported RPC method names")
+    supported_methods: list[str] = Field(
+        ..., description="All supported RPC method names"
+    )
 
 
 class AIPJsonRpcResponse(BaseModel):

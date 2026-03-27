@@ -38,7 +38,9 @@ def zero_torque_accelerations(state: State, params: GolferParams) -> np.ndarray:
     return constrained_accelerations(state, 0.0, params, _zero_torque)
 
 
-def zero_torque_joint_forces(state: State, params: GolferParams) -> dict[str, tuple[float, float]]:
+def zero_torque_joint_forces(
+    state: State, params: GolferParams
+) -> dict[str, tuple[float, float]]:
     """Joint forces that would exist with zero driving torques.
 
     Parameters

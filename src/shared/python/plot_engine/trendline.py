@@ -110,7 +110,9 @@ def _linear(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray) -> TrendlineResult
     )
 
 
-def _polynomial(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray, degree: int) -> TrendlineResult:
+def _polynomial(
+    x: np.ndarray, y: np.ndarray, x_pred: np.ndarray, degree: int
+) -> TrendlineResult:
     """Polynomial trendline: y = a_n*x^n + ... + a_1*x + a_0."""
     if not (x is not None):
         raise ValueError("x must be provided")

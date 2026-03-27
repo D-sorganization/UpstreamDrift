@@ -39,7 +39,9 @@ class TestComparativePlotter:
 
         # Mock GridSpec
         mock_gs = MagicMock()
-        mock_gs.__getitem__.return_value = MagicMock()  # Support gs[0,0] returning a subspec
+        mock_gs.__getitem__.return_value = (
+            MagicMock()
+        )  # Support gs[0,0] returning a subspec
         fig.add_gridspec.return_value = mock_gs
 
         return fig

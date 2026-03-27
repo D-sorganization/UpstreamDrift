@@ -41,7 +41,9 @@ def constant_power_payload() -> dict:
 class TestThermalProfilePhysics:
     """Validate RK4 integration and thermal physics."""
 
-    def test_constant_power_temperature_rises(self, constant_power_payload: dict) -> None:
+    def test_constant_power_temperature_rises(
+        self, constant_power_payload: dict
+    ) -> None:
         """With heating power > heat loss, temperature must rise."""
         response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
@@ -49,7 +51,9 @@ class TestThermalProfilePhysics:
         assert data["final_temp_c"] > constant_power_payload["initial_temp_c"]
         assert data["temp_change_c"] > 0
 
-    def test_steady_state_matches_analytical(self, constant_power_payload: dict) -> None:
+    def test_steady_state_matches_analytical(
+        self, constant_power_payload: dict
+    ) -> None:
         """Steady state T = P/h + T_amb; reported value should match."""
         response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
@@ -57,7 +61,9 @@ class TestThermalProfilePhysics:
         # Analytical: T_ss = 1000/10 + 20 = 120°C
         assert data["steady_state_temp_c"] == pytest.approx(120.0, abs=0.1)
 
-    def test_time_constant_matches_analytical(self, constant_power_payload: dict) -> None:
+    def test_time_constant_matches_analytical(
+        self, constant_power_payload: dict
+    ) -> None:
         """Time constant τ = C_th / h; reported value should match."""
         response = client.post("/api/calc/thermal-profile", json=constant_power_payload)
         assert response.status_code == 200
@@ -86,7 +92,9 @@ class TestThermalProfilePhysics:
             "power_profile": "linear_ramp",
             "ramp_rate_w_per_s": 0.5,
         }
-        r_const = client.post("/api/calc/thermal-profile", json=constant_power_payload).json()
+        r_const = client.post(
+            "/api/calc/thermal-profile", json=constant_power_payload
+        ).json()
         r_ramp = client.post("/api/calc/thermal-profile", json=ramp_payload).json()
         assert r_ramp["final_temp_c"] > r_const["final_temp_c"]
 

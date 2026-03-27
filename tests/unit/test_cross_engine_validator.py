@@ -98,7 +98,9 @@ class TestCrossEngineValidator(unittest.TestCase):
 
     def test_shape_mismatch(self):
         """Test handling of shape mismatch."""
-        res = self.validator.compare_states("e1", np.zeros(1), "e2", np.zeros(2), metric="position")
+        res = self.validator.compare_states(
+            "e1", np.zeros(1), "e2", np.zeros(2), metric="position"
+        )
         self.assertFalse(res.passed)
         self.assertIn("Shape mismatch", res.message)
 

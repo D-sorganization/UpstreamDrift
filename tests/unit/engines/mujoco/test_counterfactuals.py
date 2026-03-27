@@ -33,7 +33,9 @@ def simple_pendulum_model() -> mujoco.MjModel:
 class TestZTCF:
     """Test Zero-Torque Counterfactual (Guideline G1)."""
 
-    def test_ztcf_with_zero_control_gives_zero_delta(self, simple_pendulum_model) -> None:
+    def test_ztcf_with_zero_control_gives_zero_delta(
+        self, simple_pendulum_model
+    ) -> None:
         """Test ZTCF: zero control means observed = counterfactual."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
@@ -52,7 +54,9 @@ class TestZTCF:
         assert np.allclose(result.delta_acceleration, 0, atol=1e-6)
         assert result.type == "ztcf"
 
-    def test_ztcf_positive_torque_gives_positive_delta(self, simple_pendulum_model) -> None:
+    def test_ztcf_positive_torque_gives_positive_delta(
+        self, simple_pendulum_model
+    ) -> None:
         """Test ZTCF: upward torque creates positive acceleration delta."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
@@ -64,9 +68,9 @@ class TestZTCF:
         result = analyzer.ztcf(qpos, qvel, ctrl)
 
         # Torque should increase acceleration (positive delta)
-        assert (
-            result.delta_acceleration[0] > 0
-        ), "Upward torque should create positive acceleration delta"
+        assert result.delta_acceleration[0] > 0, (
+            "Upward torque should create positive acceleration delta"
+        )
 
         # Observed > counterfactual
         assert result.observed_acceleration[0] > result.counterfactual_acceleration[0]
@@ -83,9 +87,9 @@ class TestZTCF:
         result = analyzer.ztcf(qpos, qvel, ctrl)
 
         # Torque opposes motion (negative delta)
-        assert (
-            result.delta_acceleration[0] < 0
-        ), "Opposing torque should create negative acceleration delta"
+        assert result.delta_acceleration[0] < 0, (
+            "Opposing torque should create negative acceleration delta"
+        )
 
     def test_ztcf_delta_scales_with_torque(self, simple_pendulum_model) -> None:
         """Test ZTCF: delta scales linearly with applied torque."""
@@ -122,15 +126,17 @@ class TestZTCF:
         assert result.delta_position is not None
 
         # Observed position should differ from counterfactual
-        assert (
-            abs(result.delta_position[0]) > 1e-6
-        ), "Position delta should be non-zero with strong torque"
+        assert abs(result.delta_position[0]) > 1e-6, (
+            "Position delta should be non-zero with strong torque"
+        )
 
 
 class TestZVCF:
     """Test Zero-Velocity Counterfactual (Guideline G2)."""
 
-    def test_zvcf_with_zero_velocity_gives_zero_delta(self, simple_pendulum_model) -> None:
+    def test_zvcf_with_zero_velocity_gives_zero_delta(
+        self, simple_pendulum_model
+    ) -> None:
         """Test ZVCF: zero velocity means observed = counterfactual."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
@@ -255,7 +261,9 @@ class TestCounterfactualTrajectoryAnalysis:
 class TestCounterfactualPhysics:
     """Integration tests for counterfactual physics validation."""
 
-    def test_ztcf_plus_counterfactual_equals_observed(self, simple_pendulum_model) -> None:
+    def test_ztcf_plus_counterfactual_equals_observed(
+        self, simple_pendulum_model
+    ) -> None:
         """Test physics: counterfactual + delta = observed."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
@@ -268,11 +276,13 @@ class TestCounterfactualPhysics:
         # Reconstruction test
         reconstructed = result.counterfactual_acceleration + result.delta_acceleration
 
-        assert np.allclose(
-            result.observed_acceleration, reconstructed, atol=1e-6
-        ), "Physics violation: observed != counterfactual + delta"
+        assert np.allclose(result.observed_acceleration, reconstructed, atol=1e-6), (
+            "Physics violation: observed != counterfactual + delta"
+        )
 
-    def test_zvcf_plus_counterfactual_equals_observed(self, simple_pendulum_model) -> None:
+    def test_zvcf_plus_counterfactual_equals_observed(
+        self, simple_pendulum_model
+    ) -> None:
         """Test physics: counterfactual + delta = observed."""
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
@@ -284,9 +294,9 @@ class TestCounterfactualPhysics:
         # Reconstruction test
         reconstructed = result.counterfactual_acceleration + result.delta_acceleration
 
-        assert np.allclose(
-            result.observed_acceleration, reconstructed, atol=1e-6
-        ), "Physics violation: observed != counterfactual + delta"
+        assert np.allclose(result.observed_acceleration, reconstructed, atol=1e-6), (
+            "Physics violation: observed != counterfactual + delta"
+        )
 
     def test_ztcf_reveals_control_authority(self, simple_pendulum_model) -> None:
         """Test that ZTCF correctly identifies control authority."""
@@ -304,9 +314,9 @@ class TestCounterfactualPhysics:
         # Counterfactual: pendulum stays stationary (at bottom, no velocity)
         # Observed: strong upward acceleration from torque
         # Delta should be large and positive
-        assert (
-            result.delta_acceleration[0] > 5.0
-        ), "Strong torque should create large positive delta"
+        assert result.delta_acceleration[0] > 5.0, (
+            "Strong torque should create large positive delta"
+        )
 
         # This delta represents the control authority
         assert result.torque_attributed_effect is not None

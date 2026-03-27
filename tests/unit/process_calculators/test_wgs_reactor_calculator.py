@@ -46,7 +46,9 @@ class TestEquilibriumConstant:
 class TestEquilibriumComposition:
     def test_returns_dict(self) -> None:
         engine = WGSReactorEngine()
-        result = engine.calculate_equilibrium_composition(_SYNGAS, temperature=500.0, pressure=1.0)
+        result = engine.calculate_equilibrium_composition(
+            _SYNGAS, temperature=500.0, pressure=1.0
+        )
         assert isinstance(result, dict)
 
     def test_has_conversion_key(self) -> None:

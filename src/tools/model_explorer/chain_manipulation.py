@@ -109,7 +109,9 @@ class KinematicTree:
         self.nodes: dict[str, ChainNode] = {}
 
     @precondition(
-        lambda self, urdf_content: (urdf_content is not None and len(urdf_content.strip()) > 0),
+        lambda self, urdf_content: (
+            urdf_content is not None and len(urdf_content.strip()) > 0
+        ),
         "URDF content must be a non-empty string",
     )
     def build_from_urdf(self, urdf_content: str) -> None:
@@ -162,7 +164,9 @@ class KinematicTree:
                     self.root = node
                 else:
                     # Multiple roots - use first one
-                    logger.warning(f"Multiple root links found. Using '{self.root.name}'")
+                    logger.warning(
+                        f"Multiple root links found. Using '{self.root.name}'"
+                    )
 
         # Calculate depths
         self._calculate_depths()
@@ -185,11 +189,15 @@ class KinematicTree:
         set_depth(self.root, 0)
 
     @precondition(
-        lambda self, from_link, to_link: (from_link is not None and len(from_link.strip()) > 0),
+        lambda self, from_link, to_link: (
+            from_link is not None and len(from_link.strip()) > 0
+        ),
         "Source link name must be a non-empty string",
     )
     @precondition(
-        lambda self, from_link, to_link: (to_link is not None and len(to_link.strip()) > 0),
+        lambda self, from_link, to_link: (
+            to_link is not None and len(to_link.strip()) > 0
+        ),
         "Target link name must be a non-empty string",
     )
     def get_chain(self, from_link: str, to_link: str) -> list[ChainNode]:
@@ -331,7 +339,9 @@ class ChainVisualizer(QGraphicsView):
             self._draw_node(node, x, y)
 
         # Fit view
-        self.fitInView(self._graphics_scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+        self.fitInView(
+            self._graphics_scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio
+        )
 
     def _calculate_positions(self) -> dict[str, tuple[float, float]]:
         """Calculate node positions using a simple tree layout."""
@@ -461,7 +471,9 @@ class InsertSegmentDialog(QDialog):
 
         self.parent_combo.currentTextChanged.connect(self._update_reparent_list)
 
-    def _create_insertion_group(self, tree: KinematicTree, insert_after: str | None) -> QGroupBox:
+    def _create_insertion_group(
+        self, tree: KinematicTree, insert_after: str | None
+    ) -> QGroupBox:
         if not (tree is not None):
             raise ValueError("tree must be provided")
         if not (tree is not None):
@@ -542,12 +554,16 @@ class InsertSegmentDialog(QDialog):
             node = tree.nodes[parent_name]
             if node.children:
                 self.reparent_list = QListWidget()
-                self.reparent_list.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
+                self.reparent_list.setSelectionMode(
+                    QListWidget.SelectionMode.MultiSelection
+                )
                 for child in node.children:
                     item = QListWidgetItem(child.name)
                     item.setSelected(True)
                     self.reparent_list.addItem(item)
-                reparent_layout.addWidget(QLabel("Select children to re-parent to new link:"))
+                reparent_layout.addWidget(
+                    QLabel("Select children to re-parent to new link:")
+                )
                 reparent_layout.addWidget(self.reparent_list)
             else:
                 reparent_layout.addWidget(QLabel("No children to re-parent"))
@@ -714,7 +730,9 @@ class ChainManipulationWidget(QWidget):
         """Update the chain information display."""
         self.links_label.setText(f"Links: {len(self.tree.nodes)}")
 
-        joint_count = sum(1 for n in self.tree.nodes.values() if n.joint_to_parent is not None)
+        joint_count = sum(
+            1 for n in self.tree.nodes.values() if n.joint_to_parent is not None
+        )
         self.joints_label.setText(f"Joints: {joint_count}")
 
         branches = len(self.tree.get_branch_points())

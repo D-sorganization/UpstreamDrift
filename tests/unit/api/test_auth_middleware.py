@@ -34,14 +34,18 @@ class TestIsLocalMode:
         """Test returning True when GOLF_AUTH_DISABLED=true."""
         from src.api.auth.middleware import is_local_mode
 
-        with patch.dict(os.environ, {"GOLF_SUITE_MODE": "cloud", "GOLF_AUTH_DISABLED": "true"}):
+        with patch.dict(
+            os.environ, {"GOLF_SUITE_MODE": "cloud", "GOLF_AUTH_DISABLED": "true"}
+        ):
             assert is_local_mode() is True
 
     def test_returns_true_when_auth_disabled_uppercase(self):
         """Test returning True when GOLF_AUTH_DISABLED=TRUE (case insensitive)."""
         from src.api.auth.middleware import is_local_mode
 
-        with patch.dict(os.environ, {"GOLF_SUITE_MODE": "cloud", "GOLF_AUTH_DISABLED": "TRUE"}):
+        with patch.dict(
+            os.environ, {"GOLF_SUITE_MODE": "cloud", "GOLF_AUTH_DISABLED": "TRUE"}
+        ):
             assert is_local_mode() is True
 
     def test_returns_false_when_cloud_mode(self):

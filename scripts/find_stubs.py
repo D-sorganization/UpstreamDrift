@@ -14,7 +14,11 @@ def is_stub(node: Any) -> bool:
     body = node.body
 
     # Remove docstring from body consideration
-    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Str | ast.Constant):
+    if (
+        body
+        and isinstance(body[0], ast.Expr)
+        and isinstance(body[0].value, ast.Str | ast.Constant)
+    ):
         body = body[1:]
 
     if not body:
@@ -63,7 +67,9 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
                 docs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
             # Check stubs (functions only)
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and is_stub(node):
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and is_stub(
+                node
+            ):
                 stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
 

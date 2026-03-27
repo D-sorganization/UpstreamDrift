@@ -20,7 +20,9 @@ def test_validate_security_no_issues(monkeypatch):
 
 
 def test_validate_security_with_critical(monkeypatch):
-    mock_validate = MagicMock(return_value={"critical_issues": ["bad secret"], "warnings": []})
+    mock_validate = MagicMock(
+        return_value={"critical_issues": ["bad secret"], "warnings": []}
+    )
     monkeypatch.setattr(
         "src.shared.python.security.env_validator.validate_environment",
         mock_validate,
@@ -39,7 +41,9 @@ def test_setup_api_environment(monkeypatch):
     monkeypatch.setattr("start_api_server.get_repo_root", lambda: mock_root)
     monkeypatch.setattr("start_api_server._validate_security", lambda: True)
 
-    with patch.dict(os.environ, {"API_HOST": "0.0.0.0", "API_PORT": "9000"}, clear=True):
+    with patch.dict(
+        os.environ, {"API_HOST": "0.0.0.0", "API_PORT": "9000"}, clear=True
+    ):
         host, port = start_api_server.setup_api_environment()
         assert host == "0.0.0.0"
         assert port == 9000
@@ -49,7 +53,9 @@ def test_setup_api_environment(monkeypatch):
 @patch("start_api_server.check_python_dependencies")
 def test_main_success(mock_check_deps, mock_run, monkeypatch):
     mock_check_deps.return_value = True
-    monkeypatch.setattr("start_api_server.setup_api_environment", lambda: ("127.0.0.1", 8000))
+    monkeypatch.setattr(
+        "start_api_server.setup_api_environment", lambda: ("127.0.0.1", 8000)
+    )
     monkeypatch.setattr("start_api_server.print_server_info", lambda h, p: None)
 
     assert start_api_server.main() == 0

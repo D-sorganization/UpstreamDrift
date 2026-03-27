@@ -198,19 +198,27 @@ class URDFEditorWindow(QMainWindow):
         tools_menu.addAction(frankenstein_action)
 
         chain_action = QAction("&Chain Tools", self)
-        chain_action.triggered.connect(lambda: self.central_tabs.setCurrentWidget(self.chain_tools))
+        chain_action.triggered.connect(
+            lambda: self.central_tabs.setCurrentWidget(self.chain_tools)
+        )
         tools_menu.addAction(chain_action)
 
         ee_action = QAction("&End Effector Manager", self)
-        ee_action.triggered.connect(lambda: self.central_tabs.setCurrentWidget(self.ee_manager))
+        ee_action.triggered.connect(
+            lambda: self.central_tabs.setCurrentWidget(self.ee_manager)
+        )
         tools_menu.addAction(ee_action)
 
         joint_action = QAction("&Joint Manipulator", self)
-        joint_action.triggered.connect(lambda: self.central_tabs.setCurrentWidget(self.joint_tools))
+        joint_action.triggered.connect(
+            lambda: self.central_tabs.setCurrentWidget(self.joint_tools)
+        )
         tools_menu.addAction(joint_action)
 
         mesh_action = QAction("&Mesh Browser", self)
-        mesh_action.triggered.connect(lambda: self.central_tabs.setCurrentWidget(self.mesh_browser))
+        mesh_action.triggered.connect(
+            lambda: self.central_tabs.setCurrentWidget(self.mesh_browser)
+        )
         tools_menu.addAction(mesh_action)
 
     def _setup_dock_widgets(self) -> None:
@@ -254,7 +262,9 @@ class URDFEditorWindow(QMainWindow):
         self.mesh_browser.urdf_modified.connect(self._on_urdf_modified)
 
         # Component library signals
-        self.component_library.component_edited.connect(self._on_component_edit_requested)
+        self.component_library.component_edited.connect(
+            self._on_component_edit_requested
+        )
 
         # Tab change
         self.central_tabs.currentChanged.connect(self._on_tab_changed)

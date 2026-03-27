@@ -66,7 +66,9 @@ class TestSpectralArcLengthContracts(unittest.TestCase):
     def test_sal_is_non_positive(self) -> None:
         """SAL is always <= 0 by definition (negated arc length)."""
         rng = np.random.default_rng(42)
-        data = np.sin(2 * np.pi * 5.0 * np.arange(1000) / 500.0) + rng.normal(0, 0.1, 1000)
+        data = np.sin(2 * np.pi * 5.0 * np.arange(1000) / 500.0) + rng.normal(
+            0, 0.1, 1000
+        )
         result = self._sal(data, 500.0)
         self.assertLessEqual(result, 0.0)
 

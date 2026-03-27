@@ -10,10 +10,16 @@ class AcidGasDewpointRequest(BaseModel):
 
     temperature_c: float = Field(..., description="System temperature [degC]")
     pressure_bar: float = Field(..., gt=0, description="System pressure [bar]")
-    h2o_fraction: float = Field(default=0.0, ge=0, le=1, description="H2O mole fraction")
+    h2o_fraction: float = Field(
+        default=0.0, ge=0, le=1, description="H2O mole fraction"
+    )
     hf_fraction: float = Field(default=0.0, ge=0, le=1, description="HF mole fraction")
-    hcl_fraction: float = Field(default=0.0, ge=0, le=1, description="HCl mole fraction")
-    h2s_fraction: float = Field(default=0.0, ge=0, le=1, description="H2S mole fraction")
+    hcl_fraction: float = Field(
+        default=0.0, ge=0, le=1, description="HCl mole fraction"
+    )
+    h2s_fraction: float = Field(
+        default=0.0, ge=0, le=1, description="H2S mole fraction"
+    )
     method: str = Field(
         default="antoine",
         description="Vapor-pressure method: 'antoine', 'extended_antoine'",

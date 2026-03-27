@@ -92,17 +92,13 @@ def test_find_image_path(mock_assets_dir, mock_model, parent_launcher, qapp):
     with patch("src.launchers.model_card.Path") as mock_base_path:
         mock_svg = MagicMock()
         mock_svg.exists.return_value = True
-        mock_base_path.return_value.parent.parent.parent.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = (
-            mock_svg
-        )
+        mock_base_path.return_value.parent.parent.parent.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_svg
         assert card._find_image_path("test.png") == mock_svg
 
     with patch("src.launchers.model_card.Path") as mock_base_path:
         mock_svg = MagicMock()
         mock_svg.exists.return_value = False
-        mock_base_path.return_value.parent.parent.parent.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = (
-            mock_svg
-        )
+        mock_base_path.return_value.parent.parent.parent.__truediv__.return_value.__truediv__.return_value.__truediv__.return_value = mock_svg
         assert card._find_image_path("test.png") is None
 
     assert card._find_image_path(None) is None
@@ -237,7 +233,9 @@ def test_mouse_move_event(mock_model, parent_launcher, qapp):
 
     event = MagicMock(spec=QMouseEvent)
     event.buttons.return_value = Qt.MouseButton.LeftButton
-    event.position().toPoint.return_value = QPoint(50, 50)  # Over QApplication.startDragDistance()
+    event.position().toPoint.return_value = QPoint(
+        50, 50
+    )  # Over QApplication.startDragDistance()
 
     # Needs to be in edit mode
     parent_launcher.layout_edit_mode = True

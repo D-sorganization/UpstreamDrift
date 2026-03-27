@@ -152,7 +152,9 @@ class TestMirrorTrajectory:
         orientations = np.array([np.eye(3), np.eye(3)])
         angular_velocities = np.array([[0.0, 1.0, 0.0], [0.0, 1.0, 0.0]])
 
-        result = mirror_trajectory(positions, velocities, orientations, angular_velocities)
+        result = mirror_trajectory(
+            positions, velocities, orientations, angular_velocities
+        )
 
         assert "positions" in result
         assert "velocities" in result

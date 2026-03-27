@@ -212,7 +212,9 @@ class TestClubModel:
     def test_club_moi_formula(self) -> None:
         """MOI = m_head * L^2 + m_shaft * (L_shaft/2)^2."""
         c = ClubModel()
-        expected = c.head_mass * c.total_length**2 + c.shaft_mass * (c.shaft_length / 2) ** 2
+        expected = (
+            c.head_mass * c.total_length**2 + c.shaft_mass * (c.shaft_length / 2) ** 2
+        )
         assert c.club_moi == pytest.approx(expected)
 
     @pytest.mark.parametrize(
@@ -223,7 +225,9 @@ class TestClubModel:
         ],
         ids=["head-mass", "total-length"],
     )
-    def test_moi_increases_with_param(self, param: str, low_val: float, high_val: float) -> None:
+    def test_moi_increases_with_param(
+        self, param: str, low_val: float, high_val: float
+    ) -> None:
         c_low = ClubModel(**{param: low_val})
         c_high = ClubModel(**{param: high_val})
         assert c_high.club_moi > c_low.club_moi

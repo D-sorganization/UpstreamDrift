@@ -90,7 +90,9 @@ for pkg in _DRAKE_PARENT_PACKAGES:
 sys.modules.pop(_ENGINE_MOD_NAME, None)
 
 with patch.dict(sys.modules, _pydrake_mocks):
-    with patch("src.shared.python.engine_core.engine_availability.DRAKE_AVAILABLE", True):
+    with patch(
+        "src.shared.python.engine_core.engine_availability.DRAKE_AVAILABLE", True
+    ):
         try:
             from src.engines.physics_engines.drake.python import (
                 drake_physics_engine as _drake_engine_module,
@@ -144,7 +146,9 @@ class TestDrakeWrapper(unittest.TestCase):
 
         # Setup return values
         self.mock_plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
-        self.mock_scene_graph = MagicMock(spec=SceneGraph) if DRAKE_AVAILABLE else MagicMock()
+        self.mock_scene_graph = (
+            MagicMock(spec=SceneGraph) if DRAKE_AVAILABLE else MagicMock()
+        )
         self.mock_add_plant.return_value = (self.mock_plant, self.mock_scene_graph)
 
         self.addCleanup(self.patcher1.stop)
@@ -154,9 +158,15 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine = DrakePhysicsEngine(time_step=0.001)
 
         # Manually verify internal state setup
-        self.engine.diagram = MagicMock(spec=Diagram) if DRAKE_AVAILABLE else MagicMock()
-        self.engine.context = MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
-        self.engine.plant_context = MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        self.engine.diagram = (
+            MagicMock(spec=Diagram) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.plant_context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
         self.engine._is_finalized = True
         # Simulator starts None
         self.engine.simulator = None
@@ -183,7 +193,9 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine._is_finalized = False
         self.engine._ensure_finalized()
 
-        mock_simulator_class.assert_called_once_with(self.engine.diagram, self.engine.context)
+        mock_simulator_class.assert_called_once_with(
+            self.engine.diagram, self.engine.context
+        )
         mock_simulator_instance.Initialize.assert_called_once()
         self.assertIsNotNone(self.engine.simulator)
 
@@ -204,10 +216,16 @@ class TestDrakeWrapper(unittest.TestCase):
 
     def test_reset_logic(self):
         """Test that reset() properly resets state to defaults."""
-        self.engine.context = MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
-        self.engine.plant_context = MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        self.engine.context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
+        self.engine.plant_context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
         self.engine.plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
-        self.engine.simulator = MagicMock(spec=Simulator) if DRAKE_AVAILABLE else MagicMock()
+        self.engine.simulator = (
+            MagicMock(spec=Simulator) if DRAKE_AVAILABLE else MagicMock()
+        )
 
         self.engine.reset()
 
@@ -215,20 +233,28 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine.context.SetTime.assert_called_with(0.0)
 
         # Verify default positions and velocities are set (from my fix)
-        self.engine.plant.SetDefaultPositions.assert_called_with(self.engine.plant_context)
-        self.engine.plant.SetDefaultVelocities.assert_called_with(self.engine.plant_context)
+        self.engine.plant.SetDefaultPositions.assert_called_with(
+            self.engine.plant_context
+        )
+        self.engine.plant.SetDefaultVelocities.assert_called_with(
+            self.engine.plant_context
+        )
 
         # Verify simulator re-initialization
         self.engine.simulator.Initialize.assert_called_once()
 
     def test_forward_computation(self):
         """Test forward() triggers computation of derived quantities."""
-        self.engine.plant_context = MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        self.engine.plant_context = (
+            MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
+        )
         self.engine.plant = MagicMock(spec=_PLANT_SPEC_ATTRS)
 
         # Setup plant methods
         self.engine.plant.num_velocities.return_value = 3
-        self.engine.plant.CalcMassMatrixViaInverseDynamics.return_value = MagicMock(spec=["shape"])
+        self.engine.plant.CalcMassMatrixViaInverseDynamics.return_value = MagicMock(
+            spec=["shape"]
+        )
         self.engine.plant.CalcInverseDynamics.return_value = MagicMock(spec=["shape"])
         self.engine.plant.MakeMultibodyForces.return_value = MagicMock(
             spec=["mutable_generalized_forces"]

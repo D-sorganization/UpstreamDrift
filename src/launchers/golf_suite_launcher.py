@@ -34,7 +34,9 @@ else:
     QtGui = None  # type: ignore
 
 # UI feedback timing constants
-LAUNCH_FEEDBACK_DURATION_MS = 2000  # Duration to show feedback messages (e.g., "Copied!")
+LAUNCH_FEEDBACK_DURATION_MS = (
+    2000  # Duration to show feedback messages (e.g., "Copied!")
+)
 
 
 class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # type: ignore[misc]
@@ -55,24 +57,34 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         # Define paths to the GUI scripts in the new structure
         self.mujoco_path = (
-            self.suite_root / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+            self.suite_root
+            / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
         )
         self.drake_path = (
-            self.suite_root / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+            self.suite_root
+            / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
         )
         self.pinocchio_path = (
-            self.suite_root / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+            self.suite_root
+            / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
         )
         self.opensim_path = (
-            self.suite_root / "src/engines/physics_engines/opensim/python/opensim_gui.py"
+            self.suite_root
+            / "src/engines/physics_engines/opensim/python/opensim_gui.py"
         )
         self.myosim_path = (
             self.suite_root
             / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
         )
-        self.openpose_path = self.suite_root / "src/shared/python/pose_estimation/openpose_gui.py"
-        self.urdf_path = self.suite_root / "tools/urdf_generator/launch_urdf_generator.py"
-        self.pendulum_path = self.suite_root / "src/shared/python/pendulum_simulator/__main__.py"
+        self.openpose_path = (
+            self.suite_root / "src/shared/python/pose_estimation/openpose_gui.py"
+        )
+        self.urdf_path = (
+            self.suite_root / "tools/urdf_generator/launch_urdf_generator.py"
+        )
+        self.pendulum_path = (
+            self.suite_root / "src/shared/python/pendulum_simulator/__main__.py"
+        )
 
         self._setup_ui()
 
@@ -192,7 +204,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             "Launch Shot Tracer",
             self._launch_shot_tracer,
             icon_pixmap=(
-                QtWidgets.QStyle.StandardPixmap.SP_ArrowForward if PYQT6_AVAILABLE else None
+                QtWidgets.QStyle.StandardPixmap.SP_ArrowForward
+                if PYQT6_AVAILABLE
+                else None
             ),
         )
         layout.addWidget(self.btn_shot_tracer)
@@ -210,7 +224,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.log_text.setMaximumHeight(120)
         self.log_text.setReadOnly(True)
         self.log_text.setStyleSheet(
-            "background-color: #2b2b2b; " "color: #ffffff; " "font-family: 'Consolas', monospace;"
+            "background-color: #2b2b2b; "
+            "color: #ffffff; "
+            "font-family: 'Consolas', monospace;"
         )
         log_layout.addWidget(self.log_text)
 
@@ -219,7 +235,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         self.copy_btn = QtWidgets.QPushButton("&Copy Log")
         self.copy_btn.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton)
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
+            )
         )
         self.copy_btn.setToolTip("Copy the simulation log to clipboard")
         self.copy_btn.setAccessibleName("Copy Log")
@@ -228,7 +246,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         self.clear_btn = QtWidgets.QPushButton("C&lear Log")
         self.clear_btn.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogResetButton)
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogResetButton
+            )
         )
         self.clear_btn.setToolTip("Clear the simulation log output")
         self.clear_btn.setAccessibleName("Clear Log")
@@ -251,7 +271,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         title.setFont(font)
         layout.addWidget(title)
 
-        subtitle = QtWidgets.QLabel("Launches physics engines using local python environment")
+        subtitle = QtWidgets.QLabel(
+            "Launches physics engines using local python environment"
+        )
         subtitle.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(subtitle)
 
@@ -300,7 +322,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
             self.copy_btn.setText("Copied!")
             self.copy_btn.setIcon(
-                self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton)
+                self.style().standardIcon(
+                    QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton
+                )
             )
 
             # Restore button after feedback duration
@@ -313,7 +337,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             self.status.setText("Log copied")
             QtCore.QTimer.singleShot(3000, lambda: self.status.setText("Ready"))
 
-    def _restore_btn(self, btn: "QtWidgets.QPushButton", text: str, icon: object) -> None:
+    def _restore_btn(
+        self, btn: "QtWidgets.QPushButton", text: str, icon: object
+    ) -> None:
         if btn:
             btn.setText(text)
             if icon is not None:
@@ -332,7 +358,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
         self.clear_btn.setText("Cleared!")
         self.clear_btn.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton)
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton
+            )
         )
 
         # Restore button after feedback duration
@@ -417,7 +445,9 @@ def main() -> None:
     """Launch the Golf Suite GUI application."""
     if not PYQT6_AVAILABLE:
         # If logger is configured (basic config above), this goes to stderr/stdout
-        logger.error("Error: PyQt6 is not installed. Please install it to use the GUI launcher.")
+        logger.error(
+            "Error: PyQt6 is not installed. Please install it to use the GUI launcher."
+        )
         logger.error("Try: pip install PyQt6")
         sys.exit(1)
 

@@ -43,7 +43,9 @@ class TestBallFlightPhysics:
     def test_no_spin_trajectory(self) -> None:
         """Test trajectory without spin."""
         simulator = BallFlightSimulator()
-        launch = LaunchConditions(velocity=50.0, launch_angle=np.radians(45.0), spin_rate=0.0)
+        launch = LaunchConditions(
+            velocity=50.0, launch_angle=np.radians(45.0), spin_rate=0.0
+        )
 
         trajectory = simulator.simulate_trajectory(launch)
         assert len(trajectory) > 0
@@ -86,7 +88,9 @@ class TestBallFlightPhysics:
         env_calm = EnvironmentalConditions(wind_velocity=np.array([0.0, 0.0, 0.0]))
         sim_calm = BallFlightSimulator(ball, env_calm)
 
-        launch = LaunchConditions(velocity=70.0, launch_angle=np.radians(10.0), spin_rate=2500.0)
+        launch = LaunchConditions(
+            velocity=70.0, launch_angle=np.radians(10.0), spin_rate=2500.0
+        )
 
         traj_wind = sim_wind.simulate_trajectory(launch)
         traj_calm = sim_calm.simulate_trajectory(launch)
@@ -144,6 +148,6 @@ class TestBallFlightPhysics:
 
             # However, we can check that the point.acceleration matches the sum of point.forces / mass.
             # This confirms the reporting logic is self-consistent.
-            assert np.allclose(
-                point.acceleration, expected_acc, atol=1e-5
-            ), f"Acceleration mismatch at t={point.time}"
+            assert np.allclose(point.acceleration, expected_acc, atol=1e-5), (
+                f"Acceleration mismatch at t={point.time}"
+            )

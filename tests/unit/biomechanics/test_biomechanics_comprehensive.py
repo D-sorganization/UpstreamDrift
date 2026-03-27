@@ -133,12 +133,16 @@ class TestHillMuscleModel:
 
     # -- Force-Length Passive --
 
-    def test_force_length_passive_zero_below_optimal(self, muscle: HillMuscleModel) -> None:
+    def test_force_length_passive_zero_below_optimal(
+        self, muscle: HillMuscleModel
+    ) -> None:
         """Passive force is zero when l_norm <= 1.0."""
         assert muscle.force_length_passive(0.5) == 0.0
         assert muscle.force_length_passive(1.0) == 0.0
 
-    def test_force_length_passive_increases_above_optimal(self, muscle: HillMuscleModel) -> None:
+    def test_force_length_passive_increases_above_optimal(
+        self, muscle: HillMuscleModel
+    ) -> None:
         """Passive force should increase when stretched beyond optimal."""
         f_1_1 = muscle.force_length_passive(1.1)
         f_1_5 = muscle.force_length_passive(1.5)
@@ -216,13 +220,17 @@ class TestHillMuscleModel:
                 )
                 assert muscle.compute_force(state) >= 0.0
 
-    def test_compute_force_invalid_activation_raises(self, muscle: HillMuscleModel) -> None:
+    def test_compute_force_invalid_activation_raises(
+        self, muscle: HillMuscleModel
+    ) -> None:
         """Activation outside [0, 1] should raise error."""
         state = MuscleState(activation=1.5, l_CE=0.15, v_CE=0.0, l_MT=0.35)
         with pytest.raises(Exception, match="activation"):
             muscle.compute_force(state)
 
-    def test_compute_force_negative_activation_raises(self, muscle: HillMuscleModel) -> None:
+    def test_compute_force_negative_activation_raises(
+        self, muscle: HillMuscleModel
+    ) -> None:
         state = MuscleState(activation=-0.1, l_CE=0.15, v_CE=0.0, l_MT=0.35)
         with pytest.raises(Exception, match="activation"):
             muscle.compute_force(state)
@@ -278,12 +286,16 @@ class TestActivationDynamics:
 
     # -- compute_derivative --
 
-    def test_derivative_positive_when_u_gt_a(self, dynamics: ActivationDynamics) -> None:
+    def test_derivative_positive_when_u_gt_a(
+        self, dynamics: ActivationDynamics
+    ) -> None:
         """When excitation > activation, derivative should be positive."""
         dadt = dynamics.compute_derivative(u=1.0, a=0.1)
         assert dadt > 0
 
-    def test_derivative_negative_when_u_lt_a(self, dynamics: ActivationDynamics) -> None:
+    def test_derivative_negative_when_u_lt_a(
+        self, dynamics: ActivationDynamics
+    ) -> None:
         """When excitation < activation, derivative should be negative."""
         dadt = dynamics.compute_derivative(u=0.0, a=0.5)
         assert dadt < 0
@@ -331,7 +343,9 @@ class TestActivationDynamics:
             a = dynamics.update(u=0.0, a=a, dt=0.001)
         assert a < 0.05  # Should be near 0 after 500ms
 
-    def test_activation_faster_than_deactivation(self, dynamics: ActivationDynamics) -> None:
+    def test_activation_faster_than_deactivation(
+        self, dynamics: ActivationDynamics
+    ) -> None:
         """Activation (rise) should be faster than deactivation (fall)."""
         # Rise: 0 → 0.5
         a_rise = 0.0

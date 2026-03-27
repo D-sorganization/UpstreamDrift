@@ -59,7 +59,9 @@ class TestPose6DOF:
         original = Pose6DOF(euler_angles=[0.1, 0.2, 0.3])
         quat = original.to_quaternion()
         reconstructed = Pose6DOF.from_quaternion([0, 0, 0], quat)
-        np.testing.assert_allclose(original.euler_angles, reconstructed.euler_angles, atol=1e-10)
+        np.testing.assert_allclose(
+            original.euler_angles, reconstructed.euler_angles, atol=1e-10
+        )
 
     def test_pose_rotation_matrix(self) -> None:
         """Test conversion to 3x3 rotation matrix."""

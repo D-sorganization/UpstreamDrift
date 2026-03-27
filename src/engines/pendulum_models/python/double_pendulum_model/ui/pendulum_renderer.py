@@ -90,7 +90,9 @@ class PendulumRendererMixin:
 
     def _calculate_3d_positions(
         self, pivot: npt.NDArray[np.float64]
-    ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]]:
+    ) -> tuple[
+        npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
+    ]:
         """Calculate the 3D positions of pendulum joints."""
         if not (pivot is not None):
             raise ValueError("pivot must be provided")
@@ -145,7 +147,9 @@ class PendulumRendererMixin:
         return pivot, elbow, wrist
 
     @staticmethod
-    def _rotate_out_of_plane(point: npt.NDArray[np.float64], phi: float) -> npt.NDArray[np.float64]:
+    def _rotate_out_of_plane(
+        point: npt.NDArray[np.float64], phi: float
+    ) -> npt.NDArray[np.float64]:
         """Rotate point around Z axis by phi."""
         if not (point is not None):
             raise ValueError("point must be provided")
@@ -161,7 +165,9 @@ class PendulumRendererMixin:
         return np.array([new_x, new_y, z])
 
     @staticmethod
-    def _rotate_plane(point: npt.NDArray[np.float64], angle: float) -> npt.NDArray[np.float64]:
+    def _rotate_plane(
+        point: npt.NDArray[np.float64], angle: float
+    ) -> npt.NDArray[np.float64]:
         """Rotate point around X axis by angle."""
         if not (point is not None):
             raise ValueError("point must be provided")
@@ -221,7 +227,9 @@ class PendulumRendererMixin:
         # Gravity
         self._draw_gravity_arrow(pivot, max_range)
 
-    def _draw_gravity_arrow(self, pivot: npt.NDArray[np.float64], max_range: float) -> None:
+    def _draw_gravity_arrow(
+        self, pivot: npt.NDArray[np.float64], max_range: float
+    ) -> None:
         """Draw the gravity vector and label."""
         if not (pivot is not None):
             raise ValueError("pivot must be provided")

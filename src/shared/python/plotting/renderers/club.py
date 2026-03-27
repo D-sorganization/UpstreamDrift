@@ -165,7 +165,8 @@ class ClubRenderer(BaseRenderer):
         if abs(float(normal[2])) > 1e-6:
             zz = (
                 centroid[2]
-                - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1])) / normal[2]
+                - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1]))
+                / normal[2]
             )
             ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")
 
@@ -213,7 +214,9 @@ class ClubRenderer(BaseRenderer):
 
         has_data = False
 
-        for comp, label, color, style in zip(components, labels, colors, styles, strict=False):
+        for comp, label, color, style in zip(
+            components, labels, colors, styles, strict=False
+        ):
             times, acc_vec = self.data.get_club_induced_acceleration_series(comp)
 
             if len(times) > 0 and acc_vec.size > 0:
@@ -231,12 +234,16 @@ class ClubRenderer(BaseRenderer):
                     has_data = True
 
         if not has_data:
-            ax.text(0.5, 0.5, "No Club Induced Acceleration Data", ha="center", va="center")
+            ax.text(
+                0.5, 0.5, "No Club Induced Acceleration Data", ha="center", va="center"
+            )
             return
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Acceleration Magnitude (m/s²)", fontsize=12, fontweight="bold")
-        ax.set_title("Club Head Acceleration Contributors", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Club Head Acceleration Contributors", fontsize=14, fontweight="bold"
+        )
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()

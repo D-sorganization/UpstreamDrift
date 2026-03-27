@@ -346,7 +346,9 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
                 self.state.q = np.asarray(args[0]).copy()
                 self.state.v = np.asarray(args[1]).copy()
         else:
-            raise TypeError(f"set_state expects EngineState or (q, v), got {len(args)} args")
+            raise TypeError(
+                f"set_state expects EngineState or (q, v), got {len(args)} args"
+            )
 
     def get_time(self) -> float:
         """Get current simulation time.

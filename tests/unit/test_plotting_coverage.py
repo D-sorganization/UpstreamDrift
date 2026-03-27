@@ -60,7 +60,9 @@ def mock_recorder():
 
 @pytest.fixture
 def plotter(mock_recorder):
-    return GolfSwingPlotter(mock_recorder, joint_names=["Joint 0", "Joint 1", "Joint 2"])
+    return GolfSwingPlotter(
+        mock_recorder, joint_names=["Joint 0", "Joint 1", "Joint 2"]
+    )
 
 
 def test_init(plotter):

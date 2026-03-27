@@ -239,7 +239,9 @@ models:
         # initialization while the logic we care about (graceful handling of
         # missing assets) is still executed.
         # Skip in CI - mixed mock/real Qt causes hangs and segfaults
-        is_ci = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
+        is_ci = (
+            os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
+        )
 
         if is_ci:
             pytest.skip("GolfLauncher construction unreliable in CI (mock/real Qt mix)")
@@ -318,7 +320,9 @@ models:
 
         try:
             with (
-                patch("src.shared.python.config.model_registry.ModelRegistry") as MockRegistry,
+                patch(
+                    "src.shared.python.config.model_registry.ModelRegistry"
+                ) as MockRegistry,
                 patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
             ):
                 MockRegistry.return_value = temp_registry

@@ -59,18 +59,26 @@ class TestNoiseGenerator:
         assert sig.values.shape == t.shape
 
     def test_impulse_noise(self, gen: NoiseGenerator, t: np.ndarray) -> None:
-        sig = gen.generate(t, noise_type=NoiseType.IMPULSE, amplitude=5.0, probability=0.05)
+        sig = gen.generate(
+            t, noise_type=NoiseType.IMPULSE, amplitude=5.0, probability=0.05
+        )
         assert sig.values.shape == t.shape
 
     def test_quantization_noise(self, gen: NoiseGenerator, t: np.ndarray) -> None:
-        sig = gen.generate(t, noise_type=NoiseType.QUANTIZATION, amplitude=1.0, levels=256)
+        sig = gen.generate(
+            t, noise_type=NoiseType.QUANTIZATION, amplitude=1.0, levels=256
+        )
         assert sig.values.shape == t.shape
 
     def test_periodic_noise(self, gen: NoiseGenerator, t: np.ndarray) -> None:
-        sig = gen.generate(t, noise_type=NoiseType.PERIODIC, amplitude=1.0, frequency=60.0)
+        sig = gen.generate(
+            t, noise_type=NoiseType.PERIODIC, amplitude=1.0, frequency=60.0
+        )
         assert sig.values.shape == t.shape
 
-    def test_negative_amplitude_raises(self, gen: NoiseGenerator, t: np.ndarray) -> None:
+    def test_negative_amplitude_raises(
+        self, gen: NoiseGenerator, t: np.ndarray
+    ) -> None:
         with pytest.raises((ValueError, AssertionError)):
             gen.generate(t, amplitude=-1.0)
 
@@ -105,7 +113,9 @@ class TestAddNoiseToSignal:
         assert noisy.values.shape == sine_signal.values.shape
 
     def test_add_noise_pink(self, sine_signal: Signal) -> None:
-        noisy = add_noise_to_signal(sine_signal, noise_type=NoiseType.PINK, amplitude=0.5, seed=7)
+        noisy = add_noise_to_signal(
+            sine_signal, noise_type=NoiseType.PINK, amplitude=0.5, seed=7
+        )
         assert noisy.values.shape == sine_signal.values.shape
 
     def test_name_updated(self, sine_signal: Signal) -> None:
@@ -117,7 +127,9 @@ class TestGenerateDisturbanceProfile:
     """Tests for generate_disturbance_profile function."""
 
     def test_step_disturbance(self, t: np.ndarray) -> None:
-        sig = generate_disturbance_profile(t, disturbance_type="step", step_time=1.0, magnitude=2.0)
+        sig = generate_disturbance_profile(
+            t, disturbance_type="step", step_time=1.0, magnitude=2.0
+        )
         assert np.all(sig.values[t < 1.0] == 0.0)
         assert np.all(sig.values[t >= 1.0] == 2.0)
 
@@ -134,11 +146,15 @@ class TestGenerateDisturbanceProfile:
         assert np.isclose(sig.values[-1], 5.0, atol=1e-6)
 
     def test_sine_disturbance(self, t: np.ndarray) -> None:
-        sig = generate_disturbance_profile(t, disturbance_type="sine", frequency=1.0, amplitude=2.0)
+        sig = generate_disturbance_profile(
+            t, disturbance_type="sine", frequency=1.0, amplitude=2.0
+        )
         assert np.isclose(np.max(np.abs(sig.values)), 2.0, atol=0.1)
 
     def test_random_steps_disturbance(self, t: np.ndarray) -> None:
-        sig = generate_disturbance_profile(t, disturbance_type="random_steps", num_steps=5, seed=42)
+        sig = generate_disturbance_profile(
+            t, disturbance_type="random_steps", num_steps=5, seed=42
+        )
         assert sig.values.shape == t.shape
 
     def test_chirp_disturbance(self, t: np.ndarray) -> None:

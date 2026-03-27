@@ -77,7 +77,9 @@ class TestTRCGeometryEngineCalculateGeometry:
             name="Lead", thickness=1.0, density=710.0, color="#444", visible=False
         )
         result_one = engine.calculate_geometry(_make_dims(), [visible_layer])
-        result_two = engine.calculate_geometry(_make_dims(), [visible_layer, invisible_layer])
+        result_two = engine.calculate_geometry(
+            _make_dims(), [visible_layer, invisible_layer]
+        )
         # Adding invisible layer should not change the result
         assert abs(result_one.total_mass_lb - result_two.total_mass_lb) < 1e-6
 

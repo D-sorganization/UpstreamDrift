@@ -27,7 +27,9 @@ def test_aierror_str():
 
 
 def test_aiprovidererror():
-    err = AIProviderError("prov msg", provider="test_prov", status_code=500, details={"ctx": 1})
+    err = AIProviderError(
+        "prov msg", provider="test_prov", status_code=500, details={"ctx": 1}
+    )
     assert err.message == "prov msg"
     assert err.provider == "test_prov"
     assert err.status_code == 500

@@ -110,8 +110,10 @@ class APIDiagnostics:
         from src.shared.python.config.environment import get_env
 
         env_vars = {
-            "GOLF_SUITE_MODE": get_env("GOLF_SUITE_MODE", default="not set") or "not set",
-            "GOLF_AUTH_DISABLED": get_env("GOLF_AUTH_DISABLED", default="not set") or "not set",
+            "GOLF_SUITE_MODE": get_env("GOLF_SUITE_MODE", default="not set")
+            or "not set",
+            "GOLF_AUTH_DISABLED": get_env("GOLF_AUTH_DISABLED", default="not set")
+            or "not set",
             "GOLF_PORT": get_env("GOLF_PORT", default="not set") or "not set",
         }
         details["environment_variables"] = env_vars
@@ -265,7 +267,10 @@ class APIDiagnostics:
             missing_routes = []
             for er in essential_routes:
                 # Check if any route matches (accounting for prefix patterns)
-                found = any(er in rp or rp.endswith(er.replace("/api", "")) for rp in route_paths)
+                found = any(
+                    er in rp or rp.endswith(er.replace("/api", ""))
+                    for rp in route_paths
+                )
                 if not found:
                     missing_routes.append(er)
 

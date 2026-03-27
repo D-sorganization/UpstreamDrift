@@ -12,7 +12,9 @@ import sys
 from utils.logging_utils import DEFAULT_FORMAT
 
 
-def get_logger(name: str, level: int = logging.INFO, log_file: str | None = None) -> logging.Logger:
+def get_logger(
+    name: str, level: int = logging.INFO, log_file: str | None = None
+) -> logging.Logger:
     """
     Get a configured logger instance.
 

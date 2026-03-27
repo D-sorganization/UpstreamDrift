@@ -45,7 +45,9 @@ class TestCLIParser:
         from model_generation.cli import create_parser
 
         parser = create_parser()
-        args = parser.parse_args(["convert", "input.slx", "-o", "output.urdf", "-f", "simscape"])
+        args = parser.parse_args(
+            ["convert", "input.slx", "-o", "output.urdf", "-f", "simscape"]
+        )
 
         assert args.command == "convert"
         assert args.input == "input.slx"
@@ -91,7 +93,9 @@ class TestCLIParser:
         from model_generation.cli import create_parser
 
         parser = create_parser()
-        args = parser.parse_args(["inertia", "box", "1.0", "0.1", "0.2", "0.3", "--json"])
+        args = parser.parse_args(
+            ["inertia", "box", "1.0", "0.1", "0.2", "0.3", "--json"]
+        )
 
         assert args.command == "inertia"
         assert args.shape == "box"

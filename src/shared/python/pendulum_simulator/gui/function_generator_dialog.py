@@ -54,7 +54,9 @@ for _ in range(10):
         break
     _search = _search.parent
 else:
-    logger.warning("signal_toolkit not found — walked up from %s", _this_file)  # pragma: no cover
+    logger.warning(
+        "signal_toolkit not found — walked up from %s", _this_file
+    )  # pragma: no cover
 
 # ── Try to import the shared widgets ──────────────────────────────────────
 _HAS_POLY_WIDGET = False

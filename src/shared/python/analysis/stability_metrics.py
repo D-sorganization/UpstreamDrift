@@ -26,7 +26,11 @@ class StabilityMetricsMixin:
         cop_position = getattr(self, "cop_position", None)
         com_position = getattr(self, "com_position", None)
 
-        if cop_position is None or com_position is None or len(cop_position) != len(com_position):
+        if (
+            cop_position is None
+            or com_position is None
+            or len(cop_position) != len(com_position)
+        ):
             return None
 
         # Horizontal plane distance (X-Y)

@@ -232,7 +232,9 @@ class SafetyMonitor:
 
         # Check torque limits
         if command.torque_commands is not None:
-            torque_violation = np.abs(command.torque_commands) > self.limits.max_joint_torque
+            torque_violation = (
+                np.abs(command.torque_commands) > self.limits.max_joint_torque
+            )
             if np.any(torque_violation):
                 joints = list(np.where(torque_violation)[0])
                 violations.append(f"Command torque exceeds limit on joints {joints}")
@@ -240,13 +242,17 @@ class SafetyMonitor:
         # Check position targets against limits
         if command.position_targets is not None:
             if self.limits.joint_limits_lower is not None:
-                lower_violation = command.position_targets < self.limits.joint_limits_lower
+                lower_violation = (
+                    command.position_targets < self.limits.joint_limits_lower
+                )
                 if np.any(lower_violation):
                     joints = list(np.where(lower_violation)[0])
                     violations.append(f"Position target below limit on joints {joints}")
 
             if self.limits.joint_limits_upper is not None:
-                upper_violation = command.position_targets > self.limits.joint_limits_upper
+                upper_violation = (
+                    command.position_targets > self.limits.joint_limits_upper
+                )
                 if np.any(upper_violation):
                     joints = list(np.where(upper_violation)[0])
                     violations.append(f"Position target above limit on joints {joints}")
@@ -295,20 +301,28 @@ class SafetyMonitor:
             timestamp=desired.timestamp,
             mode=desired.mode,
             position_targets=(
-                desired.position_targets.copy() if desired.position_targets is not None else None
+                desired.position_targets.copy()
+                if desired.position_targets is not None
+                else None
             ),
             velocity_targets=(
-                desired.velocity_targets.copy() if desired.velocity_targets is not None else None
+                desired.velocity_targets.copy()
+                if desired.velocity_targets is not None
+                else None
             ),
             torque_commands=(
-                desired.torque_commands.copy() if desired.torque_commands is not None else None
+                desired.torque_commands.copy()
+                if desired.torque_commands is not None
+                else None
             ),
             feedforward_torque=(
                 desired.feedforward_torque.copy()
                 if desired.feedforward_torque is not None
                 else None
             ),
-            stiffness=(desired.stiffness.copy() if desired.stiffness is not None else None),
+            stiffness=(
+                desired.stiffness.copy() if desired.stiffness is not None else None
+            ),
             damping=desired.damping.copy() if desired.damping is not None else None,
         )
 

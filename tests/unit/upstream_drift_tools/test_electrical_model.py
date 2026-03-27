@@ -16,7 +16,9 @@ from src.shared.python.upstream_drift_tools.calculators.electrical.glass_interfa
 
 
 def _make_model() -> ThreePhaseElectricalModelEnhanced:
-    return ThreePhaseElectricalModelEnhanced(ElectrodeConfig(), GlassPropertiesInterface())
+    return ThreePhaseElectricalModelEnhanced(
+        ElectrodeConfig(), GlassPropertiesInterface()
+    )
 
 
 class TestThreePhaseElectricalModelInit:
@@ -70,7 +72,9 @@ class TestCalculateSystemState:
 
     def test_symmetric_depths_equal_resistances(self) -> None:
         m = _make_model()
-        state = m.calculate_system_state(np.array([10.0, 10.0, 10.0]), 120.0, 24.0, 2.0, self._K)
+        state = m.calculate_system_state(
+            np.array([10.0, 10.0, 10.0]), 120.0, 24.0, 2.0, self._K
+        )
         resistances = list(state["resistances"].values())
         # With identical depths all 3 phase resistances should be approximately equal
         assert abs(resistances[0] - resistances[1]) / resistances[0] < 0.01
@@ -84,8 +88,12 @@ class TestCalculateSystemState:
             np.array([20.0, 20.0, 20.0]), 120.0, 24.0, 2.0, self._K
         )
         # Deeper electrodes should have lower total resistance
-        avg_shallow = sum(state_shallow["resistances"].values()) / len(state_shallow["resistances"])
-        avg_deep = sum(state_deep["resistances"].values()) / len(state_deep["resistances"])
+        avg_shallow = sum(state_shallow["resistances"].values()) / len(
+            state_shallow["resistances"]
+        )
+        avg_deep = sum(state_deep["resistances"].values()) / len(
+            state_deep["resistances"]
+        )
         assert avg_deep < avg_shallow
 
 

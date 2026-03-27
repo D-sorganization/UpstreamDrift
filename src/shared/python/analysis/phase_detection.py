@@ -34,7 +34,9 @@ class PhaseDetectionMixin:
             return self._fallback_single_phase(times, duration)
 
         smoothed_speed = self._smooth_speed(club_head_speed)
-        impact_idx, transition_idx, takeaway_idx, finish_idx = self._find_key_events(smoothed_speed)
+        impact_idx, transition_idx, takeaway_idx, finish_idx = self._find_key_events(
+            smoothed_speed
+        )
         phase_defs = self._build_phase_definitions(
             smoothed_speed,
             impact_idx,
@@ -200,7 +202,11 @@ class PhaseDetectionMixin:
                     end_time=float(times[end_idx]) if max_idx >= 0 else 0.0,
                     start_index=int(start_idx),
                     end_index=int(end_idx),
-                    duration=(float(times[end_idx] - times[start_idx]) if max_idx >= 0 else 0.0),
+                    duration=(
+                        float(times[end_idx] - times[start_idx])
+                        if max_idx >= 0
+                        else 0.0
+                    ),
                 ),
             )
         return phases

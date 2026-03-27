@@ -35,7 +35,12 @@ router = APIRouter()
 
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
 @precondition(
-    lambda file=None, estimator_type="mediapipe", min_confidence=0.5, enable_smoothing=True, video_pipeline=None, logger=None: (
+    lambda file=None,
+    estimator_type="mediapipe",
+    min_confidence=0.5,
+    enable_smoothing=True,
+    video_pipeline=None,
+    logger=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
@@ -121,7 +126,9 @@ async def analyze_video(
     except (FileNotFoundError, OSError) as e:
         if logger:
             logger.error("Video analysis error: %s", e)
-        raise HTTPException(status_code=500, detail=f"Video analysis failed: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Video analysis failed: {str(e)}"
+        ) from e
     finally:
         if temp_path is not None and temp_path.exists():
             try:
@@ -137,7 +144,12 @@ async def analyze_video(
 
 @router.post("/analyze/video/async")
 @precondition(
-    lambda background_tasks=None, file=None, estimator_type="mediapipe", min_confidence=0.5, video_pipeline=None, task_manager=None: (
+    lambda background_tasks=None,
+    file=None,
+    estimator_type="mediapipe",
+    min_confidence=0.5,
+    video_pipeline=None,
+    task_manager=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
@@ -237,7 +249,9 @@ async def _process_video_background(
             "created_at": created_at,
         }
 
-        config = VideoProcessingConfig(estimator_type=estimator_type, min_confidence=min_confidence)
+        config = VideoProcessingConfig(
+            estimator_type=estimator_type, min_confidence=min_confidence
+        )
         pipeline = VideoPosePipeline(config)
 
         result = pipeline.process_video(video_path)

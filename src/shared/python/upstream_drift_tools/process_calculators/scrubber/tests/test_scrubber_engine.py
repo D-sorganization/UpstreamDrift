@@ -67,7 +67,9 @@ class TestScrubberEngine(unittest.TestCase):
 
     def test_zero_flow(self) -> None:
         """Test behavior with zero gas flow."""
-        zero_inputs = ScrubberInputs(**{**self.standard_inputs.__dict__, "gas_flow_kg_hr": 0})
+        zero_inputs = ScrubberInputs(
+            **{**self.standard_inputs.__dict__, "gas_flow_kg_hr": 0}
+        )
         # Should probably return zero or handle gracefully.
         # In current implementation, it might produce results but they should be small/zero.
         results = ScrubberEngine.calculate(zero_inputs)

@@ -43,7 +43,9 @@ class IndexerWorker(QThread):
             for root, dirs, files in os.walk(self._root):
                 # Filter directories
                 dirs[:] = [
-                    d for d in dirs if not d.startswith(".") and d != "__pycache__" and d != "venv"
+                    d
+                    for d in dirs
+                    if not d.startswith(".") and d != "__pycache__" and d != "venv"
                 ]
 
                 for file in files:
@@ -55,7 +57,9 @@ class IndexerWorker(QThread):
                             continue
 
                         try:
-                            content = file_path.read_text(encoding="utf-8", errors="ignore")
+                            content = file_path.read_text(
+                                encoding="utf-8", errors="ignore"
+                            )
                             rel_path = str(file_path.relative_to(self._root))
 
                             self._store.add_document(

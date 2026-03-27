@@ -116,11 +116,15 @@ class TestBundledManifest:
     """Tests for the bundled model manifest integrity."""
 
     def test_manifest_exists(self) -> None:
-        manifest_path = Path(__file__).parent.parent / "library" / "bundled" / "manifest.json"
+        manifest_path = (
+            Path(__file__).parent.parent / "library" / "bundled" / "manifest.json"
+        )
         assert manifest_path.exists(), "Bundled manifest.json must exist"
 
     def test_manifest_valid_json(self) -> None:
-        manifest_path = Path(__file__).parent.parent / "library" / "bundled" / "manifest.json"
+        manifest_path = (
+            Path(__file__).parent.parent / "library" / "bundled" / "manifest.json"
+        )
         data = json.loads(manifest_path.read_text())
         assert "models" in data
         assert len(data["models"]) >= 4
@@ -288,7 +292,9 @@ class TestMJCFParsing:
         model = result.model
         joint_names = {j.name for j in model.joints}
         # Key joints
-        assert "right_hip_y" in joint_names or any("hip" in name for name in joint_names)
+        assert "right_hip_y" in joint_names or any(
+            "hip" in name for name in joint_names
+        )
 
     def test_mjcf_geom_parsing_capsule(self) -> None:
         """Test that capsule geoms are parsed from fromto attribute."""

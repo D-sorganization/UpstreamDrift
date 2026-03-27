@@ -373,7 +373,8 @@ class SwingComparisonDialog(QDialog):
         )
 
         jobs = [
-            (name, self._get_coeffs(name), self._simulate_fn, self._extract_fn) for name in selected
+            (name, self._get_coeffs(name), self._simulate_fn, self._extract_fn)
+            for name in selected
         ]
         self._total_trials = len(selected) * config.n_trials
         self._completed_trials = 0

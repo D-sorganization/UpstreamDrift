@@ -288,7 +288,9 @@ class ReportingMixin:
                 abs_power = np.abs(power)
 
                 if hasattr(np, "trapezoid"):
-                    total_work = float(np.trapezoid(abs_power, dx=self.dt, axis=0).sum())
+                    total_work = float(
+                        np.trapezoid(abs_power, dx=self.dt, axis=0).sum()
+                    )
                 else:
                     trapz_func = getattr(np, "trapz")  # noqa: B009
                     total_work = float(trapz_func(abs_power, dx=self.dt, axis=0).sum())
@@ -338,12 +340,17 @@ class ReportingMixin:
             raise ValueError("joint_idx must be provided")
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if hasattr(self, "joint_accelerations") and self.joint_accelerations is not None:
+        if (
+            hasattr(self, "joint_accelerations")
+            and self.joint_accelerations is not None
+        ):
             if joint_idx >= self.joint_accelerations.shape[1]:
                 return None
             accel = self.joint_accelerations[:, joint_idx]
         elif (
-            hasattr(self, "joint_velocities") and self.joint_velocities is not None and self.dt > 0
+            hasattr(self, "joint_velocities")
+            and self.joint_velocities is not None
+            and self.dt > 0
         ):
             if joint_idx >= self.joint_velocities.shape[1]:
                 return None
@@ -516,7 +523,9 @@ class ReportingMixin:
             )
 
     @precondition(
-        lambda self, filename, report=None: (isinstance(filename, str) and len(filename) > 0),
+        lambda self, filename, report=None: (
+            isinstance(filename, str) and len(filename) > 0
+        ),
         "Filename must be a non-empty string",
     )
     def export_statistics_csv(

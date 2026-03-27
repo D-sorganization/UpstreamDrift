@@ -39,7 +39,9 @@ class TestDockerBuild(unittest.TestCase):
     def test_dockerfile_syntax(self):
         """Test that Dockerfile has valid syntax."""
         dockerfile_path = get_repo_root() / "Dockerfile"
-        self.assertTrue(dockerfile_path.exists(), f"Dockerfile not found at {dockerfile_path}")
+        self.assertTrue(
+            dockerfile_path.exists(), f"Dockerfile not found at {dockerfile_path}"
+        )
 
         content = dockerfile_path.read_text()
 
@@ -56,7 +58,9 @@ class TestDockerBuild(unittest.TestCase):
 
         # Verify PYTHONPATH is set to the workspace root
         # The multi-stage Dockerfile sets PYTHONPATH="/workspace" in the runtime stage,
-        pythonpath_line = [line for line in content.split("\n") if "PYTHONPATH=" in line][0]
+        pythonpath_line = [
+            line for line in content.split("\n") if "PYTHONPATH=" in line
+        ][0]
         self.assertIn("/workspace", pythonpath_line)
         self.assertEqual(
             pythonpath_line.strip(),
@@ -67,7 +71,9 @@ class TestDockerBuild(unittest.TestCase):
     @unittest.skipUnless(_is_docker_available(), "Docker not available")
     def test_docker_available(self):
         """Test that Docker is available for building."""
-        result = subprocess.run(["docker", "--version"], capture_output=True, text=True, timeout=10)
+        result = subprocess.run(
+            ["docker", "--version"], capture_output=True, text=True, timeout=10
+        )
         self.assertEqual(result.returncode, 0)
         self.assertIn("Docker version", result.stdout)
 
@@ -94,7 +100,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
             spec=["check_image_exists", "build_image", "run_container"]
         )
         launcher.docker_launcher.check_image_exists.return_value = True
-        launcher.process_manager = MagicMock(spec=["start_process", "stop_process", "is_running"])
+        launcher.process_manager = MagicMock(
+            spec=["start_process", "stop_process", "is_running"]
+        )
         launcher.lbl_status = MagicMock(spec=["setText", "text"])
         launcher.toast_manager = None  # Prevent show_toast from crashing
         launcher.show_toast = MagicMock()  # Mock the toast display method
@@ -122,7 +130,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/suite/path")  # type: ignore[method-assign]  # type: ignore[method-assign]
         # Ensure regex replacements work similarly if relying on string conversion
-        mock_path.replace = Mock(side_effect=lambda x, y: "/test/suite/path".replace(x, y))
+        mock_path.replace = Mock(
+            side_effect=lambda x, y: "/test/suite/path".replace(x, y)
+        )
 
         # Prepare mock Path to simulate suite_root
         mock_path_cls = MagicMock(spec=["__call__", "return_value"])
@@ -160,7 +170,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
                 command_str,
             )
             # Verify working directory instead of cd
-            self.assertIn("-w /workspace/engines/physics_engines/mujoco/python", command_str)
+            self.assertIn(
+                "-w /workspace/engines/physics_engines/mujoco/python", command_str
+            )
             # Verify direct python execution
             self.assertIn("python humanoid_launcher.py", command_str)
             self.assertNotIn("bash -c", command_str)
@@ -231,7 +243,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("-p 7000:7000", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
             # Verify working directory matches implementation
-            self.assertIn("-w /workspace/engines/physics_engines/drake/python", command_str)
+            self.assertIn(
+                "-w /workspace/engines/physics_engines/drake/python", command_str
+            )
             self.assertIn("python -m src.drake_gui_app", command_str)
 
     @_DOCKER_CMD_XFAIL
@@ -392,8 +406,12 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Find PYTHONPATH line
-        pythonpath_lines = [line for line in content.split("\n") if "PYTHONPATH=" in line]
-        self.assertEqual(len(pythonpath_lines), 1, "Should have exactly one PYTHONPATH definition")
+        pythonpath_lines = [
+            line for line in content.split("\n") if "PYTHONPATH=" in line
+        ]
+        self.assertEqual(
+            len(pythonpath_lines), 1, "Should have exactly one PYTHONPATH definition"
+        )
 
         pythonpath_line = pythonpath_lines[0]
         # so that "from src.xxx" imports work inside the container.
@@ -452,7 +470,9 @@ class TestModuleAccessibility(unittest.TestCase):
                 module_path = shared_path / subdir / module
             else:
                 module_path = shared_path / module
-            self.assertTrue(module_path.exists(), f"Key module {subdir}/{module} should exist")
+            self.assertTrue(
+                module_path.exists(), f"Key module {subdir}/{module} should exist"
+            )
 
     def test_engine_directory_structure(self):
         """Test engine directory structure."""
@@ -461,7 +481,9 @@ class TestModuleAccessibility(unittest.TestCase):
 
         # Check for physics engines
         physics_engines_path = engines_path / "physics_engines"
-        self.assertTrue(physics_engines_path.exists(), "Physics engines directory should exist")
+        self.assertTrue(
+            physics_engines_path.exists(), "Physics engines directory should exist"
+        )
 
         # Check for specific engines
         expected_engines = ["mujoco", "drake", "pinocchio"]
@@ -469,20 +491,28 @@ class TestModuleAccessibility(unittest.TestCase):
             engine_path = physics_engines_path / engine
             if engine_path.exists():  # Not all engines may be installed
                 python_path = engine_path / "python"
-                self.assertTrue(python_path.exists(), f"{engine} should have python directory")
+                self.assertTrue(
+                    python_path.exists(), f"{engine} should have python directory"
+                )
 
     def test_mujoco_module_accessibility(self):
         """Test MuJoCo module structure for container access."""
-        mujoco_python_path = get_src_root() / "engines" / "physics_engines" / "mujoco" / "python"
+        mujoco_python_path = (
+            get_src_root() / "engines" / "physics_engines" / "mujoco" / "python"
+        )
 
         if mujoco_python_path.exists():
             # Check for humanoid launcher
             humanoid_launcher = mujoco_python_path / "humanoid_launcher.py"
-            self.assertTrue(humanoid_launcher.exists(), "Humanoid launcher should exist")
+            self.assertTrue(
+                humanoid_launcher.exists(), "Humanoid launcher should exist"
+            )
 
             # Check for module package
             module_path = mujoco_python_path / "mujoco_humanoid_golf"
-            self.assertTrue(module_path.exists(), "MuJoCo humanoid golf module should exist")
+            self.assertTrue(
+                module_path.exists(), "MuJoCo humanoid golf module should exist"
+            )
 
             main_file = module_path / "__main__.py"
             self.assertTrue(main_file.exists(), "Module should have __main__.py")

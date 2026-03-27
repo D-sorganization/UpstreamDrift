@@ -325,7 +325,9 @@ class TestConvertPosesToMarkers:
         keypoint_names = ["left_shoulder", "right_shoulder"]
         target = ["LSHO"]
 
-        markers, names = convert_poses_to_markers(keypoints, keypoint_names, target_markers=target)
+        markers, names = convert_poses_to_markers(
+            keypoints, keypoint_names, target_markers=target
+        )
 
         assert len(names) == 1
         assert names[0] == "LSHO"

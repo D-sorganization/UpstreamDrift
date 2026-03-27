@@ -32,7 +32,9 @@ class TestPlaneVertices:
         in_plane_y = np.array([0.0, 1.0, 0.0])
         half_size = 1.0
 
-        vertices = generate_plane_vertices(origin, normal, in_plane_x, in_plane_y, half_size)
+        vertices = generate_plane_vertices(
+            origin, normal, in_plane_x, in_plane_y, half_size
+        )
 
         assert vertices.shape == (4, 3)
 
@@ -51,7 +53,9 @@ class TestPlaneVertices:
         in_plane_x = np.array([1.0, 0.0, 0.0])
         in_plane_y = np.array([0.0, 1.0, 0.0])
 
-        vertices = generate_plane_vertices(origin, normal, in_plane_x, in_plane_y, half_size=1.0)
+        vertices = generate_plane_vertices(
+            origin, normal, in_plane_x, in_plane_y, half_size=1.0
+        )
 
         # Center of vertices should equal origin
         center = np.mean(vertices, axis=0)
@@ -112,7 +116,9 @@ class TestFSPVisualization:
         """Should create a valid FSP visualization."""
         trajectory, timestamps, impact_time = planar_trajectory
 
-        vis = create_fsp_visualization(trajectory, timestamps, impact_time, window_ms=500.0)
+        vis = create_fsp_visualization(
+            trajectory, timestamps, impact_time, window_ms=500.0
+        )
 
         assert vis is not None
         assert vis.is_fsp is True

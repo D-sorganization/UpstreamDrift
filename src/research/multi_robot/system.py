@@ -125,7 +125,8 @@ class TaskCoordinator:
         ready = [
             task
             for task in self._tasks.values()
-            if task.status == TaskStatus.PENDING and task.is_ready(self._completed_tasks)
+            if task.status == TaskStatus.PENDING
+            and task.is_ready(self._completed_tasks)
         ]
         return sorted(ready, key=lambda t: -t.priority)
 
@@ -427,7 +428,9 @@ class MultiRobotSystem:
         # Allocate ready tasks to available robots
         while True:
             ready_tasks = self._coordinator.get_ready_tasks()
-            available_robots = self._coordinator.get_available_robots(list(self._robots.keys()))
+            available_robots = self._coordinator.get_available_robots(
+                list(self._robots.keys())
+            )
 
             if not ready_tasks or not available_robots:
                 break

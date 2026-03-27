@@ -126,7 +126,9 @@ class TestQuickDewpointCalculation:
         assert "dewpoint_margin_c" in result
 
     def test_limiting_component_present(self) -> None:
-        result = quick_dewpoint_calculation(200.0, 1.5, h2o_fraction=0.1, hcl_fraction=0.05)
+        result = quick_dewpoint_calculation(
+            200.0, 1.5, h2o_fraction=0.1, hcl_fraction=0.05
+        )
         assert "limiting_component" in result
 
 

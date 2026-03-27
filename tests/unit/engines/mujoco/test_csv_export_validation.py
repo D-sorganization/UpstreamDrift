@@ -13,7 +13,9 @@ class TestCSVExportValidation:
 
     def test_export_validates_times_is_numpy_array(self, tmp_path) -> None:
         """Test that times must be a numpy array."""
-        results = [InverseDynamicsResult(joint_torques=np.array([1.0, 2.0]), success=True)]
+        results = [
+            InverseDynamicsResult(joint_torques=np.array([1.0, 2.0]), success=True)
+        ]
         filepath = tmp_path / "test.csv"
 
         # Should fail with list instead of array
@@ -72,7 +74,9 @@ class TestCSVExportValidation:
             InverseDynamicsResult(
                 joint_torques=np.array([1.0, 2.0, 3.0]), success=True
             ),  # 3 joints
-            InverseDynamicsResult(joint_torques=np.array([4.0, 5.0]), success=True),  # 2 joints
+            InverseDynamicsResult(
+                joint_torques=np.array([4.0, 5.0]), success=True
+            ),  # 2 joints
         ]
         filepath = tmp_path / "test.csv"
 

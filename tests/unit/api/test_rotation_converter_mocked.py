@@ -31,11 +31,15 @@ client = TestClient(_app)
 @pytest.fixture
 def mock_rotation_class():
     """Mock the Rotation class from rotation_converter.converter."""
-    with patch("src.shared.python.calc_backend.routers.rotation_converter.Rotation") as mock_cls:
+    with patch(
+        "src.shared.python.calc_backend.routers.rotation_converter.Rotation"
+    ) as mock_cls:
         mock_rot = MagicMock()
         mock_cls.return_value = mock_rot
         # Set up output representations
-        mock_rot.as_quaternion.return_value = MagicMock(tolist=lambda: [0.0, 0.0, 0.0, 1.0])
+        mock_rot.as_quaternion.return_value = MagicMock(
+            tolist=lambda: [0.0, 0.0, 0.0, 1.0]
+        )
         mock_rot.as_euler.return_value = [0.0, 0.0, 0.0]
         mock_rot.as_axis_angle.return_value = (
             MagicMock(tolist=lambda: [0.0, 0.0, 1.0]),
@@ -51,7 +55,9 @@ def mock_rotation_class():
 def test_compute_rotation_quaternion_success(mock_rotation_class) -> None:
     """Valid quaternion input should return all rotation representations."""
     mock_cls, mock_rot = mock_rotation_class
-    with patch("src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls):
+    with patch(
+        "src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls
+    ):
         payload = {
             "type": "quaternion",
             "value": [0.0, 0.0, 0.0, 1.0],
@@ -68,7 +74,9 @@ def test_compute_rotation_quaternion_success(mock_rotation_class) -> None:
 def test_compute_rotation_euler_success(mock_rotation_class) -> None:
     """Valid Euler angles should be parsed and passed to the Rotation class."""
     mock_cls, mock_rot = mock_rotation_class
-    with patch("src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls):
+    with patch(
+        "src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls
+    ):
         payload = {
             "type": "euler",
             "value": [0.1, 0.2, 0.3],
@@ -83,7 +91,9 @@ def test_compute_rotation_euler_success(mock_rotation_class) -> None:
 def test_compute_rotation_invalid_euler_length(mock_rotation_class) -> None:
     """Euler angles with wrong number of elements → 422 via internal validation."""
     mock_cls, _ = mock_rotation_class
-    with patch("src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls):
+    with patch(
+        "src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls
+    ):
         payload = {
             "type": "euler",
             "value": [0.1, 0.2],  # Only 2, needs 3
@@ -96,7 +106,9 @@ def test_compute_rotation_invalid_euler_length(mock_rotation_class) -> None:
 def test_compute_rotation_unknown_type(mock_rotation_class) -> None:
     """Unknown rotation type should return 422."""
     mock_cls, _ = mock_rotation_class
-    with patch("src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls):
+    with patch(
+        "src.shared.python.calc_backend.routers.rotation_converter.Rotation", mock_cls
+    ):
         payload = {
             "type": "unknown_format",
             "value": [1.0],

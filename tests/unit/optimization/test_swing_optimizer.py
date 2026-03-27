@@ -199,7 +199,9 @@ def test_optimizer_init_default_config(default_golfer, default_club) -> None:
     assert isinstance(optimizer.config, OptimizationConfig)
 
 
-def test_optimizer_joint_limits_setup(default_golfer, default_club, basic_config) -> None:
+def test_optimizer_joint_limits_setup(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test SwingOptimizer sets up joint limits correctly."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     assert "hip_rotation" in optimizer.joint_limits
@@ -207,7 +209,9 @@ def test_optimizer_joint_limits_setup(default_golfer, default_club, basic_config
     assert len(optimizer.joint_limits) == len(SwingOptimizer.JOINTS)
 
 
-def test_optimizer_torque_limits_setup(default_golfer, default_club, basic_config) -> None:
+def test_optimizer_torque_limits_setup(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test SwingOptimizer sets up torque limits correctly."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     assert "hip_rotation" in optimizer.torque_limits
@@ -255,7 +259,9 @@ def test_optimizer_optimize_runs(default_golfer, default_club, basic_config) -> 
 
 
 @pytest.mark.slow
-def test_optimizer_result_has_trajectory(default_golfer, default_club, basic_config) -> None:
+def test_optimizer_result_has_trajectory(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test optimization result contains a trajectory."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -264,7 +270,9 @@ def test_optimizer_result_has_trajectory(default_golfer, default_club, basic_con
 
 
 @pytest.mark.slow
-def test_optimizer_result_has_metrics(default_golfer, default_club, basic_config) -> None:
+def test_optimizer_result_has_metrics(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test optimization result contains performance metrics."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -272,7 +280,9 @@ def test_optimizer_result_has_metrics(default_golfer, default_club, basic_config
 
 
 @pytest.mark.slow
-def test_optimizer_respects_joint_limits(default_golfer, default_club, basic_config) -> None:
+def test_optimizer_respects_joint_limits(
+    default_golfer, default_club, basic_config
+) -> None:
     """Test optimized trajectory respects joint limits."""
     optimizer = SwingOptimizer(default_golfer, default_club, basic_config)
     result = optimizer.optimize()
@@ -281,7 +291,9 @@ def test_optimizer_respects_joint_limits(default_golfer, default_club, basic_con
         angles = result.trajectory.joint_angles
         # Check angles are within reasonable bounds (allowing some tolerance)
         for joint_name, joint_angles in angles.items():
-            assert np.all(np.abs(joint_angles) < 5.0), f"Joint {joint_name} exceeds limits"
+            assert np.all(np.abs(joint_angles) < 5.0), (
+                f"Joint {joint_name} exceeds limits"
+            )
 
 
 @pytest.mark.slow

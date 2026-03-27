@@ -140,8 +140,12 @@ class TestPluginRegistryBasics:
 
     def test_register_overwrites(self) -> None:
         registry = PluginRegistry()
-        reg1 = EngineRegistration(engine_type=EngineType.PENDULUM, factory=_stub_factory)
-        reg2 = EngineRegistration(engine_type=EngineType.PENDULUM, factory=_stub_factory)
+        reg1 = EngineRegistration(
+            engine_type=EngineType.PENDULUM, factory=_stub_factory
+        )
+        reg2 = EngineRegistration(
+            engine_type=EngineType.PENDULUM, factory=_stub_factory
+        )
         registry.register(reg1)
         registry.register(reg2)
         assert registry.get(EngineType.PENDULUM) is reg2

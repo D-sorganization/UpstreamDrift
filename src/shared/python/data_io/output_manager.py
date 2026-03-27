@@ -100,7 +100,9 @@ class OutputManager:
             project_root = current_path
 
             while project_root.parent != project_root:
-                if (project_root / ".git").exists() or (project_root / "engines").exists():
+                if (project_root / ".git").exists() or (
+                    project_root / "engines"
+                ).exists():
                     break
                 project_root = project_root.parent
 
@@ -162,15 +164,25 @@ class OutputManager:
         logger.info("Output directory structure created successfully")
 
     @precondition(
-        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: (
-            results is not None
-        ),
+        lambda self,
+        results,
+        filename,
+        format_type=OutputFormat.CSV,
+        engine="mujoco",
+        metadata=None,
+        model_path=None,
+        parameters=None: (results is not None),
         "Simulation results must not be None",
     )
     @precondition(
-        lambda self, results, filename, format_type=OutputFormat.CSV, engine="mujoco", metadata=None, model_path=None, parameters=None: (
-            filename is not None and len(filename) > 0
-        ),
+        lambda self,
+        results,
+        filename,
+        format_type=OutputFormat.CSV,
+        engine="mujoco",
+        metadata=None,
+        model_path=None,
+        parameters=None: (filename is not None and len(filename) > 0),
         "Filename must be a non-empty string",
     )
     def save_simulation_results(
@@ -206,10 +218,14 @@ class OutputManager:
         filename = self._sanitize_filename(filename, format_type)
         file_path = engine_dir / f"{filename}.{format_type.value}"
 
-        provenance = ProvenanceInfo.capture(model_path=model_path, parameters=parameters)
+        provenance = ProvenanceInfo.capture(
+            model_path=model_path, parameters=parameters
+        )
 
         try:
-            self._dispatch_save(results, file_path, format_type, provenance, metadata, engine)
+            self._dispatch_save(
+                results, file_path, format_type, provenance, metadata, engine
+            )
 
             logger.info(
                 "simulation_results_saved file_path=%s format=%s engine=%s",
@@ -247,7 +263,9 @@ class OutputManager:
 
         return filename
 
-    def _dispatch_save(self, results, file_path, format_type, provenance, metadata, engine):
+    def _dispatch_save(
+        self, results, file_path, format_type, provenance, metadata, engine
+    ):
         if format_type == OutputFormat.CSV:
             self._save_csv(results, file_path, provenance)
         elif format_type == OutputFormat.JSON:
@@ -311,7 +329,9 @@ class OutputManager:
                 return float(obj)
             if isinstance(obj, datetime):
                 return format_datetime(obj, "iso")
-            raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+            raise TypeError(
+                f"Object of type {type(obj).__name__} is not JSON serializable"
+            )
 
         output_data = {
             "metadata": metadata or {},
@@ -533,7 +553,9 @@ class OutputManager:
         if engine:
             engine_dir = self.directories["simulations"] / engine
             if engine_dir.exists():
-                simulations.extend([f.name for f in engine_dir.iterdir() if f.is_file()])
+                simulations.extend(
+                    [f.name for f in engine_dir.iterdir() if f.is_file()]
+                )
         else:
             # Get from all engines and also from root simulations directory
             sim_dir = self.directories["simulations"]
@@ -545,12 +567,16 @@ class OutputManager:
             # Check engine subdirectories
             for engine_dir in sim_dir.iterdir():
                 if engine_dir.is_dir():
-                    simulations.extend([f.name for f in engine_dir.iterdir() if f.is_file()])
+                    simulations.extend(
+                        [f.name for f in engine_dir.iterdir() if f.is_file()]
+                    )
 
         return sorted(simulations)
 
     @precondition(
-        lambda self, analysis_data, report_name, format_type="json": (analysis_data is not None),
+        lambda self, analysis_data, report_name, format_type="json": (
+            analysis_data is not None
+        ),
         "Analysis data must not be None",
     )
     @precondition(
@@ -601,7 +627,9 @@ class OutputManager:
                         return float(obj)
                     if isinstance(obj, datetime):
                         return format_datetime(obj, "iso")
-                    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+                    raise TypeError(
+                        f"Object of type {type(obj).__name__} is not JSON serializable"
+                    )
 
                 # Embed provenance in report data
                 report_data = {
@@ -702,7 +730,9 @@ class OutputManager:
             if directory.exists():
                 for file_path in self._fast_dir_scan(directory):
                     try:
-                        file_time = datetime.fromtimestamp(file_path.stat().st_mtime).astimezone()
+                        file_time = datetime.fromtimestamp(
+                            file_path.stat().st_mtime
+                        ).astimezone()
                         if file_time < temp_cutoff:
                             file_path.unlink()
                             cleaned_count += 1
@@ -717,7 +747,9 @@ class OutputManager:
             if directory.exists():
                 for file_path in self._fast_dir_scan(directory):
                     try:
-                        file_time = datetime.fromtimestamp(file_path.stat().st_mtime).astimezone()
+                        file_time = datetime.fromtimestamp(
+                            file_path.stat().st_mtime
+                        ).astimezone()
                         if file_time < cutoff_date:
                             # Move to archive instead of deleting
                             archive_dir = self.base_path / "archive"
@@ -857,7 +889,9 @@ def load_results(
     if not (filename is not None):
         raise ValueError("filename must be provided")
     manager = OutputManager()
-    result = manager.load_simulation_results(filename, OutputFormat(format_type), engine)
+    result = manager.load_simulation_results(
+        filename, OutputFormat(format_type), engine
+    )
     # The return type of load_simulation_results is pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
     # SimulationResults includes np.ndarray, so this is compatible (subset).
     return result

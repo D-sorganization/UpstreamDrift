@@ -69,7 +69,9 @@ class TestPinocchioInducedAcceleration:
         ) -> np.ndarray:
             """Return acceleration based on which inputs are zeroed."""
             # Check inputs to return corresponding acceleration
-            if np.array_equal(v_arg, np.zeros(2)) and np.array_equal(tau_arg, np.zeros(2)):
+            if np.array_equal(v_arg, np.zeros(2)) and np.array_equal(
+                tau_arg, np.zeros(2)
+            ):
                 return np.array([10.0, 10.0])  # q_ddot_g (Gravity only)
             if np.array_equal(tau_arg, np.zeros(2)):
                 return np.array([12.0, 12.0])  # q_ddot_gv (Gravity + Velocity)

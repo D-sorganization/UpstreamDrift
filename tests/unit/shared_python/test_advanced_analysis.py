@@ -33,7 +33,9 @@ class MockRecorder:
         # Create a simple sine wave
         self.position = np.sin(2 * np.pi * self.times)
         # 3D data for 3 joints
-        self.joint_positions = np.column_stack([self.position, self.position, self.position])
+        self.joint_positions = np.column_stack(
+            [self.position, self.position, self.position]
+        )
         self.joint_velocities = np.column_stack(
             [
                 np.cos(2 * np.pi * self.times),
@@ -111,7 +113,9 @@ def test_lyapunov_exponent() -> None:
     t = np.linspace(0, 10, 1000)
     data = np.sin(t)
 
-    analyzer = StatisticalAnalyzer(t, np.zeros((1000, 1)), np.zeros((1000, 1)), np.zeros((1000, 1)))
+    analyzer = StatisticalAnalyzer(
+        t, np.zeros((1000, 1)), np.zeros((1000, 1)), np.zeros((1000, 1))
+    )
     lle = analyzer.estimate_lyapunov_exponent(data, tau=10, dim=3, window=20)
 
     # For periodic signal, divergence shouldn't grow exponentially, so slope ~ 0
@@ -147,7 +151,9 @@ def test_dtw_analysis() -> None:
 
     analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)  # type: ignore
 
-    dist, path = analyzer.compute_dtw_distance("joint_positions", joint_idx=0, radius=20)
+    dist, path = analyzer.compute_dtw_distance(
+        "joint_positions", joint_idx=0, radius=20
+    )
 
     assert dist >= 0
     assert len(path) >= 100

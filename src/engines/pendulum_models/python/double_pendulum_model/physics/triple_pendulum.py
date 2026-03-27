@@ -37,7 +37,9 @@ class TripleSegmentProperties:
 
 @dataclass
 class TriplePendulumParameters:
-    segments: tuple[TripleSegmentProperties, TripleSegmentProperties, TripleSegmentProperties]
+    segments: tuple[
+        TripleSegmentProperties, TripleSegmentProperties, TripleSegmentProperties
+    ]
     damping: tuple[float, float, float] = DAMPING_DEFAULT
     gravity_enabled: bool = True
     gravity_m_s2: float = GRAVITATIONAL_ACCELERATION
@@ -169,7 +171,9 @@ def _calc_mass_matrix(
             + lc3**2
         )
     )
-    mass[0, 2] = I3 + lc3 * m3 * (l1 * np.cos(theta2 + theta3) + l2 * np.cos(theta3) + lc3)
+    mass[0, 2] = I3 + lc3 * m3 * (
+        l1 * np.cos(theta2 + theta3) + l2 * np.cos(theta3) + lc3
+    )
     mass[1, 0] = (
         I2
         + I3
@@ -183,9 +187,13 @@ def _calc_mass_matrix(
             + lc3**2
         )
     )
-    mass[1, 1] = I2 + I3 + lc2**2 * m2 + m3 * (l2**2 + 2 * l2 * lc3 * np.cos(theta3) + lc3**2)
+    mass[1, 1] = (
+        I2 + I3 + lc2**2 * m2 + m3 * (l2**2 + 2 * l2 * lc3 * np.cos(theta3) + lc3**2)
+    )
     mass[1, 2] = I3 + lc3 * m3 * (l2 * np.cos(theta3) + lc3)
-    mass[2, 0] = I3 + lc3 * m3 * (l1 * np.cos(theta2 + theta3) + l2 * np.cos(theta3) + lc3)
+    mass[2, 0] = I3 + lc3 * m3 * (
+        l1 * np.cos(theta2 + theta3) + l2 * np.cos(theta3) + lc3
+    )
     mass[2, 1] = I3 + lc3 * m3 * (l2 * np.cos(theta3) + lc3)
     mass[2, 2] = I3 + lc3**2 * m3
     return mass
@@ -313,7 +321,9 @@ def _hardcoded_triple_functions() -> tuple[
 class TriplePendulumDynamics:
     def __init__(self, parameters: TriplePendulumParameters | None = None) -> None:
         self.parameters = parameters or TriplePendulumParameters.default()
-        self._mass_func, self._bias_func, self._gravity_func = _hardcoded_triple_functions()
+        self._mass_func, self._bias_func, self._gravity_func = (
+            _hardcoded_triple_functions()
+        )
 
     def _parameter_vector(self) -> tuple[float, ...]:
         segs = self.parameters.segments
@@ -355,7 +365,9 @@ class TriplePendulumDynamics:
         theta = (state.theta1, state.theta2, state.theta3)
         omega = (state.omega1, state.omega2, state.omega3)
         bias = self._bias_func(*theta, *omega, *params)
-        damping = np.array(self.parameters.damping, dtype=float) * np.array(omega, dtype=float)
+        damping = np.array(self.parameters.damping, dtype=float) * np.array(
+            omega, dtype=float
+        )
         result = np.array(bias, dtype=float).flatten() + damping
         return np.array(result, dtype=np.float64)
 
@@ -370,7 +382,9 @@ class TriplePendulumDynamics:
         mass = self.mass_matrix(state)
         bias = self.bias_vector(state)
         accelerations = np.linalg.solve(mass, np.array(control, dtype=float) - bias)
-        return typing.cast("tuple[float, float, float]", tuple(float(a) for a in accelerations))
+        return typing.cast(
+            "tuple[float, float, float]", tuple(float(a) for a in accelerations)
+        )
 
     def inverse_dynamics(
         self, state: TriplePendulumState, accelerations: tuple[float, float, float]
@@ -383,7 +397,9 @@ class TriplePendulumDynamics:
         mass = self.mass_matrix(state)
         bias = self.bias_vector(state)
         torques = mass @ np.array(accelerations, dtype=float) + bias
-        return typing.cast("tuple[float, float, float]", tuple(float(t) for t in torques))
+        return typing.cast(
+            "tuple[float, float, float]", tuple(float(t) for t in torques)
+        )
 
     def joint_torque_breakdown(
         self, state: TriplePendulumState, control: tuple[float, float, float]
@@ -395,13 +411,19 @@ class TriplePendulumDynamics:
             raise ValueError("state must be provided")
         theta = (state.theta1, state.theta2, state.theta3)
         params = self._parameter_vector()
-        gravity_components = np.array(self._gravity_func(*theta, *params), dtype=float).flatten()
+        gravity_components = np.array(
+            self._gravity_func(*theta, *params), dtype=float
+        ).flatten()
         damping_components = tuple(
             float(self.parameters.damping[i] * state_component)
-            for i, state_component in enumerate((state.omega1, state.omega2, state.omega3))
+            for i, state_component in enumerate(
+                (state.omega1, state.omega2, state.omega3)
+            )
         )
         coriolis_bias = (
-            self.bias_vector(state) - gravity_components - np.array(damping_components, dtype=float)
+            self.bias_vector(state)
+            - gravity_components
+            - np.array(damping_components, dtype=float)
         )
         return TripleJointTorques(
             applied=control,

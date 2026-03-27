@@ -28,7 +28,9 @@ class TestPhysicalConstantXMLSafety:
         assert option_elem is not None, "option element not found"
         gravity_attr = option_elem.get("gravity")
         assert gravity_attr is not None, "gravity attribute not found"
-        assert "PhysicalConstant" not in gravity_attr, "PhysicalConstant.__repr__ leaked into XML"
+        assert "PhysicalConstant" not in gravity_attr, (
+            "PhysicalConstant.__repr__ leaked into XML"
+        )
 
         # Verify parseable as floats
         g_components = gravity_attr.split()
@@ -44,7 +46,9 @@ class TestPhysicalConstantXMLSafety:
         xml_string = f'<option gravity="0 0 -{GRAVITY_M_S2}"/>'
 
         # This will include the __repr__ representation
-        assert "PhysicalConstant" in xml_string, "Test assumption wrong: __repr__ should appear"
+        assert "PhysicalConstant" in xml_string, (
+            "Test assumption wrong: __repr__ should appear"
+        )
 
         # Parsing may succeed but value is garbage
         root = ET.fromstring(f"<root>{xml_string}</root>")
@@ -92,12 +96,18 @@ class TestPhysicalConstantXMLSafety:
         gravity_elem = root.find("gravity")
         mass_elem = root.find("mass")
         density_elem = root.find("air_density")
-        assert gravity_elem is not None and mass_elem is not None and density_elem is not None
+        assert (
+            gravity_elem is not None
+            and mass_elem is not None
+            and density_elem is not None
+        )
 
         gravity_val = gravity_elem.get("value")
         mass_val = mass_elem.get("value")
         density_val = density_elem.get("value")
-        assert gravity_val is not None and mass_val is not None and density_val is not None
+        assert (
+            gravity_val is not None and mass_val is not None and density_val is not None
+        )
 
         gravity = float(gravity_val)
         mass = float(mass_val)
@@ -176,7 +186,9 @@ class TestPhysicalConstantEdgeCases:
 
     def test_very_small_physical_constant(self):
         """Small constants (e.g., epsilon) format correctly."""
-        epsilon = PhysicalConstant(1e-15, "dimensionless", "Machine precision", "Float64 epsilon")
+        epsilon = PhysicalConstant(
+            1e-15, "dimensionless", "Machine precision", "Float64 epsilon"
+        )
 
         xml = f"<tolerance>{float(epsilon)}</tolerance>"
         root = ET.fromstring(xml)

@@ -297,9 +297,7 @@ class GitHubRepository(Repository):
         for attempt in range(max_retries + 1):
             try:
                 req = self._build_api_request(url)
-                with urllib.request.urlopen(
-                    req, timeout=timeout
-                ) as response:  # nosec B310 - GitHub API request via _build_api_request
+                with urllib.request.urlopen(req, timeout=timeout) as response:  # nosec B310 - GitHub API request via _build_api_request
                     data = json.loads(response.read().decode())
                     # Extract next page URL from Link header
                     next_url = self._parse_link_header(response)
@@ -374,9 +372,7 @@ class GitHubRepository(Repository):
 
             for item in contents:
                 if item["type"] == "file" and item["name"].endswith(".urdf"):
-                    raw_url = (
-                        f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
-                    )
+                    raw_url = f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
                     models.append(
                         RepositoryModel(
                             name=item["name"][:-5],
@@ -408,14 +404,14 @@ class GitHubRepository(Repository):
         destination.mkdir(parents=True, exist_ok=True)
 
         # Download URDF
-        urdf_url = f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{model_path}"
+        urdf_url = (
+            f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{model_path}"
+        )
         filename = Path(model_path).name
         local_path = destination / filename
 
         try:
-            urllib.request.urlretrieve(
-                urdf_url, local_path
-            )  # nosec B310 - URL from GitHub raw content base
+            urllib.request.urlretrieve(urdf_url, local_path)  # nosec B310 - URL from GitHub raw content base
             logger.info(f"Downloaded: {filename}")
 
             # Try to download meshes from same directory
@@ -435,7 +431,9 @@ class GitHubRepository(Repository):
         if not (model_dir is not None):
             raise ValueError("model_dir must be provided")
         mesh_dir = f"{model_dir}/meshes"
-        api_url = f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{mesh_dir}"
+        api_url = (
+            f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{mesh_dir}"
+        )
 
         try:
             contents = self._api_request_with_retry(api_url)
@@ -450,9 +448,7 @@ class GitHubRepository(Repository):
                         or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
                     )
                     local_file = local_mesh_dir / item["name"]
-                    urllib.request.urlretrieve(
-                        raw_url, local_file
-                    )  # nosec B310 - URL from GitHub API download_url field
+                    urllib.request.urlretrieve(raw_url, local_file)  # nosec B310 - URL from GitHub API download_url field
 
         except (PermissionError, OSError):
             pass  # Meshes not found or not accessible
@@ -463,13 +459,13 @@ class GitHubRepository(Repository):
             raise ValueError("destination must be provided")
         if not (destination is not None):
             raise ValueError("destination must be provided")
-        archive_url = f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
+        archive_url = (
+            f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
+        )
 
         try:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
-                urllib.request.urlretrieve(
-                    archive_url, tmp.name
-                )  # nosec B310 - URL from trusted github.com base
+                urllib.request.urlretrieve(archive_url, tmp.name)  # nosec B310 - URL from trusted github.com base
 
                 with zipfile.ZipFile(tmp.name, "r") as zf:
                     zf.extractall(destination)

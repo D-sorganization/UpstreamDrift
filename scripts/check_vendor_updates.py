@@ -147,10 +147,10 @@ def get_github_sha(api_url: str) -> str:
     try:
         import urllib.request  # noqa: PLC0415
 
-        req = urllib.request.Request(api_url, headers={"Accept": "application/vnd.github.v3+json"})
-        with urllib.request.urlopen(
-            req, timeout=10
-        ) as resp:  # noqa: S310  # nosec B310 - GitHub API URL from trusted constant api_url
+        req = urllib.request.Request(
+            api_url, headers={"Accept": "application/vnd.github.v3+json"}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310  # nosec B310 - GitHub API URL from trusted constant api_url
             data = json.loads(resp.read())
             return str(data.get("sha", "<no-sha>"))
     except Exception as exc:  # noqa: BLE001
@@ -163,7 +163,9 @@ def get_github_sha(api_url: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def check_submodule(path: str, api_url: str | None, use_network: bool) -> SubmoduleStatus:
+def check_submodule(
+    path: str, api_url: str | None, use_network: bool
+) -> SubmoduleStatus:
     """Check one submodule for staleness.
 
     Parameters

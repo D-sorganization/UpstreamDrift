@@ -94,7 +94,9 @@ def test_calculate_acid_gas_dewpoint_success(mock_calculator) -> None:
 
 def test_calculate_acid_gas_dewpoint_error_handling(mock_calculator) -> None:
     """Test that arithmetic errors from the engine translate to 422 HTTP exceptions."""
-    mock_calculator.calculate_dewpoint_mixture.side_effect = ValueError("Invalid composition")
+    mock_calculator.calculate_dewpoint_mixture.side_effect = ValueError(
+        "Invalid composition"
+    )
 
     payload = {
         "temperature_c": 170.0,

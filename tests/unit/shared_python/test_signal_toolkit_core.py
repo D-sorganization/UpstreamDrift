@@ -72,7 +72,9 @@ class TestSignal:
         result = basic_signal + basic_signal
         assert np.allclose(result.values, 2 * basic_signal.values)
 
-    def test_add_signal_mismatch_raises(self, basic_signal: Signal, t100: np.ndarray) -> None:
+    def test_add_signal_mismatch_raises(
+        self, basic_signal: Signal, t100: np.ndarray
+    ) -> None:
         other = Signal(time=t100 + 1.0, values=np.zeros(100))
         with pytest.raises(ValueError):
             _ = basic_signal + other
@@ -85,7 +87,9 @@ class TestSignal:
         result = basic_signal * basic_signal
         assert np.allclose(result.values, basic_signal.values**2)
 
-    def test_mul_signal_mismatch_raises(self, basic_signal: Signal, t100: np.ndarray) -> None:
+    def test_mul_signal_mismatch_raises(
+        self, basic_signal: Signal, t100: np.ndarray
+    ) -> None:
         other = Signal(time=t100 + 2.0, values=np.zeros(100))
         with pytest.raises(ValueError):
             _ = basic_signal * other

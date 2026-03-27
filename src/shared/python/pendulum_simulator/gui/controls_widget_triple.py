@@ -270,8 +270,12 @@ class ControlsWidgetTriple(ControlsWidgetBase):
         self.inp_tau_shoulder = LabeledInput(
             "Shoulder", "-25, 10", "τ(t) = c0 + c1*t + c2*t^2 + ..."
         )
-        self.inp_tau_elbow = LabeledInput("Elbow", "0", "τ(t) = c0 + c1*t + c2*t^2 + ...")
-        self.inp_tau_wrist = LabeledInput("Wrist", "0", "τ(t) = c0 + c1*t + c2*t^2 + ...")
+        self.inp_tau_elbow = LabeledInput(
+            "Elbow", "0", "τ(t) = c0 + c1*t + c2*t^2 + ..."
+        )
+        self.inp_tau_wrist = LabeledInput(
+            "Wrist", "0", "τ(t) = c0 + c1*t + c2*t^2 + ..."
+        )
         layout.addWidget(self.inp_tau_shoulder)
         layout.addWidget(self.inp_tau_elbow)
         layout.addWidget(self.inp_tau_wrist)

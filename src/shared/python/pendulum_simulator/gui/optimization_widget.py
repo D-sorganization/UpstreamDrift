@@ -136,10 +136,14 @@ def _cmaes_step(
 
     # Learning rates
     c_sigma = (mu_eff + 2.0) / (n + mu_eff + 5.0)
-    d_sigma = 1.0 + 2.0 * max(0.0, math.sqrt((mu_eff - 1.0) / (n + 1.0)) - 1.0) + c_sigma
+    d_sigma = (
+        1.0 + 2.0 * max(0.0, math.sqrt((mu_eff - 1.0) / (n + 1.0)) - 1.0) + c_sigma
+    )
     c_c = (4.0 + mu_eff / n) / (n + 4.0 + 2.0 * mu_eff / n)
     c1 = 2.0 / ((n + 1.3) ** 2 + mu_eff)
-    c_mu_lr = min(1.0 - c1, 2.0 * (mu_eff - 2.0 + 1.0 / mu_eff) / ((n + 2.0) ** 2 + mu_eff))
+    c_mu_lr = min(
+        1.0 - c1, 2.0 * (mu_eff - 2.0 + 1.0 / mu_eff) / ((n + 2.0) ** 2 + mu_eff)
+    )
 
     # Sample population
     try:
@@ -187,9 +191,9 @@ def _cmaes_step(
         else 0.0
     )
 
-    p_c_new = (1.0 - c_c) * state.p_c + h_sigma * math.sqrt(c_c * (2.0 - c_c) * mu_eff) * (
-        new_mean - old_mean
-    ) / state.sigma
+    p_c_new = (1.0 - c_c) * state.p_c + h_sigma * math.sqrt(
+        c_c * (2.0 - c_c) * mu_eff
+    ) * (new_mean - old_mean) / state.sigma
 
     # Update covariance matrix
     artmp = (selected - old_mean) / state.sigma
@@ -263,7 +267,9 @@ class _OptimizerWorker(QObject):
         self._n_iterations = n_iterations
         self._method = method
         self._warm_start = warm_start
-        self._population_size = population_size or max(10, 4 + int(3 * np.log(n_params)))
+        self._population_size = population_size or max(
+            10, 4 + int(3 * np.log(n_params))
+        )
         self._plateau_patience = plateau_patience
         self._use_native_batch = use_native_batch
         self._native_config = native_batch_config or {}
@@ -333,7 +339,11 @@ class _OptimizerWorker(QObject):
 
         self.finished.emit(
             {
-                "coeffs": (state.best_solution if state.best_solution is not None else state.mean),
+                "coeffs": (
+                    state.best_solution
+                    if state.best_solution is not None
+                    else state.mean
+                ),
                 "speed": -state.best_fitness,
                 "history": history,
                 "success": state.best_fitness < float("inf"),
@@ -481,7 +491,9 @@ class OptimizationWidget(QWidget):
 
         # Backend status
         backend_lbl = QLabel(
-            "🦀 Rust parallel batch enabled" if _HAS_NATIVE_BATCH else "🐍 Python sequential"
+            "🦀 Rust parallel batch enabled"
+            if _HAS_NATIVE_BATCH
+            else "🐍 Python sequential"
         )
         backend_lbl.setStyleSheet(
             f"color:{'#60c060' if _HAS_NATIVE_BATCH else '#c0a060'};font-size:9px;"
@@ -498,7 +510,9 @@ class OptimizationWidget(QWidget):
         obj_row = QHBoxLayout()
         obj_row.addWidget(QLabel("Objective:"))
         self._cmb_objective = QComboBox()
-        self._cmb_objective.addItems(["Max Tip Speed", "Max Height", "Min Control Effort"])
+        self._cmb_objective.addItems(
+            ["Max Tip Speed", "Max Height", "Min Control Effort"]
+        )
         obj_row.addWidget(self._cmb_objective)
         cfg_lay.addLayout(obj_row)
 
@@ -506,7 +520,9 @@ class OptimizationWidget(QWidget):
         method_row = QHBoxLayout()
         method_row.addWidget(QLabel("Method:"))
         self._cmb_method = QComboBox()
-        self._cmb_method.addItems(["CMA-ES", "Differential Evolution", "Nelder-Mead", "L-BFGS-B"])
+        self._cmb_method.addItems(
+            ["CMA-ES", "Differential Evolution", "Nelder-Mead", "L-BFGS-B"]
+        )
         method_row.addWidget(self._cmb_method)
         cfg_lay.addLayout(method_row)
 
@@ -545,7 +561,9 @@ class OptimizationWidget(QWidget):
         self._spin_patience = QSpinBox()
         self._spin_patience.setRange(5, 200)
         self._spin_patience.setValue(20)
-        self._spin_patience.setToolTip("Stop if no improvement for this many generations")
+        self._spin_patience.setToolTip(
+            "Stop if no improvement for this many generations"
+        )
         pat_row.addWidget(self._spin_patience)
         cfg_lay.addLayout(pat_row)
 
@@ -643,7 +661,9 @@ class OptimizationWidget(QWidget):
 
         self._log.clear()
         self._log.append(f"Starting {method} optimization...")
-        self._log.append(f"  Params: {n_params}, Generations: {n_iters}, Pop: {pop_size}")
+        self._log.append(
+            f"  Params: {n_params}, Generations: {n_iters}, Pop: {pop_size}"
+        )
         if _HAS_NATIVE_BATCH and self._chk_native.isChecked():
             self._log.append("  Backend: 🦀 Rust parallel (rayon)")
         else:
@@ -724,7 +744,9 @@ class OptimizationWidget(QWidget):
             self._log.append(f"  Generations: {n_gens}, Best loss: {best:.6f}")
 
         if coeffs is not None:
-            self._log.append(f"  Coefficients: {np.array2string(np.asarray(coeffs), precision=4)}")
+            self._log.append(
+                f"  Coefficients: {np.array2string(np.asarray(coeffs), precision=4)}"
+            )
 
         self.optimized_coefficients.emit(result)
 

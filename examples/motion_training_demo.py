@@ -50,7 +50,8 @@ def parse_args():
         "--urdf",
         "-u",
         default=str(
-            PROJECT_ROOT / "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf",
+            PROJECT_ROOT
+            / "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf",
         ),
         help="Path to golfer URDF",
     )

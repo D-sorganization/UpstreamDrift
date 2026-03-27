@@ -71,7 +71,9 @@ def test_main(mock_create_icon, mock_chk_deps, mock_sync, tmp_path, monkeypatch)
     mock_chk_deps.return_value = True
 
     # Needs to not attempt creation of actual shortcuts on CI, but we mock the platform or function.
-    monkeypatch.setattr("setup_golf_suite.create_shortcut_windows", lambda *args, **kwargs: True)
+    monkeypatch.setattr(
+        "setup_golf_suite.create_shortcut_windows", lambda *args, **kwargs: True
+    )
 
     assert setup_golf_suite.main() == 0
 

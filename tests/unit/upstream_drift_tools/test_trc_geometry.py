@@ -30,7 +30,9 @@ def _simple_dims(**overrides: float | bool) -> VesselDimensions:
     return d
 
 
-def _layer(name: str = "Steel", thickness: float = 2.0, density: float = 490.0) -> LayerConfig:
+def _layer(
+    name: str = "Steel", thickness: float = 2.0, density: float = 490.0
+) -> LayerConfig:
     return LayerConfig(name=name, thickness=thickness, density=density, color="gray")
 
 
@@ -78,7 +80,9 @@ class TestCalculateGeometry:
         assert result.total_volume_ft3 > 0.0
 
     def test_layers_populated(self) -> None:
-        result = self._ENGINE.calculate_geometry(_simple_dims(), [_layer("A"), _layer("B")])
+        result = self._ENGINE.calculate_geometry(
+            _simple_dims(), [_layer("A"), _layer("B")]
+        )
         assert len(result.layers) == 2
 
     def test_invisible_layer_excluded(self) -> None:
@@ -91,11 +95,15 @@ class TestCalculateGeometry:
 
     def test_zero_diameter_raises(self) -> None:
         with pytest.raises(AssertionError):
-            self._ENGINE.calculate_geometry(_simple_dims(cylinder_diameter=0.0), [_layer()])
+            self._ENGINE.calculate_geometry(
+                _simple_dims(cylinder_diameter=0.0), [_layer()]
+            )
 
     def test_zero_height_raises(self) -> None:
         with pytest.raises(AssertionError):
-            self._ENGINE.calculate_geometry(_simple_dims(cylinder_height=0.0), [_layer()])
+            self._ENGINE.calculate_geometry(
+                _simple_dims(cylinder_height=0.0), [_layer()]
+            )
 
 
 # ---------------------------------------------------------------------------

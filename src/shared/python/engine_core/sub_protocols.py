@@ -441,7 +441,9 @@ class Recordable(Protocol):
     """
 
     @abstractmethod
-    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list[Any]]:
+    def get_time_series(
+        self, field_name: str
+    ) -> tuple[np.ndarray, np.ndarray | list[Any]]:
         """Get time series data for a specific field.
 
         Args:

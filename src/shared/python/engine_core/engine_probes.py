@@ -311,7 +311,9 @@ class DrakeProbe(EngineProbe):
             status=ProbeStatus.AVAILABLE,
             version=version,
             missing_dependencies=[],
-            diagnostic_message=(f"Drake {version} ready, meshcat port {available_port} available"),
+            diagnostic_message=(
+                f"Drake {version} ready, meshcat port {available_port} available"
+            ),
             details={
                 "engine_dir": str(engine_dir),
                 "meshcat_port": available_port,
@@ -485,7 +487,9 @@ class MatlabProbe(EngineProbe):
 
         # Check for model directory
         model_type = "3D_Golf_Model" if self.is_3d else "2D_Golf_Model"
-        engine_dir = self.suite_root / "engines" / "Simscape_Multibody_Models" / model_type
+        engine_dir = (
+            self.suite_root / "engines" / "Simscape_Multibody_Models" / model_type
+        )
 
         if not engine_dir.exists():
             return EngineProbeResult(
@@ -638,7 +642,8 @@ class MyoSimProbe(EngineProbe):
                 status=ProbeStatus.MISSING_ASSETS,
                 version=version,
                 missing_dependencies=missing,
-                diagnostic_message=f"MyoSim installed but missing: " f"{', '.join(missing)}",
+                diagnostic_message=f"MyoSim installed but missing: "
+                f"{', '.join(missing)}",
             )
 
         return EngineProbeResult(

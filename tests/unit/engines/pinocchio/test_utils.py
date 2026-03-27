@@ -142,7 +142,9 @@ segments:
         assert exporter.spec is not None
         assert "root" in exporter.spec
 
-    def test_export_produces_valid_urdf(self, minimal_yaml_spec: Path, tmp_path: Path) -> None:
+    def test_export_produces_valid_urdf(
+        self, minimal_yaml_spec: Path, tmp_path: Path
+    ) -> None:
         """Test export produces a valid URDF file."""
         from src.engines.physics_engines.pinocchio.python.dtack.utils.urdf_exporter import (
             URDFExporter,

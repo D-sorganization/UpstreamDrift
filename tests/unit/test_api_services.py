@@ -57,7 +57,9 @@ class TestSimulationService:
     ) -> None:
         """Test basic simulation run."""
         # Mock the recorder to avoid complex setup
-        with patch("api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder:
+        with patch(
+            "api.services.simulation_service.GenericPhysicsRecorder"
+        ) as MockRecorder:
             mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
             mock_recorder.is_recording = False
             mock_recorder.get_time_series.return_value = ([], [])
@@ -84,7 +86,9 @@ class TestSimulationService:
         self, service: SimulationService, mock_engine_manager: MagicMock
     ) -> None:
         """Test simulation with initial state."""
-        with patch("api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder:
+        with patch(
+            "api.services.simulation_service.GenericPhysicsRecorder"
+        ) as MockRecorder:
             mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
             mock_recorder.is_recording = False
             mock_recorder.get_time_series.return_value = ([], [])
@@ -104,7 +108,9 @@ class TestSimulationService:
             assert result is not None
 
     @pytest.mark.asyncio
-    async def test_run_simulation_engine_failure(self, mock_engine_manager: MagicMock) -> None:
+    async def test_run_simulation_engine_failure(
+        self, mock_engine_manager: MagicMock
+    ) -> None:
         """Test simulation when engine fails to load."""
         mock_engine_manager.get_active_physics_engine.return_value = None
         service = SimulationService(mock_engine_manager)
@@ -141,7 +147,9 @@ class TestSimulationService:
         assert "joint_positions" in data
         assert "joint_velocities" in data
 
-    def test_extract_simulation_data_handles_errors(self, service: SimulationService) -> None:
+    def test_extract_simulation_data_handles_errors(
+        self, service: SimulationService
+    ) -> None:
         """Test that data extraction handles missing data gracefully."""
         mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
         mock_recorder.get_time_series.side_effect = KeyError("no data")
@@ -195,7 +203,9 @@ class TestAnalysisService:
         strict=False,
     )
     @pytest.mark.asyncio
-    async def test_analyze_biomechanics_missing_data(self, service: AnalysisService) -> None:
+    async def test_analyze_biomechanics_missing_data(
+        self, service: AnalysisService
+    ) -> None:
         """Test analysis with missing required data."""
         request = AnalysisRequest(
             analysis_type="kinematics",
@@ -225,9 +235,13 @@ class TestServiceIntegration:
         strict=False,
     )
     @pytest.mark.asyncio
-    async def test_simulation_to_analysis_flow(self, mock_engine_manager: MagicMock) -> None:
+    async def test_simulation_to_analysis_flow(
+        self, mock_engine_manager: MagicMock
+    ) -> None:
         """Test that simulation output can feed into analysis."""
-        with patch("api.services.simulation_service.GenericPhysicsRecorder") as MockRecorder:
+        with patch(
+            "api.services.simulation_service.GenericPhysicsRecorder"
+        ) as MockRecorder:
             mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
             mock_recorder.is_recording = False
             mock_recorder.get_time_series.return_value = ([0.0, 0.1], [[0.0], [0.1]])
@@ -256,7 +270,9 @@ class TestServiceIntegration:
                     parameters=sim_result.data,
                     export_format="json",
                 )
-                analysis_result = await analysis_service.analyze_biomechanics(analysis_request)
+                analysis_result = await analysis_service.analyze_biomechanics(
+                    analysis_request
+                )
                 assert analysis_result is not None
 
 

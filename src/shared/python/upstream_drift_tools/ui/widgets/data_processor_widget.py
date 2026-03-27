@@ -196,7 +196,9 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
             header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
             header.setStretchLastSection(True)
         self.data_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.data_table.customContextMenuRequested.connect(self._show_table_context_menu)
+        self.data_table.customContextMenuRequested.connect(
+            self._show_table_context_menu
+        )
         layout.addWidget(self.data_table)
 
         # Pagination
@@ -270,7 +272,9 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
         self.filter_column = QComboBox()
         form.addRow("Col:", self.filter_column)
         self.filter_operator = QComboBox()
-        self.filter_operator.addItems(["==", "!=", ">", "<", ">=", "<=", "contains", "in"])
+        self.filter_operator.addItems(
+            ["==", "!=", ">", "<", ">=", "<=", "contains", "in"]
+        )
         form.addRow("Op:", self.filter_operator)
         self.filter_value = QLineEdit()
         form.addRow("Val:", self.filter_value)
@@ -484,7 +488,9 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
                 item = QTableWidgetItem(str(v) if v is not None and v == v else "")
                 item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsEditable)
                 self.data_table.setItem(r, c, item)
-        self.page_label.setText(f"Page {self.current_page + 1}/{self.total_pages} ({len(df)} rows)")
+        self.page_label.setText(
+            f"Page {self.current_page + 1}/{self.total_pages} ({len(df)} rows)"
+        )
 
     def _prev_page(self) -> None:
         if self.current_page > 0:
@@ -530,7 +536,9 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
         self.col_count_label.setText(str(len(self.engine.data.columns)))
         mem = self.engine.data.memory_usage(deep=True).sum()
         self.memory_label.setText(
-            f"{mem / 1024:.1f} KB" if mem < 1024 * 1024 else f"{mem / (1024 * 1024):.1f} MB"
+            f"{mem / 1024:.1f} KB"
+            if mem < 1024 * 1024
+            else f"{mem / (1024 * 1024):.1f} MB"
         )
         self.null_count_label.setText(str(sum(s.null_count for s in stats.values())))
         self._update_column_stats()
@@ -568,7 +576,11 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
             [
                 "\t".join(
                     [
-                        (item.text() if (item := self.data_table.item(r, c)) is not None else "")
+                        (
+                            item.text()
+                            if (item := self.data_table.item(r, c)) is not None
+                            else ""
+                        )
                         for c in cs
                     ]
                 )

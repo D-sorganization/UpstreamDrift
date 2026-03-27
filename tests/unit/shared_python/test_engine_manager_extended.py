@@ -59,7 +59,9 @@ def engine_manager(
     with (
         patch("shared.python.engine_core.engine_probes.MuJoCoProbe") as MockMuJoCo,
         patch("shared.python.engine_core.engine_probes.DrakeProbe") as MockDrake,
-        patch("shared.python.engine_core.engine_probes.PinocchioProbe") as MockPinocchio,
+        patch(
+            "shared.python.engine_core.engine_probes.PinocchioProbe"
+        ) as MockPinocchio,
         patch("shared.python.engine_core.engine_probes.OpenSimProbe") as MockOpenSim,
         patch("shared.python.engine_core.engine_probes.MyoSimProbe") as MockMyoSim,
         patch("shared.python.engine_core.engine_probes.MatlabProbe") as MockMatlab,
@@ -139,7 +141,9 @@ def test_switch_engine_success(engine_manager) -> None:
 
 def test_switch_engine_failure(engine_manager) -> None:
     """Test engine switch failure sets error status."""
-    with patch.object(engine_manager, "_load_engine", side_effect=GolfModelingError("Load failed")):
+    with patch.object(
+        engine_manager, "_load_engine", side_effect=GolfModelingError("Load failed")
+    ):
         result = engine_manager.switch_engine(EngineType.MUJOCO)
         assert result is False
         assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
@@ -182,14 +186,18 @@ def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
     # Test probe failure through switch_engine
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-    with patch("shared.python.engine_core.engine_probes.MuJoCoProbe") as mock_probe_class:
+    with patch(
+        "shared.python.engine_core.engine_probes.MuJoCoProbe"
+    ) as mock_probe_class:
         mock_probe = MagicMock()
         mock_probe.probe.return_value.is_available.return_value = False
         mock_probe.probe.return_value.diagnostic_message = "Not ready"
         mock_probe_class.return_value = mock_probe
 
         # This should fail during the loading process
-        with patch("shared.python.engine_core.engine_loaders.load_mujoco_engine") as mock_loader:
+        with patch(
+            "shared.python.engine_core.engine_loaders.load_mujoco_engine"
+        ) as mock_loader:
             mock_loader.side_effect = GolfModelingError("MuJoCo not ready")
 
             result = engine_manager.switch_engine(EngineType.MUJOCO)
@@ -238,7 +246,9 @@ def test_load_matlab_engine_success(engine_manager) -> None:
     mock_matlab.engine = mock_matlab_engine
 
     with (
-        patch.dict(sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}),
+        patch.dict(
+            sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}
+        ),
         patch("pathlib.Path.exists", return_value=True),
     ):
         engine_manager._load_matlab_engine(EngineType.MATLAB_2D)

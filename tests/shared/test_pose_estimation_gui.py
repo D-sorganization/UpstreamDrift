@@ -25,7 +25,9 @@ class TestMediaPipeConfigParsing:
         """key=value format should be parsed correctly."""
         from src.shared.python.pose_estimation.mediapipe_gui import _parse_config
 
-        config = _parse_config("min_detection_confidence=0.5\nmin_tracking_confidence=0.7")
+        config = _parse_config(
+            "min_detection_confidence=0.5\nmin_tracking_confidence=0.7"
+        )
         assert config["min_detection_confidence"] == 0.5
         assert config["min_tracking_confidence"] == 0.7
 
@@ -105,7 +107,9 @@ class TestMediaPipeWorker:
             ) as mock_run,
         ):
             # Simulate what happens when import fails
-            mock_run.side_effect = lambda: worker.error.emit("MediaPipe dependency not installed")
+            mock_run.side_effect = lambda: worker.error.emit(
+                "MediaPipe dependency not installed"
+            )
             mock_run()
 
         assert len(error_messages) == 1
@@ -127,7 +131,9 @@ class TestOpenPoseWorker:
         with patch(
             "src.shared.python.pose_estimation.openpose_gui._AnalysisWorker.run"
         ) as mock_run:
-            mock_run.side_effect = lambda: worker.error.emit("OpenPose dependency not installed")
+            mock_run.side_effect = lambda: worker.error.emit(
+                "OpenPose dependency not installed"
+            )
             mock_run()
 
         assert len(error_messages) == 1

@@ -129,7 +129,9 @@ def test_validate_url_scheme_javascript_blocked() -> None:
 
 def test_validate_url_scheme_custom_allowed() -> None:
     """Custom allowed schemes should work."""
-    result = validate_url_scheme("ftp://files.example.com", allowed_schemes=("ftp", "ftps"))
+    result = validate_url_scheme(
+        "ftp://files.example.com", allowed_schemes=("ftp", "ftps")
+    )
     assert result == "ftp://files.example.com"
 
 

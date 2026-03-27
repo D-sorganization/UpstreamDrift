@@ -66,9 +66,9 @@ class TestDriftControlDecomposer:
         )
 
         # Guideline F requires residual < 1e-5
-        assert (
-            result.residual < 1e-5
-        ), f"Residual {result.residual:.2e} exceeds Guideline F tolerance 1e-5"
+        assert result.residual < 1e-5, (
+            f"Residual {result.residual:.2e} exceeds Guideline F tolerance 1e-5"
+        )
 
     def test_zero_control_gives_drift_only(self, simple_pendulum_model) -> None:
         """Test that zero control gives drift-only acceleration."""
@@ -81,12 +81,14 @@ class TestDriftControlDecomposer:
         result = decomposer.decompose(qpos, qvel, ctrl)
 
         # With zero control, control acceleration should be near zero
-        assert np.allclose(
-            result.control_acceleration, 0, atol=1e-6
-        ), f"Expected zero control acceleration, got {result.control_acceleration}"
+        assert np.allclose(result.control_acceleration, 0, atol=1e-6), (
+            f"Expected zero control acceleration, got {result.control_acceleration}"
+        )
 
         # Full should equal drift
-        assert np.allclose(result.full_acceleration, result.drift_acceleration, atol=1e-6)
+        assert np.allclose(
+            result.full_acceleration, result.drift_acceleration, atol=1e-6
+        )
 
     def test_zvcf_isolates_coriolis_from_gravity(self, simple_pendulum_model) -> None:
         """Test ZVCF: counterfactual has only gravity, observed has
@@ -102,13 +104,18 @@ class TestDriftControlDecomposer:
 
         # With zero velocity, drift_velocity_component should be near zero
         assert np.allclose(result.drift_velocity_component, 0, atol=1e-6), (
-            f"Expected zero Coriolis with zero velocity, " f"got {result.drift_velocity_component}"
+            f"Expected zero Coriolis with zero velocity, "
+            f"got {result.drift_velocity_component}"
         )
 
         # Drift should be purely gravity
-        assert np.allclose(result.drift_acceleration, result.drift_gravity_component, atol=1e-6)
+        assert np.allclose(
+            result.drift_acceleration, result.drift_gravity_component, atol=1e-6
+        )
 
-    def test_gravity_acceleration_matches_mgL_sin_theta(self, simple_pendulum_model) -> None:
+    def test_gravity_acceleration_matches_mgL_sin_theta(
+        self, simple_pendulum_model
+    ) -> None:
         """Test gravity acceleration matches analytical solution."""
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
@@ -146,7 +153,9 @@ class TestDriftControlDecomposer:
         result_large = decomposer.decompose(qpos, qvel, ctrl_large)
 
         # Control acceleration should scale linearly (approximately 2x)
-        ratio = result_large.control_acceleration[0] / result_small.control_acceleration[0]
+        ratio = (
+            result_large.control_acceleration[0] / result_small.control_acceleration[0]
+        )
         assert 1.8 < ratio < 2.2, f"Expected ~2x scaling, got {ratio:.2f}x"
 
     def test_trajectory_analysis(self, simple_pendulum_model) -> None:
@@ -166,9 +175,9 @@ class TestDriftControlDecomposer:
 
         # All should satisfy superposition
         for r in results:
-            assert (
-                r.residual < 1e-5
-            ), f"Trajectory point failed superposition: residual={r.residual:.2e}"
+            assert r.residual < 1e-5, (
+                f"Trajectory point failed superposition: residual={r.residual:.2e}"
+            )
 
     def test_decomposition_is_reproducible(self, simple_pendulum_model) -> None:
         """Test that decomposition gives same results with same inputs."""
@@ -213,9 +222,11 @@ class TestDriftControlPhysics:
         result = decomposer.decompose(qpos, qvel, ctrl)
 
         # Control component should dominate and be positive (upward)
-        assert (
-            result.control_acceleration[0] > result.drift_acceleration[0]
-        ), "Control should dominate drift for strong actuation"
+        assert result.control_acceleration[0] > result.drift_acceleration[0], (
+            "Control should dominate drift for strong actuation"
+        )
 
         # Total should be positive (accelerating upward)
-        assert result.full_acceleration[0] > 0, "Strong torque should accelerate pendulum upward"
+        assert result.full_acceleration[0] > 0, (
+            "Strong torque should accelerate pendulum upward"
+        )

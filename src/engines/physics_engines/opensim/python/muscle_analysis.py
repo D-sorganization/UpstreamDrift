@@ -94,7 +94,9 @@ class OpenSimMuscleAnalyzer:
 
         return forces
 
-    def get_moment_arms(self, coordinate_name: str | None = None) -> dict[str, dict[str, float]]:
+    def get_moment_arms(
+        self, coordinate_name: str | None = None
+    ) -> dict[str, dict[str, float]]:
         """Compute muscle moment arms about coordinates.
 
         Section J Requirement: Moment arm analysis for torque computation.
@@ -347,7 +349,9 @@ class OpenSimGripModel:
             wrap_cylinder.set_length(length)
 
             # Set location in body frame
-            wrap_cylinder.set_translation(opensim.Vec3(location[0], location[1], location[2]))
+            wrap_cylinder.set_translation(
+                opensim.Vec3(location[0], location[1], location[2])
+            )
 
             # Rotation: typically align cylinder with shaft axis (e.g., along Y)
             wrap_cylinder.set_xyz_body_rotation(
@@ -363,7 +367,9 @@ class OpenSimGripModel:
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to add wrap geometry: {e}")
 
-    def compute_grip_constraint_forces(self, state: opensim.State) -> dict[str, np.ndarray]:
+    def compute_grip_constraint_forces(
+        self, state: opensim.State
+    ) -> dict[str, np.ndarray]:
         """Compute constraint reaction forces at grip via-points.
 
         Section J1 Requirement: Constraint forces at grip attachment points.
@@ -411,10 +417,15 @@ class OpenSimGripModel:
         grip_muscle_names = [
             name
             for name in muscle_forces
-            if any(keyword in name.lower() for keyword in ["flexor", "extensor", "grip", "hand"])
+            if any(
+                keyword in name.lower()
+                for keyword in ["flexor", "extensor", "grip", "hand"]
+            )
         ]
 
-        total_grip_force = sum(muscle_forces.get(name, 0.0) for name in grip_muscle_names)
+        total_grip_force = sum(
+            muscle_forces.get(name, 0.0) for name in grip_muscle_names
+        )
 
         return {
             "total_grip_force_N": total_grip_force,

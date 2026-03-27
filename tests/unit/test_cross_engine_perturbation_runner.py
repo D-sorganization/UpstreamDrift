@@ -76,7 +76,9 @@ def _make_metric_stats(mean: float, std: float = 0.01) -> MetricStatistics:
 
 _ZERO_PROFILE: dict = {"coeffs": [[0.0, 0.0], [0.0, 0.0]]}
 
-_SMALL_CONFIG = PerturbationConfig(n_trials=3, noise_amplitude=0.05, noise_type="white", seed=7)
+_SMALL_CONFIG = PerturbationConfig(
+    n_trials=3, noise_amplitude=0.05, noise_type="white", seed=7
+)
 
 # ---------------------------------------------------------------------------
 # SUPPORTED_ENGINES constant
@@ -261,8 +263,12 @@ class TestComputeConsistency:
     def test_consistent_when_cv_low(self) -> None:
         # Two engines with nearly identical means → consistent
         summaries = {
-            "a": _make_summary("a", 0.8, metrics={"rmse": _make_metric_stats(1.0, 0.001)}),
-            "b": _make_summary("b", 0.8, metrics={"rmse": _make_metric_stats(1.001, 0.001)}),
+            "a": _make_summary(
+                "a", 0.8, metrics={"rmse": _make_metric_stats(1.0, 0.001)}
+            ),
+            "b": _make_summary(
+                "b", 0.8, metrics={"rmse": _make_metric_stats(1.001, 0.001)}
+            ),
         }
         c = compute_consistency(summaries, threshold=0.2)["rmse"]
         assert c.is_consistent is True
@@ -270,8 +276,12 @@ class TestComputeConsistency:
     def test_inconsistent_when_cv_high(self) -> None:
         # Two engines with very different means → inconsistent
         summaries = {
-            "a": _make_summary("a", 0.8, metrics={"rmse": _make_metric_stats(1.0, 0.01)}),
-            "b": _make_summary("b", 0.8, metrics={"rmse": _make_metric_stats(10.0, 0.01)}),
+            "a": _make_summary(
+                "a", 0.8, metrics={"rmse": _make_metric_stats(1.0, 0.01)}
+            ),
+            "b": _make_summary(
+                "b", 0.8, metrics={"rmse": _make_metric_stats(10.0, 0.01)}
+            ),
         }
         c = compute_consistency(summaries, threshold=0.2)["rmse"]
         assert c.is_consistent is False
@@ -279,7 +289,9 @@ class TestComputeConsistency:
     def test_single_engine_excluded(self) -> None:
         # Only one engine → cannot compute consistency
         summaries = {
-            "mujoco": _make_summary("mujoco", 0.9, metrics={"rmse": _make_metric_stats(0.1)})
+            "mujoco": _make_summary(
+                "mujoco", 0.9, metrics={"rmse": _make_metric_stats(0.1)}
+            )
         }
         c = compute_consistency(summaries)
         assert "rmse" not in c
@@ -499,7 +511,9 @@ class TestCrossEngineIntegrationMujoco:
             profile=_ZERO_PROFILE,
             engine_kwargs={"mujoco": {"t_end": 0.05}},
         )
-        config = PerturbationConfig(n_trials=2, noise_amplitude=0.0, noise_type="white", seed=0)
+        config = PerturbationConfig(
+            n_trials=2, noise_amplitude=0.0, noise_type="white", seed=0
+        )
         report = runner.run_all(config)
 
         assert "mujoco" in report.summaries

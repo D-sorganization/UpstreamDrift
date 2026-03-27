@@ -169,7 +169,9 @@ class TestGolfSwingPlotter:
     def test_plot_frequency_analysis(self, plotter, mock_figure):
         """Test frequency analysis plotting."""
         # This calls scipy or shared signal processing
-        with patch("scipy.signal.welch", return_value=(np.arange(10), np.random.rand(10))):
+        with patch(
+            "scipy.signal.welch", return_value=(np.arange(10), np.random.rand(10))
+        ):
             plotter.plot_frequency_analysis(mock_figure, joint_idx=0)
             ax = mock_figure.add_subplot.return_value
             ax.semilogy.assert_called()
@@ -238,7 +240,9 @@ class TestGolfSwingPlotter:
         times = np.linspace(0, 1, 100)
         am = np.ones((100, 3))
         plotter.recorder.get_time_series = MagicMock(
-            side_effect=lambda name: ((times, am) if name == "angular_momentum" else ([], []))
+            side_effect=lambda name: (
+                (times, am) if name == "angular_momentum" else ([], [])
+            )
         )
         plotter.clear_cache()  # Must clear cache after modifying recorder
 
@@ -252,7 +256,9 @@ class TestGolfSwingPlotter:
         times = np.linspace(0, 1, 100)
         cop = np.random.rand(100, 2)
         plotter.recorder.get_time_series = MagicMock(
-            side_effect=lambda name: ((times, cop) if name == "cop_position" else ([], []))
+            side_effect=lambda name: (
+                (times, cop) if name == "cop_position" else ([], [])
+            )
         )
         plotter.clear_cache()  # Must clear cache after modifying recorder
 
@@ -276,7 +282,9 @@ class TestGolfSwingPlotter:
         times = np.linspace(0, 1, 100)
         powers = np.random.rand(100, 3)
         plotter.recorder.get_time_series = MagicMock(
-            side_effect=lambda name: ((times, powers) if name == "actuator_powers" else ([], []))
+            side_effect=lambda name: (
+                (times, powers) if name == "actuator_powers" else ([], [])
+            )
         )
         plotter.clear_cache()  # Must clear cache after modifying recorder
 
@@ -290,7 +298,9 @@ class TestGolfSwingPlotter:
         times = np.linspace(0, 1, 100)
         cop = np.random.rand(100, 2)
         plotter.recorder.get_time_series = MagicMock(
-            side_effect=lambda name: ((times, cop) if name == "cop_position" else ([], []))
+            side_effect=lambda name: (
+                (times, cop) if name == "cop_position" else ([], [])
+            )
         )
         plotter.clear_cache()  # Must clear cache after modifying recorder
 
@@ -307,7 +317,9 @@ class TestGolfSwingPlotter:
 
         plotter.plot_joint_angles(mock_figure)
         ax = mock_figure.add_subplot.return_value
-        ax.text.assert_called_with(0.5, 0.5, "No data recorded", ha="center", va="center")
+        ax.text.assert_called_with(
+            0.5, 0.5, "No data recorded", ha="center", va="center"
+        )
 
 
 class MockRecorder(RecorderInterface):

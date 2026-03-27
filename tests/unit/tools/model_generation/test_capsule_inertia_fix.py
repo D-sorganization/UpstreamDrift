@@ -34,7 +34,9 @@ import pytest
 # ---------------------------------------------------------------------------
 
 
-def _correct_capsule_inertia(mass: float, radius: float, length: float) -> tuple[float, float]:
+def _correct_capsule_inertia(
+    mass: float, radius: float, length: float
+) -> tuple[float, float]:
     """Return (i_axial, i_perp) for a capsule aligned along z.
 
     Uses the *correct* parallel axis theorem (factor 1, not 0.5).
@@ -62,7 +64,9 @@ def _correct_capsule_inertia(mass: float, radius: float, length: float) -> tuple
     return i_axial, i_perp
 
 
-def _buggy_capsule_inertia(mass: float, radius: float, length: float) -> tuple[float, float]:
+def _buggy_capsule_inertia(
+    mass: float, radius: float, length: float
+) -> tuple[float, float]:
     """Return the BUGGY (i_axial, i_perp) -- used to show the fix matters."""
     v_cyl = math.pi * radius**2 * length
     v_sphere = (4.0 / 3.0) * math.pi * radius**3

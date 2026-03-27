@@ -197,7 +197,9 @@ class TestValidateInertiaMatrix:
         ],
         ids=["negative-eigenvalue", "zero-eigenvalue"],
     )
-    def test_non_positive_definite_raises(self, inertia: np.ndarray, description: str) -> None:
+    def test_non_positive_definite_raises(
+        self, inertia: np.ndarray, description: str
+    ) -> None:
         with pytest.raises(PhysicalValidationError):
             validate_inertia_matrix(inertia)
 
@@ -276,7 +278,9 @@ class TestValidatePhysicalBounds:
         ],
         ids=["negative-mass", "zero-dt", "negative-friction"],
     )
-    def test_decorator_catches_invalid(self, param_name: str, invalid_value: float) -> None:
+    def test_decorator_catches_invalid(
+        self, param_name: str, invalid_value: float
+    ) -> None:
         @validate_physical_bounds
         def func(**kwargs: float) -> float:
             return list(kwargs.values())[0]
@@ -526,7 +530,9 @@ class TestValidateType:
         ],
         ids=["exact-type", "tuple-of-types"],
     )
-    def test_correct_type(self, value: object, expected_type: type | tuple, name: str) -> None:
+    def test_correct_type(
+        self, value: object, expected_type: type | tuple, name: str
+    ) -> None:
         validate_type(value, expected_type, name)
 
     def test_wrong_type_raises(self) -> None:
@@ -640,7 +646,9 @@ class TestValidateFinite:
 
     def test_nan_strict_raises(self) -> None:
         with pytest.raises(PhysicsValidationError, match="NaN"):
-            validate_finite(np.array([1.0, np.nan, 3.0]), "data", ValidationLevel.STRICT)
+            validate_finite(
+                np.array([1.0, np.nan, 3.0]), "data", ValidationLevel.STRICT
+            )
 
     def test_inf_standard_raises(self) -> None:
         with pytest.raises(PhysicsValidationError, match="NaN or Inf"):
@@ -667,12 +675,16 @@ class TestValidateMagnitude:
 
     def test_exceeds_bound_strict_raises(self) -> None:
         with pytest.raises(PhysicsValidationError, match="implausibly"):
-            validate_magnitude(np.array([200.0]), "vel", 100.0, "m/s", ValidationLevel.STRICT)
+            validate_magnitude(
+                np.array([200.0]), "vel", 100.0, "m/s", ValidationLevel.STRICT
+            )
 
     def test_exceeds_bound_standard_warns(self) -> None:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            validate_magnitude(np.array([200.0]), "vel", 100.0, "m/s", ValidationLevel.STANDARD)
+            validate_magnitude(
+                np.array([200.0]), "vel", 100.0, "m/s", ValidationLevel.STANDARD
+            )
             assert len(w) >= 1
 
 
@@ -837,7 +849,8 @@ class TestValidationDataPoint:
         expected_valid: bool,
     ) -> None:
         assert (
-            driver_data.is_valid_carry(driver_data.carry_distance_m * multiplier) == expected_valid
+            driver_data.is_valid_carry(driver_data.carry_distance_m * multiplier)
+            == expected_valid
         )
 
     def test_is_valid_carry_at_boundary(self, driver_data: ValidationDataPoint) -> None:
@@ -862,7 +875,9 @@ class TestReferenceData:
         ],
         ids=["pga-tour", "amateur"],
     )
-    def test_collections_not_empty(self, collection: list, expected_nonempty: bool) -> None:
+    def test_collections_not_empty(
+        self, collection: list, expected_nonempty: bool
+    ) -> None:
         assert (len(collection) > 0) == expected_nonempty
 
     def test_all_data_is_union(self) -> None:

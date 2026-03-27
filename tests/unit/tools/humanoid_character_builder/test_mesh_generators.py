@@ -185,7 +185,9 @@ class TestSMPLXAvailability:
 class TestSMPLXGenerate:
     """Test the full SMPL-X generate pipeline with mocked smplx module."""
 
-    def _mock_smplx_output(self, n_verts: int = 10475, n_faces: int = 20000) -> MagicMock:
+    def _mock_smplx_output(
+        self, n_verts: int = 10475, n_faces: int = 20000
+    ) -> MagicMock:
         """Create a mock SMPL-X model output.
 
         Generates face indices that are coherent with SMPLX_SEGMENT_VERTEX_RANGES
@@ -197,9 +199,7 @@ class TestSMPLXGenerate:
         mock_output.vertices = MagicMock()
         mock_output.vertices.detach.return_value.cpu.return_value.numpy.return_value.squeeze.return_value = rng.standard_normal(
             (n_verts, 3)
-        ).astype(
-            np.float32
-        )
+        ).astype(np.float32)
 
         mock_model = MagicMock()
         mock_model.return_value = mock_output
@@ -223,10 +223,14 @@ class TestSMPLXGenerate:
         return mock_model
 
     @patch("humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE", True)
-    @patch("humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True)
+    @patch(
+        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
+    )
     @patch("humanoid_character_builder.generators.mesh_generator._smplx_module")
     @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
-    def test_generate_produces_stl_files(self, mock_trimesh, mock_smplx, tmp_path: Path) -> None:
+    def test_generate_produces_stl_files(
+        self, mock_trimesh, mock_smplx, tmp_path: Path
+    ) -> None:
         """Verify that generate produces per-segment STL files."""
         import torch  # noqa: F401
 
@@ -271,7 +275,9 @@ class TestSMPLXGenerate:
         assert len(result.vertex_groups) > 0
 
     @patch("humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE", True)
-    @patch("humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True)
+    @patch(
+        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
+    )
     def test_generate_handles_exception_gracefully(self, tmp_path: Path) -> None:
         """Verify graceful failure when SMPL-X forward pass throws."""
         model_dir = tmp_path / "models"
@@ -456,9 +462,13 @@ class TestMakeHumanScriptGeneration:
 class TestMakeHumanGenerate:
     """Test the full MakeHuman generate pipeline with mocking."""
 
-    @patch("humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True)
+    @patch(
+        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
+    )
     @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
-    def test_generate_with_mocked_subprocess(self, mock_trimesh, tmp_path: Path) -> None:
+    def test_generate_with_mocked_subprocess(
+        self, mock_trimesh, tmp_path: Path
+    ) -> None:
         """Test end-to-end generation with mocked MakeHuman subprocess."""
         mh_dir = tmp_path / "makehuman"
         mh_dir.mkdir()

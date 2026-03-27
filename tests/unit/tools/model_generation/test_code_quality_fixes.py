@@ -78,8 +78,12 @@ class TestGetDescendants:
         """Test with branching structure: base -> (left_arm, right_arm)."""
         builder = ManualBuilder("test_robot", validate_on_add=False)
         builder.add_link(Link(name="base", inertia=Inertia.from_box(10, 1, 1, 0.5)))
-        builder.add_link(Link(name="left_arm", inertia=Inertia.from_cylinder(2, 0.05, 0.5)))
-        builder.add_link(Link(name="right_arm", inertia=Inertia.from_cylinder(2, 0.05, 0.5)))
+        builder.add_link(
+            Link(name="left_arm", inertia=Inertia.from_cylinder(2, 0.05, 0.5))
+        )
+        builder.add_link(
+            Link(name="right_arm", inertia=Inertia.from_cylinder(2, 0.05, 0.5))
+        )
         builder.add_link(Link(name="left_hand", inertia=Inertia.from_sphere(0.5, 0.05)))
         builder.add_joint(
             Joint(
@@ -249,7 +253,9 @@ class TestPresetConsistency:
 class TestCapsuleWarning:
     """Capsule downgrade to cylinder should produce a warning."""
 
-    def test_urdf_writer_capsule_warning(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_urdf_writer_capsule_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
         """URDFWriter._write_geometry() should warn about capsule approximation."""
         writer = URDFWriter()
         capsule = Geometry.capsule(radius=0.05, length=0.3)

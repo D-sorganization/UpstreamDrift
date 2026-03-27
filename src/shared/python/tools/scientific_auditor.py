@@ -34,7 +34,9 @@ class ScienceAuditor(ast.NodeVisitor):
             raise ValueError("node must be provided")
         if isinstance(node.op, ast.Div):
             # Check if denominator is a variable or a zero constant
-            is_constant_nonzero = isinstance(node.right, ast.Constant) and node.right.value != 0
+            is_constant_nonzero = (
+                isinstance(node.right, ast.Constant) and node.right.value != 0
+            )
             if not is_constant_nonzero:
                 self.risks.append(
                     {

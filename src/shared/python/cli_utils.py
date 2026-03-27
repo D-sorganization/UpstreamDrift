@@ -52,7 +52,9 @@ def create_base_parser(
     prog: str | None = None,
     epilog: str | None = None,
     add_help: bool = True,
-    formatter_class: type[argparse.HelpFormatter] = argparse.RawDescriptionHelpFormatter,
+    formatter_class: type[
+        argparse.HelpFormatter
+    ] = argparse.RawDescriptionHelpFormatter,
 ) -> argparse.ArgumentParser:
     """Create a base ArgumentParser with standard configuration.
 

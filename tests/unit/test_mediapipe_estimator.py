@@ -55,7 +55,9 @@ class TestMediaPipeEstimator:
                 MagicMock(),
             ),
         ):
-            estimator = mediapipe_estimator.MediaPipeEstimator(min_detection_confidence=0.7)
+            estimator = mediapipe_estimator.MediaPipeEstimator(
+                min_detection_confidence=0.7
+            )
             yield estimator
 
     def test_initialization(
@@ -89,7 +91,9 @@ class TestMediaPipeEstimator:
         image = np.zeros((100, 100, 3), dtype=np.uint8)
 
         # Ensure cv2 is mocked correctly in the module
-        with patch("src.shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cv2.cvtColor.return_value = image  # Return same image
 
             result = estimator_instance.estimate_from_image(image)
@@ -111,7 +115,9 @@ class TestMediaPipeEstimator:
         estimator_instance.load_model()
 
         # Mock cv2.VideoCapture via the module import
-        with patch("src.shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cap = MagicMock()
             mock_cv2.VideoCapture.return_value = mock_cap
             mock_cap.isOpened.return_value = True
@@ -139,7 +145,9 @@ class TestMediaPipeEstimator:
 
         image = np.zeros((100, 100, 3), dtype=np.uint8)
 
-        with patch("src.shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cv2.cvtColor.return_value = image
 
             # Process first frame
@@ -159,7 +167,9 @@ class TestMediaPipeEstimator:
         """Test calculation of joint angles."""
         estimator_instance.load_model()
 
-        mock_results = mock_mediapipe.solutions.pose.Pose.return_value.process.return_value
+        mock_results = (
+            mock_mediapipe.solutions.pose.Pose.return_value.process.return_value
+        )
         landmarks = mock_results.pose_landmarks.landmark
 
         # Reset all to 0
@@ -185,7 +195,9 @@ class TestMediaPipeEstimator:
 
         image = np.zeros((100, 100, 3), dtype=np.uint8)
 
-        with patch("src.shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cv2.cvtColor.return_value = image
 
             result = estimator_instance.estimate_from_image(image)

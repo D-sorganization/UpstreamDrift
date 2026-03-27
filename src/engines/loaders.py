@@ -180,7 +180,12 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
 
         def _model_path(root: Path) -> Path:
             return (
-                root / "engines" / "physics_engines" / "mujoco" / "models" / "simple_pendulum.xml"
+                root
+                / "engines"
+                / "physics_engines"
+                / "mujoco"
+                / "models"
+                / "simple_pendulum.xml"
             )
 
         return _load_engine_with_probe(
@@ -193,7 +198,9 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         )
 
     except ImportError as e:
-        raise GolfModelingError("MuJoCo requirements not met. Install mujoco>=3.2.3") from e
+        raise GolfModelingError(
+            "MuJoCo requirements not met. Install mujoco>=3.2.3"
+        ) from e
 
 
 def load_drake_engine(suite_root: Path) -> PhysicsEngine:

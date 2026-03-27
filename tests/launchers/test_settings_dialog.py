@@ -54,7 +54,9 @@ def parent_launcher(qapp):
 
 def test_settings_dialog_init(parent_launcher, qapp):
     data = {"summary": {"status": "healthy"}}
-    dialog = SettingsDialog(parent=parent_launcher, diagnostics_data=data, initial_tab=TAB_CONFIG)
+    dialog = SettingsDialog(
+        parent=parent_launcher, diagnostics_data=data, initial_tab=TAB_CONFIG
+    )
 
     # Check that checkboxes are synced
     assert dialog.chk_docker.isChecked() is False
@@ -178,7 +180,9 @@ def test_settings_dialog_no_launcher():
     assert dialog.parent() is None
 
     # Test diagnostics refresh without a launcher parent
-    with patch("src.launchers.launcher_diagnostics.LauncherDiagnostics") as mock_diag_class:
+    with patch(
+        "src.launchers.launcher_diagnostics.LauncherDiagnostics"
+    ) as mock_diag_class:
         mock_diag = MagicMock()
         # Include detailed checks, engines, and recommendations to cover render functions
         mock_diag.run_all_checks.return_value = {

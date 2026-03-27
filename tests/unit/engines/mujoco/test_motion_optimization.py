@@ -198,7 +198,9 @@ class TestSwingOptimizer:
         assert result.optimal_trajectory.shape[0] == optimizer.num_knot_points
         # optimal_velocities comes from _simulate_trajectory which returns
         # all simulation steps
-        assert result.optimal_velocities.shape[0] > 0, "Should have at least one timestep"
+        assert result.optimal_velocities.shape[0] > 0, (
+            "Should have at least one timestep"
+        )
         assert result.optimal_velocities.shape[1] == model.nv
         assert np.all(np.isfinite(result.optimal_trajectory))
 
@@ -223,7 +225,9 @@ class TestSwingOptimizer:
         optimizer.num_knot_points = 5
 
         initial_guess = optimizer._generate_initial_guess()
-        result = optimizer.optimize_trajectory(initial_guess=initial_guess, method="SLSQP")
+        result = optimizer.optimize_trajectory(
+            initial_guess=initial_guess, method="SLSQP"
+        )
 
         assert isinstance(result, OptimizationResult)
         assert result.optimal_trajectory.shape == initial_guess.shape

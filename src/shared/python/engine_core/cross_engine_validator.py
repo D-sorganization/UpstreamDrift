@@ -86,7 +86,11 @@ class CrossEngineValidator(ContractChecker):
                 "All tolerance values must be positive",
             ),
             (
-                lambda: (self.WARNING_THRESHOLD < self.ERROR_THRESHOLD < self.BLOCKER_THRESHOLD),
+                lambda: (
+                    self.WARNING_THRESHOLD
+                    < self.ERROR_THRESHOLD
+                    < self.BLOCKER_THRESHOLD
+                ),
                 "Severity thresholds must be ordered: WARNING < ERROR < BLOCKER",
             ),
         ]
@@ -112,7 +116,9 @@ class CrossEngineValidator(ContractChecker):
         engine1_state: np.ndarray,
         engine2_name: str,
         engine2_state: np.ndarray,
-        metric: Literal["position", "velocity", "acceleration", "torque", "jacobian"] = "position",
+        metric: Literal[
+            "position", "velocity", "acceleration", "torque", "jacobian"
+        ] = "position",
     ) -> ValidationResult:
         """Compare states from two engines against tolerance targets.
 
@@ -346,6 +352,8 @@ class CrossEngineValidator(ContractChecker):
             engine1=engine1_name,
             engine2=engine2_name,
             message=(
-                "" if passed else f"RMS difference {rms_pct:.2f}% exceeds {rms_threshold_pct:.2f}%"
+                ""
+                if passed
+                else f"RMS difference {rms_pct:.2f}% exceeds {rms_threshold_pct:.2f}%"
             ),
         )

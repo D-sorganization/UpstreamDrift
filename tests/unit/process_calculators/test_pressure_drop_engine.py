@@ -32,7 +32,9 @@ class TestFrictionFactorLaminar:
 
 class TestFrictionFactorColebrook:
     def test_typical_turbulent_flow(self) -> None:
-        f = friction_factor_colebrook(reynolds_number=100000.0, relative_roughness=0.0001)
+        f = friction_factor_colebrook(
+            reynolds_number=100000.0, relative_roughness=0.0001
+        )
         assert f > 0.0
 
     def test_smooth_pipe(self) -> None:
@@ -47,7 +49,9 @@ class TestFrictionFactorColebrook:
 
 class TestFrictionFactorSwameeJain:
     def test_positive(self) -> None:
-        f = friction_factor_swamee_jain(reynolds_number=100000.0, relative_roughness=0.001)
+        f = friction_factor_swamee_jain(
+            reynolds_number=100000.0, relative_roughness=0.001
+        )
         assert f > 0.0
 
     def test_similar_to_colebrook(self) -> None:

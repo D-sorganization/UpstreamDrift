@@ -119,7 +119,9 @@ class TestAerodynamicsConfig:
         "attr",
         ["drag_enabled", "lift_enabled", "magnus_enabled", "enabled"],
     )
-    def test_default_all_enabled(self, default_aero_config: AerodynamicsConfig, attr: str) -> None:
+    def test_default_all_enabled(
+        self, default_aero_config: AerodynamicsConfig, attr: str
+    ) -> None:
         """Test default configuration has all effects enabled."""
         assert getattr(default_aero_config, attr) is True
 
@@ -293,7 +295,9 @@ class TestLiftModel:
     def test_no_spin_no_lift(self) -> None:
         """Test zero spin produces zero lift."""
         model = LiftModel()
-        lift = model.calculate(np.array([50.0, 0.0, 0.0]), np.zeros(3), air_density=1.225)
+        lift = model.calculate(
+            np.array([50.0, 0.0, 0.0]), np.zeros(3), air_density=1.225
+        )
         np.testing.assert_array_almost_equal(lift, np.zeros(3))
 
     def test_lift_increases_with_spin(self) -> None:
@@ -304,8 +308,12 @@ class TestLiftModel:
         low_spin = np.array([0.0, -100.0, 0.0])  # Low spin
         high_spin = np.array([0.0, -300.0, 0.0])  # High spin
 
-        lift_low = np.linalg.norm(model.calculate(velocity, low_spin, air_density=1.225))
-        lift_high = np.linalg.norm(model.calculate(velocity, high_spin, air_density=1.225))
+        lift_low = np.linalg.norm(
+            model.calculate(velocity, low_spin, air_density=1.225)
+        )
+        lift_high = np.linalg.norm(
+            model.calculate(velocity, high_spin, air_density=1.225)
+        )
 
         assert lift_high > lift_low
 
@@ -354,7 +362,9 @@ class TestMagnusModel:
         model_high = MagnusModel(coefficient=0.35)
 
         mag_low = np.linalg.norm(model_low.calculate(velocity, spin, air_density=1.225))
-        mag_high = np.linalg.norm(model_high.calculate(velocity, spin, air_density=1.225))
+        mag_high = np.linalg.norm(
+            model_high.calculate(velocity, spin, air_density=1.225)
+        )
 
         assert mag_high > mag_low
 
@@ -416,7 +426,9 @@ class TestWindModel:
         model = WindModel(config, seed=42)
 
         # Sample at different times
-        winds = [model.get_wind_at(t=t, position=np.zeros(3)) for t in np.linspace(0, 10, 20)]
+        winds = [
+            model.get_wind_at(t=t, position=np.zeros(3)) for t in np.linspace(0, 10, 20)
+        ]
 
         # Should have variation
         wind_speeds = [np.linalg.norm(w) for w in winds]
@@ -558,7 +570,8 @@ class TestTurbulenceModel:
         model = TurbulenceModel(intensity=1.0, seed=42)
 
         perturbations = [
-            model.get_perturbation(t=t, position=np.zeros(3)) for t in [0.0, 0.1, 0.2, 0.5, 1.0]
+            model.get_perturbation(t=t, position=np.zeros(3))
+            for t in [0.0, 0.1, 0.2, 0.5, 1.0]
         ]
 
         # Check that not all are equal
@@ -763,7 +776,9 @@ class TestAerodynamicsEngine:
         engine_with_wind = AerodynamicsEngine(wind_model=wind_model)
 
         forces_no_wind = engine_no_wind.compute_forces(typical_velocity, typical_spin)
-        forces_with_wind = engine_with_wind.compute_forces(typical_velocity, typical_spin)
+        forces_with_wind = engine_with_wind.compute_forces(
+            typical_velocity, typical_spin
+        )
 
         # Forces should differ
         assert not np.allclose(forces_no_wind["drag"], forces_with_wind["drag"])
@@ -778,7 +793,9 @@ class TestAerodynamicsEngine:
         mass = 0.0459  # kg
 
         forces = default_engine.compute_forces(typical_velocity, typical_spin)
-        accel = default_engine.compute_acceleration(typical_velocity, typical_spin, mass)
+        accel = default_engine.compute_acceleration(
+            typical_velocity, typical_spin, mass
+        )
 
         expected_accel = forces["total"] / mass
         np.testing.assert_array_almost_equal(accel, expected_accel)
@@ -823,7 +840,8 @@ class TestAerodynamicsEngine:
 
         # Get multiple force samples
         forces_samples = [
-            engine.compute_forces(typical_velocity, typical_spin, resample=True) for _ in range(10)
+            engine.compute_forces(typical_velocity, typical_spin, resample=True)
+            for _ in range(10)
         ]
 
         # Should have variation
@@ -865,7 +883,9 @@ class TestAerodynamicsIntegration:
         dt = 0.01
 
         # Step
-        accel = engine.compute_acceleration(velocity, spin, mass, t=0.0, position=position)
+        accel = engine.compute_acceleration(
+            velocity, spin, mass, t=0.0, position=position
+        )
         new_velocity = velocity + accel * dt
         new_position = position + new_velocity * dt
         new_spin = engine.compute_spin_decay(spin, dt)

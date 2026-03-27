@@ -126,7 +126,9 @@ class TestOutputManager:
             # Let's make it find 'engines' immediately at the parent
             mock_parent = MagicMock()
             mock_resolved.parent = mock_parent
-            mock_parent.parent = MagicMock()  # Different so loop continues once if needed, or stops
+            mock_parent.parent = (
+                MagicMock()
+            )  # Different so loop continues once if needed, or stops
 
             # Make (project_root / "engines").exists() return True
             mock_engines = MagicMock()
@@ -301,7 +303,9 @@ class TestOutputManager:
         """Test cleaning up old files."""
         # Create a file
         filename = "old_sim"
-        path = output_manager.save_simulation_results(sample_data, filename, OutputFormat.CSV)
+        path = output_manager.save_simulation_results(
+            sample_data, filename, OutputFormat.CSV
+        )
 
         # Set file time to 31 days ago
         old_time = time.time() - (31 * 24 * 3600)
@@ -322,13 +326,17 @@ class TestOutputManager:
         assert new_path.exists()
 
         # Check archive
-        archive_path = output_manager.base_path / "archive" / "simulations" / "mujoco" / path.name
+        archive_path = (
+            output_manager.base_path / "archive" / "simulations" / "mujoco" / path.name
+        )
         assert archive_path.exists()
 
     def test_convenience_functions(self, temp_output_dir, sample_data):
         """Test global convenience functions."""
         # We need to patch OutputManager to use our temp dir
-        with patch("src.shared.python.data_io.output_manager.OutputManager") as MockManager:
+        with patch(
+            "src.shared.python.data_io.output_manager.OutputManager"
+        ) as MockManager:
             instance = MockManager.return_value
             instance.save_simulation_results.return_value = Path("test.csv")
 
@@ -345,7 +353,9 @@ class TestOutputManager:
             "np_int": np.int64(42),
             "np_float": np.float64(3.14),
         }
-        path = output_manager.save_simulation_results(data, "edge_cases", OutputFormat.JSON)
+        path = output_manager.save_simulation_results(
+            data, "edge_cases", OutputFormat.JSON
+        )
 
         with open(path) as f:
             loaded = json.load(f)

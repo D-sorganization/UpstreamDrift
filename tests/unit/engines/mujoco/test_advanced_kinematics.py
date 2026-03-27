@@ -354,7 +354,9 @@ class TestAdvancedKinematicsAnalyzer:
             np.testing.assert_allclose(task_inertia, task_inertia.T, atol=1e-6)
         except np.linalg.LinAlgError:
             # Singular matrix is acceptable
-            pytest.skip("Singular matrix in task-space inertia (expected in some configs)")
+            pytest.skip(
+                "Singular matrix in task-space inertia (expected in some configs)"
+            )
 
     def test_compute_grip_constraint_jacobian(self, model_and_data) -> None:
         """Test grip constraint Jacobian computation."""

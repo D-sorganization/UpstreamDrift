@@ -131,7 +131,8 @@ class URDFWriter:
         lines.append(f"{indent2}<inertial>")
         com = link.inertia.center_of_mass
         lines.append(
-            f'{indent3}<origin xyz="{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}" ' f'rpy="0 0 0"/>'
+            f'{indent3}<origin xyz="{com[0]:.6g} {com[1]:.6g} {com[2]:.6g}" '
+            f'rpy="0 0 0"/>'
         )
         lines.append(f'{indent3}<mass value="{link.inertia.mass:.6g}"/>')
         lines.append(
@@ -189,7 +190,9 @@ class URDFWriter:
         if joint_type in ("gimbal", "universal"):
             joint_type = "revolute"
 
-        lines.append(f'{indent}<joint name="{self._escape(joint.name)}" type="{joint_type}">')
+        lines.append(
+            f'{indent}<joint name="{self._escape(joint.name)}" type="{joint_type}">'
+        )
 
         # Parent and child
         lines.append(f'{indent2}<parent link="{self._escape(joint.parent)}"/>')
@@ -249,7 +252,9 @@ class URDFWriter:
 
         if geometry.geometry_type == GeometryType.BOX:
             size = geometry.dimensions
-            lines.append(f'{indent2}<box size="{size[0]:.6g} {size[1]:.6g} {size[2]:.6g}"/>')
+            lines.append(
+                f'{indent2}<box size="{size[0]:.6g} {size[1]:.6g} {size[2]:.6g}"/>'
+            )
         elif geometry.geometry_type == GeometryType.CYLINDER:
             lines.append(
                 f'{indent2}<cylinder radius="{geometry.dimensions[0]:.6g}" '
@@ -260,7 +265,8 @@ class URDFWriter:
         elif geometry.geometry_type == GeometryType.CAPSULE:
             # URDF doesn't have capsule, use cylinder approximation
             logger.warning(
-                "Capsule geometry approximated as cylinder" " (URDF has no native capsule support)"
+                "Capsule geometry approximated as cylinder"
+                " (URDF has no native capsule support)"
             )
             lines.append(
                 f'{indent2}<cylinder radius="{geometry.dimensions[0]:.6g}" '
@@ -290,10 +296,13 @@ class URDFWriter:
         lines.append(f'{indent}<material name="{self._escape(material.name)}">')
         rgba = material.color
         lines.append(
-            f'{indent2}<color rgba="{rgba[0]:.4g} {rgba[1]:.4g} ' f'{rgba[2]:.4g} {rgba[3]:.4g}"/>'
+            f'{indent2}<color rgba="{rgba[0]:.4g} {rgba[1]:.4g} '
+            f'{rgba[2]:.4g} {rgba[3]:.4g}"/>'
         )
         if material.texture:
-            lines.append(f'{indent2}<texture filename="{self._escape(material.texture)}"/>')
+            lines.append(
+                f'{indent2}<texture filename="{self._escape(material.texture)}"/>'
+            )
         lines.append(f"{indent}</material>")
 
         return lines
@@ -323,7 +332,9 @@ class URDFWriter:
 
         return materials
 
-    def _sort_links_by_hierarchy(self, links: list[Link], joints: list[Joint]) -> list[Link]:
+    def _sort_links_by_hierarchy(
+        self, links: list[Link], joints: list[Joint]
+    ) -> list[Link]:
         """Sort links so parents come before children."""
         # Build parent map
         if not (links is not None):

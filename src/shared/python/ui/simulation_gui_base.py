@@ -263,7 +263,9 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         vis_group.setLayout(vis_layout)
         parent_layout.addWidget(vis_group)
 
-    def _build_matrix_analysis_group(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
+    def _build_matrix_analysis_group(
+        self, parent_layout: QtWidgets.QVBoxLayout
+    ) -> None:
         """Build the matrix analysis info panel."""
         if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
@@ -370,7 +372,9 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         else:
             self.stop_recording()
             self.btn_record.setText("Record")
-            self._update_status(f"Recording stopped. Frames: {self.get_recording_frame_count()}")
+            self._update_status(
+                f"Recording stopped. Frames: {self.get_recording_frame_count()}"
+            )
 
     def update_recording_label(self) -> None:
         """Update the recording frame count label.
@@ -421,10 +425,14 @@ class SimulationGUIBase(QtWidgets.QMainWindow):
         """Handle export button click."""
         frame_count = self.get_recording_frame_count()
         if frame_count == 0:
-            QtWidgets.QMessageBox.warning(self, "No Data", "No recorded data to export.")
+            QtWidgets.QMessageBox.warning(
+                self, "No Data", "No recorded data to export."
+            )
             return
 
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save Data", "", "All Files (*)")
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save Data", "", "All Files (*)"
+        )
         if not filename:
             return
 

@@ -193,7 +193,9 @@ except ImportError:
             if h_f is None or s is None or mw is None:
                 return None
 
-            return _SpeciesData(formation_enthalpy=h_f, formation_entropy=s, molecular_weight=mw)
+            return _SpeciesData(
+                formation_enthalpy=h_f, formation_entropy=s, molecular_weight=mw
+            )
 
     _minimal_db = _MinimalSpeciesDB()
 
@@ -358,7 +360,8 @@ class WGSReactorEngine:
             if not species:
                 return 0
             return float(
-                species.formation_enthalpy * 1000 - temperature * species.formation_entropy
+                species.formation_enthalpy * 1000
+                - temperature * species.formation_entropy
             )
 
         g_f_CO = get_g_f("CO")
@@ -392,10 +395,26 @@ class WGSReactorEngine:
 
             P_std = STANDARD_STATE_PRESSURE_PA
 
-            g_CO = g_f_CO + self.R * temperature * math.log(p_CO / P_std) if p_CO > 0 else 0
-            g_H2O = g_f_H2O + self.R * temperature * math.log(p_H2O / P_std) if p_H2O > 0 else 0
-            g_CO2 = g_f_CO2 + self.R * temperature * math.log(p_CO2 / P_std) if p_CO2 > 0 else 0
-            g_H2 = g_f_H2 + self.R * temperature * math.log(p_H2 / P_std) if p_H2 > 0 else 0
+            g_CO = (
+                g_f_CO + self.R * temperature * math.log(p_CO / P_std)
+                if p_CO > 0
+                else 0
+            )
+            g_H2O = (
+                g_f_H2O + self.R * temperature * math.log(p_H2O / P_std)
+                if p_H2O > 0
+                else 0
+            )
+            g_CO2 = (
+                g_f_CO2 + self.R * temperature * math.log(p_CO2 / P_std)
+                if p_CO2 > 0
+                else 0
+            )
+            g_H2 = (
+                g_f_H2 + self.R * temperature * math.log(p_H2 / P_std)
+                if p_H2 > 0
+                else 0
+            )
 
             return float(n_CO * g_CO + n_H2O * g_H2O + n_CO2 * g_CO2 + n_H2 * g_H2)
 
@@ -404,7 +423,9 @@ class WGSReactorEngine:
         result = minimize(total_gibbs_energy, x_initial, bounds=bounds)
         x_eq = result.x[0]
 
-        return self._assemble_equilibrium_results(x_eq, n_CO_0, n_H2O_0, n_CO2_0, n_H2_0, K_eq)
+        return self._assemble_equilibrium_results(
+            x_eq, n_CO_0, n_H2O_0, n_CO2_0, n_H2_0, K_eq
+        )
 
     def size_wgs_reactor(
         self,
@@ -433,7 +454,9 @@ class WGSReactorEngine:
         length = diameter * ld_ratio
 
         # Heat duty
-        heat_duty = feed_rate * conversion / 100 * WGS_HEAT_KJ_PER_MOL / KJ_HR_TO_KW  # kW
+        heat_duty = (
+            feed_rate * conversion / 100 * WGS_HEAT_KJ_PER_MOL / KJ_HR_TO_KW
+        )  # kW
 
         return {
             "reactor_volume": reactor_volume,
@@ -689,7 +712,9 @@ if BASE_CALCULATOR_AVAILABLE:
 
                 QMessageBox.critical(self, "Calculation Error", str(e))
 
-        def create_plots(self, inlet: dict[str, float], outlet: dict[str, float]) -> None:
+        def create_plots(
+            self, inlet: dict[str, float], outlet: dict[str, float]
+        ) -> None:
             """Create composition comparison plot"""
             if not (inlet is not None):
                 raise ValueError("inlet must be provided")

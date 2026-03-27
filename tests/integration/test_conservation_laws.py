@@ -175,12 +175,14 @@ class TestEnergyConservation:
         KE_final, PE_final, E_final = _compute_pendulum_energy(model, data)
         final_drift_pct = 100 * abs(E_final - E0) / E0 if E0 > 1e-10 else 0.0
 
-        logger.info(f"Final energy: KE={KE_final:.6f}, PE={PE_final:.6f}, Total={E_final:.6f}")
+        logger.info(
+            f"Final energy: KE={KE_final:.6f}, PE={PE_final:.6f}, Total={E_final:.6f}"
+        )
         logger.info(f"Energy drift: {final_drift_pct:.4f}% (max: {max_drift_pct:.4f}%)")
 
-        assert (
-            max_drift_pct < 1.0
-        ), f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
+        assert max_drift_pct < 1.0, (
+            f"Energy drift {max_drift_pct:.2f}% exceeds 1% tolerance (Guideline O3)"
+        )
 
     @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_pendulum_energy_at_extremes(self) -> None:
@@ -286,9 +288,9 @@ class TestIndexedAccelerationClosure:
         logger.info(f"Residual: {residual}")
 
         TOLERANCE_CLOSURE = 1e-6  # [rad/s²] per Guideline M2
-        assert np.all(
-            residual < TOLERANCE_CLOSURE
-        ), f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
+        assert np.all(residual < TOLERANCE_CLOSURE), (
+            f"Superposition failed: residual {residual} > {TOLERANCE_CLOSURE}"
+        )
 
     @pytest.mark.skipif(not _check_mujoco_available(), reason="MuJoCo not installed")
     def test_ztcf_equals_drift(self) -> None:
@@ -371,7 +373,9 @@ class TestIndexedAccelerationClosure:
 
         # Also verify physics makes sense: should be negative (restoring force)
         # when theta > 0 (pendulum displaced counter-clockwise)
-        assert qacc_zvcf < 0, f"Acceleration should be negative (restoring), got {qacc_zvcf:.4f}"
+        assert qacc_zvcf < 0, (
+            f"Acceleration should be negative (restoring), got {qacc_zvcf:.4f}"
+        )
 
 
 @pytest.mark.integration
@@ -430,7 +434,10 @@ class TestWorkEnergyTheorem:
         # Final energies using actual inertia
         KE_final = 0.5 * I_actual * float(data.qvel[0]) ** 2
         PE_final = (
-            ROD_MASS_KG * GRAVITY_M_S2 * (ROD_LENGTH_M / 2.0) * (1 - np.cos(float(data.qpos[0])))
+            ROD_MASS_KG
+            * GRAVITY_M_S2
+            * (ROD_LENGTH_M / 2.0)
+            * (1 - np.cos(float(data.qpos[0])))
         )
 
         # Work should equal change in total mechanical energy
@@ -448,9 +455,9 @@ class TestWorkEnergyTheorem:
         TOLERANCE_ABS = 0.001  # 1 mJ absolute tolerance
         TOLERANCE_REL = 0.05  # 5% relative tolerance for numerical integration
         relative_error = error / max(abs(delta_E), TOLERANCE_ABS)
-        assert (
-            relative_error < TOLERANCE_REL
-        ), f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
+        assert relative_error < TOLERANCE_REL, (
+            f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
+        )
 
 
 @pytest.mark.unit

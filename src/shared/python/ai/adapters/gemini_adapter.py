@@ -57,7 +57,9 @@ class GeminiAdapter(BaseAgentAdapter):
         genai.configure(api_key=self._api_key)
         self._model = GenerativeModel(self._model_name)
 
-    @precondition(lambda message: bool(message.strip()), "message must not be empty or blank")
+    @precondition(
+        lambda message: bool(message.strip()), "message must not be empty or blank"
+    )
     def send_message(
         self,
         message: str,
@@ -82,7 +84,9 @@ class GeminiAdapter(BaseAgentAdapter):
         """Stream response from Gemini."""
         try:
             chat = self._build_chat_session(context)
-            response: Iterator[GenerateContentResponse] = chat.send_message(message, stream=True)
+            response: Iterator[GenerateContentResponse] = chat.send_message(
+                message, stream=True
+            )
 
             for chunk in response:
                 if chunk.text:

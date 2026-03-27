@@ -193,7 +193,9 @@ class TestModifyJointPreconditions:
     def test_valid_inputs_work(self, editor):
         from model_generation.core.types import Origin
 
-        result = editor.modify_joint("editable", "base_to_arm", origin=Origin(xyz=(0, 0, 1)))
+        result = editor.modify_joint(
+            "editable", "base_to_arm", origin=Origin(xyz=(0, 0, 1))
+        )
         assert result is True
 
 
@@ -431,7 +433,9 @@ class TestBaseURDFBuilderInvariants:
 
     def test_check_invariants_consistent_model(self):
         """Model with matching link/joint references passes."""
-        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = self._create_concrete_builder()
+        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
+            self._create_concrete_builder()
+        )
         builder = ConcreteBuilder("test")
 
         base = Link(name="base", inertia=Inertia(ixx=0.1, iyy=0.1, izz=0.1))
@@ -455,7 +459,9 @@ class TestBaseURDFBuilderInvariants:
         """Joint referencing nonexistent parent raises InvariantError."""
         from src.shared.python.contracts import InvariantError
 
-        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = self._create_concrete_builder()
+        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
+            self._create_concrete_builder()
+        )
         builder = ConcreteBuilder("test")
 
         arm = Link(name="arm", inertia=Inertia(ixx=0.1, iyy=0.1, izz=0.1))
@@ -477,7 +483,9 @@ class TestBaseURDFBuilderInvariants:
         """Joint referencing nonexistent child raises InvariantError."""
         from src.shared.python.contracts import InvariantError
 
-        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = self._create_concrete_builder()
+        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
+            self._create_concrete_builder()
+        )
         builder = ConcreteBuilder("test")
 
         base = Link(name="base", inertia=Inertia(ixx=0.1, iyy=0.1, izz=0.1))
@@ -499,7 +507,9 @@ class TestBaseURDFBuilderInvariants:
         """Duplicate link names raise InvariantError."""
         from src.shared.python.contracts import InvariantError
 
-        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = self._create_concrete_builder()
+        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
+            self._create_concrete_builder()
+        )
         builder = ConcreteBuilder("test")
 
         link1 = Link(name="base", inertia=Inertia(ixx=0.1, iyy=0.1, izz=0.1))
@@ -515,7 +525,9 @@ class TestBaseURDFBuilderInvariants:
         """Duplicate joint names raise InvariantError."""
         from src.shared.python.contracts import InvariantError
 
-        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = self._create_concrete_builder()
+        ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
+            self._create_concrete_builder()
+        )
         builder = ConcreteBuilder("test")
 
         base = Link(name="base", inertia=Inertia(ixx=0.1, iyy=0.1, izz=0.1))

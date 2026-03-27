@@ -133,7 +133,9 @@ class TestStateCheckpointToDict:
         assert "id" in cp.to_dict()
 
     def test_q_is_list_in_dict(self) -> None:
-        cp = StateCheckpoint.create("mujoco", {}, np.array([1.0, 2.0]), np.zeros(2), 0.0)
+        cp = StateCheckpoint.create(
+            "mujoco", {}, np.array([1.0, 2.0]), np.zeros(2), 0.0
+        )
         result = cp.to_dict()
         assert isinstance(result["q"], list)
 

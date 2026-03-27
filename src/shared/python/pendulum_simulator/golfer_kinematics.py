@@ -106,7 +106,9 @@ def _absolute_angles(theta_hub: float, relative_angles: list[float]) -> list[flo
     return result
 
 
-def forward_kinematics(q: np.ndarray, p: GolferParams) -> dict[str, tuple[float, float]]:
+def forward_kinematics(
+    q: np.ndarray, p: GolferParams
+) -> dict[str, tuple[float, float]]:
     """Compute all joint positions in world frame.
 
     Parameters

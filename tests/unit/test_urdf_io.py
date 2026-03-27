@@ -85,7 +85,9 @@ def mock_mujoco_model():
     model.body_ipos = np.zeros((3, 3))
     model.body_inertia = np.ones((3, 3))
     model.body_parentid = np.array([0, 0, 1])
-    model.body_jntadr = np.array([-1, -1, 0])  # Body 0 has no joint, 1 has no joint, 2 has joint 0
+    model.body_jntadr = np.array(
+        [-1, -1, 0]
+    )  # Body 0 has no joint, 1 has no joint, 2 has joint 0
 
     # Joint properties
     model.jnt_type = np.array([mujoco.mjtJoint.mjJNT_HINGE])

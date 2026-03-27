@@ -330,8 +330,12 @@ class OpenSimGolfGUI(QMainWindow):
 
         # Plot 2: Joint Torques
         ax2 = self.fig.add_subplot(222)
-        ax2.plot(self.result.time, self.result.joint_torques[:, 0], label="Shoulder Torque")
-        ax2.plot(self.result.time, self.result.joint_torques[:, 1], label="Wrist Torque")
+        ax2.plot(
+            self.result.time, self.result.joint_torques[:, 0], label="Shoulder Torque"
+        )
+        ax2.plot(
+            self.result.time, self.result.joint_torques[:, 1], label="Wrist Torque"
+        )
         ax2.set_title("Joint Torques (Nm)")
         ax2.legend()
         ax2.grid(True)

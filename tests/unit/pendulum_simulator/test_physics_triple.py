@@ -78,7 +78,9 @@ class TestGravityVector:
         assert np.all(np.isfinite(G))
 
     def test_zero_gravity_zero_vector(self) -> None:
-        p_no_g = TriplePendulumParams(m1=1.0, m2=0.5, m3=0.3, L1=1.0, L2=0.5, L3=0.4, g=0.0)
+        p_no_g = TriplePendulumParams(
+            m1=1.0, m2=0.5, m3=0.3, L1=1.0, L2=0.5, L3=0.4, g=0.0
+        )
         G = gravity_vector(0.0, 0.0, 0.0, p_no_g)
         np.testing.assert_allclose(G, [0.0, 0.0, 0.0])
 

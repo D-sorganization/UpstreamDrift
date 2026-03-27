@@ -169,7 +169,9 @@ class VRControllerState:
             position=Vector3.from_dict(d["position"]),
             rotation=Quaternion.from_dict(d["rotation"]),
             velocity=Vector3.from_dict(d.get("velocity", {"x": 0, "y": 0, "z": 0})),
-            angular_velocity=Vector3.from_dict(d.get("angular_velocity", {"x": 0, "y": 0, "z": 0})),
+            angular_velocity=Vector3.from_dict(
+                d.get("angular_velocity", {"x": 0, "y": 0, "z": 0})
+            ),
             trigger=d.get("trigger", 0.0),
             grip=d.get("grip", 0.0),
             thumbstick=tuple(d.get("thumbstick", [0.0, 0.0])),
@@ -240,7 +242,9 @@ class VRHeadsetState:
             position=Vector3.from_dict(d["position"]),
             rotation=Quaternion.from_dict(d["rotation"]),
             velocity=Vector3.from_dict(d.get("velocity", {"x": 0, "y": 0, "z": 0})),
-            angular_velocity=Vector3.from_dict(d.get("angular_velocity", {"x": 0, "y": 0, "z": 0})),
+            angular_velocity=Vector3.from_dict(
+                d.get("angular_velocity", {"x": 0, "y": 0, "z": 0})
+            ),
             ipd=d.get("ipd", 0.063),
             fov=d.get("fov", 110.0),
             is_tracking=d.get("is_tracking", True),
@@ -461,7 +465,10 @@ class VRInteractionManager:
             else:
                 prev_state = VRButtonState.RELEASED
 
-            if curr_state == VRButtonState.PRESSED and prev_state == VRButtonState.RELEASED:
+            if (
+                curr_state == VRButtonState.PRESSED
+                and prev_state == VRButtonState.RELEASED
+            ):
                 self._emit_event(
                     VRInteractionEvent(
                         event_type=f"button_{button_name}_press",
@@ -514,7 +521,9 @@ class VRInteractionManager:
                 except (RuntimeError, ValueError, OSError) as e:
                     logger.error(f"Error in VR event callback: {e}")
 
-    def on(self, event_type: str, callback: Callable[[VRInteractionEvent], None]) -> None:
+    def on(
+        self, event_type: str, callback: Callable[[VRInteractionEvent], None]
+    ) -> None:
         """Register event callback.
 
         Args:

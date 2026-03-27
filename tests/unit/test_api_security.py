@@ -76,7 +76,9 @@ class TestBcryptAPIKeyVerification:
 
         # Verify a different key fails
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
-        assert not bcrypt_lib.checkpw(wrong_key.encode("utf-8"), key_hash.encode("utf-8"))
+        assert not bcrypt_lib.checkpw(
+            wrong_key.encode("utf-8"), key_hash.encode("utf-8")
+        )
 
     @requires_bcrypt
     def test_api_key_constant_time_comparison(self) -> None:
@@ -172,7 +174,9 @@ class TestBcryptAPIKeyVerification:
         mock_user.is_active = True
 
         # Configure mock database queries
-        mock_db.query.return_value.filter.return_value.all.return_value = [mock_api_key_record]
+        mock_db.query.return_value.filter.return_value.all.return_value = [
+            mock_api_key_record
+        ]
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         # Test with correct API key
@@ -183,7 +187,9 @@ class TestBcryptAPIKeyVerification:
 
         # Test with incorrect API key
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
-        wrong_credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=wrong_key)
+        wrong_credentials = HTTPAuthorizationCredentials(
+            scheme="Bearer", credentials=wrong_key
+        )
 
         with pytest.raises(HTTPException) as exc_info:
             await get_current_user_from_api_key(wrong_credentials, mock_db)
@@ -317,7 +323,9 @@ class TestPasswordSecurity:
                     database.init_db()
                 except Exception as e:  # noqa: BLE001
                     # Catch and log expected errors for this specific logging test
-                    logging.getLogger(__name__).debug(f"Caught expected init_db error: {e}")
+                    logging.getLogger(__name__).debug(
+                        f"Caught expected init_db error: {e}"
+                    )
 
             # Get logged output
             log_output = log_buffer.getvalue()
@@ -404,12 +412,12 @@ class TestSecurityBestPractices:
         ]
 
         for pattern in suspicious_patterns:
-            assert (
-                pattern not in security_source.lower()
-            ), f"Found suspicious pattern in security.py: {pattern}"
-            assert (
-                pattern not in dependencies_source.lower()
-            ), f"Found suspicious pattern in dependencies.py: {pattern}"
+            assert pattern not in security_source.lower(), (
+                f"Found suspicious pattern in security.py: {pattern}"
+            )
+            assert pattern not in dependencies_source.lower(), (
+                f"Found suspicious pattern in dependencies.py: {pattern}"
+            )
 
     def test_secure_random_generation(self) -> None:
         """Test that secrets module is used for random generation."""

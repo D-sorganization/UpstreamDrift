@@ -65,7 +65,9 @@ class XMLHighlighter(QSyntaxHighlighter):
         # Attribute names (dark cyan)
         attr_format = QTextCharFormat()
         attr_format.setForeground(QColor("#008B8B"))
-        self.highlighting_rules.append((QRegularExpression(r'\b[\w:-]+(?==")'), attr_format))
+        self.highlighting_rules.append(
+            (QRegularExpression(r'\b[\w:-]+(?==")'), attr_format)
+        )
 
         # Attribute values (dark red/maroon)
         value_format = QTextCharFormat()
@@ -76,12 +78,16 @@ class XMLHighlighter(QSyntaxHighlighter):
         comment_format = QTextCharFormat()
         comment_format.setForeground(QColor("#808080"))
         comment_format.setFontItalic(True)
-        self.highlighting_rules.append((QRegularExpression(r"<!--.*?-->"), comment_format))
+        self.highlighting_rules.append(
+            (QRegularExpression(r"<!--.*?-->"), comment_format)
+        )
 
         # XML declaration (purple)
         decl_format = QTextCharFormat()
         decl_format.setForeground(QColor("#800080"))
-        self.highlighting_rules.append((QRegularExpression(r"<\?xml.*?\?>"), decl_format))
+        self.highlighting_rules.append(
+            (QRegularExpression(r"<\?xml.*?\?>"), decl_format)
+        )
 
         # URDF-specific keywords (green)
         urdf_format = QTextCharFormat()
@@ -113,7 +119,9 @@ class XMLHighlighter(QSyntaxHighlighter):
             "capsule",
         ]
         for keyword in urdf_keywords:
-            self.highlighting_rules.append((QRegularExpression(rf"</?{keyword}\b"), urdf_format))
+            self.highlighting_rules.append(
+                (QRegularExpression(rf"</?{keyword}\b"), urdf_format)
+            )
 
         # Numbers (orange)
         number_format = QTextCharFormat()
@@ -298,7 +306,9 @@ class URDFCodeEditor(QPlainTextEdit):
         if dy:
             self.line_number_area.scroll(0, dy)
         else:
-            self.line_number_area.update(0, rect.y(), self.line_number_area.width(), rect.height())
+            self.line_number_area.update(
+                0, rect.y(), self.line_number_area.width(), rect.height()
+            )
 
         viewport = self.viewport()
         if viewport and rect.contains(viewport.rect()):
@@ -319,7 +329,9 @@ class URDFCodeEditor(QPlainTextEdit):
 
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
-        top = round(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
+        top = round(
+            self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
+        )
         bottom = top + round(self.blockBoundingRect(block).height())
 
         while block.isValid() and top <= event.rect().bottom():
@@ -502,7 +514,9 @@ class URDFCodeEditor(QPlainTextEdit):
             if joint_type in ["revolute", "prismatic"]:
                 limit = joint.find("limit")
                 if limit is None:
-                    errors.append(f"Joint '{joint_name}' ({joint_type}) must have limits")
+                    errors.append(
+                        f"Joint '{joint_name}' ({joint_type}) must have limits"
+                    )
 
         is_valid = len(errors) == 0
         self.validation_result.emit(is_valid, errors)
@@ -555,7 +569,9 @@ class URDFCodeEditor(QPlainTextEdit):
 
         return self.find(text, flags)
 
-    def replace_text(self, find: str, replace: str, all_occurrences: bool = False) -> int:
+    def replace_text(
+        self, find: str, replace: str, all_occurrences: bool = False
+    ) -> int:
         """Replace text in the editor.
 
         Args:

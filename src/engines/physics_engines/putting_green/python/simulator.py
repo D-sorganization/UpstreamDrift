@@ -392,7 +392,9 @@ class PuttingGreenSimulator:
         # Physics step
         self._ball_state = self._physics.step(self._ball_state, dt)
         self._time += dt
-        self._last_acceleration = self._physics.compute_total_acceleration(self._ball_state)
+        self._last_acceleration = self._physics.compute_total_acceleration(
+            self._ball_state
+        )
         self._last_roll_mode = self._physics.determine_roll_mode(self._ball_state)
 
         # Record trajectory
@@ -400,11 +402,15 @@ class PuttingGreenSimulator:
             self._trajectory["positions"].append(self._ball_state.position.copy())
             self._trajectory["velocities"].append(self._ball_state.velocity.copy())
             self._trajectory["times"].append(self._time)
-            self._trajectory["modes"].append(self._physics.determine_roll_mode(self._ball_state))
+            self._trajectory["modes"].append(
+                self._physics.determine_roll_mode(self._ball_state)
+            )
 
     def forward(self) -> None:
         """Compute kinematics without advancing time."""
-        self._last_acceleration = self._physics.compute_total_acceleration(self._ball_state)
+        self._last_acceleration = self._physics.compute_total_acceleration(
+            self._ball_state
+        )
         self._last_roll_mode = self._physics.determine_roll_mode(self._ball_state)
 
     def get_last_acceleration(self) -> np.ndarray | None:
@@ -483,7 +489,9 @@ class PuttingGreenSimulator:
             self.set_ball_position(ball_position)
 
         # Execute stroke
-        self._ball_state = self.putter.execute_stroke(self._ball_state.position, stroke_params)
+        self._ball_state = self.putter.execute_stroke(
+            self._ball_state.position, stroke_params
+        )
 
         # Clear trajectory
         self._trajectory = {
@@ -496,16 +504,24 @@ class PuttingGreenSimulator:
 
         # Simulate
         holed = False
-        while self._time < self.config.max_simulation_time and self._ball_state.is_moving:
+        while (
+            self._time < self.config.max_simulation_time and self._ball_state.is_moving
+        ):
             self.step()
 
             # Check for hole
-            if self.green.is_in_hole(self._ball_state.position, self._ball_state.velocity):
+            if self.green.is_in_hole(
+                self._ball_state.position, self._ball_state.velocity
+            ):
                 holed = True
                 self._ball_state.velocity = np.zeros(2)
                 if self.config.record_trajectory:
-                    self._trajectory["positions"].append(self._ball_state.position.copy())
-                    self._trajectory["velocities"].append(self._ball_state.velocity.copy())
+                    self._trajectory["positions"].append(
+                        self._ball_state.position.copy()
+                    )
+                    self._trajectory["velocities"].append(
+                        self._ball_state.velocity.copy()
+                    )
                     self._trajectory["times"].append(self._time)
                     self._trajectory["modes"].append(
                         self._physics.determine_roll_mode(self._ball_state)
@@ -516,8 +532,12 @@ class PuttingGreenSimulator:
             if not self.green.is_on_green(self._ball_state.position):
                 self._ball_state.velocity = np.zeros(2)
                 if self.config.record_trajectory:
-                    self._trajectory["positions"].append(self._ball_state.position.copy())
-                    self._trajectory["velocities"].append(self._ball_state.velocity.copy())
+                    self._trajectory["positions"].append(
+                        self._ball_state.position.copy()
+                    )
+                    self._trajectory["velocities"].append(
+                        self._ball_state.velocity.copy()
+                    )
                     self._trajectory["times"].append(self._time)
                     self._trajectory["modes"].append(
                         self._physics.determine_roll_mode(self._ball_state)
@@ -653,7 +673,9 @@ class PuttingGreenSimulator:
         A = GOLF_BALL_CROSS_SECTIONAL_AREA_M2
 
         # Relative velocity
-        relative_v = self._wind_direction * self._wind_speed - self._ball_state.velocity[:2]
+        relative_v = (
+            self._wind_direction * self._wind_speed - self._ball_state.velocity[:2]
+        )
         rel_speed = np.linalg.norm(relative_v)
 
         if rel_speed < 0.1:
@@ -684,7 +706,9 @@ class PuttingGreenSimulator:
             raise ValueError("stroke_params must be provided")
         result = self.simulate_putt(stroke_params)
 
-        distance_from_hole = np.linalg.norm(result.final_position - self.green.hole_position)
+        distance_from_hole = np.linalg.norm(
+            result.final_position - self.green.hole_position
+        )
 
         # Generate feedback
         feedback = {
@@ -746,8 +770,10 @@ class PuttingGreenSimulator:
             cos_a, sin_a = np.cos(angle_var), np.sin(angle_var)
             direction = np.array(
                 [
-                    cos_a * stroke_params.direction[0] - sin_a * stroke_params.direction[1],
-                    sin_a * stroke_params.direction[0] + cos_a * stroke_params.direction[1],
+                    cos_a * stroke_params.direction[0]
+                    - sin_a * stroke_params.direction[1],
+                    sin_a * stroke_params.direction[0]
+                    + cos_a * stroke_params.direction[1],
                 ]
             )
 
@@ -802,7 +828,9 @@ class PuttingGreenSimulator:
             "distance": distance,
         }
 
-    def read_green(self, ball_position: np.ndarray, target: np.ndarray) -> dict[str, Any]:
+    def read_green(
+        self, ball_position: np.ndarray, target: np.ndarray
+    ) -> dict[str, Any]:
         """Read green between ball and target.
 
         Args:

@@ -48,7 +48,9 @@ def test_engine_loading_success(mock_engine_manager, engine_type):
     mock_registration = MagicMock(spec=_REGISTRATION_SPEC_ATTRS)
     mock_registration.factory.return_value = mock_engine_instance
 
-    with patch("src.shared.python.engine_core.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock(spec=EngineRegistry)
         mock_registry.get.return_value = mock_registration
         mock_get_reg.return_value = mock_registry
@@ -67,7 +69,9 @@ def test_mujoco_loading_failure_no_registration(mock_engine_manager):
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
     # Mock registry returning no registration
-    with patch("src.shared.python.engine_core.engine_manager.get_registry") as mock_get_reg:
+    with patch(
+        "src.shared.python.engine_core.engine_manager.get_registry"
+    ) as mock_get_reg:
         mock_registry = MagicMock(spec=EngineRegistry)
         mock_registry.get.return_value = None
         mock_get_reg.return_value = mock_registry

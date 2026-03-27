@@ -136,7 +136,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         """Test secure_popen wrapper functionality."""
         # Test with valid command (use sys.executable for cross-platform)
         try:
-            with secure_popen([PYTHON_EXE, "--version"], stdout=subprocess.PIPE, text=True) as proc:
+            with secure_popen(
+                [PYTHON_EXE, "--version"], stdout=subprocess.PIPE, text=True
+            ) as proc:
                 output, _ = proc.communicate(timeout=10)
                 # Python --version may output to stdout or stderr depending on version
                 self.assertTrue(output is not None)
@@ -225,7 +227,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         # Test invalid working directory (outside suite) - use a clearly invalid path
         invalid_cwd = "C:\\Windows\\System32" if os.name == "nt" else "/etc"
         with self.assertRaises(SecureSubprocessError) as context:
-            secure_run([PYTHON_EXE, "--version"], cwd=invalid_cwd, suite_root=suite_root)
+            secure_run(
+                [PYTHON_EXE, "--version"], cwd=invalid_cwd, suite_root=suite_root
+            )
 
         self.assertIn("Working directory outside suite", str(context.exception))
 
@@ -264,7 +268,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         try:
             # Test with very short timeout
             with self.assertRaises((subprocess.TimeoutExpired, SecureSubprocessError)):
-                secure_run([PYTHON_EXE, "-c", "import time; time.sleep(10)"], timeout=0.1)
+                secure_run(
+                    [PYTHON_EXE, "-c", "import time; time.sleep(10)"], timeout=0.1
+                )
         except SecureSubprocessError:
             self.skipTest("Python not available or not in whitelist")
 
@@ -311,7 +317,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             thread.join(timeout=10)
 
         # Check results (skip if Python not available)
-        if (not errors or all(isinstance(e, SecureSubprocessError) for e in errors)) and results:
+        if (
+            not errors or all(isinstance(e, SecureSubprocessError) for e in errors)
+        ) and results:
             self.assertTrue(all(rc == 0 for rc in results))
 
     def tearDown(self) -> None:

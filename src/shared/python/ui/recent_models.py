@@ -332,7 +332,9 @@ class RecentModelsPanel(QFrame):
         for model_id, display_name in self._recent_models:
             model_item = RecentModelItem(model_id, display_name)
             model_item.clicked.connect(self._on_item_clicked)
-            self.content_layout.insertWidget(self.content_layout.count() - 1, model_item)
+            self.content_layout.insertWidget(
+                self.content_layout.count() - 1, model_item
+            )
 
     def _on_item_clicked(self, model_id: str) -> None:
         """Handle item click."""
@@ -350,7 +352,9 @@ class RecentModelsPanel(QFrame):
             raise ValueError("model_id must be provided")
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
-        self._recent_models = [(mid, name) for mid, name in self._recent_models if mid != model_id]
+        self._recent_models = [
+            (mid, name) for mid, name in self._recent_models if mid != model_id
+        ]
 
         # Add to front
         self._recent_models.insert(0, (model_id, display_name))

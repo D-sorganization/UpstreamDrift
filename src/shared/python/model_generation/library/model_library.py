@@ -166,7 +166,9 @@ class LibraryConfig:
     """Configuration for the model library."""
 
     # Local storage paths
-    cache_dir: Path = field(default_factory=lambda: Path.home() / ".model_generation" / "cache")
+    cache_dir: Path = field(
+        default_factory=lambda: Path.home() / ".model_generation" / "cache"
+    )
     index_file: Path = field(
         default_factory=lambda: Path.home() / ".model_generation" / "index.json"
     )
@@ -373,7 +375,9 @@ class ModelLibrary:
         """Get a model entry by ID."""
         return self._entries.get(model_id)
 
-    @precondition(lambda self, model_id, **kw: model_id is not None, "Model ID cannot be None")
+    @precondition(
+        lambda self, model_id, **kw: model_id is not None, "Model ID cannot be None"
+    )
     @precondition(
         lambda self, model_id, **kw: len(model_id.strip()) > 0,
         "Model ID cannot be empty",
@@ -403,7 +407,9 @@ class ModelLibrary:
             return None
 
         # Check if we need to download
-        if (not entry.is_cached or force_download) and entry.source != RepositorySource.LOCAL:
+        if (
+            not entry.is_cached or force_download
+        ) and entry.source != RepositorySource.LOCAL:
             self._download_model(entry)
 
         if not entry.urdf_path or not entry.urdf_path.exists():
@@ -504,7 +510,9 @@ class ModelLibrary:
             source_path=str(urdf_path.parent),
             urdf_path=urdf_path,
             mesh_dir=(
-                urdf_path.parent / "meshes" if (urdf_path.parent / "meshes").exists() else None
+                urdf_path.parent / "meshes"
+                if (urdf_path.parent / "meshes").exists()
+                else None
             ),
             tags=tags or [],
             link_count=link_count,
@@ -628,9 +636,7 @@ class ModelLibrary:
         try:
             import urllib.request
 
-            with urllib.request.urlopen(
-                api_url
-            ) as response:  # nosec B310 - GitHub API URL from trusted constants
+            with urllib.request.urlopen(api_url) as response:  # nosec B310 - GitHub API URL from trusted constants
                 contents = json.loads(response.read().decode())
 
             # Look for URDF and MJCF files
@@ -659,9 +665,7 @@ class ModelLibrary:
                     # Check subdirectory for model files
                     subdir_url = item["url"]
                     try:
-                        with urllib.request.urlopen(
-                            subdir_url
-                        ) as sub_response:  # nosec B310 - URL from GitHub API response
+                        with urllib.request.urlopen(subdir_url) as sub_response:  # nosec B310 - URL from GitHub API response
                             sub_contents = json.loads(sub_response.read().decode())
                         for sub_item in sub_contents:
                             if sub_item["type"] != "file":
@@ -743,9 +747,7 @@ class ModelLibrary:
             urdf_filename = entry.source_url.split("/")[-1]
             local_path = cache_dir / urdf_filename
 
-            urllib.request.urlretrieve(
-                entry.source_url, local_path
-            )  # nosec B310 - source_url from library index
+            urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310 - source_url from library index
 
             entry.urdf_path = local_path
             entry.is_cached = True
@@ -758,7 +760,9 @@ class ModelLibrary:
             logger.error(f"Failed to download {entry.id}: {e}")
             return False
 
-    @precondition(lambda self, model_id, **kw: model_id is not None, "Model ID cannot be None")
+    @precondition(
+        lambda self, model_id, **kw: model_id is not None, "Model ID cannot be None"
+    )
     @precondition(
         lambda self, model_id, **kw: len(model_id.strip()) > 0,
         "Model ID cannot be empty",
@@ -840,7 +844,9 @@ class ModelLibrary:
 
         return new_entry
 
-    @precondition(lambda self, model_id, **kw: model_id is not None, "Model ID cannot be None")
+    @precondition(
+        lambda self, model_id, **kw: model_id is not None, "Model ID cannot be None"
+    )
     def remove_model(self, model_id: str, delete_files: bool = False) -> bool:
         """
         Remove a model from the library.

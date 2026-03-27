@@ -80,7 +80,9 @@ class TestSpecialAppHandler:
         assert not handler.can_handle("drake")
         assert not handler.can_handle("pinocchio")
 
-    def test_launch_motion_capture(self, repo_path: Path, process_manager: MagicMock) -> None:
+    def test_launch_motion_capture(
+        self, repo_path: Path, process_manager: MagicMock
+    ) -> None:
         """Motion capture tile launches successfully."""
         model = MockModel(
             id="motion_capture",
@@ -96,7 +98,9 @@ class TestSpecialAppHandler:
         call_kwargs = process_manager.launch_script.call_args
         assert call_kwargs.kwargs["name"] == "Motion Capture"
 
-    def test_launch_model_explorer(self, repo_path: Path, process_manager: MagicMock) -> None:
+    def test_launch_model_explorer(
+        self, repo_path: Path, process_manager: MagicMock
+    ) -> None:
         """Model explorer tile launches successfully."""
         model = MockModel(
             id="model_explorer",
@@ -110,7 +114,9 @@ class TestSpecialAppHandler:
         assert result is True
         process_manager.launch_script.assert_called_once()
 
-    def test_launch_matlab_unified(self, repo_path: Path, process_manager: MagicMock) -> None:
+    def test_launch_matlab_unified(
+        self, repo_path: Path, process_manager: MagicMock
+    ) -> None:
         """Matlab unified tile launches successfully."""
         model = MockModel(
             id="matlab_unified",
@@ -170,7 +176,9 @@ class TestPuttingGreenHandler:
         assert not handler.can_handle("special_app")
         assert not handler.can_handle("mujoco")
 
-    def test_launch_putting_green(self, repo_path: Path, process_manager: MagicMock) -> None:
+    def test_launch_putting_green(
+        self, repo_path: Path, process_manager: MagicMock
+    ) -> None:
         """Putting green simulator launches successfully."""
         model = MockModel(
             id="putting_green",
@@ -186,7 +194,9 @@ class TestPuttingGreenHandler:
         call_kwargs = process_manager.launch_script.call_args
         assert call_kwargs.kwargs["name"] == "Putting Green Simulator"
 
-    def test_launch_fails_no_path(self, repo_path: Path, process_manager: MagicMock) -> None:
+    def test_launch_fails_no_path(
+        self, repo_path: Path, process_manager: MagicMock
+    ) -> None:
         """DBC: Launch fails when model has no path."""
         model = MockModel(id="pg", name="PG", path="", type="putting_green")
         handler = PuttingGreenHandler()

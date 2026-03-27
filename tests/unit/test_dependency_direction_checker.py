@@ -7,8 +7,14 @@ from pathlib import Path
 
 
 def _load_module():
-    script_path = Path(__file__).resolve().parents[2] / "scripts" / "check_dependency_direction.py"
-    spec = importlib.util.spec_from_file_location("check_dependency_direction", script_path)
+    script_path = (
+        Path(__file__).resolve().parents[2]
+        / "scripts"
+        / "check_dependency_direction.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "check_dependency_direction", script_path
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

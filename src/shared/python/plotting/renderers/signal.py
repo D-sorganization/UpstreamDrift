@@ -180,7 +180,9 @@ class SignalRenderer(BaseRenderer):
             f, t, Sxx = signal.spectrogram(signal_data, fs=fs)
 
         ax = fig.add_subplot(111)
-        pcm = ax.pcolormesh(t, f, 10 * np.log10(Sxx + 1e-10), shading="gouraud", cmap="inferno")
+        pcm = ax.pcolormesh(
+            t, f, 10 * np.log10(Sxx + 1e-10), shading="gouraud", cmap="inferno"
+        )
 
         joint_name = self.data.get_joint_name(joint_idx)
         ax.set_title(f"{title}: {joint_name}", fontsize=14, fontweight="bold")
@@ -328,10 +330,14 @@ class SignalRenderer(BaseRenderer):
         if limit > 1:
             fit_slope, intercept = np.polyfit(time_div[:limit], divergence[:limit], 1)
             fit_line = fit_slope * time_div + intercept
-            ax.plot(time_div, fit_line, "r--", linewidth=2, label=f"MLE = {fit_slope:.3f}")
+            ax.plot(
+                time_div, fit_line, "r--", linewidth=2, label=f"MLE = {fit_slope:.3f}"
+            )
 
         name = self.data.get_joint_name(joint_idx)
-        ax.set_title(f"Lyapunov Exponent Estimation: {name}", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Lyapunov Exponent Estimation: {name}", fontsize=14, fontweight="bold"
+        )
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("ln(Divergence)", fontsize=12, fontweight="bold")
         ax.grid(True, alpha=0.3, linestyle="--")
@@ -355,7 +361,9 @@ class SignalRenderer(BaseRenderer):
             from src.shared.python.signal_toolkit import signal_processing
         except ImportError:
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Signal Processing module missing", ha="center", va="center")
+            ax.text(
+                0.5, 0.5, "Signal Processing module missing", ha="center", va="center"
+            )
             return
 
         if signal_type == "position":
@@ -428,7 +436,9 @@ class SignalRenderer(BaseRenderer):
             from src.shared.python.signal_toolkit import signal_processing
         except ImportError:
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Signal Processing module missing", ha="center", va="center")
+            ax.text(
+                0.5, 0.5, "Signal Processing module missing", ha="center", va="center"
+            )
             return
 
         if signal_type == "position":
@@ -455,7 +465,9 @@ class SignalRenderer(BaseRenderer):
         fs = 1.0 / dt
 
         try:
-            freqs, _, xwt_matrix = signal_processing.compute_xwt(s1, s2, fs, freq_range=freq_range)
+            freqs, _, xwt_matrix = signal_processing.compute_xwt(
+                s1, s2, fs, freq_range=freq_range
+            )
         except (RuntimeError, ValueError, OSError) as e:
             ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, f"XWT Error: {e}", ha="center", va="center")
@@ -486,7 +498,9 @@ class SignalRenderer(BaseRenderer):
 
         name1 = self.data.get_joint_name(joint_idx_1)
         name2 = self.data.get_joint_name(joint_idx_2)
-        ax.set_title(f"Cross Wavelet: {name1} vs {name2}", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Cross Wavelet: {name1} vs {name2}", fontsize=14, fontweight="bold"
+        )
         ax.set_ylabel("Frequency (Hz)", fontsize=12, fontweight="bold")
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_yscale("log")

@@ -39,7 +39,9 @@ class ColorPickerButton(QPushButton):
 
     color_changed = pyqtSignal(str)  # Emits hex color string
 
-    def __init__(self, initial_color: str = "#ffffff", parent: QWidget | None = None) -> None:
+    def __init__(
+        self, initial_color: str = "#ffffff", parent: QWidget | None = None
+    ) -> None:
         if not (initial_color is not None):
             raise ValueError("initial_color must be provided")
         if not (initial_color is not None):
@@ -298,7 +300,9 @@ class CustomThemeEditor(QDialog):
         preset_buttons_layout = QHBoxLayout()
         for theme_name in self.theme_manager.get_builtin_themes():
             btn = QPushButton(theme_name)
-            btn.clicked.connect(lambda checked, name=theme_name: self._load_preset_theme(name))
+            btn.clicked.connect(
+                lambda checked, name=theme_name: self._load_preset_theme(name)
+            )
             preset_buttons_layout.addWidget(btn)
 
         preset_layout.addLayout(preset_buttons_layout)
@@ -320,7 +324,8 @@ class CustomThemeEditor(QDialog):
     def _build_dialog_buttons(self) -> QDialogButtonBox:
         """Build Save/Cancel/Save&Apply button box and connect signals."""
         button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel
+            QDialogButtonBox.StandardButton.Save
+            | QDialogButtonBox.StandardButton.Cancel
         )
         self.save_btn = button_box.button(QDialogButtonBox.StandardButton.Save)
         self.save_apply_btn = button_box.addButton(
@@ -394,7 +399,11 @@ class CustomThemeEditor(QDialog):
 
         valid = bool(name)
 
-        if valid and not self.edit_theme and name in self.theme_manager.get_builtin_themes():
+        if (
+            valid
+            and not self.edit_theme
+            and name in self.theme_manager.get_builtin_themes()
+        ):
             valid = False
 
         if self.save_btn:

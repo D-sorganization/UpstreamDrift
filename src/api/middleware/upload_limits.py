@@ -31,7 +31,9 @@ async def validate_upload_size(
         if content_length_int > MAX_UPLOAD_SIZE_BYTES:
             response = JSONResponse(
                 status_code=413,
-                content={"detail": f"Request too large. Maximum size is {MAX_UPLOAD_SIZE_MB}MB"},
+                content={
+                    "detail": f"Request too large. Maximum size is {MAX_UPLOAD_SIZE_MB}MB"
+                },
             )
             return add_security_headers_to_response(response, request)
 

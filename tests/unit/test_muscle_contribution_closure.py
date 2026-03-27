@@ -160,9 +160,9 @@ if MYOSUITE_AVAILABLE:
                 # Extensors (e.g., 'TRIlong') should induce negative
                 # This depends on MyoSuite's specific coordinate system
                 # Validation: Just check they are non-zero when active
-                assert (
-                    np.linalg.norm(a_muscle) > 1e-8
-                ), f"Muscle {muscle_name} induced zero acceleration"
+                assert np.linalg.norm(a_muscle) > 1e-8, (
+                    f"Muscle {muscle_name} induced zero acceleration"
+                )
 
                 # Log for inspection (useful for understanding muscle function)
 
@@ -178,7 +178,9 @@ if MYOSUITE_AVAILABLE:
             The closure test should hold regardless of muscle activation state.
             """
             # Set all muscles to same activation
-            activations_dict = dict.fromkeys(elbow_engine.get_muscle_names(), activation_level)
+            activations_dict = dict.fromkeys(
+                elbow_engine.get_muscle_names(), activation_level
+            )
             elbow_engine.set_muscle_activations(activations_dict)
 
             # Verify activations were set (if engine exposes muscle state)

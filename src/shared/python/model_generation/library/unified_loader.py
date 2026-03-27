@@ -252,7 +252,9 @@ class UnifiedModelLoader:
 
     # -- Loading --
 
-    @precondition(lambda self, file_path: file_path is not None, "file_path must not be None")
+    @precondition(
+        lambda self, file_path: file_path is not None, "file_path must not be None"
+    )
     def load_file(self, file_path: str | Path) -> LoadResult:
         """
         Load a model file in any supported format.
@@ -288,7 +290,9 @@ class UnifiedModelLoader:
             return result
         return self._load_mjcf(path)
 
-    @postcondition(lambda result: isinstance(result, LoadResult), "Must return LoadResult")
+    @postcondition(
+        lambda result: isinstance(result, LoadResult), "Must return LoadResult"
+    )
     def load_bundled(self, model_id: str) -> LoadResult:
         """
         Load a model from the bundled library by ID.

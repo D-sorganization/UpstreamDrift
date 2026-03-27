@@ -87,7 +87,9 @@ class SwingMetricsMixin:
         window_len = min(11, len(segment))
         if window_len % 2 == 0:
             window_len -= 1
-        smoothed_speed = segment if window_len <= 3 else savgol_filter(segment, window_len, 3)
+        smoothed_speed = (
+            segment if window_len <= 3 else savgol_filter(segment, window_len, 3)
+        )
 
         # Find minimum after initial acceleration
         start_search = 5
@@ -99,7 +101,9 @@ class SwingMetricsMixin:
         backswing_duration = float(self.times[transition_idx] - self.times[0])
         downswing_duration = float(self.times[impact_idx] - self.times[transition_idx])
 
-        ratio = backswing_duration / downswing_duration if downswing_duration > 0 else 0.0
+        ratio = (
+            backswing_duration / downswing_duration if downswing_duration > 0 else 0.0
+        )
 
         ensure(
             backswing_duration >= 0,

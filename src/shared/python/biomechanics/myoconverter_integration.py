@@ -134,7 +134,9 @@ class MyoConverter:
             logger.info(f"Output folder: {output_folder}")
 
             try:
-                O2MPipeline(str(osim_file), str(geometry_folder), str(output_folder), **config)
+                O2MPipeline(
+                    str(osim_file), str(geometry_folder), str(output_folder), **config
+                )
             except (RuntimeError, ValueError, OSError) as e:
                 self._handle_conversion_error(e, osim_file, geometry_folder)
 
@@ -149,7 +151,9 @@ class MyoConverter:
                 "Try reinstalling: conda install -c conda-forge myoconverter --force-reinstall"
             ) from e
 
-    def _validate_inputs(self, osim_file: Path, geometry_folder: Path, output_folder: Path) -> None:
+    def _validate_inputs(
+        self, osim_file: Path, geometry_folder: Path, output_folder: Path
+    ) -> None:
         """Validate input paths before conversion.
 
         Args:

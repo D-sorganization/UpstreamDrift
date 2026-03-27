@@ -152,7 +152,9 @@ def test_drawContents(mock_theme_available, qapp):
 
     painter = MagicMock(spec=QPainter)
     with (
-        patch.object(splash, "_resolve_theme_colors", return_value=("1", "2", "3", "4", "5")),
+        patch.object(
+            splash, "_resolve_theme_colors", return_value=("1", "2", "3", "4", "5")
+        ),
         patch("src.launchers.startup.THEME_AVAILABLE", False),
     ):
         # test with THEME_AVAILABLE=False to hit fallback fonts easily
@@ -217,7 +219,9 @@ def test_startup_worker_run_success(mock_registry, mock_engine_mgr, mock_secure_
 @patch("src.launchers.startup.secure_run")
 @patch("src.shared.python.engine_core.engine_manager.EngineManager")
 @patch("src.shared.python.config.model_registry.ModelRegistry")
-def test_startup_worker_run_engine_import_error(mock_registry, mock_engine_mgr, mock_secure_run):
+def test_startup_worker_run_engine_import_error(
+    mock_registry, mock_engine_mgr, mock_secure_run
+):
     root = Path("fake_root")
     worker = AsyncStartupWorker(root)
     worker.progress_signal = MagicMock()
@@ -239,7 +243,9 @@ def test_startup_worker_run_engine_import_error(mock_registry, mock_engine_mgr, 
     "src.shared.python.config.model_registry.ModelRegistry",
     side_effect=ImportError("Critical error"),
 )
-def test_startup_worker_run_critical_import_error(mock_registry, mock_engine_mgr, mock_secure_run):
+def test_startup_worker_run_critical_import_error(
+    mock_registry, mock_engine_mgr, mock_secure_run
+):
     root = Path("fake_root")
     worker = AsyncStartupWorker(root)
     worker.progress_signal = MagicMock()
@@ -255,7 +261,9 @@ def test_startup_worker_run_critical_import_error(mock_registry, mock_engine_mgr
 @patch("src.launchers.startup.secure_run")
 @patch("src.shared.python.engine_core.engine_manager.EngineManager")
 @patch("src.shared.python.config.model_registry.ModelRegistry")
-def test_startup_worker_run_docker_error(mock_registry, mock_engine_mgr, mock_secure_run):
+def test_startup_worker_run_docker_error(
+    mock_registry, mock_engine_mgr, mock_secure_run
+):
     root = Path("fake_root")
     worker = AsyncStartupWorker(root)
     worker.progress_signal = MagicMock()

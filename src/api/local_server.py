@@ -123,7 +123,9 @@ def _register_api_routers(app: FastAPI) -> None:
     # Versioned routes: /api/v1/... (canonical, forward-compatible)
     app.include_router(engines.router, prefix=API_PREFIX, tags=["Engines"])
     app.include_router(simulation.router, prefix=API_PREFIX, tags=["Simulation"])
-    app.include_router(simulation_ws.router, prefix=API_PREFIX, tags=["Simulation WebSocket"])
+    app.include_router(
+        simulation_ws.router, prefix=API_PREFIX, tags=["Simulation WebSocket"]
+    )
     app.include_router(chat_ws.router, prefix=API_PREFIX, tags=["Chat"])
     app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
     app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
@@ -131,7 +133,9 @@ def _register_api_routers(app: FastAPI) -> None:
     # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
     app.include_router(simulation.router, prefix="/api", tags=["Simulation"])
-    app.include_router(simulation_ws.router, prefix="/api", tags=["Simulation WebSocket"])
+    app.include_router(
+        simulation_ws.router, prefix="/api", tags=["Simulation WebSocket"]
+    )
     app.include_router(chat_ws.router, prefix="/api", tags=["Chat"])
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
@@ -248,7 +252,9 @@ def _execute_tile_launch(
     )
     success = handler.launch(model, repo_path, launcher_service.process_manager)
     if success:
-        logger.info("[launch] Successfully launched tile %s (type=%s)", tile_id, model_type)
+        logger.info(
+            "[launch] Successfully launched tile %s (type=%s)", tile_id, model_type
+        )
         return {"status": "launched", "tile_id": tile_id, "name": tile.get("name")}
     logger.error(
         "[launch] Handler returned failure for tile %s (type=%s)",
@@ -282,7 +288,9 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         found = _find_logo_file(logo_name)
         if found is not None:
             return FileResponse(str(found))
-        return JSONResponse(status_code=404, content={"detail": f"Logo not found: {logo_name}"})
+        return JSONResponse(
+            status_code=404, content={"detail": f"Logo not found: {logo_name}"}
+        )
 
     @app.post("/api/launcher/launch/{tile_id}", response_model=None)
     async def launch_tile(tile_id: str) -> dict[str, Any] | JSONResponse:
@@ -318,11 +326,15 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         """Stop a running engine/tool process by name."""
         if not _launcher_service.stop_process(name):
             logger.warning("[stop] Process not found: %s", name)
-            return JSONResponse(status_code=404, content={"detail": f"Process not found: {name}"})
+            return JSONResponse(
+                status_code=404, content={"detail": f"Process not found: {name}"}
+            )
         return {"status": "stopped", "name": name}
 
 
-def _register_health_and_diagnostic_endpoints(app: FastAPI, engine_manager: EngineManager) -> None:
+def _register_health_and_diagnostic_endpoints(
+    app: FastAPI, engine_manager: EngineManager
+) -> None:
     """Register health check and diagnostic endpoints."""
 
     if not (app is not None):
@@ -555,7 +567,9 @@ def _register_error_page_catch_all(app: FastAPI) -> None:
     """
 
     @app.get("/{full_path:path}", response_model=None)
-    async def serve_error_page(request: Request, full_path: str) -> HTMLResponse | JSONResponse:
+    async def serve_error_page(
+        request: Request, full_path: str
+    ) -> HTMLResponse | JSONResponse:
         """Serve a helpful error page when UI is not built."""
         if not (request is not None):
             raise ValueError("request must be provided")
@@ -619,7 +633,9 @@ def create_local_app() -> FastAPI:
     _register_api_routers(app)
 
     # Store engine manager for diagnostics
-    _startup_metrics["engines_loaded"] = [e.value for e in engine_manager.get_available_engines()]
+    _startup_metrics["engines_loaded"] = [
+        e.value for e in engine_manager.get_available_engines()
+    ]
 
     # Launcher endpoints (manifest, logos, launch, processes, stop)
     _register_launcher_endpoints(app)
@@ -630,7 +646,9 @@ def create_local_app() -> FastAPI:
     # Serve static UI files in production
     _mount_static_files_and_spa(app)
 
-    _startup_metrics["startup_time"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    _startup_metrics["startup_time"] = time.strftime(
+        "%Y-%m-%dT%H:%M:%SZ", time.gmtime()
+    )
     return app
 
 

@@ -18,7 +18,9 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io impo
 )
 
 # Path to the mujoco module reference inside urdf_io
-_URDF_IO_MUJOCO = "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco"
+_URDF_IO_MUJOCO = (
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco"
+)
 
 
 def _make_mock_mujoco(**overrides: Any) -> MagicMock:
@@ -46,14 +48,18 @@ def mock_mujoco_model() -> MagicMock:
     model.nmat = 1
 
     # Body properties
-    model.body_parentid = np.array([0, 0, 1])  # Link1 child of World, Link2 child of Link1
+    model.body_parentid = np.array(
+        [0, 0, 1]
+    )  # Link1 child of World, Link2 child of Link1
     model.body_jntadr = np.array([-1, 0, 1])  # Link1 has joint 0, Link2 has joint 1
     model.body_mass = np.array([0, 1.0, 1.0])
     model.body_inertia = np.array([[0, 0, 0], [1, 1, 1], [1, 1, 1]])
     model.body_ipos = np.array([[0, 0, 0], [0, 0, 0], [0.5, 0, 0]])
 
     # Joint properties
-    model.jnt_type = np.array([mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE])
+    model.jnt_type = np.array(
+        [mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE]
+    )
     model.jnt_pos = np.array([[0, 0, 0], [1, 0, 0]])
     model.jnt_axis = np.array([[0, 0, 1], [1, 0, 0]])
     model.jnt_limited = np.array([True, False])
@@ -61,7 +67,9 @@ def mock_mujoco_model() -> MagicMock:
 
     # Geom properties
     model.geom_bodyid = np.array([1, 2])
-    model.geom_type = np.array([mujoco.mjtGeom.mjGEOM_BOX, mujoco.mjtGeom.mjGEOM_SPHERE])
+    model.geom_type = np.array(
+        [mujoco.mjtGeom.mjGEOM_BOX, mujoco.mjtGeom.mjGEOM_SPHERE]
+    )
     model.geom_size = np.array([[0.1, 0.1, 0.1], [0.05, 0, 0]])
     model.geom_pos = np.array([[0, 0, 0], [0, 0, 0]])
     model.geom_quat = np.array([[1, 0, 0, 0], [1, 0, 0, 0]])

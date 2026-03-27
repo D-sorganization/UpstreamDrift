@@ -56,7 +56,9 @@ class TestForceOverlayRequestContract:
 
     def test_valid_force_types(self) -> None:
         """All valid force types accepted."""
-        req = ForceOverlayRequest(force_types=["applied", "gravity", "contact", "bias", "all"])
+        req = ForceOverlayRequest(
+            force_types=["applied", "gravity", "contact", "bias", "all"]
+        )
         assert len(req.force_types) == 5
 
     def test_invalid_force_type_rejected(self) -> None:

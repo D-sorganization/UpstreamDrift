@@ -323,7 +323,9 @@ class DiagnosticsViewer(QDialog):
         # Events table
         self._table = QTableWidget()
         self._table.setColumnCount(5)
-        self._table.setHorizontalHeaderLabels(["Time", "Severity", "Category", "Message", "Source"])
+        self._table.setHorizontalHeaderLabels(
+            ["Time", "Severity", "Category", "Message", "Source"]
+        )
         header_view = self._table.horizontalHeader()
         if not (header_view is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
@@ -398,9 +400,13 @@ class DiagnosticsViewer(QDialog):
 
         error_count = self._tracker.error_count
         total = len(self._tracker.events)
-        self._count_label.setText(f"{total} events total • {error_count} errors/critical")
+        self._count_label.setText(
+            f"{total} events total • {error_count} errors/critical"
+        )
 
-    def _on_row_selected(self, row: int, _col: int, _prev_row: int, _prev_col: int) -> None:
+    def _on_row_selected(
+        self, row: int, _col: int, _prev_row: int, _prev_col: int
+    ) -> None:
         """Show details for the selected event."""
         # Events are displayed newest-first (reversed)
         if 0 <= row < len(self._displayed_events):

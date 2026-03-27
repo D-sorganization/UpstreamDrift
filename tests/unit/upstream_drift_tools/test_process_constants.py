@@ -68,7 +68,9 @@ class TestFahrenheitToKelvin:
 class TestKelvinToFahrenheit:
     def test_roundtrip(self) -> None:
         original = 350.0
-        assert abs(fahrenheit_to_kelvin(kelvin_to_fahrenheit(original)) - original) < 1e-6
+        assert (
+            abs(fahrenheit_to_kelvin(kelvin_to_fahrenheit(original)) - original) < 1e-6
+        )
 
     def test_freezing(self) -> None:
         assert abs(kelvin_to_fahrenheit(273.15) - 32.0) < 0.1

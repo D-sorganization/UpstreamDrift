@@ -50,7 +50,9 @@ class TestSharedExport:
         assert "hdf5" in formats
         assert formats["json"]["extension"] == ".json"
 
-    def test_export_to_matlab_success(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_matlab_success(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test successful export to MATLAB .mat file."""
         output_path = str(tmp_path / "test.mat")
 
@@ -83,7 +85,9 @@ class TestSharedExport:
             success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
             assert success is False
 
-    def test_export_to_matlab_exception(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_matlab_exception(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test exception handling during export."""
         with (
             patch(
@@ -95,7 +99,9 @@ class TestSharedExport:
             success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
             assert success is False
 
-    def test_export_to_hdf5_success(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_hdf5_success(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test successful export to HDF5 file."""
         output_path = str(tmp_path / "test.h5")
 
@@ -130,7 +136,9 @@ class TestSharedExport:
             success = export_to_hdf5(str(tmp_path / "test.h5"), sample_data)
             assert success is False
 
-    def test_export_to_hdf5_exception(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_hdf5_exception(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test exception handling during HDF5 export."""
         mock_h5py = MagicMock()
         mock_h5py.File.side_effect = Exception("File locked")
@@ -199,9 +207,13 @@ class TestSharedExport:
         base_path = str(tmp_path / "recording")
 
         # Mock export_to_matlab to fail
-        with patch("src.shared.python.data_io.export.export_to_matlab", return_value=False):
+        with patch(
+            "src.shared.python.data_io.export.export_to_matlab", return_value=False
+        ):
             # Mock json dump to succeed (real file IO)
-            results = export_recording_all_formats(base_path, sample_data, formats=["json", "mat"])
+            results = export_recording_all_formats(
+                base_path, sample_data, formats=["json", "mat"]
+            )
 
             assert results["json"] is True
             assert results["mat"] is False

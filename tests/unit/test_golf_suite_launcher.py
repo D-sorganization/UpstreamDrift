@@ -208,7 +208,9 @@ _STATUS_SPEC = ["setText", "setAlignment", "font", "setFont"]
 def mock_subprocess():
     """Mock subprocess.Popen."""
     with patch("subprocess.Popen") as mock_popen:
-        process = MagicMock(spec=["pid", "poll", "wait", "communicate", "terminate", "kill"])
+        process = MagicMock(
+            spec=["pid", "poll", "wait", "communicate", "terminate", "kill"]
+        )
         process.pid = 12345
         mock_popen.return_value = process
         yield mock_popen
@@ -232,9 +234,9 @@ class TestGolfSuiteLauncher:
         assert launcher_app is not None, "Launcher should be instantiated"
 
         # Verify PYQT6_AVAILABLE flag is set correctly for testing
-        assert (
-            golf_suite_launcher.PYQT6_AVAILABLE is True
-        ), "PYQT6_AVAILABLE should be True for launcher logic tests"
+        assert golf_suite_launcher.PYQT6_AVAILABLE is True, (
+            "PYQT6_AVAILABLE should be True for launcher logic tests"
+        )
 
         # Verify launcher has essential UI components (as mocked)
         assert hasattr(launcher_app, "log_text"), "Launcher should have log_text widget"

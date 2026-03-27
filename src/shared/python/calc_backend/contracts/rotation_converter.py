@@ -13,7 +13,9 @@ class RotationConverterRequest(BaseModel):
     Exactly one of the representations should be provided.
     """
 
-    type: Literal["quaternion", "euler", "axis_angle", "rodrigues", "rotation_matrix"] = Field(
+    type: Literal[
+        "quaternion", "euler", "axis_angle", "rodrigues", "rotation_matrix"
+    ] = Field(
         ...,
         description="The type of the input representation.",
     )
@@ -32,8 +34,12 @@ class RotationRepresentationsModel(BaseModel):
     """Contains all standard representations of a single rotation."""
 
     quaternion: list[float] = Field(description="Unit quaternion [w, x, y, z]")
-    euler: list[float] = Field(description="Euler angles in requested convention [a, b, c]")
-    euler_convention: str = Field(description="The convention used for output euler angles")
+    euler: list[float] = Field(
+        description="Euler angles in requested convention [a, b, c]"
+    )
+    euler_convention: str = Field(
+        description="The convention used for output euler angles"
+    )
     axis_angle: dict[str, list[float] | float] = Field(
         description="Axis-angle representation {'axis': [x, y, z], 'angle': theta}"
     )
@@ -87,7 +93,9 @@ class ReferenceFrameConversionRequest(BaseModel):
         """Validate operation-specific preconditions (DbC at API boundary)."""
         if self.operation == "twist_frame_conversion":
             if self.transform is None or self.twist is None:
-                raise ValueError("twist_frame_conversion requires transform and twist fields.")
+                raise ValueError(
+                    "twist_frame_conversion requires transform and twist fields."
+                )
             if any(
                 value is not None
                 for value in (
@@ -105,7 +113,9 @@ class ReferenceFrameConversionRequest(BaseModel):
 
         if self.operation == "homogeneous_transform":
             if self.rotation_matrix is None or self.translation is None:
-                raise ValueError("homogeneous_transform requires rotation_matrix and translation.")
+                raise ValueError(
+                    "homogeneous_transform requires rotation_matrix and translation."
+                )
             if any(
                 value is not None
                 for value in (
@@ -131,8 +141,13 @@ class ReferenceFrameConversionRequest(BaseModel):
                 "so3_so3_maps requires exactly one of so3_vector, so3_matrix, "
                 "or rotation_matrix."
             )
-        if any(value is not None for value in (self.transform, self.twist, self.translation)):
-            raise ValueError("so3_so3_maps does not accept transform, twist, or translation.")
+        if any(
+            value is not None
+            for value in (self.transform, self.twist, self.translation)
+        ):
+            raise ValueError(
+                "so3_so3_maps does not accept transform, twist, or translation."
+            )
         return self
 
 

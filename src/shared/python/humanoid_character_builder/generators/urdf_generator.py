@@ -182,7 +182,9 @@ class HumanoidURDFGenerator:
                 segment_def,
                 params,
                 segment_masses.get(segment_name, 1.0),
-                segment_dimensions.get(segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}),
+                segment_dimensions.get(
+                    segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
+                ),
                 gender_factor,
                 mesh_dir,
             )
@@ -338,10 +340,14 @@ class HumanoidURDFGenerator:
         )
 
         # Generate geometry
-        visual_geom = self._create_geometry_dict(segment_def, dimensions, is_collision=False)
+        visual_geom = self._create_geometry_dict(
+            segment_def, dimensions, is_collision=False
+        )
         collision_geom = None
         if self.config.generate_collision:
-            collision_geom = self._create_geometry_dict(segment_def, dimensions, is_collision=True)
+            collision_geom = self._create_geometry_dict(
+                segment_def, dimensions, is_collision=True
+            )
 
         # Get center of mass
         length = dimensions.get("length", 0.1)
@@ -395,17 +401,23 @@ class HumanoidURDFGenerator:
             if mesh_path.exists():
                 try:
                     if self.config.inertia_mode == InertiaMode.MESH_SPECIFIED_MASS:
-                        return self.mesh_inertia_calc.compute_from_mesh(mesh_path, mass=mass)
+                        return self.mesh_inertia_calc.compute_from_mesh(
+                            mesh_path, mass=mass
+                        )
                     return self.mesh_inertia_calc.compute_from_mesh(mesh_path)
                 except (KeyError, ValueError, TypeError) as e:
-                    logger.warning(f"Mesh inertia calculation failed for {segment_name}: {e}")
+                    logger.warning(
+                        f"Mesh inertia calculation failed for {segment_name}: {e}"
+                    )
 
         # Fall back to primitive approximation
         length = dimensions.get("length", 0.1)
         width = dimensions.get("width", 0.05)
         depth = dimensions.get("depth", 0.05)
 
-        shape, shape_dims = estimate_segment_primitive(segment_name, length, width, depth)
+        shape, shape_dims = estimate_segment_primitive(
+            segment_name, length, width, depth
+        )
         return self.primitive_inertia_calc.compute(shape, mass, shape_dims)
 
     def _create_geometry_dict(
@@ -420,7 +432,9 @@ class HumanoidURDFGenerator:
         if not (segment_def is not None):
             raise ValueError("segment_def must be provided")
         geom_spec = (
-            segment_def.get_collision_geometry() if is_collision else segment_def.visual_geometry
+            segment_def.get_collision_geometry()
+            if is_collision
+            else segment_def.visual_geometry
         )
 
         length = dimensions.get("length", 0.1)
@@ -687,7 +701,9 @@ class HumanoidURDFGenerator:
         geom_type = geom["type"]
         if geom_type == "box":
             size = geom["size"]
-            ET.SubElement(geometry, "box", size=f"{size[0]:.6f} {size[1]:.6f} {size[2]:.6f}")
+            ET.SubElement(
+                geometry, "box", size=f"{size[0]:.6f} {size[1]:.6f} {size[2]:.6f}"
+            )
         elif geom_type == "cylinder":
             ET.SubElement(
                 geometry,
@@ -712,7 +728,9 @@ class HumanoidURDFGenerator:
             raise ValueError("root must be provided")
         if not (root is not None):
             raise ValueError("root must be provided")
-        joint_elem = ET.SubElement(root, "joint", name=joint.name, type=joint.joint_type)
+        joint_elem = ET.SubElement(
+            root, "joint", name=joint.name, type=joint.joint_type
+        )
 
         ET.SubElement(joint_elem, "parent", link=joint.parent)
         ET.SubElement(joint_elem, "child", link=joint.child)

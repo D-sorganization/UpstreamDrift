@@ -40,7 +40,9 @@ class SingularityError(Exception):
     """Raised when Jacobian is catastrophically ill-conditioned (κ > 1e12)."""
 
 
-def check_jacobian_conditioning(J: np.ndarray, body_name: str, warn: bool = True) -> float:
+def check_jacobian_conditioning(
+    J: np.ndarray, body_name: str, warn: bool = True
+) -> float:
     """Compute condition number and warn if near singular.
 
     Guideline C2: κ > 1e6 triggers warning, κ > 1e10 triggers pseudoinverse.
@@ -122,7 +124,9 @@ def check_jacobian_conditioning(J: np.ndarray, body_name: str, warn: bool = True
     return float(kappa)
 
 
-def get_jacobian_conditioning(engine: PhysicsEngine, body_name: str, warn: bool = True) -> float:
+def get_jacobian_conditioning(
+    engine: PhysicsEngine, body_name: str, warn: bool = True
+) -> float:
     """Convenience function to get conditioning directly from engine.
 
     Args:

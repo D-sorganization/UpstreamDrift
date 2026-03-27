@@ -113,7 +113,8 @@ class TestAPIDiagnostics:
 
         # Verify counts add up
         assert (
-            summary["passed"] + summary["failed"] + summary["warnings"] == summary["total_checks"]
+            summary["passed"] + summary["failed"] + summary["warnings"]
+            == summary["total_checks"]
         )
 
     def test_check_python_environment(self) -> None:

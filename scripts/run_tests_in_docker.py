@@ -17,7 +17,9 @@ logger = setup_script_logging("DockerRunner")
 def main() -> None:
     """Main execution flow."""
     root_dir = get_repo_root()
-    dockerfile_path = root_dir / "src" / "engines" / "physics_engines" / "mujoco" / "Dockerfile"
+    dockerfile_path = (
+        root_dir / "src" / "engines" / "physics_engines" / "mujoco" / "Dockerfile"
+    )
 
     if not dockerfile_path.exists():
         logger.error(f"Dockerfile not found at {dockerfile_path}")

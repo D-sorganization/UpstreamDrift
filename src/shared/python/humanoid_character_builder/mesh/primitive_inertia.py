@@ -42,7 +42,9 @@ class PrimitiveInertiaCalculator:
     """
 
     @staticmethod
-    def compute_box(mass: float, size_x: float, size_y: float, size_z: float) -> InertiaResult:
+    def compute_box(
+        mass: float, size_x: float, size_y: float, size_z: float
+    ) -> InertiaResult:
         """
         Compute inertia for a solid box (rectangular parallelepiped).
 
@@ -347,7 +349,9 @@ class PrimitiveInertiaCalculator:
         raise ValueError(f"Unknown shape: {shape}")
 
     @staticmethod
-    def _tuple_to_dict(shape: PrimitiveShape, dims: tuple[float, ...]) -> dict[str, float]:
+    def _tuple_to_dict(
+        shape: PrimitiveShape, dims: tuple[float, ...]
+    ) -> dict[str, float]:
         """Convert dimension tuple to dictionary."""
         if not (shape is not None):
             raise ValueError("shape must be provided")
@@ -403,7 +407,9 @@ def estimate_segment_primitive(
     if _matches_category(segment_lower, ["head"]):
         return _create_sphere_primitive(length)
 
-    if _matches_category(segment_lower, ["arm", "forearm", "thigh", "shin", "shank", "leg"]):
+    if _matches_category(
+        segment_lower, ["arm", "forearm", "thigh", "shin", "shank", "leg"]
+    ):
         return _create_limb_capsule_primitive(length, width, depth)
 
     if _matches_category(segment_lower, ["torso", "thorax", "lumbar", "pelvis"]):

@@ -8,7 +8,9 @@ class TestSwingPlaneAnalysis:
     def test_fit_plane_perfect(self) -> None:
         """Test fitting a plane to points that lie perfectly on it."""
         # Plane z = 0 (XY plane)
-        points = np.array([[1.0, 1.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 0.0]])
+        points = np.array(
+            [[1.0, 1.0, 0.0], [2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 0.0]]
+        )
 
         analyzer = SwingPlaneAnalyzer()
         centroid, normal = analyzer.fit_plane(points)
@@ -92,7 +94,9 @@ class TestSwingPlaneAnalysis:
         metrics = analyzer.analyze(points)
 
         assert metrics.rmse < 1e-10
-        assert abs(metrics.steepness_deg) < 1e-5  # Normal is vertical (0 deg to vertical?)
+        assert (
+            abs(metrics.steepness_deg) < 1e-5
+        )  # Normal is vertical (0 deg to vertical?)
         # Wait, analyze ensures normal Z > 0.
         # If normal is [0, 0, 1], angle with [0, 0, 1] is 0.
 

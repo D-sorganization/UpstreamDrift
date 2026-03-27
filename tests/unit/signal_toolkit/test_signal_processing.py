@@ -27,7 +27,9 @@ from src.shared.python.signal_toolkit.signal_processing import (
 # ============================================================================
 
 
-def _sine_signal(freq: float = 10.0, fs: float = 1000.0, duration: float = 1.0) -> np.ndarray:
+def _sine_signal(
+    freq: float = 10.0, fs: float = 1000.0, duration: float = 1.0
+) -> np.ndarray:
     """Generate a pure sine wave for testing."""
     t = np.arange(0, duration, 1.0 / fs)
     return np.sin(2 * np.pi * freq * t)
@@ -194,7 +196,9 @@ class TestComputeCWT:
 
     def test_returns_expected_arrays(self) -> None:
         data = _sine_signal(freq=10.0, fs=200.0, duration=0.5)
-        freqs, times, cwt_matrix = compute_cwt(data, fs=200.0, freq_range=(5.0, 50.0), num_freqs=10)
+        freqs, times, cwt_matrix = compute_cwt(
+            data, fs=200.0, freq_range=(5.0, 50.0), num_freqs=10
+        )
         assert isinstance(freqs, np.ndarray)
         assert isinstance(times, np.ndarray)
         assert isinstance(cwt_matrix, np.ndarray)
@@ -214,7 +218,9 @@ class TestComputeCWT:
         fs = 200.0
         signal_freq = 20.0
         data = _sine_signal(freq=signal_freq, fs=fs, duration=1.0)
-        freqs, _, cwt_matrix = compute_cwt(data, fs=fs, freq_range=(5.0, 50.0), num_freqs=20)
+        freqs, _, cwt_matrix = compute_cwt(
+            data, fs=fs, freq_range=(5.0, 50.0), num_freqs=20
+        )
         # Average power for each frequency
         power = np.mean(np.abs(cwt_matrix) ** 2, axis=1)
         peak_freq = freqs[np.argmax(power)]

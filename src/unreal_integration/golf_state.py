@@ -97,7 +97,9 @@ class ClubState:
             head_position=Vector3.from_dict(d["head_position"]),
             head_velocity=Vector3.from_dict(d["head_velocity"]),
             head_acceleration=(
-                Vector3.from_dict(d["head_acceleration"]) if "head_acceleration" in d else None
+                Vector3.from_dict(d["head_acceleration"])
+                if "head_acceleration" in d
+                else None
             ),
             shaft_flex=d.get("shaft_flex"),
             face_angle=d.get("face_angle"),

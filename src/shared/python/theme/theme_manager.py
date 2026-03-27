@@ -143,7 +143,9 @@ class ThemeManager(QObject):
     def _resolve_effective_theme(self) -> str:
         """Resolve the effective theme name, handling inheritance."""
         if self.app_context:
-            pref = str(self.settings.value(f"theme_{self.app_context}", "Inherit", type=str))
+            pref = str(
+                self.settings.value(f"theme_{self.app_context}", "Inherit", type=str)
+            )
             if pref == "Inherit":
                 return str(self.settings.value("theme", "Light", type=str))
             return pref
@@ -159,7 +161,9 @@ class ThemeManager(QObject):
             Theme preference string
         """
         if self.app_context:
-            return str(self.settings.value(f"theme_{self.app_context}", "Inherit", type=str))
+            return str(
+                self.settings.value(f"theme_{self.app_context}", "Inherit", type=str)
+            )
         return str(self.settings.value("theme", "Light", type=str))
 
     # =========================================================================
@@ -302,7 +306,9 @@ class ThemeManager(QObject):
     def apply_theme(self) -> None:
         """Apply the current theme to the main window and registered windows."""
         if not self._theme_exists(self.current_theme):
-            logger.warning("Theme '%s' not available, falling back to Light", self.current_theme)
+            logger.warning(
+                "Theme '%s' not available, falling back to Light", self.current_theme
+            )
             self.current_theme = "Light"
 
         stylesheet = self.get_current_stylesheet()
@@ -377,7 +383,9 @@ class ThemeManager(QObject):
             raise ValueError("Theme name cannot be empty.")
 
         if cleaned_name in BUILTIN_THEMES:
-            raise ValueError(f"Theme name '{cleaned_name}' conflicts with a built-in theme.")
+            raise ValueError(
+                f"Theme name '{cleaned_name}' conflicts with a built-in theme."
+            )
 
         normalised_colors = self._validate_custom_theme_colors(colors)
         self.custom_themes[cleaned_name] = normalised_colors
@@ -482,7 +490,9 @@ class ThemeManager(QObject):
             name: {k: v for k, v in colors.items() if k in THEME_COLOR_KEYS}
             for name, colors in self.custom_themes.items()
         }
-        self.settings.setValue(self.CUSTOM_THEME_STORAGE_KEY, json.dumps(to_save, indent=2))
+        self.settings.setValue(
+            self.CUSTOM_THEME_STORAGE_KEY, json.dumps(to_save, indent=2)
+        )
         self.settings.sync()
 
     def _validate_custom_theme_colors(

@@ -39,7 +39,9 @@ def analyze_matlab_files() -> bool:
                 if not key.startswith("__"):  # Skip metadata
                     value = mat_data[key]
                     if isinstance(value, np.ndarray):
-                        logger.info(f"  {key}: shape {value.shape}, dtype {value.dtype}")
+                        logger.info(
+                            f"  {key}: shape {value.shape}, dtype {value.dtype}"
+                        )
                         if value.ndim == 2 and value.shape[1] > 10:
                             logger.info(
                                 f"    Large dataset: {value.shape[0]} rows, "
@@ -126,7 +128,8 @@ def check_required_signals() -> bool:
                 if key in data:
                     dataset = data[key]
                     logger.info(
-                        f"  {name}: {dataset.shape[0]} time points, " f"{dataset.shape[1]} signals"
+                        f"  {name}: {dataset.shape[0]} time points, "
+                        f"{dataset.shape[1]} signals"
                     )
 
                     # In signal bus format, signals are columns,
@@ -179,17 +182,24 @@ def main() -> bool:
         status = "✅ PASS" if passed else "❌ FAIL"
         logger.info(f"{test_name}: {status}")
 
-    logger.info(f"\nOverall: {'✅ COMPATIBLE' if all_passed else '⚠️  POTENTIAL ISSUES'}")
+    logger.info(
+        f"\nOverall: {'✅ COMPATIBLE' if all_passed else '⚠️  POTENTIAL ISSUES'}"
+    )
 
     if all_passed:
         logger.info("\n🎉 RECOMMENDATIONS:")
-        logger.info("1. ✅ The current signal bus structure appears compatible with the GUI")
+        logger.info(
+            "1. ✅ The current signal bus structure appears compatible with the GUI"
+        )
         logger.info("2. ✅ All required data files are present and readable")
         logger.info("3. ✅ Signal bus logging is likely being used (many columns)")
         logger.info(
-            "4. 🔧 Consider adding GUI option to disable Simscape Results " "Explorer for speed"
+            "4. 🔧 Consider adding GUI option to disable Simscape Results "
+            "Explorer for speed"
         )
-        logger.info("5. 🧪 Test with a full simulation run to verify all data is captured")
+        logger.info(
+            "5. 🧪 Test with a full simulation run to verify all data is captured"
+        )
 
         logger.info("\n📋 NEXT STEPS:")
         logger.info("- Run a test simulation to generate new data")

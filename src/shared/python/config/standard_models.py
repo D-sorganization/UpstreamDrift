@@ -133,7 +133,9 @@ class StandardModelManager:
             human_meshes_dir.mkdir(parents=True, exist_ok=True)
 
             # Download specific files from human-gazebo repository
-            base_url = "https://raw.githubusercontent.com/robotology/human-gazebo/master"
+            base_url = (
+                "https://raw.githubusercontent.com/robotology/human-gazebo/master"
+            )
 
             files_to_download = [
                 ("models/humanSubject06_66dof/model.urdf", "humanSubject06_66dof.urdf"),
@@ -149,9 +151,7 @@ class StandardModelManager:
 
                 logger.info(f"Downloading {url} -> {local_path}")
                 validate_url_scheme(url)
-                urllib.request.urlretrieve(
-                    url, local_path
-                )  # nosec B310 - URL validated by validate_url_scheme() above
+                urllib.request.urlretrieve(url, local_path)  # nosec B310 - URL validated by validate_url_scheme() above
 
             # Download mesh files (this is a simplified approach - in practice you'd want
             # to download the actual mesh files from the repository)

@@ -137,7 +137,9 @@ def zero_torque_joint_forces_double(
 # ---------------------------------------------------------------------------
 
 
-def _zero_torque_qddot_triple(state: np.ndarray, params: TriplePendulumParams) -> np.ndarray:
+def _zero_torque_qddot_triple(
+    state: np.ndarray, params: TriplePendulumParams
+) -> np.ndarray:
     """Compute angular accel under zero driving torque for triple pendulum.
 
     Preconditions

@@ -62,7 +62,9 @@ class TestZTCFCounterfactual:
         engine = PendulumPhysicsEngine()
         return engine
 
-    def test_ztcf_equals_drift_at_current_state(self, pendulum_engine: PhysicsEngine) -> None:
+    def test_ztcf_equals_drift_at_current_state(
+        self, pendulum_engine: PhysicsEngine
+    ) -> None:
         """ZTCF at current state should equal drift acceleration.
 
         When computing ZTCF at the engine's current (q, v) with τ=0,
@@ -106,7 +108,9 @@ class TestZTCFCounterfactual:
 
         # Verify non-zero result (pendulum with gravity)
         assert a_ztcf.size > 0, "ZTCF should return non-empty result"
-        assert not np.allclose(a_ztcf, 0, atol=1e-10), "ZTCF should be non-zero with gravity"
+        assert not np.allclose(a_ztcf, 0, atol=1e-10), (
+            "ZTCF should be non-zero with gravity"
+        )
 
     def test_ztcf_preserves_engine_state(self, pendulum_engine: PhysicsEngine) -> None:
         """Computing ZTCF should not modify the engine's internal state."""
@@ -145,7 +149,9 @@ class TestZVCFCounterfactual:
         engine = PendulumPhysicsEngine()
         return engine
 
-    def test_zvcf_removes_coriolis_effects(self, pendulum_engine: PhysicsEngine) -> None:
+    def test_zvcf_removes_coriolis_effects(
+        self, pendulum_engine: PhysicsEngine
+    ) -> None:
         """ZVCF should have no Coriolis/centrifugal contribution.
 
         With v=0, the Coriolis matrix C(q,v)·v = 0, so ZVCF isolates
@@ -167,9 +173,9 @@ class TestZVCFCounterfactual:
 
         # ZVCF should be different from ZTCF due to removed Coriolis
         # (unless by coincidence they cancel, which is unlikely)
-        assert not np.allclose(
-            a_ztcf, a_zvcf, atol=0.01
-        ), "ZVCF should differ from ZTCF when velocity is non-zero"
+        assert not np.allclose(a_ztcf, a_zvcf, atol=0.01), (
+            "ZVCF should differ from ZTCF when velocity is non-zero"
+        )
 
     def test_zvcf_at_rest_configuration(self, pendulum_engine: PhysicsEngine) -> None:
         """ZVCF at vertical (θ=0) should show gravity effect.
@@ -325,7 +331,9 @@ class TestCounterfactualCrossEngine:
 
         return engines
 
-    def test_ztcf_dimensionality(self, engines_with_ztcf: list[tuple[str, PhysicsEngine]]) -> None:
+    def test_ztcf_dimensionality(
+        self, engines_with_ztcf: list[tuple[str, PhysicsEngine]]
+    ) -> None:
         """ZTCF output should have correct dimensionality (n_v,)."""
         for name, engine in engines_with_ztcf:
             q, v = engine.get_state()
@@ -334,7 +342,9 @@ class TestCounterfactualCrossEngine:
             assert a_ztcf.ndim == 1, f"{name}: ZTCF should be 1D array"
             assert len(a_ztcf) == len(v), f"{name}: ZTCF dim should match n_v"
 
-    def test_zvcf_dimensionality(self, engines_with_ztcf: list[tuple[str, PhysicsEngine]]) -> None:
+    def test_zvcf_dimensionality(
+        self, engines_with_ztcf: list[tuple[str, PhysicsEngine]]
+    ) -> None:
         """ZVCF output should have correct dimensionality (n_v,)."""
         for name, engine in engines_with_ztcf:
             q, v = engine.get_state()

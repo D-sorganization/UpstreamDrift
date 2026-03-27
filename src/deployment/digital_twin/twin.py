@@ -382,7 +382,9 @@ class DigitalTwin:
             return self._anomaly_history.copy()
 
         current_time = real_state.timestamp
-        return [a for a in self._anomaly_history if current_time - a.timestamp <= max_age]
+        return [
+            a for a in self._anomaly_history if current_time - a.timestamp <= max_age
+        ]
 
     def clear_anomaly_history(self) -> None:
         """Clear anomaly detection history."""

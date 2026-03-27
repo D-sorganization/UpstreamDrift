@@ -123,7 +123,9 @@ def delta_matrix(q: np.ndarray, p: GolferParams) -> np.ndarray:
     return np.linalg.pinv(M)
 
 
-def ztcf_matrix(q: np.ndarray, p: GolferParams, joint_name: str = "club_tip") -> np.ndarray:
+def ztcf_matrix(
+    q: np.ndarray, p: GolferParams, joint_name: str = "club_tip"
+) -> np.ndarray:
     """Compute the Zero-Torque Constraint Force transfer matrix.
 
     Maps applied joint torques to endpoint forces via:

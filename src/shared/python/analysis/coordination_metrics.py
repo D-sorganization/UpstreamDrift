@@ -130,8 +130,13 @@ class CoordinationMetricsMixin:
 
         # Circular statistics for mean and variability
         angles_rad = np.deg2rad(angles)
-        R = np.sqrt(np.sum(np.cos(angles_rad)) ** 2 + np.sum(np.sin(angles_rad)) ** 2) / total
-        mean_angle_rad = np.arctan2(np.sum(np.sin(angles_rad)), np.sum(np.cos(angles_rad)))
+        R = (
+            np.sqrt(np.sum(np.cos(angles_rad)) ** 2 + np.sum(np.sin(angles_rad)) ** 2)
+            / total
+        )
+        mean_angle_rad = np.arctan2(
+            np.sum(np.sin(angles_rad)), np.sum(np.cos(angles_rad))
+        )
         mean_angle_deg = np.degrees(mean_angle_rad) % 360.0
 
         if R < 1.0:
@@ -346,7 +351,10 @@ class CoordinationMetricsMixin:
         # Postcondition
         if len(correlations) > 0:
             ensure(
-                bool(np.all(correlations >= -1.0 - 1e-6) and np.all(correlations <= 1.0 + 1e-6)),
+                bool(
+                    np.all(correlations >= -1.0 - 1e-6)
+                    and np.all(correlations <= 1.0 + 1e-6)
+                ),
                 "rolling correlations must be in [-1, 1]",
             )
 

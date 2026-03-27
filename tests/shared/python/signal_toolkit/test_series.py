@@ -552,7 +552,9 @@ class TestConvergenceAnalysis:
         # For numerical methods, convergence is reliable close to the center
         # Far from center (|x| > 2), many terms are needed
         for x in [-1, 0, 1]:
-            analysis = expansion.analyze_convergence(np.exp, center=0, x_test=x, tolerance=1e-6)
+            analysis = expansion.analyze_convergence(
+                np.exp, center=0, x_test=x, tolerance=1e-6
+            )
             assert analysis["convergent"]
 
     def test_ln_diverges_outside_radius(self) -> None:
@@ -565,7 +567,9 @@ class TestConvergenceAnalysis:
             return np.log(1 + x)
 
         # Should diverge for x = 2 (outside |x| < 1)
-        analysis = expansion.analyze_convergence(f, center=0, x_test=2.0, tolerance=1e-6)
+        analysis = expansion.analyze_convergence(
+            f, center=0, x_test=2.0, tolerance=1e-6
+        )
         assert not analysis["convergent"]
 
 
@@ -582,7 +586,9 @@ class TestErrorBounds:
         from signal_toolkit.series import SeriesExpansion
 
         expansion = SeriesExpansion()
-        bound = expansion.estimate_error_bound(f=np.exp, center=0, x_test=1.0, n_terms=10)
+        bound = expansion.estimate_error_bound(
+            f=np.exp, center=0, x_test=1.0, n_terms=10
+        )
 
         assert isinstance(bound, (int, float, np.floating))
 
@@ -591,7 +597,9 @@ class TestErrorBounds:
         from signal_toolkit.series import SeriesExpansion
 
         expansion = SeriesExpansion()
-        bound = expansion.estimate_error_bound(f=np.sin, center=0, x_test=0.5, n_terms=10)
+        bound = expansion.estimate_error_bound(
+            f=np.sin, center=0, x_test=0.5, n_terms=10
+        )
 
         assert bound >= 0
 
@@ -623,7 +631,9 @@ class TestErrorBounds:
 
         taylor_func = expansion.taylor_series(f, center=0, n_terms=n_terms)
         actual_error = abs(taylor_func(x_test) - f(x_test))
-        bound = expansion.estimate_error_bound(f, center=0, x_test=x_test, n_terms=n_terms)
+        bound = expansion.estimate_error_bound(
+            f, center=0, x_test=x_test, n_terms=n_terms
+        )
 
         # Bound should be >= actual error (with some margin)
         assert actual_error <= bound * 2  # Allow factor of 2 margin

@@ -51,7 +51,9 @@ def test_get_client(adapter):
     sys.modules["anthropic"].Anthropic.reset_mock()
     """Test client lazy loading."""
     client = adapter._get_client()
-    sys.modules["anthropic"].Anthropic.assert_called_once_with(api_key="sk-ant", timeout=30.0)
+    sys.modules["anthropic"].Anthropic.assert_called_once_with(
+        api_key="sk-ant", timeout=30.0
+    )
     assert adapter._client == client
 
     sys.modules["anthropic"].Anthropic.reset_mock()

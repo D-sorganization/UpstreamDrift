@@ -24,7 +24,9 @@ def _four_bar_asset_xml() -> str:
     </asset>"""
 
 
-def _four_bar_worldbody_xml(ground: float, crank: float, coupler: float, follower: float) -> str:
+def _four_bar_worldbody_xml(
+    ground: float, crank: float, coupler: float, follower: float
+) -> str:
     if not (ground is not None):
         raise ValueError("ground must be provided")
     if not (ground is not None):

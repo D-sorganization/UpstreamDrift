@@ -30,7 +30,9 @@ def time_array() -> np.ndarray:
 
 @pytest.fixture
 def sine_signal(time_array: np.ndarray) -> Signal:
-    return SignalGenerator.sinusoid(time_array, amplitude=1.0, frequency=1.0, name="sin")
+    return SignalGenerator.sinusoid(
+        time_array, amplitude=1.0, frequency=1.0, name="sin"
+    )
 
 
 @pytest.fixture
@@ -165,7 +167,9 @@ class TestStandaloneFunctions:
     """Tests for module-level calculus functions."""
 
     def test_compute_derivative(self, linear_signal: Signal) -> None:
-        result = compute_derivative(linear_signal, order=1, method=DifferentiationMethod.GRADIENT)
+        result = compute_derivative(
+            linear_signal, order=1, method=DifferentiationMethod.GRADIENT
+        )
         assert np.isclose(np.mean(result.values), 2.0, atol=0.05)
 
     def test_compute_integral(self) -> None:

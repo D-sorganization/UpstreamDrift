@@ -86,8 +86,12 @@ class AnthropometryData:
 
         # Linear interpolation
         return SegmentAnthropometry(
-            mass_ratio=_lerp(female_data.mass_ratio, male_data.mass_ratio, gender_factor),
-            length_ratio=_lerp(female_data.length_ratio, male_data.length_ratio, gender_factor),
+            mass_ratio=_lerp(
+                female_data.mass_ratio, male_data.mass_ratio, gender_factor
+            ),
+            length_ratio=_lerp(
+                female_data.length_ratio, male_data.length_ratio, gender_factor
+            ),
             com_proximal_ratio=_lerp(
                 female_data.com_proximal_ratio,
                 male_data.com_proximal_ratio,
@@ -108,8 +112,12 @@ class AnthropometryData:
                 male_data.gyration_longitudinal,
                 gender_factor,
             ),
-            width_ratio=_lerp(female_data.width_ratio, male_data.width_ratio, gender_factor),
-            depth_ratio=_lerp(female_data.depth_ratio, male_data.depth_ratio, gender_factor),
+            width_ratio=_lerp(
+                female_data.width_ratio, male_data.width_ratio, gender_factor
+            ),
+            depth_ratio=_lerp(
+                female_data.depth_ratio, male_data.depth_ratio, gender_factor
+            ),
         )
 
 
@@ -483,7 +491,9 @@ def get_segment_length_ratio(segment_name: str, gender_factor: float = 0.5) -> f
     lambda gender_factor: 0.0 <= gender_factor <= 1.0,
     "Gender factor must be between 0 and 1",
 )
-def estimate_segment_masses(total_mass_kg: float, gender_factor: float = 0.5) -> dict[str, float]:
+def estimate_segment_masses(
+    total_mass_kg: float, gender_factor: float = 0.5
+) -> dict[str, float]:
     """
     Estimate mass for all segments based on total body mass.
 
@@ -514,7 +524,9 @@ def estimate_segment_masses(total_mass_kg: float, gender_factor: float = 0.5) ->
     return masses
 
 
-@precondition(lambda total_height_m: total_height_m > 0, "Total height must be positive")
+@precondition(
+    lambda total_height_m: total_height_m > 0, "Total height must be positive"
+)
 @precondition(
     lambda gender_factor: 0.0 <= gender_factor <= 1.0,
     "Gender factor must be between 0 and 1",

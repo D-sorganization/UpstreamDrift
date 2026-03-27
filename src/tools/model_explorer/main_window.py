@@ -87,7 +87,9 @@ class URDFGeneratorWindow(QMainWindow):
 
                 if urdf_path and urdf_path.exists():
                     self._load_urdf_file(urdf_path)
-                    self.status_bar.showMessage(f"Loaded default model: {default_model}")
+                    self.status_bar.showMessage(
+                        f"Loaded default model: {default_model}"
+                    )
                 else:
                     logger.warning(f"Default model {default_model} not found")
         except ImportError as e:
@@ -126,7 +128,9 @@ class URDFGeneratorWindow(QMainWindow):
         self.visualization_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
 
         # Make the viewport expanded by default
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.visualization_dock)
+        self.addDockWidget(
+            Qt.DockWidgetArea.RightDockWidgetArea, self.visualization_dock
+        )
 
         # 3. Properties (Dock)
         self._setup_properties_dock()
@@ -149,7 +153,9 @@ class URDFGeneratorWindow(QMainWindow):
 
         # Tabify properties with segments or place below?
         # Let's place it below Segments initially or tabbed with it
-        self.splitDockWidget(self.segment_dock, self.properties_dock, Qt.Orientation.Vertical)
+        self.splitDockWidget(
+            self.segment_dock, self.properties_dock, Qt.Orientation.Vertical
+        )
 
         # Ensure Viewport takes most space
         # We can simulate this by resizing docks after show(), but for now let default handle it
@@ -244,12 +250,16 @@ class URDFGeneratorWindow(QMainWindow):
     def _setup_edit_menu(self, edit_menu: Any) -> None:
         undo_action = QAction("&Undo", self)
         undo_action.setShortcut("Ctrl+Z")
-        undo_action.setEnabled(False)  # Undo/redo functionality planned for future release
+        undo_action.setEnabled(
+            False
+        )  # Undo/redo functionality planned for future release
         edit_menu.addAction(undo_action)
 
         redo_action = QAction("&Redo", self)
         redo_action.setShortcut("Ctrl+Y")
-        redo_action.setEnabled(False)  # Undo/redo functionality planned for future release
+        redo_action.setEnabled(
+            False
+        )  # Undo/redo functionality planned for future release
         edit_menu.addAction(redo_action)
 
     def _setup_view_menu(self, view_menu: Any) -> None:
@@ -404,14 +414,18 @@ class URDFGeneratorWindow(QMainWindow):
                         urdf_path = library.generate_golf_club_urdf(model_key)
                         if urdf_path:
                             self._load_urdf_file(urdf_path)
-                            self.status_bar.showMessage(f"Loaded golf club: {model_key}")
+                            self.status_bar.showMessage(
+                                f"Loaded golf club: {model_key}"
+                            )
                     elif category == "human":
                         # Load human model URDF (prefers bundled assets)
                         urdf_path = library.get_human_model(model_key)
 
                         if urdf_path and urdf_path.exists():
                             self._load_urdf_file(urdf_path)
-                            self.status_bar.showMessage(f"Loaded human model: {model_key}")
+                            self.status_bar.showMessage(
+                                f"Loaded human model: {model_key}"
+                            )
                         else:
                             QMessageBox.information(
                                 self,
@@ -441,7 +455,9 @@ class URDFGeneratorWindow(QMainWindow):
                                     f"Loaded {category} model: {model_info['name']}"
                                 )
                             else:
-                                QMessageBox.warning(self, "Error", f"File not found: {path}")
+                                QMessageBox.warning(
+                                    self, "Error", f"File not found: {path}"
+                                )
                         else:
                             QMessageBox.warning(
                                 self,
@@ -453,7 +469,9 @@ class URDFGeneratorWindow(QMainWindow):
                         model_info = library.get_model_info(category, model_key)
                         if model_info:
                             content = model_info["content"]
-                            self.visualization_widget.update_visualization(content, None)
+                            self.visualization_widget.update_visualization(
+                                content, None
+                            )
                             self.current_file_path = None
                             self.setWindowTitle(
                                 f"Interactive URDF Generator - {model_info['name']} (Embedded)"
@@ -605,7 +623,9 @@ class URDFGeneratorWindow(QMainWindow):
                 logger.info(f"Pinocchio export saved to: {file_path}")
             except (FileNotFoundError, OSError) as e:
                 logger.error(f"Error exporting for Pinocchio: {e}")
-                QMessageBox.critical(self, "Error", f"Failed to export for Pinocchio: {e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to export for Pinocchio: {e}"
+                )
 
     def show_about(self) -> None:
         """Show the about dialog."""
@@ -666,7 +686,9 @@ class URDFGeneratorWindow(QMainWindow):
             self.status_bar.showMessage("Frankenstein mode closed")
         except ImportError as e:
             logger.error(f"Failed to open Frankenstein mode: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to open Frankenstein mode: {e}")
+            QMessageBox.critical(
+                self, "Error", f"Failed to open Frankenstein mode: {e}"
+            )
 
     def _open_code_editor(self) -> None:
         """Open the URDF code editor."""

@@ -47,8 +47,12 @@ def compute_rotation(request: RotationConverterRequest) -> RotationConverterResp
         elif request.type == "axis_angle":
             val = request.value
             if not isinstance(val, list) or len(val) != 4:
-                raise ValueError("Axis-angle must be a list of 4 floats: [x, y, z, angle].")
-            axis = np.array([float(str(val[0])), float(str(val[1])), float(str(val[2]))])
+                raise ValueError(
+                    "Axis-angle must be a list of 4 floats: [x, y, z, angle]."
+                )
+            axis = np.array(
+                [float(str(val[0])), float(str(val[1])), float(str(val[2]))]
+            )
             norm = np.linalg.norm(axis)
             if norm > 1e-12:
                 axis = axis / norm
@@ -62,7 +66,9 @@ def compute_rotation(request: RotationConverterRequest) -> RotationConverterResp
         else:
             raise ValueError(f"Unknown representation type: {request.type}")
     except (ValueError, TypeError, ArithmeticError) as exc:
-        raise HTTPException(status_code=422, detail=f"Invalid rotation input: {exc}") from exc
+        raise HTTPException(
+            status_code=422, detail=f"Invalid rotation input: {exc}"
+        ) from exc
 
     try:
         # Generate outputs
@@ -95,7 +101,9 @@ def compute_rotation(request: RotationConverterRequest) -> RotationConverterResp
         return RotationConverterResponse(representations=rep_model)
 
     except (AttributeError, TypeError, ArithmeticError) as exc:
-        raise HTTPException(status_code=500, detail=f"Failed building outputs: {exc}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Failed building outputs: {exc}"
+        ) from exc
 
 
 @router.post("/reference-frame", response_model=ReferenceFrameConversionResponse)

@@ -51,7 +51,9 @@ def sample_data() -> tuple:
     # Simple sine wave
     pos = np.column_stack([np.sin(2 * np.pi * t), np.cos(2 * np.pi * t)])
     # Derivative roughly
-    vel = np.column_stack([2 * np.pi * np.cos(2 * np.pi * t), -2 * np.pi * np.sin(2 * np.pi * t)])
+    vel = np.column_stack(
+        [2 * np.pi * np.cos(2 * np.pi * t), -2 * np.pi * np.sin(2 * np.pi * t)]
+    )
     # Torque proportional to position (spring)
     torque = -10.0 * pos
     return t, pos, vel, torque
@@ -167,7 +169,9 @@ def test_plot_joint_stiffness(sample_data) -> None:
     # Check if regression line exists
     ax = fig.axes[0]
     lines = ax.get_lines()
-    assert len(lines) >= 2  # scatter points (collection) + regression line + maybe trajectory line
+    assert (
+        len(lines) >= 2
+    )  # scatter points (collection) + regression line + maybe trajectory line
 
 
 def test_plot_dynamic_stiffness(sample_data) -> None:

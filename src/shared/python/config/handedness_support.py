@@ -261,7 +261,10 @@ def mirror_joint_configuration(
             # (i.e., has significant X or Z component)
             if abs(axis_np[1]) < Y_AXIS_ALIGNMENT_THRESHOLD:  # Not a Y-axis rotation
                 q_mirrored[i] = -q[i]
-        elif jtype.lower() == "prismatic" and abs(axis_np[1]) > Y_AXIS_SIGNIFICANCE_THRESHOLD:
+        elif (
+            jtype.lower() == "prismatic"
+            and abs(axis_np[1]) > Y_AXIS_SIGNIFICANCE_THRESHOLD
+        ):
             # Prismatic joints: flip if axis crosses mirror plane (has Y component)
             q_mirrored[i] = -q[i]
 
@@ -301,11 +304,15 @@ def mirror_trajectory(
     if orientations is not None:
         mirrored_orientations = np.zeros_like(orientations)
         for i in range(len(orientations)):
-            mirrored_orientations[i] = mirror_rotation_matrix(orientations[i], transform)
+            mirrored_orientations[i] = mirror_rotation_matrix(
+                orientations[i], transform
+            )
         result["orientations"] = mirrored_orientations
 
     if angular_velocities is not None:
-        result["angular_velocities"] = mirror_angular_velocity(angular_velocities, transform)
+        result["angular_velocities"] = mirror_angular_velocity(
+            angular_velocities, transform
+        )
 
     return result
 
@@ -373,9 +380,15 @@ def validate_mirror_trajectory(
     z_preserved = np.allclose(original_positions[:, 2], mirrored_positions[:, 2])
 
     # Check path length preservation
-    original_path_length = np.sum(np.linalg.norm(np.diff(original_positions, axis=0), axis=1))
-    mirrored_path_length = np.sum(np.linalg.norm(np.diff(mirrored_positions, axis=0), axis=1))
-    path_length_preserved = np.isclose(original_path_length, mirrored_path_length, rtol=1e-10)
+    original_path_length = np.sum(
+        np.linalg.norm(np.diff(original_positions, axis=0), axis=1)
+    )
+    mirrored_path_length = np.sum(
+        np.linalg.norm(np.diff(mirrored_positions, axis=0), axis=1)
+    )
+    path_length_preserved = np.isclose(
+        original_path_length, mirrored_path_length, rtol=1e-10
+    )
 
     all_valid = y_flipped and x_preserved and z_preserved and path_length_preserved
 
@@ -486,7 +499,9 @@ class HandednessConverter:
             return result
 
         # Need to mirror
-        return mirror_trajectory(positions, velocities, orientations, angular_velocities)
+        return mirror_trajectory(
+            positions, velocities, orientations, angular_velocities
+        )
 
     def is_conversion_needed(self, target_handedness: Handedness) -> bool:
         """Check if conversion is needed for target handedness.

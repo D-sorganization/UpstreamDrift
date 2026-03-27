@@ -101,7 +101,9 @@ def test_calculate_financial_success(mock_calculator) -> None:
 
 def test_calculate_financial_error_handling(mock_calculator) -> None:
     """Verify that configuration errors gracefully map to 422 errors through the router boundary."""
-    mock_calculator.calculate_financial_model.side_effect = ValueError("Invalid tax rate")
+    mock_calculator.calculate_financial_model.side_effect = ValueError(
+        "Invalid tax rate"
+    )
 
     payload = {
         "plant_capacity_tpd": 100.0,

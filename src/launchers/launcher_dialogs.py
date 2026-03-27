@@ -345,7 +345,9 @@ class LauncherDialogsMixin:
         if use_docker:
             logger.info("Docker mode enabled")
             if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast("Docker mode enabled - engines will run in containers", "info")
+                self.show_toast(
+                    "Docker mode enabled - engines will run in containers", "info"
+                )
         else:
             logger.info("Docker mode disabled")
             if hasattr(self, "toast_manager") and self.toast_manager:
@@ -405,7 +407,9 @@ class LauncherDialogsMixin:
 
             logger.info("WSL mode enabled")
             if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast("WSL mode - full Pinocchio/Drake/Crocoddyl support", "info")
+                self.show_toast(
+                    "WSL mode - full Pinocchio/Drake/Crocoddyl support", "info"
+                )
         else:
             logger.info("WSL mode disabled")
             if hasattr(self, "toast_manager") and self.toast_manager:

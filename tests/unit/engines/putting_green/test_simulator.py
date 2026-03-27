@@ -137,7 +137,9 @@ class TestPuttingGreenSimulator:
         # Time should be 0
         assert simulator.get_time() == 0.0
 
-    def test_step_advances_time(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_step_advances_time(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """Step should advance simulation time."""
         configured_simulator.set_ball_position(np.array([5.0, 10.0]))
         configured_simulator.set_ball_velocity(np.array([2.0, 0.0]))
@@ -159,7 +161,9 @@ class TestPuttingGreenSimulator:
 
         assert final_pos[0] > initial_pos[0]
 
-    def test_forward_computes_kinematics(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_forward_computes_kinematics(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """Forward should compute kinematics without advancing time."""
         configured_simulator.set_ball_position(np.array([5.0, 10.0]))
         configured_simulator.set_ball_velocity(np.array([2.0, 0.0]))
@@ -173,7 +177,9 @@ class TestPuttingGreenSimulator:
         assert configured_simulator.get_last_acceleration() is not None
         assert configured_simulator.get_last_roll_mode() is not None
 
-    def test_get_state_returns_arrays(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_get_state_returns_arrays(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """get_state should return position and velocity arrays."""
         configured_simulator.set_ball_position(np.array([5.0, 10.0]))
         configured_simulator.set_ball_velocity(np.array([2.0, 1.0]))
@@ -214,7 +220,9 @@ class TestPuttingGreenSimulator:
         assert isinstance(result, SimulationResult)
         assert len(result.positions) > 0
 
-    def test_simulate_putt_ball_stops(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_simulate_putt_ball_stops(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """Ball should eventually stop."""
         configured_simulator.set_ball_position(np.array([5.0, 10.0]))
 
@@ -247,7 +255,9 @@ class TestPuttingGreenSimulator:
 
         assert result.holed
 
-    def test_real_time_simulation_mode(self, configured_simulator: PuttingGreenSimulator) -> None:
+    def test_real_time_simulation_mode(
+        self, configured_simulator: PuttingGreenSimulator
+    ) -> None:
         """Should support real-time stepping mode."""
         configured_simulator.set_ball_position(np.array([5.0, 10.0]))
         configured_simulator.set_ball_velocity(np.array([2.0, 0.0]))
@@ -370,7 +380,9 @@ class TestPuttingGreenSimulatorPhysicsInterface:
         assert drift.shape == (2,)
         assert np.all(np.isfinite(drift))
 
-    def test_compute_control_acceleration(self, simulator: PuttingGreenSimulator) -> None:
+    def test_compute_control_acceleration(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Should compute control acceleration from applied force."""
         tau = np.array([0.1, 0.0])  # Applied force
 
@@ -526,7 +538,9 @@ class TestPuttingGreenSimulatorAdvanced:
         variance = np.var(positions_array, axis=0)
         assert np.any(variance > 0)
 
-    def test_scatter_is_deterministic_with_seed(self, simulator: PuttingGreenSimulator) -> None:
+    def test_scatter_is_deterministic_with_seed(
+        self, simulator: PuttingGreenSimulator
+    ) -> None:
         """Scatter analysis should be reproducible with fixed RNG seed."""
         start_pos = np.array([5.0, 10.0])
         stroke_params = StrokeParameters(
@@ -649,4 +663,6 @@ class TestPuttingGreenSimulatorAdvanced:
         simulator.set_ball_position(np.array([5.0, 10.0]))
         replay_result = simulator.simulate_putt(stroke_params)
 
-        assert np.allclose(original_result.final_position, replay_result.final_position, atol=1e-6)
+        assert np.allclose(
+            original_result.final_position, replay_result.final_position, atol=1e-6
+        )

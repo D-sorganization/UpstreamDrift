@@ -139,7 +139,9 @@ def test_digital_twin_detect_anomaly(mock_sim: MagicMock, mock_real: MagicMock) 
     assert anomaly2.anomaly_type == AnomalyType.COLLISION
 
 
-def test_digital_twin_estimated_contacts(mock_sim: MagicMock, mock_real: MagicMock) -> None:
+def test_digital_twin_estimated_contacts(
+    mock_sim: MagicMock, mock_real: MagicMock
+) -> None:
     """Test contact estimation."""
     twin = DigitalTwin(mock_sim, mock_real)
 
@@ -160,7 +162,9 @@ def test_digital_twin_estimated_contacts(mock_sim: MagicMock, mock_real: MagicMo
     assert contacts[1]["contact_id"] == 0
 
 
-def test_digital_twin_anomaly_history(mock_sim: MagicMock, mock_real: MagicMock) -> None:
+def test_digital_twin_anomaly_history(
+    mock_sim: MagicMock, mock_real: MagicMock
+) -> None:
     """Test anomaly history tracking."""
     twin = DigitalTwin(mock_sim, mock_real)
 

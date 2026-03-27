@@ -78,23 +78,37 @@ class TestCalculateFinancialModel:
         assert result.total_revenue > 0.0
 
     def test_higher_capacity_higher_revenue(self) -> None:
-        low = self._CALC.calculate_financial_model(_base_params(plant_capacity_tpd=50.0))
-        high = self._CALC.calculate_financial_model(_base_params(plant_capacity_tpd=200.0))
+        low = self._CALC.calculate_financial_model(
+            _base_params(plant_capacity_tpd=50.0)
+        )
+        high = self._CALC.calculate_financial_model(
+            _base_params(plant_capacity_tpd=200.0)
+        )
         assert high.total_revenue > low.total_revenue
 
     def test_zero_capacity_zero_revenue(self) -> None:
-        result = self._CALC.calculate_financial_model(_base_params(plant_capacity_tpd=0.0))
+        result = self._CALC.calculate_financial_model(
+            _base_params(plant_capacity_tpd=0.0)
+        )
         assert result.total_revenue == 0.0
 
     def test_negative_capital_raises(self) -> None:
         with pytest.raises(AssertionError):
-            self._CALC.calculate_financial_model(_base_params(total_capital_investment=-1.0))
+            self._CALC.calculate_financial_model(
+                _base_params(total_capital_investment=-1.0)
+            )
 
     def test_negative_operating_days_raises(self) -> None:
         with pytest.raises(AssertionError):
-            self._CALC.calculate_financial_model(_base_params(operating_days_per_year=-1))
+            self._CALC.calculate_financial_model(
+                _base_params(operating_days_per_year=-1)
+            )
 
     def test_higher_price_higher_revenue(self) -> None:
-        low = self._CALC.calculate_financial_model(_base_params(product_price_per_ton=100.0))
-        high = self._CALC.calculate_financial_model(_base_params(product_price_per_ton=400.0))
+        low = self._CALC.calculate_financial_model(
+            _base_params(product_price_per_ton=100.0)
+        )
+        high = self._CALC.calculate_financial_model(
+            _base_params(product_price_per_ton=400.0)
+        )
         assert high.total_revenue > low.total_revenue

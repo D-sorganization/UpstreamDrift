@@ -646,7 +646,9 @@ class AISettingsDialog(QDialog):
         response_layout = QVBoxLayout(response_group)
 
         self._streaming_check = QCheckBox("Enable streaming responses")
-        self._streaming_check.setToolTip("Show responses as they're generated (more responsive)")
+        self._streaming_check.setToolTip(
+            "Show responses as they're generated (more responsive)"
+        )
         response_layout.addWidget(self._streaming_check)
 
         layout.addWidget(response_group)

@@ -84,7 +84,9 @@ def _discover_models() -> list[dict[str, str]]:
     return models
 
 
-def _parse_urdf_geometry(visual_elem: Any, materials: dict[str, list[float]]) -> dict[str, Any]:
+def _parse_urdf_geometry(
+    visual_elem: Any, materials: dict[str, list[float]]
+) -> dict[str, Any]:
     """Parse a single <visual> element into geometry data.
 
     Args:
@@ -187,7 +189,9 @@ def _parse_urdf_materials(root: Any) -> dict[str, list[float]]:
     return materials
 
 
-def _parse_urdf_links(root: Any, materials: dict[str, list[float]]) -> list[URDFLinkGeometry]:
+def _parse_urdf_links(
+    root: Any, materials: dict[str, list[float]]
+) -> list[URDFLinkGeometry]:
     """Parse URDF <link> elements into geometry descriptors.
 
     Args:
@@ -363,7 +367,9 @@ async def list_models(
     except (RuntimeError, TypeError, AttributeError) as exc:
         if logger:
             logger.error("Error listing models: %s", exc)
-        raise HTTPException(status_code=500, detail=f"Failed to list models: {str(exc)}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Failed to list models: {str(exc)}"
+        ) from exc
 
 
 @router.get("/models/{model_name}/urdf", response_model=URDFModelResponse)
@@ -423,8 +429,12 @@ async def get_model_urdf(
         result = _parse_urdf(urdf_content)
         return result
     except ValueError as exc:
-        raise HTTPException(status_code=422, detail=f"Failed to parse URDF: {str(exc)}") from exc
+        raise HTTPException(
+            status_code=422, detail=f"Failed to parse URDF: {str(exc)}"
+        ) from exc
     except ImportError as exc:
         if logger:
             logger.error("Error loading model %s: %s", model_name, exc)
-        raise HTTPException(status_code=500, detail=f"Failed to load model: {str(exc)}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Failed to load model: {str(exc)}"
+        ) from exc

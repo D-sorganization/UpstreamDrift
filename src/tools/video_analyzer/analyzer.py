@@ -93,9 +93,10 @@ class SwingAnalyzer:
         self.smoothing_window = smoothing_window
 
     @precondition(
-        lambda self, video_path, stance=StanceDirection.UNKNOWN, progress_callback=None: (
-            video_path is not None and len(video_path) > 0
-        ),
+        lambda self,
+        video_path,
+        stance=StanceDirection.UNKNOWN,
+        progress_callback=None: (video_path is not None and len(video_path) > 0),
         "Video path must be a non-empty string",
     )
     def analyze_video(
@@ -129,7 +130,9 @@ class SwingAnalyzer:
         poses = processor.extract_poses(
             min_confidence=self.min_confidence,
             progress_callback=lambda c, t: (
-                progress_callback("Extracting poses", c / t * 100) if progress_callback else None
+                progress_callback("Extracting poses", c / t * 100)
+                if progress_callback
+                else None
             ),
         )
 
@@ -156,7 +159,9 @@ class SwingAnalyzer:
         "Must have at least 10 valid pose frames",
     )
     @precondition(
-        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: (fps > 0),
+        lambda self, poses, fps=30.0, video_id="", stance=StanceDirection.UNKNOWN: (
+            fps > 0
+        ),
         "FPS must be positive",
     )
     def analyze_poses(
@@ -365,7 +370,9 @@ class SwingAnalyzer:
         frame_duration = 1000 / fps
 
         # Calculate angles for all frames
-        angle_history = [self._calculate_body_angles(p.landmarks, stance) for p in poses]
+        angle_history = [
+            self._calculate_body_angles(p.landmarks, stance) for p in poses
+        ]
 
         # Find top of backswing (max shoulder rotation)
         max_rotation: float = -999.0
@@ -481,7 +488,9 @@ class SwingAnalyzer:
             if p.phase in [SwingPhase.BACKSWING, SwingPhase.TOP_OF_BACKSWING]
         )
         downswing_dur = sum(
-            p.duration for p in phases if p.phase in [SwingPhase.DOWNSWING, SwingPhase.IMPACT]
+            p.duration
+            for p in phases
+            if p.phase in [SwingPhase.DOWNSWING, SwingPhase.IMPACT]
         )
         total = backswing_dur + downswing_dur
 
@@ -599,13 +608,16 @@ class SwingAnalyzer:
             max_movement: float = 0.0
             for pose in poses:
                 nose = pose.landmarks[self.NOSE]
-                dist = math.sqrt((nose.x - address_nose.x) ** 2 + (nose.y - address_nose.y) ** 2)
+                dist = math.sqrt(
+                    (nose.x - address_nose.x) ** 2 + (nose.y - address_nose.y) ** 2
+                )
                 max_movement = max(max_movement, dist)
             head_stability = max(0.0, 100.0 - max_movement * 500)
 
         return PostureMetrics(
             address_spine_angle=angles.spine_angle,
-            address_knee_flexion=(angles.left_knee_flexion + angles.right_knee_flexion) / 2,
+            address_knee_flexion=(angles.left_knee_flexion + angles.right_knee_flexion)
+            / 2,
             address_arm_hang="good",
             head_stability=head_stability,
             early_extension=False,
@@ -694,7 +706,9 @@ class SwingAnalyzer:
 
         for issue in issues[:3]:
             if issue.drill_recommendation:
-                recommendations.append(f"For {issue.name}: {issue.drill_recommendation}")
+                recommendations.append(
+                    f"For {issue.name}: {issue.drill_recommendation}"
+                )
 
         if not issues:
             recommendations.append("Great swing! Focus on consistency.")

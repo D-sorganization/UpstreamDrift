@@ -364,7 +364,9 @@ class ParametricBuilder(BaseURDFBuilder):
                 try:
                     return get_segment_length_ratio(name, self._gender_factor)
                 except (KeyError, ValueError, TypeError) as e:
-                    logger.debug("Anthropometry length lookup failed for %s: %s", name, e)
+                    logger.debug(
+                        "Anthropometry length lookup failed for %s: %s", name, e
+                    )
             return default
 
         return get_mass, get_length
@@ -480,10 +482,14 @@ class ParametricBuilder(BaseURDFBuilder):
         if not (get_mass is not None):
             raise ValueError("get_mass must be provided")
         thorax_height = segment_heights["thorax"]
-        shoulder_width = self._height_m * 0.23 * self._proportions.get("shoulder_width_factor", 1.0)
+        shoulder_width = (
+            self._height_m * 0.23 * self._proportions.get("shoulder_width_factor", 1.0)
+        )
 
         for side, y_sign in [("left", 1), ("right", -1)]:
-            self._add_single_arm(side, y_sign, get_mass, get_length, thorax_height, shoulder_width)
+            self._add_single_arm(
+                side, y_sign, get_mass, get_length, thorax_height, shoulder_width
+            )
 
     def _add_single_arm(
         self,
@@ -566,10 +572,14 @@ class ParametricBuilder(BaseURDFBuilder):
         if not (get_mass is not None):
             raise ValueError("get_mass must be provided")
         pelvis_height = segment_heights["pelvis"]
-        hip_width = self._height_m * 0.1 * self._proportions.get("hip_width_factor", 1.0)
+        hip_width = (
+            self._height_m * 0.1 * self._proportions.get("hip_width_factor", 1.0)
+        )
 
         for side, y_sign in [("left", 1), ("right", -1)]:
-            self._add_single_leg(side, y_sign, get_mass, get_length, pelvis_height, hip_width)
+            self._add_single_leg(
+                side, y_sign, get_mass, get_length, pelvis_height, hip_width
+            )
 
     def _add_single_leg(
         self,

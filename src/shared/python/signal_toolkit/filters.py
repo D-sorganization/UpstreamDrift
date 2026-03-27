@@ -156,7 +156,11 @@ def _normalize_cutoff(
         if filter_type == FilterType.NOTCH:
             btype = "bandstop"
     else:
-        wn = cutoff / nyquist if isinstance(cutoff, (int, float)) else cutoff[0] / nyquist
+        wn = (
+            cutoff / nyquist
+            if isinstance(cutoff, (int, float))
+            else cutoff[0] / nyquist
+        )
 
     return wn, btype
 

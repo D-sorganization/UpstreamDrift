@@ -190,7 +190,10 @@ class DraggableTabWidget(QTabWidget):
             return super().eventFilter(watched, event)
 
         if event.type() == QEvent.Type.MouseButtonPress:
-            if isinstance(event, QMouseEvent) and event.button() == Qt.MouseButton.LeftButton:
+            if (
+                isinstance(event, QMouseEvent)
+                and event.button() == Qt.MouseButton.LeftButton
+            ):
                 self.drag_start_pos = event.globalPosition().toPoint()
 
         elif (
@@ -199,7 +202,9 @@ class DraggableTabWidget(QTabWidget):
             and (event.buttons() & Qt.MouseButton.LeftButton)
         ):
             pos = event.globalPosition().toPoint()
-            if (pos - self.drag_start_pos).manhattanLength() >= (QApplication.startDragDistance()):
+            if (pos - self.drag_start_pos).manhattanLength() >= (
+                QApplication.startDragDistance()
+            ):
                 local = self.mapFromGlobal(pos)
                 bar = self.tabBar()
                 if bar and not bar.geometry().contains(local):
@@ -309,7 +314,9 @@ class DraggableTabWidget(QTabWidget):
             if open_menu:
                 for name in sorted(self.closed_tabs):
                     act = QAction(name, open_menu)
-                    act.triggered.connect(lambda checked, n=name: self.reopen_closed_tab(n))
+                    act.triggered.connect(
+                        lambda checked, n=name: self.reopen_closed_tab(n)
+                    )
                     open_menu.addAction(act)
                 open_menu.addSeparator()
                 all_act = QAction("Open All Tabs", open_menu)
@@ -430,7 +437,9 @@ class DetachedTabWindow(QMainWindow):
         if checked:
             self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
         else:
-            self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
+            self.setWindowFlags(
+                self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint
+            )
         self.show()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:  # type: ignore[override]

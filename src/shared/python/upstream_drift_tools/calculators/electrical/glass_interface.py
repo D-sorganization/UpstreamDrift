@@ -56,9 +56,9 @@ class GlassPropertiesInterface:
             "metal_conductivity": 10000.0,  # S/m - Very high for molten metal
         }
         # Use OrderedDict for LRU cache behavior
-        self._temperature_dependent_data: OrderedDict[tuple[float, Any, float], float] = (
-            OrderedDict()
-        )
+        self._temperature_dependent_data: OrderedDict[
+            tuple[float, Any, float], float
+        ] = OrderedDict()
         self._current_properties: dict[str, Any] = {}  # Store current glass properties
         # Pre-compute reference term for Arrhenius equation
         self._arrhenius_ref_term = (

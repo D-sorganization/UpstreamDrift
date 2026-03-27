@@ -152,7 +152,9 @@ class TestWorkflowEngine:
         engine = WorkflowEngine(registry)
 
         workflow = Workflow(id="test", name="Test", description="Test")
-        workflow.add_step(WorkflowStep(id="intro", name="Intro", description="Introduction"))
+        workflow.add_step(
+            WorkflowStep(id="intro", name="Intro", description="Introduction")
+        )
         engine.register_workflow(workflow)
 
         context = ConversationContext()
@@ -218,7 +220,9 @@ class TestWorkflowEngine:
         engine = WorkflowEngine(registry)
 
         workflow = Workflow(id="test", name="Test", description="Test")
-        workflow.add_step(WorkflowStep(id="step1", name="Step 1", description="Only step"))
+        workflow.add_step(
+            WorkflowStep(id="step1", name="Step 1", description="Only step")
+        )
         engine.register_workflow(workflow)
 
         context = ConversationContext()

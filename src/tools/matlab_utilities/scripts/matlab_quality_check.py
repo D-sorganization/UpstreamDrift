@@ -74,7 +74,9 @@ class MATLABQualityChecker:
         if not has_args:
             issues.append(f"{file_name} (line {i}): Missing arguments validation block")
 
-    def _check_banned_patterns(self, line: str, i: int, file_name: str, issues: list[str]) -> None:
+    def _check_banned_patterns(
+        self, line: str, i: int, file_name: str, issues: list[str]
+    ) -> None:
         """Check for banned placeholders and template patterns."""
         # Pattern strings split to avoid CI placeholder detection
         if not (line is not None):
@@ -93,7 +95,9 @@ class MATLABQualityChecker:
             if re.search(pattern, line):
                 issues.append(f"{file_name} (line {i}): {msg}")
 
-    def _check_anti_patterns(self, line: str, i: int, file_name: str, issues: list[str]) -> None:
+    def _check_anti_patterns(
+        self, line: str, i: int, file_name: str, issues: list[str]
+    ) -> None:
         """Check for common MATLAB anti-patterns."""
         if not (line is not None):
             raise ValueError("line must be provided")
@@ -112,11 +116,16 @@ class MATLABQualityChecker:
 
         # load without output
         if (
-            re.search(r"^\s*load\s+\w+", line) or re.search(r"^\s*load\s*\([^)]+\)", line)
+            re.search(r"^\s*load\s+\w+", line)
+            or re.search(r"^\s*load\s*\([^)]+\)", line)
         ) and "=" not in line:
-            issues.append(f"{file_name} (line {i}): load without output - use 'data = load(...)'")
+            issues.append(
+                f"{file_name} (line {i}): load without output - use 'data = load(...)'"
+            )
 
-    def _check_magic_numbers(self, line: str, i: int, file_name: str, issues: list[str]) -> None:
+    def _check_magic_numbers(
+        self, line: str, i: int, file_name: str, issues: list[str]
+    ) -> None:
         """Check for unexplained magic numbers."""
         if not (line is not None):
             raise ValueError("line must be provided")
@@ -143,12 +152,16 @@ class MATLABQualityChecker:
         matches = re.findall(r"(?<![.\w])(?:\d+\.\d+|\d+)(?![.\w])", line)
         for num in matches:
             # Check for trailing comment explaining it
-            if num not in acceptable and ("%" not in line or line.find(num) > line.find("%")):
+            if num not in acceptable and (
+                "%" not in line or line.find(num) > line.find("%")
+            ):
                 issues.append(
                     f"{file_name} (line {i}): Magic number {num} - define as named constant with unit/source"
                 )
 
-    def _check_function_unsafe(self, line: str, i: int, file_name: str, issues: list[str]) -> None:
+    def _check_function_unsafe(
+        self, line: str, i: int, file_name: str, issues: list[str]
+    ) -> None:
         """Check for dangerous commands inside functions."""
         if not (line is not None):
             raise ValueError("line must be provided")

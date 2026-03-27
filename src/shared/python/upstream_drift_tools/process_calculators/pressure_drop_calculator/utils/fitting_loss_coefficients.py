@@ -175,7 +175,9 @@ def get_fitting_k_factor(fitting_type: str) -> float:
     """
     if fitting_type not in FITTING_K_FACTORS:
         available = ", ".join(sorted(FITTING_K_FACTORS.keys()))
-        raise ValueError(f"Fitting type '{fitting_type}' not found.\nAvailable types: {available}")
+        raise ValueError(
+            f"Fitting type '{fitting_type}' not found.\nAvailable types: {available}"
+        )
 
     return FITTING_K_FACTORS[fitting_type]
 
@@ -415,7 +417,9 @@ def print_fitting_database() -> None:
                 logger.info(f"  {name:50s} K = {k_factor:6.0f}")
 
 
-def calculate_fitting_pressure_drop(k_factor: float, density: float, velocity: float) -> float:
+def calculate_fitting_pressure_drop(
+    k_factor: float, density: float, velocity: float
+) -> float:
     """Calculate pressure drop across a fitting.
 
     ΔP = K × (ρV²/2)

@@ -566,7 +566,9 @@ def search_help(query: str) -> list[tuple[str, str, str]]:
 
         if query_lower in title.lower() or query_lower in description.lower():
             # Extract a snippet around the match
-            snippet = description[:200] + "..." if len(description) > 200 else description
+            snippet = (
+                description[:200] + "..." if len(description) > 200 else description
+            )
             results.append((topic_id, title, snippet.strip()))
 
     return results

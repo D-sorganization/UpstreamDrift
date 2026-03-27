@@ -193,7 +193,9 @@ class BandwidthLimitedNoise(NoiseModel):
     cutoff_frequency: float = 100.0
     sample_rate: float = 1000.0
     order: int = 2
-    _filter_state: NDArray[np.float64] | None = field(init=False, repr=False, default=None)
+    _filter_state: NDArray[np.float64] | None = field(
+        init=False, repr=False, default=None
+    )
     _alpha: float = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -221,7 +223,9 @@ class BandwidthLimitedNoise(NoiseModel):
             return signal.copy()
 
         # First-order IIR filter: y = alpha * x + (1-alpha) * y_prev
-        self._filter_state = self._alpha * signal + (1 - self._alpha) * self._filter_state
+        self._filter_state = (
+            self._alpha * signal + (1 - self._alpha) * self._filter_state
+        )
         return self._filter_state.copy()
 
     def reset(self) -> None:

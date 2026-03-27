@@ -210,14 +210,18 @@ class InputValidator:
             raise ValueError(f"Pressure must be > 0 Pa, got {value}")
 
     @staticmethod
-    def validate_composition(composition: dict[str, float], *, tolerance: float = 1e-6) -> None:
+    def validate_composition(
+        composition: dict[str, float], *, tolerance: float = 1e-6
+    ) -> None:
         """Composition fractions must sum to ~1.0 within *tolerance*.
 
         Also rejects negative fractions.
         """
         for species, fraction in composition.items():
             if fraction < 0:
-                raise ValueError(f"Composition fraction for '{species}' is negative: {fraction}")
+                raise ValueError(
+                    f"Composition fraction for '{species}' is negative: {fraction}"
+                )
         total = math.fsum(composition.values())
         if abs(total - 1.0) > tolerance:
             raise ValueError(f"Composition fractions must sum to 1.0 (got {total})")

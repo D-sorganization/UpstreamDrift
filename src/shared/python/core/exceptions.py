@@ -62,7 +62,9 @@ class ArrayDimensionError(GolfSuiteError):
         else:
             full_message = f"Array '{array_name}' has incorrect dimensions"
             if expected_shape and actual_shape:
-                full_message += f". Expected shape: {expected_shape}, got: {actual_shape}"
+                full_message += (
+                    f". Expected shape: {expected_shape}, got: {actual_shape}"
+                )
             elif expected_shape:
                 full_message += f". Expected shape: {expected_shape}"
             elif actual_shape:

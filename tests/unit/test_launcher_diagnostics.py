@@ -30,7 +30,9 @@ try:
         run_cli_diagnostics,
     )
 except ImportError as e:
-    pytest.skip(f"Cannot import launcher_diagnostics module: {e}", allow_module_level=True)
+    pytest.skip(
+        f"Cannot import launcher_diagnostics module: {e}", allow_module_level=True
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -141,7 +143,8 @@ class TestLauncherDiagnostics:
 
         # Verify counts add up
         assert (
-            summary["passed"] + summary["failed"] + summary["warnings"] == summary["total_checks"]
+            summary["passed"] + summary["failed"] + summary["warnings"]
+            == summary["total_checks"]
         )
 
     def test_check_python_environment(self) -> None:
@@ -181,7 +184,9 @@ class TestLauncherDiagnostics:
         """Test layout config check when no config file exists."""
         diag = LauncherDiagnostics()
 
-        with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE") as mock_path:
+        with patch(
+            "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE"
+        ) as mock_path:
             mock_path.exists.return_value = False
             result = diag.check_layout_config()
 
@@ -203,7 +208,9 @@ class TestLauncherDiagnostics:
             temp_path = Path(f.name)
 
         try:
-            with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path):
+            with patch(
+                "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path
+            ):
                 result = diag.check_layout_config()
 
             assert result.name == "layout_config"
@@ -223,7 +230,9 @@ class TestLauncherDiagnostics:
             temp_path = Path(f.name)
 
         try:
-            with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path):
+            with patch(
+                "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path
+            ):
                 result = diag.check_layout_config()
 
             assert result.name == "layout_config"
@@ -334,7 +343,9 @@ class TestResetLayoutConfig:
         """Test resetting when no config file exists."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_file = Path(tmpdir) / "nonexistent.json"
-            with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file):
+            with patch(
+                "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file
+            ):
                 result = reset_layout_config()
                 assert result is True
 
@@ -344,7 +355,9 @@ class TestResetLayoutConfig:
             config_file = Path(tmpdir) / "layout.json"
             config_file.write_text('{"model_order": ["test"]}')
 
-            with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file):
+            with patch(
+                "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", config_file
+            ):
                 result = reset_layout_config()
                 assert result is True
 
@@ -407,7 +420,9 @@ class TestTileLoadingVerification:
 
             missing = expected_ids - loaded_ids
             assert len(missing) == 0, f"Registry missing: {missing}"
-            assert len(all_models) >= 8, f"Expected at least 8 models, got {len(all_models)}"
+            assert len(all_models) >= 8, (
+                f"Expected at least 8 models, got {len(all_models)}"
+            )
 
         except ImportError as e:
             pytest.skip(f"Dependencies not available: {e}")
@@ -424,7 +439,9 @@ class TestTileLoadingVerification:
             temp_path = Path(f.name)
 
         try:
-            with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path):
+            with patch(
+                "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path
+            ):
                 result = diag.check_layout_config()
 
             assert result.status == "pass"
@@ -450,7 +467,9 @@ class TestTileLoadingVerification:
             temp_path = Path(f.name)
 
         try:
-            with patch("src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path):
+            with patch(
+                "src.launchers.launcher_diagnostics.LAYOUT_CONFIG_FILE", temp_path
+            ):
                 result = diag.check_layout_config()
 
             assert result.status == "warning"
@@ -463,7 +482,9 @@ class TestTileLoadingVerification:
 class TestCLIDiagnostics:
     """Tests for CLI diagnostic output."""
 
-    def test_run_cli_diagnostics_no_errors(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_run_cli_diagnostics_no_errors(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
         """Test CLI diagnostics runs without errors.
 
         run_cli_diagnostics() emits output via the ``logging`` module

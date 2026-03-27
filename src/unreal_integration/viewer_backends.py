@@ -398,7 +398,9 @@ class MeshcatBackend(ViewerBackend):
 
         except ImportError as e:
             logger.error(f"Failed to import meshcat: {e}")
-            raise RuntimeError("Meshcat not available. Install with: pip install meshcat") from e
+            raise RuntimeError(
+                "Meshcat not available. Install with: pip install meshcat"
+            ) from e
 
     def shutdown(self) -> None:
         """Shutdown Meshcat visualizer."""
@@ -727,7 +729,9 @@ class PyVistaBackend(ViewerBackend):
 
         except ImportError as e:
             logger.error(f"Failed to import pyvista: {e}")
-            raise RuntimeError("PyVista not available. Install with: pip install pyvista") from e
+            raise RuntimeError(
+                "PyVista not available. Install with: pip install pyvista"
+            ) from e
 
     def shutdown(self) -> None:
         """Shutdown PyVista plotter."""
@@ -1014,7 +1018,9 @@ class UnrealBridgeBackend(ViewerBackend):
         self._server_ready_event.wait(timeout=5.0)
 
         self._is_initialized = True
-        logger.info(f"Unreal Bridge backend initialized on port {self.config.server_port}")
+        logger.info(
+            f"Unreal Bridge backend initialized on port {self.config.server_port}"
+        )
 
     def _run_server_loop(self) -> None:
         """Run the asyncio event loop for the server."""

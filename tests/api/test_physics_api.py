@@ -221,7 +221,9 @@ class TestResponseModels:
             engine_name="MuJoCo",
             engine_type="mujoco",
             capabilities=[
-                CapabilityLevelResponse(name="mass_matrix", level="full", supported=True),
+                CapabilityLevelResponse(
+                    name="mass_matrix", level="full", supported=True
+                ),
             ],
             summary={"full": 1, "partial": 0, "none": 0},
         )

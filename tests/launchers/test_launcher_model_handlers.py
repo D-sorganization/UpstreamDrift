@@ -221,4 +221,6 @@ def test_registry():
     mock_handler.launch.return_value = True
     assert registry.launch_model("custom", "model", Path("/repo"), MagicMock()) is True
 
-    assert registry.launch_model("unknown", "model", Path("/repo"), MagicMock()) is False
+    assert (
+        registry.launch_model("unknown", "model", Path("/repo"), MagicMock()) is False
+    )

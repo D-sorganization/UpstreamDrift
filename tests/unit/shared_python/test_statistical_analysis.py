@@ -40,7 +40,9 @@ class TestStatisticalAnalyzer:
         # Torques: Proportional to acceleration (approx)
         joint_torques = np.zeros((n_samples, n_joints))
         joint_torques[:, 0] = -((2 * np.pi * 1.0) ** 2) * np.sin(2 * np.pi * 1.0 * t)
-        joint_torques[:, 1] = -((2 * np.pi * 1.5) ** 2) * np.sin(2 * np.pi * 1.5 * t + 0.5)
+        joint_torques[:, 1] = -((2 * np.pi * 1.5) ** 2) * np.sin(
+            2 * np.pi * 1.5 * t + 0.5
+        )
         joint_torques[:, 2] = -((2 * np.pi * 0.5) ** 2) * np.cos(2 * np.pi * 0.5 * t)
 
         # Club Head Speed (Gaussian profile for swing)

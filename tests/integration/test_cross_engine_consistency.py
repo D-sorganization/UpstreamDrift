@@ -94,10 +94,12 @@ class TestCrossEngineConsistency:
                     name1, results[name1], name2, results[name2], metric="position"
                 )
                 logger.info(
-                    f"Mass matrix {name1} vs {name2}: " f"deviation={result.max_deviation:.2e}"
+                    f"Mass matrix {name1} vs {name2}: "
+                    f"deviation={result.max_deviation:.2e}"
                 )
                 assert result.severity in ["PASSED", "WARNING"], (
-                    f"Mass matrix mismatch between {name1} and {name2}: " f"{result.message}"
+                    f"Mass matrix mismatch between {name1} and {name2}: "
+                    f"{result.message}"
                 )
 
     def test_gravity_forces_consistency(
@@ -143,10 +145,12 @@ class TestCrossEngineConsistency:
                     name1, results[name1], name2, results[name2], metric="torque"
                 )
                 logger.info(
-                    f"Gravity forces {name1} vs {name2}: " f"deviation={result.max_deviation:.2e}"
+                    f"Gravity forces {name1} vs {name2}: "
+                    f"deviation={result.max_deviation:.2e}"
                 )
                 assert result.severity in ["PASSED", "WARNING"], (
-                    f"Gravity force mismatch between {name1} and {name2}: " f"{result.message}"
+                    f"Gravity force mismatch between {name1} and {name2}: "
+                    f"{result.message}"
                 )
 
     def test_bias_forces_consistency(
@@ -192,7 +196,8 @@ class TestCrossEngineConsistency:
                     name1, results[name1], name2, results[name2], metric="torque"
                 )
                 logger.info(
-                    f"Bias forces {name1} vs {name2}: " f"deviation={result.max_deviation:.2e}"
+                    f"Bias forces {name1} vs {name2}: "
+                    f"deviation={result.max_deviation:.2e}"
                 )
                 assert result.severity in [
                     "PASSED",
@@ -252,14 +257,18 @@ class TestCrossEngineConsistency:
                 q2, v2 = final_states[name2]
 
                 # Position comparison
-                pos_result = validator.compare_states(name1, q1, name2, q2, metric="position")
+                pos_result = validator.compare_states(
+                    name1, q1, name2, q2, metric="position"
+                )
                 logger.info(
                     f"Trajectory position {name1} vs {name2}: "
                     f"deviation={pos_result.max_deviation:.2e}"
                 )
 
                 # Velocity comparison
-                vel_result = validator.compare_states(name1, v1, name2, v2, metric="velocity")
+                vel_result = validator.compare_states(
+                    name1, v1, name2, v2, metric="velocity"
+                )
                 logger.info(
                     f"Trajectory velocity {name1} vs {name2}: "
                     f"deviation={vel_result.max_deviation:.2e}"
@@ -346,7 +355,9 @@ class TestThreeWayTriangulation:
 
         # Check if any engine is the clear outlier
         for engine_name in ["MuJoCo", "Drake", "Pinocchio"]:
-            other_engines = [n for n in ["MuJoCo", "Drake", "Pinocchio"] if n != engine_name]
+            other_engines = [
+                n for n in ["MuJoCo", "Drake", "Pinocchio"] if n != engine_name
+            ]
 
             disagrees_with_first = False
             disagrees_with_second = False
@@ -365,7 +376,10 @@ class TestThreeWayTriangulation:
                 # Check if the other two agree
                 sorted_other = sorted(other_engines)
                 other_pair: tuple[str, str] = (sorted_other[0], sorted_other[1])
-                if other_pair in deviations and deviations[other_pair] < agreement_threshold:
+                if (
+                    other_pair in deviations
+                    and deviations[other_pair] < agreement_threshold
+                ):
                     logger.warning(
                         f"Triangulation identified {engine_name} as outlier: "
                         f"disagrees with both {other_engines[0]} and {other_engines[1]}"
@@ -373,6 +387,6 @@ class TestThreeWayTriangulation:
 
         # For now, just verify that at least two engines agree closely
         min_deviation = min(deviations.values()) if deviations else float("inf")
-        assert (
-            min_deviation < agreement_threshold
-        ), f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
+        assert min_deviation < agreement_threshold, (
+            f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
+        )

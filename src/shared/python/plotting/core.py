@@ -93,11 +93,15 @@ class GolfSwingPlotter:
 
     # --- Kinematics ---
 
-    def plot_joint_angles(self, fig: Figure, joint_indices: list[int] | None = None) -> None:
+    def plot_joint_angles(
+        self, fig: Figure, joint_indices: list[int] | None = None
+    ) -> None:
         """Plot joint angles over time."""
         self.kinematics.plot_joint_angles(fig, joint_indices)
 
-    def plot_joint_velocities(self, fig: Figure, joint_indices: list[int] | None = None) -> None:
+    def plot_joint_velocities(
+        self, fig: Figure, joint_indices: list[int] | None = None
+    ) -> None:
         """Plot joint velocities over time."""
         self.kinematics.plot_joint_velocities(fig, joint_indices)
 
@@ -110,7 +114,9 @@ class GolfSwingPlotter:
         ax: Axes | None = None,
     ) -> None:
         """Plot Angle-Angle diagram (Cyclogram) for two joints."""
-        self.kinematics.plot_angle_angle_diagram(fig, joint_idx_1, joint_idx_2, title, ax)
+        self.kinematics.plot_angle_angle_diagram(
+            fig, joint_idx_1, joint_idx_2, title, ax
+        )
 
     def plot_phase_diagram(self, fig: Figure, joint_idx: int = 0) -> None:
         """Plot phase diagram (angle vs angular velocity) for a joint."""
@@ -129,7 +135,9 @@ class GolfSwingPlotter:
         title: str | None = None,
     ) -> None:
         """Plot 3D Poincaré Map (Poincaré Section)."""
-        self.kinematics.plot_poincare_map_3d(fig, dimensions, section_condition, direction, title)
+        self.kinematics.plot_poincare_map_3d(
+            fig, dimensions, section_condition, direction, title
+        )
 
     def plot_phase_space_reconstruction(
         self,
@@ -144,13 +152,17 @@ class GolfSwingPlotter:
             fig, joint_idx, delay, embedding_dim, signal_type
         )
 
-    def plot_phase_space_density(self, fig: Figure, joint_idx: int = 0, bins: int = 50) -> None:
+    def plot_phase_space_density(
+        self, fig: Figure, joint_idx: int = 0, bins: int = 50
+    ) -> None:
         """Plot 2D Phase Space Density (Histogram)."""
         self.kinematics.plot_phase_space_density(fig, joint_idx, bins)
 
     # --- Kinetics ---
 
-    def plot_joint_torques(self, fig: Figure, joint_indices: list[int] | None = None) -> None:
+    def plot_joint_torques(
+        self, fig: Figure, joint_indices: list[int] | None = None
+    ) -> None:
         """Plot applied joint torques over time."""
         self.kinetics.plot_joint_torques(fig, joint_indices)
 
@@ -162,7 +174,9 @@ class GolfSwingPlotter:
         """Plot comparison of all joint torques."""
         self.kinetics.plot_torque_comparison(fig)
 
-    def plot_work_loop(self, fig: Figure, joint_idx: int = 0, title: str | None = None) -> None:
+    def plot_work_loop(
+        self, fig: Figure, joint_idx: int = 0, title: str | None = None
+    ) -> None:
         """Plot Work Loop (Torque vs Angle) for a joint."""
         self.kinetics.plot_work_loop(fig, joint_idx, title)
 
@@ -170,7 +184,9 @@ class GolfSwingPlotter:
         """Plot power flow (stacked bar) over time."""
         self.kinetics.plot_power_flow(fig)
 
-    def plot_joint_power_curves(self, fig: Figure, joint_indices: list[int] | None = None) -> None:
+    def plot_joint_power_curves(
+        self, fig: Figure, joint_indices: list[int] | None = None
+    ) -> None:
         """Plot joint power curves with generation/absorption regions."""
         self.kinetics.plot_joint_power_curves(fig, joint_indices)
 
@@ -180,7 +196,9 @@ class GolfSwingPlotter:
         """Plot cumulative impulse (integrated torque) over time."""
         self.kinetics.plot_impulse_accumulation(fig, joint_indices)
 
-    def plot_joint_stiffness(self, fig: Figure, joint_idx: int = 0, ax: Axes | None = None) -> None:
+    def plot_joint_stiffness(
+        self, fig: Figure, joint_idx: int = 0, ax: Axes | None = None
+    ) -> None:
         """Plot joint stiffness (moment-angle relationship)."""
         self.kinetics.plot_joint_stiffness(fig, joint_idx, ax)
 
@@ -210,7 +228,9 @@ class GolfSwingPlotter:
         breakdown_mode: bool = False,
     ) -> None:
         """Plot induced accelerations."""
-        self.kinetics.plot_induced_acceleration(fig, source_name, joint_idx, breakdown_mode)
+        self.kinetics.plot_induced_acceleration(
+            fig, source_name, joint_idx, breakdown_mode
+        )
 
     # --- Energy ---
 
@@ -232,13 +252,17 @@ class GolfSwingPlotter:
         """Plot fitted swing plane and trajectory deviation."""
         self.club.plot_swing_plane(fig)
 
-    def plot_club_induced_acceleration(self, fig: Figure, breakdown_mode: bool = True) -> None:
+    def plot_club_induced_acceleration(
+        self, fig: Figure, breakdown_mode: bool = True
+    ) -> None:
         """Plot club head task-space induced accelerations."""
         self.club.plot_club_induced_acceleration(fig, breakdown_mode)
 
     # --- Signal ---
 
-    def plot_jerk_trajectory(self, fig: Figure, joint_indices: list[int] | None = None) -> None:
+    def plot_jerk_trajectory(
+        self, fig: Figure, joint_indices: list[int] | None = None
+    ) -> None:
         """Plot jerk (rate of change of acceleration) over time."""
         self.signal.plot_jerk_trajectory(fig, joint_indices)
 
@@ -275,7 +299,9 @@ class GolfSwingPlotter:
         title_prefix: str = "",
     ) -> None:
         """Plot Continuous Wavelet Transform (CWT) scalogram."""
-        self.signal.plot_wavelet_scalogram(fig, joint_idx, signal_type, freq_range, title_prefix)
+        self.signal.plot_wavelet_scalogram(
+            fig, joint_idx, signal_type, freq_range, title_prefix
+        )
 
     def plot_cross_wavelet(
         self,
@@ -286,7 +312,9 @@ class GolfSwingPlotter:
         freq_range: tuple[float, float] = (1.0, 50.0),
     ) -> None:
         """Plot Cross Wavelet Transform (XWT) between two signals."""
-        self.signal.plot_cross_wavelet(fig, joint_idx_1, joint_idx_2, signal_type, freq_range)
+        self.signal.plot_cross_wavelet(
+            fig, joint_idx_1, joint_idx_2, signal_type, freq_range
+        )
 
     # --- Coordination ---
 
@@ -323,7 +351,9 @@ class GolfSwingPlotter:
         title: str = "Sequence Alignment",
     ) -> None:
         """Plot alignment between two sequences (DTW)."""
-        self.coordination.plot_dtw_alignment(fig, times1, data1, times2, data2, path, title)
+        self.coordination.plot_dtw_alignment(
+            fig, times1, data1, times2, data2, path, title
+        )
 
     def plot_cross_recurrence_plot(
         self,
@@ -352,7 +382,9 @@ class GolfSwingPlotter:
         slope_val: float | None = None,
     ) -> None:
         """Plot Correlation Sum C(r) vs r on log-log scale."""
-        self.coordination.plot_correlation_sum(fig, radii, counts, slope_region, slope_val)
+        self.coordination.plot_correlation_sum(
+            fig, radii, counts, slope_region, slope_val
+        )
 
     def plot_lag_matrix(
         self, fig: Figure, data_type: str = "velocity", max_lag: float = 0.5
@@ -376,7 +408,9 @@ class GolfSwingPlotter:
         impact_time: float | None = None,
     ) -> None:
         """Plot kinematic sequence as a Gantt-style bar chart of peak times."""
-        self.coordination.plot_kinematic_sequence_bars(fig, segment_indices, impact_time)
+        self.coordination.plot_kinematic_sequence_bars(
+            fig, segment_indices, impact_time
+        )
 
     def plot_x_factor_cycle(self, fig: Figure, shoulder_idx: int, hip_idx: int) -> None:
         """Plot X-Factor Cycle (Stretch-Shortening Cycle)."""
@@ -398,7 +432,9 @@ class GolfSwingPlotter:
         window_size: int = 20,
     ) -> None:
         """Plot Rolling Correlation between two joint velocities."""
-        self.coordination.plot_dynamic_correlation(fig, joint_idx_1, joint_idx_2, window_size)
+        self.coordination.plot_dynamic_correlation(
+            fig, joint_idx_1, joint_idx_2, window_size
+        )
 
     def plot_synergy_trajectory(
         self,
@@ -417,7 +453,9 @@ class GolfSwingPlotter:
         modes_to_plot: int = 3,
     ) -> None:
         """Plot PCA/Principal Movements analysis results."""
-        self.coordination.plot_principal_component_analysis(fig, pca_result, modes_to_plot)
+        self.coordination.plot_principal_component_analysis(
+            fig, pca_result, modes_to_plot
+        )
 
     # --- Stability ---
 
@@ -448,7 +486,9 @@ class GolfSwingPlotter:
         scale: float = 0.1,
     ) -> None:
         """Plot 3D vector field along a trajectory."""
-        self.stability.plot_3d_vector_field(fig, vector_name, position_name, skip_steps, scale)
+        self.stability.plot_3d_vector_field(
+            fig, vector_name, position_name, skip_steps, scale
+        )
 
     def plot_local_stability(
         self,

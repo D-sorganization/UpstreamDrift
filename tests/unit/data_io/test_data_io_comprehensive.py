@@ -69,7 +69,9 @@ class TestConvertUnits:
             "ft-to-m",
         ],
     )
-    def test_unit_conversion(self, value: float, from_u: str, to_u: str, expected: float) -> None:
+    def test_unit_conversion(
+        self, value: float, from_u: str, to_u: str, expected: float
+    ) -> None:
         """Unit conversions should produce the expected result."""
         assert convert_units(value, from_u, to_u) == pytest.approx(expected, rel=0.01)
 

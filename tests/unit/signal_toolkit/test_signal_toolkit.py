@@ -188,7 +188,9 @@ class TestSignalGenerator:
         """Test step generation."""
         t = np.linspace(0, 10, 100)
 
-        signal = SignalGenerator.step(t, step_time=5.0, step_value=2.0, initial_value=0.0)
+        signal = SignalGenerator.step(
+            t, step_time=5.0, step_value=2.0, initial_value=0.0
+        )
 
         # Before step
         assert signal.values[0] == 0.0
@@ -306,7 +308,9 @@ class TestLimits:
         values = np.linspace(-2, 2, 100)
 
         signal = Signal(t, values)
-        saturated = apply_saturation(signal, lower=-1.0, upper=1.0, mode=SaturationMode.HARD)
+        saturated = apply_saturation(
+            signal, lower=-1.0, upper=1.0, mode=SaturationMode.HARD
+        )
 
         assert max(saturated.values) <= 1.0
         assert min(saturated.values) >= -1.0
@@ -317,7 +321,9 @@ class TestLimits:
         values = np.linspace(-5, 5, 100)
 
         signal = Signal(t, values)
-        saturated = apply_saturation(signal, lower=-1.0, upper=1.0, mode=SaturationMode.TANH)
+        saturated = apply_saturation(
+            signal, lower=-1.0, upper=1.0, mode=SaturationMode.TANH
+        )
 
         # Tanh smoothly approaches limits
         assert max(saturated.values) <= 1.0
@@ -520,7 +526,9 @@ class TestFilters:
 
         signal = Signal(t, values)
 
-        spec = FilterDesigner.butterworth(FilterType.LOWPASS, cutoff=5.0, fs=fs, order=4)
+        spec = FilterDesigner.butterworth(
+            FilterType.LOWPASS, cutoff=5.0, fs=fs, order=4
+        )
         filtered = apply_filter(signal, spec)
 
         # High frequency should be attenuated
@@ -535,7 +543,9 @@ class TestFilters:
 
         signal = Signal(t, values)
 
-        spec = FilterDesigner.butterworth(FilterType.HIGHPASS, cutoff=10.0, fs=fs, order=4)
+        spec = FilterDesigner.butterworth(
+            FilterType.HIGHPASS, cutoff=10.0, fs=fs, order=4
+        )
         filtered = apply_filter(signal, spec)
 
         # DC should be removed
@@ -546,12 +556,18 @@ class TestFilters:
         t = np.linspace(0, 10, 2000)
         fs = 200.0
         # Components at 5Hz, 15Hz, and 30Hz
-        values = np.sin(2 * np.pi * 5 * t) + np.sin(2 * np.pi * 15 * t) + np.sin(2 * np.pi * 30 * t)
+        values = (
+            np.sin(2 * np.pi * 5 * t)
+            + np.sin(2 * np.pi * 15 * t)
+            + np.sin(2 * np.pi * 30 * t)
+        )
 
         signal = Signal(t, values)
 
         # Bandpass 10-20 Hz should keep only 15Hz
-        spec = FilterDesigner.butterworth(FilterType.BANDPASS, cutoff=(10.0, 20.0), fs=fs, order=4)
+        spec = FilterDesigner.butterworth(
+            FilterType.BANDPASS, cutoff=(10.0, 20.0), fs=fs, order=4
+        )
         filtered = apply_filter(signal, spec)
 
         # Energy should be reduced
@@ -661,7 +677,9 @@ class TestIO:
             SignalExporter.to_npz(original, path)
 
             # Import
-            imported = SignalImporter.from_npz(path, time_key="time", value_key="npz_test")
+            imported = SignalImporter.from_npz(
+                path, time_key="time", value_key="npz_test"
+            )
 
             # Compare
             assert np.allclose(original.time, imported.time)
@@ -739,7 +757,9 @@ class TestIntegration:
         signal = SignalGenerator.sinusoid(t, amplitude=5.0, frequency=2.0)
 
         # Apply saturation
-        saturated = apply_saturation(signal, lower=-3.0, upper=3.0, mode=SaturationMode.TANH)
+        saturated = apply_saturation(
+            signal, lower=-3.0, upper=3.0, mode=SaturationMode.TANH
+        )
 
         # Add noise
         noisy = add_noise_to_signal(saturated, NoiseType.WHITE, snr_db=20)

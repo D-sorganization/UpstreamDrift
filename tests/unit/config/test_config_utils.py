@@ -198,7 +198,9 @@ class TestMergeConfigs:
         assert result["x"] == 99
 
     def test_deep_merge(self) -> None:
-        result = merge_configs({"ui": {"theme": "dark", "size": 12}}, {"ui": {"theme": "light"}})
+        result = merge_configs(
+            {"ui": {"theme": "dark", "size": 12}}, {"ui": {"theme": "light"}}
+        )
         assert result["ui"]["theme"] == "light"
         assert result["ui"]["size"] == 12
 

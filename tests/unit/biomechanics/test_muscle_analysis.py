@@ -5,7 +5,9 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-pytest.importorskip("sklearn", reason="scikit-learn is required for muscle synergy analysis")
+pytest.importorskip(
+    "sklearn", reason="scikit-learn is required for muscle synergy analysis"
+)
 
 from src.shared.python.biomechanics.muscle_analysis import (  # noqa: E402
     MuscleSynergyAnalyzer,
@@ -115,7 +117,9 @@ class TestFindOptimalSynergies:
         assert isinstance(result, SynergyResult)
 
     def test_result_meets_threshold(self) -> None:
-        result = self.analyzer.find_optimal_synergies(max_synergies=4, vaf_threshold=0.5)
+        result = self.analyzer.find_optimal_synergies(
+            max_synergies=4, vaf_threshold=0.5
+        )
         assert result.vaf >= 0.5 - 0.01  # Allow tolerance
 
     def test_result_n_synergies_in_range(self) -> None:

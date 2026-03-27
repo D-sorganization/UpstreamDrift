@@ -67,7 +67,9 @@ class TestPhysicsParameter(unittest.TestCase):
 
     def test_to_dict(self):
         """Test dictionary conversion."""
-        param = PhysicsParameter("TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test")
+        param = PhysicsParameter(
+            "TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test"
+        )
         d = param.to_dict()
         self.assertEqual(d["value"], 10.0)
         self.assertEqual(d["category"], "simulation")
@@ -85,7 +87,9 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
 
     def test_register_get(self):
         """Test registering and getting parameters."""
-        param = PhysicsParameter("TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test")
+        param = PhysicsParameter(
+            "TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test"
+        )
         self.registry.register(param)
 
         retrieved = self.registry.get("TEST")
@@ -154,7 +158,9 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
 
         # Mock open for import
         import_data = {"P1": {"value": 2.0}}
-        with patch("builtins.open", new_callable=mock_open, read_data=json.dumps(import_data)):
+        with patch(
+            "builtins.open", new_callable=mock_open, read_data=json.dumps(import_data)
+        ):
             count = self.registry.import_from_json("test.json")
             self.assertEqual(count, 1)
             param = self.registry.get("P1")

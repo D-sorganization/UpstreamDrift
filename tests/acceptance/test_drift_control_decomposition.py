@@ -115,9 +115,9 @@ class TestDriftControlDecomposition:
                 "model may not support clean decomposition"
             )
 
-        assert (
-            max_res < SUPERPOSITION_TOLERANCE
-        ), f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        assert max_res < SUPERPOSITION_TOLERANCE, (
+            f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        )
 
     def test_zero_control(self, engine_name, pendulum_urdf):
         """Verify full dynamics with tau=0 equals drift acceleration."""
@@ -141,7 +141,9 @@ class TestDriftControlDecomposition:
         try:
             a_drift = engine.compute_drift_acceleration()
         except (ValueError, AttributeError, RuntimeError) as exc:
-            pytest.skip(f"{engine_name}: drift acceleration not supported for this model: {exc}")
+            pytest.skip(
+                f"{engine_name}: drift acceleration not supported for this model: {exc}"
+            )
 
         # Determine control dimension (MuJoCo URDFs without actuators have nu=0)
         model = engine.get_model() if hasattr(engine, "get_model") else None
@@ -152,7 +154,9 @@ class TestDriftControlDecomposition:
         if engine_name == "pinocchio":
             import pinocchio as pin
 
-            a_full_zero = pin.aba(engine.model, engine.data, engine.q, engine.v, tau_zero)
+            a_full_zero = pin.aba(
+                engine.model, engine.data, engine.q, engine.v, tau_zero
+            )
         else:
             if nu > 0:
                 engine.set_control(np.zeros(nu))

@@ -176,9 +176,13 @@ def check_minimum_version(
         return False
 
     try:
-        meets_requirement = version.parse(current_version) >= version.parse(minimum_version)
+        meets_requirement = version.parse(current_version) >= version.parse(
+            minimum_version
+        )
         if meets_requirement:
-            logger.debug(f"{module_name} {current_version} meets minimum {minimum_version}")
+            logger.debug(
+                f"{module_name} {current_version} meets minimum {minimum_version}"
+            )
         else:
             logger.warning(
                 f"{module_name} {current_version} does not meet minimum {minimum_version}"

@@ -302,7 +302,9 @@ class FootstepPlanner(ContractChecker):
             goal_yaw = float(np.arctan2(direction[1], direction[0]))
 
         # Generate footsteps along path
-        footsteps = self._generate_straight_path(start, goal, start_yaw, goal_yaw, start_foot)
+        footsteps = self._generate_straight_path(
+            start, goal, start_yaw, goal_yaw, start_foot
+        )
 
         # Compute timing
         total_duration = 0.0
@@ -320,15 +322,21 @@ class FootstepPlanner(ContractChecker):
         )
 
     @precondition(
-        lambda self, current_position, current_yaw, velocity_command, n_steps=4, start_foot="left": (
-            n_steps > 0
-        ),
+        lambda self,
+        current_position,
+        current_yaw,
+        velocity_command,
+        n_steps=4,
+        start_foot="left": (n_steps > 0),
         "Number of steps must be positive",
     )
     @precondition(
-        lambda self, current_position, current_yaw, velocity_command, n_steps=4, start_foot="left": (
-            start_foot in ("left", "right")
-        ),
+        lambda self,
+        current_position,
+        current_yaw,
+        velocity_command,
+        n_steps=4,
+        start_foot="left": (start_foot in ("left", "right")),
         "start_foot must be 'left' or 'right'",
     )
     def plan_from_velocity(
@@ -406,7 +414,9 @@ class FootstepPlanner(ContractChecker):
         dt = self._parameters.step_duration
         step_x = np.clip(vx * dt, -self._max_step_length, self._max_step_length)
         step_y = np.clip(vy * dt, -self._max_step_width, self._max_step_width)
-        step_yaw = np.clip(omega * dt, -self._max_step_rotation, self._max_step_rotation)
+        step_yaw = np.clip(
+            omega * dt, -self._max_step_rotation, self._max_step_rotation
+        )
         return step_x, step_y, step_yaw
 
     def _advance_position(self, pos, yaw, step_x, step_y):

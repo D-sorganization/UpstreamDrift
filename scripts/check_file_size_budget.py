@@ -56,7 +56,9 @@ def _line_count(path: Path) -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Enforce changed-file line-count budget.")
+    parser = argparse.ArgumentParser(
+        description="Enforce changed-file line-count budget."
+    )
     parser.add_argument(
         "--config-path",
         type=Path,
@@ -117,7 +119,9 @@ def main() -> int:
         logger.error("FAIL: file size budget violations detected:\n")
         for violation in violations:
             logger.error("  %s", violation)
-        logger.error("\nSplit orchestration/domain/IO concerns or add owned, expiring exception.")
+        logger.error(
+            "\nSplit orchestration/domain/IO concerns or add owned, expiring exception."
+        )
         return 1
 
     logger.info("OK: Changed files are within line-count budget.")

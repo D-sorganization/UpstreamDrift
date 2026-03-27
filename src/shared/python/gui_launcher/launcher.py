@@ -383,7 +383,9 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
         return 1
 
     if not config.module_path or not config.class_name:
-        logger.error("launch_pyqt6_app requires both module_path and class_name in config")
+        logger.error(
+            "launch_pyqt6_app requires both module_path and class_name in config"
+        )
         return 1
 
     try:
@@ -422,7 +424,9 @@ def launch_pyqt6_app(config: LaunchConfig) -> int:
                 setup_themed_app,  # type: ignore[attr-defined]
             )
 
-            settings_app = config.settings_app or config.tool_name.replace(" ", "").replace("_", "")
+            settings_app = config.settings_app or config.tool_name.replace(
+                " ", ""
+            ).replace("_", "")
             setup_themed_app(app, window, settings_app=settings_app)
         except ImportError:
             logger.warning("Theme system not available, launching without theme")
@@ -455,7 +459,9 @@ def launch_from_gui_info(gui_info: dict[str, Any]) -> int:
     """
     pyqt6 = gui_info.get("pyqt6")
     if not pyqt6:
-        logger.info(f"No pyqt6 config found in GUI_INFO for {gui_info.get('name', '?')}")
+        logger.info(
+            f"No pyqt6 config found in GUI_INFO for {gui_info.get('name', '?')}"
+        )
         return 1
 
     min_size = pyqt6.get("min_size")

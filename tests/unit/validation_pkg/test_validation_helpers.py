@@ -100,7 +100,9 @@ class TestValidateMagnitude:
 
     def test_zero_passes_any_threshold(self) -> None:
         arr = np.zeros(10)
-        validate_magnitude(arr, "zeros", max_value=1.0, units="m/s", level=ValidationLevel.STRICT)
+        validate_magnitude(
+            arr, "zeros", max_value=1.0, units="m/s", level=ValidationLevel.STRICT
+        )
 
 
 class TestPhysicsValidationError:

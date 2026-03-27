@@ -32,7 +32,8 @@ class TestEngineManagerCoverage:
             manager = EngineManager(suite_root=Path("/tmp/fake_root"))
             # Mock engine paths to exist
             manager.engine_paths = {
-                etype: Path(f"/tmp/fake_root/engines/{etype.value}") for etype in EngineType
+                etype: Path(f"/tmp/fake_root/engines/{etype.value}")
+                for etype in EngineType
             }
             return manager
 
@@ -102,7 +103,9 @@ class TestEngineManagerCoverage:
             assert mock_manager.validate_engine_configuration(EngineType.MUJOCO) is True
 
         with patch.object(Path, "exists", return_value=False):
-            assert mock_manager.validate_engine_configuration(EngineType.MUJOCO) is False
+            assert (
+                mock_manager.validate_engine_configuration(EngineType.MUJOCO) is False
+            )
 
     def test_validate_engine_configuration_invalid_type(self, mock_manager):
         """Test validation with invalid engine type."""

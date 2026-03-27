@@ -90,7 +90,9 @@ class ChatMessageBubble(QFrame):
         layout.addWidget(self._content_label)
 
         bg = "#2d2d2d" if role == "user" else "#252526"
-        self.setStyleSheet(f"ChatMessageBubble {{ background-color: {bg}; border-radius: 6px; }}")
+        self.setStyleSheet(
+            f"ChatMessageBubble {{ background-color: {bg}; border-radius: 6px; }}"
+        )
 
     def set_content(self, text: str) -> None:
         """Replace the content text."""
@@ -172,7 +174,9 @@ class ChatDockWidget(QDockWidget):
         # Message scroll area
         self._scroll_area = QScrollArea()
         self._scroll_area.setWidgetResizable(True)
-        self._scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self._scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         self._message_container = QWidget()
         self._message_layout = QVBoxLayout(self._message_container)
         self._message_layout.setContentsMargins(2, 2, 2, 2)

@@ -606,7 +606,9 @@ class TurbulenceModel:
         perturbation = np.zeros(3)
         for i in range(3):
             for j, freq in enumerate(self._freqs):
-                perturbation[i] += self._coeffs[i, j] * math.sin(freq * t + self._phases[i, j])
+                perturbation[i] += self._coeffs[i, j] * math.sin(
+                    freq * t + self._phases[i, j]
+                )
 
         # Normalize and scale
         perturbation = perturbation / len(self._freqs) * self.intensity  # type: ignore[assignment]
@@ -750,7 +752,9 @@ class WindModel:
 
             # Random direction perturbation
             base_speed = self.config.speed
-            gust_speed = base_speed * self.config.gust_intensity * self._rng.uniform(0.5, 1.5)
+            gust_speed = (
+                base_speed * self.config.gust_intensity * self._rng.uniform(0.5, 1.5)
+            )
 
             # Gust direction: mostly aligned with base wind, some random deviation
             base_dir = self.config.direction
@@ -846,7 +850,9 @@ class EnvironmentRandomizer:
         if not self.config.enabled or self.config.temperature_variance <= 0:
             return base_temperature
 
-        return float(self._rng.normal(base_temperature, self.config.temperature_variance))
+        return float(
+            self._rng.normal(base_temperature, self.config.temperature_variance)
+        )
 
     def randomize_wind_config(self, base_config: WindConfig) -> WindConfig:
         """Randomize wind configuration.
@@ -924,7 +930,9 @@ class EnvironmentRandomizer:
             air_density=self.randomize_air_density(base_air_density),
             temperature=self.randomize_temperature(base_temperature),
             wind_config=(
-                self.randomize_wind_config(base_wind_config) if base_wind_config else None
+                self.randomize_wind_config(base_wind_config)
+                if base_wind_config
+                else None
             ),
         )
 
@@ -1056,7 +1064,9 @@ class AerodynamicsEngine:
             lift = self._lift.calculate(rel_velocity, spin, self._current_air_density)
 
         if self.config.is_magnus_active():
-            magnus = self._magnus.calculate(rel_velocity, spin, self._current_air_density)
+            magnus = self._magnus.calculate(
+                rel_velocity, spin, self._current_air_density
+            )
 
         total = drag + lift + magnus
 
@@ -1068,7 +1078,9 @@ class AerodynamicsEngine:
         }
 
     @precondition(
-        lambda self, velocity, spin, mass, t=0.0, position=None, resample=False: (mass > 0),
+        lambda self, velocity, spin, mass, t=0.0, position=None, resample=False: (
+            mass > 0
+        ),
         "mass must be positive (non-zero, non-negative) to avoid ZeroDivisionError",
     )
     def compute_acceleration(

@@ -324,7 +324,10 @@ class TestPredefinedMappings:
         ]
         for bone in required_bones:
             # Check with or without mixamorig prefix
-            assert bone in MIXAMO_TO_PHYSICS_MAP or f"mixamorig:{bone}" in MIXAMO_TO_PHYSICS_MAP
+            assert (
+                bone in MIXAMO_TO_PHYSICS_MAP
+                or f"mixamorig:{bone}" in MIXAMO_TO_PHYSICS_MAP
+            )
 
     def test_unreal_mannequin_mapping_completeness(self):
         """Test Unreal Mannequin mapping covers major bones."""

@@ -17,7 +17,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 
-def validate_path(path: str | Path, allowed_roots: list[Path], strict: bool = True) -> Path:
+def validate_path(
+    path: str | Path, allowed_roots: list[Path], strict: bool = True
+) -> Path:
     """Validate that a path is within allowed root directories.
 
     Args:

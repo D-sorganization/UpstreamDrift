@@ -121,7 +121,9 @@ def test_try_launch_docker(launcher):
     # Model missing path
     model = DummyModel("m1", "M1", "mjcf")
     launcher._try_launch_docker(model)
-    launcher.show_toast.assert_called_with("Model path missing for Docker launch.", "error")
+    launcher.show_toast.assert_called_with(
+        "Model path missing for Docker launch.", "error"
+    )
 
     # Exception
     model = DummyModel("m1", "M1", "mjcf", path="test.xml")
@@ -145,7 +147,9 @@ def test_check_local_dependencies(mock_question, launcher):
 
     # Deps fail, docker available
     launcher.docker_available = True
-    with patch.object(launcher, "_check_module_dependencies", return_value=(False, "error")):
+    with patch.object(
+        launcher, "_check_module_dependencies", return_value=(False, "error")
+    ):
         mock_question.return_value = QMessageBox.StandardButton.Yes
         with patch.object(launcher, "launch_simulation") as mock_launch:
             assert launcher._check_local_dependencies(model) is False
@@ -169,7 +173,9 @@ def test_execute_local_launch(launcher):
 
     handler.launch.return_value = False
     launcher._execute_local_launch(model)
-    launcher.show_toast.assert_called_with("Failed to launch M1 — check console", "error")
+    launcher.show_toast.assert_called_with(
+        "Failed to launch M1 — check console", "error"
+    )
 
     # Handler missing
     launcher.model_handler_registry.get_handler.return_value = None
@@ -181,7 +187,9 @@ def test_execute_local_launch(launcher):
     model2 = DummyModel("m3", "M3", "unknown_type", path="test.xml")
     model2.path = "test.txt"  # Not .xml
     launcher._execute_local_launch(model2)
-    launcher.show_toast.assert_called_with("Unknown launch type: unknown_type", "warning")
+    launcher.show_toast.assert_called_with(
+        "Unknown launch type: unknown_type", "warning"
+    )
 
     # Missing path
     model3 = DummyModel("m4", "M4", "type")
@@ -350,7 +358,9 @@ def test_launch_urdf_generator(launcher):
         proc.poll.return_value = None
         launcher.running_processes["urdf_generator"] = proc
         launcher._launch_urdf_generator()
-        launcher.show_toast.assert_called_with("URDF Generator is already running.", "warning")
+        launcher.show_toast.assert_called_with(
+            "URDF Generator is already running.", "warning"
+        )
 
         launcher.running_processes.pop("urdf_generator", None)
         launcher.process_manager.launch_script.return_value = None
@@ -370,7 +380,9 @@ def test_launch_c3d_viewer(launcher):
         proc.poll.return_value = None
         launcher.running_processes["c3d_viewer"] = proc
         launcher._launch_c3d_viewer()
-        launcher.show_toast.assert_called_with("C3D Viewer is already running.", "warning")
+        launcher.show_toast.assert_called_with(
+            "C3D Viewer is already running.", "warning"
+        )
 
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
         launcher.running_processes.pop("c3d_viewer", None)
@@ -388,7 +400,9 @@ def test_launch_shot_tracer(launcher):
         proc.poll.return_value = None
         launcher.running_processes["shot_tracer"] = proc
         launcher._launch_shot_tracer()
-        launcher.show_toast.assert_called_with("Shot Tracer is already running.", "warning")
+        launcher.show_toast.assert_called_with(
+            "Shot Tracer is already running.", "warning"
+        )
 
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=False):
         launcher._launch_shot_tracer()
@@ -432,4 +446,6 @@ def test_launch_matlab_app(mock_popen, launcher):
     # Missing mathlab not found error
     mock_popen.side_effect = FileNotFoundError("test")
     launcher._launch_matlab_app(model)
-    launcher.show_toast.assert_called_with("MATLAB executable not found in PATH.", "error")
+    launcher.show_toast.assert_called_with(
+        "MATLAB executable not found in PATH.", "error"
+    )

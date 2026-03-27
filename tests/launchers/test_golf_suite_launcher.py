@@ -49,7 +49,9 @@ def test_imports_without_pyqt():
 
     import src.launchers.golf_suite_launcher as gsl
 
-    with patch("src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", False):
+    with patch(
+        "src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", False
+    ):
         try:
             importlib.reload(gsl)
             assert gsl.QtWidgets is None
@@ -109,7 +111,9 @@ def test_launch_script_success(launcher):
 
         launcher._launch_script("Test Engine", fake_path, fake_cwd)
 
-        mock_popen.assert_called_once_with([sys.executable, str(fake_path)], cwd=str(fake_cwd))
+        mock_popen.assert_called_once_with(
+            [sys.executable, str(fake_path)], cwd=str(fake_cwd)
+        )
         launcher.status.setText.assert_called_with("Test Engine Launched")
 
 

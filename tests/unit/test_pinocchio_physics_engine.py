@@ -107,7 +107,9 @@ def test_step(engine):
     engine.tau = np.array([0.0])
 
     # Mock aba return
-    with patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin") as mock_pin:
+    with patch(
+        "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
+    ) as mock_pin:
         mock_pin.aba.return_value = np.array([1.0])  # acceleration
         mock_pin.integrate.return_value = np.array([0.1])
 
@@ -126,7 +128,9 @@ def test_compute_mass_matrix(engine):
     # Mock data.M
     engine.data.M = np.array([[1.0, 0.2], [0.0, 2.0]])  # Upper triangular example
 
-    with patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin") as mock_pin:
+    with patch(
+        "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
+    ) as mock_pin:
         M = engine.compute_mass_matrix()
 
         mock_pin.crba.assert_called_once()
@@ -141,7 +145,9 @@ def test_compute_jacobian(engine):
     engine.model.existBodyName.return_value = True
     engine.model.getFrameId.return_value = 1
 
-    with patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin") as mock_pin:
+    with patch(
+        "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin"
+    ) as mock_pin:
         # 6x2 Jacobian
         mock_J = np.zeros((6, 2))
         mock_J[0, 0] = 1.0  # Linear x

@@ -162,7 +162,9 @@ def _collect_violations() -> list[str]:
                 continue
 
             for src_layer, forbidden_layer in FORBIDDEN_IMPORTS:
-                if source_layer == src_layer and _import_targets_layer(imp, forbidden_layer):
+                if source_layer == src_layer and _import_targets_layer(
+                    imp, forbidden_layer
+                ):
                     violations.append(
                         f"{relative_path}: "
                         f"{source_layer}/ imports from {forbidden_layer}/ "
@@ -177,56 +179,62 @@ class TestDependencyDirection:
 
     def test_shared_does_not_import_engines(self) -> None:
         """src/shared/ must not import from src/engines/."""
-        violations = [v for v in _collect_violations() if "shared/ imports from engines/" in v]
-        assert (
-            violations == []
-        ), f"shared/ layer imports from engines/ ({len(violations)} violations):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        violations = [
+            v for v in _collect_violations() if "shared/ imports from engines/" in v
+        ]
+        assert violations == [], (
+            f"shared/ layer imports from engines/ ({len(violations)} violations):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_shared_does_not_import_api(self) -> None:
         """src/shared/ must not import from src/api/."""
-        violations = [v for v in _collect_violations() if "shared/ imports from api/" in v]
-        assert (
-            violations == []
-        ), f"shared/ layer imports from api/ ({len(violations)} violations):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        violations = [
+            v for v in _collect_violations() if "shared/ imports from api/" in v
+        ]
+        assert violations == [], (
+            f"shared/ layer imports from api/ ({len(violations)} violations):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_shared_does_not_import_launchers(self) -> None:
         """src/shared/ must not import from src/launchers/."""
-        violations = [v for v in _collect_violations() if "shared/ imports from launchers/" in v]
-        assert (
-            violations == []
-        ), f"shared/ layer imports from launchers/ ({len(violations)} violations):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        violations = [
+            v for v in _collect_violations() if "shared/ imports from launchers/" in v
+        ]
+        assert violations == [], (
+            f"shared/ layer imports from launchers/ ({len(violations)} violations):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_engines_does_not_import_api(self) -> None:
         """src/engines/ must not import from src/api/."""
-        violations = [v for v in _collect_violations() if "engines/ imports from api/" in v]
-        assert (
-            violations == []
-        ), f"engines/ layer imports from api/ ({len(violations)} violations):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        violations = [
+            v for v in _collect_violations() if "engines/ imports from api/" in v
+        ]
+        assert violations == [], (
+            f"engines/ layer imports from api/ ({len(violations)} violations):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_engines_does_not_import_launchers(self) -> None:
         """src/engines/ must not import from src/launchers/."""
-        violations = [v for v in _collect_violations() if "engines/ imports from launchers/" in v]
-        assert (
-            violations == []
-        ), f"engines/ layer imports from launchers/ ({len(violations)} violations):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        violations = [
+            v for v in _collect_violations() if "engines/ imports from launchers/" in v
+        ]
+        assert violations == [], (
+            f"engines/ layer imports from launchers/ ({len(violations)} violations):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_api_does_not_import_launchers(self) -> None:
         """src/api/ must not import from src/launchers/."""
-        violations = [v for v in _collect_violations() if "api/ imports from launchers/" in v]
-        assert (
-            violations == []
-        ), f"api/ layer imports from launchers/ ({len(violations)} violations):\n" + "\n".join(
-            f"  - {v}" for v in violations
+        violations = [
+            v for v in _collect_violations() if "api/ imports from launchers/" in v
+        ]
+        assert violations == [], (
+            f"api/ layer imports from launchers/ ({len(violations)} violations):\n"
+            + "\n".join(f"  - {v}" for v in violations)
         )
 
     def test_all_layers_summary(self) -> None:

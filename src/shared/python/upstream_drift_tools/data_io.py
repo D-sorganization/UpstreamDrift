@@ -89,7 +89,9 @@ def read_data(
     if path.suffix.lower() in (".csv", ".tsv", ".txt"):
         if not path.exists():
             raise FileNotFoundError(f"CSV file not found: {path}")
-        delimiter = kwargs.pop("delimiter", "," if path.suffix.lower() != ".tsv" else "\t")
+        delimiter = kwargs.pop(
+            "delimiter", "," if path.suffix.lower() != ".tsv" else "\t"
+        )
         return pd.read_csv(path, delimiter=delimiter, **kwargs)
 
     raise ValueError(f"Unsupported file format: {path.suffix}")

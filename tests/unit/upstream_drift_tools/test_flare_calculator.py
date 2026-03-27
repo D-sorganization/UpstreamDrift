@@ -151,7 +151,9 @@ class TestCalculateCombustionEfficiency:
 
     def test_high_h2s_penalizes_efficiency(self) -> None:
         base = self._CALC.calculate_combustion_efficiency({"N2": 100.0}, 400.0, 1.0)
-        h2s_rich = self._CALC.calculate_combustion_efficiency({"H2S": 100.0}, 400.0, 1.0)
+        h2s_rich = self._CALC.calculate_combustion_efficiency(
+            {"H2S": 100.0}, 400.0, 1.0
+        )
         assert h2s_rich <= base
 
     def test_efficiency_within_bounds(self) -> None:

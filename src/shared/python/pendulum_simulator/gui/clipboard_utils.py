@@ -36,7 +36,9 @@ def matrix_to_tsv(data: np.ndarray) -> str:
     return result
 
 
-def series_to_tsv(x: np.ndarray, y: np.ndarray, x_label: str = "x", y_label: str = "y") -> str:
+def series_to_tsv(
+    x: np.ndarray, y: np.ndarray, x_label: str = "x", y_label: str = "y"
+) -> str:
     """Convert two 1D arrays to tab-separated text with header.
 
     Pre: x.shape == y.shape, both 1D

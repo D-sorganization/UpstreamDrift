@@ -21,7 +21,9 @@ def mock_pinocchio_env() -> Generator[None, None, None]:
     with patch.dict(sys.modules, mock_mods):
         # Clean up module under test to ensure it imports mocks
         if "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks" in sys.modules:
-            del sys.modules["src.engines.physics_engines.pinocchio.python.dtack.ik.tasks"]
+            del sys.modules[
+                "src.engines.physics_engines.pinocchio.python.dtack.ik.tasks"
+            ]
         yield
 
 

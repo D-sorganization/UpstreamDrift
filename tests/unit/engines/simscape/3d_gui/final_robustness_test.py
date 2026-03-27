@@ -27,7 +27,9 @@ def test_data_loading_accuracy() -> bool:
         # Test the WiffleDataLoader
         from wiffle_data_loader import WiffleDataConfig, WiffleDataLoader
 
-        config = WiffleDataConfig(normalize_time=True, filter_noise=True, interpolate_missing=True)
+        config = WiffleDataConfig(
+            normalize_time=True, filter_noise=True, interpolate_missing=True
+        )
 
         loader = WiffleDataLoader(config)
 
@@ -93,7 +95,9 @@ def test_data_consistency() -> bool:
     try:
         from wiffle_data_loader import WiffleDataConfig, WiffleDataLoader
 
-        config = WiffleDataConfig(normalize_time=True, filter_noise=True, interpolate_missing=True)
+        config = WiffleDataConfig(
+            normalize_time=True, filter_noise=True, interpolate_missing=True
+        )
 
         loader = WiffleDataLoader(config)
         excel_file = Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
@@ -169,12 +173,16 @@ def test_error_handling() -> bool:
                 prov1_sheet="NonExistentSheet", wiffle_sheet="NonExistentSheet"
             )
             loader = WiffleDataLoader(config)
-            excel_file = Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
+            excel_file = Path(
+                "../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx"
+            )
             loader.load_excel_data(str(excel_file))
             logger.error("❌ Should have raised error for non-existent sheets")
             return False
         except (FileNotFoundError, OSError) as e:
-            logger.info("✅ Correctly handled invalid sheet names: %s", type(e).__name__)
+            logger.info(
+                "✅ Correctly handled invalid sheet names: %s", type(e).__name__
+            )
 
         return True
 
@@ -196,7 +204,9 @@ def test_performance() -> bool:
         excel_file = Path("../Matlab Inverse Dynamics/Wiffle_ProV1_club_3D_data.xlsx")
 
         # Test loading performance
-        config = WiffleDataConfig(normalize_time=True, filter_noise=True, interpolate_missing=True)
+        config = WiffleDataConfig(
+            normalize_time=True, filter_noise=True, interpolate_missing=True
+        )
 
         loader = WiffleDataLoader(config)
 
@@ -272,7 +282,8 @@ def generate_final_report() -> bool:
         logger.info("1. The data loading system is ready for production use")
         logger.info("2. The simplified body part estimation is working as expected")
         logger.info(
-            "3. Consider implementing more sophisticated biomechanical " "modeling for body parts"
+            "3. Consider implementing more sophisticated biomechanical "
+            "modeling for body parts"
         )
         logger.info("4. The system successfully handles the complex Excel structure")
         logger.info("5. All deprecation warnings have been addressed")

@@ -110,7 +110,9 @@ class Toast(QWidget):
     def _setup_ui(self) -> None:
         """Set up the toast UI."""
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(self.PADDING, self.PADDING, self.PADDING, self.PADDING)
+        layout.setContentsMargins(
+            self.PADDING, self.PADDING, self.PADDING, self.PADDING
+        )
 
         # Message label
         self.label = QLabel(self.message)

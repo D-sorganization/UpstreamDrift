@@ -69,7 +69,10 @@ class EngineRegistry(ContractChecker):
         """Define class invariants for EngineRegistry."""
         return [
             (
-                lambda: (self._registrations is not None and isinstance(self._registrations, dict)),
+                lambda: (
+                    self._registrations is not None
+                    and isinstance(self._registrations, dict)
+                ),
                 "Registrations must be a non-None dict",
             ),
             (

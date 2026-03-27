@@ -158,7 +158,9 @@ def save_json(
         file_path.parent.mkdir(parents=True, exist_ok=True)
 
     with file_path.open("w", encoding=encoding) as f:
-        json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii, sort_keys=sort_keys)
+        json.dump(
+            data, f, indent=indent, ensure_ascii=ensure_ascii, sort_keys=sort_keys
+        )
 
     return file_path
 
@@ -194,7 +196,8 @@ def load_yaml(
     """
     if not YAML_AVAILABLE:
         raise ImportError(
-            "PyYAML is required for YAML operations. " "Install it with: pip install pyyaml"
+            "PyYAML is required for YAML operations. "
+            "Install it with: pip install pyyaml"
         )
 
     file_path = Path(path)
@@ -208,9 +211,7 @@ def load_yaml(
 
     try:
         with file_path.open("r", encoding=encoding) as f:
-            return yaml.load(
-                f, Loader=yaml_loader
-            )  # nosec B506 - Loader defaults to yaml.SafeLoader
+            return yaml.load(f, Loader=yaml_loader)  # nosec B506 - Loader defaults to yaml.SafeLoader
     except yaml.YAMLError as e:
         raise FileParseError(file_path, "YAML", str(e)) from e
 
@@ -249,7 +250,8 @@ def save_yaml(
     """
     if not YAML_AVAILABLE:
         raise ImportError(
-            "PyYAML is required for YAML operations. " "Install it with: pip install pyyaml"
+            "PyYAML is required for YAML operations. "
+            "Install it with: pip install pyyaml"
         )
 
     file_path = Path(path)

@@ -24,7 +24,9 @@ class TestToolsRepoIntegration:
         import signal_toolkit
 
         t = np.linspace(0, 1, 100)
-        signal = signal_toolkit.SignalGenerator.sinusoid(t, amplitude=1.0, frequency=5.0)
+        signal = signal_toolkit.SignalGenerator.sinusoid(
+            t, amplitude=1.0, frequency=5.0
+        )
         assert len(signal.values) == len(t)
 
     def test_humanoid_builder_compatibility(self) -> None:
@@ -46,6 +48,6 @@ class TestCrossRepoImportPaths:
 
         content = pyproject_path.read_text()
         # Check for Tools repo reference
-        assert (
-            "Tools" in content or "tools" in content.lower()
-        ), "Tools integration not documented in pyproject.toml"
+        assert "Tools" in content or "tools" in content.lower(), (
+            "Tools integration not documented in pyproject.toml"
+        )

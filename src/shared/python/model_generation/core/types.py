@@ -143,7 +143,9 @@ class Inertia:
     @precondition(lambda size_x: size_x > 0, "size_x must be positive")
     @precondition(lambda size_y: size_y > 0, "size_y must be positive")
     @precondition(lambda size_z: size_z > 0, "size_z must be positive")
-    def from_box(cls, mass: float, size_x: float, size_y: float, size_z: float) -> Inertia:
+    def from_box(
+        cls, mass: float, size_x: float, size_y: float, size_z: float
+    ) -> Inertia:
         """
         Create inertia for a solid box.
 
@@ -164,7 +166,9 @@ class Inertia:
     @precondition(lambda mass: mass > 0, "Mass must be positive")
     @precondition(lambda radius: radius > 0, "Radius must be positive")
     @precondition(lambda length: length > 0, "Length must be positive")
-    def from_cylinder(cls, mass: float, radius: float, length: float, axis: str = "z") -> Inertia:
+    def from_cylinder(
+        cls, mass: float, radius: float, length: float, axis: str = "z"
+    ) -> Inertia:
         """
         Create inertia for a solid cylinder.
 
@@ -212,7 +216,9 @@ class Inertia:
     @precondition(lambda mass: mass > 0, "Mass must be positive")
     @precondition(lambda radius: radius > 0, "Radius must be positive")
     @precondition(lambda length: length >= 0, "Length must be non-negative")
-    def from_capsule(cls, mass: float, radius: float, length: float, axis: str = "z") -> Inertia:
+    def from_capsule(
+        cls, mass: float, radius: float, length: float, axis: str = "z"
+    ) -> Inertia:
         """
         Create inertia for a solid capsule (cylinder with hemispherical caps).
 
@@ -491,7 +497,8 @@ class Geometry:
         if self.geometry_type == GeometryType.CAPSULE:
             # URDF doesn't have capsule, approximate with cylinder
             logger.warning(
-                "Capsule geometry approximated as cylinder" " (URDF has no native capsule support)"
+                "Capsule geometry approximated as cylinder"
+                " (URDF has no native capsule support)"
             )
             return (
                 f'<geometry><cylinder radius="{self.dimensions[0]:.6g}" '
@@ -571,7 +578,9 @@ class JointDynamics:
 
     def to_urdf_string(self) -> str:
         """Generate URDF dynamics element string."""
-        return f'<dynamics damping="{self.damping:.6g}" friction="{self.friction:.6g}"/>'
+        return (
+            f'<dynamics damping="{self.damping:.6g}" friction="{self.friction:.6g}"/>'
+        )
 
 
 @dataclass
@@ -619,7 +628,9 @@ class Link:
             inertia=Inertia.from_dict(inertia_data),
             visual_geometry=visual_geom,
             visual_origin=Origin.from_dict(data.get("visual_origin", {})),
-            visual_material=(Material.from_dict(data["material"]) if "material" in data else None),
+            visual_material=(
+                Material.from_dict(data["material"]) if "material" in data else None
+            ),
             collision_geometry=collision_geom,
             collision_origin=Origin.from_dict(data.get("collision_origin", {})),
         )

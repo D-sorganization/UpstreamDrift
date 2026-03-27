@@ -472,7 +472,9 @@ class LayoutBuilder:
         self.layout.addSpacing(spacing)
         return self
 
-    def set_margins(self, left: int, top: int, right: int, bottom: int) -> LayoutBuilder:
+    def set_margins(
+        self, left: int, top: int, right: int, bottom: int
+    ) -> LayoutBuilder:
         """Set layout margins.
 
         Args:

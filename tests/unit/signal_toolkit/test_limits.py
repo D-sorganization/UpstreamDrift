@@ -40,7 +40,9 @@ class TestApplySaturation:
 
     def test_sigmoid_mode_runs(self) -> None:
         sig = _make_signal(amp=3.0)
-        result = apply_saturation(sig, lower=-2.0, upper=2.0, mode=SaturationMode.SIGMOID)
+        result = apply_saturation(
+            sig, lower=-2.0, upper=2.0, mode=SaturationMode.SIGMOID
+        )
         assert isinstance(result, Signal)
 
     def test_cubic_mode_runs(self) -> None:

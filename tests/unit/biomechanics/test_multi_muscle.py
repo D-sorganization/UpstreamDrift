@@ -133,7 +133,9 @@ class TestCreateElbowMuscleSystem:
         antagonist_names = list(system.antagonist.muscles.keys())
         agonist_activations = dict.fromkeys(agonist_names, 0.5)
         antagonist_activations = dict.fromkeys(antagonist_names, 0.1)
-        muscle_states = {n: (m.params.l_opt, 0.0) for n, m in system.agonist.muscles.items()}
+        muscle_states = {
+            n: (m.params.l_opt, 0.0) for n, m in system.agonist.muscles.items()
+        }
         muscle_states.update(
             {n: (m.params.l_opt, 0.0) for n, m in system.antagonist.muscles.items()}
         )

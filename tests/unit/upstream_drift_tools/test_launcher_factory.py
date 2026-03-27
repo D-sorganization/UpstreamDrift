@@ -24,7 +24,9 @@ class TestLauncherConfig:
         assert cfg.min_height == 600
 
     def test_custom_dimensions(self) -> None:
-        cfg = LauncherConfig(app_module="a.b", window_title="App", min_width=1024, min_height=768)
+        cfg = LauncherConfig(
+            app_module="a.b", window_title="App", min_width=1024, min_height=768
+        )
         assert cfg.min_width == 1024
 
 

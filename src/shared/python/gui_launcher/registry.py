@@ -319,6 +319,8 @@ def auto_discover_guis(search_paths: list[Path]) -> int:
                     count += 1
                     logger.debug("Loaded GUI registration from: %s", reg_file)
             except ImportError as e:
-                logger.warning("Failed to load GUI registration from %s: %s", reg_file, e)
+                logger.warning(
+                    "Failed to load GUI registration from %s: %s", reg_file, e
+                )
 
     return count

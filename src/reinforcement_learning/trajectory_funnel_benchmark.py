@@ -32,7 +32,9 @@ class TrajectoryFunnelBenchmark:
         error = current_state - target_state
         return -np.sum(error**2)
 
-    def trajectory_funnel_reward(self, current_state, reference_trajectory, current_phase):
+    def trajectory_funnel_reward(
+        self, current_state, reference_trajectory, current_phase
+    ):
         """
         Geometric approach: Reward confinement to the trajectory tube (orbital stability).
         Uses transverse deviations and allows phase slippage.

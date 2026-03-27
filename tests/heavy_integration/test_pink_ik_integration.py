@@ -25,9 +25,9 @@ class TestPinkIKSolver:
         except ImportError:
             pytest.skip("pink not installed")
 
-        assert hasattr(pink, "solve_ik") or hasattr(
-            pink, "Configuration"
-        ), f"Pink API unexpected: {[a for a in dir(pink) if not a.startswith('_')]}"
+        assert hasattr(pink, "solve_ik") or hasattr(pink, "Configuration"), (
+            f"Pink API unexpected: {[a for a in dir(pink) if not a.startswith('_')]}"
+        )
 
     def test_pink_configuration_from_pinocchio_model(self) -> None:
         """Pink Configuration wraps a Pinocchio model without error."""
@@ -49,7 +49,9 @@ class TestPinkIKSolver:
             j1, pin.JointModelRZ(), pin.SE3(np.eye(3), np.array([0, 0, 1.0])), "joint2"
         )
         model.appendBodyToJoint(j2, inertia, pin.SE3.Identity())
-        model.addFrame(pin.Frame("end_effector", j2, 0, pin.SE3.Identity(), pin.FrameType.OP_FRAME))
+        model.addFrame(
+            pin.Frame("end_effector", j2, 0, pin.SE3.Identity(), pin.FrameType.OP_FRAME)
+        )
 
         data = model.createData()
         q = pin.neutral(model)
@@ -78,9 +80,9 @@ class TestPinkIKSolver:
             pytest.skip("pink.tasks not available in this version")
 
         task_module = pink.tasks
-        assert hasattr(task_module, "FrameTask") or hasattr(
-            pink, "FrameTask"
-        ), "Pink should provide FrameTask"
+        assert hasattr(task_module, "FrameTask") or hasattr(pink, "FrameTask"), (
+            "Pink should provide FrameTask"
+        )
 
 
 @pytest.mark.live_simulation

@@ -241,7 +241,9 @@ def double_mass_matrix(phi: float, params: PendulumParams) -> np.ndarray | None:
         return None
 
 
-def double_gravity_vector(theta1: float, phi: float, params: PendulumParams) -> np.ndarray | None:
+def double_gravity_vector(
+    theta1: float, phi: float, params: PendulumParams
+) -> np.ndarray | None:
     """Return the native double-pendulum gravity vector, or ``None`` if unavailable."""
     if not (theta1 is not None):
         raise ValueError("theta1 must be provided")
@@ -334,7 +336,9 @@ def double_forward_kinematics(
     }
 
 
-def triple_mass_matrix(phi1: float, phi2: float, params: TriplePendulumParams) -> np.ndarray | None:
+def triple_mass_matrix(
+    phi1: float, phi2: float, params: TriplePendulumParams
+) -> np.ndarray | None:
     """Return the native triple-pendulum mass matrix, or ``None`` if unavailable."""
     if not (phi1 is not None):
         raise ValueError("phi1 must be provided")
@@ -575,7 +579,9 @@ def golfer_constrained_dynamics(
     """Return native golfer accelerations and multipliers when supported."""
     if not (q is not None):
         raise ValueError("q must be provided")
-    if not golfer_native_enabled() or not golfer_native_constraint_dynamics_supported(params):
+    if not golfer_native_enabled() or not golfer_native_constraint_dynamics_supported(
+        params
+    ):
         return None
 
     try:
@@ -689,17 +695,21 @@ def batch_evaluate_double(
     """
     if not (params is not None):
         raise ValueError("params must be provided")
-    if _pendulum_core is None or not hasattr(_pendulum_core, "py_batch_evaluate_double"):
+    if _pendulum_core is None or not hasattr(
+        _pendulum_core, "py_batch_evaluate_double"
+    ):
         return None
 
     try:
-        result: list[tuple[float, float, bool]] = _pendulum_core.py_batch_evaluate_double(
-            _to_rust_double_params(params),
-            coeffs_batch,
-            n_coeffs_per_joint,
-            q0,
-            qdot0,
-            t_end,
+        result: list[tuple[float, float, bool]] = (
+            _pendulum_core.py_batch_evaluate_double(
+                _to_rust_double_params(params),
+                coeffs_batch,
+                n_coeffs_per_joint,
+                q0,
+                qdot0,
+                t_end,
+            )
         )
         return result
     except (RuntimeError, AttributeError, TypeError) as exc:  # pragma: no cover

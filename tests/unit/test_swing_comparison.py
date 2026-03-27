@@ -109,7 +109,9 @@ class TestSwingComparison(unittest.TestCase):
             patch.object(comparator, "compare_tempo") as mock_tempo,
             patch.object(comparator, "compute_kinematic_similarity") as mock_sim,
         ):
-            mock_tempo.return_value = ComparisonMetric("Tempo", 3.0, 3.0, 0.0, 0.0, 100.0)
+            mock_tempo.return_value = ComparisonMetric(
+                "Tempo", 3.0, 3.0, 0.0, 0.0, 100.0
+            )
             mock_sim.return_value = DTWResult(0.0, [], 0.0, 100.0)
 
             report = comparator.generate_comparison_report(segment_indices)

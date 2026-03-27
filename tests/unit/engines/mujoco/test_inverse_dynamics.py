@@ -128,12 +128,16 @@ class TestInverseDynamicsSolver:
         qacc = np.zeros(model.nv)
         external = np.array([0.5, -0.3])
 
-        result = solver.compute_required_torques(qpos, qvel, qacc, external_forces=external)
+        result = solver.compute_required_torques(
+            qpos, qvel, qacc, external_forces=external
+        )
 
         assert result.joint_torques.shape == (model.nv,)
         assert np.all(np.isfinite(result.joint_torques))
 
-    @pytest.mark.xfail(reason="Force decomposition not yet populated by compute_required_torques")
+    @pytest.mark.xfail(
+        reason="Force decomposition not yet populated by compute_required_torques"
+    )
     def test_compute_required_torques_force_decomposition(
         self,
         model_and_data,
@@ -352,8 +356,12 @@ class TestInverseDynamicsAnalyzer:
         velocities = np.array([data.qvel.copy() for _ in range(2)])
         accelerations = np.zeros((2, model.nv))
 
-        swing1 = analyzer.analyze_captured_motion(times, positions, velocities, accelerations)
-        swing2 = analyzer.analyze_captured_motion(times, positions, velocities, accelerations)
+        swing1 = analyzer.analyze_captured_motion(
+            times, positions, velocities, accelerations
+        )
+        swing2 = analyzer.analyze_captured_motion(
+            times, positions, velocities, accelerations
+        )
 
         comparison = analyzer.compare_swings(swing1, swing2)
 

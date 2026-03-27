@@ -47,7 +47,9 @@ def validate_tab_index(tab_index: int) -> int:
     """Validate SettingsDialog startup tab index."""
     valid_indexes = {TAB_LAYOUT, TAB_CONFIG, TAB_DIAGNOSTICS}
     if tab_index not in valid_indexes:
-        raise ValueError(f"Invalid tab index {tab_index}; expected one of {sorted(valid_indexes)}")
+        raise ValueError(
+            f"Invalid tab index {tab_index}; expected one of {sorted(valid_indexes)}"
+        )
     return tab_index
 
 
@@ -89,7 +91,9 @@ class SettingsDialog(QDialog):
 
         from src.shared.python.gui_pkg.draggable_tabs import DraggableTabWidget
 
-        self.tabs = DraggableTabWidget(core_tabs={"Layout", "Configuration", "Diagnostics"})
+        self.tabs = DraggableTabWidget(
+            core_tabs={"Layout", "Configuration", "Diagnostics"}
+        )
         self.tabs.setTabsClosable(False)
         layout.addWidget(self.tabs)
 
@@ -171,11 +175,15 @@ class SettingsDialog(QDialog):
         sim_inner = QVBoxLayout(sim_group)
 
         self.chk_live_viz = QCheckBox("Live Visualization")
-        self.chk_live_viz.setToolTip("Enable real-time 3D visualization during simulation")
+        self.chk_live_viz.setToolTip(
+            "Enable real-time 3D visualization during simulation"
+        )
         sim_inner.addWidget(self.chk_live_viz)
 
         self.chk_gpu = QCheckBox("GPU Acceleration")
-        self.chk_gpu.setToolTip("Use GPU for physics computation (requires supported hardware)")
+        self.chk_gpu.setToolTip(
+            "Use GPU for physics computation (requires supported hardware)"
+        )
         sim_inner.addWidget(self.chk_gpu)
 
         tab_layout.addWidget(sim_group)
@@ -400,8 +408,12 @@ class SettingsDialog(QDialog):
             raise ValueError("checks must be provided")
         if not (checks is not None):
             raise ValueError("checks must be provided")
-        engine_check = next((c for c in checks if c["name"] == "engine_availability"), None)
-        engines = engine_check.get("details", {}).get("engines", []) if engine_check else []
+        engine_check = next(
+            (c for c in checks if c["name"] == "engine_availability"), None
+        )
+        engines = (
+            engine_check.get("details", {}).get("engines", []) if engine_check else []
+        )
         if not engines:
             return ""
 
@@ -446,7 +458,9 @@ class SettingsDialog(QDialog):
         if not runtime:
             return ""
         html = "<h3>Runtime State</h3><ul>"
-        html += f"<li>Available models: {runtime.get('available_models_count', '?')}</li>"
+        html += (
+            f"<li>Available models: {runtime.get('available_models_count', '?')}</li>"
+        )
         html += f"<li>Tile order: {runtime.get('model_order_count', '?')}</li>"
         html += f"<li>Model cards: {runtime.get('model_cards_count', '?')}</li>"
         html += f"<li>Registry loaded: {runtime.get('registry_loaded', '?')}</li>"
@@ -542,7 +556,11 @@ class SettingsDialog(QDialog):
         self.build_console.append(f"\n=== Build {status} ({elapsed:.0f}s) ===")
 
     def _cancel_build(self) -> None:
-        if hasattr(self, "build_thread") and self.build_thread and self.build_thread.isRunning():
+        if (
+            hasattr(self, "build_thread")
+            and self.build_thread
+            and self.build_thread.isRunning()
+        ):
             self.build_thread.terminate()
             self._build_status.setText("Build cancelled.")
             self._btn_build.setEnabled(True)

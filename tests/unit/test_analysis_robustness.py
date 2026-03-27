@@ -69,7 +69,9 @@ class TestAnalysisRobustness:
         stats = compute_marker_statistics(time, pos)
 
         # Check robustness
-        assert np.isfinite(stats["mean_speed"])  # nanmean should skip the NaN/Inf if generated
+        assert np.isfinite(
+            stats["mean_speed"]
+        )  # nanmean should skip the NaN/Inf if generated
         assert np.isfinite(stats["path_length"])
 
     def test_negative_time_step(self):

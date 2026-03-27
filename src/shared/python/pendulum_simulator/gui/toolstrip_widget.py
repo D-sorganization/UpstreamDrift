@@ -39,7 +39,9 @@ from PyQt6.QtWidgets import (
 # Stylesheet constants
 # ---------------------------------------------------------------------------
 
-_STYLE_STRIP = "QWidget#toolstrip {background: #16162e;border-bottom: 1px solid #2a2a50;}"
+_STYLE_STRIP = (
+    "QWidget#toolstrip {background: #16162e;border-bottom: 1px solid #2a2a50;}"
+)
 _BTN_RUN = (
     "QPushButton{"
     "background:#1e5c30;color:#a8f0b8;border:none;border-radius:5px;"
@@ -543,7 +545,9 @@ class ToolStrip(QWidget):
         self._lbl_mob_scale = QLabel("1.0×")
         self._lbl_mob_scale.setStyleSheet(_VAL_LBL)
 
-        overlay_layout.addLayout(_overlay_row(self.chk_mob, self._sld_mob, self._lbl_mob_scale))
+        overlay_layout.addLayout(
+            _overlay_row(self.chk_mob, self._sld_mob, self._lbl_mob_scale)
+        )
 
         # Row C: Force Ellipsoids checkbox + scale slider
         self.chk_force_ell = QCheckBox("Force Ellipsoids")
@@ -562,7 +566,9 @@ class ToolStrip(QWidget):
         self._lbl_force_ell_scale.setStyleSheet(_VAL_LBL)
 
         overlay_layout.addLayout(
-            _overlay_row(self.chk_force_ell, self._sld_force_ell, self._lbl_force_ell_scale)
+            _overlay_row(
+                self.chk_force_ell, self._sld_force_ell, self._lbl_force_ell_scale
+            )
         )
 
         # Row D: Per-segment visibility sub-checkboxes (#1100, #1101, #1102)
@@ -800,7 +806,9 @@ class ToolStrip(QWidget):
         If all segments are checked, emit None (show all).
         Otherwise emit the set of checked segment names.
         """
-        checked = {name for name, chk in self._segment_checks.items() if chk.isChecked()}
+        checked = {
+            name for name, chk in self._segment_checks.items() if chk.isChecked()
+        }
         if len(checked) == len(self._segment_checks):
             self.segment_visibility_changed.emit(None)  # all visible
         else:

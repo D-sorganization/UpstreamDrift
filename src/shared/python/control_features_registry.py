@@ -216,7 +216,9 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         "Returns linear (3, n_v) and angular (3, n_v) Jacobians.",
         category=FeatureCategory.KINEMATICS,
         requires_args=True,
-        arg_specs=[{"name": "body_name", "type": "str", "description": "Body frame name"}],
+        arg_specs=[
+            {"name": "body_name", "type": "str", "description": "Body frame name"}
+        ],
         return_type="dict with 'linear', 'angular' keys or None",
     ),
     # --- Contact ---
@@ -236,7 +238,9 @@ _FEATURE_DEFINITIONS: list[FeatureDescriptor] = [
         "Stored for next step/forward call.",
         category=FeatureCategory.CONTROL,
         requires_args=True,
-        arg_specs=[{"name": "u", "type": "np.ndarray (n_u,)", "description": "Control vector"}],
+        arg_specs=[
+            {"name": "u", "type": "np.ndarray (n_u,)", "description": "Control vector"}
+        ],
         return_type="None",
     ),
     # --- Shaft (Section B5) ---
@@ -412,12 +416,14 @@ class ControlFeaturesRegistry:
 
         if feature is None:
             raise ValueError(
-                f"Feature '{name}' not found. " f"Available: {[f.name for f in self._features]}"
+                f"Feature '{name}' not found. "
+                f"Available: {[f.name for f in self._features]}"
             )
 
         if not feature.available:
             raise RuntimeError(
-                f"Feature '{name}' is not available on engine " f"{type(self.engine).__name__}"
+                f"Feature '{name}' is not available on engine "
+                f"{type(self.engine).__name__}"
             )
 
         method = getattr(self.engine, name)

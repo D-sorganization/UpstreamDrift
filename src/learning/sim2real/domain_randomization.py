@@ -227,13 +227,19 @@ class DomainRandomizer:
         if "masses" in self.nominal_params and hasattr(self.engine, "set_link_masses"):
             self.engine.set_link_masses(self.nominal_params["masses"])
 
-        if "friction" in self.nominal_params and hasattr(self.engine, "set_friction_coefficients"):
+        if "friction" in self.nominal_params and hasattr(
+            self.engine, "set_friction_coefficients"
+        ):
             self.engine.set_friction_coefficients(self.nominal_params["friction"])
 
-        if "damping" in self.nominal_params and hasattr(self.engine, "set_joint_damping"):
+        if "damping" in self.nominal_params and hasattr(
+            self.engine, "set_joint_damping"
+        ):
             self.engine.set_joint_damping(self.nominal_params["damping"])
 
-        if "motor_strength" in self.nominal_params and hasattr(self.engine, "set_motor_strength"):
+        if "motor_strength" in self.nominal_params and hasattr(
+            self.engine, "set_motor_strength"
+        ):
             self.engine.set_motor_strength(self.nominal_params["motor_strength"])
 
         if "gravity" in self.nominal_params and hasattr(self.engine, "set_gravity"):
@@ -245,7 +251,9 @@ class DomainRandomizer:
         self._observation_buffer = []
         self._current_randomization = {}
 
-    def apply_action_with_delay(self, action: NDArray[np.floating]) -> NDArray[np.floating]:
+    def apply_action_with_delay(
+        self, action: NDArray[np.floating]
+    ) -> NDArray[np.floating]:
         """Apply action delay.
 
         Args:
@@ -289,7 +297,9 @@ class DomainRandomizer:
         noise = self._rng.normal(0, self.config.action_noise_std, action.shape)
         return action + noise
 
-    def get_observation_with_delay(self, observation: NDArray[np.floating]) -> NDArray[np.floating]:
+    def get_observation_with_delay(
+        self, observation: NDArray[np.floating]
+    ) -> NDArray[np.floating]:
         """Apply observation delay and noise.
 
         Args:
@@ -314,7 +324,9 @@ class DomainRandomizer:
         delayed_obs = self._observation_buffer.pop(0)
         return self._apply_observation_noise(delayed_obs)
 
-    def _apply_observation_noise(self, observation: NDArray[np.floating]) -> NDArray[np.floating]:
+    def _apply_observation_noise(
+        self, observation: NDArray[np.floating]
+    ) -> NDArray[np.floating]:
         """Apply observation noise.
 
         Args:
@@ -330,7 +342,9 @@ class DomainRandomizer:
         if not self.config.randomize_noise or self.config.observation_noise_std == 0:
             return observation
 
-        noise = self._rng.normal(0, self.config.observation_noise_std, observation.shape)
+        noise = self._rng.normal(
+            0, self.config.observation_noise_std, observation.shape
+        )
         return observation + noise
 
     def get_current_randomization(self) -> dict[str, Any]:

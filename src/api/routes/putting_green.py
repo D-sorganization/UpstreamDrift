@@ -32,7 +32,9 @@ class PuttSimulationRequest(BaseModel):
     speed: float = Field(2.0, description="Stroke speed [m/s]", gt=0, le=10)
     direction_x: float = Field(0.0, description="Aim direction X component")
     direction_y: float = Field(1.0, description="Aim direction Y component")
-    stimp_rating: float = Field(10.0, description="Green speed (Stimpmeter) [ft]", ge=6.0, le=15.0)
+    stimp_rating: float = Field(
+        10.0, description="Green speed (Stimpmeter) [ft]", ge=6.0, le=15.0
+    )
     green_width: float = Field(20.0, description="Green width [m]", gt=0)
     green_height: float = Field(20.0, description="Green height [m]", gt=0)
     hole_x: float = Field(10.0, description="Hole X position [m]")
@@ -165,7 +167,9 @@ async def simulate_putt(request: PuttSimulationRequest) -> PuttSimulationRespons
         direction = direction / norm
 
     stroke = StrokeParameters(speed=request.speed, direction=direction)
-    result = sim.simulate_putt(stroke, ball_position=np.array([request.ball_x, request.ball_y]))
+    result = sim.simulate_putt(
+        stroke, ball_position=np.array([request.ball_x, request.ball_y])
+    )
 
     return PuttSimulationResponse(
         positions=result.positions.tolist(),
@@ -271,7 +275,9 @@ async def scatter_analysis(
     final_positions = [r.final_position.tolist() for r in results]
     holed_count = sum(1 for r in results if r.holed)
     hole_pos = green.hole_position
-    avg_dist = float(np.mean([np.linalg.norm(r.final_position - hole_pos) for r in results]))
+    avg_dist = float(
+        np.mean([np.linalg.norm(r.final_position - hole_pos) for r in results])
+    )
 
     return ScatterAnalysisResponse(
         final_positions=final_positions,

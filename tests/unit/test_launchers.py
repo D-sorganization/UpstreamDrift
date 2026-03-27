@@ -120,9 +120,9 @@ class TestLauncherUtilities:
         for dir_name in expected_dirs_either:
             root_path = project_root / dir_name
             src_path = project_root / "src" / dir_name
-            assert (
-                root_path.exists() or src_path.exists()
-            ), f"Directory {dir_name} should exist at root or under src/"
+            assert root_path.exists() or src_path.exists(), (
+                f"Directory {dir_name} should exist at root or under src/"
+            )
 
         for dir_name in expected_src_dirs:
             dir_path = project_root / "src" / dir_name
@@ -249,5 +249,7 @@ def mock_qt_application():
 @pytest.fixture
 def mock_launcher_environment():
     """Mock launcher environment."""
-    with patch.dict(os.environ, {"GOLF_SUITE_HEADLESS": "1", "GOLF_SUITE_TEST_MODE": "1"}):
+    with patch.dict(
+        os.environ, {"GOLF_SUITE_HEADLESS": "1", "GOLF_SUITE_TEST_MODE": "1"}
+    ):
         yield

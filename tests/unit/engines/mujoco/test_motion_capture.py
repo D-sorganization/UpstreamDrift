@@ -29,7 +29,9 @@ class TestMotionCaptureFrame:
 
         assert frame.time == 1.0
         assert "marker1" in frame.marker_positions
-        np.testing.assert_array_equal(frame.marker_positions["marker1"], [1.0, 2.0, 3.0])
+        np.testing.assert_array_equal(
+            frame.marker_positions["marker1"], [1.0, 2.0, 3.0]
+        )
 
 
 class TestMotionCaptureSequence:
@@ -100,7 +102,9 @@ class TestMotionCaptureLoader:
     def test_load_csv(self) -> None:
         """Test loading CSV file."""
         # Create temporary CSV file
-        csv_content = "time,marker1_x,marker1_y,marker1_z\n0.0,1.0,2.0,3.0\n0.01,1.1,2.1,3.1\n"
+        csv_content = (
+            "time,marker1_x,marker1_y,marker1_z\n0.0,1.0,2.0,3.0\n0.01,1.1,2.1,3.1\n"
+        )
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
             csv_path = Path(f.name)
@@ -360,7 +364,9 @@ class TestMotionCaptureValidator:
         frames = [
             MotionCaptureFrame(time=0.0, marker_positions={"m1": np.array([0, 0, 0])}),
             MotionCaptureFrame(time=0.01, marker_positions={"m1": np.array([1, 1, 1])}),
-            MotionCaptureFrame(time=0.15, marker_positions={"m1": np.array([2, 2, 2])}),  # Gap
+            MotionCaptureFrame(
+                time=0.15, marker_positions={"m1": np.array([2, 2, 2])}
+            ),  # Gap
         ]
 
         sequence = MotionCaptureSequence(
@@ -411,4 +417,6 @@ class TestMotionCaptureValidator:
 
         assert visibility["total_frames"] == 3
         assert visibility["visible_frames"] == 2
-        assert visibility["visibility_percentage"] == pytest.approx((2 / 3) * 100, abs=0.1)
+        assert visibility["visibility_percentage"] == pytest.approx(
+            (2 / 3) * 100, abs=0.1
+        )

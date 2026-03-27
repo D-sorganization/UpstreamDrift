@@ -39,7 +39,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register", response_model=UserResponse)
-@limiter.limit(REGISTRATION_RATE_LIMIT)  # SECURITY: Limit registration to prevent account farming
+@limiter.limit(
+    REGISTRATION_RATE_LIMIT
+)  # SECURITY: Limit registration to prevent account farming
 async def register_user(
     request: Request, user_data: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
@@ -72,7 +74,9 @@ async def register_user(
 
 
 @router.post("/login", response_model=LoginResponse)
-@limiter.limit(LOGIN_RATE_LIMIT)  # SECURITY: Limit login attempts to prevent brute force
+@limiter.limit(
+    LOGIN_RATE_LIMIT
+)  # SECURITY: Limit login attempts to prevent brute force
 async def login(
     request: Request, login_data: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
@@ -87,7 +91,9 @@ async def login(
         )
 
     # Verify password
-    if not security_manager.verify_password(login_data.password, str(user.hashed_password)):
+    if not security_manager.verify_password(
+        login_data.password, str(user.hashed_password)
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -124,10 +130,14 @@ async def login(
 
 @router.post("/refresh", response_model=dict)
 @precondition(
-    lambda refresh_token, db=None: (refresh_token is not None and len(refresh_token.strip()) > 0),
+    lambda refresh_token, db=None: (
+        refresh_token is not None and len(refresh_token.strip()) > 0
+    ),
     "Refresh token must be a non-empty string",
 )
-async def refresh_token(refresh_token: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+async def refresh_token(
+    refresh_token: str, db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Refresh access token using refresh token."""
 
     # Verify refresh token
@@ -229,11 +239,15 @@ async def delete_api_key(
     """Delete an API key."""
 
     api_key = (
-        db.query(APIKey).filter(APIKey.id == api_key_id, APIKey.user_id == current_user.id).first()
+        db.query(APIKey)
+        .filter(APIKey.id == api_key_id, APIKey.user_id == current_user.id)
+        .first()
     )
 
     if not api_key:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="API key not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="API key not found"
+        )
 
     db.delete(api_key)
     db.commit()
@@ -276,7 +290,9 @@ async def update_user_role(
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     user.role = new_role.value  # type: ignore[assignment]
     db.commit()
@@ -299,7 +315,9 @@ async def update_user_status(
 
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     user.is_active = is_active  # type: ignore[assignment]
     db.commit()

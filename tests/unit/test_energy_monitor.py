@@ -356,7 +356,8 @@ class TestCheckAndWarn:
         # Should warn because drift > 1%
         assert drift_pct > 1.0
         assert (
-            "Energy conservation violated" in caplog.text or "conservation" in caplog.text.lower()
+            "Energy conservation violated" in caplog.text
+            or "conservation" in caplog.text.lower()
         )
 
     def test_critical_error_at_5_percent_drift(self):
@@ -428,7 +429,8 @@ class TestCheckAndWarn:
 
         assert drift_pct < -1.0
         assert (
-            "Energy conservation violated" in caplog.text or "conservation" in caplog.text.lower()
+            "Energy conservation violated" in caplog.text
+            or "conservation" in caplog.text.lower()
         )
 
 

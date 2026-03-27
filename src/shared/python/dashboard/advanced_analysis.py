@@ -60,7 +60,9 @@ def _validate_dimension_index(dim_idx: int, *arrays: np.ndarray) -> bool:
 class SpectrogramTab(QtWidgets.QWidget):
     """Tab for Spectrogram Analysis."""
 
-    def __init__(self, recorder: RecorderInterface, initial_key: str = "joint_positions") -> None:
+    def __init__(
+        self, recorder: RecorderInterface, initial_key: str = "joint_positions"
+    ) -> None:
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
         if not (recorder is not None):
@@ -149,7 +151,9 @@ class SpectrogramTab(QtWidgets.QWidget):
         f, t, Sxx = compute_spectrogram(signal_data, fs)
 
         # Plot
-        self.ax.pcolormesh(t, f, DB_CONVERSION * np.log10(Sxx + LOG_EPSILON), shading="gouraud")
+        self.ax.pcolormesh(
+            t, f, DB_CONVERSION * np.log10(Sxx + LOG_EPSILON), shading="gouraud"
+        )
         self.ax.set_ylabel("Frequency [Hz]")
         self.ax.set_xlabel("Time [sec]")
         self.ax.set_title(f"Spectrogram: {self.current_key} (Dim {dim_idx})")
@@ -161,7 +165,9 @@ class SpectrogramTab(QtWidgets.QWidget):
 class WaveletTab(QtWidgets.QWidget):
     """Tab for Continuous Wavelet Transform (CWT) Analysis."""
 
-    def __init__(self, recorder: RecorderInterface, initial_key: str = "joint_velocities") -> None:
+    def __init__(
+        self, recorder: RecorderInterface, initial_key: str = "joint_velocities"
+    ) -> None:
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
         if not (recorder is not None):
@@ -255,7 +261,9 @@ class WaveletTab(QtWidgets.QWidget):
         self.ax.set_ylabel("Frequency [Hz]")
         self.ax.set_xlabel("Time [sec]")
         self.ax.set_yscale("log")
-        self.ax.set_title(f"Wavelet Transform (CWT): {self.current_key} (Dim {dim_idx})")
+        self.ax.set_title(
+            f"Wavelet Transform (CWT): {self.current_key} (Dim {dim_idx})"
+        )
 
         self.canvas.draw()
 
@@ -321,7 +329,9 @@ class SwingPlaneTab(QtWidgets.QWidget):
         # Handle c close to 0
         xlim = ax3d.get_xlim()
         ylim = ax3d.get_ylim()
-        xx, yy = np.meshgrid(np.linspace(xlim[0], xlim[1], 10), np.linspace(ylim[0], ylim[1], 10))
+        xx, yy = np.meshgrid(
+            np.linspace(xlim[0], xlim[1], 10), np.linspace(ylim[0], ylim[1], 10)
+        )
 
         if abs(normal[2]) > 0.001:
             zz = (-normal[0] * xx - normal[1] * yy - d) / normal[2]
@@ -406,7 +416,9 @@ class CorrelationTab(QtWidgets.QWidget):
 
         for label, key in metrics_map.items():
             _, raw_vals = self.recorder.get_time_series(key)
-            vals: np.ndarray | None = np.array(raw_vals) if raw_vals is not None else None
+            vals: np.ndarray | None = (
+                np.array(raw_vals) if raw_vals is not None else None
+            )
 
             if vals is None or len(vals) == 0:
                 continue
@@ -523,7 +535,9 @@ class PhasePlaneTab(QtWidgets.QWidget):
             vel = raw_vel
 
         if pos is None or vel is None or len(t_pos) == 0:
-            self.ax.text(0.5, 0.5, "No Position/Velocity Data", ha="center", va="center")
+            self.ax.text(
+                0.5, 0.5, "No Position/Velocity Data", ha="center", va="center"
+            )
             self.canvas.draw()
             return
 
@@ -534,7 +548,9 @@ class PhasePlaneTab(QtWidgets.QWidget):
 
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, pos, vel):
-            self.ax.text(0.5, 0.5, f"Dimension {dim_idx} out of bounds", ha="center", va="center")
+            self.ax.text(
+                0.5, 0.5, f"Dimension {dim_idx} out of bounds", ha="center", va="center"
+            )
             self.canvas.draw()
             return
 

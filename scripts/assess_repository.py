@@ -127,14 +127,18 @@ def assess_D():
         if "node_modules" in f.parts or "venv" in f.parts:
             continue
         try:
-            results = assess_error_handling_content(f.read_text(encoding="utf-8", errors="ignore"))
+            results = assess_error_handling_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
             try_count += results["try_count"]
             bare_except_count += results["bare_except_count"]
         except (OSError, KeyError, ValueError):
             pass
 
     score = 7.0
-    findings.append(f"Found {try_count} try blocks and {bare_except_count} bare except blocks.")
+    findings.append(
+        f"Found {try_count} try blocks and {bare_except_count} bare except blocks."
+    )
 
     if bare_except_count > 5:
         score -= 2
@@ -315,14 +319,18 @@ def assess_L():
         if "node_modules" in f.parts or "venv" in f.parts:
             continue
         try:
-            results = assess_logging_content(f.read_text(encoding="utf-8", errors="ignore"))
+            results = assess_logging_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
             logging_usage += results["logging_usage"]
             print_usage += results["print_usage"]
         except (OSError, KeyError, ValueError):
             pass
 
     score = 7.0
-    findings.append(f"Found {logging_usage} logging calls and {print_usage} print calls.")
+    findings.append(
+        f"Found {logging_usage} logging calls and {print_usage} print calls."
+    )
 
     if print_usage > logging_usage:
         findings.append("High usage of print statements detected.")

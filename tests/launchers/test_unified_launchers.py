@@ -74,7 +74,9 @@ def test_mujoco_unified_launcher_items(mock_base_init):
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
 @patch("subprocess.Popen")
 @patch.object(Path, "exists", return_value=True)
-def test_mujoco_unified_launcher_script_success(mock_exists, mock_popen, mock_base_init):
+def test_mujoco_unified_launcher_script_success(
+    mock_exists, mock_popen, mock_base_init
+):
     launcher = MujocoUnifiedLauncher()
     launcher.show_error = MagicMock()
 
@@ -96,7 +98,9 @@ def test_mujoco_unified_launcher_script_not_found(mock_exists, mock_base_init):
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
 @patch("subprocess.Popen", side_effect=OSError("Failed"))
 @patch.object(Path, "exists", return_value=True)
-def test_mujoco_unified_launcher_script_os_error(mock_exists, mock_popen, mock_base_init):
+def test_mujoco_unified_launcher_script_os_error(
+    mock_exists, mock_popen, mock_base_init
+):
     launcher = MujocoUnifiedLauncher()
     launcher.show_error = MagicMock()
 

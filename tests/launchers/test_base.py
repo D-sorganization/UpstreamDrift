@@ -17,7 +17,9 @@ class DummyLauncher(BaseLauncher):
     def get_items(self):
         return [
             LaunchItem(name="Item1", description="Desc1", path="path1"),
-            LaunchItem(name="Item2", description="Desc2", action=lambda: print("Action")),
+            LaunchItem(
+                name="Item2", description="Desc2", action=lambda: print("Action")
+            ),
             LaunchItem(name="Item3", description="Desc3"),
         ]
 

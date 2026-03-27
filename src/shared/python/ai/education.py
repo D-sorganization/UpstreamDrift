@@ -655,7 +655,9 @@ class EducationSystem:
         if category is None:
             return sorted(self._glossary.keys())
 
-        return sorted(name for name, entry in self._glossary.items() if entry.category == category)
+        return sorted(
+            name for name, entry in self._glossary.items() if entry.category == category
+        )
 
     def add_entry(self, entry: GlossaryEntry) -> None:
         """Add or update a glossary entry.

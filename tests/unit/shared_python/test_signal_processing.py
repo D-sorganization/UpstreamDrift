@@ -84,14 +84,19 @@ class TestSignalProcessing:
         assert len(wavelet) == M
         assert np.iscomplexobj(wavelet)
         # Peak should be at center
-        assert np.argmax(np.abs(wavelet)) == M // 2 or np.argmax(np.abs(wavelet)) == M // 2 - 1
+        assert (
+            np.argmax(np.abs(wavelet)) == M // 2
+            or np.argmax(np.abs(wavelet)) == M // 2 - 1
+        )
 
     def test_compute_cwt(self, sample_data) -> None:
         t, data, fs = sample_data
         freq_range = (5.0, 20.0)
         num_freqs = 15
 
-        freqs, times, cwt = compute_cwt(data, fs, freq_range=freq_range, num_freqs=num_freqs)
+        freqs, times, cwt = compute_cwt(
+            data, fs, freq_range=freq_range, num_freqs=num_freqs
+        )
 
         assert len(freqs) == num_freqs
         assert len(times) == len(data)
@@ -108,7 +113,9 @@ class TestSignalProcessing:
         # data2 is data1 shifted + noise
         data2 = np.roll(data1, 10)
 
-        freqs, times, xwt = compute_xwt(data1, data2, fs, freq_range=(5.0, 20.0), num_freqs=10)
+        freqs, times, xwt = compute_xwt(
+            data1, data2, fs, freq_range=(5.0, 20.0), num_freqs=10
+        )
 
         assert xwt.shape == (10, len(data1))
 

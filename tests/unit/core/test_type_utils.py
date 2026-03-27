@@ -40,7 +40,9 @@ class TestSafeInt:
             "none-default",
         ],
     )
-    def test_safe_int_conversions(self, value: object, kwargs: dict, expected: int) -> None:
+    def test_safe_int_conversions(
+        self, value: object, kwargs: dict, expected: int
+    ) -> None:
         """Test safe_int handles various input types correctly."""
         assert safe_int(value, **kwargs) == expected
 
@@ -67,7 +69,9 @@ class TestSafeFloat:
             "invalid-default",
         ],
     )
-    def test_safe_float_conversions(self, value: object, kwargs: dict, expected: float) -> None:
+    def test_safe_float_conversions(
+        self, value: object, kwargs: dict, expected: float
+    ) -> None:
         """Test safe_float handles various input types correctly."""
         assert safe_float(value, **kwargs) == pytest.approx(expected)
 
@@ -213,7 +217,9 @@ class TestCoerceNumeric:
         ],
         ids=["int-string", "float-string", "invalid-default"],
     )
-    def test_coerce_numeric_cases(self, value: str, kwargs: dict, expected: object) -> None:
+    def test_coerce_numeric_cases(
+        self, value: str, kwargs: dict, expected: object
+    ) -> None:
         """Test coerce_numeric handles various string inputs."""
         result = coerce_numeric(value, **kwargs)
         if isinstance(expected, float):

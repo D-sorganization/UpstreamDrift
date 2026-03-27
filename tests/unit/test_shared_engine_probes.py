@@ -206,7 +206,9 @@ def test_matlab_probe_success(tmp_path):
     mock_matlab = MagicMock()
     mock_matlab_engine = MagicMock()
 
-    with patch.dict(sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}):
+    with patch.dict(
+        sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}
+    ):
         probe = MatlabProbe(tmp_path, is_3d=False)
         result = probe.probe()
         assert result.status == ProbeStatus.AVAILABLE
@@ -219,7 +221,9 @@ def test_matlab_probe_missing_files(tmp_path):
     mock_matlab = MagicMock()
     mock_matlab_engine = MagicMock()
 
-    with patch.dict(sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}):
+    with patch.dict(
+        sys.modules, {"matlab": mock_matlab, "matlab.engine": mock_matlab_engine}
+    ):
         probe = MatlabProbe(tmp_path, is_3d=True)
         result = probe.probe()
         assert result.status == ProbeStatus.MISSING_ASSETS

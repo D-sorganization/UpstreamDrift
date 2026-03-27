@@ -70,7 +70,8 @@ class TestCrossEngineValidationIntegration:
                 )
                 # Allow WARNING severity (up to 2x tolerance) for cross-engine
                 assert result.severity in ["PASSED", "WARNING"], (
-                    f"Forward dynamics mismatch between {name1} and {name2}: " f"{result.message}"
+                    f"Forward dynamics mismatch between {name1} and {name2}: "
+                    f"{result.message}"
                 )
 
     def test_inverse_dynamics_agreement(
@@ -122,7 +123,8 @@ class TestCrossEngineValidationIntegration:
                     f"RMS deviation={result.max_deviation:.2f}%"
                 )
                 assert result.passed, (
-                    f"Inverse dynamics mismatch between {name1} and {name2}: " f"{result.message}"
+                    f"Inverse dynamics mismatch between {name1} and {name2}: "
+                    f"{result.message}"
                 )
 
     def test_jacobian_agreement(
@@ -241,7 +243,9 @@ class TestCrossEngineValidationIntegration:
                     ztcf_accels[name2],
                     metric="acceleration",
                 )
-                logger.info(f"ZTCF {name1} vs {name2}: deviation={result.max_deviation:.2e}")
+                logger.info(
+                    f"ZTCF {name1} vs {name2}: deviation={result.max_deviation:.2e}"
+                )
                 assert result.severity in [
                     "PASSED",
                     "WARNING",
@@ -291,7 +295,9 @@ class TestCrossEngineValidationIntegration:
                     zvcf_accels[name2],
                     metric="acceleration",
                 )
-                logger.info(f"ZVCF {name1} vs {name2}: deviation={result.max_deviation:.2e}")
+                logger.info(
+                    f"ZVCF {name1} vs {name2}: deviation={result.max_deviation:.2e}"
+                )
                 assert result.severity in [
                     "PASSED",
                     "WARNING",
@@ -339,10 +345,12 @@ class TestCrossEngineValidationIntegration:
                     metric="position",  # Tight tolerance
                 )
                 logger.info(
-                    f"Mass matrix {name1} vs {name2}: " f"deviation={result.max_deviation:.2e}"
+                    f"Mass matrix {name1} vs {name2}: "
+                    f"deviation={result.max_deviation:.2e}"
                 )
                 assert result.severity in ["PASSED", "WARNING"], (
-                    f"Mass matrix mismatch between {name1} and {name2}: " f"{result.message}"
+                    f"Mass matrix mismatch between {name1} and {name2}: "
+                    f"{result.message}"
                 )
 
     def test_indexed_acceleration_closure(
@@ -387,7 +395,8 @@ class TestCrossEngineValidationIntegration:
                 closure_err = float(np.linalg.norm(residual))
 
                 logger.info(
-                    f"{eng.name} acceleration closure at q={q}: " f"residual={closure_err:.2e}"
+                    f"{eng.name} acceleration closure at q={q}: "
+                    f"residual={closure_err:.2e}"
                 )
                 assert closure_err < TOLERANCE_CLOSURE_RAD_S2, (
                     f"{eng.name}: acceleration closure residual "

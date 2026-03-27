@@ -56,9 +56,7 @@ class DataReader:
         if fmt == "json":
             return pd.read_json(path, **kwargs)
         if fmt == "pickle":
-            return pd.read_pickle(
-                path
-            )  # nosec B301 - caller explicitly requests pickle format; for trusted data only
+            return pd.read_pickle(path)  # nosec B301 - caller explicitly requests pickle format; for trusted data only
         if fmt == "numpy":
             data = np.load(path, allow_pickle=False)
             if isinstance(data, np.ndarray):
@@ -71,7 +69,9 @@ class DataReader:
             data_keys = [k for k in data if not k.startswith("__")]
             if len(data_keys) == 1:
                 return pd.DataFrame(data[data_keys[0]])
-            return pd.DataFrame({k: v for k, v in data.items() if not k.startswith("__")})
+            return pd.DataFrame(
+                {k: v for k, v in data.items() if not k.startswith("__")}
+            )
         if fmt == "sqlite":
             import sqlite3
 
@@ -122,7 +122,9 @@ class DataWriter:
             import sqlite3
 
             conn = sqlite3.connect(str(path))
-            df.to_sql(kwargs.get("table_name", "data"), conn, if_exists="replace", index=False)
+            df.to_sql(
+                kwargs.get("table_name", "data"), conn, if_exists="replace", index=False
+            )
             conn.close()
         else:
             raise ValueError(f"Unsupported or undetected format for: {path}")

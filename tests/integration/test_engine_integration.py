@@ -52,9 +52,9 @@ class TestEngineIntegration:
         # For each available engine, verify its path actually exists
         for engine in available_engines:
             engine_path = manager.engine_paths[engine]
-            assert (
-                engine_path.exists()
-            ), f"{engine} marked available but path missing: {engine_path}"
+            assert engine_path.exists(), (
+                f"{engine} marked available but path missing: {engine_path}"
+            )
 
         # For unavailable engines, verify why they're unavailable
         for engine in EngineType:
@@ -64,7 +64,9 @@ class TestEngineIntegration:
                 if engine_path.exists():
                     # Path exists but validation failed - expected for incomplete installations
                     result = manager.validate_engine_configuration(engine)
-                    assert result is False, f"{engine} exists but should fail validation"
+                    assert result is False, (
+                        f"{engine} exists but should fail validation"
+                    )
 
     @pytest.mark.integration
     def test_engine_probe_consistency(self):
@@ -91,7 +93,10 @@ class TestEngineIntegration:
                 available_engines = manager.get_available_engines()
                 if probe_result and engine_type in available_engines:
                     # Consistency check: status should not be UNAVAILABLE
-                    assert manager.get_engine_status(engine_type) != EngineStatus.UNAVAILABLE
+                    assert (
+                        manager.get_engine_status(engine_type)
+                        != EngineStatus.UNAVAILABLE
+                    )
             except Exception as e:  # noqa: BLE001, F841
                 # Some probes may fail if dependencies missing - that's expected
                 pass
@@ -242,7 +247,9 @@ class TestEngineDataFlow:
             mock_instance = Mock()
 
             # Test invalid parameter handling
-            mock_instance.set_swing_speed.side_effect = ValueError("Invalid swing speed")
+            mock_instance.set_swing_speed.side_effect = ValueError(
+                "Invalid swing speed"
+            )
 
             with pytest.raises(ValueError):
                 mock_instance.set_swing_speed(-100)  # Invalid negative speed

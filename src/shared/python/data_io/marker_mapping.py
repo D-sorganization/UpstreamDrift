@@ -224,7 +224,11 @@ class MarkerToModelMapper:
         for _iteration in range(max_iterations):
             inlier_observed = marker_positions[inlier_mask]
             inlier_offsets = np.array(
-                [mappings[i].body_offset for i in range(len(mappings)) if inlier_mask[i]]
+                [
+                    mappings[i].body_offset
+                    for i in range(len(mappings))
+                    if inlier_mask[i]
+                ]
             )
 
             if len(inlier_observed) < 3:
@@ -265,7 +269,9 @@ class MarkerToModelMapper:
             if len(final_residuals) > 0
             else float("inf")
         )
-        max_err = float(np.max(final_residuals)) if len(final_residuals) > 0 else float("inf")
+        max_err = (
+            float(np.max(final_residuals)) if len(final_residuals) > 0 else float("inf")
+        )
 
         outlier_idx = np.where(~inlier_mask)[0].tolist()
         fit_quality = float(np.exp(-rms / 0.01))

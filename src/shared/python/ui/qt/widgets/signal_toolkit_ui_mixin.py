@@ -521,7 +521,9 @@ class SignalToolkitUIMixin:
         layout.addWidget(sat_group)
 
         self.apply_sat_btn = QPushButton("Apply Saturation")
-        self.apply_sat_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
+        self.apply_sat_btn.setStyleSheet(
+            "background-color: #0078d4; font-weight: bold;"
+        )
         layout.addWidget(self.apply_sat_btn)
 
         self.sat_preview_check = QCheckBox("Live Preview")
@@ -686,7 +688,9 @@ class SignalToolkitUIMixin:
         layout.addWidget(param_group)
 
         self.apply_filter_btn = QPushButton("Apply Filter")
-        self.apply_filter_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
+        self.apply_filter_btn.setStyleSheet(
+            "background-color: #0078d4; font-weight: bold;"
+        )
         layout.addWidget(self.apply_filter_btn)
 
         self.show_freq_response_btn = QPushButton("Show Frequency Response")
@@ -746,7 +750,9 @@ class SignalToolkitUIMixin:
         layout.addWidget(param_group)
 
         self.add_noise_btn = QPushButton("Add Noise")
-        self.add_noise_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
+        self.add_noise_btn.setStyleSheet(
+            "background-color: #0078d4; font-weight: bold;"
+        )
         layout.addWidget(self.add_noise_btn)
 
         self.reset_signal_btn = QPushButton("Reset to Original")

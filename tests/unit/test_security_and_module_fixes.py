@@ -276,7 +276,8 @@ class TestMotionTrainingGetattr:
         # Temporarily remove the sub-module from sys.modules to force a fresh import
         # attempt, then verify the error propagates rather than returning None.
         submod_key = (
-            "src.engines.physics_engines.pinocchio.python" ".motion_training.club_trajectory_parser"
+            "src.engines.physics_engines.pinocchio.python"
+            ".motion_training.club_trajectory_parser"
         )
         original = sys.modules.pop(submod_key, None)
         try:

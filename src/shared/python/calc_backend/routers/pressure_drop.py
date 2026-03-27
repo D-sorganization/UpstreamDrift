@@ -43,11 +43,17 @@ def calculate_pressure_drop(request: PressureDropRequest) -> PressureDropRespons
         velocity = vol_flow / area if area > 0 else 0.0
 
         # Reynolds number
-        re = (density * velocity * request.pipe_diameter_m) / viscosity if viscosity > 0 else 0.0
+        re = (
+            (density * velocity * request.pipe_diameter_m) / viscosity
+            if viscosity > 0
+            else 0.0
+        )
 
         # Friction factor
         rel_roughness = (
-            request.roughness_m / request.pipe_diameter_m if request.pipe_diameter_m > 0 else 0.0
+            request.roughness_m / request.pipe_diameter_m
+            if request.pipe_diameter_m > 0
+            else 0.0
         )
 
         if re > 4000:

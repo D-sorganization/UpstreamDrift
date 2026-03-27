@@ -11,7 +11,9 @@ from src.shared.python.screw_theory.visualization import (
 )
 
 
-def _make_screw(direction=(0.0, 0.0, 1.0), point=(0.0, 0.0, 0.0), pitch=0.0) -> ScrewAxis:
+def _make_screw(
+    direction=(0.0, 0.0, 1.0), point=(0.0, 0.0, 0.0), pitch=0.0
+) -> ScrewAxis:
     return ScrewAxis(
         axis_direction=np.array(direction),
         axis_point=np.array(point),

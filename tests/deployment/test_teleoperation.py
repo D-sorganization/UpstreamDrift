@@ -122,7 +122,9 @@ def test_teleop_modes(mock_robot: MagicMock, mock_device: MagicMock) -> None:
     interface.update()
 
     # Change pose so delta is non-zero
-    mock_device.get_pose.return_value = np.array([2, 5, 3, 1, 0, 0, 0], dtype=np.float64)
+    mock_device.get_pose.return_value = np.array(
+        [2, 5, 3, 1, 0, 0, 0], dtype=np.float64
+    )
 
     # POSITION mode
     interface.set_control_mode(TeleoperationMode.POSITION)
@@ -150,7 +152,9 @@ def test_teleop_modes(mock_robot: MagicMock, mock_device: MagicMock) -> None:
     assert cmd.stiffness is not None
 
 
-def test_teleop_demonstration_recording(mock_robot: MagicMock, mock_device: MagicMock) -> None:
+def test_teleop_demonstration_recording(
+    mock_robot: MagicMock, mock_device: MagicMock
+) -> None:
     """Test teleoperation recording."""
     interface = TeleoperationInterface(mock_robot, mock_device)
 
@@ -170,11 +174,15 @@ def test_teleop_demonstration_recording(mock_robot: MagicMock, mock_device: Magi
     assert demo.source == "teleoperation"
 
 
-def test_workspace_mapping_and_feedback(mock_robot: MagicMock, mock_device: MagicMock) -> None:
+def test_workspace_mapping_and_feedback(
+    mock_robot: MagicMock, mock_device: MagicMock
+) -> None:
     """Test mapping utilities."""
     interface = TeleoperationInterface(mock_robot, mock_device)
 
-    interface.set_workspace_mapping(leader_frame=np.eye(4), follower_frame=np.eye(4), scaling=2.0)
+    interface.set_workspace_mapping(
+        leader_frame=np.eye(4), follower_frame=np.eye(4), scaling=2.0
+    )
 
     assert interface._scaling == 2.0
 

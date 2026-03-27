@@ -87,7 +87,9 @@ class TestPressureDropPhysics:
         double = {**base, "pipe_length_m": 100.0}
         r1 = client.post("/api/calc/pressure-drop", json=base).json()
         r2 = client.post("/api/calc/pressure-drop", json=double).json()
-        assert r2["pressure_drop_pa"] == pytest.approx(r1["pressure_drop_pa"] * 2, rel=1e-3)
+        assert r2["pressure_drop_pa"] == pytest.approx(
+            r1["pressure_drop_pa"] * 2, rel=1e-3
+        )
 
     def test_all_outputs_finite(self, turbulent_payload: dict) -> None:
         """All output fields must be finite, not NaN or inf."""

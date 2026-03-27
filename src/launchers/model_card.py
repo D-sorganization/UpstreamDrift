@@ -289,7 +289,11 @@ class DraggableModelCard(QFrame):
             return
 
         mime_data = event.mimeData()
-        if mime_data and mime_data.hasText() and mime_data.text().startswith("model_card:"):
+        if (
+            mime_data
+            and mime_data.hasText()
+            and mime_data.text().startswith("model_card:")
+        ):
             event.acceptProposedAction()
 
     def dropEvent(self, event: QDropEvent | None) -> None:

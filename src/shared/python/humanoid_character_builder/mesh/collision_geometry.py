@@ -95,7 +95,9 @@ class CollisionGeometry:
         total_verts = sum(
             len(m.vertices) if hasattr(m, "vertices") else 0 for m in result.components
         )
-        total_faces = sum(len(m.faces) if hasattr(m, "faces") else 0 for m in result.components)
+        total_faces = sum(
+            len(m.faces) if hasattr(m, "faces") else 0 for m in result.components
+        )
 
         return cls(
             meshes=result.components,
@@ -170,7 +172,9 @@ class CollisionGeometryGenerator:
         # Wrap in backward-compatible result
         return CollisionGeometry.from_result(result, processing_time)
 
-    def compute_quality_metrics(self, original: Any, generated: list[Any]) -> dict[str, float]:
+    def compute_quality_metrics(
+        self, original: Any, generated: list[Any]
+    ) -> dict[str, float]:
         """Compute quality metrics comparing generated collision geometry to original.
 
         Args:
@@ -196,7 +200,9 @@ class CollisionGeometryGenerator:
             vol_orig = original.volume
             vol_gen = combined_gen.volume
             if vol_orig > 1e-6:
-                vol_preservation = min(vol_gen / vol_orig, vol_orig / vol_gen) if vol_gen > 0 else 0
+                vol_preservation = (
+                    min(vol_gen / vol_orig, vol_orig / vol_gen) if vol_gen > 0 else 0
+                )
             else:
                 vol_preservation = 1.0
         except (ValueError, ZeroDivisionError, OverflowError, TypeError):

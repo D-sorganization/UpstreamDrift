@@ -98,7 +98,9 @@ class TestAddCorsMiddleware:
 
     def test_env_origins_strips_whitespace(self) -> None:
         app = self._make_app()
-        with patch.dict(os.environ, {"CORS_ORIGINS": " https://a.com , https://b.com "}):
+        with patch.dict(
+            os.environ, {"CORS_ORIGINS": " https://a.com , https://b.com "}
+        ):
             add_cors_middleware(app)
         _, kwargs = app.add_middleware.call_args
         assert kwargs["allow_origins"] == ["https://a.com", "https://b.com"]

@@ -268,7 +268,9 @@ class Phase1Validator:
     def check_output_management(self) -> bool:
         """Check output management system."""
         output_dir = self.project_root / "output"
-        output_manager_path = self.project_root / "shared" / "python" / "output_manager.py"
+        output_manager_path = (
+            self.project_root / "shared" / "python" / "output_manager.py"
+        )
 
         if not output_dir.exists() or not output_manager_path.exists():
             return False

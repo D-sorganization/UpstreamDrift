@@ -117,7 +117,9 @@ class TypedConverterWidget(QWidget):
 class CaseInsensitiveCompleter(QCompleter):
     """Case-insensitive completer for unit autocomplete."""
 
-    def __init__(self, units: list[str] | None = None, parent: QObject | None = None) -> None:
+    def __init__(
+        self, units: list[str] | None = None, parent: QObject | None = None
+    ) -> None:
         super().__init__(parent)
         if units is not None:
             model = QStringListModel(units)
@@ -204,7 +206,9 @@ class UnitConverterWidget(BaseCalculatorWindow):
 
         try:
             # Type ignore since _get_category and _normalize_unit might be internal
-            from_category = self.converter._get_category(self.converter._normalize_unit(from_unit))
+            from_category = self.converter._get_category(
+                self.converter._normalize_unit(from_unit)
+            )
             if from_category:
                 all_units_by_category = self.converter.get_supported_units()
                 return all_units_by_category.get(from_category, self.all_units)
@@ -300,7 +304,9 @@ class UnitConverterWidget(BaseCalculatorWindow):
         row_widget.to_value = QLineEdit()
         row_widget.to_value.setText(conv.to_value)
         row_widget.to_value.setFixedWidth(110)
-        row_widget.to_value.textChanged.connect(lambda t: self._on_value_changed(index, "to", t))
+        row_widget.to_value.textChanged.connect(
+            lambda t: self._on_value_changed(index, "to", t)
+        )
 
         row_widget.to_unit = QComboBox()
         row_widget.to_unit.setEditable(True)
@@ -321,11 +327,15 @@ class UnitConverterWidget(BaseCalculatorWindow):
         style = self.style()
         if not is_saved:
             if style:
-                action_btn.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton))
+                action_btn.setIcon(
+                    style.standardIcon(QStyle.StandardPixmap.SP_DialogSaveButton)
+                )
             action_btn.clicked.connect(lambda: self._save_conversion(index))
         else:
             if style:
-                action_btn.setIcon(style.standardIcon(QStyle.StandardPixmap.SP_TrashIcon))
+                action_btn.setIcon(
+                    style.standardIcon(QStyle.StandardPixmap.SP_TrashIcon)
+                )
             action_btn.clicked.connect(lambda: self._delete_saved_conversion(index))
 
         row_layout.addWidget(row_widget.from_value)
@@ -552,7 +562,9 @@ class UnitConverterWidget(BaseCalculatorWindow):
             self.rows = []
 
         while len(self.rows) < 6:
-            is_saved = len([r for r in self.rows if r.is_saved]) < 3 and len(self.rows) >= 3
+            is_saved = (
+                len([r for r in self.rows if r.is_saved]) < 3 and len(self.rows) >= 3
+            )
             self.rows.append(ConversionRow(f"row_{len(self.rows)}", is_saved=is_saved))
 
     def _save_conversions(self) -> None:

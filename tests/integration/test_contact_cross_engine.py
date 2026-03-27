@@ -27,7 +27,9 @@ def _skip_if_mujoco_state_unavailable(engine) -> None:
     """Skip when the CI lane loads a degenerate MuJoCo model with no state."""
     q_current, _ = engine.get_state()
     if len(q_current) == 0:
-        pytest.skip("MuJoCo contact model did not expose floating-joint state in this lane")
+        pytest.skip(
+            "MuJoCo contact model did not expose floating-joint state in this lane"
+        )
 
 
 @pytest.fixture(scope="module")
@@ -121,7 +123,9 @@ class TestBasicContactPhysics:
         )
 
         # Ball should be near ground (not still at 1m)
-        assert final_height < 0.1, f"Ball should settle near ground: height={final_height:.3f}m"
+        assert final_height < 0.1, (
+            f"Ball should settle near ground: height={final_height:.3f}m"
+        )
 
         # Log for cross-engine comparison
         np.sqrt(E_final / E_initial)
@@ -154,9 +158,9 @@ class TestBasicContactPhysics:
         assert isinstance(contact_forces, np.ndarray), "Should return a numpy array"
         assert contact_forces.shape == (3,), "Should return a 3-element force vector"
         # Since it's a known limitation in ABA without constraint solver, we expect 0 natively
-        assert np.all(
-            contact_forces == 0
-        ), "Currently expects zero forces without constraint solver"
+        assert np.all(contact_forces == 0), (
+            "Currently expects zero forces without constraint solver"
+        )
 
 
 class TestCrossEngineContactComparison:

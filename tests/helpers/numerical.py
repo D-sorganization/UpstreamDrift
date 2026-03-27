@@ -168,7 +168,9 @@ def assert_monotonic(
         raise TypeError(f"values must be a sequence, got {type(values).__name__}")
 
     if len(values) < 2:
-        raise ValueError(f"Need at least 2 values to check monotonicity, got {len(values)}")
+        raise ValueError(
+            f"Need at least 2 values to check monotonicity, got {len(values)}"
+        )
 
     for i, v in enumerate(values):
         _validate_number(v, f"values[{i}]")

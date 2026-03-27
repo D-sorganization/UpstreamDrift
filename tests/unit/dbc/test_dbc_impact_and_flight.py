@@ -112,7 +112,9 @@ class TestRigidBodyImpactPostconditions(unittest.TestCase):
         from src.shared.python.physics.impact_model import RigidBodyImpactModel
 
         model = RigidBodyImpactModel()
-        return model.solve(_make_pre_state(clubhead_vel=clubhead_vel), _make_params(cor=cor))
+        return model.solve(
+            _make_pre_state(clubhead_vel=clubhead_vel), _make_params(cor=cor)
+        )
 
     def test_ball_velocity_finite(self) -> None:
         result = self._solve()
@@ -371,12 +373,16 @@ class TestTrajectoryPostconditions(unittest.TestCase):
     def test_positions_finite(self) -> None:
         trajectory = self._simulate()
         for pt in trajectory:
-            self.assertTrue(np.all(np.isfinite(pt.position)), f"Non-finite position at t={pt.time}")
+            self.assertTrue(
+                np.all(np.isfinite(pt.position)), f"Non-finite position at t={pt.time}"
+            )
 
     def test_velocities_finite(self) -> None:
         trajectory = self._simulate()
         for pt in trajectory:
-            self.assertTrue(np.all(np.isfinite(pt.velocity)), f"Non-finite velocity at t={pt.time}")
+            self.assertTrue(
+                np.all(np.isfinite(pt.velocity)), f"Non-finite velocity at t={pt.time}"
+            )
 
     def test_starts_at_origin(self) -> None:
         trajectory = self._simulate()
@@ -450,7 +456,9 @@ class TestBallPropertiesPostconditions(unittest.TestCase):
         ball = BallProperties()
         for s in np.linspace(0, 1.0, 50):
             cl = ball.calculate_cl(float(s))
-            self.assertLessEqual(cl, MAX_LIFT_COEFFICIENT + 1e-10, f"Cl exceeds max at s={s}")
+            self.assertLessEqual(
+                cl, MAX_LIFT_COEFFICIENT + 1e-10, f"Cl exceeds max at s={s}"
+            )
 
 
 if __name__ == "__main__":

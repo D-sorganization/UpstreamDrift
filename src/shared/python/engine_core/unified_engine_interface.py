@@ -51,7 +51,9 @@ class UnifiedEngineInterface(ContractChecker):
         """Define class invariants for UnifiedEngineInterface."""
         return [
             (
-                lambda: (self.suite_root is not None and isinstance(self.suite_root, Path)),
+                lambda: (
+                    self.suite_root is not None and isinstance(self.suite_root, Path)
+                ),
                 "suite_root must be a valid Path",
             ),
             (
@@ -59,12 +61,16 @@ class UnifiedEngineInterface(ContractChecker):
                 "engine_manager must not be None",
             ),
             (
-                lambda: (self.current_engine is None or self.current_engine_type is not None),
+                lambda: (
+                    self.current_engine is None or self.current_engine_type is not None
+                ),
                 "If current_engine is set, current_engine_type must also be set",
             ),
         ]
 
-    def load_engine(self, engine_type: str | EngineType, load_standard_model: bool = True) -> bool:
+    def load_engine(
+        self, engine_type: str | EngineType, load_standard_model: bool = True
+    ) -> bool:
         """Load a physics engine with optional standard model.
 
         Args:
@@ -168,18 +174,24 @@ class UnifiedEngineInterface(ContractChecker):
 
         try:
             # Run model validation
-            compatibility = self.model_manager.validate_model_compatibility(self.loaded_model_path)
+            compatibility = self.model_manager.validate_model_compatibility(
+                self.loaded_model_path
+            )
 
             # Get model info
             model_info = {
                 "path": str(self.loaded_model_path),
-                "engine": (self.current_engine_type.value if self.current_engine_type else None),
+                "engine": (
+                    self.current_engine_type.value if self.current_engine_type else None
+                ),
                 "compatibility": compatibility,
             }
 
             # Check if current engine is compatible
             current_engine_name = (
-                self.current_engine_type.value.lower() if self.current_engine_type else None
+                self.current_engine_type.value.lower()
+                if self.current_engine_type
+                else None
             )
             is_compatible = compatibility.get(current_engine_name or "", False)
 
@@ -204,9 +216,13 @@ class UnifiedEngineInterface(ContractChecker):
         try:
             # Get basic model info
             info: dict[str, Any] = {
-                "engine": (self.current_engine_type.value if self.current_engine_type else None),
+                "engine": (
+                    self.current_engine_type.value if self.current_engine_type else None
+                ),
                 "model_name": self.current_engine.model_name,
-                "model_path": (str(self.loaded_model_path) if self.loaded_model_path else None),
+                "model_path": (
+                    str(self.loaded_model_path) if self.loaded_model_path else None
+                ),
             }
 
             # Get state information if available

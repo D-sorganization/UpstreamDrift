@@ -74,13 +74,19 @@ class TestCalculateCompressionWork:
         )
 
     def test_returns_dict(self) -> None:
-        result = self._ENGINE.calculate_compression_work(self._make_stage(), 1000.0, _MIX_PROPS)
+        result = self._ENGINE.calculate_compression_work(
+            self._make_stage(), 1000.0, _MIX_PROPS
+        )
         assert isinstance(result, dict)
 
     def test_power_key_present(self) -> None:
-        result = self._ENGINE.calculate_compression_work(self._make_stage(), 1000.0, _MIX_PROPS)
+        result = self._ENGINE.calculate_compression_work(
+            self._make_stage(), 1000.0, _MIX_PROPS
+        )
         # Result includes power_hp and heat_rise
-        assert "power_hp" in result or "power_kw" in result or "compression_work" in result
+        assert (
+            "power_hp" in result or "power_kw" in result or "compression_work" in result
+        )
 
     def test_zero_inlet_pressure_raises(self) -> None:
         stage = CompressionStage(

@@ -45,7 +45,9 @@ inertia_offdiag_strategy = st.floats(min_value=-0.001, max_value=0.001, allow_na
 
 # Link name: non-empty alphanumeric
 link_name_strategy = st.text(
-    alphabet=st.characters(whitelist_categories=("Ll", "Lu", "Nd"), whitelist_characters="_"),
+    alphabet=st.characters(
+        whitelist_categories=("Ll", "Lu", "Nd"), whitelist_characters="_"
+    ),
     min_size=1,
     max_size=30,
 ).filter(lambda s: s[0].isalpha())
@@ -74,7 +76,9 @@ def valid_inertia(draw: st.DrawFn) -> Inertia:
             draw(dimension_strategy),
         )
     if shape == "cylinder":
-        return Inertia.from_cylinder(mass, draw(dimension_strategy), draw(dimension_strategy))
+        return Inertia.from_cylinder(
+            mass, draw(dimension_strategy), draw(dimension_strategy)
+        )
     return Inertia.from_sphere(mass, draw(dimension_strategy))
 
 
@@ -147,7 +151,9 @@ class TestURDFXMLWellFormedness:
         link = Link(
             name="body",
             inertia=inertia,
-            visual_geometry=Geometry.box(params["size_x"], params["size_y"], params["size_z"]),
+            visual_geometry=Geometry.box(
+                params["size_x"], params["size_y"], params["size_z"]
+            ),
         )
         builder = ManualBuilder("test_robot", validate_on_add=False)
         builder.add_link(link)
@@ -471,12 +477,12 @@ class TestMirrorInvolution:
         result_joint = builder.joints[0]
 
         for i in range(3):
-            assert (
-                abs(result_joint.origin.xyz[i] - joint_origin[i]) < 1e-10
-            ), f"joint origin[{i}] mismatch after double mirror({axis})"
-            assert (
-                abs(result_joint.axis[i] - joint_axis[i]) < 1e-10
-            ), f"joint axis[{i}] mismatch after double mirror({axis})"
+            assert abs(result_joint.origin.xyz[i] - joint_origin[i]) < 1e-10, (
+                f"joint origin[{i}] mismatch after double mirror({axis})"
+            )
+            assert abs(result_joint.axis[i] - joint_axis[i]) < 1e-10, (
+                f"joint axis[{i}] mismatch after double mirror({axis})"
+            )
 
     @given(axis=mirror_axis_strategy)
     @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])

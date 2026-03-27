@@ -146,7 +146,9 @@ class JointState:
             rotation=Quaternion.from_dict(d["rotation"]),
             velocity=Vector3.from_dict(d["velocity"]) if "velocity" in d else None,
             angular_velocity=(
-                Vector3.from_dict(d["angular_velocity"]) if "angular_velocity" in d else None
+                Vector3.from_dict(d["angular_velocity"])
+                if "angular_velocity" in d
+                else None
             ),
             joint_angle=d.get("joint_angle"),
             joint_velocity=d.get("joint_velocity"),

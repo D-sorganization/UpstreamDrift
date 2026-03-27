@@ -104,7 +104,9 @@ class GolfLauncher(
         self.resize(w, h)
         self.center_window()
 
-        self._startup_time_ms = startup_results.startup_time_ms if startup_results else 0
+        self._startup_time_ms = (
+            startup_results.startup_time_ms if startup_results else 0
+        )
 
         self._load_window_icon()
         self._init_state(startup_results)
@@ -148,7 +150,9 @@ class GolfLauncher(
         logger.warning("No icon files found")
 
     def _init_state(self, startup_results: StartupResults | None) -> None:
-        self.docker_available = startup_results.docker_available if startup_results else False
+        self.docker_available = (
+            startup_results.docker_available if startup_results else False
+        )
         self.docker_checker: DockerCheckThread | None = None
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
@@ -218,7 +222,9 @@ class GolfLauncher(
                 if model.type in ("special_app", "utility", "matlab_app"):
                     self.special_app_lookup[model.id] = model
 
-            logger.info(f"Built available_models with {len(self.available_models)} entries")
+            logger.info(
+                f"Built available_models with {len(self.available_models)} entries"
+            )
         else:
             logger.warning("No registry available - no models will be loaded")
 
@@ -262,7 +268,9 @@ class GolfLauncher(
                     self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
                 ),
                 "docker_mode": (
-                    self.chk_docker.isChecked() if hasattr(self, "chk_docker") else False
+                    self.chk_docker.isChecked()
+                    if hasattr(self, "chk_docker")
+                    else False
                 ),
             },
         }
@@ -495,7 +503,11 @@ class GolfLauncher(
         model = self._get_model(self.selected_model)
 
         # Check Docker dependency
-        if model and getattr(model, "requires_docker", False) and not self.docker_available:
+        if (
+            model
+            and getattr(model, "requires_docker", False)
+            and not self.docker_available
+        ):
             self.btn_launch.setText("! Docker Required")
             self.btn_launch.setStyleSheet(f"""
                 QPushButton {{
@@ -610,7 +622,9 @@ class GolfLauncher(
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""
-        running_count = sum(1 for p in self.running_processes.values() if p.poll() is None)
+        running_count = sum(
+            1 for p in self.running_processes.values() if p.poll() is None
+        )
 
         if running_count > 0:
             word_is = "is" if running_count == 1 else "are"
@@ -669,7 +683,9 @@ def main() -> None:
                 "UpstreamDrift.GolfModelingSuite.Launcher.1"
             )
         except ImportError:
-            logger.debug("ctypes not available; skipping Windows AppUserModelID assignment")
+            logger.debug(
+                "ctypes not available; skipping Windows AppUserModelID assignment"
+            )
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")

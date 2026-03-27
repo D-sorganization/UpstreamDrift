@@ -72,7 +72,9 @@ class DockerBuildThread(QThread):
     def run(self) -> None:
         """Run the docker build command."""
         if self.context_path is None or not self.context_path.exists():
-            self.finished_signal.emit(False, f"Invalid Docker context path: {self.context_path}")
+            self.finished_signal.emit(
+                False, f"Invalid Docker context path: {self.context_path}"
+            )
             return
 
         cmd = [
@@ -123,7 +125,9 @@ class DockerBuildThread(QThread):
             if process.returncode == 0:
                 self.finished_signal.emit(True, "Build successful.")
             else:
-                self.finished_signal.emit(False, f"Build failed with code {process.returncode}")
+                self.finished_signal.emit(
+                    False, f"Build failed with code {process.returncode}"
+                )
 
         except (FileNotFoundError, PermissionError, OSError) as e:
             self.finished_signal.emit(False, str(e))
@@ -249,12 +253,12 @@ class DockerLauncher:
 
         # Port mapping for MeshCat (Drake/Pinocchio)
         if model_type in ("drake", "pinocchio"):
-            cmd.extend(
-                ["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"]
-            )  # nosec: Docker container networking requires 0.0.0.0
+            cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])  # nosec: Docker container networking requires 0.0.0.0
 
         # Working Directory
-        work_dir = f"/workspace/{repo_path.parent.relative_to(self.repo_root).as_posix()}"
+        work_dir = (
+            f"/workspace/{repo_path.parent.relative_to(self.repo_root).as_posix()}"
+        )
         cmd.extend(["-w", work_dir])
 
         # Python command - determine correct launch command based on model type

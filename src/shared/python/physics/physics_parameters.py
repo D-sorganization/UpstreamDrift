@@ -346,7 +346,9 @@ class PhysicsParameterRegistry:
         Returns:
             List of parameters in category
         """
-        return [param for param in self.parameters.values() if param.category == category]
+        return [
+            param for param in self.parameters.values() if param.category == category
+        ]
 
     def get_all_categories(self) -> list[ParameterCategory]:
         """Get all parameter categories.

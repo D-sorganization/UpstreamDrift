@@ -59,15 +59,21 @@ async def run_simulation(
     except ValueError as exc:
         if logger:
             logger.warning("Invalid simulation parameters: %s", exc)
-        raise HTTPException(status_code=400, detail=f"Invalid parameters: {str(exc)}") from exc
+        raise HTTPException(
+            status_code=400, detail=f"Invalid parameters: {str(exc)}"
+        ) from exc
     except RuntimeError as exc:
         if logger:
             logger.error("Simulation runtime error: %s", exc)
-        raise HTTPException(status_code=500, detail=f"Simulation failed: {str(exc)}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Simulation failed: {str(exc)}"
+        ) from exc
     except ImportError as exc:
         if logger:
             logger.exception("Unexpected simulation error: %s", exc)
-        raise HTTPException(status_code=500, detail="Internal simulation error") from exc
+        raise HTTPException(
+            status_code=500, detail="Internal simulation error"
+        ) from exc
 
 
 @router.post("/simulate/async")

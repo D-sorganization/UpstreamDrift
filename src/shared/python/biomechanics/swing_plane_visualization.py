@@ -162,7 +162,9 @@ def create_instantaneous_plane_visualization(
         raise ValueError("clubhead_velocity must be provided")
     if not (clubhead_velocity is not None):
         raise ValueError("clubhead_velocity must be provided")
-    plane_frame = fit_instantaneous_swing_plane(clubhead_velocity, grip_position, clubhead_position)
+    plane_frame = fit_instantaneous_swing_plane(
+        clubhead_velocity, grip_position, clubhead_position
+    )
 
     # Generate plane vertices
     vertices = generate_plane_vertices(
@@ -215,7 +217,9 @@ def create_fsp_visualization(
         raise ValueError("clubhead_trajectory must be provided")
     if not (clubhead_trajectory is not None):
         raise ValueError("clubhead_trajectory must be provided")
-    fsp_frame = fit_functional_swing_plane(clubhead_trajectory, timestamps, impact_time, window_ms)
+    fsp_frame = fit_functional_swing_plane(
+        clubhead_trajectory, timestamps, impact_time, window_ms
+    )
 
     # Generate plane vertices
     vertices = generate_plane_vertices(
@@ -389,7 +393,9 @@ class SwingPlaneVisualizer:
         trajectory = np.array(self.trajectory_history)
         timestamps = np.array(self.timestamp_history)
 
-        fsp_vis = create_fsp_visualization(trajectory, timestamps, impact_time, window_ms)
+        fsp_vis = create_fsp_visualization(
+            trajectory, timestamps, impact_time, window_ms
+        )
         self.current_scene.fsp = fsp_vis
 
         # Also compute metrics using the analyzer

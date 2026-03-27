@@ -547,7 +547,9 @@ class HelpDialog(QDialog):
         for i in range(self.topic_list.count()):
             item = self.topic_list.item(i)
             if item:
-                item.setHidden(search_lower not in item.text().lower() and bool(search_lower))
+                item.setHidden(
+                    search_lower not in item.text().lower() and bool(search_lower)
+                )
 
         # Search within content
         if text:

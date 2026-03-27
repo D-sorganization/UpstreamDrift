@@ -63,7 +63,8 @@ def _get_alembic_config() -> "Config":  # type: ignore[name-defined]  # noqa: F8
 
     if not ini_path.exists():
         raise FileNotFoundError(
-            f"alembic.ini not found at {ini_path}. " "Are you running from the repository root?"
+            f"alembic.ini not found at {ini_path}. "
+            "Are you running from the repository root?"
         )
 
     cfg = Config(str(ini_path))

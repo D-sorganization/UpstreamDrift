@@ -163,8 +163,12 @@ def list_gas_components() -> dict[str, dict[str, Any]]:
         Dictionary of gas components with MW, Tc, Pc, and acentric factor
     """
     components = {}
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                    AVAILABLE GAS COMPONENTS                        ║")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                    AVAILABLE GAS COMPONENTS                        ║"
+    )
     logger.info("╠═════════════╦═══════════╦══════════╦═══════════╦══════════════════╣")
     logger.info("║ Component   ║  MW       ║   Tc (K) ║  Pc (bar) ║ Acentric Factor  ║")
     logger.info("╠═════════════╬═══════════╬══════════╬═══════════╬══════════════════╣")
@@ -194,8 +198,12 @@ def list_fittings(category: str | None = None) -> dict[str, float]:
     Returns:
         Dictionary of fitting types and K-factors
     """
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                    AVAILABLE FITTINGS (K-factors)                  ║")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                    AVAILABLE FITTINGS (K-factors)                  ║"
+    )
     logger.info("╠══════════════════════════════════════════╦═════════╦══════════════╣")
     logger.info("║ Fitting Type                             ║ K-factor║  Category    ║")
     logger.info("╠══════════════════════════════════════════╬═════════╬══════════════╣")
@@ -229,7 +237,9 @@ def list_fittings(category: str | None = None) -> dict[str, float]:
         logger.info(f"║ {name:40s} ║ {k_factor:7.2f} ║ {cat:12s} ║")
 
     logger.info("╚══════════════════════════════════════════╩═════════╩══════════════╝")
-    logger.info("\nNote: K-factors are for fully turbulent flow in standard pipe sizes.")
+    logger.info(
+        "\nNote: K-factors are for fully turbulent flow in standard pipe sizes."
+    )
     logger.info("      Use Two-K method for more accuracy in small pipes/low Re flows.")
     return result
 
@@ -243,8 +253,12 @@ def list_pipe_sizes() -> dict[str, list[str]]:
     sizes = list_available_sizes()
     result = {}
 
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                    AVAILABLE PIPE SIZES (ASME B36.10M)             ║")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                    AVAILABLE PIPE SIZES (ASME B36.10M)             ║"
+    )
     logger.info("╠═══════════════════════════════════════════════════════════════════╣")
 
     for size in sizes:
@@ -263,21 +277,35 @@ def list_flow_units() -> dict[str, list[str]]:
     Returns:
         Dictionary of unit categories and available units
     """
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                    AVAILABLE FLOW RATE UNITS                       ║")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                    AVAILABLE FLOW RATE UNITS                       ║"
+    )
     logger.info("╠═══════════════════════════════════════════════════════════════════╣")
 
-    logger.info("║ MASS FLOW UNITS:                                                   ║")
+    logger.info(
+        "║ MASS FLOW UNITS:                                                   ║"
+    )
     mass_units = list(MASS_FLOW_CONVERSIONS.keys())
     logger.info(f"║   {', '.join(mass_units):63s}║")
 
-    logger.info("║                                                                    ║")
-    logger.info("║ MOLAR FLOW UNITS:                                                  ║")
+    logger.info(
+        "║                                                                    ║"
+    )
+    logger.info(
+        "║ MOLAR FLOW UNITS:                                                  ║"
+    )
     molar_units = list(MOLAR_FLOW_CONVERSIONS.keys())
     logger.info(f"║   {', '.join(molar_units):63s}║")
 
-    logger.info("║                                                                    ║")
-    logger.info("║ VOLUMETRIC FLOW UNITS:                                             ║")
+    logger.info(
+        "║                                                                    ║"
+    )
+    logger.info(
+        "║ VOLUMETRIC FLOW UNITS:                                             ║"
+    )
     vol_units = list(VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S.keys())
     # Split into multiple lines if needed
     vol_str = ", ".join(vol_units)
@@ -287,8 +315,12 @@ def list_flow_units() -> dict[str, list[str]]:
         vol_str = vol_str[idx + 2 :]
     logger.info(f"║   {vol_str:63s}║")
 
-    logger.info("║                                                                    ║")
-    logger.info("║ STANDARD CONDITIONS FOR VOLUMETRIC FLOWS:                          ║")
+    logger.info(
+        "║                                                                    ║"
+    )
+    logger.info(
+        "║ STANDARD CONDITIONS FOR VOLUMETRIC FLOWS:                          ║"
+    )
     for name, (T, P, desc) in STANDARD_CONDITIONS.items():
         logger.info(f"║   {name:6s}: T={T:.2f}K, P={P:.0f}Pa - {desc:34s}║")
 
@@ -308,21 +340,37 @@ def list_materials() -> dict[str, dict[str, float]]:
     Returns:
         Dictionary of materials with roughness values
     """
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                    PIPE MATERIAL ROUGHNESS VALUES                  ║")
-    logger.info("╠═══════════════════════════════════╦═════════════╦══════════════════╣")
-    logger.info("║ Material                          ║  ε (mm)     ║  ε (m)           ║")
-    logger.info("╠═══════════════════════════════════╬═════════════╬══════════════════╣")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                    PIPE MATERIAL ROUGHNESS VALUES                  ║"
+    )
+    logger.info(
+        "╠═══════════════════════════════════╦═════════════╦══════════════════╣"
+    )
+    logger.info(
+        "║ Material                          ║  ε (mm)     ║  ε (m)           ║"
+    )
+    logger.info(
+        "╠═══════════════════════════════════╬═════════════╬══════════════════╣"
+    )
 
     result = {}
-    for material, (roughness_mm, _roughness_ft, _desc) in sorted(MATERIAL_ROUGHNESS.items()):
+    for material, (roughness_mm, _roughness_ft, _desc) in sorted(
+        MATERIAL_ROUGHNESS.items()
+    ):
         result[material] = {
             "roughness_mm": roughness_mm,
             "roughness_m": roughness_mm / 1000,
         }
-        logger.info(f"║ {material:33s} ║ {roughness_mm:11.4f} ║ {roughness_mm / 1000:16.6f} ║")
+        logger.info(
+            f"║ {material:33s} ║ {roughness_mm:11.4f} ║ {roughness_mm / 1000:16.6f} ║"
+        )
 
-    logger.info("╚═══════════════════════════════════╩═════════════╩══════════════════╝")
+    logger.info(
+        "╚═══════════════════════════════════╩═════════════╩══════════════════╝"
+    )
     return result
 
 
@@ -346,19 +394,33 @@ def compare_friction_methods(
         raise ValueError("reynolds_number must be provided")
     if not (reynolds_number is not None):
         raise ValueError("reynolds_number must be provided")
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                 FRICTION FACTOR METHOD COMPARISON                  ║")
-    logger.info(f"║  Re = {reynolds_number:.0f}, ε/D = {relative_roughness:.6f}".ljust(68) + "║")
-    logger.info("╠═══════════════════════════════════╦═══════════╦═════════════════════╣")
-    logger.info("║ Method                            ║ f         ║ Δ from Colebrook    ║")
-    logger.info("╠═══════════════════════════════════╬═══════════╬═════════════════════╣")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                 FRICTION FACTOR METHOD COMPARISON                  ║"
+    )
+    logger.info(
+        f"║  Re = {reynolds_number:.0f}, ε/D = {relative_roughness:.6f}".ljust(68) + "║"
+    )
+    logger.info(
+        "╠═══════════════════════════════════╦═══════════╦═════════════════════╣"
+    )
+    logger.info(
+        "║ Method                            ║ f         ║ Δ from Colebrook    ║"
+    )
+    logger.info(
+        "╠═══════════════════════════════════╬═══════════╬═════════════════════╣"
+    )
 
     results = {}
 
     # Colebrook (reference)
     f_colebrook = friction_factor_colebrook(reynolds_number, relative_roughness)
     results["colebrook"] = f_colebrook
-    logger.info(f"║ Colebrook-White (iterative)       ║ {f_colebrook:.6f}  ║ (reference)         ║")
+    logger.info(
+        f"║ Colebrook-White (iterative)       ║ {f_colebrook:.6f}  ║ (reference)         ║"
+    )
 
     # Swamee-Jain
     f_swamee = friction_factor_swamee_jain(reynolds_number, relative_roughness)
@@ -384,7 +446,9 @@ def compare_friction_methods(
         f"║ Haaland (simplified)              ║ {f_haaland:.6f}  ║ {diff:+.2f}%              ║"
     )
 
-    logger.info("╚═══════════════════════════════════╩═══════════╩═════════════════════╝")
+    logger.info(
+        "╚═══════════════════════════════════╩═══════════╩═════════════════════╝"
+    )
 
     # Flow regime classification
     if reynolds_number < 2300:
@@ -411,7 +475,9 @@ def _validate_pipe_params(
     """Validate pipe geometry parameters."""
     if pipe_diameter is None:
         if pipe_size is None or pipe_schedule is None:
-            errors.append("Must provide either pipe_diameter OR both pipe_size and pipe_schedule")
+            errors.append(
+                "Must provide either pipe_diameter OR both pipe_size and pipe_schedule"
+            )
         else:
             try:
                 get_pipe_spec(pipe_size, pipe_schedule)
@@ -421,7 +487,9 @@ def _validate_pipe_params(
     elif pipe_diameter <= 0:
         errors.append(f"pipe_diameter must be positive, got {pipe_diameter}")
     elif pipe_diameter > 2:
-        warnings.append(f"Large diameter ({pipe_diameter}m). Did you mean mm? Use meters.")
+        warnings.append(
+            f"Large diameter ({pipe_diameter}m). Did you mean mm? Use meters."
+        )
 
 
 def _validate_flow_params(
@@ -470,7 +538,9 @@ def _validate_conditions(
         if pressure <= 0:
             errors.append(f"pressure must be positive, got {pressure}")
         elif pressure > 1000:
-            warnings.append(f"High pressure ({pressure}). Ensure units are correct (bar/psi/Pa).")
+            warnings.append(
+                f"High pressure ({pressure}). Ensure units are correct (bar/psi/Pa)."
+            )
 
     if temperature is not None:
         if temperature <= 0:
@@ -480,7 +550,9 @@ def _validate_conditions(
                 f"Low temperature ({temperature}K). Did you mean Celsius? Use temperature_unit='C'"
             )
         elif temperature > 2000:
-            warnings.append(f"Very high temperature ({temperature}K). Verify this is correct.")
+            warnings.append(
+                f"Very high temperature ({temperature}K). Verify this is correct."
+            )
 
 
 def _validate_composition_and_fittings(
@@ -519,30 +591,42 @@ def _validate_composition_and_fittings(
                 )
 
 
-def _log_validation_report(is_valid: bool, errors: list[str], warnings: list[str]) -> None:
+def _log_validation_report(
+    is_valid: bool, errors: list[str], warnings: list[str]
+) -> None:
     """Log a formatted validation report."""
     if not (is_valid is not None):
         raise ValueError("is_valid must be provided")
     if not (is_valid is not None):
         raise ValueError("is_valid must be provided")
-    logger.info("\n╔═══════════════════════════════════════════════════════════════════╗")
-    logger.info("║                        INPUT VALIDATION                            ║")
+    logger.info(
+        "\n╔═══════════════════════════════════════════════════════════════════╗"
+    )
+    logger.info(
+        "║                        INPUT VALIDATION                            ║"
+    )
     logger.info("╠═══════════════════════════════════════════════════════════════════╣")
 
     if errors:
-        logger.error("║ ERRORS (must fix):                                                ║")
+        logger.error(
+            "║ ERRORS (must fix):                                                ║"
+        )
         for error in errors:
             for line in _wrap_text(error, 64):
                 logger.info(f"║   ❌ {line:62s}║")
 
     if warnings:
-        logger.warning("║ WARNINGS (review):                                                ║")
+        logger.warning(
+            "║ WARNINGS (review):                                                ║"
+        )
         for warning in warnings:
             for line in _wrap_text(warning, 64):
                 logger.info(f"║   ⚠️  {line:61s}║")
 
     if is_valid:
-        logger.info("║   ✅ All inputs valid - ready to calculate                       ║")
+        logger.info(
+            "║   ✅ All inputs valid - ready to calculate                       ║"
+        )
 
     logger.info("╚═══════════════════════════════════════════════════════════════════╝")
 
@@ -635,14 +719,20 @@ def _resolve_pipe_geometry(
         raise ValueError("pipe_material must be provided")
     if pipe_diameter is None:
         if pipe_size is None or pipe_schedule is None:
-            raise ValueError("Either provide pipe_diameter or both pipe_size and pipe_schedule")
+            raise ValueError(
+                "Either provide pipe_diameter or both pipe_size and pipe_schedule"
+            )
         pipe_spec = get_pipe_spec(pipe_size, pipe_schedule, pipe_material)
         pipe_diameter = pipe_spec.get_id_meters()
         logger.info(
             f'Using {pipe_size}" Schedule {pipe_schedule}: ID = {pipe_diameter * 1000:.2f} mm'
         )
 
-    roughness = pipe_roughness if pipe_roughness is not None else get_roughness(pipe_material, "m")
+    roughness = (
+        pipe_roughness
+        if pipe_roughness is not None
+        else get_roughness(pipe_material, "m")
+    )
     return pipe_diameter, roughness
 
 
@@ -681,7 +771,9 @@ def _resolve_gas_and_flow(
         density = props["density"]
         from .utils.flow_rate_converter import volumetric_actual_to_mass
 
-        mass_flow_kg_s = volumetric_actual_to_mass(flow_rate, flow_unit, density, "kg/s")
+        mass_flow_kg_s = volumetric_actual_to_mass(
+            flow_rate, flow_unit, density, "kg/s"
+        )
     else:
         mass_flow_kg_s = convert_flow_rate_to_mass(
             flow_rate,
@@ -705,9 +797,13 @@ def _build_fitting_list(
         for fitting_dict in fittings:
             fitting_type = str(fitting_dict.get("type", ""))
             quantity = int(fitting_dict.get("quantity", 1))
-            k_factor = float(fitting_dict.get("k_factor", FITTING_K_FACTORS.get(fitting_type, 0.0)))
+            k_factor = float(
+                fitting_dict.get("k_factor", FITTING_K_FACTORS.get(fitting_type, 0.0))
+            )
             fitting_list.append(
-                PipeFitting(fitting_type=fitting_type, quantity=quantity, k_factor=k_factor)
+                PipeFitting(
+                    fitting_type=fitting_type, quantity=quantity, k_factor=k_factor
+                )
             )
     return fitting_list
 
@@ -1074,7 +1170,9 @@ def _print_breakdown_section(results: dict[str, Any]) -> None:
     logger.info("\n┌" + "─" * 78 + "┐")
     logger.info("│" + " PRESSURE DROP BREAKDOWN ".center(78) + "│")
     logger.info("├" + "─" * 38 + "┬" + "─" * 19 + "┬" + "─" * 19 + "┤")
-    logger.info("│  Component                           │     Value (bar)   │    Percentage   │")
+    logger.info(
+        "│  Component                           │     Value (bar)   │    Percentage   │"
+    )
     logger.info("├" + "─" * 38 + "┼" + "─" * 19 + "┼" + "─" * 19 + "┤")
 
     dp_total = results["pressure_drop_pa"]

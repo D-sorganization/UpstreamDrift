@@ -67,7 +67,9 @@ class User(Base):  # type: ignore[misc,valid-type]
             name="valid_subscription_status",
         ),
         CheckConstraint("api_calls_this_month >= 0", name="non_negative_api_calls"),
-        CheckConstraint("video_analyses_this_month >= 0", name="non_negative_video_analyses"),
+        CheckConstraint(
+            "video_analyses_this_month >= 0", name="non_negative_video_analyses"
+        ),
         CheckConstraint("simulations_this_month >= 0", name="non_negative_simulations"),
     )
 
@@ -110,7 +112,9 @@ class APIKey(Base):  # type: ignore[misc,valid-type]
     __tablename__ = "api_keys"
 
     # DATA INTEGRITY: Add check constraint for non-negative usage count
-    __table_args__ = (CheckConstraint("usage_count >= 0", name="non_negative_usage_count"),)
+    __table_args__ = (
+        CheckConstraint("usage_count >= 0", name="non_negative_usage_count"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     # DATA INTEGRITY: Add ForeignKey constraint to ensure user exists
@@ -167,7 +171,9 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     """User creation model."""
 
-    password: str = Field(..., min_length=8, description="Password must be at least 8 characters")
+    password: str = Field(
+        ..., min_length=8, description="Password must be at least 8 characters"
+    )
 
 
 class UserUpdate(BaseModel):

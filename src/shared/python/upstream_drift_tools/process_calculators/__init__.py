@@ -111,7 +111,9 @@ try:
         run_multi_parameter_analysis,
     )
 
-    MultiParameterAnalysis = run_multi_parameter_analysis  # Alias for backwards compatibility
+    MultiParameterAnalysis = (
+        run_multi_parameter_analysis  # Alias for backwards compatibility
+    )
 except ImportError as e:
     _import_errors.append(f"MultiParameterAnalysis not available: {e}")
     MultiParameterAnalysis = None  # type: ignore[assignment]

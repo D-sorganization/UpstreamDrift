@@ -85,7 +85,9 @@ class TestMirrorForHandedness:
         new_y = builder_with_segment.segments[0]["geometry"]["position"]["y"]
         assert new_y == -original_y
 
-    def test_mirror_renames_right_to_left(self, builder_with_segment: URDFBuilder) -> None:
+    def test_mirror_renames_right_to_left(
+        self, builder_with_segment: URDFBuilder
+    ) -> None:
         """mirror_for_handedness should rename right_ prefix to left_."""
         builder_with_segment.mirror_for_handedness()
 
@@ -111,7 +113,9 @@ class TestMirrorForHandedness:
 
         assert builder.segments[0]["name"] == "right_leg"
 
-    def test_double_mirror_restores_original(self, builder_with_segment: URDFBuilder) -> None:
+    def test_double_mirror_restores_original(
+        self, builder_with_segment: URDFBuilder
+    ) -> None:
         """Mirroring twice should restore original values."""
         original_y = builder_with_segment.segments[0]["geometry"]["position"]["y"]
         original_name = builder_with_segment.segments[0]["name"]
@@ -119,7 +123,9 @@ class TestMirrorForHandedness:
         builder_with_segment.mirror_for_handedness()
         builder_with_segment.mirror_for_handedness()
 
-        assert builder_with_segment.segments[0]["geometry"]["position"]["y"] == original_y
+        assert (
+            builder_with_segment.segments[0]["geometry"]["position"]["y"] == original_y
+        )
         assert builder_with_segment.segments[0]["name"] == original_name
         assert builder_with_segment.get_handedness() == Handedness.RIGHT
 
@@ -145,7 +151,9 @@ class TestGetMirroredUrdf:
         )
         return builder
 
-    def test_same_handedness_returns_normal_urdf(self, builder_with_segment: URDFBuilder) -> None:
+    def test_same_handedness_returns_normal_urdf(
+        self, builder_with_segment: URDFBuilder
+    ) -> None:
         """get_mirrored_urdf with same handedness should return normal URDF."""
         normal_urdf = builder_with_segment.get_urdf()
         mirrored_urdf = builder_with_segment.get_mirrored_urdf(Handedness.RIGHT)
@@ -165,7 +173,9 @@ class TestGetMirroredUrdf:
         assert builder_with_segment.get_handedness() == original_handedness
         assert builder_with_segment.segments[0]["name"] == original_name
 
-    def test_mirrored_urdf_produces_valid_xml(self, builder_with_segment: URDFBuilder) -> None:
+    def test_mirrored_urdf_produces_valid_xml(
+        self, builder_with_segment: URDFBuilder
+    ) -> None:
         """get_mirrored_urdf should produce valid URDF XML."""
         mirrored = builder_with_segment.get_mirrored_urdf(Handedness.LEFT)
 

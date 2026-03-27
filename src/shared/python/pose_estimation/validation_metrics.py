@@ -300,11 +300,15 @@ def validate_pipeline_output(
 
     # Joint angle RMSE
     if joint_angles_series and reference_angles:
-        report.joint_angle_metrics = compute_joint_angle_rmse(joint_angles_series, reference_angles)
+        report.joint_angle_metrics = compute_joint_angle_rmse(
+            joint_angles_series, reference_angles
+        )
 
     # Marker RMSE
     if predicted_markers is not None and reference_markers is not None:
-        report.marker_metrics = compute_marker_rmse(predicted_markers, reference_markers)
+        report.marker_metrics = compute_marker_rmse(
+            predicted_markers, reference_markers
+        )
 
     # Temporal jitter
     if joint_angles_series:

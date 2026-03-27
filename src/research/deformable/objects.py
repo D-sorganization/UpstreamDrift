@@ -280,7 +280,10 @@ class SoftBody(DeformableObject):
         lam = (
             self._material.youngs_modulus
             * self._material.poisson_ratio
-            / ((1 + self._material.poisson_ratio) * (1 - 2 * self._material.poisson_ratio))
+            / (
+                (1 + self._material.poisson_ratio)
+                * (1 - 2 * self._material.poisson_ratio)
+            )
         )
 
         for i, tet in enumerate(self._tetrahedra):

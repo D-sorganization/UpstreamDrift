@@ -13,7 +13,9 @@ from src.shared.python.biomechanics.hill_muscle import (
 @pytest.fixture
 def muscle_params() -> MuscleParameters:
     """Default muscle parameters for testing."""
-    return MuscleParameters(F_max=1000.0, l_opt=0.10, l_slack=0.20, v_max=1.0, pennation_angle=0.0)
+    return MuscleParameters(
+        F_max=1000.0, l_opt=0.10, l_slack=0.20, v_max=1.0, pennation_angle=0.0
+    )
 
 
 @pytest.fixture

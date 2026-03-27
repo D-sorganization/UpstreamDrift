@@ -133,7 +133,9 @@ class TestPlotGeneration:
         """Test generating and saving a single plot."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "test_plot.png"
-            generator.generate_single_plot(sample_data, PlotType.JOINT_POSITIONS, output_path)
+            generator.generate_single_plot(
+                sample_data, PlotType.JOINT_POSITIONS, output_path
+            )
             assert output_path.exists()
 
     def test_generate_all_standard_plots(
@@ -199,10 +201,14 @@ class TestPlotGeneration:
         self, generator: PlotGenerator, sample_data: SimulationData
     ) -> None:
         """Test mass matrix condition number plot."""
-        fig = generator.generate_single_plot(sample_data, PlotType.MASS_MATRIX_CONDITION)
+        fig = generator.generate_single_plot(
+            sample_data, PlotType.MASS_MATRIX_CONDITION
+        )
         assert fig is not None
 
-    def test_unknown_plot_type(self, generator: PlotGenerator, sample_data: SimulationData) -> None:
+    def test_unknown_plot_type(
+        self, generator: PlotGenerator, sample_data: SimulationData
+    ) -> None:
         """Test unknown plot type returns None."""
         fig = generator.generate_single_plot(sample_data, "unknown_type")
         assert fig is None

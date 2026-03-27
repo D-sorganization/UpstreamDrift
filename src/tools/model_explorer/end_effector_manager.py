@@ -557,9 +557,15 @@ class EndEffectorManagerWidget(QWidget):
         self.import_from_file_btn.clicked.connect(self._on_import_from_file)
         self.attach_btn.clicked.connect(self._on_attach_end_effector)
 
-        self.current_list.itemSelectionChanged.connect(self._on_current_selection_changed)
-        self.builtin_list.itemSelectionChanged.connect(self._on_library_selection_changed)
-        self.custom_list.itemSelectionChanged.connect(self._on_library_selection_changed)
+        self.current_list.itemSelectionChanged.connect(
+            self._on_current_selection_changed
+        )
+        self.builtin_list.itemSelectionChanged.connect(
+            self._on_library_selection_changed
+        )
+        self.custom_list.itemSelectionChanged.connect(
+            self._on_library_selection_changed
+        )
 
     def _populate_builtin_list(self) -> None:
         """Populate the built-in end effectors list."""
@@ -679,7 +685,8 @@ class EndEffectorManagerWidget(QWidget):
         reply = QMessageBox.question(
             self,
             "Remove End Effector",
-            f"Remove end effector '{link_name}' and all its children?\n" "This cannot be undone.",
+            f"Remove end effector '{link_name}' and all its children?\n"
+            "This cannot be undone.",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
 
@@ -786,9 +793,13 @@ class EndEffectorManagerWidget(QWidget):
                 item.setData(Qt.ItemDataRole.UserRole, key)
                 self.custom_list.addItem(item)
 
-                self.status_label.setText(f"Imported '{link_name}' from {Path(file_path).name}")
+                self.status_label.setText(
+                    f"Imported '{link_name}' from {Path(file_path).name}"
+                )
 
-    def _select_from_list(self, title: str, label: str, items: list[str]) -> tuple[str, bool]:
+    def _select_from_list(
+        self, title: str, label: str, items: list[str]
+    ) -> tuple[str, bool]:
         """Show a simple selection dialog."""
         if not (title is not None):
             raise ValueError("title must be provided")
@@ -932,7 +943,9 @@ class EndEffectorManagerWidget(QWidget):
         self.urdf_content = new_content
         self._on_identify_end_effectors()
         self.urdf_modified.emit(new_content)
-        self.status_label.setText(f"Attached end effector '{ee.name}' to '{parent_link}'")
+        self.status_label.setText(
+            f"Attached end effector '{ee.name}' to '{parent_link}'"
+        )
 
     def get_urdf_content(self) -> str:
         """Get the current URDF content."""

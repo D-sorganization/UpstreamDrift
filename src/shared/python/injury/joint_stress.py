@@ -332,7 +332,9 @@ class JointStressAnalyzer:
         multiplier = 1.2 if side == JointSide.TRAIL else 1.0
         result.risk_score = min(100, max_rc_loading * multiplier)
 
-        result.rom_utilization = min(100, np.max(np.abs(np.degrees(horizontal))) / 180 * 100)
+        result.rom_utilization = min(
+            100, np.max(np.abs(np.degrees(horizontal))) / 180 * 100
+        )
 
         return result
 
@@ -393,7 +395,9 @@ class JointStressAnalyzer:
         n_frames = len(time)
 
         # Get wrist angles
-        cock = joint_angles.get("wrist_cock", np.zeros(n_frames))  # Ulnar/radial deviation
+        cock = joint_angles.get(
+            "wrist_cock", np.zeros(n_frames)
+        )  # Ulnar/radial deviation
         rotation = joint_angles.get("wrist_rotation", np.zeros(n_frames))
 
         # Get velocity for impact stress estimation
@@ -466,7 +470,9 @@ class JointStressAnalyzer:
                     f"{name}: Overload risk - reduce intensity or modify technique"
                 )
 
-        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(risk_scores)
+        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(
+            risk_scores
+        )
 
         return summary
 
@@ -494,7 +500,9 @@ if __name__ == "__main__":
     joint_torques = {k: 30 * np.gradient(v, dt) for k, v in joint_velocities.items()}
 
     # Analyze all joints
-    results = analyzer.analyze_all_joints(joint_angles, joint_velocities, joint_torques, time)
+    results = analyzer.analyze_all_joints(
+        joint_angles, joint_velocities, joint_torques, time
+    )
 
     for _name, _result in results.items():
         pass

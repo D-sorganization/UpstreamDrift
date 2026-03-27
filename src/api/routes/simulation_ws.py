@@ -161,10 +161,14 @@ async def _run_simulation_loop(
             if config.get("live_analysis"):
                 frame_data["analysis"] = {
                     "joint_angles": (
-                        engine.get_joint_angles() if hasattr(engine, "get_joint_angles") else None
+                        engine.get_joint_angles()
+                        if hasattr(engine, "get_joint_angles")
+                        else None
                     ),
                     "velocities": (
-                        engine.get_velocities() if hasattr(engine, "get_velocities") else None
+                        engine.get_velocities()
+                        if hasattr(engine, "get_velocities")
+                        else None
                     ),
                 }
 

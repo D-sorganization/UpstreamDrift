@@ -72,7 +72,9 @@ class TestURDFBuilder:
         """Test that removing a parent removes its children."""
         self.builder.add_segment({"name": "parent", "geometry": {}})
         self.builder.add_segment({"name": "child", "parent": "parent", "geometry": {}})
-        self.builder.add_segment({"name": "grandchild", "parent": "child", "geometry": {}})
+        self.builder.add_segment(
+            {"name": "grandchild", "parent": "child", "geometry": {}}
+        )
 
         assert len(self.builder.segments) == 3
         self.builder.remove_segment("parent")
@@ -157,7 +159,9 @@ class TestURDFBuilder:
 
     def test_validation_orphans(self) -> None:
         """Test validation detects orphaned segments."""
-        self.builder.add_segment({"name": "orphan", "parent": "missing_parent", "geometry": {}})
+        self.builder.add_segment(
+            {"name": "orphan", "parent": "missing_parent", "geometry": {}}
+        )
 
         errors = self.builder.validate_urdf()
         assert len(errors) == 1

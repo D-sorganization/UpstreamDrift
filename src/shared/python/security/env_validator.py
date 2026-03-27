@@ -194,7 +194,9 @@ def validate_database_config() -> DatabaseKeyValidationResults:
     database_url = get_database_url(default="")
 
     if not database_url:
-        results["warnings"].append("No DATABASE_URL set. Using default SQLite database.")
+        results["warnings"].append(
+            "No DATABASE_URL set. Using default SQLite database."
+        )
         results["database_url"] = False
         results["database_type"] = "sqlite"
         return results
@@ -226,7 +228,9 @@ def validate_database_config() -> DatabaseKeyValidationResults:
     # Check for credentials in URL (they should be there for remote databases)
     db_type = results["database_type"]
     if db_type in ["postgresql", "mysql"] and database_url and "@" not in database_url:
-        results["warnings"].append(f"{str(db_type).upper()} URL appears to be missing credentials")
+        results["warnings"].append(
+            f"{str(db_type).upper()} URL appears to be missing credentials"
+        )
 
     return results
 
@@ -354,7 +358,9 @@ def validate_environment(raise_on_error: bool = True) -> EnvironmentValidationRe
         if results["warnings"]:
             max_warnings = 5
             total_warnings = len(results["warnings"])
-            logger.warning(f"Found {total_warnings} warnings (showing up to {max_warnings}):")
+            logger.warning(
+                f"Found {total_warnings} warnings (showing up to {max_warnings}):"
+            )
             for warning in results["warnings"][:max_warnings]:
                 logger.warning(f"  - {warning}")
             if total_warnings > max_warnings:
@@ -389,13 +395,19 @@ def print_validation_report(results: EnvironmentValidationResults) -> None:
     # API Security
     logger.info("\nAPI Security:")
     api_sec = results["api_security"]
-    logger.info(f"  Secret Key:      {'✓ SET' if api_sec.get('secret_key') else '✗ NOT SET'}")
-    logger.info(f"  Admin Password:  {'✓ SET' if api_sec.get('admin_password') else '○ Optional'}")
+    logger.info(
+        f"  Secret Key:      {'✓ SET' if api_sec.get('secret_key') else '✗ NOT SET'}"
+    )
+    logger.info(
+        f"  Admin Password:  {'✓ SET' if api_sec.get('admin_password') else '○ Optional'}"
+    )
 
     # Database
     logger.info("\nDatabase:")
     db = results["database"]
-    logger.info(f"  Database URL:    {'✓ SET' if db.get('database_url') else '○ Using default'}")
+    logger.info(
+        f"  Database URL:    {'✓ SET' if db.get('database_url') else '○ Using default'}"
+    )
     db_type_str = str(db.get("database_type", "unknown")).upper()
     logger.info(f"  Database Type:   {db_type_str}")
 

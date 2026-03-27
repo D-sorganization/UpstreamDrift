@@ -235,7 +235,9 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
         reward -= self.reward_config.compute_energy_penalty(action)
 
         # Smoothness penalty
-        reward -= self.reward_config.compute_smoothness_penalty(action, self._prev_action)
+        reward -= self.reward_config.compute_smoothness_penalty(
+            action, self._prev_action
+        )
 
         return float(reward)
 
@@ -258,8 +260,12 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
 
         # Optionally randomize positions
         if options and options.get("randomize_positions", False):
-            self._object_pos = self._object_pos + self.np_random.uniform(-0.1, 0.1, size=3)
-            self._target_pos = self._target_pos + self.np_random.uniform(-0.1, 0.1, size=3)
+            self._object_pos = self._object_pos + self.np_random.uniform(
+                -0.1, 0.1, size=3
+            )
+            self._target_pos = self._target_pos + self.np_random.uniform(
+                -0.1, 0.1, size=3
+            )
 
     def _get_info(self) -> dict[str, Any]:
         """Get manipulation-specific info."""

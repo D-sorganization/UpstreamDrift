@@ -93,7 +93,9 @@ class TerrainMixin:
         if use_compressible_turf:
             self._turf_model = CompressibleTurfModel(terrain)
 
-        logger.info(f"Terrain set: {terrain.name} (compressible={use_compressible_turf})")
+        logger.info(
+            f"Terrain set: {terrain.name} (compressible={use_compressible_turf})"
+        )
 
     def enable_terrain(self, enabled: bool = True) -> None:
         """Enable or disable terrain contact.
@@ -237,7 +239,9 @@ class TerrainMixin:
             return np.zeros(3)
 
         if self._use_compressible_turf and self._turf_model is not None:
-            return self._turf_model.compute_turf_contact_force(x, y, z, radius, velocity)
+            return self._turf_model.compute_turf_contact_force(
+                x, y, z, radius, velocity
+            )
         if self._contact_model is not None:
             return self._contact_model.compute_contact_force(x, y, z, radius, velocity)
 
@@ -413,7 +417,9 @@ class TerrainAwareSimulation:
             raise ValueError("terrain must be provided")
         self.terrain = terrain
         self.contact_model = TerrainContactModel(terrain)
-        self.turf_model = CompressibleTurfModel(terrain) if use_compressible_turf else None
+        self.turf_model = (
+            CompressibleTurfModel(terrain) if use_compressible_turf else None
+        )
 
     def compute_object_terrain_force(
         self,
@@ -441,12 +447,18 @@ class TerrainAwareSimulation:
 
         # Contact force (normal)
         if use_turf and self.turf_model is not None:
-            contact_force = self.turf_model.compute_turf_contact_force(x, y, z, radius, velocity)
+            contact_force = self.turf_model.compute_turf_contact_force(
+                x, y, z, radius, velocity
+            )
         else:
-            contact_force = self.contact_model.compute_contact_force(x, y, z, radius, velocity)
+            contact_force = self.contact_model.compute_contact_force(
+                x, y, z, radius, velocity
+            )
 
         # Friction force (tangential)
-        friction_force = self.contact_model.compute_friction_force(x, y, z, radius, velocity)
+        friction_force = self.contact_model.compute_friction_force(
+            x, y, z, radius, velocity
+        )
 
         return contact_force + friction_force
 
@@ -493,7 +505,9 @@ class TerrainAwareSimulation:
             energy_remaining = energy["remaining_energy"]
         else:
             energy_absorbed = 0.0
-            energy_remaining = float(0.5 * ball_mass * np.linalg.norm(impact_velocity) ** 2)
+            energy_remaining = float(
+                0.5 * ball_mass * np.linalg.norm(impact_velocity) ** 2
+            )
 
         # Estimate bounce velocity
         rebound_v_normal = v_normal_mag * material.restitution
