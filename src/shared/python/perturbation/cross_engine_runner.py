@@ -361,7 +361,7 @@ class CrossEnginePerturbationRunner:
                     summary.success_rate * 100,
                     summary.execution_time_sec,
                 )
-            except (RuntimeError, ValueError, ImportError, OSError) as e:  # noqa: F841
+            except Exception as e:  # noqa: BLE001, F841
                 logger.warning("Engine '%s' failed", engine_name, exc_info=True)
                 failed_engines.append(engine_name)
 

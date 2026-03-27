@@ -39,73 +39,19 @@ JOINT_LIMIT_COUNT = 2
 class URDFExporter:
     """Export URDF from canonical YAML model specification."""
 
-    def __init__(self, yaml_path: Path | str, exercise_type: str | None = None) -> None:
+    def __init__(self, yaml_path: Path | str) -> None:
         """Initialize URDF exporter.
 
         Args:
             yaml_path: Path to canonical YAML specification
-            exercise_type: Optional exercise type to apply joint limit overrides
         """
+        if not (yaml_path is not None):
+            raise ValueError("yaml_path must be provided")
         if not (yaml_path is not None):
             raise ValueError("yaml_path must be provided")
         self.yaml_path = Path(yaml_path)
         with self.yaml_path.open() as f:
             self.spec = yaml.safe_load(f)
-
-        self.exercise_type = exercise_type
-        if self.exercise_type and "exercise_profiles" in self.spec:
-            profile = self.spec["exercise_profiles"].get(self.exercise_type, {})
-            overrides = profile.get("joint_limit_overrides", {})
-            if overrides:
-                self._apply_limit_overrides(overrides)
-
-    def _apply_limit_overrides(self, overrides: dict[str, list[float]]) -> None:
-        """Apply joint limit overrides to the segment specifications."""
-        mapping: dict[str, typing.Any] = {
-            "hip_flexion": {
-                "segments": ["right_thigh", "left_thigh"],
-                "axis": [0, 1, 0],
-            },
-            "knee_flexion": {
-                "segments": ["right_shank", "left_shank"],
-                "axis": [0, 1, 0],
-            },
-            "ankle_dorsiflexion": {
-                "segments": ["right_foot", "left_foot"],
-                "axis": [1, 0, 0],
-            },
-            "lumbar_flexion": {
-                "segments": ["lumbar1", "lumbar2", "lumbar3"],
-                "axis": [1, 0, 0],
-            },
-            "shoulder_flexion": {
-                "segments": ["upper_arm_right", "upper_arm_left"],
-                "axis": [1, 0, 0],
-            },
-            "shoulder_abduction": {
-                "segments": ["upper_arm_right", "upper_arm_left"],
-                "axis": [0, 1, 0],
-            },
-            "elbow_flexion": {
-                "segments": ["forearm_right", "forearm_left"],
-                "axis": [0, 1, 0],
-            },
-        }
-
-        segments = self.spec.get("segments", [])
-        for over_name, limits in overrides.items():
-            if over_name not in mapping:
-                continue
-            rule = mapping[over_name]
-            for segment in segments:
-                if segment.get("name") in rule["segments"]:
-                    joint = segment.get("joint", {})
-                    if "dofs" in joint:
-                        for dof in joint["dofs"]:
-                            if dof.get("axis") == rule["axis"]:
-                                dof["limits"] = limits
-                    elif joint.get("axis") == rule["axis"]:
-                        joint["limits"] = limits
 
     def export(self, output_path: Path | str) -> None:
         """Export URDF file.

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from src.shared.python.core.constants import GRAVITY_FLOAT
+from src.shared.python.core.constants import GRAVITY
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -469,7 +469,7 @@ class Cable(DeformableObject):
         total_forces = internal_forces + self._external_forces
 
         # Gravity
-        gravity = np.array([0.0, 0.0, -GRAVITY_FLOAT])
+        gravity = np.array([0.0, 0.0, -GRAVITY])
         node_mass = self._material.density * self._total_rest_length / self.n_nodes
         total_forces += node_mass * gravity
 
@@ -649,7 +649,7 @@ class Cloth(DeformableObject):
         total_forces = internal_forces + self._external_forces
 
         # Gravity
-        gravity = np.array([0.0, 0.0, -GRAVITY_FLOAT])
+        gravity = np.array([0.0, 0.0, -GRAVITY])
         node_mass = self._material.density * 0.01  # Assume thin cloth
         total_forces += node_mass * gravity
 

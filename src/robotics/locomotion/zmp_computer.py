@@ -11,7 +11,6 @@ Design by Contract:
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -19,10 +18,8 @@ import numpy as np
 from numpy.typing import NDArray
 
 from src.robotics.core.protocols import HumanoidCapable, RoboticsCapable
-from src.shared.python.core.constants import GRAVITY_FLOAT as _GRAVITY_CONST
+from src.shared.python.core.constants import GRAVITY as _GRAVITY_CONST
 from src.shared.python.core.contracts import ContractChecker
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -284,12 +281,7 @@ class ZMPComputer(ContractChecker):
             if isinstance(engine, HumanoidCapable):
                 return engine.get_com_position()
 
-        # Fallback: use origin — this is a rough default and may produce
-        # inaccurate ZMP results for non-trivial poses.
-        logger.warning(
-            "COM position unavailable from engine; using fallback [0, 0, 1]. "
-            "ZMP accuracy may be degraded."
-        )
+        # Fallback: use origin
         return np.array([0.0, 0.0, 1.0])
 
     def _get_com_velocity(self) -> NDArray[np.float64]:
@@ -319,8 +311,8 @@ class ZMPComputer(ContractChecker):
             if isinstance(engine, HumanoidCapable):
                 return engine.get_total_mass()
 
-        # Default mass — consistent with model_generation DEFAULT_MASS_KG
-        return 75.0
+        # Default mass
+        return 70.0
 
     def _check_support(
         self,

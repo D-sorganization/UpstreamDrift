@@ -335,10 +335,9 @@ def cone_inertia(
     axis: str = "z",
 ) -> dict[str, float]:
     """
-    Compute inertia tensor for a solid cone about its center of mass.
+    Compute inertia tensor for a solid cone.
 
-    The cone's center of mass is located at 3h/4 from the apex (h/4 from the
-    base), where h is the height.
+    The cone has its apex at the origin and extends along the positive axis.
 
     Args:
         mass: Mass in kg
@@ -349,13 +348,13 @@ def cone_inertia(
     Returns:
         Dict with ixx, iyy, izz, ixy, ixz, iyz
     """
-    # Inertia about center of mass (COM at 3h/4 from apex, h/4 from base)
+    # Inertia about apex
     if not (mass is not None):
         raise ValueError("mass must be provided")
     if not (mass is not None):
         raise ValueError("mass must be provided")
     i_axial = (3.0 / 10.0) * mass * radius**2
-    i_perp = mass * ((3.0 / 20.0) * radius**2 + (3.0 / 80.0) * height**2)
+    i_perp = mass * ((3.0 / 20.0) * radius**2 + (3.0 / 5.0) * height**2)
 
     if axis == "x":
         return {

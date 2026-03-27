@@ -674,12 +674,12 @@ class UnrealStreamingServer:
                 logger.info("Streaming resumed")
 
         elif message.action == ControlAction.SET_SPEED:
-            if message.value is not None and isinstance(message.value, int | float):
+            if message.value is not None and isinstance(message.value, (int, float)):
                 self._playback_speed = float(message.value)
                 logger.info(f"Playback speed set to {self._playback_speed}")
 
         elif message.action == ControlAction.SEEK:
-            if message.value is not None and isinstance(message.value, int | float):
+            if message.value is not None and isinstance(message.value, (int, float)):
                 self._current_time = float(message.value)
                 logger.info(f"Seeked to {self._current_time}")
 

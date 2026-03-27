@@ -85,7 +85,7 @@ class TestGreenSurface:
         surface = GreenSurface()
 
         slope = surface.get_slope_at(0.0, 0.0)
-        assert isinstance(slope, np.ndarray | tuple | list)
+        assert isinstance(slope, (np.ndarray, tuple, list))
 
     def test_green_surface_elevation(self) -> None:
         """Surface elevation query returns finite values."""

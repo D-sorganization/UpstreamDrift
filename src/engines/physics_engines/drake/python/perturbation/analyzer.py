@@ -307,7 +307,7 @@ class DrakePerturbationAnalyzer:
         if "coeffs" not in profile:
             raise ValueError("'coeffs' key missing from profile")
         coeffs = profile["coeffs"]
-        if not isinstance(coeffs, list) or len(coeffs) == 0:
+        if not (isinstance(coeffs, list) and len(coeffs) > 0):
             raise ValueError("profile['coeffs'] must be a non-empty list")
         self._base_coeffs = coeffs
         self._nominal_result = self._simulate(coeffs)
@@ -445,7 +445,7 @@ class DrakePerturbationAnalyzer:
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except (RuntimeError, ValueError, TypeError, ArithmeticError):
+            except Exception:  # noqa: BLE001
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -539,7 +539,7 @@ class DrakePerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except (RuntimeError, ValueError, TypeError, ArithmeticError):
+                except Exception:  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 

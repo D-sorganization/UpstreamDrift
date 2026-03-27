@@ -40,7 +40,7 @@ class TestMetricStatistics:
 
     def test_to_dict_scalar_float(self) -> None:
         d = self._make().to_dict()
-        assert isinstance(d["mean"], int | float)
+        assert isinstance(d["mean"], (int, float))
 
     def test_to_dict_array_becomes_list(self) -> None:
         ms = MetricStatistics(

@@ -36,9 +36,8 @@ FAT_DENSITY_KG_M3: float = 900.0
 # Default density for mesh-based inertia calculation (kg/m^3)
 DEFAULT_DENSITY_KG_M3: float = TISSUE_DENSITY_KG_M3
 
-# Default inertia value when not specified (kg*m^2).
-# This is a conservative fallback for small to medium rigid bodies.
-# For better accuracy, scale by segment mass: I ~ 0.1 * m_segment.
+# Default inertia value when not specified (kg*m^2)
+# Suitable for small to medium rigid bodies
 DEFAULT_INERTIA_KG_M2: float = 0.1
 
 # Default minimum mass for intermediate/virtual links (kg)

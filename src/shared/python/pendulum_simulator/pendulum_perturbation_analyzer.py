@@ -224,7 +224,7 @@ class PendulumPerturbationAnalyzer:
         if not isinstance(profile, dict):
             raise ValueError("profile must be a dict with 'coeffs' key")
         coeffs = profile["coeffs"]
-        if not isinstance(coeffs, list) or len(coeffs) == 0:
+        if not (isinstance(coeffs, list) and len(coeffs) >= 1):
             raise ValueError("profile['coeffs'] must be a non-empty list of lists")
         self._base_coeffs = [list(c) for c in coeffs]
         # Pre-run nominal to cache for trajectory RMSE
@@ -522,7 +522,7 @@ class PendulumPerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except (RuntimeError, ValueError, TypeError, ArithmeticError):
+                except Exception:  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 

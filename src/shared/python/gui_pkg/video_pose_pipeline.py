@@ -512,7 +512,7 @@ class VideoPosePipeline:
             for name in keypoint_names:
                 if name in result.raw_keypoints:
                     kp = result.raw_keypoints[name]
-                    if isinstance(kp, list | tuple) and len(kp) >= 2:
+                    if isinstance(kp, (list, tuple)) and len(kp) >= 2:
                         positions.append([kp[0], kp[1], kp[2] if len(kp) > 2 else 0.0])
                     else:
                         positions.append([0.0, 0.0, 0.0])

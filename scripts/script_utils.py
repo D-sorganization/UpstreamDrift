@@ -151,7 +151,7 @@ def run_command(
     assert cmd, "cmd must be provided"
     assert isinstance(cmd, list), "cmd must be a list"
     if cwd is not None:
-        assert isinstance(cwd, Path | str), "cwd must be a Path or str"
+        assert isinstance(cwd, (Path, str)), "cwd must be a Path or str"
 
     if logger:
         logger.debug(f"Running command: {' '.join(cmd)}")

@@ -11,7 +11,7 @@ import numpy as np
 from src.shared.python.core import constants
 
 # Default gravity vector (spatial acceleration)
-# -9.80665 m/s^2 in z-direction (NIST standard gravity)
+# -9.81 m/s^2 in z-direction (standard earth gravity)
 # Format: [ang_x, ang_y, ang_z, lin_x, lin_y, lin_z]
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
 DEFAULT_GRAVITY.flags.writeable = False

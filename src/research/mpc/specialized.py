@@ -12,7 +12,7 @@ from src.research.mpc.controller import (
     ModelPredictiveController,
     MPCResult,
 )
-from src.shared.python.core.constants import GRAVITY_FLOAT
+from src.shared.python.core.constants import GRAVITY
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -78,7 +78,7 @@ class CentroidalMPC(ModelPredictiveController):
 
         # Physical parameters
         self._mass = 50.0  # kg
-        self._gravity = np.array([0, 0, -GRAVITY_FLOAT])
+        self._gravity = np.array([0, 0, -GRAVITY])
 
         # Contact positions (updated from model)
         self._contact_positions: list[NDArray[np.floating]] = [

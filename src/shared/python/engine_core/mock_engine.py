@@ -20,7 +20,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.core.constants import GRAVITY_FLOAT
+from src.shared.python.core.constants import GRAVITY
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -326,7 +326,7 @@ class MockPhysicsEngine:
             Gravity force vector (n,)
         """
         g = np.zeros(self.num_joints)
-        g[0] = -GRAVITY_FLOAT  # First joint feels gravity
+        g[0] = -GRAVITY  # First joint feels gravity
         return g
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
