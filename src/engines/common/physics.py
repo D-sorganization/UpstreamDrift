@@ -26,7 +26,7 @@ from typing import Protocol
 
 import numpy as np
 
-from src.shared.python.core.constants import GRAVITY
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.core.contracts import postcondition, precondition
 
 # ─── Physical Constants ────────────────────────────────────────────────
@@ -407,7 +407,7 @@ class BallPhysics:
         self.ball = ball or BallProperties()
         self.aero = AerodynamicsCalculator(self.ball, air)
         self.gravity = (
-            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY])
+            gravity if gravity is not None else np.array([0.0, 0.0, -GRAVITY_FLOAT])
         )
 
     @precondition(

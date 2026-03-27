@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import APIRouter, Depends
 
 from src.api.middleware.error_handler import handle_api_errors
-from src.shared.python.core.constants import GRAVITY
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.core.contracts import precondition
 
 from ..dependencies import get_engine_manager, get_logger
@@ -233,7 +233,7 @@ def _build_gravity_vectors(
             continue
 
         y_pos = 0.5 + i * 0.3
-        gravity_mag = GRAVITY * (0.5 + 0.1 * i)
+        gravity_mag = GRAVITY_FLOAT * (0.5 + 0.1 * i)
         vectors.append(
             ForceVector3D(
                 body_name=body_name,
@@ -338,7 +338,7 @@ def _build_demo_vectors(config: ForceOverlayRequest) -> list[ForceVector3D]:
             )
 
         if "gravity" in config.force_types or "all" in config.force_types:
-            grav_mag = GRAVITY * (1.0 + 0.2 * i)
+            grav_mag = GRAVITY_FLOAT * (1.0 + 0.2 * i)
             vectors.append(
                 ForceVector3D(
                     body_name=body,

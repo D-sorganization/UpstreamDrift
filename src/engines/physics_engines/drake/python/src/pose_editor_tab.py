@@ -18,7 +18,7 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.core.constants import GRAVITY
+from src.shared.python.core.constants import GRAVITY_FLOAT
 from src.shared.python.engine_core.engine_availability import (
     DRAKE_AVAILABLE,
     PYQT6_AVAILABLE,
@@ -84,7 +84,7 @@ class DrakePoseEditor(BasePoseEditor):
         super().__init__()
         self._plant = plant
         self._context = context
-        self._original_gravity_vector = np.array([0, 0, -GRAVITY])
+        self._original_gravity_vector = np.array([0, 0, -GRAVITY_FLOAT])
         self._update_callback: Any = None
 
         if plant and context:
@@ -360,7 +360,7 @@ class DrakePoseEditor(BasePoseEditor):
     def _get_gravity_magnitude(self) -> float:
         """Get current gravity magnitude."""
         if self._plant is None:
-            return GRAVITY
+            return GRAVITY_FLOAT
 
         gravity = self._plant.gravity_field().gravity_vector()
         return float(np.linalg.norm(gravity))
