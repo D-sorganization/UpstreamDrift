@@ -106,8 +106,6 @@ class DataProcessor:
         """Fast MATLAB data loading with error handling"""
         if not (baseq_file is not None):
             raise ValueError("baseq_file must be provided")
-        if not (baseq_file is not None):
-            raise ValueError("baseq_file must be provided")
         datasets = {}
         files = {"BASEQ": baseq_file, "ZTCFQ": ztcfq_file, "DELTAQ": delta_file}
         for name, filepath in files.items():
@@ -148,8 +146,6 @@ class DataProcessor:
 
     def extract_frame_data(self, frame_idx: int, datasets: dict) -> FrameData:
         """Extract and process single frame data efficiently"""
-        if not (frame_idx is not None):
-            raise ValueError("frame_idx must be provided")
         if not (frame_idx is not None):
             raise ValueError("frame_idx must be provided")
         if frame_idx in self.cache:
@@ -211,8 +207,6 @@ class DataProcessor:
         """Safely extract 3D point with fallbacks"""
         if not (dataset is not None):
             raise ValueError("dataset must be provided")
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
         try:
             point = dataset[column].iloc[frame_idx]
             if isinstance(point, list | np.ndarray) and len(point) == 3:
@@ -225,8 +219,6 @@ class DataProcessor:
         self, dataset: np.ndarray, frame_idx: int, column: str
     ) -> np.ndarray:  # noqa: E501
         """Safely extract 3D vector with fallbacks"""
-        if not (dataset is not None):
-            raise ValueError("dataset must be provided")
         if not (dataset is not None):
             raise ValueError("dataset must be provided")
         try:
@@ -314,8 +306,6 @@ class OpenGLRenderer:
 
     def initialize(self, ctx) -> None:
         """Initialize OpenGL context and resources"""
-        if not (ctx is not None):
-            raise ValueError("ctx must be provided")
         if not (ctx is not None):
             raise ValueError("ctx must be provided")
         self.ctx = ctx
@@ -640,8 +630,6 @@ class OpenGLRenderer:
         """Render complete frame with all elements"""
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         self.ctx.clear(0.1, 0.2, 0.3)
         self.ctx.enable(mgl.DEPTH_TEST)
         self.ctx.enable(mgl.BLEND)
@@ -662,8 +650,6 @@ class OpenGLRenderer:
         proj_matrix: np.ndarray,
     ) -> None:
         """Render all body segments efficiently"""
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
         skin = [0.96, 0.76, 0.63]
@@ -734,8 +720,6 @@ class OpenGLRenderer:
         """Render cylinder between two 3D points"""
         if not (start is not None):
             raise ValueError("start must be provided")
-        if not (start is not None):
-            raise ValueError("start must be provided")
         direction = end - start
         length = np.linalg.norm(direction)
         if length < 1e-6:
@@ -769,8 +753,6 @@ class OpenGLRenderer:
         proj_matrix: np.ndarray,
     ) -> None:
         """Render force and torque vectors with different colors"""
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
         colors = {
@@ -816,8 +798,6 @@ class OpenGLRenderer:
 
     def _render_ground(self, view_matrix, proj_matrix) -> None:
         """Render infinite ground grid"""
-        if not (view_matrix is not None):
-            raise ValueError("view_matrix must be provided")
         if not (view_matrix is not None):
             raise ValueError("view_matrix must be provided")
         if "ground" not in self.vaos:
@@ -867,8 +847,6 @@ class OpenGLRenderer:
         """Render golf club"""
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         if not (
             np.isfinite(frame_data.butt).all()
             and np.isfinite(frame_data.clubhead).all()
@@ -912,8 +890,6 @@ class OpenGLRenderer:
         """Render 3D arrow"""
         if not (start_pos is not None):
             raise ValueError("start_pos must be provided")
-        if not (start_pos is not None):
-            raise ValueError("start_pos must be provided")
         end_pos = start_pos + vector
         self._render_cylinder_between_points(
             start_pos,
@@ -937,8 +913,6 @@ class OpenGLRenderer:
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
     ) -> None:
-        if not (end_pos is not None):
-            raise ValueError("end_pos must be provided")
         if not (end_pos is not None):
             raise ValueError("end_pos must be provided")
         if "cone" not in self.vaos:
@@ -1104,8 +1078,6 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
 
     def wheelEvent(self, event) -> None:
         """Handle mouse wheel for camera zoom"""
-        if not (event is not None):
-            raise ValueError("event must be provided")
         if not (event is not None):
             raise ValueError("event must be provided")
         delta = event.angleDelta().y() / 120

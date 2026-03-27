@@ -92,8 +92,6 @@ class PinocchioRecorder:
         """Extract time series for a specific field."""
         if not (field_name is not None):
             raise ValueError("field_name must be provided")
-        if not (field_name is not None):
-            raise ValueError("field_name must be provided")
         if not self.frames:
             return np.array([]), np.array([])
 
@@ -134,8 +132,6 @@ class PinocchioRecorder:
         """Extract time series for a specific induced acceleration source."""
         if not (source_name is not None):
             raise ValueError("source_name must be provided")
-        if not (source_name is not None):
-            raise ValueError("source_name must be provided")
         if not self.frames:
             return np.array([]), np.array([])
 
@@ -163,8 +159,6 @@ class PinocchioRecorder:
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific counterfactual component."""
-        if not (cf_name is not None):
-            raise ValueError("cf_name must be provided")
         if not (cf_name is not None):
             raise ValueError("cf_name must be provided")
         if not self.frames:

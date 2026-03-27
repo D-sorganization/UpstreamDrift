@@ -94,8 +94,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """
         if not (path is not None):
             raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not path.endswith(".urdf"):
             logger.warning("Pinocchio loader expects URDF, got: %s", path)
 
@@ -117,8 +115,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             content: Model definition string (URDF/XML).
             extension: File extension hint.
         """
-        if not (content is not None):
-            raise ValueError("content must be provided")
         if not (content is not None):
             raise ValueError("content must be provided")
         if extension != "urdf":
@@ -184,8 +180,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Set the current state."""
         if not (q is not None):
             raise ValueError("q must be provided")
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if self.model is None:
             return
 
@@ -196,8 +190,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
-        if not (u is not None):
-            raise ValueError("u must be provided")
         if not (u is not None):
             raise ValueError("u must be provided")
         if self.model is None:
@@ -296,8 +288,6 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     )
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
         if not (qacc is not None):
             raise ValueError("qacc must be provided")
         if self.model is None or self.data is None:

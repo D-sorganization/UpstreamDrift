@@ -19,8 +19,6 @@ class PerformanceOptionsDialog:
     def __init__(self, parent):
         if not (parent is not None):
             raise ValueError("parent must be provided")
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         self.parent = parent
         self.result = None
 

@@ -22,8 +22,6 @@ def jcalc(
     """Return transform and motion subspace for the joint type."""
     if not (jtype is not None):
         raise ValueError("jtype must be provided")
-    if not (jtype is not None):
-        raise ValueError("jtype must be provided")
     xj_transform, s_subspace, _ = _shared_jcalc(jtype, q)
     return xj_transform, s_subspace
 

@@ -171,8 +171,6 @@ class PinocchioWrapper:
         """
         if not (q_mj is not None):
             raise ValueError("q_mj must be provided")
-        if not (q_mj is not None):
-            raise ValueError("q_mj must be provided")
         q_pin = q_mj.copy()
 
         # MuJoCo uses freejoint for 7-DOF (3 pos + 4 quat)
@@ -204,8 +202,6 @@ class PinocchioWrapper:
 
         Handles quaternion conventions (Pinocchio: x,y,z,w vs MuJoCo: w,x,y,z).
         """
-        if not (q_pin is not None):
-            raise ValueError("q_pin must be provided")
         if not (q_pin is not None):
             raise ValueError("q_pin must be provided")
         q_mj = q_pin.copy()

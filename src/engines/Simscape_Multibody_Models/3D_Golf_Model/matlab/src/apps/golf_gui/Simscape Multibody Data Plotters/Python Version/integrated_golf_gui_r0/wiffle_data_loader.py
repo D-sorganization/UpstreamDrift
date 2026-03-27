@@ -212,8 +212,6 @@ class MotionDataLoader:
         """
         if not (data_df is not None):
             raise ValueError("data_df must be provided")
-        if not (data_df is not None):
-            raise ValueError("data_df must be provided")
         if len(data_df.columns) >= 2:
             logger.info("[OK] Extracted time data from column 1 for %s", sheet_name)
             return pd.to_numeric(data_df.iloc[:, 1], errors="coerce")
@@ -278,8 +276,6 @@ class MotionDataLoader:
         # Convert to numeric and handle errors
         if not (processed_data is not None):
             raise ValueError("processed_data must be provided")
-        if not (processed_data is not None):
-            raise ValueError("processed_data must be provided")
         numeric_columns = [col for col in processed_data.columns if col != "time"]
         for col in numeric_columns:
             processed_data[col] = pd.to_numeric(processed_data[col], errors="coerce")
@@ -304,8 +300,6 @@ class MotionDataLoader:
 
     def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         """Process and clean sheet data"""
-        if not (df is not None):
-            raise ValueError("df must be provided")
         if not (df is not None):
             raise ValueError("df must be provided")
         logger.info("[PROC] Processing %s data...", sheet_name)
@@ -358,8 +352,6 @@ class MotionDataLoader:
         # based on actual motion capture data
 
         # Get clubhead position
-        if not (processed_data is not None):
-            raise ValueError("processed_data must be provided")
         if not (processed_data is not None):
             raise ValueError("processed_data must be provided")
         ch_x = processed_data["clubhead_x"].values
@@ -428,8 +420,6 @@ class MotionDataLoader:
         """Create dummy data for testing purposes"""
         if not (num_frames is not None):
             raise ValueError("num_frames must be provided")
-        if not (num_frames is not None):
-            raise ValueError("num_frames must be provided")
         processed_data = pd.DataFrame()
         processed_data["time"] = np.linspace(0, 1, num_frames)
 
@@ -473,8 +463,6 @@ class MotionDataLoader:
         """Apply noise filtering to position data"""
         if not (df is not None):
             raise ValueError("df must be provided")
-        if not (df is not None):
-            raise ValueError("df must be provided")
         from scipy.signal import savgol_filter
 
         # Apply Savitzky-Golay filter to position columns
@@ -502,8 +490,6 @@ class MotionDataLoader:
         # Interpolate missing values for position columns
         if not (df is not None):
             raise ValueError("df must be provided")
-        if not (df is not None):
-            raise ValueError("df must be provided")
         position_columns = [
             col for col in df.columns if any(axis in col for axis in ["_x", "_y", "_z"])
         ]
@@ -527,8 +513,6 @@ class MotionDataLoader:
         Returns:
             Tuple of (BASEQ, ZTCFQ, DELTAQ) DataFrames for GUI compatibility
         """
-        if not (excel_data is not None):
-            raise ValueError("excel_data must be provided")
         if not (excel_data is not None):
             raise ValueError("excel_data must be provided")
         logger.info("[CONV] Converting to GUI format...")
@@ -556,8 +540,6 @@ class MotionDataLoader:
     def _create_baseq_format(self, df: pd.DataFrame) -> pd.DataFrame:
         """Create BASEQ format DataFrame from position data"""
         # Create a DataFrame with the structure expected by the GUI
-        if not (df is not None):
-            raise ValueError("df must be provided")
         if not (df is not None):
             raise ValueError("df must be provided")
         baseq_data = pd.DataFrame()
@@ -612,8 +594,6 @@ class MotionDataLoader:
     ) -> pd.DataFrame:
         """Create DELTAQ format showing differences between ProV1 and Wiffle"""
         # Align the dataframes by time
-        if not (prov1_df is not None):
-            raise ValueError("prov1_df must be provided")
         if not (prov1_df is not None):
             raise ValueError("prov1_df must be provided")
         common_time = _to_numpy(prov1_df["time"])

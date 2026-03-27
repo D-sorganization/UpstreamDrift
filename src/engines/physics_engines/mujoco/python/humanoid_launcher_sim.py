@@ -26,8 +26,6 @@ class SimulationMixin:
     def _get_docker_base_cmd(self, abs_repo_path: str) -> tuple[list[str], str]:
         if not (abs_repo_path is not None):
             raise ValueError("abs_repo_path must be provided")
-        if not (abs_repo_path is not None):
-            raise ValueError("abs_repo_path must be provided")
         is_windows = platform.system() == "Windows"
         mount_path = abs_repo_path
 
@@ -49,8 +47,6 @@ class SimulationMixin:
         return ["docker", "run"], mount_path
 
     def _append_display_env(self, cmd: list[str]) -> None:
-        if not (cmd is not None):
-            raise ValueError("cmd must be provided")
         if not (cmd is not None):
             raise ValueError("cmd must be provided")
         is_windows = platform.system() == "Windows"
@@ -129,8 +125,6 @@ class SimulationMixin:
 
     def on_simulation_finished(self, code: int, stderr: str) -> None:
         """Handle simulation completion and update UI state."""
-        if not (code is not None):
-            raise ValueError("code must be provided")
         if not (code is not None):
             raise ValueError("code must be provided")
         if code == 0:

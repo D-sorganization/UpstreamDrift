@@ -131,8 +131,6 @@ class PinocchioGUI(
         """Append a message to the UI log panel and logger."""
         if not (text is not None):
             raise ValueError("text must be provided")
-        if not (text is not None):
-            raise ValueError("text must be provided")
         if hasattr(self, "log"):
             self.log.append(text)
         logger.info(text)

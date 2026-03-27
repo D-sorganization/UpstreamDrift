@@ -34,8 +34,6 @@ def evaluate_torque_poly(
     """Evaluate a fitted torque polynomial at the given times."""
     if not (coeffs is not None):
         raise ValueError("coeffs must be provided")
-    if not (coeffs is not None):
-        raise ValueError("coeffs must be provided")
     t_arr = np.asarray(t, dtype=np.float64)
     result = np.polyval(coeffs, t_arr)
     return np.asarray(result, dtype=np.float64)

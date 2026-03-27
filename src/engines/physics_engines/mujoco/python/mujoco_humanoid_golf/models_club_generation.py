@@ -101,8 +101,6 @@ def _validate_club_config(club_type: str, num_segments: int) -> dict:
 def _build_grip_xml(club_type: str, num_segments: int, config: dict) -> list[str]:
     if not (club_type is not None):
         raise ValueError("club_type must be provided")
-    if not (club_type is not None):
-        raise ValueError("club_type must be provided")
     grip_length = cast("float", config["grip_length"])
     grip_radius = cast("float", config["grip_radius"])
     grip_mass = cast("float", config["grip_mass"])
@@ -125,8 +123,6 @@ def _build_grip_xml(club_type: str, num_segments: int, config: dict) -> list[str
 def _build_shaft_segment_xml(
     i: int, config: dict, seg_length: float, seg_mass: float
 ) -> list[str]:  # noqa: E501
-    if not (i is not None):
-        raise ValueError("i must be provided")
     if not (i is not None):
         raise ValueError("i must be provided")
     grip_length = cast("float", config["grip_length"])
@@ -173,8 +169,6 @@ def _build_shaft_segment_xml(
 def _build_clubhead_xml(
     num_segments: int, seg_length: float, config: dict
 ) -> list[str]:  # noqa: E501
-    if not (num_segments is not None):
-        raise ValueError("num_segments must be provided")
     if not (num_segments is not None):
         raise ValueError("num_segments must be provided")
     head_mass = cast("float", config["head_mass"])
@@ -227,8 +221,6 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
     Raises:
         ValueError: If club_type is not in CLUB_CONFIGS or num_segments is invalid
     """
-    if not (club_type is not None):
-        raise ValueError("club_type must be provided")
     if not (club_type is not None):
         raise ValueError("club_type must be provided")
     config = _validate_club_config(club_type, num_segments)

@@ -96,8 +96,6 @@ def C_times_qdot(
     """
     if not (q is not None):
         raise ValueError("q must be provided")
-    if not (q is not None):
-        raise ValueError("q must be provided")
     q1, q2 = q
     q1dot, q2dot = qdot
 
@@ -172,8 +170,6 @@ def tau_natural(
     """
     if not (q is not None):
         raise ValueError("q must be provided")
-    if not (q is not None):
-        raise ValueError("q must be provided")
     mq = M_matrix(q) @ qddot
     cq = C_times_qdot(q, qdot)
     gq = g_vector(q)
@@ -213,8 +209,6 @@ def double_pendulum_dynamics(
     xdot : ndarray, shape (4,)
         Time derivative of the state.
     """
-    if not (t is not None):
-        raise ValueError("t must be provided")
     if not (t is not None):
         raise ValueError("t must be provided")
     q = x[0:2]
@@ -267,8 +261,6 @@ def u_pd(
     """
     if not (_t is not None):
         raise ValueError("_t must be provided")
-    if not (_t is not None):
-        raise ValueError("_t must be provided")
     q = x[0:2]
     qdot = x[2:4]
 
@@ -306,8 +298,6 @@ def compute_tau_natural_trajectory(
     tau_nat_traj : ndarray, shape (N, 2)
         Natural torque trajectory at each time sample.
     """
-    if not (u_func is not None):
-        raise ValueError("u_func must be provided")
     if not (u_func is not None):
         raise ValueError("u_func must be provided")
     t = np.asarray(sol.t, dtype=np.float64)
@@ -393,8 +383,6 @@ def wrench_from_torque(
     """
     if not (q is not None):
         raise ValueError("q must be provided")
-    if not (q is not None):
-        raise ValueError("q must be provided")
     J = J_end_effector(q)
     return np.linalg.pinv(J.T) @ tau
 
@@ -423,8 +411,6 @@ def natural_wrench(
     w_nat : ndarray, shape (3,)
         Natural planar wrench [Fx, Fy, Mz].
     """
-    if not (q is not None):
-        raise ValueError("q must be provided")
     if not (q is not None):
         raise ValueError("q must be provided")
     tau_nat = tau_natural(q, qdot, qddot)

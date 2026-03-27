@@ -27,8 +27,6 @@ class DrakeVisualizer:
     def __init__(self, meshcat: Meshcat, plant: MultibodyPlant) -> None:  # type: ignore[no-any-unimported]
         if not (meshcat is not None):
             raise ValueError("meshcat must be provided")
-        if not (meshcat is not None):
-            raise ValueError("meshcat must be provided")
         self.meshcat = meshcat
         self.plant = plant
         self.prefix = "visual_overlays"
@@ -40,8 +38,6 @@ class DrakeVisualizer:
 
     def toggle_frame(self, body_name: str, visible: bool) -> None:  # noqa: FBT001
         """Toggle coordinate frame visualization for a body."""
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
         from numpy import pi
@@ -88,8 +84,6 @@ class DrakeVisualizer:
         """Update transforms of visible frames."""
         if not (context is not None):
             raise ValueError("context must be provided")
-        if not (context is not None):
-            raise ValueError("context must be provided")
         plant_context = self.plant.GetMyContextFromRoot(context)
         for body_name in self.visible_frames:
             body = self.plant.GetBodyByName(body_name)
@@ -99,8 +93,6 @@ class DrakeVisualizer:
 
     def toggle_com(self, body_name: str, visible: bool) -> None:  # noqa: FBT001
         """Toggle Center of Mass visualization for a body."""
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
         path = f"{self.prefix}/coms/{body_name}"
@@ -116,8 +108,6 @@ class DrakeVisualizer:
 
     def update_com_transforms(self, context: Context) -> None:  # type: ignore[no-any-unimported]
         """Update transforms of visible COMs."""
-        if not (context is not None):
-            raise ValueError("context must be provided")
         if not (context is not None):
             raise ValueError("context must be provided")
         plant_context = self.plant.GetMyContextFromRoot(context)
@@ -155,8 +145,6 @@ class DrakeVisualizer:
             position: Center position.
             color: (r, g, b, alpha)
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         path = f"{self.prefix}/ellipsoids/{name}"

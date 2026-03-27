@@ -43,8 +43,6 @@ class PlottingTab(QtWidgets.QWidget):
     ) -> None:
         if not (sim_widget is not None):
             raise ValueError("sim_widget must be provided")
-        if not (sim_widget is not None):
-            raise ValueError("sim_widget must be provided")
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.main_window = main_window
@@ -236,8 +234,6 @@ class PlottingTab(QtWidgets.QWidget):
         """Clear old canvas and create a fresh canvas and plotter."""
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
         if self.current_plot_canvas is not None:
             self.plot_container_layout.removeWidget(self.current_plot_canvas)
             self.current_plot_canvas.deleteLater()
@@ -271,8 +267,6 @@ class PlottingTab(QtWidgets.QWidget):
         """Generate one of the standard (non-recomputation) plot types."""
         if not (plot_type is not None):
             raise ValueError("plot_type must be provided")
-        if not (plot_type is not None):
-            raise ValueError("plot_type must be provided")
         standard_plots: dict[str, typing.Callable[..., typing.Any]] = {
             "Summary Dashboard": plotter.plot_summary_dashboard,
             "Joint Angles": plotter.plot_joint_angles,
@@ -301,8 +295,6 @@ class PlottingTab(QtWidgets.QWidget):
         """Generate an induced acceleration plot, recomputing data if needed."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
-        if not (plotter is not None):
-            raise ValueError("plotter must be provided")
         source = self.induced_source_combo.currentText()
         spec_act = self.induced_actuator_edit.text().strip()
         if spec_act:
@@ -324,8 +316,6 @@ class PlottingTab(QtWidgets.QWidget):
         spec_act: str,
     ) -> None:
         """Recompute induced accelerations frame-by-frame using the analyzer."""
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
         analyzer = self.sim_widget.get_analyzer()
@@ -380,8 +370,6 @@ class PlottingTab(QtWidgets.QWidget):
         """Generate a counterfactual comparison plot, recomputing if needed."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
-        if not (plotter is not None):
-            raise ValueError("plotter must be provided")
         cf_selection = self.cf_combo.currentText()
         cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
 
@@ -397,8 +385,6 @@ class PlottingTab(QtWidgets.QWidget):
         cf_name: str,
     ) -> None:
         """Recompute counterfactual data frame-by-frame using the analyzer."""
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
         analyzer = self.sim_widget.get_analyzer()

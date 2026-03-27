@@ -39,8 +39,6 @@ class ManipulationTab(QtWidgets.QWidget):
     ) -> None:
         if not (sim_widget is not None):
             raise ValueError("sim_widget must be provided")
-        if not (sim_widget is not None):
-            raise ValueError("sim_widget must be provided")
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.main_window = main_window
@@ -395,8 +393,6 @@ class ManipulationTab(QtWidgets.QWidget):
         """Handle drag manipulation setting."""
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         enabled = state == QtCore.Qt.CheckState.Checked.value
         manipulator = self.sim_widget.get_manipulator()
         if manipulator:
@@ -404,8 +400,6 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_maintain_orientation_changed(self, state: int) -> None:
         """Handle maintain orientation setting."""
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         enabled = state == QtCore.Qt.CheckState.Checked.value
@@ -417,8 +411,6 @@ class ManipulationTab(QtWidgets.QWidget):
         """Handle nullspace posture optimization setting."""
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         enabled = state == QtCore.Qt.CheckState.Checked.value
         manipulator = self.sim_widget.get_manipulator()
         if manipulator:
@@ -426,8 +418,6 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_manip_body_selected(self, index: int) -> None:
         """Handle body selection from combo box."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
         if not (index is not None):
             raise ValueError("index must be provided")
         if index < 0:
@@ -448,8 +438,6 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_manual_transform(self, type_: str, axis: int, value: float) -> None:
         """Handle manual transform changes."""
-        if not (type_ is not None):
-            raise ValueError("type_ must be provided")
         if not (type_ is not None):
             raise ValueError("type_ must be provided")
         manipulator = self.sim_widget.get_manipulator()
@@ -740,8 +728,6 @@ class ManipulationTab(QtWidgets.QWidget):
         """Interpolate between two selected poses."""
         if not (value is not None):
             raise ValueError("value must be provided")
-        if not (value is not None):
-            raise ValueError("value must be provided")
         manipulator = self.sim_widget.get_manipulator()
         if not manipulator:
             return
@@ -761,8 +747,6 @@ class ManipulationTab(QtWidgets.QWidget):
         """Handle IK damping slider change."""
         if not (value is not None):
             raise ValueError("value must be provided")
-        if not (value is not None):
-            raise ValueError("value must be provided")
         manipulator = self.sim_widget.get_manipulator()
         if not manipulator:
             return
@@ -772,8 +756,6 @@ class ManipulationTab(QtWidgets.QWidget):
 
     def on_ik_step_changed(self, value: int) -> None:
         """Handle IK step size slider change."""
-        if not (value is not None):
-            raise ValueError("value must be provided")
         if not (value is not None):
             raise ValueError("value must be provided")
         manipulator = self.sim_widget.get_manipulator()

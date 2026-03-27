@@ -48,8 +48,6 @@ class EnergyMonitor:
     def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
         self.history: list[EnergyState] = []
@@ -110,8 +108,6 @@ class EnergyMonitor:
         """
         if not (tolerance is not None):
             raise ValueError("tolerance must be provided")
-        if not (tolerance is not None):
-            raise ValueError("tolerance must be provided")
         if not self.history:
             return True, 0.0
 
@@ -153,8 +149,6 @@ class JacobianTester:
     """
 
     def __init__(self, model: mujoco.MjModel) -> None:
-        if not (model is not None):
-            raise ValueError("model must be provided")
         if not (model is not None):
             raise ValueError("model must be provided")
         self.model = model

@@ -274,8 +274,6 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         """Build a simple diagram for a custom URDF."""
         if not (urdf_path is not None):
             raise ValueError("urdf_path must be provided")
-        if not (urdf_path is not None):
-            raise ValueError("urdf_path must be provided")
         builder = DiagramBuilder()
         plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=1e-3)
         parser = Parser(plant)
@@ -334,8 +332,6 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         """Handle model change."""
         if not (index is not None):
             raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
         model_data = self.available_models[index]
         new_path = model_data["path"]
 
@@ -355,8 +351,6 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
 
     def _update_status(self, message: str) -> None:
         """Update status bar message safely."""
-        if not (message is not None):
-            raise ValueError("message must be provided")
         if not (message is not None):
             raise ValueError("message must be provided")
         status_bar = self.statusBar()

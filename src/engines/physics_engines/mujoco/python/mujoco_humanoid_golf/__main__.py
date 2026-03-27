@@ -68,8 +68,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Create the model selection combo box group."""
         if not (control_layout is not None):
             raise ValueError("control_layout must be provided")
-        if not (control_layout is not None):
-            raise ValueError("control_layout must be provided")
         model_group = QtWidgets.QGroupBox("Golf Swing Model")
         model_layout = QtWidgets.QVBoxLayout(model_group)
         self.model_combo = QtWidgets.QComboBox()
@@ -85,8 +83,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _setup_sim_buttons(self, control_layout: QtWidgets.QVBoxLayout) -> None:
         """Create the play/pause and reset buttons."""
-        if not (control_layout is not None):
-            raise ValueError("control_layout must be provided")
         if not (control_layout is not None):
             raise ValueError("control_layout must be provided")
         buttons_group = QtWidgets.QGroupBox("Simulation Control")
@@ -107,8 +103,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self, control_layout: QtWidgets.QVBoxLayout
     ) -> None:  # noqa: E501
         """Create the scrollable area for actuator control sliders."""
-        if not (control_layout is not None):
-            raise ValueError("control_layout must be provided")
         if not (control_layout is not None):
             raise ValueError("control_layout must be provided")
         scroll_area = QtWidgets.QScrollArea()
@@ -248,8 +242,6 @@ class MainWindow(QtWidgets.QMainWindow):
         # Group actuators by body part
         if not (actuator_names is not None):
             raise ValueError("actuator_names must be provided")
-        if not (actuator_names is not None):
-            raise ValueError("actuator_names must be provided")
         groups = self._group_actuators(actuator_names)
 
         for group_name, actuators in groups.items():
@@ -274,8 +266,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _group_actuators(self, actuator_names: list[str]) -> dict[str, list[str]]:
         """Group actuators by body part for organized display."""
-        if not (actuator_names is not None):
-            raise ValueError("actuator_names must be provided")
         if not (actuator_names is not None):
             raise ValueError("actuator_names must be provided")
         groups: dict[str, list[str]] = {
@@ -329,8 +319,6 @@ class MainWindow(QtWidgets.QMainWindow):
         """Create a slider and label for a single actuator."""
         if not (actuator_name is not None):
             raise ValueError("actuator_name must be provided")
-        if not (actuator_name is not None):
-            raise ValueError("actuator_name must be provided")
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
         slider.setMinimum(-100)
         slider.setMaximum(100)
@@ -350,8 +338,6 @@ class MainWindow(QtWidgets.QMainWindow):
         index: int,
     ) -> None:  # Required by Qt signal
         """Handle model selection change."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
         if not (index is not None):
             raise ValueError("index must be provided")
         self.load_current_model()

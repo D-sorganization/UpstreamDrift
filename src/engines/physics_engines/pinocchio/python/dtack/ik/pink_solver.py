@@ -92,8 +92,6 @@ class PinkSolver:
         """
         if not (q_init is not None):
             raise ValueError("q_init must be provided")
-        if not (q_init is not None):
-            raise ValueError("q_init must be provided")
         if settings is None:
             settings = SolverSettings()
 

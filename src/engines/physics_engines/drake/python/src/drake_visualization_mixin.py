@@ -148,8 +148,6 @@ class DrakeVisualizationMixin:
     def _resolve_induced_accels(self: Any, analyzer, source):
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
-        if not (analyzer is not None):
-            raise ValueError("analyzer must be provided")
         accels = np.zeros(self.plant.num_velocities())
 
         if source in ["gravity", "velocity", "total"]:
@@ -182,15 +180,11 @@ class DrakeVisualizationMixin:
     def _draw_induced_vectors_viz(self: Any, analyzer) -> None:
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
-        if not (analyzer is not None):
-            raise ValueError("analyzer must be provided")
         source = self.combo_induced_source.currentText()
         accels = self._resolve_induced_accels(analyzer, source)
         self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
     def _draw_counterfactual_vectors(self: Any, analyzer) -> None:
-        if not (analyzer is not None):
-            raise ValueError("analyzer must be provided")
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         cf_type = self.combo_cf_type.currentText()
@@ -238,8 +232,6 @@ class DrakeVisualizationMixin:
         scale: float = 0.1,
     ) -> None:
         """Draw vectors at joints (accel, torque, etc)."""
-        if not (values is not None):
-            raise ValueError("values must be provided")
         if not (values is not None):
             raise ValueError("values must be provided")
         if not self.meshcat or self.plant is None:

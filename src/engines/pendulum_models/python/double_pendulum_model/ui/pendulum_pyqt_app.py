@@ -121,8 +121,6 @@ class PendulumCanvas(FigureCanvasQTAgg):
         """Render the pendulum chain as connected line segments."""
         if not (points is not None):
             raise ValueError("points must be provided")
-        if not (points is not None):
-            raise ValueError("points must be provided")
         self.ax.cla()
         self._configure_axes()
         xs, ys, zs = points.T
@@ -190,8 +188,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(control_panel, stretch=1)
 
     def _build_form(self, parent: QtWidgets.QWidget) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         if not (parent is not None):
             raise ValueError("parent must be provided")
         form_layout = QtWidgets.QFormLayout(parent)
@@ -375,8 +371,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     ) -> tuple[PolynomialProfile, ...]:
         if not (expressions is not None):
             raise ValueError("expressions must be provided")
-        if not (expressions is not None):
-            raise ValueError("expressions must be provided")
         profiles = []
         for expr in expressions:
             cleaned = expr.replace(" ", "")
@@ -395,8 +389,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         state: DoublePendulumState,
         profiles: tuple[PolynomialProfile, PolynomialProfile],
     ) -> DoublePendulumState:
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         omega1 = profiles[0].omega(self.time)
@@ -426,8 +418,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         state: TriplePendulumState,
         profiles: tuple[PolynomialProfile, PolynomialProfile, PolynomialProfile],
     ) -> TriplePendulumState:
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         omega = [profile.omega(self.time) for profile in profiles]
@@ -461,8 +451,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _update_status(self, state: DoublePendulumState | TriplePendulumState) -> None:
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         status_text = f"Time: {self.time:.3f} s\n"
 
         def fmt(val: float) -> str:
@@ -482,8 +470,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     ) -> np.ndarray[typing.Any, typing.Any]:
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
         plane_rotation = self._plane_rotation(self.double_params.plane_inclination_deg)
         shoulder = np.array([0.0, 0.0, 0.0])
         upper = self._point_from_angles(
@@ -499,8 +485,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _points_triple(
         self, state: TriplePendulumState
     ) -> np.ndarray[typing.Any, typing.Any]:
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         shoulder = np.array([0.0, 0.0, 0.0])
@@ -522,8 +506,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     ) -> np.ndarray[typing.Any, typing.Any]:
         if not (angle is not None):
             raise ValueError("angle must be provided")
-        if not (angle is not None):
-            raise ValueError("angle must be provided")
         local = np.array(
             [
                 length * math.sin(angle),
@@ -537,8 +519,6 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _plane_rotation(
         self, inclination_deg: float
     ) -> np.ndarray[typing.Any, typing.Any]:
-        if not (inclination_deg is not None):
-            raise ValueError("inclination_deg must be provided")
         if not (inclination_deg is not None):
             raise ValueError("inclination_deg must be provided")
         inclination_rad = math.radians(inclination_deg)

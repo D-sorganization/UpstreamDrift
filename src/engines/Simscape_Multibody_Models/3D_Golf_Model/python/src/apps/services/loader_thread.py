@@ -29,8 +29,6 @@ class C3DLoaderThread(QThread):
         """
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
         super().__init__()
         self.filepath = filepath
 

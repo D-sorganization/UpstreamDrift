@@ -21,8 +21,6 @@ def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
     """
     if not (df_points is not None):
         raise ValueError("df_points must be provided")
-    if not (df_points is not None):
-        raise ValueError("df_points must be provided")
     markers: dict[str, MarkerData] = {}
     if not df_points.empty:
         grouped = df_points.groupby("marker")
@@ -51,8 +49,6 @@ def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
     """
     if not (df_analog is not None):
         raise ValueError("df_analog must be provided")
-    if not (df_analog is not None):
-        raise ValueError("df_analog must be provided")
     analog: dict[str, AnalogData] = {}
     units_map = dict(
         zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False)
@@ -76,8 +72,6 @@ def _build_metadata_ui(filepath: str, metadata_obj) -> dict[str, str]:
     Returns:
         Dictionary of display-friendly metadata key-value pairs.
     """
-    if not (filepath is not None):
-        raise ValueError("filepath must be provided")
     if not (filepath is not None):
         raise ValueError("filepath must be provided")
     metadata_ui = {

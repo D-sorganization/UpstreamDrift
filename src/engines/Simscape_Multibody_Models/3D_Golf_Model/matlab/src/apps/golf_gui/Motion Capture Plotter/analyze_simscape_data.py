@@ -232,8 +232,6 @@ def _check_segment_availability(segments, columns) -> dict:
     """
     if not (segments is not None):
         raise ValueError("segments must be provided")
-    if not (segments is not None):
-        raise ValueError("segments must be provided")
     available_segments = {}
     for segment_name, required_cols in segments.items():
         available_cols = [col for col in required_cols if col in columns]
@@ -251,8 +249,6 @@ def _check_segment_availability(segments, columns) -> dict:
 
 def _log_data_sample(df, available_segments) -> None:
     """Log a sample of data from the available segments."""
-    if not (df is not None):
-        raise ValueError("df must be provided")
     if not (df is not None):
         raise ValueError("df must be provided")
     logger.info("%s", "\n" + "=" * 80)

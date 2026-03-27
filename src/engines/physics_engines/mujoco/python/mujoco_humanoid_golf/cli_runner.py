@@ -123,8 +123,6 @@ def run_simulation(
     """Simulate the provided model for the requested duration."""
     if not (model is not None):
         raise ValueError("model must be provided")
-    if not (model is not None):
-        raise ValueError("model must be provided")
     analyzer = BiomechanicalAnalyzer(model, data)
     recorder = SwingRecorder()
     recorder.start_recording()
@@ -164,8 +162,6 @@ def export_json(path: Path, payload: Mapping[str, Any]) -> None:
     """Persist telemetry to a JSON file with provenance metadata."""
     if not (path is not None):
         raise ValueError("path must be provided")
-    if not (path is not None):
-        raise ValueError("path must be provided")
     from src.shared.python.data_io.provenance import ProvenanceInfo
 
     provenance = ProvenanceInfo.capture()
@@ -186,8 +182,6 @@ def export_json(path: Path, payload: Mapping[str, Any]) -> None:
 
 def export_csv(path: Path, payload: Mapping[str, Any]) -> None:
     """Persist telemetry to a CSV file with provenance header."""
-    if not (path is not None):
-        raise ValueError("path must be provided")
     if not (path is not None):
         raise ValueError("path must be provided")
     from src.shared.python.data_io.provenance import (
@@ -254,8 +248,6 @@ def execute_run(
 
 def run_batch(batch_path: Path, base_args: argparse.Namespace) -> None:
     """Execute every entry described in a batch configuration file."""
-    if not (batch_path is not None):
-        raise ValueError("batch_path must be provided")
     if not (batch_path is not None):
         raise ValueError("batch_path must be provided")
     spec = json.loads(batch_path.read_text(encoding="utf-8"))

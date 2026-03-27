@@ -69,8 +69,6 @@ class TelemetryRecorder:
         """Initialize the telemetry recorder."""
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.samples: list[SimulationSample] = []
         self._current_custom_metrics: dict[str, float] = {}
@@ -131,8 +129,6 @@ class TelemetryRecorder:
         """Check if actuator targets a joint."""
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         transmission_type = model.actuator_trntype[actuator_id]
         if transmission_type not in joint_transmission_types:
             return False
@@ -165,8 +161,6 @@ class TelemetryRecorder:
     def record_step(self, data: mujoco.MjData) -> None:
         """Capture telemetry for the current simulation state."""
 
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         actuator_torques = self._extract_actuator_torques(data)
@@ -212,8 +206,6 @@ class TelemetryRecorder:
         """Docstring for _extract_actuator_torques."""
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         actuator_torques: dict[str, float] = {}
         for actuator_id, dof_index in self._actuator_dof_map.items():
             torque_value = float(data.qfrc_actuator[dof_index])
@@ -231,8 +223,6 @@ class TelemetryRecorder:
         """Docstring for _extract_constraint_torques."""
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         constraint_torques: dict[str, float] = {}
         for joint_id, joint_name in enumerate(self._joint_names):
             dof_index = self.model.jnt_dofadr[joint_id]
@@ -241,8 +231,6 @@ class TelemetryRecorder:
 
     def _extract_body_forces(self, data: mujoco.MjData) -> dict[str, np.ndarray]:
         """Docstring for _extract_body_forces."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         forces: dict[str, np.ndarray] = {}

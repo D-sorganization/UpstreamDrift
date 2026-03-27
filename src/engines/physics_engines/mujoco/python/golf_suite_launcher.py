@@ -88,8 +88,6 @@ class GolfLauncher(QtWidgets.QMainWindow):
         """Launch a script in a subprocess."""
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         self.status.setText(f"Launching {name}...")
         logger.info("Launching %s from %s", name, path)
 

@@ -103,7 +103,5 @@ def screw_to_transform(
     """
     if not (axis is not None):
         raise ValueError("axis must be provided")
-    if not (axis is not None):
-        raise ValueError("axis must be provided")
     s_screw = screw_axis(axis, point, pitch)
     return exponential_map(s_screw, theta)

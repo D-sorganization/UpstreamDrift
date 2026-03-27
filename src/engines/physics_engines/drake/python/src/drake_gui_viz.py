@@ -230,8 +230,6 @@ class VisualizationMixin:
         """Draw vectors at joints (accel, torque, etc)."""
         if not (values is not None):
             raise ValueError("values must be provided")
-        if not (values is not None):
-            raise ValueError("values must be provided")
         if not self.meshcat or self.plant is None:  # type: ignore[attr-defined]
             return
 

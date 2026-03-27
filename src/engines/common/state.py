@@ -140,8 +140,6 @@ class StateManager:
         """
         if not (nq is not None):
             raise ValueError("nq must be provided")
-        if not (nq is not None):
-            raise ValueError("nq must be provided")
         self.nq = nq
         self.nv = nv
         self.max_history = max_history
@@ -224,8 +222,6 @@ class StateManager:
         Args:
             dt: Time step
         """
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
         if not (dt is not None):
             raise ValueError("dt must be provided")
         self._state.time += dt
@@ -313,8 +309,6 @@ class EngineStateMixin:
         Args:
             state: New lifecycle state
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
         old_state = self._lifecycle_state
@@ -417,8 +411,6 @@ class ForceAccumulator:
         Args:
             nv: Number of generalized velocity coordinates
         """
-        if not (nv is not None):
-            raise ValueError("nv must be provided")
         if not (nv is not None):
             raise ValueError("nv must be provided")
         self.nv = nv

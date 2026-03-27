@@ -102,8 +102,6 @@ class MJCFExporter:
         """
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         output = Path(output_path)
         mjcf_content = self._generate_mjcf()
         output.write_text(mjcf_content, encoding="utf-8")
@@ -164,8 +162,6 @@ class MJCFExporter:
         """
         if not (parent_name is not None):
             raise ValueError("parent_name must be provided")
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
         lines = []
         indent = "  " * (depth + 1)
 
@@ -216,8 +212,6 @@ class MJCFExporter:
         Returns:
             List of MJCF lines
         """
-        if not (body is not None):
-            raise ValueError("body must be provided")
         if not (body is not None):
             raise ValueError("body must be provided")
         lines = []

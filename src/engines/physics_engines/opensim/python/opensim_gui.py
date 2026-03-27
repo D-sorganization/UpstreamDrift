@@ -184,8 +184,6 @@ class OpenSimGolfGUI(QMainWindow):
         """Update the status label."""
         if not (message is not None):
             raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         self.lbl_status.setText(f"Status: {message}")
         self.lbl_status.setStyleSheet(f"color: {color}; font-weight: bold;")
 

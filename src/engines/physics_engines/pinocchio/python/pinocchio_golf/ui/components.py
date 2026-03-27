@@ -18,8 +18,6 @@ class GUIBuilder:
         """Build the top bar with model selector, load button, and mode selector."""
         if not (gui is not None):
             raise ValueError("gui must be provided")
-        if not (gui is not None):
-            raise ValueError("gui must be provided")
         toolbar = QtWidgets.QHBoxLayout()
 
         gui.model_combo = QtWidgets.QComboBox()
@@ -44,8 +42,6 @@ class GUIBuilder:
         gui: PinocchioGUI, parent_layout: QtWidgets.QVBoxLayout
     ) -> None:  # noqa: E501
         """Build the visualization group box."""
-        if not (gui is not None):
-            raise ValueError("gui must be provided")
         if not (gui is not None):
             raise ValueError("gui must be provided")
         vis_group = QtWidgets.QGroupBox("Visualization Overlays")

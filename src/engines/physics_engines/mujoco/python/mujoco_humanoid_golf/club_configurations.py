@@ -370,8 +370,6 @@ class ClubDatabase:
         """
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         data = {}
         for club_id, spec in cls.CLUBS.items():
             data[club_id] = {
@@ -412,8 +410,6 @@ class ClubDatabase:
             ClubSpecification
         """
         # Start with default values
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         defaults: dict[str, Any] = {

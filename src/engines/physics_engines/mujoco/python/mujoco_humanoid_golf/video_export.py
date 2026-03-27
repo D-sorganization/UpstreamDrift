@@ -81,8 +81,6 @@ class VideoExporter:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
         self.width = width
@@ -108,8 +106,6 @@ class VideoExporter:
         Returns:
             True if recording started successfully
         """
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
         output_path_obj = Path(output_path)
@@ -233,8 +229,6 @@ class VideoExporter:
         # Reset to initial state
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         nq = self.model.nq
         self.data.qpos[:] = initial_state[:nq]
         self.data.qvel[:] = initial_state[nq:]
@@ -314,8 +308,6 @@ def create_metrics_overlay(
     """
     if not (frame is not None):
         raise ValueError("frame must be provided")
-    if not (frame is not None):
-        raise ValueError("frame must be provided")
     if not CV2_AVAILABLE:
         return frame
 
@@ -375,8 +367,6 @@ def _build_frame_metrics(
 ) -> dict[str, Any]:
     if not (model is not None):
         raise ValueError("model must be provided")
-    if not (model is not None):
-        raise ValueError("model must be provided")
     metrics: dict[str, Any] = {
         "Frame": lambda d, frame_num=frame_idx: frame_num,
     }
@@ -429,8 +419,6 @@ def export_simulation_video(  # noqa: PLR0913
     Returns:
         True if successful
     """
-    if not (model is not None):
-        raise ValueError("model must be provided")
     if not (model is not None):
         raise ValueError("model must be provided")
     format = _detect_video_format(output_path)

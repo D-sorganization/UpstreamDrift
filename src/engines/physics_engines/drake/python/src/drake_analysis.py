@@ -36,8 +36,6 @@ class DrakeInducedAccelerationAnalyzer:
         """Compute the bias term using inverse dynamics with zero acceleration."""
         if not (context is not None):
             raise ValueError("context must be provided")
-        if not (context is not None):
-            raise ValueError("context must be provided")
         vdot_zero = np.zeros(self.plant.num_velocities())
         return self.plant.CalcInverseDynamics(
             context,
@@ -57,8 +55,6 @@ class DrakeInducedAccelerationAnalyzer:
         Returns:
             Dict with 'gravity', 'velocity', 'control', 'total'
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
         if not (context is not None):
             raise ValueError("context must be provided")
         if self.plant is None:
@@ -99,8 +95,6 @@ class DrakeInducedAccelerationAnalyzer:
 
     def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
         """Compute ZTCF and ZVCF."""
-        if not (context is not None):
-            raise ValueError("context must be provided")
         if not (context is not None):
             raise ValueError("context must be provided")
         if self.plant is None:
@@ -148,8 +142,6 @@ class DrakeInducedAccelerationAnalyzer:
             (e.g., [0, 1, 0]), the result is the sensitivity of acceleration
             to that specific actuator.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
         if not (context is not None):
             raise ValueError("context must be provided")
         if self.plant is None:
@@ -222,8 +214,6 @@ class DrakeRecorder:
         """Record a single simulation frame with state and optional data."""
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
         if not self.is_recording:
             return
         self.times.append(t)
@@ -256,8 +246,6 @@ class DrakeRecorder:
         """Implement RecorderInterface."""
         if not (field_name is not None):
             raise ValueError("field_name must be provided")
-        if not (field_name is not None):
-            raise ValueError("field_name must be provided")
         times = np.array(self.times)
         if field_name == "club_head_position":
             return times, np.array(self.club_head_pos_history)
@@ -281,8 +269,6 @@ class DrakeRecorder:
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced accelerations."""
-        if not (source_name is not None):
-            raise ValueError("source_name must be provided")
         if not (source_name is not None):
             raise ValueError("source_name must be provided")
         if (
@@ -324,8 +310,6 @@ class DrakeRecorder:
         """Get counterfactual data."""
         if not (cf_name is not None):
             raise ValueError("cf_name must be provided")
-        if not (cf_name is not None):
-            raise ValueError("cf_name must be provided")
         if cf_name not in self.counterfactuals:
             return np.array([]), np.array([])
 
@@ -344,8 +328,6 @@ class DrakeRecorder:
 
         def add_series(target: dict, name: str, arr_list: list) -> None:
             """Append a time-aligned array to the target dictionary."""
-            if not (target is not None):
-                raise ValueError("target must be provided")
             if not (target is not None):
                 raise ValueError("target must be provided")
             if not arr_list:

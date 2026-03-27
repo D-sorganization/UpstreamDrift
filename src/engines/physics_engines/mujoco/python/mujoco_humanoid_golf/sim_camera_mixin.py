@@ -239,8 +239,6 @@ class SimCameraMixin:
         """Display a right-click context menu for a selected body."""
         if not (global_pos is not None):
             raise ValueError("global_pos must be provided")
-        if not (global_pos is not None):
-            raise ValueError("global_pos must be provided")
         if self.manipulator is None:
             return
 
@@ -273,8 +271,6 @@ class SimCameraMixin:
         """Toggle coordinate frame overlay for a body."""
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if body_id in self.visible_frames:
             self.visible_frames.remove(body_id)
         else:
@@ -283,8 +279,6 @@ class SimCameraMixin:
 
     def toggle_com_visibility(self: Any, body_id: int) -> None:
         """Toggle center-of-mass overlay for a body."""
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
         if body_id in self.visible_coms:

@@ -186,8 +186,6 @@ class MotionVisualizer:
         # X axis (red)
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         x_cyl = mcg.Cylinder(size, 0.002)
         x_mat = mcg.MeshBasicMaterial(color=0xFF0000)
         self.viewer[f"{name}/x"].set_object(x_cyl, x_mat)
@@ -221,8 +219,6 @@ class MotionVisualizer:
         trajectory: ClubTrajectory,
     ) -> None:
         """Add the club trajectory as a path visualization."""
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         if not self.settings.show_trajectory_path:
@@ -260,8 +256,6 @@ class MotionVisualizer:
         """Add markers for swing events."""
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         events = {
             "address": (0x00FF00, trajectory.events.address),  # Green
             "top": (0xFFFF00, trajectory.events.top),  # Yellow
@@ -287,8 +281,6 @@ class MotionVisualizer:
         """Add club visualization at a specific frame."""
         if not (frame is not None):
             raise ValueError("frame must be provided")
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         s = self.settings
 
         # Club shaft
@@ -310,8 +302,6 @@ class MotionVisualizer:
 
     def _update_club_transform(self, frame, name: str = "club") -> None:
         """Update club transform based on frame data."""
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not (frame is not None):
             raise ValueError("frame must be provided")
         s = self.settings
@@ -341,8 +331,6 @@ class MotionVisualizer:
         right_pos: NDArray[np.float64],
     ) -> None:
         """Add hand target visualizations."""
-        if not (left_pos is not None):
-            raise ValueError("left_pos must be provided")
         if not (left_pos is not None):
             raise ValueError("left_pos must be provided")
         s = self.settings
@@ -388,8 +376,6 @@ class MotionVisualizer:
             trajectory: Club trajectory
             ik_result: Optional IK result with body configurations
         """
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         s = self.settings
@@ -455,8 +441,6 @@ class MotionVisualizer:
         """
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         self.add_club_trajectory_path(trajectory)
 
         # Select frames to show
@@ -485,8 +469,6 @@ class MotionVisualizer:
         alpha: float,
     ) -> None:
         """Add a semi-transparent club visualization."""
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not (frame is not None):
             raise ValueError("frame must be provided")
         s = self.settings
@@ -555,8 +537,6 @@ class MatplotlibVisualizer:
         Returns:
             Matplotlib figure
         """
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         fig = plt.figure(figsize=figsize)
@@ -637,8 +617,6 @@ class MatplotlibVisualizer:
         """
         if not (ik_result is not None):
             raise ValueError("ik_result must be provided")
-        if not (ik_result is not None):
-            raise ValueError("ik_result must be provided")
         fig, axes = plt.subplots(2, 1, figsize=figsize, sharex=True)
 
         times = np.array(ik_result.times)
@@ -683,8 +661,6 @@ class MatplotlibVisualizer:
         Returns:
             Matplotlib figure
         """
-        if not (ik_result is not None):
-            raise ValueError("ik_result must be provided")
         if not (ik_result is not None):
             raise ValueError("ik_result must be provided")
         q_traj = ik_result.q_trajectory

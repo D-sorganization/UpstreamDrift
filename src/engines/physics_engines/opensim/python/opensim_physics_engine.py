@@ -172,8 +172,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         """Set coordinate positions and speeds on the model state."""
         if not (q is not None):
             raise ValueError("q must be provided")
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if not self._model or not self._state:
             return
 
@@ -197,8 +195,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Set controls for the model."""
-        if not (u is not None):
-            raise ValueError("u must be provided")
         if not (u is not None):
             raise ValueError("u must be provided")
         if not self._model or not self._state:
@@ -297,8 +293,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         """Compute required torques for the given joint accelerations."""
         if not (qacc is not None):
             raise ValueError("qacc must be provided")
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
         if not self._model or not self._state:
             return np.array([])
 
@@ -351,8 +345,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             - 'angular': Rotation Jacobian (3 × nv) [rad/rad or rad/m]
             - 'spatial': Combined [angular; linear] (6 × nv)
         """
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
         if not self._model or not self._state or opensim is None:
@@ -541,8 +533,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         """
         if not (tau is not None):
             raise ValueError("tau must be provided")
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
         if not self._model or not self._state:
             logger.warning("Model or state not initialized")
             return np.array([])
@@ -611,6 +601,72 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         return dict(analyzer.compute_muscle_induced_accelerations())
 
+    def compute_iaa_decomposition(self) -> dict[str, np.ndarray]:
+        """Update the IAA decomposition to separate active vs. passive muscle contributions."""
+        analyzer = self.get_muscle_analyzer()
+        if not analyzer or not self.is_initialized:
+            return {}
+
+        # M * a = tau  =>  a = M^-1 * tau
+        M = self.compute_mass_matrix()
+
+        cond = np.linalg.cond(M)
+        if cond > 1e8:
+            lambda_reg = 1e-6 * np.trace(M) / M.shape[0]
+            M_solve = M + lambda_reg * np.eye(M.shape[0])
+        else:
+            M_solve = M
+
+        # Gravity and Velocity
+        gravity = self.compute_gravity_forces()
+        bias = self.compute_bias_forces()
+        velocity_forces = bias - gravity
+
+        gravity_accel = np.linalg.solve(M_solve, gravity)
+        velocity_accel = -np.linalg.solve(
+            M_solve, velocity_forces
+        )  # Since bias = C*v + G
+
+        # Muscle Active vs Passive
+        active_forces = analyzer.get_muscle_forces()
+        passive_forces = analyzer.get_passive_muscle_forces()
+        moment_arms = analyzer.get_moment_arms()
+
+        n_u = self._model.getNumSpeeds()
+        active_tau = np.zeros(n_u)
+        passive_tau = np.zeros(n_u)
+
+        for muscle_name in active_forces:
+            if muscle_name in moment_arms:
+                moment_arm_values = list(moment_arms[muscle_name].values())
+                for coord_idx, r in enumerate(moment_arm_values):
+                    if coord_idx < n_u:
+                        active_tau[coord_idx] += active_forces[muscle_name] * r
+                        passive_tau[coord_idx] += (
+                            passive_forces.get(muscle_name, 0.0) * r
+                        )
+
+        active_muscle_accel = np.linalg.solve(M_solve, active_tau)
+        passive_muscle_accel = np.linalg.solve(M_solve, passive_tau)
+
+        external_accel = np.zeros(n_u)
+        total_accel = (
+            gravity_accel
+            + velocity_accel
+            + active_muscle_accel
+            + passive_muscle_accel
+            + external_accel
+        )
+
+        return {
+            "gravity": gravity_accel,
+            "velocity": velocity_accel,
+            "active_muscle": active_muscle_accel,
+            "passive_muscle": passive_muscle_accel,
+            "external": external_accel,
+            "total": total_accel,
+        }
+
     def analyze_muscle_contributions(self) -> Any | None:
         """Full muscle contribution analysis.
 
@@ -639,8 +695,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         Returns:
             q̈_ZTCF: Acceleration under zero applied torque (n_v,)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if not (q is not None):
             raise ValueError("q must be provided")
         if not self._model or not self._state:
@@ -691,8 +745,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         Returns:
             q̈_ZVCF: Acceleration with v=0 (n_v,)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if not (q is not None):
             raise ValueError("q must be provided")
         if not self._model or not self._state:

@@ -202,8 +202,6 @@ class TurfProperties:
         """
         if not (velocity_direction is not None):
             raise ValueError("velocity_direction must be provided")
-        if not (velocity_direction is not None):
-            raise ValueError("velocity_direction must be provided")
         if np.linalg.norm(velocity_direction) < 1e-10:
             return 0.0
 
@@ -223,8 +221,6 @@ class TurfProperties:
         Returns:
             Deceleration vector [m/s²] (opposing motion)
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         speed = np.linalg.norm(velocity)

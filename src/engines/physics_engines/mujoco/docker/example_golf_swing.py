@@ -103,8 +103,6 @@ def interpolate_pose(start_pose, end_pose, alpha) -> dict[str, float]:
     """Linearly interpolate between two poses."""
     if not (start_pose is not None):
         raise ValueError("start_pose must be provided")
-    if not (start_pose is not None):
-        raise ValueError("start_pose must be provided")
     result = start_pose.copy()
     for joint, end_val in end_pose.items():
         start_val = start_pose.get(joint, 0.0)

@@ -54,8 +54,6 @@ def pd_control(physics, target_pose, actuators, kp=10.0, kd=1.0) -> np.ndarray:
     """Compute PD control action."""
     if not (physics is not None):
         raise ValueError("physics must be provided")
-    if not (physics is not None):
-        raise ValueError("physics must be provided")
     action = np.zeros(physics.model.nu)
     for joint_name, target_angle in target_pose.items():
         try:
@@ -291,8 +289,6 @@ def _set_initial_pose(physics) -> None:
 
 def _run_simulation_loop(physics, actuators, camera_id) -> None:
     """Run the simulation loop, recording frames and saving video."""
-    if not (physics is not None):
-        raise ValueError("physics must be provided")
     if not (physics is not None):
         raise ValueError("physics must be provided")
     logger.info("Simulating...")

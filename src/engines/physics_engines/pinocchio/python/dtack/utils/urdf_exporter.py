@@ -115,8 +115,6 @@ class URDFExporter:
         """
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         output = Path(output_path)
         urdf_content = self._generate_urdf()
         output.write_text(urdf_content, encoding="utf-8")
@@ -170,8 +168,6 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
-        if not (segment is not None):
-            raise ValueError("segment must be provided")
         if not (segment is not None):
             raise ValueError("segment must be provided")
         lines = []
@@ -243,8 +239,6 @@ class URDFExporter:
         """
         if not (parent_name is not None):
             raise ValueError("parent_name must be provided")
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
         lines = []
         joint_name = f"{parent_name}_to_{seg_name}"
 
@@ -294,8 +288,6 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
         if not (parent_name is not None):
             raise ValueError("parent_name must be provided")
         lines = []
@@ -371,8 +363,6 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
         if not (parent_name is not None):
             raise ValueError("parent_name must be provided")
         lines = []
@@ -460,8 +450,6 @@ class URDFExporter:
         """
         if not (body is not None):
             raise ValueError("body must be provided")
-        if not (body is not None):
-            raise ValueError("body must be provided")
         lines = ["    <inertial>"]
         lines.append(f'      <mass value="{body["mass"]}"/>')
         lines.append("      <inertia")
@@ -503,8 +491,6 @@ class URDFExporter:
 
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         origin_xyz, origin_rpy = self._parse_origin(origin)
         lines = [
             f'  <joint name="{name}" type="{joint_type}">',
@@ -540,8 +526,6 @@ class URDFExporter:
         Returns:
             List of URDF lines
         """
-        if not (body is not None):
-            raise ValueError("body must be provided")
         if not (body is not None):
             raise ValueError("body must be provided")
         lines = ["    <visual>"]

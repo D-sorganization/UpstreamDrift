@@ -131,8 +131,6 @@ class AnalysisMixin:
         """Plot the Swing Profile radar chart."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
-        if not (plotter is not None):
-            raise ValueError("plotter must be provided")
         times, positions = self.recorder.get_time_series("joint_positions")
         _, velocities = self.recorder.get_time_series("joint_velocities")
         _, torques = self.recorder.get_time_series("joint_torques")

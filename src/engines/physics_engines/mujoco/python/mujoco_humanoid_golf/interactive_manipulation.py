@@ -68,8 +68,6 @@ class MousePickingRay:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -94,8 +92,6 @@ class MousePickingRay:
             Tuple of (ray_origin [3], ray_direction [3])
         """
         # Normalize screen coordinates to [-1, 1]
-        if not (x is not None):
-            raise ValueError("x must be provided")
         if not (x is not None):
             raise ValueError("x must be provided")
         x_ndc = (2.0 * x) / width - 1.0
@@ -162,8 +158,6 @@ class MousePickingRay:
         """
         if not (x is not None):
             raise ValueError("x must be provided")
-        if not (x is not None):
-            raise ValueError("x must be provided")
         ray_origin, ray_dir = self.screen_to_ray(x, y, width, height, camera)
 
         # Test ray against all body geometries
@@ -221,8 +215,6 @@ class InteractiveManipulator:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -277,8 +269,6 @@ class InteractiveManipulator:
         """
         if not (x is not None):
             raise ValueError("x must be provided")
-        if not (x is not None):
-            raise ValueError("x must be provided")
         if not self.drag_enabled:
             return None
 
@@ -327,8 +317,6 @@ class InteractiveManipulator:
         Returns:
             True if IK succeeded
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
         if not (x is not None):
             raise ValueError("x must be provided")
         if self.selected_body_id is None or not self.drag_enabled:
@@ -402,8 +390,6 @@ class InteractiveManipulator:
     ) -> np.ndarray:
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         current_pos = self.data.xpos[body_id].copy()
         pos_error = target_position - current_pos
 
@@ -420,8 +406,6 @@ class InteractiveManipulator:
         task_dim: int,
         maintain_orientation: bool,
     ) -> np.ndarray | None:
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
         jacp = np.zeros((3, self.model.nv))
@@ -443,8 +427,6 @@ class InteractiveManipulator:
         q: np.ndarray,
         maintain_orientation: bool,
     ) -> np.ndarray:
-        if not (J_damped is not None):
-            raise ValueError("J_damped must be provided")
         if not (J_damped is not None):
             raise ValueError("J_damped must be provided")
         if not self.use_nullspace_posture or self.original_qpos is None:
@@ -486,8 +468,6 @@ class InteractiveManipulator:
         Returns:
             True if IK succeeded
         """
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
         q = self.data.qpos.copy()
@@ -546,8 +526,6 @@ class InteractiveManipulator:
         # Quaternion difference
         if not (q_current is not None):
             raise ValueError("q_current must be provided")
-        if not (q_current is not None):
-            raise ValueError("q_current must be provided")
         q_current_conj = np.array(
             [q_current[0], -q_current[1], -q_current[2], -q_current[3]],
         )
@@ -570,8 +548,6 @@ class InteractiveManipulator:
 
     def _clamp_joint_limits(self, q: np.ndarray) -> np.ndarray:
         """Clamp joint configuration to limits."""
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if not (q is not None):
             raise ValueError("q must be provided")
         q_clamped = q.copy()
@@ -602,8 +578,6 @@ class InteractiveManipulator:
             constraint_type: Type of constraint
             reference_body_id: Reference body for relative constraints
         """
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
         if constraint_type == ConstraintType.FIXED_IN_SPACE:
@@ -647,8 +621,6 @@ class InteractiveManipulator:
         Returns:
             New active state
         """
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
         if body_id in self.constraints:
@@ -723,8 +695,6 @@ class InteractiveManipulator:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         pose = StoredPose(
             name=name,
             qpos=self.data.qpos.copy(),
@@ -746,8 +716,6 @@ class InteractiveManipulator:
         Returns:
             True if pose was loaded
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         if name not in self.pose_library:
@@ -775,8 +743,6 @@ class InteractiveManipulator:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if name in self.pose_library:
             del self.pose_library[name]
             return True
@@ -798,8 +764,6 @@ class InteractiveManipulator:
         Returns:
             True if interpolation succeeded
         """
-        if not (pose_name_a is not None):
-            raise ValueError("pose_name_a must be provided")
         if not (pose_name_a is not None):
             raise ValueError("pose_name_a must be provided")
         if pose_name_a not in self.pose_library or pose_name_b not in self.pose_library:
@@ -824,8 +788,6 @@ class InteractiveManipulator:
         Args:
             filepath: Path to save file
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
         data = {}
@@ -890,8 +852,6 @@ class InteractiveManipulator:
         """
         if not (body_id is not None):
             raise ValueError("body_id must be provided")
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
         if name is not None:
             return str(name)
@@ -906,8 +866,6 @@ class InteractiveManipulator:
         Returns:
             Body ID or None
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         for body_id in range(self.model.nbody):

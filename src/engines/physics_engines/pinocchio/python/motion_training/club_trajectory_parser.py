@@ -96,8 +96,6 @@ class ClubTrajectory:
         """Interpolate to get frame at specific time."""
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
         times = self.times
         if t <= times[0]:
             return self.frames[0]
@@ -131,8 +129,6 @@ class ClubTrajectory:
 
     def get_event_frame(self, event: str) -> ClubFrame | None:
         """Get frame at a specific swing event (address, top, impact, finish)."""
-        if not (event is not None):
-            raise ValueError("event must be provided")
         if not (event is not None):
             raise ValueError("event must be provided")
         event_map = {
@@ -225,8 +221,6 @@ class ClubTrajectoryParser:
         """Parse using pandas."""
         if not (sheet_name is not None):
             raise ValueError("sheet_name must be provided")
-        if not (sheet_name is not None):
-            raise ValueError("sheet_name must be provided")
         df = pd.read_excel(self.file_path, sheet_name=sheet_name, header=None)
 
         # Parse event markers from row 0
@@ -245,8 +239,6 @@ class ClubTrajectoryParser:
 
     def _parse_with_openpyxl(self, sheet_name: str) -> ClubTrajectory:
         """Parse using openpyxl."""
-        if not (sheet_name is not None):
-            raise ValueError("sheet_name must be provided")
         if not (sheet_name is not None):
             raise ValueError("sheet_name must be provided")
         wb = load_workbook(self.file_path, data_only=True)
@@ -274,8 +266,6 @@ class ClubTrajectoryParser:
 
     def _parse_events_list(self, row: list) -> SwingEventMarkers:
         """Parse event markers from list."""
-        if not (row is not None):
-            raise ValueError("row must be provided")
         if not (row is not None):
             raise ValueError("row must be provided")
         events = SwingEventMarkers()
@@ -314,8 +304,6 @@ class ClubTrajectoryParser:
     def _orthogonalize_axes(x_axis, y_axis):
         if not (x_axis is not None):
             raise ValueError("x_axis must be provided")
-        if not (x_axis is not None):
-            raise ValueError("x_axis must be provided")
         x_axis = x_axis / (np.linalg.norm(x_axis) + 1e-8)
         y_axis = y_axis - np.dot(y_axis, x_axis) * x_axis
         y_axis = y_axis / (np.linalg.norm(y_axis) + 1e-8)
@@ -323,8 +311,6 @@ class ClubTrajectoryParser:
         return np.column_stack([x_axis, y_axis, z_axis])
 
     def _parse_grip_data(self, get):
-        if not (get is not None):
-            raise ValueError("get must be provided")
         if not (get is not None):
             raise ValueError("get must be provided")
         grip_pos = np.array(
@@ -354,8 +340,6 @@ class ClubTrajectoryParser:
         return grip_pos, grip_rot
 
     def _parse_club_face_data(self, get, grip_pos, grip_rot):
-        if not (get is not None):
-            raise ValueError("get must be provided")
         if not (get is not None):
             raise ValueError("get must be provided")
         face_x = get(self.FACE_X_COL)
@@ -394,8 +378,6 @@ class ClubTrajectoryParser:
 
     def _parse_row(self, row) -> ClubFrame | None:
         """Parse a single data row into ClubFrame."""
-        if not (row is not None):
-            raise ValueError("row must be provided")
         if not (row is not None):
             raise ValueError("row must be provided")
         get = self._make_row_accessor(row)
@@ -453,8 +435,6 @@ def compute_hand_positions(
         Tuple of (left_hand_position, right_hand_position)
     """
     # Get the grip Z-axis (along the shaft)
-    if not (frame is not None):
-        raise ValueError("frame must be provided")
     if not (frame is not None):
         raise ValueError("frame must be provided")
     grip_z = frame.grip_rotation[:, 2]

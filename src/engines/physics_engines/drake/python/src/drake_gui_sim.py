@@ -172,8 +172,6 @@ class SimulationMixin:
     ) -> None:
         if not (val is not None):
             raise ValueError("val must be provided")
-        if not (val is not None):
-            raise ValueError("val must be provided")
         radian = val * SLIDER_TO_RADIAN
         with QtCore.QSignalBlocker(spin):
             spin.setValue(radian)
@@ -188,8 +186,6 @@ class SimulationMixin:
 
     def _update_joint_pos(self, joint_idx: int, angle: float) -> None:
         """Update joint position in plant context."""
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
         if self.operating_mode != "kinematic":  # type: ignore[attr-defined]

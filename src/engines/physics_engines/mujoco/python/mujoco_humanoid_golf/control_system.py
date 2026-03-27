@@ -58,8 +58,6 @@ class ActuatorControl:
         """
         if not (control_type is not None):
             raise ValueError("control_type must be provided")
-        if not (control_type is not None):
-            raise ValueError("control_type must be provided")
         self.control_type = control_type
         self.constant_value = constant_value
         self.damping = damping
@@ -102,8 +100,6 @@ class ActuatorControl:
             Control torque value
         """
         # Base torque from control type
-        if not (time is not None):
-            raise ValueError("time must be provided")
         if not (time is not None):
             raise ValueError("time must be provided")
         if self.control_type == ControlType.CONSTANT:
@@ -153,8 +149,6 @@ class ControlSystem:
         Args:
             num_actuators: Number of actuators in the system
         """
-        if not (num_actuators is not None):
-            raise ValueError("num_actuators must be provided")
         if not (num_actuators is not None):
             raise ValueError("num_actuators must be provided")
         self.num_actuators = num_actuators

@@ -156,8 +156,6 @@ class SimRenderingMixin:
     def _add_live_kinematics_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
         if not (rgb is not None):
             raise ValueError("rgb must be provided")
-        if not (rgb is not None):
-            raise ValueError("rgb must be provided")
         if self.model is None or self.data is None:
             return rgb
         cv2 = get_cv2()
@@ -288,8 +286,6 @@ class SimRenderingMixin:
         """Overlay torque/force/accel vectors using screen-space arrows."""
         if not (rgb is not None):
             raise ValueError("rgb must be provided")
-        if not (rgb is not None):
-            raise ValueError("rgb must be provided")
         if self.model is None or self.data is None:
             return rgb
 
@@ -306,8 +302,6 @@ class SimRenderingMixin:
             color: tuple[int, int, int],
         ) -> None:
             """Draw a screen-space arrow between two world positions."""
-            if not (start is not None):
-                raise ValueError("start must be provided")
             if not (start is not None):
                 raise ValueError("start must be provided")
             start_px = self._world_to_screen(start)
@@ -340,8 +334,6 @@ class SimRenderingMixin:
     def _draw_torque_vectors(self: Any, draw_arrow_func: Callable) -> None:
         if not (draw_arrow_func is not None):
             raise ValueError("draw_arrow_func must be provided")
-        if not (draw_arrow_func is not None):
-            raise ValueError("draw_arrow_func must be provided")
         if self.model is None or self.data is None:
             return
 
@@ -372,8 +364,6 @@ class SimRenderingMixin:
             draw_arrow_func(joint_pos, arrow_end, color)
 
     def _draw_force_vectors(self: Any, draw_arrow_func: Callable) -> None:
-        if not (draw_arrow_func is not None):
-            raise ValueError("draw_arrow_func must be provided")
         if not (draw_arrow_func is not None):
             raise ValueError("draw_arrow_func must be provided")
         if self.data is None or self.model is None:
@@ -411,8 +401,6 @@ class SimRenderingMixin:
 
     def _draw_induced_vectors(self: Any, draw_arrow_func: Callable) -> None:
         """Draw Induced Acceleration vectors (Magenta)."""
-        if not (draw_arrow_func is not None):
-            raise ValueError("draw_arrow_func must be provided")
         if not (draw_arrow_func is not None):
             raise ValueError("draw_arrow_func must be provided")
         if self.model is None or self.data is None or self.latest_bio_data is None:
@@ -457,8 +445,6 @@ class SimRenderingMixin:
         """Draw Counterfactual vectors (Yellow)."""
         if not (draw_arrow_func is not None):
             raise ValueError("draw_arrow_func must be provided")
-        if not (draw_arrow_func is not None):
-            raise ValueError("draw_arrow_func must be provided")
         if self.model is None or self.data is None or self.latest_bio_data is None:
             return
         if self.cf_vector_type not in self.latest_bio_data.counterfactuals:
@@ -486,8 +472,6 @@ class SimRenderingMixin:
             draw_arrow_func(joint_pos, arrow_end, (0, 255, 255))
 
     def _add_manipulation_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
-        if not (rgb is not None):
-            raise ValueError("rgb must be provided")
         if not (rgb is not None):
             raise ValueError("rgb must be provided")
         cv2 = get_cv2()
@@ -552,8 +536,6 @@ class SimRenderingMixin:
     def _world_to_screen(self: Any, world_pos: np.ndarray) -> tuple[int, int] | None:
         if not (world_pos is not None):
             raise ValueError("world_pos must be provided")
-        if not (world_pos is not None):
-            raise ValueError("world_pos must be provided")
         cam_azimuth = np.deg2rad(self.camera.azimuth)
         cam_elevation = np.deg2rad(self.camera.elevation)
         cam_distance = self.camera.distance
@@ -598,8 +580,6 @@ class SimRenderingMixin:
 
     def _add_swing_plane_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
         """Overlay club trajectory and swing plane normal onto the pixel frame."""
-        if not (rgb is not None):
-            raise ValueError("rgb must be provided")
         if not (rgb is not None):
             raise ValueError("rgb must be provided")
         cv2 = get_cv2()
@@ -652,8 +632,6 @@ class SimRenderingMixin:
         return img
 
     def _add_frame_and_com_overlays(self: Any, rgb: np.ndarray) -> np.ndarray:
-        if not (rgb is not None):
-            raise ValueError("rgb must be provided")
         if not (rgb is not None):
             raise ValueError("rgb must be provided")
         cv2 = get_cv2()

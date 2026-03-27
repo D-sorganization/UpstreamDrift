@@ -15,8 +15,6 @@ def compute_marker_statistics(
     """
     if not (pos is not None):
         raise ValueError("pos must be provided")
-    if not (pos is not None):
-        raise ValueError("pos must be provided")
     if pos.shape[0] < 2 or time is None or len(time) != pos.shape[0]:
         return {
             "path_length": np.nan,

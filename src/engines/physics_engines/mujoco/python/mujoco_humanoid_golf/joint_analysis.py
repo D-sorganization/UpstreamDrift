@@ -29,8 +29,6 @@ class UniversalJointAnalyzer:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -115,8 +113,6 @@ class UniversalJointAnalyzer:
         # where β is the joint angle and θ is the input rotation
         if not (input_angle is not None):
             raise ValueError("input_angle must be provided")
-        if not (input_angle is not None):
-            raise ValueError("input_angle must be provided")
         if abs(joint_angle) < 1e-6:
             return 1.0
 
@@ -197,8 +193,6 @@ class GimbalJointAnalyzer:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self.data = data
 
@@ -254,8 +248,6 @@ class GimbalJointAnalyzer:
         """
         if not (joint_x is not None):
             raise ValueError("joint_x must be provided")
-        if not (joint_x is not None):
-            raise ValueError("joint_x must be provided")
         _, angle_y, _ = self.get_gimbal_angles(joint_x, joint_y, joint_z)
 
         # Distance to nearest ±90 degree position
@@ -276,8 +268,6 @@ def plot_torque_wobble(
         analysis_results: Results from UniversalJointAnalyzer.analyze_torque_trans
         save_path: Optional path to save the plot
     """
-    if not (analysis_results is not None):
-        raise ValueError("analysis_results must be provided")
     if not (analysis_results is not None):
         raise ValueError("analysis_results must be provided")
     _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))  # type: ignore[misc]
@@ -329,8 +319,6 @@ def analyze_constraint_forces_over_time(
     Returns:
         Dictionary mapping joint names to force time series
     """
-    if not (model is not None):
-        raise ValueError("model must be provided")
     if not (model is not None):
         raise ValueError("model must be provided")
     if timestep is None:
@@ -385,8 +373,6 @@ def plot_constraint_forces(
         joint_names: List of joint names to plot
         save_path: Optional path to save the plot
     """
-    if not (force_data is not None):
-        raise ValueError("force_data must be provided")
     if not (force_data is not None):
         raise ValueError("force_data must be provided")
     num_joints = len(joint_names)

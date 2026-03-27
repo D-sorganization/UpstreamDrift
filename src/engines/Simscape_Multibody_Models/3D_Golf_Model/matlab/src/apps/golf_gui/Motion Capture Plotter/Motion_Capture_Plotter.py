@@ -393,8 +393,6 @@ class MotionCapturePlotter(QMainWindow):
         """Handle data source change."""
         if not (source is not None):
             raise ValueError("source must be provided")
-        if not (source is not None):
-            raise ValueError("source must be provided")
         self.current_data_source = source
         logger.info(f"Data source changed to: {source}")
 
@@ -433,8 +431,6 @@ class MotionCapturePlotter(QMainWindow):
 
     def _process_excel_sheet(self, filename, sheet_name) -> None:
         """Process a single Excel sheet and store parsed frames in swing_data."""
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
         if not (filename is not None):
             raise ValueError("filename must be provided")
         result = process_excel_sheet(filename, sheet_name)
@@ -618,16 +614,12 @@ class MotionCapturePlotter(QMainWindow):
         """Handle frame slider change."""
         if not (frame is not None):
             raise ValueError("frame must be provided")
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         self.current_frame = frame
         self.frame_label.setText(str(frame))
         self.update_visualization()
 
     def on_speed_change(self, speed) -> None:
         """Handle speed slider change."""
-        if not (speed is not None):
-            raise ValueError("speed must be provided")
         if not (speed is not None):
             raise ValueError("speed must be provided")
         self.speed_label.setText(str(speed))
@@ -638,16 +630,12 @@ class MotionCapturePlotter(QMainWindow):
         """Handle motion scale change."""
         if not (scale is not None):
             raise ValueError("scale must be provided")
-        if not (scale is not None):
-            raise ValueError("scale must be provided")
         self.motion_scale = scale
         self.scale_label.setText(f"{scale}x")
         self.update_visualization()
 
     def on_club_length_change(self, length_cm) -> None:
         """Handle club length change."""
-        if not (length_cm is not None):
-            raise ValueError("length_cm must be provided")
         if not (length_cm is not None):
             raise ValueError("length_cm must be provided")
         self.shaft_length = length_cm / 100.0  # Convert cm to meters
@@ -779,8 +767,6 @@ class MotionCapturePlotter(QMainWindow):
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if self.trajectory_check.isChecked() and len(data) > 1:
             # Mid-hands path (blue dashed) - flip X for right-handed swing
             trajectory = np.array(
@@ -831,8 +817,6 @@ class MotionCapturePlotter(QMainWindow):
         # For right-handed golfers: X should be flipped to show proper swing direction
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         mid_hands = np.array(
             [
                 -frame_data["mid_X"]
@@ -862,8 +846,6 @@ class MotionCapturePlotter(QMainWindow):
 
         Returns a dict mapping joint names to numpy position arrays.
         """
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
         joints = {}
@@ -899,8 +881,6 @@ class MotionCapturePlotter(QMainWindow):
             grip_pos: numpy array of grip (left hand) position [x, y, z]
         """
         # Draw club shaft from grip to club head
-        if not (club_head_pos is not None):
-            raise ValueError("club_head_pos must be provided")
         if not (club_head_pos is not None):
             raise ValueError("club_head_pos must be provided")
         club_points = np.array([grip_pos, club_head_pos])
@@ -949,8 +929,6 @@ class MotionCapturePlotter(QMainWindow):
             face_normal: unit numpy array of face normal direction
         """
         # Draw face normal vector (red arrow) - longer and more visible
-        if not (club_head_pos is not None):
-            raise ValueError("club_head_pos must be provided")
         if not (club_head_pos is not None):
             raise ValueError("club_head_pos must be provided")
         normal_length = 0.25  # 25cm normal vector (longer)
@@ -1029,8 +1007,6 @@ class MotionCapturePlotter(QMainWindow):
         # Draw body segments
         if not (joints is not None):
             raise ValueError("joints must be provided")
-        if not (joints is not None):
-            raise ValueError("joints must be provided")
         for start_joint, end_joint, color in segment_definitions:
             if start_joint in joints and end_joint in joints:
                 segment_points = np.array([joints[start_joint], joints[end_joint]])
@@ -1057,8 +1033,6 @@ class MotionCapturePlotter(QMainWindow):
             data: full DataFrame of all frames
         """
         # Club head trajectory
-        if not (joints is not None):
-            raise ValueError("joints must be provided")
         if not (joints is not None):
             raise ValueError("joints must be provided")
         if (
@@ -1123,8 +1097,6 @@ class MotionCapturePlotter(QMainWindow):
         """
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         trace_colors = {
             "club_head": "red",
             "left_hand": "blue",
@@ -1175,8 +1147,6 @@ class MotionCapturePlotter(QMainWindow):
         # Define colors for different body segments
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         colors = {
             "club": "red",
             "hands": "blue",
@@ -1212,8 +1182,6 @@ class MotionCapturePlotter(QMainWindow):
 
     def update_info_text(self, frame_data) -> None:
         """Update the information text display."""
-        if not (frame_data is not None):
-            raise ValueError("frame_data must be provided")
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
         info = f"Frame: {self.current_frame}\n"
@@ -1278,8 +1246,6 @@ class MotionCapturePlotter(QMainWindow):
         """Set predefined camera views."""
         if not (view is not None):
             raise ValueError("view must be provided")
-        if not (view is not None):
-            raise ValueError("view must be provided")
         if view == "face_on":
             # Face-on view: looking at golfer from front (toward +X target line)
             self.ax.view_init(elev=15, azim=90)
@@ -1313,8 +1279,6 @@ class MotionCapturePlotter(QMainWindow):
 
     def on_scroll(self, event) -> None:
         """Handle mouse scroll for zooming."""
-        if not (event is not None):
-            raise ValueError("event must be provided")
         if not (event is not None):
             raise ValueError("event must be provided")
         if event.inaxes != self.ax:
@@ -1352,8 +1316,6 @@ class MotionCapturePlotter(QMainWindow):
         """Handle mouse button press for rotation/panning."""
         if not (event is not None):
             raise ValueError("event must be provided")
-        if not (event is not None):
-            raise ValueError("event must be provided")
         if event.inaxes != self.ax:
             return
         # Store initial position for rotation/panning (use screen coordinates)
@@ -1366,8 +1328,6 @@ class MotionCapturePlotter(QMainWindow):
 
     def on_mouse_move(self, event) -> None:
         """Handle mouse movement for rotation/panning."""
-        if not (event is not None):
-            raise ValueError("event must be provided")
         if not (event is not None):
             raise ValueError("event must be provided")
         if event.inaxes != self.ax or self._last_pos is None:

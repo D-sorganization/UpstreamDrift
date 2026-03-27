@@ -168,8 +168,6 @@ class SimulationMixin:
         """Add a single joint control row."""
         if not (i is not None):
             raise ValueError("i must be provided")
-        if not (i is not None):
-            raise ValueError("i must be provided")
         if self.model is None:
             return
 
@@ -240,8 +238,6 @@ class SimulationMixin:
     def _on_slider(
         self: PinocchioGUI, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
     ) -> None:  # noqa: E501
-        if not (val is not None):
-            raise ValueError("val must be provided")
         if not (val is not None):
             raise ValueError("val must be provided")
         angle = val / SLIDER_SCALE
@@ -353,8 +349,6 @@ class SimulationMixin:
         self: PinocchioGUI, tau: np.ndarray
     ) -> tuple[dict[str, np.ndarray] | None, dict[str, np.ndarray] | None]:
         """Run real-time induced/counterfactual analysis if enabled."""
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
         if not (tau is not None):
             raise ValueError("tau must be provided")
         if not self.chk_live_analysis.isChecked():

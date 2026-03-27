@@ -82,8 +82,6 @@ class UISetupMixin:
         """Build the model selection group box."""
         if not (layout is not None):
             raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
         model_group = QtWidgets.QGroupBox("Model Selection")
         model_layout = QtWidgets.QHBoxLayout()
         self.model_combo = QtWidgets.QComboBox()
@@ -97,8 +95,6 @@ class UISetupMixin:
 
     def _setup_mode_selector(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the operating mode group box."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
         if not (layout is not None):
             raise ValueError("layout must be provided")
         mode_group = QtWidgets.QGroupBox("Operating Mode")
@@ -119,8 +115,6 @@ class UISetupMixin:
 
     def _setup_controls_tabs(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the main tab widget with simulation controls and live analysis."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
         if not (layout is not None):
             raise ValueError("layout must be provided")
         self.main_tab_widget = QtWidgets.QTabWidget()
@@ -179,8 +173,6 @@ class UISetupMixin:
 
     def _setup_analysis_group(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Build the recording and post-hoc analysis group box."""
-        if not (parent_layout is not None):
-            raise ValueError("parent_layout must be provided")
         if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
         analysis_group = QtWidgets.QGroupBox("Recording & Post-Hoc Analysis")
@@ -257,8 +249,6 @@ class UISetupMixin:
         """Build the visualization toggles group box."""
         if not (layout is not None):
             raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
         vis_group = QtWidgets.QGroupBox("Visualization")
         vis_layout = QtWidgets.QVBoxLayout()
 
@@ -314,8 +304,6 @@ class UISetupMixin:
         """Build the advanced vector controls (induced accel, counterfactual combos)."""
         if not (vis_layout is not None):
             raise ValueError("vis_layout must be provided")
-        if not (vis_layout is not None):
-            raise ValueError("vis_layout must be provided")
         vec_grid = QtWidgets.QGridLayout()
 
         self.chk_induced_vec = QtWidgets.QCheckBox("Induced Vectors")
@@ -351,8 +339,6 @@ class UISetupMixin:
 
     def _setup_matrix_analysis_panel(self, layout: QtWidgets.QVBoxLayout) -> None:
         """Build the matrix analysis group box (Jacobian condition, constraint rank)."""
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
         if not (layout is not None):
             raise ValueError("layout must be provided")
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")

@@ -29,8 +29,6 @@ def _four_bar_worldbody_xml(
 ) -> str:
     if not (ground is not None):
         raise ValueError("ground must be provided")
-    if not (ground is not None):
-        raise ValueError("ground must be provided")
     cx = crank * np.cos(np.pi / 4)
     cy = crank * np.sin(np.pi / 4)
     return f"""    <worldbody>
@@ -97,8 +95,6 @@ def generate_four_bar_linkage_xml(
     -------
     str : MuJoCo XML string
     """
-    if not (link_type is not None):
-        raise ValueError("link_type must be provided")
     if not (link_type is not None):
         raise ValueError("link_type must be provided")
     configs = {

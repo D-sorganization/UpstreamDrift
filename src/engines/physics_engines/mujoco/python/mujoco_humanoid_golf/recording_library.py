@@ -43,8 +43,6 @@ class ConnectionPool:
     def __init__(self, db_path: str) -> None:
         if not (db_path is not None):
             raise ValueError("db_path must be provided")
-        if not (db_path is not None):
-            raise ValueError("db_path must be provided")
         self.db_path = db_path
         self._local = threading.local()
 
@@ -92,8 +90,6 @@ class RecordingLibrary:
         Args:
             library_path: Directory for recordings and database
         """
-        if not (library_path is not None):
-            raise ValueError("library_path must be provided")
         if not (library_path is not None):
             raise ValueError("library_path must be provided")
         self.library_path = Path(library_path)
@@ -314,8 +310,6 @@ class RecordingLibrary:
         """
         if not (recording_id is not None):
             raise ValueError("recording_id must be provided")
-        if not (recording_id is not None):
-            raise ValueError("recording_id must be provided")
         conn = self._get_connection()
         cursor = conn.cursor()
 
@@ -335,8 +329,6 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
-        if not (metadata is not None):
-            raise ValueError("metadata must be provided")
         if not (metadata is not None):
             raise ValueError("metadata must be provided")
         if metadata.id is None:
@@ -396,8 +388,6 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
-        if not (recording_id is not None):
-            raise ValueError("recording_id must be provided")
         if not (recording_id is not None):
             raise ValueError("recording_id must be provided")
         if delete_file:
@@ -466,8 +456,6 @@ class RecordingLibrary:
         Returns:
             List of matching RecordingMetadata
         """
-        if not (min_rating is not None):
-            raise ValueError("min_rating must be provided")
         if not (min_rating is not None):
             raise ValueError("min_rating must be provided")
         conn = self._get_connection()
@@ -589,8 +577,6 @@ class RecordingLibrary:
         """
         if not (output_file is not None):
             raise ValueError("output_file must be provided")
-        if not (output_file is not None):
-            raise ValueError("output_file must be provided")
         recordings = self.get_all_recordings()
         data = {
             "library_path": str(self.library_path),
@@ -608,8 +594,6 @@ class RecordingLibrary:
             input_file: Input JSON file path
             merge: If True, merge with existing library; if False, replace
         """
-        if not (input_file is not None):
-            raise ValueError("input_file must be provided")
         if not (input_file is not None):
             raise ValueError("input_file must be provided")
         with open(input_file) as f:
@@ -647,26 +631,27 @@ class RecordingLibrary:
         # Whitelist allowed fields to prevent SQL injection
         if not (field is not None):
             raise ValueError("field must be provided")
-        if not (field is not None):
-            raise ValueError("field must be provided")
 
-        queries = {
-            "golfer_name": "SELECT DISTINCT golfer_name FROM recordings WHERE golfer_name != ''",
-            "club_type": "SELECT DISTINCT club_type FROM recordings WHERE club_type != ''",
-            "model_name": "SELECT DISTINCT model_name FROM recordings WHERE model_name != ''",
-            "swing_type": "SELECT DISTINCT swing_type FROM recordings WHERE swing_type != ''",
-            "tags": "SELECT DISTINCT tags FROM recordings WHERE tags != ''",
-            "notes": "SELECT DISTINCT notes FROM recordings WHERE notes != ''",
+        allowed_fields = {
+            "golfer_name",
+            "club_type",
+            "model_name",
+            "swing_type",
+            "tags",
+            "notes",
         }
 
-        query = queries.get(field)
-        if not query:
+        if field not in allowed_fields:
             return []
 
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        # Safe: query is selected from a static dictionary mapping above
+        # Safe: field is validated against whitelist above
+        query = (
+            f"SELECT DISTINCT {field} "  # nosec B608
+            f"FROM recordings WHERE {field} != ''"
+        )
         cursor.execute(query)
         values = [row[0] for row in cursor.fetchall()]
 
@@ -698,8 +683,6 @@ class RecordingLibrary:
         """
         if not (file_path is not None):
             raise ValueError("file_path must be provided")
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
         sha256 = hashlib.sha256()
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
@@ -715,8 +698,6 @@ class RecordingLibrary:
         Returns:
             Path to data file
         """
-        if not (metadata is not None):
-            raise ValueError("metadata must be provided")
         if not (metadata is not None):
             raise ValueError("metadata must be provided")
         file_path = Path(metadata.filename)
@@ -742,8 +723,6 @@ def create_metadata_from_recording(
     Returns:
         RecordingMetadata with computed statistics
     """
-    if not (data_dict is not None):
-        raise ValueError("data_dict must be provided")
     if not (data_dict is not None):
         raise ValueError("data_dict must be provided")
     times = data_dict.get("times", [])
