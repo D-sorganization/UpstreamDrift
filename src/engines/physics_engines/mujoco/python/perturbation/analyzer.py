@@ -271,13 +271,11 @@ class MuJoCoPerturbationAnalyzer:
         """
         if not isinstance(profile, dict):
             raise ValueError(f"profile must be a dict, got {type(profile)}")
-        if not ("coeffs" in profile):
+        if "coeffs" not in profile:
             raise ValueError("'coeffs' key missing from profile")
         coeffs = profile["coeffs"]
-        if not (isinstance(coeffs):
-            raise ValueError(list) and len(coeffs) > 0, ()
-            "profile['coeffs'] must be a non-empty list"
-        )
+        if not isinstance(coeffs, list) or len(coeffs) == 0:
+            raise ValueError("profile['coeffs'] must be a non-empty list")
         self._base_coeffs = coeffs
         self._nominal_result = self._simulate(coeffs)
 
@@ -291,8 +289,8 @@ class MuJoCoPerturbationAnalyzer:
         """
         if not (self._base_coeffs is not None):
             raise ValueError(
-            "set_base_torque_profile() must be called before perturb_torque()"
-        )
+                "set_base_torque_profile() must be called before perturb_torque()"
+            )
         perturbed = perturb_torque_coeffs(
             self._base_coeffs,
             noise_amplitude=config.noise_amplitude,
@@ -319,7 +317,9 @@ class MuJoCoPerturbationAnalyzer:
         Post: all MANDATORY_METRICS present; all values finite.
         """
         if not isinstance(sim_result, MuJoCoSimResult):
-            raise ValueError("f"sim_result must be MuJoCoSimResult, got {type(sim_result)}")  # noqa: E501
+            raise ValueError(
+                f"sim_result must be MuJoCoSimResult, got {type(sim_result)}"
+            )  # noqa: E501
         if not (sim_result.n_steps >= 2):
             raise ValueError("Simulation must have >= 2 steps")
 
@@ -376,8 +376,8 @@ class MuJoCoPerturbationAnalyzer:
         """
         if not (self._base_coeffs is not None):
             raise ValueError(
-            "set_base_torque_profile() must be called before run_batch()"
-        )
+                "set_base_torque_profile() must be called before run_batch()"
+            )
 
         t_start = time.monotonic()
         base_seed = config.seed if config.seed is not None else 0
@@ -414,7 +414,7 @@ class MuJoCoPerturbationAnalyzer:
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except (RuntimeError, ValueError, TypeError, ArithmeticError) as e:
+            except (RuntimeError, ValueError, TypeError, ArithmeticError):
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -508,7 +508,7 @@ class MuJoCoPerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except (RuntimeError, ValueError, TypeError, ArithmeticError) as e:
+                except (RuntimeError, ValueError, TypeError, ArithmeticError):
                     pass
             return np.array(values) if values else np.array([0.0])
 

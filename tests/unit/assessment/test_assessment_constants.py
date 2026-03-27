@@ -54,7 +54,7 @@ class TestGroupWeights:
         assert all(w > 0 for w in GROUP_WEIGHTS.values())
 
     def test_all_weights_are_floats(self) -> None:
-        assert all(isinstance(w, (int, float)) for w in GROUP_WEIGHTS.values())
+        assert all(isinstance(w, int | float) for w in GROUP_WEIGHTS.values())
 
 
 # ---------------------------------------------------------------------------

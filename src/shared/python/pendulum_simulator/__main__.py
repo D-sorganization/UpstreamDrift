@@ -46,7 +46,7 @@ class _WheelBlockFilter(QObject):
                 event.accept()
                 return True
             # Plain wheel on value-input widgets → blocked
-            if isinstance(obj, (QComboBox, QDoubleSpinBox, QSpinBox)):
+            if isinstance(obj, QComboBox | QDoubleSpinBox | QSpinBox):
                 event.ignore()
                 return True  # Block the event
         return False

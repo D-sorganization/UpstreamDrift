@@ -810,7 +810,7 @@ class DrakePoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         for joint in joints:
             if joint.name in data:
                 value = data[joint.name]
-                if isinstance(value, (int, float)):
+                if isinstance(value, int | float):
                     positions[joint.position_index] = value
 
         self._editor.set_all_positions(positions)

@@ -280,7 +280,7 @@ class CollisionGeometryGenerator:
 
         import trimesh
 
-        if isinstance(mesh_or_path, (str, Path)):
+        if isinstance(mesh_or_path, str | Path):
             try:
                 return trimesh.load(str(mesh_or_path))
             except (ValueError, KeyError, TypeError) as e:

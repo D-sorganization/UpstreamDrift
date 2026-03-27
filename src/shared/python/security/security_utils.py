@@ -35,7 +35,10 @@ def validate_path(
     """
     try:
         resolved_path = Path(path).resolve()
-    except (OSError, ValueError) as e:  # path resolution can raise OSError or ValueError
+    except (
+        OSError,
+        ValueError,
+    ) as e:  # path resolution can raise OSError or ValueError
         if strict:
             raise ValueError(f"Invalid path format: {path}") from e
         return Path(path)

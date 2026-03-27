@@ -57,7 +57,7 @@ def read_data(
     """
     require(file_path is not None, "file_path must not be None")
     require(
-        isinstance(file_path, (str, Path)),
+        isinstance(file_path, str | Path),
         "file_path must be a string or Path",
         value=type(file_path).__name__,
     )
@@ -118,7 +118,7 @@ def write_data(
     require(df is not None, "df must not be None")
     require(file_path is not None, "file_path must not be None")
     require(
-        isinstance(file_path, (str, Path)),
+        isinstance(file_path, str | Path),
         "file_path must be a string or Path",
         value=type(file_path).__name__,
     )

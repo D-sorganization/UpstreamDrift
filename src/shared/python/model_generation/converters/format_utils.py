@@ -261,8 +261,11 @@ def validate_mjcf(source: str | Path) -> list[str]:
         return []
     except ImportError:
         # MuJoCo not available, do basic XML validation
+        from xml.etree.ElementTree import (
+            ParseError,  # noqa: S405 — only exception class, not parsing
+        )
+
         import defusedxml.ElementTree as DefusedET
-        from xml.etree.ElementTree import ParseError  # noqa: S405 — only exception class, not parsing
 
         try:
             if isinstance(source, Path) or not source.strip().startswith("<"):

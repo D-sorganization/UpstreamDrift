@@ -10,8 +10,6 @@ Covers:
 
 from __future__ import annotations
 
-import math
-
 import pytest
 
 
@@ -77,37 +75,37 @@ class TestGravityConstantUnification:
     def test_constants_gravity(self) -> None:
         from src.shared.python.core.constants import GRAVITY
 
-        assert GRAVITY == pytest.approx(9.80665, abs=1e-5)
+        assert pytest.approx(9.80665, abs=1e-5) == GRAVITY
 
     def test_constants_gravity_float(self) -> None:
         from src.shared.python.core.constants import GRAVITY_FLOAT
 
-        assert GRAVITY_FLOAT == pytest.approx(9.80665, abs=1e-10)
+        assert pytest.approx(9.80665, abs=1e-10) == GRAVITY_FLOAT
 
     def test_pendulum_gravity_mss(self) -> None:
         from src.shared.python.pendulum_simulator.constants import GRAVITY_MSS
 
-        assert GRAVITY_MSS == pytest.approx(9.80665, abs=1e-10)
+        assert pytest.approx(9.80665, abs=1e-10) == GRAVITY_MSS
 
     def test_pendulum_gravity_standard(self) -> None:
         from src.shared.python.pendulum_simulator.constants import GRAVITY_STANDARD
 
-        assert GRAVITY_STANDARD == pytest.approx(9.80665, abs=1e-10)
+        assert pytest.approx(9.80665, abs=1e-10) == GRAVITY_STANDARD
 
     def test_model_generation_gravity(self) -> None:
         from src.shared.python.model_generation.core.constants import GRAVITY_M_S2
 
-        assert GRAVITY_M_S2 == pytest.approx(9.80665, abs=1e-10)
+        assert pytest.approx(9.80665, abs=1e-10) == GRAVITY_M_S2
 
     def test_engines_common_standard_gravity(self) -> None:
         from src.engines.common.physics import STANDARD_GRAVITY
 
-        assert STANDARD_GRAVITY == pytest.approx(9.80665, abs=1e-10)
+        assert pytest.approx(9.80665, abs=1e-10) == STANDARD_GRAVITY
 
     def test_engines_common_gravity_approx(self) -> None:
         from src.engines.common.physics import GRAVITY_APPROX
 
-        assert GRAVITY_APPROX == pytest.approx(9.80665, abs=1e-10)
+        assert pytest.approx(9.80665, abs=1e-10) == GRAVITY_APPROX
 
 
 class TestSegmentMassRatios:
@@ -164,7 +162,7 @@ class TestGraphiteDensity:
         from src.shared.python.core.physics_constants import GRAPHITE_DENSITY_KG_M3
         from src.shared.python.physics.flexible_shaft import GRAPHITE_DENSITY
 
-        assert GRAPHITE_DENSITY == float(GRAPHITE_DENSITY_KG_M3)
+        assert float(GRAPHITE_DENSITY_KG_M3) == GRAPHITE_DENSITY
 
 
 class TestZMPFallbackMass:
@@ -179,7 +177,7 @@ class TestZMPFallbackMass:
         mock_engine.get_total_mass = MagicMock(return_value=75.0)
         computer = ZMPComputer(engine=mock_engine)
         # Access private method to test fallback
-        mass = computer._estimate_mass()
+        computer._estimate_mass()
         # Non-humanoid engine should return fallback
         computer2 = ZMPComputer(engine=MagicMock(spec=[]))
         fallback = computer2._estimate_mass()
