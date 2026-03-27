@@ -48,7 +48,9 @@ INTERMEDIATE_LINK_MASS: float = 0.001
 # Joint Defaults
 # =============================================================================
 
-# Default joint damping coefficient (N*m*s/rad)
+# Default joint damping coefficient (N*m*s/rad).
+# This is a uniform default applied to all joints. For accurate dynamics,
+# use per-joint damping values calibrated to each joint type and actuator.
 DEFAULT_JOINT_DAMPING: float = 0.5
 
 # Default joint friction coefficient (N*m)

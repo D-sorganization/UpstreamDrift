@@ -976,6 +976,12 @@ class A3FittingPipeline:
 
         # Sensitivity analysis (placeholder - requires model function)
         sensitivities: list[SensitivityResult] = []
+        if not sensitivities:
+            logger.warning(
+                "Sensitivity analysis is empty (placeholder). "
+                "Results lack parameter sensitivity information. "
+                "See issue #2170 for implementation tracking."
+            )
 
         # Quality metrics
         quality_metrics = {
