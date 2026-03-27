@@ -81,7 +81,7 @@ MANDATORY_METRICS: tuple[str, ...] = (
 # ---------------------------------------------------------------------------
 
 _MINIMAL_MJCF: str = """<mujoco model="minimal_myo_arm">
-  <option timestep="0.005" gravity="0 0 -9.81"/>
+  <option timestep="0.005" gravity="0 0 -9.80665"/>
   <worldbody>
     <body name="upper_arm" pos="0 0 1">
       <joint name="shoulder" type="hinge" axis="0 1 0"/>
@@ -277,7 +277,7 @@ class MyoSuitePerturbationAnalyzer:
                 self._nq = self._nu
                 self._nv = self._nu
             self._use_gym = True
-        except Exception as exc:  # noqa: BLE001
+        except (ImportError, RuntimeError, ValueError, OSError) as exc:
             logger.warning("MyoSuite init failed (%s), falling back to MuJoCo", exc)
             self._init_mujoco_fallback(None, None)
 
@@ -462,7 +462,7 @@ class MyoSuitePerturbationAnalyzer:
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except Exception as e:  # noqa: BLE001
+            except (RuntimeError, ValueError, TypeError, ArithmeticError) as e:
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -556,7 +556,7 @@ class MyoSuitePerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception as e:  # noqa: BLE001
+                except (RuntimeError, ValueError, TypeError, ArithmeticError) as e:
                     pass
             return np.array(values) if values else np.array([0.0])
 
@@ -676,7 +676,7 @@ class MyoSuitePerturbationAnalyzer:
                         mujoco.mj_energyVel(mj_model, mj_data)
                         pe = float(mj_data.energy[0])
                         ke = float(mj_data.energy[1])
-                    except Exception as e:  # noqa: BLE001
+                    except (ImportError, RuntimeError, ValueError, TypeError, AttributeError) as e:
                         pass
 
             t_list.append(t)

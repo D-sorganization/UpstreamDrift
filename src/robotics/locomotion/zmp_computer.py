@@ -311,8 +311,8 @@ class ZMPComputer(ContractChecker):
             if isinstance(engine, HumanoidCapable):
                 return engine.get_total_mass()
 
-        # Default mass
-        return 70.0
+        # Default mass — consistent with model_generation DEFAULT_MASS_KG
+        return 75.0
 
     def _check_support(
         self,

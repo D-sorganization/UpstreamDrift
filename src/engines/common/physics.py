@@ -31,8 +31,8 @@ from src.shared.python.core.contracts import postcondition, precondition
 
 # ─── Physical Constants ────────────────────────────────────────────────
 STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
-GRAVITY_APPROX: float = 9.81  # m/s² (common approximation)
-GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY_APPROX])
+GRAVITY_APPROX: float = STANDARD_GRAVITY  # m/s² (unified to NIST standard)
+GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -STANDARD_GRAVITY])
 
 
 @dataclass(frozen=True)

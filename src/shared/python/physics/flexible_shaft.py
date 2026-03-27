@@ -45,7 +45,7 @@ logger = get_logger(__name__)
 SHAFT_LENGTH_DRIVER = 1.168  # [m] 46" driver shaft
 SHAFT_LENGTH_IRON = 0.965  # [m] 38" 7-iron shaft
 STEEL_DENSITY = 7850  # [kg/m³]
-GRAPHITE_DENSITY = 1800  # [kg/m³]
+GRAPHITE_DENSITY = 1750  # [kg/m³] — matches physics_constants.GRAPHITE_DENSITY_KG_M3
 STEEL_E = 200e9  # [Pa] Young's modulus for steel
 GRAPHITE_E = 130e9  # [Pa] Young's modulus for graphite
 

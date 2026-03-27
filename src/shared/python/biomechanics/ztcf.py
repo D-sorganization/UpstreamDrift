@@ -156,7 +156,7 @@ def compute_ztcf_forces(
     joint_positions: np.ndarray,
     segment_masses: np.ndarray,
     segment_lengths: np.ndarray,
-    gravity_acceleration: float = 9.81,
+    gravity_acceleration: float = 9.80665,
 ) -> ZTCFResult:
     """Compute ZTCF joint forces from dynamics matrices and kinematics.
 

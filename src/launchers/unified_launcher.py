@@ -190,7 +190,7 @@ class UnifiedLauncher:
             v = getattr(_shared, "__version__", None)
             if v and not callable(v):
                 return str(v)
-        except Exception as e:  # noqa: BLE001
+        except (ImportError, AttributeError, TypeError) as e:
             logger.debug("Could not read version from shared.python: %s", e)
 
         # 3. Read directly from pyproject.toml (development / editable installs)

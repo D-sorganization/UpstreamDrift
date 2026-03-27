@@ -873,7 +873,7 @@ def generate_human():
             continue
         try:
             h.setDetail(key, value)
-        except Exception as exc:  # noqa: BLE001
+        except (RuntimeError, ValueError, KeyError, AttributeError) as exc:
             logger.info(f'Warning: modifier {{key}}={{value}}: {{exc}}')
 
     exportOBJ(h, '{obj_path_str}')

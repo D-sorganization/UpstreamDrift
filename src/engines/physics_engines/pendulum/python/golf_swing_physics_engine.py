@@ -100,7 +100,7 @@ _DEFAULT_GOLF_PARAMS: dict[str, float] = {
     "L1": 0.65,  # arm length (m)
     "L2": 1.10,  # shaft length (m)
     "mClub": 0.20,  # clubhead mass (kg)
-    "g": 9.81,  # gravity (m/s²)
+    "g": 9.80665,  # gravity (m/s²) — NIST standard
     "b1": 0.4,  # shoulder damping (N·m·s/rad)
     "b2": 0.05,  # wrist damping (N·m·s/rad)
     "mu1": 0.0,  # Coulomb friction shoulder

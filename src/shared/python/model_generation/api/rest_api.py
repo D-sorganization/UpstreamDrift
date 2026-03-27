@@ -450,7 +450,7 @@ class ModelGenerationAPI:
                     self._add_security_headers(response)
                     self._add_cors_headers(response)
                     return response
-                except Exception as e:  # noqa: BLE001
+                except (RuntimeError, ValueError, TypeError, OSError, KeyError) as e:
                     logger.exception("Error handling request")
                     response = APIResponse.error(str(e), 500)
                     self._add_security_headers(response)

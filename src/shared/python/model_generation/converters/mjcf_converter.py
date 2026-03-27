@@ -59,7 +59,7 @@ class MJCFConfig:
     inertiafromgeom: bool = False
 
     # Option settings
-    gravity: tuple[float, float, float] = (0.0, 0.0, -9.81)
+    gravity: tuple[float, float, float] = (0.0, 0.0, -9.80665)
     timestep: float = 0.002
 
     # Visual settings

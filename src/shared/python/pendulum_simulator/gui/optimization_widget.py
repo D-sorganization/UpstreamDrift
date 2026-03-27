@@ -289,7 +289,7 @@ class _OptimizerWorker(QObject):
                 self._run_scipy("Nelder-Mead")
             else:
                 self._run_scipy("L-BFGS-B")
-        except Exception as exc:  # noqa: BLE001
+        except (RuntimeError, ValueError, ArithmeticError, TypeError) as exc:
             self.error.emit(str(exc))
         finally:
             elapsed = time.perf_counter() - t0

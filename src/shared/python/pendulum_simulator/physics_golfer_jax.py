@@ -65,7 +65,7 @@ class GolferParamsJAX(NamedTuple):
     m_clubhead: float = 0.2
 
     # Gravity
-    g: float = 9.81
+    g: float = 9.80665
 
     # Dissipation (viscous damping coefficients)
     b_hub: float = 0.0

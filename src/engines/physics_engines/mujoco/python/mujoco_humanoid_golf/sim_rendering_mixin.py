@@ -257,7 +257,7 @@ class SimRenderingMixin:
                     (255, 0, 255),
                     1,
                 )
-            except Exception as exc:  # noqa: BLE001
+            except (RuntimeError, ValueError, AttributeError, IndexError) as exc:
                 logger.debug("Overlay text render skipped: %s", exc)
         return img
 

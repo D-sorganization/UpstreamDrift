@@ -167,7 +167,7 @@ def _try_build_real_engine(name: str) -> object | None:
             )
 
             return PinocchioPhysicsEngine()
-    except Exception:  # noqa: BLE001
+    except (ImportError, RuntimeError, OSError) as _:
         logger.warning("Engine '%s' unavailable — will use stub", name, exc_info=False)
     return None
 
@@ -506,7 +506,7 @@ def _build_qt_window() -> object:
                 cv_summary = _run_headless(selected, config)
                 self._update_charts(selected, cv_summary)
                 self._status_label.setText("Done")
-            except Exception as exc:  # noqa: BLE001
+            except (RuntimeError, ValueError, OSError, ImportError) as exc:
                 self._status_label.setText(f"Error: {exc}")
                 logger.error("Comparison failed: %s", exc, exc_info=True)
             finally:

@@ -232,7 +232,7 @@ def _torso_segments() -> dict[str, SegmentDefinition]:
         "pelvis": SegmentDefinition(
             name="pelvis",
             parent=None,
-            mass_ratio=0.110795,
+            mass_ratio=0.112,
             length_ratio=0.10,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -243,7 +243,7 @@ def _torso_segments() -> dict[str, SegmentDefinition]:
         "lumbar": SegmentDefinition(
             name="lumbar",
             parent="pelvis",
-            mass_ratio=0.131629,
+            mass_ratio=0.131,
             length_ratio=0.10,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -254,7 +254,7 @@ def _torso_segments() -> dict[str, SegmentDefinition]:
         "thorax": SegmentDefinition(
             name="thorax",
             parent="lumbar",
-            mass_ratio=0.169504,
+            mass_ratio=0.169,
             length_ratio=0.12,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -265,7 +265,7 @@ def _torso_segments() -> dict[str, SegmentDefinition]:
         "neck": SegmentDefinition(
             name="neck",
             parent="thorax",
-            mass_ratio=0.022727,
+            mass_ratio=0.023,
             length_ratio=0.052,
             visual_geometry=GeometrySpec(
                 GeometryType.CYLINDER,
@@ -276,7 +276,7 @@ def _torso_segments() -> dict[str, SegmentDefinition]:
         "head": SegmentDefinition(
             name="head",
             parent="neck",
-            mass_ratio=0.065341,
+            mass_ratio=0.065,
             length_ratio=0.14,
             visual_geometry=GeometrySpec(
                 GeometryType.SPHERE,
@@ -294,7 +294,7 @@ def _shoulder_segments() -> dict[str, SegmentDefinition]:
         "left_shoulder": SegmentDefinition(
             name="left_shoulder",
             parent="thorax",
-            mass_ratio=0.014205,
+            mass_ratio=0.014,
             length_ratio=0.06,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -305,7 +305,7 @@ def _shoulder_segments() -> dict[str, SegmentDefinition]:
         "right_shoulder": SegmentDefinition(
             name="right_shoulder",
             parent="thorax",
-            mass_ratio=0.014205,
+            mass_ratio=0.014,
             length_ratio=0.06,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -322,7 +322,7 @@ def _arm_segments() -> dict[str, SegmentDefinition]:
         "left_upper_arm": SegmentDefinition(
             name="left_upper_arm",
             parent="left_shoulder",
-            mass_ratio=0.025568,
+            mass_ratio=0.026,
             length_ratio=0.186,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -333,7 +333,7 @@ def _arm_segments() -> dict[str, SegmentDefinition]:
         "right_upper_arm": SegmentDefinition(
             name="right_upper_arm",
             parent="right_shoulder",
-            mass_ratio=0.025568,
+            mass_ratio=0.026,
             length_ratio=0.186,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -344,7 +344,7 @@ def _arm_segments() -> dict[str, SegmentDefinition]:
         "left_forearm": SegmentDefinition(
             name="left_forearm",
             parent="left_upper_arm",
-            mass_ratio=0.015152,
+            mass_ratio=0.015,
             length_ratio=0.146,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -355,7 +355,7 @@ def _arm_segments() -> dict[str, SegmentDefinition]:
         "right_forearm": SegmentDefinition(
             name="right_forearm",
             parent="right_upper_arm",
-            mass_ratio=0.015152,
+            mass_ratio=0.015,
             length_ratio=0.146,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -424,7 +424,7 @@ def _leg_segments() -> dict[str, SegmentDefinition]:
         "left_thigh": SegmentDefinition(
             name="left_thigh",
             parent="left_hip",
-            mass_ratio=0.134470,
+            mass_ratio=0.134,
             length_ratio=0.245,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -435,7 +435,7 @@ def _leg_segments() -> dict[str, SegmentDefinition]:
         "right_thigh": SegmentDefinition(
             name="right_thigh",
             parent="right_hip",
-            mass_ratio=0.134470,
+            mass_ratio=0.134,
             length_ratio=0.245,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -446,7 +446,7 @@ def _leg_segments() -> dict[str, SegmentDefinition]:
         "left_shin": SegmentDefinition(
             name="left_shin",
             parent="left_thigh",
-            mass_ratio=0.040720,
+            mass_ratio=0.041,
             length_ratio=0.246,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -457,7 +457,7 @@ def _leg_segments() -> dict[str, SegmentDefinition]:
         "right_shin": SegmentDefinition(
             name="right_shin",
             parent="right_thigh",
-            mass_ratio=0.040720,
+            mass_ratio=0.041,
             length_ratio=0.246,
             visual_geometry=GeometrySpec(
                 GeometryType.CAPSULE,
@@ -468,7 +468,7 @@ def _leg_segments() -> dict[str, SegmentDefinition]:
         "left_foot": SegmentDefinition(
             name="left_foot",
             parent="left_shin",
-            mass_ratio=0.013258,
+            mass_ratio=0.013,
             length_ratio=0.152,
             visual_geometry=GeometrySpec(
                 GeometryType.BOX,
@@ -480,7 +480,7 @@ def _leg_segments() -> dict[str, SegmentDefinition]:
         "right_foot": SegmentDefinition(
             name="right_foot",
             parent="right_shin",
-            mass_ratio=0.013258,
+            mass_ratio=0.013,
             length_ratio=0.152,
             visual_geometry=GeometrySpec(
                 GeometryType.BOX,
