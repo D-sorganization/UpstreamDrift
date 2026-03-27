@@ -193,8 +193,12 @@ class MuscleDrivenEnv:
             Observation: [q, v, a_1, ..., a_n]
         """
         obs = [self.q, self.v]
-        for muscle_name in sorted(self._get_muscle_names()):
-            obs.append(self.muscle_activations.get(muscle_name, 0.0))
+        obs.extend(
+            [
+                self.muscle_activations.get(muscle_name, 0.0)
+                for muscle_name in sorted(self._get_muscle_names())
+            ]
+        )
 
         return np.array(obs, dtype=np.float32)
 

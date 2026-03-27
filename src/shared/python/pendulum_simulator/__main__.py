@@ -15,6 +15,8 @@ from PyQt6.QtWidgets import QApplication, QComboBox, QDoubleSpinBox, QSpinBox
 from .gui import MainWindow
 from .gui.diagnostics import get_tracker
 
+logger = logging.getLogger(__name__)
+
 
 class _WheelBlockFilter(QObject):
     """Global event filter: blocks wheel on value-inputs, Ctrl+Wheel zooms fonts.

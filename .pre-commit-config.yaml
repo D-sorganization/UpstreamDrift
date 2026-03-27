@@ -105,6 +105,13 @@ repos:
             src/legacy/|
             src/experimental/|
             src/shared/python/pendulum_simulator/|
+            src/shared/python/plotting/|
+            src/shared/python/ui/|
+            src/launchers/|
+            src/engines/Simscape_Multibody_Models/|
+            src/engines/physics_engines/drake/python/src/|
+            src/engines/physics_engines/mujoco/python/humanoid_launcher|
+            src/engines/physics_engines/pinocchio/python/pinocchio_golf/|
             __pycache__/|
             \.pytest_cache/|
             \.venv/|

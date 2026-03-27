@@ -233,8 +233,12 @@ class ProvenanceInfo:
         # Analysis parameters
         if self.parameters:
             lines.append("# Analysis parameters:")
-            for key, value in sorted(self.parameters.items()):
-                lines.append(f"#   {key}: {value}")
+            lines.extend(
+                [
+                    f"#   {key}: {value}"
+                    for (key, value) in sorted(self.parameters.items())
+                ]
+            )
 
         # Environment
         lines.append("# Environment:")

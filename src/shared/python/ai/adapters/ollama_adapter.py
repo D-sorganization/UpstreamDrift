@@ -382,13 +382,15 @@ class OllamaAdapter(BaseAgentAdapter):
         )
 
         # Add conversation history
-        for msg in context.messages:
-            messages.append(
+        messages.extend(
+            [
                 {
                     "role": msg.role if msg.role != "tool" else "assistant",
                     "content": msg.content,
                 }
-            )
+                for msg in context.messages
+            ]
+        )
 
         # Add current message
         messages.append(
@@ -419,14 +421,16 @@ class OllamaAdapter(BaseAgentAdapter):
         # Parse tool calls if present (model-dependent)
         tool_calls: list[ToolCall] = []
         if "tool_calls" in message:
-            for tc in message["tool_calls"]:
-                tool_calls.append(
+            tool_calls.extend(
+                [
                     ToolCall(
                         id=tc.get("id", f"tc_{len(tool_calls)}"),
                         name=tc.get("function", {}).get("name", ""),
                         arguments=tc.get("function", {}).get("arguments", {}),
                     )
-                )
+                    for tc in message["tool_calls"]
+                ]
+            )
 
         # Extract usage if available
         usage: dict[str, int] = {}

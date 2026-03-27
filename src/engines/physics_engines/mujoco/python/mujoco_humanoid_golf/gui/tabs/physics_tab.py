@@ -258,8 +258,8 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _add_linkage_mechanism_configs(self) -> None:
         """Add linkage mechanism configs from the catalog."""
-        for mech_name, mech_config in LINKAGE_CATALOG.items():
-            self.model_configs.append(
+        self.model_configs.extend(
+            [
                 {
                     "name": mech_name.lower()
                     .replace(" ", "_")
@@ -271,7 +271,9 @@ class PhysicsTab(QtWidgets.QWidget):
                     "category": mech_config.get("category", "Mechanisms"),
                     "description": mech_config.get("description", ""),
                 }
-            )
+                for (mech_name, mech_config) in LINKAGE_CATALOG.items()
+            ]
+        )
 
     def _load_shared_urdfs(self) -> None:
         """Load URDF models from shared/urdf directory."""

@@ -123,7 +123,7 @@ class SecurityManager:
             raise ValueError("password must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
-        return hashed.decode("utf-8")
+        return hashed.decode("utf-8")  # type: ignore[no-any-return]
 
     @precondition(
         lambda self, plain_password, hashed_password: (
@@ -148,7 +148,7 @@ class SecurityManager:
             True if password matches, False otherwise
         """
         try:
-            return bcrypt.checkpw(
+            return bcrypt.checkpw(  # type: ignore[no-any-return]
                 plain_password.encode("utf-8"), hashed_password.encode("utf-8")
             )
         except (ValueError, TypeError):
@@ -275,7 +275,7 @@ class SecurityManager:
             raise ValueError("api_key must be provided")
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
-        return hashed.decode("utf-8")
+        return hashed.decode("utf-8")  # type: ignore[no-any-return]
 
     def verify_api_key(self, api_key: str, hashed_key: str) -> bool:
         """Verify an API key against its hash.
@@ -288,7 +288,9 @@ class SecurityManager:
             True if key matches, False otherwise
         """
         try:
-            return bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
+            return bcrypt.checkpw(  # type: ignore[no-any-return]
+                api_key.encode("utf-8"), hashed_key.encode("utf-8")
+            )
         except (ValueError, TypeError):
             return False
 

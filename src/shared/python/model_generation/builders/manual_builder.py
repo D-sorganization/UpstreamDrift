@@ -366,10 +366,12 @@ class ManualBuilder(BaseURDFBuilder):
         )
 
         # Copy links and joints
-        for link in self._links:
-            new_builder._links.append(Link.from_dict(link.to_dict()))
-        for joint in self._joints:
-            new_builder._joints.append(Joint.from_dict(joint.to_dict()))
+        new_builder._links.extend(
+            [Link.from_dict(link.to_dict()) for link in self._links]
+        )
+        new_builder._joints.extend(
+            [Joint.from_dict(joint.to_dict()) for joint in self._joints]
+        )
         new_builder._materials = self._materials.copy()
 
         # Mirror the copy

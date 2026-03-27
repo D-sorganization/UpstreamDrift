@@ -59,8 +59,7 @@ class EndEffector:
     def get_all_link_names(self) -> list[str]:
         """Get names of all links in this end effector."""
         names = [self.link_element.get("name", "")]
-        for link in self.child_links:
-            names.append(link.get("name", ""))
+        names.extend([link.get("name", "") for link in self.child_links])
         return names
 
     def get_attachment_joint_type(self) -> str:
@@ -196,13 +195,21 @@ class EndEffectorLibrary:
 
         # Parse child links
         child_links = []
-        for link_xml in definition["child_links"]:
-            child_links.append(DefusedET.fromstring(link_xml.strip()))
+        child_links.extend(
+            [
+                DefusedET.fromstring(link_xml.strip())
+                for link_xml in definition["child_links"]
+            ]
+        )
 
         # Parse child joints
         child_joints = []
-        for joint_xml in definition["child_joints"]:
-            child_joints.append(DefusedET.fromstring(joint_xml.strip()))
+        child_joints.extend(
+            [
+                DefusedET.fromstring(joint_xml.strip())
+                for joint_xml in definition["child_joints"]
+            ]
+        )
 
         return EndEffector(
             name=definition["name"],
@@ -896,12 +903,10 @@ class EndEffectorManagerWidget(QWidget):
                         child.set("link", name_mapping[old_link])
 
         # Add links to model
-        for link in links:
-            root.append(link)
+        root.extend([link for link in links])  # noqa: C416
 
         # Add joints to model
-        for joint in joints:
-            root.append(joint)
+        root.extend([joint for joint in joints])  # noqa: C416
 
         # Create attachment joint
         ee_root_name = links[0].get("name", "end_effector")

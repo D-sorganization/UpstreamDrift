@@ -118,10 +118,12 @@ class XMLHighlighter(QSyntaxHighlighter):
             "mesh",
             "capsule",
         ]
-        for keyword in urdf_keywords:
-            self.highlighting_rules.append(
-                (QRegularExpression(rf"</?{keyword}\b"), urdf_format)
-            )
+        self.highlighting_rules.extend(
+            [
+                (QRegularExpression(f"</?{keyword}\\b"), urdf_format)
+                for keyword in urdf_keywords
+            ]
+        )
 
         # Numbers (orange)
         number_format = QTextCharFormat()

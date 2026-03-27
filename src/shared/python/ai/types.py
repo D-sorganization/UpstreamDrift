@@ -383,14 +383,16 @@ class ConversationContext:
 
             # Reconstruct tool calls
             tool_calls = []
-            for tc_data in m_data.get("tool_calls", []):
-                tool_calls.append(
+            tool_calls.extend(
+                [
                     ToolCall(
                         id=tc_data["id"],
                         name=tc_data["name"],
                         arguments=tc_data["arguments"],
                     )
-                )
+                    for tc_data in m_data.get("tool_calls", [])
+                ]
+            )
 
             messages.append(
                 Message(

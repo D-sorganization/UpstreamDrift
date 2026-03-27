@@ -53,8 +53,7 @@ class ModelRegistry:
             with open(full_config_path) as f:
                 data = yaml.safe_load(f)
 
-            for item in data.get("models", []):
-                self.models.append(ModelSpec(**item))
+            self.models.extend([ModelSpec(**item) for item in data.get("models", [])])
 
             self._loaded = True
             logger.info(f"Loaded {len(self.models)} models from registry")

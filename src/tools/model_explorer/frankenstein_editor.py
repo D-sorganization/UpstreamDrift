@@ -121,20 +121,16 @@ class URDFModel:
         root = ET.Element("robot", name=self.robot_name)
 
         # Add materials first
-        for material in self.materials.values():
-            root.append(copy.deepcopy(material))
+        root.extend([copy.deepcopy(material) for material in self.materials.values()])
 
         # Add links
-        for link in self.links.values():
-            root.append(copy.deepcopy(link))
+        root.extend([copy.deepcopy(link) for link in self.links.values()])
 
         # Add joints
-        for joint in self.joints.values():
-            root.append(copy.deepcopy(joint))
+        root.extend([copy.deepcopy(joint) for joint in self.joints.values()])
 
         # Add other elements
-        for elem in self.other_elements:
-            root.append(copy.deepcopy(elem))
+        root.extend([copy.deepcopy(elem) for elem in self.other_elements])
 
         ET.indent(root, space="  ")
         return ET.tostring(root, encoding="unicode", xml_declaration=True)
