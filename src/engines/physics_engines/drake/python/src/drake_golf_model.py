@@ -142,6 +142,9 @@ class GolfModelParams:
     # Default clubhead radius based on golf ball diameter approx
     clubhead_radius: float = GOLF_BALL_DIAMETER_M / 2.0 + 0.005  # Slight margin
 
+    # Optional exercise type to apply joint limit overrides
+    exercise_type: str | None = None
+
 
 # -----------------------------
 # URDF Generation
@@ -195,8 +198,6 @@ class GolfURDFGenerator:
         """Initialize the generator with parameters."""
         if not (params is not None):
             raise ValueError("params must be provided")
-        if not (params is not None):
-            raise ValueError("params must be provided")
         self.params = params
         self.root = ET.Element("robot", name="golf_swing_model")
         self.materials: set[str] = set()
@@ -204,6 +205,40 @@ class GolfURDFGenerator:
 
         # Add basic material
         self._add_material("gray", "0.5 0.5 0.5 1.0")
+
+        self.limits_map: dict[str, list[float]] = {}
+        if self.params.exercise_type:
+            import yaml
+
+            p = Path(__file__).resolve().parents[5]
+            yaml_path = p / "pinocchio" / "models" / "spec" / "golfer_canonical.yaml"
+            if yaml_path.exists():
+                with yaml_path.open() as f:
+                    spec = yaml.safe_load(f)
+                profiles = spec.get("exercise_profiles", {})
+                profile = profiles.get(self.params.exercise_type, {})
+                overrides = profile.get("joint_limit_overrides", {})
+
+                if "lumbar_flexion" in overrides:
+                    self.limits_map["spine_universal_1"] = overrides["lumbar_flexion"]
+                    self.limits_map["spine_universal_2"] = overrides["lumbar_flexion"]
+                if "shoulder_flexion" in overrides:
+                    self.limits_map["left_shoulder_roll"] = overrides[
+                        "shoulder_flexion"
+                    ]
+                    self.limits_map["right_shoulder_roll"] = overrides[
+                        "shoulder_flexion"
+                    ]
+                if "shoulder_abduction" in overrides:
+                    self.limits_map["left_shoulder_pitch"] = overrides[
+                        "shoulder_abduction"
+                    ]
+                    self.limits_map["right_shoulder_pitch"] = overrides[
+                        "shoulder_abduction"
+                    ]
+                if "elbow_flexion" in overrides:
+                    self.limits_map["left_elbow"] = overrides["elbow_flexion"]
+                    self.limits_map["right_elbow"] = overrides["elbow_flexion"]
 
     def _add_material(self, name: str, rgba: str) -> None:
         """Add a material definition to the URDF."""
@@ -323,8 +358,6 @@ class GolfURDFGenerator:
         """Add a joint to the model."""
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         joint = ET.SubElement(self.root, "joint", name=name, type=joint_type)
         ET.SubElement(joint, "parent", link=parent)
         ET.SubElement(joint, "child", link=child)
@@ -333,6 +366,18 @@ class GolfURDFGenerator:
 
         if axis is not None:
             ET.SubElement(joint, "axis", xyz=self._np_to_str(axis))
+
+        # Apply limits if defined
+        if name in self.limits_map and joint_type in ("revolute", "prismatic"):
+            limits = self.limits_map[name]
+            ET.SubElement(
+                joint,
+                "limit",
+                lower=f"{limits[0]:.6g}",
+                upper=f"{limits[1]:.6g}",
+                effort="1000",
+                velocity="10",
+            )
 
     def _add_pelvis(self) -> None:
         """Add the pelvis link to the model."""
