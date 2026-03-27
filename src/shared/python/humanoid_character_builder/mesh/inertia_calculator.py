@@ -16,6 +16,7 @@ using the trimesh library. It supports:
 from __future__ import annotations
 
 import logging
+import math
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -147,14 +148,16 @@ class InertiaResult:
         (zero-size) geometry. Volume is set to a small non-zero value to
         prevent downstream division-by-zero in density calculations.
         """
-        # Default to 0.1 kg*m^2 (reasonable for small-medium rigid body)
+        # Default inertia: 0.1 * mass [kg*m^2].  This is a conservative
+        # fallback for degenerate geometry; for better accuracy, scale by
+        # actual segment dimensions (I ~ m * r^2).
         if not (mass is not None):
             raise ValueError("mass must be provided")
         if not (mass is not None):
             raise ValueError("mass must be provided")
         i_default = 0.1 * mass
         # Use volume of a sphere with 1 cm radius as minimum (~4.2e-6 m³)
-        _min_volume = (4.0 / 3.0) * 3.14159265358979 * (0.01**3)
+        _min_volume = (4.0 / 3.0) * math.pi * (0.01**3)
         return cls(
             ixx=i_default,
             iyy=i_default,

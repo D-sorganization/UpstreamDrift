@@ -187,7 +187,8 @@ class BandwidthLimitedNoise(NoiseModel):
     Attributes:
         cutoff_frequency: Filter cutoff frequency [Hz].
         sample_rate: Sampling rate [Hz].
-        order: Filter order.
+        order: Filter order (currently unused; only first-order IIR
+            is implemented).
     """
 
     cutoff_frequency: float = 100.0
