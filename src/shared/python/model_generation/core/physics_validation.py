@@ -101,7 +101,9 @@ class PhysicsValidator:
         Args:
             gravity: Gravity vector [m/s²] (default: [0, 0, -9.80665])
         """
-        self.gravity = gravity if gravity is not None else np.array([0.0, 0.0, -9.80665])
+        self.gravity = (
+            gravity if gravity is not None else np.array([0.0, 0.0, -9.80665])
+        )
         self._validator = Validator()
 
     def validate_inertia_tensor(

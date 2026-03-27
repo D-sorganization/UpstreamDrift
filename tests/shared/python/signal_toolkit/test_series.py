@@ -91,7 +91,7 @@ class TestTaylorSeriesContract:
         taylor_func = expansion.taylor_series(f, center=0, n_terms=5)
 
         result = taylor_func(1.0)
-        assert isinstance(result, (int, float, np.floating))
+        assert isinstance(result, int | float | np.floating)
 
     def test_callable_accepts_array(self) -> None:
         """Postcondition: Returned function accepts array input."""
@@ -590,7 +590,7 @@ class TestErrorBounds:
             f=np.exp, center=0, x_test=1.0, n_terms=10
         )
 
-        assert isinstance(bound, (int, float, np.floating))
+        assert isinstance(bound, int | float | np.floating)
 
     def test_error_bound_is_non_negative(self) -> None:
         """Postcondition: Error bound is non-negative."""
@@ -677,7 +677,7 @@ class TestSeriesResult:
         result = expansion.get_series_result(np.cos, center=0, n_terms=10)
 
         assert callable(result.function)
-        assert isinstance(result.function(0.5), (int, float, np.floating))
+        assert isinstance(result.function(0.5), int | float | np.floating)
 
 
 # =============================================================================

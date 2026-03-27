@@ -209,14 +209,14 @@ async def get_analysis_statistics(
         scalar_keys: set[str] = set()
         for snapshot in history:
             for key, value in snapshot.items():
-                if isinstance(value, (int, float)) and not math.isnan(value):
+                if isinstance(value, int | float) and not math.isnan(value):
                     scalar_keys.add(key)
 
         for key in sorted(scalar_keys):
             values = []
             for snapshot in history:
                 val = snapshot.get(key)
-                if isinstance(val, (int, float)) and not math.isnan(val):
+                if isinstance(val, int | float) and not math.isnan(val):
                     values.append(float(val))
 
             if not values:
@@ -303,7 +303,7 @@ async def export_analysis_data(
                 all_keys: set[str] = set()
                 for snapshot in filtered:
                     for key, value in snapshot.items():
-                        if isinstance(value, (int, float)):
+                        if isinstance(value, int | float):
                             all_keys.add(key)
 
                 fieldnames = sorted(all_keys)
@@ -313,7 +313,7 @@ async def export_analysis_data(
                     row = {}
                     for key in fieldnames:
                         val = snapshot.get(key)
-                        if isinstance(val, (int, float)):
+                        if isinstance(val, int | float):
                             row[key] = val
                     writer.writerow(row)
 

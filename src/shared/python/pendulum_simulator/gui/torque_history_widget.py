@@ -259,7 +259,7 @@ class TorqueHistoryWidget(QWidget):
 
         # Detect DOF count from first sample
         sample = result.torques_at(0)
-        if isinstance(sample, (tuple, list)):
+        if isinstance(sample, tuple | list):
             n_joints = len(sample)
         elif isinstance(sample, np.ndarray):
             n_joints = sample.shape[0]

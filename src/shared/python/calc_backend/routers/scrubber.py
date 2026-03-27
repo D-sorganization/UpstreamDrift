@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/calc/scrubber", tags=["scrubber"])
 
 def _as_float(value: Any, field_name: str) -> float:
     """Convert calculator outputs to float for strict response contracts."""
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return float(value)
     if isinstance(value, str):
         try:

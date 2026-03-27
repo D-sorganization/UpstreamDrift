@@ -33,7 +33,7 @@ class AnalyticalPendulum:
         h = L * (1 - cos(theta))
         """
         assert theta is not None, "theta must be provided"
-        assert isinstance(theta, (int, float)), "theta must be a number"
+        assert isinstance(theta, int | float), "theta must be a number"
         h = self.L * (1.0 - np.cos(theta))
         return float(self.m * self.g * h)
 
@@ -48,8 +48,8 @@ class AnalyticalPendulum:
         """Calculate total mechanical energy."""
         assert theta is not None, "theta must be provided"
         assert omega is not None, "omega must be provided"
-        assert isinstance(theta, (int, float)), "theta must be a number"
-        assert isinstance(omega, (int, float)), "omega must be a number"
+        assert isinstance(theta, int | float), "theta must be a number"
+        assert isinstance(omega, int | float), "omega must be a number"
         return self.potential_energy(theta) + self.kinetic_energy(omega)
 
 
@@ -68,8 +68,8 @@ class AnalyticalBallistic:
         """
         assert height is not None, "height must be provided"
         assert velocity is not None, "velocity must be provided"
-        assert isinstance(height, (int, float)), "height must be numeric"
-        assert isinstance(velocity, (int, float)), "velocity must be numeric"
+        assert isinstance(height, int | float), "height must be numeric"
+        assert isinstance(velocity, int | float), "velocity must be numeric"
         pe = self.m * self.g * height
         ke = 0.5 * self.m * velocity**2
         return pe + ke
