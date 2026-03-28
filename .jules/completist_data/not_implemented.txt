@@ -1,11 +1,11 @@
 ./src/api/middleware/error_handler.py:27:    - NotImplementedError -> 501 Not Implemented
 ./src/api/middleware/error_handler.py:47:            except NotImplementedError as e:
-./src/api/middleware/error_handler.py:67:        except NotImplementedError as e:
+./src/api/middleware/error_handler.py:69:        except NotImplementedError as e:
 ./src/launchers/cross_engine_dashboard.py:277:        raise NotImplementedError(
 ./src/launchers/base.py:98:    NotImplementedError at runtime.
-./src/shared/python/engine_core/base_physics_engine.py:402:            except (NotImplementedError, AttributeError):
+./src/shared/python/engine_core/base_physics_engine.py:404:            except (NotImplementedError, AttributeError):
 ./src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
-./src/engines/physics_engines/opensim/python/opensim_gui.py:302:        except NotImplementedError as e:
+./src/engines/physics_engines/opensim/python/opensim_gui.py:300:        except NotImplementedError as e:
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
@@ -36,18 +36,18 @@
 ./tests/integration/test_physics_interfaces.py:122:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:123:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
 ./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:7:          NotImplementedError for simulation/loopback backends
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:208:# Issue #1778 – RealTimeController must not raise NotImplementedError for
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:216:    The issue reports NotImplementedError being raised on first control loop
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:235:        """_read_state must not raise NotImplementedError for SIMULATION."""
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:251:        """_send_command must not raise NotImplementedError for SIMULATION."""
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:264:        """_read_state must not raise NotImplementedError for LOOPBACK."""
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:270:        """_send_command must not raise NotImplementedError for LOOPBACK."""
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:345:        NotImplementedError (which crashes the first control loop iteration),
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:365:        # Must return a stub state without raising NotImplementedError
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:375:        than raising NotImplementedError.
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:395:        # Must not raise NotImplementedError
-./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:399:        """Full control loop must complete without NotImplementedError for simulation."""
-./tests/unit/test_third_party_integration_audit.py:240:        """compute_contact_forces must raise NotImplementedError (not fake zeros)."""
-./tests/unit/test_third_party_integration_audit.py:258:            with pytest.raises(NotImplementedError):
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:214:# Issue #1778 – RealTimeController must not raise NotImplementedError for
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:222:    The issue reports NotImplementedError being raised on first control loop
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:241:        """_read_state must not raise NotImplementedError for SIMULATION."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:257:        """_send_command must not raise NotImplementedError for SIMULATION."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:270:        """_read_state must not raise NotImplementedError for LOOPBACK."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:276:        """_send_command must not raise NotImplementedError for LOOPBACK."""
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:351:        NotImplementedError (which crashes the first control loop iteration),
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:371:        # Must return a stub state without raising NotImplementedError
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:381:        than raising NotImplementedError.
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:401:        # Must not raise NotImplementedError
+./tests/unit/test_issue_fixes_1777_1778_1779_1782.py:405:        """Full control loop must complete without NotImplementedError for simulation."""
+./tests/unit/test_third_party_integration_audit.py:242:        """compute_contact_forces must raise NotImplementedError (not fake zeros)."""
+./tests/unit/test_third_party_integration_audit.py:260:            with pytest.raises(NotImplementedError):
 ./tests/tools/test_code_quality_check.py:89:    lines = ["    raise NotImplementedError"]
 ./tests/tools/test_code_quality_check.py:91:    assert any("NotImplementedError" in i[1] for i in issues)

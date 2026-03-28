@@ -634,7 +634,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         passive_forces = analyzer.get_passive_muscle_forces()
         moment_arms = analyzer.get_moment_arms()
 
-        n_u = self._model.getNumSpeeds()
+        n_u = self._model.getNumSpeeds()  # type: ignore
         active_tau = np.zeros(n_u)
         passive_tau = np.zeros(n_u)
 
