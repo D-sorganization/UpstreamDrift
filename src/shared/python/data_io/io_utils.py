@@ -73,8 +73,6 @@ def ensure_directory(path: Path | str, parents: bool = True) -> Path:
     """
     if not (path is not None):
         raise ValueError("path must be provided")
-    if not (path is not None):
-        raise ValueError("path must be provided")
     dir_path = Path(path)
     dir_path.mkdir(parents=parents, exist_ok=True)
     return dir_path
@@ -148,8 +146,6 @@ def save_json(
         save_json("output.json", {"key": "value"})
         save_json("data.json", results, indent=4, sort_keys=True)
     """
-    if not (path is not None):
-        raise ValueError("path must be provided")
     if not (path is not None):
         raise ValueError("path must be provided")
     file_path = Path(path)
@@ -326,8 +322,6 @@ def write_text(
     Example:
         write_text("output.txt", "Hello, World!")
     """
-    if not (path is not None):
-        raise ValueError("path must be provided")
     if not (path is not None):
         raise ValueError("path must be provided")
     file_path = Path(path)

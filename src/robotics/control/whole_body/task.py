@@ -175,8 +175,6 @@ def create_com_task(
     """
     if not (jacobian_com is not None):
         raise ValueError("jacobian_com must be provided")
-    if not (jacobian_com is not None):
-        raise ValueError("jacobian_com must be provided")
     if gains is None:
         gains = TaskGains(weight=1.0, priority=2, gain_p=100.0, gain_d=20.0)
 
@@ -229,8 +227,6 @@ def create_posture_task(
     Returns:
         Task configured for posture regularization.
     """
-    if not (n_v is not None):
-        raise ValueError("n_v must be provided")
     if not (n_v is not None):
         raise ValueError("n_v must be provided")
     if gains is None:
@@ -299,8 +295,6 @@ def create_ee_task(
     """
     if not (jacobian_ee is not None):
         raise ValueError("jacobian_ee must be provided")
-    if not (jacobian_ee is not None):
-        raise ValueError("jacobian_ee must be provided")
     if gains is None:
         gains = TaskGains(weight=1.0, priority=3, gain_p=100.0, gain_d=20.0)
 
@@ -362,8 +356,6 @@ def create_contact_constraint(
     """
     if not (jacobian_contact is not None):
         raise ValueError("jacobian_contact must be provided")
-    if not (jacobian_contact is not None):
-        raise ValueError("jacobian_contact must be provided")
     jacobian_contact = np.asarray(jacobian_contact, dtype=np.float64)
     task_dim = jacobian_contact.shape[0]
 
@@ -410,8 +402,6 @@ def create_joint_limit_task(
     Returns:
         Task for limit avoidance, or None if not near limits.
     """
-    if not (n_v is not None):
-        raise ValueError("n_v must be provided")
     if not (n_v is not None):
         raise ValueError("n_v must be provided")
     q_current = np.asarray(q_current, dtype=np.float64)[:n_v]

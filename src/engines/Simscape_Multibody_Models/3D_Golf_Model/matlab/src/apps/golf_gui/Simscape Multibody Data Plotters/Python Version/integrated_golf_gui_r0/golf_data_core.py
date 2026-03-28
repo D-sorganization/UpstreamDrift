@@ -769,8 +769,6 @@ class GeometryUtils:
         return R.astype(np.float32)
 
     @staticmethod
-    @jit(nopython=True, fastmath=True)  # noqa: F821
-    @jit(nopython=True, fastmath=True)  # noqa: F821
     def create_cylinder_mesh(
         radius: float = 1.0, height: float = 1.0, segments: int = 16
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -812,9 +810,6 @@ class GeometryUtils:
         )
 
     @staticmethod
-    @jit(nopython=True, fastmath=True)  # noqa: F821
-    @jit(nopython=True, fastmath=True)  # noqa: F821
-    @jit(nopython=True, fastmath=True)  # noqa: F821
     def create_sphere_mesh(
         radius: float = 1.0, lat_segments: int = 12, lon_segments: int = 16
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -858,10 +853,6 @@ class GeometryUtils:
         )
 
     @staticmethod
-    @jit(nopython=True, fastmath=True)  # noqa: F821
-    @jit(nopython=True, fastmath=True)  # noqa: F821
-    @jit(nopython=True, fastmath=True)  # noqa: F821
-    @jit(nopython=True, fastmath=True)  # noqa: F821
     def create_arrow_mesh(
         shaft_radius: float = 0.01,
         shaft_length: float = 0.8,

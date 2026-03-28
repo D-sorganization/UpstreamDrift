@@ -139,8 +139,6 @@ class EngineCapabilities:
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         level_map = {
             "full": CapabilityLevel.FULL,
             "partial": CapabilityLevel.PARTIAL,

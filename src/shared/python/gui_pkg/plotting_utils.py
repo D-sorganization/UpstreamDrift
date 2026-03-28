@@ -58,8 +58,6 @@ def create_figure(
     """
     if not (figsize is not None):
         raise ValueError("figsize must be provided")
-    if not (figsize is not None):
-        raise ValueError("figsize must be provided")
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, **kwargs)
     logger.debug(f"Created figure with size {figsize}, {nrows}x{ncols} subplots")
     return fig, axes
@@ -85,8 +83,6 @@ def save_figure(
         save_figure(fig, "output/plot.png")
         save_figure(fig, "plot.pdf", dpi=600)
     """
-    if not (fig is not None):
-        raise ValueError("fig must be provided")
     if not (fig is not None):
         raise ValueError("fig must be provided")
     path_obj = Path(path)
@@ -135,8 +131,6 @@ def format_axis(
     Example:
         format_axis(ax, xlabel="Time [s]", ylabel="Position [m]", title="Trajectory")
     """
-    if not (ax is not None):
-        raise ValueError("ax must be provided")
     if not (ax is not None):
         raise ValueError("ax must be provided")
     if xlabel:
@@ -196,8 +190,6 @@ def plot_multiple_time_series(
     """
     if not (ax is not None):
         raise ValueError("ax must be provided")
-    if not (ax is not None):
-        raise ValueError("ax must be provided")
     for label, data in data_dict.items():
         ax.plot(time, data, label=label, **kwargs)
     ax.legend()
@@ -229,8 +221,6 @@ def create_comparison_plot(
     Example:
         fig, ax = create_comparison_plot(time, measured, simulated)
     """
-    if not (time is not None):
-        raise ValueError("time must be provided")
     if not (time is not None):
         raise ValueError("time must be provided")
     fig, ax = create_figure(**kwargs)
@@ -266,8 +256,6 @@ def create_error_plot(
     """
     if not (time is not None):
         raise ValueError("time must be provided")
-    if not (time is not None):
-        raise ValueError("time must be provided")
     fig, ax = create_figure(**kwargs)
     error = data1 - data2
     ax.plot(time, error)
@@ -300,8 +288,6 @@ def create_subplot_grid(
         for ax in axes.flat:
             ax.plot(data)
     """
-    if not (nrows is not None):
-        raise ValueError("nrows must be provided")
     if not (nrows is not None):
         raise ValueError("nrows must be provided")
     if figsize is None:

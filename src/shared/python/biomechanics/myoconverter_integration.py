@@ -290,8 +290,6 @@ class MyoConverter:
         """
         if not (model_path is not None):
             raise ValueError("model_path must be provided")
-        if not (model_path is not None):
-            raise ValueError("model_path must be provided")
         code = f"""import mujoco
 
 # Load converted model
@@ -335,8 +333,6 @@ mujoco.mj_resetDataKeyframe(model, data, 0)
         """
         # This would require implementing validation logic
         # For now, just check if files exist
-        if not (mujoco_xml is not None):
-            raise ValueError("mujoco_xml must be provided")
         if not (mujoco_xml is not None):
             raise ValueError("mujoco_xml must be provided")
         if not mujoco_xml.exists():

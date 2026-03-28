@@ -258,8 +258,6 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
         """
         if not (file_path is not None):
             raise ValueError("file_path must be provided")
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
         valid_engines = ["mujoco", "drake", "pinocchio"]
         if engine.lower() not in valid_engines:
             return {
@@ -314,8 +312,6 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
         # Typical ranges for golf swing (approximate)
         if not (shoulder_torque is not None):
             raise ValueError("shoulder_torque must be provided")
-        if not (shoulder_torque is not None):
-            raise ValueError("shoulder_torque must be provided")
         ranges = {
             "shoulder": {"low": 40, "typical": 80, "high": 150, "unit": "N·m"},
             "hip": {"low": 60, "typical": 120, "high": 200, "unit": "N·m"},
@@ -324,8 +320,6 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
 
         def classify(value: float, range_info: dict[str, Any]) -> str:
             """Classify a torque value relative to its typical range."""
-            if not (value is not None):
-                raise ValueError("value must be provided")
             if not (value is not None):
                 raise ValueError("value must be provided")
             if value < range_info["low"]:
@@ -386,8 +380,6 @@ def _register_explain_concept_tool(registry: ToolRegistry) -> None:
         Returns:
             Explanation at appropriate level.
         """
-        if not (term is not None):
-            raise ValueError("term must be provided")
         if not (term is not None):
             raise ValueError("term must be provided")
         edu = _get_education_system()

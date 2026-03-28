@@ -274,8 +274,6 @@ class SwingOptimizer(ContractChecker):
         """
         if not (golfer is not None):
             raise ValueError("golfer must be provided")
-        if not (golfer is not None):
-            raise ValueError("golfer must be provided")
         self.golfer = golfer
         self.club = club
         self.config = config or OptimizationConfig()
@@ -391,8 +389,6 @@ class SwingOptimizer(ContractChecker):
         """Execute the scipy minimization and return raw result + iterations."""
         if not (x0 is not None):
             raise ValueError("x0 must be provided")
-        if not (x0 is not None):
-            raise ValueError("x0 must be provided")
         bounds = self._get_bounds()
         constraints = self._build_constraints()
 
@@ -430,8 +426,6 @@ class SwingOptimizer(ContractChecker):
         computation_time: float,
     ) -> OptimizationResult:
         """Extract trajectory and metrics from a successful optimization."""
-        if not (iterations is not None):
-            raise ValueError("iterations must be provided")
         if not (iterations is not None):
             raise ValueError("iterations must be provided")
         trajectory = self._vector_to_trajectory(result.x)
@@ -491,8 +485,6 @@ class SwingOptimizer(ContractChecker):
         Returns:
             List of OptimizationResults representing the Pareto frontier
         """
-        if not (n_points is not None):
-            raise ValueError("n_points must be provided")
         if not (n_points is not None):
             raise ValueError("n_points must be provided")
         results = []
@@ -562,16 +554,12 @@ class SwingOptimizer(ContractChecker):
         """Convert a SwingTrajectory to optimization vector."""
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         angles = np.array([trajectory.joint_angles[j] for j in self.JOINTS])
         velocities = np.array([trajectory.joint_velocities[j] for j in self.JOINTS])
         return np.concatenate([angles.flatten(), velocities.flatten()])
 
     def _vector_to_trajectory(self, x: np.ndarray) -> SwingTrajectory:
         """Convert optimization vector to SwingTrajectory."""
-        if not (x is not None):
-            raise ValueError("x must be provided")
         if not (x is not None):
             raise ValueError("x must be provided")
         n_joints = len(self.JOINTS)
@@ -617,8 +605,6 @@ class SwingOptimizer(ContractChecker):
         time: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Compute clubhead position and velocity from joint angles."""
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
         if not (joint_angles is not None):
             raise ValueError("joint_angles must be provided")
         n_frames = len(time)
@@ -697,8 +683,6 @@ class SwingOptimizer(ContractChecker):
         """Constraint: torques must be within limits."""
         if not (x is not None):
             raise ValueError("x must be provided")
-        if not (x is not None):
-            raise ValueError("x must be provided")
         trajectory = self._vector_to_trajectory(x)
         violations = []
 
@@ -712,8 +696,6 @@ class SwingOptimizer(ContractChecker):
 
     def _kinematic_sequence_constraint(self, x: np.ndarray) -> np.ndarray:
         """Constraint: enforce proximal-to-distal sequencing."""
-        if not (x is not None):
-            raise ValueError("x must be provided")
         if not (x is not None):
             raise ValueError("x must be provided")
         trajectory = self._vector_to_trajectory(x)
@@ -748,8 +730,6 @@ class SwingOptimizer(ContractChecker):
         """Compute the weighted objective function."""
         if not (x is not None):
             raise ValueError("x must be provided")
-        if not (x is not None):
-            raise ValueError("x must be provided")
         trajectory = self._vector_to_trajectory(x)
         objective = 0.0
 
@@ -778,8 +758,6 @@ class SwingOptimizer(ContractChecker):
         """Compute simplified injury risk score (0-100)."""
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         risk = 0.0
 
         # Check joint velocities (high velocities = higher risk)
@@ -805,8 +783,6 @@ class SwingOptimizer(ContractChecker):
 
     def _compute_energy_cost(self, trajectory: SwingTrajectory) -> float:
         """Compute metabolic energy cost of the swing."""
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         total_work = 0.0
@@ -837,8 +813,6 @@ class SwingOptimizer(ContractChecker):
     def _compute_metrics(self, trajectory: SwingTrajectory) -> dict:
         """Compute all metrics for a trajectory."""
         # Clubhead speed at impact
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
         if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         clubhead_speed = trajectory.impact_speed

@@ -28,8 +28,6 @@ def get_logger(
     """
     if not (name is not None):
         raise ValueError("name must be provided")
-    if not (name is not None):
-        raise ValueError("name must be provided")
     logger = logging.getLogger(name)
     logger.setLevel(level)
 

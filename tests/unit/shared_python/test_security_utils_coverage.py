@@ -80,12 +80,12 @@ def test_validate_path_invalid_format() -> None:
 
     with (
         pytest.raises(ValueError, match="Invalid path format"),
-        patch.object(Path, "resolve", side_effect=Exception("Disk error")),
+        patch.object(Path, "resolve", side_effect=OSError("Disk error")),
     ):
         validate_path("some/path", [Path(".")])
 
     # Non-strict should return the input as Path
-    with patch.object(Path, "resolve", side_effect=Exception("Disk error")):
+    with patch.object(Path, "resolve", side_effect=OSError("Disk error")):
         result = validate_path("some/path", [Path(".")], strict=False)
         assert isinstance(result, Path)
         # Compare as Path for cross-platform compatibility (Windows uses backslashes)

@@ -69,8 +69,6 @@ class MockPhysicsEngine:
         """
         if not (model_path is not None):
             raise ValueError("model_path must be provided")
-        if not (model_path is not None):
-            raise ValueError("model_path must be provided")
         logger.info("MockPhysicsEngine: Loading model from %s", model_path)
         self._is_loaded = True
         self.model_name = model_path
@@ -139,8 +137,6 @@ class MockPhysicsEngine:
         """
         if not (positions is not None):
             raise ValueError("positions must be provided")
-        if not (positions is not None):
-            raise ValueError("positions must be provided")
         self._positions = np.array(positions)
         self._velocities = np.array(velocities)
         logger.debug("State set: pos=%s, vel=%s", positions, velocities)
@@ -184,8 +180,6 @@ class MockPhysicsEngine:
         Args:
             torques: Array of torque values
         """
-        if not (torques is not None):
-            raise ValueError("torques must be provided")
         if not (torques is not None):
             raise ValueError("torques must be provided")
         self._torques = np.array(torques)[: self.num_joints]
@@ -298,8 +292,6 @@ class MockPhysicsEngine:
         """
         if not (content is not None):
             raise ValueError("content must be provided")
-        if not (content is not None):
-            raise ValueError("content must be provided")
         self._is_loaded = True
         self.model_name = "mock_model"
 
@@ -340,8 +332,6 @@ class MockPhysicsEngine:
         """
         if not (qacc is not None):
             raise ValueError("qacc must be provided")
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
         M = self.compute_mass_matrix()
         bias = self.compute_bias_forces()
         return M @ qacc + bias
@@ -369,8 +359,6 @@ class MockPhysicsEngine:
         """
         if not (tau is not None):
             raise ValueError("tau must be provided")
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
         M = self.compute_mass_matrix()
         return np.linalg.solve(M, tau)
 
@@ -395,8 +383,6 @@ class MockPhysicsEngine:
         Returns:
             Acceleration with zero velocity.
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if not (q is not None):
             raise ValueError("q must be provided")
         M = self.compute_mass_matrix()

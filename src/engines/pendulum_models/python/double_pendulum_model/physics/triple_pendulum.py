@@ -428,8 +428,6 @@ class TriplePendulumDynamics:
 
         if not (_t is not None):
             raise ValueError("_t must be provided")
-        if not (_t is not None):
-            raise ValueError("_t must be provided")
 
         def rk4_increment(
             current_state: TriplePendulumState,

@@ -52,8 +52,6 @@ class ArrayDimensionError(GolfSuiteError):
     ) -> None:
         if not (array_name is not None):
             raise ValueError("array_name must be provided")
-        if not (array_name is not None):
-            raise ValueError("array_name must be provided")
         self.expected_shape = expected_shape
         self.actual_shape = actual_shape
 

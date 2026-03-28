@@ -106,15 +106,11 @@ class Sphere(GeometricPrimitive):
         """Check if point is inside sphere."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point)
         return float(np.linalg.norm(point - self.center)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
@@ -182,8 +178,6 @@ class Box(GeometricPrimitive):
         """Check if point is inside box."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point)
         # Transform to local frame
         local_point = self.rotation.T @ (point - self.center)
@@ -191,8 +185,6 @@ class Box(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
@@ -268,8 +260,6 @@ class Capsule(GeometricPrimitive):
         """Get closest point on capsule's central line segment."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         ab = self.point_b - self.point_a
         t = np.dot(point - self.point_a, ab) / (np.dot(ab, ab) + 1e-10)
         t = np.clip(t, 0.0, 1.0)
@@ -279,16 +269,12 @@ class Capsule(GeometricPrimitive):
         """Check if point is inside capsule."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
         return float(np.linalg.norm(point - closest)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
@@ -370,8 +356,6 @@ class Cylinder(GeometricPrimitive):
         """Check if point is inside cylinder."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point)
         # Project onto axis
         to_point = point - self.center
@@ -387,8 +371,6 @@ class Cylinder(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
@@ -458,8 +440,6 @@ class ConvexHull(GeometricPrimitive):
         """
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point)
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
@@ -475,8 +455,6 @@ class ConvexHull(GeometricPrimitive):
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
-        if not (direction is not None):
-            raise ValueError("direction must be provided")
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
@@ -512,8 +490,6 @@ def compute_primitive_distance(
     # Dispatch based on primitive types for specialized algorithms
     if not (prim_a is not None):
         raise ValueError("prim_a must be provided")
-    if not (prim_a is not None):
-        raise ValueError("prim_a must be provided")
     if isinstance(prim_a, Sphere) and isinstance(prim_b, Sphere):
         return _sphere_sphere_distance(prim_a, prim_b)
     if isinstance(prim_a, Sphere) and isinstance(prim_b, Capsule):
@@ -533,8 +509,6 @@ def _sphere_sphere_distance(
     sphere_b: Sphere,
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between two spheres."""
-    if not (sphere_a is not None):
-        raise ValueError("sphere_a must be provided")
     if not (sphere_a is not None):
         raise ValueError("sphere_a must be provided")
     diff = sphere_b.center - sphere_a.center
@@ -559,8 +533,6 @@ def _sphere_capsule_distance(
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Distance between sphere and capsule."""
     # Closest point on capsule axis to sphere center
-    if not (sphere is not None):
-        raise ValueError("sphere must be provided")
     if not (sphere is not None):
         raise ValueError("sphere must be provided")
     closest_on_axis = capsule._closest_point_on_segment(sphere.center)
@@ -592,8 +564,6 @@ def _capsule_capsule_distance(
     # Find closest points between line segments
     if not (cap_a is not None):
         raise ValueError("cap_a must be provided")
-    if not (cap_a is not None):
-        raise ValueError("cap_a must be provided")
     closest_a, closest_b = _closest_points_segments(
         cap_a.point_a, cap_a.point_b, cap_b.point_a, cap_b.point_b
     )
@@ -622,8 +592,6 @@ def _closest_points_segments(
     b1: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Find closest points between two line segments."""
-    if not (a0 is not None):
-        raise ValueError("a0 must be provided")
     if not (a0 is not None):
         raise ValueError("a0 must be provided")
     d1 = a1 - a0  # Direction of segment 1
@@ -678,8 +646,6 @@ def _gjk_distance(
     consider using a proper GJK library.
     """
     # Initial direction from A to B
-    if not (prim_a is not None):
-        raise ValueError("prim_a must be provided")
     if not (prim_a is not None):
         raise ValueError("prim_a must be provided")
     direction = prim_b.compute_support(np.array([1, 0, 0])) - prim_a.compute_support(

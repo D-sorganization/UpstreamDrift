@@ -167,8 +167,6 @@ class ScipyQPSolver(QPSolver):
         """
         if not (method is not None):
             raise ValueError("method must be provided")
-        if not (method is not None):
-            raise ValueError("method must be provided")
         self._method = method
         self._max_iter = max_iter
         self._available = self._check_available()
@@ -195,8 +193,6 @@ class ScipyQPSolver(QPSolver):
         Returns:
             QP solution.
         """
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
         if not (problem is not None):
             raise ValueError("problem must be provided")
         import time
@@ -258,8 +254,6 @@ class ScipyQPSolver(QPSolver):
     def _build_variable_bounds(self, problem: QPProblem):
         if not (problem is not None):
             raise ValueError("problem must be provided")
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
         from scipy.optimize import Bounds
 
         if problem.x_lb is None and problem.x_ub is None:
@@ -271,8 +265,6 @@ class ScipyQPSolver(QPSolver):
         return Bounds(lb, ub)
 
     def _build_constraints(self, problem: QPProblem) -> list[dict]:
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
         if not (problem is not None):
             raise ValueError("problem must be provided")
         constraints: list[dict] = []
@@ -296,8 +288,6 @@ class ScipyQPSolver(QPSolver):
         constraints: list[dict],
         problem: QPProblem,
     ) -> None:
-        if not (constraints is not None):
-            raise ValueError("constraints must be provided")
         if not (constraints is not None):
             raise ValueError("constraints must be provided")
         lb = (
@@ -345,8 +335,6 @@ class NullspaceQPSolver(QPSolver):
         """
         if not (regularization is not None):
             raise ValueError("regularization must be provided")
-        if not (regularization is not None):
-            raise ValueError("regularization must be provided")
         self._reg = regularization
 
     def is_available(self) -> bool:
@@ -364,8 +352,6 @@ class NullspaceQPSolver(QPSolver):
         Returns:
             QP solution.
         """
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
         if not (problem is not None):
             raise ValueError("problem must be provided")
         import time

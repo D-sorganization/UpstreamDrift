@@ -46,8 +46,9 @@ def test_mass_matrix_conditioning_fallback(caplog):
     """Test that a near-singular mass matrix triggers the Tikhonov regularization fallback."""
     if not OPENSIM_AVAILABLE:
         # Simple mock objects just to instantiate the analyzer
-        mock_model = MagicMock(spec=opensim.Model)
-        mock_state = MagicMock(spec=opensim.State)
+        # No spec= here: MockOpenSim.Model/State are empty stubs without getMuscles etc.
+        mock_model = MagicMock()
+        mock_state = MagicMock()
         mock_muscle_set = MagicMock()
         mock_model.getMuscles.return_value = mock_muscle_set
         mock_muscle_set.getSize.return_value = 0

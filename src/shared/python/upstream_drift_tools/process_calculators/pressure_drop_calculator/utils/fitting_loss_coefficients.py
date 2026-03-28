@@ -440,8 +440,6 @@ def calculate_fitting_pressure_drop(
     """
     if not (k_factor is not None):
         raise ValueError("k_factor must be provided")
-    if not (k_factor is not None):
-        raise ValueError("k_factor must be provided")
     velocity_pressure = 0.5 * density * velocity**2
     return k_factor * velocity_pressure
 

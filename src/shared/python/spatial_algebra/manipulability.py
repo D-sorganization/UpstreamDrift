@@ -144,8 +144,6 @@ def get_jacobian_conditioning(
     """
     if not (engine is not None):
         raise ValueError("engine must be provided")
-    if not (engine is not None):
-        raise ValueError("engine must be provided")
     jac_dict = engine.compute_jacobian(body_name)
 
     if jac_dict is None:

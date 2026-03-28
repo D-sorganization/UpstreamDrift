@@ -47,8 +47,6 @@ def create_png(
 
     if not (width is not None):
         raise ValueError("width must be provided")
-    if not (width is not None):
-        raise ValueError("width must be provided")
 
     def crc32(data: bytes) -> int:
         """Compute CRC-32 checksum for the given bytes."""
@@ -56,8 +54,6 @@ def create_png(
 
     def make_chunk(chunk_type: bytes, data: bytes) -> bytes:
         """Build a PNG chunk with type, data, length, and CRC."""
-        if not (chunk_type is not None):
-            raise ValueError("chunk_type must be provided")
         if not (chunk_type is not None):
             raise ValueError("chunk_type must be provided")
         chunk = chunk_type + data
@@ -91,8 +87,6 @@ def draw_rounded_rect_with_text(
     width: int, height: int, bg_color: tuple[int, int, int], text: str, radius: int = 20
 ) -> list[tuple[int, int, int, int]]:
     """Create a rounded rectangle with centered text."""
-    if not (width is not None):
-        raise ValueError("width must be provided")
     if not (width is not None):
         raise ValueError("width must be provided")
     pixels = []
@@ -161,8 +155,6 @@ def draw_rounded_rect_with_text(
 
 def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str) -> None:
     """Draw a simple blocky letter representation."""
-    if not (pixels is not None):
-        raise ValueError("pixels must be provided")
     if not (pixels is not None):
         raise ValueError("pixels must be provided")
     white = (255, 255, 255, 255)

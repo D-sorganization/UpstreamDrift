@@ -31,8 +31,6 @@ class MATLABQualityChecker:
     def __init__(self, project_root: Path) -> None:
         if not (project_root is not None):
             raise ValueError("project_root must be provided")
-        if not (project_root is not None):
-            raise ValueError("project_root must be provided")
         self.project_root = project_root
         self.matlab_dir = project_root / "matlab"
         self.results: dict[str, object] = {
@@ -49,8 +47,6 @@ class MATLABQualityChecker:
     ) -> None:
         """Check for docstrings and arguments block in functions."""
         # Check docstring
-        if not (lines is not None):
-            raise ValueError("lines must be provided")
         if not (lines is not None):
             raise ValueError("lines must be provided")
         has_doc = False
@@ -81,8 +77,6 @@ class MATLABQualityChecker:
         # Pattern strings split to avoid CI placeholder detection
         if not (line is not None):
             raise ValueError("line must be provided")
-        if not (line is not None):
-            raise ValueError("line must be provided")
         banned = [
             (r"\bTO" + r"DO\b", "Placeholder marker (TO-DO) found"),
             (r"\bFIX" + r"ME\b", "Placeholder marker (FIX-ME) found"),
@@ -99,8 +93,6 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for common MATLAB anti-patterns."""
-        if not (line is not None):
-            raise ValueError("line must be provided")
         if not (line is not None):
             raise ValueError("line must be provided")
         anti = [
@@ -127,8 +119,6 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for unexplained magic numbers."""
-        if not (line is not None):
-            raise ValueError("line must be provided")
         if not (line is not None):
             raise ValueError("line must be provided")
         acceptable = {
@@ -165,8 +155,6 @@ class MATLABQualityChecker:
         """Check for dangerous commands inside functions."""
         if not (line is not None):
             raise ValueError("line must be provided")
-        if not (line is not None):
-            raise ValueError("line must be provided")
         unsafe = [
             (r"\bclear\s+(all|global)\b", "Avoid 'clear all/global' in functions"),
             (r"\bclear\b(?!\s+\w+)", "Avoid 'clear' in functions"),
@@ -180,8 +168,6 @@ class MATLABQualityChecker:
 
     def _analyze_matlab_file(self, file_path: Path) -> list[str]:
         """Analyze a single MATLAB file (Decomposed for Orthogonality)."""
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
         if not (file_path is not None):
             raise ValueError("file_path must be provided")
         issues: list[str] = []

@@ -265,8 +265,6 @@ class DisplayPreviewPanel(QGroupBox):
     def __init__(self, preferences: UserPreferences, parent: QWidget | None = None):
         if not (preferences is not None):
             raise ValueError("preferences must be provided")
-        if not (preferences is not None):
-            raise ValueError("preferences must be provided")
         super().__init__("Display Preview", parent)
         self._preferences = preferences
         self._checkboxes: dict[str, QCheckBox] = {}
@@ -293,8 +291,6 @@ class DisplayPreviewPanel(QGroupBox):
 
     def _on_toggle(self, key: str, checked: bool) -> None:
         """Handle checkbox toggle and update preferences."""
-        if not (key is not None):
-            raise ValueError("key must be provided")
         if not (key is not None):
             raise ValueError("key must be provided")
         attr_name = f"show_{key}"
@@ -475,8 +471,6 @@ class ModelExplorerWindow(QMainWindow):
         """Populate the model list from bundled library."""
         if not (category_filter is not None):
             raise ValueError("category_filter must be provided")
-        if not (category_filter is not None):
-            raise ValueError("category_filter must be provided")
         self.model_list.clear()
         for entry in self._loader.list_bundled_models():
             if category_filter and entry.get("category") != category_filter:
@@ -606,8 +600,6 @@ class ModelExplorerWindow(QMainWindow):
         """Handle single click: show model info."""
         if not (item is not None):
             raise ValueError("item must be provided")
-        if not (item is not None):
-            raise ValueError("item must be provided")
         model_id = item.data(Qt.ItemDataRole.UserRole)
         if model_id:
             result = self._loader.load_bundled(model_id)
@@ -626,8 +618,6 @@ class ModelExplorerWindow(QMainWindow):
         """Handle display checkbox change."""
         if not (key is not None):
             raise ValueError("key must be provided")
-        if not (key is not None):
-            raise ValueError("key must be provided")
         self._loader.save_preferences()
         self._status_label.setText(
             f"Display: {key} {'enabled' if checked else 'disabled'}"
@@ -637,8 +627,6 @@ class ModelExplorerWindow(QMainWindow):
 
     def _show_load_result(self, result: LoadResult) -> None:
         """Update all panels with a load result."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
         if not (result is not None):
             raise ValueError("result must be provided")
         self._current_result = result

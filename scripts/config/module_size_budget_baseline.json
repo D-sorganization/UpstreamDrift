@@ -4,5 +4,5 @@
   "src/engines/physics_engines/mujoco/head_models.py": 1666,
   "src/engines/physics_engines/mujoco/python/humanoid_launcher.py": 1583,
   "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py": 2007,
-  "src/shared/python/humanoid_character_builder/generators/mesh_generator.py": 1641
+  "src/shared/python/humanoid_character_builder/generators/mesh_generator.py": 1645
 }

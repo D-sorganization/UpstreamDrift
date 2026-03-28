@@ -143,8 +143,6 @@ class PlotConfig:
         """
         if not (nrows is not None):
             raise ValueError("nrows must be provided")
-        if not (nrows is not None):
-            raise ValueError("nrows must be provided")
         if self.style:
             plt.style.use(self.style)
 

@@ -238,8 +238,6 @@ class GolfLauncher(
         """Retrieve a model or application by ID."""
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         if model_id in self.available_models:
             return self.available_models[model_id]
 
@@ -284,8 +282,6 @@ class GolfLauncher(
         """Apply a new set of selected models from the layout dialog."""
         if not (selected_ids is not None):
             raise ValueError("selected_ids must be provided")
-        if not (selected_ids is not None):
-            raise ValueError("selected_ids must be provided")
         self.layout_manager.apply_model_selection(selected_ids)
         self.model_order = self.layout_manager.model_order
         self._sync_model_cards()
@@ -308,8 +304,6 @@ class GolfLauncher(
         """Update the search filter and rebuild grid."""
         if not (text is not None):
             raise ValueError("text must be provided")
-        if not (text is not None):
-            raise ValueError("text must be provided")
         self.layout_manager.update_search_filter(text)
         self._rebuild_grid()
 
@@ -322,8 +316,6 @@ class GolfLauncher(
 
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
         self.select_model(model_id)
@@ -419,8 +411,6 @@ class GolfLauncher(
         """Safely convert a value to int, handling Mock objects from tests."""
         if not (default is not None):
             raise ValueError("default must be provided")
-        if not (default is not None):
-            raise ValueError("default must be provided")
         if hasattr(value, "return_value"):
             return default
         return int(value) if isinstance(value, int | float) else default
@@ -429,8 +419,6 @@ class GolfLauncher(
 
     def select_model(self, model_id: str) -> None:
         """Select a model and update UI."""
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
         self.selected_model = model_id
@@ -538,8 +526,6 @@ class GolfLauncher(
         """Map model type to EngineType."""
         if not (model_type is not None):
             raise ValueError("model_type must be provided")
-        if not (model_type is not None):
-            raise ValueError("model_type must be provided")
         _, EngineType = _lazy_load_engine_manager()
 
         if "mujoco" in model_type:
@@ -558,8 +544,6 @@ class GolfLauncher(
 
     def _apply_docker_status(self, available: bool) -> None:
         """Apply Docker availability status to UI."""
-        if not (available is not None):
-            raise ValueError("available must be provided")
         if not (available is not None):
             raise ValueError("available must be provided")
         self.docker_available = available

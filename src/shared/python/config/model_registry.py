@@ -41,8 +41,6 @@ class ModelRegistry(ContractChecker):
         """
         if not (config_path is not None):
             raise ValueError("config_path must be provided")
-        if not (config_path is not None):
-            raise ValueError("config_path must be provided")
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
         self._load_registry()

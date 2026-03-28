@@ -514,8 +514,6 @@ def path_type(
 
     if not (must_exist is not None):
         raise ValueError("must_exist must be provided")
-    if not (must_exist is not None):
-        raise ValueError("must_exist must be provided")
 
     def _path_type(value: str) -> Path:
         path = Path(value)
@@ -604,8 +602,6 @@ def run_main(
         >>> import sys
         >>> sys.exit(run_main(main, parser))
     """
-    if not (main_func is not None):
-        raise ValueError("main_func must be provided")
     if not (main_func is not None):
         raise ValueError("main_func must be provided")
     logger = get_logger(__name__)

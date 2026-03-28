@@ -53,8 +53,6 @@ class MeshLoadError(Exception):
     ) -> None:
         if not (message is not None):
             raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         super().__init__(message)
         self.path = path
         self.cause = cause
@@ -64,8 +62,6 @@ class UnsupportedFormatError(MeshLoadError):
     """Exception raised when mesh format is not supported."""
 
     def __init__(self, extension: str, path: str | None = None) -> None:
-        if not (extension is not None):
-            raise ValueError("extension must be provided")
         if not (extension is not None):
             raise ValueError("extension must be provided")
         super().__init__(f"Unsupported mesh format: {extension}", path)
@@ -246,8 +242,6 @@ class MeshSkeleton:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         for bone in self.bones:
             if bone.name == name:
                 return bone
@@ -262,8 +256,6 @@ class MeshSkeleton:
         Returns:
             MeshBone if found, None otherwise.
         """
-        if not (index is not None):
-            raise ValueError("index must be provided")
         if not (index is not None):
             raise ValueError("index must be provided")
         for bone in self.bones:
@@ -405,8 +397,6 @@ class MeshLoader:
         """
         if not (enable_cache is not None):
             raise ValueError("enable_cache must be provided")
-        if not (enable_cache is not None):
-            raise ValueError("enable_cache must be provided")
         self.enable_cache = enable_cache
         self._cache: dict[str, tuple[float, LoadedMesh]] = {}
 
@@ -520,8 +510,6 @@ class MeshLoader:
         """
         if not (path is not None):
             raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
         vertices: list[MeshVertex] = []
         faces: list[MeshFace] = []
         positions: list[np.ndarray] = []
@@ -596,8 +584,6 @@ class MeshLoader:
         Returns:
             Loaded mesh data.
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         vertices: list[MeshVertex] = []

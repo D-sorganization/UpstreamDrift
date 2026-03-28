@@ -239,8 +239,6 @@ class ModelLibrary:
         # Handle embedded MuJoCo Humanoid special case
         if not (model_key is not None):
             raise ValueError("model_key must be provided")
-        if not (model_key is not None):
-            raise ValueError("model_key must be provided")
         if model_key == "mujoco_humanoid":
             return self._get_cached_embedded_model("full_body_golf_swing")
 
@@ -300,8 +298,6 @@ class ModelLibrary:
         """
         if not (embedded_key is not None):
             raise ValueError("embedded_key must be provided")
-        if not (embedded_key is not None):
-            raise ValueError("embedded_key must be provided")
         embedded = self.get_embedded_mujoco_models()
         if embedded_key not in embedded:
             logger.error(f"Embedded model key not found: {embedded_key}")
@@ -341,8 +337,6 @@ class ModelLibrary:
         Returns:
             Path to downloaded URDF file, or None if download failed
         """
-        if not (model_key is not None):
-            raise ValueError("model_key must be provided")
         if not (model_key is not None):
             raise ValueError("model_key must be provided")
         if model_key not in self.HUMAN_MODELS:
@@ -419,8 +413,6 @@ class ModelLibrary:
         """
         if not (club_key is not None):
             raise ValueError("club_key must be provided")
-        if not (club_key is not None):
-            raise ValueError("club_key must be provided")
         if club_key not in self.GOLF_CLUBS:
             logger.error(f"Unknown golf club: {club_key}")
             return None
@@ -449,8 +441,6 @@ class ModelLibrary:
         Returns:
             URDF XML content as string
         """
-        if not (club_key is not None):
-            raise ValueError("club_key must be provided")
         if not (club_key is not None):
             raise ValueError("club_key must be provided")
         dims = self._compute_club_dimensions(club_info)
@@ -499,8 +489,6 @@ class ModelLibrary:
     def _urdf_club_joints(self, grip_length: float, shaft_length: float) -> list[str]:
         if not (grip_length is not None):
             raise ValueError("grip_length must be provided")
-        if not (grip_length is not None):
-            raise ValueError("grip_length must be provided")
         base_to_grip = """    <joint name="base_to_grip" type="fixed">
         <parent link="base_link"/>
         <child link="grip"/>
@@ -540,8 +528,6 @@ class ModelLibrary:
     ) -> str:
         if not (club_info is not None):
             raise ValueError("club_info must be provided")
-        if not (club_info is not None):
-            raise ValueError("club_info must be provided")
         ixx = club_info["grip_mass"] * (3 * grip_radius**2 + grip_length**2) / 12
         izz = club_info["grip_mass"] * grip_radius**2 / 2
         return f"""    <!-- Grip -->
@@ -572,8 +558,6 @@ class ModelLibrary:
     def _urdf_shaft_link(
         self, club_info: dict, shaft_length: float, shaft_radius: float
     ) -> str:
-        if not (club_info is not None):
-            raise ValueError("club_info must be provided")
         if not (club_info is not None):
             raise ValueError("club_info must be provided")
         ixx = club_info["shaft_mass"] * (3 * shaft_radius**2 + shaft_length**2) / 12
@@ -610,8 +594,6 @@ class ModelLibrary:
         head_width: float,
         head_height: float,
     ) -> str:
-        if not (club_info is not None):
-            raise ValueError("club_info must be provided")
         if not (club_info is not None):
             raise ValueError("club_info must be provided")
         loft_rad = club_info["loft"] * math.pi / 180
@@ -684,8 +666,6 @@ class ModelLibrary:
         Returns:
             Dictionary with model information, or None if not found
         """
-        if not (category is not None):
-            raise ValueError("category must be provided")
         if not (category is not None):
             raise ValueError("category must be provided")
         if category == "human":
@@ -924,8 +904,6 @@ class ModelLibrary:
         """
         if not (source_path is not None):
             raise ValueError("source_path must be provided")
-        if not (source_path is not None):
-            raise ValueError("source_path must be provided")
         import shutil
 
         src = Path(source_path)
@@ -968,8 +946,6 @@ class ModelLibrary:
         """
         if not (model_path is not None):
             raise ValueError("model_path must be provided")
-        if not (model_path is not None):
-            raise ValueError("model_path must be provided")
         path = Path(model_path)
         import_root = self._get_imported_models_path()
 
@@ -1003,8 +979,6 @@ class ModelLibrary:
         Returns:
             New path if successful, None otherwise.
         """
-        if not (model_path is not None):
-            raise ValueError("model_path must be provided")
         if not (model_path is not None):
             raise ValueError("model_path must be provided")
         path = Path(model_path)

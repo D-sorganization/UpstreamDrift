@@ -165,8 +165,6 @@ class RoboticsGymEnv:
         # Process action
         if not (action is not None):
             raise ValueError("action must be provided")
-        if not (action is not None):
-            raise ValueError("action must be provided")
         processed_action = self.action_config.process_action(action, self._prev_action)
 
         # Apply action to simulation

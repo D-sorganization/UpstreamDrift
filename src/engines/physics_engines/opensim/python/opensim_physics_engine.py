@@ -607,6 +607,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if not analyzer or not self.is_initialized:
             return {}
 
+        assert self._model is not None  # guaranteed by is_initialized check above
+
         # M * a = tau  =>  a = M^-1 * tau
         M = self.compute_mass_matrix()
 

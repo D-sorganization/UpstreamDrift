@@ -82,8 +82,6 @@ class ShortcutBadge(QFrame):
     def __init__(self, text: str, parent: QWidget | None = None) -> None:
         if not (text is not None):
             raise ValueError("text must be provided")
-        if not (text is not None):
-            raise ValueError("text must be provided")
         super().__init__(parent)
         self.text = text
         self._setup_ui()
@@ -145,8 +143,6 @@ class ShortcutsOverlay(QWidget):
         """
         if not (parent is not None):
             raise ValueError("parent must be provided")
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         super().__init__(parent)
         self.shortcuts = shortcuts or DEFAULT_SHORTCUTS
         self._setup_ui()
@@ -201,8 +197,6 @@ class ShortcutsOverlay(QWidget):
     def _create_header(self, content_layout: QVBoxLayout) -> None:
         if not (content_layout is not None):
             raise ValueError("content_layout must be provided")
-        if not (content_layout is not None):
-            raise ValueError("content_layout must be provided")
         header = QHBoxLayout()
         title = QLabel("Keyboard Shortcuts")
         if THEME_AVAILABLE:
@@ -241,8 +235,6 @@ class ShortcutsOverlay(QWidget):
         content_layout.addLayout(header)
 
     def _create_shortcuts_scroll(self, content_layout: QVBoxLayout) -> None:
-        if not (content_layout is not None):
-            raise ValueError("content_layout must be provided")
         if not (content_layout is not None):
             raise ValueError("content_layout must be provided")
         scroll = QScrollArea()
@@ -286,8 +278,6 @@ class ShortcutsOverlay(QWidget):
         self, category: str, shortcuts: list[Shortcut]
     ) -> QWidget:
         """Create a section for a category of shortcuts."""
-        if not (category is not None):
-            raise ValueError("category must be provided")
         if not (category is not None):
             raise ValueError("category must be provided")
         section = QWidget()

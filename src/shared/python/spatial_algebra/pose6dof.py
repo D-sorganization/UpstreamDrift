@@ -295,8 +295,6 @@ def quaternion_multiply(q1: Quat | list[float], q2: Quat | list[float]) -> Quat:
     """
     if not (q1 is not None):
         raise ValueError("q1 must be provided")
-    if not (q1 is not None):
-        raise ValueError("q1 must be provided")
     q1 = np.asarray(q1, dtype=np.float64)
     q2 = np.asarray(q2, dtype=np.float64)
 
@@ -340,8 +338,6 @@ def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
     Returns:
         Interpolated quaternion
     """
-    if not (q1 is not None):
-        raise ValueError("q1 must be provided")
     if not (q1 is not None):
         raise ValueError("q1 must be provided")
     q1 = np.asarray(q1, dtype=np.float64)
@@ -418,8 +414,6 @@ class Pose6DOF:
         """Create pose from position and quaternion [w, x, y, z]."""
         if not (position is not None):
             raise ValueError("position must be provided")
-        if not (position is not None):
-            raise ValueError("position must be provided")
         euler = quaternion_to_euler(quaternion)
         return cls(position=position, euler_angles=euler)
 
@@ -430,8 +424,6 @@ class Pose6DOF:
         rotation: Mat3,
     ) -> Pose6DOF:
         """Create pose from position and rotation matrix."""
-        if not (position is not None):
-            raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
         euler = rotation_matrix_to_euler(rotation)
@@ -555,8 +547,6 @@ class Pose6DOF:
         """Return new pose translated by offset (world frame)."""
         if not (offset is not None):
             raise ValueError("offset must be provided")
-        if not (offset is not None):
-            raise ValueError("offset must be provided")
         offset = np.asarray(offset, dtype=np.float64)
         return Pose6DOF(
             position=self._position + offset,
@@ -566,8 +556,6 @@ class Pose6DOF:
     def rotate_euler(self, delta_euler: Vec3 | list[float]) -> Pose6DOF:
         """Return new pose with additional euler rotation."""
         # Compose rotations via quaternions for accuracy
-        if not (delta_euler is not None):
-            raise ValueError("delta_euler must be provided")
         if not (delta_euler is not None):
             raise ValueError("delta_euler must be provided")
         q1 = self.to_quaternion()
@@ -588,8 +576,6 @@ class Pose6DOF:
         """Compose this pose with another (this * other)."""
         if not (other is not None):
             raise ValueError("other must be provided")
-        if not (other is not None):
-            raise ValueError("other must be provided")
         R1 = self.rotation_matrix
         p1 = self._position
         R2 = other.rotation_matrix
@@ -604,15 +590,11 @@ class Pose6DOF:
         """Transform a point by this pose."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
         return self.rotation_matrix @ point + self._position
 
     def transform_vector(self, vector: Vec3 | list[float]) -> Vec3:
         """Transform a direction vector (rotation only, no translation)."""
-        if not (vector is not None):
-            raise ValueError("vector must be provided")
         if not (vector is not None):
             raise ValueError("vector must be provided")
         vector = np.asarray(vector, dtype=np.float64)
@@ -631,8 +613,6 @@ class Pose6DOF:
 
     def __eq__(self, other: object) -> bool:
         """Check equality with tolerance."""
-        if not (other is not None):
-            raise ValueError("other must be provided")
         if not (other is not None):
             raise ValueError("other must be provided")
         if not isinstance(other, Pose6DOF):
@@ -708,8 +688,6 @@ class Transform6DOF:
         """Create rotation about x-axis."""
         if not (angle is not None):
             raise ValueError("angle must be provided")
-        if not (angle is not None):
-            raise ValueError("angle must be provided")
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[1, 0, 0], [0, c, -s], [0, s, c]], dtype=np.float64)
         return cls(rotation=R)
@@ -717,8 +695,6 @@ class Transform6DOF:
     @classmethod
     def from_rotation_y(cls, angle: float) -> Transform6DOF:
         """Create rotation about y-axis."""
-        if not (angle is not None):
-            raise ValueError("angle must be provided")
         if not (angle is not None):
             raise ValueError("angle must be provided")
         c, s = np.cos(angle), np.sin(angle)
@@ -730,8 +706,6 @@ class Transform6DOF:
         """Create rotation about z-axis."""
         if not (angle is not None):
             raise ValueError("angle must be provided")
-        if not (angle is not None):
-            raise ValueError("angle must be provided")
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]], dtype=np.float64)
         return cls(rotation=R)
@@ -739,8 +713,6 @@ class Transform6DOF:
     @classmethod
     def from_axis_angle(cls, axis: Vec3 | list[float], angle: float) -> Transform6DOF:
         """Create rotation about arbitrary axis."""
-        if not (axis is not None):
-            raise ValueError("axis must be provided")
         if not (axis is not None):
             raise ValueError("axis must be provided")
         R = axis_angle_to_rotation_matrix(axis, angle)
@@ -755,8 +727,6 @@ class Transform6DOF:
         """Create transform from rotation matrix and optional translation."""
         if not (rotation is not None):
             raise ValueError("rotation must be provided")
-        if not (rotation is not None):
-            raise ValueError("rotation must be provided")
         if translation is None:
             translation = np.zeros(3)
         return cls(rotation=rotation, translation=translation)
@@ -764,8 +734,6 @@ class Transform6DOF:
     @classmethod
     def from_homogeneous_matrix(cls, H: Mat4) -> Transform6DOF:
         """Create transform from 4x4 homogeneous matrix."""
-        if not (H is not None):
-            raise ValueError("H must be provided")
         if not (H is not None):
             raise ValueError("H must be provided")
         H = np.asarray(H, dtype=np.float64)
@@ -794,8 +762,6 @@ class Transform6DOF:
             Interpolated transform
         """
         # Interpolate translation linearly
-        if not (t1 is not None):
-            raise ValueError("t1 must be provided")
         if not (t1 is not None):
             raise ValueError("t1 must be provided")
         translation = (1 - alpha) * t1._translation + alpha * t2._translation
@@ -838,8 +804,6 @@ class Transform6DOF:
         """Compose transforms using world-frame chaining (`other * this`)."""
         if not (other is not None):
             raise ValueError("other must be provided")
-        if not (other is not None):
-            raise ValueError("other must be provided")
         R = other._rotation @ self._rotation
         t = other._rotation @ self._translation + other._translation
         return Transform6DOF(rotation=R, translation=t)
@@ -854,8 +818,6 @@ class Transform6DOF:
         """Transform a point."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
         return self._rotation @ point + self._translation
 
@@ -865,15 +827,11 @@ class Transform6DOF:
         """Transform multiple points (Nx3 array)."""
         if not (points is not None):
             raise ValueError("points must be provided")
-        if not (points is not None):
-            raise ValueError("points must be provided")
         points = np.asarray(points, dtype=np.float64)
         return (self._rotation @ points.T).T + self._translation
 
     def transform_vector(self, vector: Vec3 | list[float]) -> Vec3:
         """Transform a direction vector (rotation only)."""
-        if not (vector is not None):
-            raise ValueError("vector must be provided")
         if not (vector is not None):
             raise ValueError("vector must be provided")
         vector = np.asarray(vector, dtype=np.float64)
@@ -937,8 +895,6 @@ class EntityPlacement:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         self.name = name
         self.pose = pose if pose is not None else Pose6DOF()
         self.metadata = metadata if metadata is not None else {}
@@ -963,8 +919,6 @@ class EntityPlacement:
         """Set entity rotation using euler angles."""
         if not (roll is not None):
             raise ValueError("roll must be provided")
-        if not (roll is not None):
-            raise ValueError("roll must be provided")
         self.pose.euler_angles = np.array([roll, pitch, yaw], dtype=np.float64)
 
     def set_yaw(self, yaw: float) -> None:
@@ -973,8 +927,6 @@ class EntityPlacement:
 
     def rotate_axis(self, axis: Vec3 | list[float], angle: float) -> None:
         """Rotate entity about arbitrary axis."""
-        if not (axis is not None):
-            raise ValueError("axis must be provided")
         if not (axis is not None):
             raise ValueError("axis must be provided")
         R = axis_angle_to_rotation_matrix(axis, angle)
@@ -991,8 +943,6 @@ class EntityPlacement:
             target: Point to look at
             up: Up vector, defaults to [0, 0, 1]
         """
-        if not (target is not None):
-            raise ValueError("target must be provided")
         if not (target is not None):
             raise ValueError("target must be provided")
         target = np.asarray(target, dtype=np.float64)
@@ -1049,8 +999,6 @@ class EntityPlacement:
         """Calculate distance to a point."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
         return float(np.linalg.norm(self.pose.position - point))
 
@@ -1088,8 +1036,6 @@ class EntityPlacement:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> EntityPlacement:
         """Deserialize from dictionary."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         pose = Pose6DOF(
@@ -1161,8 +1107,6 @@ class PlacementGroup:
         """Translate all entities by offset."""
         if not (offset is not None):
             raise ValueError("offset must be provided")
-        if not (offset is not None):
-            raise ValueError("offset must be provided")
         offset = np.asarray(offset, dtype=np.float64)
         for entity in self._entities.values():
             entity.pose._position += offset
@@ -1181,8 +1125,6 @@ class PlacementGroup:
             axis: Rotation axis
             angle: Rotation angle in radians
         """
-        if not (point is not None):
-            raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)

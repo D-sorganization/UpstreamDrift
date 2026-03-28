@@ -27,8 +27,6 @@ class ComparativePlotter:
         """
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
-        if not (analyzer is not None):
-            raise ValueError("analyzer must be provided")
         self.analyzer = analyzer
         self.colors = {
             "a": "#1f77b4",  # Blue
@@ -54,8 +52,6 @@ class ComparativePlotter:
             title: Plot title
             ylabel: Y-axis label
         """
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
         aligned = self.analyzer.align_signals(field_name, joint_idx=joint_idx)
@@ -150,8 +146,6 @@ class ComparativePlotter:
         """
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if ax is None:
             if fig is None:
                 raise ValueError("Must provide either fig or ax")
@@ -230,8 +224,6 @@ class ComparativePlotter:
             title: Title
         """
         # Align both joints
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
         pos1_aligned = self.analyzer.align_signals(
@@ -329,8 +321,6 @@ class ComparativePlotter:
 
         if not (fig is not None):
             raise ValueError("fig must be provided")
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         rec_a = self.analyzer.recorder_a
         rec_b = self.analyzer.recorder_b
 
@@ -392,8 +382,6 @@ class ComparativePlotter:
         Args:
             fig: Matplotlib figure
         """
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
         gs = fig.add_gridspec(2, 2, hspace=0.3, wspace=0.3)
@@ -470,8 +458,6 @@ class ComparativePlotter:
         """
         if not (fig is not None):
             raise ValueError("fig must be provided")
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         dist, path = self.analyzer.compute_dtw_distance(field_name, joint_idx, radius)
 
         if not path:
@@ -523,8 +509,6 @@ class ComparativePlotter:
             joint_idx: Optional joint index
             title: Optional title
         """
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
         aligned = self.analyzer.align_signals(field_name, joint_idx=joint_idx)

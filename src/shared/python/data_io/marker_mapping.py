@@ -102,8 +102,6 @@ class MarkerToModelMapper:
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         self.model = model
         self._mappings: dict[str, list[MarkerMapping]] = {}
 
@@ -118,8 +116,6 @@ class MarkerToModelMapper:
         Args:
             mapping: Marker-to-body mapping
         """
-        if not (mapping is not None):
-            raise ValueError("mapping must be provided")
         if not (mapping is not None):
             raise ValueError("mapping must be provided")
         if mapping.body_name not in self._mappings:
@@ -161,8 +157,6 @@ class MarkerToModelMapper:
         Returns:
             RegistrationResult with transformation and diagnostics
         """
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
         if body_name not in self._mappings:
@@ -215,8 +209,6 @@ class MarkerToModelMapper:
         """
         if not (mappings is not None):
             raise ValueError("mappings must be provided")
-        if not (mappings is not None):
-            raise ValueError("mappings must be provided")
         inlier_mask = np.ones(len(marker_positions), dtype=bool)
         transformation = np.eye(4)
         residuals = np.zeros(len(marker_positions))
@@ -259,8 +251,6 @@ class MarkerToModelMapper:
         inlier_observed: np.ndarray,
     ) -> RegistrationResult:
         """Compute final metrics and build a successful RegistrationResult."""
-        if not (inlier_mask is not None):
-            raise ValueError("inlier_mask must be provided")
         if not (inlier_mask is not None):
             raise ValueError("inlier_mask must be provided")
         final_residuals = residuals[inlier_mask]
@@ -312,8 +302,6 @@ class MarkerToModelMapper:
         # Center point clouds
         if not (source_points is not None):
             raise ValueError("source_points must be provided")
-        if not (source_points is not None):
-            raise ValueError("source_points must be provided")
         source_center = np.mean(source_points, axis=0)
         target_center = np.mean(target_points, axis=0)
 
@@ -358,8 +346,6 @@ class MarkerToModelMapper:
         # Convert to homogeneous coordinates
         if not (transformation is not None):
             raise ValueError("transformation must be provided")
-        if not (transformation is not None):
-            raise ValueError("transformation must be provided")
         points_h = np.hstack([points, np.ones((len(points), 1))])
 
         # Apply transformation
@@ -378,8 +364,6 @@ class MarkerToModelMapper:
             result: Registration result
             marker_names: Optional marker names for labeling
         """
-        if not (result is not None):
-            raise ValueError("result must be provided")
         if not (result is not None):
             raise ValueError("result must be provided")
         try:

@@ -280,7 +280,8 @@ class TestGolfLauncherLogic:
         src.launchers.ui_components.ContextHelpDock = MagicMock()
         yield
 
-    @pytest.mark.skip(
+    @pytest.mark.xfail(
+        strict=False,
         reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
@@ -308,7 +309,8 @@ class TestGolfLauncherLogic:
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
 
-    @pytest.mark.skip(
+    @pytest.mark.xfail(
+        strict=False,
         reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
@@ -353,7 +355,8 @@ class TestGolfLauncherLogic:
         # The button text should contain the NAME, upper case
         assert "TEST MODEL" in launcher.btn_launch.text()
 
-    @pytest.mark.skip(
+    @pytest.mark.xfail(
+        strict=False,
         reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
@@ -402,7 +405,8 @@ class TestGolfLauncherLogic:
             idx = args.index("-w")
             assert args[idx + 1] == "/workspace"
 
-    @pytest.mark.skip(
+    @pytest.mark.xfail(
+        strict=False,
         reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")

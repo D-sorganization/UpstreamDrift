@@ -237,8 +237,6 @@ def safe_eval(
     """
     if not (expression is not None):
         raise ValueError("expression must be provided")
-    if not (expression is not None):
-        raise ValueError("expression must be provided")
     if allowed_names is None:
         allowed_names = set(namespace.keys())
 
@@ -265,8 +263,6 @@ def safe_eval_math(
         If True, use numpy math functions (array-safe).  Otherwise use
         scalar ``math`` module functions.
     """
-    if not (expression is not None):
-        raise ValueError("expression must be provided")
     if not (expression is not None):
         raise ValueError("expression must be provided")
     base = dict(NUMPY_MATH_NAMESPACE if use_numpy else SCALAR_MATH_NAMESPACE)

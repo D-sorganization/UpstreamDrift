@@ -95,8 +95,6 @@ class ContractChecker:
         """
         if not (method_name is not None):
             raise ValueError("method_name must be provided")
-        if not (method_name is not None):
-            raise ValueError("method_name must be provided")
         from .level import DBC_LEVEL  # re-import to capture runtime changes
 
         if DBC_LEVEL == ContractLevel.OFF:
@@ -190,8 +188,6 @@ def invariant(
                 self.timestep = timestep
                 self.model = model
     """
-    if not (condition is not None):
-        raise ValueError("condition must be provided")
     if not (condition is not None):
         raise ValueError("condition must be provided")
     from .level import DBC_LEVEL  # defer to capture runtime changes

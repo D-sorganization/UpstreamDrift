@@ -49,8 +49,6 @@ class PlotThemeManager:
         """
         if not (settings_org is not None):
             raise ValueError("settings_org must be provided")
-        if not (settings_org is not None):
-            raise ValueError("settings_org must be provided")
         self._settings_org = settings_org
         self._settings_app = settings_app
         self._current_theme_name = DEFAULT_THEME
@@ -110,8 +108,6 @@ class PlotThemeManager:
             name: Theme name
             save: Whether to persist the choice
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         theme = get_theme(name)
@@ -190,8 +186,6 @@ class PlotThemeManager:
         """
         if not (fig is not None):
             raise ValueError("fig must be provided")
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         theme = self._current_theme
 
         fig.set_facecolor(theme.figure_facecolor)
@@ -205,8 +199,6 @@ class PlotThemeManager:
         Args:
             ax: matplotlib Axes to style
         """
-        if not (ax is not None):
-            raise ValueError("ax must be provided")
         if not (ax is not None):
             raise ValueError("ax must be provided")
         theme = self._current_theme
@@ -282,8 +274,6 @@ class PlotThemeManager:
         """
         if not (index is not None):
             raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
         theme = self._current_theme
         colors = theme.get_color_cycle()
         return {
@@ -328,8 +318,6 @@ def get_plot_theme_manager(
     Returns:
         PlotThemeManager instance
     """
-    if not (settings_org is not None):
-        raise ValueError("settings_org must be provided")
     if not (settings_org is not None):
         raise ValueError("settings_org must be provided")
     if _ManagerHolder.instance is None:

@@ -171,8 +171,6 @@ class SimscapeToURDFConverter:
         """
         if not (source is not None):
             raise ValueError("source must be provided")
-        if not (source is not None):
-            raise ValueError("source must be provided")
         result = ConversionResult(success=False)
 
         try:
@@ -224,8 +222,6 @@ class SimscapeToURDFConverter:
         """
         if not (content is not None):
             raise ValueError("content must be provided")
-        if not (content is not None):
-            raise ValueError("content must be provided")
         result = ConversionResult(success=False)
 
         try:
@@ -254,8 +250,6 @@ class SimscapeToURDFConverter:
     ) -> None:
         """Convert SimScape model to URDF elements."""
         # Reset counters
-        if not (model is not None):
-            raise ValueError("model must be provided")
         if not (model is not None):
             raise ValueError("model must be provided")
         self._link_counter = 0
@@ -323,8 +317,6 @@ class SimscapeToURDFConverter:
         # Maps block name to list of (connected_block, port) tuples
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         connection_map: dict[str, list[tuple[str, str]]] = {}
 
         for conn in model.connections:
@@ -345,8 +337,6 @@ class SimscapeToURDFConverter:
     def _convert_body_to_link(self, block: SimscapeBlock) -> Link | None:
         """Convert a SimScape body block to URDF Link."""
         # Get or generate link name
-        if not (block is not None):
-            raise ValueError("block must be provided")
         if not (block is not None):
             raise ValueError("block must be provided")
         link_name = self._sanitize_name(block.name)
@@ -388,8 +378,6 @@ class SimscapeToURDFConverter:
         """Extract mass from body block."""
         if not (block is not None):
             raise ValueError("block must be provided")
-        if not (block is not None):
-            raise ValueError("block must be provided")
         mass = 1.0  # Default
 
         # Try common parameter names
@@ -406,8 +394,6 @@ class SimscapeToURDFConverter:
     def _get_inertia(self, block: SimscapeBlock, mass: float) -> Inertia:
         """Extract inertia from body block."""
         # Check for explicit inertia tensor
-        if not (block is not None):
-            raise ValueError("block must be provided")
         if not (block is not None):
             raise ValueError("block must be provided")
         inertia_param = block.parameters.get("Inertia") or block.parameters.get(
@@ -436,8 +422,6 @@ class SimscapeToURDFConverter:
 
     def _get_geometry(self, block: SimscapeBlock) -> Geometry | None:
         """Extract geometry from body block."""
-        if not (block is not None):
-            raise ValueError("block must be provided")
         if not (block is not None):
             raise ValueError("block must be provided")
         block_type = block.block_type
@@ -490,8 +474,6 @@ class SimscapeToURDFConverter:
         """Calculate inertia from geometry."""
         if not (geometry is not None):
             raise ValueError("geometry must be provided")
-        if not (geometry is not None):
-            raise ValueError("geometry must be provided")
         if geometry.geometry_type == GeometryType.BOX:
             return Inertia.from_box(mass, *geometry.dimensions[:3])
         if geometry.geometry_type == GeometryType.CYLINDER:
@@ -511,8 +493,6 @@ class SimscapeToURDFConverter:
     ) -> Joint | None:
         """Convert a SimScape joint block to URDF Joint."""
         # Determine joint type
-        if not (block is not None):
-            raise ValueError("block must be provided")
         if not (block is not None):
             raise ValueError("block must be provided")
         urdf_joint_type = self.JOINT_TYPE_MAP.get(block.block_type, JointType.FIXED)
@@ -583,8 +563,6 @@ class SimscapeToURDFConverter:
         """Extract joint origin from block parameters."""
         if not (block is not None):
             raise ValueError("block must be provided")
-        if not (block is not None):
-            raise ValueError("block must be provided")
         length_scale = self.LENGTH_FACTORS.get(self.config.length_unit, 1.0)
         angle_scale = self.ANGLE_FACTORS.get(self.config.angle_unit, 1.0)
 
@@ -621,8 +599,6 @@ class SimscapeToURDFConverter:
         # Try common parameter names
         if not (block is not None):
             raise ValueError("block must be provided")
-        if not (block is not None):
-            raise ValueError("block must be provided")
         for param_name in ["Axis", "JointAxis", "RotationAxis"]:
             if param_name in block.parameters:
                 axis = block.get_param_vector(param_name, (0.0, 0.0, 1.0))
@@ -648,8 +624,6 @@ class SimscapeToURDFConverter:
         joint_type: JointType,
     ) -> JointLimits | None:
         """Extract joint limits from block parameters."""
-        if not (block is not None):
-            raise ValueError("block must be provided")
         if not (block is not None):
             raise ValueError("block must be provided")
         if joint_type in (JointType.FIXED, JointType.FLOATING, JointType.CONTINUOUS):
@@ -693,8 +667,6 @@ class SimscapeToURDFConverter:
         # Find connected bodies
         if not (block is not None):
             raise ValueError("block must be provided")
-        if not (block is not None):
-            raise ValueError("block must be provided")
         connections = connection_map.get(block.full_path, [])
 
         parent_link = None
@@ -733,8 +705,6 @@ class SimscapeToURDFConverter:
         """Create links inferred from joint connections."""
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         link_names: set[str] = set()
 
         for joint_block in model.get_joint_blocks():
@@ -767,8 +737,6 @@ class SimscapeToURDFConverter:
     ) -> None:
         """Connect any orphan links to base with fixed joints."""
         # Find links that are not children of any joint
-        if not (result is not None):
-            raise ValueError("result must be provided")
         if not (result is not None):
             raise ValueError("result must be provided")
         child_links = {j.child for j in result.joints}
@@ -804,8 +772,6 @@ class SimscapeToURDFConverter:
         # Replace path separators and special chars
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         sanitized = name.replace("/", "_").replace("\\", "_")
         sanitized = sanitized.replace(" ", "_").replace("-", "_")
         sanitized = "".join(c for c in sanitized if c.isalnum() or c == "_")
@@ -818,8 +784,6 @@ class SimscapeToURDFConverter:
 
     def _generate_urdf(self, result: ConversionResult) -> str:
         """Generate URDF XML string from conversion result."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
         if not (result is not None):
             raise ValueError("result must be provided")
         from model_generation.builders.urdf_writer import URDFWriter
@@ -851,8 +815,6 @@ def convert_simscape_to_urdf(
     Returns:
         ConversionResult
     """
-    if not (source is not None):
-        raise ValueError("source must be provided")
     if not (source is not None):
         raise ValueError("source must be provided")
     config = ConversionConfig(robot_name=robot_name, **config_kwargs)

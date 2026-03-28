@@ -224,8 +224,6 @@ class SegmentManager:
             """Check for cycles using DFS."""
             if not (name is not None):
                 raise ValueError("name must be provided")
-            if not (name is not None):
-                raise ValueError("name must be provided")
             visited.add(name)
             rec_stack.add(name)
 

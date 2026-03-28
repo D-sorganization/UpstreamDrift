@@ -67,8 +67,6 @@ class RecentModelItem(QFrame):
         """
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         super().__init__(parent)
         self.model_id = model_id
         self.display_name = display_name
@@ -348,8 +346,6 @@ class RecentModelsPanel(QFrame):
             display_name: Human-readable name
         """
         # Remove if already exists
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
         self._recent_models = [

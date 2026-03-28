@@ -91,8 +91,6 @@ class ReportingMixin:
     def _report_joint_stats(self, joint_idx: int) -> dict[str, Any]:
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         angles_deg = np.rad2deg(self.joint_positions[:, joint_idx])
         position_stats = self.compute_summary_stats(angles_deg)  # type: ignore[attr-defined]
 
@@ -187,8 +185,6 @@ class ReportingMixin:
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         fs = 1.0 / self.dt if self.dt > 0 else 0.0
         if fs == 0.0:
             return np.array([]), np.array([])
@@ -215,8 +211,6 @@ class ReportingMixin:
         Returns:
             Smoothness score (negative dimensionless value)
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         fs = 1.0 / self.dt if self.dt > 0 else 0.0
@@ -338,8 +332,6 @@ class ReportingMixin:
         """
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if (
             hasattr(self, "joint_accelerations")
             and self.joint_accelerations is not None
@@ -399,8 +391,6 @@ class ReportingMixin:
     def _write_csv_overall_metrics(self, writer, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         writer.writerow(["Golf Swing Statistical Analysis"])
         writer.writerow([])
         writer.writerow(["Overall Metrics"])
@@ -411,8 +401,6 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_stability_metrics(self, writer, report: dict) -> None:
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if "stability_metrics" not in report:
@@ -426,8 +414,6 @@ class ReportingMixin:
     def _write_csv_club_head_speed(self, writer, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         if "club_head_speed" not in report:
             return
         writer.writerow(["Club Head Speed"])
@@ -438,8 +424,6 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_tempo(self, writer, report: dict) -> None:
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if "tempo" not in report:
@@ -456,8 +440,6 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_phases(self, writer, report: dict) -> None:
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if "phases" not in report:
@@ -478,8 +460,6 @@ class ReportingMixin:
     def _write_csv_grf_metrics(self, writer, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         if "grf_metrics" not in report:
             return
         writer.writerow(["GRF & CoP Metrics"])
@@ -490,8 +470,6 @@ class ReportingMixin:
         writer.writerow([])
 
     def _write_csv_joint_statistics(self, writer, report: dict) -> None:
-        if not (writer is not None):
-            raise ValueError("writer must be provided")
         if not (writer is not None):
             raise ValueError("writer must be provided")
         writer.writerow(["Joint Statistics"])
@@ -539,8 +517,6 @@ class ReportingMixin:
             filename: Output filename
             report: Statistics report (if None, generates new one)
         """
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
         if not (filename is not None):
             raise ValueError("filename must be provided")
         if report is None:

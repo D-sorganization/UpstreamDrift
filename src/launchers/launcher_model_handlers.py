@@ -51,8 +51,6 @@ class ModuleHandler:
     ) -> None:
         if not (model_types is not None):
             raise ValueError("model_types must be provided")
-        if not (model_types is not None):
-            raise ValueError("model_types must be provided")
         self.model_types = model_types
         self.module_name = module_name
         self.display_name = display_name
@@ -68,8 +66,6 @@ class ModuleHandler:
         process_manager: ProcessManager,
     ) -> bool:
         """Launch the module."""
-        if not (repo_path is not None):
-            raise ValueError("repo_path must be provided")
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
         process = process_manager.launch_module(
@@ -96,8 +92,6 @@ class ScriptHandler:
     ) -> None:
         if not (model_types is not None):
             raise ValueError("model_types must be provided")
-        if not (model_types is not None):
-            raise ValueError("model_types must be provided")
         self.model_types = model_types
         self._script_path = script_path
         self.display_name = display_name
@@ -114,8 +108,6 @@ class ScriptHandler:
         process_manager: ProcessManager,
     ) -> bool:
         """Launch the script."""
-        if not (repo_path is not None):
-            raise ValueError("repo_path must be provided")
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
         script_path = repo_path / self._script_path
@@ -164,8 +156,6 @@ class SpecialAppHandler:
             True if launch succeeded, False otherwise.
         """
         # DBC Precondition: model must have a path
-        if not (repo_path is not None):
-            raise ValueError("repo_path must be provided")
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
         model_path = getattr(model, "path", None) or ""
@@ -221,8 +211,6 @@ class PuttingGreenHandler:
         Returns:
             True if launch succeeded, False otherwise.
         """
-        if not (repo_path is not None):
-            raise ValueError("repo_path must be provided")
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
         model_path = getattr(model, "path", None) or ""
@@ -290,8 +278,6 @@ class _SystemFileHandler:
         process_manager: ProcessManager,
     ) -> bool:
         """Open a file with the system default application."""
-        if not (repo_path is not None):
-            raise ValueError("repo_path must be provided")
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
         model_path = getattr(model, "path", None) or ""
@@ -428,8 +414,6 @@ class ModelHandlerRegistry:
         """
         if not (model_type is not None):
             raise ValueError("model_type must be provided")
-        if not (model_type is not None):
-            raise ValueError("model_type must be provided")
         for handler in self._handlers:
             if handler.can_handle(model_type):
                 return handler
@@ -453,8 +437,6 @@ class ModelHandlerRegistry:
         Returns:
             True if launch succeeded, False otherwise.
         """
-        if not (model_type is not None):
-            raise ValueError("model_type must be provided")
         if not (model_type is not None):
             raise ValueError("model_type must be provided")
         handler = self.get_handler(model_type)

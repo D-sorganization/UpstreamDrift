@@ -109,8 +109,6 @@ class TaskCoordinator:
         """
         if not (task_id is not None):
             raise ValueError("task_id must be provided")
-        if not (task_id is not None):
-            raise ValueError("task_id must be provided")
         if task_id in self._tasks:
             del self._tasks[task_id]
             return True
@@ -142,8 +140,6 @@ class TaskCoordinator:
         """
         if not (task_id is not None):
             raise ValueError("task_id must be provided")
-        if not (task_id is not None):
-            raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
 
@@ -167,8 +163,6 @@ class TaskCoordinator:
         """
         if not (task_id is not None):
             raise ValueError("task_id must be provided")
-        if not (task_id is not None):
-            raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
 
@@ -188,8 +182,6 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
-        if not (task_id is not None):
-            raise ValueError("task_id must be provided")
         if not (task_id is not None):
             raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
@@ -215,8 +207,6 @@ class TaskCoordinator:
         """
         if not (task_id is not None):
             raise ValueError("task_id must be provided")
-        if not (task_id is not None):
-            raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
 
@@ -237,8 +227,6 @@ class TaskCoordinator:
         Returns:
             Assigned task or None.
         """
-        if not (robot_id is not None):
-            raise ValueError("robot_id must be provided")
         if not (robot_id is not None):
             raise ValueError("robot_id must be provided")
         task_id = self._robot_tasks.get(robot_id)
@@ -299,8 +287,6 @@ class MultiRobotSystem:
         """
         if not (robot_id is not None):
             raise ValueError("robot_id must be provided")
-        if not (robot_id is not None):
-            raise ValueError("robot_id must be provided")
         self._robots[robot_id] = engine
         self._robot_poses[robot_id] = base_pose.copy()
 
@@ -313,8 +299,6 @@ class MultiRobotSystem:
         Returns:
             True if robot was found and removed.
         """
-        if not (robot_id is not None):
-            raise ValueError("robot_id must be provided")
         if not (robot_id is not None):
             raise ValueError("robot_id must be provided")
         if robot_id in self._robots:
@@ -385,8 +369,6 @@ class MultiRobotSystem:
         """
         if not (safety_distance is not None):
             raise ValueError("safety_distance must be provided")
-        if not (safety_distance is not None):
-            raise ValueError("safety_distance must be provided")
         collisions = []
         robot_ids = list(self._robots.keys())
 
@@ -415,8 +397,6 @@ class MultiRobotSystem:
         Returns:
             Dictionary mapping robot IDs to assigned tasks.
         """
-        if not (tasks is not None):
-            raise ValueError("tasks must be provided")
         if not (tasks is not None):
             raise ValueError("tasks must be provided")
         allocation: dict[str, list[Task]] = {robot_id: [] for robot_id in self._robots}

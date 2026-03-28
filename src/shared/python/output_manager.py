@@ -16,8 +16,6 @@ def save_results(
     """Backward-compatible convenience save helper."""
     if not (results is not None):
         raise ValueError("results must be provided")
-    if not (results is not None):
-        raise ValueError("results must be provided")
     manager = OutputManager()
     return str(
         manager.save_simulation_results(
@@ -31,8 +29,6 @@ def save_results(
 
 def load_results(filename: str, format_type: str = "csv", engine: str = "mujoco"):
     """Backward-compatible convenience load helper."""
-    if not (filename is not None):
-        raise ValueError("filename must be provided")
     if not (filename is not None):
         raise ValueError("filename must be provided")
     manager = OutputManager()

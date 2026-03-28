@@ -218,8 +218,6 @@ class DragModel:
         """
         if not (base_coefficient is not None):
             raise ValueError("base_coefficient must be provided")
-        if not (base_coefficient is not None):
-            raise ValueError("base_coefficient must be provided")
         self.base_coefficient = base_coefficient
         self.ball_area = ball_area
         self.ball_radius = ball_radius
@@ -239,8 +237,6 @@ class DragModel:
         Returns:
             Drag force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         speed = float(np.linalg.norm(velocity))
@@ -272,8 +268,6 @@ class DragModel:
         Returns:
             Effective drag coefficient
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         if not self.reynolds_correction:
@@ -331,8 +325,6 @@ class LiftModel:
         """
         if not (base_coefficient is not None):
             raise ValueError("base_coefficient must be provided")
-        if not (base_coefficient is not None):
-            raise ValueError("base_coefficient must be provided")
         self.base_coefficient = base_coefficient
         self.ball_area = ball_area
         self.ball_radius = ball_radius
@@ -354,8 +346,6 @@ class LiftModel:
         Returns:
             Lift force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         speed = float(np.linalg.norm(velocity))
@@ -395,8 +385,6 @@ class LiftModel:
         # Empirical relationship: Cl saturates at high spin
         if not (spin_ratio is not None):
             raise ValueError("spin_ratio must be provided")
-        if not (spin_ratio is not None):
-            raise ValueError("spin_ratio must be provided")
         cl = self.max_coefficient * (1 - math.exp(-spin_ratio / 0.1))
         return min(cl, self.max_coefficient)
 
@@ -425,8 +413,6 @@ class MagnusModel:
         """
         if not (coefficient is not None):
             raise ValueError("coefficient must be provided")
-        if not (coefficient is not None):
-            raise ValueError("coefficient must be provided")
         self.coefficient = coefficient
         self.ball_area = ball_area
         self.ball_radius = ball_radius
@@ -447,8 +433,6 @@ class MagnusModel:
         Returns:
             Magnus force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         speed = float(np.linalg.norm(velocity))
@@ -515,8 +499,6 @@ class WindGust:
         """
         if not (start_time is not None):
             raise ValueError("start_time must be provided")
-        if not (start_time is not None):
-            raise ValueError("start_time must be provided")
         self.start_time = start_time
         self.duration = duration
         self.peak_velocity = peak_velocity
@@ -537,8 +519,6 @@ class WindGust:
         Returns:
             Gust velocity at time t [m/s]
         """
-        if not (t is not None):
-            raise ValueError("t must be provided")
         if not (t is not None):
             raise ValueError("t must be provided")
         if t < self.start_time or t > self.end_time:
@@ -572,8 +552,6 @@ class TurbulenceModel:
         """
         if not (intensity is not None):
             raise ValueError("intensity must be provided")
-        if not (intensity is not None):
-            raise ValueError("intensity must be provided")
         self.intensity = intensity
         self._rng = np.random.default_rng(seed)
         # Pre-generate noise coefficients for smooth interpolation
@@ -595,8 +573,6 @@ class TurbulenceModel:
         Returns:
             Turbulence velocity perturbation [m/s]
         """
-        if not (t is not None):
-            raise ValueError("t must be provided")
         if not (t is not None):
             raise ValueError("t must be provided")
         if self.intensity < 1e-10:
@@ -666,8 +642,6 @@ class WindModel:
         # Start with base wind
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
         wind = self.config.base_velocity.copy()
 
         # Apply altitude gradient
@@ -697,8 +671,6 @@ class WindModel:
         # Maybe spawn new gust
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
         self._maybe_spawn_gust(t)
 
         # Sum contributions from active gusts
@@ -721,8 +693,6 @@ class WindModel:
             t: Current time [s]
         """
         # Compute time since last check
-        if not (t is not None):
-            raise ValueError("t must be provided")
         if not (t is not None):
             raise ValueError("t must be provided")
         if self._last_check_time < 0:
@@ -825,8 +795,6 @@ class EnvironmentRandomizer:
         """
         if not (base_density is not None):
             raise ValueError("base_density must be provided")
-        if not (base_density is not None):
-            raise ValueError("base_density must be provided")
         if not self.config.enabled or self.config.air_density_variance <= 0:
             return base_density
 
@@ -845,8 +813,6 @@ class EnvironmentRandomizer:
         """
         if not (base_temperature is not None):
             raise ValueError("base_temperature must be provided")
-        if not (base_temperature is not None):
-            raise ValueError("base_temperature must be provided")
         if not self.config.enabled or self.config.temperature_variance <= 0:
             return base_temperature
 
@@ -863,8 +829,6 @@ class EnvironmentRandomizer:
         Returns:
             Randomized wind configuration
         """
-        if not (base_config is not None):
-            raise ValueError("base_config must be provided")
         if not (base_config is not None):
             raise ValueError("base_config must be provided")
         if not self.config.enabled:
@@ -972,8 +936,6 @@ class AerodynamicsEngine:
         """
         if not (air_density is not None):
             raise ValueError("air_density must be provided")
-        if not (air_density is not None):
-            raise ValueError("air_density must be provided")
         self.config = config or AerodynamicsConfig()
         self.wind_model = wind_model
         self.randomization = randomization
@@ -1030,8 +992,6 @@ class AerodynamicsEngine:
         Returns:
             Dictionary with 'drag', 'lift', 'magnus', and 'total' forces [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         if position is None:
@@ -1110,8 +1070,6 @@ class AerodynamicsEngine:
         """
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
         forces = self.compute_forces(velocity, spin, t, position, resample)
         return forces["total"] / mass
 
@@ -1131,8 +1089,6 @@ class AerodynamicsEngine:
         Returns:
             Updated spin after decay [rad/s]
         """
-        if not (spin is not None):
-            raise ValueError("spin must be provided")
         if not (spin is not None):
             raise ValueError("spin must be provided")
         decay_factor = math.exp(-self.config.spin_decay_rate * dt)

@@ -21,8 +21,6 @@ class ColumnNotFoundError(DataProcessingError):
     def __init__(self, column: str, available: list[str] | None = None) -> None:
         if not (column is not None):
             raise ValueError("column must be provided")
-        if not (column is not None):
-            raise ValueError("column must be provided")
         self.column = column
         self.available = available or []
         detail = f"Column '{column}' not found"

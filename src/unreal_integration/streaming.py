@@ -144,8 +144,6 @@ class ControlMessage:
         """
         if not (json_str is not None):
             raise ValueError("json_str must be provided")
-        if not (json_str is not None):
-            raise ValueError("json_str must be provided")
         d = json.loads(json_str)
         return cls(
             action=ControlAction.from_string(d["action"]),
@@ -258,8 +256,6 @@ class FrameBuffer:
         """
         if not (max_size is not None):
             raise ValueError("max_size must be provided")
-        if not (max_size is not None):
-            raise ValueError("max_size must be provided")
         self.max_size = max_size
         self._buffer: deque[UnrealDataFrame] = deque(maxlen=max_size)
         self._lock = asyncio.Lock() if asyncio.get_event_loop().is_running() else None
@@ -289,8 +285,6 @@ class FrameBuffer:
         Returns:
             True if frame was added (oldest may have been dropped).
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not (frame is not None):
             raise ValueError("frame must be provided")
         self._buffer.append(frame)
@@ -392,8 +386,6 @@ class StreamingProtocol:
         Returns:
             Protocol-compliant error message.
         """
-        if not (error_code is not None):
-            raise ValueError("error_code must be provided")
         if not (error_code is not None):
             raise ValueError("error_code must be provided")
         msg: dict[str, Any] = {
@@ -598,8 +590,6 @@ class UnrealStreamingServer:
         """
         if not (frame is not None):
             raise ValueError("frame must be provided")
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if self._state != StreamingState.RUNNING:
             return
 
@@ -656,8 +646,6 @@ class UnrealStreamingServer:
         Args:
             message: Control message to handle.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
         if not (message is not None):
             raise ValueError("message must be provided")
         if self._on_control_message:
@@ -737,8 +725,6 @@ class SimulationStreamer:
         """
         if not (server is not None):
             raise ValueError("server must be provided")
-        if not (server is not None):
-            raise ValueError("server must be provided")
         self.server = server
         self._frame_number = 0
         self._last_send_time = 0.0
@@ -749,8 +735,6 @@ class SimulationStreamer:
         Args:
             frame: Frame to send.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not (frame is not None):
             raise ValueError("frame must be provided")
         await self.server.broadcast(frame)
@@ -774,8 +758,6 @@ class SimulationStreamer:
             forces: Optional list of force vectors.
             metrics: Optional swing metrics.
         """
-        if not (joints is not None):
-            raise ValueError("joints must be provided")
         if not (joints is not None):
             raise ValueError("joints must be provided")
         from src.unreal_integration.data_models import JointState

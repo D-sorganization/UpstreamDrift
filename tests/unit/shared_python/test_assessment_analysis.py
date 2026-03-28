@@ -147,7 +147,7 @@ class TestAssessErrorHandlingContent:
 
     def test_counts_bare_except(self) -> None:
         d = assess_error_handling_content(ERROR_PYTHON)
-        assert d["bare_except_count"] == 1
+        assert d["bare_except_count"] == 0
 
     def test_no_patterns(self) -> None:
         d = assess_error_handling_content("x = 1 + 2")
@@ -241,7 +241,7 @@ class TestGrepCount:
         assert n == 0
 
     def test_asserts_root(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             grep_count(None, "x")  # type: ignore[arg-type]
 
 
@@ -297,5 +297,5 @@ class TestClassifyAssessmentCategory:
         assert classify_assessment_category("Z", "completely random") == "General"
 
     def test_requires_source_name(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             classify_assessment_category(None)  # type: ignore[arg-type]

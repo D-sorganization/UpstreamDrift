@@ -463,8 +463,6 @@ class BallRollPhysics:
 
         if not (state is not None):
             raise ValueError("state must be provided")
-        if not (state is not None):
-            raise ValueError("state must be provided")
 
         def derivatives(
             pos: np.ndarray, vel: np.ndarray

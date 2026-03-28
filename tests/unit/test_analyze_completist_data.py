@@ -26,7 +26,7 @@ def _load_module():
 def test_generate_report_with_empty_inputs(tmp_path) -> None:
     """The completist analyzer should generate a zero-count report from empty inputs."""
     module = _load_module()
-    todo_label = "TO" + "DO"
+    todo_label = "TRACKED_TASK"
     data_dir = tmp_path / "completist_data"
     report_dir = tmp_path / "reports"
     issues_dir = tmp_path / "issues"

@@ -31,12 +31,18 @@ from src.shared.python.perturbation.config import PerturbationConfig
 try:
     import opensim as _opensim  # noqa: F401
 
-    _OPENSIM_AVAILABLE = True
+    _OPENSIM_IMPORT_OK = True
 except ImportError:
-    _OPENSIM_AVAILABLE = False
+    _OPENSIM_IMPORT_OK = False
+
+# Use the shared engine availability check (consistent with production code).
+# opensim may be importable but still broken (e.g., missing shared libs in CI).
+from src.shared.python.engine_core.engine_availability import (
+    OPENSIM_AVAILABLE as _OPENSIM_AVAILABLE,
+)
 
 _skip_no_opensim = pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE, reason="opensim not installed"
+    not _OPENSIM_AVAILABLE, reason="opensim not available (import or init failed)"
 )
 
 # ---------------------------------------------------------------------------
@@ -199,6 +205,8 @@ class TestComparisonReport:
 
 @pytest.fixture(scope="module")
 def analyzer():  # type: ignore[no-untyped-def]
+    if not _OPENSIM_AVAILABLE:
+        pytest.skip("opensim not installed")
     from src.engines.physics_engines.opensim.python.perturbation.analyzer import (
         OpenSimPerturbationAnalyzer,
     )
@@ -334,7 +342,10 @@ class TestRunBatch:
             OpenSimPerturbationAnalyzer,
         )
 
-        fresh = OpenSimPerturbationAnalyzer(t_end=0.1, dt=0.01)
+        try:
+            fresh = OpenSimPerturbationAnalyzer(t_end=0.1, dt=0.01)
+        except ImportError:
+            pytest.skip("opensim not available")
         with pytest.raises((AssertionError, AttributeError)):
             fresh.run_batch(_SMALL_CONFIG)
 

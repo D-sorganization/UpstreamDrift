@@ -60,8 +60,6 @@ class NonlinearDynamicsMixin:
         """
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if data_type == "position":
             data = self.joint_positions[:, joint_idx]
         else:
@@ -138,8 +136,6 @@ class NonlinearDynamicsMixin:
         """
         if not (threshold_ratio is not None):
             raise ValueError("threshold_ratio must be provided")
-        if not (threshold_ratio is not None):
-            raise ValueError("threshold_ratio must be provided")
         if (
             self.joint_positions.shape[1] == 0
             or self.joint_velocities.shape[1] == 0
@@ -209,8 +205,6 @@ class NonlinearDynamicsMixin:
         """
         if not (joint_idx_1 is not None):
             raise ValueError("joint_idx_1 must be provided")
-        if not (joint_idx_1 is not None):
-            raise ValueError("joint_idx_1 must be provided")
         s1 = np.column_stack(
             (
                 self.joint_positions[:, joint_idx_1],
@@ -249,8 +243,6 @@ class NonlinearDynamicsMixin:
         Returns:
             RQAMetrics object or None
         """
-        if not (recurrence_matrix is not None):
-            raise ValueError("recurrence_matrix must be provided")
         if not (recurrence_matrix is not None):
             raise ValueError("recurrence_matrix must be provided")
         if recurrence_matrix.size == 0:
@@ -316,8 +308,6 @@ class NonlinearDynamicsMixin:
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         N = len(data)
         M = N - (dim - 1) * tau
         if M < 20:
@@ -379,8 +369,6 @@ class NonlinearDynamicsMixin:
         Returns:
             Estimated LLE (nats/s)
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         require(tau >= 1, "tau must be >= 1", tau)
@@ -478,8 +466,6 @@ class NonlinearDynamicsMixin:
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         require(order >= 2, "permutation order must be >= 2", order)
         require(delay >= 1, "delay must be >= 1", delay)
 
@@ -538,8 +524,6 @@ class NonlinearDynamicsMixin:
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         require(m >= 1, "template length m must be >= 1", m)
         require(r > 0, "tolerance r must be positive", r)
 
@@ -593,8 +577,6 @@ class NonlinearDynamicsMixin:
         """
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         mse_values = []
         scales = np.arange(1, max_scale + 1)
 
@@ -643,8 +625,6 @@ class NonlinearDynamicsMixin:
         Returns:
             Fractal dimension (HFD) approx between 1.0 and 2.0
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         require(k_max >= 1, "k_max must be >= 1", k_max)

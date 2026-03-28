@@ -74,8 +74,6 @@ class GaussianNoise(NoiseModel):
         """
         if not (signal is not None):
             raise ValueError("signal must be provided")
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         noise = self._rng.normal(self.mean, self.std, signal.shape)
         return signal + noise
 
@@ -122,8 +120,6 @@ class BrownianNoise(NoiseModel):
         # Update bias with random walk
         if not (signal is not None):
             raise ValueError("signal must be provided")
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         drift = self._rng.normal(0, self.drift_rate)
         self._current_bias += drift
 
@@ -166,8 +162,6 @@ class QuantizationNoise(NoiseModel):
         Returns:
             Quantized signal.
         """
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         if not (signal is not None):
             raise ValueError("signal must be provided")
         shifted = signal - self.offset
@@ -216,8 +210,6 @@ class BandwidthLimitedNoise(NoiseModel):
         """
         if not (signal is not None):
             raise ValueError("signal must be provided")
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         if self._filter_state is None:
             self._filter_state = signal.copy()
             return signal.copy()
@@ -254,8 +246,6 @@ class CompositeNoise(NoiseModel):
         Returns:
             Signal with all noise sources applied.
         """
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         if not (signal is not None):
             raise ValueError("signal must be provided")
         result = signal.copy()
@@ -298,8 +288,6 @@ def create_realistic_sensor_noise(
     Returns:
         Composite noise model with realistic characteristics.
     """
-    if not (noise_std is not None):
-        raise ValueError("noise_std must be provided")
     if not (noise_std is not None):
         raise ValueError("noise_std must be provided")
     resolution = signal_range / (2**quantization_bits)

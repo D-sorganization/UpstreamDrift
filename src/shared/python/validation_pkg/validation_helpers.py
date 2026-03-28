@@ -166,8 +166,6 @@ def validate_magnitude(
     """
     if not (array is not None):
         raise ValueError("array must be provided")
-    if not (array is not None):
-        raise ValueError("array must be provided")
     max_observed = np.max(np.abs(array))
 
     if max_observed > max_value:
@@ -268,8 +266,6 @@ def validate_cartesian_state(
     Warns:
         UserWarning: For plausibility issues
     """
-    if not (level is not None):
-        raise ValueError("level must be provided")
     if not (level is not None):
         raise ValueError("level must be provided")
     if position is not None:

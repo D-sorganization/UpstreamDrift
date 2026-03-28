@@ -117,7 +117,7 @@ class TestPlotScrewAxis3D:
         assert True  # Confirms no exception
 
     def test_assert_screw_not_none(self) -> None:
-        """plot_screw_axis_3d raises AssertionError when screw is None."""
+        """plot_screw_axis_3d raises ValueError when screw is None."""
         ax = _make_mock_ax()
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             plot_screw_axis_3d(ax, None, length=1.0)  # type: ignore[arg-type]

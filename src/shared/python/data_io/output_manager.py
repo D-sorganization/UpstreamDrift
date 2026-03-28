@@ -210,8 +210,6 @@ class OutputManager:
         """
         if not (results is not None):
             raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
         engine_dir = self.directories["simulations"] / engine
         engine_dir.mkdir(parents=True, exist_ok=True)
 
@@ -247,8 +245,6 @@ class OutputManager:
             raise
 
     def _sanitize_filename(self, filename, format_type):
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
         if not (filename is not None):
             raise ValueError("filename must be provided")
         if "OutputFormat." in filename:
@@ -288,8 +284,6 @@ class OutputManager:
         """Save results in CSV format with provenance header."""
         if not (results is not None):
             raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
         is_df = False
         try:
             if isinstance(results, pd.DataFrame):
@@ -316,8 +310,6 @@ class OutputManager:
     ) -> None:
         """Save results in JSON format with provenance and metadata."""
 
-        if not (results is not None):
-            raise ValueError("results must be provided")
         if not (results is not None):
             raise ValueError("results must be provided")
 
@@ -404,8 +396,6 @@ class OutputManager:
         """
         if not (results is not None):
             raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
         executor = self._get_io_executor()
 
         def _save_task() -> Path:
@@ -456,8 +446,6 @@ class OutputManager:
             on_error: Called with exception on failure
         """
 
-        if not (results is not None):
-            raise ValueError("results must be provided")
         if not (results is not None):
             raise ValueError("results must be provided")
 
@@ -604,8 +592,6 @@ class OutputManager:
         """
         if not (analysis_data is not None):
             raise ValueError("analysis_data must be provided")
-        if not (analysis_data is not None):
-            raise ValueError("analysis_data must be provided")
         report_dir = self.directories["reports"] / format_type
         report_dir.mkdir(parents=True, exist_ok=True)
 
@@ -681,8 +667,6 @@ class OutputManager:
 
         if not (directory is not None):
             raise ValueError("directory must be provided")
-        if not (directory is not None):
-            raise ValueError("directory must be provided")
 
         def _scan_recursive(path: Path, depth: int = 0) -> Iterator[Path]:
             if depth > max_depth:
@@ -716,8 +700,6 @@ class OutputManager:
         Returns:
             Number of files cleaned up
         """
-        if not (max_age_days is not None):
-            raise ValueError("max_age_days must be provided")
         if not (max_age_days is not None):
             raise ValueError("max_age_days must be provided")
         cutoff_date = now_local() - timedelta(days=max_age_days)
@@ -773,8 +755,6 @@ class OutputManager:
 
     def _generate_html_report(self, data: dict[str, Any], title: str) -> str:
         """Generate basic HTML report."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         timestamp_str = timestamp_display(utc=False)
@@ -850,8 +830,6 @@ def save_results(
     """
     if not (results is not None):
         raise ValueError("results must be provided")
-    if not (results is not None):
-        raise ValueError("results must be provided")
     manager = OutputManager()
     # Cast to the type expected by save_simulation_results if needed,
     # or rely on structural compatibility.
@@ -884,8 +862,6 @@ def load_results(
 
     TYPE-001: Replaced Any with Union type for better type safety.
     """
-    if not (filename is not None):
-        raise ValueError("filename must be provided")
     if not (filename is not None):
         raise ValueError("filename must be provided")
     manager = OutputManager()

@@ -112,8 +112,6 @@ class EnvironmentDialog(QDialog):
     def _on_build_log(self, line: str) -> None:
         if not (line is not None):
             raise ValueError("line must be provided")
-        if not (line is not None):
-            raise ValueError("line must be provided")
         self.console.append(line)
         # Auto-scroll to bottom
         sb = self.console.verticalScrollBar()
@@ -121,8 +119,6 @@ class EnvironmentDialog(QDialog):
             sb.setValue(sb.maximum())
 
     def _on_build_finished(self, success: bool, message: str) -> None:
-        if not (success is not None):
-            raise ValueError("success must be provided")
         if not (success is not None):
             raise ValueError("success must be provided")
         self.btn_build.setEnabled(True)

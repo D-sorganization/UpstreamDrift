@@ -44,8 +44,6 @@ def evaluate_output(
     """
     if not (base_params is not None):
         raise ValueError("base_params must be provided")
-    if not (base_params is not None):
-        raise ValueError("base_params must be provided")
     params = {**base_params}
     if overrides:
         params.update(overrides)

@@ -236,8 +236,6 @@ class InjuryRiskScorer:
         # Hip risks
         if not (joint_results is not None):
             raise ValueError("joint_results must be provided")
-        if not (joint_results is not None):
-            raise ValueError("joint_results must be provided")
         hip_scores = []
         for name, result in joint_results.items():
             if "hip" in name:
@@ -320,8 +318,6 @@ class InjuryRiskScorer:
         # Kinematic sequence timing
         if not (swing_metrics is not None):
             raise ValueError("swing_metrics must be provided")
-        if not (swing_metrics is not None):
-            raise ValueError("swing_metrics must be provided")
         if "sequence_timing_error" in swing_metrics:
             error = swing_metrics["sequence_timing_error"]
             self.risk_factors.append(
@@ -382,8 +378,6 @@ class InjuryRiskScorer:
         # Acute:Chronic Workload Ratio
         if not (training_load is not None):
             raise ValueError("training_load must be provided")
-        if not (training_load is not None):
-            raise ValueError("training_load must be provided")
         if "acwr" in training_load:
             acwr = training_load["acwr"]
             # Optimal range is 0.8-1.3
@@ -427,8 +421,6 @@ class InjuryRiskScorer:
         """Convert a value to a 0-100 risk score."""
         if not (value is not None):
             raise ValueError("value must be provided")
-        if not (value is not None):
-            raise ValueError("value must be provided")
         if value <= safe:
             return 0
         if value >= high:
@@ -438,8 +430,6 @@ class InjuryRiskScorer:
     def _compute_overall_scores(self, report: InjuryRiskReport) -> None:
         """Compute overall risk scores from individual factors."""
         # Acute risk from biomechanical loading
-        if not (report is not None):
-            raise ValueError("report must be provided")
         if not (report is not None):
             raise ValueError("report must be provided")
         if report.region_scores:
@@ -478,8 +468,6 @@ class InjuryRiskScorer:
 
     def _generate_recommendations(self, report: InjuryRiskReport) -> None:
         """Generate actionable recommendations based on risk factors."""
-        if not (report is not None):
-            raise ValueError("report must be provided")
         if not (report is not None):
             raise ValueError("report must be provided")
         recommendations = []

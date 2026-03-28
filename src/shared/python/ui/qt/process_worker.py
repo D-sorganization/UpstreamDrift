@@ -72,8 +72,6 @@ class ProcessWorker(QThread):
         """
         if not (cmd is not None):
             raise ValueError("cmd must be provided")
-        if not (cmd is not None):
-            raise ValueError("cmd must be provided")
         super().__init__()
         self.cmd = cmd
         self.cwd = cwd

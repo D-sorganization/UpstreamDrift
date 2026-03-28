@@ -154,8 +154,6 @@ class SwingAnimator:
     def _gather_trajectory_data(self, body_names):
         if not (body_names is not None):
             raise ValueError("body_names must be provided")
-        if not (body_names is not None):
-            raise ValueError("body_names must be provided")
         body_data: dict[str, np.ndarray] = {}
         times = np.empty(0)
         for name in body_names:
@@ -185,8 +183,6 @@ class SwingAnimator:
     def _create_body_artists(self, ax, body_data, cfg):
         if not (ax is not None):
             raise ValueError("ax must be provided")
-        if not (ax is not None):
-            raise ValueError("ax must be provided")
         lines: dict[str, Any] = {}
         points: dict[str, Any] = {}
         for name in body_data:
@@ -199,8 +195,6 @@ class SwingAnimator:
         return lines, points
 
     def _set_axis_limits_from_data(self, ax, body_data):
-        if not (ax is not None):
-            raise ValueError("ax must be provided")
         if not (ax is not None):
             raise ValueError("ax must be provided")
         all_pts = np.vstack(list(body_data.values()))
@@ -228,8 +222,6 @@ class SwingAnimator:
         Returns:
             ``FuncAnimation`` for skeleton playback.
         """
-        if not (body_positions is not None):
-            raise ValueError("body_positions must be provided")
         if not (body_positions is not None):
             raise ValueError("body_positions must be provided")
         cfg = self.config
@@ -297,8 +289,6 @@ class SwingAnimator:
         Returns:
             ``FuncAnimation`` for vector evolution.
         """
-        if not (positions is not None):
-            raise ValueError("positions must be provided")
         if not (positions is not None):
             raise ValueError("positions must be provided")
         cfg = self.config
@@ -385,8 +375,6 @@ class SwingAnimator:
         Returns:
             Resolved ``Path`` of the saved file.
         """
-        if not (anim is not None):
-            raise ValueError("anim must be provided")
         if not (anim is not None):
             raise ValueError("anim must be provided")
         out = Path(path)

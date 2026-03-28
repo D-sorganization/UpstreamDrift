@@ -17,8 +17,6 @@ class ComparisonRenderer(BaseRenderer):
         """Plot counterfactual data against actual data."""
         if not (fig is not None):
             raise ValueError("fig must be provided")
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         if cf_name == "dual":
             self._plot_counterfactual_dual(fig, metric_idx)
             return
@@ -79,8 +77,6 @@ class ComparisonRenderer(BaseRenderer):
 
     def _plot_counterfactual_dual(self, fig: Figure, joint_idx: int) -> None:
         """Helper to plot ZTCF (Accel) and ZVCF (Torque) on dual axes."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
         if not (fig is not None):
             raise ValueError("fig must be provided")
         try:

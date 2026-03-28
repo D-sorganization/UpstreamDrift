@@ -149,8 +149,6 @@ def _build_wrench_generators(
     # Compute object frame as centroid
     if not (contacts is not None):
         raise ValueError("contacts must be provided")
-    if not (contacts is not None):
-        raise ValueError("contacts must be provided")
     positions = np.array([c.position for c in contacts])
     object_center = positions.mean(axis=0)
 
@@ -330,8 +328,6 @@ def required_contact_forces(
     Returns:
         Contact forces (3*n_contacts,) or None if infeasible.
     """
-    if not (contacts is not None):
-        raise ValueError("contacts must be provided")
     if not (contacts is not None):
         raise ValueError("contacts must be provided")
     try:

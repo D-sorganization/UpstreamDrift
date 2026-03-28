@@ -192,8 +192,6 @@ def create_styled_figure(
     """
     if not (nrows is not None):
         raise ValueError("nrows must be provided")
-    if not (nrows is not None):
-        raise ValueError("nrows must be provided")
     if figsize is None:
         figsize = (10, 6)
 
@@ -215,8 +213,6 @@ def style_for_export(fig: Figure, dpi: int = 200) -> None:
         fig: Figure to prepare
         dpi: DPI for export (default 200 for crisp output)
     """
-    if not (fig is not None):
-        raise ValueError("fig must be provided")
     if not (fig is not None):
         raise ValueError("fig must be provided")
     fig.set_dpi(dpi)

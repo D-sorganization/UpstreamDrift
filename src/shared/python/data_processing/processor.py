@@ -187,8 +187,6 @@ class DataProcessor:
         """
         if not (path is not None):
             raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
         path = Path(path)
         suffix = path.suffix.lower()
 
@@ -227,8 +225,6 @@ class DataProcessor:
         """Load from an existing DataFrame."""
         if not (df is not None):
             raise ValueError("df must be provided")
-        if not (df is not None):
-            raise ValueError("df must be provided")
         self._df = df.copy()
         self._source_path = ""
         self._history = [
@@ -247,8 +243,6 @@ class DataProcessor:
         time_column: str | None = None,
     ) -> DataProcessor:
         """Trim data to a time range.  Auto-detects the time column if not given."""
-        if not (start is not None):
-            raise ValueError("start must be provided")
         if not (start is not None):
             raise ValueError("start must be provided")
         df = self.dataframe
@@ -270,8 +264,6 @@ class DataProcessor:
         Uses the core ``resample_data`` when available, else falls back to
         pandas interpolation.
         """
-        if not (target_rate is not None):
-            raise ValueError("target_rate must be provided")
         if not (target_rate is not None):
             raise ValueError("target_rate must be provided")
         df = self.dataframe
@@ -326,8 +318,6 @@ class DataProcessor:
         window_size : int
             Window size for moving_average / median / savgol.
         """
-        if not (filter_type is not None):
-            raise ValueError("filter_type must be provided")
         if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
         self._validate_filter_contract(filter_type, window_size)
@@ -401,8 +391,6 @@ class DataProcessor:
         """Apply filter implementation backed by scipy.signal."""
         if not (df is not None):
             raise ValueError("df must be provided")
-        if not (df is not None):
-            raise ValueError("df must be provided")
         from scipy.signal import butter, filtfilt, medfilt, savgol_filter
 
         for column in columns:
@@ -442,8 +430,6 @@ class DataProcessor:
         """
         if not (new_column is not None):
             raise ValueError("new_column must be provided")
-        if not (new_column is not None):
-            raise ValueError("new_column must be provided")
         # Security (issue #2065): validate the expression before passing to
         # DataFrame.eval() which can execute arbitrary Python code.
         _validate_dataframe_expression(expression)
@@ -456,8 +442,6 @@ class DataProcessor:
         """Drop specified columns."""
         if not (columns is not None):
             raise ValueError("columns must be provided")
-        if not (columns is not None):
-            raise ValueError("columns must be provided")
         self._df = self.dataframe.drop(columns=columns, errors="ignore")
         self._history.append(f"Dropped columns: {columns}")
         return self
@@ -466,16 +450,12 @@ class DataProcessor:
         """Rename columns."""
         if not (mapping is not None):
             raise ValueError("mapping must be provided")
-        if not (mapping is not None):
-            raise ValueError("mapping must be provided")
         self._df = self.dataframe.rename(columns=mapping)
         self._history.append(f"Renamed {len(mapping)} columns")
         return self
 
     def sort(self, by: str, ascending: bool = True) -> DataProcessor:
         """Sort by a column."""
-        if not (by is not None):
-            raise ValueError("by must be provided")
         if not (by is not None):
             raise ValueError("by must be provided")
         self._df = self.dataframe.sort_values(by=by, ascending=ascending).reset_index(
@@ -511,8 +491,6 @@ class DataProcessor:
         """Return correlation matrix."""
         if not (method is not None):
             raise ValueError("method must be provided")
-        if not (method is not None):
-            raise ValueError("method must be provided")
         result: pd.DataFrame = self.dataframe.select_dtypes(include="number").corr(
             method=method
         )
@@ -528,8 +506,6 @@ class DataProcessor:
 
         Delegates to ``data_processor.core.outlier_detection`` when available.
         """
-        if not (method is not None):
-            raise ValueError("method must be provided")
         if not (method is not None):
             raise ValueError("method must be provided")
         df = self.dataframe
@@ -576,8 +552,6 @@ class DataProcessor:
 
         Supported formats: .csv, .xlsx, .parquet, .json
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)

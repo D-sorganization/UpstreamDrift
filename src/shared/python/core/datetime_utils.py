@@ -437,8 +437,6 @@ def add_days(dt: datetime | None = None, days: int = 0) -> datetime:
     """
     if not (days is not None):
         raise ValueError("days must be provided")
-    if not (days is not None):
-        raise ValueError("days must be provided")
     if dt is None:
         dt = now_utc()
     return dt + timedelta(days=days)
@@ -487,8 +485,6 @@ def is_expired(dt: datetime, ttl_seconds: float) -> bool:
         >>> is_expired(created, ttl_seconds=1800)  # 30 min TTL
         True
     """
-    if not (dt is not None):
-        raise ValueError("dt must be provided")
     if not (dt is not None):
         raise ValueError("dt must be provided")
     now = now_utc()

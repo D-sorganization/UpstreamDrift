@@ -161,8 +161,6 @@ class MotionPlanner(ABC):
         """
         if not (collision_checker is not None):
             raise ValueError("collision_checker must be provided")
-        if not (collision_checker is not None):
-            raise ValueError("collision_checker must be provided")
         self._collision_checker = collision_checker
         self._config = config or PlannerConfig()
         self._lower_bounds: np.ndarray | None = None
@@ -243,8 +241,6 @@ class MotionPlanner(ABC):
         """
         if not (q_goal is not None):
             raise ValueError("q_goal must be provided")
-        if not (q_goal is not None):
-            raise ValueError("q_goal must be provided")
         if self._rng.random() < self._config.goal_bias:
             return q_goal.copy()
         return self._sample_random()
@@ -259,8 +255,6 @@ class MotionPlanner(ABC):
             True if configuration is valid.
         """
         # Check bounds
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if not (q is not None):
             raise ValueError("q must be provided")
         if (
@@ -290,8 +284,6 @@ class MotionPlanner(ABC):
         Returns:
             New configuration in direction of target.
         """
-        if not (q_from is not None):
-            raise ValueError("q_from must be provided")
         if not (q_from is not None):
             raise ValueError("q_from must be provided")
         max_distance = max_distance or self._config.step_size
@@ -331,8 +323,6 @@ class MotionPlanner(ABC):
         """
         if not (q_from is not None):
             raise ValueError("q_from must be provided")
-        if not (q_from is not None):
-            raise ValueError("q_from must be provided")
         is_free, _ = self._collision_checker.check_path_collision(
             q_from,
             q_to,
@@ -349,8 +339,6 @@ class MotionPlanner(ABC):
         Returns:
             Total path length.
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         if len(path) < 2:

@@ -1,7 +1,3 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 """Import utilities for checking module availability and versions.
 
 This module provides reusable import patterns for dependency checking.
@@ -12,11 +8,11 @@ Usage:
     available = ensure_imports("numpy", "matplotlib")
 """
 
-from __future__ import annotations  # noqa: E402, F404
+from __future__ import annotations
 
-from typing import Any  # noqa: E402
+from typing import Any
 
-from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -165,8 +161,6 @@ def check_minimum_version(
         if check_minimum_version("numpy", "1.20.0"):
             use_new_api()
     """
-    if not (module_name is not None):
-        raise ValueError("module_name must be provided")
     if not (module_name is not None):
         raise ValueError("module_name must be provided")
     from packaging import version

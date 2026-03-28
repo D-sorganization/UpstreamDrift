@@ -558,8 +558,6 @@ class DataProcessorWidget(DataProcessorOpsMixin, BaseCalculatorWidget):
     def _show_table_context_menu(self, pos: QPoint) -> None:
         if not (pos is not None):
             raise ValueError("pos must be provided")
-        if not (pos is not None):
-            raise ValueError("pos must be provided")
         menu = QMenu()
         action = menu.addAction("Copy Selected")
         if action is not None:

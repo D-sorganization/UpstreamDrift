@@ -310,8 +310,6 @@ def save_preset_to_file(
     """
     if not (params is not None):
         raise ValueError("params must be provided")
-    if not (params is not None):
-        raise ValueError("params must be provided")
     import json
 
     import yaml

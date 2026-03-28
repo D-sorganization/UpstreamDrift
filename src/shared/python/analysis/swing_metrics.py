@@ -41,8 +41,6 @@ class SwingMetricsMixin:
         """
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if joint_idx >= self.joint_positions.shape[1]:
             return (0.0, 0.0, 0.0)
 
@@ -135,8 +133,6 @@ class SwingMetricsMixin:
         """
         if not (shoulder_joint_idx is not None):
             raise ValueError("shoulder_joint_idx must be provided")
-        if not (shoulder_joint_idx is not None):
-            raise ValueError("shoulder_joint_idx must be provided")
         if (
             shoulder_joint_idx >= self.joint_positions.shape[1]
             or hip_joint_idx >= self.joint_positions.shape[1]
@@ -166,8 +162,6 @@ class SwingMetricsMixin:
         Returns:
             Tuple of (x_factor_velocity_array, peak_stretch_rate) or None
         """
-        if not (shoulder_joint_idx is not None):
-            raise ValueError("shoulder_joint_idx must be provided")
         if not (shoulder_joint_idx is not None):
             raise ValueError("shoulder_joint_idx must be provided")
         x_factor = self.compute_x_factor(shoulder_joint_idx, hip_joint_idx)

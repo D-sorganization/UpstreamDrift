@@ -43,8 +43,6 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         """
         if not (engine is not None):
             raise ValueError("engine must be provided")
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
         super().__init__()
         self.setWindowTitle(title)
         self.setAccessibleName("Physics Dashboard Main Window")
@@ -119,8 +117,6 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         """Setup standard plotting tab."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
         # Plot Selector
@@ -169,8 +165,6 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         """Setup advanced analysis tab."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
         self.btn_compute = QtWidgets.QPushButton("Compute Analysis (Post-Hoc)")
@@ -206,8 +200,6 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_export_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup export tab."""
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         if not (parent is not None):
             raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
@@ -297,8 +289,6 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _dispatch_plot(self, plot_type: str) -> None:
         """Dispatch to the appropriate plotter method."""
-        if not (plot_type is not None):
-            raise ValueError("plot_type must be provided")
         if not (plot_type is not None):
             raise ValueError("plot_type must be provided")
         fig = self.static_canvas.fig

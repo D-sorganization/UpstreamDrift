@@ -94,8 +94,6 @@ class PoseEstimator:
         """
         if not (model_complexity is not None):
             raise ValueError("model_complexity must be provided")
-        if not (model_complexity is not None):
-            raise ValueError("model_complexity must be provided")
         self.model_complexity = model_complexity
         self.min_detection_confidence = min_detection_confidence
         self.min_tracking_confidence = min_tracking_confidence
@@ -148,8 +146,6 @@ class PoseEstimator:
         Returns:
             PoseFrame with landmarks, or None if no pose detected.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not (frame is not None):
             raise ValueError("frame must be provided")
         if not self._initialized and not self.initialize():
@@ -208,8 +204,6 @@ class PoseEstimator:
         Returns:
             PoseFrame with world-space landmarks, or None if no pose detected.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not (frame is not None):
             raise ValueError("frame must be provided")
         if not self._initialized and not self.initialize():
@@ -276,8 +270,6 @@ class PoseEstimator:
         """
         if not (frame is not None):
             raise ValueError("frame must be provided")
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
         if not MEDIAPIPE_AVAILABLE:
             return frame
 
@@ -322,8 +314,6 @@ class PoseEstimator:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
-        if not (exc_type is not None):
-            raise ValueError("exc_type must be provided")
         if not (exc_type is not None):
             raise ValueError("exc_type must be provided")
         self.close()

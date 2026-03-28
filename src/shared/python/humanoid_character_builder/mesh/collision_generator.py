@@ -188,8 +188,6 @@ class CollisionGeometryGenerator:
         # Convert string enum values
         if not (method is not None):
             raise ValueError("method must be provided")
-        if not (method is not None):
-            raise ValueError("method must be provided")
         if isinstance(method, str):
             method = SimplificationMethod[method.upper()]
         if isinstance(target_complexity, str):
@@ -301,8 +299,6 @@ class CollisionGeometryGenerator:
         """
         if not (max_primitives is not None):
             raise ValueError("max_primitives must be provided")
-        if not (max_primitives is not None):
-            raise ValueError("max_primitives must be provided")
         n_faces = len(mesh.faces) if hasattr(mesh, "faces") else 0
 
         # Simple meshes: single convex hull
@@ -337,8 +333,6 @@ class CollisionGeometryGenerator:
         """Estimate if primitive fitting would work well."""
         if not (max_primitives is not None):
             raise ValueError("max_primitives must be provided")
-        if not (max_primitives is not None):
-            raise ValueError("max_primitives must be provided")
         try:
             extents = mesh.extents
             aspect_ratios = extents / extents.min()
@@ -366,8 +360,6 @@ class CollisionGeometryGenerator:
         vhacd_params: VHACDParameters | None,
     ) -> CollisionGeometryResult:
         """Generate collision geometry using VHACD."""
-        if not (max_hulls is not None):
-            raise ValueError("max_hulls must be provided")
         if not (max_hulls is not None):
             raise ValueError("max_hulls must be provided")
         import trimesh
@@ -412,8 +404,6 @@ class CollisionGeometryGenerator:
         """Use pybullet for VHACD decomposition."""
         if not (params is not None):
             raise ValueError("params must be provided")
-        if not (params is not None):
-            raise ValueError("params must be provided")
         import os
         import tempfile
 
@@ -449,8 +439,6 @@ class CollisionGeometryGenerator:
         max_primitives: int,
     ) -> CollisionGeometryResult:
         """Generate collision geometry using fitted primitives."""
-        if not (max_primitives is not None):
-            raise ValueError("max_primitives must be provided")
         if not (max_primitives is not None):
             raise ValueError("max_primitives must be provided")
         primitives = []
@@ -604,8 +592,6 @@ class CollisionGeometryGenerator:
         """Convert primitive fit to mesh."""
         if not (fit is not None):
             raise ValueError("fit must be provided")
-        if not (fit is not None):
-            raise ValueError("fit must be provided")
         import trimesh
 
         if fit.primitive_type == "box":
@@ -637,8 +623,6 @@ class CollisionGeometryGenerator:
         max_triangles: int,
     ) -> CollisionGeometryResult:
         """Generate collision geometry via mesh decimation."""
-        if not (max_triangles is not None):
-            raise ValueError("max_triangles must be provided")
         if not (max_triangles is not None):
             raise ValueError("max_triangles must be provided")
         if len(mesh.faces) <= max_triangles:
@@ -704,8 +688,6 @@ class CollisionGeometryGenerator:
         # Start with primitive fitting
         if not (max_primitives is not None):
             raise ValueError("max_primitives must be provided")
-        if not (max_primitives is not None):
-            raise ValueError("max_primitives must be provided")
         prim_result = self._generate_primitives(mesh, max_primitives)
 
         # If primitives fit well, use them
@@ -722,8 +704,6 @@ class CollisionGeometryGenerator:
         """Count total triangles in components."""
         if not (components is not None):
             raise ValueError("components must be provided")
-        if not (components is not None):
-            raise ValueError("components must be provided")
         total = 0
         for comp in components:
             if hasattr(comp, "faces"):
@@ -737,8 +717,6 @@ class CollisionGeometryGenerator:
         original_volume: float,
     ) -> float:
         """Compute volume preservation ratio."""
-        if not (components is not None):
-            raise ValueError("components must be provided")
         if not (components is not None):
             raise ValueError("components must be provided")
         if original_volume <= 0:

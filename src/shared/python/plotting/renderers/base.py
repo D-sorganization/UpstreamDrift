@@ -37,8 +37,6 @@ class BaseRenderer:
         """Initialize renderer with data manager."""
         if not (data_manager is not None):
             raise ValueError("data_manager must be provided")
-        if not (data_manager is not None):
-            raise ValueError("data_manager must be provided")
         self.data = data_manager
         self.colors = COLORS
 

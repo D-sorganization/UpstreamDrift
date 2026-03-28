@@ -322,8 +322,6 @@ class BasePoseEditor(ABC):
         """
         if not (joint_index is not None):
             raise ValueError("joint_index must be provided")
-        if not (joint_index is not None):
-            raise ValueError("joint_index must be provided")
         self._state.selected_joint_index = joint_index
         self._notify("selection_changed", joint_index)
 
@@ -380,8 +378,6 @@ class BasePoseEditor(ABC):
         Returns:
             JointInfo or None if not found
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         for joint in self._joint_info:

@@ -140,7 +140,7 @@ class _PerturbWorker(QObject):
 
     def run(self) -> None:
         """Run all trials using the protocol analyzer."""
-        analyzer = PendulumPerturbationAnalyzer(self._simulate_fn, self._extract_fn)
+        analyzer = PendulumPerturbationAnalyzer(self._simulate_fn, self._extract_fn)  # type: ignore[arg-type]
         analyzer.set_base_torque_profile(self._base_coeffs)
         summary: PerturbationSummary = analyzer.run_batch(self._config)
         self.progress.emit(summary.config.n_trials)

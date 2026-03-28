@@ -6,6 +6,7 @@ on:
 # ✅ PERMISSION FIX: Grants access to delete remote branches
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   archive-tasks:

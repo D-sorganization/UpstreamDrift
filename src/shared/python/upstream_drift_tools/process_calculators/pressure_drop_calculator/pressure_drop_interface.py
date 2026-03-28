@@ -392,8 +392,6 @@ def compare_friction_methods(
     """
     if not (reynolds_number is not None):
         raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
     logger.info(
         "\n╔═══════════════════════════════════════════════════════════════════╗"
     )
@@ -500,8 +498,6 @@ def _validate_flow_params(
     """Validate flow rate value and unit."""
     if not (errors is not None):
         raise ValueError("errors must be provided")
-    if not (errors is not None):
-        raise ValueError("errors must be provided")
     if flow_rate is not None:
         if flow_rate <= 0:
             errors.append(f"flow_rate must be positive, got {flow_rate}")
@@ -530,8 +526,6 @@ def _validate_conditions(
     warnings: list[str],
 ) -> None:
     """Validate pressure and temperature values."""
-    if not (errors is not None):
-        raise ValueError("errors must be provided")
     if not (errors is not None):
         raise ValueError("errors must be provided")
     if pressure is not None:
@@ -564,8 +558,6 @@ def _validate_composition_and_fittings(
     """Validate gas composition and fitting specifications."""
     if not (errors is not None):
         raise ValueError("errors must be provided")
-    if not (errors is not None):
-        raise ValueError("errors must be provided")
     if gas_composition:
         total = sum(gas_composition.values())
         if not (0.99 <= total <= 1.01):
@@ -595,8 +587,6 @@ def _log_validation_report(
     is_valid: bool, errors: list[str], warnings: list[str]
 ) -> None:
     """Log a formatted validation report."""
-    if not (is_valid is not None):
-        raise ValueError("is_valid must be provided")
     if not (is_valid is not None):
         raise ValueError("is_valid must be provided")
     logger.info(
@@ -676,8 +666,6 @@ def _wrap_text(text: str, width: int) -> list[str]:
     """Wrap text to specified width."""
     if not (text is not None):
         raise ValueError("text must be provided")
-    if not (text is not None):
-        raise ValueError("text must be provided")
     words = text.split()
     lines = []
     current_line = ""
@@ -715,8 +703,6 @@ def _resolve_pipe_geometry(
     """
     if not (pipe_material is not None):
         raise ValueError("pipe_material must be provided")
-    if not (pipe_material is not None):
-        raise ValueError("pipe_material must be provided")
     if pipe_diameter is None:
         if pipe_size is None or pipe_schedule is None:
             raise ValueError(
@@ -750,8 +736,6 @@ def _resolve_gas_and_flow(
     Returns:
         Tuple of (composition, mass_flow_kg_s).
     """
-    if not (flow_rate is not None):
-        raise ValueError("flow_rate must be provided")
     if not (flow_rate is not None):
         raise ValueError("flow_rate must be provided")
     if gas_composition is None:
@@ -873,8 +857,6 @@ def calculate_pressure_drop(
         ... )
         >>> print(f"ΔP = {result['pressure_drop_bar']:.4f} bar")
     """
-    if not (pipe_length is not None):
-        raise ValueError("pipe_length must be provided")
     if not (pipe_length is not None):
         raise ValueError("pipe_length must be provided")
     temp_k = _convert_temperature(temperature, temperature_unit, "K")
@@ -1020,8 +1002,6 @@ def calculate_pressure_drop_syngas(
         ... )
     """
     # Create syngas composition
-    if not (pipe_size is not None):
-        raise ValueError("pipe_size must be provided")
     if not (pipe_size is not None):
         raise ValueError("pipe_size must be provided")
     syngas = {
@@ -1250,8 +1230,6 @@ def _print_warnings_and_recommendations(
     """Log warnings and engineering recommendations."""
     if not (results is not None):
         raise ValueError("results must be provided")
-    if not (results is not None):
-        raise ValueError("results must be provided")
     if results.get("warnings"):
         warnings = results["warnings"]
         if isinstance(warnings, list) and len(warnings) > 0:
@@ -1289,8 +1267,6 @@ def print_results(
         title: Title for the output
         show_recommendations: Whether to show engineering recommendations
     """
-    if not (results is not None):
-        raise ValueError("results must be provided")
     if not (results is not None):
         raise ValueError("results must be provided")
     logger.info("\n" + "═" * 80)

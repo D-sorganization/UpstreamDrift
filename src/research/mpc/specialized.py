@@ -65,8 +65,6 @@ class CentroidalMPC(ModelPredictiveController):
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         super().__init__(model, horizon, dt)
 
         # Centroidal state dimension: 9 (com pos, vel, ang momentum)
@@ -150,8 +148,6 @@ class CentroidalMPC(ModelPredictiveController):
         Returns:
             Next state.
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
         if not (x is not None):
             raise ValueError("x must be provided")
         com = x[:3]
@@ -266,8 +262,6 @@ class WholeBodyMPC(ModelPredictiveController):
         """
         if not (model is not None):
             raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
         super().__init__(model, horizon, dt)
 
         # Setup default costs for whole-body control
@@ -343,8 +337,6 @@ class WholeBodyMPC(ModelPredictiveController):
         """
         if not (lower_limits is not None):
             raise ValueError("lower_limits must be provided")
-        if not (lower_limits is not None):
-            raise ValueError("lower_limits must be provided")
         from src.research.mpc.controller import Constraint
 
         n_q = self._n_x // 2
@@ -372,8 +364,6 @@ class WholeBodyMPC(ModelPredictiveController):
         """
         if not (torque_limits is not None):
             raise ValueError("torque_limits must be provided")
-        if not (torque_limits is not None):
-            raise ValueError("torque_limits must be provided")
         from src.research.mpc.controller import Constraint
 
         B = np.eye(self._n_u)
@@ -399,8 +389,6 @@ class WholeBodyMPC(ModelPredictiveController):
             MPC solution result.
         """
         # Convert EE targets to joint targets via IK
-        if not (initial_state is not None):
-            raise ValueError("initial_state must be provided")
         if not (initial_state is not None):
             raise ValueError("initial_state must be provided")
         if self._end_effector_targets and hasattr(self.model, "solve_ik"):

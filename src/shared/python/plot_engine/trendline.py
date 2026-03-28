@@ -78,8 +78,6 @@ def _r_squared(y: np.ndarray, y_pred: np.ndarray) -> float:
     """Compute R-squared (coefficient of determination)."""
     if not (y is not None):
         raise ValueError("y must be provided")
-    if not (y is not None):
-        raise ValueError("y must be provided")
     ss_res = np.sum((y - y_pred) ** 2)
     ss_tot = np.sum((y - np.mean(y)) ** 2)
     return float(1.0 - (ss_res / ss_tot)) if ss_tot > 0 else 0.0
@@ -87,8 +85,6 @@ def _r_squared(y: np.ndarray, y_pred: np.ndarray) -> float:
 
 def _linear(x: np.ndarray, y: np.ndarray, x_pred: np.ndarray) -> TrendlineResult:
     """Linear trendline: y = mx + b."""
-    if not (x is not None):
-        raise ValueError("x must be provided")
     if not (x is not None):
         raise ValueError("x must be provided")
     coeffs = np.polyfit(x, y, 1)
@@ -114,8 +110,6 @@ def _polynomial(
     x: np.ndarray, y: np.ndarray, x_pred: np.ndarray, degree: int
 ) -> TrendlineResult:
     """Polynomial trendline: y = a_n*x^n + ... + a_1*x + a_0."""
-    if not (x is not None):
-        raise ValueError("x must be provided")
     if not (x is not None):
         raise ValueError("x must be provided")
     degree = min(degree, len(x) - 1)

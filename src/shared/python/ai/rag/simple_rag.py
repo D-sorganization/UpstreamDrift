@@ -58,8 +58,6 @@ class SimpleRAGStore:
         """
         if not (doc_id is not None):
             raise ValueError("doc_id must be provided")
-        if not (doc_id is not None):
-            raise ValueError("doc_id must be provided")
         self.documents[doc_id] = Document(
             id=doc_id,
             content=content,
@@ -110,8 +108,6 @@ class SimpleRAGStore:
         """
         if not (query_text is not None):
             raise ValueError("query_text must be provided")
-        if not (query_text is not None):
-            raise ValueError("query_text must be provided")
         if not SKLEARN_AVAILABLE or not self.documents:
             return []
 
@@ -148,8 +144,6 @@ class SimpleRAGStore:
         """Save the store to disk."""
         if not (path is not None):
             raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
         data = {"documents": [asdict(doc) for doc in self.documents.values()]}
 
         # Save JSON
@@ -158,8 +152,6 @@ class SimpleRAGStore:
 
     def load(self, path: Path) -> None:
         """Load store from disk."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         if not path.exists():

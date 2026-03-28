@@ -50,8 +50,6 @@ def _solve_thermal_profile(
     def deriv(t: float, temp: float) -> float:
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
         q_in = power_func(t)
         q_loss = h * (temp - t_amb)
         return (q_in - q_loss) / thermal_mass

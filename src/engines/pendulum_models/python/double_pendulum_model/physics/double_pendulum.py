@@ -503,8 +503,6 @@ class DoublePendulumDynamics:
 
         if not (t is not None):
             raise ValueError("t must be provided")
-        if not (t is not None):
-            raise ValueError("t must be provided")
 
         def rk4_increment(
             current_state: DoublePendulumState, scale: float, derivs: Iterable[float]

@@ -125,8 +125,6 @@ def generate_plane_vertices(
     # Four corners in CCW order
     if not (origin is not None):
         raise ValueError("origin must be provided")
-    if not (origin is not None):
-        raise ValueError("origin must be provided")
     corners = np.array(
         [
             origin + half_size * in_plane_x + half_size * in_plane_y,
@@ -158,8 +156,6 @@ def create_instantaneous_plane_visualization(
         SwingPlaneVisualization for the current instant
     """
     # Fit the plane
-    if not (clubhead_velocity is not None):
-        raise ValueError("clubhead_velocity must be provided")
     if not (clubhead_velocity is not None):
         raise ValueError("clubhead_velocity must be provided")
     plane_frame = fit_instantaneous_swing_plane(
@@ -215,8 +211,6 @@ def create_fsp_visualization(
     # Fit the FSP
     if not (clubhead_trajectory is not None):
         raise ValueError("clubhead_trajectory must be provided")
-    if not (clubhead_trajectory is not None):
-        raise ValueError("clubhead_trajectory must be provided")
     fsp_frame = fit_functional_swing_plane(
         clubhead_trajectory, timestamps, impact_time, window_ms
     )
@@ -262,8 +256,6 @@ def compute_trajectory_deviations(
     # Vector from plane origin to each point
     if not (trajectory is not None):
         raise ValueError("trajectory must be provided")
-    if not (trajectory is not None):
-        raise ValueError("trajectory must be provided")
     offsets = trajectory - plane_frame.origin
 
     # Deviation = dot product with normal
@@ -290,8 +282,6 @@ def create_deviation_colormap(
         colors: RGB colors (N, 3) normalized 0-1
     """
     # Normalize deviations to [-1, 1]
-    if not (deviations is not None):
-        raise ValueError("deviations must be provided")
     if not (deviations is not None):
         raise ValueError("deviations must be provided")
     normalized = np.clip(deviations / max_deviation, -1, 1)
@@ -346,8 +336,6 @@ class SwingPlaneVisualizer:
         """
         if not (clubhead_velocity is not None):
             raise ValueError("clubhead_velocity must be provided")
-        if not (clubhead_velocity is not None):
-            raise ValueError("clubhead_velocity must be provided")
         vis = create_instantaneous_plane_visualization(
             clubhead_velocity, grip_position, clubhead_position
         )
@@ -361,8 +349,6 @@ class SwingPlaneVisualizer:
             position: Clubhead position [m] (3,)
             timestamp: Current time [s]
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
         self.trajectory_history.append(position.copy())
@@ -382,8 +368,6 @@ class SwingPlaneVisualizer:
         Returns:
             FSP visualization, or None if insufficient data
         """
-        if not (impact_time is not None):
-            raise ValueError("impact_time must be provided")
         if not (impact_time is not None):
             raise ValueError("impact_time must be provided")
         if len(self.trajectory_history) < 3:
@@ -437,8 +421,6 @@ class SwingPlaneVisualizer:
         Args:
             output_path: Path to output JSON file
         """
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
         from typing import Any

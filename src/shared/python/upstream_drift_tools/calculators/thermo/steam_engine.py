@@ -231,8 +231,6 @@ class SteamCalculationEngine:
         """
         if not (engine is not None):
             raise ValueError("engine must be provided")
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
         if engine == "auto":
             if COOLPROP_AVAILABLE:
                 return "coolprop"
@@ -357,8 +355,6 @@ class SteamCalculationEngine:
         # P in mmHg, T in °C
         if not (temperature_c is not None):
             raise ValueError("temperature_c must be provided")
-        if not (temperature_c is not None):
-            raise ValueError("temperature_c must be provided")
         log_p_mmhg = ANTOINE_A - ANTOINE_B / (ANTOINE_C_CELSIUS + temperature_c)
         p_mmhg = 10**log_p_mmhg
 
@@ -375,8 +371,6 @@ class SteamCalculationEngine:
         # Convert mbar to kPa by dividing by 10 (1 mbar = 0.1 kPa)
         if not (temperature_c is not None):
             raise ValueError("temperature_c must be provided")
-        if not (temperature_c is not None):
-            raise ValueError("temperature_c must be provided")
         a_kpa = BUCK_A / MBAR_TO_KPA_FACTOR
         p_kpa = a_kpa * np.exp(
             (BUCK_B - temperature_c / BUCK_D) * temperature_c / (temperature_c + BUCK_C)
@@ -389,8 +383,6 @@ class SteamCalculationEngine:
         """IAPWS-IF97 formulation for high-accuracy vapor pressure"""
         # Simplified IAPWS implementation
         # For high accuracy, use CoolProp if available
-        if not (temperature_c is not None):
-            raise ValueError("temperature_c must be provided")
         if not (temperature_c is not None):
             raise ValueError("temperature_c must be provided")
         if COOLPROP_AVAILABLE:
@@ -528,8 +520,6 @@ class SteamCalculationEngine:
         # log10(P_mmHg) = A - B/(T_K - C) where C is for temperature in Kelvin
         if not (temperature is not None):
             raise ValueError("temperature must be provided")
-        if not (temperature is not None):
-            raise ValueError("temperature must be provided")
         temp_c = temperature - KELVIN_TO_CELSIUS_OFFSET
 
         if temp_c < 1.0:
@@ -550,8 +540,6 @@ class SteamCalculationEngine:
     ) -> SteamProperties:
         """Calculate saturated steam properties from pressure using simplified correlations"""
         # Inverse Antoine equation to find temperature from pressure
-        if not (pressure is not None):
-            raise ValueError("pressure must be provided")
         if not (pressure is not None):
             raise ValueError("pressure must be provided")
         pressure_mmhg = pressure * PASCAL_TO_MMHG_FACTOR
@@ -779,8 +767,6 @@ class SteamCalculationEngine:
         temperature: float,
     ) -> dict[str, float | None]:
         """Compute derived thermo properties (Z, Pr, k)."""
-        if not (cp is not None):
-            raise ValueError("cp must be provided")
         if not (cp is not None):
             raise ValueError("cp must be provided")
         r_specific = 461.5  # J/kg-K for water

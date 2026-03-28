@@ -68,8 +68,6 @@ class GUIRegistry:
         """
         if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
-        if not (tool_name is not None):
-            raise ValueError("tool_name must be provided")
         registration = GUIRegistration(
             tool_name=tool_name,
             display_name=display_name,
@@ -91,8 +89,6 @@ class GUIRegistry:
         Returns:
             True if the tool was found and removed
         """
-        if not (tool_name is not None):
-            raise ValueError("tool_name must be provided")
         if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
         if tool_name in self._registrations:
@@ -125,8 +121,6 @@ class GUIRegistry:
         Returns:
             LaunchConfig or None if not found
         """
-        if not (tool_name is not None):
-            raise ValueError("tool_name must be provided")
         if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
         registration = self._registrations.get(tool_name)
@@ -168,8 +162,6 @@ class GUIRegistry:
         """
         if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
-        if not (tool_name is not None):
-            raise ValueError("tool_name must be provided")
         registration = self._registrations.get(tool_name)
         if registration:
             return list(registration.gui_configs.keys())
@@ -205,8 +197,6 @@ def register_gui(
         gui_configs: Dictionary mapping GUIType to LaunchConfig
         **kwargs: Additional registration options
     """
-    if not (tool_name is not None):
-        raise ValueError("tool_name must be provided")
     if not (tool_name is not None):
         raise ValueError("tool_name must be provided")
     registry = get_registry()

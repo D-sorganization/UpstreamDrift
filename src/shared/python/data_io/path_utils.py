@@ -193,8 +193,6 @@ def get_relative_path(path: Path | str, base: Path | str | None = None) -> Path:
     """
     if not (path is not None):
         raise ValueError("path must be provided")
-    if not (path is not None):
-        raise ValueError("path must be provided")
     path_obj = Path(path).resolve()
     base_obj = Path(base).resolve() if base else get_repo_root()
 
@@ -223,8 +221,6 @@ def find_file_in_parents(
     Example:
         pyproject = find_file_in_parents("pyproject.toml")
     """
-    if not (filename is not None):
-        raise ValueError("filename must be provided")
     if not (filename is not None):
         raise ValueError("filename must be provided")
     if start_path is None:

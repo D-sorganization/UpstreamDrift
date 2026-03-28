@@ -254,8 +254,6 @@ class IMUSensor:
         # where omega = [0, wx, wy, wz]
         if not (angular_vel is not None):
             raise ValueError("angular_vel must be provided")
-        if not (angular_vel is not None):
-            raise ValueError("angular_vel must be provided")
         omega_mag = float(np.linalg.norm(angular_vel))
 
         if omega_mag < 1e-10:
@@ -328,8 +326,6 @@ def _quaternion_multiply(
     """
     if not (q1 is not None):
         raise ValueError("q1 must be provided")
-    if not (q1 is not None):
-        raise ValueError("q1 must be provided")
     w1, x1, y1, z1 = q1
     w2, x2, y2, z2 = q2
 
@@ -369,8 +365,6 @@ def _rotate_vector_by_quaternion(
         Rotated vector (3,).
     """
     # v' = q * [0, v] * q^{-1}
-    if not (v is not None):
-        raise ValueError("v must be provided")
     if not (v is not None):
         raise ValueError("v must be provided")
     v_quat = np.array([0.0, v[0], v[1], v[2]])
@@ -420,8 +414,6 @@ def create_realistic_imu(
         IMUSensor with appropriate noise characteristics.
     """
     # Noise parameters based on typical sensor grades
-    if not (sensor_id is not None):
-        raise ValueError("sensor_id must be provided")
     if not (sensor_id is not None):
         raise ValueError("sensor_id must be provided")
     noise_params = {

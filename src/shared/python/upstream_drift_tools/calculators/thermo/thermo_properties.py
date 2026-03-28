@@ -112,8 +112,6 @@ class ThermoPropertiesCalculator:
         """
         if not (temperature_c is not None):
             raise ValueError("temperature_c must be provided")
-        if not (temperature_c is not None):
-            raise ValueError("temperature_c must be provided")
         temp_k = temperature_c + 273.15
         pressure_pa = pressure_kpa * 1000.0
 

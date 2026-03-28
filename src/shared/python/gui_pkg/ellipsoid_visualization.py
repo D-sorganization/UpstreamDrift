@@ -113,8 +113,6 @@ def compute_velocity_ellipsoid(
     """
     if not (engine is not None):
         raise ValueError("engine must be provided")
-    if not (engine is not None):
-        raise ValueError("engine must be provided")
     jac_dict = engine.compute_jacobian(body_name)
     if jac_dict is None:
         LOGGER.warning(f"Could not compute Jacobian for '{body_name}'")
@@ -181,8 +179,6 @@ def compute_force_ellipsoid(
         >>> ellipsoid = compute_force_ellipsoid(engine, "clubhead")
         >>> print(f"Max force capability: {ellipsoid.radii.max():.3f} N")
     """
-    if not (engine is not None):
-        raise ValueError("engine must be provided")
     if not (engine is not None):
         raise ValueError("engine must be provided")
     jac_dict = engine.compute_jacobian(body_name)
@@ -261,8 +257,6 @@ def export_ellipsoid_sequence_json(
     """
     if not (sequence is not None):
         raise ValueError("sequence must be provided")
-    if not (sequence is not None):
-        raise ValueError("sequence must be provided")
     data = {
         "body_name": sequence.body_name,
         "timesteps": sequence.timesteps.tolist(),
@@ -298,8 +292,6 @@ def generate_ellipsoid_mesh(
             faces: (M, 3) array of triangle face indices
     """
     # Generate unit sphere vertices
-    if not (ellipsoid is not None):
-        raise ValueError("ellipsoid must be provided")
     if not (ellipsoid is not None):
         raise ValueError("ellipsoid must be provided")
     phi = np.linspace(0, np.pi, n_parallels + 1)
@@ -375,8 +367,6 @@ def export_ellipsoid_obj(
     """
     if not (ellipsoid is not None):
         raise ValueError("ellipsoid must be provided")
-    if not (ellipsoid is not None):
-        raise ValueError("ellipsoid must be provided")
     vertices, faces = generate_ellipsoid_mesh(ellipsoid)
 
     output_path = Path(output_path)
@@ -420,8 +410,6 @@ def export_ellipsoid_stl(
     """
     if not (ellipsoid is not None):
         raise ValueError("ellipsoid must be provided")
-    if not (ellipsoid is not None):
-        raise ValueError("ellipsoid must be provided")
     vertices, faces = generate_ellipsoid_mesh(ellipsoid)
 
     output_path = Path(output_path)
@@ -442,8 +430,6 @@ def _write_stl_binary(
     ellipsoid: EllipsoidData,
 ) -> None:
     """Write binary STL file."""
-    if not (vertices is not None):
-        raise ValueError("vertices must be provided")
     if not (vertices is not None):
         raise ValueError("vertices must be provided")
     import struct
@@ -539,8 +525,6 @@ class EllipsoidVisualizer:
         """
         if not (engine is not None):
             raise ValueError("engine must be provided")
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
         self.engine = engine
         self.ellipsoid_cache: dict[str, EllipsoidData] = {}
         self.sequences: dict[str, EllipsoidSequence] = {}
@@ -554,8 +538,6 @@ class EllipsoidVisualizer:
         Returns:
             Dictionary mapping body names to their EllipsoidData
         """
-        if not (body_names is not None):
-            raise ValueError("body_names must be provided")
         if not (body_names is not None):
             raise ValueError("body_names must be provided")
         results = {}
@@ -575,8 +557,6 @@ class EllipsoidVisualizer:
         Args:
             body_names: List of body names to record
         """
-        if not (body_names is not None):
-            raise ValueError("body_names must be provided")
         if not (body_names is not None):
             raise ValueError("body_names must be provided")
         t = self.engine.get_time()
@@ -619,8 +599,6 @@ class EllipsoidVisualizer:
         # Ensure timesteps are converted to arrays
         if not (output_dir is not None):
             raise ValueError("output_dir must be provided")
-        if not (output_dir is not None):
-            raise ValueError("output_dir must be provided")
         self.finalize_sequences()
 
         output_dir = Path(output_dir)
@@ -637,8 +615,6 @@ class EllipsoidVisualizer:
         Returns:
             Dictionary with manipulability metrics, or None if not computed
         """
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
         if body_name not in self.ellipsoid_cache:

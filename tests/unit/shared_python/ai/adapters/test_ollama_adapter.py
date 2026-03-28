@@ -11,11 +11,11 @@ httpx_mock.Anthropic = MagicMock()
 sys.modules["httpx"] = httpx_mock
 
 
-class MockConnectError(Exception):
+class MockConnectError(OSError):
     pass
 
 
-class MockTimeoutException(Exception):
+class MockTimeoutException(OSError):
     pass
 
 

@@ -54,8 +54,6 @@ class CoordinationMetricsMixin:
         """
         if not (joint_idx_1 is not None):
             raise ValueError("joint_idx_1 must be provided")
-        if not (joint_idx_1 is not None):
-            raise ValueError("joint_idx_1 must be provided")
         if (
             joint_idx_1 >= self.joint_velocities.shape[1]
             or joint_idx_2 >= self.joint_velocities.shape[1]
@@ -110,8 +108,6 @@ class CoordinationMetricsMixin:
         Returns:
             CoordinationMetrics object or None
         """
-        if not (joint_idx_1 is not None):
-            raise ValueError("joint_idx_1 must be provided")
         if not (joint_idx_1 is not None):
             raise ValueError("joint_idx_1 must be provided")
         angles = self.compute_coupling_angles(joint_idx_1, joint_idx_2)
@@ -193,8 +189,6 @@ class CoordinationMetricsMixin:
         """
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if (
             joint_idx >= self.joint_positions.shape[1]
             or joint_idx >= self.joint_velocities.shape[1]
@@ -242,8 +236,6 @@ class CoordinationMetricsMixin:
         """
         if not (joint_idx_1 is not None):
             raise ValueError("joint_idx_1 must be provided")
-        if not (joint_idx_1 is not None):
-            raise ValueError("joint_idx_1 must be provided")
         phi1 = self.compute_phase_angle(joint_idx_1)
         phi2 = self.compute_phase_angle(joint_idx_2)
 
@@ -265,8 +257,6 @@ class CoordinationMetricsMixin:
         Returns:
             Tuple of (correlation_matrix, labels)
         """
-        if not (data_type is not None):
-            raise ValueError("data_type must be provided")
         if not (data_type is not None):
             raise ValueError("data_type must be provided")
         if data_type == "position":
@@ -308,8 +298,6 @@ class CoordinationMetricsMixin:
         Returns:
             Tuple of (times, correlations). Times correspond to window centers.
         """
-        if not (joint_idx_1 is not None):
-            raise ValueError("joint_idx_1 must be provided")
         if not (joint_idx_1 is not None):
             raise ValueError("joint_idx_1 must be provided")
         require(window_size >= 2, "window_size must be >= 2", window_size)
@@ -382,8 +370,6 @@ class CoordinationMetricsMixin:
         """
         if not (data_type is not None):
             raise ValueError("data_type must be provided")
-        if not (data_type is not None):
-            raise ValueError("data_type must be provided")
         if data_type == "position":
             data = self.joint_positions
         elif data_type == "torque":
@@ -416,8 +402,6 @@ class CoordinationMetricsMixin:
 
             def compute_lag_pair(i: int, j: int) -> tuple[int, int, float]:
                 """Compute lag for a single pair of joints."""
-                if not (i is not None):
-                    raise ValueError("i must be provided")
                 if not (i is not None):
                     raise ValueError("i must be provided")
                 lag = signal_processing.compute_time_shift(

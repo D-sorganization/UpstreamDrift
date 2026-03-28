@@ -52,8 +52,6 @@ class GolfSwingPlotter:
         """
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
         self.recorder = recorder
         self.joint_names = joint_names or []
         self.enable_cache = enable_cache

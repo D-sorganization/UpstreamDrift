@@ -20,8 +20,6 @@ def safe_read_json(file_path: Path | str, default: Any = None) -> Any:
     """Read JSON from a file, returning a default on failure."""
     if not (file_path is not None):
         raise ValueError("file_path must be provided")
-    if not (file_path is not None):
-        raise ValueError("file_path must be provided")
     path = Path(file_path)
     if not path.exists():
         return default
@@ -39,8 +37,6 @@ def safe_write_json(
     create_parents: bool = True,
 ) -> bool:
     """Write data as JSON to a file."""
-    if not (file_path is not None):
-        raise ValueError("file_path must be provided")
     if not (file_path is not None):
         raise ValueError("file_path must be provided")
     path = Path(file_path)
@@ -76,8 +72,6 @@ class StateManager:
             base_directory: Base directory for saving states
 
         """
-        if not (base_directory is not None):
-            raise ValueError("base_directory must be provided")
         if not (base_directory is not None):
             raise ValueError("base_directory must be provided")
         self.base_directory = Path(base_directory)
@@ -479,8 +473,6 @@ class StateManager:
         """Sanitize filename for filesystem compatibility"""
         if not (filename is not None):
             raise ValueError("filename must be provided")
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
         import re
 
         # Remove or replace invalid characters
@@ -505,8 +497,6 @@ class StateManager:
 
     def _state_exists(self, state_name: str) -> bool:
         """Check if a state already exists"""
-        if not (state_name is not None):
-            raise ValueError("state_name must be provided")
         if not (state_name is not None):
             raise ValueError("state_name must be provided")
         safe_name = self._sanitize_filename(state_name)

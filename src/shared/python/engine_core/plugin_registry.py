@@ -132,8 +132,6 @@ class PluginRegistry:
         """
         if not (engine_type is not None):
             raise ValueError("engine_type must be provided")
-        if not (engine_type is not None):
-            raise ValueError("engine_type must be provided")
         reg = EngineRegistration(engine_type=engine_type, factory=factory)
         with self._lock:
             self._registrations[engine_type] = reg
@@ -198,8 +196,6 @@ class EngineLifecycle:
             - Engine is no longer tracked
             - shutdown() called if engine supports it
         """
-        if not (engine_type is not None):
-            raise ValueError("engine_type must be provided")
         if not (engine_type is not None):
             raise ValueError("engine_type must be provided")
         engine = self._active.pop(engine_type, None)

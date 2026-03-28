@@ -324,8 +324,6 @@ class PhysicsParameterRegistry:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         param = self.parameters.get(name)
         if param is None:
             return False, f"Parameter {name} not found"
@@ -384,8 +382,6 @@ class PhysicsParameterRegistry:
         Returns:
             Number of parameters imported
         """
-        if not (filepath is not None):
-            raise ValueError("filepath must be provided")
         if not (filepath is not None):
             raise ValueError("filepath must be provided")
         with open(filepath) as f:

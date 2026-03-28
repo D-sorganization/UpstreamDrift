@@ -200,8 +200,6 @@ class SyngasCompressionEngine:
         """Calculate mixture properties from component composition"""
         if not (composition is not None):
             raise ValueError("composition must be provided")
-        if not (composition is not None):
-            raise ValueError("composition must be provided")
         mole_fractions = validate_gas_composition(composition, auto_normalize=True)
 
         mix_mw = 0.0
@@ -436,8 +434,6 @@ class SyngasCompressionEngine:
         """Analyze process conditions and potential concerns"""
         if not (compression_result is not None):
             raise ValueError("compression_result must be provided")
-        if not (compression_result is not None):
-            raise ValueError("compression_result must be provided")
         concerns = []
         warnings = []
         recommendations = []
@@ -522,8 +518,6 @@ class CompressionCalculationWorker(QThread):
         intercooling: bool,
     ) -> None:
         """Initialize the class."""
-        if not (flow_rate is not None):
-            raise ValueError("flow_rate must be provided")
         if not (flow_rate is not None):
             raise ValueError("flow_rate must be provided")
         super().__init__()
@@ -947,8 +941,6 @@ if HAS_PYQT:
             """
             if not (data is not None):
                 raise ValueError("data must be provided")
-            if not (data is not None):
-                raise ValueError("data must be provided")
             result = data["result"]
             analysis = data["analysis"]
 
@@ -983,8 +975,6 @@ if HAS_PYQT:
                 analysis: Dictionary containing analysis data.
             """
             # Use list join for O(n) instead of O(n²) string concatenation
-            if not (result is not None):
-                raise ValueError("result must be provided")
             if not (result is not None):
                 raise ValueError("result must be provided")
             output_parts = [
@@ -1062,8 +1052,6 @@ if HAS_PYQT:
             # Use list join for O(n) instead of O(n²) string concatenation
             if not (analysis is not None):
                 raise ValueError("analysis must be provided")
-            if not (analysis is not None):
-                raise ValueError("analysis must be provided")
             output_parts = [
                 "PROCESS ANALYSIS & CONCERNS\n",
                 "=" * 40 + "\n\n",
@@ -1116,8 +1104,6 @@ if HAS_PYQT:
         def create_plots(self, result: dict[str, Any]) -> None:
             """Create visualization plots"""
             # Clear previous plots
-            if not (result is not None):
-                raise ValueError("result must be provided")
             if not (result is not None):
                 raise ValueError("result must be provided")
             self.figure.clear()

@@ -183,8 +183,6 @@ class EndEffectorLibrary:
         """Get a built-in end effector definition."""
         if not (key is not None):
             raise ValueError("key must be provided")
-        if not (key is not None):
-            raise ValueError("key must be provided")
         if key not in self._builtin_definitions:
             return None
 
@@ -227,8 +225,6 @@ class EndEffectorLibrary:
         """Get info about a built-in end effector."""
         if not (key is not None):
             raise ValueError("key must be provided")
-        if not (key is not None):
-            raise ValueError("key must be provided")
         if key in self._builtin_definitions:
             return {
                 "name": self._builtin_definitions[key]["name"],
@@ -252,8 +248,6 @@ class EndEffectorLibrary:
         Returns:
             Extracted end effector, or None if not found
         """
-        if not (urdf_content is not None):
-            raise ValueError("urdf_content must be provided")
         if not (urdf_content is not None):
             raise ValueError("urdf_content must be provided")
         try:
@@ -318,8 +312,6 @@ class EndEffectorLibrary:
         """Remove an end effector from the library."""
         if not (key is not None):
             raise ValueError("key must be provided")
-        if not (key is not None):
-            raise ValueError("key must be provided")
         if key in self.end_effectors:
             del self.end_effectors[key]
             return True
@@ -335,8 +327,6 @@ class AttachmentPointSelector(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
-        if not (available_links is not None):
-            raise ValueError("available_links must be provided")
         if not (available_links is not None):
             raise ValueError("available_links must be provided")
         super().__init__(parent)
@@ -360,8 +350,6 @@ class AttachmentPointSelector(QDialog):
 
     def _create_attachment_config(self, available_links: list[str]) -> QGroupBox:
         """Create attachment configuration group."""
-        if not (available_links is not None):
-            raise ValueError("available_links must be provided")
         if not (available_links is not None):
             raise ValueError("available_links must be provided")
         attach_group = QGroupBox("Attachment Configuration")
@@ -589,8 +577,6 @@ class EndEffectorManagerWidget(QWidget):
         """Load URDF content."""
         if not (content is not None):
             raise ValueError("content must be provided")
-        if not (content is not None):
-            raise ValueError("content must be provided")
         self.urdf_content = content
         self._on_identify_end_effectors()
 
@@ -810,8 +796,6 @@ class EndEffectorManagerWidget(QWidget):
         """Show a simple selection dialog."""
         if not (title is not None):
             raise ValueError("title must be provided")
-        if not (title is not None):
-            raise ValueError("title must be provided")
         from PyQt6.QtWidgets import QInputDialog
 
         item, ok = QInputDialog.getItem(self, title, label, items, 0, False)
@@ -862,8 +846,6 @@ class EndEffectorManagerWidget(QWidget):
 
     def _attach_end_effector(self, ee: EndEffector, config: dict[str, Any]) -> None:
         """Attach an end effector to the model."""
-        if not (ee is not None):
-            raise ValueError("ee must be provided")
         if not (ee is not None):
             raise ValueError("ee must be provided")
         try:

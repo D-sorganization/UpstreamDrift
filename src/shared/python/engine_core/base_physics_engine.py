@@ -440,8 +440,6 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         """
         if not (checkpoint is not None):
             raise ValueError("checkpoint must be provided")
-        if not (checkpoint is not None):
-            raise ValueError("checkpoint must be provided")
         if not checkpoint.engine_state:
             return
 
@@ -551,8 +549,6 @@ class SimulationMixin:
         Args:
             dt: Time step size
         """
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
         if not (dt is not None):
             raise ValueError("dt must be provided")
         self._simulation_time += dt

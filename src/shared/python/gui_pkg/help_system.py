@@ -112,8 +112,6 @@ def _extract_section_from_manual(content: str, topic: str) -> str | None:
     # Map topics to section headers in the manual
     if not (content is not None):
         raise ValueError("content must be provided")
-    if not (content is not None):
-        raise ValueError("content must be provided")
     topic_mapping = {
         "engine_selection": "Physics Engines Guide",
         "simulation_controls": "Core Features",
@@ -482,8 +480,6 @@ class HelpDialog(QDialog):
         """
         if not (topic is not None):
             raise ValueError("topic must be provided")
-        if not (topic is not None):
-            raise ValueError("topic must be provided")
         if topic == "__user_manual__":
             self._load_user_manual()
             return
@@ -512,8 +508,6 @@ class HelpDialog(QDialog):
         """
         if not (item is not None):
             raise ValueError("item must be provided")
-        if not (item is not None):
-            raise ValueError("item must be provided")
         topic = item.data(Qt.ItemDataRole.UserRole)
         if topic:
             self._load_topic(topic)
@@ -524,8 +518,6 @@ class HelpDialog(QDialog):
         Args:
             index: The selected index.
         """
-        if not (index is not None):
-            raise ValueError("index must be provided")
         if not (index is not None):
             raise ValueError("index must be provided")
         topic = self.topic_combo.itemData(index)
@@ -539,8 +531,6 @@ class HelpDialog(QDialog):
             text: The search text.
         """
         # Filter topic list
-        if not (text is not None):
-            raise ValueError("text must be provided")
         if not (text is not None):
             raise ValueError("text must be provided")
         search_lower = text.lower()
@@ -576,8 +566,6 @@ class HelpButton(QToolButton):
             tooltip: The tooltip text.
             parent: The parent widget.
         """
-        if not (topic is not None):
-            raise ValueError("topic must be provided")
         if not (topic is not None):
             raise ValueError("topic must be provided")
         super().__init__(parent)
@@ -649,8 +637,6 @@ class TooltipManager:
         # Build tooltip HTML
         if not (widget is not None):
             raise ValueError("widget must be provided")
-        if not (widget is not None):
-            raise ValueError("widget must be provided")
         tooltip_html = f"<b>{short_text}</b>"
         if long_text:
             tooltip_html += f"<br/><br/>{long_text}"
@@ -679,8 +665,6 @@ class TooltipManager:
         """
         if not (widget is not None):
             raise ValueError("widget must be provided")
-        if not (widget is not None):
-            raise ValueError("widget must be provided")
         widget_id = id(widget)
         content = cls._tooltip_content.get(widget_id)
         return content.get("topic") if content else None
@@ -697,8 +681,6 @@ class TooltipManager:
             widget: The widget.
             position: Optional position to show tooltip.
         """
-        if not (widget is not None):
-            raise ValueError("widget must be provided")
         if not (widget is not None):
             raise ValueError("widget must be provided")
         widget_id = id(widget)
@@ -735,8 +717,6 @@ def create_help_menu_actions(
         A list of tuples (name, shortcut, callback) for menu actions.
     """
 
-    if not (parent is not None):
-        raise ValueError("parent must be provided")
     if not (parent is not None):
         raise ValueError("parent must be provided")
 
@@ -782,8 +762,6 @@ def add_help_button_to_widget(
     Returns:
         The created HelpButton.
     """
-    if not (layout is not None):
-        raise ValueError("layout must be provided")
     if not (layout is not None):
         raise ValueError("layout must be provided")
     button = HelpButton(topic, tooltip)

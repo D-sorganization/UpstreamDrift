@@ -37,8 +37,6 @@ class EnergyMetricsMixin:
         """
         if not (kinetic_energy is not None):
             raise ValueError("kinetic_energy must be provided")
-        if not (kinetic_energy is not None):
-            raise ValueError("kinetic_energy must be provided")
         require(len(kinetic_energy) > 0, "kinetic_energy must be non-empty")
         require(len(potential_energy) > 0, "potential_energy must be non-empty")
         require(

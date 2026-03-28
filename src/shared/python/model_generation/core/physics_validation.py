@@ -127,8 +127,6 @@ class PhysicsValidator:
         """
         if not (inertia is not None):
             raise ValueError("inertia must be provided")
-        if not (inertia is not None):
-            raise ValueError("inertia must be provided")
         result = InertiaValidationResult(
             is_valid=True,
             is_symmetric=True,
@@ -244,8 +242,6 @@ class PhysicsValidator:
         """
         if not (links is not None):
             raise ValueError("links must be provided")
-        if not (links is not None):
-            raise ValueError("links must be provided")
         if support_link_names is None:
             link_z_positions = []
             for link in links:
@@ -282,8 +278,6 @@ class PhysicsValidator:
         Returns:
             Tuple of (is_stable, margin, support_polygon, tipping_angle_deg).
         """
-        if not (com is not None):
-            raise ValueError("com must be provided")
         if not (com is not None):
             raise ValueError("com must be provided")
         support_polygon: list[tuple[float, float]] | None = None
@@ -339,8 +333,6 @@ class PhysicsValidator:
         """
         if not (links is not None):
             raise ValueError("links must be provided")
-        if not (links is not None):
-            raise ValueError("links must be provided")
         if not links:
             return StabilityResult(
                 is_stable=False,
@@ -385,8 +377,6 @@ class PhysicsValidator:
         Returns:
             CollisionCheckResult with intersection data
         """
-        if not (links is not None):
-            raise ValueError("links must be provided")
         if not (links is not None):
             raise ValueError("links must be provided")
         result = CollisionCheckResult(has_self_intersection=False)
@@ -445,8 +435,6 @@ class PhysicsValidator:
         Returns:
             Complete PhysicsValidationResult
         """
-        if not (links is not None):
-            raise ValueError("links must be provided")
         if not (links is not None):
             raise ValueError("links must be provided")
         result = PhysicsValidationResult(is_valid=True)
@@ -522,8 +510,6 @@ class PhysicsValidator:
         """Check if a 2D point is inside a polygon using ray casting."""
         if not (point is not None):
             raise ValueError("point must be provided")
-        if not (point is not None):
-            raise ValueError("point must be provided")
         x, y = point
         n = len(polygon)
         inside = False
@@ -545,8 +531,6 @@ class PhysicsValidator:
         polygon: list[tuple[float, float]],
     ) -> float:
         """Compute minimum distance from point to polygon edge."""
-        if not (point is not None):
-            raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
         min_dist = float("inf")

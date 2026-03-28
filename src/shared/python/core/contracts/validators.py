@@ -36,8 +36,6 @@ def check_shape(arr: np.ndarray | None, expected_shape: tuple[int, ...]) -> bool
     """
     if not (expected_shape is not None):
         raise ValueError("expected_shape must be provided")
-    if not (expected_shape is not None):
-        raise ValueError("expected_shape must be provided")
     if arr is None:
         return False
     return arr.shape == expected_shape
@@ -81,8 +79,6 @@ def check_symmetric(matrix: np.ndarray, tol: float = 1e-10) -> bool:
     Returns:
         True if matrix is symmetric.
     """
-    if not (matrix is not None):
-        raise ValueError("matrix must be provided")
     if not (matrix is not None):
         raise ValueError("matrix must be provided")
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:

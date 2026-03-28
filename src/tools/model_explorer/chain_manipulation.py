@@ -118,8 +118,6 @@ class KinematicTree:
         """Build the tree from URDF XML content."""
         if not (urdf_content is not None):
             raise ValueError("urdf_content must be provided")
-        if not (urdf_content is not None):
-            raise ValueError("urdf_content must be provided")
         try:
             root_elem = DefusedET.fromstring(urdf_content)
         except ET.ParseError as e:
@@ -180,8 +178,6 @@ class KinematicTree:
             """Recursively assign depth values to each node."""
             if not (node is not None):
                 raise ValueError("node must be provided")
-            if not (node is not None):
-                raise ValueError("node must be provided")
             node.depth = depth
             for child in node.children:
                 set_depth(child, depth + 1)
@@ -210,8 +206,6 @@ class KinematicTree:
         Returns:
             List of nodes in the chain (may be empty if no path exists)
         """
-        if not (from_link is not None):
-            raise ValueError("from_link must be provided")
         if not (from_link is not None):
             raise ValueError("from_link must be provided")
         if from_link not in self.nodes or to_link not in self.nodes:
@@ -262,8 +256,6 @@ class KinematicTree:
             """Recursively collect root-to-leaf chains."""
             if not (node is not None):
                 raise ValueError("node must be provided")
-            if not (node is not None):
-                raise ValueError("node must be provided")
             current_chain = current_chain + [node]
             if node.is_leaf():
                 chains.append(current_chain)
@@ -306,8 +298,6 @@ class ChainVisualizer(QGraphicsView):
 
     def set_tree(self, tree: KinematicTree) -> None:
         """Set the kinematic tree to visualize."""
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
         if not (tree is not None):
             raise ValueError("tree must be provided")
         self.tree = tree
@@ -383,8 +373,6 @@ class ChainVisualizer(QGraphicsView):
         """Draw a single node."""
         if not (node is not None):
             raise ValueError("node must be provided")
-        if not (node is not None):
-            raise ValueError("node must be provided")
         r = self.node_radius
 
         # Determine color based on node type
@@ -448,8 +436,6 @@ class InsertSegmentDialog(QDialog):
         """Initialize the dialog."""
         if not (tree is not None):
             raise ValueError("tree must be provided")
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
         super().__init__(parent)
         self.tree = tree
         self.setWindowTitle("Insert Segment")
@@ -474,8 +460,6 @@ class InsertSegmentDialog(QDialog):
     def _create_insertion_group(
         self, tree: KinematicTree, insert_after: str | None
     ) -> QGroupBox:
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
         if not (tree is not None):
             raise ValueError("tree must be provided")
         insertion_group = QGroupBox("Insertion Point")
@@ -544,8 +528,6 @@ class InsertSegmentDialog(QDialog):
     def _create_reparent_group(self, tree: KinematicTree) -> QGroupBox:
         if not (tree is not None):
             raise ValueError("tree must be provided")
-        if not (tree is not None):
-            raise ValueError("tree must be provided")
         reparent_group = QGroupBox("Re-parent Children")
         reparent_layout = QVBoxLayout(reparent_group)
 
@@ -575,8 +557,6 @@ class InsertSegmentDialog(QDialog):
 
     def _update_reparent_list(self, parent_name: str) -> None:
         """Update the reparent list when parent selection changes."""
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
         if not (parent_name is not None):
             raise ValueError("parent_name must be provided")
         if self.reparent_list is None:
@@ -718,8 +698,6 @@ class ChainManipulationWidget(QWidget):
         """Load URDF content and build the kinematic tree."""
         if not (content is not None):
             raise ValueError("content must be provided")
-        if not (content is not None):
-            raise ValueError("content must be provided")
         self.urdf_content = content
         self.tree.build_from_urdf(content)
         self._update_info()
@@ -752,8 +730,6 @@ class ChainManipulationWidget(QWidget):
 
     def _on_node_selected(self, name: str) -> None:
         """Handle node selection."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         self.selected_node = name
@@ -793,8 +769,6 @@ class ChainManipulationWidget(QWidget):
 
     def _insert_segment(self, config: dict[str, Any]) -> None:
         """Insert a new segment into the URDF."""
-        if not (config is not None):
-            raise ValueError("config must be provided")
         if not (config is not None):
             raise ValueError("config must be provided")
         try:

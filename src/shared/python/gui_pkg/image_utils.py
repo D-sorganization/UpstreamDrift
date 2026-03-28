@@ -45,8 +45,6 @@ def auto_crop_to_content(img: Image.Image, padding: int = 50) -> Image.Image:
     """
     if not (img is not None):
         raise ValueError("img must be provided")
-    if not (img is not None):
-        raise ValueError("img must be provided")
     ensure_pillow()
 
     # Find bounding box
@@ -100,8 +98,6 @@ def enhance_icon_source(
     """
     if not (img is not None):
         raise ValueError("img must be provided")
-    if not (img is not None):
-        raise ValueError("img must be provided")
     ensure_pillow()
 
     if contrast != 1.0:
@@ -127,8 +123,6 @@ def create_optimized_icon(
     Returns:
         Resized and sharpened PIL Image.
     """
-    if not (img is not None):
-        raise ValueError("img must be provided")
     if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()
@@ -205,8 +199,6 @@ def save_ico(
     """
     if not (img is not None):
         raise ValueError("img must be provided")
-    if not (img is not None):
-        raise ValueError("img must be provided")
     ensure_pillow()
     if sizes is None:
         sizes = [16, 32, 48, 64, 128, 256]
@@ -230,8 +222,6 @@ def save_png_icons(
     mode: str = "standard",
 ) -> None:
     """Save multiple PNG icons at specified sizes."""
-    if not (img is not None):
-        raise ValueError("img must be provided")
     if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()

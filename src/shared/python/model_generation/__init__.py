@@ -327,8 +327,6 @@ def quick_build(
     """
     if not (height_m is not None):
         raise ValueError("height_m must be provided")
-    if not (height_m is not None):
-        raise ValueError("height_m must be provided")
     from pathlib import Path
 
     from model_generation.builders.parametric_builder import ParametricBuilder

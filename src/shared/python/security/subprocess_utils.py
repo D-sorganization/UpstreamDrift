@@ -1,7 +1,3 @@
-import logging
-
-logger = logging.getLogger(__name__)
-
 """Subprocess utilities for eliminating subprocess management duplication.
 
 This module provides reusable subprocess patterns to eliminate repeated
@@ -23,17 +19,17 @@ Usage:
     manager.stop("server")
 """
 
-from __future__ import annotations  # noqa: E402, F404
+from __future__ import annotations
 
-import contextlib  # noqa: E402
-import subprocess  # noqa: E402
-import threading  # noqa: E402
-import time  # noqa: E402
-from pathlib import Path  # noqa: E402
+import contextlib
+import subprocess
+import threading
+import time
+from pathlib import Path
 
-from src.shared.python.core.error_decorators import log_errors  # noqa: E402
-from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
-from src.shared.python.security.secure_subprocess import secure_run  # noqa: E402
+from src.shared.python.core.error_decorators import log_errors
+from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.secure_subprocess import secure_run
 
 logger = get_logger(__name__)
 
@@ -68,8 +64,6 @@ def run_command(
         if result and result.returncode == 0:
             logger.info(result.stdout)
     """
-    if not (cmd is not None):
-        raise ValueError("cmd must be provided")
     if not (cmd is not None):
         raise ValueError("cmd must be provided")
     effective_timeout = timeout if timeout is not None else DEFAULT_SUBPROCESS_TIMEOUT
@@ -209,8 +203,6 @@ class ProcessManager:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if name not in self.processes:
             return False
 
@@ -226,8 +218,6 @@ class ProcessManager:
         Returns:
             Tuple of (stdout, stderr) as strings
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         if name not in self.processes:
@@ -250,8 +240,6 @@ class ProcessManager:
         Args:
             timeout: Timeout for each process
         """
-        if not (timeout is not None):
-            raise ValueError("timeout must be provided")
         if not (timeout is not None):
             raise ValueError("timeout must be provided")
         logger.info("Stopping all processes")
@@ -370,8 +358,6 @@ class CommandRunner:
         Returns:
             CompletedProcess object or None if failed after all attempts
         """
-        if not (cmd is not None):
-            raise ValueError("cmd must be provided")
         if not (cmd is not None):
             raise ValueError("cmd must be provided")
         for attempt in range(max_attempts):

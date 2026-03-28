@@ -30,8 +30,6 @@ class ScienceAuditor(ast.NodeVisitor):
         # 1. Division Safety
         if not (node is not None):
             raise ValueError("node must be provided")
-        if not (node is not None):
-            raise ValueError("node must be provided")
         if isinstance(node.op, ast.Div):
             # Check if denominator is a variable or a zero constant
             is_constant_nonzero = (
@@ -50,8 +48,6 @@ class ScienceAuditor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         """Check for trig function unit ambiguity."""
         # 2. Trig Safety (sin, cos, tan)
-        if not (node is not None):
-            raise ValueError("node must be provided")
         if not (node is not None):
             raise ValueError("node must be provided")
         trig_functions = {"sin", "cos", "tan"}

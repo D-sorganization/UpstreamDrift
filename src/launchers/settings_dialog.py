@@ -77,8 +77,6 @@ class SettingsDialog(QDialog):
     ) -> None:
         if not (initial_tab is not None):
             raise ValueError("initial_tab must be provided")
-        if not (initial_tab is not None):
-            raise ValueError("initial_tab must be provided")
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.resize(850, 650)
@@ -342,8 +340,6 @@ class SettingsDialog(QDialog):
         """Render diagnostics results as styled HTML."""
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         summary = data.get("summary", {})
         checks = data.get("checks", [])
         runtime = data.get("runtime_state", {})
@@ -358,8 +354,6 @@ class SettingsDialog(QDialog):
         self._diag_browser.setHtml(html)
 
     def _render_diag_summary(self, summary: dict) -> str:
-        if not (summary is not None):
-            raise ValueError("summary must be provided")
         if not (summary is not None):
             raise ValueError("summary must be provided")
         status = summary.get("status", "unknown").upper()
@@ -383,8 +377,6 @@ class SettingsDialog(QDialog):
     def _render_diag_checks(self, checks: list) -> str:
         if not (checks is not None):
             raise ValueError("checks must be provided")
-        if not (checks is not None):
-            raise ValueError("checks must be provided")
         html = "<h3>Check Results</h3><table style='width:100%;'>"
         for check in checks:
             icon = {"pass": "&#9989;", "fail": "&#10060;", "warning": "&#9888;"}.get(
@@ -404,8 +396,6 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_engines(self, checks: list) -> str:
-        if not (checks is not None):
-            raise ValueError("checks must be provided")
         if not (checks is not None):
             raise ValueError("checks must be provided")
         engine_check = next(
@@ -453,8 +443,6 @@ class SettingsDialog(QDialog):
     def _render_diag_runtime(self, runtime: dict) -> str:
         if not (runtime is not None):
             raise ValueError("runtime must be provided")
-        if not (runtime is not None):
-            raise ValueError("runtime must be provided")
         if not runtime:
             return ""
         html = "<h3>Runtime State</h3><ul>"
@@ -469,8 +457,6 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_recommendations(self, recommendations: list) -> str:
-        if not (recommendations is not None):
-            raise ValueError("recommendations must be provided")
         if not (recommendations is not None):
             raise ValueError("recommendations must be provided")
         if not recommendations:
@@ -533,16 +519,12 @@ class SettingsDialog(QDialog):
     def _on_build_log(self, line: str) -> None:
         if not (line is not None):
             raise ValueError("line must be provided")
-        if not (line is not None):
-            raise ValueError("line must be provided")
         self.build_console.append(line)
         sb = self.build_console.verticalScrollBar()
         if sb:
             sb.setValue(sb.maximum())
 
     def _on_build_finished(self, success: bool, message: str) -> None:
-        if not (success is not None):
-            raise ValueError("success must be provided")
         if not (success is not None):
             raise ValueError("success must be provided")
         self._btn_build.setEnabled(True)

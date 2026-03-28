@@ -522,8 +522,6 @@ class DoublePendulumApp(PendulumRendererMixin):
 
         if not (widget is not None):
             raise ValueError("widget must be provided")
-        if not (widget is not None):
-            raise ValueError("widget must be provided")
 
         def on_enter(event: tk.Event) -> None:
             """Display tooltip near the cursor on mouse enter."""

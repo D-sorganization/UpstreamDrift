@@ -134,8 +134,6 @@ def check_friction_cone(
     """
     if not (normal_force is not None):
         raise ValueError("normal_force must be provided")
-    if not (normal_force is not None):
-        raise ValueError("normal_force must be provided")
     tangent_magnitude = np.linalg.norm(tangent_force)
     max_tangent = friction_coefficient * abs(normal_force)
     return bool(tangent_magnitude <= max_tangent)
@@ -176,8 +174,6 @@ def decompose_contact_force(
     # Normal component
     if not (contact_force is not None):
         raise ValueError("contact_force must be provided")
-    if not (contact_force is not None):
-        raise ValueError("contact_force must be provided")
     normal_force = float(np.dot(contact_force, contact_normal))
 
     # Tangential component
@@ -204,8 +200,6 @@ def classify_contact_state(
         ContactState classification
     """
     # No contact if normal force is negligible or tensile
-    if not (normal_force is not None):
-        raise ValueError("normal_force must be provided")
     if not (normal_force is not None):
         raise ValueError("normal_force must be provided")
     if normal_force <= 0:
@@ -269,8 +263,6 @@ def compute_grip_torque(
     """
     if not (contacts is not None):
         raise ValueError("contacts must be provided")
-    if not (contacts is not None):
-        raise ValueError("contacts must be provided")
     total_torque = np.zeros(3)
 
     for c in contacts:
@@ -320,8 +312,6 @@ class GripContactModel:
         Returns:
             Updated GripContactState
         """
-        if not (contact_positions is not None):
-            raise ValueError("contact_positions must be provided")
         if not (contact_positions is not None):
             raise ValueError("contact_positions must be provided")
         n_contacts = len(contact_positions)
@@ -394,8 +384,6 @@ class GripContactModel:
         Returns:
             Dictionary with equilibrium check results
         """
-        if not (club_weight is not None):
-            raise ValueError("club_weight must be provided")
         if not (club_weight is not None):
             raise ValueError("club_weight must be provided")
         if self.current_state is None:
@@ -498,8 +486,6 @@ def create_mujoco_grip_contacts(
     """
     if not (grip_body_name is not None):
         raise ValueError("grip_body_name must be provided")
-    if not (grip_body_name is not None):
-        raise ValueError("grip_body_name must be provided")
     if hand_body_names is None:
         hand_body_names = ["left_hand", "right_hand"]
 
@@ -578,8 +564,6 @@ class GripContactExporter:
         Args:
             model: GripContactModel to export data from
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
         if not (model is not None):
             raise ValueError("model must be provided")
         self.model = model
@@ -769,8 +753,6 @@ def compute_pressure_visualization(
     Returns:
         PressureVisualizationData for rendering
     """
-    if not (contacts is not None):
-        raise ValueError("contacts must be provided")
     if not (contacts is not None):
         raise ValueError("contacts must be provided")
     if not contacts:

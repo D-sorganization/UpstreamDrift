@@ -48,8 +48,6 @@ class BackgroundWorker(ABC):
         """
         if not (target is not None):
             raise ValueError("target must be provided")
-        if not (target is not None):
-            raise ValueError("target must be provided")
         self.target = target
         self.args = args
         self.kwargs = kwargs or {}
@@ -93,8 +91,6 @@ class BackgroundWorker(ABC):
         """
         if not (callback is not None):
             raise ValueError("callback must be provided")
-        if not (callback is not None):
-            raise ValueError("callback must be provided")
         self._on_complete = callback
         return self
 
@@ -109,8 +105,6 @@ class BackgroundWorker(ABC):
         """
         if not (callback is not None):
             raise ValueError("callback must be provided")
-        if not (callback is not None):
-            raise ValueError("callback must be provided")
         self._on_error = callback
         return self
 
@@ -123,8 +117,6 @@ class BackgroundWorker(ABC):
         Returns:
             Self for chaining
         """
-        if not (callback is not None):
-            raise ValueError("callback must be provided")
         if not (callback is not None):
             raise ValueError("callback must be provided")
         self._on_progress = callback
@@ -171,8 +163,6 @@ class ThreadWorker(BackgroundWorker):
         kwargs: dict[str, Any] | None = None,
     ) -> None:
         """Initialize thread worker."""
-        if not (target is not None):
-            raise ValueError("target must be provided")
         if not (target is not None):
             raise ValueError("target must be provided")
         super().__init__(target, args, kwargs)
@@ -236,8 +226,6 @@ class QtWorker(BackgroundWorker):
         """
         if not (target is not None):
             raise ValueError("target must be provided")
-        if not (target is not None):
-            raise ValueError("target must be provided")
         super().__init__(target, args, kwargs)
 
         try:
@@ -256,8 +244,6 @@ class QtWorker(BackgroundWorker):
                     args: tuple[Any, ...],
                     kwargs: dict[str, Any],
                 ) -> None:
-                    if not (target is not None):
-                        raise ValueError("target must be provided")
                     if not (target is not None):
                         raise ValueError("target must be provided")
                     super().__init__()
@@ -304,8 +290,6 @@ class QtWorker(BackgroundWorker):
 
     def _handle_error(self, error: Exception) -> None:
         """Handle error signal from Qt thread."""
-        if not (error is not None):
-            raise ValueError("error must be provided")
         if not (error is not None):
             raise ValueError("error must be provided")
         self._error = error
@@ -357,8 +341,6 @@ def get_worker_adapter(
     Returns:
         Appropriate BackgroundWorker implementation
     """
-    if not (target is not None):
-        raise ValueError("target must be provided")
     if not (target is not None):
         raise ValueError("target must be provided")
     if force_threading or not is_qt_available():

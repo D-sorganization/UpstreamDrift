@@ -44,8 +44,6 @@ class BaseCalculatorWindow(QMainWindow, BaseCalculatorMixin):
     ) -> None:
         if not (calculator_name is not None):
             raise ValueError("calculator_name must be provided")
-        if not (calculator_name is not None):
-            raise ValueError("calculator_name must be provided")
         QMainWindow.__init__(self, parent)
         BaseCalculatorMixin.__init__(self, calculator_name)
 

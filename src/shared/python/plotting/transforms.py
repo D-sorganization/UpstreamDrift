@@ -28,8 +28,6 @@ class DataManager:
         """
         if not (recorder is not None):
             raise ValueError("recorder must be provided")
-        if not (recorder is not None):
-            raise ValueError("recorder must be provided")
         self.recorder = recorder
         self.joint_names = joint_names or []
         self.enable_cache = enable_cache
@@ -80,8 +78,6 @@ class DataManager:
         """
         if not (field_name is not None):
             raise ValueError("field_name must be provided")
-        if not (field_name is not None):
-            raise ValueError("field_name must be provided")
         if not self.enable_cache:
             times, values = self.recorder.get_time_series(field_name)
             return np.asarray(times), np.asarray(values)
@@ -108,16 +104,12 @@ class DataManager:
         """Get human-readable joint name."""
         if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
-        if not (joint_idx is not None):
-            raise ValueError("joint_idx must be provided")
         if 0 <= joint_idx < len(self.joint_names):
             return self.joint_names[joint_idx]
         return f"Joint {joint_idx}"
 
     def get_aligned_label(self, idx: int, data_dim: int) -> str:
         """Get label aligned with data dimension (handling nq != nv)."""
-        if not (idx is not None):
-            raise ValueError("idx must be provided")
         if not (idx is not None):
             raise ValueError("idx must be provided")
         if len(self.joint_names) == 0:
@@ -148,8 +140,6 @@ class DataManager:
         self, source_name: str
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get club induced acceleration series (uncached)."""
-        if not (source_name is not None):
-            raise ValueError("source_name must be provided")
         if not (source_name is not None):
             raise ValueError("source_name must be provided")
         if hasattr(self.recorder, "get_club_induced_acceleration_series"):

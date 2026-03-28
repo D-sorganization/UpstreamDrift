@@ -61,8 +61,6 @@ def _create_arm_bodies():
 def _create_arm_joints(arm, humerus, radius):
     if not (arm is not None):
         raise ValueError("arm must be provided")
-    if not (arm is not None):
-        raise ValueError("arm must be provided")
     shoulder = osim.PinJoint(
         "shoulder",
         arm.getGround(),  # parent frame
@@ -88,8 +86,6 @@ def _create_arm_joints(arm, humerus, radius):
 def _create_biceps_muscle(humerus, radius):
     if not (humerus is not None):
         raise ValueError("humerus must be provided")
-    if not (humerus is not None):
-        raise ValueError("humerus must be provided")
     biceps = osim.Millard2012EquilibriumMuscle(
         "biceps",  # name
         200.0,  # max isometric force [N]
@@ -112,8 +108,6 @@ def _create_controller(biceps):
 def _add_reporter(arm, biceps, elbow):
     if not (arm is not None):
         raise ValueError("arm must be provided")
-    if not (arm is not None):
-        raise ValueError("arm must be provided")
     reporter = osim.ConsoleReporter()
     reporter.set_report_time_interval(1.0)
     reporter.addToReport(biceps.getOutput("fiber_force"))
@@ -123,8 +117,6 @@ def _add_reporter(arm, biceps, elbow):
 
 
 def _attach_body_visualization(body, name):
-    if not (body is not None):
-        raise ValueError("body must be provided")
     if not (body is not None):
         raise ValueError("body must be provided")
     body_geometry = osim.Ellipsoid(0.1, 0.5, 0.1)
@@ -179,8 +171,6 @@ def run_simulation(model: osim.Model, duration: float = 10.0) -> osim.State:
         Final state after simulation.
     """
     # Initialize the system
-    if not (model is not None):
-        raise ValueError("model must be provided")
     if not (model is not None):
         raise ValueError("model must be provided")
     state = model.initSystem()

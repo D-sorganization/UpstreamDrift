@@ -60,8 +60,6 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         # Create task config for walking
         if not (engine is not None):
             raise ValueError("engine must be provided")
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
         task_config = TaskConfig(
             task_type=TaskType.LOCOMOTION,
             target_velocity=np.array([target_velocity, 0.0, 0.0]),
@@ -154,8 +152,6 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for walking task."""
-        if not (action is not None):
-            raise ValueError("action must be provided")
         if not (action is not None):
             raise ValueError("action must be provided")
         reward = 0.0
@@ -287,8 +283,6 @@ class HumanoidStandEnv(RoboticsGymEnv):
         """
         if not (engine is not None):
             raise ValueError("engine must be provided")
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
         task_config = TaskConfig(
             task_type=TaskType.BALANCE,
             target_velocity=np.array([0.0, 0.0, 0.0]),
@@ -360,8 +354,6 @@ class HumanoidStandEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for standing task."""
-        if not (action is not None):
-            raise ValueError("action must be provided")
         if not (action is not None):
             raise ValueError("action must be provided")
         reward = 0.0

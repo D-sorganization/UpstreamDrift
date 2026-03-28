@@ -539,8 +539,6 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         """
         if not (position_error is not None):
             raise ValueError("position_error must be provided")
-        if not (position_error is not None):
-            raise ValueError("position_error must be provided")
         self.lbl_position_error.setText(f"{position_error:.4f} m")
 
         if velocity_error is not None:

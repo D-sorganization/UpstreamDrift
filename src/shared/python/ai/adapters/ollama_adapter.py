@@ -160,8 +160,6 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         if not (message is not None):
             raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         client = self._get_client()
 
         # Format messages for Ollama
@@ -224,8 +222,6 @@ class OllamaAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
         if not (message is not None):
             raise ValueError("message must be provided")
         client = self._get_client()
@@ -365,8 +361,6 @@ class OllamaAdapter(BaseAgentAdapter):
         """
         if not (context is not None):
             raise ValueError("context must be provided")
-        if not (context is not None):
-            raise ValueError("context must be provided")
         messages: list[dict[str, str]] = []
 
         # Add system prompt
@@ -411,8 +405,6 @@ class OllamaAdapter(BaseAgentAdapter):
         Returns:
             Parsed AgentResponse.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
         if not (data is not None):
             raise ValueError("data must be provided")
         message = data.get("message", {})

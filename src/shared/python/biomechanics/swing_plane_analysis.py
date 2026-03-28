@@ -50,8 +50,6 @@ class SwingPlaneAnalyzer:
         """
         if not (points is not None):
             raise ValueError("points must be provided")
-        if not (points is not None):
-            raise ValueError("points must be provided")
         require(len(points) >= 3, "At least 3 points required to fit a plane")
 
         centroid = np.mean(points, axis=0)
@@ -93,8 +91,6 @@ class SwingPlaneAnalyzer:
         """
         if not (points is not None):
             raise ValueError("points must be provided")
-        if not (points is not None):
-            raise ValueError("points must be provided")
         result = np.dot(points - centroid, normal)
         return np.asarray(result)
 
@@ -113,8 +109,6 @@ class SwingPlaneAnalyzer:
         Returns:
             SwingPlaneMetrics object
         """
-        if not (points is not None):
-            raise ValueError("points must be provided")
         if not (points is not None):
             raise ValueError("points must be provided")
         centroid, normal = self.fit_plane(points)

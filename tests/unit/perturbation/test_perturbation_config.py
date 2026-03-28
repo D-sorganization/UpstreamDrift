@@ -34,11 +34,11 @@ class TestPerturbationConfig:
         assert cfg.seed == 42
 
     def test_n_trials_zero_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             PerturbationConfig(n_trials=0)
 
     def test_n_trials_negative_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             PerturbationConfig(n_trials=-10)
 
     def test_noise_amplitude_zero_allowed(self) -> None:
@@ -46,7 +46,7 @@ class TestPerturbationConfig:
         assert cfg.noise_amplitude == pytest.approx(0.0)
 
     def test_noise_amplitude_negative_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             PerturbationConfig(noise_amplitude=-0.1)
 
     def test_noise_type_white(self) -> None:
@@ -62,7 +62,7 @@ class TestPerturbationConfig:
         assert cfg.noise_type == "brown"
 
     def test_noise_type_invalid_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             PerturbationConfig(noise_type="red")
 
     def test_perturb_mode_additive(self) -> None:
@@ -78,7 +78,7 @@ class TestPerturbationConfig:
         assert cfg.perturb_mode == "both"
 
     def test_perturb_mode_invalid_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises(ValueError):
             PerturbationConfig(perturb_mode="subtractive")
 
     def test_seed_integer(self) -> None:

@@ -128,8 +128,6 @@ def friction_factor_colebrook(
     """
     if not (reynolds_number is not None):
         raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -183,8 +181,6 @@ def friction_factor_swamee_jain(
     """
     if not (reynolds_number is not None):
         raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
         return friction_factor_laminar(reynolds_number)
 
@@ -229,8 +225,6 @@ def friction_factor_churchill(
     """
     if not (reynolds_number is not None):
         raise ValueError("reynolds_number must be provided")
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
     Re = reynolds_number
 
     if Re < 1:
@@ -269,8 +263,6 @@ def friction_factor_haaland(reynolds_number: float, relative_roughness: float) -
         Haaland, S.E. (1983): "Simple and Explicit Formulas for Friction Factor"
         J. Fluids Engineering, 105(1), 89-90
     """
-    if not (reynolds_number is not None):
-        raise ValueError("reynolds_number must be provided")
     if not (reynolds_number is not None):
         raise ValueError("reynolds_number must be provided")
     if reynolds_number < RE_LAMINAR_UPPER:
@@ -524,8 +516,6 @@ def calculate_fitting_pressure_drop(
     """
     if not (fittings is not None):
         raise ValueError("fittings must be provided")
-    if not (fittings is not None):
-        raise ValueError("fittings must be provided")
     total_k = 0.0
     velocity_head = 0.5 * density * (velocity**2)
 
@@ -581,8 +571,6 @@ def calculate_elevation_pressure_drop(density: float, elevation_change: float) -
     """
     if not (density is not None):
         raise ValueError("density must be provided")
-    if not (density is not None):
-        raise ValueError("density must be provided")
     dp_elevation = density * GRAVITY * elevation_change
 
     logger.debug(f"Elevation: Δh={elevation_change:.1f}m, ΔP={dp_elevation:.1f} Pa")
@@ -613,8 +601,6 @@ def _iterate_compressible_pressure(
     Returns:
         Tuple of (converged_P2, is_choked). If choked, P2 is meaningless.
     """
-    if not (P1 is not None):
-        raise ValueError("P1 must be provided")
     if not (P1 is not None):
         raise ValueError("P1 must be provided")
     P2 = P2_initial
@@ -760,8 +746,6 @@ def calculate_expansion_factor(
     """
     if not (inlet_pressure is not None):
         raise ValueError("inlet_pressure must be provided")
-    if not (inlet_pressure is not None):
-        raise ValueError("inlet_pressure must be provided")
     if inlet_pressure <= 0 or pressure_drop < 0:
         return 1.0
 
@@ -830,8 +814,6 @@ def calculate_erosional_velocity(
     """
     if not (density is not None):
         raise ValueError("density must be provided")
-    if not (density is not None):
-        raise ValueError("density must be provided")
     if service_type == "continuous":
         C = API_14E_C_CONTINUOUS
     elif service_type == "intermittent" or service_type == "non_corrosive":
@@ -884,8 +866,6 @@ class PressureDropCalculationEngine:
         """
         if not (inputs is not None):
             raise ValueError("inputs must be provided")
-        if not (inputs is not None):
-            raise ValueError("inputs must be provided")
         dp_friction = calculate_frictional_pressure_drop(
             friction_factor,
             inputs.pipe_length,
@@ -926,8 +906,6 @@ class PressureDropCalculationEngine:
         Returns:
             (total_dp, outlet_pressure, dp_acceleration, warnings)
         """
-        if not (inputs is not None):
-            raise ValueError("inputs must be provided")
         if not (inputs is not None):
             raise ValueError("inputs must be provided")
         warnings_list: list[str] = []

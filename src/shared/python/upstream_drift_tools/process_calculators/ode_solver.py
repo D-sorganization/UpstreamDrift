@@ -32,8 +32,6 @@ class ODESolver:
         """
         if not (derivatives is not None):
             raise ValueError("derivatives must be provided")
-        if not (derivatives is not None):
-            raise ValueError("derivatives must be provided")
         self.derivatives = derivatives
         self.parameters = parameters
 
@@ -67,8 +65,6 @@ class ODESolver:
         Returns:
             List of derivatives for each variable.
         """
-        if not (t is not None):
-            raise ValueError("t must be provided")
         if not (t is not None):
             raise ValueError("t must be provided")
         args = [t] + list(y) + [self.parameters[p] for p in self.parameters]

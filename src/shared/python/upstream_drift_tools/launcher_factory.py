@@ -166,8 +166,6 @@ def launch_app(
     """
     if not (config is not None):
         raise ValueError("config must be provided")
-    if not (config is not None):
-        raise ValueError("config must be provided")
     validate_launcher_config(config)
 
     try:

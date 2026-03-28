@@ -80,8 +80,6 @@ class MultiModelShotTracerWidget(QWidget):
         """Initialize the shot tracer widget."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         super().__init__(parent)
         self.results: dict[str, FlightResult] = {}
         self.trajectory_plots: dict[str, Any] = {}
@@ -302,8 +300,6 @@ class MultiModelShotTracerWidget(QWidget):
 
     def _apply_preset(self, club: str) -> None:
         """Apply preset values for a club type."""
-        if not (club is not None):
-            raise ValueError("club must be provided")
         if not (club is not None):
             raise ValueError("club must be provided")
         presets = {

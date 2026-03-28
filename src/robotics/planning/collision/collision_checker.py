@@ -169,8 +169,6 @@ class CollisionChecker:
         """
         if not (name is not None):
             raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if name in self._environment_primitives:
             del self._environment_primitives[name]
             return True
@@ -273,8 +271,6 @@ class CollisionChecker:
         """Check collision between body pair."""
         if not (pair is not None):
             raise ValueError("pair must be provided")
-        if not (pair is not None):
-            raise ValueError("pair must be provided")
         geom_a = self._engine.get_body_collision_geometry(pair.body_a)
         geom_b = self._engine.get_body_collision_geometry(pair.body_b)
 
@@ -300,8 +296,6 @@ class CollisionChecker:
         """Check collision between robot body and environment."""
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         body_geom = self._engine.get_body_collision_geometry(body_name)
         if body_geom is None:
             return False
@@ -323,8 +317,6 @@ class CollisionChecker:
         margin: float,
     ) -> bool:
         """Check if AABBs overlap (with margin)."""
-        if not (prim_a is not None):
-            raise ValueError("prim_a must be provided")
         if not (prim_a is not None):
             raise ValueError("prim_a must be provided")
         min_a, max_a = prim_a.get_aabb()
@@ -438,8 +430,6 @@ class CollisionChecker:
         """Compute distance between body pair."""
         if not (pair is not None):
             raise ValueError("pair must be provided")
-        if not (pair is not None):
-            raise ValueError("pair must be provided")
         geom_a = self._engine.get_body_collision_geometry(pair.body_a)
         geom_b = self._engine.get_body_collision_geometry(pair.body_b)
 
@@ -454,8 +444,6 @@ class CollisionChecker:
         env_primitive: GeometricPrimitive,
     ) -> tuple[float, np.ndarray, np.ndarray]:
         """Compute distance between body and environment primitive."""
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
         body_geom = self._engine.get_body_collision_geometry(body_name)
@@ -512,8 +500,6 @@ class CollisionChecker:
         """
         if not (body_a is not None):
             raise ValueError("body_a must be provided")
-        if not (body_a is not None):
-            raise ValueError("body_a must be provided")
         pair = CollisionPair(body_a, body_b)
         if pair in self._collision_pairs:
             self._collision_pairs.remove(pair)
@@ -527,8 +513,6 @@ class CollisionChecker:
             body_a: First body name.
             body_b: Second body name.
         """
-        if not (body_a is not None):
-            raise ValueError("body_a must be provided")
         if not (body_a is not None):
             raise ValueError("body_a must be provided")
         pair = CollisionPair(body_a, body_b)

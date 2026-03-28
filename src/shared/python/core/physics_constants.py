@@ -29,8 +29,6 @@ class PhysicalConstant(float):
     ) -> None:
         if not (value is not None):
             raise ValueError("value must be provided")
-        if not (value is not None):
-            raise ValueError("value must be provided")
         self.unit = unit
         self.source = source
         self.description = description

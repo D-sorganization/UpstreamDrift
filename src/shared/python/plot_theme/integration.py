@@ -43,8 +43,6 @@ def apply_plot_theme(
     """
     if not (settings_app is not None):
         raise ValueError("settings_app must be provided")
-    if not (settings_app is not None):
-        raise ValueError("settings_app must be provided")
     manager = get_plot_theme_manager(settings_app=settings_app)
 
     if theme_name:
@@ -71,8 +69,6 @@ def create_themed_figure(
     """
     if not (figsize is not None):
         raise ValueError("figsize must be provided")
-    if not (figsize is not None):
-        raise ValueError("figsize must be provided")
     import matplotlib.pyplot as plt
 
     manager = get_plot_theme_manager()
@@ -97,8 +93,6 @@ def style_axis(
         ax: Axes to style
         theme_name: Theme to use (None = current theme)
     """
-    if not (ax is not None):
-        raise ValueError("ax must be provided")
     if not (ax is not None):
         raise ValueError("ax must be provided")
     manager = get_plot_theme_manager()
@@ -183,8 +177,6 @@ class PlotThemeMixin:
         """
         if not (settings_org is not None):
             raise ValueError("settings_org must be provided")
-        if not (settings_org is not None):
-            raise ValueError("settings_org must be provided")
         self._plot_theme_manager = get_plot_theme_manager(
             settings_org=settings_org,
             settings_app=settings_app,
@@ -203,8 +195,6 @@ class PlotThemeMixin:
     def _on_plot_theme_changed_internal(self, theme: PlotTheme) -> None:
         """Internal handler for theme changes."""
         # Apply to matplotlib
-        if not (theme is not None):
-            raise ValueError("theme must be provided")
         if not (theme is not None):
             raise ValueError("theme must be provided")
         if self._plot_theme_manager:
@@ -315,8 +305,6 @@ def setup_plot_theme_for_app(
     Returns:
         PlotThemeManager instance
     """
-    if not (add_menu is not None):
-        raise ValueError("add_menu must be provided")
     if not (add_menu is not None):
         raise ValueError("add_menu must be provided")
     if settings_app is None:

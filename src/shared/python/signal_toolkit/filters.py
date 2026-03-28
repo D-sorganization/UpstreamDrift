@@ -91,8 +91,6 @@ class FilterSpec:
         """
         if not (num_points is not None):
             raise ValueError("num_points must be provided")
-        if not (num_points is not None):
-            raise ValueError("num_points must be provided")
         w, h = scipy_signal.freqz(self.b, self.a, worN=num_points, fs=self.fs)
         magnitude = np.abs(h)
         phase = np.angle(h)
@@ -110,8 +108,6 @@ class FilterSpec:
         Returns:
             Tuple of (time, impulse_response).
         """
-        if not (num_samples is not None):
-            raise ValueError("num_samples must be provided")
         if not (num_samples is not None):
             raise ValueError("num_samples must be provided")
         impulse = np.zeros(num_samples)
@@ -188,8 +184,6 @@ class FilterDesigner:
         """
         if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
-        if not (filter_type is not None):
-            raise ValueError("filter_type must be provided")
         require(order > 0, f"Filter order must be positive, got {order}")
         require(fs > 0, f"Sampling frequency must be positive, got {fs}")
         wn, btype = _normalize_cutoff(filter_type, cutoff, fs)
@@ -226,8 +220,6 @@ class FilterDesigner:
         """
         if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
-        if not (filter_type is not None):
-            raise ValueError("filter_type must be provided")
         wn, btype = _normalize_cutoff(filter_type, cutoff, fs)
         b, a = cheby1(order, ripple_db, wn, btype=btype)
         return FilterSpec(
@@ -260,8 +252,6 @@ class FilterDesigner:
         Returns:
             FilterSpec with filter coefficients.
         """
-        if not (filter_type is not None):
-            raise ValueError("filter_type must be provided")
         if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
         wn, btype = _normalize_cutoff(filter_type, cutoff, fs)
@@ -300,8 +290,6 @@ class FilterDesigner:
         """
         if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
-        if not (filter_type is not None):
-            raise ValueError("filter_type must be provided")
         wn, btype = _normalize_cutoff(filter_type, cutoff, fs)
         b, a = ellip(order, ripple_db, attenuation_db, wn, btype=btype)
         return FilterSpec(
@@ -334,8 +322,6 @@ class FilterDesigner:
         """
         if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
-        if not (filter_type is not None):
-            raise ValueError("filter_type must be provided")
         wn, btype = _normalize_cutoff(filter_type, cutoff, fs)
         b, a = _scipy_bessel(order, wn, btype=btype, norm="phase")
         return FilterSpec(
@@ -364,8 +350,6 @@ def apply_filter(
     Returns:
         Filtered signal.
     """
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if not (signal is not None):
         raise ValueError("signal must be provided")
     if zero_phase:
@@ -411,8 +395,6 @@ def create_butterworth_filter(
     """
     if not (filter_type is not None):
         raise ValueError("filter_type must be provided")
-    if not (filter_type is not None):
-        raise ValueError("filter_type must be provided")
     ft = FilterType(filter_type)
     return FilterDesigner.butterworth(ft, cutoff, fs, order)
 
@@ -436,8 +418,6 @@ def create_chebyshev_filter(
     Returns:
         FilterSpec.
     """
-    if not (filter_type is not None):
-        raise ValueError("filter_type must be provided")
     if not (filter_type is not None):
         raise ValueError("filter_type must be provided")
     ft = FilterType(filter_type)
@@ -478,8 +458,6 @@ def create_savgol_filter(
     """
     if not (window_length is not None):
         raise ValueError("window_length must be provided")
-    if not (window_length is not None):
-        raise ValueError("window_length must be provided")
     if window_length % 2 == 0:
         window_length += 1
 
@@ -504,8 +482,6 @@ def apply_moving_average(
     Returns:
         Filtered signal.
     """
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if not (signal is not None):
         raise ValueError("signal must be provided")
     filter_func = create_moving_average_filter(window_size)
@@ -535,8 +511,6 @@ def apply_savgol(
     Returns:
         Filtered signal.
     """
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if not (signal is not None):
         raise ValueError("signal must be provided")
     if window_length % 2 == 0:
@@ -578,8 +552,6 @@ def apply_median_filter(
     """
     if not (signal is not None):
         raise ValueError("signal must be provided")
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if kernel_size % 2 == 0:
         kernel_size += 1
 
@@ -607,8 +579,6 @@ def apply_exponential_smoothing(
     Returns:
         Smoothed signal.
     """
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if not (signal is not None):
         raise ValueError("signal must be provided")
     require(0.0 < alpha <= 1.0, f"alpha must be in (0, 1], got {alpha}")
@@ -641,8 +611,6 @@ def apply_gaussian_smoothing(
     Returns:
         Smoothed signal.
     """
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if not (signal is not None):
         raise ValueError("signal must be provided")
     require(sigma > 0.0, f"sigma must be positive, got {sigma}")
@@ -678,8 +646,6 @@ def apply_bilateral_filter(
     Returns:
         Filtered signal.
     """
-    if not (signal is not None):
-        raise ValueError("signal must be provided")
     if not (signal is not None):
         raise ValueError("signal must be provided")
     values = signal.values
@@ -746,8 +712,6 @@ class AdaptiveFilter:
         """
         if not (signal is not None):
             raise ValueError("signal must be provided")
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         n = len(signal.values)
         x = signal.values
         d = reference.values
@@ -798,8 +762,6 @@ class AdaptiveFilter:
         Returns:
             Tuple of (filtered_signal, error_signal).
         """
-        if not (signal is not None):
-            raise ValueError("signal must be provided")
         if not (signal is not None):
             raise ValueError("signal must be provided")
         n = len(signal.values)

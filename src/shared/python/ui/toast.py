@@ -78,8 +78,6 @@ class Toast(QWidget):
         """
         if not (message is not None):
             raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         super().__init__(parent)
         self.message = message
         self.toast_type = toast_type
@@ -246,8 +244,6 @@ class ToastManager:
         """
         if not (parent is not None):
             raise ValueError("parent must be provided")
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
         self.parent = parent
         self.active_toasts: list[Toast] = []
 
@@ -260,8 +256,6 @@ class ToastManager:
         Returns:
             Tuple of (x, y) coordinates
         """
-        if not (toast is not None):
-            raise ValueError("toast must be provided")
         if not (toast is not None):
             raise ValueError("toast must be provided")
         parent_rect = self.parent.geometry()
@@ -291,8 +285,6 @@ class ToastManager:
         # Pass parent window to ensure proper cleanup and prevent memory leaks
         # Note: We don't use self.parent as actual Qt parent since toasts use
         # frameless window flags, but we keep a reference for positioning
-        if not (message is not None):
-            raise ValueError("message must be provided")
         if not (message is not None):
             raise ValueError("message must be provided")
         toast = Toast(message, toast_type, duration, parent=None)

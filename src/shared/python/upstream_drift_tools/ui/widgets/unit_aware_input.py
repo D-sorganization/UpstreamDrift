@@ -49,8 +49,6 @@ class UnitAwareInput(QWidget):
     ) -> None:
         if not (category is not None):
             raise ValueError("category must be provided")
-        if not (category is not None):
-            raise ValueError("category must be provided")
         super().__init__(parent)
         self._category = category
         self._decimals = decimals
@@ -99,8 +97,6 @@ class UnitAwareInput(QWidget):
     def _on_value_changed(self, value: float) -> None:
         if not (value is not None):
             raise ValueError("value must be provided")
-        if not (value is not None):
-            raise ValueError("value must be provided")
         if self._updating:
             return
         self._si_value = self._preferences.convert_to_si(
@@ -110,8 +106,6 @@ class UnitAwareInput(QWidget):
         self.input_changed.emit(self._si_value, self._current_unit)
 
     def _on_unit_changed(self, new_unit: str) -> None:
-        if not (new_unit is not None):
-            raise ValueError("new_unit must be provided")
         if not (new_unit is not None):
             raise ValueError("new_unit must be provided")
         if self._updating or not new_unit:
@@ -164,15 +158,11 @@ class UnitAwareInput(QWidget):
         """Set number of displayed decimals."""
         if not (decimals is not None):
             raise ValueError("decimals must be provided")
-        if not (decimals is not None):
-            raise ValueError("decimals must be provided")
         self._decimals = decimals
         self._value_input.setDecimals(decimals)
 
     def set_readonly(self, readonly: bool) -> None:
         """Set widget to read-only mode."""
-        if not (readonly is not None):
-            raise ValueError("readonly must be provided")
         if not (readonly is not None):
             raise ValueError("readonly must be provided")
         self._value_input.setReadOnly(readonly)
@@ -203,8 +193,6 @@ class UnitAwareDisplay(QWidget):
         decimals: int = 2,
         show_label: bool = False,
     ) -> None:
-        if not (category is not None):
-            raise ValueError("category must be provided")
         if not (category is not None):
             raise ValueError("category must be provided")
         super().__init__(parent)
@@ -238,8 +226,6 @@ class UnitAwareDisplay(QWidget):
         self._preferences.category_unit_changed.connect(self._on_preference_changed)
 
     def _on_unit_changed(self, new_unit: str) -> None:
-        if not (new_unit is not None):
-            raise ValueError("new_unit must be provided")
         if not (new_unit is not None):
             raise ValueError("new_unit must be provided")
         if new_unit:

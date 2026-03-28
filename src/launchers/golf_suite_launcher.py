@@ -298,8 +298,6 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         """Add a timestamped message to the log area."""
         if not (message is not None):
             raise ValueError("message must be provided")
-        if not (message is not None):
-            raise ValueError("message must be provided")
         import datetime
 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
@@ -370,8 +368,6 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         )
 
     def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
-        if not (name is not None):
-            raise ValueError("name must be provided")
         if not (name is not None):
             raise ValueError("name must be provided")
         self.status.setText(f"Launching {name}...")

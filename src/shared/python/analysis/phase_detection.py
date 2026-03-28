@@ -76,8 +76,6 @@ class PhaseDetectionMixin:
         """Return a single 'Complete Swing' phase when data is insufficient."""
         if not (duration is not None):
             raise ValueError("duration must be provided")
-        if not (duration is not None):
-            raise ValueError("duration must be provided")
         t_start = float(times[0]) if times is not None and len(times) > 0 else 0.0
         t_end = float(times[-1]) if times is not None and len(times) > 0 else 0.0
         idx_end = len(times) - 1 if times is not None and len(times) > 0 else 0
@@ -184,8 +182,6 @@ class PhaseDetectionMixin:
         """Convert raw phase definitions into bounded SwingPhase objects."""
         if not (phase_definitions is not None):
             raise ValueError("phase_definitions must be provided")
-        if not (phase_definitions is not None):
-            raise ValueError("phase_definitions must be provided")
         phases: list[SwingPhase] = []
         for name, start_idx_raw, end_idx_raw in phase_definitions:
             start_idx_val = int(cast(int, start_idx_raw))
@@ -225,8 +221,6 @@ class PhaseDetectionMixin:
         Returns:
             Dictionary mapping phase name to statistics
         """
-        if not (phases is not None):
-            raise ValueError("phases must be provided")
         if not (phases is not None):
             raise ValueError("phases must be provided")
         phase_stats = {}

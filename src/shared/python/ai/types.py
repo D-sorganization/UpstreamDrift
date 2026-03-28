@@ -40,16 +40,12 @@ class ExpertiseLevel(Enum):
         """Support comparison for level filtering."""
         if not (other is not None):
             raise ValueError("other must be provided")
-        if not (other is not None):
-            raise ValueError("other must be provided")
         if isinstance(other, ExpertiseLevel):
             return self.value < other.value
         return NotImplemented
 
     def __le__(self, other: object) -> bool:
         """Support comparison for level filtering."""
-        if not (other is not None):
-            raise ValueError("other must be provided")
         if not (other is not None):
             raise ValueError("other must be provided")
         if isinstance(other, ExpertiseLevel):
@@ -255,8 +251,6 @@ class ConversationContext:
         """
         if not (role is not None):
             raise ValueError("role must be provided")
-        if not (role is not None):
-            raise ValueError("role must be provided")
         message = Message(role=role, content=content, **kwargs)
         self.messages.append(message)
         self._update_token_estimate()
@@ -368,8 +362,6 @@ class ConversationContext:
         # Reconstruct messages
         if not (data is not None):
             raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
         messages = []
         for m_data in data.get("messages", []):
             timestamp_str = m_data.get("timestamp")
@@ -427,8 +419,6 @@ class ConversationContext:
         """
         if not (path is not None):
             raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
         import json
         from pathlib import Path
 
@@ -448,8 +438,6 @@ class ConversationContext:
         Returns:
             Loaded context, or new context if file not found.
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
         if not (path is not None):
             raise ValueError("path must be provided")
         path_obj = Path(path) if isinstance(path, str) else path

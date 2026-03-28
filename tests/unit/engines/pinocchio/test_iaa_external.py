@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip("pinocchio", reason="pinocchio not installed")
+
 import numpy as np
 import pinocchio as pin
 

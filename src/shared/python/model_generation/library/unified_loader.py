@@ -79,8 +79,6 @@ class UserPreferences:
         """Add a model to the recent list."""
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         if model_id in self.recent_models:
             self.recent_models.remove(model_id)
         self.recent_models.insert(0, model_id)
@@ -208,8 +206,6 @@ class UnifiedModelLoader:
         """
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         self._preferences.default_model_id = model_id
         self.save_preferences()
 
@@ -243,8 +239,6 @@ class UnifiedModelLoader:
         """Get metadata for a specific bundled model."""
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         for entry in self.list_bundled_models():
             if entry["id"] == model_id:
                 return entry
@@ -267,8 +261,6 @@ class UnifiedModelLoader:
         Returns:
             LoadResult with the parsed model or error information.
         """
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
         if not (file_path is not None):
             raise ValueError("file_path must be provided")
         path = Path(file_path)
@@ -303,8 +295,6 @@ class UnifiedModelLoader:
         Returns:
             LoadResult with the parsed model.
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
         if not (model_id is not None):
             raise ValueError("model_id must be provided")
         info = self.get_bundled_model_info(model_id)

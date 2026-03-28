@@ -130,8 +130,6 @@ class GeminiAdapter(BaseAgentAdapter):
         """Build a chat session with history."""
         if not (context is not None):
             raise ValueError("context must be provided")
-        if not (context is not None):
-            raise ValueError("context must be provided")
         history = []
         for msg in context.messages:
             role = "user" if msg.role == "user" else "model"

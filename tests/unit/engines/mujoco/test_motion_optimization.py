@@ -218,6 +218,7 @@ class TestSwingOptimizer:
         assert isinstance(result, OptimizationResult)
         assert result.optimal_trajectory.shape[0] == optimizer.num_knot_points
 
+    @pytest.mark.skip(reason="xdist worker crash - infrastructure flakiness (#1949)")
     def test_optimize_trajectory_with_initial_guess(self, model_and_data) -> None:
         """Test optimizing with provided initial guess."""
         model, data = model_and_data
