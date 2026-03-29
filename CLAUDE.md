@@ -83,3 +83,9 @@ maturin develop                                   # build Rust extensions locall
 
 - `/gaai-deliver` — Run Delivery Loop for next ready backlog item
 - `/gaai-status` — Show current backlog and memory state
+
+## Specification
+
+This repository's specification is defined in `SPEC.md` at the repo root.
+Read SPEC.md before making any changes. Update it when your changes
+affect documented functionality, features, or architecture.

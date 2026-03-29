@@ -635,3 +635,9 @@ To maintain a clean repository root, all development-related documentation (summ
 
 - **DO NOT** create new `.md` files in the root unless they are critical project-wide files (e.g., README, AGENTS, CHANGELOG).
 - Prefer creating issues for task tracking rather than temporary markdown files.
+
+## Specification
+
+This repository's specification is defined in `SPEC.md` at the repo root.
+Read SPEC.md before making any changes. Update it when your changes
+affect documented functionality, features, or architecture.
