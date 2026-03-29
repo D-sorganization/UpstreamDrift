@@ -10,6 +10,7 @@ from DrakeSimApp (drake_gui_app.py).
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any
 
 from src.shared.python.engine_core.engine_availability import (
@@ -47,8 +48,8 @@ except ImportError:
     LivePlotWidget = None  # type: ignore[misc, assignment]
 
 # Constants
-JOINT_ANGLE_MIN_RAD = -3.141592653589793
-JOINT_ANGLE_MAX_RAD = 3.141592653589793
+JOINT_ANGLE_MIN_RAD = -math.pi
+JOINT_ANGLE_MAX_RAD = math.pi
 SPINBOX_STEP_RAD = 0.01
 SLIDER_TO_RADIAN = 0.01
 SLIDER_RANGE_MIN = -314
