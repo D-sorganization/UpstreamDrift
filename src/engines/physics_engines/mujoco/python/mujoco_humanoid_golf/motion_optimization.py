@@ -268,27 +268,21 @@ class SwingOptimizer:
         Returns:
             List of (min, max) tuples for each decision variable
         """
-        bounds = []
+        # Build per-knot joint bounds
+        joint_bounds = [
+            (
+                (float(self.model.jnt_range[j, 0]), float(self.model.jnt_range[j, 1]))
+                if self.constraints.joint_position_limits and self.model.jnt_limited[j]
+                else (-np.pi, np.pi)
+            )
+            for j in range(self.model.njnt)
+        ]
+        # Extra DOFs (freejoint, etc.)
+        extra_bounds = [(-10.0, 10.0)] * (self.model.nv - self.model.njnt)
+        knot_bounds = joint_bounds + extra_bounds
 
-        for _knot in range(self.num_knot_points):
-            for joint_idx in range(self.model.njnt):
-                if (
-                    self.constraints.joint_position_limits
-                    and self.model.jnt_limited[joint_idx]
-                ):  # noqa: E501
-                    q_min = self.model.jnt_range[joint_idx, 0]
-                    q_max = self.model.jnt_range[joint_idx, 1]
-                else:
-                    q_min = -np.pi
-                    q_max = np.pi
-
-                bounds.append((q_min, q_max))
-
-            # Add bounds for any extra DOFs (freejoint, etc.)
-            for _ in range(self.model.nv - self.model.njnt):
-                bounds.append((-10.0, 10.0))
-
-        return bounds
+        # Repeat for each knot point
+        return knot_bounds * self.num_knot_points
 
     def _setup_constraints(self) -> list:
         """Setup optimization constraints.
@@ -619,25 +613,26 @@ class SwingOptimizer:
         """
         if not (num_swings is not None):
             raise ValueError("num_swings must be provided")
-        swings = []
-
         if variation == "speed":
             # Vary target speeds
             speeds = np.linspace(30.0, 55.0, num_swings)
-            for speed in speeds:
-                result = self.optimize_swing_for_speed(target_speed=speed)
-                swings.append(result)
+            return [
+                self.optimize_swing_for_speed(target_speed=float(speed))
+                for speed in speeds
+            ]
 
-        elif variation == "accuracy":
+        if variation == "accuracy":
             # Vary target positions
             base_pos = np.array([2.0, 0.0, 0.0])
-            for i in range(num_swings):
-                offset = np.array([0, (i - num_swings / 2) * 0.2, 0])
-                target = base_pos + offset
-                result = self.optimize_swing_for_accuracy(target_position=target)
-                swings.append(result)
+            return [
+                self.optimize_swing_for_accuracy(
+                    target_position=base_pos
+                    + np.array([0, (i - num_swings / 2) * 0.2, 0])
+                )
+                for i in range(num_swings)
+            ]
 
-        return swings
+        return []
 
 
 class MotionPrimitiveLibrary:

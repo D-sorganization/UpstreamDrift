@@ -179,12 +179,10 @@ class ManipulabilityAnalyzer:
             "pelvis",
             "hip",
         ]
-        found = []
-        for i in range(self.model.nbody):
-            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
-            if not name:
-                continue
-            name_lower = name.lower()
-            if any(c in name_lower for c in candidates):
-                found.append(name)
-        return sorted(list(set(found)))
+        found = [
+            name
+            for i in range(self.model.nbody)
+            if (name := mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i))
+            and any(c in name.lower() for c in candidates)
+        ]
+        return sorted(set(found))

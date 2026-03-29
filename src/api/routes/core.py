@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, Depends
 
@@ -58,7 +58,7 @@ async def health_check(
 
 
 @router.get("/api/diagnostics", response_model=None)
-async def get_diagnostics() -> dict:  # type: ignore[type-arg]
+async def get_diagnostics() -> dict[str, Any]:
     """Get comprehensive diagnostic information for browser mode."""
     repo_root = Path(__file__).parent.parent.parent.parent
 

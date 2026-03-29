@@ -40,11 +40,14 @@ def _get_manifest() -> LauncherManifest:
                 status_code=500,
                 detail=f"Launcher manifest error: {e}",
             ) from e
-    return _launcher_state["manifest"]  # type: ignore[return-value]
+    # Guaranteed non-None after the check above
+    manifest = _launcher_state["manifest"]
+    assert manifest is not None  # for mypy
+    return manifest
 
 
 @router.get("/manifest")
-async def get_manifest() -> dict:  # type: ignore[type-arg]
+async def get_manifest() -> dict[str, Any]:
     """Get the complete launcher manifest.
 
     Returns:
@@ -55,7 +58,7 @@ async def get_manifest() -> dict:  # type: ignore[type-arg]
 
 
 @router.get("/tiles")
-async def get_tiles() -> list[dict]:  # type: ignore[type-arg]
+async def get_tiles() -> list[dict[str, Any]]:
     """Get all launcher tiles in display order.
 
     Returns:
@@ -70,7 +73,7 @@ async def get_tiles() -> list[dict]:  # type: ignore[type-arg]
     lambda tile_id: tile_id is not None and len(tile_id.strip()) > 0,
     "Tile ID must be a non-empty string",
 )
-async def get_tile(tile_id: str) -> dict:  # type: ignore[type-arg]
+async def get_tile(tile_id: str) -> dict[str, Any]:
     """Get a specific tile by ID.
 
     Args:
@@ -90,7 +93,7 @@ async def get_tile(tile_id: str) -> dict:  # type: ignore[type-arg]
 
 
 @router.get("/engines")
-async def get_engines() -> list[dict]:  # type: ignore[type-arg]
+async def get_engines() -> list[dict[str, Any]]:
     """Get only physics engine tiles.
 
     Returns:
@@ -101,7 +104,7 @@ async def get_engines() -> list[dict]:  # type: ignore[type-arg]
 
 
 @router.get("/tools")
-async def get_tools() -> list[dict]:  # type: ignore[type-arg]
+async def get_tools() -> list[dict[str, Any]]:
     """Get only tool/utility tiles.
 
     Returns:
@@ -112,7 +115,7 @@ async def get_tools() -> list[dict]:  # type: ignore[type-arg]
 
 
 @router.get("/logos/validate")
-async def validate_logos() -> dict:  # type: ignore[type-arg]
+async def validate_logos() -> dict[str, Any]:
     """Validate that all tile logos exist on disk.
 
     Returns:

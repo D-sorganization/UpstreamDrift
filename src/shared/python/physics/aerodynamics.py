@@ -578,16 +578,13 @@ class TurbulenceModel:
         if self.intensity < 1e-10:
             return np.zeros(3)
 
-        # Sum of sinusoids at different frequencies (poor man's Perlin noise)
-        perturbation = np.zeros(3)
-        for i in range(3):
-            for j, freq in enumerate(self._freqs):
-                perturbation[i] += self._coeffs[i, j] * math.sin(
-                    freq * t + self._phases[i, j]
-                )
+        # Sum of sinusoids at different frequencies (vectorized)
+        # _freqs is [N_freq], _phases is [3, N_freq], _coeffs is [3, N_freq]
+        sin_args = np.outer(np.ones(3), self._freqs) * t + self._phases  # [3, N_freq]
+        perturbation = np.sum(self._coeffs * np.sin(sin_args), axis=1)  # [3]
 
         # Normalize and scale
-        perturbation = perturbation / len(self._freqs) * self.intensity  # type: ignore[assignment]
+        perturbation = perturbation / len(self._freqs) * self.intensity
 
         return perturbation
 

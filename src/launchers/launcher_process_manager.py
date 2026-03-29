@@ -140,13 +140,13 @@ class ProcessManager:
 
         # repo_root and src are always added (required for imports).
         # Optional extras are only added when the directory exists.
-        paths_to_add = []
-        for p in [repo_root_str, src_dir]:
-            if p not in current_paths:
-                paths_to_add.append(p)
-        for p in [shared_python, mujoco_python, conda_sp]:
-            if p not in current_paths and os.path.isdir(p):
-                paths_to_add.append(p)
+        paths_to_add = [
+            p for p in [repo_root_str, src_dir] if p not in current_paths
+        ] + [
+            p
+            for p in [shared_python, mujoco_python, conda_sp]
+            if p not in current_paths and os.path.isdir(p)
+        ]
 
         if paths_to_add:
             new_paths = separator.join(paths_to_add)

@@ -361,11 +361,10 @@ class DrakePoseEditor(BasePoseEditor):
         if self._plant is None:
             return []
 
-        names = []
-        for i in range(self._plant.num_bodies()):
-            body = self._plant.get_body(i)  # type: ignore[arg-type]
-            names.append(body.name())
-        return names
+        return [
+            self._plant.get_body(i).name()  # type: ignore[arg-type]
+            for i in range(self._plant.num_bodies())
+        ]
 
     def get_body_position(self, body_name: str) -> np.ndarray | None:
         """Get world position of a body."""

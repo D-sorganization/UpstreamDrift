@@ -1,0 +1,457 @@
+"""Library and inertia request handlers for ModelGenerationAPI.
+
+Extracted from rest_api.py to reduce god-class size (#2176).
+These handler methods are mixed into ModelGenerationAPI via inheritance.
+"""
+
+from __future__ import annotations
+
+import tempfile
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from .rest_api import APIRequest, APIResponse
+
+
+class LibraryHandlersMixin:
+    """Mixin providing model library, inertia, validation, parse, and editor handlers."""
+
+    def validate_urdf(self, request: APIRequest) -> APIResponse:
+        """Validate URDF content."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.editor.text_editor import (
+            URDFTextEditor,
+            ValidationSeverity,
+        )
+
+        body = request.body or {}
+        content = body.get("content") or (
+            request.files.get("file", b"").decode("utf-8") if request.files else None
+        )
+
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        editor = URDFTextEditor()
+        editor.load_string(content)
+        messages = editor.validate()
+        has_errors = any(m.severity == ValidationSeverity.ERROR for m in messages)
+
+        return APIResponse.ok(
+            {
+                "valid": not has_errors,
+                "error_count": sum(
+                    1 for m in messages if m.severity == ValidationSeverity.ERROR
+                ),
+                "warning_count": sum(
+                    1 for m in messages if m.severity == ValidationSeverity.WARNING
+                ),
+                "messages": [
+                    {
+                        "severity": m.severity.value,
+                        "line": m.line,
+                        "column": m.column,
+                        "message": m.message,
+                        "element": m.element,
+                    }
+                    for m in messages
+                ],
+            }
+        )
+
+    def parse_urdf(self, request: APIRequest) -> APIResponse:
+        """Parse URDF and return structure."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.converters.urdf_parser import URDFParser
+
+        body = request.body or {}
+        content = body.get("content") or (
+            request.files.get("file", b"").decode("utf-8") if request.files else None
+        )
+
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        parser = URDFParser()
+
+        try:
+            model = parser.parse(content)
+        except (ValueError, KeyError, OSError) as e:
+            return APIResponse.error(f"Parse failed: {e}", 422)
+
+        root = model.get_root_link()
+
+        return APIResponse.ok(
+            {
+                "name": model.name,
+                "root_link": root.name if root else None,
+                "links": [link.to_dict() for link in model.links],
+                "joints": [j.to_dict() for j in model.joints],
+                "materials": {k: v.to_dict() for k, v in model.materials.items()},
+                "warnings": model.warnings,
+            }
+        )
+
+    def calculate_inertia(self, request: APIRequest) -> APIResponse:
+        """Calculate inertia for primitive shape."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.core.types import Inertia
+
+        body = request.body or {}
+        shape = body.get("shape")
+        mass = body.get("mass", 1.0)
+        dimensions = body.get("dimensions", [])
+
+        if not shape:
+            return APIResponse.error("Missing 'shape' parameter")
+
+        try:
+            if shape == "box":
+                if len(dimensions) != 3:
+                    return APIResponse.error("Box requires 3 dimensions")
+                inertia = Inertia.from_box(mass, *dimensions)
+            elif shape == "cylinder":
+                if len(dimensions) != 2:
+                    return APIResponse.error(
+                        "Cylinder requires 2 dimensions (radius, length)"
+                    )
+                inertia = Inertia.from_cylinder(mass, dimensions[0], dimensions[1])
+            elif shape == "sphere":
+                if len(dimensions) != 1:
+                    return APIResponse.error("Sphere requires 1 dimension (radius)")
+                inertia = Inertia.from_sphere(mass, dimensions[0])
+            elif shape == "capsule":
+                if len(dimensions) != 2:
+                    return APIResponse.error(
+                        "Capsule requires 2 dimensions (radius, length)"
+                    )
+                inertia = Inertia.from_capsule(mass, dimensions[0], dimensions[1])
+            else:
+                return APIResponse.error(f"Unknown shape: {shape}")
+        except (KeyError, ValueError, TypeError) as e:
+            return APIResponse.error(f"Calculation failed: {e}")
+
+        return APIResponse.ok(
+            {
+                "shape": shape,
+                "mass": mass,
+                "dimensions": dimensions,
+                "inertia": {
+                    "ixx": inertia.ixx,
+                    "iyy": inertia.iyy,
+                    "izz": inertia.izz,
+                    "ixy": inertia.ixy,
+                    "ixz": inertia.ixz,
+                    "iyz": inertia.iyz,
+                },
+                "is_positive_definite": inertia.is_positive_definite(),
+                "satisfies_triangle_inequality": inertia.satisfies_triangle_inequality(),
+            }
+        )
+
+    def inertia_from_mesh(self, request: APIRequest) -> APIResponse:
+        """Calculate inertia from mesh file."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        body = request.body or {}
+
+        mesh_content = request.files.get("mesh")
+        if not mesh_content:
+            return APIResponse.error("Missing mesh file")
+
+        mass = body.get("mass")
+        density = body.get("density")
+
+        if not mass and not density:
+            return APIResponse.error("Must provide either 'mass' or 'density'")
+
+        try:
+            import trimesh
+
+            with tempfile.NamedTemporaryFile(suffix=".stl", delete=False) as f:
+                f.write(mesh_content)
+                temp_path = f.name
+
+            mesh: Any = trimesh.load(temp_path)
+
+            if density:
+                mesh.density = density
+                inertia_tensor = mesh.moment_inertia
+                calculated_mass = mesh.mass
+            else:
+                volume = mesh.volume
+                inertia_tensor = mesh.moment_inertia * (mass / mesh.mass)
+                calculated_mass = mass
+
+            Path(temp_path).unlink()
+
+            return APIResponse.ok(
+                {
+                    "mass": calculated_mass,
+                    "volume": volume if density else mesh.volume,
+                    "center_of_mass": mesh.center_mass.tolist(),
+                    "inertia_tensor": inertia_tensor.tolist(),
+                }
+            )
+
+        except ImportError:
+            return APIResponse.error(
+                "trimesh library not available for mesh-based inertia calculation",
+                501,
+            )
+        except (PermissionError, OSError) as e:
+            return APIResponse.error(f"Mesh processing failed: {e}")
+
+    def library_list_models(self, request: APIRequest) -> APIResponse:
+        """List models in library."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.library import ModelLibrary
+
+        library = ModelLibrary()
+
+        category = request.query_params.get("category")
+        source = request.query_params.get("source")
+        search = request.query_params.get("search")
+        tags = (
+            request.query_params.get("tags", "").split(",")
+            if request.query_params.get("tags")
+            else None
+        )
+
+        models = library.list_models(
+            category=category,  # type: ignore[arg-type]
+            source=source,  # type: ignore[arg-type]
+            search=search,
+            tags=tags,
+        )
+
+        return APIResponse.ok(
+            {
+                "count": len(models),
+                "models": [
+                    {
+                        "id": m.id,
+                        "name": m.name,
+                        "category": m.category.value,
+                        "source": m.source.value if m.source else None,
+                        "tags": m.tags,
+                        "description": m.description,
+                    }
+                    for m in models
+                ],
+            }
+        )
+
+    def library_get_model(self, request: APIRequest) -> APIResponse:
+        """Get model details."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.library import ModelLibrary
+
+        model_id = request.query_params.get("model_id")
+        if not model_id:
+            return APIResponse.error("Missing model_id")
+
+        library = ModelLibrary()
+        models = library.list_models()
+
+        for m in models:
+            if m.name == model_id or getattr(m, "model_id", m.name) == model_id:
+                return APIResponse.ok(
+                    {
+                        "id": getattr(m, "model_id", m.name),
+                        "name": m.name,
+                        "category": m.category.value,
+                        "source": m.source.value if m.source else None,
+                        "tags": m.tags,
+                        "description": m.description,
+                        "path": str(m.urdf_path) if m.urdf_path else None,
+                    }
+                )
+
+        return APIResponse.not_found(f"Model not found: {model_id}")
+
+    def library_add_model(self, request: APIRequest) -> APIResponse:
+        """Add model to library."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.library import ModelLibrary
+
+        body = request.body or {}
+
+        name = body.get("name")
+        if not name:
+            return APIResponse.error("Missing 'name'")
+
+        urdf_content = body.get("urdf_content")
+        file_content = request.files.get("file")
+
+        if not urdf_content and not file_content:
+            return APIResponse.error("Missing URDF content or file")
+
+        content = urdf_content or file_content.decode("utf-8") if file_content else ""
+
+        library = ModelLibrary()
+
+        try:
+            model_id = library.add_model(
+                name=name,
+                content=content,
+                category=body.get("category", "custom"),
+                tags=body.get("tags", []),
+                description=body.get("description", ""),
+            )
+        except (ValueError, OSError) as e:
+            return APIResponse.error(f"Failed to add model: {e}")
+
+        return APIResponse.created({"model_id": model_id, "name": name})
+
+    def library_remove_model(self, request: APIRequest) -> APIResponse:
+        """Remove model from library."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.library import ModelLibrary
+
+        model_id = request.query_params.get("model_id")
+        if not model_id:
+            return APIResponse.error("Missing model_id")
+
+        library = ModelLibrary()
+        try:
+            library.remove_model(model_id)
+        except (KeyError, OSError) as e:
+            return APIResponse.error(f"Failed to remove model: {e}")
+
+        return APIResponse.ok({"removed": model_id})
+
+    def library_download_model(self, request: APIRequest) -> APIResponse:
+        """Download model URDF."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.library import ModelLibrary
+
+        model_id = request.query_params.get("model_id")
+        if not model_id:
+            return APIResponse.error("Missing model_id")
+
+        library = ModelLibrary()
+        model = library.load_model(model_id)
+
+        if not model:
+            return APIResponse.not_found(f"Model not found: {model_id}")
+
+        urdf_string = model.to_urdf()
+
+        return APIResponse.file(urdf_string, f"{model.name}.urdf")
+
+    def compose_models(self, request: APIRequest) -> APIResponse:
+        """Compose model from multiple sources."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.editor import FrankensteinEditor
+
+        body = request.body or {}
+
+        sources = body.get("sources", {})
+        operations = body.get("operations", [])
+        output_name = body.get("name", "composed_robot")
+
+        if not sources:
+            return APIResponse.error("Missing 'sources' in request body")
+
+        editor = FrankensteinEditor()
+
+        for model_id, content in sources.items():
+            try:
+                editor.load_model(model_id, content, read_only=True)
+            except (ValueError, KeyError, OSError) as e:
+                return APIResponse.error(f"Failed to load model '{model_id}': {e}")
+
+        editor.create_model("output", output_name)
+
+        for op in operations:
+            op_type = op.get("type")
+
+            if op_type == "copy_subtree":
+                editor.copy_subtree(op["source"], op["link"])
+            elif op_type == "paste":
+                editor.paste(
+                    "output",
+                    attach_to=op.get("attach_to"),
+                    prefix=op.get("prefix", ""),
+                )
+            elif op_type == "delete_subtree":
+                editor.delete_subtree("output", op["link"])
+            elif op_type == "rename":
+                editor.rename_link("output", op["old_name"], op["new_name"])
+
+        urdf_string = editor.export_model("output")
+        stats = editor.get_model_statistics("output")
+
+        if request.query_params.get("download") == "true":
+            return APIResponse.file(urdf_string, f"{output_name}.urdf")
+
+        return APIResponse.ok(
+            {
+                "name": output_name,
+                "links": stats.get("link_count", 0),
+                "joints": stats.get("joint_count", 0),
+                "urdf": urdf_string,
+            }
+        )
+
+    def diff_urdfs(self, request: APIRequest) -> APIResponse:
+        """Compare two URDF files."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.editor.text_editor import URDFTextEditor
+
+        body = request.body or {}
+
+        content_a = body.get("content_a")
+        content_b = body.get("content_b")
+
+        if not content_a or not content_b:
+            return APIResponse.error("Missing content_a or content_b")
+
+        editor = URDFTextEditor()
+        editor.load_string(content_a)
+
+        diff_result = editor.get_diff_with_string(content_b)
+
+        return APIResponse.ok(
+            {
+                "has_changes": diff_result.has_changes,
+                "additions": diff_result.additions,
+                "deletions": diff_result.deletions,
+                "hunks": len(diff_result.hunks),
+                "unified_diff": diff_result.unified_diff,
+            }
+        )

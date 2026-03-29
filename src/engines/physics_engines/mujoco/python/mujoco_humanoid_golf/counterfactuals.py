@@ -291,13 +291,10 @@ class CounterfactualAnalyzer:
         """
         if not (qpos_traj is not None):
             raise ValueError("qpos_traj must be provided")
-        results = []
-
-        for i in range(len(qpos_traj)):
-            result = self.ztcf(qpos_traj[i], qvel_traj[i], ctrl_traj[i])
-            results.append(result)
-
-        return results
+        return [
+            self.ztcf(qpos_traj[i], qvel_traj[i], ctrl_traj[i])
+            for i in range(len(qpos_traj))
+        ]
 
     def analyze_trajectory_zvcf(
         self,
@@ -315,13 +312,7 @@ class CounterfactualAnalyzer:
         """
         if not (qpos_traj is not None):
             raise ValueError("qpos_traj must be provided")
-        results = []
-
-        for i in range(len(qpos_traj)):
-            result = self.zvcf(qpos_traj[i], qvel_traj[i])
-            results.append(result)
-
-        return results
+        return [self.zvcf(qpos_traj[i], qvel_traj[i]) for i in range(len(qpos_traj))]
 
     def plot_counterfactual_comparison(
         self,

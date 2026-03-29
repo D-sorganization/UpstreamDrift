@@ -114,7 +114,9 @@ def _get_active_terrain() -> Terrain:
             length=200.0,
             terrain_type=TerrainType.FAIRWAY,
         )
-    return _terrain_state["active"]  # type: ignore[return-value]
+    terrain = _terrain_state["active"]
+    assert terrain is not None  # for mypy; guaranteed by preceding assignment
+    return terrain
 
 
 # ──────────────────────────────────────────────────────────────

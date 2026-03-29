@@ -98,17 +98,15 @@ class Obstacle:
         if not (point is not None):
             raise ValueError("point must be provided")
         eps = 1e-6
-        gradient = np.zeros(3)
-
-        for i in range(3):
-            point_plus = point.copy()
-            point_plus[i] += eps
-            point_minus = point.copy()
-            point_minus[i] -= eps
-
-            gradient[i] = (
-                self.get_distance(point_plus) - self.get_distance(point_minus)
-            ) / (2 * eps)
+        # Vectorized finite-difference gradient: perturb each axis simultaneously
+        perturbations = np.eye(3) * eps
+        dist_plus = np.array(
+            [self.get_distance(point + perturbations[i]) for i in range(3)]
+        )
+        dist_minus = np.array(
+            [self.get_distance(point - perturbations[i]) for i in range(3)]
+        )
+        gradient = (dist_plus - dist_minus) / (2 * eps)
 
         norm = np.linalg.norm(gradient)
         if norm > eps:

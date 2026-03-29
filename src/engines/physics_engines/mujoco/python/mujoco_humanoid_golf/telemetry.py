@@ -81,20 +81,18 @@ class TelemetryRecorder:
     @staticmethod
     def _build_body_name_map(model: mujoco.MjModel) -> list[str]:
         """Build a list of body names from the model."""
-        body_names: list[str] = []
-        for idx in range(model.nbody):
-            name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, idx)
-            body_names.append(name or f"body_{idx}")
-        return body_names
+        return [
+            mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, idx) or f"body_{idx}"
+            for idx in range(model.nbody)
+        ]
 
     @staticmethod
     def _build_joint_name_map(model: mujoco.MjModel) -> list[str]:
         """Build a list of joint names from the model."""
-        joint_names: list[str] = []
-        for idx in range(model.njnt):
-            name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, idx)
-            joint_names.append(name or f"joint_{idx}")
-        return joint_names
+        return [
+            mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, idx) or f"joint_{idx}"
+            for idx in range(model.njnt)
+        ]
 
     @staticmethod
     def _build_actuator_dof_map(model: mujoco.MjModel) -> dict[int, int]:

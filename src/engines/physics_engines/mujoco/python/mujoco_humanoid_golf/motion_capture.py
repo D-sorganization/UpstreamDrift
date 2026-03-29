@@ -237,15 +237,15 @@ class MotionCaptureLoader:
         with open(filepath) as f:
             data = json.load(f)
 
-        frames = []
-        for frame_data in data["frames"]:
-            frame = MotionCaptureFrame(
+        frames = [
+            MotionCaptureFrame(
                 time=frame_data["time"],
                 marker_positions={
                     name: np.array(pos) for name, pos in frame_data["markers"].items()
                 },
             )
-            frames.append(frame)
+            for frame_data in data["frames"]
+        ]
 
         return MotionCaptureSequence(
             frames=frames,

@@ -745,28 +745,27 @@ class ImpactRecorder:
         Returns:
             Dictionary with all impact events and summary
         """
-        events_data = []
-        for event in self.events:
-            events_data.append(
-                {
-                    "impact_id": event.impact_id,
-                    "timestamp": event.timestamp,
-                    "model_type": event.model_type.name,
-                    "pre_impact": {
-                        "clubhead_velocity": event.pre_state.clubhead_velocity.tolist(),
-                        "ball_velocity": event.pre_state.ball_velocity.tolist(),
-                        "ball_spin": event.pre_state.ball_angular_velocity.tolist(),
-                    },
-                    "post_impact": {
-                        "ball_velocity": event.post_state.ball_velocity.tolist(),
-                        "ball_spin": event.post_state.ball_angular_velocity.tolist(),
-                        "clubhead_velocity": event.post_state.clubhead_velocity.tolist(),
-                        "contact_duration": event.post_state.contact_duration,
-                        "energy_transfer": event.post_state.energy_transfer,
-                    },
-                    "energy_balance": event.energy_balance,
-                }
-            )
+        events_data = [
+            {
+                "impact_id": event.impact_id,
+                "timestamp": event.timestamp,
+                "model_type": event.model_type.name,
+                "pre_impact": {
+                    "clubhead_velocity": event.pre_state.clubhead_velocity.tolist(),
+                    "ball_velocity": event.pre_state.ball_velocity.tolist(),
+                    "ball_spin": event.pre_state.ball_angular_velocity.tolist(),
+                },
+                "post_impact": {
+                    "ball_velocity": event.post_state.ball_velocity.tolist(),
+                    "ball_spin": event.post_state.ball_angular_velocity.tolist(),
+                    "clubhead_velocity": event.post_state.clubhead_velocity.tolist(),
+                    "contact_duration": event.post_state.contact_duration,
+                    "energy_transfer": event.post_state.energy_transfer,
+                },
+                "energy_balance": event.energy_balance,
+            }
+            for event in self.events
+        ]
 
         return {
             "num_impacts": len(self.events),
@@ -987,19 +986,18 @@ class ImpactSolverAPI:
         if not self.recorder.events:
             return {"error": "No impacts recorded"}
 
-        reports = []
-        for event in self.recorder.events:
-            reports.append(
-                {
-                    "impact_id": event.impact_id,
-                    "timestamp": event.timestamp,
-                    "ke_pre": event.energy_balance["total_ke_pre"],
-                    "ke_post": event.energy_balance["total_ke_post"],
-                    "energy_lost": event.energy_balance["energy_lost"],
-                    "loss_ratio": event.energy_balance["energy_loss_ratio"],
-                    "ball_speed": event.energy_balance["ball_launch_speed"],
-                }
-            )
+        reports = [
+            {
+                "impact_id": event.impact_id,
+                "timestamp": event.timestamp,
+                "ke_pre": event.energy_balance["total_ke_pre"],
+                "ke_post": event.energy_balance["total_ke_post"],
+                "energy_lost": event.energy_balance["energy_lost"],
+                "loss_ratio": event.energy_balance["energy_loss_ratio"],
+                "ball_speed": event.energy_balance["ball_launch_speed"],
+            }
+            for event in self.recorder.events
+        ]
 
         # Aggregate statistics
         total_ke_pre = sum(r["ke_pre"] for r in reports)
@@ -1085,10 +1083,10 @@ class ImpactSolverAPI:
 
         max_spin_rad = max_spin_rpm * 2 * np.pi / 60  # Convert to rad/s
 
-        spins = []
-        for event in self.recorder.events:
-            spin_mag = np.linalg.norm(event.post_state.ball_angular_velocity)
-            spins.append(spin_mag)
+        spins = [
+            np.linalg.norm(event.post_state.ball_angular_velocity)
+            for event in self.recorder.events
+        ]
 
         max_observed = float(np.max(spins))
         max_observed_rpm = max_observed * 60 / (2 * np.pi)

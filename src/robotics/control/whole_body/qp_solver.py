@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
@@ -251,7 +252,7 @@ class ScipyQPSolver(QPSolver):
                 status=f"Solver error: {e}",
             )
 
-    def _build_variable_bounds(self, problem: QPProblem):
+    def _build_variable_bounds(self, problem: QPProblem) -> Any:
         if not (problem is not None):
             raise ValueError("problem must be provided")
         from scipy.optimize import Bounds

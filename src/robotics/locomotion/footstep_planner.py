@@ -394,18 +394,26 @@ class FootstepPlanner(ContractChecker):
             total_duration=timing,
         )
 
-    def _compute_clamped_step(self, vx, vy, omega):
+    def _compute_clamped_step(
+        self, vx: float, vy: float, omega: float
+    ) -> tuple[float, float, float]:
         if not (vx is not None):
             raise ValueError("vx must be provided")
         dt = self._parameters.step_duration
-        step_x = np.clip(vx * dt, -self._max_step_length, self._max_step_length)
-        step_y = np.clip(vy * dt, -self._max_step_width, self._max_step_width)
-        step_yaw = np.clip(
-            omega * dt, -self._max_step_rotation, self._max_step_rotation
+        step_x = float(np.clip(vx * dt, -self._max_step_length, self._max_step_length))
+        step_y = float(np.clip(vy * dt, -self._max_step_width, self._max_step_width))
+        step_yaw = float(
+            np.clip(omega * dt, -self._max_step_rotation, self._max_step_rotation)
         )
         return step_x, step_y, step_yaw
 
-    def _advance_position(self, pos, yaw, step_x, step_y):
+    def _advance_position(
+        self,
+        pos: np.ndarray,
+        yaw: float,
+        step_x: float,
+        step_y: float,
+    ) -> np.ndarray:
         if not (pos is not None):
             raise ValueError("pos must be provided")
         cos_yaw = np.cos(yaw)
@@ -414,7 +422,9 @@ class FootstepPlanner(ContractChecker):
         pos[1] += sin_yaw * step_x + cos_yaw * step_y
         return pos
 
-    def _compute_foot_position(self, pos, yaw, foot):
+    def _compute_foot_position(
+        self, pos: np.ndarray, yaw: float, foot: str
+    ) -> np.ndarray:
         if not (pos is not None):
             raise ValueError("pos must be provided")
         cos_yaw = np.cos(yaw)

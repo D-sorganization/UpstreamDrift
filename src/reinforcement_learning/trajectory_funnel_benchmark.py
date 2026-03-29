@@ -15,32 +15,35 @@ class TrajectoryFunnelBenchmark:
     will drastically outperform agents using a clock-synchronized static destination reward.
     """
 
-    def __init__(self, mode="transverse"):
+    def __init__(self, mode: str = "transverse") -> None:
         assert mode in [
             "transverse",
             "setpoint",
         ], "Mode must be 'transverse' or 'setpoint'"
         self.mode = mode
 
-    def setpoint_reward(self, current_state, target_state):
+    def setpoint_reward(
+        self, current_state: np.ndarray, target_state: np.ndarray
+    ) -> float:
         """
         Classical control approach: Drive Euclidean distance to the destination to zero.
         Ignores path geometry, heavily penalizes phase asynchrony.
         """
         assert current_state is not None, "current_state must be provided"
-        assert current_state is not None, "current_state must be provided"
         error = current_state - target_state
-        return -np.sum(error**2)
+        return float(-np.sum(error**2))
 
     def trajectory_funnel_reward(
-        self, current_state, reference_trajectory, current_phase
-    ):
+        self,
+        current_state: np.ndarray,
+        reference_trajectory: np.ndarray,
+        current_phase: float,
+    ) -> float:
         """
         Geometric approach: Reward confinement to the trajectory tube (orbital stability).
         Uses transverse deviations and allows phase slippage.
         """
         # Find the geometrically closest point on the reference trajectory manifold
-        assert current_state is not None, "current_state must be provided"
         assert current_state is not None, "current_state must be provided"
         distances = np.linalg.norm(reference_trajectory - current_state, axis=1)
         transverse_distance = np.min(distances)
@@ -52,9 +55,9 @@ class TrajectoryFunnelBenchmark:
         # Add a small reward for progressive traversal (phase velocity)
         phase_velocity_reward = 0.5 * (projected_phase_idx / len(reference_trajectory))
 
-        return transverse_cost + phase_velocity_reward
+        return float(transverse_cost + phase_velocity_reward)
 
-    def simulate_agent_training_mock(self):
+    def simulate_agent_training_mock(self) -> dict[str, float]:
         """
         Mocks the RL convergence behavior discussed in Chapter 10.
         This will be replaced with Stable Baselines3 + MuJoCo in future PRs.

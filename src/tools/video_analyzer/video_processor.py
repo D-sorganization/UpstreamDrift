@@ -349,14 +349,17 @@ class VideoProcessor:
             self._cap = None
             self.video_path = None
 
-    def __enter__(self):
+    def __enter__(self) -> VideoProcessor:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object,
+    ) -> bool:
         """Context manager exit."""
-        if not (exc_type is not None):
-            raise ValueError("exc_type must be provided")
         self.close()
         return False
 

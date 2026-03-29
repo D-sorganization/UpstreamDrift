@@ -13,8 +13,9 @@ The launcher now features:
 import builtins
 import importlib
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -38,7 +39,7 @@ def _is_pyqt6_available() -> bool:
     return bool(PYQT6_AVAILABLE)
 
 
-def _get_golf_main(*, prefer_legacy: bool = False):
+def _get_golf_main(*, prefer_legacy: bool = False) -> Callable[..., Any] | None:
     """Resolve golf launcher entry point across legacy/new module paths."""
     if prefer_legacy:
         legacy_module = sys.modules.get("launchers.golf_launcher")

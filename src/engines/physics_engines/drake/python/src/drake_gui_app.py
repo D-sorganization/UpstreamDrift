@@ -174,13 +174,11 @@ class DrakeSimApp(  # type: ignore[misc, no-any-unimported]
         if not self.plant:
             return []
 
-        names = []
-        for i in range(self.plant.num_joints()):
-            joint = self.plant.get_joint(JointIndex(i))
-            # Only include 1-DOF joints for simplicity in plotting mapping
-            if joint.num_velocities() == 1:
-                names.append(joint.name())
-        return names
+        return [
+            self.plant.get_joint(JointIndex(i)).name()
+            for i in range(self.plant.num_joints())
+            if self.plant.get_joint(JointIndex(i)).num_velocities() == 1
+        ]
 
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""

@@ -122,10 +122,9 @@ class PinocchioManipulabilityAnalyzer:
     def find_potential_bodies(self) -> list[str]:
         """Find frame names that look like points of interest."""
         candidates = ["hand", "wrist", "arm", "club", "head", "grip"]
-        found = []
-        for frame in self.model.frames:
-            name = frame.name
-            name_lower = name.lower()
-            if any(c in name_lower for c in candidates):
-                found.append(name)
-        return sorted(list(set(found)))
+        found = [
+            frame.name
+            for frame in self.model.frames
+            if any(c in frame.name.lower() for c in candidates)
+        ]
+        return sorted(set(found))

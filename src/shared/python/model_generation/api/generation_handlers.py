@@ -1,0 +1,218 @@
+"""Generation and conversion request handlers for ModelGenerationAPI.
+
+Extracted from rest_api.py to reduce god-class size (#2176).
+These handler methods are mixed into ModelGenerationAPI via inheritance.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .rest_api import APIRequest, APIResponse
+
+
+class GenerationHandlersMixin:
+    """Mixin providing URDF generation and format conversion handlers."""
+
+    def generate_humanoid(self, request: APIRequest) -> APIResponse:
+        """Generate humanoid URDF."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.builders.parametric_builder import ParametricBuilder
+
+        body = request.body or {}
+        robot_name = body.get("name", "humanoid")
+        height = body.get("height", 1.7)
+        mass = body.get("mass", 70.0)
+
+        builder = ParametricBuilder(robot_name=robot_name)
+
+        proportions = body.get("proportions", {})
+        builder.set_parameters(height_m=height, mass_kg=mass, **proportions)
+
+        builder.add_humanoid_segments()
+        result = builder.build()
+
+        if not result.success:
+            return APIResponse.error(result.error_message or "Build failed")
+
+        urdf_string = result.urdf_xml
+
+        if request.query_params.get("download") == "true" and urdf_string is not None:
+            return APIResponse.file(urdf_string, f"{robot_name}.urdf")
+
+        return APIResponse.ok(
+            {
+                "robot_name": robot_name,
+                "links": len(result.links),
+                "joints": len(result.joints),
+                "urdf": urdf_string,
+            }
+        )
+
+    def generate_from_params(self, request: APIRequest) -> APIResponse:
+        """Generate URDF from detailed parameters."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.builders.manual_builder import ManualBuilder
+        from model_generation.core.types import (
+            Joint,
+            Link,
+        )
+
+        body = request.body or {}
+
+        if "links" not in body:
+            return APIResponse.error("Missing 'links' in request body")
+
+        robot_name = body.get("name", "robot")
+        builder = ManualBuilder(robot_name=robot_name)
+
+        for link_data in body.get("links", []):
+            link = Link.from_dict(link_data)
+            builder.add_link(link)
+
+        for joint_data in body.get("joints", []):
+            joint = Joint.from_dict(joint_data)
+            builder.add_joint(joint)
+
+        result = builder.build()
+
+        if not result.success:
+            return APIResponse.error(result.error_message or "Build failed")
+
+        urdf_string = result.urdf_xml
+
+        if request.query_params.get("download") == "true" and urdf_string is not None:
+            return APIResponse.file(urdf_string, f"{robot_name}.urdf")
+
+        return APIResponse.ok(
+            {
+                "robot_name": robot_name,
+                "links": len(result.links),
+                "joints": len(result.joints),
+                "urdf": urdf_string,
+            }
+        )
+
+    def convert_simscape_to_urdf(self, request: APIRequest) -> APIResponse:
+        """Convert SimScape MDL/SLX to URDF."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.converters.simscape import (
+            ConversionConfig,
+            SimscapeToURDFConverter,
+        )
+
+        body = request.body or {}
+
+        content = None
+        format_type = "mdl"
+
+        if "file" in request.files:
+            content = request.files["file"].decode("utf-8", errors="ignore")
+            if content.strip().startswith("<?xml") or content.strip().startswith("<"):
+                format_type = "xml"
+        elif "content" in body:
+            content = body["content"]
+            format_type = body.get("format", "mdl")
+        else:
+            return APIResponse.error("Missing model content or file")
+
+        robot_name = body.get("robot_name", "converted_robot")
+        config = ConversionConfig(robot_name=robot_name)
+
+        converter = SimscapeToURDFConverter(config)
+        result = converter.convert_string(content, format_type)  # type: ignore[arg-type]
+
+        if not result.success:
+            return APIResponse.error(
+                "; ".join(result.errors),
+                status_code=422,
+            )
+
+        response_data = {
+            "success": True,
+            "robot_name": result.robot_name,
+            "links": len(result.links),
+            "joints": len(result.joints),
+            "warnings": result.warnings,
+            "urdf": result.urdf_string,
+        }
+
+        if (
+            request.query_params.get("download") == "true"
+            and result.urdf_string is not None
+        ):
+            return APIResponse.file(result.urdf_string, f"{result.robot_name}.urdf")
+
+        return APIResponse.ok(response_data)
+
+    def convert_mjcf_to_urdf(self, request: APIRequest) -> APIResponse:
+        """Convert MJCF to URDF."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.converters.mjcf_converter import MJCFConverter
+
+        body = request.body or {}
+
+        content = body.get("content") or (
+            request.files.get("file", b"").decode("utf-8") if request.files else None
+        )
+
+        if not content:
+            return APIResponse.error("Missing MJCF content")
+
+        converter = MJCFConverter()
+
+        try:
+            urdf_string = converter.mjcf_to_urdf(content)
+        except (ValueError, KeyError, OSError) as e:
+            return APIResponse.error(f"Conversion failed: {e}", 422)
+
+        robot_name = body.get("robot_name", "converted")
+
+        if request.query_params.get("download") == "true":
+            return APIResponse.file(urdf_string, f"{robot_name}.urdf")
+
+        return APIResponse.ok({"urdf": urdf_string})
+
+    def convert_urdf_to_mjcf(self, request: APIRequest) -> APIResponse:
+        """Convert URDF to MJCF."""
+        from .rest_api import APIResponse
+
+        if not (request is not None):
+            raise ValueError("request must be provided")
+        from model_generation.converters.mjcf_converter import MJCFConverter
+
+        body = request.body or {}
+
+        content = body.get("content") or (
+            request.files.get("file", b"").decode("utf-8") if request.files else None
+        )
+
+        if not content:
+            return APIResponse.error("Missing URDF content")
+
+        converter = MJCFConverter()
+
+        try:
+            mjcf_string = converter.urdf_to_mjcf(content)
+        except (ValueError, KeyError, OSError) as e:
+            return APIResponse.error(f"Conversion failed: {e}", 422)
+
+        robot_name = body.get("robot_name", "converted")
+
+        if request.query_params.get("download") == "true":
+            return APIResponse.file(mjcf_string, f"{robot_name}.xml", "application/xml")
+
+        return APIResponse.ok({"mjcf": mjcf_string})

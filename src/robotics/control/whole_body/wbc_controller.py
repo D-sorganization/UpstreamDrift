@@ -413,7 +413,13 @@ class WholeBodyController:
 
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)
 
-    def _build_priority_level_cost(self, tasks, n_v, n_vars, accumulated_A):
+    def _build_priority_level_cost(
+        self,
+        tasks: list,
+        n_v: int,
+        n_vars: int,
+        accumulated_A: list[np.ndarray],
+    ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
         if not (tasks is not None):
             raise ValueError("tasks must be provided")
         H = np.zeros((n_vars, n_vars))
@@ -445,14 +451,25 @@ class WholeBodyController:
 
         return H, g, accumulated_A
 
-    def _apply_regularization(self, H, n_v, n_contact_vars):
+    def _apply_regularization(
+        self, H: np.ndarray, n_v: int, n_contact_vars: int
+    ) -> None:
         H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
         if n_contact_vars > 0:
             H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
                 n_contact_vars
             )
 
-    def _build_level_qp(self, H, g, n_v, n_contact_vars, M, nle, qd):
+    def _build_level_qp(
+        self,
+        H: np.ndarray,
+        g: np.ndarray,
+        n_v: int,
+        n_contact_vars: int,
+        M: np.ndarray,
+        nle: np.ndarray,
+        qd: np.ndarray,
+    ) -> QPProblem:
         if not (H is not None):
             raise ValueError("H must be provided")
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
