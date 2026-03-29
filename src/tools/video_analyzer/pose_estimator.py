@@ -317,7 +317,6 @@ class PoseEstimator:
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
         exc_tb: object,
-    ) -> bool:
+    ) -> None:
         """Context manager exit."""
         self.close()
-        return False

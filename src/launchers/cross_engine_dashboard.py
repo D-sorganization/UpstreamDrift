@@ -516,46 +516,34 @@ def _build_qt_window() -> object:
         # Chart update
         # ------------------------------------------------------------------
 
+        _METRIC_KEYS = [
+            "cv_total_energy_final",
+            "cv_end_effector_speed_final",
+            "cv_peak_end_effector_speed",
+        ]
+        _METRIC_LABELS = ["Energy", "Speed", "Peak Speed"]
+
         def _update_charts(
             self,
             engine_names: list[str],
             cv_summary: dict[str, float],
         ) -> None:
-            """Refresh Robustness Score and CV charts from the latest results.
-
-            Parameters
-            ----------
-            engine_names : list of str
-                Names of engines that were run.
-            cv_summary : dict
-                Output of CrossEnginePerturbationRunner.compute_cv_summary().
-
-            Design by Contract
-            ------------------
-            Pre:  engine_names is non-empty
-            Pre:  cv_summary has the three standard CV keys
-            Post: both canvases are redrawn
-            """
-            if not _has_mpl:
-                return
-            if not engine_names:
+            """Refresh Robustness Score and CV charts from the latest results."""
+            if not _has_mpl or not engine_names:
                 return
 
-            metric_keys = [
-                "cv_total_energy_final",
-                "cv_end_effector_speed_final",
-                "cv_peak_end_effector_speed",
-            ]
-            metric_labels = ["Energy", "Speed", "Peak Speed"]
-
-            # Robustness Score: use mean CV across metrics per engine.
-            # Since compute_cv_summary returns aggregate CVs (not per-engine),
-            # we compute a single robustness score for the ensemble.
-            cv_values = [cv_summary.get(k, 0.0) for k in metric_keys]
+            cv_values = [cv_summary.get(k, 0.0) for k in self._METRIC_KEYS]
             mean_cv = float(np.mean(cv_values)) if cv_values else 0.0
             robustness = max(0.0, min(1.0, 1.0 - mean_cv))
-            robustness_per_engine = [robustness] * len(engine_names)
 
+            self._draw_robustness_chart(engine_names, robustness)
+            self._draw_cv_chart(cv_values)
+
+        def _draw_robustness_chart(
+            self, engine_names: list[str], robustness: float
+        ) -> None:
+            """Draw per-engine robustness score bar chart."""
+            robustness_per_engine = [robustness] * len(engine_names)
             ax = self._ax_rs
             ax.clear()
             ax.set_facecolor("#1a1a2e")
@@ -573,51 +561,49 @@ def _build_qt_window() -> object:
             ax.set_ylabel("Robustness Score", fontsize=9)
             ax.axhline(0.5, color="#ff6060", linewidth=0.8, linestyle="--")
             self._style_ax(ax)
-
-            # Annotate bar values
-            for bar, val in zip(bars, robustness_per_engine, strict=True):
-                ax.text(
-                    bar.get_x() + bar.get_width() / 2,
-                    bar.get_height() + 0.02,
-                    f"{val:.2f}",
-                    ha="center",
-                    va="bottom",
-                    color="#d0d0f0",
-                    fontsize=8,
-                )
-
+            self._annotate_bars(ax, bars, robustness_per_engine, fmt=".2f")
             self._canvas_rs.draw()
 
-            # CV chart — one bar per metric
-            ax2 = self._ax_cv
-            ax2.clear()
-            ax2.set_facecolor("#1a1a2e")
-            x2 = np.arange(len(metric_labels))
-            bars2 = ax2.bar(
-                x2,
+        def _draw_cv_chart(self, cv_values: list[float]) -> None:
+            """Draw coefficient of variation bar chart per metric."""
+            ax = self._ax_cv
+            ax.clear()
+            ax.set_facecolor("#1a1a2e")
+            x = np.arange(len(self._METRIC_LABELS))
+            bars = ax.bar(
+                x,
                 cv_values,
                 color="#8040c0",
                 edgecolor="#502080",
                 width=0.5,
             )
-            ax2.set_xticks(x2)
-            ax2.set_xticklabels(metric_labels, fontsize=9)
-            ax2.set_ylabel("CV", fontsize=9)
-            ax2.axhline(1.0, color="#ff6060", linewidth=0.8, linestyle="--")
-            self._style_ax(ax2)
+            ax.set_xticks(x)
+            ax.set_xticklabels(self._METRIC_LABELS, fontsize=9)
+            ax.set_ylabel("CV", fontsize=9)
+            ax.axhline(1.0, color="#ff6060", linewidth=0.8, linestyle="--")
+            self._style_ax(ax)
+            self._annotate_bars(ax, bars, cv_values, fmt=".3f", offset=0.01)
+            self._canvas_cv.draw()
 
-            for bar, val in zip(bars2, cv_values, strict=True):
-                ax2.text(
+        @staticmethod
+        def _annotate_bars(
+            ax: object,
+            bars: object,
+            values: list[float],
+            fmt: str = ".2f",
+            offset: float = 0.02,
+        ) -> None:
+            """Add value labels above each bar."""
+            for bar, val in zip(bars, values, strict=True):
+                ax.text(
                     bar.get_x() + bar.get_width() / 2,
-                    bar.get_height() + 0.01,
-                    f"{val:.3f}",
+                    bar.get_height() + offset,
+                    f"{val:{fmt}}",
                     ha="center",
                     va="bottom",
                     color="#d0d0f0",
                     fontsize=8,
                 )
-
-            self._canvas_cv.draw()
 
     return _Window()
 
