@@ -187,20 +187,23 @@ class BandwidthLimitedNoise(NoiseModel):
     cutoff_frequency: float = 100.0
     sample_rate: float = 1000.0
     order: int = 2
-    _filter_state: NDArray[np.float64] | None = field(
-        init=False, repr=False, default=None
+    _filter_states: list[NDArray[np.float64] | None] = field(
+        init=False, repr=False, default_factory=list
     )
     _alpha: float = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        """Initialize filter coefficient."""
+        """Initialize filter coefficient and per-stage states."""
+        if self.order < 1:
+            raise ValueError("order must be >= 1")
         # Simple first-order IIR approximation
         dt = 1.0 / self.sample_rate
         tau = 1.0 / (2 * np.pi * self.cutoff_frequency)
         self._alpha = dt / (tau + dt)
+        self._filter_states = [None] * self.order
 
     def apply(self, signal: NDArray[np.float64]) -> NDArray[np.float64]:
-        """Apply low-pass filter to signal.
+        """Apply nth-order low-pass filter by chaining first-order stages.
 
         Args:
             signal: Input signal.
@@ -210,19 +213,23 @@ class BandwidthLimitedNoise(NoiseModel):
         """
         if not (signal is not None):
             raise ValueError("signal must be provided")
-        if self._filter_state is None:
-            self._filter_state = signal.copy()
-            return signal.copy()
 
-        # First-order IIR filter: y = alpha * x + (1-alpha) * y_prev
-        self._filter_state = (
-            self._alpha * signal + (1 - self._alpha) * self._filter_state
-        )
-        return self._filter_state.copy()
+        result = signal.copy()
+        for stage in range(self.order):
+            if self._filter_states[stage] is None:
+                self._filter_states[stage] = result.copy()
+            else:
+                # First-order IIR filter: y = alpha * x + (1-alpha) * y_prev
+                self._filter_states[stage] = (
+                    self._alpha * result
+                    + (1 - self._alpha) * self._filter_states[stage]
+                )
+                result = self._filter_states[stage].copy()
+        return result
 
     def reset(self) -> None:
         """Reset filter state."""
-        self._filter_state = None
+        self._filter_states = [None] * self.order
 
 
 @dataclass

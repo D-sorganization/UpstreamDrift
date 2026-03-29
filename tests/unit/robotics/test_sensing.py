@@ -137,6 +137,33 @@ class TestNoiseModels:
         assert outputs[1] < 1.0  # Not instant
         assert outputs[-1] > 0.9  # Eventually reaches target
 
+    def test_bandwidth_limited_noise_order2_slower_than_order1(self) -> None:
+        """Higher-order filter has steeper roll-off / slower step response."""
+        order1 = BandwidthLimitedNoise(
+            cutoff_frequency=10.0, sample_rate=100.0, order=1
+        )
+        order2 = BandwidthLimitedNoise(
+            cutoff_frequency=10.0, sample_rate=100.0, order=2
+        )
+
+        outputs1: list[float] = []
+        outputs2: list[float] = []
+        for i in range(50):
+            signal = np.array([1.0]) if i > 0 else np.array([0.0])
+            outputs1.append(order1.apply(signal)[0])
+            outputs2.append(order2.apply(signal)[0])
+
+        arr1 = np.array(outputs1)
+        arr2 = np.array(outputs2)
+
+        # 2nd-order filter should respond more slowly to a step than 1st-order
+        # at early samples, the 2nd-order output must lag behind the 1st-order
+        assert arr2[3] < arr1[3], (
+            "order=2 filter should be slower than order=1 at early samples"
+        )
+        # Both should eventually converge toward 1.0
+        assert arr2[-1] > 0.8
+
     def test_composite_noise(self) -> None:
         """Test composite noise applies all models."""
         composite = CompositeNoise(
