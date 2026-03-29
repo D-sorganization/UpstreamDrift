@@ -12,6 +12,7 @@ the URDF kinematic tree.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -47,8 +48,8 @@ class GeometryType(Enum):
 class JointLimits:
     """Joint limits specification."""
 
-    lower: float = -3.14159  # radians
-    upper: float = 3.14159
+    lower: float = -math.pi  # radians
+    upper: float = math.pi
     effort: float = 100.0  # N*m
     velocity: float = 10.0  # rad/s
 
