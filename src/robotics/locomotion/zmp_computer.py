@@ -277,8 +277,11 @@ class ZMPComputer(ContractChecker):
             if isinstance(engine, HumanoidCapable):
                 return engine.get_com_position()
 
-        # Fallback: use origin
-        return np.array([0.0, 0.0, 1.0])
+        # No silent fallback -- caller must provide COM or use a HumanoidCapable engine
+        raise ValueError(
+            "Cannot determine COM position: engine does not implement "
+            "HumanoidCapable. Provide com_position explicitly."
+        )
 
     def _get_com_velocity(self) -> NDArray[np.float64]:
         """Get CoM velocity from engine."""
@@ -327,13 +330,14 @@ class ZMPComputer(ContractChecker):
         if not (point is not None):
             raise ValueError("point must be provided")
         if support_polygon is None:
-            # Default small support polygon
+            # Default support polygon: realistic human bipedal stance (~30cm x 45cm)
+            # Approximates foot-length (0.28m) x stance-width (0.25m per side)
             support_polygon = np.array(
                 [
-                    [-0.1, -0.1],
-                    [0.1, -0.1],
-                    [0.1, 0.1],
-                    [-0.1, 0.1],
+                    [-0.15, -0.25],
+                    [0.15, -0.25],
+                    [0.15, 0.25],
+                    [-0.15, 0.25],
                 ]
             )
 
