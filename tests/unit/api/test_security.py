@@ -519,7 +519,7 @@ class TestAuthCacheContract:
 class TestAuthCache:
     """Functional tests for AuthCache."""
 
-    def test_get_returns_none_for_missing(self):
+    async def test_get_returns_none_for_missing(self):
         """Test get returns None for missing key."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -527,9 +527,9 @@ class TestAuthCache:
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
-            assert cache.get("nonexistent_key") is None
+            assert await cache.get("nonexistent_key") is None
 
-    def test_set_and_get_round_trip(self):
+    async def test_set_and_get_round_trip(self):
         """Test set and get work together."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -540,12 +540,12 @@ class TestAuthCache:
             api_key = "gms_test_key_12345"
             user_id = 42
 
-            cache.set(api_key, user_id)
-            result = cache.get(api_key)
+            await cache.set(api_key, user_id)
+            result = await cache.get(api_key)
 
             assert result == user_id
 
-    def test_different_keys_cached_separately(self):
+    async def test_different_keys_cached_separately(self):
         """Test different keys are cached separately."""
         with patch.dict(
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
@@ -553,11 +553,11 @@ class TestAuthCache:
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
-            cache.set("key1", "value1")
-            cache.set("key2", "value2")
+            await cache.set("key1", "value1")
+            await cache.set("key2", "value2")
 
-            assert cache.get("key1") == "value1"
-            assert cache.get("key2") == "value2"
+            assert await cache.get("key1") == "value1"
+            assert await cache.get("key2") == "value2"
 
 
 class TestComputePrefixHash:

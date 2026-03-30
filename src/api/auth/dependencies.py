@@ -78,10 +78,10 @@ def _validate_api_key_format(api_key: str) -> None:
         )
 
 
-def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
+async def _lookup_cached_api_key(api_key: str, db: Session) -> APIKey | None:
     from .security import auth_cache
 
-    cached_key_id = auth_cache.get(api_key)
+    cached_key_id = await auth_cache.get(api_key)
     if not cached_key_id:
         return None
     record = db.query(APIKey).filter(APIKey.id == cached_key_id).first()
@@ -173,13 +173,13 @@ async def get_current_user_from_api_key(
     api_key = credentials.credentials
     _validate_api_key_format(api_key)
 
-    api_key_record = _lookup_cached_api_key(api_key, db)
+    api_key_record = await _lookup_cached_api_key(api_key, db)
 
     if not api_key_record:
         api_key_record = _lookup_api_key_by_prefix(api_key, db)
         from .security import auth_cache
 
-        auth_cache.set(api_key, api_key_record.id)
+        await auth_cache.set(api_key, api_key_record.id)
 
     user = _get_active_user_for_api_key(api_key_record, db)
     _update_api_key_usage(api_key_record, db)
