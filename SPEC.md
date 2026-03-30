@@ -27,8 +27,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript |
 | **License** | MIT |
 | **Current Version** | 2.1.0 |
-| **Spec Version** | 1.0.0 |
-| **Last Spec Update** | 2026-03-28 |
+| **Spec Version** | 1.0.1 |
+| **Last Spec Update** | 2026-03-29 |
 
 ## 2. Purpose & Mission
 
@@ -457,6 +457,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-03-29 | 1.0.1 | Performance optimization in validation package: explicitly computing magnitudes instead of using `np.linalg.norm` to avoid NumPy reduction overhead on small axes. |
 | 2026-03-28 | 1.0.0 | Initial specification for UpstreamDrift v2.1.0; documented all 14 features, architecture, testing strategy, and CI/CD pipeline |
 
 ---

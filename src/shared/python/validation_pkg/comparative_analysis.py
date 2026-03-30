@@ -222,8 +222,14 @@ class ComparativeSwingAnalyzer:
             am_a = np.asarray(am_a)
             am_b = np.asarray(am_b)
             # Compare max magnitude
-            max_am_a = float(np.max(np.linalg.norm(am_a, axis=1)))
-            max_am_b = float(np.max(np.linalg.norm(am_b, axis=1)))
+            # PERFORMANCE: Explicit computation instead of np.linalg.norm(..., axis=1)
+            # which has high reduction overhead on small axes.
+            max_am_a = float(
+                np.max(np.sqrt(am_a[:, 0] ** 2 + am_a[:, 1] ** 2 + am_a[:, 2] ** 2))
+            )
+            max_am_b = float(
+                np.max(np.sqrt(am_b[:, 0] ** 2 + am_b[:, 1] ** 2 + am_b[:, 2] ** 2))
+            )
             metrics.append(
                 self.compare_scalars("Max Angular Momentum", max_am_a, max_am_b)
             )
@@ -237,7 +243,10 @@ class ComparativeSwingAnalyzer:
 
             def path_len(c: np.ndarray) -> float:
                 """Calculate path length of a trajectory."""
-                return float(np.sum(np.linalg.norm(np.diff(c[:, :2], axis=0), axis=1)))
+                # PERFORMANCE: Explicit computation using hypot instead of np.linalg.norm(..., axis=1)
+                # to avoid reduction overhead on a small axis.
+                diff = np.diff(c[:, :2], axis=0)
+                return float(np.sum(np.hypot(diff[:, 0], diff[:, 1])))
 
             metrics.append(
                 self.compare_scalars(
