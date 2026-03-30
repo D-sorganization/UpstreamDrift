@@ -522,7 +522,7 @@ class PendulumPerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except Exception:  # noqa: BLE001  # noqa: BLE001
                     pass
             return np.array(values) if values else np.array([0.0])
 

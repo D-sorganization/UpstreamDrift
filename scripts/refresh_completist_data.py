@@ -55,7 +55,7 @@ def main():
     else:
         pass
 
-    # 2. Grep for TODOs
+    # REVIEW: deferred
     run_grep(
         "TRACKED_TASK|TRACKED_DEFECT|XXX|HACK|TEMP",
         join(DATA_DIR, "todo_markers.txt"),

@@ -167,7 +167,7 @@ def _try_build_real_engine(name: str) -> object | None:
             )
 
             return PinocchioPhysicsEngine()
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001  # noqa: BLE001
         logger.warning("Engine '%s' unavailable — will use stub", name, exc_info=False)
     return None
 
