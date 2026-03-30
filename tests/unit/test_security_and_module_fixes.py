@@ -141,8 +141,7 @@ class TestAuthCacheCryptoHash:
         expected = hashlib.sha256(api_key.encode()).hexdigest()
         assert token == expected
 
-    @pytest.mark.anyio
-    async def test_cache_round_trip(self) -> None:
+    def test_cache_round_trip(self) -> None:
         """AuthCache set/get round-trip works correctly with the new hash."""
         from src.api.auth.security import AuthCache
 
@@ -150,8 +149,8 @@ class TestAuthCacheCryptoHash:
         api_key = "gms_roundtrip_key"
         user_id = 42
 
-        await cache.set(api_key, user_id)
-        result = await cache.get(api_key)
+        cache.set(api_key, user_id)
+        result = cache.get(api_key)
 
         assert result == user_id, "Cache get did not return the stored value"
 

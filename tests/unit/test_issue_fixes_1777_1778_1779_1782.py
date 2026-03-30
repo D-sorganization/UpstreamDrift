@@ -196,8 +196,7 @@ class TestAuthCacheSHA256CacheKey:
             "Cache token must not be derived from Python's built-in hash()"
         )
 
-    @pytest.mark.anyio
-    async def test_auth_cache_round_trip_with_sha256_key(self) -> None:
+    def test_auth_cache_round_trip_with_sha256_key(self) -> None:
         """set() then get() must return the stored value using SHA-256 keying."""
         from src.api.auth.security import AuthCache
 
@@ -205,8 +204,8 @@ class TestAuthCacheSHA256CacheKey:
         api_key = "gms_roundtrip_sha256"
         user_id = 99
 
-        await cache.set(api_key, user_id)
-        result = await cache.get(api_key)
+        cache.set(api_key, user_id)
+        result = cache.get(api_key)
 
         assert result == user_id
 

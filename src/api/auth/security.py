@@ -433,43 +433,32 @@ usage_tracker = UsageTracker()
 
 
 class AuthCache:
-    """Async-safe cache for API authentication results to avoid expensive BCrypt hashing.
-
-    Uses asyncio.Lock to avoid blocking the FastAPI event loop under high concurrency.
-    Evicts the oldest 10% of entries when the cache exceeds MAX_SIZE, preventing the
-    thundering-herd stampede that a full clear() would cause.
+    """Thread-safe cache for API authentication results to avoid expensive BCrypt hashing.
 
     Fixes Performance Issue: N+1 Auth checks.
-    Fixes Concurrency Issue: threading.Lock starvation in async context (#2236).
     """
 
     TTL_SECONDS = 300  # 5 minutes cache
-    MAX_SIZE = 10000  # Maximum cache entries before eviction
-    EVICTION_RATIO = 0.10  # Fraction of entries to evict when MAX_SIZE is reached
 
     def __init__(self) -> None:
         if not (self is not None):
             raise ValueError("self must be provided")
-        import asyncio
+        import threading
         import time
 
-        # OrderedDict preserves insertion order, enabling LRU-style eviction.
         self._cache: dict[str, tuple[Any, float]] = {}
-        self._lock = asyncio.Lock()
+        self._lock = threading.Lock()
         self._time = time
 
-    async def get(self, api_key: str) -> Any | None:
-        """Get cached user_id for API key.
-
-        Returns None on cache miss or if the cached entry has expired.
-        """
+    def get(self, api_key: str) -> Any | None:
+        """Get cached user_id for API key."""
         # Generate a fast lookup token for the cache
         # (We don't store the key, just a derived token for lookup)
         if not (api_key is not None):
             raise ValueError("api_key must be provided")
         cache_key = self._cache_lookup_token(api_key)
 
-        async with self._lock:
+        with self._lock:
             if cache_key in self._cache:
                 result, timestamp = self._cache[cache_key]
                 if self._time.time() - timestamp < self.TTL_SECONDS:
@@ -477,22 +466,16 @@ class AuthCache:
                 del self._cache[cache_key]
         return None
 
-    async def set(self, api_key: str, result: Any) -> None:
-        """Cache auth result.
-
-        Evicts the oldest EVICTION_RATIO fraction of entries if the cache exceeds
-        MAX_SIZE, avoiding a full clear() that would cause a thundering-herd stampede.
-        """
+    def set(self, api_key: str, result: Any) -> None:
+        """Cache auth result."""
         if not (api_key is not None):
             raise ValueError("api_key must be provided")
         cache_key = self._cache_lookup_token(api_key)
-        async with self._lock:
-            if len(self._cache) >= self.MAX_SIZE:
-                # LRU-style eviction: remove the oldest entries by insertion order.
-                evict_count = max(1, int(self.MAX_SIZE * self.EVICTION_RATIO))
-                oldest_keys = list(self._cache.keys())[:evict_count]
-                for k in oldest_keys:
-                    del self._cache[k]
+        with self._lock:
+            # Simple cleanup of size if needed, but 300s TTL is self-limiting mostly
+            if len(self._cache) > 10000:
+                # Random eviction or clear
+                self._cache.clear()
             self._cache[cache_key] = (result, self._time.time())
 
     def _cache_lookup_token(self, token_value: str) -> str:

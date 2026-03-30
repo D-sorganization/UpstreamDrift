@@ -151,17 +151,16 @@ def test_usage_tracker() -> None:
     assert summary["api_calls"]["used"] == 1
 
 
-@pytest.mark.anyio
-async def test_auth_cache() -> None:
+def test_auth_cache() -> None:
     """Test AuthCache functionality."""
     cache = AuthCache()
     key = "test_key"
     mock_user = MagicMock()
 
-    assert await cache.get(key) is None
+    assert cache.get(key) is None
 
-    await cache.set(key, mock_user)
-    assert await cache.get(key) is mock_user
+    cache.set(key, mock_user)
+    assert cache.get(key) is mock_user
 
     # Test token is deterministic
     token1 = cache._cache_lookup_token("token A")
