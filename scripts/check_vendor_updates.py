@@ -182,7 +182,20 @@ def check_submodule(
     -------
     SubmoduleStatus
         Structured status report for this submodule.
+
+    Raises
+    ------
+    TypeError
+        If path is not a string or use_network is not a bool.
+    ValueError
+        If path is empty.
     """
+    if not isinstance(path, str):
+        raise TypeError("path must be a string")
+    if not path:
+        raise ValueError("path must be a non-empty string")
+    if not isinstance(use_network, bool):
+        raise TypeError("use_network must be a bool")
     pinned = get_pinned_sha(path)
 
     if use_network and api_url:
@@ -254,6 +267,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     """Entry point. Returns exit code."""
+    if argv is not None and not isinstance(argv, list):
+        raise TypeError("argv must be a list of strings or None")
     args = build_arg_parser().parse_args(argv)
     use_network = not args.no_network
 

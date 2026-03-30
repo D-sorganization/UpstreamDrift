@@ -23,12 +23,18 @@ DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
 ISSUES_DIR = "docs/assessments/issues"
 
+
+def _data_path(filename: str) -> str:
+    """Return the full path to a completist data file."""
+    return os.path.join(DATA_DIR, filename)
+
+
 FILES_MAP = {
-    "MARKERS": os.path.join(DATA_DIR, "todo_markers.txt"),
-    "NOT_IMPL": os.path.join(DATA_DIR, "not_implemented.txt"),
-    "STUBS": os.path.join(DATA_DIR, "stub_functions.txt"),
-    "DOCS": os.path.join(DATA_DIR, "incomplete_docs.txt"),
-    "ABSTRACT": os.path.join(DATA_DIR, "abstract_methods.txt"),
+    "MARKERS": _data_path("todo_markers.txt"),
+    "NOT_IMPL": _data_path("not_implemented.txt"),
+    "STUBS": _data_path("stub_functions.txt"),
+    "DOCS": _data_path("incomplete_docs.txt"),
+    "ABSTRACT": _data_path("abstract_methods.txt"),
 }
 
 EXCLUDED_PATHS = [
@@ -84,6 +90,10 @@ def _scan_completist_file(
     source_key: str, parser: Callable[[str], Finding | None]
 ) -> list[Finding]:
     """Generic helper to scan a completist data file and parse findings."""
+    if not isinstance(source_key, str) or not source_key:
+        raise ValueError("source_key must be a non-empty string")
+    if not callable(parser):
+        raise TypeError("parser must be callable")
     source_path = FILES_MAP.get(source_key)
     if not source_path or not os.path.exists(source_path):
         return []
@@ -107,6 +117,7 @@ def analyze_todos() -> tuple[list[Finding], list[Finding]]:
     fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 
     def _parser(line: str) -> Finding | None:
+        """Parse a single grep output line into a todo or fixme Finding."""
         filepath, lineno, content = _parse_grep_line(line)
         if not filepath or not lineno or content is None:
             return None
@@ -202,6 +213,10 @@ def analyze_abstract_methods() -> list[Finding]:
 
 def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     """Calculate heuristics for Impact, Coverage, and Complexity (1-5 range)."""
+    if not isinstance(item, Mapping):
+        raise TypeError("item must be a Mapping")
+    if "file" not in item:
+        raise ValueError("item must contain a 'file' key")
     filepath = cast(str, item["file"])
     itype = cast(str, item.get("type", ""))
 
@@ -228,6 +243,12 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
 
 def create_issue_file(item: Mapping[str, Any], issue_id: int) -> str:
     """Idempotent creation of markdown issue files."""
+    if not isinstance(item, Mapping):
+        raise TypeError("item must be a Mapping")
+    if "file" not in item or "line" not in item:
+        raise ValueError("item must contain 'file' and 'line' keys")
+    if not isinstance(issue_id, int) or issue_id < 0:
+        raise ValueError("issue_id must be a non-negative integer")
     os.makedirs(ISSUES_DIR, exist_ok=True)
 
     itype = str(item.get("type", "Incomplete Implementation"))
@@ -282,6 +303,14 @@ def generate_mermaid_charts(
     docs: list[Finding],
 ) -> str:
     """Generate Mermaid charts for the report."""
+    if not isinstance(criticals, list):
+        raise TypeError("criticals must be a list")
+    if not isinstance(todos, list):
+        raise TypeError("todos must be a list")
+    if not isinstance(fixmes, list):
+        raise TypeError("fixmes must be a list")
+    if not isinstance(docs, list):
+        raise TypeError("docs must be a list")
     chart = []
     chart.append("## Visualization")
 
@@ -371,6 +400,10 @@ def _generate_priority_table(
     criticals: list[Finding], todos: list[Finding]
 ) -> list[str]:
     """Generate the recommended implementation order section."""
+    if not isinstance(criticals, list):
+        raise TypeError("criticals must be a list")
+    if not isinstance(todos, list):
+        raise TypeError("todos must be a list")
     section = [
         "\n## Recommended Implementation Order",
         "Prioritized by Impact (High) and Complexity (Low).",
@@ -388,6 +421,8 @@ def _generate_priority_table(
 
 def _generate_issues_section(criticals: list[Finding]) -> list[str]:
     """Generate the issues created section and create issue files."""
+    if not isinstance(criticals, list):
+        raise TypeError("criticals must be a list")
     section = ["\n## Issues Created"]
     max_id = 0
     issues_glob = glob.glob(os.path.join(ISSUES_DIR, "Issue_*.md")) + glob.glob(
@@ -407,6 +442,10 @@ def _generate_issues_section(criticals: list[Finding]) -> list[str]:
 
 def _write_report(report: list[str], date_s: str) -> str:
     """Write the report to disk and return the file path."""
+    if not isinstance(report, list):
+        raise TypeError("report must be a list")
+    if not isinstance(date_s, str) or not date_s:
+        raise ValueError("date_s must be a non-empty string")
     os.makedirs(REPORT_DIR, exist_ok=True)
     report_text = "\n".join(report)
 

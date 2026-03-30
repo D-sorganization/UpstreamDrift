@@ -13,7 +13,9 @@ from typing import Any
 
 from cx_Freeze import Executable, setup  # type: ignore[import-not-found]
 
-project_root = Path(__file__).parent.parent.parent
+_this_file = Path(__file__)
+_installer_dir = _this_file.parent
+project_root = _installer_dir.parent.parent
 # Import version and metadata
 try:
     from shared.python.version import (  # type: ignore[import-not-found]

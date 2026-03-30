@@ -55,7 +55,12 @@ def _extract_pip_packages(text: str) -> set[str]:
     Handles multi-line pip install blocks (backslash-continued lines in Dockerfile
     and YAML multi-line strings). Ignores shell keywords, flags (--...), and
     conditional/optional install patterns (|| echo ...).
+
+    Raises:
+        TypeError: If text is not a string.
     """
+    if not isinstance(text, str):
+        raise TypeError("text must be a string")
     packages: set[str] = set()
     lines = text.splitlines()
     i = 0

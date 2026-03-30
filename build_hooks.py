@@ -32,7 +32,9 @@ class UIBuildHook(BuildHookInterface):
                 logger.warning("Warning: UI dist directory does not exist!")
             return
 
-        if not dist_dir.exists() or self.config.get("force_ui_build"):
+        hook_config = self.config
+        force_ui_build = hook_config.get("force_ui_build")
+        if not dist_dir.exists() or force_ui_build:
             logger.info("Building UI...")
 
             # Check if npm is available

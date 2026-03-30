@@ -13,7 +13,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-project_root = Path(__file__).resolve().parents[1]
+_this_file = Path(__file__).resolve()
+_parents = _this_file.parents
+project_root = _parents[1]
 sys.path.insert(0, str(project_root))
 
 import numpy as np  # noqa: E402

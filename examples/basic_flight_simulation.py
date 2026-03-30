@@ -14,11 +14,13 @@ import sys
 from pathlib import Path
 
 # Allow running from repo root without installing the package
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+_this_file = Path(__file__).resolve()
+_project_root = _this_file.parents[1]
+sys.path.insert(0, str(_project_root))
 
-import numpy as np
+import numpy as np  # noqa: E402
 
-from src.shared.python.physics.ball_flight_physics import (
+from src.shared.python.physics.ball_flight_physics import (  # noqa: E402
     BallFlightSimulator,
     BallProperties,
     EnvironmentalConditions,

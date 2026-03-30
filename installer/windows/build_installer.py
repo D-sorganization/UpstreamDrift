@@ -12,8 +12,10 @@ import sys
 from pathlib import Path
 
 # Project paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-INSTALLER_DIR = Path(__file__).parent
+_this_file = Path(__file__)
+_installer_dir = _this_file.parent
+PROJECT_ROOT = _installer_dir.parent.parent
+INSTALLER_DIR = _installer_dir
 BUILD_DIR = INSTALLER_DIR / "build"
 DIST_DIR = INSTALLER_DIR / "dist"
 
