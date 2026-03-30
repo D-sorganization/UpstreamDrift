@@ -164,9 +164,7 @@ def compute_marker_rmse(
     ref = reference[:n]
 
     # Per-marker RMSE
-    # ⚡ Bolt: Explicit element-wise sum and sqrt avoids the heavy dispatch overhead of np.linalg.norm
-    # while preserving support for n-dimensional markers (2D, 3D).
-    errors = np.sqrt(np.sum((pred - ref) ** 2, axis=2))  # [frames x markers]
+    errors = np.linalg.norm(pred - ref, axis=2)  # [frames x markers]
     per_marker_rmse = np.sqrt(np.mean(errors**2, axis=0))  # [markers]
     aggregate_rmse = float(np.sqrt(np.mean(errors**2)))
 

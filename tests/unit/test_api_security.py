@@ -106,10 +106,10 @@ class TestBcryptAPIKeyVerification:
             bcrypt_lib.checkpw(wrong_key.encode("utf-8"), key_hash)
         incorrect_time = time.perf_counter() - start
 
-        # Times should be similar (bcrypt takes consistent time)
-        # Use a generous threshold (3.0) to avoid flakiness in shared CI environments
+        # Times should be similar (within 50% of each other)
+        # Bcrypt is designed to take consistent time regardless of correctness
         ratio = max(correct_time, incorrect_time) / min(correct_time, incorrect_time)
-        assert ratio < 3.0, "Timing difference suggests non-constant-time comparison"
+        assert ratio < 1.5, "Timing difference suggests non-constant-time comparison"
 
     def test_api_key_format_validation(self) -> None:
         """Test that API keys must have gms_ prefix."""
