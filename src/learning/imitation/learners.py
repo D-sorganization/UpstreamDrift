@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import json
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -415,21 +416,26 @@ class BehaviorCloning(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
         data = {
-            "observation_dim": self.observation_dim,
-            "action_dim": self.action_dim,
-            "config": {
-                "epochs": self.config.epochs,
-                "batch_size": self.config.batch_size,
-                "learning_rate": self.config.learning_rate,
-                "weight_decay": self.config.weight_decay,
-                "hidden_sizes": self.config.hidden_sizes,
-            },
-            "layers": [
-                {"W": layer["W"].tolist(), "b": layer["b"].tolist()}
-                for layer in self._policy
-            ],
+            "observation_dim": np.array(self.observation_dim),
+            "action_dim": np.array(self.action_dim),
+            "config": np.array(
+                json.dumps(
+                    {
+                        "epochs": self.config.epochs,
+                        "batch_size": self.config.batch_size,
+                        "learning_rate": self.config.learning_rate,
+                        "weight_decay": self.config.weight_decay,
+                        "hidden_sizes": self.config.hidden_sizes,
+                    }
+                )
+            ),
+            "num_layers": np.array(len(self._policy)),
         }
-        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})  # type: ignore[arg-type]
+        for i, layer in enumerate(self._policy):
+            data[f"policy_{i}_W"] = layer["W"]
+            data[f"policy_{i}_b"] = layer["b"]
+
+        np.savez(path, **data)  # type: ignore[arg-type]
 
     def load(self, path: str | Path) -> None:
         """Load policy from disk.
@@ -440,16 +446,21 @@ class BehaviorCloning(ImitationLearner):
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
-        data = np.load(path, allow_pickle=True)
+        # Security: allow_pickle=False prevents arbitrary code execution
+        data = np.load(path, allow_pickle=False)
 
         self.observation_dim = int(data["observation_dim"])
         self.action_dim = int(data["action_dim"])
 
-        layers_data = data["layers"].tolist()
-        self._policy = [
-            {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
-            for layer in layers_data
-        ]
+        num_layers = int(data["num_layers"])
+        self._policy = []
+        for i in range(num_layers):
+            self._policy.append(
+                {
+                    "W": data[f"policy_{i}_W"],
+                    "b": data[f"policy_{i}_b"],
+                }
+            )
 
 
 class DAgger(ImitationLearner):
@@ -851,37 +862,49 @@ class GAIL(ImitationLearner):
             raise ValueError("path must be provided")
         path = Path(path)
         data = {
-            "observation_dim": self.observation_dim,
-            "action_dim": self.action_dim,
-            "policy": [
-                {"W": layer["W"].tolist(), "b": layer["b"].tolist()}
-                for layer in self._policy
-            ],
-            "discriminator": [
-                {"W": layer["W"].tolist(), "b": layer["b"].tolist()}
-                for layer in self._discriminator
-            ],
+            "observation_dim": np.array(self.observation_dim),
+            "action_dim": np.array(self.action_dim),
+            "num_policy_layers": np.array(len(self._policy)),
+            "num_disc_layers": np.array(len(self._discriminator)),
         }
-        np.savez(path, **{k: np.array(v, dtype=object) for k, v in data.items()})  # type: ignore[arg-type]
+
+        for i, layer in enumerate(self._policy):
+            data[f"policy_{i}_W"] = layer["W"]
+            data[f"policy_{i}_b"] = layer["b"]
+
+        for i, layer in enumerate(self._discriminator):
+            data[f"disc_{i}_W"] = layer["W"]
+            data[f"disc_{i}_b"] = layer["b"]
+
+        np.savez(path, **data)  # type: ignore[arg-type]
 
     def load(self, path: str | Path) -> None:
         """Load GAIL networks."""
         if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
-        data = np.load(path, allow_pickle=True)
+        # Security: allow_pickle=False prevents arbitrary code execution
+        data = np.load(path, allow_pickle=False)
 
         self.observation_dim = int(data["observation_dim"])
         self.action_dim = int(data["action_dim"])
 
-        policy_data = data["policy"].tolist()
-        self._policy = [
-            {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
-            for layer in policy_data
-        ]
+        num_policy_layers = int(data["num_policy_layers"])
+        self._policy = []
+        for i in range(num_policy_layers):
+            self._policy.append(
+                {
+                    "W": data[f"policy_{i}_W"],
+                    "b": data[f"policy_{i}_b"],
+                }
+            )
 
-        disc_data = data["discriminator"].tolist()
-        self._discriminator = [
-            {"W": np.array(layer["W"]), "b": np.array(layer["b"])}
-            for layer in disc_data
-        ]
+        num_disc_layers = int(data["num_disc_layers"])
+        self._discriminator = []
+        for i in range(num_disc_layers):
+            self._discriminator.append(
+                {
+                    "W": data[f"disc_{i}_W"],
+                    "b": data[f"disc_{i}_b"],
+                }
+            )
