@@ -141,7 +141,7 @@ class TestSMPLXAvailability:
 
     def test_unavailable_when_smplx_missing(self) -> None:
         with patch(
-            "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
+            "humanoid_character_builder.generators.mesh_smplx.SMPLX_AVAILABLE",
             False,
         ):
             gen = SMPLXMeshGenerator()
@@ -149,7 +149,7 @@ class TestSMPLXAvailability:
 
     def test_unavailable_when_model_dir_missing(self) -> None:
         with patch(
-            "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
+            "humanoid_character_builder.generators.mesh_smplx.SMPLX_AVAILABLE",
             True,
         ):
             gen = SMPLXMeshGenerator(model_dir="/nonexistent/path")
@@ -157,7 +157,7 @@ class TestSMPLXAvailability:
 
     def test_returns_error_result_when_smplx_missing(self) -> None:
         with patch(
-            "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
+            "humanoid_character_builder.generators.mesh_smplx.SMPLX_AVAILABLE",
             False,
         ):
             gen = SMPLXMeshGenerator()
@@ -168,11 +168,11 @@ class TestSMPLXAvailability:
     def test_returns_error_when_trimesh_missing(self) -> None:
         with (
             patch(
-                "humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE",
+                "humanoid_character_builder.generators.mesh_smplx.SMPLX_AVAILABLE",
                 True,
             ),
             patch(
-                "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE",
+                "humanoid_character_builder.generators.mesh_smplx.TRIMESH_AVAILABLE",
                 False,
             ),
         ):
@@ -222,12 +222,10 @@ class TestSMPLXGenerate:
 
         return mock_model
 
-    @patch("humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE", True)
-    @patch(
-        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
-    )
-    @patch("humanoid_character_builder.generators.mesh_generator._smplx_module")
-    @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
+    @patch("humanoid_character_builder.generators.mesh_smplx.SMPLX_AVAILABLE", True)
+    @patch("humanoid_character_builder.generators.mesh_smplx.TRIMESH_AVAILABLE", True)
+    @patch("humanoid_character_builder.generators.mesh_smplx._smplx_module")
+    @patch("humanoid_character_builder.generators.mesh_smplx._trimesh_module")
     def test_generate_produces_stl_files(
         self, mock_trimesh, mock_smplx, tmp_path: Path
     ) -> None:
@@ -274,10 +272,8 @@ class TestSMPLXGenerate:
         assert len(result.collision_paths) > 0
         assert len(result.vertex_groups) > 0
 
-    @patch("humanoid_character_builder.generators.mesh_generator.SMPLX_AVAILABLE", True)
-    @patch(
-        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
-    )
+    @patch("humanoid_character_builder.generators.mesh_smplx.SMPLX_AVAILABLE", True)
+    @patch("humanoid_character_builder.generators.mesh_smplx.TRIMESH_AVAILABLE", True)
     def test_generate_handles_exception_gracefully(self, tmp_path: Path) -> None:
         """Verify graceful failure when SMPL-X forward pass throws."""
         model_dir = tmp_path / "models"
@@ -286,7 +282,7 @@ class TestSMPLXGenerate:
         gen = SMPLXMeshGenerator(model_dir=model_dir)
 
         with patch(
-            "humanoid_character_builder.generators.mesh_generator._smplx_module"
+            "humanoid_character_builder.generators.mesh_smplx._smplx_module"
         ) as mock_smplx:
             mock_smplx.create.side_effect = RuntimeError("Model load failed")
             result = gen.generate(_default_params(), tmp_path / "out")
@@ -469,9 +465,9 @@ class TestMakeHumanGenerate:
     """Test the full MakeHuman generate pipeline with mocking."""
 
     @patch(
-        "humanoid_character_builder.generators.mesh_generator.TRIMESH_AVAILABLE", True
+        "humanoid_character_builder.generators.mesh_makehuman.TRIMESH_AVAILABLE", True
     )
-    @patch("humanoid_character_builder.generators.mesh_generator._trimesh_module")
+    @patch("humanoid_character_builder.generators.mesh_makehuman._trimesh_module")
     def test_generate_with_mocked_subprocess(
         self, mock_trimesh, tmp_path: Path
     ) -> None:

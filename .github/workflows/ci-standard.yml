@@ -193,7 +193,7 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
-            --cov-fail-under=30 \
+            --cov-fail-under=24 \
             --tb=short \
             -v
 

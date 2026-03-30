@@ -474,7 +474,7 @@ class TestSMPLXVertexValidation:
         )
 
         with patch(
-            "humanoid_character_builder.generators.mesh_generator.logger"
+            "humanoid_character_builder.generators.mesh_smplx.logger"
         ) as mock_logger:
             SMPLXMeshGenerator.load_part_segmentation(Path("/nonexistent/path"))
             mock_logger.warning.assert_called()
