@@ -78,6 +78,18 @@
       "owner": "@upstream-drift-tools",
       "reason": "Pressure drop interface (1400 lines) grew due to multi-regime flow models and validation logic. Decomposition into regime-specific calculator modules planned. Tracked in issue #2051.",
       "expires_on": "2027-03-23"
+    },
+    {
+      "path": "src/shared/python/physics/terrain.py",
+      "owner": "@physics-core",
+      "reason": "Terrain module at 1239 lines due to multi-surface model implementations. Decomposition pending.",
+      "expires_on": "2027-06-30"
+    },
+    {
+      "path": "src/shared/python/spatial_algebra/pose6dof.py",
+      "owner": "@physics-core",
+      "reason": "Pose6DOF at 1229 lines due to comprehensive SE(3) operations. Decomposition pending.",
+      "expires_on": "2027-06-30"
     }
   ]
 }

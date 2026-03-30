@@ -390,7 +390,6 @@ def parallel_axis(
     if not (inertia is not None):
         raise ValueError("inertia must be provided")
     dx, dy, dz = offset
-    dx**2 + dy**2 + dz**2
 
     return {
         "ixx": inertia["ixx"] + mass * (dy**2 + dz**2),

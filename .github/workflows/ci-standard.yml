@@ -39,7 +39,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v6
         with: { python-version: "3.11" }
-      - run: pip install ruff==0.14.10 mypy==1.13.0 bandit==1.7.7 pydocstyle==6.3.0
+      - run: pip install ruff==0.14.10 mypy>=1.15.0 bandit==1.7.7 pydocstyle==6.3.0
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
       - name: Lint
@@ -136,7 +136,7 @@ jobs:
     timeout-minutes: 20 # Prevent runaway tests - hard cutoff
     strategy:
       matrix:
-        python: ["3.11"]
+        python: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v6
       - name: Install System Dependencies
@@ -217,7 +217,7 @@ jobs:
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
           echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
-      - uses: codecov/codecov-action@v6
+      - uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
@@ -278,7 +278,7 @@ jobs:
         working-directory: ./ui
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: "npm"

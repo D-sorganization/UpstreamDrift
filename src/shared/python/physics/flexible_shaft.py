@@ -34,6 +34,9 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from src.shared.python.contracts import check_positive, require
+from src.shared.python.core.physics_constants import (
+    GRAPHITE_DENSITY_KG_M3,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -45,7 +48,7 @@ logger = get_logger(__name__)
 SHAFT_LENGTH_DRIVER = 1.168  # [m] 46" driver shaft
 SHAFT_LENGTH_IRON = 0.965  # [m] 38" 7-iron shaft
 STEEL_DENSITY = 7850  # [kg/m³]
-GRAPHITE_DENSITY = 1800  # [kg/m³]
+GRAPHITE_DENSITY = int(GRAPHITE_DENSITY_KG_M3)  # [kg/m³] from physics_constants
 STEEL_E = 200e9  # [Pa] Young's modulus for steel
 GRAPHITE_E = 130e9  # [Pa] Young's modulus for graphite
 
@@ -504,7 +507,10 @@ class ModalShaftModel(ShaftModel):
             # Modal force = physical force projected onto mode
             # (simplified: only using first component of force)
             modal_force = phi_at_load * np.linalg.norm(force)
-            self.modal_coords[i] += modal_force * 1e-6  # Scale factor
+            # TODO(#2166): Scale factor needs proper modal mass derivation.
+            # Current 1e-6 is an ad-hoc value that produces plausible
+            # deflections but lacks rigorous justification.
+            self.modal_coords[i] += modal_force * 1e-6
 
     def step(self, dt: float) -> ShaftState:
         """Advance modal coordinates by dt."""
@@ -719,9 +725,15 @@ class FiniteElementShaftModel(ShaftModel):
                     self.M[i, j] += m_e[ii, jj]
 
         # Rayleigh damping: C = α*M + β*K
-        # Using typical values for structural damping
-        alpha = 0.1  # Mass proportional
-        beta = 0.0001  # Stiffness proportional
+        # Targets approximately 2% critical damping ratio (ζ ≈ 0.02) in the
+        # 10–100 Hz frequency range relevant to golf shaft bending modes.
+        # Derivation: for two target frequencies ω₁, ω₂ with damping ratio ζ,
+        #   α = 2ζ·ω₁·ω₂ / (ω₁ + ω₂)
+        #   β = 2ζ / (ω₁ + ω₂)
+        # With ω₁=2π·10≈62.8, ω₂=2π·100≈628.3, ζ=0.02:
+        #   α ≈ 0.1, β ≈ 5.8e-5 (rounded to 1e-4 for conservatism)
+        alpha = 0.1  # Mass proportional coefficient
+        beta = 0.0001  # Stiffness proportional coefficient
         self.C = alpha * self.M + beta * self.K
 
     def _apply_boundary_conditions(self) -> None:

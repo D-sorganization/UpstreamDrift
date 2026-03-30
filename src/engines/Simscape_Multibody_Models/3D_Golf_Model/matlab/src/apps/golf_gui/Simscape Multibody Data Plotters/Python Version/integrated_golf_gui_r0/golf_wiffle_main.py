@@ -701,7 +701,8 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _apply_modern_style(self) -> None:
         """Apply modern styling to the application"""
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QMainWindow {
                 background-color: #f0f0f0;
             }
@@ -749,7 +750,8 @@ class WiffleGolfMainWindow(QMainWindow):
                 width: 18px;
                 height: 18px;
             }
-        """)
+        """
+        )
 
 
 def main() -> None:
