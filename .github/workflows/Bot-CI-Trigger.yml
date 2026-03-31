@@ -38,8 +38,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  check-and-trigger:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  check-and-trigger:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Only run for bot-authored PRs or scheduled/manual runs
     if: |
       github.event_name == 'schedule' ||
@@ -53,7 +77,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          token: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
           fetch-depth: 5
 
       - name: Check Loop Prevention
@@ -81,7 +105,7 @@ jobs:
         id: find-prs
         if: steps.loop-check.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
           INPUT_PR: ${{ inputs.pr_number }}
           FORCE: ${{ inputs.force }}
         run: |
@@ -141,7 +165,7 @@ jobs:
       - name: Trigger CI for PRs
         if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != ''
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
         run: |
           for pr in ${{ steps.find-prs.outputs.prs }}; do
             echo "Triggering CI for PR #$pr"

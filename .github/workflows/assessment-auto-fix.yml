@@ -35,9 +35,33 @@ env:
   PYTHON_VERSION: "3.11"
 
 jobs:
-  analyze-assessment-issues:
-    name: Analyze Assessment Issues
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  analyze-assessment-issues:
+    needs: pick-runner
+    name: Analyze Assessment Issues
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: hashFiles('.github/WORKFLOWS_PAUSED') == ''
     outputs:
       top_issues: ${{ steps.prioritize.outputs.top_issues }}
@@ -52,7 +76,7 @@ jobs:
       - name: Fetch assessment-related issues
         id: fetch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           # Get all open issues with assessment-related labels
           gh issue list \
@@ -164,8 +188,8 @@ jobs:
 
   auto-fix-code-quality:
     name: Auto-Fix Code Quality Issues
-    needs: analyze-assessment-issues
-    runs-on: ubuntu-latest
+    needs: [pick-runner, analyze-assessment-issues]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: contains(needs.analyze-assessment-issues.outputs.code_quality_issues, '526') || github.event.inputs.focus_area == 'code-quality' || github.event.inputs.focus_area == 'all'
     steps:
       - name: Checkout
@@ -234,7 +258,7 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           if git diff --quiet; then
             echo "No changes to commit"
@@ -275,8 +299,8 @@ jobs:
 
   create-test-coverage-fix-pr:
     name: Create Test Coverage Improvement PR
-    needs: analyze-assessment-issues
-    runs-on: ubuntu-latest
+    needs: [pick-runner, analyze-assessment-issues]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: contains(needs.analyze-assessment-issues.outputs.test_issues, '520') || github.event.inputs.focus_area == 'testing' || github.event.inputs.focus_area == 'all'
     steps:
       - name: Checkout
@@ -331,7 +355,7 @@ jobs:
 
       - name: Create PR with test improvements
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           git config user.name "Assessment Auto-Fix Bot"
           git config user.email "noreply@github.com"
@@ -390,8 +414,8 @@ jobs:
 
   create-documentation-pr:
     name: Create Documentation Improvements
-    needs: analyze-assessment-issues
-    runs-on: ubuntu-latest
+    needs: [pick-runner, analyze-assessment-issues]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: contains(needs.analyze-assessment-issues.outputs.doc_issues, '525') || github.event.inputs.focus_area == 'documentation' || github.event.inputs.focus_area == 'all'
     steps:
       - name: Checkout
@@ -548,7 +572,7 @@ jobs:
 
       - name: Create PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           git config user.name "Assessment Auto-Fix Bot"
           git config user.email "noreply@github.com"
@@ -600,13 +624,14 @@ jobs:
   summary:
     name: Generate Summary Report
     needs:
+      - pick-runner
       [
         analyze-assessment-issues,
         auto-fix-code-quality,
         create-test-coverage-fix-pr,
         create-documentation-pr,
       ]
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: always()
     steps:
       - name: Create summary

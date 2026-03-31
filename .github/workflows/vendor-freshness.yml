@@ -20,9 +20,33 @@ permissions:
   pull-requests: write
 
 jobs:
-  check-vendor-freshness:
-    name: Check vendor submodule freshness
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  check-vendor-freshness:
+    needs: pick-runner
+    name: Check vendor submodule freshness
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     outputs:
       stale: ${{ steps.check.outputs.stale }}
 
@@ -60,18 +84,18 @@ jobs:
 
   bump-submodule:
     name: Open bump PR if stale
-    needs: check-vendor-freshness
+    needs: [pick-runner, check-vendor-freshness]
     if: >
       needs.check-vendor-freshness.outputs.stale == 'true' &&
       (github.event_name == 'schedule' ||
        (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_bump == 'true'))
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v6
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RUNNER_CHECK_TOKEN }}
           fetch-depth: 0
 
       - name: Configure git identity
@@ -111,7 +135,7 @@ jobs:
       - name: Open PR
         if: steps.diff.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           SHORT="${NEW_SHA:0:12}"
           gh pr create \

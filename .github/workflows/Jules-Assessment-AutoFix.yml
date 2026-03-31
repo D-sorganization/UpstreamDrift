@@ -36,9 +36,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  run-assessments:
-    name: Run Repository Assessments (A-O)
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  run-assessments:
+    needs: pick-runner
+    name: Run Repository Assessments (A-O)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       contents: write
       pull-requests: write
@@ -164,7 +188,7 @@ jobs:
 
       - name: Commit Assessment Reports
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           git config user.name "Jules Assessment Bot"
           git config user.email "jules-bot@gasification-model.local"
@@ -208,9 +232,9 @@ jobs:
   # This prevents PR proliferation from matrix strategy
   auto-fix-issues:
     name: Auto-Fix All Issues (Consolidated)
-    needs: run-assessments
+    needs: [pick-runner, run-assessments]
     if: github.event.inputs.auto_fix != 'false' && github.event.inputs.dry_run != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       contents: write
       pull-requests: write
@@ -332,7 +356,7 @@ jobs:
       - name: Create Single Consolidated PR
         if: steps.check_changes.outputs.has_changes == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           # HARDENING: Check if PR already exists for this branch
           EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq '.[0].number // empty')
@@ -380,8 +404,8 @@ jobs:
 
   create-github-issues:
     name: Create GitHub Issues for Untracked Problems
-    needs: run-assessments
-    runs-on: ubuntu-latest
+    needs: [pick-runner, run-assessments]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       issues: write
 
@@ -401,7 +425,7 @@ jobs:
 
       - name: Create issues for critical findings
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           python scripts/create_issues_from_assessment.py \
             --input assessment_summary.json \
@@ -410,7 +434,7 @@ jobs:
 
       - name: Comment on assessment summary
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           # Create or update issue with weekly assessment summary
           gh issue list --label "assessment-summary" --json number --jq '.[0].number // ""' > issue_num.txt
@@ -429,20 +453,20 @@ jobs:
   # Close source PR if specified (prevents PR proliferation)
   close-source-pr:
     name: Close Source PR (Superseded)
-    needs: [run-assessments, auto-fix-issues]
+    needs: [pick-runner, run-assessments, auto-fix-issues]
     if: |
       always() &&
       inputs.source_pr_to_close != '' &&
       inputs.dry_run != 'true' &&
       needs.auto-fix-issues.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       pull-requests: write
 
     steps:
       - name: Close superseded PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           SOURCE_PR="${{ inputs.source_pr_to_close }}"
 
@@ -477,14 +501,15 @@ jobs:
 
   # Dry run summary - runs independently when dry_run is true
   dry-run-summary:
+    needs: pick-runner
     name: Dry Run Summary
     if: inputs.dry_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
 
     steps:
       - name: Generate dry run report
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
           # 🔍 Dry Run Summary

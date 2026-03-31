@@ -11,9 +11,33 @@ permissions:
   issues: write
 
 jobs:
-  comprehensive-assessment:
-    name: Comprehensive Assessment & Audit
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  comprehensive-assessment:
+    needs: pick-runner
+    name: Comprehensive Assessment & Audit
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -117,7 +141,7 @@ jobs:
       - name: Jules Comprehensive Analysis
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           set -e
           DATE=$(date +%Y-%m-%d)
@@ -243,7 +267,7 @@ jobs:
       - name: Enforce PR Title
         if: always()
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           DATE=$(date +%Y-%m-%d)
           EXPECTED_TITLE="[${{ github.event.repository.name }}] [docs] Assessment Generation - $DATE"

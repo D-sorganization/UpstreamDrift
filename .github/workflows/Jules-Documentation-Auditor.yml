@@ -14,8 +14,32 @@ permissions:
   issues: write
 
 jobs:
-  audit-documentation:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  audit-documentation:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 60
 
     steps:
@@ -142,7 +166,7 @@ jobs:
       - name: Create Issue for Low Coverage
         if: ${{ steps.scan.outputs.coverage < '50%' }}
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           COVERAGE: ${{ steps.scan.outputs.coverage }}
         run: |
           # Check if issue already exists

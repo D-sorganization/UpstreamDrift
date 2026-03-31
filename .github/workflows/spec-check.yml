@@ -22,9 +22,33 @@ permissions:
   pull-requests: write
 
 jobs:
-  spec-freshness:
-    name: Verify SPEC.md freshness
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  spec-freshness:
+    needs: pick-runner
+    name: Verify SPEC.md freshness
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Skip if spec-exempt label is applied
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'spec-exempt') }}
     timeout-minutes: 5

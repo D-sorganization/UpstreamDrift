@@ -4,22 +4,30 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Cleaned up global sys.modules mutation
-from src.launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
+# Ensure PYQT6_AVAILABLE is True during tests
+with patch("src.launchers.unified_launcher.PYQT6_AVAILABLE", True):
+    from src.launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def mock_pyqt6_available() -> Generator[None, None, None]:
+    """Force PyQt6 to be available for all tests."""
+    with patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True):
+        yield
 
 
 @pytest.fixture(autouse=True)
 def mock_golf_launcher_module() -> Generator[MagicMock, None, None]:
     """Mock golf_launcher module."""
     mock_mod = MagicMock()
-    with patch.dict(sys.modules, {"launchers.golf_launcher": mock_mod}):
+    with patch.dict(sys.modules, {"src.launchers.golf_launcher": mock_mod}):
         yield mock_mod
 
 
 @pytest.fixture
 def mock_qapp() -> Generator[MagicMock, None, None]:
     """Mock qapp."""
-    with patch("launchers.unified_launcher.QApplication") as mock_app_cls:
+    with patch("src.launchers.unified_launcher.QApplication") as mock_app_cls:
         mock_app_instance = MagicMock()
         mock_app_cls.instance.return_value = mock_app_instance
         yield mock_app_instance
@@ -41,7 +49,7 @@ def test_init(mock_qapp, mock_golf_launcher) -> None:
 
 def test_init_no_pyqt() -> None:
     with (
-        patch("launchers.unified_launcher.PYQT6_AVAILABLE", False),
+        patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=False),
         pytest.raises(ImportError, match="PyQt6 is required"),
     ):
         UnifiedLauncher()
@@ -51,7 +59,11 @@ def test_mainloop(mock_qapp, mock_golf_launcher, mock_golf_launcher_module) -> N
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 
-    launcher.mainloop()
+    with patch(
+        "src.launchers.unified_launcher._get_golf_main",
+        return_value=mock_golf_launcher_module.main,
+    ):
+        launcher.mainloop()
 
     # mainloop now delegates to golf_launcher.main which calls sys.exit
     # Since we mocked it, the main function should be called.
@@ -59,60 +71,40 @@ def test_mainloop(mock_qapp, mock_golf_launcher, mock_golf_launcher_module) -> N
 
 
 def test_launch_function() -> None:
-    with patch("src.launchers.golf_launcher.main") as mock_main:
+    with patch("src.launchers.unified_launcher._get_golf_main") as mock_get_main:
+        mock_main = MagicMock()
+        mock_get_main.return_value = mock_main
         launch()
         mock_main.assert_called_once()
 
 
 def test_show_status() -> None:
     with (
-        patch("shared.python.engine_core.engine_manager.EngineManager") as mock_mgr_cls,
+        patch("src.launchers.unified_launcher.QApplication"),
+        patch("src.launchers.golf_launcher.GolfLauncher"),
         patch("builtins.print") as mock_print,
-    ):
-        mock_mgr = mock_mgr_cls.return_value
-        mock_mgr.get_available_engines.return_value = []
-
-        # Patch UnifiedLauncher to avoid init logic (GUI) if called,
-        # but show_status is a function that creates instance.
-        # Wait, show_status() instantiates UnifiedLauncher().
-        # We should mock UnifiedLauncher class to avoid GUI init.
-
-        with patch("launchers.unified_launcher.UnifiedLauncher"):
-            # We need to call the REAL show_status method of the mock?
-            # Or simpler: test the method on an instance.
-            # But the test is calling the module-level function `show_status`.
-
-            # The module function `show_status` does:
-            # launcher = UnifiedLauncher()
-            # launcher.show_status()
-
-            # So if we mock UnifiedLauncher class, we can mock the `show_status` method on the instance.
-            # But we want to test the LOGIC of show_status.
-            # So we should probably test `UnifiedLauncher.show_status` directly.
-            pass
-
-    # Better approach: Instantiate UnifiedLauncher with mocks, then call show_status method
-    with (
-        patch("launchers.unified_launcher.QApplication"),
-        patch("launchers.golf_launcher.GolfLauncher"),
     ):
         launcher = UnifiedLauncher()
 
-        with (
-            patch(
-                "src.shared.python.engine_core.engine_manager.EngineManager"
-            ) as mock_mgr_cls,
-            patch("builtins.print") as mock_print,
-        ):
-            mock_mgr = mock_mgr_cls.return_value
-            mock_mgr.get_available_engines.return_value = [
-                MagicMock(value="test_engine")
-            ]
+        # EngineManager is imported inside the method
+        mock_mgr_instance = MagicMock()
 
+        # In unified_launcher.py, it calls getattr(_engine, "value", str(_engine))
+        engine_mock = MagicMock()
+        engine_mock.value = "TEST_ENGINE"
+        mock_mgr_instance.get_available_engines.return_value = [engine_mock]
+
+        with patch.dict(
+            sys.modules,
+            {
+                "src.shared.python.engine_core.engine_manager": MagicMock(
+                    EngineManager=MagicMock(return_value=mock_mgr_instance)
+                )
+            },
+        ):
             launcher.show_status()
 
             # Check if print was called with engine name
-            # print calls are many. We check if any args contain "TEST_ENGINE"
             found = False
             for call in mock_print.call_args_list:
                 args = call[0]
@@ -124,8 +116,8 @@ def test_show_status() -> None:
 
 def test_get_version() -> None:
     with (
-        patch("launchers.unified_launcher.QApplication"),
-        patch("launchers.golf_launcher.GolfLauncher"),
+        patch("src.launchers.unified_launcher.QApplication"),
+        patch("src.launchers.golf_launcher.GolfLauncher"),
     ):
         launcher = UnifiedLauncher()
 
@@ -133,14 +125,52 @@ def test_get_version() -> None:
         with patch("importlib.metadata.version", return_value="1.2.3"):
             assert launcher.get_version() == "1.2.3"
 
-        # Case 2: shared.__version__
+        # Case 2: pyproject.toml
+        from importlib.metadata import PackageNotFoundError
+
+        # We mock what is actually in unified_launcher.py
+        with (
+            patch("importlib.metadata.version", side_effect=PackageNotFoundError),
+            patch("builtins.open"),
+            patch("os.path.exists", return_value=True),
+        ):
+            # Patch tomllib conditionally depending on whether it exists in unified_launcher
+            import importlib
+
+            unified = importlib.import_module("src.launchers.unified_launcher")
+            if hasattr(unified, "tomllib"):
+                with patch(
+                    "src.launchers.unified_launcher.tomllib.load",
+                    return_value={"project": {"version": "3.4.5"}},
+                ):
+                    assert launcher.get_version() == "3.4.5"
+            else:
+                # If tomllib is not imported there, we might need to patch tomli
+                if hasattr(unified, "tomli"):
+                    with patch(
+                        "src.launchers.unified_launcher.tomli.load",
+                        return_value={"project": {"version": "3.4.5"}},
+                    ):
+                        assert launcher.get_version() == "3.4.5"
+                elif hasattr(unified, "toml"):
+                    with patch(
+                        "src.launchers.unified_launcher.toml.load",
+                        return_value={"project": {"version": "3.4.5"}},
+                    ):
+                        assert launcher.get_version() == "3.4.5"
+                else:
+                    # just mock it by replacing the whole method or setting __version__ to skip TOML logic
+                    with patch("shared.python.__version__", "3.4.5", create=True):
+                        assert launcher.get_version() == "3.4.5"
+
+        # Case 3: shared.__version__
         with (
             patch("importlib.metadata.version", side_effect=ImportError),
             patch("shared.python.__version__", "4.5.6", create=True),
         ):
             assert launcher.get_version() == "4.5.6"
 
-        # Case 3: Fallback
+        # Case 4: Fallback
         with (
             patch("importlib.metadata.version", side_effect=ImportError),
             patch.dict(sys.modules, {"shared.python": MagicMock()}),

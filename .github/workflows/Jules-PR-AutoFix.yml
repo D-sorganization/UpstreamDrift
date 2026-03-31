@@ -52,9 +52,33 @@ env:
   CI_POLL_INTERVAL: 30
 
 jobs:
-  iterative-fix:
-    name: Fix and Verify CI (Iterative)
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  iterative-fix:
+    needs: pick-runner
+    name: Fix and Verify CI (Iterative)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 30
     # Only run on failures (not success) for workflow_run events
     if: |
@@ -69,7 +93,7 @@ jobs:
       - name: Get Branch Info
         id: branch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           if [ -n "${{ github.event.inputs.branch }}" ]; then
             BRANCH="${{ github.event.inputs.branch }}"
@@ -106,7 +130,7 @@ jobs:
         id: limits
         if: steps.branch.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           BRANCH: ${{ steps.branch.outputs.branch }}
         run: |
           # Count recent autofix commits on this branch to prevent loops
@@ -135,7 +159,7 @@ jobs:
         with:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RUNNER_CHECK_TOKEN }}
 
       - name: Setup Python
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
@@ -158,7 +182,7 @@ jobs:
         id: fix-loop
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           BRANCH: ${{ steps.branch.outputs.branch }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
           MAX_ITERATIONS: ${{ steps.limits.outputs.remaining_attempts }}
@@ -341,7 +365,7 @@ jobs:
           steps.fix-loop.outputs.status != '' &&
           github.event.inputs.dry_run != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
           STATUS: ${{ steps.fix-loop.outputs.status }}
           ITERATIONS: ${{ steps.fix-loop.outputs.iterations_used }}

@@ -26,8 +26,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  assess-technical-debt:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  assess-technical-debt:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -449,7 +473,7 @@ jobs:
       - name: Create GitHub Issue for Critical Debt
         if: inputs.create_issues != false
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           DEBT_SCORE: ${{ steps.report.outputs.debt_score }}
           SEVERITY: ${{ steps.report.outputs.severity }}
           REPORT_FILE: ${{ steps.report.outputs.report_file }}
@@ -504,7 +528,7 @@ jobs:
 
       - name: Commit and Push Report
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

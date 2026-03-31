@@ -21,12 +21,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   collect-comment:
+    needs: pick-runner
     # Only run on PR comments (not issue comments)
     if: |
       (github.event_name == 'pull_request_review_comment') ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request != null)
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Filter Bot Comments
         id: filter
@@ -50,7 +74,7 @@ jobs:
         id: pr_state
         if: steps.filter.outputs.is_bot != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
             PR_NUMBER="${{ github.event.pull_request.number }}"
@@ -121,7 +145,7 @@ jobs:
           steps.pr_state.outputs.should_skip != 'true' &&
           steps.analyze.outputs.is_actionable == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           mkdir -p .jules/pending
           QUEUE_FILE=".jules/pending/pr_comments.json"

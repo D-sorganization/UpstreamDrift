@@ -21,9 +21,33 @@ permissions:
   pull-requests: write
 
 jobs:
-  prioritize-issues:
-    name: Prioritize Issues for Remediation
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  prioritize-issues:
+    needs: pick-runner
+    name: Prioritize Issues for Remediation
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     outputs:
       issue_list: ${{ steps.prioritize.outputs.issues }}
     steps:
@@ -33,7 +57,7 @@ jobs:
       - name: Get open issues with auto-fix labels
         id: get_issues
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           # Get issues that can be auto-remediated
           gh issue list \
@@ -108,8 +132,8 @@ jobs:
 
   fix-ruff-violations:
     name: Auto-Fix Ruff Violations
-    needs: prioritize-issues
-    runs-on: ubuntu-latest
+    needs: [pick-runner, prioritize-issues]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: contains(needs.prioritize-issues.outputs.issue_list, '526') || contains(github.event.inputs.issue_numbers, '526')
     steps:
       - name: Checkout repository
@@ -148,7 +172,7 @@ jobs:
       - name: Create Pull Request
         if: steps.check_changes.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           # Configure git
           git config user.name "Auto-Remediation Bot"
@@ -208,8 +232,8 @@ jobs:
 
   add-security-headers:
     name: Add API Security Headers
-    needs: prioritize-issues
-    runs-on: ubuntu-latest
+    needs: [pick-runner, prioritize-issues]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: contains(needs.prioritize-issues.outputs.issue_list, '521') || contains(github.event.inputs.issue_numbers, '521')
     steps:
       - name: Checkout repository
@@ -260,7 +284,7 @@ jobs:
 
       - name: Create Pull Request with instructions
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           git config user.name "Auto-Remediation Bot"
           git config user.email "noreply@github.com"
@@ -319,8 +343,8 @@ jobs:
 
   generate-api-documentation:
     name: Auto-Generate API Documentation
-    needs: prioritize-issues
-    runs-on: ubuntu-latest
+    needs: [pick-runner, prioritize-issues]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: contains(needs.prioritize-issues.outputs.issue_list, '525') || contains(github.event.inputs.issue_numbers, '525')
     steps:
       - name: Checkout repository
@@ -352,7 +376,7 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           git config user.name "Auto-Remediation Bot"
           git config user.email "noreply@github.com"
@@ -412,13 +436,14 @@ jobs:
   workflow-summary:
     name: Remediation Summary
     needs:
+      - pick-runner
       [
         prioritize-issues,
         fix-ruff-violations,
         add-security-headers,
         generate-api-documentation,
       ]
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: always()
     steps:
       - name: Generate summary

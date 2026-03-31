@@ -12,8 +12,32 @@ permissions:
   issues: write
 
 jobs:
-  auto-assign:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  auto-assign:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # CHANGED: Only trigger for automated issues or explicit jules-triage label
     # - Issues created by github-actions (from automated assessments)
     # - Issues with 'jules-triage' or 'auto-generated' labels
@@ -25,7 +49,7 @@ jobs:
       - name: Check Issue Labels
         id: check
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
           LABELS: ${{ toJson(github.event.issue.labels) }}
         run: |
           # LABELS is passed via env to prevent shell injection
@@ -46,7 +70,7 @@ jobs:
       - name: Comment @jules
         if: steps.check.outputs.should_assign == 'true'
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
@@ -63,7 +87,7 @@ jobs:
       - name: Add Jules Label
         if: steps.check.outputs.should_assign == 'true'
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |

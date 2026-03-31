@@ -31,15 +31,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  cleanup:
-    name: Cleanup Stale Jules PRs
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  cleanup:
+    needs: pick-runner
+    name: Cleanup Stale Jules PRs
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
 
     steps:
       - name: Find Stale Jules PRs
         id: find
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           MAX_AGE_DAYS: ${{ inputs.max_age_days || '7' }}
         run: |
           echo "Looking for stale Jules PRs..."
@@ -69,7 +93,7 @@ jobs:
         id: check_ci
         if: steps.find.outputs.count != '0'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           echo "Checking CI status for stale PRs..."
 
@@ -99,7 +123,7 @@ jobs:
       - name: Close Stale PRs
         if: steps.check_ci.outputs.close_count != '0'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           DRY_RUN: ${{ inputs.dry_run || 'true' }}
         run: |
           CLOSED=0

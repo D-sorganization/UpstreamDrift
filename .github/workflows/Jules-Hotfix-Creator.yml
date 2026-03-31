@@ -19,8 +19,32 @@ permissions:
   actions: write
 
 jobs:
-  create-hotfix:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  create-hotfix:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Validate failed branch
         id: branch
@@ -69,7 +93,7 @@ jobs:
         id: hotfix
         if: steps.jules.outputs.enabled == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           HOTFIX_BRANCH="hotfix/ci-fail-${TIMESTAMP}"
@@ -83,7 +107,7 @@ jobs:
       - name: Fetch CI Logs & Auto-Fix
         if: steps.jules.outputs.enabled == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
         run: |
           HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
@@ -108,7 +132,7 @@ jobs:
       - name: Create Urgent PR
         if: steps.jules.outputs.enabled == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
           FAILED_BRANCH="${{ steps.branch.outputs.failed_branch }}"

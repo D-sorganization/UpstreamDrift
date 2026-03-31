@@ -48,8 +48,32 @@ env:
   CI_POLL_INTERVAL: 30
 
 jobs:
-  intelligent-repair:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  intelligent-repair:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Prevent multiple repairs on same branch simultaneously
     concurrency:
       group: auto-repair-${{ inputs.branch || github.event.workflow_run.head_branch }}
@@ -59,7 +83,7 @@ jobs:
       - name: Get Branch Info
         id: branch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
           INPUT_BRANCH: ${{ inputs.branch }}
         run: |
@@ -102,7 +126,7 @@ jobs:
         id: limits
         if: steps.branch.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           BRANCH: ${{ steps.branch.outputs.branch }}
         run: |
           HOURS_AGO=$(date -u -d "${{ env.REPAIR_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.REPAIR_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
@@ -128,7 +152,7 @@ jobs:
         with:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RUNNER_CHECK_TOKEN }}
 
       - uses: actions/setup-python@v6
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
@@ -144,7 +168,7 @@ jobs:
         id: logs
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
         run: |
           if [ -n "$TARGET_RUN_ID" ]; then
@@ -170,7 +194,7 @@ jobs:
         id: repair
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           BRANCH: ${{ steps.branch.outputs.branch }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
@@ -406,7 +430,7 @@ jobs:
       - name: Comment on PR
         if: steps.branch.outputs.pr_number != '' && steps.repair.outputs.status != ''
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
           STATUS: ${{ steps.repair.outputs.status }}
           ITERATIONS: ${{ steps.repair.outputs.iterations }}

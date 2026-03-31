@@ -25,8 +25,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  fix-issues:
+
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
     runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
+  fix-issues:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -49,7 +73,7 @@ jobs:
       - name: Find or Create Fix Branch
         id: branch
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           # Check for existing open PR from this workflow
           EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
@@ -79,7 +103,7 @@ jobs:
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           ASSESSMENT_FILE: ${{ inputs.assessment_file || 'docs/assessments/Code_Quality_Review_Latest.md' }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           set -e
           DATE=$(date +%Y-%m-%d)
@@ -187,7 +211,7 @@ jobs:
 
       - name: Commit and Create/Update PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           REUSING_PR: ${{ steps.branch.outputs.reusing_pr }}
           EXISTING_PR_NUM: ${{ steps.branch.outputs.existing_pr_num }}
         run: |
