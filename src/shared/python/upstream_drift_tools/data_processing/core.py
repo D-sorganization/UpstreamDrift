@@ -632,6 +632,14 @@ class DataProcessorEngine(BaseCalculationEngine):
             raise DataNotLoadedError("No data loaded")
         if not expression:
             raise FilterError("Query expression must not be empty")
+
+        # Security: validate the expression before passing to DataFrame.query()
+        # which can execute arbitrary Python code.
+        try:
+            _validate_dataframe_expression(expression)
+        except ValueError as exc:
+            raise FilterError(str(exc)) from exc
+
         self._save_undo_state()
         try:
             self.data = self.data.query(expression)
