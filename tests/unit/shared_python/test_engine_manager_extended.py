@@ -57,15 +57,19 @@ def engine_manager(
     # Patch probes globally for the lifetime of the fixture
     # This ensures new instances created inside methods are also mocked
     with (
-        patch("shared.python.engine_core.engine_probes.MuJoCoProbe") as MockMuJoCo,
-        patch("shared.python.engine_core.engine_probes.DrakeProbe") as MockDrake,
+        patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe") as MockMuJoCo,
+        patch("src.shared.python.engine_core.engine_probes.DrakeProbe") as MockDrake,
         patch(
-            "shared.python.engine_core.engine_probes.PinocchioProbe"
+            "src.shared.python.engine_core.engine_probes.PinocchioProbe"
         ) as MockPinocchio,
-        patch("shared.python.engine_core.engine_probes.OpenSimProbe") as MockOpenSim,
-        patch("shared.python.engine_core.engine_probes.MyoSimProbe") as MockMyoSim,
-        patch("shared.python.engine_core.engine_probes.MatlabProbe") as MockMatlab,
-        patch("shared.python.engine_core.engine_probes.PendulumProbe") as MockPendulum,
+        patch(
+            "src.shared.python.engine_core.engine_probes.OpenSimProbe"
+        ) as MockOpenSim,
+        patch("src.shared.python.engine_core.engine_probes.MyoSimProbe") as MockMyoSim,
+        patch("src.shared.python.engine_core.engine_probes.MatlabProbe") as MockMatlab,
+        patch(
+            "src.shared.python.engine_core.engine_probes.PendulumProbe"
+        ) as MockPendulum,
     ):
         manager = EngineManager(mock_suite_root)
 
@@ -106,13 +110,13 @@ def test_discover_engines_missing(mock_suite_root) -> None:
     shutil.rmtree(mock_suite_root / "engines" / "physics_engines" / "mujoco")
 
     with (
-        patch("shared.python.engine_core.engine_probes.MuJoCoProbe"),
-        patch("shared.python.engine_core.engine_probes.DrakeProbe"),
-        patch("shared.python.engine_core.engine_probes.PinocchioProbe"),
-        patch("shared.python.engine_core.engine_probes.OpenSimProbe"),
-        patch("shared.python.engine_core.engine_probes.MyoSimProbe"),
-        patch("shared.python.engine_core.engine_probes.MatlabProbe"),
-        patch("shared.python.engine_core.engine_probes.PendulumProbe"),
+        patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe"),
+        patch("src.shared.python.engine_core.engine_probes.DrakeProbe"),
+        patch("src.shared.python.engine_core.engine_probes.PinocchioProbe"),
+        patch("src.shared.python.engine_core.engine_probes.OpenSimProbe"),
+        patch("src.shared.python.engine_core.engine_probes.MyoSimProbe"),
+        patch("src.shared.python.engine_core.engine_probes.MatlabProbe"),
+        patch("src.shared.python.engine_core.engine_probes.PendulumProbe"),
     ):
         manager = EngineManager(mock_suite_root)
 
@@ -152,7 +156,7 @@ def test_switch_engine_failure(engine_manager) -> None:
 def test_load_engine_no_loader(engine_manager) -> None:
     """Test loading engine with no registered loader raises error."""
     # Mock the registry to return None (no registration)
-    from shared.python.engine_core.engine_registry import get_registry
+    from src.shared.python.engine_core.engine_registry import get_registry
 
     registry = get_registry()
 
@@ -187,7 +191,7 @@ def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
     engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
     with patch(
-        "shared.python.engine_core.engine_probes.MuJoCoProbe"
+        "src.shared.python.engine_core.engine_probes.MuJoCoProbe"
     ) as mock_probe_class:
         mock_probe = MagicMock()
         mock_probe.probe.return_value.is_available.return_value = False
@@ -196,7 +200,7 @@ def test_load_mujoco_engine_probe_fail(engine_manager) -> None:
 
         # This should fail during the loading process
         with patch(
-            "shared.python.engine_core.engine_loaders.load_mujoco_engine"
+            "src.shared.python.engine_core.engine_loaders.load_mujoco_engine"
         ) as mock_loader:
             mock_loader.side_effect = GolfModelingError("MuJoCo not ready")
 

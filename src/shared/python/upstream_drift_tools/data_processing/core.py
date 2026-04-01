@@ -97,8 +97,11 @@ def _validate_dataframe_expression(expression: str) -> None:
     Raises:
         ValueError: If the expression contains disallowed syntax.
     """
+    # pandas query allows variables starting with @, which breaks native ast.parse
+    # we temporarily remove the @ symbol for validation purposes.
+    validation_expr = expression.replace("@", "")
     try:
-        tree = ast.parse(expression, mode="eval")
+        tree = ast.parse(validation_expr, mode="eval")
     except SyntaxError as exc:
         raise ValueError(f"Syntax error in expression: {exc}") from exc
 
@@ -632,6 +635,14 @@ class DataProcessorEngine(BaseCalculationEngine):
             raise DataNotLoadedError("No data loaded")
         if not expression:
             raise FilterError("Query expression must not be empty")
+
+        # Security: validate the expression before passing to DataFrame.query()
+        # which can execute arbitrary Python code.
+        try:
+            _validate_dataframe_expression(expression)
+        except ValueError as exc:
+            raise FilterError(str(exc)) from exc
+
         self._save_undo_state()
         try:
             self.data = self.data.query(expression)
