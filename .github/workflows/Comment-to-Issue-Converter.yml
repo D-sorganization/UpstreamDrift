@@ -143,20 +143,31 @@ jobs:
           created_issues = []
           archived_comments = []
 
+          def load_json_file(path: Path, default):
+              if not path.exists():
+                  return default
+              try:
+                  if path.stat().st_size == 0:
+                      return default
+                  with open(path, 'r', encoding='utf-8') as f:
+                      return json.load(f)
+              except (json.JSONDecodeError, OSError):
+                  return default
+
           # Load existing issue tracking to avoid duplicates
           tracking_file = archive_dir / 'comment_tracking.json'
-          if tracking_file.exists():
-              with open(tracking_file, 'r') as f:
-                  tracking = json.load(f)
-          else:
-              tracking = {'processed_comments': [], 'created_issues': {}}
+          tracking = load_json_file(
+              tracking_file,
+              {'processed_comments': [], 'created_issues': {}}
+          )
 
           # Find all PR details files
           for details_file in comments_dir.glob('pr_*_details.json'):
               pr_num = details_file.stem.split('_')[1]
 
-              with open(details_file, 'r') as f:
-                  pr_details = json.load(f)
+              pr_details = load_json_file(details_file, {})
+              if not pr_details:
+                  continue
 
               pr_title = pr_details.get('title', f'PR #{pr_num}')
               pr_author = pr_details.get('author', {}).get('login', 'unknown')
@@ -164,11 +175,7 @@ jobs:
 
               # Load review comments
               review_file = comments_dir / f'pr_{pr_num}_review_comments.json'
-              if review_file.exists():
-                  with open(review_file, 'r') as f:
-                      review_comments = json.load(f)
-              else:
-                  review_comments = []
+              review_comments = load_json_file(review_file, [])
 
               # Process each review comment
               for comment in review_comments:
@@ -334,7 +341,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add docs/review_archive/ .github/review_comments/comment_tracking.json || true
+          git add docs/review_archive/ docs/review_archive/comment_tracking.json || true
 
           if ! git diff --staged --quiet; then
             git commit -m "docs: archive review comments from PRs"

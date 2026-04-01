@@ -34,3 +34,8 @@
 **Vulnerability:** Found arbitrary code execution vulnerability via pickle deserialization in `src/learning/imitation/learners.py`. `np.load` was being called with `allow_pickle=True` to load model checkpoints, and `np.savez` was using `dtype=object` which forces the use of pickle.
 **Learning:** `allow_pickle=True` in `np.load` is extremely dangerous and can lead to complete system compromise if untrusted files are loaded. The use of nested dictionary objects inside `np.savez` naturally leads developers to rely on pickle.
 **Prevention:** We should serialize complex structures (like configurations) using secure formats such as JSON strings, and save neural network weights as individual flat numpy arrays (`policy_0_W`, `policy_0_b`) inside `.npz` files instead of structured Python objects. This allows us to strictly use `allow_pickle=False`.
+
+## 2024-06-13 - Prevent insecure deserialization via np.load
+**Vulnerability:** Calling np.load without allow_pickle=False can lead to arbitrary code execution if an attacker supplies a malicious pickle-embedded numpy file.
+**Learning:** Always specify allow_pickle=False when loading numpy files to ensure insecure deserialization does not happen.
+**Prevention:** Ensured allow_pickle=False is the default behavior across all data loading utilities and modules that use np.load.

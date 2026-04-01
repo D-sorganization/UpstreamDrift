@@ -169,10 +169,10 @@ def load_numpy_data(
     logger.debug(f"Loading numpy data from {path}")
 
     if path_obj.suffix == ".npz":
-        data: np.ndarray = np.load(path_obj)  # type: ignore[assignment]
+        data: np.ndarray = np.load(path_obj, allow_pickle=False)  # type: ignore[assignment]
         logger.info(f"Loaded npz archive from {path}")
     else:
-        data = np.load(path_obj)
+        data = np.load(path_obj, allow_pickle=False)
         logger.info(f"Loaded numpy array from {path} with shape {data.shape}")
 
     return data  # type: ignore[return-value]

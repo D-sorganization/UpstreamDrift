@@ -184,7 +184,7 @@ class SignalImporter:
         if not (file_path is not None):
             raise ValueError("file_path must be provided")
         file_path = Path(file_path)
-        data = np.load(file_path)
+        data = np.load(file_path, allow_pickle=False)
 
         time = data[time_key]
         values = data[value_key]
@@ -580,7 +580,7 @@ class SignalLoader:
 
         if fmt == "npy":
             # .npy files contain a single array
-            data = np.load(file_path)
+            data = np.load(file_path, allow_pickle=False)
             if data.ndim == 1:
                 # Assume uniform time sampling
                 time = np.arange(len(data))
