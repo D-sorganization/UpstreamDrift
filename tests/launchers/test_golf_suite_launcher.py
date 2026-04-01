@@ -1,5 +1,6 @@
 """Tests for golf_suite_launcher.py."""
 
+import importlib
 import sys  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
@@ -38,8 +39,8 @@ def launcher(mock_pyqt):
 
 def test_init_raises_without_pyqt():
     with patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", False):
-        import importlib
         import src.launchers.golf_suite_launcher as gsl
+
         importlib.reload(gsl)
 
         with pytest.raises(ImportError, match="PyQt6 is required"):
@@ -47,8 +48,6 @@ def test_init_raises_without_pyqt():
 
 
 def test_imports_without_pyqt():
-    import importlib
-
     import src.launchers.golf_suite_launcher as gsl
 
     with patch(
