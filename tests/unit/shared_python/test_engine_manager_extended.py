@@ -62,10 +62,14 @@ def engine_manager(
         patch(
             "src.shared.python.engine_core.engine_probes.PinocchioProbe"
         ) as MockPinocchio,
-        patch("src.shared.python.engine_core.engine_probes.OpenSimProbe") as MockOpenSim,
+        patch(
+            "src.shared.python.engine_core.engine_probes.OpenSimProbe"
+        ) as MockOpenSim,
         patch("src.shared.python.engine_core.engine_probes.MyoSimProbe") as MockMyoSim,
         patch("src.shared.python.engine_core.engine_probes.MatlabProbe") as MockMatlab,
-        patch("src.shared.python.engine_core.engine_probes.PendulumProbe") as MockPendulum,
+        patch(
+            "src.shared.python.engine_core.engine_probes.PendulumProbe"
+        ) as MockPendulum,
     ):
         manager = EngineManager(mock_suite_root)
 
