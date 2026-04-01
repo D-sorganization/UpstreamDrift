@@ -97,8 +97,11 @@ def _validate_dataframe_expression(expression: str) -> None:
     Raises:
         ValueError: If the expression contains disallowed syntax.
     """
+    # pandas query allows variables starting with @, which breaks native ast.parse
+    # we temporarily remove the @ symbol for validation purposes.
+    validation_expr = expression.replace("@", "")
     try:
-        tree = ast.parse(expression, mode="eval")
+        tree = ast.parse(validation_expr, mode="eval")
     except SyntaxError as exc:
         raise ValueError(f"Syntax error in expression: {exc}") from exc
 
