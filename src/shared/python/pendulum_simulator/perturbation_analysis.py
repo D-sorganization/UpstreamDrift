@@ -25,10 +25,6 @@ from typing import Protocol
 
 import numpy as np
 
-from src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer import (
-    PendulumPerturbationAnalyzer as PendulumPerturbationAnalyzer,
-)
-
 logger = logging.getLogger(__name__)
 
 

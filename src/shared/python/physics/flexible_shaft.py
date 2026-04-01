@@ -513,7 +513,7 @@ class ModalShaftModel(ShaftModel):
             # Modal force = physical force projected onto mode
             # (simplified: only using first component of force)
             modal_force = phi_at_load * np.linalg.norm(force)
-            # TODO(#2166): Scale factor needs proper modal mass derivation.
+            # Scale factor needs proper modal mass derivation (see issue #2166).
             # Current 1e-6 is an ad-hoc value that produces plausible
             # deflections but lacks rigorous justification.
             self.modal_coords[i] += modal_force * 1e-6
