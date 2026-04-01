@@ -125,6 +125,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           ARCHIVE_ONLY: ${{ inputs.archive_only || 'false' }}
+          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           # Write Python script to temp file to avoid YAML heredoc issues
           cat > /tmp/process_comments.py << 'SCRIPT_EOF'
@@ -337,6 +338,7 @@ jobs:
       - name: Commit Archive
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -345,7 +347,7 @@ jobs:
 
           if ! git diff --staged --quiet; then
             git commit -m "docs: archive review comments from PRs"
-            git push
+            git push origin HEAD:"$TARGET_BRANCH"
           else
             echo "No changes to commit"
           fi

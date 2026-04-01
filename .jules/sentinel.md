@@ -39,3 +39,8 @@
 **Vulnerability:** Calling np.load without allow_pickle=False can lead to arbitrary code execution if an attacker supplies a malicious pickle-embedded numpy file.
 **Learning:** Always specify allow_pickle=False when loading numpy files to ensure insecure deserialization does not happen.
 **Prevention:** Ensured allow_pickle=False is the default behavior across all data loading utilities and modules that use np.load.
+
+## 2026-03-09 - Command Injection in pandas query()
+**Vulnerability:** Found arbitrary code execution vulnerability in `DataProcessorEngine.query()` because user input was passed directly to `pandas.DataFrame.query()` without validation. `DataFrame.query()` effectively uses `pd.eval()` under the hood, which is prone to executing arbitrary code.
+**Learning:** `DataFrame.query()` carries the exact same security risks as `DataFrame.eval()`. While previous fixes addressed `add_calculated_column` which uses `eval()`, the `query()` method was missed, showing that developers must audit *all* pandas methods that parse string expressions (`eval`, `query`).
+**Prevention:** Always validate expressions passed to `pd.DataFrame.query()` or `pd.DataFrame.eval()` using an AST-based validator to ensure they only contain safe operations.
