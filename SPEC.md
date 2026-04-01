@@ -27,8 +27,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript |
 | **License** | MIT |
 | **Current Version** | 2.1.0 |
-| **Spec Version** | 1.0.5 |
-| **Last Spec Update** | 2026-03-30 |
+| **Spec Version** | 1.0.7 |
+| **Last Spec Update** | 2026-04-01 |
 
 ## 2. Purpose & Mission
 
@@ -457,6 +457,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-04-01 | 1.0.7 | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for camera framing in GUI |
 | 2026-03-31 | 1.0.6 | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for validation metrics |
 | 2026-03-30 | 1.0.5 | A-N Assessment remediation (issue #2255): added DbC input validation (TypeError/ValueError) to functions in `scripts/analyze_completist_data.py`, `check_coverage_gates.py`, `check_dependency_direction.py`, `check_duplicates.py`, `check_heavy_dep_parity.py`, and `check_vendor_updates.py`; extracted chained attribute accesses to intermediate variables (LoD) in `build_hooks.py`, `examples/aerodynamics_demo.py`, `basic_flight_simulation.py`, `topography_demo.py`, `motion_training_demo.py`, and `installer/windows/`; extracted `_data_path()` helper to eliminate repeated `os.path.join(DATA_DIR, ...)` calls (DRY). |
 | 2026-03-30 | 1.0.4 | Suppressed mypy false-positive on `np.savez` keyword-array arguments in `ImitationLearner` and `GAILLearner` save methods; numpy stubs do not model `**kwargs` as ndarray values. |
