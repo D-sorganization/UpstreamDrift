@@ -4,10 +4,8 @@ name: Code Metrics
 # Reports complexity (radon) and duplication (jscpd) metrics
 
 on:
-  # COST OPTIMIZATION: Removed pull_request and push triggers to reduce CI costs
-  schedule:
-    # Weekly on Sundays at 4 AM PST (12 UTC)
-    - cron: "0 0 * * 0,4"
+  # COST OPTIMIZATION: Schedule removed. This is an informational report — run manually via workflow_dispatch.
+  # Was: cron "0 0 * * 0,4" (twice-weekly cloud runs wasting ~10 min/run across 3 repos)
   workflow_dispatch:
 
 permissions:

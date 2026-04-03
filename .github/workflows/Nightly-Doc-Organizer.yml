@@ -1,8 +1,8 @@
 name: Nightly Documentation Organizer
 
 on:
-  schedule:
-    - cron: "0 0 * * 0,4" # Daily at 3 AM PST (11 UTC)
+  # COST OPTIMIZATION: Schedule removed — doc organization runs on workflow_dispatch only.
+  # Was: cron "0 0 * * 0,4" (twice-weekly cloud run for low-value doc housekeeping)
   workflow_dispatch:
 
 permissions:

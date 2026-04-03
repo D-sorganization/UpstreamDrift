@@ -13,8 +13,8 @@ on:
         required: false
         default: ""
         type: string
-  schedule:
-    - cron: "0 0 * * 0,4" # 5 AM PST Mon-Fri (13 UTC)
+  # Schedule removed: Control Tower handles Consolidator invocation via workflow_call.
+  # Was: cron "0 0 * * 0,4" — duplicate of Control Tower's pr-compiler routing.
 
 concurrency:
   group: jules-consolidator

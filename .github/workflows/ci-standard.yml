@@ -15,7 +15,6 @@ on:
       - "**.md"
       - "LICENSE"
       - ".gitignore"
-      - ".github/**"
   workflow_dispatch:
   schedule:
     # Weekly run every Monday at 06:00 UTC — catches test drift and

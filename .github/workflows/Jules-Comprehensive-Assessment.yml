@@ -1,9 +1,9 @@
 name: Jules Comprehensive Assessment
 
 on:
-  schedule:
-    - cron: "0 0 * * 0,4" # Every 3 days at 5 AM PST (10 UTC) - cost optimized
+  workflow_call:
   workflow_dispatch:
+  # Schedule removed: Control Tower handles scheduling at 08:00 UTC Sun+Thu via assessment-generator path.
 
 permissions:
   contents: write

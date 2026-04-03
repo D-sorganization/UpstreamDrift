@@ -1,9 +1,8 @@
 name: Weekly CI Failure Digest
 
 on:
-  schedule:
-    # Every Monday at 9am UTC
-    - cron: "0 0 * * 0,4"
+  # COST OPTIMIZATION: Schedule removed — informational digest, run manually.
+  # Was: cron "0 0 * * 0,4" (twice-weekly cloud run creating issues nobody reads daily)
   workflow_dispatch: # Allow manual trigger
 
 permissions:

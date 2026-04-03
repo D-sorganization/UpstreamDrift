@@ -3,8 +3,8 @@ name: Jules Completist (Incomplete Implementation Auditor)
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * 0,4" # Daily at 1 AM UTC (matches Control Tower)
+  # Schedule removed: Control Tower (Jules-Control-Tower.yml) handles all scheduling.
+  # This workflow runs via workflow_call from Control Tower at 09:00 UTC Sun+Thu.
 
 permissions:
   contents: write

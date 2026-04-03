@@ -9,16 +9,17 @@ on:
     workflows: ["CI Standard"]
     types: [completed]
   schedule:
-    # OVERNIGHT SCHEDULE - All work done before morning (midnight-6 AM PST / 8 AM-2 PM UTC)
-    - cron: "0 0 * * 0,4" # Midnight PST (Mondays) - Assessment Generator
-    - cron: "0 0 * * 0,4" # 12:30 AM PST (Mondays) - Code Quality Reviewer
-    - cron: "0 0 * * 0,4" # 1 AM PST (Mondays) - Completist (incomplete impl)
-    - cron: "0 0 * * 0,4" # 1:30 AM PST (Mondays) - Documentation Auditor
-    - cron: "0 0 * * 0,4" # 2:30 AM PST (Mondays) - Sentinel (security)
-    - cron: "0 0 * * 0,4" # 3 AM PST (Mondays) - Auto-Refactor
-    - cron: "0 0 * * 0,4" # 3:30 AM PST (Mondays) - Issue Resolver (daily fix)
-    - cron: "0 0 * * 0,4" # 5 AM PST (Mondays) - Auto-Rebase
-    - cron: "0 0 * * 0,4" # 4 AM PST (Mondays) - PR Compiler (consolidate PRs)
+    # OVERNIGHT SCHEDULE - Staggered so each cron maps to exactly one worker via routing switch
+    # Runs Sun (0) + Thu (4) at unique UTC times — matches routing logic in triage job
+    - cron: "0 8 * * 0,4"    # 08:00 UTC → assessment-generator
+    - cron: "30 8 * * 0,4"   # 08:30 UTC → code-quality-reviewer
+    - cron: "0 9 * * 0,4"    # 09:00 UTC → completist
+    - cron: "30 9 * * 0,4"   # 09:30 UTC → documentation-auditor
+    - cron: "30 10 * * 0,4"  # 10:30 UTC → sentinel
+    - cron: "0 11 * * 0,4"   # 11:00 UTC → auto-refactor
+    - cron: "30 11 * * 0,4"  # 11:30 UTC → issue-resolver
+    - cron: "0 12 * * 0,4"   # 12:00 UTC → pr-compiler
+    - cron: "0 13 * * 0,4"   # 13:00 UTC → auto-rebase
   workflow_dispatch:
     inputs:
       target:
