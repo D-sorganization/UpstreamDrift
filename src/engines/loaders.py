@@ -389,7 +389,9 @@ def load_putting_green_engine(suite_root: Path) -> PhysicsEngine:  # noqa: ARG00
     Postcondition: returned engine is non-None (DbC).
     """
     try:
-        from src.engines.physics_engines.putting_green import PuttingGreenSimulator
+        from src.engines.physics_engines.putting_green.python.simulator import (
+            PuttingGreenSimulator,
+        )
 
         # Putting green doesn't need probing - it's always available as pure Python
         simulator = PuttingGreenSimulator()

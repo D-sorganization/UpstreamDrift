@@ -457,7 +457,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date | Version | Changes |
 |------|---------|---------|
-| 2026-04-03 | 1.0.11 | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit element-wise calculation for validation package data fitting. |
+| 2026-04-03 | 1.0.11 | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit element-wise sum of squares calculation in `trajectory_funnel_benchmark.py` for performance gain. |
 | 2026-04-01 | 1.0.8 | Sentinel: restricted legacy `np.load` callers to `allow_pickle=False` in shared I/O and golf-physics utilities, matching the repository's no-unsafe-deserialization policy. |
 | 2026-04-01 | 1.0.7 | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for camera framing in GUI |
 | 2026-03-31 | 1.0.6 | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for validation metrics |
