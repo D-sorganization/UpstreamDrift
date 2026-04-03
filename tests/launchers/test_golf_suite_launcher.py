@@ -38,13 +38,18 @@ def launcher(mock_pyqt):
 
 
 def test_init_raises_without_pyqt():
-    with patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", False):
-        import src.launchers.golf_suite_launcher as gsl
+    import src.launchers.golf_suite_launcher as gsl
 
+    with patch(
+        "src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", False
+    ):
         importlib.reload(gsl)
 
         with pytest.raises(ImportError, match="PyQt6 is required"):
             gsl.GolfLauncher()
+
+    # Restore module state so other tests on this worker do not fail!
+    importlib.reload(gsl)
 
 
 def test_imports_without_pyqt():
