@@ -334,8 +334,12 @@ class TestRunBatch:
             MuJoCoPerturbationAnalyzer,
         )
 
-        fresh = MuJoCoPerturbationAnalyzer(t_end=0.1)
-        with pytest.raises((AssertionError, AttributeError)):
+        # Bypass the __init__ (which requires a real mujoco model) and test
+        # the base-class precondition check directly.
+        fresh = MuJoCoPerturbationAnalyzer.__new__(MuJoCoPerturbationAnalyzer)
+        fresh._base_coeffs = None  # type: ignore[attr-defined]
+        fresh._nominal_result = None  # type: ignore[attr-defined]
+        with pytest.raises((ValueError, AssertionError, AttributeError)):
             fresh.run_batch(_SMALL_CONFIG)
 
     def test_contains_scalar_metrics(self, analyzer_with_profile) -> None:  # type: ignore[no-untyped-def]
