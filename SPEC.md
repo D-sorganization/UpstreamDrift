@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript |
 | **License** | MIT |
 | **Current Version** | 2.1.0 |
-| **Spec Version** | 1.0.17 |
+| **Spec Version** | 1.0.18 |
 | **Last Spec Update** | 2026-04-04 |
 
 ## 2. Purpose & Mission
@@ -461,6 +461,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 | 2026-04-04 | 1.0.14 | Bolt: Optimized `np.max(np.linalg.norm(..., axis=1))` to `np.sqrt(np.max(np.sum(..., axis=1)))` in `CollisionGeometryGenerator._fit_sphere` for performance gain. |
 | 2026-04-04 | 1.0.15 | Sentinel: Replace pickle-based checksum serialization in `engine_core/checkpoint.py` with deterministic string encoding to eliminate pickle deserialization risk. |
 | 2026-04-04 | 1.0.16 | Bolt: Optimized MuJoCo PerturbationAnalyzer norm calculations using explicit element-wise arithmetic; fix MANDATORY_METRICS re-export regression from analyzer_base refactor. |
+| 2026-04-04 | 1.0.18 | Bolt: Optimized MuJoCo PerturbationAnalyzer peak speed and trajectory RMSE calculations using explicit element-wise squaring instead of np.linalg.norm; added test fixes for Python 3.10/3.12 namespace package compatibility. |
 | 2026-04-04 | 1.0.17 | Bolt: Optimized `np.linalg.norm` to explicit element-wise sum of squares calculation in `biomechanics/ztcf.py` for performance gain. |
 | 2026-04-03 | 1.0.11 | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit element-wise sum of squares calculation in `trajectory_funnel_benchmark.py` for performance gain. |
 | 2026-04-01 | 1.0.8 | Sentinel: restricted legacy `np.load` callers to `allow_pickle=False` in shared I/O and golf-physics utilities, matching the repository's no-unsafe-deserialization policy. |
