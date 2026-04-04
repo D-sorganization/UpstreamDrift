@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript |
 | **License** | MIT |
 | **Current Version** | 2.1.0 |
-| **Spec Version** | 1.0.18 |
+| **Spec Version** | 1.0.20 |
 | **Last Spec Update** | 2026-04-04 |
 
 ## 2. Purpose & Mission
@@ -457,6 +457,8 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-04-04 | 1.0.20 | Fix: Use `patch.dict(sys.modules)` in `test_cli_launch` (test_unified_launcher_coverage.py) to prevent real import of `golf_launcher.py` with top-level PyQt6 imports; avoids xdist worker crash in subprocess context on Python 3.10. |
+| 2026-04-04 | 1.0.19 | Fix: Populate `src/engines/physics_engines/__init__.py` with subpackage imports (mujoco, pinocchio, opensim, drake, myosuite) to register them as module attributes; required for Python 3.10 compatibility where `unittest.mock.patch` navigates attribute chains and fails on unregistered subpackages. |
 | 2026-04-04 | 1.0.13 | Bolt: Performance optimization in MuJoCo PerturbationAnalyzer. Replaced `np.linalg.norm(..., axis=1)` with explicit element-wise squaring and summation for max value calculations to avoid axis reduction overhead. |
 | 2026-04-04 | 1.0.14 | Bolt: Optimized `np.max(np.linalg.norm(..., axis=1))` to `np.sqrt(np.max(np.sum(..., axis=1)))` in `CollisionGeometryGenerator._fit_sphere` for performance gain. |
 | 2026-04-04 | 1.0.15 | Sentinel: Replace pickle-based checksum serialization in `engine_core/checkpoint.py` with deterministic string encoding to eliminate pickle deserialization risk. |

@@ -1,5 +1,6 @@
 import argparse
-from unittest.mock import patch
+import sys
+from unittest.mock import MagicMock, patch
 
 import launch_golf_suite
 
@@ -32,11 +33,15 @@ def test_route_launch_web_engine(mock_server_main, monkeypatch):
     mock_server_main.assert_called_once()
 
 
-@patch("src.launchers.golf_launcher.main")
-def test_route_launch_classic(mock_classic_main):
-    args = argparse.Namespace(engine=None, classic=True, api_only=False)
-    launch_golf_suite.route_launch(args)
-    mock_classic_main.assert_called_once()
+def test_route_launch_classic():
+    # Use patch.dict instead of @patch to avoid triggering the real import of
+    # golf_launcher.py, which has top-level PyQt6 imports that crash xdist
+    # workers on Python 3.10 when Qt is initialised in a subprocess context.
+    mock_module = MagicMock()
+    with patch.dict(sys.modules, {"src.launchers.golf_launcher": mock_module}):
+        args = argparse.Namespace(engine=None, classic=True, api_only=False)
+        launch_golf_suite.route_launch(args)
+    mock_module.main.assert_called_once()
 
 
 @patch("src.api.local_server.main")
