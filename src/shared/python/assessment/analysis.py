@@ -60,9 +60,22 @@ def assess_error_handling_content(content: str) -> dict[str, int]:
 
 def assess_logging_content(content: str) -> dict[str, int]:
     """Count logging vs print usage in content."""
+    print_usage = 0
+    try:
+        tree = ast.parse(content)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "print"
+            ):
+                print_usage += 1
+    except SyntaxError:
+        print_usage = len(re.findall(r"(?<!\w)print\s*\(", content))
+
     return {
         "logging_usage": len(re.findall(r"logging\.|logger\.", content)),
-        "print_usage": content.count("print("),
+        "print_usage": print_usage,
     }
 
 
