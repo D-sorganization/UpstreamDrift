@@ -158,8 +158,8 @@ class TestTerrainQueries:
         """Query results are numeric."""
         client.post("/api/terrain/load", json={"preset": "fairway"})
         data = client.post("/api/terrain/query", json={"x": 25.0, "y": 100.0}).json()
-        assert isinstance(data["elevation"], (int, float))
-        assert isinstance(data["friction"], (int, float))
+        assert isinstance(data["elevation"], int | float)
+        assert isinstance(data["friction"], int | float)
         assert data["friction"] > 0
 
     def test_query_different_terrain_types(self, client: TestClient) -> None:

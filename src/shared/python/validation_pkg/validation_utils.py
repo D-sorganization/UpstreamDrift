@@ -345,7 +345,7 @@ def validate_numeric(
         validate_numeric(mass, "mass")
         validate_numeric(result, "result", allow_nan=True)
     """
-    if not isinstance(value, (int, float, np.number)):
+    if not isinstance(value, int | float | np.number):
         raise TypeError(f"{name} must be numeric, got {type(value).__name__}")
 
     if not allow_nan and np.isnan(value):

@@ -308,7 +308,7 @@ class InertiaCalculator:
                 return InertiaMode.MESH_UNIFORM_DENSITY
             return InertiaMode.PRIMITIVE
 
-        if isinstance(source, (str, Path)):
+        if isinstance(source, str | Path):
             path = Path(source)
             if path.suffix.lower() in (".stl", ".obj", ".ply", ".dae", ".glb"):
                 return InertiaMode.MESH_UNIFORM_DENSITY
@@ -426,7 +426,7 @@ class InertiaCalculator:
         """Resolve source to a mesh file path."""
         if isinstance(source, Geometry) and source.mesh_filename:
             return Path(source.mesh_filename)
-        if isinstance(source, (str, Path)):
+        if isinstance(source, str | Path):
             return Path(source)
         raise ValueError(f"Mesh mode requires path, got {type(source)}")
 

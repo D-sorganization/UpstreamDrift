@@ -64,7 +64,19 @@ def test_load_drake_missing(tmp_path: object) -> None:
         def side_effect(name, *args, **kwargs):
             if name == "pydrake" or name.startswith("pydrake."):
                 raise ImportError(f"No module named {name}")
-            return original_import(name, *args, **kwargs)
+            try:
+                return original_import(name, *args, **kwargs)
+            except ImportError as e:
+                if "cannot load module more than once per process" in str(e):
+                    if name == "" and args and kwargs:
+                        name = args[0][0] if args else ""
+                        if not name:
+                            return None
+                    # Python 3.12+ extension loading race condition with mocked __import__
+                    import importlib
+
+                    return importlib.import_module(name)
+                raise
 
         # Need to mock other engines to allow import of engine_loaders
         with (

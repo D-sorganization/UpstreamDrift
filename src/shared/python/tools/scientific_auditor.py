@@ -58,7 +58,7 @@ class ScienceAuditor(ast.NodeVisitor):
             func_name = node.func.attr
 
         if func_name in trig_functions and any(
-            isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float))
+            isinstance(arg, ast.Constant) and isinstance(arg.value, int | float)
             for arg in node.args
         ):
             self.risks.append(

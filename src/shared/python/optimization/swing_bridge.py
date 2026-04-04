@@ -90,7 +90,7 @@ class SwingOptimizationConfig:
                 f"got {self.horizon_steps}"
             )
 
-        if not isinstance(self.dt, (int, float)):
+        if not isinstance(self.dt, int | float):
             raise TypeError(f"dt must be numeric, got {type(self.dt).__name__}")
         if not (_MIN_DT <= self.dt <= _MAX_DT):
             raise ValueError(f"dt must be in [{_MIN_DT}, {_MAX_DT}], got {self.dt}")
@@ -102,7 +102,7 @@ class SwingOptimizationConfig:
         if self.max_iterations < 1:
             raise ValueError(f"max_iterations must be >= 1, got {self.max_iterations}")
 
-        if not isinstance(self.convergence_tol, (int, float)):
+        if not isinstance(self.convergence_tol, int | float):
             raise TypeError(
                 f"convergence_tol must be numeric, got "
                 f"{type(self.convergence_tol).__name__}"
@@ -110,7 +110,7 @@ class SwingOptimizationConfig:
         if self.convergence_tol <= 0:
             raise ValueError(f"convergence_tol must be > 0, got {self.convergence_tol}")
 
-        if not isinstance(self.target_clubhead_velocity, (int, float)):
+        if not isinstance(self.target_clubhead_velocity, int | float):
             raise TypeError(
                 f"target_clubhead_velocity must be numeric, got "
                 f"{type(self.target_clubhead_velocity).__name__}"
@@ -121,7 +121,7 @@ class SwingOptimizationConfig:
                 f"{self.target_clubhead_velocity}"
             )
 
-        if not isinstance(self.control_cost_weight, (int, float)):
+        if not isinstance(self.control_cost_weight, int | float):
             raise TypeError(
                 f"control_cost_weight must be numeric, got "
                 f"{type(self.control_cost_weight).__name__}"
@@ -131,7 +131,7 @@ class SwingOptimizationConfig:
                 f"control_cost_weight must be >= 0, got {self.control_cost_weight}"
             )
 
-        if not isinstance(self.terminal_cost_weight, (int, float)):
+        if not isinstance(self.terminal_cost_weight, int | float):
             raise TypeError(
                 f"terminal_cost_weight must be numeric, got "
                 f"{type(self.terminal_cost_weight).__name__}"

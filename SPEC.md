@@ -27,8 +27,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript |
 | **License** | MIT |
 | **Current Version** | 2.1.0 |
-| **Spec Version** | 1.0.12 |
-| **Last Spec Update** | 2026-04-03 |
+| **Spec Version** | 1.0.13 |
+| **Last Spec Update** | 2026-04-04 |
 
 ## 2. Purpose & Mission
 
@@ -457,6 +457,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-04-04 | 1.0.13 | Bolt: Performance optimization in MuJoCo PerturbationAnalyzer. Replaced `np.linalg.norm(..., axis=1)` with explicit element-wise squaring and summation for max value calculations to avoid axis reduction overhead. |
 | 2026-04-03 | 1.0.11 | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit element-wise sum of squares calculation in `trajectory_funnel_benchmark.py` for performance gain. |
 | 2026-04-01 | 1.0.8 | Sentinel: restricted legacy `np.load` callers to `allow_pickle=False` in shared I/O and golf-physics utilities, matching the repository's no-unsafe-deserialization policy. |
 | 2026-04-01 | 1.0.7 | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for camera framing in GUI |
