@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript |
 | **License** | MIT |
 | **Current Version** | 2.1.0 |
-| **Spec Version** | 1.0.20 |
+| **Spec Version** | 1.0.21 |
 | **Last Spec Update** | 2026-04-04 |
 
 ## 2. Purpose & Mission
@@ -457,6 +457,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date | Version | Changes |
 |------|---------|---------|
+| 2026-04-04 | 1.0.21 | Fix: Re-export `MANDATORY_METRICS` from all 5 engine perturbation analyzers (drake, mujoco, myosuite, opensim, pinocchio) via `# noqa: F401` import; tests import `MANDATORY_METRICS` from engine-specific modules after refactor moved it to `analyzer_base`. |
 | 2026-04-04 | 1.0.20 | Fix: Use `patch.dict(sys.modules)` in `test_cli_launch` (test_unified_launcher_coverage.py) to prevent real import of `golf_launcher.py` with top-level PyQt6 imports; avoids xdist worker crash in subprocess context on Python 3.10. |
 | 2026-04-04 | 1.0.19 | Fix: Populate `src/engines/physics_engines/__init__.py` with subpackage imports (mujoco, pinocchio, opensim, drake, myosuite) to register them as module attributes; required for Python 3.10 compatibility where `unittest.mock.patch` navigates attribute chains and fails on unregistered subpackages. |
 | 2026-04-04 | 1.0.13 | Bolt: Performance optimization in MuJoCo PerturbationAnalyzer. Replaced `np.linalg.norm(..., axis=1)` with explicit element-wise squaring and summation for max value calculations to avoid axis reduction overhead. |
