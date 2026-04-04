@@ -182,3 +182,4 @@ pkg/
 
 # Rust build artifacts
 target/
+venv/
