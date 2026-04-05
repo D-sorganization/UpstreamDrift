@@ -418,7 +418,8 @@ class CorrelationTab(QtWidgets.QWidget):
             # Reduce to scalar
             # Take L2 norm for vectors (forces, etc.)
             # Assuming shape (N, D)
-            scalar_vals = np.linalg.norm(vals, axis=1) if vals.ndim > 1 else vals
+            # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1) for small inner dimensions
+            scalar_vals = np.sqrt(np.sum(vals**2, axis=1)) if vals.ndim > 1 else vals
 
             data_dict[label] = scalar_vals
             if len(scalar_vals) < min_len:

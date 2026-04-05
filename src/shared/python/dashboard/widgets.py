@@ -571,7 +571,8 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         elif plot_mode == "Norm":
             # Compute Euclidean norm
-            data = np.linalg.norm(data, axis=1).reshape(-1, 1)
+            # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1) for small inner dimensions
+            data = np.sqrt(np.sum(data**2, axis=1)).reshape(-1, 1)
             dim_label = "Norm"
 
         return times, data, dim_label
