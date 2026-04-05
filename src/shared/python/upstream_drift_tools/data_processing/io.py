@@ -56,7 +56,7 @@ class DataReader:
         if fmt == "json":
             return pd.read_json(path, **kwargs)
         if fmt == "pickle":
-            return pd.read_pickle(path)  # nosec B301 - caller explicitly requests pickle format; for trusted data only
+            raise ValueError("Pickle format is disabled for security reasons.")
         if fmt == "numpy":
             data = np.load(path, allow_pickle=False)
             if isinstance(data, np.ndarray):
@@ -113,7 +113,7 @@ class DataWriter:
         elif fmt == "json":
             df.to_json(path, orient="records", indent=2, **kwargs)
         elif fmt == "pickle":
-            df.to_pickle(path)
+            raise ValueError("Pickle format is disabled for security reasons.")
         elif fmt == "numpy":
             np.save(str(path), df.values)
         elif fmt == "sqlite":

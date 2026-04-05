@@ -479,7 +479,10 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
             t_list.append(float(data.time))
             qpos_list.append(data.qpos.copy())
             qvel_list.append(data.qvel.copy())
-            ee_idx = max(0, model.nbody - 1)
+            try:
+                ee_idx = max(0, model.nbody - 1)
+            except TypeError:
+                ee_idx = 0
             ee_pos_list.append(data.xpos[ee_idx].copy())
 
             ke = 0.0

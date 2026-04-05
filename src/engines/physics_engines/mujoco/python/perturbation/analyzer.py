@@ -200,7 +200,10 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
                 raise ValueError(f"Body '{ee_body_name}' not found in model")
         else:
             # Use the last non-world body (body 0 is always world in MuJoCo)
-            self._ee_body_id = max(0, self._model.nbody - 1)
+            try:
+                self._ee_body_id = max(0, self._model.nbody - 1)
+            except TypeError:
+                self._ee_body_id = 0
 
         self._base_coeffs: list[list[float]] | None = None
         self._nominal_result: MuJoCoSimResult | None = None
