@@ -2,35 +2,35 @@
 ./src/api/middleware/error_handler.py:47:            except NotImplementedError as e:
 ./src/api/middleware/error_handler.py:69:        except NotImplementedError as e:
 ./src/launchers/cross_engine_dashboard.py:277:        raise NotImplementedError(
-./src/launchers/base.py:98:    NotImplementedError at runtime.
+./src/launchers/base.py:96:    NotImplementedError at runtime.
 ./src/shared/python/engine_core/base_physics_engine.py:404:            except (NotImplementedError, AttributeError):
 ./src/shared/python/upstream_drift_tools/process_calculators/psa_package/pyproject.toml:104:    "raise NotImplementedError",
 ./src/engines/physics_engines/opensim/python/opensim_gui.py:300:        except NotImplementedError as e:
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/tools/code_quality_check.py:39:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./reports/bandit.json:13636:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:13654:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
 ./scripts/refresh_completist_data.py:65:    # 3. Grep for NotImplementedError
 ./scripts/refresh_completist_data.py:66:    run_grep("NotImplementedError", join(DATA_DIR, "not_implemented.txt"))
-./scripts/analyze_completist_data.py:218:        "NotImplementedError": 4,
+./scripts/analyze_completist_data.py:233:        "NotImplementedError": 4,
 ./scripts/scan_for_incomplete_code.py:10:        "NotImplementedError": re.compile(r"raise NotImplementedError"),
 ./scripts/verify_backends.py:45:    except NotImplementedError:
 ./pyproject.toml:328:    "raise NotImplementedError",
 ./AGENTS.md:415:- **Read:** Codebase for TRACKED_TASK, TRACKED_DEFECT, NotImplementedError, pass statements
 ./.github/copilot-instructions.md:14:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
-./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements
-./.github/workflows/Jules-Completist.yml:122:          - Raise NotImplementedError in core paths
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:93:          # Find NotImplementedError patterns
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:94:          echo "### NotImplementedError Placeholders" >> /tmp/incomplete_report.md
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:97:          grep -rn "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | grep -v ".git" | head -30 >> /tmp/incomplete_report.md || echo "None found"
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:117:          NOT_IMPL_COUNT=$(grep -rc "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:306:          | NotImplementedError | ${NOT_IMPL:-0} | x5 | $(echo "$NOT_IMPL * 5" | bc) |
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:373:          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:428:          | NotImplementedError | x5 | Incomplete features affect stability |
-./.github/workflows/Jules-Comprehensive-Assessment.yml:72:          # Find NotImplementedError
-./.github/workflows/Jules-Comprehensive-Assessment.yml:73:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
+./.github/workflows/Jules-Completist.yml:69:          # Find NotImplementedError
+./.github/workflows/Jules-Completist.yml:70:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
+./.github/workflows/Jules-Completist.yml:137:          - not_implemented.txt - NotImplementedError and pass statements
+./.github/workflows/Jules-Completist.yml:146:          - Raise NotImplementedError in core paths
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:117:          # Find NotImplementedError patterns
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:118:          echo "### NotImplementedError Placeholders" >> /tmp/incomplete_report.md
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:121:          grep -rn "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | grep -v ".git" | head -30 >> /tmp/incomplete_report.md || echo "None found"
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:141:          NOT_IMPL_COUNT=$(grep -rc "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:330:          | NotImplementedError | ${NOT_IMPL:-0} | x5 | $(echo "$NOT_IMPL * 5" | bc) |
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:397:          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:452:          | NotImplementedError | x5 | Incomplete features affect stability |
+./.github/workflows/Jules-Comprehensive-Assessment.yml:96:          # Find NotImplementedError
+./.github/workflows/Jules-Comprehensive-Assessment.yml:97:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
 ./tests/integration/test_physics_interfaces.py:79:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:80:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
 ./tests/integration/test_physics_interfaces.py:122:        except NotImplementedError:
