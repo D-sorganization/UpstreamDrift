@@ -18,12 +18,12 @@ import pytest
 
 from src.engines.physics_engines.drake.python.perturbation.analyzer import (
     MANDATORY_METRICS,
-    ComparisonReport,
     DrakeSimResult,
 )
 from src.shared.python.pendulum_simulator.perturbation_analysis import (
     perturb_torque_coeffs,
 )
+from src.shared.python.perturbation.analyzer_base import ComparisonReport
 from src.shared.python.perturbation.config import PerturbationConfig
 
 # ---------------------------------------------------------------------------

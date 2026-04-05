@@ -41,6 +41,7 @@ from src.shared.python.engine_core.engine_availability import PINOCCHIO_AVAILABL
 # Shared noise / perturbation helpers
 from src.shared.python.perturbation.analyzer_base import (
     MANDATORY_METRICS,  # noqa: F401  re-exported for test imports
+    ComparisonReport,  # noqa: F401
     PerturbationAnalyzerBase,
 )
 
@@ -258,8 +259,10 @@ class PinocchioPerturbationAnalyzer(PerturbationAnalyzerBase):
         ee_speed_final = float(np.linalg.norm(ee_vel_final))
 
         # Peak end-effector speed
-        speeds = np.linalg.norm(r.ee_vel_traj, axis=1)
-        peak_speed = float(np.max(speeds))
+        # ⚡ Bolt: Explicit element-wise sum of squares is faster than
+        # np.linalg.norm(..., axis=1) when finding max
+        sq_speeds = np.sum(r.ee_vel_traj**2, axis=1)
+        peak_speed = float(np.sqrt(np.max(sq_speeds)))
 
         # Total energy (kinetic + potential) at final step
         total_energy_final = float(
@@ -272,9 +275,11 @@ class PinocchioPerturbationAnalyzer(PerturbationAnalyzerBase):
         if self._nominal_result is not None:
             nom = self._nominal_result
             n_cmp = min(r.n_steps, nom.n_steps)
-            deviations = np.linalg.norm(r.q_traj[:n_cmp] - nom.q_traj[:n_cmp], axis=1)
-            trajectory_rmse = float(np.sqrt(np.mean(deviations**2)))
-            trajectory_max_deviation = float(np.max(deviations))
+            # ⚡ Bolt: Explicit element-wise sum of squares is faster than
+            # np.linalg.norm(..., axis=1)
+            sq_deviations = np.sum((r.q_traj[:n_cmp] - nom.q_traj[:n_cmp]) ** 2, axis=1)
+            trajectory_rmse = float(np.sqrt(np.mean(sq_deviations)))
+            trajectory_max_deviation = float(np.sqrt(np.max(sq_deviations)))
 
         motion_duration = float(r.t[last] - r.t[0])
 
