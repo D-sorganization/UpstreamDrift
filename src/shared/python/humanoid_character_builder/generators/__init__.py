@@ -2,6 +2,14 @@
 Generator module for humanoid character builder.
 
 Provides URDF generation and mesh generation capabilities.
+
+The URDF generator is decomposed into focused sub-modules:
+
+- :mod:`urdf_config`      -- URDFGeneratorConfig dataclass
+- :mod:`urdf_geometry`    -- geometry dict creation and XML rendering
+- :mod:`urdf_joints`      -- joint-type mapping and composite expansion
+- :mod:`urdf_xml_builder` -- full XML tree assembly
+- :mod:`urdf_generator`   -- public orchestrator (HumanoidURDFGenerator)
 """
 
 from humanoid_character_builder.generators.mesh_generator import (
@@ -9,14 +17,16 @@ from humanoid_character_builder.generators.mesh_generator import (
     MeshGenerator,
     MeshGeneratorBackend,
 )
+from humanoid_character_builder.generators.urdf_config import URDFGeneratorConfig
 from humanoid_character_builder.generators.urdf_generator import (
     HumanoidURDFGenerator,
-    URDFGeneratorConfig,
+    generate_humanoid_urdf,
 )
 
 __all__ = [
     "HumanoidURDFGenerator",
     "URDFGeneratorConfig",
+    "generate_humanoid_urdf",
     "MeshGenerator",
     "MeshGeneratorBackend",
     "GeneratedMeshResult",

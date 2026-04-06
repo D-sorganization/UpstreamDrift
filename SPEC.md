@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.31                                             |
+| **Spec Version**        | 1.0.33                                             |
 | **Last Spec Update**    | 2026-04-06                                         |
 
 ## 2. Purpose & Mission
@@ -140,22 +140,22 @@ UpstreamDrift/
 
 ### Key Components
 
-| Component                | Location                                          | Purpose                                                                                     |
-| ------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| MuJoCo Engine Adapter    | `src/engines/physics_engines/mujoco_engine.py`    | Primary physics engine integration with full support for contact dynamics and muscle models |
-| Drake Engine Adapter     | `src/engines/physics_engines/drake_engine.py`     | Extended Drake support for trajectory optimization and manipulation tasks                   |
-| Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio_engine.py` | Extended Pinocchio support for efficient rigid-body dynamics computation                    |
-| OpenSim Engine Adapter   | `src/engines/physics_engines/opensim_engine.py`   | Experimental OpenSim integration for clinical biomechanics workflows                        |
-| MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite_engine.py`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
-| Pendulum Models          | `src/engines/pendulum_models/`                    | Educational simplified models for learning and quick prototyping                            |
-| FastAPI Backend          | `src/api/`                                        | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
-| PyQt6 GUI                | `src/launchers/gui_launcher.py`                   | Professional interactive GUI with real-time 3D visualization                                |
-| Tauri Desktop App        | `ui/`                                             | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
-| Rust Physics Kernels     | `rust_core/upstream-physics/`                     | High-performance compiled physics routines for critical paths                               |
-| Configuration Manager    | `src/config/`                                     | Centralized configuration loading, validation, and environment management                   |
-| Shared Utilities         | `src/shared/`                                     | Cross-engine validators, helpers, and exception definitions                                 |
+| Component                | Location                                                   | Purpose                                                                                                           |
+| ------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| MuJoCo Engine Adapter    | `src/engines/physics_engines/mujoco_engine.py`             | Primary physics engine integration with full support for contact dynamics and muscle models                       |
+| Drake Engine Adapter     | `src/engines/physics_engines/drake_engine.py`              | Extended Drake support for trajectory optimization and manipulation tasks                                         |
+| Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio_engine.py`          | Extended Pinocchio support for efficient rigid-body dynamics computation                                          |
+| OpenSim Engine Adapter   | `src/engines/physics_engines/opensim_engine.py`            | Experimental OpenSim integration for clinical biomechanics workflows                                              |
+| MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite_engine.py`           | Experimental MyoSuite integration for detailed muscle physiology simulation                                       |
+| Pendulum Models          | `src/engines/pendulum_models/`                             | Educational simplified models for learning and quick prototyping                                                  |
+| FastAPI Backend          | `src/api/`                                                 | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints                               |
+| PyQt6 GUI                | `src/launchers/gui_launcher.py`                            | Professional interactive GUI with real-time 3D visualization                                                      |
+| Tauri Desktop App        | `ui/`                                                      | Cross-platform desktop application wrapper (Windows, macOS, Linux)                                                |
+| Rust Physics Kernels     | `rust_core/upstream-physics/`                              | High-performance compiled physics routines for critical paths                                                     |
+| Configuration Manager    | `src/config/`                                              | Centralized configuration loading, validation, and environment management                                         |
+| Shared Utilities         | `src/shared/`                                              | Cross-engine validators, helpers, and exception definitions                                                       |
 | Humanoid URDF Generator  | `src/shared/python/humanoid_character_builder/generators/` | Generates humanoid URDFs via a thin public orchestrator backed by focused model-building and XML-emission helpers |
-| URDF Models              | `shared/models/`                                  | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
+| URDF Models              | `shared/models/`                                           | Canonical model definitions (URDF format) for golf swings, human body, pendulums                                  |
 
 ## 5. Desired Functionality
 
@@ -474,6 +474,8 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-06 | 1.0.33  | refactor(urdf): decompose 761-line `urdf_generator.py` into four focused sub-modules: `urdf_config.py` (URDFGeneratorConfig dataclass), `urdf_geometry.py` (geometry dict creation and XML rendering), `urdf_joints.py` (joint-type mapping and composite joint expansion), `urdf_xml_builder.py` (full XML tree assembly). Public API fully preserved; backward-compat shims added for all private methods. Added "Generated URDF must be valid XML" postcondition. Closes #2370.                                                                                                                                                    |
+| 2026-04-06 | 1.0.32  | test(urdf): add 20-test cross-engine URDF generation and load smoke test covering XML structural validity, file persistence, config variants, and optional MuJoCo/Drake/Pinocchio loading paths (gracefully skipped when engine is absent). Closes #2369.                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-06 | 1.0.31  | CI: Added `ci-optional-stack.yml` — the optional-stack verification lane (issue #2368). Installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras so that tests guarded by `try: import X` run without being skipped. Includes skip-visibility report in job summary. SPEC.md updated with new lane in module map and CI/CD pipeline table.                                                                                                                                                                                                                                                                                     |
 | 2026-04-06 | 1.0.30  | Refactor: split monolithic `src/shared/python/mujoco_humanoid_golf/kinematic_forces.py` (1102 lines) into three focused modules: `mujoco_version.py` (MuJoCo version checking and `MjDataContext`), `jacobian_utils.py` (Jacobian and mass-matrix utilities), and a slimmed `kinematic_forces.py` retaining `KinematicForceData`, `KinematicForceAnalyzer`, and `export_kinematic_forces_to_csv`. Public API fully preserved; no logic changed. Closes #2357.                                                                                                                                                                         |
 | 2026-04-06 | 1.0.29  | Sentinel: Fixed command injection vulnerability in `DataProcessorEngine.filter_data()` by adding AST-based validation to user-provided query strings before passing them to `pandas.DataFrame.query()`.                                                                                                                                                                                                                                                                                                                                                                                                                               |

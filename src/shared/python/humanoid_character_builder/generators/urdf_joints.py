@@ -1,0 +1,188 @@
+"""
+URDF joint generation helpers.
+
+Handles mapping internal joint types to URDF strings and expanding
+composite joints (gimbal, universal) into chains of revolute joints
+with intermediate virtual links.
+
+Extracted from urdf_generator.py to isolate joint-generation concerns.
+"""
+
+from __future__ import annotations
+
+from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
+from humanoid_character_builder.core.segment_definitions import (
+    JointDefinition,
+    JointType,
+)
+from humanoid_character_builder.mesh.inertia_calculator import InertiaResult
+
+
+def map_joint_type(joint_type: JointType) -> str:
+    """Map internal JointType enum to URDF joint type string.
+
+    Args:
+        joint_type: Internal joint type enum value.
+
+    Returns:
+        URDF joint type string (e.g. "revolute", "fixed").
+    """
+    if not (joint_type is not None):
+        raise ValueError("joint_type must be provided")
+    mapping = {
+        JointType.FIXED: "fixed",
+        JointType.REVOLUTE: "revolute",
+        JointType.CONTINUOUS: "continuous",
+        JointType.PRISMATIC: "prismatic",
+        JointType.FLOATING: "floating",
+        JointType.PLANAR: "planar",
+        JointType.UNIVERSAL: "revolute",  # Expanded separately
+        JointType.GIMBAL: "revolute",  # Expanded separately
+        JointType.SPHERICAL: "revolute",  # Expanded separately
+    }
+    return mapping.get(joint_type, "fixed")
+
+
+def generate_single_joint(
+    joint_name: str,
+    joint_def: JointDefinition,
+) -> GeneratedJoint:
+    """Build a single GeneratedJoint from a joint definition.
+
+    Args:
+        joint_name: Name string for the joint.
+        joint_def: Joint definition data.
+
+    Returns:
+        A GeneratedJoint instance.
+    """
+    if not (joint_name is not None):
+        raise ValueError("joint_name must be provided")
+    urdf_type = map_joint_type(joint_def.joint_type)
+
+    limits = None
+    if urdf_type in ("revolute", "prismatic"):
+        limits = joint_def.limits.as_dict()
+
+    return GeneratedJoint(
+        name=joint_name,
+        joint_type=urdf_type,
+        parent=joint_def.parent_segment,
+        child=joint_def.child_segment,
+        origin_xyz=joint_def.origin_xyz,
+        origin_rpy=joint_def.origin_rpy,
+        axis=joint_def.axis,
+        limits=limits,
+        dynamics={
+            "damping": joint_def.damping,
+            "friction": joint_def.friction,
+        },
+    )
+
+
+def expand_composite_joint(
+    joint_name: str,
+    joint_def: JointDefinition,
+) -> tuple[list[GeneratedLink], list[GeneratedJoint]]:
+    """Expand a composite joint into intermediate links and revolute joints.
+
+    Gimbal joints produce three revolute joints (_z, _y, _x axes) with two
+    intermediate virtual links.  Universal joints produce two revolute joints
+    (_1, _2) with one intermediate virtual link.
+
+    Args:
+        joint_name: Base name for the generated joints/links.
+        joint_def: Joint definition (must be GIMBAL or UNIVERSAL type).
+
+    Returns:
+        Tuple of (intermediate_links, generated_joints).  If the joint is not
+        composite, returns a single joint in the joints list and an empty
+        links list.
+    """
+    if not (joint_name is not None):
+        raise ValueError("joint_name must be provided")
+
+    if joint_def.joint_type == JointType.GIMBAL:
+        axes = [
+            joint_def.axis,
+            joint_def.secondary_axis or (0.0, 1.0, 0.0),
+            joint_def.tertiary_axis or (1.0, 0.0, 0.0),
+        ]
+        suffixes = ["_z", "_y", "_x"]
+    elif joint_def.joint_type == JointType.UNIVERSAL:
+        axes = [
+            joint_def.axis,
+            joint_def.secondary_axis or (0.0, 1.0, 0.0),
+        ]
+        suffixes = ["_1", "_2"]
+    else:
+        # Not composite: fall back to a single joint
+        return [], [generate_single_joint(joint_name, joint_def)]
+
+    intermediate_links: list[GeneratedLink] = []
+    generated_joints: list[GeneratedJoint] = []
+    parent = joint_def.parent_segment
+
+    for i, (axis, suffix) in enumerate(zip(axes, suffixes, strict=True)):
+        is_last = i == len(axes) - 1
+        child = joint_def.child_segment if is_last else f"{joint_name}{suffix}_link"
+
+        if not is_last:
+            intermediate_links.append(
+                GeneratedLink(
+                    name=child,
+                    mass=0.001,
+                    inertia=InertiaResult.create_default(0.001),
+                    visual_geometry={"type": "sphere", "radius": 0.001},
+                    collision_geometry=None,
+                    origin_xyz=(0.0, 0.0, 0.0),
+                    origin_rpy=(0.0, 0.0, 0.0),
+                )
+            )
+
+        origin_xyz = joint_def.origin_xyz if i == 0 else (0.0, 0.0, 0.0)
+        origin_rpy = joint_def.origin_rpy if i == 0 else (0.0, 0.0, 0.0)
+
+        generated_joints.append(
+            GeneratedJoint(
+                name=f"{joint_name}{suffix}",
+                joint_type="revolute",
+                parent=parent,
+                child=child,
+                origin_xyz=origin_xyz,
+                origin_rpy=origin_rpy,
+                axis=axis,
+                limits=joint_def.limits.as_dict(),
+                dynamics={
+                    "damping": joint_def.damping,
+                    "friction": joint_def.friction,
+                },
+            )
+        )
+
+        parent = child
+
+    return intermediate_links, generated_joints
+
+
+def generate_joint(
+    joint_name: str,
+    joint_def: JointDefinition,
+    expand_composite: bool,
+) -> tuple[list[GeneratedLink], list[GeneratedJoint]]:
+    """Generate URDF joint(s) from a joint definition.
+
+    Dispatches to :func:`expand_composite_joint` for composite joints when
+    *expand_composite* is True, or :func:`generate_single_joint` otherwise.
+
+    Args:
+        joint_name: Name string for the joint.
+        joint_def: Joint definition data.
+        expand_composite: Whether to expand composite joints.
+
+    Returns:
+        Tuple of (extra_links, generated_joints).
+    """
+    if joint_def.is_composite() and expand_composite:
+        return expand_composite_joint(joint_name, joint_def)
+    return [], [generate_single_joint(joint_name, joint_def)]
