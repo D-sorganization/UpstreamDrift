@@ -130,7 +130,7 @@ class SimulationResult:
 
         # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1)
         diffs = np.diff(self.positions, axis=0)
-        distances = np.sqrt(np.sum(diffs**2, axis=-1))
+        distances = np.sqrt(np.sum(np.square(diffs, dtype=float), axis=-1))
         return float(np.sum(distances))
 
     @property
