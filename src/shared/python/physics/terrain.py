@@ -38,6 +38,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.contracts import require
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -465,8 +466,8 @@ class ElevationMap:
         Returns:
             Elevation at the point (meters)
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
+        require(math.isfinite(x), "x must be finite", x)
+        require(math.isfinite(y), "y must be finite", y)
         self._check_bounds(x, y)
 
         gx, gy = self._to_grid_coords(x, y)
@@ -551,8 +552,8 @@ class ElevationMap:
         Returns:
             Unit normal vector (3,)
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
+        require(math.isfinite(x), "x must be finite", x)
+        require(math.isfinite(y), "y must be finite", y)
         dzdx, dzdy = self.get_gradient(x, y)
 
         # Normal from gradient: n = (-dz/dx, -dz/dy, 1) normalized
@@ -929,8 +930,8 @@ class Terrain:
         Returns:
             Dictionary with friction, restitution, stiffness, damping
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
+        require(math.isfinite(x), "x must be finite", x)
+        require(math.isfinite(y), "y must be finite", y)
         material = self.get_material(x, y)
 
         # Calculate stiffness and damping from material properties

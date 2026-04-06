@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.contracts import require, require_finite
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -266,8 +267,13 @@ class RigidBodyImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
-        if not (pre_state is not None):
-            raise ValueError("pre_state must be provided")
+        require_finite(pre_state.clubhead_velocity, "clubhead_velocity")
+        require_finite(pre_state.ball_velocity, "ball_velocity")
+        require_finite(pre_state.clubhead_orientation, "clubhead_orientation")
+        require(
+            bool(np.linalg.norm(pre_state.clubhead_orientation) > 1e-10),
+            "clubhead_orientation must be non-zero",
+        )
         m_club_effective = self._compute_effective_club_mass(pre_state)
 
         n = pre_state.clubhead_orientation / np.linalg.norm(

@@ -36,6 +36,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.contracts import require, require_finite
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
@@ -237,8 +238,8 @@ class DragModel:
         Returns:
             Drag force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
+        require_finite(velocity, "velocity")
+        require(air_density > 0, "air_density must be positive", air_density)
         speed = float(np.linalg.norm(velocity))
         if speed < 1e-10:
             return np.zeros(3)
@@ -346,8 +347,9 @@ class LiftModel:
         Returns:
             Lift force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
+        require_finite(velocity, "velocity")
+        require_finite(spin, "spin")
+        require(air_density > 0, "air_density must be positive", air_density)
         speed = float(np.linalg.norm(velocity))
         spin_magnitude = float(np.linalg.norm(spin))
 
@@ -433,8 +435,9 @@ class MagnusModel:
         Returns:
             Magnus force vector [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
+        require_finite(velocity, "velocity")
+        require_finite(spin, "spin")
+        require(air_density > 0, "air_density must be positive", air_density)
         speed = float(np.linalg.norm(velocity))
         spin_magnitude = float(np.linalg.norm(spin))
 
@@ -989,8 +992,8 @@ class AerodynamicsEngine:
         Returns:
             Dictionary with 'drag', 'lift', 'magnus', and 'total' forces [N]
         """
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
+        require_finite(velocity, "velocity")
+        require_finite(spin, "spin")
         if position is None:
             position = np.zeros(3)
 
@@ -1086,7 +1089,7 @@ class AerodynamicsEngine:
         Returns:
             Updated spin after decay [rad/s]
         """
-        if not (spin is not None):
-            raise ValueError("spin must be provided")
+        require_finite(spin, "spin")
+        require(dt >= 0, "dt must be non-negative", dt)
         decay_factor = math.exp(-self.config.spin_decay_rate * dt)
         return spin * decay_factor
