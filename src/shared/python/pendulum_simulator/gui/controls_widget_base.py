@@ -82,14 +82,25 @@ STYLE_COMBO = "background:#2a2a38;color:#e0e0f0;border:1px solid #505068;border-
 class ControlsWidgetBase(QWidget):
     """Abstract base for pendulum model control panels.
 
+    DRY resolution (issue #2353): Common signals, preset wiring, playback
+    controls, export section, and run/reset builders are defined here and
+    shared by ``ControlsWidget`` (double pendulum) and
+    ``ControlsWidgetTriple`` (triple pendulum).
+
+    The ``_build_sim_section`` and ``_build_dissipation_section`` methods
+    in the subclasses appear similar but differ by joint count, label
+    text, and field arrangement, making them intentionally model-specific.
+    If a third pendulum model is added, consider introducing a
+    ``_build_n_joint_sim_section(n)`` factory method here.
+
     Subclass contract
     -----------------
     - Define ``PRESETS`` as a class-level dict.
     - Implement ``_build_model_sections(layout)`` to add model-specific UI.
     - Implement ``_apply_preset(name)`` to populate inputs from preset data.
     - Implement ``get_params()`` to parse and return simulation parameters.
-    - Implement ``_get_joint_names()`` â†’ list[str] for signal toolkit dialog.
-    - Implement ``_get_torque_inputs()`` â†’ dict[str, LabeledInput].
+    - Implement ``_get_joint_names()`` -> list[str] for signal toolkit dialog.
+    - Implement ``_get_torque_inputs()`` -> dict[str, LabeledInput].
     """
 
     # â”€â”€ Common signals (identical across all three widgets) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

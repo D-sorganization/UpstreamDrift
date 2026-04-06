@@ -10,7 +10,6 @@ Ported from Gasification Model and ud-tools legacy Data Processor.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -25,6 +24,7 @@ from scipy.signal import butter, filtfilt, medfilt, savgol_filter
 from src.shared.python.data_processing.processor import (
     _validate_dataframe_expression,
 )
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 from ..calculators.base import BaseCalculationEngine
 from .exceptions import (
@@ -38,7 +38,7 @@ from .exceptions import (
 )
 from .io import DataReader, DataWriter
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DataFormat(Enum):

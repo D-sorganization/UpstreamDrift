@@ -209,8 +209,12 @@ class PerturbationAnalyzerBase(ABC):
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:
-                    pass
+                except Exception:  # noqa: BLE001
+                    logger.debug(
+                        "Trial %d failed during profile comparison metric collection",
+                        i,
+                        exc_info=True,
+                    )
             return np.array(values) if values else np.array([0.0])
 
         for metric in scalar_metrics:

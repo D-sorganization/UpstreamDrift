@@ -6,10 +6,13 @@ Hub for accessing MuJoCo Humanoid Simulation and Analysis Dashboard.
 Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
-import subprocess
 import sys
 
 from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+)
 
 
 class MujocoUnifiedLauncher(BaseLauncher):
@@ -85,8 +88,18 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             env = self._get_launch_env()
-            subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT, env=env)
-        except (FileNotFoundError, PermissionError, OSError) as e:
+            secure_popen(
+                [sys.executable, str(script_path)],
+                cwd=REPO_ROOT,
+                suite_root=REPO_ROOT,
+                env=env,
+            )
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             self.show_error("Launch Error", str(e))
 
     def _launch_python_module(
@@ -106,12 +119,18 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             env = self._get_launch_env()
-            subprocess.Popen(
+            secure_popen(
                 [sys.executable, "-m", module_name],
                 cwd=cwd,
+                suite_root=REPO_ROOT,
                 env=env,
             )
-        except (FileNotFoundError, PermissionError, OSError) as e:
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             self.show_error("Launch Error", str(e))
 
 

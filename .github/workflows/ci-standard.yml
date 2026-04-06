@@ -1,4 +1,32 @@
 name: CI Standard
+# ---------------------------------------------------------------------------
+# WORKFLOW INVENTORY (issue #2352 — 58 workflows with overlapping concerns)
+# ---------------------------------------------------------------------------
+# Core CI (this file and below) are authoritative. Jules-* workflows are
+# AI-automation helpers that SHOULD NOT duplicate core-CI checks.
+#
+# Known overlaps (to consolidate in a future cleanup PR):
+#   - auto-remediate-issues.yml   ←→  Jules-Assessment-Remediator.yml
+#     Both remediate assessment issues. Remediator is the canonical version;
+#     auto-remediate-issues.yml is scheduled for removal.
+#
+#   - assessment-auto-fix.yml     ←→  Jules-Assessment-AutoFix.yml
+#     Both dispatch auto-fixes. Jules-Assessment-AutoFix is the newer version
+#     with dry-run support; assessment-auto-fix.yml is legacy.
+#
+#   - Jules-Code-Quality-Fixer    ←→  Jules-Assessment-AutoFix
+#     Both fix code quality issues found in assessments. Fixer runs on a
+#     static assessment file; AutoFix generates and fixes in one pass.
+#
+#   - Jules-Auto-Repair           ←→  Jules-Hotfix-Creator
+#     Both respond to CI failures. Auto-Repair pushes to the failing branch;
+#     Hotfix-Creator opens a new hotfix branch. Not truly redundant.
+#
+# Action items:
+#   1. Disable/delete auto-remediate-issues.yml (superseded).
+#   2. Disable/delete assessment-auto-fix.yml (superseded).
+#   3. Review Jules-Code-Quality-Fixer vs Jules-Assessment-AutoFix for merge.
+# ---------------------------------------------------------------------------
 on:
   push:
     branches: [main]
@@ -29,7 +57,6 @@ permissions:
   contents: read
 
 jobs:
-
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
   pick-runner:
     runs-on: ubuntu-latest

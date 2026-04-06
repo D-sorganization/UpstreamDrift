@@ -10,14 +10,15 @@ See issue #407.
 from __future__ import annotations
 
 import ast
-import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 SUPPORTED_FILTER_TYPES = {"butterworth", "moving_average", "median", "savgol"}
 
 # ---------------------------------------------------------------------------
@@ -429,15 +430,25 @@ class DataProcessor:
     ) -> DataProcessor:
         """Create a new column from a pandas-eval expression.
 
+        Security: All expressions are AST-validated via
+        ``_validate_dataframe_expression`` before being passed to
+        ``DataFrame.eval()``. The validator disallows imports, lambdas,
+        dunder attribute access, and other constructs that could lead to
+        arbitrary code execution.  Users supplying untrusted expressions
+        should also ensure those expressions are sourced from trusted input.
+
         Example: ``dp.apply_formula("speed", "distance / time")``
         """
         if not (new_column is not None):
             raise ValueError("new_column must be provided")
-        # Security (issue #2065): validate the expression before passing to
-        # DataFrame.eval() which can execute arbitrary Python code.
+        # Security (#2065, #2349): AST-validate expression before passing to
+        # DataFrame.eval(), which uses numexpr/Python backend that may not be
+        # fully sandboxed.  _validate_dataframe_expression raises ValueError
+        # on disallowed constructs.
         _validate_dataframe_expression(expression)
         df = self.dataframe
-        df[new_column] = df.eval(expression)
+        # noqa: S307 – expression is validated above; this is intentional.
+        df[new_column] = df.eval(expression)  # type: ignore[call-overload]
         self._history.append(f"Created column '{new_column}' = {expression}")
         return self
 

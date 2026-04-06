@@ -17,20 +17,22 @@ launcher issues including:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-logger = logging.getLogger(__name__)
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     pass
 
-# Constants
-REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
+# Constants — use centralized root discovery (issue #2354)
+REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
 CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"

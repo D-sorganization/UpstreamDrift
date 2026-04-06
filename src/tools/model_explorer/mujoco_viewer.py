@@ -240,6 +240,20 @@ class MuJoCoOffscreenRenderer:
         # Visualization flags
         self.vis_flags = VisualizationFlags()
 
+    # ------------------------------------------------------------------
+    # Property accessors (LOD — issue #2344)
+    # ------------------------------------------------------------------
+
+    @property
+    def _model_offwidth(self) -> int:
+        """Return model's offscreen render width (model.vis.global_.offwidth)."""
+        return int(self._model.vis.global_.offwidth)  # type: ignore[union-attr]
+
+    @property
+    def _model_offheight(self) -> int:
+        """Return model's offscreen render height (model.vis.global_.offheight)."""
+        return int(self._model.vis.global_.offheight)  # type: ignore[union-attr]
+
     def load_urdf_file(self, urdf_path: str) -> bool:
         """Load URDF model from file path.
 
@@ -276,8 +290,8 @@ class MuJoCoOffscreenRenderer:
                 self._data = mujoco.MjData(self._model)
 
                 # Use model's offscreen dimensions to avoid framebuffer mismatch
-                render_width = min(self.width, self._model.vis.global_.offwidth)
-                render_height = min(self.height, self._model.vis.global_.offheight)
+                render_width = min(self.width, self._model_offwidth)
+                render_height = min(self.height, self._model_offheight)
 
                 # Create renderer with compatible dimensions
                 # Note: MuJoCo Renderer takes (model, height, width) not (model, width, height)

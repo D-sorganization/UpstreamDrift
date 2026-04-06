@@ -80,6 +80,20 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         self.env_id = ""
         self._dt = 0.002
 
+    # ------------------------------------------------------------------
+    # Property accessors to avoid LOD violations (issue #2344)
+    # ------------------------------------------------------------------
+
+    @property
+    def _sim_ctrl(self) -> Any:
+        """Return the underlying simulation control array (sim.data.ctrl)."""
+        return self.sim.data.ctrl  # type: ignore[union-attr]
+
+    @property
+    def _sim_timestep(self) -> float:
+        """Return the simulator timestep (sim.model.opt.timestep)."""
+        return float(self.sim.model.opt.timestep)  # type: ignore[union-attr]
+
     @staticmethod
     def _extract_sim_from_env(env: Any) -> Any:
         """Extract the underlying MuJoCo simulation object from a Gym env."""
@@ -147,7 +161,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             self.env = env
             self.sim = sim
             self.env_id = env_id
-            self._dt = self.sim.model.opt.timestep
+            self._dt = self._sim_timestep
 
         except (RuntimeError, TypeError, ValueError, AttributeError) as e:
             self._reset_loaded_state()
@@ -282,16 +296,16 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return
 
         try:
-            ctrl = self.sim.data.ctrl
+            ctrl = self._sim_ctrl
 
             if hasattr(ctrl, "shape") and hasattr(ctrl, "__len__"):
                 if len(u) == ctrl.shape[0]:
-                    self.sim.data.ctrl[:] = u
+                    self._sim_ctrl[:] = u
 
             else:
                 # Fallback for mocked objects
 
-                self.sim.data.ctrl[:] = u
+                self._sim_ctrl[:] = u
 
         except (TypeError, AttributeError) as e:
             # Handle mocked objects or other edge cases
@@ -299,7 +313,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             logger.debug(f"Primary control assignment failed (may be mocked): {e}")
 
             try:
-                self.sim.data.ctrl[:] = u
+                self._sim_ctrl[:] = u
 
             except (RuntimeError, ValueError, OSError) as fallback_error:
                 # Log instead of silent pass - helps debugging test failures
@@ -455,11 +469,11 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         try:
             # Save current activations/controls
 
-            ctrl_saved = self.sim.data.ctrl.copy()
+            ctrl_saved = self._sim_ctrl.copy()
 
             # Set all muscle activations to zero
 
-            self.sim.data.ctrl[:] = 0.0
+            self._sim_ctrl[:] = 0.0
 
             # Compute forward dynamics
 
@@ -473,7 +487,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             # Restore original controls
 
-            self.sim.data.ctrl[:] = ctrl_saved
+            self._sim_ctrl[:] = ctrl_saved
 
             self.sim.forward()
 
@@ -636,15 +650,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 # Set control
 
                 try:
-                    ctrl = self.sim.data.ctrl
+                    ctrl = self._sim_ctrl
 
                     if hasattr(ctrl, "__len__") and actuator_id < len(ctrl):
-                        self.sim.data.ctrl[actuator_id] = activation_clamped
+                        self._sim_ctrl[actuator_id] = activation_clamped
 
                     elif hasattr(ctrl, "__setitem__"):
                         # Fallback for mocked objects
 
-                        self.sim.data.ctrl[actuator_id] = activation_clamped
+                        self._sim_ctrl[actuator_id] = activation_clamped
 
                 except (TypeError, AttributeError, IndexError):
                     # Handle mocked objects or other edge cases
@@ -768,7 +782,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             q_saved, v_saved = self.get_state()
 
-            ctrl_saved = self.sim.data.ctrl.copy()
+            ctrl_saved = self._sim_ctrl.copy()
 
             # Set desired state
 
@@ -776,7 +790,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             # Set zero control
 
-            self.sim.data.ctrl[:] = 0.0
+            self._sim_ctrl[:] = 0.0
 
             # Compute forward dynamics
 
@@ -788,7 +802,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
             # Restore state and control
 
-            self.sim.data.ctrl[:] = ctrl_saved
+            self._sim_ctrl[:] = ctrl_saved
 
             self.set_state(q_saved, v_saved)
 

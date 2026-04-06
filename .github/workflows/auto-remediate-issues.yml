@@ -1,19 +1,17 @@
 name: Auto-Remediate Assessment Issues
+# DISABLED (issue #2352): Superseded by Jules-Assessment-Remediator.yml which
+# uses the Jules AI integration with better rate-limiting and duplicate
+# prevention.  Archived copy saved to archived/auto-remediate-issues.yml.disabled.
+# This file is kept for historical reference; all triggers have been removed.
 
 on:
+  # Triggers intentionally disabled — use Jules-Assessment-Remediator.yml instead.
   workflow_dispatch:
     inputs:
-      issue_numbers:
-        description: "Comma-separated issue numbers to remediate (e.g., 520,521,522)"
-        required: true
-        type: string
-      max_issues:
-        description: "Maximum number of issues to fix (default: 10)"
+      _disabled:
+        description: "This workflow is disabled — use Jules-Assessment-Remediator instead"
         required: false
-        default: "10"
-        type: string
-  # schedule: DISABLED to reduce CI cost (see #1751)
-  # Run weekly on Sundays at 2 AM UTC
+        default: "true"
 
 permissions:
   contents: write

@@ -10,7 +10,6 @@ Signal processing logic in ``signal_toolkit_processing_mixin.py``.
 
 from __future__ import annotations
 
-import logging
 import sys
 
 import numpy as np
@@ -32,9 +31,15 @@ try:
 except ImportError:
     HAS_PYQT = False
 
+from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.signal_toolkit.core import Signal
 
-logger = logging.getLogger(__name__)
+# DRY note (issue #2340): This widget and signal_toolkit/widget.py are parallel
+# implementations with shared MplCanvas / dark-theme logic. The canonical split
+# is: signal_toolkit/widget.py for standalone use; this file for the full Qt
+# integration that also uses SignalToolkitProcessingMixin + SignalToolkitUIMixin.
+# Further consolidation is tracked in #2340.
+logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
 # Dark theme stylesheet
@@ -158,12 +163,21 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             self.updateGeometry()
 
         def setup_dark_theme(self) -> None:
-            """Apply dark theme to the plot."""
+            """Apply dark theme to the plot.
+
+            Note: axes.xaxis.label.set_color() is a 4-level chain (LOD #2344).
+            Matplotlib does not expose a single-call alternative for axis label
+            colours; the chain is unavoidable here and is annotated accordingly.
+            """
             self.fig.patch.set_facecolor("#2b2b2b")
             self.axes.set_facecolor("#1e1e1e")
             self.axes.tick_params(colors="#aaaaaa", which="both")
-            self.axes.xaxis.label.set_color("#aaaaaa")
-            self.axes.yaxis.label.set_color("#aaaaaa")
+            self.axes.xaxis.label.set_color(
+                "#aaaaaa"
+            )  # matplotlib: no single-call API for axis label colour
+            self.axes.yaxis.label.set_color(
+                "#aaaaaa"
+            )  # matplotlib: no single-call API for axis label colour
             self.axes.title.set_color("#ffffff")
             for spine in self.axes.spines.values():
                 spine.set_edgecolor("#555555")

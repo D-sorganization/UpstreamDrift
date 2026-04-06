@@ -1,12 +1,13 @@
 """Utilities for analyzing Python code quality and structure."""
 
 import ast
-import logging
 import re
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_python_metrics(file_path: Path) -> dict[str, Any]:

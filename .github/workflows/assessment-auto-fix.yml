@@ -1,30 +1,17 @@
 name: Assessment Auto-Fix - Top Priority Issues
+# DISABLED (issue #2352): Superseded by Jules-Assessment-AutoFix.yml which
+# adds dry-run support, PR supersede logic, and richer assessment filtering.
+# Archived copy saved to archived/assessment-auto-fix.yml.disabled.
+# This file is kept for historical reference; active triggering is disabled.
 
 on:
+  # Triggers intentionally disabled — use Jules-Assessment-AutoFix.yml instead.
   workflow_dispatch:
     inputs:
-      max_fixes:
-        description: "Maximum number of issues to fix in one run (1-10)"
+      _disabled:
+        description: "This workflow is disabled — use Jules-Assessment-AutoFix instead"
         required: false
-        default: "5"
-        type: choice
-        options:
-          - "1"
-          - "5"
-          - "10"
-      focus_area:
-        description: "Focus area for fixes"
-        required: false
-        default: "all"
-        type: choice
-        options:
-          - "all"
-          - "code-quality"
-          - "security"
-          - "documentation"
-          - "testing"
-  # schedule: DISABLED to reduce CI cost (see #1751)
-  # Run weekly on Mondays at 3 AM UTC to fix top 5 issues
+        default: "true"
 
 permissions:
   contents: write

@@ -25,16 +25,18 @@ from src.shared.python.core.contracts import (
     postcondition,
     precondition,
 )
+from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.security_utils import validate_path
 
 logger = get_logger(__name__)
 
-# Model directories allowed for loading (relative to suite root)
-# Hardening: Prevent loading from arbitrary system paths
-SUITE_ROOT = Path(__file__).parents[5]
-REPO_ROOT = SUITE_ROOT.parent
+# Model directories allowed for loading (relative to suite root).
+# Use centralized root discovery rather than fragile parents[N] indexing
+# (see issue #2354).
+REPO_ROOT = get_repo_root()
+SUITE_ROOT = REPO_ROOT / "src"
 
 ALLOWED_MODEL_DIRS = [
     SUITE_ROOT / "engines",
