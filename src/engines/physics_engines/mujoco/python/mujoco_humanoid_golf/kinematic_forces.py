@@ -1,7 +1,3 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
-
 """Kinematic-dependent force analysis for golf swing biomechanics.
 
 This module computes motion-dependent forces that can be calculated from
@@ -148,9 +144,7 @@ REFERENCES
 from __future__ import annotations
 
 import csv
-import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 import mujoco
 import numpy as np
@@ -161,131 +155,24 @@ from src.shared.python.core.numerical_constants import (
     EPSILON_SINGULARITY_DETECTION,
 )
 
-if TYPE_CHECKING:
-    from types import TracebackType
+from .jacobian_utils import (
+    check_jacobian_rank,
+    check_mass_matrix_conditioning,
+    compute_coriolis_matrix,
+    compute_effective_mass_value,
+    compute_jacobian,
+    compute_mass_matrix,
+    validate_effective_mass_direction,
+)
+from .mujoco_version import MjDataContext, _check_mujoco_version  # noqa: F401
 
-
-def _check_mujoco_version() -> None:
-    """Validate MuJoCo version meets minimum requirements.
-
-    Addresses Issue F-003: Prevents API signature mismatches by enforcing
-    minimum version at runtime.
-
-    Raises:
-        ImportError: If MuJoCo version is too old
-    """
-    try:
-        # MuJoCo version format: "3.3.0" or similar
-        version_str = mujoco.__version__
-        major, minor, *_ = map(int, version_str.split("."))
-
-        # Require MuJoCo 3.3+ for reshaped Jacobian API
-        if (major, minor) < (3, 3):
-            msg = (
-                f"MuJoCo {version_str} detected, but 3.3.0+ is required.\n"
-                f"The reshaped Jacobian API (mj_jacBody with 2D arrays) was "
-                f"introduced in MuJoCo 3.3. Earlier versions use flat arrays "
-                f"which can cause dimension alignment errors.\n"
-                f"Please upgrade: pip install 'mujoco>=3.3.0,<4.0.0'\n"
-                f"See Issue F-003 in Assessment C for details."
-            )
-            raise ImportError(msg)
-
-        # Success - log version
-        # Success - log version
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.info(f"MuJoCo version {version_str} validated successfully")
-
-    except (AttributeError, ValueError) as e:
-        # Could not parse version
-        warnings.warn(
-            f"Could not validate MuJoCo version: {e}. "
-            f"Proceeding with fallback Jacobian handling.",
-            category=UserWarning,
-            stacklevel=2,
-        )
-
-
-# Validate MuJoCo version on module import (Issue F-003)
-_check_mujoco_version()
-
-
-class MjDataContext:
-    """Context manager for safe MuJoCo MjData state isolation.
-
-    This context manager saves the current state of MjData on entry and
-    restores it on exit, ensuring that any mutations within the context
-    do not affect the original state.
-
-    Addresses Issues A-001, A-003, F-001, F-002 by providing functional
-    purity guarantees for analysis methods.
-
-    Example:
-        >>> with MjDataContext(model, data):
-        ...     data.qpos[:] = new_positions  # Safe to mutate
-        ...     result = compute_something(model, data)
-        ... # data.qpos is automatically restored here
-
-    This enables:
-    - Safe parallel analysis
-    - No Observer Effect bugs
-    - Scientific reproducibility
-    - Thread-safe computations
-    """
-
-    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
-        """Initialize context manager.
-
-        Args:
-            model: MuJoCo model (needed for forward kinematics)
-            data: MuJoCo data structure to protect
-        """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        self.model = model
-        self.data = data
-        self.qpos_backup: np.ndarray | None = None
-        self.qvel_backup: np.ndarray | None = None
-        self.qacc_backup: np.ndarray | None = None
-        self.ctrl_backup: np.ndarray | None = None
-        self.time_backup: float = 0.0
-
-    def __enter__(self) -> mujoco.MjData:
-        """Save current state on context entry.
-
-        Returns:
-            The data object for convenience
-        """
-        self.qpos_backup = self.data.qpos.copy()
-        self.qvel_backup = self.data.qvel.copy()
-        self.qacc_backup = self.data.qacc.copy()
-        self.ctrl_backup = self.data.ctrl.copy()
-        self.time_backup = self.data.time
-        return self.data
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        """Restore state on context exit, even if exception occurred.
-
-        Args:
-            exc_type: Exception type if raised
-            exc_val: Exception value if raised
-            exc_tb: Exception traceback if raised
-        """
-        self.data.qpos[:] = self.qpos_backup
-        self.data.qvel[:] = self.qvel_backup
-        self.data.qacc[:] = self.qacc_backup
-        self.data.ctrl[:] = self.ctrl_backup
-        self.data.time = self.time_backup
-
-        # Recompute forward kinematics to sync all derived quantities
-        mujoco.mj_forward(self.model, self.data)
+# Re-export MjDataContext so existing imports from this module continue to work
+__all__ = [
+    "KinematicForceData",
+    "KinematicForceAnalyzer",
+    "MjDataContext",
+    "export_kinematic_forces_to_csv",
+]
 
 
 @dataclass
@@ -408,20 +295,17 @@ class KinematicForceAnalyzer:
             Tuple of (jacp, jacr) as (3, nv) arrays.
             Note: Returns views into internal buffers or copies depending on usage.
         """
-        if not (body_id is not None):
-            raise ValueError("body_id must be provided")
         if data is None:
             data = self.data
-
-        if self._use_reshaped_arrays:
-            mujoco.mj_jacBody(self.model, data, self._jacp, self._jacr, body_id)
-            return self._jacp, self._jacr
-        else:
-            mujoco.mj_jacBody(self.model, data, self._jacp, self._jacr, body_id)
-            return (
-                self._jacp.reshape(3, self.nv),
-                self._jacr.reshape(3, self.nv),
-            )
+        return compute_jacobian(
+            self.model,
+            data,
+            body_id,
+            self._jacp,
+            self._jacr,
+            self._use_reshaped_arrays,
+            self.nv,
+        )
 
     def compute_coriolis_forces(self, qpos: np.ndarray, qvel: np.ndarray) -> np.ndarray:
         """Compute Coriolis and centrifugal forces.
@@ -551,7 +435,6 @@ class KinematicForceAnalyzer:
         if not (qpos is not None):
             raise ValueError("qpos must be provided")
         centrifugal = np.zeros(self.model.nv)
-        coupling = np.zeros(self.model.nv)
 
         # Full Coriolis forces
         total_coriolis = self.compute_coriolis_forces(qpos, qvel)
@@ -581,17 +464,7 @@ class KinematicForceAnalyzer:
         Returns:
             Mass matrix [nv x nv]
         """
-        # FIXED: Use private data structure
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
-        self._perturb_data.qpos[:] = qpos
-        mujoco.mj_forward(self.model, self._perturb_data)
-
-        # Get full mass matrix
-        M = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M, self._perturb_data.qM)
-
-        return M
+        return compute_mass_matrix(self.model, self._perturb_data, qpos)
 
     def compute_coriolis_matrix(self, qpos: np.ndarray, qvel: np.ndarray) -> np.ndarray:
         """Compute Coriolis matrix C(q,q̇).
@@ -607,23 +480,9 @@ class KinematicForceAnalyzer:
         """
         # Use finite differences to estimate C
         # (Deprecated - use RNE-based method instead)
-        if not (qpos is not None):
-            raise ValueError("qpos must be provided")
-        epsilon = EPSILON_FINITE_DIFF_JACOBIAN
-        C = np.zeros((self.model.nv, self.model.nv))
-
-        # Reference Coriolis forces
-        c_ref = self.compute_coriolis_forces(qpos, qvel)
-
-        for i in range(self.model.nv):
-            qvel_perturb = qvel.copy()
-            qvel_perturb[i] += epsilon
-
-            c_perturb = self.compute_coriolis_forces(qpos, qvel_perturb)
-
-            C[:, i] = (c_perturb - c_ref) / epsilon
-
-        return C
+        return compute_coriolis_matrix(
+            self.model, qpos, qvel, self.compute_coriolis_forces
+        )
 
     def compute_club_head_apparent_forces(  # noqa: PLR0915
         self,
@@ -871,79 +730,18 @@ class KinematicForceAnalyzer:
         return results
 
     def _validate_effective_mass_direction(self, direction: np.ndarray) -> np.ndarray:
-        direction_norm = np.linalg.norm(direction)
-        if direction_norm < EPSILON_SINGULARITY_DETECTION:
-            raise ValueError(
-                f"Direction vector has near-zero magnitude: {direction_norm:.2e}. "
-                "Cannot compute effective mass for zero-length direction."
-            )
-        return direction / direction_norm
+        return validate_effective_mass_direction(direction)
 
     def _check_mass_matrix_conditioning(self, M: np.ndarray) -> None:
-        M_cond = np.linalg.cond(M)
-        if M_cond > 1e6:
-            warnings.warn(
-                f"Mass matrix is ill-conditioned: κ(M) = {M_cond:.2e} > 1e6. "
-                "Effective mass computation may be numerically unstable. "
-                "This often indicates the robot is near a kinematic singularity.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-
-        eigenvalues = np.linalg.eigvalsh(M)
-        if np.any(eigenvalues <= 0):
-            raise ValueError(
-                f"Mass matrix is not positive definite. "
-                f"Minimum eigenvalue: {eigenvalues.min():.2e}. "
-                "This indicates a modeling error or numerical instability."
-            )
+        check_mass_matrix_conditioning(M)
 
     def _check_jacobian_rank(self, jacp: np.ndarray) -> None:
-        J_rank = np.linalg.matrix_rank(jacp)
-        if J_rank < 3:
-            warnings.warn(
-                f"Jacobian is rank deficient: rank={J_rank} < 3. "
-                "Robot has lost mobility in some directions. "
-                "Effective mass may not be well-defined.",
-                category=RuntimeWarning,
-                stacklevel=2,
-            )
+        check_jacobian_rank(jacp)
 
     def _compute_effective_mass_value(
         self, direction: np.ndarray, jacp: np.ndarray, M: np.ndarray
     ) -> float:
-        J_dir = direction @ jacp
-        M_inv = np.linalg.inv(M)
-        denominator = J_dir @ M_inv @ J_dir.T + EPSILON_SINGULARITY_DETECTION
-
-        if abs(denominator) < 1e-8:
-            warnings.warn(
-                f"Effective mass denominator near zero: {denominator:.2e}. "
-                "Robot is at or very close to a kinematic singularity in the "
-                f"specified direction {direction}. Effective mass is extremely large.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-
-        m_eff = 1.0 / denominator
-
-        if m_eff < 0:
-            raise ValueError(
-                f"Computed negative effective mass: {m_eff:.2e} kg. "
-                "This indicates a numerical error or modeling issue."
-            )
-
-        if not np.isfinite(m_eff):
-            warnings.warn(
-                f"Effective mass is non-finite: {m_eff}. "
-                "Robot is at a kinematic singularity. "
-                "Returning large finite value instead.",
-                category=UserWarning,
-                stacklevel=2,
-            )
-            m_eff = 1e10
-
-        return float(m_eff)
+        return compute_effective_mass_value(direction, jacp, M)
 
     def compute_effective_mass(
         self,
