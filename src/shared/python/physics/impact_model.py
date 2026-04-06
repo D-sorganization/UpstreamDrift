@@ -505,7 +505,7 @@ class FiniteTimeImpactModel(ImpactModel):
         )
 
 
-@precondition(
+@precondition(  # fmt: skip
     lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=100.0, v_scale=50.0: (
         0 <= gear_factor <= 1
     ),
@@ -826,13 +826,13 @@ class ImpactSolverAPI:
         self.params = params or ImpactParameters()
         self.recorder = ImpactRecorder()
 
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
             clubhead_mass > 0
         ),
         "Clubhead mass must be positive",
     )
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
             timestamp >= 0
         ),

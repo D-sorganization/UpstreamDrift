@@ -200,13 +200,13 @@ class CaptureExportData:
     )
 
 
-@precondition(
+@precondition(  # fmt: skip
     lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
         output_path is not None and len(output_path) > 0
     ),
     "Output path must be a non-empty string",
 )
-@precondition(
+@precondition(  # fmt: skip
     lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
         frame_rate > 0
     ),
