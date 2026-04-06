@@ -34,7 +34,9 @@ def patch_imports(content: str) -> str:
         return content
     statistics_import = "from src.shared.python.perturbation.statistics import ("
     if statistics_import in content:
-        return content.replace(statistics_import, BASE_IMPORT + "\n" + statistics_import)
+        return content.replace(
+            statistics_import, BASE_IMPORT + "\n" + statistics_import
+        )
     return content.replace("import numpy as np", "import numpy as np\n" + BASE_IMPORT)
 
 
