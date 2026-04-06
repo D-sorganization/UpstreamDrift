@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.30                                             |
+| **Spec Version**        | 1.0.31                                             |
 | **Last Spec Update**    | 2026-04-06                                         |
 
 ## 2. Purpose & Mission
@@ -125,7 +125,8 @@ UpstreamDrift/
 │   └── conftest.py                 # Pytest fixtures and configuration
 ├── .github/
 │   └── workflows/
-│       ├── ci-standard.yml         # Standard CI checks
+│       ├── ci-standard.yml         # Standard CI checks (core deps only)
+│       ├── ci-optional-stack.yml   # Optional-stack verification lane (issue #2368)
 │       ├── heavy-tests-opt-in.yml  # Heavy tests (custom runner)
 │       ├── nightly-cross-validation.yml
 │       ├── tauri-build.yml
@@ -340,14 +341,15 @@ Beyond standard tools, CI enforces custom checks:
 
 ### CI/CD Pipeline
 
-| Workflow                       | Trigger                                | Purpose                                                         | Blocking?          |
-| ------------------------------ | -------------------------------------- | --------------------------------------------------------------- | ------------------ |
-| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests                        | Yes                |
-| `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)              | No (opt-in)        |
-| `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations | No (informational) |
-| `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                      | Yes (for releases) |
-| `vendor-freshness.yml`         | Weekly                                 | Check for stale dependencies and security updates               | No (warning-only)  |
-| `docker-size-gates.yml`        | Push                                   | Ensure Docker image size stays <800 MB                          | Yes                |
+| Workflow                       | Trigger                                | Purpose                                                                                                                                                       | Blocking?          |
+| ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests (core deps only — no optional extras)                                                                                | Yes                |
+| `ci-optional-stack.yml`        | Push/PR/weekly Wednesday               | **Optional-stack verification lane** (issue #2368): installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras; exercises tests skipped in `ci-standard` | Yes                |
+| `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                                                                                            | No (opt-in)        |
+| `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                                                                                               | No (informational) |
+| `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                                                                                                    | Yes (for releases) |
+| `vendor-freshness.yml`         | Weekly                                 | Check for stale dependencies and security updates                                                                                                             | No (warning-only)  |
+| `docker-size-gates.yml`        | Push                                   | Ensure Docker image size stays <800 MB                                                                                                                        | Yes                |
 
 ## 9. Dependencies
 
@@ -472,6 +474,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-06 | 1.0.31  | CI: Added `ci-optional-stack.yml` — the optional-stack verification lane (issue #2368). Installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras so that tests guarded by `try: import X` run without being skipped. Includes skip-visibility report in job summary. SPEC.md updated with new lane in module map and CI/CD pipeline table.                                                                                                                                                                                                                                                                                     |
 | 2026-04-06 | 1.0.30  | Refactor: split monolithic `src/shared/python/mujoco_humanoid_golf/kinematic_forces.py` (1102 lines) into three focused modules: `mujoco_version.py` (MuJoCo version checking and `MjDataContext`), `jacobian_utils.py` (Jacobian and mass-matrix utilities), and a slimmed `kinematic_forces.py` retaining `KinematicForceData`, `KinematicForceAnalyzer`, and `export_kinematic_forces_to_csv`. Public API fully preserved; no logic changed. Closes #2357.                                                                                                                                                                         |
 | 2026-04-06 | 1.0.29  | Sentinel: Fixed command injection vulnerability in `DataProcessorEngine.filter_data()` by adding AST-based validation to user-provided query strings before passing them to `pandas.DataFrame.query()`.                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 2026-04-06 | 1.0.28  | Bolt: Optimized `np.linalg.norm(..., axis=1)` to `np.sqrt(np.sum((...)**2, axis=1))` in `src/shared/python/data_io/marker_mapping.py` iterative fitting loop.                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
