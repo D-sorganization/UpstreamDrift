@@ -22,7 +22,7 @@ def test_mocap_launcher_items(mock_base_init):
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch("src.launchers.motion_capture_launcher.subprocess.Popen")
+@patch("src.launchers.motion_capture_launcher._spawn_process")
 @patch.object(Path, "exists", return_value=True)
 def test_mocap_launcher_python_launch_success(mock_exists, mock_popen, mock_base_init):
     launcher = MoCapLauncher()
@@ -44,10 +44,7 @@ def test_mocap_launcher_python_launch_not_found(mock_exists, mock_base_init):
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch(
-    "src.launchers.motion_capture_launcher.subprocess.Popen",
-    side_effect=OSError("Failed"),
-)
+@patch("src.launchers.motion_capture_launcher._spawn_process", side_effect=OSError("Failed"))
 @patch.object(Path, "exists", return_value=True)
 def test_mocap_launcher_python_launch_os_error(mock_exists, mock_popen, mock_base_init):
     launcher = MoCapLauncher()
@@ -75,7 +72,7 @@ def test_mujoco_unified_launcher_items(mock_base_init):
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch("src.launchers.mujoco_unified_launcher.subprocess.Popen")
+@patch("src.launchers.mujoco_unified_launcher._spawn_process")
 @patch.object(Path, "exists", return_value=True)
 def test_mujoco_unified_launcher_script_success(
     mock_exists, mock_popen, mock_base_init
@@ -99,10 +96,7 @@ def test_mujoco_unified_launcher_script_not_found(mock_exists, mock_base_init):
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch(
-    "src.launchers.mujoco_unified_launcher.subprocess.Popen",
-    side_effect=OSError("Failed"),
-)
+@patch("src.launchers.mujoco_unified_launcher._spawn_process", side_effect=OSError("Failed"))
 @patch.object(Path, "exists", return_value=True)
 def test_mujoco_unified_launcher_script_os_error(
     mock_exists, mock_popen, mock_base_init
@@ -115,7 +109,7 @@ def test_mujoco_unified_launcher_script_os_error(
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch("src.launchers.mujoco_unified_launcher.subprocess.Popen")
+@patch("src.launchers.mujoco_unified_launcher._spawn_process")
 def test_mujoco_unified_launcher_module_success(mock_popen, mock_base_init):
     launcher = MujocoUnifiedLauncher()
     launcher.show_error = MagicMock()
@@ -126,7 +120,7 @@ def test_mujoco_unified_launcher_module_success(mock_popen, mock_base_init):
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch("src.launchers.mujoco_unified_launcher.subprocess.Popen")
+@patch("src.launchers.mujoco_unified_launcher._spawn_process")
 def test_mujoco_unified_launcher_module_success_no_cwd(mock_popen, mock_base_init):
     launcher = MujocoUnifiedLauncher()
     launcher.show_error = MagicMock()
@@ -137,10 +131,7 @@ def test_mujoco_unified_launcher_module_success_no_cwd(mock_popen, mock_base_ini
 
 
 @patch("src.launchers.base.BaseLauncher.__init__", return_value=None)
-@patch(
-    "src.launchers.mujoco_unified_launcher.subprocess.Popen",
-    side_effect=OSError("Failed"),
-)
+@patch("src.launchers.mujoco_unified_launcher._spawn_process", side_effect=OSError("Failed"))
 def test_mujoco_unified_launcher_module_os_error(mock_popen, mock_base_init):
     launcher = MujocoUnifiedLauncher()
     launcher.show_error = MagicMock()

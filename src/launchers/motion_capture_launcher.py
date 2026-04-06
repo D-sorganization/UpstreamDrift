@@ -15,6 +15,11 @@ from src.shared.python.security.secure_subprocess import (
 )
 
 
+def _spawn_process(command: list[str], cwd: object) -> None:
+    """Spawn a launcher subprocess through the secure wrapper."""
+    secure_popen(command, cwd=cwd, suite_root=REPO_ROOT)
+
+
 class MoCapLauncher(BaseLauncher):
     """Launcher for motion capture and pose estimation tools."""
 
@@ -69,11 +74,7 @@ class MoCapLauncher(BaseLauncher):
             return
 
         try:
-            secure_popen(
-                [sys.executable, str(script_path)],
-                cwd=REPO_ROOT,
-                suite_root=REPO_ROOT,
-            )
+            _spawn_process([sys.executable, str(script_path)], cwd=REPO_ROOT)
         except (
             FileNotFoundError,
             PermissionError,
