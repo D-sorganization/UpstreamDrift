@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.27                                             |
+| **Spec Version**        | 1.0.28                                             |
 | **Last Spec Update**    | 2026-04-06                                         |
 
 ## 2. Purpose & Mission
@@ -465,6 +465,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-06 | 1.0.28  | Bolt: Optimized `np.linalg.norm(..., axis=1)` to `np.sqrt(np.sum((...)**2, axis=1))` in `src/shared/python/data_io/marker_mapping.py` iterative fitting loop. |
 | 2026-04-06 | 1.0.27  | Bolt: Optimized GRF contact force magnitude calculation across `src/api/routes/force_overlays.py`, `src/api/routes/video.py`, `src/robotics/locomotion/footstep_planner.py`, `src/shared/python/data_io/export.py`, `src/shared/python/data_io/output_manager.py`, `src/shared/python/gui_pkg/plot_generator.py`, `src/shared/python/physics/impact_model.py`, and `src/tools/video_analyzer/analyzer.py` by streamlining repeated magnitude computations and reducing array reduction overhead. |
 | 2026-04-06 | 1.0.26  | Bolt: Fixed integer overflow in `src/engines/physics_engines/putting_green/python/simulator.py` distance calculation by casting coordinate deltas to float before explicit element-wise squaring; added regression coverage for integer-array inputs. |
 | 2026-04-06 | 1.0.25  | Fixed `patch_analyzers.py` to discover the repository root from the script location instead of a hardcoded workstation path, refactored it into import-safe helper functions plus a `main()` entrypoint, and added a regression test guarding maintained scripts against `C:/Users/diete/Repositories/UpstreamDrift` literals. |

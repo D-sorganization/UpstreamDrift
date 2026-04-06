@@ -231,7 +231,9 @@ class MarkerToModelMapper:
 
             all_offsets = np.array([m.body_offset for m in mappings])
             predicted = self._apply_transform(transformation, all_offsets)
-            residuals = np.linalg.norm(marker_positions - predicted, axis=1)
+            # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1)
+            diffs = marker_positions - predicted
+            residuals = np.sqrt(np.sum(np.square(diffs, dtype=float), axis=-1))
 
             inlier_residuals = residuals[inlier_mask]
             if len(inlier_residuals) > 0:
