@@ -89,6 +89,12 @@ UpstreamDrift/
 │   │   ├── validators.py           # Shared validation logic
 │   │   ├── utilities.py            # Helper functions
 │   │   └── exceptions.py           # Exception definitions
+│   │   └── python/
+│   │       └── humanoid_character_builder/
+│   │           └── generators/
+│   │               ├── urdf_generator.py      # Public humanoid URDF generator orchestration
+│   │               ├── _urdf_model_builder.py # Internal link/joint/model assembly helpers
+│   │               └── _urdf_xml_writer.py    # Internal URDF XML emission helpers
 │   └── tools/                      # Development and analysis tools
 │       ├── analysis_tools.py       # Biomechanical analysis utilities
 │       └── validation_tools.py     # Cross-engine validation
@@ -147,6 +153,7 @@ UpstreamDrift/
 | Rust Physics Kernels     | `rust_core/upstream-physics/`                     | High-performance compiled physics routines for critical paths                               |
 | Configuration Manager    | `src/config/`                                     | Centralized configuration loading, validation, and environment management                   |
 | Shared Utilities         | `src/shared/`                                     | Cross-engine validators, helpers, and exception definitions                                 |
+| Humanoid URDF Generator  | `src/shared/python/humanoid_character_builder/generators/` | Generates humanoid URDFs via a thin public orchestrator backed by focused model-building and XML-emission helpers |
 | URDF Models              | `shared/models/`                                  | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
 
 ## 5. Desired Functionality

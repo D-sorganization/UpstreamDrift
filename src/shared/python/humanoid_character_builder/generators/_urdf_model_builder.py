@@ -1,0 +1,376 @@
+"""Internal helpers for humanoid URDF model assembly."""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from humanoid_character_builder.core.anthropometry import get_com_location
+from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
+from humanoid_character_builder.core.segment_definitions import (
+    GeometryType,
+    JointDefinition,
+    JointType,
+    SegmentDefinition,
+)
+from humanoid_character_builder.mesh.inertia_calculator import (
+    InertiaMode,
+    InertiaResult,
+    MeshInertiaCalculator,
+)
+from humanoid_character_builder.mesh.primitive_inertia import (
+    PrimitiveInertiaCalculator,
+    estimate_segment_primitive,
+)
+
+if TYPE_CHECKING:
+    from humanoid_character_builder.core.body_parameters import BodyParameters
+    from humanoid_character_builder.generators.urdf_generator import URDFGeneratorConfig
+
+
+logger = logging.getLogger(__name__)
+
+
+class URDFModelBuilder:
+    """Assemble generated links, joints, and materials for humanoid URDF output."""
+
+    def __init__(
+        self,
+        config: URDFGeneratorConfig,
+        mesh_inertia_calc: MeshInertiaCalculator,
+        primitive_inertia_calc: PrimitiveInertiaCalculator,
+        links: dict[str, GeneratedLink],
+        joints: list[GeneratedJoint],
+        materials: dict[str, tuple[float, float, float, float]],
+    ) -> None:
+        self.config = config
+        self.mesh_inertia_calc = mesh_inertia_calc
+        self.primitive_inertia_calc = primitive_inertia_calc
+        self.links = links
+        self.joints = joints
+        self.materials = materials
+
+    def apply_proportion_factors(
+        self,
+        dimensions: dict[str, dict[str, float]],
+        params: BodyParameters,
+    ) -> dict[str, dict[str, float]]:
+        """Apply body proportion factors to segment dimensions."""
+        if not (dimensions is not None):
+            raise ValueError("dimensions must be provided")
+        scaled = {}
+
+        for seg_name, dims in dimensions.items():
+            scaled_dims = dims.copy()
+            seg_lower = seg_name.lower()
+
+            if "arm" in seg_lower or "hand" in seg_lower:
+                scaled_dims["length"] *= params.arm_length_factor
+            elif "thigh" in seg_lower or "shin" in seg_lower or "foot" in seg_lower:
+                scaled_dims["length"] *= params.leg_length_factor
+            elif "thorax" in seg_lower or "lumbar" in seg_lower:
+                scaled_dims["length"] *= params.torso_length_factor
+                scaled_dims["width"] *= params.shoulder_width_factor
+            elif "pelvis" in seg_lower:
+                scaled_dims["width"] *= params.hip_width_factor
+            elif "head" in seg_lower:
+                for key in scaled_dims:
+                    scaled_dims[key] *= params.head_scale_factor
+            elif "neck" in seg_lower:
+                scaled_dims["length"] *= params.neck_length_factor
+
+            width_factor = 1.0 + 0.2 * params.muscularity + 0.3 * params.body_fat_factor
+            scaled_dims["width"] = scaled_dims.get("width", 0.05) * width_factor
+            scaled_dims["depth"] = scaled_dims.get("depth", 0.05) * width_factor
+
+            seg_params = params.get_segment_params(seg_name)
+            scale = seg_params.scale.as_tuple()
+            scaled_dims["width"] *= scale[0]
+            scaled_dims["depth"] *= scale[1]
+            scaled_dims["length"] *= scale[2]
+
+            scaled[seg_name] = scaled_dims
+
+        return scaled
+
+    def generate_materials(self, params: BodyParameters) -> None:
+        """Populate reusable material definitions."""
+        if not (params is not None):
+            raise ValueError("params must be provided")
+        self.materials["skin"] = params.appearance.skin_tone.as_tuple()
+        self.materials["default"] = (0.7, 0.7, 0.7, 1.0)
+
+    def generate_link(
+        self,
+        segment_name: str,
+        segment_def: SegmentDefinition,
+        params: BodyParameters,
+        mass: float,
+        dimensions: dict[str, float],
+        gender_factor: float,
+        mesh_dir: Path | str | None,
+    ) -> None:
+        """Generate a single URDF link."""
+        if not (segment_name is not None):
+            raise ValueError("segment_name must be provided")
+        seg_params = params.get_segment_params(segment_name)
+        final_mass = seg_params.mass_kg if seg_params.has_mass_override() else mass
+
+        inertia = self.compute_segment_inertia(
+            segment_name,
+            segment_def,
+            seg_params,
+            final_mass,
+            dimensions,
+            gender_factor,
+            mesh_dir,
+        )
+
+        visual_geom = self.create_geometry_dict(
+            segment_def,
+            dimensions,
+            is_collision=False,
+        )
+        collision_geom = None
+        if self.config.generate_collision:
+            collision_geom = self.create_geometry_dict(
+                segment_def,
+                dimensions,
+                is_collision=True,
+            )
+
+        length = dimensions.get("length", 0.1)
+        com = get_com_location(segment_name, length, gender_factor)
+
+        self.links[segment_name] = GeneratedLink(
+            name=segment_name,
+            mass=final_mass,
+            inertia=inertia,
+            visual_geometry=visual_geom,
+            collision_geometry=collision_geom,
+            origin_xyz=com,
+            origin_rpy=(0.0, 0.0, 0.0),
+        )
+
+    def compute_segment_inertia(
+        self,
+        segment_name: str,
+        segment_def: SegmentDefinition,
+        seg_params: Any,
+        mass: float,
+        dimensions: dict[str, float],
+        gender_factor: float,
+        mesh_dir: Path | str | None,
+    ) -> InertiaResult:
+        """Compute inertia for a segment."""
+        del segment_def, gender_factor
+        if not (segment_name is not None):
+            raise ValueError("segment_name must be provided")
+        if seg_params.has_inertia_override():
+            override = seg_params.inertia_override
+            return MeshInertiaCalculator.create_manual_inertia(
+                ixx=override.get("ixx", 0.01),
+                iyy=override.get("iyy", 0.01),
+                izz=override.get("izz", 0.01),
+                mass=mass,
+                ixy=override.get("ixy", 0.0),
+                ixz=override.get("ixz", 0.0),
+                iyz=override.get("iyz", 0.0),
+            )
+
+        if (
+            self.config.inertia_mode
+            in (InertiaMode.MESH_UNIFORM_DENSITY, InertiaMode.MESH_SPECIFIED_MASS)
+            and mesh_dir
+        ):
+            mesh_path = Path(mesh_dir) / f"{segment_name}.stl"
+            if mesh_path.exists():
+                try:
+                    if self.config.inertia_mode == InertiaMode.MESH_SPECIFIED_MASS:
+                        return self.mesh_inertia_calc.compute_from_mesh(
+                            mesh_path,
+                            mass=mass,
+                        )
+                    return self.mesh_inertia_calc.compute_from_mesh(mesh_path)
+                except (KeyError, TypeError, ValueError) as exc:
+                    logger.warning(
+                        "Mesh inertia calculation failed for %s: %s",
+                        segment_name,
+                        exc,
+                    )
+
+        length = dimensions.get("length", 0.1)
+        width = dimensions.get("width", 0.05)
+        depth = dimensions.get("depth", 0.05)
+        shape, shape_dims = estimate_segment_primitive(
+            segment_name, length, width, depth
+        )
+        return self.primitive_inertia_calc.compute(shape, mass, shape_dims)
+
+    def create_geometry_dict(
+        self,
+        segment_def: SegmentDefinition,
+        dimensions: dict[str, float],
+        is_collision: bool,
+    ) -> dict[str, Any]:
+        """Create a normalized geometry specification dictionary."""
+        if not (segment_def is not None):
+            raise ValueError("segment_def must be provided")
+        geom_spec = (
+            segment_def.get_collision_geometry()
+            if is_collision
+            else segment_def.visual_geometry
+        )
+
+        length = dimensions.get("length", 0.1)
+        width = dimensions.get("width", 0.05)
+        depth = dimensions.get("depth", 0.05)
+
+        if geom_spec.geometry_type == GeometryType.BOX:
+            return {"type": "box", "size": (width, depth, length)}
+        if geom_spec.geometry_type == GeometryType.CYLINDER:
+            return {
+                "type": "cylinder",
+                "radius": (width + depth) / 4,
+                "length": length,
+            }
+        if geom_spec.geometry_type == GeometryType.SPHERE:
+            return {"type": "sphere", "radius": length / 2}
+        if geom_spec.geometry_type == GeometryType.CAPSULE:
+            radius = (width + depth) / 4
+            return {
+                "type": "cylinder",
+                "radius": radius,
+                "length": max(0.01, length - 2 * radius),
+            }
+        if geom_spec.geometry_type == GeometryType.MESH:
+            return {
+                "type": "mesh",
+                "filename": geom_spec.mesh_path,
+                "scale": geom_spec.mesh_scale,
+            }
+        return {"type": "box", "size": (width, depth, length)}
+
+    def generate_joint(
+        self,
+        joint_name: str,
+        joint_def: JointDefinition,
+        dimensions: dict[str, dict[str, float]],
+    ) -> None:
+        """Generate URDF joints from a joint definition."""
+        del dimensions
+        if joint_def.is_composite() and self.config.expand_composite_joints:
+            self.expand_composite_joint(joint_name, joint_def)
+        else:
+            self.generate_single_joint(joint_name, joint_def)
+
+    def generate_single_joint(
+        self,
+        joint_name: str,
+        joint_def: JointDefinition,
+    ) -> None:
+        """Generate a single URDF joint."""
+        if not (joint_name is not None):
+            raise ValueError("joint_name must be provided")
+
+        urdf_type = map_joint_type(joint_def.joint_type)
+        limits = None
+        if urdf_type in ("revolute", "prismatic"):
+            limits = joint_def.limits.as_dict()
+
+        self.joints.append(
+            GeneratedJoint(
+                name=joint_name,
+                joint_type=urdf_type,
+                parent=joint_def.parent_segment,
+                child=joint_def.child_segment,
+                origin_xyz=joint_def.origin_xyz,
+                origin_rpy=joint_def.origin_rpy,
+                axis=joint_def.axis,
+                limits=limits,
+                dynamics={
+                    "damping": joint_def.damping,
+                    "friction": joint_def.friction,
+                },
+            )
+        )
+
+    def expand_composite_joint(
+        self,
+        joint_name: str,
+        joint_def: JointDefinition,
+    ) -> None:
+        """Expand a composite joint into URDF-compatible revolute joints."""
+        if not (joint_name is not None):
+            raise ValueError("joint_name must be provided")
+
+        if joint_def.joint_type == JointType.GIMBAL:
+            axes = [
+                joint_def.axis,
+                joint_def.secondary_axis or (0.0, 1.0, 0.0),
+                joint_def.tertiary_axis or (1.0, 0.0, 0.0),
+            ]
+            suffixes = ["_z", "_y", "_x"]
+        elif joint_def.joint_type == JointType.UNIVERSAL:
+            axes = [
+                joint_def.axis,
+                joint_def.secondary_axis or (0.0, 1.0, 0.0),
+            ]
+            suffixes = ["_1", "_2"]
+        else:
+            self.generate_single_joint(joint_name, joint_def)
+            return
+
+        parent = joint_def.parent_segment
+        for index, (axis, suffix) in enumerate(zip(axes, suffixes, strict=True)):
+            is_last = index == len(axes) - 1
+            child = joint_def.child_segment if is_last else f"{joint_name}{suffix}_link"
+
+            if not is_last:
+                self.links[child] = GeneratedLink(
+                    name=child,
+                    mass=0.001,
+                    inertia=InertiaResult.create_default(0.001),
+                    visual_geometry={"type": "sphere", "radius": 0.001},
+                    collision_geometry=None,
+                    origin_xyz=(0.0, 0.0, 0.0),
+                    origin_rpy=(0.0, 0.0, 0.0),
+                )
+
+            self.joints.append(
+                GeneratedJoint(
+                    name=f"{joint_name}{suffix}",
+                    joint_type="revolute",
+                    parent=parent,
+                    child=child,
+                    origin_xyz=joint_def.origin_xyz if index == 0 else (0.0, 0.0, 0.0),
+                    origin_rpy=joint_def.origin_rpy if index == 0 else (0.0, 0.0, 0.0),
+                    axis=axis,
+                    limits=joint_def.limits.as_dict(),
+                    dynamics={
+                        "damping": joint_def.damping,
+                        "friction": joint_def.friction,
+                    },
+                )
+            )
+
+            parent = child
+
+
+def map_joint_type(joint_type: JointType) -> str:
+    """Map internal joint types to URDF joint type strings."""
+    if not (joint_type is not None):
+        raise ValueError("joint_type must be provided")
+    mapping = {
+        JointType.FIXED: "fixed",
+        JointType.REVOLUTE: "revolute",
+        JointType.CONTINUOUS: "continuous",
+        JointType.PRISMATIC: "prismatic",
+        JointType.FLOATING: "floating",
+        JointType.PLANAR: "planar",
+        JointType.UNIVERSAL: "revolute",
+        JointType.GIMBAL: "revolute",
+        JointType.SPHERICAL: "revolute",
+    }
+    return mapping.get(joint_type, "fixed")
