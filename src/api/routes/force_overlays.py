@@ -380,7 +380,7 @@ def _get_sim_time(engine_manager: EngineManager) -> float:
     "/simulation/forces",
     response_model=ForceOverlayResponse,
 )
-@precondition(
+@precondition(  # fmt: skip
     lambda force_types="applied",
     color_by_magnitude=True,
     body_filter=None,

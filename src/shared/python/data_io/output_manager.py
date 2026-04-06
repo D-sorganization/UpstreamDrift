@@ -163,7 +163,7 @@ class OutputManager:
 
         logger.info("Output directory structure created successfully")
 
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self,
         results,
         filename,
@@ -174,7 +174,7 @@ class OutputManager:
         parameters=None: (results is not None),
         "Simulation results must not be None",
     )
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self,
         results,
         filename,

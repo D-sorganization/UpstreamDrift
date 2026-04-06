@@ -34,7 +34,7 @@ router = APIRouter()
 
 
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
-@precondition(
+@precondition(  # fmt: skip
     lambda file=None,
     estimator_type="mediapipe",
     min_confidence=0.5,
@@ -143,7 +143,7 @@ async def analyze_video(
 
 
 @router.post("/analyze/video/async")
-@precondition(
+@precondition(  # fmt: skip
     lambda background_tasks=None,
     file=None,
     estimator_type="mediapipe",

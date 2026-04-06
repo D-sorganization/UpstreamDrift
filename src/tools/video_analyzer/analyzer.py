@@ -90,7 +90,7 @@ class SwingAnalyzer:
         self.min_confidence = min_confidence
         self.smoothing_window = smoothing_window
 
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self,
         video_path,
         stance=StanceDirection.UNKNOWN,

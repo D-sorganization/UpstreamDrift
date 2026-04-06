@@ -311,7 +311,7 @@ class FootstepPlanner(ContractChecker):
             total_duration=total_duration,
         )
 
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self,
         current_position,
         current_yaw,
@@ -320,7 +320,7 @@ class FootstepPlanner(ContractChecker):
         start_foot="left": (n_steps > 0),
         "Number of steps must be positive",
     )
-    @precondition(
+    @precondition(  # fmt: skip
         lambda self,
         current_position,
         current_yaw,
