@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.33                                             |
+| **Spec Version**        | 1.0.34                                             |
 | **Last Spec Update**    | 2026-04-06                                         |
 
 ## 2. Purpose & Mission
@@ -307,6 +307,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - [ ] Trajectory optimization improves cost function by >20% over initial guess
 - [ ] Muscle dynamics simulation produces realistic activation patterns
 - [ ] Cross-platform build (Windows, macOS, Linux) produces functional binaries
+- [x] Integration: URDF smoke tests reuse a shared parsed fixture for structural assertions and skip Pinocchio loading cleanly when `buildModelFromUrdf` is unavailable
 
 ## 8. Quality Standards
 
@@ -474,6 +475,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-06 | 1.0.34  | test(urdf): reduced duplication in `tests/integration/test_urdf_generation_smoke.py` by reusing a shared parsed XML fixture for structural assertions and documenting the Pinocchio smoke-test skip path when `buildModelFromUrdf` is unavailable in the installed wheel.                                                                                                                                                                                                                                                                                                                                                         |
 | 2026-04-06 | 1.0.33  | refactor(urdf): decompose 761-line `urdf_generator.py` into four focused sub-modules: `urdf_config.py` (URDFGeneratorConfig dataclass), `urdf_geometry.py` (geometry dict creation and XML rendering), `urdf_joints.py` (joint-type mapping and composite joint expansion), `urdf_xml_builder.py` (full XML tree assembly). Public API fully preserved; backward-compat shims added for all private methods. Added "Generated URDF must be valid XML" postcondition. Closes #2370.                                                                                                                                                    |
 | 2026-04-06 | 1.0.32  | test(urdf): add 20-test cross-engine URDF generation and load smoke test covering XML structural validity, file persistence, config variants, and optional MuJoCo/Drake/Pinocchio loading paths (gracefully skipped when engine is absent). Closes #2369.                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-06 | 1.0.31  | CI: Added `ci-optional-stack.yml` — the optional-stack verification lane (issue #2368). Installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras so that tests guarded by `try: import X` run without being skipped. Includes skip-visibility report in job summary. SPEC.md updated with new lane in module map and CI/CD pipeline table.                                                                                                                                                                                                                                                                                     |

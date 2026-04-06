@@ -33,6 +33,12 @@ def default_urdf() -> str:
 
 
 @pytest.fixture(scope="module")
+def default_urdf_root(default_urdf: str) -> ET.Element:
+    """Parse the default URDF once for read-only structural assertions."""
+    return ET.fromstring(default_urdf)
+
+
+@pytest.fixture(scope="module")
 def default_urdf_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Write the default URDF to a temp file and return its path."""
     params = BodyParameters(name="smoke_test_robot")
@@ -45,44 +51,37 @@ def default_urdf_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
 class TestURDFStructuralValidity:
     """Verify the generated URDF is structurally well-formed."""
 
-    def test_is_parseable_xml(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        assert root.tag == "robot"
+    def test_is_parseable_xml(self, default_urdf_root: ET.Element) -> None:
+        assert default_urdf_root.tag == "robot"
 
-    def test_has_robot_name(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        assert root.get("name") == "smoke_test_robot"
+    def test_has_robot_name(self, default_urdf_root: ET.Element) -> None:
+        assert default_urdf_root.get("name") == "smoke_test_robot"
 
-    def test_has_links(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        links = root.findall("link")
+    def test_has_links(self, default_urdf_root: ET.Element) -> None:
+        links = default_urdf_root.findall("link")
         assert len(links) >= 10, f"Expected >=10 links, got {len(links)}"
 
-    def test_has_joints(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        joints = root.findall("joint")
+    def test_has_joints(self, default_urdf_root: ET.Element) -> None:
+        joints = default_urdf_root.findall("joint")
         assert len(joints) >= 10, f"Expected >=10 joints, got {len(joints)}"
 
-    def test_all_links_have_inertial(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        for link in root.findall("link"):
+    def test_all_links_have_inertial(self, default_urdf_root: ET.Element) -> None:
+        for link in default_urdf_root.findall("link"):
             inertial = link.find("inertial")
             link_name = link.get("name")
             assert inertial is not None, f"Link '{link_name}' missing <inertial>"
             assert inertial.find("mass") is not None
             assert inertial.find("inertia") is not None
 
-    def test_all_links_have_visual(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        for link in root.findall("link"):
+    def test_all_links_have_visual(self, default_urdf_root: ET.Element) -> None:
+        for link in default_urdf_root.findall("link"):
             visual = link.find("visual")
             link_name = link.get("name")
             assert visual is not None, f"Link '{link_name}' missing <visual>"
             assert visual.find("geometry") is not None
 
-    def test_revolute_joints_have_limits(self, default_urdf: str) -> None:
-        root = ET.fromstring(default_urdf)
-        for joint in root.findall("joint"):
+    def test_revolute_joints_have_limits(self, default_urdf_root: ET.Element) -> None:
+        for joint in default_urdf_root.findall("joint"):
             if joint.get("type") == "revolute":
                 limit = joint.find("limit")
                 joint_name = joint.get("name")
@@ -92,11 +91,12 @@ class TestURDFStructuralValidity:
                 assert "lower" in limit.attrib
                 assert "upper" in limit.attrib
 
-    def test_joint_parent_child_reference_valid_links(self, default_urdf: str) -> None:
+    def test_joint_parent_child_reference_valid_links(
+        self, default_urdf_root: ET.Element
+    ) -> None:
         """Every joint parent and child must reference an existing link."""
-        root = ET.fromstring(default_urdf)
-        link_names = {link.get("name") for link in root.findall("link")}
-        for joint in root.findall("joint"):
+        link_names = {link.get("name") for link in default_urdf_root.findall("link")}
+        for joint in default_urdf_root.findall("joint"):
             joint_name = joint.get("name")
             parent = joint.find("parent")
             child = joint.find("child")
@@ -234,6 +234,8 @@ class TestURDFPinocchioLoad:
             pytest.skip(
                 "pinocchio appears to be a stub/mock -- skipping Pinocchio URDF load smoke test"
             )
+        if not hasattr(pin, "buildModelFromUrdf"):
+            pytest.skip("pinocchio buildModelFromUrdf not available in this build")
         try:
             model = pin.buildModelFromUrdf(str(default_urdf_path))
             assert model is not None
