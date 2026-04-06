@@ -536,7 +536,9 @@ class DataProcessorEngine(BaseCalculationEngine):
                     )
                 ]
             else:
-                self.data = self.data.query(f"{column} {operator} @value")
+                expr = f"{column} {operator} @value"
+                _validate_dataframe_expression(expr.replace("@", ""))
+                self.data = self.data.query(expr)
             return ProcessingResult(success=True, message="Filtered", data=self.data)
         except (KeyError, ValueError, TypeError, SyntaxError) as e:
             self._undo()

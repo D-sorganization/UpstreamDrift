@@ -53,3 +53,8 @@
 **Vulnerability:** Found arbitrary code execution vulnerability via pickle deserialization in `src/shared/python/upstream_drift_tools/data_processing/io.py` where `pd.read_pickle` was being called for files with the `.pkl` or `.pickle` extension.
 **Learning:** Even though the function caller is assumed to provide trusted data, `pd.read_pickle` allows for extremely dangerous code execution. We cannot rely on caller context for safety.
 **Prevention:** Explicitly raise a `ValueError` when attempting to read or write pickle formats, forcing the use of safer serialization formats like JSON, Parquet, or CSV.
+## 2026-04-06 - Command Injection in pandas query() via filter_data
+
+**Vulnerability:** Found arbitrary code execution vulnerability in `DataProcessorEngine.filter_data()` where user-provided column and operator strings were concatenated and passed directly to `pandas.DataFrame.query()` without validation.
+**Learning:** `DataFrame.query()` evaluates string expressions and is vulnerable to injection if the concatenated string isn't validated, even if parts of it are formatted dynamically.
+**Prevention:** Always validate constructed query expressions passed to `pd.DataFrame.query()` using an AST-based validator to ensure they only contain safe operations.
