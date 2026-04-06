@@ -15,6 +15,13 @@ from src.shared.python.security.secure_subprocess import (
 )
 
 
+def _spawn_process(
+    command: list[str], cwd: object, env: dict[str, str] | None = None
+) -> None:
+    """Spawn a launcher subprocess through the secure wrapper."""
+    secure_popen(command, cwd=cwd, suite_root=REPO_ROOT, env=env)
+
+
 class MujocoUnifiedLauncher(BaseLauncher):
     """Launcher for MuJoCo simulation modes."""
 
@@ -88,12 +95,7 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             env = self._get_launch_env()
-            secure_popen(
-                [sys.executable, str(script_path)],
-                cwd=REPO_ROOT,
-                suite_root=REPO_ROOT,
-                env=env,
-            )
+            _spawn_process([sys.executable, str(script_path)], cwd=REPO_ROOT, env=env)
         except (
             FileNotFoundError,
             PermissionError,
@@ -119,12 +121,7 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             env = self._get_launch_env()
-            secure_popen(
-                [sys.executable, "-m", module_name],
-                cwd=cwd,
-                suite_root=REPO_ROOT,
-                env=env,
-            )
+            _spawn_process([sys.executable, "-m", module_name], cwd=cwd, env=env)
         except (
             FileNotFoundError,
             PermissionError,
