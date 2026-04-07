@@ -16,10 +16,16 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import numpy as np
+
+
+def _fast_norm_3d(v: np.ndarray) -> float:
+    """Fast magnitude calculation for 3D vectors."""
+    return math.hypot(v[0], v[1], v[2])
 
 
 class GeometricPrimitive(ABC):
@@ -107,14 +113,14 @@ class Sphere(GeometricPrimitive):
         if not (point is not None):
             raise ValueError("point must be provided")
         point = np.asarray(point)
-        return float(np.linalg.norm(point - self.center)) <= self.radius
+        return float(_fast_norm_3d(point - self.center)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = np.linalg.norm(direction)
+        norm = _fast_norm_3d(direction)
         if norm < 1e-10:
             return self.center.copy()
         return self.center + self.radius * direction / norm
@@ -233,13 +239,13 @@ class Capsule(GeometricPrimitive):
     @property
     def length(self) -> float:
         """Get capsule length (distance between endpoints)."""
-        return float(np.linalg.norm(self.point_b - self.point_a))
+        return float(_fast_norm_3d(self.point_b - self.point_a))
 
     @property
     def axis(self) -> np.ndarray:
         """Get capsule axis direction (normalized)."""
         diff = self.point_b - self.point_a
-        length = np.linalg.norm(diff)
+        length = _fast_norm_3d(diff)
         if length < 1e-10:
             return np.array([0.0, 0.0, 1.0])
         return diff / length
@@ -271,14 +277,14 @@ class Capsule(GeometricPrimitive):
             raise ValueError("point must be provided")
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
-        return float(np.linalg.norm(point - closest)) <= self.radius
+        return float(_fast_norm_3d(point - closest)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = np.linalg.norm(direction)
+        norm = _fast_norm_3d(direction)
         if norm < 1e-10:
             return self.point_a.copy()
         d = direction / norm
@@ -321,7 +327,7 @@ class Cylinder(GeometricPrimitive):
             raise ValueError("height must be positive")
 
         # Normalize axis
-        norm = np.linalg.norm(self.axis)
+        norm = _fast_norm_3d(self.axis)
         if norm < 1e-10:
             raise ValueError("axis must be non-zero")
         self.axis = self.axis / norm
@@ -367,14 +373,14 @@ class Cylinder(GeometricPrimitive):
 
         # Check radius (perpendicular distance)
         perp = to_point - along_axis * self.axis
-        return float(np.linalg.norm(perp)) <= self.radius
+        return float(_fast_norm_3d(perp)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = np.linalg.norm(direction)
+        norm = _fast_norm_3d(direction)
         if norm < 1e-10:
             return self.center.copy()
 
@@ -392,7 +398,7 @@ class Cylinder(GeometricPrimitive):
             axis_support = self.center - self.half_height * self.axis
 
         # Support on radius (perpendicular)
-        perp_norm = np.linalg.norm(d_perp)
+        perp_norm = _fast_norm_3d(d_perp)
         if perp_norm > 1e-10:
             return axis_support + self.radius * d_perp / perp_norm
 
@@ -444,7 +450,7 @@ class ConvexHull(GeometricPrimitive):
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
         to_point = point - self.center
-        norm = np.linalg.norm(to_point)
+        norm = _fast_norm_3d(to_point)
         if norm < 1e-10:
             return True  # At center
 
@@ -512,7 +518,7 @@ def _sphere_sphere_distance(
     if not (sphere_a is not None):
         raise ValueError("sphere_a must be provided")
     diff = sphere_b.center - sphere_a.center
-    center_dist = np.linalg.norm(diff)
+    center_dist = _fast_norm_3d(diff)
 
     if center_dist < 1e-10:
         # Concentric spheres
@@ -539,7 +545,7 @@ def _sphere_capsule_distance(
 
     # Now it's sphere-sphere distance
     diff = sphere.center - closest_on_axis
-    center_dist = np.linalg.norm(diff)
+    center_dist = _fast_norm_3d(diff)
 
     if center_dist < 1e-10:
         # Sphere center on capsule axis
@@ -569,7 +575,7 @@ def _capsule_capsule_distance(
     )
 
     diff = closest_b - closest_a
-    center_dist = np.linalg.norm(diff)
+    center_dist = _fast_norm_3d(diff)
 
     if center_dist < 1e-10:
         direction = np.array([1.0, 0.0, 0.0])
@@ -651,10 +657,10 @@ def _gjk_distance(
     direction = prim_b.compute_support(np.array([1, 0, 0])) - prim_a.compute_support(
         np.array([-1, 0, 0])
     )
-    if np.linalg.norm(direction) < 1e-10:
+    if _fast_norm_3d(direction) < 1e-10:
         direction = np.array([1.0, 0.0, 0.0])
     else:
-        direction = direction / np.linalg.norm(direction)
+        direction = direction / _fast_norm_3d(direction)
 
     # Simplex vertices
     simplex: list[np.ndarray] = []
@@ -670,7 +676,7 @@ def _gjk_distance(
         if np.dot(support, direction) < 0 and len(simplex) == 0:
             # Return distance between supports
             diff = support_b - support_a
-            dist = float(np.linalg.norm(diff))
+            dist = float(_fast_norm_3d(diff))
             return dist, support_a, support_b
 
         simplex.append(support)
@@ -678,7 +684,7 @@ def _gjk_distance(
         # Update simplex and direction
         if len(simplex) == 1:
             direction = -simplex[0]
-            norm = np.linalg.norm(direction)
+            norm = _fast_norm_3d(direction)
             if norm < 1e-10:
                 # Origin at support point (collision)
                 return 0.0, support_a, support_b
@@ -690,7 +696,7 @@ def _gjk_distance(
             t = np.dot(ao, ab) / (np.dot(ab, ab) + 1e-10)
             t = np.clip(t, 0.0, 1.0)
             closest = simplex[0] + t * ab
-            dist = float(np.linalg.norm(closest))
+            dist = float(_fast_norm_3d(closest))
             if dist < 1e-6:
                 # Origin very close to simplex (collision)
                 return 0.0, support_a, support_b
@@ -703,7 +709,7 @@ def _gjk_distance(
             t = np.dot(ao, ab) / (np.dot(ab, ab) + 1e-10)
             t = np.clip(t, 0.0, 1.0)
             closest = simplex[0] + t * ab
-            dist = float(np.linalg.norm(closest))
+            dist = float(_fast_norm_3d(closest))
             if dist < 1e-6:
                 return 0.0, support_a, support_b
             direction = -closest / dist
@@ -712,7 +718,7 @@ def _gjk_distance(
     support_a = prim_a.compute_support(direction)
     support_b = prim_b.compute_support(-direction)
     diff = support_b - support_a
-    return float(np.linalg.norm(diff)), support_a, support_b
+    return float(_fast_norm_3d(diff)), support_a, support_b
 
 
 def check_primitive_collision(
