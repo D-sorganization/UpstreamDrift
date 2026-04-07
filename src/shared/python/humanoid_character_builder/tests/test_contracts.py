@@ -9,26 +9,26 @@ from humanoid_character_builder.contracts import (
 )
 
 
-def test_precondition_valid():
+def test_precondition_valid() -> None:
     @precondition(lambda x: x > 0)
-    def func(x):
+    def func(x: int) -> int:
         return x
 
     assert func(5) == 5
 
 
-def test_precondition_invalid():
+def test_precondition_invalid() -> None:
     @precondition(lambda x: x > 0)
-    def func(x):
+    def func(x: int) -> int:
         return x
 
     with pytest.raises(ContractViolationError):
         func(-1)
 
 
-def test_precondition_argument_binding():
+def test_precondition_argument_binding() -> None:
     @precondition(lambda y: y > 0)
-    def func(x, y):
+    def func(x: int, y: int) -> int:
         return x + y
 
     assert func(1, 2) == 3
@@ -37,9 +37,9 @@ def test_precondition_argument_binding():
         func(1, -2)
 
 
-def test_precondition_with_kwargs():
+def test_precondition_with_kwargs() -> None:
     @precondition(lambda y: y > 0)
-    def func(x, y=10):
+    def func(x: int, y: int = 10) -> int:
         return x + y
 
     assert func(1) == 11
@@ -49,34 +49,34 @@ def test_precondition_with_kwargs():
         func(1, y=-1)
 
 
-def test_postcondition_valid():
+def test_postcondition_valid() -> None:
     @postcondition(lambda r: r > 0)
-    def func(x):
+    def func(x: int) -> int:
         return x * x
 
     assert func(2) == 4
 
 
-def test_postcondition_invalid():
+def test_postcondition_invalid() -> None:
     @postcondition(lambda r: r > 0)
-    def func(x):
+    def func(x: int) -> int:
         return x
 
     with pytest.raises(ContractViolationError):
         func(-1)
 
 
-def test_invariant():
+def test_invariant() -> None:
     @invariant(lambda self: self.value > 0)
     class Counter:
-        def __init__(self, value):
+        def __init__(self, value: int) -> None:
             self.value = value
 
-        def increment(self):
+        def increment(self) -> int:
             self.value += 1
             return self.value
 
-        def decrement(self):
+        def decrement(self) -> int:
             self.value -= 1
             return self.value
 
@@ -91,9 +91,9 @@ def test_invariant():
         c.decrement()  # Becomes 0, fails invariant > 0
 
 
-def test_precondition_message():
+def test_precondition_message() -> None:
     @precondition(lambda x: x > 0, "X must be positive")
-    def func(x):
+    def func(x: int) -> int:
         return x
 
     with pytest.raises(ContractViolationError, match="X must be positive"):

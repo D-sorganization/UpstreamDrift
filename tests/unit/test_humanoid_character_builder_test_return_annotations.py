@@ -10,6 +10,10 @@ SCOPED_FILES = (
     "src/shared/python/humanoid_character_builder/tests/test_api.py",
     "src/shared/python/humanoid_character_builder/tests/test_inertia_calculator.py",
     "src/shared/python/humanoid_character_builder/tests/test_body_parameters.py",
+    "src/shared/python/humanoid_character_builder/tests/test_urdf_generator.py",
+    "src/shared/python/humanoid_character_builder/tests/test_contracts.py",
+    "src/shared/python/humanoid_character_builder/tests/test_collision_geometry.py",
+    "src/shared/python/humanoid_character_builder/tests/test_physics_validator.py",
 )
 
 

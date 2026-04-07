@@ -1,29 +1,39 @@
 """test_collision_geometry.py module."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pytest
-import trimesh
 from humanoid_character_builder.mesh.collision_geometry import (
     CollisionGeometryGenerator,
 )
 
+if TYPE_CHECKING:
+    import trimesh
+else:
+    trimesh = pytest.importorskip("trimesh")
+
 
 @pytest.fixture
-def generator():
+def generator() -> CollisionGeometryGenerator:
     return CollisionGeometryGenerator()
 
 
 @pytest.fixture
-def box_mesh():
+def box_mesh() -> trimesh.Trimesh:
     return trimesh.creation.box(extents=(1.0, 1.0, 1.0))
 
 
 @pytest.fixture
-def sphere_mesh():
+def sphere_mesh() -> trimesh.Trimesh:
     return trimesh.creation.icosphere(radius=1.0, subdivisions=2)
 
 
-def test_generate_primitives_box(generator, box_mesh):
+def test_generate_primitives_box(
+    generator: CollisionGeometryGenerator, box_mesh: trimesh.Trimesh
+) -> None:
     result = generator.generate(box_mesh, method="primitives")
     assert len(result.meshes) == 1
     # Check if volume is close
@@ -32,7 +42,9 @@ def test_generate_primitives_box(generator, box_mesh):
     assert result.method == "primitives"
 
 
-def test_generate_vhacd_fallback(generator, sphere_mesh):
+def test_generate_vhacd_fallback(
+    generator: CollisionGeometryGenerator, sphere_mesh: trimesh.Trimesh
+) -> None:
     # VHACD likely falls back to hull if binary missing
     result = generator.generate(sphere_mesh, method="vhacd")
     assert len(result.meshes) >= 1
@@ -41,7 +53,9 @@ def test_generate_vhacd_fallback(generator, sphere_mesh):
     assert result.meshes[0].volume > 0
 
 
-def test_generate_decimation(generator, sphere_mesh):
+def test_generate_decimation(
+    generator: CollisionGeometryGenerator, sphere_mesh: trimesh.Trimesh
+) -> None:
     # Sphere has 80 faces at subdiv 2
     target = 20
     result = generator.generate(sphere_mesh, method="decimation", max_triangles=target)
@@ -51,13 +65,17 @@ def test_generate_decimation(generator, sphere_mesh):
     assert result.method == "decimation"
 
 
-def test_generate_auto(generator, sphere_mesh):
+def test_generate_auto(
+    generator: CollisionGeometryGenerator, sphere_mesh: trimesh.Trimesh
+) -> None:
     result = generator.generate(sphere_mesh, method="auto")
     assert len(result.meshes) >= 1
     assert result.method == "auto"
 
 
-def test_quality_metrics(generator, box_mesh):
+def test_quality_metrics(
+    generator: CollisionGeometryGenerator, box_mesh: trimesh.Trimesh
+) -> None:
     result = generator.generate(box_mesh, method="primitives")
     # Should be nearly identical
     assert result.quality_score > 0.8
@@ -67,7 +85,7 @@ def test_quality_metrics(generator, box_mesh):
     assert result.processing_time >= 0
 
 
-def test_generate_cylinder_fit(generator):
+def test_generate_cylinder_fit(generator: CollisionGeometryGenerator) -> None:
     # Create a cylinder and see if it fits a cylinder
     cyl = trimesh.creation.cylinder(radius=0.5, height=2.0)
     result = generator.generate(cyl, method="primitives")
@@ -75,7 +93,7 @@ def test_generate_cylinder_fit(generator):
     assert np.isclose(result.meshes[0].volume, cyl.volume, rtol=0.2)
 
 
-def test_generate_capsule_fit(generator):
+def test_generate_capsule_fit(generator: CollisionGeometryGenerator) -> None:
     # Create a capsule
     cap = trimesh.creation.capsule(radius=0.5, height=2.0)
     result = generator.generate(cap, method="primitives")
@@ -84,7 +102,7 @@ def test_generate_capsule_fit(generator):
     assert np.isclose(result.meshes[0].volume, cap.volume, rtol=0.2)
 
 
-def test_generate_oriented_cylinder(generator):
+def test_generate_oriented_cylinder(generator: CollisionGeometryGenerator) -> None:
     # Cylinder along X axis
     cyl = trimesh.creation.cylinder(radius=0.5, height=2.0)
     cyl.apply_transform(trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0]))
