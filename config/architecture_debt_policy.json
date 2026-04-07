@@ -1,0 +1,52 @@
+{
+  "facade_budgets": [
+    {
+      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
+      "max_lines": 140,
+      "required_modules": [
+        "mesh_generator_models",
+        "mesh_generator_primitive",
+        "mesh_generator_makehuman",
+        "mesh_generator_smplx",
+        "mesh_generator_factory"
+      ]
+    },
+    {
+      "path": "src/shared/python/physics/terrain.py",
+      "max_lines": 120,
+      "required_modules": [
+        "terrain_representation",
+        "terrain_loading",
+        "terrain_physics"
+      ]
+    },
+    {
+      "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
+      "max_lines": 120,
+      "required_modules": [
+        "pressure_drop_api",
+        "pressure_drop_reference",
+        "pressure_drop_results",
+        "pressure_drop_validation"
+      ]
+    }
+  ],
+  "tracked_subtargets": [
+    {
+      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator_makehuman.py",
+      "max_lines": 760
+    },
+    {
+      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator_smplx.py",
+      "max_lines": 760
+    },
+    {
+      "path": "src/shared/python/physics/terrain_representation.py",
+      "max_lines": 1100
+    },
+    {
+      "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+      "max_lines": 220
+    }
+  ]
+}

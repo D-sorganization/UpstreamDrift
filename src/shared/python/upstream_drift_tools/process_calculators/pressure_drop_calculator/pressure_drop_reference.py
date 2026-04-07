@@ -1,0 +1,142 @@
+"""Reference and discovery helpers for the pressure drop calculator."""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+from .engine.pressure_drop_calculation_engine import (
+    friction_factor_churchill,
+    friction_factor_colebrook,
+    friction_factor_haaland,
+    friction_factor_swamee_jain,
+)
+from .utils.fitting_loss_coefficients import FITTING_K_FACTORS
+from .utils.flow_rate_converter import (
+    MASS_FLOW_CONVERSIONS,
+    MOLAR_FLOW_CONVERSIONS,
+    STANDARD_CONDITIONS,
+    VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S,
+)
+from .utils.gas_properties import GAS_DATABASE
+from .utils.pipe_database import (
+    MATERIAL_ROUGHNESS,
+    list_available_sizes,
+    list_schedules_for_size,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def show_help() -> None:
+    """Display comprehensive help with available options and examples."""
+    help_text = """
+╔══════════════════════════════════════════════════════════════════════════════╗
+║               ADVANCED PRESSURE DROP CALCULATOR - QUICK REFERENCE            ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║                                                                              ║
+║  BASIC USAGE:                                                                ║
+║  ─────────────                                                               ║
+║    result = calculate_pressure_drop(                                         ║
+║        pipe_size="4", pipe_schedule="40",     # Use standard pipe OR         ║
+║        pipe_diameter=0.1,                      # specify diameter (m)        ║
+║        pipe_length=100,                        # meters                      ║
+║        flow_rate=1000, flow_unit='kg/h',      # flow with units             ║
+║        pressure=10, pressure_unit='bar',       # inlet pressure             ║
+║        temperature=500, temperature_unit='K',  # inlet temperature          ║
+║        gas_composition={'H2': 0.3, 'CO': 0.7}, # optional (default: air)    ║
+║    )                                                                         ║
+║                                                                              ║
+║  HELPER FUNCTIONS:                                                           ║
+║    show_help()           - Display this help                                ║
+║    list_gas_components() - Show available gas components                    ║
+║    list_fittings()       - Show available fittings with K-factors           ║
+║    list_pipe_sizes()     - Show available pipe sizes                        ║
+║    list_flow_units()     - Show available flow rate units                   ║
+║    list_materials()      - Show pipe materials and roughness values         ║
+║    compare_friction_methods() - Compare friction factor correlations        ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+"""
+    logger.info(help_text)
+
+
+def list_gas_components() -> dict[str, dict[str, Any]]:
+    """List all available gas components with their properties."""
+    components = {}
+    for name, props in sorted(GAS_DATABASE.items()):
+        components[name] = {
+            "molecular_weight": props.molecular_weight,
+            "critical_temp": props.critical_temp,
+            "critical_pressure": props.critical_pressure,
+            "acentric_factor": props.acentric_factor,
+        }
+    return components
+
+
+def list_fittings(category: str | None = None) -> dict[str, float]:
+    """List available fittings with their K-factors."""
+    result = {}
+    categories = {
+        "elbow": ["elbow", "miter"],
+        "tee": ["tee"],
+        "valve": ["valve"],
+        "entrance": ["entrance"],
+        "exit": ["exit"],
+        "bend": ["bend"],
+        "reducer": ["reducer", "expander"],
+    }
+    for fitting_type, k_factor in sorted(FITTING_K_FACTORS.items()):
+        fitting_category = "other"
+        for cat_name, keywords in categories.items():
+            if any(keyword in fitting_type for keyword in keywords):
+                fitting_category = cat_name
+                break
+        if category and fitting_category != category:
+            continue
+        result[fitting_type] = k_factor
+    return result
+
+
+def list_pipe_sizes() -> dict[str, list[str]]:
+    """List available standard pipe sizes and schedules."""
+    sizes = list_available_sizes()
+    return {size: list_schedules_for_size(size) for size in sizes}
+
+
+def list_flow_units() -> dict[str, list[str]]:
+    """List all available flow rate units."""
+    return {
+        "mass": list(MASS_FLOW_CONVERSIONS.keys()),
+        "molar": list(MOLAR_FLOW_CONVERSIONS.keys()),
+        "volumetric": list(VOLUMETRIC_FLOW_CONVERSIONS_TO_M3_S.keys()),
+        "standard_conditions": list(STANDARD_CONDITIONS.keys()),
+    }
+
+
+def list_materials() -> dict[str, dict[str, float]]:
+    """List available pipe materials with roughness values."""
+    result = {}
+    for material, (roughness_mm, _roughness_ft, _desc) in sorted(
+        MATERIAL_ROUGHNESS.items()
+    ):
+        result[material] = {
+            "roughness_mm": roughness_mm,
+            "roughness_m": roughness_mm / 1000,
+        }
+    return result
+
+
+def compare_friction_methods(
+    reynolds_number: float,
+    relative_roughness: float = 0.0001,
+) -> dict[str, float]:
+    """Compare friction factor correlations for given conditions."""
+    if reynolds_number is None:
+        raise ValueError("reynolds_number must be provided")
+    return {
+        "colebrook": friction_factor_colebrook(reynolds_number, relative_roughness),
+        "swamee-jain": friction_factor_swamee_jain(reynolds_number, relative_roughness),
+        "churchill": friction_factor_churchill(reynolds_number, relative_roughness),
+        "haaland": friction_factor_haaland(reynolds_number, relative_roughness),
+    }

@@ -12,13 +12,10 @@ from typing import Any
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .mesh_generator import (
-    MakeHumanMeshGenerator,
-    MeshGeneratorBackend,
-    MeshGeneratorInterface,
-    PrimitiveMeshGenerator,
-    SMPLXMeshGenerator,
-)
+from .mesh_generator_makehuman import MakeHumanMeshGenerator
+from .mesh_generator_models import MeshGeneratorBackend, MeshGeneratorInterface
+from .mesh_generator_primitive import PrimitiveMeshGenerator
+from .mesh_generator_smplx import SMPLXMeshGenerator
 
 logger = get_logger(__name__)
 
