@@ -78,11 +78,10 @@ def test_launch_function() -> None:
         mock_main.assert_called_once()
 
 
-def test_show_status() -> None:
+def test_show_status(capsys) -> None:
     with (
         patch("src.launchers.unified_launcher.QApplication"),
         patch("src.launchers.golf_launcher.GolfLauncher"),
-        patch("builtins.print") as mock_print,
     ):
         launcher = UnifiedLauncher()
 
@@ -104,14 +103,8 @@ def test_show_status() -> None:
         ):
             launcher.show_status()
 
-            # Check if print was called with engine name
-            found = False
-            for call in mock_print.call_args_list:
-                args = call[0]
-                if args and "TEST_ENGINE" in str(args[0]):
-                    found = True
-                    break
-            assert found
+    captured = capsys.readouterr()
+    assert "TEST_ENGINE" in captured.out
 
 
 def test_get_version() -> None:

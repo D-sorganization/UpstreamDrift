@@ -166,6 +166,8 @@ def test_main(
     tmp_path,
 ):
     monkeypatch.setattr(bi, "DIST_DIR", tmp_path)
+    artifact = tmp_path / "artifact.msi"
+    artifact.write_bytes(b"abc")
     monkeypatch.setattr("sys.argv", ["build_installer.py", "--clean"])
     (tmp_path / "installer.msi").write_text("artifact")
 

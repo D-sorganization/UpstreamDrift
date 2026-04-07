@@ -364,7 +364,7 @@ class TestDbMigrateFunctions:
         spec.loader.exec_module(mod)  # type: ignore[union-attr]
         return mod
 
-    def test_cmd_check_returns_0_on_success(self, db_migrate, tmp_path):
+    def test_cmd_check_returns_0_on_success(self, db_migrate, tmp_path, capsys):
         """cmd_check returns 0 when migrations are in sync."""
         from alembic.config import Config
 
@@ -383,6 +383,28 @@ class TestDbMigrateFunctions:
             args = argparse.Namespace(command="check", func=db_migrate.cmd_check)
             result = db_migrate.cmd_check(args)
         assert result == 0
+        captured = capsys.readouterr()
+        assert (
+            "Migration check passed: models and migrations are in sync." in captured.out
+        )
+
+    def test_cmd_check_writes_failure_to_stderr(self, db_migrate, capsys):
+        """cmd_check reports failures on stderr and returns 1."""
+        import argparse
+
+        with (
+            patch.object(db_migrate, "_get_alembic_config", return_value=object()),
+            patch("alembic.command.check", side_effect=RuntimeError("boom")),
+        ):
+            args = argparse.Namespace(command="check", func=db_migrate.cmd_check)
+            result = db_migrate.cmd_check(args)
+
+        assert result == 1
+        captured = capsys.readouterr()
+        assert "Migration check FAILED: boom" in captured.err
+        assert (
+            "Run: python3 scripts/db_migrate.py revision --autogenerate" in captured.err
+        )
 
     def test_cmd_upgrade_calls_alembic_upgrade(self, db_migrate, tmp_path):
         """cmd_upgrade calls alembic.command.upgrade with correct args."""

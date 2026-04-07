@@ -10,7 +10,6 @@ The launcher now features:
 - Pre-loaded resources passed to main window (no duplicate loading)
 """
 
-import builtins
 import importlib
 import sys
 from collections.abc import Callable
@@ -29,6 +28,11 @@ else:
     QApplication = None  # type: ignore
 
 logger = get_logger(__name__)
+
+
+def _emit_stdout(message: str) -> None:
+    """Write a single line to standard output."""
+    sys.stdout.write(f"{message}\n")
 
 
 def _is_pyqt6_available() -> bool:
@@ -126,10 +130,10 @@ class UnifiedLauncher:
             for _engine in engines:
                 engine_name = str(getattr(_engine, "value", str(_engine)))
                 logger.info(" - %s", engine_name)
-                builtins.print(engine_name.upper())  # noqa: T201
+                _emit_stdout(engine_name.upper())
         else:
             logger.info("No engines available.")
-            builtins.print("NO ENGINES AVAILABLE")  # noqa: T201
+            _emit_stdout("NO ENGINES AVAILABLE")
 
         # Show suite root — import from the canonical location
         try:
