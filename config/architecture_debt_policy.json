@@ -31,6 +31,14 @@
       ]
     },
     {
+      "path": "src/shared/python/pendulum_simulator/gui/equations_popup.py",
+      "max_lines": 120,
+      "required_modules": [
+        "equations_popup_reference_content",
+        "equations_popup_jacobian_content"
+      ]
+    },
+    {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
       "max_lines": 220,
       "required_modules": [
@@ -67,6 +75,14 @@
     {
       "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
       "max_lines": 220
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/equations_popup_reference_content.py",
+      "max_lines": 700
+    },
+    {
+      "path": "src/shared/python/pendulum_simulator/gui/equations_popup_jacobian_content.py",
+      "max_lines": 380
     },
     {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/motion_capture_plotter_ui.py",
