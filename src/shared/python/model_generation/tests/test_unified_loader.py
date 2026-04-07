@@ -10,8 +10,14 @@ Covers:
 - Library manifest integrity
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from model_generation.library.unified_loader import UnifiedModelLoader
 
 
 class TestFormatDetection:
@@ -155,7 +161,7 @@ class TestBundledManifest:
 class TestUnifiedLoader:
     """Tests for loading bundled models via UnifiedModelLoader."""
 
-    def _make_loader(self, tmp_path: Path):
+    def _make_loader(self, tmp_path: Path) -> UnifiedModelLoader:
         from model_generation.library.unified_loader import UnifiedModelLoader
 
         return UnifiedModelLoader(prefs_dir=tmp_path)

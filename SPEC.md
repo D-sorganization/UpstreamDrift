@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.39                                             |
+| **Spec Version**        | 1.0.40                                             |
 | **Last Spec Update**    | 2026-04-07                                         |
 
 ## 2. Purpose & Mission
@@ -308,6 +308,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - [ ] Muscle dynamics simulation produces realistic activation patterns
 - [ ] Cross-platform build (Windows, macOS, Linux) produces functional binaries
 - [x] Integration: URDF smoke tests reuse a shared parsed fixture for structural assertions and skip Pinocchio loading cleanly when `buildModelFromUrdf` is unavailable
+- [x] Unit: `src/shared/python/model_generation/tests/` is covered by an AST-based regression check so pytest fixtures and shared loader helpers keep explicit return annotations
 
 ## 8. Quality Standards
 
@@ -475,6 +476,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-07 | 1.0.40  | Added explicit return annotations across the `src/shared/python/model_generation/tests/` API, CLI, editor, library, Simscape, and GitHub-importer suites, and added `tests/unit/test_model_generation_test_return_annotations.py` so future missing return annotations in that subtree fail fast in CI under issue #2385.                                                                                                                                                                                                                                                                                                             |
 | 2026-04-07 | 1.0.39  | Refactor(pendulum-gui): decomposed `equations_popup.py` into a small facade backed by `equations_popup_reference_content.py`, `equations_popup_jacobian_content.py`, and shared popup styling. Added popup regression coverage plus architecture-debt budgets so the extracted content modules stay tracked under issue #2388.                                                                                                                                                                                                                                                                                                        |
 | 2026-04-07 | 1.0.38  | Refactor(golf-gui): decomposed the legacy Python visualization stack by turning `Motion_Capture_Plotter.py` into a thin shell backed by `motion_capture_plotter_ui.py`, `motion_capture_plotter_data.py`, and `motion_capture_plotter_visualization.py`, and by splitting `golf_visualizer_implementation.py` into focused models/data/renderer/widget/app modules with a compatibility facade. Extended `config/architecture_debt_policy.json` and `tests/unit/test_architecture_debt_policy.py` to track the remaining MATLAB monoliths under phased size budgets. Closes #2383.                                                    |
 | 2026-04-07 | 1.0.37  | Refactor(shared-python): decomposed `mesh_generator.py` into backend-specific modules (`mesh_generator_models.py`, `mesh_generator_primitive.py`, `mesh_generator_makehuman.py`, `mesh_generator_smplx.py`), split `terrain.py` into `terrain_representation.py`, `terrain_loading.py`, and `terrain_physics.py`, and split pressure-drop facade logic into `pressure_drop_api.py`, validation/results/reference helpers, and focused engine modules. Added `config/architecture_debt_policy.json` plus `tests/unit/test_architecture_debt_policy.py` to lock in facade budgets and tracked hotspots. Closes #2382.                   |
@@ -537,4 +539,3 @@ pytest tests/ --cov=src --cov-fail-under=70
   5. VERSION: Bump the Spec Version field when making substantive changes.
      Use semver: major (structure change), minor (new features), patch (corrections).
 -->
-

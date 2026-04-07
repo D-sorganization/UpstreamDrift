@@ -13,17 +13,19 @@ class TestGitHubImporter:
     """Tests for GitHubImporter."""
 
     @pytest.fixture
-    def mock_library(self):
+    def mock_library(self) -> MagicMock:
         """Mock ModelLibrary."""
         return MagicMock()
 
     @pytest.fixture
-    def importer(self, mock_library):
+    def importer(self, mock_library: MagicMock) -> GitHubImporter:
         """Create importer with mock library."""
         return GitHubImporter(library=mock_library)
 
     @patch("urllib.request.urlopen")
-    def test_import_from_search_dry_run(self, mock_urlopen, importer):
+    def test_import_from_search_dry_run(
+        self, mock_urlopen: MagicMock, importer: GitHubImporter
+    ) -> None:
         """Test search with dry_run."""
         # Mock GitHub response
         mock_response = MagicMock()
@@ -55,7 +57,9 @@ class TestGitHubImporter:
         importer.library.add_repository.assert_not_called()
 
     @patch("urllib.request.urlopen")
-    def test_import_from_search_import(self, mock_urlopen, importer):
+    def test_import_from_search_import(
+        self, mock_urlopen: MagicMock, importer: GitHubImporter
+    ) -> None:
         """Test search and import."""
         # Mock GitHub response
         mock_response = MagicMock()
@@ -88,7 +92,9 @@ class TestGitHubImporter:
         importer.library.refresh_repository.assert_called_once()
 
     @patch("urllib.request.urlopen")
-    def test_import_from_urls(self, mock_urlopen, importer):
+    def test_import_from_urls(
+        self, mock_urlopen: MagicMock, importer: GitHubImporter
+    ) -> None:
         """Test import from URLs."""
         # Mock repo metadata response
         mock_response = MagicMock()
@@ -121,7 +127,7 @@ class TestGitHubImporter:
             description="Desc",
         )
 
-    def test_import_from_urls_existing(self, importer):
+    def test_import_from_urls_existing(self, importer: GitHubImporter) -> None:
         """Test skipping existing repositories."""
         importer.library._repositories = {"github_owner_repo": {}}
 

@@ -52,14 +52,14 @@ Model {
 class TestMDLParser:
     """Tests for MDLParser class."""
 
-    def test_parser_creation(self):
+    def test_parser_creation(self) -> None:
         """Test parser instantiation."""
         from model_generation.converters.simscape import MDLParser
 
         parser = MDLParser()
         assert parser is not None
 
-    def test_parse_mdl_string(self):
+    def test_parse_mdl_string(self) -> None:
         """Test parsing MDL content from string."""
         from model_generation.converters.simscape import MDLParser
 
@@ -69,7 +69,7 @@ class TestMDLParser:
         assert model is not None
         assert model.name == "test_model"
 
-    def test_parse_body_blocks(self):
+    def test_parse_body_blocks(self) -> None:
         """Test parsing body/solid blocks."""
         from model_generation.converters.simscape import (
             MDLParser,
@@ -92,7 +92,7 @@ class TestMDLParser:
             ]
         )
 
-    def test_parse_joint_blocks(self):
+    def test_parse_joint_blocks(self) -> None:
         """Test parsing joint blocks."""
         from model_generation.converters.simscape import (
             MDLParser,
@@ -105,7 +105,7 @@ class TestMDLParser:
         # Should find at least the revolute joint
         assert len(joints) >= 0  # May be 0 if parsing doesn't find it
 
-    def test_parse_connections(self):
+    def test_parse_connections(self) -> None:
         """Test parsing connections between blocks."""
         from model_generation.converters.simscape import MDLParser
 
@@ -115,7 +115,7 @@ class TestMDLParser:
         # Should have some connections
         assert isinstance(model.connections, list)
 
-    def test_get_block_parameters(self):
+    def test_get_block_parameters(self) -> None:
         """Test extracting block parameters."""
         from model_generation.converters.simscape import MDLParser
 
@@ -133,14 +133,14 @@ class TestMDLParser:
 class TestSimscapeConverter:
     """Tests for SimscapeToURDFConverter class."""
 
-    def test_converter_creation(self):
+    def test_converter_creation(self) -> None:
         """Test converter instantiation."""
         from model_generation.converters.simscape import SimscapeToURDFConverter
 
         converter = SimscapeToURDFConverter()
         assert converter is not None
 
-    def test_convert_simple_mdl(self):
+    def test_convert_simple_mdl(self) -> None:
         """Test converting simple MDL content."""
         from model_generation.converters.simscape import SimscapeToURDFConverter
 
@@ -151,7 +151,7 @@ class TestSimscapeConverter:
         assert result is not None
         assert result.robot_name is not None
 
-    def test_convert_with_config(self):
+    def test_convert_with_config(self) -> None:
         """Test conversion with custom configuration."""
         from model_generation.converters.simscape import (
             ConversionConfig,
@@ -169,7 +169,7 @@ class TestSimscapeConverter:
 
         assert result.robot_name == "custom_name"
 
-    def test_convert_generates_urdf(self):
+    def test_convert_generates_urdf(self) -> None:
         """Test that conversion generates valid URDF string."""
         from model_generation.converters.simscape import SimscapeToURDFConverter
 
@@ -180,7 +180,7 @@ class TestSimscapeConverter:
             assert "<robot" in result.urdf_string
             assert "</robot>" in result.urdf_string
 
-    def test_conversion_result_contents(self):
+    def test_conversion_result_contents(self) -> None:
         """Test conversion result structure."""
         from model_generation.converters.simscape import SimscapeToURDFConverter
 
@@ -195,7 +195,7 @@ class TestSimscapeConverter:
         assert isinstance(result.links, list)
         assert isinstance(result.joints, list)
 
-    def test_unit_conversion(self):
+    def test_unit_conversion(self) -> None:
         """Test unit conversion factors."""
         from model_generation.converters.simscape import (
             ConversionConfig,
@@ -216,7 +216,7 @@ class TestSimscapeConverter:
 class TestConversionConfig:
     """Tests for ConversionConfig class."""
 
-    def test_default_config(self):
+    def test_default_config(self) -> None:
         """Test default configuration values."""
         from model_generation.converters.simscape import ConversionConfig
 
@@ -228,7 +228,7 @@ class TestConversionConfig:
         assert config.include_visual is True
         assert config.include_collision is True
 
-    def test_custom_config(self):
+    def test_custom_config(self) -> None:
         """Test custom configuration."""
         from model_generation.converters.simscape import ConversionConfig
 
@@ -248,7 +248,7 @@ class TestConversionConfig:
 class TestConvenienceFunction:
     """Tests for convenience conversion function."""
 
-    def test_convert_simscape_to_urdf_function(self):
+    def test_convert_simscape_to_urdf_function(self) -> None:
         """Test the convenience function."""
         from model_generation.converters.simscape import convert_simscape_to_urdf
 

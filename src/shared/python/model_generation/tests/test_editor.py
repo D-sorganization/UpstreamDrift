@@ -71,7 +71,7 @@ TWO_ARM_URDF = """<?xml version="1.0"?>
 class TestFrankensteinEditor:
     """Tests for FrankensteinEditor class."""
 
-    def test_editor_creation(self):
+    def test_editor_creation(self) -> None:
         """Test editor instantiation."""
         from model_generation.editor import FrankensteinEditor
 
@@ -79,7 +79,7 @@ class TestFrankensteinEditor:
         assert editor is not None
         assert editor.list_models() == []
 
-    def test_load_model_from_string(self):
+    def test_load_model_from_string(self) -> None:
         """Test loading a model from URDF string."""
         from model_generation.editor import FrankensteinEditor
 
@@ -92,7 +92,7 @@ class TestFrankensteinEditor:
         assert len(model.joints) == 1
         assert "test" in editor.list_models()
 
-    def test_create_model(self):
+    def test_create_model(self) -> None:
         """Test creating a new empty model."""
         from model_generation.editor import FrankensteinEditor
 
@@ -104,7 +104,7 @@ class TestFrankensteinEditor:
         assert len(model.links) == 1  # Base link
         assert "new_model" in editor.list_models()
 
-    def test_duplicate_model(self):
+    def test_duplicate_model(self) -> None:
         """Test duplicating a model."""
         from model_generation.editor import FrankensteinEditor
 
@@ -121,7 +121,7 @@ class TestFrankensteinEditor:
         assert copy is not None
         assert len(original.links) == len(copy.links)
 
-    def test_copy_link(self):
+    def test_copy_link(self) -> None:
         """Test copying a single link to clipboard."""
         from model_generation.editor import FrankensteinEditor
 
@@ -136,7 +136,7 @@ class TestFrankensteinEditor:
         assert info["link_count"] == 1
         assert "arm_link" in info["link_names"]
 
-    def test_copy_subtree(self):
+    def test_copy_subtree(self) -> None:
         """Test copying a subtree to clipboard."""
         from model_generation.editor import FrankensteinEditor
 
@@ -150,7 +150,7 @@ class TestFrankensteinEditor:
         assert not info["empty"]
         assert info["link_count"] >= 1
 
-    def test_paste_to_model(self):
+    def test_paste_to_model(self) -> None:
         """Test pasting clipboard contents to a model."""
         from model_generation.editor import FrankensteinEditor
 
@@ -170,7 +170,7 @@ class TestFrankensteinEditor:
         link_names = [link.name for link in target.links]
         assert "arm_link" in link_names or any("arm" in n for n in link_names)
 
-    def test_delete_link(self):
+    def test_delete_link(self) -> None:
         """Test deleting a link."""
         from model_generation.editor import FrankensteinEditor
 
@@ -188,7 +188,7 @@ class TestFrankensteinEditor:
         link_names = [link.name for link in model.links]
         assert "arm_link" not in link_names
 
-    def test_rename_link(self):
+    def test_rename_link(self) -> None:
         """Test renaming a link."""
         from model_generation.editor import FrankensteinEditor
 
@@ -208,7 +208,7 @@ class TestFrankensteinEditor:
         joint = model.joints[0]
         assert joint.child == "new_arm_name"
 
-    def test_undo_redo(self):
+    def test_undo_redo(self) -> None:
         """Test undo/redo functionality."""
         from model_generation.editor import FrankensteinEditor
 
@@ -238,7 +238,7 @@ class TestFrankensteinEditor:
         assert redone is not None
         assert len(redone.links) < original_count
 
-    def test_export_model(self):
+    def test_export_model(self) -> None:
         """Test exporting a model to URDF string."""
         from model_generation.editor import FrankensteinEditor
 
@@ -250,7 +250,7 @@ class TestFrankensteinEditor:
         assert "<robot" in urdf_string
         assert "simple_robot" in urdf_string
 
-    def test_compare_models(self):
+    def test_compare_models(self) -> None:
         """Test comparing two models."""
         from model_generation.editor import FrankensteinEditor
 
@@ -263,7 +263,7 @@ class TestFrankensteinEditor:
         assert "joints" in comparison
         assert "stats" in comparison
 
-    def test_get_model_statistics(self):
+    def test_get_model_statistics(self) -> None:
         """Test getting model statistics."""
         from model_generation.editor import FrankensteinEditor
 
@@ -279,14 +279,14 @@ class TestFrankensteinEditor:
 class TestURDFTextEditor:
     """Tests for URDFTextEditor class."""
 
-    def test_editor_creation(self):
+    def test_editor_creation(self) -> None:
         """Test editor instantiation."""
         from model_generation.editor import URDFTextEditor
 
         editor = URDFTextEditor()
         assert editor is not None
 
-    def test_load_string(self):
+    def test_load_string(self) -> None:
         """Test loading URDF from string."""
         from model_generation.editor import URDFTextEditor
 
@@ -296,7 +296,7 @@ class TestURDFTextEditor:
         content = editor.get_content()
         assert content == SIMPLE_URDF
 
-    def test_load_file(self):
+    def test_load_file(self) -> None:
         """Test loading URDF from file."""
         from model_generation.editor import URDFTextEditor
 
@@ -311,7 +311,7 @@ class TestURDFTextEditor:
         finally:
             temp_path.unlink()
 
-    def test_validate_valid_urdf(self):
+    def test_validate_valid_urdf(self) -> None:
         """Test validation of valid URDF."""
         from model_generation.editor import URDFTextEditor, ValidationSeverity
 
@@ -322,7 +322,7 @@ class TestURDFTextEditor:
         errors = [m for m in messages if m.severity == ValidationSeverity.ERROR]
         assert len(errors) == 0
 
-    def test_validate_invalid_xml(self):
+    def test_validate_invalid_xml(self) -> None:
         """Test validation catches invalid XML."""
         from model_generation.editor import URDFTextEditor, ValidationSeverity
 
@@ -335,7 +335,7 @@ class TestURDFTextEditor:
         errors = [m for m in messages if m.severity == ValidationSeverity.ERROR]
         assert len(errors) > 0
 
-    def test_validate_missing_link_reference(self):
+    def test_validate_missing_link_reference(self) -> None:
         """Test validation catches missing link references."""
         from model_generation.editor import URDFTextEditor, ValidationSeverity
 
@@ -357,7 +357,7 @@ class TestURDFTextEditor:
         assert len(errors) > 0
         assert any("nonexistent" in m.message for m in errors)
 
-    def test_set_content(self):
+    def test_set_content(self) -> None:
         """Test setting content."""
         from model_generation.editor import URDFTextEditor
 
@@ -369,7 +369,7 @@ class TestURDFTextEditor:
 
         assert "modified_robot" in editor.get_content()
 
-    def test_diff_from_original(self):
+    def test_diff_from_original(self) -> None:
         """Test generating diff from original."""
         from model_generation.editor import URDFTextEditor
 
@@ -385,7 +385,7 @@ class TestURDFTextEditor:
         assert diff.additions > 0 or diff.deletions > 0
         assert "modified_robot" in diff.unified_diff
 
-    def test_undo_redo(self):
+    def test_undo_redo(self) -> None:
         """Test undo/redo functionality."""
         from model_generation.editor import URDFTextEditor
 
@@ -406,7 +406,7 @@ class TestURDFTextEditor:
         assert result is True
         assert "<!-- comment -->" in editor.get_content()
 
-    def test_has_unsaved_changes(self):
+    def test_has_unsaved_changes(self) -> None:
         """Test unsaved changes detection."""
         from model_generation.editor import URDFTextEditor
 
@@ -418,7 +418,7 @@ class TestURDFTextEditor:
         editor.set_content(SIMPLE_URDF + "<!-- change -->", validate=False)
         assert editor.has_unsaved_changes()
 
-    def test_find_text(self):
+    def test_find_text(self) -> None:
         """Test text search."""
         from model_generation.editor import URDFTextEditor
 
@@ -432,7 +432,7 @@ class TestURDFTextEditor:
         results = editor.find_text(r"mass\s+value", regex=True)
         assert len(results) > 0
 
-    def test_replace_all(self):
+    def test_replace_all(self) -> None:
         """Test replace all functionality."""
         from model_generation.editor import URDFTextEditor
 
@@ -443,7 +443,7 @@ class TestURDFTextEditor:
         assert count > 0
         assert "LINK" in editor.get_content()
 
-    def test_get_history(self):
+    def test_get_history(self) -> None:
         """Test getting version history."""
         from model_generation.editor import URDFTextEditor
 
@@ -455,7 +455,7 @@ class TestURDFTextEditor:
         history = editor.get_history()
         assert len(history) == 3
 
-    def test_go_to_version(self):
+    def test_go_to_version(self) -> None:
         """Test navigating to specific version."""
         from model_generation.editor import URDFTextEditor
 
