@@ -1,4 +1,4 @@
-"""Structural regression tests for issue #2382."""
+"""Structural regression tests for issues #2382 and #2383."""
 
 from __future__ import annotations
 
@@ -41,6 +41,9 @@ def test_architecture_policy_tracks_priority_subtargets() -> None:
         "src/shared/python/humanoid_character_builder/generators/mesh_generator_smplx.py",
         "src/shared/python/physics/terrain_representation.py",
         "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
+        "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/motion_capture_plotter_visualization.py",
+        "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_renderer.py",
+        "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m",
     } <= tracked_paths
 
 
@@ -61,26 +64,8 @@ def test_tracked_subtargets_exist_and_match_budget() -> None:
         assert _line_count(path) <= int(entry["max_lines"])
 
 
-def test_mesh_generator_facade_imports_split_backends() -> None:
-    facade_path = _repo_file(
-        "src/shared/python/humanoid_character_builder/generators/mesh_generator.py"
-    )
-    assert set(
-        _load_policy()["facade_budgets"][0]["required_modules"]
-    ) <= _imported_modules(facade_path)
-
-
-def test_terrain_facade_imports_representation_loading_and_physics() -> None:
-    facade_path = _repo_file("src/shared/python/physics/terrain.py")
-    assert set(
-        _load_policy()["facade_budgets"][1]["required_modules"]
-    ) <= _imported_modules(facade_path)
-
-
-def test_pressure_drop_facade_imports_split_modules() -> None:
-    facade_path = _repo_file(
-        "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_interface.py"
-    )
-    assert set(
-        _load_policy()["facade_budgets"][2]["required_modules"]
-    ) <= _imported_modules(facade_path)
+def test_budgeted_python_facades_import_required_split_modules() -> None:
+    for entry in _load_policy()["facade_budgets"]:
+        facade_path = _repo_file(str(entry["path"]))
+        required_modules = set(entry["required_modules"])
+        assert required_modules <= _imported_modules(facade_path)

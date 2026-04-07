@@ -29,6 +29,26 @@
         "pressure_drop_results",
         "pressure_drop_validation"
       ]
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
+      "max_lines": 220,
+      "required_modules": [
+        "motion_capture_plotter_ui",
+        "motion_capture_plotter_data",
+        "motion_capture_plotter_visualization"
+      ]
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py",
+      "max_lines": 160,
+      "required_modules": [
+        "golf_visualizer_models",
+        "golf_visualizer_data",
+        "golf_visualizer_renderer",
+        "golf_visualizer_widget",
+        "golf_visualizer_app"
+      ]
     }
   ],
   "tracked_subtargets": [
@@ -47,6 +67,50 @@
     {
       "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_api.py",
       "max_lines": 220
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/motion_capture_plotter_ui.py",
+      "max_lines": 320
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/motion_capture_plotter_data.py",
+      "max_lines": 520
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/motion_capture_plotter_visualization.py",
+      "max_lines": 760
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_renderer.py",
+      "max_lines": 760
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_widget.py",
+      "max_lines": 220
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_app.py",
+      "max_lines": 340
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_camera_system.py",
+      "max_lines": 1000
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py",
+      "max_lines": 820
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m",
+      "max_lines": 5000
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m",
+      "max_lines": 4200
+    },
+    {
+      "path": "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/2D GUI/main_scripts/golf_swing_analysis_gui.m",
+      "max_lines": 4200
     }
   ]
 }
