@@ -5,6 +5,7 @@ with modular physics engine selection and proper dependency management.
 """
 
 import argparse
+import logging
 import os
 import shutil
 import subprocess
@@ -19,6 +20,8 @@ INSTALLER_DIR = _installer_dir
 BUILD_DIR = INSTALLER_DIR / "build"
 DIST_DIR = INSTALLER_DIR / "dist"
 
+logger = logging.getLogger(__name__)
+
 
 def check_prerequisites() -> bool:
     """Check that all required tools are available."""
@@ -29,7 +32,7 @@ def check_prerequisites() -> bool:
     try:
         import cx_Freeze  # type: ignore[import-not-found]
 
-        print(f"✓ cx_Freeze {cx_Freeze.version}")  # noqa: T201
+        logger.info("cx_Freeze %s", cx_Freeze.version)
     except ImportError:
         return False
 
@@ -158,6 +161,13 @@ def create_installer_info() -> None:
         json.dump(info, f, indent=2)
 
 
+def _log_generated_outputs(output_files: list[Path]) -> None:
+    """Log generated installer artifacts with their sizes."""
+    for file_path in output_files:
+        size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        logger.info("Generated %s (%.2f MB)", file_path.name, size_mb)
+
+
 def main() -> None:
     """Main build process."""
     parser = argparse.ArgumentParser(
@@ -207,9 +217,7 @@ def main() -> None:
     # List output files
     output_files = list(DIST_DIR.glob("*"))
     if output_files:
-        for file_path in output_files:
-            size_mb = os.path.getsize(file_path) / (1024 * 1024)
-            print(f"Generated {file_path.name} ({size_mb:.2f} MB)")  # noqa: T201
+        _log_generated_outputs(output_files)
 
 
 if __name__ == "__main__":
