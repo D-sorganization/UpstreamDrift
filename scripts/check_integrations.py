@@ -363,7 +363,7 @@ def main() -> int:
                 try:
                     subprocess.run(result.fix_command, cwd=result.fix_cwd, check=True)
                     logger.info("  Success!")
-                except subprocess.CalledProcessError as e:
+                except (subprocess.CalledProcessError, OSError) as e:
                     logger.error("  Failed: %s", e)
 
     return 0 if failed == 0 else 1
