@@ -1,3 +1,5 @@
+"""Public terrain facade for shared physics helpers and models."""
+
 from .elevation import ElevationMap
 from .materials import MATERIALS, TERRAIN_MATERIAL_MAP, SurfaceMaterial, TerrainType
 from .regions import TerrainPatch, TerrainRegion

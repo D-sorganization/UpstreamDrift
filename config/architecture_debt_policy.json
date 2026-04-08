@@ -12,13 +12,9 @@
       ]
     },
     {
-      "path": "src/shared/python/physics/terrain.py",
+      "path": "src/shared/python/physics/terrain/__init__.py",
       "max_lines": 120,
-      "required_modules": [
-        "terrain_representation",
-        "terrain_loading",
-        "terrain_physics"
-      ]
+      "required_modules": ["elevation", "materials", "regions", "terrain_base"]
     },
     {
       "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
