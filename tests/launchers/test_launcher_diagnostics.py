@@ -28,12 +28,20 @@ def test_diagnostic_result_to_dict():
 @patch.object(LauncherDiagnostics, "check_python_environment")
 @patch.object(LauncherDiagnostics, "check_models_yaml")
 @patch.object(LauncherDiagnostics, "check_model_registry")
+@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
 @patch.object(LauncherDiagnostics, "check_layout_config")
 @patch.object(LauncherDiagnostics, "check_asset_files")
 @patch.object(LauncherDiagnostics, "check_pyqt6_availability")
 @patch.object(LauncherDiagnostics, "check_engine_availability")
 def test_run_all_checks(
-    mock_engine, mock_qt, mock_assets, mock_layout, mock_registry, mock_yaml, mock_env
+    mock_engine,
+    mock_qt,
+    mock_assets,
+    mock_layout,
+    mock_provider,
+    mock_registry,
+    mock_yaml,
+    mock_env,
 ):
     diag = LauncherDiagnostics()
 
@@ -157,6 +165,65 @@ def test_check_model_registry_missing(mock_registry_class):
     res = diag.check_model_registry()
     assert res.status == "fail"
     assert "missing" in res.message
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch(
+    "src.launchers.launcher_provider_compatibility.evaluate_launcher_model_compatibility"
+)
+def test_check_launcher_provider_compatibility_success(
+    mock_evaluate, mock_registry_class
+):
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+    mock_registry.get_all_models.return_value = [MagicMock(id="mujoco_unified")]
+
+    compatible_result = MagicMock()
+    compatible_result.model_id = "mujoco_unified"
+    compatible_result.provider = "local"
+    compatible_result.is_compatible = True
+    compatible_result.issues = ()
+    mock_evaluate.return_value = [compatible_result]
+
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "pass"
+    assert res.details["compatible_model_ids"] == ["mujoco_unified"]
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch(
+    "src.launchers.launcher_provider_compatibility.evaluate_launcher_model_compatibility"
+)
+def test_check_launcher_provider_compatibility_warning(
+    mock_evaluate, mock_registry_class
+):
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+    mock_registry.get_all_models.return_value = [MagicMock(id="external_model")]
+
+    incompatible_result = MagicMock()
+    incompatible_result.model_id = "external_model"
+    incompatible_result.provider = "drake_models"
+    incompatible_result.is_compatible = False
+    incompatible_result.issues = ("source root does not exist",)
+    mock_evaluate.return_value = [incompatible_result]
+
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "warning"
+    assert res.details["incompatible_models"][0]["model_id"] == "external_model"
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=ImportError("mock"),
+)
+def test_check_launcher_provider_compatibility_import_error(mock_registry_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "warning"
+    assert "unavailable" in res.message
 
 
 @patch("pathlib.Path.exists")
@@ -415,10 +482,11 @@ def test_generate_recommendations():
         "layout_config", "warning", "msg", {"missing_from_saved": ["drake"]}
     )
     res6 = DiagnosticResult("asset_files", "warning", "msg", {})
+    res7 = DiagnosticResult("launcher_provider_compatibility", "warning", "msg", {})
 
-    diag.results.extend([res1, res2, res3, res4, res5, res6])
+    diag.results.extend([res1, res2, res3, res4, res5, res6, res7])
     recs = diag._generate_recommendations()
-    assert len(recs) == 6
+    assert len(recs) == 7
 
     # Test healthy branch
     diag.results.clear()

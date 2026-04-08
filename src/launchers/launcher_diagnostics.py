@@ -121,6 +121,7 @@ class LauncherDiagnostics:
         self.check_python_environment()
         self.check_models_yaml()
         self.check_model_registry()
+        self.check_launcher_provider_compatibility()
         self.check_layout_config()
         self.check_asset_files()
         self.check_pyqt6_availability()
@@ -339,6 +340,82 @@ class LauncherDiagnostics:
                 name="model_registry",
                 status="fail",
                 message=f"ModelRegistry error: {e}",
+                details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+
+        self.results.append(result)
+        return result
+
+    def check_launcher_provider_compatibility(self) -> DiagnosticResult:
+        """Check that launcher model entries resolve cleanly as local/provider sources."""
+        start = time.time()
+        details: dict[str, Any] = {}
+
+        try:
+            from src.launchers.launcher_provider_compatibility import (
+                evaluate_launcher_model_compatibility,
+            )
+            from src.shared.python.config.model_registry import ModelRegistry
+
+            registry_path = REPOS_ROOT / "src" / "config" / "models.yaml"
+            registry = ModelRegistry(registry_path)
+            results = evaluate_launcher_model_compatibility(
+                registry.get_all_models(), REPOS_ROOT
+            )
+
+            details["model_count"] = len(results)
+            details["compatible_model_ids"] = [
+                result.model_id for result in results if result.is_compatible
+            ]
+            details["incompatible_models"] = [
+                {
+                    "model_id": result.model_id,
+                    "provider": result.provider,
+                    "issues": list(result.issues),
+                }
+                for result in results
+                if not result.is_compatible
+            ]
+
+            if details["incompatible_models"]:
+                result = DiagnosticResult(
+                    name="launcher_provider_compatibility",
+                    status="warning",
+                    message=(
+                        "Launcher provider compatibility found "
+                        f"{len(details['incompatible_models'])} incompatible models"
+                    ),
+                    details=details,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+            else:
+                result = DiagnosticResult(
+                    name="launcher_provider_compatibility",
+                    status="pass",
+                    message=(
+                        "Launcher provider compatibility validated "
+                        f"{len(results)} models"
+                    ),
+                    details=details,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+
+        except ImportError as e:
+            details["import_error"] = str(e)
+            result = DiagnosticResult(
+                name="launcher_provider_compatibility",
+                status="warning",
+                message=f"Launcher provider compatibility unavailable: {e}",
+                details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+        except (RuntimeError, TypeError, AttributeError, ValueError) as e:
+            details["error"] = str(e)
+            result = DiagnosticResult(
+                name="launcher_provider_compatibility",
+                status="warning",
+                message=f"Launcher provider compatibility error: {e}",
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
@@ -637,6 +714,10 @@ class LauncherDiagnostics:
                     recommendations.append(
                         "Restore missing asset files in src/launchers/assets/"
                     )
+                elif result.name == "launcher_provider_compatibility":
+                    recommendations.append(
+                        "Fix model provider metadata so launcher entries resolve valid source roots, artifacts, and working directories"
+                    )
 
             elif result.status == "warning":
                 if result.name == "layout_config":
@@ -647,6 +728,10 @@ class LauncherDiagnostics:
                         )
                 elif result.name == "asset_files":
                     recommendations.append("Some tile icons may not display correctly")
+                elif result.name == "launcher_provider_compatibility":
+                    recommendations.append(
+                        "Review incompatible provider-backed models before enabling shared external packs in the launcher"
+                    )
 
         if not recommendations:
             recommendations.append("All systems operational - no issues detected")

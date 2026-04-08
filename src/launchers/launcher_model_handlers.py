@@ -15,6 +15,12 @@ import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Protocol
 
+from src.launchers.launcher_model_sources import (
+    get_model_python_paths,
+    get_model_source_root,
+    get_model_working_directory,
+    resolve_model_artifact_path,
+)
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -68,10 +74,12 @@ class ModuleHandler:
         """Launch the module."""
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
+        cwd = get_model_working_directory(model, repo_path)
         process = process_manager.launch_module(
             name=self.display_name,
             module_name=self.module_name,
-            cwd=repo_path,
+            cwd=cwd,
+            extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
 
@@ -110,13 +118,15 @@ class ScriptHandler:
         """Launch the script."""
         if not (repo_path is not None):
             raise ValueError("repo_path must be provided")
-        script_path = repo_path / self._script_path
-        cwd = repo_path / self._cwd_path if self._cwd_path else repo_path
+        source_root = get_model_source_root(model, repo_path)
+        script_path = source_root / self._script_path
+        cwd = get_model_working_directory(model, repo_path, self._cwd_path)
 
         process = process_manager.launch_script(
             name=self.display_name,
             script_path=script_path,
             cwd=cwd,
+            extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
 
@@ -166,7 +176,7 @@ class SpecialAppHandler:
             )
             return False
 
-        script_path = repo_path / model_path
+        script_path = resolve_model_artifact_path(model, repo_path)
         model_name = getattr(model, "name", model_path)
 
         if not script_path.exists():
@@ -176,7 +186,8 @@ class SpecialAppHandler:
         process = process_manager.launch_script(
             name=model_name,
             script_path=script_path,
-            cwd=repo_path,
+            cwd=get_model_working_directory(model, repo_path),
+            extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
 
@@ -218,7 +229,7 @@ class PuttingGreenHandler:
             logger.error("PuttingGreenHandler: model has no path")
             return False
 
-        script_path = repo_path / model_path
+        script_path = resolve_model_artifact_path(model, repo_path)
         if not script_path.exists():
             logger.warning("PuttingGreenHandler: script not found: %s", script_path)
             return False
@@ -226,7 +237,8 @@ class PuttingGreenHandler:
         process = process_manager.launch_script(
             name="Putting Green Simulator",
             script_path=script_path,
-            cwd=script_path.parent,
+            cwd=get_model_working_directory(model, repo_path, script_path.parent),
+            extra_python_paths=get_model_python_paths(model, repo_path),
         )
         return process is not None
 
@@ -289,7 +301,7 @@ class _SystemFileHandler:
             )
             return False
 
-        file_path = repo_path / model_path
+        file_path = resolve_model_artifact_path(model, repo_path)
         if not file_path.exists():
             logger.warning("%s: file not found: %s", self.HANDLER_NAME, file_path)
             return False

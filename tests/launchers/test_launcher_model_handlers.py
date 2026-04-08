@@ -32,7 +32,10 @@ def test_module_handler():
     res = handler.launch("model", Path("/repo"), mock_manager)
     assert res is True
     mock_manager.launch_module.assert_called_once_with(
-        name="My Module", module_name="my_module", cwd=Path("/repo")
+        name="My Module",
+        module_name="my_module",
+        cwd=Path("/repo"),
+        extra_python_paths=(),
     )
 
 
@@ -58,6 +61,7 @@ def test_script_handler():
         name="Drake",
         script_path=Path("/repo/script.py"),
         cwd=Path("/repo/dir"),
+        extra_python_paths=(),
     )
 
 
@@ -67,6 +71,30 @@ def test_script_handler_fail():
     mock_manager.launch_script.return_value = None
 
     assert handler.launch("model", Path("/repo"), mock_manager) is False
+
+
+def test_script_handler_uses_model_source_metadata():
+    handler = ScriptHandler({"drake"}, "script.py", "Drake", cwd_path="dir")
+
+    class ProviderModel:
+        source_root = "../Drake_Models"
+        working_dir = "python"
+        python_paths = ["src", "bindings"]
+
+    mock_manager = MagicMock()
+    mock_manager.launch_script.return_value = "process"
+
+    res = handler.launch(ProviderModel(), Path("/repo"), mock_manager)
+    assert res is True
+    mock_manager.launch_script.assert_called_once_with(
+        name="Drake",
+        script_path=Path("/repo/../Drake_Models/script.py"),
+        cwd=Path("/repo/../Drake_Models/python"),
+        extra_python_paths=(
+            Path("/repo/../Drake_Models/src"),
+            Path("/repo/../Drake_Models/bindings"),
+        ),
+    )
 
 
 def test_special_app_handler():
@@ -96,6 +124,31 @@ def test_special_app_handler():
     # Missing script file
     with patch.object(Path, "exists", return_value=False):
         assert handler.launch(DummyModel(), Path("/repo"), mock_manager) is False
+
+
+def test_special_app_handler_uses_source_root():
+    handler = SpecialAppHandler()
+
+    class DummyModel:
+        path = "app.py"
+        name = "External App"
+        id = "app_1"
+        source_root = "../Tools"
+        working_dir = "python"
+        python_paths = ["src"]
+
+    mock_manager = MagicMock()
+    mock_manager.launch_script.return_value = "proc"
+
+    with patch.object(Path, "exists", return_value=True):
+        res = handler.launch(DummyModel(), Path("/repo"), mock_manager)
+        assert res is True
+        mock_manager.launch_script.assert_called_once_with(
+            name="External App",
+            script_path=Path("/repo/../Tools/app.py"),
+            cwd=Path("/repo/../Tools/python"),
+            extra_python_paths=(Path("/repo/../Tools/src"),),
+        )
 
 
 def test_putting_green_handler():

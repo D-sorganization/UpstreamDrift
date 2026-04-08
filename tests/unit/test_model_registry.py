@@ -5,6 +5,7 @@ TEST-004: Added @pytest.mark.unit markers for test categorization.
 
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -159,3 +160,47 @@ class TestModelRegistry:
             drake_models = registry.get_models_by_type("drake")
             assert len(drake_models) == 1
             assert drake_models[0].id == "m2"
+
+    def test_load_provider_manifest_from_configured_roots(self):
+        """Test loading external provider manifests via env-configured roots."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []", encoding="utf-8")
+
+            provider_root = root / "providers" / "Drake_Models"
+            provider_root.mkdir(parents=True)
+            provider_manifest = provider_root / "model_pack.yaml"
+            provider_manifest.write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "drake-models",
+                        "pack_name": "Drake Models",
+                        "provider": "drake_models",
+                        "models": [
+                            {
+                                "id": "external_drake",
+                                "name": "External Drake",
+                                "description": "Provider model",
+                                "type": "drake",
+                                "path": "models/external.urdf",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {"UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root)},
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            model = registry.get_model("external_drake")
+            assert model is not None
+            assert model.provider == "drake_models"
+            assert model.source_root == str(provider_root)

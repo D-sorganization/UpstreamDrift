@@ -110,49 +110,72 @@ class ProcessManager:
         self._log_file_path = self._log_dir / "process_output.log"
         self._init_log_file()
 
-    def get_subprocess_env(self) -> dict[str, str]:
+    def _merge_python_paths(
+        self,
+        existing_path: str,
+        extra_python_paths: tuple[str, ...] = (),
+    ) -> str:
+        """Merge required and extra PYTHONPATH entries without duplication."""
+        separator = ";" if os.name == "nt" else ":"
+        current_paths = existing_path.split(separator) if existing_path else []
+
+        required_paths = [str(self.repo_root), str(self.repo_root / "src")]
+        optional_paths = [
+            str(self.repo_root / "src" / "shared" / "python"),
+            str(
+                self.repo_root
+                / "src"
+                / "engines"
+                / "physics_engines"
+                / "mujoco"
+                / "python"
+            ),
+            os.path.join(
+                os.path.expanduser("~"),
+                "miniconda3",
+                "lib",
+                "python3.10",
+                "site-packages",
+            ),
+        ]
+
+        merged_paths: list[str] = []
+        seen: set[str] = set()
+
+        for path in required_paths:
+            if path not in seen and path not in current_paths:
+                seen.add(path)
+                merged_paths.append(path)
+
+        for path in [*optional_paths, *extra_python_paths]:
+            if path in seen or path in current_paths:
+                continue
+            if path in optional_paths and not os.path.isdir(path):
+                continue
+            seen.add(path)
+            merged_paths.append(path)
+
+        if not merged_paths:
+            return existing_path
+
+        new_paths = separator.join(merged_paths)
+        return f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
+
+    def get_subprocess_env(
+        self,
+        extra_python_paths: tuple[Path, ...] = (),
+    ) -> dict[str, str]:
         """Get environment variables for subprocess execution.
 
         Returns:
             Dictionary of environment variables with proper PYTHONPATH.
         """
         env = os.environ.copy()
-        repo_root_str = str(self.repo_root)
-        src_dir = str(self.repo_root / "src")
-
         existing_path = env.get("PYTHONPATH", "")
-        separator = ";" if os.name == "nt" else ":"
-        current_paths = existing_path.split(separator) if existing_path else []
-
-        shared_python = str(self.repo_root / "src" / "shared" / "python")
-        mujoco_python = str(
-            self.repo_root / "src" / "engines" / "physics_engines" / "mujoco" / "python"
+        env["PYTHONPATH"] = self._merge_python_paths(
+            existing_path,
+            tuple(str(path) for path in extra_python_paths),
         )
-        # Include conda site-packages for opensim/pinocchio if available.
-        # Use os.path to avoid WindowsPath instantiation issues on Linux.
-        conda_sp = os.path.join(
-            os.path.expanduser("~"),
-            "miniconda3",
-            "lib",
-            "python3.10",
-            "site-packages",
-        )
-
-        # repo_root and src are always added (required for imports).
-        # Optional extras are only added when the directory exists.
-        paths_to_add = [
-            p for p in [repo_root_str, src_dir] if p not in current_paths
-        ] + [
-            p
-            for p in [shared_python, mujoco_python, conda_sp]
-            if p not in current_paths and os.path.isdir(p)
-        ]
-
-        if paths_to_add:
-            new_paths = separator.join(paths_to_add)
-            env["PYTHONPATH"] = (
-                f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
-            )
 
         return env
 
@@ -249,6 +272,7 @@ class ProcessManager:
         script_path: Path,
         cwd: Path,
         env: dict[str, str] | None = None,
+        extra_python_paths: tuple[Path, ...] = (),
         keep_terminal_open: bool = False,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python script as a subprocess.
@@ -266,7 +290,7 @@ class ProcessManager:
             The process object if successful, None otherwise.
         """
         try:
-            process_env = env or self.get_subprocess_env()
+            process_env = env or self.get_subprocess_env(extra_python_paths)
 
             # Validate script path to prevent path-traversal / injection.
             validate_script_path(script_path, self.repo_root)
@@ -345,6 +369,7 @@ class ProcessManager:
         module_name: str,
         cwd: Path,
         env: dict[str, str] | None = None,
+        extra_python_paths: tuple[Path, ...] = (),
         keep_terminal_open: bool = False,
     ) -> subprocess.Popen[bytes] | None:
         """Launch a Python module as a subprocess.
@@ -362,7 +387,7 @@ class ProcessManager:
             The process object if successful, None otherwise.
         """
         try:
-            process_env = env or self.get_subprocess_env()
+            process_env = env or self.get_subprocess_env(extra_python_paths)
 
             # Validate module name: must be a dotted Python identifier.
             if not _MODULE_NAME_RE.match(module_name):
