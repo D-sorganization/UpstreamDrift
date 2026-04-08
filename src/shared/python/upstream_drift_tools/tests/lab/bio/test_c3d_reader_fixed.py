@@ -43,11 +43,11 @@ class TestC3DDataReader:
             },
         }
 
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         reader = C3DDataReader("test.c3d")
         assert reader.file_path == Path("test.c3d")
 
-    def test_metadata_extraction(self, mock_ezc3d, sample_c3d_data):
+    def test_metadata_extraction(self, mock_ezc3d, sample_c3d_data) -> None:
         mock_ezc3d.c3d.return_value = sample_c3d_data
 
         # Mock file existence
@@ -61,7 +61,7 @@ class TestC3DDataReader:
             assert len(metadata.events) == 2
             assert abs(metadata.duration - 100 / 120.0) < 1e-6
 
-    def test_points_dataframe(self, mock_ezc3d, sample_c3d_data):
+    def test_points_dataframe(self, mock_ezc3d, sample_c3d_data) -> None:
         mock_ezc3d.c3d.return_value = sample_c3d_data
 
         with patch("pathlib.Path.exists", return_value=True):
@@ -75,7 +75,7 @@ class TestC3DDataReader:
             assert "marker" in df.columns
             assert set(df["marker"].unique()) == {"Marker1", "Marker2"}
 
-    def test_analog_dataframe(self, mock_ezc3d, sample_c3d_data):
+    def test_analog_dataframe(self, mock_ezc3d, sample_c3d_data) -> None:
         mock_ezc3d.c3d.return_value = sample_c3d_data
 
         with patch("pathlib.Path.exists", return_value=True):

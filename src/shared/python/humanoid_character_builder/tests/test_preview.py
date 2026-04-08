@@ -6,7 +6,7 @@ from unittest.mock import patch
 from humanoid_character_builder.interfaces.api import BodyParameters, CharacterBuilder
 
 
-def test_simulation_missing_mujoco():
+def test_simulation_missing_mujoco() -> None:
     """Test simulate() returns False gracefully if MuJoCo is missing."""
     builder = CharacterBuilder()
     params = BodyParameters(height_m=1.80)
