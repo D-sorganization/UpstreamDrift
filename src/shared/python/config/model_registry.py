@@ -38,10 +38,12 @@ class ModelConfig:
     type: str  # 'mjcf', 'urdf', 'matlab'
     path: str
     engine_type: str | None = None
+    capabilities: tuple[str, ...] = ()
     provider: str | None = None
     source_root: str | None = None
     working_dir: str | None = None
     python_paths: tuple[str, ...] = ()
+    order: int = 99
 
 
 class ModelRegistry(ContractChecker):
@@ -189,10 +191,12 @@ class ModelRegistry(ContractChecker):
             type=entry.type,
             path=entry.path,
             engine_type=entry.engine_type,
+            capabilities=entry.capabilities,
             provider=entry.provider or provider,
             source_root=entry.source_root or source_root,
             working_dir=entry.working_dir,
             python_paths=entry.python_paths,
+            order=entry.order,
         )
 
     def _iter_provider_manifest_paths(self) -> list[Path]:

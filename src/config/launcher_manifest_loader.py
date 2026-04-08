@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -31,6 +32,63 @@ logger = get_logger(__name__)
 CONFIG_DIR = Path(__file__).parent
 MANIFEST_PATH = CONFIG_DIR / "launcher_manifest.json"
 ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "logos"
+REGISTRY_PATH = CONFIG_DIR / "models.yaml"
+_DEFAULT_PROVIDER_LOGO = "golf_logo.svg"
+_ENGINE_LOGOS = {
+    "drake": "drake.svg",
+    "mujoco": "mujoco_humanoid.svg",
+    "myosuite": "myosim.svg",
+    "opensim": "opensim.svg",
+    "pinocchio": "pinocchio.svg",
+    "putting_green": "putting_green.svg",
+}
+
+
+def _has_provider_metadata(model: ModelConfig) -> bool:
+    """Return True when a registry entry comes from provider-aware metadata."""
+    if model.provider not in (None, "", "local"):
+        return True
+    return bool(model.source_root)
+
+
+def _infer_tile_category(model: ModelConfig) -> str:
+    """Infer launcher category for provider-backed models."""
+    if model.engine_type:
+        return "physics_engine"
+    return "external"
+
+
+def _infer_tile_logo(model: ModelConfig) -> str:
+    """Choose the most appropriate existing logo for a provider-backed model."""
+    if model.engine_type:
+        return _ENGINE_LOGOS.get(model.engine_type, _DEFAULT_PROVIDER_LOGO)
+    return _DEFAULT_PROVIDER_LOGO
+
+
+def _infer_tile_status(model: ModelConfig) -> str:
+    """Map provider-backed registry entries onto launcher status labels."""
+    if model.engine_type:
+        return "provider_ready"
+    return "external"
+
+
+def _build_provider_tile(model: ModelConfig) -> LauncherTile:
+    """Adapt a provider-backed model registry entry into a launcher tile."""
+    return LauncherTile(
+        id=model.id,
+        name=model.name,
+        description=model.description,
+        category=_infer_tile_category(model),
+        type=model.type,
+        path=model.path,
+        logo=_infer_tile_logo(model),
+        status=_infer_tile_status(model),
+        capabilities=model.capabilities,
+        order=model.order,
+        engine_type=model.engine_type,
+        provider=model.provider,
+        source_root=model.source_root,
+    )
 
 
 @dataclass(frozen=True)
@@ -62,6 +120,8 @@ class LauncherTile:
     capabilities: tuple[str, ...] = ()
     order: int = 99
     engine_type: str | None = None
+    provider: str | None = None
+    source_root: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherTile:
@@ -93,6 +153,8 @@ class LauncherTile:
             capabilities=tuple(data.get("capabilities", [])),
             order=data.get("order", 99),
             engine_type=data.get("engine_type"),
+            provider=data.get("provider"),
+            source_root=data.get("source_root"),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -115,6 +177,10 @@ class LauncherTile:
         }
         if self.engine_type:
             result["engine_type"] = self.engine_type
+        if self.provider:
+            result["provider"] = self.provider
+        if self.source_root:
+            result["source_root"] = self.source_root
         return result
 
     @property
@@ -150,11 +216,20 @@ class LauncherManifest:
     description: str = ""
 
     @classmethod
-    def load(cls, path: Path | None = None) -> LauncherManifest:
+    def load(
+        cls,
+        path: Path | None = None,
+        *,
+        include_provider_tiles: bool = True,
+        registry_path: Path | None = None,
+    ) -> LauncherManifest:
         """Load the launcher manifest from disk.
 
         Args:
             path: Optional override path. Defaults to MANIFEST_PATH.
+            include_provider_tiles: Whether to augment the base manifest with
+                provider-backed tiles from the shared model registry.
+            registry_path: Optional override for the shared model registry path.
 
         Returns:
             Loaded LauncherManifest
@@ -181,33 +256,65 @@ class LauncherManifest:
         if not isinstance(tiles_raw, list):
             raise ValueError("Manifest 'tiles' must be a list")
 
-        tiles = tuple(
-            sorted(
-                [LauncherTile.from_dict(t) for t in tiles_raw],
-                key=lambda t: t.order,
+        tiles = [LauncherTile.from_dict(t) for t in tiles_raw]
+        if include_provider_tiles:
+            tiles.extend(
+                cls._load_provider_tiles(
+                    registry_path=registry_path or REGISTRY_PATH,
+                    existing_ids={tile.id for tile in tiles},
+                )
             )
+
+        sorted_tiles: tuple[LauncherTile, ...] = tuple(
+            sorted(tiles, key=lambda t: (t.order, t.id))
         )
 
         manifest = cls(
             version=raw.get("version", "0.0.0"),
-            tiles=tiles,
+            tiles=sorted_tiles,
             description=raw.get("description", ""),
         )
 
         # DBC Postcondition: verify all tiles have unique IDs
-        ids = [t.id for t in tiles]
+        ids = [t.id for t in sorted_tiles]
         duplicates = [tid for tid in ids if ids.count(tid) > 1]
         if duplicates:
             raise ValueError(f"Duplicate tile IDs in manifest: {set(duplicates)}")
 
         logger.info(
             "Loaded %d tiles (v%s): %s",
-            len(tiles),
+            len(sorted_tiles),
             manifest.version,
             ", ".join(t.id for t in tiles),
         )
 
         return manifest
+
+    @staticmethod
+    def _load_provider_tiles(
+        *,
+        registry_path: Path,
+        existing_ids: set[str],
+    ) -> list[LauncherTile]:
+        """Load dynamic provider-backed tiles from the shared model registry."""
+        if not registry_path.exists():
+            return []
+
+        registry = ModelRegistry(config_path=registry_path)
+        provider_tiles: list[LauncherTile] = []
+
+        for model in registry.get_all_models():
+            if model.id in existing_ids or not _has_provider_metadata(model):
+                continue
+            provider_tiles.append(_build_provider_tile(model))
+
+        if provider_tiles:
+            logger.info(
+                "Augmented launcher manifest with %d provider-backed tiles",
+                len(provider_tiles),
+            )
+
+        return provider_tiles
 
     def get_tile(self, tile_id: str) -> LauncherTile | None:
         """Get a tile by its ID.

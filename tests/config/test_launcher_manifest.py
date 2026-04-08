@@ -54,6 +54,14 @@ def sample_tile_dict() -> dict:
     }
 
 
+@pytest.fixture
+def registry_path(tmp_path: Path) -> Path:
+    """A minimal local registry file for provider-manifest tests."""
+    config_path = tmp_path / "models.yaml"
+    config_path.write_text("models: []\n", encoding="utf-8")
+    return config_path
+
+
 # =============================================================================
 # 1. Manifest Loading
 # =============================================================================
@@ -110,6 +118,96 @@ class TestManifestLoading:
         bad.write_text(json.dumps({"tiles": [tile, tile]}))
         with pytest.raises(ValueError, match="Duplicate"):
             LauncherManifest.load(bad)
+
+    def test_manifest_loads_provider_tiles_from_configured_roots(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider manifests augment the launcher tile list through the registry."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "mujoco-models"
+        provider_root.mkdir(parents=True)
+        provider_manifest = provider_root / "model_pack.yaml"
+        provider_manifest.write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "mujoco-pack"
+pack_name: "MuJoCo Models"
+provider: "mujoco_models"
+models:
+  - id: "external_mujoco"
+    name: "External MuJoCo"
+    description: "Provider-backed MuJoCo model"
+    type: "custom_humanoid"
+    path: "apps/mujoco_launcher.py"
+    engine_type: "mujoco"
+    capabilities: ["rigid_body", "contact"]
+    order: 4
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("external_mujoco")
+        assert tile is not None
+        assert tile.category == "physics_engine"
+        assert tile.provider == "mujoco_models"
+        assert tile.source_root == str(provider_root)
+        assert tile.logo == "mujoco_humanoid.svg"
+        assert tile.capabilities == ("rigid_body", "contact")
+
+    def test_manifest_ignores_provider_tiles_when_disabled(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider discovery is opt-out for callers that need static-only tiles."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "opensim-models"
+        provider_root.mkdir(parents=True)
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "opensim-pack"
+pack_name: "OpenSim Models"
+provider: "opensim_models"
+models:
+  - id: "external_opensim"
+    name: "External OpenSim"
+    description: "Provider-backed OpenSim model"
+    type: "opensim"
+    path: "apps/opensim_gui.py"
+    engine_type: "opensim"
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            include_provider_tiles=False,
+            registry_path=registry_path,
+        )
+
+        assert manifest.get_tile("external_opensim") is None
 
 
 # =============================================================================

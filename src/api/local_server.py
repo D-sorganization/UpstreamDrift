@@ -147,14 +147,13 @@ def _load_launcher_manifest() -> dict[str, Any]:
     Returns:
         Parsed manifest dict, or a default empty manifest if not found.
     """
-    import json
+    from src.config.launcher_manifest_loader import LauncherManifest
 
-    manifest_path = Path(__file__).parent.parent / "config" / "launcher_manifest.json"
-    if manifest_path.exists():
-        with open(manifest_path, encoding="utf-8") as f:
-            result: dict[str, Any] = json.load(f)
-            return result
-    return {"version": "1.0.0", "tiles": []}
+    try:
+        return LauncherManifest.load().to_dict()
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        logger.error("[launch] Failed to load launcher manifest: %s", exc)
+        return {"version": "1.0.0", "tiles": []}
 
 
 def _find_logo_file(logo_name: str) -> Path | None:
@@ -188,15 +187,10 @@ def _find_tile_in_manifest(
     Returns:
         Tuple of (manifest dict, tile dict) or (None, None) if not found.
     """
-    import json as _json
-
-    manifest_path = Path(__file__).parent.parent / "config" / "launcher_manifest.json"
-    if not manifest_path.exists():
-        logger.error("[launch] Manifest not found at %s", manifest_path)
+    manifest = _load_launcher_manifest()
+    if not manifest.get("tiles"):
+        logger.error("[launch] Manifest not available for tile lookup")
         return None, None
-
-    with open(manifest_path, encoding="utf-8") as f:
-        manifest = _json.load(f)
 
     for t in manifest.get("tiles", []):
         if t.get("id") == tile_id:
