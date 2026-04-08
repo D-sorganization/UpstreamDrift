@@ -59,3 +59,8 @@
 **Vulnerability:** Found arbitrary code execution vulnerability in `DataProcessorEngine.filter_data()` where user-provided column and operator strings were concatenated and passed directly to `pandas.DataFrame.query()` without validation.
 **Learning:** `DataFrame.query()` evaluates string expressions and is vulnerable to injection if the concatenated string isn't validated, even if parts of it are formatted dynamically.
 **Prevention:** Always validate constructed query expressions passed to `pd.DataFrame.query()` using an AST-based validator to ensure they only contain safe operations.
+
+## 2026-04-08 - Prevent Command Injection by removing shell=True
+**Vulnerability:** A subprocess invocation in `scripts/check_integrations.py` was utilizing `shell=True` when executing fix commands. While the commands were predefined in the script, using `shell=True` is generally an unsafe pattern that can easily evolve into command injection vulnerabilities if dynamic user inputs are introduced later.
+**Learning:** Even internal helper scripts must follow secure coding practices to ensure defense-in-depth, as they are part of the broader repository environment. Relying on  annotations to suppress warnings instead of fixing the root cause leaves potential risks open.
+**Prevention:** Always pass commands and arguments to `subprocess.run` as a list of strings, rather than a single space-separated string with `shell=True`. Explicitly define the working directory using the `cwd` parameter instead of chaining commands with shell operators like `cd ... && ...`.
