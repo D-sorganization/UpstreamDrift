@@ -3,6 +3,7 @@ Unit tests for EngineManager functionality.
 """
 
 import tempfile
+import textwrap
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -84,6 +85,81 @@ class TestEngineManager:
                 assert (
                     manager.get_engine_status(engine_type) == EngineStatus.UNAVAILABLE
                 )
+
+    def test_engine_discovery_uses_provider_backed_paths(self):
+        """Provider-backed model packs can surface engine availability."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            (temp_path / "src" / "config").mkdir(parents=True)
+            provider_root = temp_path / "provider_roots" / "Drake_Models"
+            (provider_root / "python").mkdir(parents=True)
+            (provider_root / "models").mkdir(parents=True)
+            (provider_root / "models" / "humanoid.urdf").write_text(
+                "<robot/>",
+                encoding="utf-8",
+            )
+
+            models_yaml = temp_path / "src" / "config" / "models.yaml"
+            models_yaml.write_text(
+                textwrap.dedent(
+                    """
+                    models:
+                      - id: drake_provider_model
+                        name: Drake Provider Model
+                        description: External Drake-backed model
+                        type: urdf
+                        path: models/humanoid.urdf
+                        engine_type: drake
+                        capabilities: [swing]
+                        source_root: provider_roots/Drake_Models
+                        working_dir: python
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            manager = EngineManager(suite_root=temp_path)
+
+            assert EngineType.DRAKE in manager.get_available_engines()
+            assert manager.provider_engine_paths[EngineType.DRAKE] == (
+                (provider_root / "python").resolve(),
+            )
+            assert manager.validate_engine_configuration(EngineType.DRAKE) is True
+
+    def test_engine_discovery_handles_missing_provider_roots_gracefully(self):
+        """Missing provider repos should degrade to unavailable without exploding."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            (temp_path / "src" / "config").mkdir(parents=True)
+            models_yaml = temp_path / "src" / "config" / "models.yaml"
+            models_yaml.write_text(
+                textwrap.dedent(
+                    """
+                    models:
+                      - id: drake_provider_model
+                        name: Drake Provider Model
+                        description: External Drake-backed model
+                        type: urdf
+                        path: models/humanoid.urdf
+                        engine_type: drake
+                        capabilities: [swing]
+                        source_root: provider_roots/Drake_Models
+                        working_dir: python
+                    """
+                ).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            manager = EngineManager(suite_root=temp_path)
+
+            assert manager.provider_engine_paths[EngineType.DRAKE] == (
+                (temp_path / "provider_roots" / "Drake_Models").resolve(),
+            )
+            assert (
+                manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
+            )
 
     def test_switch_engine_unavailable(self):
         """Test switching to unavailable engine."""
