@@ -8,6 +8,7 @@ import pytest
 import yaml
 
 from src.shared.python.config.model_pack_manifest import (
+    LauncherPresentationMetadata,
     ModelPackEntry,
     ModelPackManifest,
     group_entries_by_canonical_id,
@@ -114,6 +115,30 @@ class TestModelPackEntry:
         assert entry.provenance is not None
         assert entry.provenance.source_format == "osim"
         assert entry.provenance.derived_from == ("opensim:humanoid-v1",)
+
+    def test_from_dict_preserves_explicit_launcher_metadata(self) -> None:
+        entry = ModelPackEntry.from_dict(
+            {
+                "id": "drake_humanoid",
+                "name": "Drake Humanoid",
+                "description": "Provider-backed humanoid model",
+                "type": "urdf",
+                "path": "models/drake/humanoid.urdf",
+                "launcher": {
+                    "category": "physics_engine",
+                    "logo": "drake.svg",
+                    "status": "provider_ready",
+                    "web_route": "/providers/drake",
+                },
+            }
+        )
+
+        assert entry.launcher == LauncherPresentationMetadata(
+            category="physics_engine",
+            logo="drake.svg",
+            status="provider_ready",
+            web_route="/providers/drake",
+        )
 
     def test_from_dict_missing_required_field_raises(self) -> None:
         with pytest.raises(ValueError, match="missing required fields"):

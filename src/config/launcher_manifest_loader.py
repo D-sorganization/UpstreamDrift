@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -51,43 +52,41 @@ def _has_provider_metadata(model: ModelConfig) -> bool:
     return bool(model.source_root)
 
 
-def _infer_tile_category(model: ModelConfig) -> str:
-    """Infer launcher category for provider-backed models."""
+def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadata:
+    """Provide a migration bridge for models without explicit launcher metadata."""
     if model.engine_type:
-        return "physics_engine"
-    return "external"
-
-
-def _infer_tile_logo(model: ModelConfig) -> str:
-    """Choose the most appropriate existing logo for a provider-backed model."""
-    if model.engine_type:
-        return _ENGINE_LOGOS.get(model.engine_type, _DEFAULT_PROVIDER_LOGO)
-    return _DEFAULT_PROVIDER_LOGO
-
-
-def _infer_tile_status(model: ModelConfig) -> str:
-    """Map provider-backed registry entries onto launcher status labels."""
-    if model.engine_type:
-        return "provider_ready"
-    return "external"
+        category = "physics_engine"
+        logo = _ENGINE_LOGOS.get(model.engine_type, _DEFAULT_PROVIDER_LOGO)
+        status = "provider_ready"
+    else:
+        category = "external"
+        logo = _DEFAULT_PROVIDER_LOGO
+        status = "external"
+    return LauncherPresentationMetadata(
+        category=category,
+        logo=logo,
+        status=status,
+    )
 
 
 def _build_provider_tile(model: ModelConfig) -> LauncherTile:
     """Adapt a provider-backed model registry entry into a launcher tile."""
+    metadata = model.launcher or _legacy_launcher_metadata(model)
     return LauncherTile(
         id=model.id,
         name=model.name,
         description=model.description,
-        category=_infer_tile_category(model),
+        category=metadata.category,
         type=model.type,
         path=model.path,
-        logo=_infer_tile_logo(model),
-        status=_infer_tile_status(model),
+        logo=metadata.logo,
+        status=metadata.status,
         capabilities=model.capabilities,
         order=model.order,
         engine_type=model.engine_type,
         provider=model.provider,
         source_root=model.source_root,
+        web_route=metadata.web_route,
     )
 
 
@@ -122,6 +121,7 @@ class LauncherTile:
     engine_type: str | None = None
     provider: str | None = None
     source_root: str | None = None
+    web_route: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> LauncherTile:
@@ -155,6 +155,7 @@ class LauncherTile:
             engine_type=data.get("engine_type"),
             provider=data.get("provider"),
             source_root=data.get("source_root"),
+            web_route=data.get("web_route"),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -181,6 +182,8 @@ class LauncherTile:
             result["provider"] = self.provider
         if self.source_root:
             result["source_root"] = self.source_root
+        if self.web_route:
+            result["web_route"] = self.web_route
         return result
 
     @property

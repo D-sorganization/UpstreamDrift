@@ -168,6 +168,57 @@ models:
         assert tile.logo == "mujoco_humanoid.svg"
         assert tile.capabilities == ("rigid_body", "contact")
 
+    def test_manifest_prefers_explicit_provider_launcher_metadata(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider packs can define launcher presentation without loader inference."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "drake-models"
+        provider_root.mkdir(parents=True)
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "drake-pack"
+pack_name: "Drake Models"
+provider: "drake_models"
+models:
+  - id: "external_drake"
+    name: "External Drake"
+    description: "Provider-backed Drake model"
+    type: "drake"
+    path: "apps/drake_launcher.py"
+    engine_type: "drake"
+    capabilities: ["rigid_body"]
+    launcher:
+      category: "physics_engine"
+      logo: "drake.svg"
+      status: "experimental"
+      web_route: "/providers/drake"
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("external_drake")
+        assert tile is not None
+        assert tile.category == "physics_engine"
+        assert tile.logo == "drake.svg"
+        assert tile.status == "experimental"
+        assert tile.web_route == "/providers/drake"
+
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
         tmp_path: Path,
@@ -317,6 +368,65 @@ class TestOrdering:
         ids1 = manifest.ordered_ids
         ids2 = LauncherManifest.load().ordered_ids
         assert ids1 == ids2
+
+    def test_mixed_static_and_provider_tiles_sort_by_order_then_id(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Mixed tile sources preserve deterministic ordering across migration."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "version": "1.0.0",
+                    "tiles": [
+                        {
+                            "id": "z_static",
+                            "name": "Z Static",
+                            "description": "Static tile",
+                            "category": "tool",
+                            "type": "special_app",
+                            "path": "src/z_static.py",
+                            "logo": "golf_logo.svg",
+                            "status": "utility",
+                            "capabilities": ["docs"],
+                            "order": 3,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "mujoco-models"
+        provider_root.mkdir(parents=True)
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "mujoco-pack"
+pack_name: "MuJoCo Models"
+provider: "mujoco_models"
+models:
+  - id: "a_provider"
+    name: "A Provider"
+    description: "Provider tile"
+    type: "custom_humanoid"
+    path: "apps/mujoco_launcher.py"
+    engine_type: "mujoco"
+    order: 3
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        assert manifest.ordered_ids == ["a_provider", "z_static"]
 
 
 # =============================================================================
