@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
 from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -72,6 +73,15 @@ def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadat
 def _build_provider_tile(model: ModelConfig) -> LauncherTile:
     """Adapt a provider-backed model registry entry into a launcher tile."""
     metadata = model.launcher or _legacy_launcher_metadata(model)
+    status = metadata.status
+    source_root = (
+        Path(model.source_root) if isinstance(model.source_root, str) else None
+    )
+    if source_root is not None and not source_root.exists():
+        status = "provider_unavailable"
+    elif not is_engine_runtime_available(model.engine_type):
+        status = "runtime_unavailable"
+
     return LauncherTile(
         id=model.id,
         name=model.name,
@@ -80,7 +90,7 @@ def _build_provider_tile(model: ModelConfig) -> LauncherTile:
         type=model.type,
         path=model.path,
         logo=metadata.logo,
-        status=metadata.status,
+        status=status,
         capabilities=model.capabilities,
         order=model.order,
         engine_type=model.engine_type,

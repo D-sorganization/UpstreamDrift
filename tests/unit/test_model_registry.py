@@ -323,6 +323,99 @@ class TestModelRegistry:
             assert model.launcher.logo == "drake.svg"
             assert model.launcher.web_route == "/providers/drake"
 
+    def test_discovers_known_sibling_provider_repos_without_env(self):
+        """Known engine-model sibling repos should be discovered without env wiring."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            repo_root = workspace_root / "UpstreamDrift"
+            config_path = repo_root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []", encoding="utf-8")
+
+            provider_layout = {
+                "MuJoCo_Models": (
+                    "mujoco_models",
+                    "external_mujoco",
+                    "mjcf",
+                    "mujoco",
+                ),
+                "Drake_Models": (
+                    "drake_models",
+                    "external_drake",
+                    "urdf",
+                    "drake",
+                ),
+                "Pinocchio_Models": (
+                    "pinocchio_models",
+                    "external_pinocchio",
+                    "urdf",
+                    "pinocchio",
+                ),
+                "OpenSim_Models": (
+                    "opensim_models",
+                    "external_opensim",
+                    "osim",
+                    "opensim",
+                ),
+            }
+
+            for (
+                repo_name,
+                (provider_id, model_id, model_type, engine_type),
+            ) in provider_layout.items():
+                provider_root = workspace_root / repo_name
+                provider_root.mkdir(parents=True)
+                (provider_root / "model_pack.yaml").write_text(
+                    yaml.safe_dump(
+                        {
+                            "manifest_version": "1.0.0",
+                            "pack_id": provider_id.replace("_", "-"),
+                            "pack_name": repo_name,
+                            "provider": provider_id,
+                            "models": [
+                                {
+                                    "id": model_id,
+                                    "name": model_id.replace("_", " ").title(),
+                                    "description": f"{repo_name} model",
+                                    "type": model_type,
+                                    "path": f"models/{model_id}.{model_type}",
+                                    "engine_type": engine_type,
+                                    "capabilities": ["rigid_body"],
+                                    "identity": {
+                                        "canonical_id": f"demo.{model_id}",
+                                        "motion_family": "demo",
+                                        "exercise": model_id,
+                                        "humanoid": "athlete",
+                                    },
+                                }
+                            ],
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+
+            with patch.dict("os.environ", {}, clear=False):
+                registry = ModelRegistry(config_path)
+
+            assert registry.get_model("external_mujoco") is not None
+            assert registry.get_model("external_drake") is not None
+            assert registry.get_model("external_pinocchio") is not None
+            assert registry.get_model("external_opensim") is not None
+
+    def test_missing_known_sibling_provider_repos_do_not_break_registry(self):
+        """Absent sibling provider repos should not prevent registry startup."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            repo_root = workspace_root / "UpstreamDrift"
+            config_path = repo_root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []", encoding="utf-8")
+
+            with patch.dict("os.environ", {}, clear=False):
+                registry = ModelRegistry(config_path)
+
+            assert registry.get_all_models() == []
+
     def test_local_only_mode_ignores_provider_manifests(self):
         """Legacy mode should preserve local-only discovery during migration."""
         with tempfile.TemporaryDirectory() as tmpdir:
