@@ -222,6 +222,71 @@ class ProvenanceMetadata:
 
 
 @dataclass(frozen=True)
+class LauncherPresentationMetadata:
+    """UI-facing launcher presentation metadata for a model-pack entry."""
+
+    category: str
+    logo: str
+    status: str
+    web_route: str | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> LauncherPresentationMetadata:
+        """Create validated launcher presentation metadata."""
+        require(
+            isinstance(data, dict),
+            "launcher metadata must be a mapping",
+            data,
+        )
+        required = {"category", "logo", "status"}
+        missing = required - set(data.keys())
+        if missing:
+            raise ValueError(
+                f"Launcher metadata missing required fields: {sorted(missing)}"
+            )
+
+        category = str(data["category"]).strip()
+        require(
+            category in {"physics_engine", "tool", "external"},
+            "launcher category must be physics_engine, tool, or external",
+            category,
+        )
+
+        logo = str(data["logo"]).strip()
+        status = str(data["status"]).strip()
+        require(logo != "", "launcher logo must be non-empty", logo)
+        require(status != "", "launcher status must be non-empty", status)
+
+        web_route_raw = data.get("web_route")
+        if web_route_raw is not None:
+            require(
+                isinstance(web_route_raw, str) and web_route_raw.strip() != "",
+                "launcher web_route must be a non-empty string when provided",
+                web_route_raw,
+            )
+
+        return cls(
+            category=category,
+            logo=logo,
+            status=status,
+            web_route=(
+                web_route_raw.strip() if isinstance(web_route_raw, str) else None
+            ),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize launcher presentation metadata."""
+        data: dict[str, Any] = {
+            "category": self.category,
+            "logo": self.logo,
+            "status": self.status,
+        }
+        if self.web_route:
+            data["web_route"] = self.web_route
+        return data
+
+
+@dataclass(frozen=True)
 class ModelPackEntry:
     """A single launchable model entry inside a model pack."""
 
@@ -240,6 +305,7 @@ class ModelPackEntry:
     identity: CrossEngineIdentity | None = None
     exchange_artifacts: tuple[ExchangeArtifact, ...] = ()
     provenance: ProvenanceMetadata | None = None
+    launcher: LauncherPresentationMetadata | None = None
     order: int = 99
 
     @classmethod
@@ -318,6 +384,12 @@ class ModelPackEntry:
             if provenance_raw is not None
             else None
         )
+        launcher_raw = data.get("launcher")
+        launcher = (
+            LauncherPresentationMetadata.from_dict(launcher_raw)
+            if launcher_raw is not None
+            else None
+        )
 
         return cls(
             id=data["id"].strip(),
@@ -335,6 +407,7 @@ class ModelPackEntry:
             identity=identity,
             exchange_artifacts=exchange_artifacts,
             provenance=provenance,
+            launcher=launcher,
             order=order,
         )
 
@@ -368,6 +441,8 @@ class ModelPackEntry:
             ]
         if self.provenance:
             data["provenance"] = self.provenance.to_dict()
+        if self.launcher:
+            data["launcher"] = self.launcher.to_dict()
         return data
 
 

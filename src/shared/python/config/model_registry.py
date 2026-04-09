@@ -13,6 +13,7 @@ import yaml  # type: ignore[import-untyped]
 from src.shared.python.config.model_pack_manifest import (
     CrossEngineIdentity,
     ExchangeArtifact,
+    LauncherPresentationMetadata,
     ModelPackEntry,
     ModelPackManifest,
     ProvenanceMetadata,
@@ -66,6 +67,7 @@ class ModelConfig:
     identity: CrossEngineIdentity | None = None
     exchange_artifacts: tuple[ExchangeArtifact, ...] = ()
     provenance: ProvenanceMetadata | None = None
+    launcher: LauncherPresentationMetadata | None = None
     order: int = 99
 
 
@@ -258,6 +260,7 @@ class ModelRegistry(ContractChecker):
             identity=entry.identity,
             exchange_artifacts=entry.exchange_artifacts,
             provenance=entry.provenance,
+            launcher=entry.launcher,
             order=entry.order,
         )
 

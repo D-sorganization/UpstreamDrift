@@ -272,6 +272,57 @@ class TestModelRegistry:
             assert model.provenance is not None
             assert model.provenance.version == "2026.04"
 
+    def test_load_provider_manifest_preserves_launcher_metadata(self):
+        """Provider launcher metadata should survive registry loading unchanged."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []", encoding="utf-8")
+
+            provider_root = root / "providers" / "Drake_Models"
+            provider_root.mkdir(parents=True)
+            provider_manifest = provider_root / "model_pack.yaml"
+            provider_manifest.write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "drake-models",
+                        "pack_name": "Drake Models",
+                        "provider": "drake_models",
+                        "models": [
+                            {
+                                "id": "external_drake",
+                                "name": "External Drake",
+                                "description": "Provider model",
+                                "type": "drake",
+                                "path": "models/external.urdf",
+                                "launcher": {
+                                    "category": "physics_engine",
+                                    "logo": "drake.svg",
+                                    "status": "provider_ready",
+                                    "web_route": "/providers/drake",
+                                },
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {"UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root)},
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            model = registry.get_model("external_drake")
+            assert model is not None
+            assert model.launcher is not None
+            assert model.launcher.logo == "drake.svg"
+            assert model.launcher.web_route == "/providers/drake"
+
     def test_local_only_mode_ignores_provider_manifests(self):
         """Legacy mode should preserve local-only discovery during migration."""
         with tempfile.TemporaryDirectory() as tmpdir:
