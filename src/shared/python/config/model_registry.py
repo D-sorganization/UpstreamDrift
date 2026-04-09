@@ -11,8 +11,11 @@ from typing import Any, cast
 import yaml  # type: ignore[import-untyped]
 
 from src.shared.python.config.model_pack_manifest import (
+    CrossEngineIdentity,
+    ExchangeArtifact,
     ModelPackEntry,
     ModelPackManifest,
+    ProvenanceMetadata,
 )
 from src.shared.python.core.contracts import ContractChecker
 
@@ -43,6 +46,9 @@ class ModelConfig:
     source_root: str | None = None
     working_dir: str | None = None
     python_paths: tuple[str, ...] = ()
+    identity: CrossEngineIdentity | None = None
+    exchange_artifacts: tuple[ExchangeArtifact, ...] = ()
+    provenance: ProvenanceMetadata | None = None
     order: int = 99
 
 
@@ -196,6 +202,9 @@ class ModelRegistry(ContractChecker):
             source_root=entry.source_root or source_root,
             working_dir=entry.working_dir,
             python_paths=entry.python_paths,
+            identity=entry.identity,
+            exchange_artifacts=entry.exchange_artifacts,
+            provenance=entry.provenance,
             order=entry.order,
         )
 

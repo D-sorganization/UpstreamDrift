@@ -26,6 +26,7 @@ class LauncherCompatibilityResult:
 
     model_id: str
     provider: str
+    canonical_id: str | None
     source_root: Path
     artifact_path: Path | None
     working_dir: Path
@@ -49,6 +50,8 @@ def evaluate_launcher_model_compatibility(
         model_id = getattr(model, "id", "unknown")
         provider = getattr(model, "provider", None)
         provider_name = provider if isinstance(provider, str) and provider else "local"
+        identity = getattr(model, "identity", None)
+        canonical_id = getattr(identity, "canonical_id", None)
         source_root = get_model_source_root(model, repo_root)
         working_dir = get_model_working_directory(model, repo_root)
         python_paths = get_model_python_paths(model, repo_root)
@@ -75,6 +78,11 @@ def evaluate_launcher_model_compatibility(
             LauncherCompatibilityResult(
                 model_id=str(model_id),
                 provider=provider_name,
+                canonical_id=(
+                    str(canonical_id)
+                    if isinstance(canonical_id, str) and canonical_id.strip()
+                    else None
+                ),
                 source_root=source_root,
                 artifact_path=artifact_path,
                 working_dir=working_dir,

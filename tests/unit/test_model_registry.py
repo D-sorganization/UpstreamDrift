@@ -204,3 +204,70 @@ class TestModelRegistry:
             assert model is not None
             assert model.provider == "drake_models"
             assert model.source_root == str(provider_root)
+
+    def test_load_provider_manifest_preserves_cross_engine_metadata(self):
+        """Provider metadata should survive registry loading unchanged."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []", encoding="utf-8")
+
+            provider_root = root / "providers" / "MuJoCo_Models"
+            provider_root.mkdir(parents=True)
+            provider_manifest = provider_root / "model_pack.yaml"
+            provider_manifest.write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "mujoco-models",
+                        "pack_name": "MuJoCo Models",
+                        "provider": "mujoco_models",
+                        "models": [
+                            {
+                                "id": "external_mujoco",
+                                "name": "External MuJoCo",
+                                "description": "Provider model",
+                                "type": "mjcf",
+                                "path": "models/external.xml",
+                                "identity": {
+                                    "canonical_id": "golf.swing.main",
+                                    "motion_family": "Golf Swing",
+                                    "exercise": "Driver Full Swing",
+                                    "humanoid": "Golf Athlete",
+                                },
+                                "capabilities": ["inverse-kinematics"],
+                                "exchange_artifacts": [
+                                    {
+                                        "format": "urdf",
+                                        "path": "exports/external.urdf",
+                                        "role": "derived",
+                                    }
+                                ],
+                                "provenance": {
+                                    "source_format": "mjcf",
+                                    "source_path": "models/external.xml",
+                                    "version": "2026.04",
+                                },
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {"UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root)},
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            model = registry.get_model("external_mujoco")
+            assert model is not None
+            assert model.identity is not None
+            assert model.identity.canonical_id == "golf.swing.main"
+            assert model.capabilities == ("ik",)
+            assert model.exchange_artifacts[0].format == "urdf"
+            assert model.provenance is not None
+            assert model.provenance.version == "2026.04"
