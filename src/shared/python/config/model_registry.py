@@ -17,7 +17,9 @@ from src.shared.python.config.model_pack_manifest import (
     ModelPackManifest,
     ProvenanceMetadata,
 )
-from src.shared.python.core.contracts import ContractChecker
+from src.shared.python.core.contracts import ContractChecker, require
+
+_DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
 
 
 def _normalize_legacy_model_entry(model_data: dict[str, Any]) -> dict[str, Any]:
@@ -29,6 +31,16 @@ def _normalize_legacy_model_entry(model_data: dict[str, Any]) -> dict[str, Any]:
         if isinstance(fallback_name, str) and fallback_name.strip():
             normalized["description"] = fallback_name.strip()
     return normalized
+
+
+def _normalize_discovery_mode(raw_value: str | None) -> str:
+    """Return the configured provider-discovery mode."""
+    if raw_value is None:
+        return "hybrid"
+
+    mode = raw_value.strip().lower()
+    require(mode in _DISCOVERY_MODES, "invalid discovery mode", mode)
+    return mode
 
 
 @dataclass
@@ -72,6 +84,9 @@ class ModelRegistry(ContractChecker):
             raise ValueError("config_path must be provided")
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
+        self.discovery_mode = _normalize_discovery_mode(
+            os.environ.get("UPSTREAM_DRIFT_DISCOVERY_MODE")
+        )
         self._load_registry()
 
     def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
@@ -90,6 +105,10 @@ class ModelRegistry(ContractChecker):
             (
                 lambda: all(isinstance(k, str) and len(k) > 0 for k in self.models),
                 "All model IDs must be non-empty strings",
+            ),
+            (
+                lambda: self.discovery_mode in _DISCOVERY_MODES,
+                "discovery_mode must be one of local-only, hybrid, provider-first",
             ),
         ]
 
@@ -125,21 +144,14 @@ class ModelRegistry(ContractChecker):
                 )
                 return
 
-            for model_data in data["models"]:
-                try:
-                    if not isinstance(model_data, dict):
-                        raise ValueError("legacy model entries must be mappings")
-                    legacy_model_data = cast(dict[str, Any], model_data)
-                    entry = ModelPackEntry.from_dict(
-                        _normalize_legacy_model_entry(legacy_model_data)
-                    )
-                    model = self._build_model_config(entry)
-                    self.models[model.id] = model
-                    logger.debug(f"Loaded model: {model.id}")
-                except (TypeError, ValueError) as e:
-                    logger.error(f"Invalid model configuration: {model_data} - {e}")
-
-            self._load_provider_manifests()
+            models_raw = data["models"]
+            if self.discovery_mode == "provider-first":
+                self._load_provider_manifests()
+                self._load_legacy_models(models_raw, overwrite_existing=False)
+            else:
+                self._load_legacy_models(models_raw, overwrite_existing=True)
+                if self.discovery_mode == "hybrid":
+                    self._load_provider_manifests()
             logger.info(f"Loaded {len(self.models)} models from {self.config_path}")
 
         except yaml.YAMLError as e:
@@ -208,6 +220,40 @@ class ModelRegistry(ContractChecker):
             order=entry.order,
         )
 
+    def _load_legacy_models(
+        self,
+        models_raw: Any,
+        *,
+        overwrite_existing: bool,
+    ) -> None:
+        """Load legacy models.yaml entries with explicit overwrite policy."""
+        from ..core import setup_logging
+
+        logger = setup_logging(__name__)
+        require(
+            isinstance(models_raw, list), "legacy models must be a list", models_raw
+        )
+
+        for model_data in models_raw:
+            try:
+                if not isinstance(model_data, dict):
+                    raise ValueError("legacy model entries must be mappings")
+                legacy_model_data = cast(dict[str, Any], model_data)
+                entry = ModelPackEntry.from_dict(
+                    _normalize_legacy_model_entry(legacy_model_data)
+                )
+                if not overwrite_existing and entry.id in self.models:
+                    logger.info(
+                        "Keeping existing provider-backed model '%s' over legacy duplicate",
+                        entry.id,
+                    )
+                    continue
+                model = self._build_model_config(entry)
+                self.models[model.id] = model
+                logger.debug(f"Loaded model: {model.id}")
+            except (TypeError, ValueError) as e:
+                logger.error(f"Invalid model configuration: {model_data} - {e}")
+
     def _iter_provider_manifest_paths(self) -> list[Path]:
         """Discover external provider manifests from configured provider roots."""
         env_value = os.environ.get("UPSTREAM_DRIFT_PROVIDER_ROOTS", "").strip()
@@ -251,13 +297,25 @@ class ModelRegistry(ContractChecker):
             try:
                 manifest = ModelPackManifest.load(manifest_path)
                 for entry in manifest.models:
-                    if entry.id in self.models:
+                    if (
+                        entry.id in self.models
+                        and self.discovery_mode != "provider-first"
+                    ):
                         logger.warning(
                             "Skipping duplicate provider model id '%s' from %s",
                             entry.id,
                             manifest_path,
                         )
                         continue
+                    if (
+                        entry.id in self.models
+                        and self.discovery_mode == "provider-first"
+                    ):
+                        logger.info(
+                            "Provider-first mode overriding legacy model '%s' from %s",
+                            entry.id,
+                            manifest_path,
+                        )
                     self.models[entry.id] = self._build_model_config(
                         entry,
                         provider=manifest.provider,
