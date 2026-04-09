@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -96,7 +97,10 @@ def test_detect_physics_engines(monkeypatch):
 @patch("os.getcwd", return_value="/tmp")
 def test_build_executable(mock_getcwd, mock_chdir, mock_run):
     mock_run.return_value.returncode = 0
-    assert bi.build_executable() is True
+    assert bi.build_executable("hybrid") is True
+    assert (
+        mock_run.call_args.kwargs["env"]["UPSTREAM_DRIFT_INSTALL_PROFILE"] == "hybrid"
+    )
 
 
 @patch("subprocess.run")
@@ -106,7 +110,11 @@ def test_build_msi(mock_getcwd, mock_chdir, mock_run, monkeypatch, tmp_path):
     mock_run.return_value.returncode = 0
     monkeypatch.setattr(bi, "DIST_DIR", tmp_path)
     (tmp_path / "installer.msi").touch()
-    assert bi.build_msi() is True
+    assert bi.build_msi("full", ("C:/repos/Drake_Models",)) is True
+    assert mock_run.call_args.kwargs["env"]["UPSTREAM_DRIFT_INSTALL_PROFILE"] == "full"
+    assert mock_run.call_args.kwargs["env"]["UPSTREAM_DRIFT_PROVIDER_ROOTS"] == str(
+        Path("C:/repos/Drake_Models")
+    )
 
 
 @patch("subprocess.run")
@@ -114,14 +122,14 @@ def test_build_msi(mock_getcwd, mock_chdir, mock_run, monkeypatch, tmp_path):
 @patch("os.getcwd", return_value="/tmp")
 def test_build_msi_fail(mock_getcwd, mock_chdir, mock_run):
     mock_run.return_value.returncode = 1
-    assert bi.build_msi() is False
+    assert bi.build_msi("hybrid") is False
 
 
 def test_create_installer_info(tmp_path, monkeypatch):
     monkeypatch.setattr(bi, "DIST_DIR", tmp_path)
     monkeypatch.setattr(bi, "detect_physics_engines", lambda: ["mujoco"])
 
-    bi.create_installer_info()
+    bi.create_installer_info("full", ("C:/repos/MuJoCo_Models",))
 
     info_file = tmp_path / "installer_info.json"
     assert info_file.exists()
@@ -131,6 +139,9 @@ def test_create_installer_info(tmp_path, monkeypatch):
         data = json.load(f)
     assert data["physics_engines"] == ["mujoco"]
     assert "version" in data
+    assert data["packaging_profile"] == "full"
+    assert data["discovery_mode"] == "provider-first"
+    assert data["provider_roots"] == [str(Path("C:/repos/MuJoCo_Models"))]
 
 
 def test_log_generated_outputs(caplog, tmp_path):
@@ -168,7 +179,17 @@ def test_main(
     monkeypatch.setattr(bi, "DIST_DIR", tmp_path)
     artifact = tmp_path / "artifact.msi"
     artifact.write_bytes(b"abc")
-    monkeypatch.setattr("sys.argv", ["build_installer.py", "--clean"])
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "build_installer.py",
+            "--clean",
+            "--profile",
+            "full",
+            "--provider-root",
+            "C:/repos/MuJoCo_Models",
+        ],
+    )
     (tmp_path / "installer.msi").write_text("artifact")
 
     try:
@@ -180,7 +201,7 @@ def test_main(
     mock_clean.assert_called_once()
     mock_deps.assert_called_once()
     mock_detect.assert_called_once()
-    mock_exe.assert_called_once()
-    mock_msi.assert_called_once()
-    mock_info.assert_called_once()
+    mock_exe.assert_called_once_with("full", ("C:/repos/MuJoCo_Models",))
+    mock_msi.assert_called_once_with("full", ("C:/repos/MuJoCo_Models",))
+    mock_info.assert_called_once_with("full", ("C:/repos/MuJoCo_Models",))
     mock_log_outputs.assert_called_once()
