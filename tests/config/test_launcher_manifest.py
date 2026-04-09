@@ -219,6 +219,62 @@ models:
         assert tile.status == "experimental"
         assert tile.web_route == "/providers/drake"
 
+    def test_manifest_marks_provider_tile_runtime_unavailable(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider tiles should surface runtime-unavailable status cleanly."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "pinocchio-models"
+        (provider_root / "models").mkdir(parents=True)
+        (provider_root / "models" / "pinocchio.urdf").write_text(
+            "<robot />",
+            encoding="utf-8",
+        )
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "pinocchio-pack"
+pack_name: "Pinocchio Models"
+provider: "pinocchio_models"
+models:
+  - id: "external_pinocchio"
+    name: "External Pinocchio"
+    description: "Provider-backed Pinocchio model"
+    type: "urdf"
+    path: "models/pinocchio.urdf"
+    engine_type: "pinocchio"
+    capabilities: ["rigid_body"]
+    identity:
+      canonical_id: "demo.external.pinocchio"
+      motion_family: "demo"
+      exercise: "pinocchio"
+      humanoid: "athlete"
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.is_engine_runtime_available",
+            lambda engine_type: False,
+        )
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("external_pinocchio")
+        assert tile is not None
+        assert tile.status == "runtime_unavailable"
+
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
         tmp_path: Path,

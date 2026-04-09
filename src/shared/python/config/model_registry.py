@@ -23,6 +23,7 @@ from src.shared.python.config.model_source_providers import (
     collect_engine_provider_paths,
     resolve_model_source,
 )
+from src.shared.python.config.provider_catalog import iter_provider_manifest_specs
 from src.shared.python.core.contracts import ContractChecker, require
 
 _DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
@@ -298,38 +299,12 @@ class ModelRegistry(ContractChecker):
             except (TypeError, ValueError) as e:
                 logger.error(f"Invalid model configuration: {model_data} - {e}")
 
-    def _iter_provider_manifest_paths(self) -> list[Path]:
-        """Discover external provider manifests from configured provider roots."""
-        env_value = os.environ.get("UPSTREAM_DRIFT_PROVIDER_ROOTS", "").strip()
-        if not env_value:
-            return []
-
-        config_root = self.config_path.parent
-        manifest_paths: list[Path] = []
-        seen: set[Path] = set()
-
-        for raw_root in env_value.split(os.pathsep):
-            root_value = raw_root.strip()
-            if not root_value:
-                continue
-
-            root_path = Path(root_value)
-            if not root_path.is_absolute():
-                root_path = (config_root / root_path).resolve()
-
-            candidates = [
-                root_path / "model_pack.yaml",
-                root_path / "model_pack.yml",
-                root_path / ".upstreamdrift" / "model_pack.yaml",
-                root_path / ".upstreamdrift" / "model_pack.yml",
-            ]
-            for candidate in candidates:
-                if candidate in seen or not candidate.exists():
-                    continue
-                seen.add(candidate)
-                manifest_paths.append(candidate)
-
-        return manifest_paths
+    def _iter_provider_manifest_specs(self) -> tuple[tuple[Path, Path], ...]:
+        """Discover external provider manifests from env and sibling repos."""
+        return iter_provider_manifest_specs(
+            self.config_path,
+            os.environ.get("UPSTREAM_DRIFT_PROVIDER_ROOTS"),
+        )
 
     def _load_provider_manifests(self) -> None:
         """Load external provider manifests configured for the launcher migration."""
@@ -337,7 +312,7 @@ class ModelRegistry(ContractChecker):
 
         logger = setup_logging(__name__)
 
-        for manifest_path in self._iter_provider_manifest_paths():
+        for provider_root, manifest_path in self._iter_provider_manifest_specs():
             try:
                 manifest = ModelPackManifest.load(manifest_path)
                 for entry in manifest.models:
@@ -363,7 +338,7 @@ class ModelRegistry(ContractChecker):
                     self.models[entry.id] = self._build_model_config(
                         entry,
                         provider=manifest.provider,
-                        source_root=str(manifest_path.parent),
+                        source_root=str(provider_root),
                     )
                 logger.info(
                     "Loaded %d provider models from %s",
