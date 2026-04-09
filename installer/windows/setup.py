@@ -1,17 +1,11 @@
-"""Windows MSI installer setup for UpstreamDrift.
+"""Windows MSI installer setup for UpstreamDrift."""
 
-This script creates a professional Windows MSI installer with:
-- Modular physics engine selection
-- Desktop shortcuts and Start Menu entries
-- Automatic dependency management
-- Uninstaller support
-"""
-
-import sys
+import os
 from pathlib import Path
-from typing import Any
 
 from cx_Freeze import Executable, setup  # type: ignore[import-not-found]
+
+from installer.windows.setup_config import build_setup_configuration
 
 _this_file = Path(__file__)
 _installer_dir = _this_file.parent
@@ -26,145 +20,21 @@ except ImportError:
     __version__ = "1.0.0"
     __description__ = "UpstreamDrift - Professional Biomechanical Analysis"
 
-# Define physics engine modules
-PHYSICS_ENGINES = {
-    "mujoco": {
-        "name": "MuJoCo Physics Engine",
-        "description": "High-performance physics simulation with contact dynamics",
-        "modules": ["mujoco", "engines.physics_engines.mujoco"],
-        "required": True,  # Core engine
-    },
-    "drake": {
-        "name": "Drake Manipulation Planning",
-        "description": "Trajectory optimization and system analysis",
-        "modules": ["pydrake", "engines.physics_engines.drake"],
-        "required": False,
-    },
-    "pinocchio": {
-        "name": "Pinocchio Rigid Body Dynamics",
-        "description": "Fast rigid body dynamics and derivatives",
-        "modules": ["pinocchio", "engines.physics_engines.pinocchio"],
-        "required": False,
-    },
-    "myosuite": {
-        "name": "MyoSuite Muscle Simulation",
-        "description": "Realistic muscle dynamics and neural control",
-        "modules": ["myosuite", "engines.physics_engines.myosuite"],
-        "required": False,
-    },
-    "opensim": {
-        "name": "OpenSim Biomechanics",
-        "description": "Biomechanical modeling and analysis",
-        "modules": ["opensim", "engines.physics_engines.opensim"],
-        "required": False,
-    },
-}
-
-# Base packages always included
-BASE_PACKAGES = [
-    "numpy",
-    "scipy",
-    "matplotlib",
-    "pandas",
-    "PyQt6",
-    "yaml",
-    "structlog",
-    "ezc3d",
-    "sympy",
-    "defusedxml",
-    "shared",
-    "launchers",
-    "api",
-    "tools",
-]
-
-# Build options
-build_exe_options = {
-    "packages": BASE_PACKAGES,
-    "excludes": [
-        "tkinter",
-        "unittest",
-        "pydoc",
-        "difflib",
-        "calendar",
-        "doctest",
-        "inspect",
-        "pickle",
-        "pdb",
-        "profile",
-        "pstats",
-        "timeit",
-        "trace",
-    ],
-    "include_files": [
-        (str(project_root / "shared" / "urdf"), "shared/urdf"),
-        (str(project_root / "shared" / "meshes"), "shared/meshes"),
-        (str(project_root / "config"), "config"),
-        (str(project_root / "docs"), "docs"),
-        (str(project_root / "README.md"), "README.md"),
-        (str(project_root / "LICENSE"), "LICENSE"),
-    ],
-    "include_msvcrt": True,
-    "optimize": 2,
-    "build_exe": "build/upstream_drift",
-}
-
-# MSI options
-bdist_msi_options = {
-    "upgrade_code": "{12345678-1234-5678-9012-123456789012}",
-    "add_to_path": True,
-    "initial_target_dir": r"[ProgramFilesFolder]\UpstreamDrift",
-    "install_icon": str(project_root / "shared" / "icons" / "golf_robot.ico"),
-    "summary_data": {
-        "author": "UpstreamDrift Team",
-        "comments": "Professional biomechanical analysis software",
-        "keywords": "golf, biomechanics, physics, simulation",
-    },
-}
-
-# Executables
+setup_configuration = build_setup_configuration(
+    project_root,
+    os.environ.get("UPSTREAM_DRIFT_INSTALL_PROFILE"),
+)
 executables = [
     Executable(
-        script=str(project_root / "launchers" / "golf_launcher.py"),
-        base="Win32GUI",
-        target_name="GolfModelingSuite.exe",
-        icon=str(project_root / "shared" / "icons" / "golf_robot.ico"),
-        shortcut_name="UpstreamDrift",
-        shortcut_dir="DesktopFolder",
-    ),
-    Executable(
-        script=str(project_root / "api" / "server.py"),
-        base="Console",
-        target_name="GolfAPI.exe",
-        icon=str(project_root / "shared" / "icons" / "golf_robot.ico"),
-    ),
+        script=executable.script,
+        base=executable.base,
+        target_name=executable.target_name,
+        icon=executable.icon,
+        shortcut_name=executable.shortcut_name,
+        shortcut_dir=executable.shortcut_dir,
+    )
+    for executable in setup_configuration.executables
 ]
-
-
-# Dynamic package inclusion based on available engines
-def get_available_engines() -> list[str]:
-    """Detect which physics engines are available for inclusion."""
-    available = []
-
-    for engine_id, engine_info in PHYSICS_ENGINES.items():
-        engine_info_dict: dict[str, Any] = engine_info  # type: ignore[assignment]
-        try:
-            # Try to import the main module
-            main_module = engine_info_dict["modules"][0]
-            __import__(main_module)
-            available.append(engine_id)
-        except ImportError:
-            if engine_info_dict["required"]:
-                sys.exit(1)
-
-    return available
-
-
-# Add available engine packages
-available_engines = get_available_engines()
-for engine_id in available_engines:
-    engine_modules = PHYSICS_ENGINES[engine_id]["modules"]
-    build_exe_options["packages"].extend(engine_modules)  # type: ignore[attr-defined]
 
 # Setup configuration
 setup(
@@ -190,7 +60,10 @@ research-grade biomechanical insights.
     url="https://github.com/D-sorganization/UpstreamDrift",
     license="MIT",
     executables=executables,
-    options={"build_exe": build_exe_options, "bdist_msi": bdist_msi_options},
+    options={
+        "build_exe": setup_configuration.build_exe_options,
+        "bdist_msi": setup_configuration.bdist_msi_options,
+    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",

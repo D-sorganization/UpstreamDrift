@@ -5,12 +5,19 @@ with modular physics engine selection and proper dependency management.
 """
 
 import argparse
+import json
 import logging
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+from installer.windows.packaging_profiles import (
+    build_profile_environment,
+    get_packaging_profile,
+    iter_packaging_profile_ids,
+)
 
 # Project paths
 _this_file = Path(__file__)
@@ -94,8 +101,12 @@ def detect_physics_engines() -> list[str]:
     return available
 
 
-def build_executable() -> bool:
+def build_executable(
+    profile_name: str,
+    provider_roots: tuple[str | os.PathLike[str], ...] = (),
+) -> bool:
     """Build the executable using cx_Freeze."""
+    profile = get_packaging_profile(profile_name)
 
     # Change to installer directory
     original_cwd = os.getcwd()
@@ -104,7 +115,10 @@ def build_executable() -> bool:
     try:
         # Run setup.py build
         result = subprocess.run(
-            [sys.executable, "setup.py", "build"], capture_output=True, text=True
+            [sys.executable, "setup.py", "build"],
+            capture_output=True,
+            text=True,
+            env=build_profile_environment(profile, provider_roots),
         )
 
         return result.returncode == 0
@@ -113,8 +127,12 @@ def build_executable() -> bool:
         os.chdir(original_cwd)
 
 
-def build_msi() -> bool:
+def build_msi(
+    profile_name: str,
+    provider_roots: tuple[str | os.PathLike[str], ...] = (),
+) -> bool:
     """Build the MSI installer."""
+    profile = get_packaging_profile(profile_name)
 
     # Change to installer directory
     original_cwd = os.getcwd()
@@ -123,7 +141,10 @@ def build_msi() -> bool:
     try:
         # Run setup.py bdist_msi
         result = subprocess.run(
-            [sys.executable, "setup.py", "bdist_msi"], capture_output=True, text=True
+            [sys.executable, "setup.py", "bdist_msi"],
+            capture_output=True,
+            text=True,
+            env=build_profile_environment(profile, provider_roots),
         )
 
         if result.returncode != 0:
@@ -140,24 +161,33 @@ def build_msi() -> bool:
         os.chdir(original_cwd)
 
 
-def create_installer_info() -> None:
+def create_installer_info(
+    profile_name: str,
+    provider_roots: tuple[str | os.PathLike[str], ...] = (),
+) -> None:
     """Create installer information file."""
+    profile = get_packaging_profile(profile_name)
     available_engines = detect_physics_engines()
     major, minor, micro = sys.version_info[:3]
 
     info = {
         "version": "1.0.0",
         "build_date": "2026-01-12",
+        "packaging_profile": profile.profile_id,
+        "profile_display_name": profile.display_name,
+        "description": profile.description,
+        "discovery_mode": profile.discovery_mode,
         "physics_engines": available_engines,
+        "supported_provider_ids": list(profile.supported_provider_ids),
+        "provider_roots": [str(Path(root)) for root in provider_roots],
         "python_version": f"{major}.{minor}.{micro}",
         "platform": "Windows x64",
     }
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     info_file = DIST_DIR / "installer_info.json"
-    import json
 
-    with open(info_file, "w") as f:
+    with open(info_file, "w", encoding="utf-8") as f:
         json.dump(info, f, indent=2)
 
 
@@ -182,8 +212,21 @@ def main() -> None:
     parser.add_argument(
         "--exe-only", action="store_true", help="Build executable only (no MSI)"
     )
+    parser.add_argument(
+        "--profile",
+        choices=iter_packaging_profile_ids(),
+        default="hybrid",
+        help="Packaging profile to build",
+    )
+    parser.add_argument(
+        "--provider-root",
+        action="append",
+        default=[],
+        help="Optional external provider repository root for hybrid/full builds",
+    )
 
     args = parser.parse_args()
+    provider_roots = tuple(args.provider_root)
 
     # Check prerequisites
     if not check_prerequisites():
@@ -203,16 +246,16 @@ def main() -> None:
         sys.exit(1)
 
     # Build executable
-    if not build_executable():
+    if not build_executable(args.profile, provider_roots):
         sys.exit(1)
 
     # Build MSI (unless exe-only)
     if not args.exe_only:
-        if not build_msi():
+        if not build_msi(args.profile, provider_roots):
             sys.exit(1)
 
         # Create installer info
-        create_installer_info()
+        create_installer_info(args.profile, provider_roots)
 
     # List output files
     output_files = list(DIST_DIR.glob("*"))
