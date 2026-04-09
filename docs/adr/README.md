@@ -16,6 +16,7 @@ This directory tracks architecture-impacting decisions for UpstreamDrift.
 | [0001](0001-fastapi-local-first-api.md)            | FastAPI for Local-First API Design          | Accepted | 2026-02-18 |
 | [0002](0002-physics-engine-plugin-architecture.md) | Physics Engine Plugin Architecture          | Accepted | 2026-02-18 |
 | [0003](0003-websocket-realtime-simulation.md)      | WebSocket Protocol for Real-Time Simulation | Accepted | 2026-02-18 |
+| [0004](0004-launcher-provider-migration.md)        | Launcher Provider Migration Modes and Legacy Deprecation Policy | Accepted | 2026-04-08 |
 
 ## ADR Backlog
 

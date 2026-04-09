@@ -271,3 +271,182 @@ class TestModelRegistry:
             assert model.exchange_artifacts[0].format == "urdf"
             assert model.provenance is not None
             assert model.provenance.version == "2026.04"
+
+    def test_local_only_mode_ignores_provider_manifests(self):
+        """Legacy mode should preserve local-only discovery during migration."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "models": [
+                            {
+                                "id": "local_model",
+                                "name": "Local Model",
+                                "description": "Local entry",
+                                "type": "mjcf",
+                                "path": "models/local.xml",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            provider_root = root / "providers" / "Drake_Models"
+            provider_root.mkdir(parents=True)
+            (provider_root / "model_pack.yaml").write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "drake-models",
+                        "pack_name": "Drake Models",
+                        "provider": "drake_models",
+                        "models": [
+                            {
+                                "id": "provider_model",
+                                "name": "Provider Model",
+                                "description": "Provider entry",
+                                "type": "urdf",
+                                "path": "models/provider.urdf",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {
+                    "UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root),
+                    "UPSTREAM_DRIFT_DISCOVERY_MODE": "local-only",
+                },
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            assert registry.get_model("local_model") is not None
+            assert registry.get_model("provider_model") is None
+
+    def test_hybrid_mode_loads_local_and_provider_manifests(self):
+        """Hybrid mode should merge legacy local models with provider packs."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "models": [
+                            {
+                                "id": "local_model",
+                                "name": "Local Model",
+                                "description": "Local entry",
+                                "type": "mjcf",
+                                "path": "models/local.xml",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            provider_root = root / "providers" / "Drake_Models"
+            provider_root.mkdir(parents=True)
+            (provider_root / "model_pack.yaml").write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "drake-models",
+                        "pack_name": "Drake Models",
+                        "provider": "drake_models",
+                        "models": [
+                            {
+                                "id": "provider_model",
+                                "name": "Provider Model",
+                                "description": "Provider entry",
+                                "type": "urdf",
+                                "path": "models/provider.urdf",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {
+                    "UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root),
+                    "UPSTREAM_DRIFT_DISCOVERY_MODE": "hybrid",
+                },
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            assert registry.get_model("local_model") is not None
+            assert registry.get_model("provider_model") is not None
+
+    def test_provider_first_mode_prefers_provider_definition_on_duplicates(self):
+        """Provider-first mode should let provider manifests override legacy duplicates."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "models": [
+                            {
+                                "id": "shared_model",
+                                "name": "Legacy Shared",
+                                "description": "Legacy entry",
+                                "type": "mjcf",
+                                "path": "models/local.xml",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            provider_root = root / "providers" / "Drake_Models"
+            provider_root.mkdir(parents=True)
+            (provider_root / "model_pack.yaml").write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "drake-models",
+                        "pack_name": "Drake Models",
+                        "provider": "drake_models",
+                        "models": [
+                            {
+                                "id": "shared_model",
+                                "name": "Provider Shared",
+                                "description": "Provider entry",
+                                "type": "urdf",
+                                "path": "models/provider.urdf",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict(
+                "os.environ",
+                {
+                    "UPSTREAM_DRIFT_PROVIDER_ROOTS": str(provider_root),
+                    "UPSTREAM_DRIFT_DISCOVERY_MODE": "provider-first",
+                },
+                clear=False,
+            ):
+                registry = ModelRegistry(config_path)
+
+            model = registry.get_model("shared_model")
+            assert model is not None
+            assert model.name == "Provider Shared"
+            assert model.provider == "drake_models"
