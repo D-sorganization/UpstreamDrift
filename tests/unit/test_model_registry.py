@@ -450,3 +450,80 @@ class TestModelRegistry:
             assert model is not None
             assert model.name == "Provider Shared"
             assert model.provider == "drake_models"
+
+    def test_resolve_model_source_uses_shared_provider_policy(self):
+        """ModelRegistry should expose the shared provider-backed source resolver."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "models": [
+                            {
+                                "id": "provider_model",
+                                "name": "Provider Model",
+                                "description": "Provider entry",
+                                "type": "urdf",
+                                "path": "models/provider.urdf",
+                                "engine_type": "drake",
+                                "capabilities": ["swing"],
+                                "source_root": "providers/Drake_Models",
+                                "working_dir": "python",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "providers" / "Drake_Models" / "python").mkdir(parents=True)
+
+            registry = ModelRegistry(config_path)
+
+            resolved = registry.resolve_model_source("provider_model", root)
+
+            assert resolved.provider_id == "sibling-repo"
+            assert (
+                resolved.source_root == (root / "providers" / "Drake_Models").resolve()
+            )
+            assert (
+                resolved.working_directory
+                == (root / "providers" / "Drake_Models" / "python").resolve()
+            )
+
+    def test_get_engine_provider_paths_groups_models_by_engine_type(self):
+        """Registry engine-path grouping should feed shared engine discovery."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            config_path = root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text(
+                yaml.safe_dump(
+                    {
+                        "models": [
+                            {
+                                "id": "provider_model",
+                                "name": "Provider Model",
+                                "description": "Provider entry",
+                                "type": "urdf",
+                                "path": "models/provider.urdf",
+                                "engine_type": "drake",
+                                "capabilities": ["swing"],
+                                "source_root": "providers/Drake_Models",
+                                "working_dir": "python",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (root / "providers" / "Drake_Models" / "python").mkdir(parents=True)
+
+            registry = ModelRegistry(config_path)
+
+            grouped = registry.get_engine_provider_paths(root)
+
+            assert grouped == {
+                "drake": ((root / "providers" / "Drake_Models" / "python").resolve(),)
+            }

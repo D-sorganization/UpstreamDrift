@@ -17,6 +17,11 @@ from src.shared.python.config.model_pack_manifest import (
     ModelPackManifest,
     ProvenanceMetadata,
 )
+from src.shared.python.config.model_source_providers import (
+    ResolvedModelSource,
+    collect_engine_provider_paths,
+    resolve_model_source,
+)
 from src.shared.python.core.contracts import ContractChecker, require
 
 _DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
@@ -193,6 +198,42 @@ class ModelRegistry(ContractChecker):
             A list of ModelConfig objects matching the specified type.
         """
         return [m for m in self.models.values() if m.type == model_type]
+
+    def resolve_model_source(
+        self,
+        model_id: str,
+        default_root: Path,
+        *,
+        approved_roots: tuple[Path, ...] = (),
+        fallback_relative: str | Path | None = None,
+    ) -> ResolvedModelSource:
+        """Resolve canonical source paths for a registered model."""
+        require(
+            isinstance(model_id, str) and bool(model_id.strip()),
+            "invalid model id",
+            model_id,
+        )
+        model = self.get_model(model_id)
+        require(model is not None, "model id not found", model_id)
+        return resolve_model_source(
+            model,
+            default_root,
+            approved_roots=approved_roots,
+            fallback_relative=fallback_relative,
+        )
+
+    def get_engine_provider_paths(
+        self,
+        default_root: Path,
+        *,
+        approved_roots: tuple[Path, ...] = (),
+    ) -> dict[str, tuple[Path, ...]]:
+        """Collect resolved provider validation paths grouped by engine type."""
+        return collect_engine_provider_paths(
+            self.models.values(),
+            default_root,
+            approved_roots=approved_roots,
+        )
 
     def _build_model_config(
         self,

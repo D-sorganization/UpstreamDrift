@@ -10,6 +10,8 @@ from functools import partial
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.config.model_registry import ModelRegistry
+
 from ..core.contracts import ContractChecker, precondition
 from ..core.error_utils import EngineLaunchError
 from ..data_io.common_utils import (
@@ -62,6 +64,13 @@ class EngineManager(ContractChecker):
             ),
             (
                 lambda: (
+                    self.provider_engine_paths is not None
+                    and isinstance(self.provider_engine_paths, dict)
+                ),
+                "provider_engine_paths must be a non-None dict",
+            ),
+            (
+                lambda: (
                     self.suite_root is not None and isinstance(self.suite_root, Path)
                 ),
                 "suite_root must be a valid Path",
@@ -89,6 +98,7 @@ class EngineManager(ContractChecker):
         self.current_engine: EngineType | None = None
         self.active_physics_engine: PhysicsEngine | None = None
         self.engine_status: dict[EngineType, EngineStatus] = {}
+        self.provider_engine_paths: dict[EngineType, tuple[Path, ...]] = {}
 
         # Define engine paths (Legacy map - could be moved to registry objects eventually)
         self.engine_paths = {
@@ -157,6 +167,7 @@ class EngineManager(ContractChecker):
             )
 
         # Initialize engine status
+        self.provider_engine_paths = self._discover_provider_engine_paths()
         self._discover_engines()
 
         # Engine storage (Legacy / Specifics)
@@ -205,12 +216,24 @@ class EngineManager(ContractChecker):
     def _discover_engines(self) -> None:
         """Discover available engines by checking their directories."""
         for engine_type, engine_path in self.engine_paths.items():
+            provider_paths = self.provider_engine_paths.get(engine_type, ())
+            available_provider_path = next(
+                (path for path in provider_paths if path.exists()),
+                None,
+            )
             if engine_path.exists():
                 self.engine_status[engine_type] = EngineStatus.AVAILABLE
                 logger.info(
                     "engine_discovered engine=%s path=%s status=available",
                     engine_type.value,
                     engine_path,
+                )
+            elif available_provider_path is not None:
+                self.engine_status[engine_type] = EngineStatus.AVAILABLE
+                logger.info(
+                    "engine_discovered_via_provider engine=%s path=%s status=available",
+                    engine_type.value,
+                    available_provider_path,
                 )
             else:
                 self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
@@ -358,7 +381,46 @@ class EngineManager(ContractChecker):
         }
 
         validation_path = validation_paths.get(engine_type, base_path)
-        return validation_path.exists()
+        if validation_path.exists():
+            return True
+
+        provider_paths = self.provider_engine_paths.get(engine_type, ())
+        return any(path.exists() for path in provider_paths)
+
+    def _discover_provider_engine_paths(self) -> dict[EngineType, tuple[Path, ...]]:
+        """Discover provider-backed engine roots from the shared model registry."""
+        config_path = self._get_model_registry_path()
+        if config_path is None:
+            return {}
+
+        registry = ModelRegistry(config_path)
+        grouped_paths = registry.get_engine_provider_paths(
+            self.suite_root,
+            approved_roots=(self.suite_root, self.suite_root.parent),
+        )
+        provider_paths: dict[EngineType, tuple[Path, ...]] = {}
+        for engine_name, paths in grouped_paths.items():
+            try:
+                engine_type = EngineType(engine_name)
+            except ValueError:
+                logger.debug(
+                    "Skipping provider engine path for unknown engine type '%s'",
+                    engine_name,
+                )
+                continue
+            provider_paths[engine_type] = paths
+        return provider_paths
+
+    def _get_model_registry_path(self) -> Path | None:
+        """Resolve the shared model registry path relative to suite_root."""
+        candidates = (
+            self.suite_root / "src" / "config" / "models.yaml",
+            self.suite_root / "config" / "models.yaml",
+        )
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        return None
 
     def probe_all_engines(self) -> dict[EngineType, Any]:
         """Probe every registered engine and cache the results."""

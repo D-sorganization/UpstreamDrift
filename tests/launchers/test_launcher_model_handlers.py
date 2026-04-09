@@ -34,7 +34,7 @@ def test_module_handler():
     mock_manager.launch_module.assert_called_once_with(
         name="My Module",
         module_name="my_module",
-        cwd=Path("/repo"),
+        cwd=Path("/repo").resolve(),
         extra_python_paths=(),
     )
 
@@ -59,8 +59,8 @@ def test_script_handler():
     assert res is True
     mock_manager.launch_script.assert_called_once_with(
         name="Drake",
-        script_path=Path("/repo/script.py"),
-        cwd=Path("/repo/dir"),
+        script_path=(Path("/repo") / "script.py").resolve(),
+        cwd=(Path("/repo") / "dir").resolve(),
         extra_python_paths=(),
     )
 
@@ -88,11 +88,11 @@ def test_script_handler_uses_model_source_metadata():
     assert res is True
     mock_manager.launch_script.assert_called_once_with(
         name="Drake",
-        script_path=Path("/repo/../Drake_Models/script.py"),
-        cwd=Path("/repo/../Drake_Models/python"),
+        script_path=(Path("/repo") / "../Drake_Models/script.py").resolve(),
+        cwd=(Path("/repo") / "../Drake_Models/python").resolve(),
         extra_python_paths=(
-            Path("/repo/../Drake_Models/src"),
-            Path("/repo/../Drake_Models/bindings"),
+            (Path("/repo") / "../Drake_Models/src").resolve(),
+            (Path("/repo") / "../Drake_Models/bindings").resolve(),
         ),
     )
 
@@ -145,9 +145,9 @@ def test_special_app_handler_uses_source_root():
         assert res is True
         mock_manager.launch_script.assert_called_once_with(
             name="External App",
-            script_path=Path("/repo/../Tools/app.py"),
-            cwd=Path("/repo/../Tools/python"),
-            extra_python_paths=(Path("/repo/../Tools/src"),),
+            script_path=(Path("/repo") / "../Tools/app.py").resolve(),
+            cwd=(Path("/repo") / "../Tools/python").resolve(),
+            extra_python_paths=((Path("/repo") / "../Tools/src").resolve(),),
         )
 
 
