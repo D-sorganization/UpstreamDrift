@@ -5,10 +5,13 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 
 from src.launchers.launcher_provider_compatibility import (
     assert_launcher_provider_compatibility,
+    assert_provider_manifest_compatibility,
     evaluate_launcher_model_compatibility,
+    validate_provider_manifest,
 )
 
 
@@ -52,6 +55,13 @@ class CrossEngineModelB:
         humanoid = "golf-athlete"
 
 
+class DrakeProviderModel:
+    id = "drake_model"
+    provider = "drake_models"
+    path = "models/drake.urdf"
+    engine_type = "drake"
+
+
 def test_evaluate_launcher_model_compatibility_for_local_model(tmp_path: Path) -> None:
     model_file = tmp_path / "models" / "model.urdf"
     model_file.parent.mkdir(parents=True)
@@ -72,11 +82,9 @@ def test_evaluate_launcher_model_compatibility_reports_missing_provider_paths(
 
     assert len(results) == 1
     assert not results[0].is_compatible
-    assert any("source root does not exist" in issue for issue in results[0].issues)
-    assert any("artifact path does not exist" in issue for issue in results[0].issues)
-    assert any(
-        "working directory does not exist" in issue for issue in results[0].issues
-    )
+    assert any(issue.code == "missing_source_root" for issue in results[0].issues)
+    assert any(issue.code == "missing_artifact_path" for issue in results[0].issues)
+    assert any(issue.code == "missing_working_directory" for issue in results[0].issues)
 
 
 def test_assert_launcher_provider_compatibility_raises_on_failures(
@@ -105,3 +113,93 @@ def test_evaluate_launcher_model_compatibility_preserves_canonical_identity(
         "golf.swing.main",
     ]
     assert all(result.is_compatible for result in results)
+
+
+def test_evaluate_launcher_model_compatibility_distinguishes_runtime_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    model_file = tmp_path / "models" / "drake.urdf"
+    model_file.parent.mkdir(parents=True)
+    model_file.write_text("<robot />", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "src.launchers.launcher_provider_compatibility.is_engine_runtime_available",
+        lambda engine_type: False,
+    )
+
+    results = evaluate_launcher_model_compatibility([DrakeProviderModel()], tmp_path)
+
+    assert len(results) == 1
+    assert not results[0].is_compatible
+    assert any(issue.category == "runtime_unavailable" for issue in results[0].issues)
+
+
+def test_validate_provider_manifest_reports_machine_readable_diagnostics(
+    tmp_path: Path,
+) -> None:
+    provider_root = tmp_path / "provider"
+    provider_root.mkdir()
+    manifest_path = provider_root / "model_pack.yaml"
+    manifest_path.write_text(
+        yaml.safe_dump(
+            {
+                "manifest_version": "1.0.0",
+                "pack_id": "broken-pack",
+                "pack_name": "Broken Pack",
+                "provider": "drake_models",
+                "models": [
+                    {
+                        "id": "broken_model",
+                        "name": "Broken Model",
+                        "description": "Missing asset path",
+                        "type": "urdf",
+                        "path": "models/missing.urdf",
+                        "engine_type": "drake",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_provider_manifest(manifest_path, provider_root)
+
+    assert report.provider == "drake_models"
+    assert not report.is_compatible
+    assert any(issue.code == "missing_artifact_path" for issue in report.issues)
+    assert all(issue.message for issue in report.issues)
+    assert all(isinstance(issue.context, dict) for issue in report.issues)
+
+
+def test_assert_provider_manifest_compatibility_raises_with_model_and_issue_codes(
+    tmp_path: Path,
+) -> None:
+    provider_root = tmp_path / "provider"
+    provider_root.mkdir()
+    manifest_path = provider_root / "model_pack.yaml"
+    manifest_path.write_text(
+        yaml.safe_dump(
+            {
+                "manifest_version": "1.0.0",
+                "pack_id": "broken-pack",
+                "pack_name": "Broken Pack",
+                "provider": "drake_models",
+                "models": [
+                    {
+                        "id": "broken_model",
+                        "name": "Broken Model",
+                        "description": "Missing asset path",
+                        "type": "urdf",
+                        "path": "models/missing.urdf",
+                        "engine_type": "drake",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="broken_model") as exc_info:
+        assert_provider_manifest_compatibility(manifest_path, provider_root)
+
+    assert "missing_artifact_path" in str(exc_info.value)
