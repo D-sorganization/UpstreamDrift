@@ -550,7 +550,11 @@ def _create_sensitivity_controllers() -> tuple:
     return controller1, controller2
 
 
-def _plot_angle_comparison(ax, results1, results2) -> None:
+def _plot_angle_comparison(
+    ax: Any,
+    results1: dict[str, Any],
+    results2: dict[str, Any],
+) -> None:
     if not (ax is not None):
         raise ValueError("ax must be provided")
     if not (ax is not None):
@@ -575,7 +579,11 @@ def _plot_angle_comparison(ax, results1, results2) -> None:
     ax.set_title("Angle vs Time (Two Different Initial Conditions)")
 
 
-def _plot_trajectory_divergence(ax, results1, results2) -> None:
+def _plot_trajectory_divergence(
+    ax: Any,
+    results1: dict[str, Any],
+    results2: dict[str, Any],
+) -> None:
     if not (ax is not None):
         raise ValueError("ax must be provided")
     if not (ax is not None):
@@ -588,7 +596,11 @@ def _plot_trajectory_divergence(ax, results1, results2) -> None:
     ax.set_title("Divergence of Trajectories (Log Scale)")
 
 
-def _plot_phase_portraits_comparison(ax, results1, results2) -> None:
+def _plot_phase_portraits_comparison(
+    ax: Any,
+    results1: dict[str, Any],
+    results2: dict[str, Any],
+) -> None:
     if not (ax is not None):
         raise ValueError("ax must be provided")
     if not (ax is not None):
@@ -613,7 +625,11 @@ def _plot_phase_portraits_comparison(ax, results1, results2) -> None:
     ax.set_title("Phase Portraits Comparison")
 
 
-def _plot_velocity_comparison(ax, results1, results2) -> None:
+def _plot_velocity_comparison(
+    ax: Any,
+    results1: dict[str, Any],
+    results2: dict[str, Any],
+) -> None:
     if not (ax is not None):
         raise ValueError("ax must be provided")
     if not (ax is not None):

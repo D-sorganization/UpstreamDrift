@@ -17,6 +17,7 @@ import sys
 import threading
 from functools import partial
 from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ DEFAULT_COLORS = {
 
 
 class GolfSimulationGUI(StyleMixin, DockerMixin):
-    def __init__(self, root) -> None:
+    def __init__(self, root: "tk.Tk") -> None:
         """Initialize the GUI."""
         if not (root is not None):
             raise ValueError("root must be provided")
@@ -192,7 +193,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         self._setup_sim_action_buttons(main_container)
         self._setup_sim_log_section(main_container)
 
-    def _setup_sim_title(self, parent) -> None:
+    def _setup_sim_title(self, parent: Any) -> None:
         """Create the simulation tab title section."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
@@ -213,7 +214,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         )
         subtitle.pack(anchor="center", pady=(5, 0))
 
-    def _setup_sim_settings_card(self, parent) -> None:
+    def _setup_sim_settings_card(self, parent: Any) -> None:
         """Create the simulation settings card with control mode and live view."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
@@ -255,7 +256,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
             style="Modern.TCheckbutton",
         ).pack(side="left")
 
-    def _setup_sim_state_card(self, parent) -> None:
+    def _setup_sim_state_card(self, parent: Any) -> None:
         """Create the state management card with load/save path entries."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
@@ -327,7 +328,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
             style="Modern.TButton",
         ).pack(side="right")
 
-    def _setup_sim_action_buttons(self, parent) -> None:
+    def _setup_sim_action_buttons(self, parent: Any) -> None:
         """Create the simulation control and results action buttons."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
@@ -344,7 +345,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         self._create_primary_action_buttons(action_inner)
         self._create_secondary_action_buttons(action_inner)
 
-    def _create_primary_action_buttons(self, parent) -> None:
+    def _create_primary_action_buttons(self, parent: Any) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -398,7 +399,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         )
         self.btn_rebuild.pack(side="right")
 
-    def _create_secondary_action_buttons(self, parent) -> None:
+    def _create_secondary_action_buttons(self, parent: Any) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -443,7 +444,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         )
         self.btn_open_data.pack(side="left")
 
-    def _setup_sim_log_section(self, parent) -> None:
+    def _setup_sim_log_section(self, parent: Any) -> None:
         """Create the simulation log section with text area and scrollbar."""
         if not (parent is not None):
             raise ValueError("parent must be provided")
@@ -864,7 +865,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         )
         save_btn.pack(anchor="center")
 
-    def browse_file(self, var, save=False) -> None:
+    def browse_file(self, var: "tk.StringVar", save: bool = False) -> None:
         """Open file dialog to browse for file."""
         if not (var is not None):
             raise ValueError("var must be provided")
@@ -879,7 +880,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         if path:
             var.set(path)
 
-    def update_swatch(self, part) -> None:
+    def update_swatch(self, part: str) -> None:
         """Update color swatch."""
         if not (part is not None):
             raise ValueError("part must be provided")
@@ -890,7 +891,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         hex_color = f"#{r:02x}{g:02x}{b:02x}"
         self.color_widgets[part].config(bg=hex_color)
 
-    def pick_color(self, part) -> None:
+    def pick_color(self, part: str) -> None:
         """Open color picker dialog."""
         if not (part is not None):
             raise ValueError("part must be provided")
@@ -911,7 +912,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
             self.update_swatch(part)
             self.save_config()
 
-    def log(self, message) -> None:
+    def log(self, message: str) -> None:
         """Log message to GUI console."""
         if not (message is not None):
             raise ValueError("message must be provided")
@@ -927,7 +928,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         self.log(f"[{timestamp}] Log cleared.")
 
-    def _on_tab_changed(self, event) -> None:
+    def _on_tab_changed(self, event: Any) -> None:
         """Handle tab selection changes to maintain consistent styling."""
         # Force update of tab styling to prevent height changes
         self.notebook.update_idletasks()
@@ -956,7 +957,7 @@ class GolfSimulationGUI(StyleMixin, DockerMixin):
         self.btn_open_video.config(state=tk.NORMAL)
         self.btn_open_data.config(state=tk.NORMAL)
 
-    def open_file(self, filepath) -> None:
+    def open_file(self, filepath: str | Path) -> None:
         """Open a file with the default application."""
         if self.is_windows:
             if Path(filepath).exists():

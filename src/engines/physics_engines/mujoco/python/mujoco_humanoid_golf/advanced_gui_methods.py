@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import mujoco
 
@@ -223,7 +223,11 @@ class AdvancedGuiMethodsMixin:
         dialog.exec()
 
     def _prepare_analysis_data(
-        self, recorder, np_mod, analyzer_cls, plotter_cls
+        self,
+        recorder: Any,
+        np_mod: Any,
+        analyzer_cls: type[Any],
+        plotter_cls: type[Any],
     ) -> tuple:
         """Prepare analyzer, report, plotter, and radar metrics from recorded data."""
         if not (recorder is not None):
@@ -305,7 +309,7 @@ class AdvancedGuiMethodsMixin:
         return pelvis_idx, torso_idx
 
     def _create_swing_profile_tab(
-        self, plotter, metrics, fig_cls, canvas_cls
+        self, plotter: Any, metrics: dict, fig_cls: type[Any], canvas_cls: type[Any]
     ) -> QWidget:
         """Create the Swing Profile (radar chart) tab widget."""
         if not (plotter is not None):
@@ -322,7 +326,9 @@ class AdvancedGuiMethodsMixin:
         plotter.plot_radar_chart(fig, metrics)
         return widget
 
-    def _create_cop_tab(self, plotter, recorder, fig_cls, canvas_cls) -> QWidget:
+    def _create_cop_tab(
+        self, plotter: Any, recorder: Any, fig_cls: type[Any], canvas_cls: type[Any]
+    ) -> QWidget:
         """Create the Center of Pressure vector field tab widget."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
@@ -342,7 +348,9 @@ class AdvancedGuiMethodsMixin:
             ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
         return widget
 
-    def _create_power_flow_tab(self, plotter, recorder, fig_cls, canvas_cls) -> QWidget:
+    def _create_power_flow_tab(
+        self, plotter: Any, recorder: Any, fig_cls: type[Any], canvas_cls: type[Any]
+    ) -> QWidget:
         """Create the Power Flow tab widget."""
         if not (plotter is not None):
             raise ValueError("plotter must be provided")
@@ -363,7 +371,7 @@ class AdvancedGuiMethodsMixin:
         return widget
 
     def _create_kinematic_sequence_tab(
-        self, plotter, recorder, fig_cls, canvas_cls
+        self, plotter: Any, recorder: Any, fig_cls: type[Any], canvas_cls: type[Any]
     ) -> QWidget:
         """Create the Kinematic Sequence tab widget."""
         if not (plotter is not None):
@@ -439,7 +447,13 @@ class AdvancedGuiMethodsMixin:
         return widget
 
     def _create_coordination_tab(
-        self, plotter, analyzer, pelvis_idx, torso_idx, fig_cls, canvas_cls
+        self,
+        plotter: Any,
+        analyzer: Any,
+        pelvis_idx: int | None,
+        torso_idx: int | None,
+        fig_cls: type[Any],
+        canvas_cls: type[Any],
     ) -> QWidget:
         """Create the Coordination (Angle-Angle and Vector Coding) tab widget."""
         if not (plotter is not None):
@@ -497,7 +511,12 @@ class AdvancedGuiMethodsMixin:
         return widget
 
     def _create_work_loop_tab(
-        self, plotter, analyzer, torso_idx, fig_cls, canvas_cls
+        self,
+        plotter: Any,
+        analyzer: Any,
+        torso_idx: int | None,
+        fig_cls: type[Any],
+        canvas_cls: type[Any],
     ) -> QWidget:
         """Create the Work Loop (Energetics) tab widget."""
         if not (plotter is not None):
@@ -536,7 +555,12 @@ class AdvancedGuiMethodsMixin:
         return widget
 
     def _create_ssc_tab(
-        self, plotter, pelvis_idx, torso_idx, fig_cls, canvas_cls
+        self,
+        plotter: Any,
+        pelvis_idx: int | None,
+        torso_idx: int | None,
+        fig_cls: type[Any],
+        canvas_cls: type[Any],
     ) -> QWidget:
         """Create the Stretch-Shortening Cycle (X-Factor) tab widget."""
         if not (plotter is not None):

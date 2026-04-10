@@ -83,17 +83,17 @@ def _rnea_validate_inputs(
 
 
 def _rnea_forward_pass_body(
-    i,
-    q,
-    qd,
-    qdd,
-    neg_a_grav,
+    i: int,
+    q: np.ndarray,
+    qd: np.ndarray,
+    qdd: np.ndarray,
+    neg_a_grav: np.ndarray,
     mdl: _RneaModelCache,
-    xup,
-    v,
-    a,
-    s_subspace_list,
-    dof_indices,
+    xup: np.ndarray,
+    v: np.ndarray,
+    a: np.ndarray,
+    s_subspace_list: list,
+    dof_indices: list,
     buf: _RneaScratchBuffers,
 ) -> None:
     if not (i is not None):
@@ -138,16 +138,16 @@ def _rnea_forward_pass_body(
 
 
 def _rnea_backward_pass(
-    nb,
+    nb: int,
     mdl: _RneaModelCache,
-    v,
-    a,
-    f,
-    tau,
-    xup,
-    s_subspace_list,
-    dof_indices,
-    f_ext,
+    v: np.ndarray,
+    a: np.ndarray,
+    f: np.ndarray,
+    tau: np.ndarray,
+    xup: np.ndarray,
+    s_subspace_list: list,
+    dof_indices: list,
+    f_ext: np.ndarray | None,
     buf: _RneaScratchBuffers,
 ) -> None:
     for i in range(nb - 1, -1, -1):
