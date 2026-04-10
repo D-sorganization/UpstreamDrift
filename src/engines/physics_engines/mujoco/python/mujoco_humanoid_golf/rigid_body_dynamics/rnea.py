@@ -95,7 +95,7 @@ def _rnea_forward_pass_body(
     s_subspace_list,
     dof_indices,
     buf: _RneaScratchBuffers,
-):
+) -> None:
     if not (i is not None):
         raise ValueError("i must be provided")
     if not (i is not None):
@@ -149,7 +149,7 @@ def _rnea_backward_pass(
     dof_indices,
     f_ext,
     buf: _RneaScratchBuffers,
-):
+) -> None:
     for i in range(nb - 1, -1, -1):
         np.matmul(mdl.inertia[i], a[:, i], out=buf.scratch_vec)
         f_body = buf.scratch_vec

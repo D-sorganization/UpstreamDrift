@@ -381,7 +381,7 @@ class TestRoute:
         """Test Route creation."""
         from model_generation.api import HTTPMethod, Route
 
-        def dummy_handler(request):
+        def dummy_handler(request) -> None:
             return None
 
         route = Route(

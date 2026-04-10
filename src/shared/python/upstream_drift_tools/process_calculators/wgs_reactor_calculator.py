@@ -88,7 +88,7 @@ else:
         QWidget = object
         QTimer = object
 
-        def pyqtSignal(*args):
+        def pyqtSignal(*args) -> None:
             return None
 
     try:

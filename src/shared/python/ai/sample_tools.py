@@ -88,7 +88,7 @@ def _register_list_sample_files_tool(registry: ToolRegistry) -> None:
         }
 
 
-def _register_load_c3d_tool(registry: ToolRegistry):  # type: ignore[return]
+def _register_load_c3d_tool(registry: ToolRegistry) -> None:  # type: ignore[return]
     @registry.register(
         name="load_c3d",
         description=(

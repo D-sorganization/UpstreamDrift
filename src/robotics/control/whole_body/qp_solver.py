@@ -12,11 +12,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts import invariant
+
+if TYPE_CHECKING:
+    from scipy.optimize import Bounds
 
 
 @dataclass
@@ -255,7 +259,7 @@ class ScipyQPSolver(QPSolver):
                 status=f"Solver error: {e}",
             )
 
-    def _build_variable_bounds(self, problem: QPProblem):  # type: ignore[return]
+    def _build_variable_bounds(self, problem: QPProblem) -> Bounds | None:  # type: ignore[return]
         if not (problem is not None):
             raise ValueError("problem must be provided")
         if not (problem is not None):

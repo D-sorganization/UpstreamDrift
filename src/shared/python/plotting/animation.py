@@ -151,7 +151,9 @@ class SwingAnimator:
         )
         return anim
 
-    def _gather_trajectory_data(self, body_names):
+    def _gather_trajectory_data(
+        self, body_names
+    ) -> tuple[dict[str, np.ndarray], np.ndarray]:
         if not (body_names is not None):
             raise ValueError("body_names must be provided")
         if not (body_names is not None):
@@ -166,7 +168,7 @@ class SwingAnimator:
                     times = np.asarray(t)
         return body_data, times
 
-    def _plot_desired_trajectories(self, ax, desired_positions, cfg):
+    def _plot_desired_trajectories(self, ax, desired_positions, cfg) -> None:
         if not desired_positions:
             return
         for name, pts in desired_positions.items():
@@ -182,7 +184,9 @@ class SwingAnimator:
                     label=f"{name} desired",
                 )
 
-    def _create_body_artists(self, ax, body_data, cfg):
+    def _create_body_artists(
+        self, ax, body_data, cfg
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         if not (ax is not None):
             raise ValueError("ax must be provided")
         if not (ax is not None):
@@ -198,7 +202,7 @@ class SwingAnimator:
             points[name] = pt
         return lines, points
 
-    def _set_axis_limits_from_data(self, ax, body_data):
+    def _set_axis_limits_from_data(self, ax, body_data) -> None:
         if not (ax is not None):
             raise ValueError("ax must be provided")
         if not (ax is not None):

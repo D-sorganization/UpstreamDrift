@@ -774,7 +774,7 @@ class KineticsRenderer(BaseRenderer):
             f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
         )
 
-    def _plot_induced_joint(self, ax, times, acc, joint_idx):
+    def _plot_induced_joint(self, ax, times, acc, joint_idx) -> bool:
         if not (ax is not None):
             raise ValueError("ax must be provided")
         if not (ax is not None):
@@ -802,7 +802,7 @@ class KineticsRenderer(BaseRenderer):
         )
         return True
 
-    def _plot_induced_norm(self, ax, times, acc):
+    def _plot_induced_norm(self, ax, times, acc) -> None:
         if not (ax is not None):
             raise ValueError("ax must be provided")
         if not (ax is not None):

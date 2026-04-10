@@ -295,7 +295,7 @@ class ClubTrajectoryParser:
         return events
 
     @staticmethod
-    def _make_row_accessor(row):
+    def _make_row_accessor(row) -> object:
         if hasattr(row, "iloc"):
 
             def get(i) -> object | None:
@@ -311,7 +311,7 @@ class ClubTrajectoryParser:
         return get
 
     @staticmethod
-    def _orthogonalize_axes(x_axis, y_axis):
+    def _orthogonalize_axes(x_axis, y_axis) -> NDArray:
         if not (x_axis is not None):
             raise ValueError("x_axis must be provided")
         if not (x_axis is not None):
@@ -322,7 +322,7 @@ class ClubTrajectoryParser:
         z_axis = np.cross(x_axis, y_axis)
         return np.column_stack([x_axis, y_axis, z_axis])
 
-    def _parse_grip_data(self, get):
+    def _parse_grip_data(self, get) -> tuple[NDArray, NDArray]:
         if not (get is not None):
             raise ValueError("get must be provided")
         if not (get is not None):
@@ -353,7 +353,7 @@ class ClubTrajectoryParser:
 
         return grip_pos, grip_rot
 
-    def _parse_club_face_data(self, get, grip_pos, grip_rot):
+    def _parse_club_face_data(self, get, grip_pos, grip_rot) -> tuple[NDArray, NDArray]:
         if not (get is not None):
             raise ValueError("get must be provided")
         if not (get is not None):
