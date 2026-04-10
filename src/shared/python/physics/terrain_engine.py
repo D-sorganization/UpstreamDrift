@@ -113,11 +113,7 @@ class TerrainAwareEngine:
         if self.terrain is None:
             return 0.0
 
-        try:
-            return self.terrain.get_elevation(x, y)
-        except ValueError:
-            # Out of bounds - return edge value
-            return 0.0
+        return self.terrain.get_elevation(x, y)
 
     def get_contact_normal(self, x: float, y: float) -> np.ndarray:
         """Get terrain contact normal at a position.

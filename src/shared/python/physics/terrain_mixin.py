@@ -122,10 +122,7 @@ class TerrainMixin:
         if self._terrain is None:
             return 0.0
 
-        try:
-            return self._terrain.get_elevation(x, y)
-        except ValueError:
-            return 0.0
+        return self._terrain.get_elevation(x, y)
 
     def get_terrain_normal(self, x: float, y: float) -> np.ndarray:
         """Get terrain surface normal at a position.

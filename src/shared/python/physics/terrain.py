@@ -443,14 +443,23 @@ class ElevationMap:
         return gx, gy
 
     def _check_bounds(self, x: float, y: float) -> None:
-        """Check if coordinates are within bounds."""
-        if x < self.origin_x or x > self.origin_x + self.width:
+        """Check if coordinates are within the actual grid extent.
+
+        The valid range is [origin, origin + (n-1)*resolution] where n is the
+        number of grid nodes in that axis.  Coordinates equal to
+        ``origin + width`` (or length) are *beyond* the last grid node and must
+        be rejected so callers never receive silently-clamped values.
+        """
+        n_rows, n_cols = self.data.shape
+        max_x = self.origin_x + (n_cols - 1) * self.resolution
+        max_y = self.origin_y + (n_rows - 1) * self.resolution
+        if x < self.origin_x or x > max_x:
             raise ValueError(
-                f"X coordinate {x} out of bounds [{self.origin_x}, {self.origin_x + self.width}]"
+                f"X coordinate {x} out of bounds [{self.origin_x}, {max_x}]"
             )
-        if y < self.origin_y or y > self.origin_y + self.length:
+        if y < self.origin_y or y > max_y:
             raise ValueError(
-                f"Y coordinate {y} out of bounds [{self.origin_y}, {self.origin_y + self.length}]"
+                f"Y coordinate {y} out of bounds [{self.origin_y}, {max_y}]"
             )
 
     def get_elevation(self, x: float, y: float) -> float:
@@ -786,7 +795,7 @@ class TerrainRegion:
         return MATERIALS[material_name]
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize region to dictionary."""
+        """Serialize region to dictionary, preserving all SurfaceMaterial fields."""
         result: dict[str, Any] = {
             "terrain_type": self.terrain_type.name.lower(),
             "shape_type": self.shape_type,
@@ -795,8 +804,15 @@ class TerrainRegion:
         if self.material is not None:
             result["material"] = {
                 "name": self.material.name,
-                "friction": self.material.friction_coefficient,
+                "friction_coefficient": self.material.friction_coefficient,
+                "rolling_resistance": self.material.rolling_resistance,
                 "restitution": self.material.restitution,
+                "hardness": self.material.hardness,
+                "grass_height_m": self.material.grass_height_m,
+                "compressibility": self.material.compressibility,
+                "compression_damping": self.material.compression_damping,
+                "turf_density": self.material.turf_density,
+                "moisture_content": self.material.moisture_content,
             }
         return result
 
@@ -809,12 +825,7 @@ class TerrainRegion:
             raise ValueError("data must be provided")
         material = None
         if "material" in data:
-            mat = data["material"]
-            material = SurfaceMaterial(
-                name=mat["name"],
-                friction_coefficient=mat["friction"],
-                restitution=mat["restitution"],
-            )
+            material = SurfaceMaterial(**data["material"])
         return cls(
             terrain_type=TerrainType[data["terrain_type"].upper()],
             shape_type=data["shape_type"],
