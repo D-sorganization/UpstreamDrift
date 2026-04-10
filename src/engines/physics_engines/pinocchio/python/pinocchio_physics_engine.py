@@ -181,7 +181,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         return self.q.copy(), self.v.copy()
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        """Set the current state."""
+        """Set the current state and refresh derived kinematics."""
         if not (q is not None):
             raise ValueError("q must be provided")
         if not (q is not None):
@@ -189,10 +189,14 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None:
             return
 
-        if len(q) == self.model.nq:
-            self.q = q.copy()
-        if len(v) == self.model.nv:
-            self.v = v.copy()
+        if len(q) != self.model.nq:
+            raise ValueError(f"q size {len(q)} does not match model nq={self.model.nq}")
+        if len(v) != self.model.nv:
+            raise ValueError(f"v size {len(v)} does not match model nv={self.model.nv}")
+        self.q = q.copy()
+        self.v = v.copy()
+        # Refresh derived kinematics so Jacobians and frame placements are current
+        self.forward()
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""

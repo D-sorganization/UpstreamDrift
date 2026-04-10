@@ -69,6 +69,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         self._dt = 0.002  # Default
 
+        self._terminated: bool = False  # True after episode termination or truncation
+
     def _reset_loaded_state(self) -> None:
         """Clear all engine state after a failed or closed load attempt."""
         self.env = None
@@ -168,6 +170,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         if self.env:
             self.env.reset()
+            self._terminated = False
 
     @precondition(
         lambda self, dt=None: self.env is not None, "Environment must be loaded"
@@ -185,12 +188,23 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 "Runtime timestep modification is unsafe in MuJoCo. Ignoring dt override."
             )
 
+        if self._terminated:
+            logger.warning(
+                "step() called on a terminated MyoSuite environment; "
+                "call reset() before stepping again"
+            )
+            return
+
         action = getattr(self, "_last_action", None)
         if action is None:
             # Fallback to zero action
             action = self.env.action_space.sample() * 0.0
 
-        self.env.step(action)
+        result = self.env.step(action)
+        # Gym step returns (obs, reward, terminated, truncated, info)
+        if len(result) >= 4:
+            _obs, _reward, terminated, truncated = result[:4]
+            self._terminated = bool(terminated or truncated)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
