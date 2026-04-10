@@ -83,7 +83,7 @@ class UnifiedEngineInterface(ContractChecker):
         try:
             # Convert string to enum if needed
             if isinstance(engine_type, str):
-                engine_type = EngineType(engine_type.upper())
+                engine_type = EngineType(engine_type.lower())
 
             # Load engine
             self.engine_manager._load_engine(engine_type)
