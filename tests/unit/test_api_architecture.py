@@ -32,13 +32,33 @@ class TestRouteRegistry:
             assert hasattr(router, "routes")  # APIRouter has .routes
 
     def test_discover_routes_excludes_websocket_modules(self) -> None:
-        """WebSocket-only modules are excluded by default."""
+        """WebSocket-only modules are excluded from auto-discovery (handled explicitly)."""
         from src.api.route_registry import discover_routes
 
         routes = discover_routes()
         module_names = {name for name, _ in routes}
         assert "chat_ws" not in module_names
         assert "simulation_ws" not in module_names
+
+    def test_websocket_modules_registered_explicitly_in_server(self) -> None:
+        """WebSocket modules must be explicitly registered in server.py.
+
+        They are excluded from auto-discovery but must still be served —
+        this test protects against accidental removal of the explicit registration.
+        """
+        source = (
+            __import__("pathlib").Path("src/api/server.py").read_text(encoding="utf-8")
+        )
+        assert "chat_ws" in source, (
+            "server.py does not register chat_ws router. "
+            "WebSocket modules are excluded from auto-discovery and must be "
+            "explicitly included in server.py."
+        )
+        assert "simulation_ws" in source, (
+            "server.py does not register simulation_ws router. "
+            "WebSocket modules are excluded from auto-discovery and must be "
+            "explicitly included in server.py."
+        )
 
     def test_discover_routes_custom_exclude(self) -> None:
         """Custom exclusion set is respected."""
