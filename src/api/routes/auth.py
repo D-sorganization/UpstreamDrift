@@ -16,6 +16,7 @@ from src.api.auth.models import (
     APIKeyResponse,
     LoginRequest,
     LoginResponse,
+    RefreshTokenRequest,
     User,
     UserCreate,
     UserResponse,
@@ -130,16 +131,26 @@ async def login(
 
 @router.post("/refresh", response_model=dict)
 @precondition(
-    lambda refresh_token, db=None: (
-        refresh_token is not None and len(refresh_token.strip()) > 0
+    lambda body, db=None: (
+        body is not None
+        and body.refresh_token is not None
+        and len(body.refresh_token.strip()) > 0
     ),
     "Refresh token must be a non-empty string",
 )
 async def refresh_token(
-    refresh_token: str, db: Session = Depends(get_db)
+    body: RefreshTokenRequest, db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    """Refresh access token using refresh token."""
+    """Refresh access token using refresh token.
 
+    Args:
+        body: Request body containing the refresh token.
+        db: Database session.
+
+    Returns:
+        New access token and metadata.
+    """
+    refresh_token = body.refresh_token
     # Verify refresh token
     payload = security_manager.verify_token(refresh_token, "refresh")
     user_id = payload.get("sub")

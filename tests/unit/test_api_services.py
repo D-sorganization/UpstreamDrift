@@ -158,6 +158,60 @@ class TestSimulationService:
         data = service._extract_simulation_data(mock_recorder)
         assert isinstance(data, dict)
 
+    @pytest.mark.asyncio
+    async def test_run_simulation_background_success(
+        self, service: SimulationService
+    ) -> None:
+        """Successful background run stores status=completed (issue #2467)."""
+        active_tasks: dict = {}
+        task_id = "test-task-1"
+        request = SimulationRequest(
+            engine_type="mujoco",
+            duration=0.1,
+            timestep=0.01,
+            model_path=None,
+            initial_state=None,
+            control_inputs=None,
+            analysis_config=None,
+        )
+        with patch.object(
+            service,
+            "run_simulation",
+            return_value=MagicMock(success=True, model_dump=dict),
+        ):
+            await service.run_simulation_background(task_id, request, active_tasks)
+
+        assert active_tasks[task_id]["status"] == "completed"
+
+    @pytest.mark.asyncio
+    async def test_run_simulation_background_failure_marks_failed(
+        self, service: SimulationService
+    ) -> None:
+        """Failed background run stores status=failed, not completed (issue #2467)."""
+        active_tasks: dict = {}
+        task_id = "test-task-2"
+        request = SimulationRequest(
+            engine_type="mujoco",
+            duration=0.1,
+            timestep=0.01,
+            model_path=None,
+            initial_state=None,
+            control_inputs=None,
+            analysis_config=None,
+        )
+        with patch.object(
+            service,
+            "run_simulation",
+            return_value=MagicMock(
+                success=False, model_dump=lambda: {"success": False}
+            ),
+        ):
+            await service.run_simulation_background(task_id, request, active_tasks)
+
+        assert active_tasks[task_id]["status"] == "failed", (
+            "Failed simulation must not be stored as 'completed'"
+        )
+
 
 class TestAnalysisService:
     """Tests for AnalysisService."""

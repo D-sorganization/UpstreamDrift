@@ -322,3 +322,28 @@ class TestSubscriptionQuotas:
         assert pro.api_calls_per_month > free.api_calls_per_month
         assert pro.video_analyses_per_month > free.video_analyses_per_month
         assert pro.simulations_per_month > free.simulations_per_month
+
+
+class TestRefreshTokenRequestContract:
+    """Design by Contract tests for RefreshTokenRequest (issue #2471)."""
+
+    def test_accepts_valid_token(self):
+        """Postcondition: Valid refresh_token is accepted as JSON body field."""
+        from src.api.auth.models import RefreshTokenRequest
+
+        req = RefreshTokenRequest(refresh_token="sometoken123")
+        assert req.refresh_token == "sometoken123"
+
+    def test_requires_refresh_token(self):
+        """Precondition: refresh_token field is required."""
+        from src.api.auth.models import RefreshTokenRequest
+
+        with pytest.raises(ValidationError):
+            RefreshTokenRequest()  # type: ignore[call-arg]
+
+    def test_refresh_token_is_body_field(self):
+        """Postcondition: refresh_token is a JSON body field, not a query param."""
+        from src.api.auth.models import RefreshTokenRequest
+
+        fields = RefreshTokenRequest.model_fields
+        assert "refresh_token" in fields, "refresh_token must be a model field"
