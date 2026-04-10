@@ -36,9 +36,7 @@ class TestImpactModelFileSizes:
     @pytest.mark.unit
     def test_coordinator_loc(self) -> None:
         loc = _count_lines(PHYSICS_DIR / "impact_model.py")
-        assert loc <= LOC_BUDGET, (
-            f"impact_model.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert loc <= LOC_BUDGET, f"impact_model.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_impact_physics_loc(self) -> None:

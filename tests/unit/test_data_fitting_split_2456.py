@@ -36,9 +36,7 @@ class TestDataFittingFileSizes:
     @pytest.mark.unit
     def test_coordinator_loc(self) -> None:
         loc = _count_lines(VAL_DIR / "data_fitting.py")
-        assert loc <= LOC_BUDGET, (
-            f"data_fitting.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert loc <= LOC_BUDGET, f"data_fitting.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_models_loc(self) -> None:
