@@ -584,3 +584,42 @@ class TestMeshLoaderContracts:
         for face in mesh.faces:
             for idx in face.indices:
                 assert 0 <= idx < mesh.vertex_count
+
+
+class TestIssue2480GltfFallbackNoPlaceholder:
+    """Issue #2480: _load_gltf_basic must raise MeshLoadError, not return placeholder."""
+
+    def test_gltf_without_trimesh_raises_not_returns_placeholder(
+        self, tmp_path: Path
+    ) -> None:
+        """_load_gltf_basic must raise MeshLoadError rather than silently returning degenerate geometry."""
+        from src.unreal_integration.mesh_loader import MeshLoadError
+
+        gltf_content = {
+            "asset": {"version": "2.0"},
+            "meshes": [{"name": "test", "primitives": [{"attributes": {}}]}],
+        }
+        gltf_file = tmp_path / "test.gltf"
+        gltf_file.write_text(json.dumps(gltf_content))
+
+        loader = MeshLoader()
+
+        import unittest.mock as mock
+
+        with (
+            mock.patch.dict("sys.modules", {"trimesh": None}),
+            pytest.raises(MeshLoadError, match="(?i)gltf|accessor|buffer|trimesh"),
+        ):
+            loader._load_gltf_basic(gltf_file)
+
+    def test_gltf_no_meshes_still_raises(self, tmp_path: Path) -> None:
+        """_load_gltf_basic must raise MeshLoadError when no meshes present."""
+        from src.unreal_integration.mesh_loader import MeshLoadError
+
+        gltf_content = {"asset": {"version": "2.0"}}
+        gltf_file = tmp_path / "empty.gltf"
+        gltf_file.write_text(json.dumps(gltf_content))
+
+        loader = MeshLoader()
+        with pytest.raises(MeshLoadError):
+            loader._load_gltf_basic(gltf_file)
