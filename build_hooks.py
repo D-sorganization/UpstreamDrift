@@ -27,9 +27,13 @@ class UIBuildHook(BuildHookInterface):
         # Check if we should skip UI build
         # Always skip UI build in CI environment or if explicitly requested
         if environ.get("CI") or environ.get("SKIP_UI_BUILD"):
-            logger.warning("Skipping UI build (CI environment or SKIP_UI_BUILD set)")
+            logger.info("Skipping UI build (CI environment or SKIP_UI_BUILD set)")
             if not dist_dir.exists():
-                logger.warning("Warning: UI dist directory does not exist!")
+                raise RuntimeError(
+                    f"UI dist directory {dist_dir} is absent in CI. "
+                    "Build the frontend with `npm run build` in the ui/ directory "
+                    "before packaging, or set SKIP_UI_BUILD only when ui/dist is present."
+                )
             return
 
         if not dist_dir.exists() or self.config.get("force_ui_build"):

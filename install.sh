@@ -34,20 +34,23 @@ else
     exit 1
 fi
 
-# Check for pipx (recommended) or pip
+REPO_URL="https://github.com/D-sorganization/UpstreamDrift.git"
+
+# Determine install target: prefer a git+https URL so the script works when
+# piped from `curl | bash` (no local checkout exists at that point).
 if command -v pipx &> /dev/null; then
     echo "✓ pipx found - using isolated installation"
-    INSTALL_CMD="pipx install ."
+    INSTALL_CMD="pipx install git+${REPO_URL}"
 elif command -v pip3 &> /dev/null; then
     echo "⚠ pipx not found - using pip (consider installing pipx)"
-    INSTALL_CMD="pip3 install ."
+    INSTALL_CMD="pip3 install git+${REPO_URL}"
 else
     echo "✗ Neither pipx nor pip found"
     exit 1
 fi
 
 echo
-echo "Installing Golf Modeling Suite..."
+echo "Installing Golf Modeling Suite from ${REPO_URL}..."
 echo "  Command: $INSTALL_CMD"
 echo
 
