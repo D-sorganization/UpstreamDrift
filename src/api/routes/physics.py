@@ -23,7 +23,7 @@ from src.shared.python.logging_pkg.logging_config import (
     get_logger as _get_module_logger,
 )
 
-from ..dependencies import get_engine_manager, get_logger
+from ..dependencies import get_engine_manager, get_logger, get_simulation_service
 from ..models.requests import (
     ActuatorUpdateRequest,
     CameraPresetRequest,
@@ -44,6 +44,8 @@ from ..models.responses import (
 if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
 
+    from ..services.simulation_service import SimulationService
+
 _logger = _get_module_logger(__name__)
 
 router = APIRouter()
@@ -60,10 +62,6 @@ def clear_physics_caches() -> None:
     _CONTROL_INTERFACE_CACHE.clear()
     _FEATURES_REGISTRY_CACHE.clear()
 
-
-# Module-level state is stored in app.state via dependency injection.
-# These defaults are used when no simulation state exists yet.
-_DEFAULT_SPEED_FACTOR = 1.0
 
 # Camera preset definitions (position, target, up vectors)
 CAMERA_PRESETS: dict[str, dict[str, list[float]]] = {
@@ -464,6 +462,7 @@ async def get_control_features(
 @handle_api_errors
 async def get_simulation_stats(
     engine_manager: EngineManager = Depends(get_engine_manager),
+    simulation_service: SimulationService = Depends(get_simulation_service),
 ) -> SimulationStatsResponse:
     """Get simulation runtime statistics.
 
@@ -476,14 +475,9 @@ async def get_simulation_stats(
     if engine is not None:
         sim_time = getattr(engine, "time", 0.0)
 
-    # Retrieve simulation tracking state from engine manager
-    start_time = getattr(engine_manager, "_sim_start_time", time.time())
-    wall_time = time.time() - start_time
-    frame_count = getattr(engine_manager, "_sim_frame_count", 0)
-    speed_factor = getattr(engine_manager, "_speed_factor", _DEFAULT_SPEED_FACTOR)
-    is_recording = getattr(engine_manager, "_is_recording", False)
-
-    fps = frame_count / wall_time if wall_time > 0 else 0.0
+    stats = simulation_service.stats
+    wall_time = time.time() - stats.start_time
+    fps = stats.frame_count / wall_time if wall_time > 0 else 0.0
     real_time_factor = sim_time / wall_time if wall_time > 0 else 0.0
 
     return SimulationStatsResponse(
@@ -491,9 +485,9 @@ async def get_simulation_stats(
         wall_time=wall_time,
         fps=fps,
         real_time_factor=real_time_factor,
-        speed_factor=speed_factor,
-        is_recording=is_recording,
-        frame_count=frame_count,
+        speed_factor=stats.speed_factor,
+        is_recording=stats.is_recording,
+        frame_count=stats.frame_count,
     )
 
 
@@ -501,20 +495,20 @@ async def get_simulation_stats(
 @handle_api_errors
 async def set_simulation_speed(
     request: SpeedControlRequest,
-    engine_manager: EngineManager = Depends(get_engine_manager),
+    simulation_service: SimulationService = Depends(get_simulation_service),
 ) -> SpeedControlResponse:
     """Set simulation speed multiplier.
 
     Args:
         request: Speed control parameters.
-        engine_manager: Injected engine manager.
+        simulation_service: Injected simulation service.
 
     Returns:
         Applied speed factor and status.
     """
     if not (request is not None):
         raise ValueError("request must be provided")
-    engine_manager._speed_factor = request.speed_factor  # type: ignore[attr-defined]
+    simulation_service.set_speed_factor(request.speed_factor)
 
     return SpeedControlResponse(
         speed_factor=request.speed_factor,
@@ -557,14 +551,14 @@ async def set_camera_preset(
 @handle_api_errors
 async def control_recording(
     request: TrajectoryRecordRequest,
-    engine_manager: EngineManager = Depends(get_engine_manager),
+    simulation_service: SimulationService = Depends(get_simulation_service),
     logger: Any = Depends(get_logger),
 ) -> TrajectoryRecordResponse:
     """Control trajectory recording (start, stop, export).
 
     Args:
         request: Recording action and export format.
-        engine_manager: Injected engine manager.
+        simulation_service: Injected simulation service (owns recording state).
         logger: Injected logger.
 
     Returns:
@@ -573,8 +567,7 @@ async def control_recording(
     action = request.action
 
     if action == "start":
-        engine_manager._is_recording = True  # type: ignore[attr-defined]
-        engine_manager._recorded_frames = []  # type: ignore[attr-defined]
+        simulation_service.start_recording()
         return TrajectoryRecordResponse(  # type: ignore[call-arg]
             recording=True,
             frame_count=0,
@@ -582,8 +575,8 @@ async def control_recording(
         )
 
     if action == "stop":
-        engine_manager._is_recording = False  # type: ignore[attr-defined]
-        frame_count = len(getattr(engine_manager, "_recorded_frames", []))
+        simulation_service.stop_recording()
+        frame_count = len(simulation_service.stats.recorded_frames)
         return TrajectoryRecordResponse(  # type: ignore[call-arg]
             recording=False,
             frame_count=frame_count,
@@ -591,7 +584,7 @@ async def control_recording(
         )
 
     if action == "export":
-        recorded = getattr(engine_manager, "_recorded_frames", [])
+        recorded = simulation_service.stats.recorded_frames
         frame_count = len(recorded)
         export_path = None
 
@@ -618,7 +611,7 @@ async def control_recording(
                 )
 
         return TrajectoryRecordResponse(
-            recording=getattr(engine_manager, "_is_recording", False),
+            recording=simulation_service.stats.is_recording,
             frame_count=frame_count,
             status="Trajectory exported" if export_path else "No frames to export",
             export_path=export_path,

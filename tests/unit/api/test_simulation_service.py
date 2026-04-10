@@ -490,3 +490,160 @@ class TestPerformAnalysis:
 
         # Should return empty results without raising
         assert isinstance(results, dict)
+
+
+# ──────────────────────────────────────────────────────────────
+#  SimulationStats — authoritative runtime state (issue #2469)
+# ──────────────────────────────────────────────────────────────
+
+
+class TestSimulationStats:
+    """SimulationStats dataclass is the single source of truth for runtime state."""
+
+    def test_can_import(self):
+        from src.api.services.simulation_service import SimulationStats  # noqa: F401
+
+    def test_default_frame_count_is_zero(self):
+        from src.api.services.simulation_service import SimulationStats
+
+        s = SimulationStats()
+        assert s.frame_count == 0
+
+    def test_default_is_not_recording(self):
+        from src.api.services.simulation_service import SimulationStats
+
+        s = SimulationStats()
+        assert s.is_recording is False
+
+    def test_default_recorded_frames_is_empty(self):
+        from src.api.services.simulation_service import SimulationStats
+
+        s = SimulationStats()
+        assert s.recorded_frames == []
+
+    def test_default_speed_factor_is_one(self):
+        from src.api.services.simulation_service import SimulationStats
+
+        s = SimulationStats()
+        assert s.speed_factor == 1.0
+
+    def test_start_time_is_float(self):
+        from src.api.services.simulation_service import SimulationStats
+
+        s = SimulationStats()
+        assert isinstance(s.start_time, float)
+
+
+class TestSimulationServiceStatsTracking:
+    """SimulationService owns stats and wires them through the sim loop."""
+
+    def test_service_exposes_stats_property(self, mock_engine_manager):
+        from src.api.services.simulation_service import (
+            SimulationService,
+            SimulationStats,
+        )
+
+        service = SimulationService(mock_engine_manager)
+        assert isinstance(service.stats, SimulationStats)
+
+    def test_start_recording_sets_flag(self, mock_engine_manager):
+        from src.api.services.simulation_service import SimulationService
+
+        service = SimulationService(mock_engine_manager)
+        service.start_recording()
+        assert service.stats.is_recording is True
+
+    def test_start_recording_clears_frames(self, mock_engine_manager):
+        from src.api.services.simulation_service import SimulationService
+
+        service = SimulationService(mock_engine_manager)
+        # Manually place a frame to verify it gets cleared
+        service.stats.recorded_frames.append({"t": 0.0})
+        service.start_recording()
+        assert service.stats.recorded_frames == []
+
+    def test_stop_recording_clears_flag(self, mock_engine_manager):
+        from src.api.services.simulation_service import SimulationService
+
+        service = SimulationService(mock_engine_manager)
+        service.start_recording()
+        service.stop_recording()
+        assert service.stats.is_recording is False
+
+    def test_set_speed_factor_updates_stats(self, mock_engine_manager):
+        from src.api.services.simulation_service import SimulationService
+
+        service = SimulationService(mock_engine_manager)
+        service.set_speed_factor(2.5)
+        assert service.stats.speed_factor == 2.5
+
+    async def test_frame_count_reflects_simulation_steps(self, mock_engine_manager):
+        """After run_simulation, stats.frame_count equals the steps executed."""
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine.step = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        with (
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+        ):
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_recorder.is_recording = False
+            mock_recorder.record_step = MagicMock()
+            mock_recorder.get_time_series = MagicMock(
+                return_value=(np.array([0.0, 0.001]), np.array([[0], [0.1]]))
+            )
+            MockRecorder.return_value = mock_recorder
+
+            service = SimulationService(mock_engine_manager)
+            request = SimulationRequest(
+                engine_type="mujoco",
+                duration=0.01,
+                timestep=0.001,
+            )
+
+            await service.run_simulation(request)
+            # 0.01 / 0.001 = 10 steps
+            assert service.stats.frame_count == 10
+
+    async def test_start_time_reset_on_run_simulation(self, mock_engine_manager):
+        """run_simulation resets start_time so wall_time is accurate."""
+        import time
+
+        from src.api.models.requests import SimulationRequest
+        from src.api.services.simulation_service import SimulationService
+
+        mock_engine = MagicMock(spec=PhysicsEngine)
+        mock_engine.step = MagicMock()
+        mock_engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        with (
+            patch(
+                "src.api.services.simulation_service.GenericPhysicsRecorder"
+            ) as MockRecorder,
+            patch("src.api.services.simulation_service.EngineType", MockEngineType),
+        ):
+            mock_recorder = MagicMock(spec=_RECORDER_SPEC_ATTRS)
+            mock_recorder.is_recording = False
+            mock_recorder.record_step = MagicMock()
+            mock_recorder.get_time_series = MagicMock(
+                return_value=(np.array([0.0]), np.array([[0]]))
+            )
+            MockRecorder.return_value = mock_recorder
+
+            service = SimulationService(mock_engine_manager)
+            before = time.time()
+            request = SimulationRequest(engine_type="mujoco", duration=0.001)
+            await service.run_simulation(request)
+            after = time.time()
+
+            assert before <= service.stats.start_time <= after
