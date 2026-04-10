@@ -2,137 +2,62 @@
 
 from __future__ import annotations
 
-import json
-import tempfile
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
-from datetime import datetime, timezone
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, cast
-
-try:
-    import ezc3d
-except ImportError:
-    ezc3d = None  # type: ignore[assignment, unused-ignore]
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 try:
-    from .logger_utils import get_logger, log_execution_time
+    from ._c3d_export import export_dataframe, unit_scale
+    from ._c3d_force_plates import (
+        detect_force_plate_channels,
+        extract_force_plate_dataframe,
+        force_plate_columns,
+        pivot_analog_to_wide,
+    )
+    from ._c3d_io import build_metadata, load_c3d_file
+    from ._c3d_models import (
+        BIOMECHANICAL_MARKER_MAX_M,
+        BIOMECHANICAL_MARKER_MIN_M,
+        SCHEMA_VERSION,
+        C3DEvent,
+        C3DMapping,
+        C3DMetadata,
+    )
+    from .logger_utils import get_logger
 except ImportError:
-    from logger_utils import get_logger, log_execution_time  # type: ignore[no-redef]
+    from _c3d_export import export_dataframe, unit_scale  # type: ignore[no-redef]
+    from _c3d_force_plates import (  # type: ignore[no-redef]
+        detect_force_plate_channels,
+        extract_force_plate_dataframe,
+        force_plate_columns,
+        pivot_analog_to_wide,
+    )
+    from _c3d_io import build_metadata, load_c3d_file  # type: ignore[no-redef]
+    from _c3d_models import (  # type: ignore[no-redef]
+        BIOMECHANICAL_MARKER_MAX_M,
+        BIOMECHANICAL_MARKER_MIN_M,
+        SCHEMA_VERSION,
+        C3DEvent,
+        C3DMapping,
+        C3DMetadata,
+    )
+    from logger_utils import get_logger  # type: ignore[no-redef]
 
 logger = get_logger(__name__)
 
-C3DMapping = dict[str, Any]
-SCHEMA_VERSION = "1.0"
-
-# Guideline P1: Biomechanical marker validation thresholds [m]
-# Source: NIST - Human body dimensions range from
-# ~0.001m (1mm detail) to ~10m (extended reach)
-BIOMECHANICAL_MARKER_MIN_M = 0.001  # 1mm minimum - detects mm/m confusion
-BIOMECHANICAL_MARKER_MAX_M = 10.0  # 10m maximum - detects unrealistic scales
-
-
-def _force_plate_columns(include_time: bool, compute_cop: bool) -> list[str]:
-    if not (include_time is not None):
-        raise ValueError("include_time must be provided")
-    if not (include_time is not None):
-        raise ValueError("include_time must be provided")
-    columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
-    if include_time:
-        columns.insert(1, "time")
-    if compute_cop:
-        columns.extend(["cop_x", "cop_y", "cop_z"])
-    return columns
-
-
-def _write_sidecar_metadata(path: Path, metadata: dict[str, Any]) -> None:
-    meta_path = path.with_name(f"{path.stem}_meta.json")
-    with open(meta_path, "w") as f:
-        json.dump(metadata, f, indent=2)
-
-
-def _add_cop_columns(plate_df: pd.DataFrame, ground_height: float) -> None:
-    if not (plate_df is not None):
-        raise ValueError("plate_df must be provided")
-    if not (plate_df is not None):
-        raise ValueError("plate_df must be provided")
-    fz = plate_df["fz"].to_numpy()
-    mx = plate_df["mx"].to_numpy()
-    my = plate_df["my"].to_numpy()
-
-    min_force_threshold = 10.0  # [N] minimum force for valid COP
-    valid_contact = np.abs(fz) > min_force_threshold
-
-    plate_df["cop_x"] = np.where(valid_contact, -my / fz, np.nan)
-    plate_df["cop_y"] = np.where(valid_contact, mx / fz, np.nan)
-    plate_df["cop_z"] = np.where(valid_contact, ground_height, np.nan)
-
-
-@dataclass(frozen=True)
-class C3DEvent:
-    """A labeled event occurring at a specific time within a capture."""
-
-    label: str
-    time: float
-
-    def __post_init__(self) -> None:
-        """Validate event data."""
-        if not self.label:
-            raise ValueError("Event label cannot be empty.")
-        # Time can be negative (pre-trigger) per spec, so we allow it.
-
-
-@dataclass(frozen=True)
-class C3DMetadata:
-    """Describes key properties of a C3D motion-capture recording."""
-
-    marker_labels: list[str]
-    frame_count: int
-    frame_rate: float
-    units: str
-    analog_labels: list[str]
-    analog_units: list[str]
-    analog_rate: float | None
-    events: list[C3DEvent]
-
-    def __post_init__(self) -> None:
-        """Validate metadata fields."""
-        if self.frame_count < 0:
-            raise ValueError(f"Frame count cannot be negative: {self.frame_count}")
-        if self.frame_rate < 0:
-            raise ValueError(f"Frame rate cannot be negative: {self.frame_rate}")
-        if self.analog_rate is not None and self.analog_rate < 0:
-            raise ValueError(f"Analog rate cannot be negative: {self.analog_rate}")
-
-        # Check consistency
-        if len(self.analog_units) != len(self.analog_labels):
-            raise ValueError(
-                "analog_units and analog_labels must have the same length: "
-                f"{len(self.analog_units)} units vs {len(self.analog_labels)} labels"
-            )
-
-    @property
-    def marker_count(self) -> int:
-        """Number of tracked markers in the recording."""
-
-        return len(self.marker_labels)
-
-    @property
-    def analog_count(self) -> int:
-        """Number of analog channels in the recording."""
-
-        return len(self.analog_labels)
-
-    @property
-    def duration(self) -> float:
-        """Capture duration in seconds, or ``0`` if the rate is missing."""
-
-        if self.frame_rate == 0:
-            return 0.0
-        return self.frame_count / self.frame_rate
+__all__ = [
+    "C3DEvent",
+    "C3DMetadata",
+    "C3DMapping",
+    "C3DDataReader",
+    "SCHEMA_VERSION",
+    "BIOMECHANICAL_MARKER_MIN_M",
+    "BIOMECHANICAL_MARKER_MAX_M",
+    "load_tour_average_reader",
+]
 
 
 class C3DDataReader:
@@ -152,26 +77,7 @@ class C3DDataReader:
         """Return metadata describing marker labels, frame count, rate, and units."""
 
         if self._metadata is None:
-            point_parameters = self._get_point_parameters()
-            marker_labels = [
-                label.strip() for label in point_parameters["LABELS"]["value"]
-            ]
-            frame_count = int(point_parameters["FRAMES"]["value"][0])
-            frame_rate = float(point_parameters["RATE"]["value"][0])
-            units = str(point_parameters["UNITS"]["value"][0])
-            analog_labels, analog_rate, analog_units = self._get_analog_details()
-            events = self._get_events()
-            self._metadata = C3DMetadata(
-                marker_labels=marker_labels,
-                frame_count=frame_count,
-                frame_rate=frame_rate,
-                units=units,
-                analog_labels=analog_labels,
-                analog_units=analog_units,
-                analog_rate=analog_rate,
-                events=events,
-            )
-
+            self._metadata = build_metadata(self._load(), self.file_path)
         return self._metadata
 
     def points_dataframe(
@@ -251,7 +157,7 @@ class C3DDataReader:
         target_units: str | None,
     ) -> np.ndarray:
         raw_coordinates = np.transpose(points[:3, :, :], axes=(2, 1, 0)).reshape(-1, 3)
-        return raw_coordinates * self._unit_scale(metadata.units, target_units)
+        return raw_coordinates * unit_scale(metadata.units, target_units)
 
     @staticmethod
     def _validate_marker_positions(
@@ -418,9 +324,17 @@ class C3DDataReader:
             residual_nan_threshold=residual_nan_threshold,
             target_units=target_units,
         )
-        return self._export_dataframe(
-            dataframe, output_path, file_format, sanitize=True
+        metadata = self.get_metadata()
+        result = export_dataframe(
+            dataframe,
+            output_path,
+            file_format,
+            sanitize=True,
+            source_file_name=self.file_path.name,
+            units=metadata.units,
         )
+        logger.info("Exported %s rows to %s", len(dataframe), result)
+        return result
 
     def export_analog(
         self,
@@ -449,9 +363,17 @@ class C3DDataReader:
         if not (output_path is not None):
             raise ValueError("output_path must be provided")
         dataframe = self.analog_dataframe(include_time=include_time)
-        return self._export_dataframe(
-            dataframe, output_path, file_format, sanitize=True
+        metadata = self.get_metadata()
+        result = export_dataframe(
+            dataframe,
+            output_path,
+            file_format,
+            sanitize=True,
+            source_file_name=self.file_path.name,
+            units=metadata.units,
         )
+        logger.info("Exported %s rows to %s", len(dataframe), result)
+        return result
 
     def get_force_plate_channels(self) -> dict[int, dict[str, str]]:
         """Detect and map force plate channels by plate number.
@@ -467,52 +389,7 @@ class C3DDataReader:
                  'mx': 'Mx1', 'my': 'My1', 'mz': 'Mz1'}, ...}
         """
         metadata = self.get_metadata()
-        labels = metadata.analog_labels
-
-        # Patterns for force plate detection
-        # Standard: Fx1, Fy1, Fz1, Mx1, My1, Mz1
-        # AMTI: FP1_Fx, FP1_Fy, etc.
-        # Kistler: Force.X1, Force.Y1, etc.
-        import re
-
-        plate_channels: dict[int, dict[str, str]] = {}
-
-        # Pattern 1: Standard suffix (Fx1, Fy1, Fz1, Mx1, My1, Mz1)
-        standard_pattern = re.compile(r"^(?:Force\.)?([FfMm])([xyzXYZ])(\d+)$")
-        # Pattern 2: Prefix style (FP1_Fx, FP1_Fy, etc.)
-        prefix_pattern = re.compile(r"^(?:FP|fp)?(\d+)[_.]?([FfMm])([xyzXYZ])$")
-
-        for label in labels:
-            label_stripped = label.strip()
-
-            # Try standard pattern first
-            match = standard_pattern.match(label_stripped)
-            if match:
-                force_or_moment = match.group(1).lower()  # 'f' or 'm'
-                axis = match.group(2).lower()  # 'x', 'y', 'z'
-                plate_num = int(match.group(3))
-
-                if plate_num not in plate_channels:
-                    plate_channels[plate_num] = {}
-
-                key = f"{force_or_moment}{axis}"  # 'fx', 'fy', 'fz', 'mx', 'my', 'mz'
-                plate_channels[plate_num][key] = label
-                continue
-
-            # Try prefix pattern
-            match = prefix_pattern.match(label_stripped)
-            if match:
-                plate_num = int(match.group(1))
-                force_or_moment = match.group(2).lower()
-                axis = match.group(3).lower()
-
-                if plate_num not in plate_channels:
-                    plate_channels[plate_num] = {}
-
-                key = f"{force_or_moment}{axis}"
-                plate_channels[plate_num][key] = label
-
-        return plate_channels
+        return detect_force_plate_channels(metadata.analog_labels)
 
     def force_plate_dataframe(
         self,
@@ -551,7 +428,7 @@ class C3DDataReader:
                 "No force plate channels detected in C3D file. "
                 "Expected channels like Fx1, Fy1, Fz1, Mx1, My1, Mz1."
             )
-            return pd.DataFrame(columns=_force_plate_columns(include_time, compute_cop))
+            return pd.DataFrame(columns=force_plate_columns(include_time, compute_cop))
 
         if plate_number is not None:
             if plate_number not in plate_channels:
@@ -561,342 +438,28 @@ class C3DDataReader:
                 )
             plate_channels = {plate_number: plate_channels[plate_number]}
 
-        analog_wide = self._pivot_analog_data()
+        analog_wide = pivot_analog_to_wide(self.analog_dataframe(include_time=False))
         metadata = self.get_metadata()
 
-        result_dfs = self._build_plate_dataframes(
-            plate_channels, analog_wide, compute_cop, ground_height
-        )
-
-        if not result_dfs:
-            return pd.DataFrame(columns=_force_plate_columns(include_time, compute_cop))
-
-        result = pd.concat(result_dfs, ignore_index=True)
-
-        if include_time and metadata.analog_rate:
-            result.insert(1, "time", result["sample"] / metadata.analog_rate)
-
-        logger.info(
-            "Extracted force plate data for %d plates, %d samples from %s",
-            len(plate_channels),
-            len(result),
+        return extract_force_plate_dataframe(
+            plate_channels,
+            analog_wide,
+            metadata.analog_rate,
+            include_time,
+            compute_cop,
+            ground_height,
             self.file_path.name,
         )
-        return result
-
-    def _pivot_analog_data(self) -> pd.DataFrame:
-        analog_df = self.analog_dataframe(include_time=False)
-        return analog_df.pivot(
-            index="sample", columns="channel", values="value"
-        ).reset_index()
-
-    @staticmethod
-    def _build_plate_dataframes(
-        plate_channels: dict[int, dict[str, str]],
-        analog_wide: pd.DataFrame,
-        compute_cop: bool,
-        ground_height: float,
-    ) -> list[pd.DataFrame]:
-        if not (plate_channels is not None):
-            raise ValueError("plate_channels must be provided")
-        if not (plate_channels is not None):
-            raise ValueError("plate_channels must be provided")
-        required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
-        result_dfs: list[pd.DataFrame] = []
-
-        for plate_num, channels in sorted(plate_channels.items()):
-            missing_keys = required_keys - set(channels.keys())
-            if missing_keys:
-                logger.warning(
-                    f"Force plate {plate_num} missing channels: {missing_keys}. "
-                    "Skipping."
-                )
-                continue
-
-            plate_df = pd.DataFrame(
-                {
-                    "sample": analog_wide["sample"],
-                    "plate": plate_num,
-                    "fx": analog_wide[channels["fx"]].to_numpy(),
-                    "fy": analog_wide[channels["fy"]].to_numpy(),
-                    "fz": analog_wide[channels["fz"]].to_numpy(),
-                    "mx": analog_wide[channels["mx"]].to_numpy(),
-                    "my": analog_wide[channels["my"]].to_numpy(),
-                    "mz": analog_wide[channels["mz"]].to_numpy(),
-                }
-            )
-
-            if compute_cop:
-                _add_cop_columns(plate_df, ground_height)
-
-            result_dfs.append(plate_df)
-
-        return result_dfs
 
     def get_force_plate_count(self) -> int:
         """Return the number of detected force plates."""
         return len(self.get_force_plate_channels())
 
-    def _get_point_parameters(self) -> dict[str, Any]:
-        """Get POINT parameters from the C3D file."""
-        c3d_data = self._load()
-        try:
-            return cast(dict[str, Any], c3d_data["parameters"]["POINT"])
-        except KeyError as error:  # pragma: no cover - defensive guard
-            raise ValueError(
-                f"POINT parameters missing from C3D file: {self.file_path}"
-            ) from error
-
-    def _get_analog_parameters(self) -> dict[str, Any] | None:
-        """Get ANALOG parameters from the C3D file, if present."""
-        c3d_data = self._load()
-        analog_params = c3d_data["parameters"].get("ANALOG")
-        return (
-            cast(dict[str, Any], analog_params) if analog_params is not None else None
-        )
-
-    def _get_analog_details(self) -> tuple[list[str], float | None, list[str]]:
-        """Get analog channel labels, sample rate, and units from the C3D file."""
-        analog_parameters = self._get_analog_parameters()
-        analog_array = self._load()["data"]["analogs"]
-        channel_count = analog_array.shape[1]
-
-        if analog_parameters is None:
-            labels = []
-            units = []
-            analog_rate = None
-        else:
-            labels = [
-                label.strip()
-                for label in analog_parameters.get("LABELS", {}).get("value", [])
-            ]
-            units = [
-                unit.strip()
-                for unit in analog_parameters.get("UNITS", {}).get("value", [])
-            ]
-            analog_rate = float(analog_parameters.get("RATE", {}).get("value", [0])[0])
-
-        if not labels and channel_count > 0:
-            labels = [f"Analog_{idx + 1}" for idx in range(channel_count)]
-
-        # Ensure units list checks out
-        if len(units) < len(labels):
-            units.extend([""] * (len(labels) - len(units)))
-        elif len(units) > len(labels):
-            units = units[: len(labels)]
-
-        return labels, analog_rate, units
-
-    def _get_events(self) -> list[C3DEvent]:
-        """Extract event markers from the C3D file."""
-        c3d_data = self._load()
-        event_parameters = c3d_data["parameters"].get("EVENT")
-        if not event_parameters:
-            return []
-
-        labels_raw: Iterable[str] = event_parameters.get("LABELS", {}).get("value", [])
-        times = event_parameters.get("TIMES", {}).get("value")
-        if times is None:
-            return []
-
-        times_array = np.asarray(times)
-        if times_array.ndim == 2:
-            times_array = times_array[1, :]
-
-        events: list[C3DEvent] = []
-        for idx, label in enumerate(labels_raw):
-            time_value = float(times_array[idx]) if idx < len(times_array) else np.nan
-            if np.isfinite(time_value):
-                events.append(C3DEvent(label=str(label).strip(), time=time_value))
-
-        return events
-
     def _load(self) -> C3DMapping:
         """Load the C3D file if not already loaded."""
         if self._c3d_data is None:
-            if ezc3d is None:
-                raise ImportError(
-                    "ezc3d is required for C3D file reading. "
-                    "Install it with: pip install ezc3d\n"
-                    "Note: ezc3d requires Python >=3.10. "
-                    "For Python 3.9, this functionality is not available."
-                )
-            if not self.file_path.exists():
-                raise FileNotFoundError(f"File not found: {self.file_path}")
-            self._c3d_data = ezc3d.c3d(str(self.file_path))
+            self._c3d_data = load_c3d_file(self.file_path)
         return self._c3d_data
-
-    @staticmethod
-    def _sanitize_for_csv(value: Any) -> Any:
-        """Sanitize a value to prevent CSV injection."""
-        if not isinstance(value, str):
-            return value
-        if value.startswith(("=", "+", "-", "@")):
-            return f"'{value}"
-        return value
-
-    @staticmethod
-    def _unit_scale(current_units: str, target_units: str | None) -> float:
-        """Calculate scaling factor for unit conversion."""
-        if target_units is None:
-            return 1.0
-
-        normalized_current = current_units.lower()
-        normalized_target = target_units.lower()
-
-        if normalized_current == normalized_target:
-            return 1.0
-
-        # Define conversion factors to meters
-        to_meters = {
-            "m": 1.0,
-            "mm": 0.001,
-            "mm^2": 0.000001,  # Added minimal robust area unit support for consistency?
-            "cm": 0.01,
-            "in": 0.0254,
-            "ft": 0.3048,
-        }
-        # Note: Original code only had length units.
-        # Stick to original:
-        to_meters = {
-            "m": 1.0,
-            "mm": 0.001,
-            "cm": 0.01,
-            "in": 0.0254,
-            "ft": 0.3048,
-        }
-
-        if normalized_current not in to_meters:
-            raise ValueError(f"Unsupported source unit: {current_units}")
-        if normalized_target not in to_meters:
-            raise ValueError(f"Unsupported target unit: {target_units}")
-
-        return to_meters[normalized_current] / to_meters[normalized_target]
-
-    def _export_dataframe(
-        self,
-        dataframe: pd.DataFrame,
-        output_path: Path | str,
-        file_format: str | None,
-        sanitize: bool = True,
-    ) -> Path:
-        """Export a DataFrame to CSV, JSON, or NPZ format.
-
-        Includes validation, versioning, and telemetry.
-        """
-        if not (dataframe is not None):
-            raise ValueError("dataframe must be provided")
-        if not (dataframe is not None):
-            raise ValueError("dataframe must be provided")
-        path = Path(output_path).resolve()
-        self._validate_export_path(path)
-
-        if not file_format:
-            if not path.suffix:
-                raise ValueError(
-                    "File format could not be inferred from the path suffix."
-                )
-            file_format = path.suffix.lstrip(".")
-
-        normalized_format = file_format.lower()
-        path.parent.mkdir(parents=True, exist_ok=True)
-
-        metadata = self._build_export_metadata(dataframe)
-
-        with log_execution_time(f"export_{normalized_format}"):
-            if normalized_format == "csv":
-                self._export_csv(dataframe, path, metadata, sanitize)
-            elif normalized_format == "json":
-                self._export_json(dataframe, path, metadata)
-            elif normalized_format == "npz":
-                self._export_npz(dataframe, path, metadata)
-            else:  # pragma: no cover - defensive guard for unrecognized formats
-                raise ValueError(f"Unsupported export format: {file_format}")
-
-        logger.info("Exported %s rows to %s", len(dataframe), path)
-        return path
-
-    @staticmethod
-    def _validate_export_path(path: Path) -> None:
-        base_dir = Path.cwd().resolve()
-
-        import inspect
-
-        frame = inspect.currentframe()
-        is_security_test = False
-        try:
-            while frame:
-                if frame.f_code.co_name == "test_security_prevents_directory_traversal":
-                    is_security_test = True
-                    break
-                frame = frame.f_back
-        finally:
-            del frame
-
-        is_test_env = not is_security_test and any(
-            [
-                "pytest" in str(base_dir),
-                "test" in str(base_dir).lower(),
-                str(tempfile.gettempdir()) in str(path) and "pytest" in str(path),
-                "pytest" in str(path),
-            ]
-        )
-
-        if not is_test_env and base_dir not in path.parents and path != base_dir:
-            raise ValueError(
-                f"Security: Refusing to output to {path} "
-                f"(outside project root {base_dir})"
-            )
-
-    def _build_export_metadata(self, dataframe: pd.DataFrame) -> dict[str, Any]:
-        return {
-            "schema_version": SCHEMA_VERSION,
-            "created_at_utc": datetime.now(timezone.utc).isoformat(),  # noqa: UP017
-            "source_file": self.file_path.name,
-            "row_count": len(dataframe),
-            "units": self.get_metadata().units,
-        }
-
-    def _export_csv(
-        self,
-        dataframe: pd.DataFrame,
-        path: Path,
-        metadata: dict[str, Any],
-        sanitize: bool,
-    ) -> None:
-        if not (dataframe is not None):
-            raise ValueError("dataframe must be provided")
-        if not (dataframe is not None):
-            raise ValueError("dataframe must be provided")
-        df_to_export = dataframe.copy() if sanitize else dataframe
-        if sanitize:
-            for col in df_to_export.select_dtypes(include=[object, "string"]).columns:
-                df_to_export[col] = df_to_export[col].apply(self._sanitize_for_csv)
-        df_to_export.to_csv(path, index=False)
-        _write_sidecar_metadata(path, metadata)
-
-    @staticmethod
-    def _export_json(
-        dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
-    ) -> None:
-        output = {
-            "metadata": metadata,
-            "data": dataframe.to_dict(orient="records"),
-        }
-        with open(path, "w") as f:
-            json.dump(output, f, indent=2)
-
-    @staticmethod
-    def _export_npz(
-        dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
-    ) -> None:
-        if not (dataframe is not None):
-            raise ValueError("dataframe must be provided")
-        if not (dataframe is not None):
-            raise ValueError("dataframe must be provided")
-        arrays = {column: dataframe[column].to_numpy() for column in dataframe}
-        np.savez(path, _metadata=json.dumps(metadata), **arrays)
-        _write_sidecar_metadata(path, metadata)
 
 
 def load_tour_average_reader(base_directory: Path | None = None) -> C3DDataReader:
