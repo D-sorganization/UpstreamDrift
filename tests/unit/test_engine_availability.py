@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
@@ -62,6 +64,26 @@ class TestGetEngineStatus:
         s1 = get_engine_status("math")
         s2 = get_engine_status("math")
         assert s1 == s2
+
+    def test_broken_opensim_path_constructor_is_not_available(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        import src.shared.python.engine_core.engine_availability as availability
+
+        class BrokenOpenSim:
+            Manager = object
+            Vector = object
+            InverseDynamicsSolver = object
+
+            class Model:
+                def __init__(self) -> None:
+                    pass
+
+        availability._engine_status_cache.pop("opensim", None)
+        availability._engine_error_cache.pop("opensim", None)
+        monkeypatch.setitem(sys.modules, "opensim", BrokenOpenSim)
+
+        assert get_engine_status("opensim") == EngineStatus.BROKEN
 
 
 # ---------------------------------------------------------------------------

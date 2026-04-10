@@ -77,10 +77,13 @@ def test_initialization(engine):
 
 
 @patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin")
-def test_load_from_path(mock_pin, engine):
-    engine.load_from_path("test.urdf")
+def test_load_from_path(mock_pin, engine, tmp_path):
+    model_path = tmp_path / "test.urdf"
+    model_path.write_text("<robot name='test'/>")
 
-    mock_pin.buildModelFromUrdf.assert_called_once_with("test.urdf")
+    engine.load_from_path(str(model_path))
+
+    mock_pin.buildModelFromUrdf.assert_called_once_with(str(model_path))
     mock_pin.neutral.assert_called_once()
     assert engine.model is not None
     assert engine.data is not None

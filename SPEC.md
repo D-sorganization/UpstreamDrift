@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.82                                             |
+| **Spec Version**        | 1.0.84                                             |
 | **Last Spec Update**    | 2026-04-10                                         |
 
 ## 2. Purpose & Mission
@@ -493,6 +493,8 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-10 | 1.0.84  | Optional-stack contracts: tightened OpenSim availability probing to reject importable-but-incompatible bindings, exported unlimited MuJoCo hinge joints as URDF `continuous` joints, and aligned Pinocchio/OpenSim audit tests with the implemented engine contracts. |
+| 2026-04-10 | 1.0.83  | CI governance: removed the `**.md` pull-request ignore from CI Standard so required quality-gate checks run for SPEC-only pull requests instead of leaving required checks permanently pending. |
 | 2026-04-10 | 1.0.82  | Refactor(data-fitting): decomposed `validation_pkg/data_fitting.py` into focused data-model, inverse-kinematics, parameter-estimation, sensitivity, and pipeline helper modules while preserving the legacy facade import surface and adding facade regression coverage. |
 | 2026-04-10 | 1.0.81  | Test framework fix: finalized the pendulum panel-builder helper isolation by reloading `panel_builders` under fixture-scoped fake simulation and perturbation modules, preserving richer fake `run_simulation` results, and removing stale merge-conflict artifacts that broke linting on the branch. |
 | 2026-04-10 | 1.0.80  | Test isolation(Drake): expanded the isolated Drake strict-test mock surface to include `pydrake.geometry` and `pydrake.multibody.tree`, reducing cross-test import failures when the optional-stack lane executes strict Drake mocks before the broader Drake wrapper and integration-audit suites. |

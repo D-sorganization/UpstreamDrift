@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -21,15 +22,40 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io impo
 _URDF_IO_MUJOCO = (
     "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco"
 )
+_URDF_IO_JOINT_TYPES = (
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io"
+    ".MJCF_TO_URDF_JOINT_TYPES"
+)
+
+_MUJOCO_IS_MOCKED = isinstance(mujoco.mjtJoint.mjJNT_HINGE, MagicMock)
+_MJT_OBJ = (
+    SimpleNamespace(mjOBJ_BODY=1, mjOBJ_JOINT=3, mjOBJ_GEOM=5)
+    if _MUJOCO_IS_MOCKED
+    else mujoco.mjtObj
+)
+_MJT_JOINT = (
+    SimpleNamespace(mjJNT_FREE=0, mjJNT_BALL=1, mjJNT_SLIDE=2, mjJNT_HINGE=3)
+    if _MUJOCO_IS_MOCKED
+    else mujoco.mjtJoint
+)
+_MJT_GEOM = (
+    SimpleNamespace(mjGEOM_BOX=6, mjGEOM_SPHERE=2)
+    if _MUJOCO_IS_MOCKED
+    else mujoco.mjtGeom
+)
+_JOINT_TYPE_MAP = {
+    _MJT_JOINT.mjJNT_HINGE: "revolute",
+    _MJT_JOINT.mjJNT_SLIDE: "prismatic",
+}
 
 
 def _make_mock_mujoco(**overrides: Any) -> MagicMock:
     """Create a mock mujoco module that preserves enum types but stubs C functions."""
     mock = MagicMock()
     # Preserve real enum types so comparisons work
-    mock.mjtObj = mujoco.mjtObj
-    mock.mjtJoint = mujoco.mjtJoint
-    mock.mjtGeom = mujoco.mjtGeom
+    mock.mjtObj = _MJT_OBJ
+    mock.mjtJoint = _MJT_JOINT
+    mock.mjtGeom = _MJT_GEOM
     mock.mjtTrn = getattr(mujoco, "mjtTrn", MagicMock())
     for key, val in overrides.items():
         setattr(mock, key, val)
@@ -39,7 +65,8 @@ def _make_mock_mujoco(**overrides: Any) -> MagicMock:
 @pytest.fixture
 def mock_mujoco_model() -> MagicMock:
     """Create a mock MuJoCo model."""
-    model = MagicMock(spec=mujoco.MjModel)
+    model_spec = None if isinstance(mujoco.MjModel, MagicMock) else mujoco.MjModel
+    model = MagicMock(spec=model_spec) if model_spec is not None else MagicMock()
 
     # Setup standard model structure
     model.nbody = 3  # World, Link1, Link2
@@ -57,9 +84,7 @@ def mock_mujoco_model() -> MagicMock:
     model.body_ipos = np.array([[0, 0, 0], [0, 0, 0], [0.5, 0, 0]])
 
     # Joint properties
-    model.jnt_type = np.array(
-        [mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE]
-    )
+    model.jnt_type = np.array([_MJT_JOINT.mjJNT_HINGE, _MJT_JOINT.mjJNT_SLIDE])
     model.jnt_pos = np.array([[0, 0, 0], [1, 0, 0]])
     model.jnt_axis = np.array([[0, 0, 1], [1, 0, 0]])
     model.jnt_limited = np.array([True, False])
@@ -67,9 +92,7 @@ def mock_mujoco_model() -> MagicMock:
 
     # Geom properties
     model.geom_bodyid = np.array([1, 2])
-    model.geom_type = np.array(
-        [mujoco.mjtGeom.mjGEOM_BOX, mujoco.mjtGeom.mjGEOM_SPHERE]
-    )
+    model.geom_type = np.array([_MJT_GEOM.mjGEOM_BOX, _MJT_GEOM.mjGEOM_SPHERE])
     model.geom_size = np.array([[0.1, 0.1, 0.1], [0.05, 0, 0]])
     model.geom_pos = np.array([[0, 0, 0], [0, 0, 0]])
     model.geom_quat = np.array([[1, 0, 0, 0], [1, 0, 0, 0]])
@@ -136,11 +159,11 @@ def test_export_to_urdf(mock_mujoco_model: MagicMock) -> None:
 
     def id2name(m: Any, obj_type: int, obj_id: int) -> str:
         """Map MuJoCo object type and id to a name string."""
-        if obj_type == mujoco.mjtObj.mjOBJ_BODY:
+        if obj_type == _MJT_OBJ.mjOBJ_BODY:
             return ["world", "link1", "link2"][obj_id]
-        if obj_type == mujoco.mjtObj.mjOBJ_JOINT:
+        if obj_type == _MJT_OBJ.mjOBJ_JOINT:
             return f"joint_{obj_id}"
-        if obj_type == mujoco.mjtObj.mjOBJ_GEOM:
+        if obj_type == _MJT_OBJ.mjOBJ_GEOM:
             return f"geom_{obj_id}"
         return "obj"
 
@@ -149,7 +172,11 @@ def test_export_to_urdf(mock_mujoco_model: MagicMock) -> None:
     )
     mock_mj.MjData.return_value = MagicMock()
 
-    with patch(_URDF_IO_MUJOCO, mock_mj), patch("pathlib.Path.write_text"):
+    with (
+        patch(_URDF_IO_MUJOCO, mock_mj),
+        patch(_URDF_IO_JOINT_TYPES, _JOINT_TYPE_MAP),
+        patch("pathlib.Path.write_text"),
+    ):
         exporter = URDFExporter(mock_mujoco_model)
         urdf_str = exporter.export_to_urdf("output.urdf", "test_robot")
 
@@ -160,6 +187,37 @@ def test_export_to_urdf(mock_mujoco_model: MagicMock) -> None:
         assert 'type="prismatic"' in urdf_str
 
 
+def test_export_unlimited_hinge_as_continuous(mock_mujoco_model: MagicMock) -> None:
+    """Unlimited MuJoCo hinge joints must map to valid URDF continuous joints."""
+    mock_mujoco_model.jnt_type[1] = _MJT_JOINT.mjJNT_HINGE
+    mock_mujoco_model.jnt_limited[1] = False
+
+    def id2name(m: Any, obj_type: int, obj_id: int) -> str:
+        if obj_type == _MJT_OBJ.mjOBJ_BODY:
+            return ["world", "link1", "link2"][obj_id]
+        if obj_type == _MJT_OBJ.mjOBJ_JOINT:
+            return f"joint_{obj_id}"
+        if obj_type == _MJT_OBJ.mjOBJ_GEOM:
+            return f"geom_{obj_id}"
+        return "obj"
+
+    mock_mj = _make_mock_mujoco(mj_id2name=MagicMock(side_effect=id2name))
+    mock_mj.MjData.return_value = MagicMock()
+
+    with (
+        patch(_URDF_IO_MUJOCO, mock_mj),
+        patch(_URDF_IO_JOINT_TYPES, _JOINT_TYPE_MAP),
+        patch("pathlib.Path.write_text"),
+    ):
+        urdf_str = URDFExporter(mock_mujoco_model).export_to_urdf("output.urdf")
+
+    root = ET.fromstring(urdf_str)
+    joint = root.find("./joint[@name='joint_1']")
+    assert joint is not None
+    assert joint.get("type") == "continuous"
+    assert joint.find("limit") is None
+
+
 def test_export_model_to_urdf_function(mock_mujoco_model: MagicMock) -> None:
     """Test the export_model_to_urdf convenience function."""
     mock_mj = _make_mock_mujoco(
@@ -167,7 +225,11 @@ def test_export_model_to_urdf_function(mock_mujoco_model: MagicMock) -> None:
     )
     mock_mj.MjData.return_value = MagicMock()
 
-    with patch(_URDF_IO_MUJOCO, mock_mj), patch("pathlib.Path.write_text"):
+    with (
+        patch(_URDF_IO_MUJOCO, mock_mj),
+        patch(_URDF_IO_JOINT_TYPES, _JOINT_TYPE_MAP),
+        patch("pathlib.Path.write_text"),
+    ):
         urdf_str = export_model_to_urdf(mock_mujoco_model, "out.urdf")
         assert len(urdf_str) > 0
 

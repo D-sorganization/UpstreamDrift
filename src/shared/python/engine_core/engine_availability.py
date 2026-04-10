@@ -51,6 +51,27 @@ _engine_status_cache: dict[str, EngineStatus] = {}
 _engine_error_cache: dict[str, Exception] = {}
 
 
+def _validate_opensim_bindings(opensim_module: Any) -> None:
+    """Reject importable but incompatible OpenSim Python packages."""
+    required_attrs = ("Model", "Manager", "Vector", "InverseDynamicsSolver")
+    missing_attrs = [
+        attr for attr in required_attrs if not hasattr(opensim_module, attr)
+    ]
+    if missing_attrs:
+        raise AttributeError(
+            "OpenSim package is missing required bindings: " + ", ".join(missing_attrs)
+        )
+
+    try:
+        opensim_module.Model("__upstream_drift_missing_probe__.osim")
+    except TypeError as exc:
+        raise TypeError("OpenSim Model binding does not accept model paths") from exc
+    except Exception:
+        # Real OpenSim bindings may reject the missing probe file, but reaching
+        # that runtime error proves the path-taking constructor exists.
+        pass
+
+
 def _probe_engine(
     engine_name: str,
     import_name: str | None = None,
@@ -105,6 +126,8 @@ def _probe_engine(
                 raise ImportError(
                     "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
                 )
+        elif import_name == "opensim":
+            _validate_opensim_bindings(importlib.import_module("opensim"))
         else:
             importlib.import_module(import_name)
 
