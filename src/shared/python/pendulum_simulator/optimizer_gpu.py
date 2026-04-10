@@ -198,7 +198,7 @@ def optimize_torque_profile(
 
     @jax.jit
     @jax.value_and_grad
-    def loss_fn(coeffs):
+    def loss_fn(coeffs: JaxArray) -> JaxArray:
         coeffs_reshaped = coeffs.reshape(7, n_coeffs_per_joint)
         # Use mean torque across coefficients as the single torque profile
         torque_simple = jnp.mean(coeffs_reshaped, axis=1)
@@ -279,7 +279,7 @@ def optimize_simple_torque_profile(
 
     @jax.jit
     @jax.value_and_grad
-    def loss_fn(coeffs):
+    def loss_fn(coeffs: JaxArray) -> JaxArray:
         return clubhead_speed_objective(
             coeffs, params, initial_state, t_end, alpha, beta, dt
         )
