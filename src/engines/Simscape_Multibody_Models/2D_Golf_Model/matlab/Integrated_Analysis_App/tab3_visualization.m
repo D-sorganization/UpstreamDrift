@@ -71,8 +71,14 @@ try
     ztcfq_file = fullfile(default_data_path, 'ZTCFQ.mat');
     deltaq_file = fullfile(default_data_path, 'DELTAQ.mat');
 
-    if ~exist(baseq_file, 'file')
-        errordlg(sprintf('Default data not found at:\n%s', default_data_path), 'Data Not Found');
+    missing = {};
+    if ~exist(baseq_file, 'file');  missing{end+1} = 'BASEQ.mat'; end
+    if ~exist(ztcfq_file, 'file');  missing{end+1} = 'ZTCFQ.mat'; end
+    if ~exist(deltaq_file, 'file'); missing{end+1} = 'DELTAQ.mat'; end
+
+    if ~isempty(missing)
+        errordlg(sprintf('Required data file(s) not found in:\n%s\n\nMissing: %s', ...
+            default_data_path, strjoin(missing, ', ')), 'Data Not Found');
         return;
     end
 
