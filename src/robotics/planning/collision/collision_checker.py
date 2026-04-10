@@ -394,10 +394,6 @@ class CollisionChecker:
                     if np.linalg.norm(pb - pa) > 1e-10:
                         normal = (pb - pa) / np.linalg.norm(pb - pa)
 
-                    # Early exit if max_distance exceeded
-                    if min_distance > query.max_distance:
-                        break
-
             # Check environment
             body_names = self._engine.get_body_names()
             for body_name in body_names:
