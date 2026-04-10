@@ -24,7 +24,7 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-router = APIRouter(prefix="/api/tools/data-explorer", tags=["data-explorer"])
+router = APIRouter(prefix="/tools/data-explorer", tags=["data-explorer"])
 
 
 # ── Request / Response Models ──

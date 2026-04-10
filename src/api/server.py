@@ -254,9 +254,10 @@ app.middleware("http")(_tracer.trace_request)
 # Use plugin-style auto-discovery instead of 20+ explicit imports (#1485).
 # Routes are registered both at root (backward compat) and under /api/v1/ (#1488).
 
-# Register all routes at root level (backward compatibility)
-_root_count = register_routes(app, prefix="")
-logger.info("Registered %d route modules at root prefix", _root_count)
+# Register all routes at /api prefix (backward compatibility — previously these modules
+# hardcoded /api/ in their own prefix, so legacy clients expect /api/<resource>).
+_root_count = register_routes(app, prefix="/api")
+logger.info("Registered %d route modules at /api prefix", _root_count)
 
 # Register all routes under /api/v1/ prefix (versioned API)
 _versioned_count = register_routes(app, prefix=API_PREFIX)
