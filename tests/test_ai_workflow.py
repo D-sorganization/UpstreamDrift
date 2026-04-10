@@ -147,3 +147,117 @@ class TestAIWorkflowEngine:
         assert len(wf.steps) == 5
         assert wf.steps[0].id == "welcome"
         assert wf.steps[1].tool_name == "list_sample_files"
+
+
+class TestWorkflowEngineFixIssue2504:
+    """TDD tests for #2504: step output propagation and RUNNING-after-completion."""
+
+    @pytest.fixture
+    def mock_tool_registry(self):
+        registry = Mock()
+        return registry
+
+    @pytest.fixture
+    def engine(self, mock_tool_registry):
+        return WorkflowEngine(mock_tool_registry)
+
+    def test_step_tool_output_propagated_to_state(self, engine, mock_tool_registry):
+        """Successful step tool output (dict) must be merged into execution.state."""
+        mock_tool_registry.execute.return_value = ToolResult(
+            tool_call_id="id1",
+            success=True,
+            result={"selected_file": "sample_A.csv"},
+        )
+        wf = Workflow(id="prop_wf", name="Propagate", description="desc")
+        wf.add_step(
+            WorkflowStep(id="s1", name="S1", description="d", tool_name="list_files")
+        )
+        engine.register_workflow(wf)
+
+        context = MagicMock(spec=ConversationContext)
+        execution = engine.start_workflow("prop_wf", context, initial_state={})
+        engine.execute_next_step(execution)
+
+        assert execution.state.get("selected_file") == "sample_A.csv"
+
+    def test_step_tool_non_dict_output_does_not_crash(self, engine, mock_tool_registry):
+        """Non-dict tool output must not crash; state is unchanged."""
+        mock_tool_registry.execute.return_value = ToolResult(
+            tool_call_id="id2",
+            success=True,
+            result="plain string result",
+        )
+        wf = Workflow(id="str_wf", name="String result", description="desc")
+        wf.add_step(WorkflowStep(id="s1", name="S1", description="d", tool_name="tool"))
+        engine.register_workflow(wf)
+
+        context = MagicMock(spec=ConversationContext)
+        execution = engine.start_workflow("str_wf", context, initial_state={"k": "v"})
+        engine.execute_next_step(execution)
+
+        assert execution.state.get("k") == "v"
+
+    def test_skip_of_final_step_sets_completed_status(self, engine):
+        """Skipping the last step must set execution.status = COMPLETED (not RUNNING)."""
+        wf = Workflow(id="skip_final", name="Skip final", description="desc")
+        wf.add_step(
+            WorkflowStep(
+                id="last",
+                name="Last",
+                description="d",
+                condition=lambda state: False,
+            )
+        )
+        engine.register_workflow(wf)
+
+        context = MagicMock(spec=ConversationContext)
+        execution = engine.start_workflow("skip_final", context)
+        engine.execute_next_step(execution)
+
+        assert execution.status == StepStatus.COMPLETED
+
+    def test_skip_of_middle_step_leaves_running(self, engine, mock_tool_registry):
+        """Skipping a non-final step must leave execution.status = RUNNING."""
+        mock_tool_registry.execute.return_value = ToolResult(
+            tool_call_id="id3", success=True, result={}
+        )
+        wf = Workflow(id="skip_mid", name="Skip middle", description="desc")
+        wf.add_step(
+            WorkflowStep(
+                id="mid",
+                name="Middle",
+                description="d",
+                condition=lambda state: False,
+            )
+        )
+        wf.add_step(WorkflowStep(id="last", name="Last", description="d"))
+        engine.register_workflow(wf)
+
+        context = MagicMock(spec=ConversationContext)
+        execution = engine.start_workflow("skip_mid", context)
+        engine.execute_next_step(execution)
+
+        assert execution.status == StepStatus.RUNNING
+
+    def test_later_step_receives_prior_step_output(self, engine, mock_tool_registry):
+        """Later step's tool arguments must include output written by earlier step."""
+        mock_tool_registry.execute.side_effect = [
+            ToolResult(tool_call_id="a", success=True, result={"file": "chosen.csv"}),
+            ToolResult(tool_call_id="b", success=True, result={}),
+        ]
+        wf = Workflow(id="chain_wf", name="Chain", description="desc")
+        wf.add_step(
+            WorkflowStep(id="pick", name="Pick", description="d", tool_name="picker")
+        )
+        wf.add_step(
+            WorkflowStep(id="load", name="Load", description="d", tool_name="loader")
+        )
+        engine.register_workflow(wf)
+
+        context = MagicMock(spec=ConversationContext)
+        execution = engine.start_workflow("chain_wf", context, initial_state={})
+        engine.execute_next_step(execution)
+        engine.execute_next_step(execution)
+
+        call_args = mock_tool_registry.execute.call_args_list[1]
+        assert call_args[0][1].get("file") == "chosen.csv"

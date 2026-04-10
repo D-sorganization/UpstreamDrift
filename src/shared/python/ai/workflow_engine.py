@@ -406,6 +406,11 @@ class WorkflowEngine:
 
         skipped = self._check_step_condition(step, execution, start_time)
         if skipped is not None:
+            if execution.current_step_index >= len(workflow.steps):
+                execution.status = StepStatus.COMPLETED
+                logger.info(
+                    "Workflow completed (final step skipped): %s", execution.workflow_id
+                )
             return skipped
 
         tool_result, failure = self._execute_step_tool(step, execution, start_time)
@@ -545,6 +550,10 @@ class WorkflowEngine:
             duration=time.perf_counter() - start_time,
         )
         execution.step_results.append(result)
+
+        if tool_result and isinstance(tool_result.result, dict):
+            execution.state.update(tool_result.result)
+
         execution.current_step_index += 1
 
         if execution.current_step_index >= len(workflow.steps):
