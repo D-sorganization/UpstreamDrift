@@ -11,9 +11,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).parents[2]
-GENERATORS_DIR = (
-    REPO / "src/shared/python/humanoid_character_builder/generators"
-)
+GENERATORS_DIR = REPO / "src/shared/python/humanoid_character_builder/generators"
 LOC_BUDGET_TYPES = 150
 LOC_BUDGET_PRIMITIVES = 250
 LOC_BUDGET_MAKEHUMAN = 750

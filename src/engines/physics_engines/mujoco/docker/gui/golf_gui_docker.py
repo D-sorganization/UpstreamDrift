@@ -282,7 +282,7 @@ class DockerMixin:
 
             host.root.after(0, host.log, output.strip())
 
-    def _handle_process_failure(self, rc: int) -> None:
+    def _handle_process_failure(self, rc: int | None) -> None:
         """Log error details and suggest solutions for common failures."""
         if not (rc is not None):
             raise ValueError("rc must be provided")

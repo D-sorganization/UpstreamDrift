@@ -36,9 +36,7 @@ class TestTextEditorFileSizes:
     @pytest.mark.unit
     def test_coordinator_loc(self) -> None:
         loc = _count_lines(EDITOR_DIR / "text_editor.py")
-        assert loc <= LOC_BUDGET, (
-            f"text_editor.py has {loc} LOC; budget {LOC_BUDGET}"
-        )
+        assert loc <= LOC_BUDGET, f"text_editor.py has {loc} LOC; budget {LOC_BUDGET}"
 
     @pytest.mark.unit
     def test_models_loc(self) -> None:
