@@ -136,8 +136,41 @@ def postcondition(
         raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
+    def _check_postcondition(result: Any, func_name: str) -> Any:
+        """Evaluate the postcondition against result and handle violations."""
+        try:
+            check_result = condition(result)
+        except (RuntimeError, TypeError, ValueError) as e:
+            _handle_violation(
+                "Postcondition",
+                f"Failed to evaluate postcondition: {e}",
+                function_name=func_name,
+                value=result,
+            )
+            return result
+        if not check_result:
+            _handle_violation(
+                "Postcondition",
+                message,
+                function_name=func_name,
+                value=result,
+            )
+        return result
+
     def decorator(func: F) -> F:
         """Wrap the function with postcondition checking logic."""
+
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                """Execute async function and verify its postcondition."""
+                if not enabled or get_contract_level() == ContractLevel.OFF:
+                    return await func(*args, **kwargs)
+                result = await func(*args, **kwargs)
+                return _check_postcondition(result, func.__qualname__)
+
+            return cast(F, async_wrapper)
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -145,30 +178,8 @@ def postcondition(
             # Check level at call time so runtime changes to contract level take effect
             if not enabled or get_contract_level() == ContractLevel.OFF:
                 return func(*args, **kwargs)
-
             result = func(*args, **kwargs)
-
-            # Evaluate the postcondition
-            try:
-                check_result = condition(result)
-            except (RuntimeError, TypeError, ValueError) as e:
-                _handle_violation(
-                    "Postcondition",
-                    f"Failed to evaluate postcondition: {e}",
-                    function_name=func.__qualname__,
-                    value=result,
-                )
-                return result
-
-            if not check_result:
-                _handle_violation(
-                    "Postcondition",
-                    message,
-                    function_name=func.__qualname__,
-                    value=result,
-                )
-
-            return result
+            return _check_postcondition(result, func.__qualname__)
 
         return cast(F, wrapper)
 

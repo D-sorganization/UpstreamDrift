@@ -164,6 +164,51 @@ class TestFiniteResultDecorator:
             make_nan()
 
 
+class TestAsyncPostconditionDecorator:
+    """Tests for async-aware postcondition handling (issue #2470)."""
+
+    def setup_method(self) -> None:
+        self._saved_level = get_contract_level()
+        set_contract_level(ContractLevel.ENFORCE)
+
+    def teardown_method(self) -> None:
+        set_contract_level(self._saved_level)
+
+    @pytest.mark.asyncio
+    async def test_async_postcondition_receives_awaited_result(self) -> None:
+        """Postcondition must evaluate the awaited result, not the coroutine."""
+
+        @postcondition(lambda r: r > 0, "result must be positive")
+        async def get_value() -> int:
+            return 42
+
+        result = await get_value()
+        assert result == 42
+
+    @pytest.mark.asyncio
+    async def test_async_postcondition_raises_on_violation(self) -> None:
+        """Postcondition raises PostconditionError for async function violations."""
+        from src.shared.python.core.contracts.exceptions import PostconditionError
+
+        @postcondition(lambda r: r > 0, "result must be positive")
+        async def get_negative() -> int:
+            return -1
+
+        with pytest.raises(PostconditionError):
+            await get_negative()
+
+    @pytest.mark.asyncio
+    async def test_async_postcondition_disabled_skips_check(self) -> None:
+        """Disabled postcondition does not check async results."""
+
+        @postcondition(lambda r: r > 0, "result must be positive", enabled=False)
+        async def get_negative() -> int:
+            return -1
+
+        result = await get_negative()
+        assert result == -1
+
+
 class TestNonEmptyResultDecorator:
     def setup_method(self) -> None:
         self._saved_level = get_contract_level()
