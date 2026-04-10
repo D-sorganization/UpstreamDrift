@@ -223,6 +223,8 @@ class GaitStateMachine(ContractChecker):
         self._state.phase = GaitPhase.DOUBLE_SUPPORT
         self._state.support_state = SupportState.DOUBLE_SUPPORT_CENTERED
         self._state.phase_time = 0.0
+        self._state.stance_foot = "both"
+        self._state.next_stance_foot = "both"
         self._invoke_callbacks("gait_change", GaitEvent.EMERGENCY_STOP)
 
     def update(self, dt: float) -> GaitState:
