@@ -26,11 +26,9 @@ class AnalysisController:
         try:
             gui._ensure_analyzer_initialized()
             # ... actual logic from _plot_induced_accelerations ...
-            pass
         except (ValueError, RuntimeError, AttributeError) as e:
             logger.error(f"Induced acceleration plotting failed: {e}")
 
     def generate_plot(self) -> None:
         """Main plot dispatcher."""
         # ... logic from _generate_plot ...
-        pass
