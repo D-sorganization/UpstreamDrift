@@ -242,7 +242,7 @@ class OutputManager:
             )
             raise
 
-    def _sanitize_filename(self, filename, format_type):
+    def _sanitize_filename(self, filename: str, format_type: OutputFormat) -> str:
         if not (filename is not None):
             raise ValueError("filename must be provided")
         if not (filename is not None):
@@ -260,8 +260,14 @@ class OutputManager:
         return filename
 
     def _dispatch_save(
-        self, results, file_path, format_type, provenance, metadata, engine
-    ):
+        self,
+        results: Any,
+        file_path: Path,
+        format_type: OutputFormat,
+        provenance: Any,
+        metadata: Any,
+        engine: Any,
+    ) -> None:
         if format_type == OutputFormat.CSV:
             self._save_csv(results, file_path, provenance)
         elif format_type == OutputFormat.JSON:

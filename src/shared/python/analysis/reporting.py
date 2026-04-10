@@ -396,7 +396,7 @@ class ReportingMixin:
             dimensionless_jerk=dim_jerk,
         )
 
-    def _write_csv_overall_metrics(self, writer, report: dict) -> None:
+    def _write_csv_overall_metrics(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):
@@ -410,7 +410,7 @@ class ReportingMixin:
         writer.writerow(["Samples", report["num_samples"], ""])
         writer.writerow([])
 
-    def _write_csv_stability_metrics(self, writer, report: dict) -> None:
+    def _write_csv_stability_metrics(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):
@@ -423,7 +423,7 @@ class ReportingMixin:
             writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
         writer.writerow([])
 
-    def _write_csv_club_head_speed(self, writer, report: dict) -> None:
+    def _write_csv_club_head_speed(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):
@@ -437,7 +437,7 @@ class ReportingMixin:
         writer.writerow(["Peak Time", chs["peak_time"], "s"])
         writer.writerow([])
 
-    def _write_csv_tempo(self, writer, report: dict) -> None:
+    def _write_csv_tempo(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):
@@ -455,7 +455,7 @@ class ReportingMixin:
         writer.writerow(["Tempo Ratio", report["tempo"]["ratio"], ""])
         writer.writerow([])
 
-    def _write_csv_phases(self, writer, report: dict) -> None:
+    def _write_csv_phases(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):
@@ -475,7 +475,7 @@ class ReportingMixin:
             )
         writer.writerow([])
 
-    def _write_csv_grf_metrics(self, writer, report: dict) -> None:
+    def _write_csv_grf_metrics(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):
@@ -489,7 +489,7 @@ class ReportingMixin:
                 writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
         writer.writerow([])
 
-    def _write_csv_joint_statistics(self, writer, report: dict) -> None:
+    def _write_csv_joint_statistics(self, writer: Any, report: dict) -> None:
         if not (writer is not None):
             raise ValueError("writer must be provided")
         if not (writer is not None):

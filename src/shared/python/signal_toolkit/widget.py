@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from typing import Any
 
 import numpy as np
 
@@ -227,7 +228,7 @@ else:
     class SignalToolkitWidget:  # type: ignore[no-redef]
         """Stub class when PyQt6 or matplotlib is not available."""
 
-        def __init__(self, *args, **kwargs) -> None:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
             msg = "SignalToolkitWidget requires PyQt6 and matplotlib"
             raise ImportError(msg)
 

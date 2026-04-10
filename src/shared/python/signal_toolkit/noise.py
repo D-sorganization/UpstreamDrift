@@ -7,6 +7,7 @@ and adding disturbances to signals for simulation and testing.
 from __future__ import annotations
 
 from enum import Enum
+from typing import Any
 
 import numpy as np
 
@@ -50,7 +51,7 @@ class NoiseGenerator:
         t: np.ndarray,
         noise_type: NoiseType = NoiseType.WHITE,
         amplitude: float = 1.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> Signal:
         """Generate a noise signal.
 
@@ -276,7 +277,7 @@ def add_noise_to_signal(
     snr_db: float | None = None,
     amplitude: float | None = None,
     seed: int | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Signal:
     """Add noise to an existing signal.
 
@@ -326,7 +327,7 @@ def add_noise_to_signal(
 def generate_disturbance_profile(
     t: np.ndarray,
     disturbance_type: str = "step",
-    **kwargs,
+    **kwargs: Any,
 ) -> Signal:
     """Generate a disturbance signal for simulation.
 
@@ -436,7 +437,7 @@ class DisturbanceSimulator:
         self,
         noise_type: NoiseType = NoiseType.WHITE,
         amplitude: float = 0.1,
-        **kwargs,
+        **kwargs: Any,
     ) -> DisturbanceSimulator:
         """Add a noise component.
 

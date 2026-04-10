@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 import numpy as np
 from scipy import integrate
@@ -382,7 +383,7 @@ def compute_derivative(
     signal: Signal,
     order: int = 1,
     method: DifferentiationMethod = DifferentiationMethod.SAVGOL,
-    **kwargs,
+    **kwargs: Any,
 ) -> Signal:
     """Convenience function to compute signal derivative.
 

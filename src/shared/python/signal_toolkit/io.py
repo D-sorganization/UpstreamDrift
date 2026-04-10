@@ -481,7 +481,7 @@ def import_from_csv(
     file_path: str | Path,
     time_column: str | int = 0,
     value_columns: str | int | list[str | int] | None = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Signal | list[Signal]:
     """Import signal(s) from a CSV file (convenience function).
 
@@ -500,7 +500,7 @@ def import_from_csv(
 def export_to_csv(
     signal: Signal | list[Signal],
     file_path: str | Path,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Export signal(s) to a CSV file (convenience function).
 
@@ -529,7 +529,7 @@ class SignalLoader:
     def load(
         cls,
         file_path: str | Path,
-        **kwargs,
+        **kwargs: Any,
     ) -> Signal | list[Signal]:
         """Load signal(s) from a file with automatic format detection.
 
@@ -648,7 +648,7 @@ class BatchProcessor:
     def load_all(
         self,
         pattern: str = "*.csv",
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Signal | list[Signal]]:
         """Load all signals from matching files.
 
@@ -680,7 +680,7 @@ class BatchProcessor:
         pattern: str = "*.csv",
         output_dir: str | Path | None = None,
         output_format: str = "csv",
-        **kwargs,
+        **kwargs: Any,
     ) -> dict[str, Signal]:
         """Load, process, and optionally save all signals.
 
