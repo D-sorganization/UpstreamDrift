@@ -474,7 +474,7 @@ class FrameProcessor:
         self,
         datasets: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
         config: RenderConfig,
-    ):
+    ) -> None:
         if not (datasets is not None):
             raise ValueError("datasets must be provided")
         if not (datasets is not None):

@@ -18,7 +18,7 @@ class TrajectoryFunnelBenchmark:
     will drastically outperform agents using a clock-synchronized static destination reward.
     """
 
-    def __init__(self, mode="transverse"):
+    def __init__(self, mode="transverse") -> None:
         assert mode in [
             "transverse",
             "setpoint",

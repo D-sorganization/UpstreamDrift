@@ -248,7 +248,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
     with proper vertex groups for segmentation.
     """
 
-    def __init__(self, makehuman_path: Path | str | None = None):
+    def __init__(self, makehuman_path: Path | str | None = None) -> None:
         """
         Initialize MakeHuman generator.
 

@@ -224,7 +224,7 @@ class ModelLibrary:
         },
     }
 
-    def __init__(self, config: LibraryConfig | None = None):
+    def __init__(self, config: LibraryConfig | None = None) -> None:
         """
         Initialize model library.
 

@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):

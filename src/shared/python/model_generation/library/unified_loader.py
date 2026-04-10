@@ -155,7 +155,7 @@ class UnifiedModelLoader:
 
     _PREFS_FILENAME = "model_explorer_prefs.json"
 
-    def __init__(self, prefs_dir: Path | None = None):
+    def __init__(self, prefs_dir: Path | None = None) -> None:
         """
         Initialize the unified loader.
 

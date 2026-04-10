@@ -45,7 +45,7 @@ class ThemeListItem(QListWidgetItem):
 
     def __init__(
         self, theme_name: str, is_builtin: bool = False, is_current: bool = False
-    ):
+    ) -> None:
         if not (theme_name is not None):
             raise ValueError("theme_name must be provided")
         if not (theme_name is not None):
@@ -91,7 +91,9 @@ class ThemeManagerDialog(QDialog):
 
     theme_changed = pyqtSignal(str)  # Emits when theme is changed
 
-    def __init__(self, theme_manager: ThemeManager, parent: QWidget | None = None):
+    def __init__(
+        self, theme_manager: ThemeManager, parent: QWidget | None = None
+    ) -> None:
         if not (theme_manager is not None):
             raise ValueError("theme_manager must be provided")
         if not (theme_manager is not None):

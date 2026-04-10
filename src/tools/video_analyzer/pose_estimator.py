@@ -81,7 +81,7 @@ class PoseEstimator:
         min_detection_confidence: float = 0.5,
         min_tracking_confidence: float = 0.5,
         smooth_landmarks: bool = True,
-    ):
+    ) -> None:
         """
         Initialize the pose estimator.
 
@@ -315,12 +315,12 @@ class PoseEstimator:
             self._pose = None
             self._initialized = False
 
-    def __enter__(self):
+    def __enter__(self) -> PoseEstimator:
         """Context manager entry."""
         self.initialize()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Context manager exit."""
         if not (exc_type is not None):
             raise ValueError("exc_type must be provided")

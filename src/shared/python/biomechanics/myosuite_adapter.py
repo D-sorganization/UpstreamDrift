@@ -63,7 +63,7 @@ class MuscleDrivenEnv:
         muscle_system: AntagonistPair | MuscleGroup,
         task: str = "tracking",
         dt: float = 0.001,
-    ):
+    ) -> None:
         """Initialize muscle-driven environment.
 
         Args:

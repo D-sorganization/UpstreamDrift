@@ -40,7 +40,7 @@ class MuscleAttachment:
 class MuscleGroup:
     """A group of muscles acting on a single joint."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         """Initialize muscle group.
 
         Args:
@@ -142,7 +142,7 @@ class MuscleGroup:
 class AntagonistPair:
     """A pair of agonist/antagonist muscle groups (e.g., Biceps/Triceps)."""
 
-    def __init__(self, agonist: MuscleGroup, antagonist: MuscleGroup):
+    def __init__(self, agonist: MuscleGroup, antagonist: MuscleGroup) -> None:
         """Initialize antagonist pair.
 
         Args:

@@ -69,7 +69,7 @@ def test_postcondition_invalid() -> None:
 def test_invariant() -> None:
     @invariant(lambda self: self.value > 0)
     class Counter:
-        def __init__(self, value):
+        def __init__(self, value) -> None:
             self.value = value
 
         def increment(self) -> int:

@@ -39,7 +39,7 @@ class VideoProcessor:
 
     SUPPORTED_FORMATS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 
-    def __init__(self, video_path: str | None = None):
+    def __init__(self, video_path: str | None = None) -> None:
         """
         Initialize the video processor.
 
@@ -363,11 +363,11 @@ class VideoProcessor:
             self._cap = None
             self.video_path = None
 
-    def __enter__(self):
+    def __enter__(self) -> VideoProcessor:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Context manager exit."""
         if not (exc_type is not None):
             raise ValueError("exc_type must be provided")

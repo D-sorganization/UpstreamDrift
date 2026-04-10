@@ -57,7 +57,7 @@ class EquilibriumSolver:
         >>> print(f"Fiber length: {l_CE:.4f} m")
     """
 
-    def __init__(self, muscle: HillMuscleModel):
+    def __init__(self, muscle: HillMuscleModel) -> None:
         """Initialize equilibrium solver.
 
         Args:

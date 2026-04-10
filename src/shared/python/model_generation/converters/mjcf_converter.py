@@ -79,7 +79,7 @@ class MJCFConverter:
     URDF uses a flat structure with explicit parent-child relationships.
     """
 
-    def __init__(self, config: MJCFConfig | None = None):
+    def __init__(self, config: MJCFConfig | None = None) -> None:
         """
         Initialize converter.
 
