@@ -63,7 +63,12 @@ class LogExecutionTime:
         self.logger.debug(f"Starting {self.name}...")
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object,
+    ) -> None:
         duration = __import__("time").time() - self.start_time
         self.logger.info(f"{self.name} completed in {duration:.4f}s")
 

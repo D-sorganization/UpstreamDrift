@@ -10,6 +10,7 @@ import logging
 import time
 import traceback
 from dataclasses import dataclass
+from typing import Any
 
 import moderngl as mgl
 import numpy as np
@@ -482,9 +483,9 @@ class OpenGLRenderer:
 
     def render_frame(
         self,
-        frame_data,
-        dynamics_data,
-        render_config,
+        frame_data: Any,
+        dynamics_data: Any,
+        render_config: Any,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
@@ -609,7 +610,7 @@ class OpenGLRenderer:
             return False
 
     @staticmethod
-    def _build_body_segment_definitions(frame_data) -> list:
+    def _build_body_segment_definitions(frame_data: Any) -> list:
         """Build the list of body segment rendering definitions.
 
         Returns a list of (name, start_point, end_point, radius, color, is_skin) tuples.
@@ -667,8 +668,8 @@ class OpenGLRenderer:
 
     def _render_body_segments(
         self,
-        frame_data,
-        render_config,
+        frame_data: Any,
+        render_config: Any,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,
@@ -852,7 +853,7 @@ class OpenGLRenderer:
             logger.error("[WARN] Sphere render error: %s", e)
 
     @staticmethod
-    def _compute_club_face_normal(frame_data) -> np.ndarray:
+    def _compute_club_face_normal(frame_data: Any) -> np.ndarray:
         """Compute the club face normal vector from shaft direction.
 
         Returns a unit vector perpendicular to the shaft direction.
@@ -871,7 +872,9 @@ class OpenGLRenderer:
 
         return face_normal
 
-    def _render_club_face_normal(self, frame_data, face_normal, program) -> None:
+    def _render_club_face_normal(
+        self, frame_data: Any, face_normal: np.ndarray, program: Any
+    ) -> None:
         """Render the club face normal vector arrow."""
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
@@ -896,7 +899,9 @@ class OpenGLRenderer:
             "normal_arrow", normal_end, 0.005, normal_color, 0.8, program
         )
 
-    def _render_club_ball(self, frame_data, face_normal, program) -> None:
+    def _render_club_ball(
+        self, frame_data: Any, face_normal: np.ndarray, program: Any
+    ) -> None:
         """Render the golf ball positioned for center strike."""
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
@@ -913,8 +918,8 @@ class OpenGLRenderer:
 
     def _render_club(
         self,
-        frame_data,
-        render_config,
+        frame_data: Any,
+        render_config: Any,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,
         view_position: np.ndarray,

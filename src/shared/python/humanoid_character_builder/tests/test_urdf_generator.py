@@ -257,7 +257,7 @@ class TestProportionFactors:
         # Instead, we can inspect the generated link lengths in the generator logic?
         # Or check the <cylinder length="..."> in the XML.
 
-        def get_total_cylinder_length(xml_str) -> float:
+        def get_total_cylinder_length(xml_str: str) -> float:
             root = ET.fromstring(xml_str)
             total = 0.0
             for geom in root.findall(".//geometry/cylinder"):

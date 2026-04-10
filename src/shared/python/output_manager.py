@@ -17,7 +17,7 @@ from src.shared.python.data_io.output_manager import (
 
 
 def save_results(
-    results, filename: str, format_type: str = "csv", engine: str = "mujoco"
+    results: Any, filename: str, format_type: str = "csv", engine: str = "mujoco"
 ) -> str:
     """Backward-compatible convenience save helper."""
     if not (results is not None):

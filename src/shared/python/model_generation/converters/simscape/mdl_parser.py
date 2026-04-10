@@ -342,7 +342,7 @@ class MDLParser:
 
         return model
 
-    def _parse_slx_xml(self, file, model: SimscapeModel) -> None:
+    def _parse_slx_xml(self, file: Any, model: SimscapeModel) -> None:
         """Parse SLX model XML content."""
         if not (file is not None):
             raise ValueError("file must be provided")

@@ -7,6 +7,7 @@ Extracted from golf_gui_application.py for Single Responsibility Principle.
 from __future__ import annotations
 
 import traceback
+from typing import Any
 
 import numpy as np
 from golf_data_core import FrameData, FrameProcessor, RenderConfig
@@ -30,7 +31,7 @@ from wiffle_data_loader import MotionDataLoader
 class MotionCaptureTab(QWidget):
     """Tab for motion capture data visualization with smooth playback."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -233,7 +234,7 @@ class MotionCaptureTab(QWidget):
 class SimulinkModelTab(QWidget):
     """Tab for Simulink model data visualization."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -424,7 +425,7 @@ class SimulinkModelTab(QWidget):
 class ComparisonTab(QWidget):
     """Tab for comparing motion capture vs Simulink model data."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):

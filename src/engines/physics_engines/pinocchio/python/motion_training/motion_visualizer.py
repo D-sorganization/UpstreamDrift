@@ -277,7 +277,7 @@ class MotionVisualizer:
 
     def add_club_at_frame(
         self,
-        frame,
+        frame: Any,
         name: str = "club",
     ) -> None:
         """Add club visualization at a specific frame."""
@@ -304,7 +304,7 @@ class MotionVisualizer:
         # Position the club based on grip frame
         self._update_club_transform(frame, name)
 
-    def _update_club_transform(self, frame, name: str = "club") -> None:
+    def _update_club_transform(self, frame: Any, name: str = "club") -> None:
         """Update club transform based on frame data."""
         if not (frame is not None):
             raise ValueError("frame must be provided")
@@ -476,7 +476,7 @@ class MotionVisualizer:
 
     def _add_ghost_club(
         self,
-        frame,
+        frame: Any,
         name: str,
         alpha: float,
     ) -> None:

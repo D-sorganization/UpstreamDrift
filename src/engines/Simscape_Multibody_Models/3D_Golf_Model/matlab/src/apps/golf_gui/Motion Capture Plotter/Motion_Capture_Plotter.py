@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
+from typing import Any
 
 import matplotlib
 import numpy as np
@@ -385,7 +386,7 @@ class MotionCapturePlotter(QMainWindow):
             if filename:
                 self.load_simscape_csv(filename)
 
-    def on_data_source_changed(self, source) -> None:
+    def on_data_source_changed(self, source: str) -> None:
         """Handle data source change."""
         if not (source is not None):
             raise ValueError("source must be provided")
@@ -427,7 +428,7 @@ class MotionCapturePlotter(QMainWindow):
     _safe_float = staticmethod(safe_float)
     _parse_excel_row = staticmethod(parse_excel_row)
 
-    def _process_excel_sheet(self, filename, sheet_name) -> None:
+    def _process_excel_sheet(self, filename: str, sheet_name: str) -> None:
         """Process a single Excel sheet and store parsed frames in swing_data."""
         if not (filename is not None):
             raise ValueError("filename must be provided")
@@ -438,7 +439,7 @@ class MotionCapturePlotter(QMainWindow):
             self.swing_data[sheet_name] = result
             self.print_data_debug(sheet_name)
 
-    def load_excel_file(self, filename) -> None:
+    def load_excel_file(self, filename: str) -> None:
         """Load and process Excel file."""
         try:
             logger.info(f"Loading file: {filename}")
@@ -470,7 +471,7 @@ class MotionCapturePlotter(QMainWindow):
     _simscape_joint_position_definitions = staticmethod(get_simscape_joint_positions)
     _find_available_joints = staticmethod(find_available_joints)
 
-    def load_simscape_csv(self, filename) -> None:
+    def load_simscape_csv(self, filename: str) -> None:
         """Load and process Simscape CSV file."""
         try:
             logger.info(f"Loading Simscape CSV file: {filename}")
@@ -525,7 +526,7 @@ class MotionCapturePlotter(QMainWindow):
                 self, "Error", f"Failed to load Simscape CSV file: {str(e)}"
             )
 
-    def print_data_debug(self, sheet_name) -> None:
+    def print_data_debug(self, sheet_name: str) -> None:
         """Print debug information about the loaded data."""
         if sheet_name in self.swing_data:
             data = self.swing_data[sheet_name]
@@ -603,14 +604,14 @@ class MotionCapturePlotter(QMainWindow):
             self.frame_slider.setValue(0)
             self.current_frame = 0
 
-    def on_swing_change(self, swing_name) -> None:
+    def on_swing_change(self, swing_name: str) -> None:
         """Handle swing selection change."""
         if swing_name in self.swing_data:
             self.current_swing = swing_name
             self.setup_frame_slider()
             self.update_visualization()
 
-    def on_frame_change(self, frame) -> None:
+    def on_frame_change(self, frame: int) -> None:
         """Handle frame slider change."""
         if not (frame is not None):
             raise ValueError("frame must be provided")
@@ -620,7 +621,7 @@ class MotionCapturePlotter(QMainWindow):
         self.frame_label.setText(str(frame))
         self.update_visualization()
 
-    def on_speed_change(self, speed) -> None:
+    def on_speed_change(self, speed: int) -> None:
         """Handle speed slider change."""
         if not (speed is not None):
             raise ValueError("speed must be provided")
@@ -630,7 +631,7 @@ class MotionCapturePlotter(QMainWindow):
         if self.is_playing:
             self.animation_timer.setInterval(1000 // speed)
 
-    def on_scale_change(self, scale) -> None:
+    def on_scale_change(self, scale: int) -> None:
         """Handle motion scale change."""
         if not (scale is not None):
             raise ValueError("scale must be provided")
@@ -640,7 +641,7 @@ class MotionCapturePlotter(QMainWindow):
         self.scale_label.setText(f"{scale}x")
         self.update_visualization()
 
-    def on_club_length_change(self, length_cm) -> None:
+    def on_club_length_change(self, length_cm: int) -> None:
         """Handle club length change."""
         if not (length_cm is not None):
             raise ValueError("length_cm must be provided")
@@ -767,7 +768,7 @@ class MotionCapturePlotter(QMainWindow):
         # Redraw canvas
         self.canvas.draw()
 
-    def _draw_motion_capture_trajectory_paths(self, data) -> None:
+    def _draw_motion_capture_trajectory_paths(self, data: Any) -> None:
         """Draw mid-hands and club head trajectory paths for motion capture data.
 
         Parameters:
@@ -821,7 +822,7 @@ class MotionCapturePlotter(QMainWindow):
                 label="Club Head Path",
             )
 
-    def visualize_motion_capture_data(self, frame_data, data) -> None:
+    def visualize_motion_capture_data(self, frame_data: Any, data: Any) -> None:
         """Visualize motion capture data (Excel format)."""
         # Use actual mid-hands and club head positions from the data
         # For right-handed golfers: X should be flipped to show proper swing direction
@@ -853,7 +854,7 @@ class MotionCapturePlotter(QMainWindow):
         # Draw trajectory paths
         self._draw_motion_capture_trajectory_paths(data)
 
-    def _extract_joint_positions(self, frame_data) -> dict[str, np.ndarray]:
+    def _extract_joint_positions(self, frame_data: Any) -> dict[str, np.ndarray]:
         """Extract scaled joint positions from a Simscape frame.
 
         Returns a dict mapping joint names to numpy position arrays.
@@ -887,7 +888,9 @@ class MotionCapturePlotter(QMainWindow):
                 )
         return joints
 
-    def _draw_club_with_face_normal(self, club_head_pos, grip_pos) -> None:
+    def _draw_club_with_face_normal(
+        self, club_head_pos: np.ndarray, grip_pos: np.ndarray
+    ) -> None:
         """Draw the club shaft, head sphere, face normal vector, and golf ball.
 
         Parameters:
@@ -937,7 +940,9 @@ class MotionCapturePlotter(QMainWindow):
                 face_normal = face_normal / face_normal_length
                 self._draw_face_normal_and_ball(club_head_pos, face_normal)
 
-    def _draw_face_normal_and_ball(self, club_head_pos, face_normal) -> None:
+    def _draw_face_normal_and_ball(
+        self, club_head_pos: np.ndarray, face_normal: np.ndarray
+    ) -> None:
         """Draw the face normal vector arrow and a golf ball in front of the club.
 
         Parameters:
@@ -1015,7 +1020,9 @@ class MotionCapturePlotter(QMainWindow):
             label="Golf Ball",
         )
 
-    def _draw_body_segments_and_markers(self, joints, segment_definitions) -> None:
+    def _draw_body_segments_and_markers(
+        self, joints: Any, segment_definitions: Any
+    ) -> None:
         """Draw body segment lines and joint marker dots.
 
         Parameters:
@@ -1045,7 +1052,7 @@ class MotionCapturePlotter(QMainWindow):
                 position[0], position[1], position[2], color="black", s=50, alpha=0.8
             )
 
-    def _draw_simscape_trajectory_paths(self, joints, data) -> None:
+    def _draw_simscape_trajectory_paths(self, joints: Any, data: Any) -> None:
         """Draw club head and hands trajectory paths for Simscape data.
 
         Parameters:
@@ -1110,7 +1117,7 @@ class MotionCapturePlotter(QMainWindow):
                     label="Hands Path",
                 )
 
-    def _draw_segment_traces(self, frame_data, data) -> None:
+    def _draw_segment_traces(self, frame_data: Any, data: Any) -> None:
         """Draw optional per-segment trace paths for Simscape data.
 
         Parameters:
@@ -1166,7 +1173,7 @@ class MotionCapturePlotter(QMainWindow):
                         label=f"{segment_key.replace('_', ' ').title()} Path",
                     )
 
-    def visualize_simscape_data(self, frame_data, data) -> None:
+    def visualize_simscape_data(self, frame_data: Any, data: Any) -> None:
         """Visualize Simscape multibody data (CSV format)."""
         # Define colors for different body segments
         if not (frame_data is not None):
@@ -1206,7 +1213,7 @@ class MotionCapturePlotter(QMainWindow):
         self._draw_simscape_trajectory_paths(joints, data)
         self._draw_segment_traces(frame_data, data)
 
-    def update_info_text(self, frame_data) -> None:
+    def update_info_text(self, frame_data: Any) -> None:
         """Update the information text display."""
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
@@ -1270,7 +1277,7 @@ class MotionCapturePlotter(QMainWindow):
 
         self.info_text.setText(info)
 
-    def set_camera_view(self, view) -> None:
+    def set_camera_view(self, view: str) -> None:
         """Set predefined camera views."""
         if not (view is not None):
             raise ValueError("view must be provided")
@@ -1307,7 +1314,7 @@ class MotionCapturePlotter(QMainWindow):
         self.canvas.draw_idle()
         self.canvas.flush_events()
 
-    def on_scroll(self, event) -> None:
+    def on_scroll(self, event: Any) -> None:
         """Handle mouse scroll for zooming."""
         if not (event is not None):
             raise ValueError("event must be provided")
@@ -1344,7 +1351,7 @@ class MotionCapturePlotter(QMainWindow):
         self.canvas.draw()
         logger.info(f"Zooming: factor={zoom_factor}")
 
-    def on_mouse_press(self, event) -> None:
+    def on_mouse_press(self, event: Any) -> None:
         """Handle mouse button press for rotation/panning."""
         if not (event is not None):
             raise ValueError("event must be provided")
@@ -1356,11 +1363,11 @@ class MotionCapturePlotter(QMainWindow):
         self._last_pos = (event.x, event.y)
         logger.info(f"Mouse press: button={event.button}, pos=({event.x}, {event.y})")
 
-    def on_mouse_release(self, event) -> None:
+    def on_mouse_release(self, event: Any) -> None:
         """Handle mouse button release."""
         self._last_pos = None
 
-    def on_mouse_move(self, event) -> None:
+    def on_mouse_move(self, event: Any) -> None:
         """Handle mouse movement for rotation/panning."""
         if not (event is not None):
             raise ValueError("event must be provided")

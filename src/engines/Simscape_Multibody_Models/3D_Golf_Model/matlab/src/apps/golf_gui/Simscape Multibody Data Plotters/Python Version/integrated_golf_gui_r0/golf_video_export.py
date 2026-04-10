@@ -16,6 +16,7 @@ import logging
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from golf_data_core import RenderConfig
@@ -63,7 +64,7 @@ class VideoExporter(QObject):
     finished = pyqtSignal(str)  # output_path
     error = pyqtSignal(str)  # error_message
 
-    def __init__(self, renderer, frame_processor) -> None:
+    def __init__(self, renderer: Any, frame_processor: Any) -> None:
         if not (renderer is not None):
             raise ValueError("renderer must be provided")
         if not (renderer is not None):
@@ -209,7 +210,7 @@ class VideoExporter(QObject):
         )
 
     def _render_frame_to_buffer(
-        self, frame_data, resolution: tuple[int, int]
+        self, frame_data: Any, resolution: tuple[int, int]
     ) -> np.ndarray:
         """
         Render frame to RGB buffer
@@ -372,7 +373,9 @@ class VideoExportThread(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
 
-    def __init__(self, renderer, frame_processor, config: VideoExportConfig) -> None:
+    def __init__(
+        self, renderer: Any, frame_processor: Any, config: VideoExportConfig
+    ) -> None:
         if not (renderer is not None):
             raise ValueError("renderer must be provided")
         if not (renderer is not None):
@@ -408,7 +411,7 @@ class VideoExportDialog(QDialog):
     Simply create and show this dialog when user wants to export
     """
 
-    def __init__(self, parent, renderer, frame_processor) -> None:
+    def __init__(self, parent: Any, renderer: Any, frame_processor: Any) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -575,7 +578,7 @@ class VideoExportDialog(QDialog):
         self.export_thread.start()
         progress_dialog.exec()
 
-    def _on_export_finished(self, progress_dialog, output_path) -> None:
+    def _on_export_finished(self, progress_dialog: Any, output_path: str) -> None:
         """Handle export completion"""
         if not (progress_dialog is not None):
             raise ValueError("progress_dialog must be provided")
@@ -590,7 +593,7 @@ class VideoExportDialog(QDialog):
             f"You can now play the video in any media player.",
         )
 
-    def _on_export_error(self, progress_dialog, error_msg) -> None:
+    def _on_export_error(self, progress_dialog: Any, error_msg: str) -> None:
         """Handle export error"""
         if not (progress_dialog is not None):
             raise ValueError("progress_dialog must be provided")

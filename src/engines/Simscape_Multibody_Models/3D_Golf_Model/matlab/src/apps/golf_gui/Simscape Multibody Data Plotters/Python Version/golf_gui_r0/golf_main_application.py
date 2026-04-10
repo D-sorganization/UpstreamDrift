@@ -11,6 +11,7 @@ import logging
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
@@ -55,7 +56,7 @@ except ImportError as e:
 class EnhancedGolfVisualizerApp(QApplication):
     """Enhanced main application with advanced features"""
 
-    def __init__(self, argv) -> None:
+    def __init__(self, argv: list) -> None:
         if not (argv is not None):
             raise ValueError("argv must be provided")
         if not (argv is not None):
@@ -744,7 +745,7 @@ def main() -> int:
     """Enhanced main entry point with comprehensive error handling"""
 
     # Setup exception handling
-    def handle_exception(exc_type, exc_value, exc_traceback) -> None:
+    def handle_exception(exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
         """Log uncaught exceptions and show an error dialog."""
         if not (exc_type is not None):
             raise ValueError("exc_type must be provided")

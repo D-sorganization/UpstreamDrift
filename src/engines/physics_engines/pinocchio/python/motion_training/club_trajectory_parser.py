@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -295,23 +295,23 @@ class ClubTrajectoryParser:
         return events
 
     @staticmethod
-    def _make_row_accessor(row) -> object:
+    def _make_row_accessor(row: Any) -> object:
         if hasattr(row, "iloc"):
 
-            def get(i) -> object | None:
+            def get(i: int) -> object | None:
                 """Return the value at index i from a pandas row."""
                 return row.iloc[i] if i < len(row) else None
 
         else:
 
-            def get(i) -> object | None:
+            def get(i: int) -> object | None:
                 """Return the value at index i from a list row."""
                 return row[i] if i < len(row) else None
 
         return get
 
     @staticmethod
-    def _orthogonalize_axes(x_axis, y_axis) -> NDArray:
+    def _orthogonalize_axes(x_axis: NDArray, y_axis: NDArray) -> NDArray:
         if not (x_axis is not None):
             raise ValueError("x_axis must be provided")
         if not (x_axis is not None):
@@ -322,7 +322,7 @@ class ClubTrajectoryParser:
         z_axis = np.cross(x_axis, y_axis)
         return np.column_stack([x_axis, y_axis, z_axis])
 
-    def _parse_grip_data(self, get) -> tuple[NDArray, NDArray]:
+    def _parse_grip_data(self, get: Any) -> tuple[NDArray, NDArray]:
         if not (get is not None):
             raise ValueError("get must be provided")
         if not (get is not None):
@@ -353,7 +353,9 @@ class ClubTrajectoryParser:
 
         return grip_pos, grip_rot
 
-    def _parse_club_face_data(self, get, grip_pos, grip_rot) -> tuple[NDArray, NDArray]:
+    def _parse_club_face_data(
+        self, get: Any, grip_pos: NDArray, grip_rot: NDArray
+    ) -> tuple[NDArray, NDArray]:
         if not (get is not None):
             raise ValueError("get must be provided")
         if not (get is not None):
@@ -392,7 +394,7 @@ class ClubTrajectoryParser:
 
         return face_pos, face_rot
 
-    def _parse_row(self, row) -> ClubFrame | None:
+    def _parse_row(self, row: Any) -> ClubFrame | None:
         """Parse a single data row into ClubFrame."""
         if not (row is not None):
             raise ValueError("row must be provided")

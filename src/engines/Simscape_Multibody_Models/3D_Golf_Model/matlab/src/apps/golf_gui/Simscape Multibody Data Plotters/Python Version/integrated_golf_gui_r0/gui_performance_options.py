@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent: tk.Tk) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -162,13 +162,13 @@ class PerformanceOptionsDialog:
         return self.result
 
 
-def get_performance_options(parent) -> dict | None:
+def get_performance_options(parent: tk.Tk) -> dict | None:
     """Show performance options dialog and return settings"""
     dialog = PerformanceOptionsDialog(parent)
     return dialog.show()
 
 
-def generate_matlab_performance_script(settings) -> str:
+def generate_matlab_performance_script(settings: dict) -> str:
     """Generate MATLAB script with performance settings"""
     script_lines = []
 

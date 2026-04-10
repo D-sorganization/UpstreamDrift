@@ -61,7 +61,7 @@ def _create_arm_bodies() -> tuple[Any, Any]:
     return humerus, radius
 
 
-def _create_arm_joints(arm, humerus, radius) -> tuple[Any, Any]:
+def _create_arm_joints(arm: Any, humerus: Any, radius: Any) -> tuple[Any, Any]:
     if not (arm is not None):
         raise ValueError("arm must be provided")
     if not (arm is not None):
@@ -88,7 +88,7 @@ def _create_arm_joints(arm, humerus, radius) -> tuple[Any, Any]:
     return shoulder, elbow
 
 
-def _create_biceps_muscle(humerus, radius) -> Any:
+def _create_biceps_muscle(humerus: Any, radius: Any) -> Any:
     if not (humerus is not None):
         raise ValueError("humerus must be provided")
     if not (humerus is not None):
@@ -105,14 +105,14 @@ def _create_biceps_muscle(humerus, radius) -> Any:
     return biceps
 
 
-def _create_controller(biceps) -> Any:
+def _create_controller(biceps: Any) -> Any:
     brain = osim.PrescribedController()
     brain.addActuator(biceps)
     brain.prescribeControlForActuator("biceps", osim.StepFunction(0.5, 3.0, 0.3, 1.0))
     return brain
 
 
-def _add_reporter(arm, biceps, elbow) -> None:
+def _add_reporter(arm: Any, biceps: Any, elbow: Any) -> None:
     if not (arm is not None):
         raise ValueError("arm must be provided")
     if not (arm is not None):
@@ -125,7 +125,7 @@ def _add_reporter(arm, biceps, elbow) -> None:
     arm.addComponent(reporter)
 
 
-def _attach_body_visualization(body, name) -> None:
+def _attach_body_visualization(body: Any, name: str) -> None:
     if not (body is not None):
         raise ValueError("body must be provided")
     if not (body is not None):

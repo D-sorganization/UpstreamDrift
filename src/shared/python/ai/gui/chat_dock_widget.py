@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtWebSockets import QWebSocket
@@ -377,7 +378,7 @@ class ChatDockWidget(QDockWidget):
 
     # ── Cleanup ──────────────────────────────────────────────────────
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: Any) -> None:  # type: ignore[override]
         """Clean up WebSocket on close."""
         if not (event is not None):
             raise ValueError("event must be provided")

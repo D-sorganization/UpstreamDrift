@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Callable
+from typing import Any
 
 from PyQt6.QtCore import QEvent, QObject, QPoint, Qt, pyqtSignal
 from PyQt6.QtGui import QAction, QCursor, QIcon, QMouseEvent
@@ -449,7 +450,7 @@ class DetachedTabWindow(QMainWindow):
         else:
             super().mouseDoubleClickEvent(event)
 
-    def closeEvent(self, event) -> None:  # type: ignore[override]
+    def closeEvent(self, event: Any) -> None:  # type: ignore[override]
         """On close: offer redock instead of losing the tab."""
         if not (event is not None):
             raise ValueError("event must be provided")

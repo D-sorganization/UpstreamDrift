@@ -9,7 +9,7 @@ context help, and AI panel setup methods.
 from __future__ import annotations
 
 import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import (
@@ -110,7 +110,7 @@ class LauncherUISetupMixin:
         self._setup_tools_menu(menubar)
         self._setup_help_menu(menubar)
 
-    def _setup_file_menu(self, menubar) -> None:
+    def _setup_file_menu(self, menubar: Any) -> None:
         if not (menubar is not None):
             raise ValueError("menubar must be provided")
         if not (menubar is not None):
@@ -129,7 +129,7 @@ class LauncherUISetupMixin:
         action_exit.triggered.connect(self.close)
         file_menu.addAction(action_exit)
 
-    def _setup_view_menu(self, menubar) -> None:
+    def _setup_view_menu(self, menubar: Any) -> None:
         if not (menubar is not None):
             raise ValueError("menubar must be provided")
         if not (menubar is not None):
@@ -164,7 +164,7 @@ class LauncherUISetupMixin:
         theme_menu = view_menu.addMenu("&Theme")
         self._setup_theme_menu(theme_menu)
 
-    def _setup_tools_menu(self, menubar) -> None:
+    def _setup_tools_menu(self, menubar: Any) -> None:
         if not (menubar is not None):
             raise ValueError("menubar must be provided")
         if not (menubar is not None):
@@ -179,7 +179,7 @@ class LauncherUISetupMixin:
         action_diag.triggered.connect(lambda: self._open_settings(tab=2))
         tools_menu.addAction(action_diag)
 
-    def _setup_help_menu(self, menubar) -> None:
+    def _setup_help_menu(self, menubar: Any) -> None:
         if not (menubar is not None):
             raise ValueError("menubar must be provided")
         if not (menubar is not None):

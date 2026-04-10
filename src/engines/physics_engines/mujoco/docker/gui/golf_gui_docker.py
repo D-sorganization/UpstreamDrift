@@ -13,7 +13,7 @@ import os
 import subprocess
 import tempfile
 import threading
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 if TYPE_CHECKING:
     import queue
@@ -245,7 +245,7 @@ class DockerMixin:
         host = cast("DockerProtocol", self)
         q: queue.Queue[str | None] = queue.Queue()
 
-        def enqueue_output(out, output_queue) -> None:
+        def enqueue_output(out: Any, output_queue: Any) -> None:
             """Enqueue output from subprocess."""
             if not (out is not None):
                 raise ValueError("out must be provided")
@@ -282,7 +282,7 @@ class DockerMixin:
 
             host.root.after(0, host.log, output.strip())
 
-    def _handle_process_failure(self, rc) -> None:
+    def _handle_process_failure(self, rc: int) -> None:
         """Log error details and suggest solutions for common failures."""
         if not (rc is not None):
             raise ValueError("rc must be provided")

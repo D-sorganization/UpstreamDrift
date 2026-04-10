@@ -17,6 +17,7 @@ import logging
 import sys
 import time
 from dataclasses import dataclass
+from typing import Any
 
 import moderngl as mgl
 import numpy as np
@@ -308,7 +309,7 @@ class OpenGLRenderer:
         }
         """
 
-    def initialize(self, ctx) -> None:
+    def initialize(self, ctx: Any) -> None:
         """Initialize OpenGL context and resources"""
         if not (ctx is not None):
             raise ValueError("ctx must be provided")
@@ -810,7 +811,7 @@ class OpenGLRenderer:
                     proj_matrix,
                 )
 
-    def _render_ground(self, view_matrix, proj_matrix) -> None:
+    def _render_ground(self, view_matrix: np.ndarray, proj_matrix: np.ndarray) -> None:
         """Render infinite ground grid"""
         if not (view_matrix is not None):
             raise ValueError("view_matrix must be provided")
@@ -859,7 +860,13 @@ class OpenGLRenderer:
             self.programs["ground"]["opacity"].value = 1.0
             self.vaos["ground"].render()
 
-    def _render_club(self, frame_data, config, view_matrix, proj_matrix) -> None:
+    def _render_club(
+        self,
+        frame_data: Any,
+        config: Any,
+        view_matrix: np.ndarray,
+        proj_matrix: np.ndarray,
+    ) -> None:
         """Render golf club"""
         if not (frame_data is not None):
             raise ValueError("frame_data must be provided")
@@ -893,7 +900,13 @@ class OpenGLRenderer:
             self.programs["standard"]["opacity"].value = config.body_opacity
             self.vaos["sphere"].render()
 
-    def _render_face_normal(self, frame_data, config, view_matrix, proj_matrix) -> None:
+    def _render_face_normal(
+        self,
+        frame_data: Any,
+        config: Any,
+        view_matrix: np.ndarray,
+        proj_matrix: np.ndarray,
+    ) -> None:
         """Render face normal"""
 
     def _render_arrow(
@@ -1036,7 +1049,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             len(self.frame_times) / sum(self.frame_times) if self.frame_times else 0
         )
 
-    def resizeGL(self, width, height) -> None:
+    def resizeGL(self, width: int, height: int) -> None:
         """Handle window resize"""
         self.ctx.viewport = (0, 0, width, height)
 
@@ -1082,11 +1095,11 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             self.current_frame = frame_idx
             self.update()
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle mouse press for camera control"""
         self.last_mouse_pos = (event.x(), event.y())
 
-    def mouseMoveEvent(self, event) -> None:
+    def mouseMoveEvent(self, event: Any) -> None:
         """Handle mouse movement for camera control"""
         if self.last_mouse_pos is not None:
             dx = event.x() - self.last_mouse_pos[0]
@@ -1098,7 +1111,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
             self.last_mouse_pos = (event.x(), event.y())
             self.update()
 
-    def wheelEvent(self, event) -> None:
+    def wheelEvent(self, event: Any) -> None:
         """Handle mouse wheel for camera zoom"""
         if not (event is not None):
             raise ValueError("event must be provided")

@@ -10,7 +10,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def _load_excel_frame_data(filename, sheet_name) -> list:
+def _load_excel_frame_data(filename: str, sheet_name: str) -> list:
     """Load and parse frame data from an Excel sheet.
 
     Returns a list of frame data dicts, or an empty list on failure.
@@ -66,7 +66,7 @@ def _load_excel_frame_data(filename, sheet_name) -> list:
     return data
 
 
-def _compute_motion_ranges(data) -> tuple:
+def _compute_motion_ranges(data: list) -> tuple:
     """Compute and log per-axis motion ranges for mid-hands and club head.
 
     Returns (mid_motion_ranges, club_motion_ranges) as lists of [X, Y, Z] range sizes.
@@ -125,7 +125,7 @@ def _compute_motion_ranges(data) -> tuple:
     return mid_motion_ranges, club_motion_ranges
 
 
-def _interpret_swing_motion(mid_motion_ranges, club_motion_ranges) -> None:
+def _interpret_swing_motion(mid_motion_ranges: list, club_motion_ranges: list) -> None:
     """Log interpretation of the swing motion directions and patterns."""
     if not (mid_motion_ranges is not None):
         raise ValueError("mid_motion_ranges must be provided")
@@ -179,7 +179,7 @@ def _interpret_swing_motion(mid_motion_ranges, club_motion_ranges) -> None:
         logger.info("  This seems unusual for a golf swing")
 
 
-def _analyze_key_frame(name, frame) -> None:
+def _analyze_key_frame(name: str, frame: dict) -> None:
     """Analyze and log position, club vector, and rotation matrix for a single frame."""
     if not (name is not None):
         raise ValueError("name must be provided")

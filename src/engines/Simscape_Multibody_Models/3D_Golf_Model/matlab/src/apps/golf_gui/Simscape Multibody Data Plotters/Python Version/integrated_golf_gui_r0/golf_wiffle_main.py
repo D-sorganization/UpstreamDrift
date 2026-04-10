@@ -7,6 +7,7 @@ Enhanced main application with Excel data loading and advanced visualization
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -442,7 +443,7 @@ class WiffleGolfMainWindow(QMainWindow):
         self.progress_text.append(message)
         self.statusBar().showMessage(message)
 
-    def _on_data_loaded(self, baseq, ztcfq, deltaq) -> None:
+    def _on_data_loaded(self, baseq: Any, ztcfq: Any, deltaq: Any) -> None:
         """Handle successful data loading"""
         if not (baseq is not None):
             raise ValueError("baseq must be provided")
@@ -582,7 +583,7 @@ class WiffleGolfMainWindow(QMainWindow):
         except (RuntimeError, ValueError, OSError) as e:
             self.metrics_label.setText(f"Error calculating metrics: {str(e)}")
 
-    def _calculate_max_speed(self, data) -> float:
+    def _calculate_max_speed(self, data: Any) -> float:
         """Calculate maximum clubhead speed"""
         try:
             # Calculate velocity from position data

@@ -141,7 +141,7 @@ class DrakeVisualizationMixin:
             if self.meshcat is not None:
                 self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))
 
-    def _resolve_induced_accels(self: Any, analyzer, source) -> Any:
+    def _resolve_induced_accels(self: Any, analyzer: Any, source: str) -> Any:
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         if not (analyzer is not None):
@@ -175,7 +175,7 @@ class DrakeVisualizationMixin:
 
         return accels
 
-    def _draw_induced_vectors_viz(self: Any, analyzer) -> None:
+    def _draw_induced_vectors_viz(self: Any, analyzer: Any) -> None:
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         if not (analyzer is not None):
@@ -184,7 +184,7 @@ class DrakeVisualizationMixin:
         accels = self._resolve_induced_accels(analyzer, source)
         self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
-    def _draw_counterfactual_vectors(self: Any, analyzer) -> None:
+    def _draw_counterfactual_vectors(self: Any, analyzer: Any) -> None:
         if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         if not (analyzer is not None):

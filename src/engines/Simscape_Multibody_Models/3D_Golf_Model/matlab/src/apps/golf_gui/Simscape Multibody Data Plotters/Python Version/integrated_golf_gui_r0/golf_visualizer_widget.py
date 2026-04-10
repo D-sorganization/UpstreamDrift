@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import traceback
+from typing import Any
 
 import moderngl as mgl
 import numpy as np
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 class GolfVisualizerWidget(QOpenGLWidget):
     """OpenGL widget for 3D golf swing visualization."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):
@@ -296,7 +297,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.update()
         logger.info("Camera: Overhead view")
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle mouse press events."""
         if not (event is not None):
             raise ValueError("event must be provided")
@@ -305,11 +306,11 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.last_mouse_pos = event.pos()
         self.mouse_pressed = True
 
-    def mouseReleaseEvent(self, event) -> None:
+    def mouseReleaseEvent(self, event: Any) -> None:
         """Handle mouse release events."""
         self.mouse_pressed = False
 
-    def mouseMoveEvent(self, event) -> None:
+    def mouseMoveEvent(self, event: Any) -> None:
         """Handle mouse move events."""
         if not (event is not None):
             raise ValueError("event must be provided")
@@ -344,7 +345,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.last_mouse_pos = event.pos()
         self.update()
 
-    def wheelEvent(self, event) -> None:
+    def wheelEvent(self, event: Any) -> None:
         """Handle mouse wheel events."""
         if not (event is not None):
             raise ValueError("event must be provided")
@@ -355,7 +356,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.camera_distance = np.clip(self.camera_distance, 0.1, 50.0)
         self.update()
 
-    def keyPressEvent(self, event) -> None:
+    def keyPressEvent(self, event: Any) -> None:
         """Handle keyboard shortcuts."""
         if not (event is not None):
             raise ValueError("event must be provided")

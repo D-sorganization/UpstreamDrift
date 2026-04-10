@@ -339,7 +339,7 @@ class SystemIdentifier:
 
     def _coordinate_descent(
         self,
-        objective,
+        objective: Any,
         best_params: NDArray[np.floating],
         best_error: float,
         lower_bounds: NDArray[np.floating],

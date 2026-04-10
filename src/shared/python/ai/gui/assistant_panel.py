@@ -434,7 +434,7 @@ class AIAssistantPanel(QWidget):
 
         return header
 
-    def _add_header_title_widgets(self, layout) -> None:
+    def _add_header_title_widgets(self, layout: Any) -> None:
         if not (layout is not None):
             raise ValueError("layout must be provided")
         if not (layout is not None):
@@ -453,7 +453,7 @@ class AIAssistantPanel(QWidget):
 
         layout.addSpacing(10)
 
-    def _add_header_mode_and_status(self, layout) -> None:
+    def _add_header_mode_and_status(self, layout: Any) -> None:
         if not (layout is not None):
             raise ValueError("layout must be provided")
         if not (layout is not None):
@@ -483,7 +483,7 @@ class AIAssistantPanel(QWidget):
         )
         layout.addWidget(self._status_label)
 
-    def _add_header_action_buttons(self, layout) -> None:
+    def _add_header_action_buttons(self, layout: Any) -> None:
         if not (layout is not None):
             raise ValueError("layout must be provided")
         if not (layout is not None):

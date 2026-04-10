@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import sys
+from typing import Any
 
 from golf_gui_styles import get_full_modern_style
 from golf_gui_tabs import ComparisonTab, MotionCaptureTab, SimulinkModelTab
@@ -239,7 +240,7 @@ class GolfVisualizerMainWindow(QMainWindow):
         if hasattr(self, "gl_widget") and self.gl_widget:
             self.gl_widget.set_above_view()
 
-    def _toggle_face_normal(self, state) -> None:
+    def _toggle_face_normal(self, state: Any) -> None:
         """Toggle face normal visibility."""
         if (
             hasattr(self, "gl_widget")
@@ -249,7 +250,7 @@ class GolfVisualizerMainWindow(QMainWindow):
             self.gl_widget.current_render_config.show_face_normal = bool(state)
             self.gl_widget.update()
 
-    def _toggle_ball(self, state) -> None:
+    def _toggle_ball(self, state: Any) -> None:
         """Toggle ball visibility."""
         if (
             hasattr(self, "gl_widget")

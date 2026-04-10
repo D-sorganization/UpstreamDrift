@@ -18,14 +18,16 @@ class TrajectoryFunnelBenchmark:
     will drastically outperform agents using a clock-synchronized static destination reward.
     """
 
-    def __init__(self, mode="transverse") -> None:
+    def __init__(self, mode: str = "transverse") -> None:
         assert mode in [
             "transverse",
             "setpoint",
         ], "Mode must be 'transverse' or 'setpoint'"
         self.mode = mode
 
-    def setpoint_reward(self, current_state, target_state) -> float:
+    def setpoint_reward(
+        self, current_state: np.ndarray, target_state: np.ndarray
+    ) -> float:
         """
         Classical control approach: Drive Euclidean distance to the destination to zero.
         Ignores path geometry, heavily penalizes phase asynchrony.
@@ -36,7 +38,10 @@ class TrajectoryFunnelBenchmark:
         return -np.sum(error**2)
 
     def trajectory_funnel_reward(
-        self, current_state, reference_trajectory, current_phase
+        self,
+        current_state: np.ndarray,
+        reference_trajectory: np.ndarray,
+        current_phase: int,
     ) -> float:
         """
         Geometric approach: Reward confinement to the trajectory tube (orbital stability).

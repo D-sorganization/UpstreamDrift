@@ -152,7 +152,7 @@ def _register_load_c3d_tool(registry: ToolRegistry) -> None:  # type: ignore[ret
     return load_c3d
 
 
-def _register_marker_info_tool(registry: ToolRegistry, load_c3d_fn) -> None:
+def _register_marker_info_tool(registry: ToolRegistry, load_c3d_fn: Any) -> None:
     @registry.register(
         name="get_marker_info",
         description=(

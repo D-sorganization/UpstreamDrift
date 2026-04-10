@@ -13,7 +13,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def _load_csv_data(csv_file) -> pd.DataFrame | None:
+def _load_csv_data(csv_file: str) -> pd.DataFrame | None:
     """Load and validate Simscape CSV data.
 
     Returns the DataFrame on success, or None on failure.
@@ -31,7 +31,7 @@ def _load_csv_data(csv_file) -> pd.DataFrame | None:
         return None
 
 
-def _categorize_columns(columns) -> dict:
+def _categorize_columns(columns: list) -> dict:
     """Categorize CSV columns by data type (position, rotation, etc.).
 
     Returns a dict mapping category names to lists of column names.
@@ -73,7 +73,7 @@ def _categorize_columns(columns) -> dict:
     return categories
 
 
-def _identify_joint_positions(position_columns) -> dict:
+def _identify_joint_positions(position_columns: list) -> dict:
     """Identify key joint center positions from position columns.
 
     Returns a dict mapping joint group names to lists of matching columns.
@@ -225,7 +225,7 @@ def _build_segment_definitions() -> dict:
     }
 
 
-def _check_segment_availability(segments, columns) -> dict:
+def _check_segment_availability(segments: dict, columns: list) -> dict:
     """Check which segments have all required columns available.
 
     Returns a dict of available segment names to their column lists.
@@ -249,7 +249,7 @@ def _check_segment_availability(segments, columns) -> dict:
     return available_segments
 
 
-def _log_data_sample(df, available_segments) -> None:
+def _log_data_sample(df: pd.DataFrame, available_segments: dict) -> None:
     """Log a sample of data from the available segments."""
     if not (df is not None):
         raise ValueError("df must be provided")
@@ -273,7 +273,7 @@ def _log_data_sample(df, available_segments) -> None:
         logger.info("%s", df[sample_cols].head(3).to_string())
 
 
-def analyze_simscape_data(csv_file) -> tuple | None:
+def analyze_simscape_data(csv_file: str) -> tuple | None:
     """Analyze the Simscape CSV file and identify key joint positions."""
 
     logger.info("Analyzing Simscape data file: %s", csv_file)

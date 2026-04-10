@@ -1,6 +1,7 @@
 """Service for loading C3D files into application data models."""
 
 import os
+from typing import Any
 
 import numpy as np
 
@@ -9,7 +10,7 @@ from ...logger_utils import log_execution_time
 from ..core.models import AnalogData, C3DDataModel, MarkerData
 
 
-def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
+def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerData]:
     """Build marker data dictionary from points dataframe.
 
     Args:
@@ -39,7 +40,7 @@ def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
     return markers
 
 
-def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
+def _build_analog(df_analog: Any, metadata_obj: Any) -> dict[str, AnalogData]:
     """Build analog channel data dictionary from analog dataframe.
 
     Args:
@@ -66,7 +67,7 @@ def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
     return analog
 
 
-def _build_metadata_ui(filepath: str, metadata_obj) -> dict[str, str]:
+def _build_metadata_ui(filepath: str, metadata_obj: Any) -> dict[str, str]:
     """Build UI-friendly metadata dictionary from C3D metadata.
 
     Args:

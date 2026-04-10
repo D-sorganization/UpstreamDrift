@@ -201,7 +201,7 @@ class MotionDataLoader:
         except (RuntimeError, TypeError, ValueError) as e:
             raise RuntimeError(f"Error loading Excel data: {e}") from e
 
-    def _extract_time_column(self, data_df, sheet_name) -> pd.Series:
+    def _extract_time_column(self, data_df: pd.DataFrame, sheet_name: str) -> pd.Series:
         """Extract or create the time column from processed sheet data.
 
         Returns a pandas Series for the time column.
@@ -219,7 +219,9 @@ class MotionDataLoader:
         )
         return pd.Series(np.linspace(0, 1, len(data_df)))
 
-    def _extract_clubhead_position(self, data_df, processed_data, sheet_name) -> None:
+    def _extract_clubhead_position(
+        self, data_df: pd.DataFrame, processed_data: pd.DataFrame, sheet_name: str
+    ) -> None:
         """Extract clubhead XYZ position columns from the sheet data.
 
         Modifies processed_data in place by adding clubhead_x/y/z columns.
@@ -266,7 +268,7 @@ class MotionDataLoader:
                 processed_data["clubhead_y"] = np.linspace(0, 1, len(processed_data))
                 processed_data["clubhead_z"] = np.linspace(0, 1, len(processed_data))
 
-    def _apply_post_processing(self, processed_data) -> pd.DataFrame:
+    def _apply_post_processing(self, processed_data: pd.DataFrame) -> pd.DataFrame:
         """Apply normalization, noise filtering, and interpolation to processed data.
 
         Returns the post-processed DataFrame.

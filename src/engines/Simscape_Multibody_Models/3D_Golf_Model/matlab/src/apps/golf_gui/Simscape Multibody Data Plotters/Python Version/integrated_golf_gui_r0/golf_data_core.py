@@ -12,6 +12,7 @@ import time
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -700,7 +701,7 @@ class FrameProcessor:
         """Set the current filter type and invalidate cached filtered data"""
         self.set_filter(filter_type)  # Use existing method
 
-    def set_filter_param(self, param_name: str, value) -> None:
+    def set_filter_param(self, param_name: str, value: Any) -> None:
         """Set a filter parameter and invalidate cached filtered data"""
         if not (param_name is not None):
             raise ValueError("param_name must be provided")

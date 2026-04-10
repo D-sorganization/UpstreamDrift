@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -475,7 +477,9 @@ class KinematicsRenderer(BaseRenderer):
         fig.tight_layout()
 
     @staticmethod
-    def _get_embedding_signal(data, signal_type: str) -> tuple[np.ndarray, np.ndarray]:
+    def _get_embedding_signal(
+        data: Any, signal_type: str
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Retrieve and convert the signal for phase space embedding.
 
         Args:

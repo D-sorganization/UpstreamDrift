@@ -6,6 +6,7 @@ Extracted from golf_gui_application.py for Single Responsibility Principle.
 from __future__ import annotations
 
 from copy import copy
+from typing import Any
 
 import numpy as np
 from golf_data_core import FrameData, FrameProcessor
@@ -32,7 +33,7 @@ class SmoothPlaybackController(QObject):
     frameUpdated = pyqtSignal(FrameData)  # Emits interpolated frame data
     positionChanged = pyqtSignal(float)  # Emits current position (0.0 to total_frames)
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         if not (parent is not None):
             raise ValueError("parent must be provided")
         if not (parent is not None):

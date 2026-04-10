@@ -6,6 +6,7 @@ Computes Force and Mobility ellipsoids/matrices using Drake's MultibodyPlant.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -92,7 +93,9 @@ class DrakeManipulabilityAnalyzer:
 
         return sorted(bodies, key=sort_key)
 
-    def _compute_translational_jacobian(self, context: Context, body) -> np.ndarray:
+    def _compute_translational_jacobian(
+        self, context: Context, body: Any
+    ) -> np.ndarray:
         return self.plant.CalcJacobianTranslationalVelocity(
             context,
             JacobianWrtVariable.kV,
@@ -103,7 +106,7 @@ class DrakeManipulabilityAnalyzer:
         )
 
     def _decompose_mobility_matrix(
-        self, mobility_matrix
+        self, mobility_matrix: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
         if not (mobility_matrix is not None):
             raise ValueError("mobility_matrix must be provided")
@@ -116,7 +119,7 @@ class DrakeManipulabilityAnalyzer:
         radii_v = np.sqrt(np.maximum(eigvals_v, 1e-9))
         return radii_v, eigvecs_v
 
-    def _check_condition_number(self, name, cond) -> bool:
+    def _check_condition_number(self, name: str, cond: float) -> bool:
         if not (name is not None):
             raise ValueError("name must be provided")
         if not (name is not None):
@@ -137,7 +140,13 @@ class DrakeManipulabilityAnalyzer:
         return True
 
     def _build_result_for_body(
-        self, context: Context, name, body, radii_v, eigvecs_v, cond
+        self,
+        context: Context,
+        name: str,
+        body: Any,
+        radii_v: np.ndarray,
+        eigvecs_v: np.ndarray,
+        cond: float,
     ) -> ManipulabilityResult:
         if not (context is not None):
             raise ValueError("context must be provided")
