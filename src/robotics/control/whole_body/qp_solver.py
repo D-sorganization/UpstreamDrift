@@ -353,13 +353,22 @@ class NullspaceQPSolver(QPSolver):
         """Always available (uses numpy only)."""
         return True
 
+    def _apply_variable_bounds(self, x: np.ndarray, problem: QPProblem) -> np.ndarray:
+        """Clamp x to variable bounds [x_lb, x_ub] if set."""
+        if problem.x_lb is not None:
+            x = np.maximum(x, problem.x_lb)
+        if problem.x_ub is not None:
+            x = np.minimum(x, problem.x_ub)
+        return x
+
     def solve(self, problem: QPProblem) -> QPSolution:
         """Solve QP using nullspace method.
 
-        Only handles equality constraints and soft bounds.
+        Handles equality constraints via KKT system. Variable bounds
+        are enforced by post-solve clamping (best-effort).
 
         Args:
-            problem: QP problem (equality constraints only).
+            problem: QP problem.
 
         Returns:
             QP solution.
@@ -396,7 +405,7 @@ class NullspaceQPSolver(QPSolver):
 
             try:
                 solution = np.linalg.solve(KKT, rhs)
-                x = solution[:n]
+                x = self._apply_variable_bounds(solution[:n], problem)
                 dual = solution[n:]
 
                 cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
@@ -423,7 +432,9 @@ class NullspaceQPSolver(QPSolver):
         else:
             # Unconstrained: solve H @ x = -g
             try:
-                x = np.asarray(np.linalg.solve(H, -g), dtype=np.float64)
+                x = self._apply_variable_bounds(
+                    np.asarray(np.linalg.solve(H, -g), dtype=np.float64), problem
+                )
                 cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
 
                 solve_time = time.perf_counter() - start_time

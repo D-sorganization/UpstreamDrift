@@ -706,6 +706,8 @@ class WholeBodyController:
 
         # Compute torques: tau = M @ qdd + nle - J_c^T @ f_c
         tau = M @ qdd + nle
+        if self._config.torque_limits is not None:
+            tau = np.clip(tau, -self._config.torque_limits, self._config.torque_limits)
         if contact_forces is not None and self._contact_jacobians:
             for i, J_c in enumerate(self._contact_jacobians):
                 if J_c.shape[0] == 6:
