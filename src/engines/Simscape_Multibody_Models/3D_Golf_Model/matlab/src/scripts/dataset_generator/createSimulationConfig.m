@@ -34,18 +34,10 @@ end
 config = struct();
 
 % === Model Configuration ===
-config.model_name = 'GolfSwing3D_Model';
+config.model_name = 'GolfSwing3D_Kinetic';
 
 % Try to find model path automatically
-model_path = which([config.model_name '.slx']);
-if isempty(model_path)
-    model_path = which([config.model_name '.mdl']);
-end
-if isempty(model_path)
-    % Use current directory as fallback
-    model_path = fullfile(pwd, [config.model_name '.slx']);
-end
-config.model_path = model_path;
+config.model_path = resolveModelPath(config.model_name);
 
 % Optional input file
 config.input_file = '';  % Empty = use generated data
@@ -93,18 +85,21 @@ config.enable_master_dataset = true;       % Compile master dataset CSV
 % === Verbosity Configuration ===
 % Options: 'Silent', 'Normal', 'Verbose', 'Debug'
 config.verbosity = 'Normal';
+config.verbose = deriveVerboseFlag(config.verbosity);
 
 % === Advanced Configuration ===
 config.stop_on_error = false;              % Continue on simulation errors
 config.timeout_seconds = 300;              % Maximum time per simulation (seconds)
 
 %% Process custom overrides
+explicit_verbose_override = false;
 
 if nargin > 0
     % Check if first argument is a struct (merge mode)
     if isstruct(varargin{1})
         % Merge custom struct with defaults
         custom_config = varargin{1};
+        explicit_verbose_override = isfield(custom_config, 'verbose');
         custom_fields = fieldnames(custom_config);
 
         for i = 1:length(custom_fields)
@@ -114,12 +109,20 @@ if nargin > 0
 
         % Process remaining name-value pairs if any
         if nargin > 1
+            explicit_verbose_override = explicit_verbose_override || containsParameterName(varargin{2:end}, 'verbose');
             config = applyNameValuePairs(config, varargin{2:end});
         end
     else
         % Process name-value pairs
+        explicit_verbose_override = containsParameterName(varargin{:}, 'verbose');
         config = applyNameValuePairs(config, varargin{:});
     end
+end
+
+% Keep the legacy boolean logging flag aligned with the human-readable level
+% unless the caller explicitly supplied their own boolean override.
+if ~explicit_verbose_override
+    config.verbose = deriveVerboseFlag(config.verbosity);
 end
 
 %% Validate configuration
@@ -261,6 +264,49 @@ function validateSimulationConfig(config)
         if ~license('test', 'Simscape')
             warning('DataGenerator:SimscapeMissing', ...
                 'Simscape license not available - Simscape extraction may fail');
+        end
+    end
+end
+
+function model_path = resolveModelPath(model_name)
+    % Resolve the bundled model first, then fall back to path lookup.
+    model_candidates = {
+        which([model_name '.slx'])
+        which([model_name '.mdl'])
+        fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'model', [model_name '.slx'])
+        fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'model', [model_name '.mdl'])
+    };
+
+    for i = 1:length(model_candidates)
+        candidate = model_candidates{i};
+        if ~isempty(candidate) && exist(candidate, 'file')
+            model_path = candidate;
+            return;
+        end
+    end
+
+    % Return the primary bundled path so validation can report a clear warning.
+    model_path = fullfile(fileparts(fileparts(fileparts(mfilename('fullpath')))), 'model', [model_name '.slx']);
+end
+
+function verbose = deriveVerboseFlag(verbosity)
+    % Convert the UI verbosity level into the boolean extractor flag.
+    verbose = ~strcmpi(verbosity, 'Silent');
+end
+
+function has_parameter = containsParameterName(varargin, target_name)
+    % Check whether a name-value argument list includes a parameter.
+    has_parameter = false;
+
+    for i = 1:2:length(varargin)
+        parameter_name = varargin{i};
+        if isstring(parameter_name)
+            parameter_name = char(parameter_name);
+        end
+
+        if ischar(parameter_name) && strcmpi(parameter_name, target_name)
+            has_parameter = true;
+            return;
         end
     end
 end

@@ -12,7 +12,13 @@ try
     options.extract_combined_bus = config.use_signal_bus;
     options.extract_logsout = config.use_logsout;
     options.extract_simscape = config.use_simscape;
-    options.verbose = config.verbose;
+    if isfield(config, 'verbose') && ~isempty(config.verbose)
+        options.verbose = logical(config.verbose);
+    elseif isfield(config, 'verbosity')
+        options.verbose = ~strcmpi(config.verbosity, 'Silent');
+    else
+        options.verbose = true;
+    end
 
     % Run diagnostic to see what data sources are available
     diagnoseDataExtraction(simOut, config);

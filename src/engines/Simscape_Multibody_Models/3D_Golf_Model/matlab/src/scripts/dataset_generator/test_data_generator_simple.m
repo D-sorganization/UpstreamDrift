@@ -55,11 +55,12 @@ try
     minimal_config.num_simulations = 10;
     minimal_config.model_name = 'TestModel';
     minimal_config.output_folder = pwd;
+    minimal_config.verbosity = 'Normal';
 
     enhanced_config = ensureEnhancedConfig(minimal_config);
 
     fprintf('  ✓ ensureEnhancedConfig() works\n');
-    fprintf('  - Added verbosity: %s\n', enhanced_config.verbosity);
+    fprintf('  - Added verbose flag: %d\n', enhanced_config.verbose);
     fprintf('  - Added use_signal_bus: %d\n', enhanced_config.use_signal_bus);
     fprintf('  - Added use_logsout: %d\n', enhanced_config.use_logsout);
     fprintf('  - Added capture_workspace: %d\n', enhanced_config.capture_workspace);

@@ -4,6 +4,7 @@ Covers:
 - CrossEngineSimConfig default values and validation
 - _StubEngine protocol compliance
 - _run_headless() headless comparison path
+- Qt window assembly helpers and GUI bootstrap
 - main() CLI interface
 - _build_arg_parser() argument handling
 - CV summary dict structure
@@ -16,15 +17,26 @@ skipped if PyQt6 is not installed.
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from unittest.mock import patch
 
 import numpy as np
 import pytest
 
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
+try:
+    from PyQt6.QtWidgets import QApplication, QMainWindow
+except ImportError:  # pragma: no cover - depends on local GUI install
+    QApplication = None
+    QMainWindow = None
+
 from src.launchers.cross_engine_dashboard import (
     CrossEngineSimConfig,
     _build_arg_parser,
+    _build_qt_window,
+    _load_qt_backends,
     _run_headless,
     _StubEngine,
 )
@@ -34,6 +46,14 @@ from src.launchers.cross_engine_dashboard import (
 # ---------------------------------------------------------------------------
 
 pytestmark = pytest.mark.unit
+
+
+@pytest.fixture(scope="module")
+def qapp() -> QApplication:
+    """Provide a QApplication instance for GUI smoke tests."""
+    if QApplication is None:
+        pytest.skip("PyQt6 not available")
+    return QApplication.instance() or QApplication([])
 
 
 # ---------------------------------------------------------------------------
@@ -224,6 +244,54 @@ class TestArgParser:
         parser = _build_arg_parser()
         args = parser.parse_args(["--n-trials", "20"])
         assert args.n_trials == 20
+
+
+# ---------------------------------------------------------------------------
+# Qt bootstrap
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.skipif(QApplication is None, reason="PyQt6 not available")
+class TestQtBootstrap:
+    """Tests for the deferred Qt window assembly helpers."""
+
+    def test_load_qt_backends_with_matplotlib(self) -> None:
+        """The backend loader should expose Qt and Matplotlib classes."""
+        backends = _load_qt_backends()
+        assert backends.has_mpl is True
+        assert backends.figure is not None
+        assert backends.figure_canvas is not None
+        assert backends.qmainwindow.__name__ == "QMainWindow"
+
+    def test_load_qt_backends_without_matplotlib(self) -> None:
+        """The backend loader should degrade cleanly when Matplotlib is missing."""
+        with patch.dict(sys.modules, {"matplotlib": None}):
+            backends = _load_qt_backends()
+        assert backends.has_mpl is False
+        assert backends.figure is None
+        assert backends.figure_canvas is None
+
+    def test_build_qt_window_creates_expected_controls(
+        self, qapp: QApplication
+    ) -> None:
+        """The built window should expose the expected control defaults."""
+        window = _build_qt_window()
+        assert isinstance(window, QMainWindow)
+        assert window.windowTitle() == "Cross-Engine Perturbation Comparison Dashboard"
+        assert window.minimumSize().width() == 900
+        assert window.minimumSize().height() == 620
+        assert window.centralWidget() is not None
+        assert window.centralWidget().objectName() == "central"
+
+        assert window._engine_checks["pendulum_stub"].isChecked() is True
+        assert window._trials_spin.value() == 10
+        assert window._amp_spin.value() == pytest.approx(0.1)
+        assert window._tend_spin.value() == pytest.approx(1.5)
+        assert window._dt_spin.value() == pytest.approx(0.01)
+        assert window._status_label.text() == "Ready"
+        assert window._run_btn.text() == "Run Comparison"
+        assert hasattr(window, "_canvas_rs")
+        assert hasattr(window, "_canvas_cv")
 
 
 # ---------------------------------------------------------------------------
