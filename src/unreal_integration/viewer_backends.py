@@ -984,16 +984,23 @@ class UnrealBridgeBackend(ViewerBackend):
         self._frame_queue: Queue[UnrealDataFrame] = Queue()
         self._stop_event = threading.Event()
         self._server_ready_event = threading.Event()
+        self._server_start_error: BaseException | None = None
         self._frame_counter = 0
         self._object_counter = 0
         self._start_time = 0.0
 
     def initialize(self) -> None:
-        """Initialize streaming server in background thread."""
+        """Initialize streaming server in background thread.
+
+        Raises:
+            RuntimeError: If the streaming server fails to bind its socket or
+                does not become ready within the startup timeout.
+        """
         if self._is_initialized:
             return
 
         self._start_time = time.time()
+        self._server_start_error = None
 
         # Configure streaming
         streaming_config = StreamingConfig(
@@ -1010,8 +1017,21 @@ class UnrealBridgeBackend(ViewerBackend):
         )
         self._server_thread.start()
 
-        # Block until the server loop signals it has started (replaces time.sleep)
-        self._server_ready_event.wait(timeout=5.0)
+        # Block until the server loop signals readiness (or failure).
+        if not self._server_ready_event.wait(timeout=5.0):
+            self._stop_event.set()
+            raise RuntimeError(
+                f"Unreal streaming server did not start within 5 s "
+                f"(port {self.config.server_port})"
+            )
+
+        # Re-raise any error captured by the background thread.
+        if self._server_start_error is not None:
+            err = self._server_start_error
+            self._server_start_error = None
+            raise RuntimeError(
+                f"Unreal streaming server failed to start: {err}"
+            ) from err
 
         self._is_initialized = True
         logger.info(
@@ -1027,8 +1047,15 @@ class UnrealBridgeBackend(ViewerBackend):
             if self._server is None:
                 return
 
-            # Start server
-            await self._server.start()
+            # Start server — capture failures and always signal the ready event
+            # so initialize() does not hang on a timeout.
+            try:
+                await self._server.start()
+            except (OSError, RuntimeError) as exc:
+                self._server_start_error = exc
+                self._server_ready_event.set()
+                return
+
             self._server_ready_event.set()
 
             # Process frames
