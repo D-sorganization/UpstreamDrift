@@ -29,7 +29,8 @@ class CheckResult(NamedTuple):
     name: str
     passed: bool
     message: str
-    fix_command: str | None = None
+    fix_command: list[str] | None = None
+    fix_cwd: str | None = None
 
 
 def check_tools_repo_availability() -> CheckResult:
@@ -47,7 +48,7 @@ def check_tools_repo_availability() -> CheckResult:
             name="Tools Repo - model_generation",
             passed=False,
             message="model_generation not installed. Install with: pip install -e ../Tools[urdf]",
-            fix_command="pip install -e ../Tools[urdf]",
+            fix_command=["pip", "install", "-e", "../Tools[urdf]"],
         )
 
 
@@ -66,7 +67,7 @@ def check_signal_toolkit() -> CheckResult:
             name="Tools Repo - signal_toolkit",
             passed=False,
             message="signal_toolkit not installed. Install with: pip install -e ../Tools[signal]",
-            fix_command="pip install -e ../Tools[signal]",
+            fix_command=["pip", "install", "-e", "../Tools[signal]"],
         )
 
 
@@ -87,7 +88,8 @@ def check_frontend_dependencies() -> CheckResult:
             name="Frontend Dependencies",
             passed=False,
             message="node_modules not found. Run: cd ui && npm install",
-            fix_command="cd ui && npm install",
+            fix_command=["npm", "install"],
+            fix_cwd="ui",
         )
 
     return CheckResult(
@@ -154,7 +156,15 @@ def check_frontend_tests() -> CheckResult:
             name="Frontend Tests",
             passed=False,
             message="No test script in package.json. Add Vitest configuration.",
-            fix_command="npm install -D vitest @testing-library/react jsdom",
+            fix_command=[
+                "npm",
+                "install",
+                "-D",
+                "vitest",
+                "@testing-library/react",
+                "jsdom",
+            ],
+            fix_cwd="ui",
         )
 
     # Check for vitest config
@@ -215,7 +225,7 @@ def check_pyqt_launcher() -> CheckResult:
             name="PyQt6 Launcher",
             passed=False,
             message="PyQt6 not installed. Install with: pip install PyQt6",
-            fix_command="pip install PyQt6",
+            fix_command=["pip", "install", "PyQt6"],
         )
 
 
@@ -351,9 +361,9 @@ def main() -> int:
             if not result.passed and result.fix_command:
                 logger.info("  Running: %s", result.fix_command)
                 try:
-                    subprocess.run(result.fix_command, shell=True, check=True)  # nosec B602 - fix_command from predefined integration check list
+                    subprocess.run(result.fix_command, cwd=result.fix_cwd, check=True)
                     logger.info("  Success!")
-                except subprocess.CalledProcessError as e:
+                except (subprocess.CalledProcessError, OSError) as e:
                     logger.error("  Failed: %s", e)
 
     return 0 if failed == 0 else 1
