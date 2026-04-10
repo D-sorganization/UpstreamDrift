@@ -95,9 +95,9 @@ build_exe_options = {
         "trace",
     ],
     "include_files": [
-        (str(project_root / "shared" / "urdf"), "shared/urdf"),
-        (str(project_root / "shared" / "meshes"), "shared/meshes"),
-        (str(project_root / "config"), "config"),
+        (str(project_root / "src" / "shared" / "urdf"), "src/shared/urdf"),
+        (str(project_root / "src" / "shared" / "meshes"), "src/shared/meshes"),
+        (str(project_root / "src" / "config"), "src/config"),
         (str(project_root / "docs"), "docs"),
         (str(project_root / "README.md"), "README.md"),
         (str(project_root / "LICENSE"), "LICENSE"),
@@ -112,7 +112,9 @@ bdist_msi_options = {
     "upgrade_code": "{12345678-1234-5678-9012-123456789012}",
     "add_to_path": True,
     "initial_target_dir": r"[ProgramFilesFolder]\UpstreamDrift",
-    "install_icon": str(project_root / "shared" / "icons" / "golf_robot.ico"),
+    "install_icon": str(
+        project_root / "src" / "launchers" / "assets" / "golf_icon.ico"
+    ),
     "summary_data": {
         "author": "UpstreamDrift Team",
         "comments": "Professional biomechanical analysis software",
@@ -123,18 +125,18 @@ bdist_msi_options = {
 # Executables
 executables = [
     Executable(
-        script=str(project_root / "launchers" / "golf_launcher.py"),
+        script=str(project_root / "src" / "launchers" / "golf_launcher.py"),
         base="Win32GUI",
         target_name="GolfModelingSuite.exe",
-        icon=str(project_root / "shared" / "icons" / "golf_robot.ico"),
+        icon=str(project_root / "src" / "launchers" / "assets" / "golf_icon.ico"),
         shortcut_name="UpstreamDrift",
         shortcut_dir="DesktopFolder",
     ),
     Executable(
-        script=str(project_root / "api" / "server.py"),
+        script=str(project_root / "src" / "api" / "server.py"),
         base="Console",
         target_name="GolfAPI.exe",
-        icon=str(project_root / "shared" / "icons" / "golf_robot.ico"),
+        icon=str(project_root / "src" / "launchers" / "assets" / "golf_icon.ico"),
     ),
 ]
 

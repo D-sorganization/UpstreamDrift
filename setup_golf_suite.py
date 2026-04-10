@@ -177,9 +177,9 @@ def _find_source_image(repo_root: pathlib.Path) -> pathlib.Path | None:
     """Find the best available source image for icon generation."""
     potential_sources = [
         repo_root / "GolfingRobot.png",
-        repo_root / "launchers" / "assets" / "golf_robot_cropped.png",
-        repo_root / "launchers" / "assets" / "golf_icon.png",
-        repo_root / "launchers" / "assets" / "golf_robot_icon.png",
+        repo_root / "src" / "launchers" / "assets" / "golf_robot_cropped.png",
+        repo_root / "src" / "launchers" / "assets" / "golf_icon.png",
+        repo_root / "src" / "launchers" / "assets" / "golf_robot_icon.png",
     ]
     for src in potential_sources:
         if src.exists():
@@ -205,7 +205,7 @@ def main() -> int:
     # 3. Resolve Paths
     repo_root = get_repo_root()
     source_icon = _find_source_image(repo_root)
-    output_icon = repo_root / "launchers" / "assets" / "golf_suite_unified.ico"
+    output_icon = repo_root / "src" / "launchers" / "assets" / "golf_suite_unified.ico"
     target_launch_script = repo_root / "launch_golf_suite.py"
 
     # 4. Generate Icon
@@ -213,7 +213,7 @@ def main() -> int:
         create_optimized_icon(source_icon, output_icon)
     elif not output_icon.exists():
         # Fallback to existing icon if generation impossible
-        fallback = repo_root / "launchers" / "assets" / "golf_robot_icon.ico"
+        fallback = repo_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
         if fallback.exists():
             output_icon = fallback
             logger.info("Using fallback existing icon.")
