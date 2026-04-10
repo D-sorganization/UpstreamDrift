@@ -145,7 +145,7 @@ class TestOutputManager(unittest.TestCase):
         fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=UTC)
         with (
             patch(
-                "src.shared.python.data_io.output_manager.now_local",
+                "src.shared.python.data_io._simulation_store.now_local",
                 return_value=fixed_now,
             ),
             # Also mock unlink to verify it was called and avoid actual deletion

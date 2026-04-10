@@ -8,16 +8,18 @@ OBS-001: Migrated to structured logging for better observability.
 
 PERFORMANCE: Added async file I/O support using ThreadPoolExecutor
 to prevent blocking the main thread during large file writes.
+
+Implementation is split across submodules for maintainability (#2486):
+  _format_handlers.py  — CSV/JSON/HDF5/Parquet save & load dispatch
+  _path_utils.py       — filename sanitization, dir scanning, project-root resolution
+  _async_io.py         — ThreadPoolExecutor-based background saves
+  _report_generators.py — analysis report export (JSON, HTML)
 """
 
 from __future__ import annotations
 
-import json
-import os
-from collections.abc import Callable, Iterator
-from concurrent.futures import Future, ThreadPoolExecutor
-from datetime import datetime, timedelta
-from enum import Enum
+from collections.abc import Callable
+from concurrent.futures import Future
 from pathlib import Path
 from typing import Any, TypeAlias
 
@@ -25,29 +27,32 @@ import numpy as np
 import pandas as pd  # type: ignore[import]
 
 from ..core.contracts import invariant, precondition
-from ..core.datetime_utils import (
-    format_datetime,
-    now_local,
-    timestamp_display,
-    timestamp_filename,
-    timestamp_iso,
+
+# Re-imported for backward compatibility with tests that patch this name here
+from ..core.datetime_utils import now_local  # noqa: F401
+from ._async_io import (
+    get_io_executor,
+    shutdown_executor,
+    submit_async_save,
+    submit_background_save,
 )
+
+# Submodule imports — re-exported for backward compatibility
+from ._format_handlers import OutputFormat, dispatch_load, dispatch_save
+from ._path_utils import (
+    create_output_structure,
+    fast_dir_scan,
+    resolve_base_path,
+    sanitize_filename,
+)
+from ._report_generators import export_analysis_report
+from ._simulation_store import cleanup_old_files, get_simulation_list
 from .common_utils import get_logger, setup_structured_logging
-from .provenance import ProvenanceInfo, add_provenance_header_file
+from .provenance import ProvenanceInfo
 
 # Configure structured logging
 setup_structured_logging()
 logger = get_logger(__name__)
-
-
-class OutputFormat(Enum):
-    """Supported output formats."""
-
-    CSV = "csv"
-    JSON = "json"
-    HDF5 = "hdf5"
-    PICKLE = "pickle"
-    PARQUET = "parquet"
 
 
 @invariant(
@@ -64,25 +69,15 @@ class OutputManager:
     PERFORMANCE: Includes async file I/O support to prevent blocking main thread.
     """
 
-    # PERFORMANCE: Shared executor for async I/O operations
-    _io_executor: ThreadPoolExecutor | None = None
-    _MAX_IO_WORKERS = 4  # Limit concurrent I/O operations
-
     @classmethod
-    def _get_io_executor(cls) -> ThreadPoolExecutor:
+    def _get_io_executor(cls):
         """Get or create the shared I/O executor."""
-        if cls._io_executor is None:
-            cls._io_executor = ThreadPoolExecutor(
-                max_workers=cls._MAX_IO_WORKERS, thread_name_prefix="output_io"
-            )
-        return cls._io_executor
+        return get_io_executor()
 
     @classmethod
     def shutdown_executor(cls) -> None:
         """Shutdown the I/O executor. Call on application exit."""
-        if cls._io_executor is not None:
-            cls._io_executor.shutdown(wait=True)
-            cls._io_executor = None
+        shutdown_executor()
 
     def __init__(self, base_path: str | Path | None = None) -> None:
         """
@@ -91,25 +86,7 @@ class OutputManager:
         Args:
             base_path: Base directory for outputs. Defaults to 'output' in project root.
         """
-        if base_path is None:
-            current_path = Path(__file__).resolve()
-            project_root = current_path
-
-            while project_root.parent != project_root:
-                if (project_root / ".git").exists() or (
-                    project_root / "engines"
-                ).exists():
-                    break
-                project_root = project_root.parent
-
-            # Verify if we found a valid root, otherwise fallback to CWD
-            if (project_root / "engines").exists():
-                base_path = project_root / "output"
-            else:
-                base_path = Path.cwd() / "output"
-
-        self.base_path = Path(base_path)
-        self.base_path.mkdir(parents=True, exist_ok=True)
+        self.base_path = resolve_base_path(base_path)
 
         # Define standard subdirectories
         self.directories = {
@@ -128,36 +105,7 @@ class OutputManager:
 
     def create_output_structure(self) -> None:
         """Create the standard output directory structure."""
-        # Main directories
-        for directory in self.directories.values():
-            directory.mkdir(parents=True, exist_ok=True)
-
-        # Engine-specific simulation directories
-        engines = ["mujoco", "drake", "pinocchio", "matlab"]
-        for engine in engines:
-            (self.directories["simulations"] / engine).mkdir(exist_ok=True)
-
-        # Analysis subdirectories
-        analysis_types = ["biomechanics", "trajectories", "optimization", "comparisons"]
-        for analysis_type in analysis_types:
-            (self.directories["analysis"] / analysis_type).mkdir(exist_ok=True)
-
-        # Export subdirectories
-        export_types = ["videos", "images", "data", "c3d"]
-        for export_type in export_types:
-            (self.directories["exports"] / export_type).mkdir(exist_ok=True)
-
-        # Report subdirectories
-        report_types = ["pdf", "html", "presentations"]
-        for report_type in report_types:
-            (self.directories["reports"] / report_type).mkdir(exist_ok=True)
-
-        # Cache subdirectories
-        cache_types = ["models", "computations", "temp"]
-        for cache_type in cache_types:
-            (self.directories["cache"] / cache_type).mkdir(exist_ok=True)
-
-        logger.info("Output directory structure created successfully")
+        create_output_structure(self.directories)
 
     @precondition(
         lambda self,
@@ -200,28 +148,24 @@ class OutputManager:
             format_type: Output format
             engine: Physics engine name
             metadata: Additional metadata to include
+            model_path: Optional path to the model file (for provenance)
+            parameters: Optional simulation parameters (for provenance)
 
         Returns:
             Path to saved file
         """
-        if not (results is not None):
-            raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
         engine_dir = self.directories["simulations"] / engine
         engine_dir.mkdir(parents=True, exist_ok=True)
 
-        filename = self._sanitize_filename(filename, format_type)
-        file_path = engine_dir / f"{filename}.{format_type.value}"
+        clean_filename = sanitize_filename(filename, format_type)
+        file_path = engine_dir / f"{clean_filename}.{format_type.value}"
 
         provenance = ProvenanceInfo.capture(
             model_path=model_path, parameters=parameters
         )
 
         try:
-            self._dispatch_save(
-                results, file_path, format_type, provenance, metadata, engine
-            )
+            dispatch_save(results, file_path, format_type, provenance, metadata, engine)
 
             logger.info(
                 "simulation_results_saved file_path=%s format=%s engine=%s",
@@ -241,142 +185,6 @@ class OutputManager:
                 exc_info=True,
             )
             raise
-
-    def _sanitize_filename(self, filename: str, format_type: OutputFormat) -> str:
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
-        if not (filename is not None):
-            raise ValueError("filename must be provided")
-        if "OutputFormat." in filename:
-            filename = filename.split(".")[-1]
-            filename = "test_format"
-
-        filename = filename.removesuffix(f".{format_type.value}")
-
-        if not any(char.isdigit() for char in filename) and "test_" not in filename:
-            timestamp = timestamp_filename(utc=False)
-            filename = f"{filename}_{timestamp}"
-
-        return filename
-
-    def _dispatch_save(
-        self,
-        results: Any,
-        file_path: Path,
-        format_type: OutputFormat,
-        provenance: Any,
-        metadata: Any,
-        engine: Any,
-    ) -> None:
-        if format_type == OutputFormat.CSV:
-            self._save_csv(results, file_path, provenance)
-        elif format_type == OutputFormat.JSON:
-            self._save_json(results, file_path, provenance, metadata, engine)
-        elif format_type == OutputFormat.HDF5:
-            self._save_hdf5(results, file_path)
-        elif format_type == OutputFormat.PICKLE:
-            raise ValueError(
-                "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
-            )
-        elif format_type == OutputFormat.PARQUET:
-            self._save_parquet(results, file_path)
-
-    def _save_csv(
-        self,
-        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
-        file_path: Path,
-        provenance: ProvenanceInfo,
-    ) -> None:
-        """Save results in CSV format with provenance header."""
-        if not (results is not None):
-            raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
-        is_df = False
-        try:
-            if isinstance(results, pd.DataFrame):
-                csv_text = results.to_csv(index=False)
-                is_df = True
-        except TypeError:
-            csv_text = ""
-
-        if not is_df:
-            df = pd.DataFrame(results)
-            csv_text = df.to_csv(index=False)
-
-        with open(file_path, "w") as f:
-            add_provenance_header_file(f, provenance)
-            f.write(csv_text)
-
-    def _save_json(
-        self,
-        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
-        file_path: Path,
-        provenance: ProvenanceInfo,
-        metadata: dict[str, Any] | None,
-        engine: str,
-    ) -> None:
-        """Save results in JSON format with provenance and metadata."""
-
-        if not (results is not None):
-            raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
-
-        def json_serializer(obj: Any) -> Any:
-            """Serialize numpy arrays, numbers, and datetimes to JSON-safe types."""
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            if isinstance(obj, np.integer | np.floating):
-                return float(obj)
-            if isinstance(obj, datetime):
-                return format_datetime(obj, "iso")
-            raise TypeError(
-                f"Object of type {type(obj).__name__} is not JSON serializable"
-            )
-
-        output_data = {
-            "metadata": metadata or {},
-            "provenance": {
-                "software": f"{provenance.software_name} v{provenance.software_version}",
-                "timestamp_utc": provenance.timestamp_utc,
-                "git_commit": provenance.git_commit_sha,
-                "git_branch": provenance.git_branch,
-                "git_dirty": provenance.git_is_dirty,
-                "python_version": provenance.python_version,
-                "numpy_version": provenance.numpy_version,
-            },
-            "results": results,
-            "timestamp": timestamp_iso(utc=False),
-            "engine": engine,
-        }
-
-        with open(file_path, "w") as f:
-            json.dump(output_data, f, indent=2, default=json_serializer)
-
-    def _save_hdf5(
-        self,
-        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
-        file_path: Path,
-    ) -> None:
-        """Save results in HDF5 format."""
-        if isinstance(results, pd.DataFrame):
-            results.to_hdf(file_path, key="data", mode="w")
-        else:
-            df = pd.DataFrame(results)
-            df.to_hdf(file_path, key="data", mode="w")
-
-    def _save_parquet(
-        self,
-        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
-        file_path: Path,
-    ) -> None:
-        """Save results in Parquet format."""
-        if isinstance(results, pd.DataFrame):
-            results.to_parquet(file_path, index=False)
-        else:
-            df = pd.DataFrame(results)
-            df.to_parquet(file_path, index=False)
 
     def save_simulation_results_async(
         self,
@@ -404,33 +212,17 @@ class OutputManager:
         Returns:
             Future that resolves to the saved file path
         """
-        if not (results is not None):
+        if results is None:
             raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
-        executor = self._get_io_executor()
-
-        def _save_task() -> Path:
-            try:
-                path = self.save_simulation_results(
-                    results, filename, format_type, engine, metadata
-                )
-                if callback:
-                    callback(path)
-                return path
-            except (RuntimeError, TypeError, ValueError) as e:
-                if callback:
-                    callback(e)
-                raise
-
-        future = executor.submit(_save_task)
-        logger.debug(
-            "async_save_submitted filename=%s format=%s engine=%s",
+        return submit_async_save(
+            self.save_simulation_results,
+            results,
             filename,
-            format_type.value,
+            format_type,
             engine,
+            metadata,
+            callback=callback,
         )
-        return future
 
     def save_simulation_results_background(
         self,
@@ -457,27 +249,17 @@ class OutputManager:
             on_complete: Called with file path on successful save
             on_error: Called with exception on failure
         """
-
-        if not (results is not None):
+        if results is None:
             raise ValueError("results must be provided")
-        if not (results is not None):
-            raise ValueError("results must be provided")
-
-        def _callback(result: Path | Exception) -> None:
-            if isinstance(result, Exception):
-                if on_error:
-                    on_error(result)
-                else:
-                    logger.error(
-                        "background_save_failed filename=%s error=%s",
-                        filename,
-                        result,
-                    )
-            elif on_complete:
-                on_complete(result)
-
-        self.save_simulation_results_async(
-            results, filename, format_type, engine, metadata, callback=_callback
+        submit_background_save(
+            self.save_simulation_results,
+            results,
+            filename,
+            format_type,
+            engine,
+            metadata,
+            on_complete=on_complete,
+            on_error=on_error,
         )
 
     def load_simulation_results(
@@ -499,7 +281,6 @@ class OutputManager:
         """
         engine_dir = self.directories["simulations"] / engine
 
-        # Handle filename with or without extension
         if not filename.endswith(f".{format_type.value}"):
             filename = f"{filename}.{format_type.value}"
 
@@ -509,35 +290,9 @@ class OutputManager:
             raise FileNotFoundError(f"Simulation file not found: {file_path}")
 
         try:
-            if format_type == OutputFormat.CSV:
-                return pd.read_csv(file_path, comment="#")
-
-            if format_type == OutputFormat.JSON:
-                with open(file_path) as f:
-                    data = json.load(f)
-                result = data.get("results", data)
-                return dict(result) if isinstance(result, dict) else result
-
-            if format_type == OutputFormat.HDF5:
-                result = pd.read_hdf(file_path, key="data")
-                if not isinstance(result, pd.DataFrame):
-                    raise TypeError(
-                        f"Expected HDF5 key 'data' to contain a pandas DataFrame, "
-                        f"but got {type(result).__name__}"
-                    )
-                return result
-
-            if format_type == OutputFormat.PICKLE:
-                # Security hardening: Disable Pickle
-                raise ValueError(
-                    "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
-                )
-
-            if format_type == OutputFormat.PARQUET:
-                return pd.read_parquet(file_path)
-
+            return dispatch_load(file_path, format_type)
         except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(f"Error loading simulation results: {e}")
+            logger.error("Error loading simulation results: %s", e)
             raise
 
     def get_simulation_list(self, engine: str | None = None) -> list[str]:
@@ -550,30 +305,7 @@ class OutputManager:
         Returns:
             List of simulation filenames
         """
-        simulations = []
-
-        if engine:
-            engine_dir = self.directories["simulations"] / engine
-            if engine_dir.exists():
-                simulations.extend(
-                    [f.name for f in engine_dir.iterdir() if f.is_file()]
-                )
-        else:
-            # Get from all engines and also from root simulations directory
-            sim_dir = self.directories["simulations"]
-
-            # Check root simulations directory
-            if sim_dir.exists():
-                simulations.extend([f.name for f in sim_dir.iterdir() if f.is_file()])
-
-            # Check engine subdirectories
-            for engine_dir in sim_dir.iterdir():
-                if engine_dir.is_dir():
-                    simulations.extend(
-                        [f.name for f in engine_dir.iterdir() if f.is_file()]
-                    )
-
-        return sorted(simulations)
+        return get_simulation_list(self.directories["simulations"], engine)
 
     @precondition(
         lambda self, analysis_data, report_name, format_type="json": (
@@ -604,105 +336,10 @@ class OutputManager:
         Returns:
             Path to exported report
         """
-        if not (analysis_data is not None):
-            raise ValueError("analysis_data must be provided")
-        if not (analysis_data is not None):
-            raise ValueError("analysis_data must be provided")
         report_dir = self.directories["reports"] / format_type
-        report_dir.mkdir(parents=True, exist_ok=True)
-
-        timestamp = timestamp_filename(utc=False)
-        filename = f"{report_name}_{timestamp}.{format_type}"
-        file_path = report_dir / filename
-
-        # Capture provenance metadata for reproducibility
-        provenance = ProvenanceInfo.capture()
-
-        try:
-            if format_type == "json":
-
-                def json_serializer(obj: Any) -> Any:
-                    """Serialize numpy arrays, numbers, and datetimes for report JSON."""
-                    if isinstance(obj, np.ndarray):
-                        return obj.tolist()
-                    if isinstance(obj, np.integer | np.floating):
-                        return float(obj)
-                    if isinstance(obj, datetime):
-                        return format_datetime(obj, "iso")
-                    raise TypeError(
-                        f"Object of type {type(obj).__name__} is not JSON serializable"
-                    )
-
-                # Embed provenance in report data
-                report_data = {
-                    "provenance": {
-                        "software": f"{provenance.software_name} v{provenance.software_version}",
-                        "timestamp_utc": provenance.timestamp_utc,
-                        "git_commit": provenance.git_commit_sha,
-                        "git_branch": provenance.git_branch,
-                        "git_dirty": provenance.git_is_dirty,
-                        "python_version": provenance.python_version,
-                        "numpy_version": provenance.numpy_version,
-                    },
-                    **analysis_data,
-                }
-
-                with open(file_path, "w") as f:
-                    json.dump(report_data, f, indent=2, default=json_serializer)
-
-            elif format_type == "html":
-                # Basic HTML report generation
-                html_content = self._generate_html_report(analysis_data, report_name)
-                with open(file_path, "w") as f:
-                    f.write(html_content)
-
-            # PDF generation would require additional dependencies
-            # elif format_type == "pdf":
-            #     self._generate_pdf_report(analysis_data, file_path)
-
-            logger.info(f"Analysis report exported to: {file_path}")
-            return file_path
-
-        except (FileNotFoundError, PermissionError, OSError) as e:
-            logger.error(f"Error exporting analysis report: {e}")
-            raise
-
-    @staticmethod
-    def _fast_dir_scan(directory: Path, max_depth: int = 10) -> Iterator[Path]:
-        """Fast directory scanning using os.scandir instead of rglob.
-
-        PERF-003: Optimized from rglob to os.scandir for 10-50x speedup.
-
-        Args:
-            directory: Directory to scan
-            max_depth: Maximum recursion depth (prevents infinite loops)
-
-        Yields:
-            Path objects for all files found
-        """
-
-        if not (directory is not None):
-            raise ValueError("directory must be provided")
-        if not (directory is not None):
-            raise ValueError("directory must be provided")
-
-        def _scan_recursive(path: Path, depth: int = 0) -> Iterator[Path]:
-            if depth > max_depth:
-                return
-
-            try:
-                with os.scandir(path) as entries:
-                    for entry in entries:
-                        entry_path = Path(entry.path)
-                        if entry.is_file(follow_symlinks=False):
-                            yield entry_path
-                        elif entry.is_dir(follow_symlinks=False):
-                            yield from _scan_recursive(entry_path, depth + 1)
-            except (OSError, PermissionError):
-                # Skip directories we can't access
-                pass
-
-        yield from _scan_recursive(directory)
+        return export_analysis_report(
+            analysis_data, report_name, report_dir, format_type
+        )
 
     @precondition(
         lambda self, max_age_days=30: max_age_days > 0,
@@ -718,109 +355,25 @@ class OutputManager:
         Returns:
             Number of files cleaned up
         """
-        if not (max_age_days is not None):
-            raise ValueError("max_age_days must be provided")
-        if not (max_age_days is not None):
-            raise ValueError("max_age_days must be provided")
-        cutoff_date = now_local() - timedelta(days=max_age_days)
-        cleaned_count = 0
-
-        # Clean temporary files more aggressively (1 day)
-        temp_cutoff = now_local() - timedelta(days=1)
-
-        for directory in [self.directories["cache"] / "temp"]:
-            if directory.exists():
-                for file_path in self._fast_dir_scan(directory):
-                    try:
-                        file_time = datetime.fromtimestamp(
-                            file_path.stat().st_mtime
-                        ).astimezone()
-                        if file_time < temp_cutoff:
-                            file_path.unlink()
-                            cleaned_count += 1
-                    except (OSError, PermissionError):
-                        continue
-
-        # Clean older simulation and analysis files
-        for directory in [
-            self.directories["simulations"],
-            self.directories["analysis"],
-        ]:
-            if directory.exists():
-                for file_path in self._fast_dir_scan(directory):
-                    try:
-                        file_time = datetime.fromtimestamp(
-                            file_path.stat().st_mtime
-                        ).astimezone()
-                        if file_time < cutoff_date:
-                            # Move to archive instead of deleting
-                            archive_dir = self.base_path / "archive"
-                            archive_dir.mkdir(exist_ok=True)
-
-                            relative_path = file_path.relative_to(self.base_path)
-                            archive_path = archive_dir / relative_path
-                            archive_path.parent.mkdir(parents=True, exist_ok=True)
-
-                            file_path.rename(archive_path)
-                            cleaned_count += 1
-                    except (OSError, PermissionError):
-                        continue
-
-        logger.info(
-            "cleanup_completed files_cleaned=%d max_age_days=%s",
-            cleaned_count,
-            max_age_days,
+        return cleanup_old_files(
+            cache_dir=self.directories["cache"],
+            simulations_dir=self.directories["simulations"],
+            analysis_dir=self.directories["analysis"],
+            base_path=self.base_path,
+            max_age_days=max_age_days,
         )
-        return cleaned_count
 
-    def _generate_html_report(self, data: dict[str, Any], title: str) -> str:
-        """Generate basic HTML report."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        timestamp_str = timestamp_display(utc=False)
-        html = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>{title} - Golf Modeling Suite Report</title>
-            <style>
-                body {{ font-family: Arial, sans-serif; margin: 40px; }}
-                h1 {{ color: #2c3e50; }}
-                h2 {{ color: #34495e; }}
-                table {{ border-collapse: collapse; width: 100%; }}
-                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-                th {{ background-color: #f2f2f2; }}
-                .timestamp {{ color: #7f8c8d; font-size: 0.9em; }}
-            </style>
-        </head>
-        <body>
-            <h1>{title}</h1>
-            <p class="timestamp">Generated: {timestamp_str}</p>
-
-            <h2>Summary</h2>
-            <table>
-        """
-
-        # Add data to table
-        for key, value in data.items():
-            if not isinstance(value, dict | list):
-                html += f"<tr><td><strong>{key}</strong></td><td>{value}</td></tr>"
-
-        html += f"""
-            </table>
-
-            <h2>Detailed Data</h2>
-            <pre>{json.dumps(data, indent=2, default=str)}</pre>
-        </body>
-        </html>
-        """
-
-        return html
+    # Kept for backward compatibility — thin delegation to _path_utils
+    @staticmethod
+    def _fast_dir_scan(directory: Path, max_depth: int = 10):
+        """Fast directory scanning. Delegates to _path_utils.fast_dir_scan."""
+        return fast_dir_scan(directory, max_depth)
 
 
-# Type alias for simulation results (TYPE-001: Improved type safety over Any)
+# ---------------------------------------------------------------------------
+# Type aliases (TYPE-001: Improved type safety over Any)
+# ---------------------------------------------------------------------------
+
 SimulationResultScalar: TypeAlias = int | float | str | bool | None
 # Helper alias for recursive dict
 SimulationResultValue: TypeAlias = (
@@ -830,8 +383,8 @@ SimulationResultValue: TypeAlias = (
     # Allow simple nested lists of dictionaries for JSON-like structures
     | list[dict[str, Any]]
 )
-# Using Any for dict values to handle arbitrarily nested JSON structures better than recursive types
-# which mypy struggles with in some contexts, while still providing some structure.
+# Using Any for dict values to handle arbitrarily nested JSON structures better than
+# recursive types which mypy struggles with in some contexts.
 SimulationResultDict: TypeAlias = dict[str, Any]
 
 SimulationResults: TypeAlias = (
@@ -839,7 +392,11 @@ SimulationResults: TypeAlias = (
 )
 
 
+# ---------------------------------------------------------------------------
 # Convenience functions for backward compatibility
+# ---------------------------------------------------------------------------
+
+
 def save_results(
     results: SimulationResults,
     filename: str,
@@ -850,26 +407,9 @@ def save_results(
 
     TYPE-001: Replaced Any with Union type for better type safety.
     """
-    if not (results is not None):
-        raise ValueError("results must be provided")
-    if not (results is not None):
+    if results is None:
         raise ValueError("results must be provided")
     manager = OutputManager()
-    # Cast to the type expected by save_simulation_results if needed,
-    # or rely on structural compatibility.
-    # save_simulation_results expects: pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
-    # SimulationResults is: dict[str, Any] | pd.DataFrame | np.ndarray | list[dict[str, Any]]
-
-    # We need to handle np.ndarray explicitly if save_simulation_results doesn't support it directly
-    # save_simulation_results logic:
-    # if isinstance(results, pd.DataFrame): ...
-    # else: df = pd.DataFrame(results)
-    # pd.DataFrame(ndarray) works.
-
-    # However, type hint of save_simulation_results is:
-    # results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
-    # It misses np.ndarray. We should update save_simulation_results type hint as well.
-
     path = manager.save_simulation_results(
         results,
         filename,
@@ -886,14 +426,10 @@ def load_results(
 
     TYPE-001: Replaced Any with Union type for better type safety.
     """
-    if not (filename is not None):
-        raise ValueError("filename must be provided")
-    if not (filename is not None):
+    if filename is None:
         raise ValueError("filename must be provided")
     manager = OutputManager()
     result = manager.load_simulation_results(
         filename, OutputFormat(format_type), engine
     )
-    # The return type of load_simulation_results is pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
-    # SimulationResults includes np.ndarray, so this is compatible (subset).
     return result
