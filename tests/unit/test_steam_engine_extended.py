@@ -14,6 +14,8 @@ All tests use the simplified calculation path (no CoolProp / Cantera required).
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -24,7 +26,7 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def engine():
+def engine() -> Any:
     """SteamCalculationEngine instance."""
     from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
         SteamCalculationEngine,

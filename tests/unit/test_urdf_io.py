@@ -2,6 +2,7 @@
 Unit tests for URDF I/O module.
 """
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import defusedxml.ElementTree as ET
@@ -26,7 +27,7 @@ if MUJOCO_AVAILABLE:
 
 
 @pytest.fixture
-def sample_urdf(tmp_path):
+def sample_urdf(tmp_path) -> Path:
     """Create a sample URDF file."""
     urdf_content = """<?xml version="1.0" ?>
 <robot name="test_robot">
@@ -71,7 +72,7 @@ def sample_urdf(tmp_path):
 
 
 @pytest.fixture
-def mock_mujoco_model():
+def mock_mujoco_model() -> MagicMock:
     """Create a mock MuJoCo model."""
     # Since we can't easily construct a valid MjModel without XML parsing,
     # we'll mock the attributes needed by URDFExporter.

@@ -38,7 +38,7 @@ class TestGolfLauncherUX(unittest.TestCase):
         self.mock_registry.get_all_models.return_value = self.mock_models
         self.mock_registry.__iter__ = lambda x: iter(self.mock_models)
 
-        def mock_get_model(model_id):
+        def mock_get_model(model_id) -> Mock | None:
             for model in self.mock_models:
                 if model.id == model_id:
                     return model

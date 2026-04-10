@@ -1,5 +1,7 @@
 """Unit tests for kinematic sequence analysis."""
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
@@ -15,7 +17,7 @@ class MockRecorder:
         self.times = times
         self.velocities = velocities
 
-    def get_time_series(self, name):
+    def get_time_series(self, name) -> tuple[np.ndarray | list, np.ndarray | list]:
         if name == "joint_velocities":
             return self.times, self.velocities
         return [], []

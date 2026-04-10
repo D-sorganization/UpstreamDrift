@@ -1,4 +1,7 @@
+from typing import Any
+
 import numpy as np
+from numpy.typing import NDArray
 
 from src.deployment.realtime import ControlMode
 from src.deployment.teleoperation.interface import (
@@ -13,16 +16,16 @@ class MockRobot:
         self.ee_pos = np.zeros(3)
         self.contact_forces = np.zeros(6)
 
-    def get_ee_position(self):
+    def get_ee_position(self) -> NDArray:
         return self.ee_pos
 
-    def solve_ik(self, link, target):
+    def solve_ik(self, link: Any, target: Any) -> tuple[NDArray, bool]:
         return np.ones(7), True
 
-    def compute_jacobian(self, link):
+    def compute_jacobian(self, link: Any) -> NDArray:
         return np.eye(6, 7)
 
-    def get_contact_forces(self):
+    def get_contact_forces(self) -> NDArray:
         return self.contact_forces
 
 
@@ -34,16 +37,16 @@ class MockInputDevice:
         self.gripper = 1.0
         self.buttons = {}
 
-    def get_pose(self):
+    def get_pose(self) -> NDArray:
         return self.pose
 
-    def get_twist(self):
+    def get_twist(self) -> NDArray:
         return self.twist
 
-    def get_gripper_state(self):
+    def get_gripper_state(self) -> float:
         return self.gripper
 
-    def get_buttons(self):
+    def get_buttons(self) -> dict[str, Any]:
         return self.buttons
 
 

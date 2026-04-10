@@ -1,6 +1,7 @@
 """Tests for lazy import functionality in dependency management."""
 
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -52,7 +53,7 @@ class TestPolynomialGeneratorLazyImport:
     """Test lazy import of polynomial generator widget."""
 
     @pytest.fixture
-    def mock_launcher(self):
+    def mock_launcher(self) -> Any:
         """Create a mock launcher instance."""
         from PyQt6.QtWidgets import QMainWindow
 

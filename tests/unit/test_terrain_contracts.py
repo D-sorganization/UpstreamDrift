@@ -8,6 +8,8 @@ Covers three semantic bugs:
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from src.shared.python.physics.terrain import (
@@ -204,7 +206,7 @@ class TestTerrainEngineOutOfBounds:
 class TestTerrainMixinOutOfBounds:
     """TerrainMixin.get_ground_height must not fabricate 0.0 on out-of-bounds."""
 
-    def _make_mixin_with_terrain(self):  # type: ignore[no-untyped-def]
+    def _make_mixin_with_terrain(self) -> Any:
         from src.shared.python.physics.terrain_mixin import TerrainMixin
 
         class FakeEngine(TerrainMixin):

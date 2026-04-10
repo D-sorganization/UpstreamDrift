@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Generator
 from unittest.mock import AsyncMock
 
 import pytest
@@ -33,7 +34,7 @@ pytest.importorskip("pytest_asyncio", reason="pytest-asyncio not installed")
 
 
 @pytest.fixture
-def event_loop():
+def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     """Provide an explicit event loop for sync buffer tests on Python 3.14+."""
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)

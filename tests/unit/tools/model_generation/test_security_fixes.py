@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,12 +21,12 @@ import pytest
 class TestAPIKeyAuthentication:
     """API key authentication middleware (X-API-Key header)."""
 
-    def _make_api(self):
+    def _make_api(self) -> Any:
         from model_generation.api.rest_api import ModelGenerationAPI
 
         return ModelGenerationAPI()
 
-    def _health_request(self, api_key: str | None = None):
+    def _health_request(self, api_key: str | None = None) -> Any:
         from model_generation.api.rest_api import APIRequest, HTTPMethod
 
         headers = {}
@@ -71,12 +72,12 @@ class TestAPIKeyAuthentication:
 class TestCORSHeaders:
     """CORS header configuration."""
 
-    def _make_api(self):
+    def _make_api(self) -> Any:
         from model_generation.api.rest_api import ModelGenerationAPI
 
         return ModelGenerationAPI()
 
-    def _health_request(self):
+    def _health_request(self) -> Any:
         from model_generation.api.rest_api import APIRequest, HTTPMethod
 
         return APIRequest(
@@ -127,12 +128,12 @@ class TestCORSHeaders:
 class TestRateLimiting:
     """In-memory rate limiting."""
 
-    def _make_api(self):
+    def _make_api(self) -> Any:
         from model_generation.api.rest_api import ModelGenerationAPI
 
         return ModelGenerationAPI()
 
-    def _health_request(self, client_ip: str = "127.0.0.1"):
+    def _health_request(self, client_ip: str = "127.0.0.1") -> Any:
         from model_generation.api.rest_api import APIRequest, HTTPMethod
 
         return APIRequest(
@@ -185,12 +186,12 @@ class TestRateLimiting:
 class TestInputValidation:
     """Input validation for request bodies."""
 
-    def _make_api(self):
+    def _make_api(self) -> Any:
         from model_generation.api.rest_api import ModelGenerationAPI
 
         return ModelGenerationAPI()
 
-    def _post_request(self, path: str, body: dict | None = None):
+    def _post_request(self, path: str, body: dict | None = None) -> Any:
         from model_generation.api.rest_api import APIRequest, HTTPMethod
 
         return APIRequest(
@@ -229,7 +230,7 @@ class TestInputValidation:
 class TestErrorResponseSanitization:
     """Error responses should not leak stack traces in production."""
 
-    def _make_api(self):
+    def _make_api(self) -> Any:
         from model_generation.api.rest_api import ModelGenerationAPI
 
         return ModelGenerationAPI()

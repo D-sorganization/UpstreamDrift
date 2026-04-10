@@ -1,4 +1,6 @@
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -56,7 +58,7 @@ def _cleanup_drake_modules() -> None:
 
 
 @pytest.fixture(scope="module")
-def DrakePhysicsEngineClass(mock_drake_dependencies):
+def DrakePhysicsEngineClass(mock_drake_dependencies) -> Generator[Any, None, None]:
     """Fixture to provide the DrakePhysicsEngine class with mocked dependencies."""
     # Ensure module is imported
     import engines.physics_engines.drake.python.drake_physics_engine as mod
@@ -86,7 +88,7 @@ def DrakePhysicsEngineClass(mock_drake_dependencies):
 
 
 @pytest.fixture
-def engine(DrakePhysicsEngineClass):
+def engine(DrakePhysicsEngineClass) -> Any:
     """Fixture to provide an uninitialized DrakePhysicsEngine instance."""
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
@@ -103,7 +105,7 @@ def engine(DrakePhysicsEngineClass):
 
 
 @pytest.fixture
-def initialized_engine(engine):
+def initialized_engine(engine) -> Any:
     """Fixture providing a DrakePhysicsEngine that satisfies DBC preconditions.
 
     Sets _is_finalized=True and plant_context so @precondition(is_initialized)

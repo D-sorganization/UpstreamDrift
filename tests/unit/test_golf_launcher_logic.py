@@ -3,6 +3,7 @@ Unit tests for GolfLauncher GUI logic (Model selection, Launching).
 """
 
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -22,7 +23,7 @@ class MockQtBase:
     def setWindowTitle(self, title) -> None:
         self._window_title = title
 
-    def windowTitle(self):
+    def windowTitle(self) -> str:
         return self._window_title
 
     def setWindowIcon(self, icon) -> None:
@@ -89,13 +90,13 @@ class MockQWidget(MockQtBase):
     def setWindowTitle(self, title) -> None:
         self._window_title = title
 
-    def windowTitle(self):
+    def windowTitle(self) -> str:
         return self._window_title
 
     def setStyleSheet(self, s) -> None:
         self._style_sheet = s
 
-    def styleSheet(self):
+    def styleSheet(self) -> str:
         return self._style_sheet
 
 
@@ -117,13 +118,13 @@ class MockQPushButton(MockQWidget):
     def setText(self, t) -> None:
         self._text = str(t)  # Ensure it's always a string
 
-    def text(self):
+    def text(self) -> str:
         return self._text
 
     def setEnabled(self, b) -> None:
         self._enabled = bool(b)
 
-    def isEnabled(self):
+    def isEnabled(self) -> bool:
         return self._enabled
 
     def setFont(self, f) -> None:
@@ -141,7 +142,7 @@ class MockQCheckBox(MockQWidget):
     def setChecked(self, b) -> None:
         self.checked = b
 
-    def isChecked(self):
+    def isChecked(self) -> bool:
         return self.checked
 
     def setToolTip(self, t) -> None:
@@ -182,7 +183,7 @@ class MockQLabel(MockQWidget):
 
 
 @pytest.fixture
-def mock_pyqt(monkeypatch):
+def mock_pyqt(monkeypatch) -> Generator[None, None, None]:
     """
     Fixture to patch sys.modules with our local Mock classes.
     This ensures that when 'launchers.golf_launcher' is imported/reloaded,
@@ -232,14 +233,14 @@ def mock_pyqt(monkeypatch):
 
 class TestGolfLauncherLogic:
     @pytest.fixture(autouse=True)
-    def mock_process_manager(self):
+    def mock_process_manager(self) -> Generator[MagicMock, None, None]:
         """Mock ProcessManager to prevent real file I/O side effects in workers."""
         with patch("src.launchers.golf_launcher.ProcessManager") as mock_pm:
             mock_pm.return_value.running_processes = {}
             yield mock_pm
 
     @pytest.fixture(autouse=True)
-    def mock_help_system(self):
+    def mock_help_system(self) -> Generator[MagicMock, None, None]:
         """
         Mock the help system to avoid instantiation of real QWidgets (HelpButton)
         which might trigger TypeErrors with our MockQMainWindow parent.
@@ -253,7 +254,7 @@ class TestGolfLauncherLogic:
             yield mock_btn
 
     @pytest.fixture(autouse=True)
-    def setup_launcher_module(self, mock_pyqt):
+    def setup_launcher_module(self, mock_pyqt) -> Generator[None, None, None]:
         """
         Reload the module to ensure it uses the patched sys.modules.
         After re-import, patch QDockWidget at the module level so the

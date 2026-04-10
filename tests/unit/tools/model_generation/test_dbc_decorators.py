@@ -10,6 +10,7 @@ while valid inputs still work correctly.
 from __future__ import annotations
 
 import os
+from typing import Any
 
 import pytest
 
@@ -59,7 +60,7 @@ SIMPLE_URDF = """<?xml version="1.0"?>
 
 
 @pytest.fixture
-def editor():
+def editor() -> Any:
     """Create a FrankensteinEditor with a loaded model."""
     from model_generation.editor import FrankensteinEditor
 
@@ -409,13 +410,13 @@ class TestHumanoidGeneratorPreconditions:
 class TestBaseURDFBuilderInvariants:
     """Tests for BaseURDFBuilder._check_invariants method."""
 
-    def _create_concrete_builder(self):
+    def _create_concrete_builder(self) -> Any:
         """Create a concrete subclass of BaseURDFBuilder for testing."""
         from model_generation.builders.base_builder import BaseURDFBuilder, BuildResult
         from model_generation.core.types import Inertia, Joint, JointType, Link, Origin
 
         class ConcreteBuilder(BaseURDFBuilder):
-            def build(self, **kwargs):
+            def build(self, **kwargs) -> Any:
                 return BuildResult(success=True)
 
             def clear(self) -> None:

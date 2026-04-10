@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import importlib
 import secrets
+import types
+from typing import Any
 
 import numpy as np
 import pytest
@@ -224,7 +226,7 @@ class TestRealTimeControllerSimulationBackend:
     realistic default values.
     """
 
-    def _make_controller(self, comm_type: str = "simulation", n_joints: int = 7):
+    def _make_controller(self, comm_type: str = "simulation", n_joints: int = 7) -> Any:
         """Helper: create and connect a controller with a test robot config."""
         from src.deployment.realtime.controller import RealTimeController, RobotConfig
 
@@ -455,7 +457,7 @@ class TestMotionTrainingExportsNotNone:
 
     _MODULE = "src.engines.physics_engines.pinocchio.python.motion_training"
 
-    def _get_module(self):
+    def _get_module(self) -> types.ModuleType:
         return importlib.import_module(self._MODULE)
 
     def test_club_trajectory_parser_is_importable_and_not_none(self) -> None:

@@ -1,5 +1,6 @@
 import sys
 import unittest
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -54,7 +55,7 @@ _DRAKE_PARENT_PACKAGES = [
 
 
 @pytest.fixture(autouse=True)
-def _fix_drake_pollution():
+def _fix_drake_pollution() -> Generator[None, None, None]:
     """Fix Drake parent package pollution before each test.
 
     When test_drake_gui_app or other tests import Drake modules, they may leave
@@ -110,7 +111,7 @@ with patch.dict(sys.modules, _pydrake_mocks):
 
 
 @pytest.fixture(autouse=True)
-def _isolate_drake_module_state():
+def _isolate_drake_module_state() -> Generator[None, None, None]:
     """Prevent module-level Drake mocks from leaking across tests."""
     engine_before = sys.modules.get(_ENGINE_MOD_NAME)
     pydrake_before = {key: sys.modules.get(key) for key in _PYDRAKE_KEYS}

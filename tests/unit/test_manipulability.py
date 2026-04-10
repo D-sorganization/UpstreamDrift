@@ -30,7 +30,7 @@ class MockEngine:
         """Initialize mock engine with optional jacobian dict."""
         self.jacobian_dict = jacobian_dict
 
-    def compute_jacobian(self, body_name):
+    def compute_jacobian(self, body_name) -> dict | None:
         """Return mock Jacobian."""
         return self.jacobian_dict
 

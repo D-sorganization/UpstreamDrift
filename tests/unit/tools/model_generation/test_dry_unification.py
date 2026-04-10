@@ -9,6 +9,7 @@ Verifies that:
 
 from __future__ import annotations
 
+import types
 from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
@@ -16,7 +17,7 @@ from unittest.mock import MagicMock, patch
 # ---------------------------------------------------------------------------
 
 
-def _import_model_generation():
+def _import_model_generation() -> types.ModuleType:
     """Import model_generation, returning the live module."""
     import model_generation
 
@@ -120,7 +121,7 @@ class TestHumanoidPresetsConstant:
 class TestQuickFunctionsUseSharedPresets:
     """quick_urdf() and quick_build() must read from _HUMANOID_PRESETS, not a local copy."""
 
-    def _make_builder_mock(self):
+    def _make_builder_mock(self) -> MagicMock:
         """Create a mock ParametricBuilder that records set_parameters calls."""
         mock_builder = MagicMock()
         mock_result = MagicMock()
@@ -204,7 +205,7 @@ class TestQuickFunctionsUseSharedPresets:
         builders = [mock_builder_urdf, mock_builder_build]
         call_count = [0]
 
-        def builder_factory(*a, **kw):
+        def builder_factory(*a, **kw) -> MagicMock:
             idx = call_count[0]
             call_count[0] += 1
             return builders[idx]

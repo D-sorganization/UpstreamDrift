@@ -14,6 +14,8 @@ import os
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MUJOCO_GL", "osmesa")
 
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -48,7 +50,7 @@ def _load_model_or_skip(widget, xml_string: str) -> None:
 
 
 @pytest.fixture(scope="module")
-def qapp():
+def qapp() -> Generator[Any, None, None]:
     """Create a QApplication instance for tests that need it."""
     if not PYQT6_AVAILABLE:
         pytest.skip("PyQt6 not available")

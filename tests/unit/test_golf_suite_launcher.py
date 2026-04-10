@@ -4,7 +4,9 @@ Unit tests for Golf Suite Launcher.
 
 import os
 import sys
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -14,7 +16,7 @@ os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 
 @pytest.fixture(scope="module", autouse=True)
-def cleanup_imports():
+def cleanup_imports() -> Generator[None, None, None]:
     """Clean up imports after tests to prevent mock leakage."""
     yield
     sys.modules.pop("src.launchers.golf_suite_launcher", None)
@@ -44,7 +46,7 @@ class MockQMainWindow:
     def show(self) -> None:
         pass
 
-    def style(self):
+    def style(self) -> MagicMock:
         return MagicMock()
 
 
@@ -88,7 +90,7 @@ class MockQLabel:
     def setAlignment(self, a) -> None:
         pass
 
-    def font(self):
+    def font(self) -> MagicMock:
         return MagicMock()
 
     def setFont(self, f) -> None:
@@ -205,7 +207,7 @@ _STATUS_SPEC = ["setText", "setAlignment", "font", "setFont"]
 
 
 @pytest.fixture
-def mock_subprocess():
+def mock_subprocess() -> Generator[MagicMock, None, None]:
     """Mock subprocess.Popen."""
     with patch("subprocess.Popen") as mock_popen:
         process = MagicMock(
@@ -217,7 +219,7 @@ def mock_subprocess():
 
 
 @pytest.fixture
-def launcher_app():
+def launcher_app() -> Any:
     """Fixture to create the launcher instance."""
     # Ensure PYQT6_AVAILABLE is True for logic testing
     golf_suite_launcher.PYQT6_AVAILABLE = True

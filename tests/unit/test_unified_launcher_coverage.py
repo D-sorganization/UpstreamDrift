@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -14,7 +15,7 @@ if PYQT6_AVAILABLE:
 
 
 @pytest.fixture
-def launcher():
+def launcher() -> Any:
     """Create a UnifiedLauncher instance."""
     return UnifiedLauncher()
 

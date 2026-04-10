@@ -17,7 +17,7 @@ class MockJointResult:
 
 
 @pytest.fixture
-def scorer():
+def scorer() -> InjuryRiskScorer:
     return InjuryRiskScorer()
 
 

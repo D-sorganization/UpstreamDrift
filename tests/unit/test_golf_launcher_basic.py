@@ -7,6 +7,8 @@ We mark them as serial to avoid this.
 """
 
 import sys
+import types
+from collections.abc import Generator
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -30,7 +32,7 @@ class MockQThread:
         """Mock wait."""
 
 
-def mock_pyqt_signal(*args):
+def mock_pyqt_signal(*args) -> MagicMock:
     return MagicMock()
 
 
@@ -44,7 +46,7 @@ class MockQWidget:
         """Mock setWindowTitle."""
         self._window_title = title
 
-    def windowTitle(self):
+    def windowTitle(self) -> str:
         """Mock windowTitle."""
         return self._window_title
 
@@ -95,7 +97,7 @@ class MockQVBoxLayout:
 
 
 @pytest.fixture
-def mocked_launcher_module():
+def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
     """
     Import golf_launcher with mocked Qt modules.
     This fixture ensures that the mocks don't pollute the global sys.modules,

@@ -2,6 +2,8 @@
 Unit tests for shared.python.statistical_analysis module.
 """
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -9,7 +11,7 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 
 @pytest.fixture
-def sample_data():
+def sample_data() -> dict[str, Any]:
     """Create sample data for testing."""
     times = np.linspace(0, 1.0, 101)  # 101 points, dt=0.01
 
@@ -47,7 +49,7 @@ def sample_data():
 
 
 @pytest.fixture
-def analyzer(sample_data):
+def analyzer(sample_data) -> StatisticalAnalyzer:
     return StatisticalAnalyzer(
         times=sample_data["times"],
         joint_positions=sample_data["positions"],

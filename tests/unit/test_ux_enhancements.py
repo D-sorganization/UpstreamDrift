@@ -1,4 +1,6 @@
 import sys
+import types
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -107,7 +109,7 @@ class MockQFrame(MockQWidget):
 
 
 @pytest.fixture
-def mocked_launcher_module():
+def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
     """Import golf_launcher with mocked Qt modules."""
     mock_qt_core = MagicMock()
     mock_qt_core.Qt = MagicMock()
@@ -211,7 +213,7 @@ def test_escape_shortcut_logic(mocked_launcher_module) -> None:
         patch("src.launchers.golf_launcher.QKeySequence") as MockKeySequence,
     ):
         # Setup QKeySequence to return identifiable mocks
-        def key_seq_side_effect(arg):
+        def key_seq_side_effect(arg) -> MagicMock:
             m = MagicMock()
             m.key_str = arg
             return m

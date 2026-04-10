@@ -1,5 +1,6 @@
 # Import path setup is handled by pyproject.toml and conftest.py
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -39,18 +40,18 @@ with patch.dict(sys.modules, _MOCKED_MODULES):
 
 
 @pytest.fixture
-def mock_cv2():
+def mock_cv2() -> MagicMock:
     return _mock_cv2
 
 
 @pytest.fixture
-def mock_output_manager():
+def mock_output_manager() -> Generator[MagicMock, None, None]:
     with patch("src.shared.python.gui_pkg.video_pose_pipeline.OutputManager") as mock:
         yield mock
 
 
 @pytest.fixture
-def pipeline(mock_cv2, mock_output_manager):
+def pipeline(mock_cv2, mock_output_manager) -> VideoPosePipeline:
     config = VideoProcessingConfig(estimator_type="mediapipe", min_confidence=0.5)
 
     # Ensure MediaPipeEstimator class is a mock
