@@ -234,6 +234,11 @@ class GeneratorConfig:
             raise ValueError(f"duration must be positive, got {self.duration}")
         if self.timestep <= 0:
             raise ValueError(f"timestep must be positive, got {self.timestep}")
+        if self.duration < self.timestep:
+            raise ValueError(
+                f"duration ({self.duration}) must be >= timestep ({self.timestep}); "
+                "otherwise no steps would be recorded"
+            )
 
 
 @dataclass
@@ -403,42 +408,44 @@ class DatasetGenerator:
             n_steps,
         )
 
-        for i in range(config.num_samples):
-            try:
-                sample = self._run_single_simulation(
-                    sample_id=i,
-                    config=config,
-                    rng=rng,
-                    n_steps=n_steps,
-                    n_q=n_q,
-                    n_v=n_v,
+        try:
+            for i in range(config.num_samples):
+                try:
+                    sample = self._run_single_simulation(
+                        sample_id=i,
+                        config=config,
+                        rng=rng,
+                        n_steps=n_steps,
+                        n_q=n_q,
+                        n_v=n_v,
+                    )
+                    samples.append(sample)
+
+                    if progress_callback is not None:
+                        progress_callback(i + 1, config.num_samples)
+
+                except (RuntimeError, TypeError, ValueError) as e:
+                    logger.warning("Sample %d failed: %s", i, e)
+                    failed_count += 1
+                    continue
+
+            if not samples:
+                raise SimulationError(
+                    f"All {config.num_samples} samples failed during generation"
                 )
-                samples.append(sample)
 
-                if progress_callback is not None:
-                    progress_callback(i + 1, config.num_samples)
+            if failed_count > 0:
+                logger.warning(
+                    "%d/%d samples failed during generation",
+                    failed_count,
+                    config.num_samples,
+                )
 
-            except (RuntimeError, TypeError, ValueError) as e:
-                logger.warning("Sample %d failed: %s", i, e)
-                failed_count += 1
-                continue
-
-        if not samples:
-            raise SimulationError(
-                f"All {config.num_samples} samples failed during generation"
-            )
-
-        if failed_count > 0:
-            logger.warning(
-                "%d/%d samples failed during generation",
-                failed_count,
-                config.num_samples,
-            )
-
-        # Restore original state
-        if self._original_state is not None:
-            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-                self.engine.set_state(*self._original_state)
+        finally:
+            # Restore original state regardless of success or failure
+            if self._original_state is not None:
+                with contextlib.suppress(ValueError, RuntimeError, AttributeError):
+                    self.engine.set_state(*self._original_state)
 
         dataset = TrainingDataset(
             samples=samples,
@@ -683,6 +690,10 @@ class DatasetGenerator:
             buffers["kinetic_energy"][step] = 0.5 * float(v.T @ M @ v)  # type: ignore[index]
         except (ValueError, RuntimeError, AttributeError):
             pass
+        with contextlib.suppress(ValueError, RuntimeError, AttributeError):
+            buffers["potential_energy"][step] = float(  # type: ignore[index]
+                self.engine.compute_potential_energy()
+            )
 
     def _generate_initial_conditions(
         self,

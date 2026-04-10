@@ -440,3 +440,73 @@ class TestDatasetExport:
             pytest.raises((ValueError, PreconditionError)),
         ):
             generator.export(dataset, Path(tmpdir) / "test", format="invalid")
+
+
+class TestIssue2472DatasetGeneratorInvariants:
+    """Issue #2472: DatasetGenerator must restore state and validate sample integrity."""
+
+    def test_zero_frame_config_raises(self) -> None:
+        """GeneratorConfig with duration < timestep must raise ValueError."""
+        with pytest.raises(ValueError, match="(?i)step|frame|duration|timestep"):
+            GeneratorConfig(
+                num_samples=1,
+                duration=0.001,
+                timestep=0.01,  # timestep > duration → n_steps = 0
+            )
+
+    def test_state_restored_even_when_all_samples_fail(self) -> None:
+        """Engine state must be restored even when SimulationError is raised."""
+        from unittest.mock import MagicMock
+
+        from src.shared.python.data_io.dataset_generator import SimulationError
+
+        engine = MagicMock()
+        initial_state = (np.ones(4), np.zeros(4))
+        engine.get_state.return_value = initial_state
+        engine.model_name = "mock"
+        engine.set_control.side_effect = RuntimeError("all samples fail")
+
+        gen = DatasetGenerator(engine)
+        config = GeneratorConfig(num_samples=2, duration=0.01, timestep=0.005)
+
+        with pytest.raises(SimulationError):
+            gen.generate(config)
+
+        engine.set_state.assert_called()
+        restore_call_args = engine.set_state.call_args[0]
+        np.testing.assert_array_equal(
+            restore_call_args[0],
+            initial_state[0],
+            err_msg="Engine positions must be restored after SimulationError",
+        )
+
+    def test_potential_energy_computed_when_engine_supports_it(self) -> None:
+        """potential_energy buffer must be filled when engine.compute_potential_energy exists."""
+        from src.shared.python.engine_core.mock_engine import MockPhysicsEngine
+
+        engine = MockPhysicsEngine(num_joints=4)
+        engine.load_from_string("<mock/>")
+
+        expected_pe = 9.81
+        engine.compute_potential_energy = lambda: expected_pe
+
+        gen = DatasetGenerator(engine)
+        config = GeneratorConfig(
+            num_samples=1,
+            duration=0.01,
+            timestep=0.005,
+            record_mass_matrix=False,
+            record_bias_forces=False,
+            record_gravity=False,
+            record_contact_forces=False,
+            record_drift_control=False,
+        )
+        dataset = gen.generate(config)
+
+        sample = dataset.samples[0]
+        assert "potential" in sample.energies, (
+            "potential_energy must be present in sample.energies"
+        )
+        assert np.any(sample.energies["potential"] != 0.0), (
+            "potential_energy must not be all zeros when engine provides it"
+        )
