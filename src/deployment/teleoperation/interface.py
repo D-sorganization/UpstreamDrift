@@ -159,6 +159,10 @@ class TeleoperationInterface:
         """
         from src.deployment.realtime import ControlCommand, ControlMode
 
+        # Poll device for fresh input before reading state
+        if hasattr(self.input, "update"):
+            self.input.update()
+
         # Get device input
         device_pose = self.input.get_pose()
         device_twist = self.input.get_twist()

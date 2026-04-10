@@ -168,3 +168,36 @@ def test_demonstration_recording():
     assert len(demo.actions) == 2
     assert demo.source == "teleoperation"
     assert demo.success
+
+
+class TestIssue2476TeleoperationPolling:
+    """Issue #2476: update() must poll the input device before reading state."""
+
+    def test_update_calls_input_update_before_reading_state(self) -> None:
+        """update() must call input.update() before reading pose/twist/buttons."""
+        from unittest.mock import MagicMock, call
+
+        robot = MockRobot()
+        device = MagicMock()
+        device.get_pose.return_value = np.zeros(7)
+        device.get_pose.return_value[3] = 1.0
+        device.get_twist.return_value = np.zeros(6)
+        device.get_gripper_state.return_value = 1.0
+        device.get_buttons.return_value = {}
+
+        interface = TeleoperationInterface(robot, device)
+        interface.update()
+
+        device.update.assert_called_once()
+        # update() must happen before any state reads
+        update_idx = next(
+            i for i, c in enumerate(device.method_calls) if c == call.update()
+        )
+        state_read_indices = [
+            i
+            for i, c in enumerate(device.method_calls)
+            if c[0] in ("get_pose", "get_twist", "get_gripper_state", "get_buttons")
+        ]
+        assert all(update_idx < idx for idx in state_read_indices), (
+            "input.update() must be called before any state reads in update()"
+        )
