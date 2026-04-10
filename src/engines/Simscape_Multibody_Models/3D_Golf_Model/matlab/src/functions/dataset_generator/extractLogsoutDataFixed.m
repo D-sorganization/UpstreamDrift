@@ -79,11 +79,26 @@ try
                             end
                         end
 
-
+                    elseif size(data, ndims(data)) == expected_length
+                        % 3D tensor signal where time is the last dimension
+                        % e.g. [3 1 N] or [3 3 N] — permute so time is first,
+                        % then reshape to (N x prod_other_dims) and add columns.
+                        n_dims = ndims(data);
+                        perm_order = [n_dims, 1:(n_dims-1)];
+                        data_perm = permute(data, perm_order);  % (N x ...)
+                        n_cols = numel(data) / expected_length;
+                        data_2d = reshape(data_perm, expected_length, n_cols);
+                        for col = 1:n_cols
+                            col_data = data_2d(:, col);
+                            data_cells{end+1} = col_data;
+                            var_names{end+1} = sprintf('%s_%d', signalName, col);
+                            fprintf('Debug: Added tensor signal %s_%d from shape [%s] (length: %d)\n', ...
+                                signalName, col, num2str(data_size), expected_length);
+                        end
 
                     else
-                        fprintf('Debug: Skipping signal %s (size [%s] not supported - need time series, [3 1 N], or [3 3 N])\n', ...
-                            signalName, num2str(data_size));
+                        fprintf('Debug: Skipping signal %s (size [%s], no dimension matches expected length %d)\n', ...
+                            signalName, num2str(data_size), expected_length);
                     end
                 else
                     fprintf('Debug: Skipping signal %s (time length mismatch: %d vs %d, or empty data)\n', signalName, length(signal_time), expected_length);
@@ -107,11 +122,24 @@ try
                             fprintf('Debug: Skipping timeseries %s (flattened length mismatch: %d vs %d)\n', signalName, length(flat_data), expected_length);
                         end
 
-
+                    elseif size(data, ndims(data)) == expected_length
+                        % 3D tensor timeseries where time is the last dimension
+                        n_dims = ndims(data);
+                        perm_order = [n_dims, 1:(n_dims-1)];
+                        data_perm = permute(data, perm_order);
+                        n_cols = numel(data) / expected_length;
+                        data_2d = reshape(data_perm, expected_length, n_cols);
+                        for col = 1:n_cols
+                            col_data = data_2d(:, col);
+                            data_cells{end+1} = col_data;
+                            var_names{end+1} = sprintf('%s_%d', signalName, col);
+                            fprintf('Debug: Added tensor timeseries %s_%d from shape [%s] (length: %d)\n', ...
+                                signalName, col, num2str(data_size), expected_length);
+                        end
 
                     else
-                        fprintf('Debug: Skipping timeseries %s (size [%s] not supported - need time series, [3 1 N], or [3 3 N])\n', ...
-                            signalName, num2str(data_size));
+                        fprintf('Debug: Skipping timeseries %s (size [%s], no dimension matches expected length %d)\n', ...
+                            signalName, num2str(data_size), expected_length);
                     end
                 else
                     fprintf('Debug: Skipping timeseries %s (empty data)\n', signalName);
