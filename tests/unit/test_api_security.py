@@ -144,10 +144,6 @@ class TestBcryptAPIKeyVerification:
         assert cost_factor >= 12, f"Bcrypt cost factor {cost_factor} is too low"
 
     @requires_bcrypt
-    @pytest.mark.xfail(
-        reason="APIKey model lacks prefix_hash column (schema migration needed)",
-        strict=False,
-    )
     async def test_api_key_verification_integration(self) -> None:
         """Test full API key verification flow."""
         from fastapi import HTTPException
@@ -195,6 +191,41 @@ class TestBcryptAPIKeyVerification:
             await get_current_user_from_api_key(wrong_credentials, mock_db)
 
         assert exc_info.value.status_code == 401
+
+    async def test_create_api_key_persists_prefix_hash(self) -> None:
+        """Created API key records should persist the lookup prefix hash."""
+        from src.api.auth.models import APIKeyCreate
+        from src.api.auth.security import compute_prefix_hash
+        from src.api.routes.auth import create_api_key
+
+        mock_db = MagicMock()
+        current_user = MagicMock(spec=User)
+        current_user.id = 7
+        api_key_data = APIKeyCreate(name="integration key")
+        generated_api_key = "gms_abcdefgh1234567890"
+
+        fake_response = MagicMock()
+        with (
+            patch(
+                "src.api.routes.auth.security_manager.generate_api_key",
+                return_value=generated_api_key,
+            ),
+            patch(
+                "src.api.routes.auth.security_manager.hash_api_key",
+                return_value="hashed-key",
+            ),
+            patch(
+                "src.api.routes.auth.APIKeyResponse.from_orm",
+                return_value=fake_response,
+            ),
+        ):
+            response = await create_api_key(api_key_data, current_user, mock_db)
+
+        saved_record = mock_db.add.call_args.args[0]
+        assert isinstance(saved_record, APIKey)
+        assert saved_record.key_prefix == compute_prefix_hash("abcdefgh")
+        assert response is fake_response
+        assert response.key == generated_api_key
 
 
 class TestTimezoneAwareJWT:

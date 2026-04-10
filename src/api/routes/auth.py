@@ -21,7 +21,7 @@ from src.api.auth.models import (
     UserResponse,
     UserRole,
 )
-from src.api.auth.security import security_manager, usage_tracker
+from src.api.auth.security import compute_prefix_hash, security_manager, usage_tracker
 from src.api.database import get_db
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
@@ -201,6 +201,7 @@ async def create_api_key(
     db_api_key = APIKey(
         user_id=current_user.id,
         key_hash=api_key_hash,
+        key_prefix=compute_prefix_hash(api_key[4:12]),
         name=api_key_data.name,
         is_active=True,
     )
