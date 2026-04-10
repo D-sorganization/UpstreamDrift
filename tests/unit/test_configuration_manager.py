@@ -74,3 +74,13 @@ def test_load_nonexistent():
     manager = ConfigurationManager(Path("nonexistent.json"))
     config = manager.load()
     assert config.height_m == 1.8
+
+
+def test_load_malformed_json_raises_golf_error(tmp_path):
+    """Malformed JSON must raise GolfModelingError, not raw JSONDecodeError (#2494)."""
+    bad_file = tmp_path / "bad.json"
+    bad_file.write_text("{not valid json", encoding="utf-8")
+
+    manager = ConfigurationManager(bad_file)
+    with pytest.raises(GolfModelingError, match="malformed JSON"):
+        manager.load()

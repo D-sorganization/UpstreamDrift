@@ -322,3 +322,71 @@ class TestCategories:
         assert "openpose" in mc.capabilities
         assert "mediapipe" in mc.capabilities
         assert "c3d_viewer" in mc.capabilities
+
+
+class TestWebRouteFieldRoundTrip:
+    """Tests for web_route round-trip preservation (issue #2494)."""
+
+    def test_from_dict_preserves_web_route(self) -> None:
+        """from_dict() must read web_route from the manifest dict."""
+        data = {
+            "id": "test_tile",
+            "name": "Test",
+            "description": "A test tile",
+            "category": "tool",
+            "type": "web",
+            "path": "/some/path",
+            "logo": "logo.png",
+            "status": "gui_ready",
+            "web_route": "/tools/test",
+        }
+        tile = LauncherTile.from_dict(data)
+        assert tile.web_route == "/tools/test"
+
+    def test_to_dict_includes_web_route(self) -> None:
+        """to_dict() must serialize web_route so it survives a round-trip."""
+        data = {
+            "id": "test_tile",
+            "name": "Test",
+            "description": "A test tile",
+            "category": "tool",
+            "type": "web",
+            "path": "/some/path",
+            "logo": "logo.png",
+            "status": "gui_ready",
+            "web_route": "/tools/test",
+        }
+        tile = LauncherTile.from_dict(data)
+        serialized = tile.to_dict()
+        assert "web_route" in serialized
+        assert serialized["web_route"] == "/tools/test"
+
+    def test_web_route_none_by_default(self) -> None:
+        """web_route defaults to None when absent from the manifest dict."""
+        data = {
+            "id": "test_tile",
+            "name": "Test",
+            "description": "A test tile",
+            "category": "physics_engine",
+            "type": "mujoco",
+            "path": "/some/path",
+            "logo": "logo.png",
+            "status": "engine_ready",
+        }
+        tile = LauncherTile.from_dict(data)
+        assert tile.web_route is None
+
+    def test_to_dict_omits_web_route_when_none(self) -> None:
+        """to_dict() must not include web_route key when it is None."""
+        data = {
+            "id": "test_tile",
+            "name": "Test",
+            "description": "A test tile",
+            "category": "physics_engine",
+            "type": "mujoco",
+            "path": "/some/path",
+            "logo": "logo.png",
+        }
+        tile = LauncherTile.from_dict(data)
+        serialized = tile.to_dict()
+        assert "web_route" not in serialized
