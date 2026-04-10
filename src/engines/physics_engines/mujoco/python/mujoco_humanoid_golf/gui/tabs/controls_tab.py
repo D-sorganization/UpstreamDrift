@@ -2,24 +2,25 @@
 
 Provides joint angle sliders, actuator controls, and simulation
 playback controls for the humanoid golf simulation viewer.
+
+Actuator management is in :mod:`actuator_controls_mixin`.
+Kinematic controls are in :mod:`kinematic_controls_mixin`.
+Playback handlers are in :mod:`simulation_controls_mixin`.
 """
 
 from __future__ import annotations
 
 import typing
-from collections.abc import Callable
-from datetime import datetime
-from pathlib import Path
-from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
 
-from ...control_system import ControlSystem, ControlType
-from ...polynomial_generator import PolynomialGeneratorWidget
 from ...sim_widget import MuJoCoSimWidget
+from .actuator_controls_mixin import _ActuatorControlsMixin
+from .kinematic_controls_mixin import _KinematicControlsMixin
+from .simulation_controls_mixin import _SimulationControlsMixin
 
 if typing.TYPE_CHECKING:
     from ..advanced_gui import AdvancedGolfAnalysisWindow
@@ -27,7 +28,12 @@ if typing.TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-class ControlsTab(QtWidgets.QWidget):
+class ControlsTab(
+    _SimulationControlsMixin,
+    _ActuatorControlsMixin,
+    _KinematicControlsMixin,
+    QtWidgets.QWidget,
+):
     """Tab for simulation playback and actuator control."""
 
     SIMPLIFIED_ACTUATOR_THRESHOLD = 20
@@ -40,20 +46,17 @@ class ControlsTab(QtWidgets.QWidget):
     ) -> None:
         if not (sim_widget is not None):
             raise ValueError("sim_widget must be provided")
-        if not (sim_widget is not None):
-            raise ValueError("sim_widget must be provided")
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.main_window = main_window
 
-        # State storage
+        # Actuator state (used by _ActuatorControlsMixin)
         self.actuator_groups: list[QtWidgets.QGroupBox] = []
         self.actuator_control_widgets: list[QtWidgets.QWidget] = []
         self.actuator_sliders: list[QtWidgets.QSlider] = []
         self.actuator_labels: list[QtWidgets.QLabel] = []
         self.actuator_control_types: list[QtWidgets.QComboBox] = []
         self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []
-        # List of lists for coeffs? The new code uses list of lists of double spin boxes
         self.actuator_polynomial_coeffs: list[list[QtWidgets.QDoubleSpinBox]] = []
         self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []
         self.quick_camera_buttons: dict[str, QtWidgets.QPushButton] = {}
@@ -77,8 +80,6 @@ class ControlsTab(QtWidgets.QWidget):
         self.joint_widgets: dict[str, dict[str, QtWidgets.QWidget]] = {}
 
     def _create_simulation_buttons(self, main_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (main_layout is not None):
-            raise ValueError("main_layout must be provided")
         if not (main_layout is not None):
             raise ValueError("main_layout must be provided")
         buttons_group = QtWidgets.QGroupBox("Simulation Control")
@@ -133,8 +134,6 @@ class ControlsTab(QtWidgets.QWidget):
     def _create_recording_info(self, main_layout: QtWidgets.QVBoxLayout) -> None:
         if not (main_layout is not None):
             raise ValueError("main_layout must be provided")
-        if not (main_layout is not None):
-            raise ValueError("main_layout must be provided")
         self.recording_label = QtWidgets.QLabel("Not recording")
         self.recording_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.recording_label.setStyleSheet(Styles.RECORDING_IDLE)
@@ -149,8 +148,6 @@ class ControlsTab(QtWidgets.QWidget):
         main_layout.addWidget(self.chk_live_analysis)
 
     def _create_dynamic_controls(self, main_layout: QtWidgets.QVBoxLayout) -> None:
-        if not (main_layout is not None):
-            raise ValueError("main_layout must be provided")
         if not (main_layout is not None):
             raise ValueError("main_layout must be provided")
         self.dynamic_controls_widget = QtWidgets.QWidget()
@@ -183,8 +180,6 @@ class ControlsTab(QtWidgets.QWidget):
     def _create_kinematic_controls(self, main_layout: QtWidgets.QVBoxLayout) -> None:
         if not (main_layout is not None):
             raise ValueError("main_layout must be provided")
-        if not (main_layout is not None):
-            raise ValueError("main_layout must be provided")
         self.kinematic_controls_widget = QtWidgets.QWidget()
         self.kinematic_controls_widget.setVisible(False)
         kinematic_layout = QtWidgets.QVBoxLayout(self.kinematic_controls_widget)
@@ -203,11 +198,9 @@ class ControlsTab(QtWidgets.QWidget):
         """Create a collapsible help panel."""
         if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
-        if not (parent_layout is not None):
-            raise ValueError("parent_layout must be provided")
         self.help_group = QtWidgets.QGroupBox("Quick Start Guide")
         self.help_group.setCheckable(True)
-        self.help_group.setChecked(False)  # Collapsed by default
+        self.help_group.setChecked(False)
         help_layout = QtWidgets.QVBoxLayout(self.help_group)
 
         help_text = (
@@ -226,8 +219,6 @@ class ControlsTab(QtWidgets.QWidget):
         self, parent_layout: QtWidgets.QVBoxLayout
     ) -> None:
         """Create quick access camera buttons."""
-        if not (parent_layout is not None):
-            raise ValueError("parent_layout must be provided")
         if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
         camera_group = QtWidgets.QGroupBox("Quick Camera Views")
@@ -254,15 +245,12 @@ class ControlsTab(QtWidgets.QWidget):
         self.sim_widget.set_camera(preset_name)
         if hasattr(self.main_window, "visualization_tab"):
             self.main_window.update_visualization_camera_sliders()
-            # Update combo box in vis tab loop back
             self.main_window.set_visualization_camera_preset(preset_name)
 
     # -------- Signal Handlers (Connected by Main Window) --------
 
     def on_model_loaded(self, model_name: str, config: dict) -> None:
         """Handle new model loaded from PhysicsTab."""
-        if not (model_name is not None):
-            raise ValueError("model_name must be provided")
         if not (model_name is not None):
             raise ValueError("model_name must be provided")
         self._clear_actuator_controls()
@@ -272,7 +260,6 @@ class ControlsTab(QtWidgets.QWidget):
             self.sim_widget.has_model()
             and len(actuators) != self.sim_widget.get_num_actuators()
         ):
-            # Re-verify if fixup happened in PhysicsTab, but just in case
             logger.warning("Actuator count mismatch in ControlsTab update")
 
         self._create_actuator_controls(actuators)
@@ -281,851 +268,13 @@ class ControlsTab(QtWidgets.QWidget):
         """Handle operating mode change (dynamic/kinematic)."""
         if not (mode is not None):
             raise ValueError("mode must be provided")
-        if not (mode is not None):
-            raise ValueError("mode must be provided")
         self.dynamic_controls_widget.setVisible(mode == "dynamic")
         self.kinematic_controls_widget.setVisible(mode == "kinematic")
 
         if mode == "kinematic":
             self._refresh_kinematic_controls()
-            # Ensure simulation is "running" so interactive events work
             if self.sim_widget.has_model():
-                if self.play_pause_btn.isChecked():  # If paused
-                    self.play_pause_btn.setChecked(False)  # Resume
+                if self.play_pause_btn.isChecked():
+                    self.play_pause_btn.setChecked(False)
                 else:
                     self.sim_widget.set_running(True)
-
-    # -------- Actuator Management --------
-
-    def _clear_actuator_controls(self) -> None:
-        """Remove all existing actuator control widgets."""
-        self.actuator_sliders.clear()
-        self.actuator_labels.clear()
-        self.actuator_control_types.clear()
-        self.actuator_constant_inputs.clear()
-        self.actuator_polynomial_coeffs.clear()
-        self.actuator_damping_inputs.clear()
-
-        for widget in self.actuator_control_widgets:
-            self.actuator_layout.removeWidget(widget)
-            widget.deleteLater()
-        self.actuator_control_widgets.clear()
-        self.actuator_groups.clear()
-
-        if self._simplified_notice:
-            self.actuator_layout.removeWidget(self._simplified_notice)
-            self._simplified_notice.deleteLater()
-            self._simplified_notice = None
-
-    def _create_actuator_controls(self, actuator_names: list[str]) -> None:
-        if not (actuator_names is not None):
-            raise ValueError("actuator_names must be provided")
-        if not (actuator_names is not None):
-            raise ValueError("actuator_names must be provided")
-        groups = self._group_actuators(actuator_names)
-        actuator_index = 0
-        total = len(actuator_names)
-
-        self.simplified_actuator_mode = total >= self.SIMPLIFIED_ACTUATOR_THRESHOLD
-
-        if self.simplified_actuator_mode:
-            self._simplified_notice = QtWidgets.QLabel(
-                "Large musculoskeletal model detected. Showing simplified "
-                "actuator controls."
-            )
-            self._simplified_notice.setStyleSheet(Styles.NOTICE_WARNING)
-            self.actuator_layout.addWidget(self._simplified_notice)
-
-        for group_name, actuators in groups.items():
-            group_box = QtWidgets.QGroupBox(f"{group_name} ({len(actuators)})")
-            group_box.setCheckable(True)
-            group_box.setChecked(True)
-            group_box.setProperty("actuator_names", actuators)
-
-            content = QtWidgets.QWidget()
-            layout = QtWidgets.QVBoxLayout(content)
-            layout.setContentsMargins(0, 0, 0, 0)
-
-            for act_name in actuators:
-                if self.simplified_actuator_mode:
-                    w = self._create_simplified_actuator_row(actuator_index, act_name)
-                else:
-                    w = self._create_advanced_actuator_control(actuator_index, act_name)
-                self.actuator_control_widgets.append(w)
-                layout.addWidget(w)
-                actuator_index += 1
-
-            group_box.toggled.connect(content.setVisible)
-
-            # Wrap content in group
-            gl = QtWidgets.QVBoxLayout(group_box)
-            gl.addWidget(content)
-
-            self.actuator_groups.append(group_box)
-            self.actuator_layout.addWidget(group_box)
-
-        self.actuator_layout.addStretch(1)
-
-    def _group_actuators(self, names: list[str]) -> dict[str, list[str]]:
-        if not (names is not None):
-            raise ValueError("names must be provided")
-        if not (names is not None):
-            raise ValueError("names must be provided")
-        groups: dict[str, list[str]] = {}
-        for name in names:
-            if "Shoulder" in name:
-                key = "Shoulder"
-            elif "Elbow" in name or "Forearm" in name:
-                key = "Arm/Elbow"
-            elif "Wrist" in name:
-                key = "Wrist"
-            elif "Spine" in name:
-                key = "Spine/Torso"
-            elif "Leg" in name or "Knee" in name or "Ankle" in name:
-                key = "Legs"
-            elif "Scap" in name:
-                key = "Scapula"
-            elif "Muscle" in name:
-                key = "Muscles"
-            else:
-                key = "Other"
-
-            if key not in groups:
-                groups[key] = []
-            groups[key].append(name)
-        return groups
-
-    def _create_simplified_actuator_row(
-        self, index: int, name: str
-    ) -> QtWidgets.QWidget:
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        container = QtWidgets.QFrame()
-        layout = QtWidgets.QHBoxLayout(container)
-        layout.setContentsMargins(4, 2, 4, 2)
-
-        layout.addWidget(QtWidgets.QLabel(f"<b>{name}</b>"), stretch=2)
-
-        slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        slider.setRange(-100, 100)
-        slider.valueChanged.connect(
-            lambda v, i=index: self.on_actuator_slider_changed(i, v)
-        )
-        self.actuator_sliders.append(slider)
-        layout.addWidget(slider, stretch=4)
-
-        label = QtWidgets.QLabel("0 Nm")
-        label.setMinimumWidth(60)
-        self.actuator_labels.append(label)
-        layout.addWidget(label)
-
-        # Detail button
-        detail_btn = QtWidgets.QPushButton("Edit...")
-        detail_btn.setFixedWidth(50)
-        detail_btn.clicked.connect(
-            lambda _, i=index, n=name, s=slider: self.open_actuator_detail_dialog(
-                i, n, s
-            )
-        )
-        layout.addWidget(detail_btn)
-
-        return container
-
-    def _create_advanced_actuator_control(
-        self, index: int, name: str
-    ) -> QtWidgets.QWidget:
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        container = QtWidgets.QFrame()
-        container.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-        layout = QtWidgets.QVBoxLayout(container)
-
-        # Header
-        hl = QtWidgets.QHBoxLayout()
-        hl.addWidget(QtWidgets.QLabel(f"<b>{name}</b>"))
-
-        combo = QtWidgets.QComboBox()
-        combo.addItems(["Constant", "Polynomial", "Sine Wave", "Step"])
-        combo.currentIndexChanged.connect(
-            lambda idx, i=index: self.on_control_type_changed(i, idx)
-        )
-        self.actuator_control_types.append(combo)
-        hl.addWidget(QtWidgets.QLabel("Type:"))
-        hl.addWidget(combo)
-        layout.addLayout(hl)
-
-        # Constant Control
-        ql = QtWidgets.QHBoxLayout()
-        slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        slider.setRange(-100, 100)
-        slider.valueChanged.connect(
-            lambda v, i=index: self.on_actuator_slider_changed(i, v)
-        )
-        self.actuator_sliders.append(slider)
-
-        spin = QtWidgets.QDoubleSpinBox()
-        spin.setRange(-1000, 1000)
-        spin.valueChanged.connect(
-            lambda v, i=index: self.on_constant_value_changed(i, v)
-        )
-        self.actuator_constant_inputs.append(spin)
-
-        label = QtWidgets.QLabel("0 Nm")
-        self.actuator_labels.append(label)
-
-        ql.addWidget(QtWidgets.QLabel("Value:"))
-        ql.addWidget(slider)
-        ql.addWidget(spin)
-        ql.addWidget(label)
-        layout.addLayout(ql)
-
-        # Damping
-        dl = QtWidgets.QHBoxLayout()
-        d_spin = QtWidgets.QDoubleSpinBox()
-        d_spin.setRange(0, 100)
-        d_spin.valueChanged.connect(lambda v, i=index: self.on_damping_changed(i, v))
-        self.actuator_damping_inputs.append(d_spin)
-        dl.addWidget(QtWidgets.QLabel("Damping:"))
-        dl.addWidget(d_spin)
-
-        # Details button for advanced layout too (for Poly/Sine/Step params)
-        detail_btn = QtWidgets.QPushButton("Params...")
-        detail_btn.clicked.connect(
-            lambda _, i=index, n=name, s=slider: self.open_actuator_detail_dialog(
-                i, n, s
-            )
-        )
-        dl.addWidget(detail_btn)
-
-        layout.addLayout(dl)
-
-        return container
-
-    def open_actuator_detail_dialog(
-        self,
-        actuator_index: int,
-        actuator_name: str,
-        slider: QtWidgets.QSlider | None = None,
-    ) -> None:
-        """Open a dialog with comprehensive controls for an actuator."""
-        if not (actuator_index is not None):
-            raise ValueError("actuator_index must be provided")
-        if not (actuator_index is not None):
-            raise ValueError("actuator_index must be provided")
-        control_system = self.sim_widget.get_control_system()
-        if control_system is None:
-            QtWidgets.QMessageBox.warning(
-                self, "Error", "Control system not initialized."
-            )
-            return
-
-        slider_sync: Callable[[float], None] | None = None
-        if slider is not None:
-
-            def slider_sync_func(value: float) -> None:
-                """Synchronize slider position with the detail dialog value."""
-                slider.blockSignals(True)
-                slider.setValue(int(value))
-                slider.blockSignals(False)
-                if actuator_index < len(self.actuator_labels):
-                    self.actuator_labels[actuator_index].setText(f"{value:.0f} Nm")
-
-            slider_sync = slider_sync_func
-
-        dialog = ActuatorDetailDialog(
-            control_system=control_system,
-            actuator_index=actuator_index,
-            actuator_name=actuator_name,
-            slider_sync=slider_sync,
-            parent=self,
-        )
-        dialog.exec()
-
-    # Callbacks
-    def on_actuator_filter_changed(self, text: str) -> None:
-        """Filter visible actuator groups by search text."""
-        if not (text is not None):
-            raise ValueError("text must be provided")
-        if not (text is not None):
-            raise ValueError("text must be provided")
-        text = text.lower()
-        for group in self.actuator_groups:
-            group_name = group.title().lower()
-            actuators = group.property("actuator_names") or []
-            match = (text in group_name) or any(text in a.lower() for a in actuators)
-            group.setVisible(match)
-
-    def on_actuator_slider_changed(self, index: int, value: int) -> None:
-        """Apply slider value change to actuator constant torque."""
-        # Update label
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if index < len(self.actuator_labels):
-            self.actuator_labels[index].setText(f"{value} Nm")
-
-        # Sync spinbox if exists
-        if index < len(self.actuator_constant_inputs):
-            s = self.actuator_constant_inputs[index]
-            s.blockSignals(True)
-            s.setValue(float(value))
-            s.blockSignals(False)
-
-        # Apply to sim
-        cs = self.sim_widget.get_control_system()
-        if cs:
-            cs.set_constant_value(index, float(value))
-            cs.set_control_type(index, ControlType.CONSTANT)
-
-    def on_constant_value_changed(self, index: int, value: float) -> None:
-        """Apply spinbox value change to actuator constant torque."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if index < len(self.actuator_sliders):
-            s = self.actuator_sliders[index]
-            s.blockSignals(True)
-            s.setValue(int(value))
-            s.blockSignals(False)
-
-        cs = self.sim_widget.get_control_system()
-        if cs:
-            cs.set_constant_value(index, value)
-            cs.set_control_type(index, ControlType.CONSTANT)
-
-    def on_damping_changed(self, index: int, value: float) -> None:
-        """Update damping coefficient for an actuator."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        cs = self.sim_widget.get_control_system()
-        if cs:
-            cs.set_damping(index, value)
-
-    def on_control_type_changed(self, index: int, type_idx: int) -> None:
-        """Switch the control type for an actuator."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        cs = self.sim_widget.get_control_system()
-        if cs:
-            types = [
-                ControlType.CONSTANT,
-                ControlType.POLYNOMIAL,
-                ControlType.SINE_WAVE,
-                ControlType.STEP,
-            ]
-            if type_idx < len(types):
-                cs.set_control_type(index, types[type_idx])
-
-    def on_play_pause_toggled(self, checked: bool) -> None:
-        """Toggle simulation between paused and running states."""
-        # Toggle simulation running state
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        self.sim_widget.set_running(not checked)
-        self.play_pause_btn.setText("Resume" if checked else "Pause")
-
-        style = self.style()
-        if style:
-            icon = (
-                QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
-                if checked
-                else QtWidgets.QStyle.StandardPixmap.SP_MediaPause
-            )
-            self.play_pause_btn.setIcon(style.standardIcon(icon))
-
-    def on_reset_clicked(self) -> None:
-        """Reset the simulation to the initial state."""
-        self.sim_widget.reset_state()
-        self.play_pause_btn.setChecked(False)  # Resume if paused
-        self.sim_widget.set_running(True)
-
-    def on_record_toggled(self, checked: bool) -> None:
-        """Start or stop recording simulation data."""
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        recorder = self.sim_widget.get_recorder()
-        if checked:
-            self.record_btn.setText("Stop Recording")
-            if style := self.style():
-                self.record_btn.setIcon(
-                    style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
-                )
-            recorder.start_recording()
-        else:
-            self.record_btn.setText("Start Recording")
-            if style := self.style():
-                self.record_btn.setIcon(
-                    style.standardIcon(
-                        QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton
-                    )
-                )
-            recorder.stop_recording()
-
-    def on_take_screenshot(self) -> None:
-        """Save the current simulation view as a PNG screenshot."""
-        pixmap = self.sim_widget.get_pixmap()
-        if not pixmap or pixmap.isNull():
-            return
-
-        output_dir = Path("output/screenshots")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        filename = (
-            output_dir / f"screenshot_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
-        )
-        pixmap.save(str(filename))
-        logger.info("Screenshot saved: %s", filename)
-
-        if self.main_window.statusBar():
-            self.main_window.statusBar().showMessage(
-                f"Screenshot saved: {filename}", 3000
-            )
-
-    def on_export_data(self) -> None:
-        """Delegate data export to the main window handler."""
-        if hasattr(self.main_window, "on_export_data"):
-            self.main_window.on_export_data()
-
-    def _refresh_kinematic_controls(self) -> None:
-        """Rebuild the kinematic joint controls."""
-        # Clear existing
-        while self.joint_layout.count():
-            item = self.joint_layout.takeAt(0)
-            if item is None:
-                continue
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-
-        # Initialize storage for cross-referencing
-        self.joint_widgets = {}
-
-        dof_info = self.sim_widget.get_dof_info()
-
-        if not dof_info:
-            self.joint_layout.addWidget(
-                QtWidgets.QLabel("No controllable joints found.")
-            )
-            return
-
-        for name, (min_val, max_val), current_val in dof_info:
-            # Container
-            container = QtWidgets.QFrame()
-            container.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-            layout = QtWidgets.QVBoxLayout(container)
-
-            # Label
-            header = QtWidgets.QHBoxLayout()
-            header.addWidget(QtWidgets.QLabel(f"<b>{name}</b>"))
-            val_label = QtWidgets.QLabel(f"{current_val:.3f}")
-            header.addWidget(val_label, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
-            layout.addLayout(header)
-
-            # Slider
-            slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-            steps = 1000
-            slider.setRange(0, steps)
-
-            # Set init value
-            range_span = max_val - min_val
-            if range_span <= 0:
-                range_span = 1.0  # Protect div zero
-
-            norm_val = (current_val - min_val) / range_span
-            slider_val = int(norm_val * steps)
-            slider_val = max(0, min(steps, slider_val))
-            slider.setValue(slider_val)
-
-            def _on_slider_change(
-                v: int,
-                n: str = name,
-                mn: float = min_val,
-                mx: float = max_val,
-                lbl: Any = val_label,
-            ) -> None:
-                self._on_joint_slider_changed(n, v, mn, mx, lbl)
-
-            slider.valueChanged.connect(_on_slider_change)
-
-            layout.addWidget(slider)
-
-            # Text Input for precise control
-            spin = QtWidgets.QDoubleSpinBox()
-            spin.setRange(min_val, max_val)
-            spin.setSingleStep(0.01)
-            spin.setValue(current_val)
-
-            def _on_spin_change(
-                v: float,
-                n: str = name,
-                mn: float = min_val,
-                mx: float = max_val,
-                sl: Any = slider,
-                lbl: Any = val_label,
-            ) -> None:
-                self._on_joint_spin_changed(n, v, mn, mx, sl, lbl)
-
-            spin.valueChanged.connect(_on_spin_change)
-
-            layout.addWidget(spin)
-
-            # Store references
-            self.joint_widgets[name] = {"slider": slider, "spin": spin}
-
-            self.joint_layout.addWidget(container)
-
-    def _on_joint_slider_changed(
-        self,
-        name: str,
-        value_int: int,
-        min_val: float,
-        max_val: float,
-        label: QtWidgets.QLabel,
-    ) -> None:
-        """Handle joint slider change."""
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        steps = 1000
-        val = min_val + (value_int / steps) * (max_val - min_val)
-
-        # Update label
-        label.setText(f"{val:.3f}")
-
-        # Update simulation
-        self.sim_widget.set_joint_qpos(name, val)
-
-        # Update spinbox if available
-        if hasattr(self, "joint_widgets") and name in self.joint_widgets:
-            spin = self.joint_widgets[name]["spin"]
-            if isinstance(spin, QtWidgets.QDoubleSpinBox):
-                spin.blockSignals(True)
-                spin.setValue(val)
-                spin.blockSignals(False)
-
-    def _on_joint_spin_changed(
-        self,
-        name: str,
-        value: float,
-        min_val: float,
-        max_val: float,
-        slider: QtWidgets.QSlider,
-        label: QtWidgets.QLabel,
-    ) -> None:
-        """Handle joint spinbox change."""
-        # Update simulation
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        self.sim_widget.set_joint_qpos(name, value)
-
-        # Update label
-        label.setText(f"{value:.3f}")
-
-        # Update slider
-        steps = 1000
-        range_span = max_val - min_val
-        if range_span <= 0:
-            range_span = 1.0
-
-        norm_val = (value - min_val) / range_span
-        slider_val = int(norm_val * steps)
-        slider_val = max(0, min(steps, slider_val))
-
-        if isinstance(slider, QtWidgets.QSlider):
-            slider.blockSignals(True)
-            slider.setValue(slider_val)
-            slider.blockSignals(False)
-
-
-class ActuatorDetailDialog(QtWidgets.QDialog):
-    """On-demand editor for actuator control parameters."""
-
-    CONTROL_TYPE_LABELS = [
-        "Constant",
-        "Polynomial (6th order)",
-        "Sine Wave",
-        "Step Function",
-    ]
-
-    def __init__(
-        self,
-        *,
-        control_system: ControlSystem,
-        actuator_index: int,
-        actuator_name: str,
-        slider_sync: Callable[[float], None] | None,
-        parent: QtWidgets.QWidget | None = None,
-    ) -> None:
-        """Build the detail dialog for a single actuator."""
-        super().__init__(parent)
-        self.control_system = control_system
-        self.actuator_index = actuator_index
-        self.slider_sync = slider_sync
-        self.setWindowTitle(f"Actuator Detail — {actuator_name}")
-        self.setModal(True)
-        self.resize(500, 540)
-
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(12, 12, 12, 12)
-
-        self.control = self.control_system.get_actuator_control(actuator_index)
-
-        self._create_control_type_section(layout)
-        self._create_constant_damping_section(layout)
-        self._create_polynomial_section(layout)
-        self._create_sine_wave_section(layout)
-        self._create_step_function_section(layout)
-
-        button_box = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.StandardButton.Close,
-        )
-        button_box.rejected.connect(self.reject)
-        layout.addWidget(button_box)
-
-        self._update_visibility()
-
-    def _create_control_type_section(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        self.control_type_combo = QtWidgets.QComboBox()
-        self.control_type_combo.addItems(self.CONTROL_TYPE_LABELS)
-        self.control_type_combo.setCurrentIndex(
-            self._type_to_index(self.control.control_type),
-        )
-        self.control_type_combo.currentIndexChanged.connect(self._on_type_changed)
-        layout.addWidget(QtWidgets.QLabel("<b>Control Type</b>"))
-        layout.addWidget(self.control_type_combo)
-
-    def _create_constant_damping_section(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        self.constant_input = QtWidgets.QDoubleSpinBox()
-        self.constant_input.setRange(-1000.0, 1000.0)
-        self.constant_input.setDecimals(3)
-        self.constant_input.setValue(float(self.control.constant_value))
-        self.constant_input.setSuffix(" Nm")
-        self.constant_input.valueChanged.connect(self._on_constant_changed)
-
-        self.damping_input = QtWidgets.QDoubleSpinBox()
-        self.damping_input.setRange(0.0, 200.0)
-        self.damping_input.setDecimals(3)
-        self.damping_input.setValue(float(self.control.damping))
-        self.damping_input.setSuffix(" N·s/m")
-        self.damping_input.valueChanged.connect(self._on_damping_changed)
-
-        const_form = QtWidgets.QFormLayout()
-        const_form.addRow("Constant Torque:", self.constant_input)
-        const_form.addRow("Damping:", self.damping_input)
-        layout.addLayout(const_form)
-
-    def _create_polynomial_section(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        self.poly_widget = QtWidgets.QGroupBox("Polynomial Coefficients")
-        poly_layout = QtWidgets.QGridLayout(self.poly_widget)
-        coeffs = self.control.get_polynomial_coeffs()
-        self.poly_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
-        for idx in range(7):
-            spin = QtWidgets.QDoubleSpinBox()
-            spin.setRange(-1000.0, 1000.0)
-            spin.setDecimals(4)
-            spin.setValue(float(coeffs[idx]))
-            spin.valueChanged.connect(
-                lambda val, c_idx=idx: self._on_polynomial_changed(c_idx, val),
-            )
-            self.poly_spinboxes.append(spin)
-            row = idx // 2
-            col = (idx % 2) * 2
-            poly_layout.addWidget(QtWidgets.QLabel(f"c{idx}:"), row, col)
-            poly_layout.addWidget(spin, row, col + 1)
-
-        visual_btn = QtWidgets.QPushButton("📊 Visual Editor")
-        visual_btn.setToolTip("Draw and fit polynomial curve visually")
-        visual_btn.clicked.connect(self._open_visual_editor)
-        poly_layout.addWidget(visual_btn, 4, 0, 1, 4)
-
-        layout.addWidget(self.poly_widget)
-
-    def _create_sine_wave_section(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        self.sine_widget = QtWidgets.QGroupBox("Sine Wave Parameters")
-        sine_form = QtWidgets.QFormLayout(self.sine_widget)
-
-        self.sine_amp_spin = QtWidgets.QDoubleSpinBox()
-        self.sine_amp_spin.setRange(0.0, 1000.0)
-        self.sine_amp_spin.setValue(float(self.control.sine_amplitude))
-        self.sine_amp_spin.setSuffix(" Nm")
-        self.sine_amp_spin.valueChanged.connect(
-            lambda val: self._on_sine_changed("amplitude", val),
-        )
-        sine_form.addRow("Amplitude:", self.sine_amp_spin)
-
-        self.sine_freq_spin = QtWidgets.QDoubleSpinBox()
-        self.sine_freq_spin.setRange(0.01, 100.0)
-        self.sine_freq_spin.setDecimals(3)
-        self.sine_freq_spin.setValue(float(self.control.sine_frequency))
-        self.sine_freq_spin.setSuffix(" Hz")
-        self.sine_freq_spin.valueChanged.connect(
-            lambda val: self._on_sine_changed("frequency", val),
-        )
-        sine_form.addRow("Frequency:", self.sine_freq_spin)
-
-        self.sine_phase_spin = QtWidgets.QDoubleSpinBox()
-        self.sine_phase_spin.setRange(-6.28319, 6.28319)
-        self.sine_phase_spin.setDecimals(3)
-        self.sine_phase_spin.setValue(float(self.control.sine_phase))
-        self.sine_phase_spin.setSuffix(" rad")
-        self.sine_phase_spin.valueChanged.connect(
-            lambda val: self._on_sine_changed("phase", val),
-        )
-        sine_form.addRow("Phase:", self.sine_phase_spin)
-        layout.addWidget(self.sine_widget)
-
-    def _create_step_function_section(self, layout: QtWidgets.QVBoxLayout) -> None:
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        if not (layout is not None):
-            raise ValueError("layout must be provided")
-        self.step_widget = QtWidgets.QGroupBox("Step Function Parameters")
-        step_form = QtWidgets.QFormLayout(self.step_widget)
-
-        self.step_time_spin = QtWidgets.QDoubleSpinBox()
-        self.step_time_spin.setRange(0.0, 120.0)
-        self.step_time_spin.setDecimals(3)
-        self.step_time_spin.setValue(float(self.control.step_time))
-        self.step_time_spin.setSuffix(" s")
-        self.step_time_spin.valueChanged.connect(
-            lambda val: self._on_step_changed("time", val),
-        )
-        step_form.addRow("Step Time:", self.step_time_spin)
-
-        self.step_value_spin = QtWidgets.QDoubleSpinBox()
-        self.step_value_spin.setRange(-1000.0, 1000.0)
-        self.step_value_spin.setDecimals(3)
-        self.step_value_spin.setValue(float(self.control.step_value))
-        self.step_value_spin.setSuffix(" Nm")
-        self.step_value_spin.valueChanged.connect(
-            lambda val: self._on_step_changed("value", val),
-        )
-        step_form.addRow("Step Value:", self.step_value_spin)
-        layout.addWidget(self.step_widget)
-
-    def _type_to_index(self, ctype: ControlType) -> int:
-        mapping = {
-            ControlType.CONSTANT: 0,
-            ControlType.POLYNOMIAL: 1,
-            ControlType.SINE_WAVE: 2,
-            ControlType.STEP: 3,
-        }
-        return mapping.get(ctype, 0)
-
-    def _on_type_changed(self, idx: int) -> None:
-        self.control_system.set_control_type(
-            self.actuator_index,
-            [
-                ControlType.CONSTANT,
-                ControlType.POLYNOMIAL,
-                ControlType.SINE_WAVE,
-                ControlType.STEP,
-            ][idx],
-        )
-        self._update_visibility()
-
-    def _on_constant_changed(self, val: float) -> None:
-        self.control_system.set_constant_value(self.actuator_index, val)
-        if self.slider_sync:
-            self.slider_sync(val)
-
-    def _on_damping_changed(self, val: float) -> None:
-        self.control_system.set_damping(self.actuator_index, val)
-
-    def _on_polynomial_changed(self, coeff_idx: int, val: float) -> None:
-        if not (coeff_idx is not None):
-            raise ValueError("coeff_idx must be provided")
-        if not (coeff_idx is not None):
-            raise ValueError("coeff_idx must be provided")
-        coeffs = self.control.get_polynomial_coeffs()
-        coeffs[coeff_idx] = val
-        self.control_system.set_polynomial_coeffs(self.actuator_index, coeffs)
-
-    def _on_sine_changed(self, param: str, val: float) -> None:
-        if param == "amplitude":
-            self.control.sine_amplitude = val
-        elif param == "frequency":
-            self.control.sine_frequency = val
-        elif param == "phase":
-            self.control.sine_phase = val
-
-    def _on_step_changed(self, param: str, val: float) -> None:
-        if param == "time":
-            self.control.step_time = val
-        elif param == "value":
-            self.control.step_value = val
-
-    def _update_visibility(self) -> None:
-        idx = self.control_type_combo.currentIndex()
-        self.constant_input.setEnabled(idx == 0)
-        self.poly_widget.setVisible(idx == 1)
-        self.sine_widget.setVisible(idx == 2)
-        self.step_widget.setVisible(idx == 3)
-
-    def _open_visual_editor(self) -> None:
-        """Open the visual polynomial generator."""
-        dialog = QtWidgets.QDialog(self)
-        dialog.setWindowTitle(f"Polynomial Generator - {self.windowTitle()}")
-        dialog.setMinimumSize(900, 700)
-
-        layout = QtWidgets.QVBoxLayout(dialog)
-
-        # Instantiate generator
-        generator = PolynomialGeneratorWidget(dialog)
-        generator.set_joints([self.control_system.actuator_names[self.actuator_index]])  # type: ignore[attr-defined]
-
-        # Handle result
-        def on_generated(name: str, coeffs: list[float]) -> None:
-            """Apply generated polynomial coefficients to spinboxes."""
-            # Update spinboxes
-            if not (name is not None):
-                raise ValueError("name must be provided")
-            if not (name is not None):
-                raise ValueError("name must be provided")
-            for i, val in enumerate(coeffs):
-                if i < len(self.poly_spinboxes):
-                    self.poly_spinboxes[i].setValue(val)
-            dialog.accept()
-
-        generator.polynomial_generated.connect(on_generated)
-
-        layout.addWidget(generator)
-
-        # Close button
-        btn_close = QtWidgets.QPushButton("Cancel")
-        btn_close.clicked.connect(dialog.reject)
-        layout.addWidget(btn_close)
-
-        dialog.exec()

@@ -1,0 +1,236 @@
+"""Tab builder mixin for SyngasCompressionCalculatorWidget.
+
+All methods set attributes on *self* (the widget) and are safe to call
+from :meth:`SyngasCompressionCalculatorWidget.init_ui`.
+"""
+
+from __future__ import annotations
+
+from typing import Any
+
+try:
+    from PyQt6.QtWidgets import (
+        QCheckBox,
+        QComboBox,
+        QDoubleSpinBox,
+        QFormLayout,
+        QGridLayout,
+        QGroupBox,
+        QHeaderView,
+        QLabel,
+        QScrollArea,
+        QTabWidget,
+        QTextEdit,
+        QVBoxLayout,
+        QWidget,
+    )
+
+    HAS_PYQT = True
+except ImportError:
+    HAS_PYQT = False
+
+try:
+    from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+except ImportError:
+    try:
+        from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    except ImportError:
+        FigureCanvas = None  # type: ignore[assignment,misc]
+
+from matplotlib.figure import Figure
+
+if HAS_PYQT:
+
+    class _SyngasTabsMixin:
+        """Mixin providing all tab-builder methods for the syngas widget."""
+
+        tab_widget: QTabWidget
+        composition_inputs: dict[str, QDoubleSpinBox]
+        flow_rate_input: QDoubleSpinBox
+        inlet_temp_input: QDoubleSpinBox
+        inlet_pressure_input: QDoubleSpinBox
+        stage_table: Any
+        stage_inputs: list[list[Any]]
+        compression_type_combo: QComboBox
+        intercooling_checkbox: QCheckBox
+        results_text: QTextEdit
+        analysis_text: QTextEdit
+        figure: Figure
+        canvas: Any
+
+        def create_input_tab(self) -> None:
+            """Create the input parameters tab."""
+            input_widget = QWidget()
+            scroll = QScrollArea()
+            scroll_widget = QWidget()
+            scroll_layout = QVBoxLayout()
+
+            scroll_layout.addWidget(self._create_composition_group())
+            scroll_layout.addWidget(self._create_process_conditions_group())
+            scroll_layout.addWidget(self._create_stages_group())
+            scroll_layout.addWidget(self._create_config_group())
+
+            from PyQt6.QtWidgets import QPushButton
+
+            self.calculate_button = QPushButton("Calculate Compression")
+            self.calculate_button.clicked.connect(self.calculate_compression)  # type: ignore[attr-defined]
+            scroll_layout.addWidget(self.calculate_button)
+
+            scroll_widget.setLayout(scroll_layout)
+            scroll.setWidget(scroll_widget)
+            scroll.setWidgetResizable(True)
+
+            input_widget.setLayout(QVBoxLayout())
+            layout = input_widget.layout()
+            if layout:
+                layout.addWidget(scroll)
+
+            self.tab_widget.addTab(input_widget, "Input Parameters")
+
+        def _create_composition_group(self) -> QGroupBox:
+            """Create the gas composition input group."""
+            comp_group = QGroupBox("Syngas Composition (mol%)")
+            comp_layout = QGridLayout()
+
+            self.composition_inputs = {}
+            components = ["H2", "CO", "CO2", "CH4", "N2", "H2O", "Ar"]
+            for i, comp in enumerate(components):
+                row = i // 3
+                col = i % 3
+                comp_layout.addWidget(QLabel(f"{comp}:"), row, col * 2)
+                spinbox = QDoubleSpinBox()
+                spinbox.setRange(0, 100)
+                spinbox.setDecimals(2)
+                spinbox.setSuffix(" %")
+                self.composition_inputs[comp] = spinbox
+                comp_layout.addWidget(spinbox, row, col * 2 + 1)
+
+            comp_group.setLayout(comp_layout)
+            return comp_group
+
+        def _create_process_conditions_group(self) -> QGroupBox:
+            """Create the process conditions input group."""
+            process_group = QGroupBox("Process Conditions")
+            process_layout = QFormLayout()
+
+            self.flow_rate_input = QDoubleSpinBox()
+            self.flow_rate_input.setRange(0, 10000)
+            self.flow_rate_input.setDecimals(1)
+            self.flow_rate_input.setSuffix(" kmol/h")
+
+            self.inlet_temp_input = QDoubleSpinBox()
+            self.inlet_temp_input.setRange(-50, 500)
+            self.inlet_temp_input.setDecimals(1)
+            self.inlet_temp_input.setSuffix(" °C")
+
+            self.inlet_pressure_input = QDoubleSpinBox()
+            self.inlet_pressure_input.setRange(0.1, 1000)
+            self.inlet_pressure_input.setDecimals(2)
+            self.inlet_pressure_input.setSuffix(" bar")
+
+            process_layout.addRow("Flow Rate:", self.flow_rate_input)
+            process_layout.addRow("Inlet Temperature:", self.inlet_temp_input)
+            process_layout.addRow("Inlet Pressure:", self.inlet_pressure_input)
+
+            process_group.setLayout(process_layout)
+            return process_group
+
+        def _create_stages_group(self) -> QGroupBox:
+            """Create the compression stages input group."""
+            from PyQt6.QtWidgets import QTableWidget
+
+            stages_group = QGroupBox("Compression Stages")
+            stages_layout = QVBoxLayout()
+
+            self.stage_table = QTableWidget()
+            self.stage_table.setColumnCount(4)
+            self.stage_table.setRowCount(4)
+            self.stage_table.setHorizontalHeaderLabels(
+                ["Inlet P (bar)", "Outlet P (bar)", "Efficiency (%)", "Active"],
+            )
+
+            header = self.stage_table.horizontalHeader()
+            if header is not None:
+                header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
+            self.stage_inputs = []
+            for row in range(4):
+                row_inputs: list[Any] = []
+                for col in range(3):
+                    if col == 2:
+                        spinbox = QDoubleSpinBox()
+                        spinbox.setRange(50, 100)
+                        spinbox.setDecimals(1)
+                        spinbox.setSuffix(" %")
+                    else:
+                        spinbox = QDoubleSpinBox()
+                        spinbox.setRange(0.1, 1000)
+                        spinbox.setDecimals(2)
+                        spinbox.setSuffix(" bar")
+                    self.stage_table.setCellWidget(row, col, spinbox)
+                    row_inputs.append(spinbox)
+
+                checkbox = QCheckBox()
+                checkbox.setChecked(True)
+                self.stage_table.setCellWidget(row, 3, checkbox)
+                row_inputs.append(checkbox)
+                self.stage_inputs.append(row_inputs)
+
+            stages_layout.addWidget(self.stage_table)
+            stages_group.setLayout(stages_layout)
+            return stages_group
+
+        def _create_config_group(self) -> QGroupBox:
+            """Create the compression configuration input group."""
+            config_group = QGroupBox("Compression Configuration")
+            config_layout = QFormLayout()
+
+            self.compression_type_combo = QComboBox()
+            self.compression_type_combo.addItems(
+                ["Isentropic", "Polytropic", "Isothermal"],
+            )
+
+            self.intercooling_checkbox = QCheckBox("Enable intercooling between stages")
+            self.intercooling_checkbox.setChecked(True)
+
+            config_layout.addRow("Compression Type:", self.compression_type_combo)
+            config_layout.addRow("", self.intercooling_checkbox)
+
+            config_group.setLayout(config_layout)
+            return config_group
+
+        def create_results_tab(self) -> None:
+            """Create the results display tab."""
+            results_widget = QWidget()
+            layout = QVBoxLayout()
+
+            self.results_text = QTextEdit()
+            self.results_text.setReadOnly(True)
+            layout.addWidget(self.results_text)
+
+            results_widget.setLayout(layout)
+            self.tab_widget.addTab(results_widget, "Results")
+
+        def create_analysis_tab(self) -> None:
+            """Create the analysis and concerns tab."""
+            analysis_widget = QWidget()
+            layout = QVBoxLayout()
+
+            self.analysis_text = QTextEdit()
+            self.analysis_text.setReadOnly(True)
+            layout.addWidget(self.analysis_text)
+
+            analysis_widget.setLayout(layout)
+            self.tab_widget.addTab(analysis_widget, "Analysis & Concerns")
+
+        def create_plots_tab(self) -> None:
+            """Create the plots tab."""
+            plots_widget = QWidget()
+            layout = QVBoxLayout()
+
+            self.figure = Figure(figsize=(10, 8))
+            self.canvas = FigureCanvas(self.figure)
+            layout.addWidget(self.canvas)
+
+            plots_widget.setLayout(layout)
+            self.tab_widget.addTab(plots_widget, "Plots")
