@@ -204,20 +204,40 @@ class RealTimeController:
             return False
 
     def _connect_ros2(self) -> None:
-        """Connect via ROS2."""
-        # ROS2 connection would be implemented here
-        # For now, placeholder for integration
-        # Planned enhancement: implement ROS2 connection (rclpy node, subscribers, publishers).
+        """Connect via ROS2.
+
+        Raises:
+            RuntimeError: Always — ROS2 integration is not yet implemented.
+                Wire rclpy node setup here when deploying to real hardware.
+        """
+        raise RuntimeError(
+            "ROS2 connection is not implemented. "
+            "Wire rclpy node, subscribers, and publishers here."
+        )
 
     def _connect_udp(self) -> None:
-        """Connect via UDP socket."""
-        # UDP socket connection would be implemented here
-        # Planned enhancement: implement UDP connection (create socket, bind port).
+        """Connect via UDP socket.
+
+        Raises:
+            RuntimeError: Always — UDP integration is not yet implemented.
+                Wire socket creation and port binding here when deploying.
+        """
+        raise RuntimeError(
+            "UDP connection is not implemented. "
+            "Wire socket creation and port binding here."
+        )
 
     def _connect_ethercat(self) -> None:
-        """Connect via EtherCAT."""
-        # EtherCAT connection would be implemented here
-        # Planned enhancement: implement EtherCAT connection (initialize SOEM master).
+        """Connect via EtherCAT.
+
+        Raises:
+            RuntimeError: Always — EtherCAT integration is not yet implemented.
+                Wire SOEM master initialization here when deploying.
+        """
+        raise RuntimeError(
+            "EtherCAT connection is not implemented. "
+            "Wire SOEM master initialization here."
+        )
 
     def disconnect(self) -> None:
         """Safely disconnect from robot."""
@@ -371,19 +391,10 @@ class RealTimeController:
                 joint_torques=np.zeros(n_joints),
             )
 
-        # Hardware-specific protocols (ETHERCAT, ROS2, UDP) return zero state as stub.
-        # Integrate hardware SDK calls here when deploying to real hardware.
-        n_joints = self._config.n_joints if self._config else 7
-        logger.warning(
-            "Hardware state reading for %s is not implemented; returning zero state. "
-            "Wire hardware SDK calls here for production deployment.",
-            self.comm_type.value,
-        )
-        return RobotState(
-            timestamp=timestamp,
-            joint_positions=np.zeros(n_joints),
-            joint_velocities=np.zeros(n_joints),
-            joint_torques=np.zeros(n_joints),
+        # Hardware-specific protocols (ETHERCAT, ROS2, UDP) are not yet implemented.
+        raise RuntimeError(
+            f"Hardware state reading for {self.comm_type.value} is not implemented. "
+            "Wire the appropriate hardware SDK calls here before deploying."
         )
 
     def _send_command(self, command: ControlCommand) -> None:
@@ -449,12 +460,10 @@ class RealTimeController:
             self._sim_state = (q, qd)
             return
 
-        # Hardware-specific protocols (ETHERCAT, ROS2, UDP) drop commands as stub.
-        # Wire hardware SDK calls here when deploying to real hardware.
-        logger.warning(
-            "Hardware command sending for %s is not implemented; command dropped. "
-            "Wire hardware SDK calls here for production deployment.",
-            self.comm_type.value,
+        # Hardware-specific protocols (ETHERCAT, ROS2, UDP) are not yet implemented.
+        raise RuntimeError(
+            f"Hardware command sending for {self.comm_type.value} is not implemented. "
+            "Wire the appropriate hardware SDK calls here before deploying."
         )
 
     def get_timing_stats(self) -> TimingStatistics:
