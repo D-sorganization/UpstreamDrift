@@ -161,6 +161,23 @@ class TestEngineManager:
                 manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
             )
 
+    def test_model_registry_path_uses_src_config_when_suite_root_is_src(self):
+        """suite_root already at src/ should not duplicate the src segment."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            src_root = repo_root / "src"
+            (src_root / "config").mkdir(parents=True)
+            (src_root / "config" / "models.yaml").write_text(
+                "models: []\n",
+                encoding="utf-8",
+            )
+
+            manager = EngineManager(suite_root=src_root)
+
+            assert manager._get_model_registry_path() == (
+                src_root / "config" / "models.yaml"
+            )
+
     def test_switch_engine_unavailable(self):
         """Test switching to unavailable engine."""
         with tempfile.TemporaryDirectory() as temp_dir:

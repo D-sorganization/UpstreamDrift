@@ -416,6 +416,86 @@ class TestModelRegistry:
 
             assert registry.get_all_models() == []
 
+    def test_discovers_utility_provider_repos_without_env(self):
+        """Utility sibling repos should flow through the shared registry too."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            workspace_root = Path(tmpdir)
+            repo_root = workspace_root / "UpstreamDrift"
+            config_path = repo_root / "src" / "config" / "models.yaml"
+            config_path.parent.mkdir(parents=True)
+            config_path.write_text("models: []", encoding="utf-8")
+
+            tools_root = workspace_root / "Tools"
+            tools_root.mkdir(parents=True)
+            (tools_root / "model_pack.yaml").write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "tools-pack",
+                        "pack_name": "Tools",
+                        "provider": "tools",
+                        "models": [
+                            {
+                                "id": "pendulum_suite",
+                                "name": "Pendulum Suite",
+                                "description": "Pendulum workflows",
+                                "type": "special_app",
+                                "path": "src/pendulum_launcher.py",
+                                "capabilities": ["pendulum", "simulation"],
+                                "launcher": {
+                                    "category": "tool",
+                                    "logo": "golf_logo.svg",
+                                    "status": "utility",
+                                },
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            optimizer_root = workspace_root / "Movement-Optimizer"
+            optimizer_root.mkdir(parents=True)
+            (optimizer_root / "model_pack.yaml").write_text(
+                yaml.safe_dump(
+                    {
+                        "manifest_version": "1.0.0",
+                        "pack_id": "movement-optimizer-pack",
+                        "pack_name": "Movement Optimizer",
+                        "provider": "movement_optimizer",
+                        "models": [
+                            {
+                                "id": "movement_optimizer_cli",
+                                "name": "Movement Optimizer",
+                                "description": "Optimization utility",
+                                "type": "special_app",
+                                "path": "src/optimizer.py",
+                                "capabilities": ["optimization", "trajectory"],
+                                "launcher": {
+                                    "category": "tool",
+                                    "logo": "golf_logo.svg",
+                                    "status": "utility",
+                                    "web_route": "/tools/movement-optimizer",
+                                },
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.dict("os.environ", {}, clear=False):
+                registry = ModelRegistry(config_path)
+
+            pendulum = registry.get_model("pendulum_suite")
+            optimizer = registry.get_model("movement_optimizer_cli")
+            assert pendulum is not None
+            assert pendulum.launcher is not None
+            assert pendulum.launcher.category == "tool"
+            assert optimizer is not None
+            assert optimizer.launcher is not None
+            assert optimizer.launcher.web_route == "/tools/movement-optimizer"
+
     def test_local_only_mode_ignores_provider_manifests(self):
         """Legacy mode should preserve local-only discovery during migration."""
         with tempfile.TemporaryDirectory() as tmpdir:

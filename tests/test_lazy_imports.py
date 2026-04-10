@@ -1,5 +1,8 @@
+# ruff: noqa: I001
+
+from pathlib import Path
 import sys
-from unittest.mock import patch
+import tempfile
 
 
 def test_lazy_imports_engine_manager():
@@ -21,10 +24,13 @@ def test_lazy_imports_engine_manager():
     # Now verify probing (which might import them if available, but let's mock checks)
     # Actually, we just want to ensure the specific Lazy Import logic holds.
 
-    # Verify EngineManager can be instantiated without triggering imports
-    # We mock suite_root/engines to be valid so it doesn't crash on path checks
-    with patch("pathlib.Path.exists", return_value=True):
-        EngineManager()
+    # Verify EngineManager can be instantiated without triggering imports.
+    # Use a real temp tree instead of globally mocking Path.exists, which
+    # interferes with repo-root and registry-path discovery.
+    with tempfile.TemporaryDirectory() as temp_dir:
+        suite_root = Path(temp_dir)
+        (suite_root / "engines").mkdir()
+        EngineManager(suite_root=suite_root)
 
     # Still shouldn't be loaded (unless probe_all_engines is called instantly in __init__)
     # Looking at EngineManager.__init__:
