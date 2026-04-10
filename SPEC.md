@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.78                                             |
+| **Spec Version**        | 1.0.79                                             |
 | **Last Spec Update**    | 2026-04-10                                         |
 
 ## 2. Purpose & Mission
@@ -493,6 +493,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-10 | 1.0.79  | Test isolation(Drake): expanded the isolated Drake strict-test mock surface to include `pydrake.geometry` and `pydrake.multibody.tree`, reducing cross-test import failures when the optional-stack lane executes strict Drake mocks before the broader Drake wrapper and integration-audit suites. |
 | 2026-04-10 | 1.0.78  | Test framework fix: Refactored `test_panel_builders_helpers.py` to prevent module-level mocking of `run_simulation` from polluting `sys.modules` and causing cascading failures in other test suites. |
 | 2026-04-10 | 1.0.77  | Optimization: Cached difference vectors and their np.linalg.norm results into local variables inside tight collision-checking loops to eliminate redundant vector subtractions and matrix math operations, halving execution time in these hot paths without sacrificing code readability. |
 | 2026-04-10 | 1.0.76  | Simscape + GUI maintenance: fixed the 3D golf dataset generator defaults to target the bundled `GolfSwing3D_Kinetic` model while keeping legacy `verbose` and newer `verbosity` config paths compatible, and decomposed the launcher dashboard plus pendulum GUI builder/toolstrip code into smaller helpers with focused regression coverage. |

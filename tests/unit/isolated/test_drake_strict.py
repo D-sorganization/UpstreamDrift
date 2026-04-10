@@ -20,9 +20,11 @@ mock_pydrake = MagicMock()
 module_patches = {
     "pydrake": mock_pydrake,
     "pydrake.all": mock_pydrake,
+    "pydrake.geometry": mock_pydrake,
     "pydrake.multibody": mock_pydrake,
     "pydrake.multibody.parsing": mock_pydrake,
     "pydrake.multibody.plant": mock_pydrake,
+    "pydrake.multibody.tree": mock_pydrake,
     "pydrake.systems": mock_pydrake,
     "pydrake.systems.framework": mock_pydrake,
     "pydrake.systems.analysis": mock_pydrake,
