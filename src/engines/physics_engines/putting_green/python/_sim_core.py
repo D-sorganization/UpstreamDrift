@@ -1,11 +1,30 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from src.engines.physics_engines.putting_green.python._checkpoint import (
+    get_checkpoint,
+    restore_checkpoint,
+)
+from src.engines.physics_engines.putting_green.python._dynamics import (
+    compute_bias_forces,
+    compute_control_acceleration,
+    compute_drift_acceleration,
+    compute_gravity_forces,
+    compute_inverse_dynamics,
+    compute_jacobian,
+    compute_mass_matrix,
+    compute_ztcf,
+    compute_zvcf,
+)
+from src.engines.physics_engines.putting_green.python._green_loader import (
+    load_from_data,
+    load_from_path,
+    load_from_string,
+    load_topographical_data,
+)
 from src.engines.physics_engines.putting_green.python._practice_mode import (
     compute_aim_line,
     export_result,
@@ -27,14 +46,12 @@ from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
 )
 from src.engines.physics_engines.putting_green.python.green_surface import (
     GreenSurface,
-    SlopeRegion,
 )
 from src.engines.physics_engines.putting_green.python.putter_stroke import (
     PutterStroke,
     StrokeParameters,
 )
 from src.engines.physics_engines.putting_green.python.turf_properties import (
-    GrassType,
     TurfProperties,
 )
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
@@ -130,16 +147,7 @@ class PuttingGreenSimulator:
         Args:
             path: Path to configuration file
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        filepath = Path(path)
-
-        with open(filepath) as f:
-            data = json.load(f)
-
-        self._load_from_data(data)
+        load_from_path(self, path)
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load green configuration from string.
@@ -148,56 +156,11 @@ class PuttingGreenSimulator:
             content: Configuration content
             extension: Format hint (e.g., "json")
         """
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        data = json.loads(content)
-        self._load_from_data(data)
+        load_from_string(self, content, extension)
 
     def _load_from_data(self, data: dict[str, Any]) -> None:
         """Load configuration from dictionary."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if "green" in data:
-            green_data = data["green"]
-
-            turf_data = green_data.get("turf", {})
-            if "stimp_rating" in turf_data:
-                grass_type = GrassType(turf_data.get("grass_type", "bent_grass"))
-                turf = TurfProperties(
-                    stimp_rating=turf_data["stimp_rating"],
-                    grass_type=grass_type,
-                )
-            else:
-                turf = TurfProperties()
-
-            self.green = GreenSurface(
-                width=green_data.get("width", 20.0),
-                height=green_data.get("height", 20.0),
-                turf=turf,
-            )
-
-            if "hole_position" in green_data:
-                self.green.set_hole_position(np.array(green_data["hole_position"]))
-
-            if "slopes" in green_data:
-                for s in green_data["slopes"]:
-                    self.green.add_slope_region(
-                        SlopeRegion(
-                            center=np.array(s["center"]),
-                            radius=s["radius"],
-                            slope_direction=np.array(s["direction"]),
-                            slope_magnitude=s["magnitude"],
-                        )
-                    )
-
-        self._physics = BallRollPhysics(
-            green=self.green,
-            integrator=self.config.integrator,
-        )
+        load_from_data(self, data)
 
     def load_topographical_data(
         self,
@@ -212,30 +175,7 @@ class PuttingGreenSimulator:
             width: Physical width [m] (uses current if None)
             height: Physical height [m] (uses current if None)
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        filepath = Path(path)
-        suffix = filepath.suffix.lower()
-
-        if width is not None:
-            self.green.width = width
-        if height is not None:
-            self.green.height = height
-
-        if suffix == ".npy":
-            heightmap = np.load(filepath)
-            self.green.set_heightmap(heightmap)
-        elif suffix == ".csv" or suffix in (".tif", ".tiff"):
-            self.green.load_from_file(filepath)
-        else:
-            self.green.load_from_file(filepath)
-
-        self._physics = BallRollPhysics(
-            green=self.green,
-            integrator=self.config.integrator,
-        )
+        load_topographical_data(self, path, width, height)
 
     def reset(self) -> None:
         """Reset simulation to initial state."""
@@ -388,31 +328,13 @@ class PuttingGreenSimulator:
                 holed = True
                 self._ball_state.velocity = np.zeros(2)
                 if self.config.record_trajectory:
-                    self._trajectory["positions"].append(
-                        self._ball_state.position.copy()
-                    )
-                    self._trajectory["velocities"].append(
-                        self._ball_state.velocity.copy()
-                    )
-                    self._trajectory["times"].append(self._time)
-                    self._trajectory["modes"].append(
-                        self._physics.determine_roll_mode(self._ball_state)
-                    )
+                    self._record_terminal_step()
                 break
 
             if not self.green.is_on_green(self._ball_state.position):
                 self._ball_state.velocity = np.zeros(2)
                 if self.config.record_trajectory:
-                    self._trajectory["positions"].append(
-                        self._ball_state.position.copy()
-                    )
-                    self._trajectory["velocities"].append(
-                        self._ball_state.velocity.copy()
-                    )
-                    self._trajectory["times"].append(self._time)
-                    self._trajectory["modes"].append(
-                        self._physics.determine_roll_mode(self._ball_state)
-                    )
+                    self._record_terminal_step()
                 break
 
         return SimulationResult(
@@ -422,6 +344,15 @@ class PuttingGreenSimulator:
             holed=holed,
             final_position=self._ball_state.position.copy(),
             modes=self._trajectory["modes"],
+        )
+
+    def _record_terminal_step(self) -> None:
+        """Record the final step to the trajectory."""
+        self._trajectory["positions"].append(self._ball_state.position.copy())
+        self._trajectory["velocities"].append(self._ball_state.velocity.copy())
+        self._trajectory["times"].append(self._time)
+        self._trajectory["modes"].append(
+            self._physics.determine_roll_mode(self._ball_state)
         )
 
     def get_current_trajectory(self) -> dict[str, Any]:
@@ -434,79 +365,47 @@ class PuttingGreenSimulator:
 
     def get_checkpoint(self) -> StateCheckpoint:
         """Save current state to checkpoint."""
-        return StateCheckpoint.create(
-            engine_type="putting_green",
-            engine_state={
-                "spin": self._ball_state.spin.tolist(),
-            },
-            q=self._ball_state.position,
-            v=self._ball_state.velocity,
-            timestamp=self._time,
-        )
+        return get_checkpoint(self)
 
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Restore state from checkpoint."""
-        if not (checkpoint is not None):
-            raise ValueError("checkpoint must be provided")
-        if not (checkpoint is not None):
-            raise ValueError("checkpoint must be provided")
-        self._ball_state.position = checkpoint.get_q()
-        self._ball_state.velocity = checkpoint.get_v()
-        self._time = checkpoint.timestamp
-        if "spin" in checkpoint.engine_state:
-            self._ball_state.spin = np.array(checkpoint.engine_state["spin"])
+        restore_checkpoint(self, checkpoint)
 
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute mass matrix (scalar mass for single ball)."""
-        return np.eye(2) * self.ball_mass
+        return compute_mass_matrix(self)
 
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces (friction + slope)."""
-        accel = self._physics.compute_total_acceleration(self._ball_state)
-        return self.ball_mass * accel
+        return compute_bias_forces(self)
 
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravitational forces from slope."""
-        g_accel = self._physics.compute_slope_acceleration(self._ball_state.position)
-        return self.ball_mass * g_accel
+        return compute_gravity_forces(self)
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute forces required for given acceleration."""
-        return self.ball_mass * qacc
+        return compute_inverse_dynamics(self, qacc)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute Jacobian (identity for ball)."""
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if body_name == "ball":
-            return {
-                "linear": np.eye(2),
-                "angular": np.zeros((1, 2)),
-            }
-        return None
+        return compute_jacobian(self, body_name)
 
     def compute_drift_acceleration(self) -> np.ndarray:
         """Compute passive drift acceleration."""
-        return self._physics.compute_total_acceleration(self._ball_state)
+        return compute_drift_acceleration(self)
 
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
         """Compute acceleration from applied force."""
-        return tau / self.ball_mass
+        return compute_control_acceleration(self, tau)
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-torque counterfactual (drift only)."""
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        temp_state = BallState(q, v, self._ball_state.spin)
-        return self._physics.compute_total_acceleration(temp_state)
+        return compute_ztcf(self, q, v)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-velocity counterfactual."""
-        return self._physics.compute_slope_acceleration(q)
+        return compute_zvcf(self, q)
 
     def set_real_time_mode(self, enabled: bool) -> None:
         """Enable or disable real-time simulation mode."""
@@ -539,14 +438,7 @@ class PuttingGreenSimulator:
         self._practice_mode = True
 
     def simulate_with_feedback(self, stroke_params: StrokeParameters) -> dict[str, Any]:
-        """Simulate putt with practice feedback.
-
-        Args:
-            stroke_params: Stroke parameters
-
-        Returns:
-            Dictionary with result and feedback
-        """
+        """Simulate putt with practice feedback."""
         return simulate_with_feedback(self, stroke_params)
 
     def simulate_scatter(
@@ -558,19 +450,7 @@ class PuttingGreenSimulator:
         direction_variance_deg: float = 2.0,
         rng: np.random.Generator | None = None,
     ) -> list[SimulationResult]:
-        """Simulate multiple putts with variance for scatter analysis.
-
-        Args:
-            start_position: Starting ball position
-            stroke_params: Base stroke parameters
-            n_simulations: Number of simulations
-            speed_variance: Standard deviation of speed [m/s]
-            direction_variance_deg: Standard deviation of direction [degrees]
-            rng: Optional random generator (defaults to simulator RNG)
-
-        Returns:
-            List of simulation results
-        """
+        """Simulate multiple putts with variance for scatter analysis."""
         return simulate_scatter(
             self,
             start_position,
@@ -582,35 +462,15 @@ class PuttingGreenSimulator:
         )
 
     def compute_aim_line(self, ball_position: np.ndarray) -> dict[str, Any]:
-        """Compute aim line accounting for break.
-
-        Args:
-            ball_position: Current ball position
-
-        Returns:
-            Dictionary with aim information
-        """
+        """Compute aim line accounting for break."""
         return compute_aim_line(self, ball_position)
 
     def read_green(
         self, ball_position: np.ndarray, target: np.ndarray
     ) -> dict[str, Any]:
-        """Read green between ball and target.
-
-        Args:
-            ball_position: Ball position
-            target: Target position
-
-        Returns:
-            Green reading with slopes and recommendations
-        """
+        """Read green between ball and target."""
         return read_green(self, ball_position, target)
 
     def export_result(self, result: SimulationResult, path: str) -> None:
-        """Export simulation result to file.
-
-        Args:
-            result: Simulation result
-            path: Output file path
-        """
+        """Export simulation result to file."""
         export_result(result, path)

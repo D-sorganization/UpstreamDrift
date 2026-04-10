@@ -29,7 +29,9 @@ def compute_gravity_forces(sim: PuttingGreenSimulator) -> np.ndarray:
     return sim.ball_mass * g_accel
 
 
-def compute_inverse_dynamics(sim: PuttingGreenSimulator, qacc: np.ndarray) -> np.ndarray:
+def compute_inverse_dynamics(
+    sim: PuttingGreenSimulator, qacc: np.ndarray
+) -> np.ndarray:
     """Compute forces required for given acceleration."""
     return sim.ball_mass * qacc
 
