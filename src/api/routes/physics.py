@@ -50,6 +50,17 @@ router = APIRouter()
 _CONTROL_INTERFACE_CACHE: dict[int, Any] = {}
 _FEATURES_REGISTRY_CACHE: dict[int, Any] = {}
 
+
+def clear_physics_caches() -> None:
+    """Invalidate control-interface and features-registry caches.
+
+    Must be called whenever the active engine changes so that subsequent
+    requests reflect the new engine's metadata.
+    """
+    _CONTROL_INTERFACE_CACHE.clear()
+    _FEATURES_REGISTRY_CACHE.clear()
+
+
 # Module-level state is stored in app.state via dependency injection.
 # These defaults are used when no simulation state exists yet.
 _DEFAULT_SPEED_FACTOR = 1.0
@@ -100,8 +111,8 @@ def _get_control_interface(
     if engine is None:
         return None
 
-    # Check if we already have a cached control interface
-    cache_key = id(engine_manager)
+    # Key by active engine identity so a switch automatically invalidates the cache
+    cache_key = id(engine)
     if cache_key in _CONTROL_INTERFACE_CACHE:
         return _CONTROL_INTERFACE_CACHE[cache_key]
 
@@ -131,7 +142,8 @@ def _get_features_registry(
     if engine is None:
         return None
 
-    cache_key = id(engine_manager)
+    # Key by active engine identity so a switch automatically invalidates the cache
+    cache_key = id(engine)
     if cache_key in _FEATURES_REGISTRY_CACHE:
         return _FEATURES_REGISTRY_CACHE[cache_key]
 
