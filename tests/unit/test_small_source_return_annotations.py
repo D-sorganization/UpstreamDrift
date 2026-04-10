@@ -8,6 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCOPED_FILES = (
     "src/shared/python/model_generation/explorer/__init__.py",
+    "src/shared/python/data_io/output_manager.py",
     "src/shared/python/output_manager.py",
     "src/tools/video_analyzer/types.py",
 )
