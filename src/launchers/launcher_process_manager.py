@@ -462,16 +462,40 @@ class ProcessManager:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
+    def _get_wsl_distro(self) -> str:
+        """Return the WSL distro name from WSL_DISTRO env var (default: Ubuntu)."""
+        return os.environ.get("WSL_DISTRO", "Ubuntu")
+
+    def _get_wsl_project_dir(self) -> str:
+        """Return the WSL project directory from WSL_PROJECT_DIR env var.
+
+        Falls back to converting self.repo_root to a WSL path.
+        """
+        if env_val := os.environ.get("WSL_PROJECT_DIR"):
+            return env_val
+        return self._convert_to_wsl_path(str(self.repo_root))
+
+    def _get_wsl_conda_env(self) -> str:
+        """Return the conda environment name from WSL_CONDA_ENV env var (default: base)."""
+        return os.environ.get("WSL_CONDA_ENV", "base")
+
     def launch_in_wsl(
         self,
         script_path: str,
-        project_dir: str = "/mnt/c/Users/diete/Repositories/UpstreamDrift",
+        project_dir: str | None = None,
     ) -> bool:
         """Launch a script in WSL2 Ubuntu environment.
 
+        WSL settings are read from environment variables so this method is
+        portable across developers and machines:
+        - ``WSL_DISTRO``: WSL distro name (default: ``"Ubuntu"``)
+        - ``WSL_PROJECT_DIR``: WSL path to the project root (default: derived
+          from repo_root)
+        - ``WSL_CONDA_ENV``: conda environment name (default: ``"base"``)
+
         Args:
             script_path: Windows path to the script.
-            project_dir: WSL path to the project directory.
+            project_dir: Override WSL project dir (uses WSL_PROJECT_DIR if not set).
 
         Returns:
             True if launch succeeded, False otherwise.
@@ -481,23 +505,29 @@ class ProcessManager:
             raise ValueError("script_path must be provided")
         if not (script_path is not None):
             raise ValueError("script_path must be provided")
+
+        resolved_project_dir = project_dir or self._get_wsl_project_dir()
+        distro = self._get_wsl_distro()
+        conda_env = self._get_wsl_conda_env()
+
         wsl_script_path = self._convert_to_wsl_path(script_path)
 
         # Use shlex.quote to prevent injection of shell metacharacters in the
         # paths that are interpolated into the bash -c script.
-        quoted_project_dir = shlex.quote(project_dir)
+        quoted_project_dir = shlex.quote(resolved_project_dir)
         quoted_wsl_script = shlex.quote(wsl_script_path)
+        quoted_conda_env = shlex.quote(conda_env)
 
         wsl_cmd = (
             "source ~/miniforge3/etc/profile.d/conda.sh\n"
-            "conda activate golf_suite\n"
+            f"conda activate {quoted_conda_env}\n"
             'export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"\n'
             f"export PYTHONPATH={quoted_project_dir}:$PYTHONPATH\n"
             f"cd {quoted_project_dir}\n"
             f"python {quoted_wsl_script}\n"
         )
 
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
+        cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
 
         try:
             logger.info(f"Launching in WSL: {script_path}")
@@ -518,14 +548,16 @@ class ProcessManager:
         self,
         module_name: str,
         cwd: Path | None = None,
-        project_dir: str = "/mnt/c/Users/diete/Repositories/UpstreamDrift",
+        project_dir: str | None = None,
     ) -> bool:
         """Launch a Python module in WSL2 Ubuntu environment.
+
+        WSL settings are read from environment variables (see launch_in_wsl).
 
         Args:
             module_name: Python module name to run with -m flag.
             cwd: Optional working directory (Windows Path).
-            project_dir: WSL path to the project directory.
+            project_dir: Override WSL project dir (uses WSL_PROJECT_DIR if not set).
 
         Returns:
             True if launch succeeded, False otherwise.
@@ -543,26 +575,31 @@ class ProcessManager:
             )
             return False
 
-        work_dir = project_dir
+        resolved_project_dir = project_dir or self._get_wsl_project_dir()
+        distro = self._get_wsl_distro()
+        conda_env = self._get_wsl_conda_env()
+
+        work_dir = resolved_project_dir
         if cwd:
             work_dir = self._convert_to_wsl_path(str(cwd))
 
         # Use shlex.quote to prevent injection of shell metacharacters in the
         # paths that are interpolated into the bash -c script.
         # module_name has already been validated against the allowlist regex.
-        quoted_project_dir = shlex.quote(project_dir)
+        quoted_project_dir = shlex.quote(resolved_project_dir)
         quoted_work_dir = shlex.quote(work_dir)
+        quoted_conda_env = shlex.quote(conda_env)
 
         wsl_cmd = (
             "source ~/miniforge3/etc/profile.d/conda.sh\n"
-            "conda activate golf_suite\n"
+            f"conda activate {quoted_conda_env}\n"
             'export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"\n'
             f"export PYTHONPATH={quoted_project_dir}:$PYTHONPATH\n"
             f"cd {quoted_work_dir}\n"
             f"python -m {module_name}\n"
         )
 
-        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
+        cmd = ["wsl", "-d", distro, "--", "bash", "-c", wsl_cmd]
 
         try:
             logger.info(f"Launching module in WSL: {module_name}")

@@ -6,10 +6,29 @@ Central hub for C3D visualization and Markerless Pose Estimation.
 Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
+import os
 import subprocess
 import sys
+from pathlib import Path
 
 from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher
+
+
+def _make_subprocess_env(repo_root: Path) -> dict[str, str]:
+    """Build an environment dict that injects *repo_root* into PYTHONPATH.
+
+    Args:
+        repo_root: Repository root directory.
+
+    Returns:
+        A copy of the current environment with repo_root prepended to PYTHONPATH.
+    """
+    env = os.environ.copy()
+    sep = ";" if os.name == "nt" else ":"
+    existing = env.get("PYTHONPATH", "")
+    repo_str = str(repo_root)
+    env["PYTHONPATH"] = f"{repo_str}{sep}{existing}" if existing else repo_str
+    return env
 
 
 class MoCapLauncher(BaseLauncher):
@@ -68,7 +87,12 @@ class MoCapLauncher(BaseLauncher):
             return
 
         try:
-            subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT)
+            env = _make_subprocess_env(REPO_ROOT)
+            subprocess.Popen(  # noqa: S603
+                [sys.executable, str(script_path)],
+                cwd=REPO_ROOT,
+                env=env,
+            )
         except (FileNotFoundError, PermissionError, OSError) as e:
             self.show_error("Launch Error", str(e))
 
