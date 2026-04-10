@@ -220,8 +220,7 @@ class MuscleDrivenEnv:
     def _get_muscle_names(self) -> list[str]:
         """Get list of muscle names in system."""
         if isinstance(self.muscle_system, AntagonistPair):
-            names = list(self.muscle_system.agonist.muscles.keys())
-            names.extend(self.muscle_system.antagonist.muscles.keys())
+            names = self.muscle_system.muscle_names
         else:
             names = list(self.muscle_system.muscles.keys())
         return names

@@ -16,6 +16,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+from src.shared.python import SUITE_ROOT
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.subprocess_utils import run_command
 
@@ -93,7 +94,7 @@ def git_sync_repository(repo_path: Path | None = None) -> bool:
         True if sync succeeded, False otherwise.
     """
     if repo_path is None:
-        repo_path = Path(__file__).parent.parent.parent.parent
+        repo_path = SUITE_ROOT
 
     logger.info("Syncing repository with remote...")
     try:
@@ -120,7 +121,7 @@ def get_repo_root() -> Path:
     Returns:
         Path to the repository root directory.
     """
-    return Path(__file__).parent.parent.parent.parent.absolute()
+    return SUITE_ROOT.resolve()
 
 
 def ensure_environment_var(

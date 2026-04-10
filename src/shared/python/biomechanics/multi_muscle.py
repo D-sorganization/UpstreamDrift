@@ -193,6 +193,11 @@ class AntagonistPair:
         ensure(np.isfinite(result), "antagonist pair net torque must be finite", result)
         return result
 
+    @property
+    def muscle_names(self) -> list[str]:
+        """Return all muscle names (agonist + antagonist) without chain traversal."""
+        return list(self.agonist.muscles.keys()) + list(self.antagonist.muscles.keys())
+
 
 def create_elbow_muscle_system() -> AntagonistPair:
     """Factory function to create a simplified elbow muscle system.

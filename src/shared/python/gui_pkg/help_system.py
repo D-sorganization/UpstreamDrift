@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import QSize, Qt, QUrl
@@ -45,9 +44,10 @@ from PyQt6.QtWidgets import (
 if TYPE_CHECKING:
     pass
 
+from src.shared.python import SUITE_ROOT
+
 # Get paths
-REPOS_ROOT = Path(__file__).parent.parent.parent.parent.resolve()
-DOCS_DIR = REPOS_ROOT / "docs"
+DOCS_DIR = SUITE_ROOT / "docs"
 HELP_DIR = DOCS_DIR / "help"
 USER_MANUAL_PATH = DOCS_DIR / "USER_MANUAL.md"
 
