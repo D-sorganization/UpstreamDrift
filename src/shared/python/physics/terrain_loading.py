@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .terrain_representation import (
+from .terrain import (
     ElevationMap,
     Terrain,
     TerrainConfig,

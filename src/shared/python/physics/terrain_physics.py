@@ -9,7 +9,7 @@ import numpy as np
 
 from src.shared.python.core.physics_constants import GRAVITY_M_S2
 
-from .terrain_representation import ElevationMap
+from .terrain import ElevationMap
 
 
 @functools.lru_cache(maxsize=256)

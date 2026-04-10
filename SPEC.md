@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.77                                             |
+| **Spec Version**        | 1.0.78                                             |
 | **Last Spec Update**    | 2026-04-10                                         |
 
 ## 2. Purpose & Mission
@@ -493,6 +493,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-10 | 1.0.78  | Refactor(terrain-compatibility): collapsed the legacy `terrain_representation.py` monolith into a thin compatibility facade over the already-decomposed `physics.terrain` package, rewired the remaining terrain loaders and physics helpers to import from the package surface directly, and added regression coverage that pins the legacy import path to the shared implementation. |
 | 2026-04-10 | 1.0.77  | Optimization: Replaced np.linalg.norm(..., axis=1) with explicit element-wise computation in handedness_support and electrical_model to avoid axis reduction overhead for arrays with small inner dimensions. |
 | 2026-04-10 | 1.0.76  | Simscape + GUI maintenance: fixed the 3D golf dataset generator defaults to target the bundled `GolfSwing3D_Kinetic` model while keeping legacy `verbose` and newer `verbosity` config paths compatible, and decomposed the launcher dashboard plus pendulum GUI builder/toolstrip code into smaller helpers with focused regression coverage. |
 | 2026-04-10 | 1.0.75  | Optimization: Replaced np.linalg.norm(..., axis=1) with explicit element-wise computation in deformable objects to avoid axis reduction overhead for arrays with small inner dimensions. |
