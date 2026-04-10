@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import asyncio
 import time
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 
@@ -277,7 +279,7 @@ class TestAPIVersioning:
     """Tests for API versioning under /api/v1/ prefix (#1488)."""
 
     @pytest.fixture
-    def client(self):
+    def client(self) -> Generator[Any, None, None]:
         """Create a test client for the API."""
         httpx = pytest.importorskip("httpx")  # noqa: F841
         fastapi = pytest.importorskip("fastapi")  # noqa: F841
@@ -465,7 +467,7 @@ class TestOpenAPIEnhancements:
     """Tests for OpenAPI schema improvements (#1488)."""
 
     @pytest.fixture
-    def client(self):
+    def client(self) -> Generator[Any, None, None]:
         """Create a test client for the API."""
         httpx = pytest.importorskip("httpx")  # noqa: F841
         fastapi = pytest.importorskip("fastapi")  # noqa: F841

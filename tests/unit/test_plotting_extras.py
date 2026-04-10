@@ -13,10 +13,10 @@ from src.shared.python.plotting.kinematics import plot_joint_positions
 class _MockRecorder:
     engine = None
 
-    def get_time_series(self, field_name):
+    def get_time_series(self, field_name) -> tuple[np.ndarray, np.ndarray]:
         return np.linspace(0, 1, 10), np.zeros((10, 3))
 
-    def get_induced_acceleration_series(self, source):
+    def get_induced_acceleration_series(self, source) -> tuple[np.ndarray, np.ndarray]:
         return np.linspace(0, 1, 10), np.zeros((10, 3))
 
     def set_analysis_config(self, config) -> None:

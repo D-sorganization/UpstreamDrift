@@ -23,7 +23,7 @@ if MUJOCO_AVAILABLE:
         )
 
 
-def create_random_model(num_bodies=5):
+def create_random_model(num_bodies: int = 5) -> dict:
     """
     Create a random kinematic chain model for testing.
     """

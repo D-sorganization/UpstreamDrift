@@ -24,7 +24,7 @@ def _set(**kwargs: str) -> patch[dict[str, str]]:
     return patch.dict(os.environ, kwargs)
 
 
-def _unset(*keys: str):
+def _unset(*keys: str) -> patch[dict[str, str]]:
     """Convenience: ensure the given keys are absent from os.environ."""
     env = {k: v for k, v in os.environ.items() if k not in keys}
     return patch.dict(os.environ, env, clear=True)

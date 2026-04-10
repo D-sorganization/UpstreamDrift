@@ -9,7 +9,7 @@ from src.shared.python.physics.physics_parameters import (
 
 
 @pytest.fixture
-def registry():
+def registry() -> PhysicsParameterRegistry:
     """Create a fresh registry for testing."""
     return PhysicsParameterRegistry()
 
@@ -22,7 +22,7 @@ def test_registry_initialization(registry) -> None:
 
 
 @pytest.fixture
-def bounded_param():
+def bounded_param() -> PhysicsParameter:
     """Create a bounded parameter for validation tests."""
     return PhysicsParameter(
         name="TEST",

@@ -2,6 +2,7 @@
 Unit tests for shared.python.plotting module.
 """
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -18,7 +19,7 @@ from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
 
 
 @pytest.fixture
-def mock_recorder():
+def mock_recorder() -> MagicMock:
     """Create a mock recorder providing time series data."""
     recorder = MagicMock(spec=RecorderInterface)
 
@@ -41,7 +42,7 @@ def mock_recorder():
     pe = GRAVITY_M_S2 * club_pos[:, 2]
     te = ke + pe
 
-    def get_data(field_name):
+    def get_data(field_name) -> tuple[Any, Any]:
         field_map = {
             "joint_positions": positions,
             "joint_velocities": velocities,
@@ -61,13 +62,13 @@ def mock_recorder():
 
 
 @pytest.fixture
-def plotter(mock_recorder):
+def plotter(mock_recorder) -> GolfSwingPlotter:
     """Create a GolfSwingPlotter instance."""
     return GolfSwingPlotter(mock_recorder, joint_names=["Joint1", "Joint2"])
 
 
 @pytest.fixture
-def mock_figure():
+def mock_figure() -> MagicMock:
     """Create a mock Matplotlib figure."""
     fig = MagicMock()
     # Mock add_subplot to return a mock axes
@@ -329,13 +330,15 @@ class MockRecorder(RecorderInterface):
         self.engine = None
         self.analysis_config = {}
 
-    def get_time_series(self, field_name):
+    def get_time_series(self, field_name) -> tuple[np.ndarray, np.ndarray]:
         return self.data.get(field_name, (np.array([]), np.array([])))
 
-    def get_induced_acceleration_series(self, source_name):
+    def get_induced_acceleration_series(
+        self, source_name
+    ) -> tuple[np.ndarray, np.ndarray]:
         return self.data.get(f"induced_{source_name}", (np.array([]), np.array([])))
 
-    def get_counterfactual_series(self, cf_name):
+    def get_counterfactual_series(self, cf_name) -> tuple[np.ndarray, np.ndarray]:
         return self.data.get(f"cf_{cf_name}", (np.array([]), np.array([])))
 
     def set_analysis_config(self, config) -> None:
@@ -343,7 +346,7 @@ class MockRecorder(RecorderInterface):
 
 
 @pytest.fixture
-def sample_recorder():
+def sample_recorder() -> MockRecorder:
     times = np.linspace(0, 1, 100)
     torques = np.random.randn(100, 2)
     velocities = np.random.randn(100, 2)

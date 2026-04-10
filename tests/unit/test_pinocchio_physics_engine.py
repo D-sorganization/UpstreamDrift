@@ -1,3 +1,5 @@
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -29,7 +31,7 @@ class MockPhysicsEngine:
 
 
 @pytest.fixture(autouse=True, scope="module")
-def mock_pinocchio_dependencies():
+def mock_pinocchio_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
     """Fixture to mock pinocchio and interfaces safely for the duration of this module."""
     mock_pin = MagicMock()
     mock_interfaces = MagicMock()
@@ -43,7 +45,9 @@ def mock_pinocchio_dependencies():
 
 
 @pytest.fixture(scope="module")
-def PinocchioPhysicsEngineClass(mock_pinocchio_dependencies):
+def PinocchioPhysicsEngineClass(
+    mock_pinocchio_dependencies,
+) -> Generator[type, None, None]:
     """Fixture to provide the PinocchioPhysicsEngine class with mocked dependencies."""
     # Ensure module is imported
     import engines.physics_engines.pinocchio.python.pinocchio_physics_engine as mod
@@ -65,7 +69,7 @@ def PinocchioPhysicsEngineClass(mock_pinocchio_dependencies):
 
 
 @pytest.fixture
-def engine(PinocchioPhysicsEngineClass):
+def engine(PinocchioPhysicsEngineClass) -> Any:
     """Fixture to provide a PinocchioPhysicsEngine instance."""
     return PinocchioPhysicsEngineClass()
 

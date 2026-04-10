@@ -16,7 +16,7 @@ class TestComparativePlotter:
     """Tests for ComparativePlotter class."""
 
     @pytest.fixture
-    def mock_analyzer(self):
+    def mock_analyzer(self) -> MagicMock:
         """Mock ComparativeSwingAnalyzer."""
         analyzer = MagicMock(spec=ComparativeSwingAnalyzer)
         analyzer.name_a = "Swing A"
@@ -24,12 +24,12 @@ class TestComparativePlotter:
         return analyzer
 
     @pytest.fixture
-    def plotter(self, mock_analyzer):
+    def plotter(self, mock_analyzer) -> ComparativePlotter:
         """Create ComparativePlotter instance."""
         return ComparativePlotter(mock_analyzer)
 
     @pytest.fixture
-    def mock_figure(self):
+    def mock_figure(self) -> MagicMock:
         """Mock matplotlib Figure."""
         fig = MagicMock(spec=matplotlib.figure.Figure)
         # Setup subplot mocks

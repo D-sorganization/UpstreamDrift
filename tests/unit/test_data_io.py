@@ -20,7 +20,7 @@ needs_parquet = pytest.mark.skipif(not HAS_PYARROW, reason="pyarrow not installe
 
 
 @pytest.fixture
-def sample_df():
+def sample_df() -> pd.DataFrame:
     return pd.DataFrame({"a": [1, 2, 3], "b": [4.0, 5.0, 6.0]})
 
 

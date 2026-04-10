@@ -1,5 +1,7 @@
 """Unit tests for Pinocchio GUI logic."""
 
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,7 +17,7 @@ if PYQT6_AVAILABLE:
 
 
 @pytest.fixture(autouse=True, scope="module")
-def mock_pinocchio_gui_dependencies():
+def mock_pinocchio_gui_dependencies() -> Generator[None, None, None]:
     """Fixture to mock pinocchio and meshcat safely for the duration of this module."""
     with patch.dict(
         "sys.modules",
@@ -35,13 +37,13 @@ class TestPinocchioGUI:
     """Test Pinocchio GUI."""
 
     @pytest.fixture
-    def qapp(self):
+    def qapp(self) -> Any:
         """Ensure QApplication exists."""
         app = get_qapp()
         return app
 
     @pytest.fixture
-    def mock_gui(self, qapp):
+    def mock_gui(self, qapp) -> Any:
         """Create a mocked PinocchioGUI instance."""
         from contextlib import ExitStack
 

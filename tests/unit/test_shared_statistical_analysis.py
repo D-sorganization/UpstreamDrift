@@ -8,7 +8,7 @@ from src.shared.python.validation_pkg.statistical_analysis import (
 
 
 @pytest.fixture
-def sample_data():
+def sample_data() -> StatisticalAnalyzer:
     N = 100
     times = np.linspace(0, 1.0, N)
     # Simple sine wave for joint positions

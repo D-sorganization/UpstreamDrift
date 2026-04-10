@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import importlib.util
+import types
 from pathlib import Path
 
 
-def _load_script_module(name: str):
+def _load_script_module(name: str) -> types.ModuleType:
     script_path = Path(__file__).resolve().parents[2] / "scripts" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, script_path)
     assert spec is not None and spec.loader is not None

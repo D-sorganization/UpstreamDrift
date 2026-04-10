@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -18,13 +19,13 @@ _skip_no_3d = pytest.mark.skipif(not _HAS_3D, reason="mpl_toolkits.mplot3d unava
 
 
 @pytest.fixture
-def mock_recorder():
+def mock_recorder() -> MagicMock:
     recorder = MagicMock()
 
     # Default behavior: return some dummy data
     times = np.linspace(0, 1, 100)
 
-    def get_time_series(field):
+    def get_time_series(field) -> tuple[Any, Any]:
         if (
             field == "joint_positions"
             or field == "joint_velocities"
@@ -59,7 +60,7 @@ def mock_recorder():
 
 
 @pytest.fixture
-def plotter(mock_recorder):
+def plotter(mock_recorder) -> GolfSwingPlotter:
     return GolfSwingPlotter(
         mock_recorder, joint_names=["Joint 0", "Joint 1", "Joint 2"]
     )

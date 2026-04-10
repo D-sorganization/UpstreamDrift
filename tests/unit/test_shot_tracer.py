@@ -1,6 +1,8 @@
 """Unit tests for shot tracer module."""
 
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,7 +27,7 @@ with patch.dict(sys.modules, {"flight_models": MagicMock()}):
 
 
 @pytest.fixture
-def mock_flight_models():
+def mock_flight_models() -> Generator[tuple[Any, Any, Any, Any], None, None]:
     with (
         patch.object(shot_tracer_module, "FlightModelRegistry") as mock_registry,
         patch.object(shot_tracer_module, "UnifiedLaunchConditions") as mock_launch,
@@ -53,7 +55,7 @@ def mock_flight_models():
 
 
 @pytest.fixture
-def widget(qtbot, mock_flight_models):
+def widget(qtbot, mock_flight_models) -> Any:
     if PYQT6_AVAILABLE:
         from PyQt6.QtWidgets import QWidget
 

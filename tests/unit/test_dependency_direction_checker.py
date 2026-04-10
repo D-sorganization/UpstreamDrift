@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import importlib.util
+import types
 from pathlib import Path
 
 
-def _load_module():
+def _load_module() -> types.ModuleType:
     script_path = (
         Path(__file__).resolve().parents[2]
         / "scripts"

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
+
 import pytest
 
 from src.shared.python.contracts import (
@@ -26,7 +28,7 @@ _needs_contracts = pytest.mark.skipif(
 
 
 @pytest.fixture(autouse=True)
-def _enforce_contracts():
+def _enforce_contracts() -> Generator[None, None, None]:
     """Force ENFORCE mode by patching the exact module dict that require/ensure read.
 
     set_contract_level() updates sys.modules[__name__], but in a namespace-package
@@ -121,7 +123,7 @@ class TestCheckHelpers:
 class TestPreconditionDecorator:
     def test_decorator_allows_valid_input(self) -> None:
         @precondition(lambda self, x: x > 0, "x must be positive")
-        def compute(self, x):
+        def compute(self, x) -> int:
             return x * 2
 
         assert compute(None, 5) == 10
@@ -132,7 +134,7 @@ class TestPreconditionDecorator:
         try:
 
             @precondition(lambda self, x: x > 0, "x must be positive")
-            def compute(self, x):
+            def compute(self, x) -> int:
                 return x * 2
 
             with pytest.raises((ContractViolationError, AssertionError, ValueError)):

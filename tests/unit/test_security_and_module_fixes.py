@@ -11,6 +11,7 @@ Covers issues:
 from __future__ import annotations
 
 import importlib
+import types
 from unittest.mock import patch
 
 import pytest
@@ -173,7 +174,7 @@ class TestAuthCacheCryptoHash:
 class TestMotionTrainingGetattr:
     """Issue #1777: motion_training exports must return real objects, not None."""
 
-    def _import_motion_training(self):
+    def _import_motion_training(self) -> types.ModuleType:
         """Import the motion_training module."""
         return importlib.import_module(
             "src.engines.physics_engines.pinocchio.python.motion_training"

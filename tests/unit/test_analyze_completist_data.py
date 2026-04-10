@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import types
 from datetime import datetime
 from pathlib import Path
 
@@ -11,7 +12,7 @@ SCRIPT_PATH = (
 )
 
 
-def _load_module():
+def _load_module() -> types.ModuleType:
     spec = importlib.util.spec_from_file_location(
         "analyze_completist_data", SCRIPT_PATH
     )

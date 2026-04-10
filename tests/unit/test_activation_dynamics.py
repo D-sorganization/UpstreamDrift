@@ -59,7 +59,7 @@ class TestComputeDerivative:
     """Test compute_derivative method."""
 
     @pytest.fixture
-    def dynamics(self):
+    def dynamics(self) -> ActivationDynamics:
         """Create standard activation dynamics instance."""
         return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 
@@ -173,7 +173,7 @@ class TestUpdate:
     """Test update method."""
 
     @pytest.fixture
-    def dynamics(self):
+    def dynamics(self) -> ActivationDynamics:
         """Create standard activation dynamics instance."""
         return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 
@@ -242,7 +242,7 @@ class TestStepResponse:
     """Test step response behavior."""
 
     @pytest.fixture
-    def dynamics(self):
+    def dynamics(self) -> ActivationDynamics:
         """Create standard activation dynamics instance."""
         return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 
@@ -426,7 +426,7 @@ class TestNumericalStability:
     """Test numerical stability and edge cases."""
 
     @pytest.fixture
-    def dynamics(self):
+    def dynamics(self) -> ActivationDynamics:
         """Create standard activation dynamics instance."""
         return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 
@@ -499,7 +499,7 @@ class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
     @pytest.fixture
-    def dynamics(self):
+    def dynamics(self) -> ActivationDynamics:
         """Create standard activation dynamics instance."""
         return ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 

@@ -6,13 +6,15 @@ regardless of whether PyQt6 is installed.
 
 import importlib
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
 @pytest.fixture(autouse=True)
-def _force_fallback_signals():
+def _force_fallback_signals() -> Generator[None, None, None]:
     """Force ProcessWorker to use the fallback (non-PyQt6) signal stubs.
 
     This patches PYQT6_AVAILABLE to False and clears the cached module
@@ -36,7 +38,7 @@ def _force_fallback_signals():
 
 
 @pytest.fixture
-def worker_cls():
+def worker_cls() -> type:
     """Import ProcessWorker using fallback signals."""
     mod_key = "src.shared.python.ui.qt.process_worker"
     if mod_key in sys.modules:
@@ -49,7 +51,7 @@ def worker_cls():
 
 
 @pytest.fixture
-def worker(worker_cls):
+def worker(worker_cls) -> Any:
     """Create a ProcessWorker instance with a simple command."""
     return worker_cls(["echo", "hello"])
 

@@ -33,7 +33,7 @@ class MockRecorder:
         self.joint_positions = np.zeros((100, 2))
         self.joint_velocities = np.zeros((100, 2))
 
-    def get_time_series(self, field_name):
+    def get_time_series(self, field_name) -> tuple[np.ndarray, np.ndarray]:
         if field_name == "cop_position":
             return self.times, self.cop_position
         if field_name == "com_position":
@@ -48,10 +48,12 @@ class MockRecorder:
             return self.times, self.joint_velocities
         raise KeyError(f"Unknown field: {field_name}")
 
-    def get_induced_acceleration_series(self, source_name):
+    def get_induced_acceleration_series(
+        self, source_name
+    ) -> tuple[np.ndarray, np.ndarray]:
         return self.times, np.zeros((100, 3))
 
-    def get_counterfactual_series(self, cf_name):
+    def get_counterfactual_series(self, cf_name) -> tuple[np.ndarray, np.ndarray]:
         return self.times, np.zeros((100, 3))
 
 

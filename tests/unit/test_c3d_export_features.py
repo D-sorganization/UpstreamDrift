@@ -1,7 +1,9 @@
 """Tests for C3D export security, versioning, and telemetry features."""
 
 import json
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -21,7 +23,7 @@ class TestCaptureExportFeatures:
     """Tests for the enhanced export functionality."""
 
     @pytest.fixture
-    def mock_reader(self):
+    def mock_reader(self) -> C3DDataReader:
         """Create a reader with a mocked get_metadata method."""
         reader = C3DDataReader("test_capture.c3d")
         # Mock underlying data to allow export to proceed (it calls self.get_metadata().units)
@@ -31,7 +33,7 @@ class TestCaptureExportFeatures:
         return reader
 
     @pytest.fixture
-    def sample_dataframe(self):
+    def sample_dataframe(self) -> pd.DataFrame:
         """Create a dummy DataFrame for export."""
         return pd.DataFrame(
             {
@@ -45,7 +47,7 @@ class TestCaptureExportFeatures:
         )
 
     @pytest.fixture
-    def mock_project_root(self, tmp_path):
+    def mock_project_root(self, tmp_path) -> Generator[Any, None, None]:
         """Make tmp_path appear as the project root."""
         with patch("pathlib.Path.cwd") as mock_cwd:
             mock_cwd.return_value = Path(tmp_path).resolve()

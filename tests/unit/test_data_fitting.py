@@ -239,7 +239,7 @@ class TestSensitivityAnalyzer:
         analyzer = SensitivityAnalyzer()
 
         # Simple linear model: output = 2 * param
-        def model_func(params):
+        def model_func(params) -> dict:
             return {"output": 2 * params["param"]}
 
         result = analyzer.compute_sensitivity(
