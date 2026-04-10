@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.76                                             |
+| **Spec Version**        | 1.0.77                                             |
 | **Last Spec Update**    | 2026-04-10                                         |
 
 ## 2. Purpose & Mission
@@ -493,6 +493,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-10 | 1.0.77  | Optimization: Replaced np.linalg.norm(..., axis=1) with explicit element-wise computation in handedness_support and electrical_model to avoid axis reduction overhead for arrays with small inner dimensions. |
 | 2026-04-10 | 1.0.76  | Simscape + GUI maintenance: fixed the 3D golf dataset generator defaults to target the bundled `GolfSwing3D_Kinetic` model while keeping legacy `verbose` and newer `verbosity` config paths compatible, and decomposed the launcher dashboard plus pendulum GUI builder/toolstrip code into smaller helpers with focused regression coverage. |
 | 2026-04-10 | 1.0.75  | Optimization: Replaced np.linalg.norm(..., axis=1) with explicit element-wise computation in deformable objects to avoid axis reduction overhead for arrays with small inner dimensions. |
 | 2026-04-10 | 1.0.74  | API/auth integrity: aligned API-key prefix lookup and API-key creation on the canonical `key_prefix` field, removed the stale auth integration xfail, and added a route-level regression test to ensure newly created API keys persist the hashed prefix used by the fast-path lookup dependency.                                                                                                                                                                                                        |
