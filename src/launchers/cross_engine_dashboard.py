@@ -276,12 +276,13 @@ class CrossEngineDashboardWindow:
         )
 
 
-def _build_qt_window() -> object:
-    """Build and return the QMainWindow instance (deferred Qt import).
+def _create_dashboard_window_class() -> type:
+    """Construct and return the _Window class with deferred Qt/mpl imports.
 
     Returns
     -------
-    QMainWindow subclass instance.
+    type
+        A QMainWindow subclass ready to be instantiated.
 
     Raises
     ------
@@ -621,6 +622,16 @@ def _build_qt_window() -> object:
 # ---------------------------------------------------------------------------
 # CLI entry point
 # ---------------------------------------------------------------------------
+
+
+def _build_qt_window() -> object:
+    """Build and return the QMainWindow instance (deferred Qt import)."""
+    return _create_dashboard_window_class()()
+
+
+def _build_qt_window() -> object:
+    """Build and return the QMainWindow instance (deferred Qt import)."""
+    return _create_dashboard_window_class()()
 
 
 def _build_arg_parser() -> argparse.ArgumentParser:
