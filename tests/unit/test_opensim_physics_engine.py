@@ -54,7 +54,7 @@ with (
 
 
 @pytest.fixture
-def engine():
+def engine() -> OpenSimPhysicsEngine:
     # Reset mock_opensim for each test
     mock_opensim.reset_mock()
     # Ensure the engine module's opensim ref points to our mock
@@ -232,10 +232,10 @@ def test_compute_jacobian_scales_finite_difference_step(engine) -> None:
         def __init__(self, x):
             self._x = x
 
-        def p(self):
+        def p(self) -> list[float]:
             return [self._x, 0.0, 0.0]
 
-        def R(self):
+        def R(self) -> MagicMock:
             return MagicMock()
 
     body = MagicMock()

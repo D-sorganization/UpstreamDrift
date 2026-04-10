@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from typing import Any
+from unittest.mock import MagicMock
+
 import numpy as np
 import pytest
 
@@ -9,7 +12,7 @@ import pytest
 class TestIssue2483MyoSuiteTerminationHandling:
     """Issue #2483: step() must handle environment termination state."""
 
-    def _make_engine_with_mock_env(self):
+    def _make_engine_with_mock_env(self) -> tuple[Any, MagicMock]:
         """Create MyoSuitePhysicsEngine with a mocked Gym environment."""
         try:
             from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (

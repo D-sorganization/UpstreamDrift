@@ -24,7 +24,7 @@ def test_validate_tab_index() -> None:
 
 
 @pytest.fixture
-def parent_launcher(qapp):
+def parent_launcher(qapp) -> QWidget:
     launcher = QWidget()
     launcher.btn_modify_layout = MagicMock()
     launcher.btn_modify_layout.isChecked.return_value = True

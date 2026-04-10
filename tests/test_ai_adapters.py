@@ -1,4 +1,6 @@
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -14,7 +16,7 @@ mock_anthropic_module = MagicMock()
 
 
 @pytest.fixture
-def mock_openai_adapter():
+def mock_openai_adapter() -> Generator[Any, None, None]:
     with patch.dict(sys.modules, {"openai": mock_openai_module}):
         from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
@@ -23,7 +25,7 @@ def mock_openai_adapter():
 
 
 @pytest.fixture
-def mock_anthropic_adapter():
+def mock_anthropic_adapter() -> Generator[Any, None, None]:
     with patch.dict(sys.modules, {"anthropic": mock_anthropic_module}):
         from src.shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
 
@@ -32,7 +34,7 @@ def mock_anthropic_adapter():
 
 
 @pytest.fixture
-def context():
+def context() -> ConversationContext:
     return ConversationContext(user_expertise=ExpertiseLevel.BEGINNER)
 
 

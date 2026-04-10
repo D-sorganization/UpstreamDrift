@@ -7,6 +7,7 @@ adapter loading, and disk persistence.
 from __future__ import annotations
 
 import time
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,7 +16,7 @@ from src.shared.python.core.error_utils import InvalidRequestError
 
 
 @pytest.fixture
-def chat_service(tmp_path):
+def chat_service(tmp_path) -> Any:
     """Create a ChatService with mocked adapter and temp persist dir."""
     with patch("src.api.services.chat_service.ChatService._load_adapter"):
         from src.api.services.chat_service import ChatService

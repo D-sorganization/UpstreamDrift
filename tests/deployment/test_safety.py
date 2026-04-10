@@ -141,7 +141,7 @@ class TestCollisionAvoidance:
             def set_joint_positions(self, q) -> None:
                 pass
 
-            def get_link_positions(self):
+            def get_link_positions(self) -> dict[str, np.ndarray]:
                 return {"link_0": np.array([0.5, 0, 0.5])}
 
         ca = CollisionAvoidance(MockEngine(), safety_distance=0.1)
@@ -211,7 +211,7 @@ class TestCollisionAvoidance:
 class TestIssue2477EStopPositionMode:
     """Issue #2477: E-stop must neutralize position-controlled motion."""
 
-    def _make_monitor_and_state(self):
+    def _make_monitor_and_state(self) -> tuple:
         from src.deployment.realtime import RobotConfig, RobotState
         from src.deployment.safety import SafetyMonitor
 

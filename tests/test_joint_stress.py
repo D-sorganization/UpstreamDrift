@@ -12,11 +12,11 @@ class TestJointStressAnalyzer:
     """Test suite for JointStressAnalyzer."""
 
     @pytest.fixture
-    def analyzer(self):
+    def analyzer(self) -> JointStressAnalyzer:
         return JointStressAnalyzer(body_weight=80.0, handedness="right")
 
     @pytest.fixture
-    def mock_data(self):
+    def mock_data(self) -> dict:
         time = np.linspace(0, 1.0, 20)
         zeros = np.zeros_like(time)
         return {

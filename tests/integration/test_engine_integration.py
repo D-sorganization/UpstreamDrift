@@ -143,7 +143,7 @@ class TestEngineIntegration:
         performance_results = {}
 
         # Mock simulation with realistic timing - moved outside loop to avoid closure
-        def mock_simulate(engine_type):
+        def mock_simulate(engine_type: object) -> dict[str, float]:
             # Simulate different performance characteristics
             if engine_type == EngineType.MUJOCO:
                 time.sleep(0.01)  # Slower but more accurate

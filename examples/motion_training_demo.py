@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add the motion_training module to path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,7 @@ sys.path.insert(
 )
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Motion Training Demo - Generate body motion from club trajectory",
@@ -92,7 +93,9 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: Path):
+def run_trajectory_analysis(
+    trajectory_path: Path, sheet_name: str, output_dir: Path
+) -> Any:
     """Run trajectory analysis and generate plots."""
     if not (trajectory_path is not None):
         raise ValueError("trajectory_path required")
@@ -123,7 +126,7 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
     return trajectory
 
 
-def _parse_and_subsample(trajectory_path, sheet_name, subsample):
+def _parse_and_subsample(trajectory_path: Any, sheet_name: Any, subsample: Any) -> Any:
     if not (trajectory_path is not None):
         raise ValueError("trajectory_path required")
     if not (sheet_name):
@@ -141,7 +144,7 @@ def _parse_and_subsample(trajectory_path, sheet_name, subsample):
     return trajectory
 
 
-def _init_and_solve_ik(urdf_path, trajectory):
+def _init_and_solve_ik(urdf_path: Any, trajectory: Any) -> Any:
     if not (urdf_path is not None):
         raise ValueError("urdf_path required")
     if not (trajectory is not None):
@@ -238,7 +241,7 @@ def run_ik_demo(
     subsample: int = 10,
     visualize: bool = False,
     playback: bool = False,
-):
+) -> Any:
     """Run the full IK demo."""
     if not (trajectory_path is not None):
         raise ValueError("trajectory_path required")

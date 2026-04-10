@@ -1,6 +1,7 @@
 """Tests for shared.python.engine_loaders coverage."""
 
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -61,7 +62,7 @@ def test_load_drake_missing(tmp_path: object) -> None:
             else __import__
         )
 
-        def side_effect(name, *args, **kwargs):
+        def side_effect(name, *args, **kwargs) -> Any:
             if name == "pydrake" or name.startswith("pydrake."):
                 raise ImportError(f"No module named {name}")
             return original_import(name, *args, **kwargs)

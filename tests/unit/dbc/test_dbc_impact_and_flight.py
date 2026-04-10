@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from typing import Any
 
 import numpy as np
 
@@ -108,7 +109,7 @@ class TestRigidBodyImpactPreconditions(unittest.TestCase):
 class TestRigidBodyImpactPostconditions(unittest.TestCase):
     """Physical postconditions for rigid body impact."""
 
-    def _solve(self, clubhead_vel: float = 45.0, cor: float = 0.83):  # type: ignore[no-untyped-def]
+    def _solve(self, clubhead_vel: float = 45.0, cor: float = 0.83) -> Any:
         from src.shared.python.physics.impact_model import RigidBodyImpactModel
 
         model = RigidBodyImpactModel()
@@ -351,7 +352,7 @@ class TestSimulateTrajectoryPreconditions(unittest.TestCase):
 class TestTrajectoryPostconditions(unittest.TestCase):
     """Physical postconditions for trajectory simulation (requires Rust kernel)."""
 
-    def _simulate(self, velocity: float = 50.0, angle: float = 0.2):  # type: ignore[no-untyped-def]
+    def _simulate(self, velocity: float = 50.0, angle: float = 0.2) -> Any:
         from src.shared.python.physics.ball_flight_physics import (
             BallFlightSimulator,
             LaunchConditions,

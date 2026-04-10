@@ -8,6 +8,7 @@ internal mathematical logic.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -22,7 +23,7 @@ client = TestClient(_app)
 
 
 @pytest.fixture
-def mock_engine():
+def mock_engine() -> Generator[MagicMock, None, None]:
     """Mock the WGSReactorEngine securely from Tools."""
     with patch(
         "upstream_drift_tools.process_calculators.WGSReactorEngine"

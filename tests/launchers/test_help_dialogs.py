@@ -16,7 +16,7 @@ from src.launchers.help_dialogs import (  # noqa: E402
 
 
 @pytest.fixture
-def test_model():
+def test_model() -> MagicMock:
     model = MagicMock()
     model.name = "Test Model"
     model.description = "A test model"

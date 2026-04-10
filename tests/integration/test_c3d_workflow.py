@@ -3,7 +3,10 @@
 TEST-004: Added @pytest.mark.integration markers for test categorization.
 """
 
-from unittest.mock import patch
+from collections.abc import Generator
+from pathlib import Path
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
@@ -37,7 +40,7 @@ if not C3D_IMPORTS_AVAILABLE:
 
 
 @pytest.fixture
-def mock_c3d_file(tmp_path):
+def mock_c3d_file(tmp_path: Path) -> Path:
     """Create a dummy file path."""
     f = tmp_path / "test.c3d"
     f.touch()
@@ -45,7 +48,7 @@ def mock_c3d_file(tmp_path):
 
 
 @pytest.fixture
-def mock_ezc3d():
+def mock_ezc3d() -> Generator[MagicMock, None, None]:
     """Mock ezc3d module behavior."""
     with patch("c3d_reader.ezc3d") as mock:
         # Construct a fake C3D structure
@@ -148,7 +151,7 @@ def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path) -> None:
 
 
 @pytest.fixture(scope="session")
-def qapp():
+def qapp() -> Generator[Any, None, None]:
     """Manage a single QApplication instance for the test session."""
 
     app = get_qapp()

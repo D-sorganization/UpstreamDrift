@@ -20,7 +20,7 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-def mock_request():
+def mock_request() -> MagicMock:
     """Create a mock request."""
     request = MagicMock(spec=Request)
     request.url = MagicMock()
@@ -30,7 +30,7 @@ def mock_request():
 
 
 @pytest.fixture
-def mock_response():
+def mock_response() -> MagicMock:
     """Create a mock response."""
     response = MagicMock(spec=Response)
     response.headers = {}
@@ -44,7 +44,7 @@ class TestAddSecurityHeadersContract:
         """Postcondition: Returns a Response."""
         from src.api.middleware.security_headers import add_security_headers
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -60,7 +60,7 @@ class TestAddSecurityHeaders:
         """Test adding X-Content-Type-Options header."""
         from src.api.middleware.security_headers import add_security_headers
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -70,7 +70,7 @@ class TestAddSecurityHeaders:
         """Test adding X-Frame-Options header."""
         from src.api.middleware.security_headers import add_security_headers
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -80,7 +80,7 @@ class TestAddSecurityHeaders:
         """Test adding X-XSS-Protection header."""
         from src.api.middleware.security_headers import add_security_headers
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -90,7 +90,7 @@ class TestAddSecurityHeaders:
         """Test adding Referrer-Policy header."""
         from src.api.middleware.security_headers import add_security_headers
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -104,7 +104,7 @@ class TestAddSecurityHeaders:
 
         mock_request.url.scheme = "https"
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -118,7 +118,7 @@ class TestAddSecurityHeaders:
 
         mock_request.url.scheme = "http"
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await add_security_headers(mock_request, call_next)
@@ -163,7 +163,7 @@ class TestValidateUploadSizeContract:
 
         mock_request.headers = {}
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await validate_upload_size(mock_request, call_next)
@@ -181,7 +181,7 @@ class TestValidateUploadSize:
 
         mock_request.headers = {}
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await validate_upload_size(mock_request, call_next)
@@ -193,7 +193,7 @@ class TestValidateUploadSize:
 
         mock_request.headers = {"content-length": "1000"}  # 1KB
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         result = await validate_upload_size(mock_request, call_next)
@@ -206,7 +206,7 @@ class TestValidateUploadSize:
 
         mock_request.headers = {"content-length": str(MAX_UPLOAD_SIZE_BYTES + 1)}
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return MagicMock()
 
         result = await validate_upload_size(mock_request, call_next)
@@ -220,7 +220,7 @@ class TestValidateUploadSize:
 
         mock_request.headers = {"content-length": "not-a-number"}
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return MagicMock()
 
         result = await validate_upload_size(mock_request, call_next)
@@ -237,7 +237,7 @@ class TestValidateUploadSize:
         mock_request.url = MagicMock()
         mock_request.url.scheme = "https"
 
-        async def call_next(request):
+        async def call_next(request: MagicMock) -> MagicMock:
             return MagicMock()
 
         result = await validate_upload_size(mock_request, call_next)

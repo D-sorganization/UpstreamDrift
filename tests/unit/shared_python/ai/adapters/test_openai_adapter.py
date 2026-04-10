@@ -11,6 +11,7 @@ sys.modules["openai"] = openai_mock
 # for gemini
 if "openai" == "google.generativeai":
     sys.modules["google"] = MagicMock()
+from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -32,7 +33,7 @@ from src.shared.python.ai.types import (  # noqa: E402
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> OpenAIAdapter:
     """Provide a configured OpenAIAdapter."""
     return OpenAIAdapter(api_key="sk-test", model="gpt-4-test", timeout=30.0)
 
@@ -67,7 +68,7 @@ def test_get_client_import_error() -> None:
     # Force ImportError when importing OpenAI
     real_import = __import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name == "openai":
             raise ImportError("No module named 'openai'")
         return real_import(name, *args, **kwargs)

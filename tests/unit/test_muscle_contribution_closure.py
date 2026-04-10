@@ -44,7 +44,7 @@ if MYOSUITE_AVAILABLE:
         """Test that muscle contributions sum to total acceleration (closure property)."""
 
         @pytest.fixture
-        def elbow_engine(self):  # type: ignore
+        def elbow_engine(self) -> "_MyoSuitePhysicsEngine":  # type: ignore[return]
             """Create MyoSuite elbow model for testing."""
             engine = _MyoSuitePhysicsEngine()
             # Load simple elbow model (1-DOF, 6 muscles)

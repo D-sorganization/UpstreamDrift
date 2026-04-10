@@ -20,7 +20,7 @@ class TestEngineManagerCoverage:
     """Tests to improve coverage of EngineManager."""
 
     @pytest.fixture
-    def mock_manager(self):
+    def mock_manager(self) -> EngineManager:
         """Create an EngineManager with mocked probes and paths."""
         with (
             patch("src.shared.python.engine_core.engine_probes.MuJoCoProbe"),

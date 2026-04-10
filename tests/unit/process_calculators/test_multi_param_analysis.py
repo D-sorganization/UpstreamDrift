@@ -13,7 +13,7 @@ from src.shared.python.upstream_drift_tools.process_calculators.multi_param_anal
 class _StubEngine:
     """Simple engine: output = p1 + p2."""
 
-    def calculate(self, **params):
+    def calculate(self, **params) -> dict:
         return {
             "output": params.get("p1", 0.0) + params.get("p2", 0.0),
         }

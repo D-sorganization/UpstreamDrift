@@ -525,10 +525,10 @@ class TestAbstractMethods:
         """A class missing any abstract method should raise TypeError."""
 
         class Partial(PerturbationAnalyzerBase):
-            def _simulate(self, coeffs):  # type: ignore[override]
+            def _simulate(self, coeffs) -> _StubSimResult:  # type: ignore[override]
                 return _make_stub_result()
 
-            def _get_q_traj(self, r):  # type: ignore[override]
+            def _get_q_traj(self, r) -> np.ndarray:  # type: ignore[override]
                 return r.q_traj
 
             # Missing _get_v_traj and _validate_sim_result_type

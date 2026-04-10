@@ -13,13 +13,12 @@ class TestSpinalLoadAnalysis:
     """Test suite for SpinalLoadAnalyzer."""
 
     @pytest.fixture
-    def analyzer(self):
+    def analyzer(self) -> SpinalLoadAnalyzer:
         """Create a default analyzer."""
         return SpinalLoadAnalyzer(body_weight=80.0, height=1.80)
 
     @pytest.fixture
-    def example_data(self):
-        """Generate synthetic swing data."""
+    def example_data(self) -> dict:
         time = np.linspace(0, 1.0, 50)
         zeros = np.zeros_like(time)
         return {

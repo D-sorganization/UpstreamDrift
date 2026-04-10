@@ -13,6 +13,7 @@ Bugs covered:
 from __future__ import annotations
 
 import math
+from typing import Any
 
 import pytest
 from double_pendulum_model.physics.double_pendulum import (
@@ -25,7 +26,7 @@ from src.shared.python.ui.qt.utils import get_qapp
 
 
 @pytest.fixture(scope="module")
-def qapp():
+def qapp() -> Any:
     """Shared QApplication for the module."""
     return get_qapp()
 

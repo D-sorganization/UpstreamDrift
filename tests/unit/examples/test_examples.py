@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "examples"
@@ -41,7 +44,7 @@ def test_basic_flight_simulation(monkeypatch) -> None:
             self.vx, self.vy, self.vz = 70.0, 0.0, 10.0
 
     class _FakeResult:
-        def get_points(self):
+        def get_points(self) -> list[Any]:
             return [_FakePoint(i * 0.05, i * 3.0, max(0.0, 20.0 - i)) for i in range(5)]
 
     fake_physics.IntegratorConfig = MagicMock(return_value=object())

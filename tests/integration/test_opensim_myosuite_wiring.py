@@ -10,8 +10,9 @@ Fixes #1115, #1116
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -298,7 +299,7 @@ class TestAPIRouteConnectivity:
     """Verify OpenSim/MyoSuite are accessible via API routes."""
 
     @pytest.fixture(scope="class")
-    def client(self):
+    def client(self) -> Generator[Any, None, None]:
         """Create test client."""
         try:
             from fastapi.testclient import TestClient

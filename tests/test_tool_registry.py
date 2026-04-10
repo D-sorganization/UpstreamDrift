@@ -5,7 +5,7 @@ from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 
 class TestToolRegistry:
     @pytest.fixture
-    def registry(self):
+    def registry(self) -> ToolRegistry:
         return ToolRegistry()
 
     def test_decorator_registration(self, registry) -> None:
@@ -40,7 +40,7 @@ class TestToolRegistry:
 
     def test_execution_param_validation(self, registry) -> None:
         @registry.register("echo", "Echo")
-        def echo(msg: str):
+        def echo(msg: str) -> str:
             return msg
 
         # Missing required

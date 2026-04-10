@@ -23,7 +23,7 @@ from src.shared.python.engine_core.engine_availability import (
 
 
 @pytest.fixture
-def temp_osim_file(tmp_path):
+def temp_osim_file(tmp_path) -> Path:
     """Create a temporary valid OpenSim file."""
     osim_path = tmp_path / "test_model.osim"
 
@@ -36,7 +36,7 @@ def temp_osim_file(tmp_path):
 
 
 @pytest.fixture
-def temp_geometry_folder(tmp_path):
+def temp_geometry_folder(tmp_path) -> Path:
     """Create a temporary geometry folder."""
     geom_path = tmp_path / "Geometry"
     geom_path.mkdir()
@@ -44,7 +44,7 @@ def temp_geometry_folder(tmp_path):
 
 
 @pytest.fixture
-def temp_output_folder(tmp_path):
+def temp_output_folder(tmp_path) -> Path:
     """Create a temporary output folder."""
     output_path = tmp_path / "output"
     return output_path

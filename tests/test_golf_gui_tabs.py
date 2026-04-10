@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import sys
 import unittest
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch as _patch
 
@@ -147,13 +151,13 @@ class MockProperty:
         self.fget = fget
         self.fset = fset
 
-    def setter(self, fset):
+    def setter(self, fset) -> MockProperty:
         self.fset = fset
         return self
 
 
-def mock_pyqt_property(type_):
-    def decorator(func):
+def mock_pyqt_property(type_) -> Callable[[Any], MockProperty]:
+    def decorator(func) -> MockProperty:
         return MockProperty(fget=func)
 
     return decorator

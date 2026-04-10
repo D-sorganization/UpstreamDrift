@@ -9,6 +9,7 @@ sys.modules["google"] = MagicMock()
 sys.modules["google.generativeai"] = mock_genai_pkg
 sys.modules["google.generativeai.types"] = MagicMock()
 
+from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -20,7 +21,7 @@ def reset_mocks() -> None:
 
 
 @pytest.fixture(autouse=True)
-def patch_has_gemini():
+def patch_has_gemini() -> Generator[None, None, None]:
     with patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True):
         yield
 

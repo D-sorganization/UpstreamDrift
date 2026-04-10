@@ -53,7 +53,7 @@ if PYQT6_AVAILABLE:
         def forward(self) -> None:
             pass
 
-        def get_state(self):
+        def get_state(self) -> tuple[np.ndarray, np.ndarray]:
             return self._q, self._v
 
         def set_state(self, q, v) -> None:
@@ -66,31 +66,31 @@ if PYQT6_AVAILABLE:
         def get_time(self) -> float:
             return self._time
 
-        def compute_mass_matrix(self):
+        def compute_mass_matrix(self) -> np.ndarray:
             return np.eye(10)
 
-        def compute_bias_forces(self):
+        def compute_bias_forces(self) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_gravity_forces(self):
+        def compute_gravity_forces(self) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_inverse_dynamics(self, qacc):
+        def compute_inverse_dynamics(self, qacc) -> np.ndarray:
             return np.zeros(10)
 
         def compute_jacobian(self, body_name) -> None:
             return None
 
-        def compute_drift_acceleration(self):
+        def compute_drift_acceleration(self) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_control_acceleration(self, tau):
+        def compute_control_acceleration(self, tau) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_ztcf(self, q, v):
+        def compute_ztcf(self, q, v) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_zvcf(self, q):
+        def compute_zvcf(self, q) -> np.ndarray:
             return np.zeros(10)
 
     class TestDashboardEnhancements(unittest.TestCase):

@@ -1,6 +1,7 @@
 """Tests for startup.py."""
 
 import builtins  # noqa: E402
+from collections.abc import Generator  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
@@ -16,7 +17,7 @@ from src.launchers.startup import (  # noqa: E402
 
 
 @pytest.fixture
-def mock_theme_available():
+def mock_theme_available() -> Generator[None, None, None]:
     import types
 
     colors = types.SimpleNamespace(
@@ -43,7 +44,7 @@ def mock_theme_available():
 
 
 @pytest.fixture
-def mock_theme_unavailable():
+def mock_theme_unavailable() -> Generator[None, None, None]:
     with patch("src.launchers.startup.THEME_AVAILABLE", False):
         yield
 
@@ -62,7 +63,9 @@ def test_get_theme_colors_not_available() -> None:
 
         real_import = builtins.__import__
 
-        def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+        def mock_import(
+            name, globals=None, locals=None, fromlist=(), level=0
+        ) -> object:
             if name == "src.shared.python.theme" and "get_current_colors" in fromlist:
                 raise ImportError("Mocked error")
             return real_import(name, globals, locals, fromlist, level)

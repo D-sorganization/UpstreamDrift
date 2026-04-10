@@ -25,7 +25,7 @@ _VALIDATE_SCRIPT = "src.launchers.launcher_process_manager.validate_script_path"
 
 
 @pytest.fixture
-def manager():
+def manager() -> ProcessManager:
     with patch.object(Path, "mkdir"), patch.object(Path, "exists", return_value=False):
         return ProcessManager(repo_root=PureWindowsPath("/fake/repo"))  # type: ignore[arg-type]
 

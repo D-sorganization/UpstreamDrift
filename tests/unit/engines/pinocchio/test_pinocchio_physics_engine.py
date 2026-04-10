@@ -1,5 +1,9 @@
 """Tests for src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine."""
 
+from __future__ import annotations
+
+from typing import Any
+
 import pytest
 
 
@@ -19,7 +23,7 @@ def test_import() -> None:
 class TestIssue2483PinocchioSetStateInvariants:
     """Issue #2483: set_state() must validate sizes and refresh derived kinematics."""
 
-    def _make_engine_with_mock_model(self):
+    def _make_engine_with_mock_model(self) -> Any:
         """Create a PinocchioPhysicsEngine with a mocked pinocchio model."""
         try:
             from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (

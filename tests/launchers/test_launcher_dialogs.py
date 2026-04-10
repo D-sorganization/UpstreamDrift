@@ -34,7 +34,7 @@ class DummyLauncher(QMainWindow, LauncherDialogsMixin):
 
 
 @pytest.fixture
-def launcher(qapp):
+def launcher(qapp) -> DummyLauncher:
     return DummyLauncher()
 
 

@@ -19,7 +19,9 @@ from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import 
 )
 
 
-def configure_simple_pendulum(m1_kg: float = 1.0, l1_m: float = 1.0):
+def configure_simple_pendulum(
+    m1_kg: float = 1.0, l1_m: float = 1.0
+) -> tuple[PendulumPhysicsEngine, float, float]:
     """Factory to create a pendulum engine with simplified parameters."""
     from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
         DoublePendulumDynamics,

@@ -1,6 +1,7 @@
 """Tests for golf_launcher.py."""
 
 import contextlib  # noqa: E402
+from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -11,7 +12,7 @@ from src.launchers.ui_components import StartupResults  # noqa: E402
 
 
 @pytest.fixture
-def startup_results():
+def startup_results() -> StartupResults:
     results = StartupResults()
     results.startup_time_ms = 100
     results.docker_available = True
@@ -21,7 +22,7 @@ def startup_results():
 
 
 @contextlib.contextmanager
-def patch_launcher_ui():
+def patch_launcher_ui() -> Generator[None, None, None]:
     with (
         patch("src.launchers.golf_launcher.DockerCheckThread"),
         patch("src.launchers.golf_launcher.QTimer"),

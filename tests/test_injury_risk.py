@@ -13,11 +13,11 @@ from src.shared.python.injury.injury_risk import (
 
 class TestInjuryRiskScorer:
     @pytest.fixture
-    def scorer(self):
+    def scorer(self) -> InjuryRiskScorer:
         return InjuryRiskScorer()
 
     @pytest.fixture
-    def mock_spinal_result(self):
+    def mock_spinal_result(self) -> Mock:
         result = Mock()
         result.peak_compression_bw = 5.0  # Caution range (4-6)
         result.peak_lateral_shear_bw = 0.8  # Caution range (0.5-1.0)
@@ -29,8 +29,8 @@ class TestInjuryRiskScorer:
         return result
 
     @pytest.fixture
-    def mock_joint_results(self):
-        def create_result(score, impingement=False):
+    def mock_joint_results(self) -> dict[str, Mock]:
+        def create_result(score, impingement=False) -> Mock:
             result = Mock()
             result.risk_score = score
             result.impingement_risk = impingement
@@ -48,7 +48,7 @@ class TestInjuryRiskScorer:
         }
 
     @pytest.fixture
-    def mock_swing_metrics(self):
+    def mock_swing_metrics(self) -> dict[str, float]:
         return {
             "sequence_timing_error": 0.10,  # Middle of range
             "tempo_ratio": 3.5,  # Error of 0.5
@@ -56,7 +56,7 @@ class TestInjuryRiskScorer:
         }
 
     @pytest.fixture
-    def mock_training_load(self):
+    def mock_training_load(self) -> dict[str, float]:
         return {
             "acwr": 1.4,  # High (>1.3)
             "weekly_swings": 800,  # High (500-1000)

@@ -6,6 +6,7 @@ and REST fallback endpoints.
 
 from __future__ import annotations
 
+from collections.abc import AsyncGenerator
 from unittest.mock import MagicMock
 
 import pytest
@@ -24,7 +25,7 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-def mock_chat_service():
+def mock_chat_service() -> MagicMock:
     """Create a mock ChatService."""
     svc = MagicMock()
 
@@ -54,7 +55,7 @@ def mock_chat_service():
     ]
 
     # Make stream_response an async generator
-    async def mock_stream(session_id):
+    async def mock_stream(session_id: str) -> AsyncGenerator[str, None]:
         yield "Hello "
         yield "world!"
 
@@ -64,7 +65,7 @@ def mock_chat_service():
 
 
 @pytest.fixture
-def app(mock_chat_service):
+def app(mock_chat_service: MagicMock) -> FastAPI:
     """Create a FastAPI app with chat routes."""
     test_app = FastAPI()
     test_app.state.chat_service = mock_chat_service
@@ -73,7 +74,7 @@ def app(mock_chat_service):
 
 
 @pytest.fixture
-def client(app):
+def client(app: FastAPI) -> TestClient:
     """Create a test client."""
     return TestClient(app)
 

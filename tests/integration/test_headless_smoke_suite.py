@@ -5,6 +5,7 @@ without a physical display, suitable for CI/CD environments.
 """
 
 import os
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,7 +20,7 @@ except ImportError:
 
 
 @pytest.fixture
-def mock_loader_thread():
+def mock_loader_thread() -> Generator[MagicMock, None, None]:
     """Mock the C3DLoaderThread to prevent actual thread execution."""
     with patch("apps.c3d_viewer.C3DLoaderThread") as MockThread:
         mock_instance = MockThread.return_value

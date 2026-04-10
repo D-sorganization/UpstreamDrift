@@ -6,6 +6,8 @@ Refactored for DRY compliance using parameterized engine tests.
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -17,7 +19,7 @@ logger = get_logger(__name__)
 SUPERPOSITION_TOLERANCE = 1e-5
 
 
-def _get_engine(engine_name: str):
+def _get_engine(engine_name: str) -> Any:
     """Factory to get the requested physics engine, skipping if not available."""
     if engine_name == "pinocchio":
         try:

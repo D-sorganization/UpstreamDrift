@@ -19,17 +19,17 @@ Context = namedtuple("Context", ["user_id"])
 
 class TestWorkflowEngine:
     @pytest.fixture
-    def mock_registry(self):
+    def mock_registry(self) -> Mock:
         registry = Mock(spec=ToolRegistry)
         registry.execute.return_value = ToolResult("", True, "success")
         return registry
 
     @pytest.fixture
-    def engine(self, mock_registry):
+    def engine(self, mock_registry) -> WorkflowEngine:
         return WorkflowEngine(mock_registry)
 
     @pytest.fixture
-    def simple_workflow(self):
+    def simple_workflow(self) -> Workflow:
         wf = Workflow(
             id="test_wf",
             name="Test Workflow",

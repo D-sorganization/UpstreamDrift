@@ -335,7 +335,7 @@ class TestRequestTracer:
         mock_response.status_code = 200
 
         # Mock call_next
-        async def mock_call_next(request):
+        async def mock_call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         with patch("src.api.utils.tracing.logger"):
@@ -366,7 +366,7 @@ class TestRequestTracer:
         mock_response.headers = {}
         mock_response.status_code = 200
 
-        async def mock_call_next(request):
+        async def mock_call_next(request: MagicMock) -> MagicMock:
             return mock_response
 
         with patch("src.api.utils.tracing.logger"):

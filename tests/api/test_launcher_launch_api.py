@@ -11,9 +11,13 @@ Covers:
 from __future__ import annotations
 
 import json
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
+
+if TYPE_CHECKING:
+    from fastapi.testclient import TestClient
 
 import pytest
 
@@ -52,7 +56,7 @@ def _reset_startup_metrics() -> None:
 
 
 @pytest.fixture()
-def client(_reset_startup_metrics):
+def client(_reset_startup_metrics) -> Generator[TestClient, None, None]:
     """Create a TestClient for the local FastAPI app with mocked process management."""
     from fastapi.testclient import TestClient
 

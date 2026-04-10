@@ -15,7 +15,7 @@ class TestEnginesEndpoint:
     """Tests for the /api/engines endpoint used by the frontend EngineSelector."""
 
     @pytest.fixture
-    def mock_engine_manager(self):
+    def mock_engine_manager(self) -> MagicMock:
         """Create a mock engine manager."""
         manager = MagicMock(spec=EngineManager)
         manager.get_available_engines.return_value = []

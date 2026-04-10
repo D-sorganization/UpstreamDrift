@@ -72,7 +72,7 @@ class TestTaylorSeriesContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.sin(x)
 
         taylor_func = expansion.taylor_series(f, center=0, n_terms=5)
@@ -85,7 +85,7 @@ class TestTaylorSeriesContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.exp(x)
 
         taylor_func = expansion.taylor_series(f, center=0, n_terms=5)
@@ -99,7 +99,7 @@ class TestTaylorSeriesContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.cos(x)
 
         taylor_func = expansion.taylor_series(f, center=0, n_terms=5)
@@ -123,7 +123,7 @@ class TestTaylorSeriesContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return x**2
 
         with pytest.raises(ValueError):
@@ -147,7 +147,7 @@ class TestMaclaurinSeriesContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.sin(x)
 
         maclaurin_func = expansion.maclaurin_series(f, n_terms=5)
@@ -160,7 +160,7 @@ class TestMaclaurinSeriesContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.exp(x)
 
         taylor_func = expansion.taylor_series(f, center=0, n_terms=10)
@@ -184,7 +184,7 @@ class TestGetCoefficientsContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.exp(x)
 
         coeffs = expansion.get_coefficients(f, center=0, n_terms=5)
@@ -197,7 +197,7 @@ class TestGetCoefficientsContract:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.sin(x)
 
         for n in [3, 5, 10]:
@@ -277,7 +277,7 @@ class TestTaylorSeriesFunctional:
         expansion = SeriesExpansion()
 
         # f(x) = 1 + 2x + 3x^2
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return 1 + 2 * x + 3 * x**2
 
         taylor_func = expansion.taylor_series(f, center=0, n_terms=5)
@@ -563,7 +563,7 @@ class TestConvergenceAnalysis:
 
         expansion = SeriesExpansion()
 
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return np.log(1 + x)
 
         # Should diverge for x = 2 (outside |x| < 1)
@@ -749,7 +749,7 @@ class TestUtilityFunctions:
         expansion = SeriesExpansion()
 
         # For polynomial f(x) = x^3, f'(0) = 0, f''(0) = 0, f'''(0) = 6
-        def f(x):
+        def f(x) -> float | np.ndarray:
             return x**3
 
         coeffs = expansion.get_coefficients(f, center=0, n_terms=5)

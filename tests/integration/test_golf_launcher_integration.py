@@ -3,7 +3,9 @@
 import os
 import sys
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -59,7 +61,7 @@ class MockQtBase:
     def setWordWrap(self, b) -> None:
         pass
 
-    def font(self):
+    def font(self) -> MagicMock:
         return MagicMock()
 
 
@@ -71,7 +73,7 @@ class MockQWidget(MockQtBase):
     def setEnabled(self, b) -> None:
         self._enabled = bool(b)
 
-    def isEnabled(self):
+    def isEnabled(self) -> bool:
         if isinstance(self._enabled, bool):
             return self._enabled
         return False
@@ -164,7 +166,7 @@ mock_widgets.QLineEdit = MockQWidget
 
 
 @pytest.fixture(scope="module", autouse=True)
-def mock_pyqt_modules():
+def mock_pyqt_modules() -> Generator[None, None, None]:
     """Patch PyQt6 modules in sys.modules for the duration of this test module."""
     with patch.dict(
         sys.modules,
@@ -184,7 +186,7 @@ def mock_pyqt_modules():
 
 
 @pytest.fixture(scope="session")
-def qapp():
+def qapp() -> Generator[Any, None, None]:
     """Create QApplication instance."""
     app = mock_widgets.QApplication.instance()
     if app is None:
@@ -193,7 +195,7 @@ def qapp():
 
 
 @pytest.fixture
-def launcher_env(qapp):
+def launcher_env(qapp) -> Generator[Any, None, None]:
     """Setup launcher environment with temp config."""
 
     with tempfile.TemporaryDirectory() as temp_dir:

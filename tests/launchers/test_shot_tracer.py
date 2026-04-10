@@ -1,5 +1,6 @@
 """Tests for shot_tracer."""
 
+from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -11,7 +12,7 @@ from src.launchers.shot_tracer import (  # noqa: E402
 
 
 @pytest.fixture
-def mock_flight_models():
+def mock_flight_models() -> Generator[tuple[MagicMock, MagicMock], None, None]:
     class MockModelType:
         value = "mock"
 
@@ -31,7 +32,9 @@ def mock_flight_models():
 
 
 @pytest.fixture
-def tracer_widget(qapp, mock_flight_models):
+def tracer_widget(
+    qapp, mock_flight_models
+) -> Generator[MultiModelShotTracerWidget, None, None]:
     with patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", False):
         from PyQt6.QtWidgets import QWidget
 

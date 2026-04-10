@@ -33,7 +33,7 @@ def _skip_if_mujoco_state_unavailable(engine) -> None:
 
 
 @pytest.fixture(scope="module")
-def ball_urdf(tmp_path_factory):
+def ball_urdf(tmp_path_factory: pytest.TempPathFactory) -> str:
     """Create a simple ball URDF for contact testing."""
     # Golf ball: mass = 0.045kg, radius = 0.02135m
     urdf_content = """<?xml version="1.0"?>

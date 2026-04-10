@@ -1,5 +1,7 @@
 """Tests for the base AI adapter module."""
 
+from collections.abc import Iterator
+
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
     AgentChunk,
@@ -20,7 +22,7 @@ class DummyAdapter(BaseAgentAdapter):
 
     def stream_response(
         self, message: str, context: ConversationContext, tools: list[ToolDeclaration]
-    ):
+    ) -> Iterator[AgentChunk]:
         yield AgentChunk(content="test")
 
     @property

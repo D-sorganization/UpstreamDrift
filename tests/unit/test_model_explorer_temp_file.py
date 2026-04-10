@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import contextlib
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from types import ModuleType
 from typing import NoReturn
@@ -36,7 +37,7 @@ def _make_qt_stubs() -> dict[str, ModuleType]:
 
 
 @pytest.fixture(scope="module")
-def offscreen_renderer_class():
+def offscreen_renderer_class() -> Generator[type, None, None]:
     """Import MuJoCoOffscreenRenderer with PyQt6 stubbed out."""
     with patch.dict(sys.modules, _make_qt_stubs()):
         from src.tools.model_explorer.mujoco_viewer import MuJoCoOffscreenRenderer
@@ -47,7 +48,7 @@ def offscreen_renderer_class():
 class TestIssue2502TempFileHandling:
     """MuJoCoOffscreenRenderer.load_urdf_file must use a unique temp filename."""
 
-    def _mock_mujoco(self):
+    def _mock_mujoco(self) -> MagicMock:
         mock = MagicMock()
         model = MagicMock()
         model.vis.global_.offwidth = 640

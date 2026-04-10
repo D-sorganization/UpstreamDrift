@@ -207,7 +207,7 @@ def test_check_asset_files_dir_missing(mock_exists) -> None:
 @patch("pathlib.Path.exists", autospec=True)
 @patch("pathlib.Path.iterdir")
 def test_check_asset_files_success(mock_iterdir, mock_exists) -> None:
-    def exists_side_effect(self):
+    def exists_side_effect(self) -> bool:
         # Only some assets exist
         return "mujoco" not in str(self)
 

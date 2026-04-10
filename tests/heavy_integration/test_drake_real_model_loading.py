@@ -9,6 +9,9 @@ All tests skip gracefully when Drake is unavailable.
 
 from __future__ import annotations
 
+from pathlib import Path
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -41,7 +44,7 @@ _MINIMAL_URDF = """\
 
 
 @pytest.fixture(scope="module")
-def drake_modules():
+def drake_modules() -> dict[str, Any]:
     """Import required Drake modules or skip the entire module."""
     try:
         from pydrake.all import DiagramBuilder, Parser  # noqa: F401
@@ -59,7 +62,7 @@ def drake_modules():
 
 
 @pytest.fixture(scope="module")
-def minimal_urdf_path(tmp_path_factory):
+def minimal_urdf_path(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Write the minimal URDF to a temp file."""
     tmpdir = tmp_path_factory.mktemp("urdf")
     urdf = tmpdir / "minimal_pendulum.urdf"

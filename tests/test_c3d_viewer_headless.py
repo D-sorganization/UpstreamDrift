@@ -1,14 +1,17 @@
 """Headless smoke test for C3D Viewer."""
 
+from __future__ import annotations
+
 import importlib
 import sys
+import types
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
 # Handle import of module with invalid identifier (3D_Golf_Model)
-def import_c3d_viewer():
+def import_c3d_viewer() -> types.ModuleType | None:
     """Import the C3D viewer module dynamically."""
     module_name = (
         "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"

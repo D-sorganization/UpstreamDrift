@@ -14,7 +14,7 @@ from src.launchers.base import BaseLauncher, LaunchItem, run_launcher  # noqa: E
 
 
 class DummyLauncher(BaseLauncher):
-    def get_items(self):
+    def get_items(self) -> list[LaunchItem]:
         return [
             LaunchItem(name="Item1", description="Desc1", path="path1"),
             LaunchItem(
@@ -49,7 +49,7 @@ def test_launch_item_get_full_path() -> None:
 
 
 @pytest.fixture
-def launcher(qapp):
+def launcher(qapp) -> DummyLauncher:
     with patch("src.launchers.base.BaseLauncher.center_window"):
         return DummyLauncher()
 

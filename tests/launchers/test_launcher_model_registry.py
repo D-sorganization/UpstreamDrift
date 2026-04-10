@@ -15,7 +15,7 @@ from src.launchers.model_registry import (  # noqa: E402
 
 
 @pytest.fixture
-def mock_yaml_data():
+def mock_yaml_data() -> dict:
     return {
         "models": [
             {

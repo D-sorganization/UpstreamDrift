@@ -2,6 +2,7 @@
 """Unit tests for OpenPose pose estimator."""
 
 import sys
+from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -28,7 +29,7 @@ op_module.op = mock_op
 
 
 @pytest.fixture
-def op_mock():
+def op_mock() -> Generator[MagicMock, None, None]:
     """Provide a fresh mock for pyopenpose."""
     mock_op.reset_mock()
     op_module.op = mock_op
@@ -36,14 +37,14 @@ def op_mock():
 
 
 @pytest.fixture
-def mock_op_wrapper(op_mock):
+def mock_op_wrapper(op_mock) -> MagicMock:
     wrapper = MagicMock()
     op_mock.WrapperPython.return_value = wrapper
     return wrapper
 
 
 @pytest.fixture
-def estimator(mock_op_wrapper):
+def estimator(mock_op_wrapper) -> OpenPoseEstimator:
     est = OpenPoseEstimator()
     # Mock loaded state for processing tests
     est.wrapper = mock_op_wrapper

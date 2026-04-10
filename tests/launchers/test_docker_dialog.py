@@ -11,7 +11,7 @@ from src.launchers.docker_dialog import EnvironmentDialog  # noqa: E402
 
 
 @pytest.fixture
-def dialog(qapp):
+def dialog(qapp) -> EnvironmentDialog:
     """Provide an EnvironmentDialog instance."""
     return EnvironmentDialog()
 

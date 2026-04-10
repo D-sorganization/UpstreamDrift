@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import os
 import sys
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -151,7 +152,7 @@ def pendulum_urdf(tmp_path: Path) -> str:
 
 
 @pytest.fixture
-def clean_pendulum_dynamics():
+def clean_pendulum_dynamics() -> Callable[..., Any]:
     """Fixture to provide standardized DoublePendulumDynamics setup for unit tests."""
     from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
         DoublePendulumDynamics,
@@ -160,7 +161,7 @@ def clean_pendulum_dynamics():
         SegmentProperties,
     )
 
-    def _create(m1_kg=1.0, l1_m=1.0):
+    def _create(m1_kg: float = 1.0, l1_m: float = 1.0) -> Any:
         assert m1_kg is not None, "m1_kg must be provided"
         assert l1_m is not None, "l1_m must be provided"
         assert m1_kg > 0.0, "m1_kg must be positive"
@@ -199,7 +200,7 @@ class MockPhysicsEngine:
 
 
 @pytest.fixture
-def mock_drake_dependencies():
+def mock_drake_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
     """Fixture to mock pydrake and interfaces safely.
 
     This fixture mocks pydrake modules to allow testing Drake integration
@@ -227,7 +228,7 @@ def mock_drake_dependencies():
 
 
 @pytest.fixture(scope="module")
-def mock_mujoco_dependencies():
+def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
     """Fixture to mock mujoco and interfaces safely.
 
     This fixture mocks mujoco modules to allow testing MuJoCo integration

@@ -159,7 +159,7 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     return 0
 
 
-def main():
+def main() -> int:
     """Parse arguments and run a single repository assessment category."""
     parser = argparse.ArgumentParser(description="Run repository assessment")
     parser.add_argument("--assessment", required=True, choices=list("ABCDEFGHIJKLMNO"))

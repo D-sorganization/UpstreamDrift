@@ -1,7 +1,8 @@
 """Tests for unified_launcher.py."""
 
 import sys  # noqa: E402
-from typing import NoReturn
+from collections.abc import Generator  # noqa: E402
+from typing import Any, NoReturn
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -16,7 +17,7 @@ from src.launchers.unified_launcher import (  # noqa: E402
 
 
 @pytest.fixture
-def clean_sys_modules():
+def clean_sys_modules() -> Generator[None, None, None]:
     """Remove specific modules from sys.modules."""
     modules_to_remove = ["launchers.unified_launcher", "launchers.golf_launcher"]
     for mod in modules_to_remove:
@@ -71,7 +72,7 @@ def test_get_golf_main_absolute_import() -> None:
 
     mock_module.main = fake_main
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if "golf_launcher" in name and not name.startswith("launchers"):
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
@@ -103,7 +104,7 @@ def test_get_golf_main_all_imports_fail(clean_sys_modules) -> None:
 
     orig_import = builtins.__import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if "golf_launcher" in name:
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
@@ -127,7 +128,7 @@ def test_get_golf_main_legacy_no_main() -> None:
 
     orig_import = builtins.__import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if "golf_launcher" in name and not name.startswith("launchers"):
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
@@ -153,7 +154,7 @@ def test_get_golf_main_module_no_main() -> None:
     orig_import = builtins.__import__
 
     # We make the *relative* import fail, jumping to the absolute import
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if "golf_launcher" in name and not name.startswith("launchers"):
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)
@@ -195,7 +196,7 @@ def test_pyqt6_unavailable_reload(clean_sys_modules) -> None:
 
     orig_import = builtins.__import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name == "PyQt6.QtWidgets":
             raise ImportError("fake")
         return orig_import(name, *args, **kwargs)

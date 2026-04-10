@@ -11,14 +11,14 @@ from src.launchers.model_card import DraggableModelCard  # noqa: E402
 
 
 @pytest.fixture
-def parent_launcher():
+def parent_launcher() -> MagicMock:
     launcher = MagicMock()
     launcher.layout_edit_mode = True
     return launcher
 
 
 @pytest.fixture
-def mock_model():
+def mock_model() -> MagicMock:
     model = MagicMock()
     model.id = "mujoco_unified"
     model.name = "MuJoCo"
@@ -218,7 +218,7 @@ def test_refresh_theme(mock_model, parent_launcher, qapp) -> None:
         img = MagicMock()
         img.pixmap.return_value = True
 
-        def find_mock(*args):
+        def find_mock(*args) -> MagicMock:
             if args[1] == "CardImage":
                 return img
             return MagicMock()

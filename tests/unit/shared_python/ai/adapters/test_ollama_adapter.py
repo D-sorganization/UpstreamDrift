@@ -25,6 +25,8 @@ httpx_mock.TimeoutException = MockTimeoutException
 # for gemini
 if "httpx" == "google.generativeai":
     sys.modules["google"] = MagicMock()
+from collections.abc import Iterator  # noqa: E402
+from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -51,7 +53,7 @@ from src.shared.python.ai.types import (  # noqa: E402
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> OllamaAdapter:
     """Provide a configured OllamaAdapter."""
     return OllamaAdapter(
         host="http://localhost:11434", model="llama3.1:8b", timeout=10.0
@@ -71,7 +73,7 @@ def test_get_client_import_error() -> None:
 
     real_import = __import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name == "httpx":
             raise ImportError("No httpx provided")
         return real_import(name, *args, **kwargs)
@@ -263,7 +265,7 @@ def test_stream_response(mock_get_client, adapter) -> None:
                 def raise_for_status(self) -> None:
                     pass
 
-                def iter_lines(self):
+                def iter_lines(self) -> Iterator[str]:
                     yield json.dumps({"message": {"content": "Hel"}})
                     yield json.dumps({"message": {"content": "lo"}, "done": True})
 

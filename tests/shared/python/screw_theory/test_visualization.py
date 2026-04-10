@@ -12,6 +12,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.screw_theory.kinematics import (
+    ScrewAxis,
     Twist,
     compute_screw_axis,
 )
@@ -21,7 +22,7 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.fixture
-def rotation_screw():
+def rotation_screw() -> ScrewAxis:
     """ScrewAxis for pure rotation about Z-axis."""
     twist = Twist(
         angular=np.array([0.0, 0.0, 1.0]),
@@ -33,7 +34,7 @@ def rotation_screw():
 
 
 @pytest.fixture
-def translation_screw():
+def translation_screw() -> ScrewAxis:
     """ScrewAxis for pure translation along X-axis."""
     twist = Twist(
         angular=np.zeros(3),
@@ -44,7 +45,7 @@ def translation_screw():
     return compute_screw_axis(twist)
 
 
-def _make_mock_ax():
+def _make_mock_ax() -> MagicMock:
     """Create a mock matplotlib 3D axes object."""
     ax = MagicMock()
     return ax

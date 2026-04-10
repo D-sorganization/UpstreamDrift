@@ -9,6 +9,7 @@ These tests demonstrate proper integration testing:
 """
 
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -194,7 +195,7 @@ class TestCrossEngineConsistency:
     """
 
     @pytest.fixture
-    def available_engines(self):
+    def available_engines(self) -> dict[str, Any]:
         """Get list of engines that are actually available (not mocked)."""
         engines = {}
 

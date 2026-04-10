@@ -16,7 +16,7 @@ from src.shared.python.ai.workflow_engine import (
 
 class TestAIWorkflowEngine:
     @pytest.fixture
-    def mock_tool_registry(self):
+    def mock_tool_registry(self) -> Mock:
         registry = Mock()
         registry.execute.return_value = ToolResult(
             tool_call_id="mock_id", success=True, result={"data": "test"}
@@ -24,11 +24,11 @@ class TestAIWorkflowEngine:
         return registry
 
     @pytest.fixture
-    def engine(self, mock_tool_registry):
+    def engine(self, mock_tool_registry) -> WorkflowEngine:
         return WorkflowEngine(mock_tool_registry)
 
     @pytest.fixture
-    def basic_workflow(self):
+    def basic_workflow(self) -> Workflow:
         wf = Workflow(
             id="test_workflow",
             name="Test Workflow",
@@ -153,12 +153,12 @@ class TestWorkflowEngineFixIssue2504:
     """TDD tests for #2504: step output propagation and RUNNING-after-completion."""
 
     @pytest.fixture
-    def mock_tool_registry(self):
+    def mock_tool_registry(self) -> Mock:
         registry = Mock()
         return registry
 
     @pytest.fixture
-    def engine(self, mock_tool_registry):
+    def engine(self, mock_tool_registry) -> WorkflowEngine:
         return WorkflowEngine(mock_tool_registry)
 
     def test_step_tool_output_propagated_to_state(

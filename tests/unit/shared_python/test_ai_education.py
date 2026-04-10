@@ -115,10 +115,10 @@ def test_load_data_file_entries(monkeypatch) -> None:
     # Coverage for the try-except logic
 
     # We mock get_core_entries and get_extended_entries
-    def mock_get_core():
+    def mock_get_core() -> list[dict]:
         return [{"key": "core_mock", "term": "Core Mock", "cat": "test", "b": "beg"}]
 
-    def mock_get_ext():
+    def mock_get_ext() -> list[dict]:
         return [{"key": "ext_mock", "term": "Ext Mock", "cat": "test", "i": "int"}]
 
     monkeypatch.setattr(

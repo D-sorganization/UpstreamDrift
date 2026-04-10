@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import NoReturn
+from typing import Any, NoReturn
 
 import pytest
 
@@ -15,7 +15,7 @@ from installer.windows.setup_config import (
 def test_detect_available_engines_core_skips_optional_imports() -> None:
     imported: list[str] = []
 
-    def fake_import(name: str):
+    def fake_import(name: str) -> Any:
         imported.append(name)
         if name == "mujoco":
             return object()
@@ -33,7 +33,7 @@ def test_detect_available_engines_core_skips_optional_imports() -> None:
 def test_detect_available_engines_hybrid_includes_optional_imports() -> None:
     imported: list[str] = []
 
-    def fake_import(name: str):
+    def fake_import(name: str) -> Any:
         imported.append(name)
         if name in {"mujoco", "pydrake", "pinocchio"}:
             return object()
@@ -46,7 +46,7 @@ def test_detect_available_engines_hybrid_includes_optional_imports() -> None:
 
 
 def test_build_setup_configuration_core_omits_api_executable() -> None:
-    def fake_import(name: str):
+    def fake_import(name: str) -> Any:
         if name == "mujoco":
             return object()
         raise ImportError
@@ -59,7 +59,7 @@ def test_build_setup_configuration_core_omits_api_executable() -> None:
 
 
 def test_build_setup_configuration_full_includes_api_executable() -> None:
-    def fake_import(name: str):
+    def fake_import(name: str) -> Any:
         if name in {"mujoco", "pydrake"}:
             return object()
         raise ImportError

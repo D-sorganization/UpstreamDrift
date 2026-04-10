@@ -1,4 +1,5 @@
 import importlib  # noqa: E402
+from typing import Any  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -92,7 +93,7 @@ def test_optional_imports_failure() -> None:
     # We mock builtins.__import__ so that it raises ImportError for specific modules
     original_import = __builtins__["__import__"]
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name in (
             "src.shared.python.ai.gui",
             "src.shared.python.help_system",

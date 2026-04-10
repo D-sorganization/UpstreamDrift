@@ -17,6 +17,7 @@ from __future__ import annotations
 import importlib
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -215,7 +216,7 @@ class TestMigrationRoundTrip:
     """Run the initial migration up and back down on an in-memory SQLite DB."""
 
     @pytest.fixture()
-    def alembic_cfg(self, tmp_path):
+    def alembic_cfg(self, tmp_path) -> Any:
         """Return an Alembic Config pointing at a fresh temporary SQLite DB."""
         from alembic.config import Config
 
@@ -289,7 +290,7 @@ class TestDbMigrateCliParser:
     """Test the db_migrate.py CLI argument parser."""
 
     @pytest.fixture()
-    def parser(self):
+    def parser(self) -> Any:
         """Return the argument parser from db_migrate."""
         import importlib.util
 
@@ -352,7 +353,7 @@ class TestDbMigrateFunctions:
     """Test the functional command implementations in db_migrate.py."""
 
     @pytest.fixture()
-    def db_migrate(self):
+    def db_migrate(self) -> ModuleType:
         """Import and return the db_migrate module."""
         import importlib.util
 

@@ -4,6 +4,8 @@ import importlib
 import sys
 import types
 from pathlib import Path
+from types import ModuleType
+from typing import Any
 from unittest.mock import MagicMock
 
 from installer.windows import setup_config
@@ -62,7 +64,7 @@ def _fake_setup_configuration(
     )
 
 
-def _load_setup_module(monkeypatch):
+def _load_setup_module(monkeypatch) -> tuple[ModuleType, Any]:
     fake_cx_freeze = types.ModuleType("cx_Freeze")
     fake_cx_freeze.Executable = lambda *args, **kwargs: {
         "args": args,

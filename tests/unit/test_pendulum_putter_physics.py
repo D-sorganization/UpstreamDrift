@@ -7,6 +7,7 @@ and has correct physical properties.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -94,7 +95,7 @@ class TestModelValidationForEngines:
     """Test that model meets requirements for physics engine loading."""
 
     @pytest.fixture
-    def model_result(self):
+    def model_result(self) -> Any:
         """Build model result for testing."""
         from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
 

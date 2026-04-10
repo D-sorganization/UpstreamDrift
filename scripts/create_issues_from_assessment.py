@@ -123,7 +123,7 @@ def process_findings(
     return 0
 
 
-def main():
+def main() -> int:
     """Parse arguments and create GitHub issues from assessment findings."""
     parser = argparse.ArgumentParser(description="Create GitHub issues from assessment")
 

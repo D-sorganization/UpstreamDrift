@@ -21,7 +21,7 @@ _REGISTRATION_SPEC_ATTRS = [
 
 
 @pytest.fixture
-def mock_engine_manager():
+def mock_engine_manager() -> EngineManager:
     """Fixture to provide EngineManager with actual repo root to pass security validation."""
     # Use actual src root so paths pass security validation checks
     return EngineManager(get_src_root())

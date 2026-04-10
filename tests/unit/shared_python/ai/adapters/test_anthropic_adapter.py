@@ -11,6 +11,7 @@ sys.modules["anthropic"] = anthropic_mock
 # for gemini
 if "anthropic" == "google.generativeai":
     sys.modules["google"] = MagicMock()
+from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -34,7 +35,7 @@ from src.shared.python.ai.types import (  # noqa: E402
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> AnthropicAdapter:
     """Provide a configured AnthropicAdapter."""
     return AnthropicAdapter(api_key="sk-ant", model="claude-3", timeout=30.0)
 
@@ -68,7 +69,7 @@ def test_get_client_import_error() -> None:
 
     real_import = __import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name == "anthropic":
             raise ImportError("No module named 'anthropic'")
         return real_import(name, *args, **kwargs)

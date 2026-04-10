@@ -4,7 +4,7 @@ These tests verify the simulation service using Design by Contract principles.
 """
 
 from enum import Enum
-from typing import NoReturn
+from typing import Any, NoReturn
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -53,7 +53,7 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-def mock_engine_manager():
+def mock_engine_manager() -> MagicMock:
     """Create a mock engine manager."""
     manager = MagicMock(spec=EngineManager)
     manager._load_engine = MagicMock()
@@ -62,7 +62,7 @@ def mock_engine_manager():
 
 
 @pytest.fixture
-def simulation_service(mock_engine_manager):
+def simulation_service(mock_engine_manager: MagicMock) -> Any:
     """Create a simulation service instance."""
     from src.api.services.simulation_service import SimulationService
 

@@ -1,6 +1,7 @@
 """Tests for launcher_layout_manager."""
 
 import json  # noqa: E402
+from collections.abc import Callable  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
@@ -15,7 +16,7 @@ from src.launchers.model_registry import ModelSpec  # noqa: E402
 
 
 @pytest.fixture
-def available_models():
+def available_models() -> dict[str, ModelSpec]:
     return {
         "model_1": ModelSpec(
             id="model_1",
@@ -35,16 +36,16 @@ def available_models():
 
 
 @pytest.fixture
-def get_model_func(available_models):
-    def get_model(model_id):
+def get_model_func(available_models) -> Callable[[str], ModelSpec | None]:
+    def get_model(model_id: str) -> ModelSpec | None:
         return available_models.get(model_id)
 
     return get_model
 
 
 @pytest.fixture
-def create_card_func():
-    def create_card(model):
+def create_card_func() -> Callable[[ModelSpec], MagicMock]:
+    def create_card(model: ModelSpec) -> MagicMock:
         card = MagicMock()
         card.model_id = model.id
         return card
@@ -53,7 +54,7 @@ def create_card_func():
 
 
 @pytest.fixture
-def layout_manager(available_models, get_model_func, create_card_func):
+def layout_manager(available_models, get_model_func, create_card_func) -> LayoutManager:
     return LayoutManager(
         config_file=Path("/fake/config.json"),
         available_models=available_models,

@@ -12,6 +12,7 @@ Fixes #1119
 """
 
 import time
+from collections.abc import Generator
 
 import pytest
 
@@ -26,7 +27,7 @@ from src.shared.python.engine_core.engine_registry import EngineType
 
 
 @pytest.fixture(scope="module")
-def client():
+def client() -> Generator[TestClient, None, None]:
     """Create test client with proper application lifespan."""
     with TestClient(app) as c:
         yield c

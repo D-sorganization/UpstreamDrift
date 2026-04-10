@@ -1,4 +1,5 @@
 import sys
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -55,7 +56,7 @@ def teardown_module(module) -> None:
 
 
 @pytest.fixture
-def mock_casadi():
+def mock_casadi() -> MagicMock:
     opti = MagicMock()
     # Mock variable creation
     mock_var = MagicMock()
@@ -88,7 +89,7 @@ def mock_casadi():
     # Set up value side effect to return appropriate mock data
     call_count = 0
 
-    def value_side_effect(arg):
+    def value_side_effect(arg) -> Any:
         nonlocal call_count
         call_count += 1
         # Return data based on call order: Q, V, U, cost
@@ -113,7 +114,7 @@ def mock_casadi():
 
 
 @pytest.fixture
-def mock_pinocchio():
+def mock_pinocchio() -> MagicMock:
     # Mock model
     model = MagicMock()
     model.nq = 2

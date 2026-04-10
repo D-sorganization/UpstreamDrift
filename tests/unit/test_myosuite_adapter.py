@@ -20,7 +20,7 @@ from src.shared.python.biomechanics.myosuite_adapter import (
 
 
 @pytest.fixture
-def mock_muscle_system():
+def mock_muscle_system() -> MagicMock:
     """Create a mock muscle system."""
     system = MagicMock(spec=MuscleGroup)
     system.muscles = {"muscle1": MagicMock(), "muscle2": MagicMock()}

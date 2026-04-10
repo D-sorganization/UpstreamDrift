@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from src.shared.python.ai.exceptions import ToolExecutionError
@@ -26,7 +28,7 @@ def test_tool_parameter_to_json() -> None:
 
 
 def test_tool_to_json_schema() -> None:
-    def handler(a):
+    def handler(a) -> Any:
         return a
 
     t = Tool(
@@ -43,7 +45,7 @@ def test_tool_to_json_schema() -> None:
 
 
 def test_tool_formats() -> None:
-    def handler(a):
+    def handler(a) -> Any:
         return a
 
     t = Tool(name="tool", description="desc", handler=handler)
@@ -58,7 +60,7 @@ def test_tool_formats() -> None:
 
 
 def test_validate_arguments() -> None:
-    def handler(a, b=1):
+    def handler(a, b=1) -> Any:
         return a + b
 
     t = Tool(
@@ -91,7 +93,7 @@ def test_validate_arguments() -> None:
 
 
 def test_execute() -> None:
-    def handler(a):
+    def handler(a) -> Any:
         if a == 0:
             raise ValueError("bad a")
         return a * 2

@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -70,7 +71,7 @@ def temp_test_dir() -> Path:
 
 
 @pytest.fixture(scope="session")
-def mujoco_model():
+def mujoco_model() -> Any:
     """
     Session-scoped MuJoCo model fixture using the built-in humanoid model.
     Loaded once per test session to amortize startup cost.
@@ -96,7 +97,7 @@ def mujoco_model():
 
 
 @pytest.fixture(scope="session")
-def pinocchio_model():
+def pinocchio_model() -> Any:
     """
     Session-scoped Pinocchio model fixture.
     Returns a simple 1-DOF pendulum model for FK testing.

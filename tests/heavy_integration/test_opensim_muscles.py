@@ -11,6 +11,8 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -30,7 +32,7 @@ if OPENSIM_AVAILABLE:
 
 
 @pytest.fixture
-def simple_arm_model():
+def simple_arm_model() -> Any:
     """Create a simple arm model with muscles for testing."""
     if not OPENSIM_AVAILABLE:
         pytest.skip("OpenSim not installed")

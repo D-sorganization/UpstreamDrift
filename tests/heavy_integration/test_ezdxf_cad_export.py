@@ -8,12 +8,13 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
 
 @pytest.fixture(scope="module")
-def ezdxf():
+def ezdxf() -> ModuleType:
     """Import ezdxf or skip the module."""
     ezdxf_mod = pytest.importorskip("ezdxf")
     return ezdxf_mod

@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
 
 
-def _import_mesh_processor():
+def _import_mesh_processor() -> Any:
     """Import MeshProcessor or skip the test."""
     try:
         from src.shared.python.humanoid_character_builder.mesh.mesh_processor import (
@@ -26,7 +27,7 @@ def _import_mesh_processor():
         pytest.skip(f"humanoid_character_builder not importable: {exc}")
 
 
-def _import_inertia_calculator():
+def _import_inertia_calculator() -> Any:
     """Import InertiaCalculator or skip the test."""
     try:
         from src.shared.python.humanoid_character_builder.mesh.inertia_calculator import (
@@ -38,7 +39,7 @@ def _import_inertia_calculator():
         pytest.skip(f"inertia_calculator not importable: {exc}")
 
 
-def _import_collision_generator():
+def _import_collision_generator() -> Any:
     """Import CollisionGenerator or skip the test."""
     try:
         from src.shared.python.humanoid_character_builder.mesh.collision_generator import (
@@ -51,7 +52,7 @@ def _import_collision_generator():
 
 
 @pytest.fixture(scope="module")
-def sphere_mesh():
+def sphere_mesh() -> Any:
     """Create a unit sphere trimesh or skip if trimesh unavailable."""
     trimesh = pytest.importorskip("trimesh")
     sphere = trimesh.creation.icosphere(subdivisions=2, radius=0.1)

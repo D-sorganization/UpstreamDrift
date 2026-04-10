@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -10,7 +13,7 @@ def test_check_prerequisites(monkeypatch) -> None:
     original_import = __import__
 
     # Test failure
-    def mock_import_fail(name, *args, **kwargs):
+    def mock_import_fail(name, *args, **kwargs) -> Any:
         if name == "cx_Freeze":
             raise ImportError
         return original_import(name, *args, **kwargs)
@@ -23,7 +26,7 @@ def test_check_prerequisites(monkeypatch) -> None:
     mock_cx = MagicMock()
     mock_cx.version = "1.0.0"
 
-    def mock_import_success(name, *args, **kwargs):
+    def mock_import_success(name, *args, **kwargs) -> Any:
         if name == "cx_Freeze":
             return mock_cx
         return original_import(name, *args, **kwargs)
@@ -37,7 +40,7 @@ def test_check_prerequisites_logs_cx_freeze_version(monkeypatch, caplog) -> None
     mock_cx = MagicMock()
     mock_cx.version = "9.9.9"
 
-    def mock_import_success(name, *args, **kwargs):
+    def mock_import_success(name, *args, **kwargs) -> Any:
         if name == "cx_Freeze":
             return mock_cx
         return original_import(name, *args, **kwargs)
@@ -82,7 +85,7 @@ def test_install_dependencies_fail(mock_run) -> None:
 
 
 def test_detect_physics_engines(monkeypatch) -> None:
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name in ("mujoco", "pinocchio"):
             return MagicMock()
         raise ImportError

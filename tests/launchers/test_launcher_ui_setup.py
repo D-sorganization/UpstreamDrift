@@ -32,7 +32,7 @@ class DummyLauncher(QMainWindow, LauncherUISetupMixin):
 
 
 @pytest.fixture
-def launcher(qapp):
+def launcher(qapp) -> DummyLauncher:
     return DummyLauncher()
 
 
@@ -160,7 +160,7 @@ def test_setup_ai_panel(launcher) -> None:
 def test_setup_ai_panel_error(launcher) -> None:
     original_import = __import__
 
-    def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
+    def mock_import(name, globals=None, locals=None, fromlist=(), level=0) -> object:
         if name == "src.shared.python.ai.gui":
             raise ImportError("test error")
         return original_import(name, globals, locals, fromlist, level)
@@ -202,7 +202,7 @@ def test_init_overlay(launcher) -> None:
 def test_init_overlay_error(launcher) -> None:
     original_import = __import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> object:
         if "vendor" in name or "overlay" in name:
             raise ImportError("test")
         return original_import(name, *args, **kwargs)

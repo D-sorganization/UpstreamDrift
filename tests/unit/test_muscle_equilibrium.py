@@ -18,7 +18,7 @@ from src.shared.python.core.contracts import PostconditionError
 
 
 @pytest.fixture
-def standard_muscle():
+def standard_muscle() -> HillMuscleModel:
     """Create a standard muscle for testing."""
     params = MuscleParameters(
         F_max=1000.0,  # N
@@ -31,7 +31,7 @@ def standard_muscle():
 
 
 @pytest.fixture
-def pennated_muscle():
+def pennated_muscle() -> HillMuscleModel:
     """Create a pennated muscle for testing."""
     params = MuscleParameters(
         F_max=1500.0,

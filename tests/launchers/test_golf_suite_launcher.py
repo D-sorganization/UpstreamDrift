@@ -1,6 +1,7 @@
 """Tests for golf_suite_launcher.py."""
 
 import sys  # noqa: E402
+from collections.abc import Generator  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
@@ -8,7 +9,7 @@ import pytest  # noqa: E402
 
 
 @pytest.fixture
-def mock_pyqt(qapp):
+def mock_pyqt(qapp) -> Generator[tuple[MagicMock, MagicMock], None, None]:
     """Mock PyQt6 components for testing non-UI logic safely."""
     with (
         patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", True),
@@ -22,7 +23,7 @@ def mock_pyqt(qapp):
 
 
 @pytest.fixture
-def launcher(mock_pyqt):
+def launcher(mock_pyqt) -> Generator[MagicMock, None, None]:
     """Provide a minimal instantiated GolfLauncher."""
     with patch("src.launchers.golf_suite_launcher.GolfLauncher._setup_ui"):
         from src.launchers.golf_suite_launcher import GolfLauncher

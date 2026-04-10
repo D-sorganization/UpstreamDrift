@@ -11,6 +11,8 @@ Design by Contract
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -209,7 +211,7 @@ class TestComparisonReport:
 
 
 @pytest.fixture(scope="module")
-def analyzer():  # type: ignore[no-untyped-def]
+def analyzer() -> Any:  # type: ignore[no-untyped-def]
     from src.engines.physics_engines.myosuite.python.perturbation.analyzer import (
         MyoSuitePerturbationAnalyzer,
     )
@@ -219,7 +221,7 @@ def analyzer():  # type: ignore[no-untyped-def]
 
 
 @pytest.fixture(scope="module")
-def analyzer_with_profile(analyzer):  # type: ignore[no-untyped-def]
+def analyzer_with_profile(analyzer) -> Any:  # type: ignore[no-untyped-def]
     analyzer.set_base_torque_profile(_ZERO_PROFILE)
     return analyzer
 

@@ -235,7 +235,7 @@ def generate_summary(
     return 0
 
 
-def main():
+def main() -> int:
     """Parse CLI arguments and generate assessment summary."""
     parser = argparse.ArgumentParser(description="Generate assessment summary")
     parser.add_argument(

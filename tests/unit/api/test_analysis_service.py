@@ -3,6 +3,7 @@
 These tests verify the analysis service using Design by Contract principles.
 """
 
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -19,7 +20,7 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-def mock_engine_manager():
+def mock_engine_manager() -> MagicMock:
     """Create a mock engine manager."""
     manager = MagicMock()
     manager.get_active_physics_engine = MagicMock(return_value=None)
@@ -27,7 +28,7 @@ def mock_engine_manager():
 
 
 @pytest.fixture
-def analysis_service(mock_engine_manager):
+def analysis_service(mock_engine_manager: MagicMock) -> Any:
     """Create an analysis service instance."""
     from src.api.services.analysis_service import AnalysisService
 

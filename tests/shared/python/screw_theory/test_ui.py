@@ -6,6 +6,8 @@ and provides the expected interface: is_active() and get_target_body().
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
@@ -20,14 +22,14 @@ class TestScrewVisualizationTab:
     """Tests for ScrewVisualizationTab widget."""
 
     @pytest.fixture(scope="class")
-    def qapp(self):
+    def qapp(self) -> Any:
         """Ensure QApplication exists for the test class."""
         from src.shared.python.gui_pkg.gui_utils import get_qapp
 
         return get_qapp()
 
     @pytest.fixture
-    def tab(self, qapp):
+    def tab(self, qapp) -> Any:
         """Instantiate a ScrewVisualizationTab for testing."""
         from src.shared.python.screw_theory.ui import ScrewVisualizationTab
 

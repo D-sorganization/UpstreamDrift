@@ -3,6 +3,8 @@
 Uses shared module-level mocks for the mujoco dependency from conftest.py.
 """
 
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -35,7 +37,7 @@ _MJ_DATA_SPEC = [
 
 
 @pytest.fixture(scope="module")
-def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
+def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies) -> Generator[type, None, None]:
     """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
     import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
@@ -50,7 +52,7 @@ def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
 
 
 @pytest.fixture
-def mock_mj(mock_mujoco_dependencies):
+def mock_mj(mock_mujoco_dependencies) -> MagicMock:
     """Return the shared mujoco mock **and** reset its call tracking.
 
     This avoids ghostly cross-test state while still using a single mock
@@ -62,7 +64,7 @@ def mock_mj(mock_mujoco_dependencies):
 
 
 @pytest.fixture
-def engine(MuJoCoPhysicsEngineClass):
+def engine(MuJoCoPhysicsEngineClass) -> Any:
     """Fixture to provide a MuJoCoPhysicsEngine instance."""
     return MuJoCoPhysicsEngineClass()
 

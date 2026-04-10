@@ -7,6 +7,7 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -47,19 +48,19 @@ def _has_hdf5_support() -> bool | None:
 
 
 @pytest.fixture
-def temp_output_dir(tmp_path):
+def temp_output_dir(tmp_path) -> Path:
     """Create a temporary output directory for testing."""
     return tmp_path / "output"
 
 
 @pytest.fixture
-def output_manager(temp_output_dir):
+def output_manager(temp_output_dir) -> OutputManager:
     """Create an OutputManager instance with temporary directory."""
     return OutputManager(base_path=temp_output_dir)
 
 
 @pytest.fixture
-def sample_data():
+def sample_data() -> pd.DataFrame:
     """Create sample data for testing."""
     return pd.DataFrame(
         {
@@ -71,7 +72,7 @@ def sample_data():
 
 
 @pytest.fixture
-def sample_dict_data():
+def sample_dict_data() -> dict[str, Any]:
     """Create sample dictionary data for testing."""
     return {
         "metadata": {"version": "1.0"},
