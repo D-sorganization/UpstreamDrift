@@ -96,6 +96,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | `docs/assessments/completist/Completist_Report_2026-03-01.md`       | 2026-03-01 | Widespread Placeholder Logic (TODOs, FIXMEs, NotImplementedErrors, and passes) |
 | `docs/assessments/completist/Completist_Report_2026-03-24.md`       | 2026-03-24 | Completist Audit Report                                                        |
 | `docs/assessments/completist/Completist_Report_2026-03-26.md`       | 2026-03-26 | Completist Audit Report                                                        |
+| `docs/assessments/completist/Completist_Report_2026-03-27.md`       | 2026-03-27 | Completist Audit Report                                                        |
+| `docs/assessments/completist/Completist_Report_2026-04-05.md`       | 2026-04-05 | Completist Audit Report                                                        |
 
 ---
 
@@ -171,6 +173,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-23 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-23.md`                 |
 | 2026-03-24 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-24.md`                 |
 | 2026-03-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-26.md`                 |
+| 2026-03-27 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-27.md`                 |
+| 2026-04-05 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-05.md`                 |
 
 ---
 
@@ -252,6 +256,10 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 3.2     | 2026-03 | Removed duplicate `Assessment_H_CICD.md` (superseded by CI/CD results)             |
 | 3.3     | 2026-03 | Populated empty `Assessment_H_CI_CD.md` with content from archived version (#1962) |
 | 3.4     | 2026-03 | Added Completist Report 2026-03-26                                                 |
+| 3.5     | 2026-03 | Updated Completist Report 2026-03-27 with gap analysis and 32 stub issue files     |
+| 3.5     | 2026-03 | Added Completist Report 2026-03-27 + 32 incomplete-stub issues (#2194-#2243)       |
+| 3.6     | 2026-04 | Added Completist Report 2026-04-05                                                 |
+| 3.7     | 2026-04 | Added A-N Assessment 2026-04-10 refresh (see `A-N_Assessment_2026-04-10.md`)       |
 
 ---
 
