@@ -22,10 +22,22 @@ from src.api.config import (
 )
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
-from src.shared.python.gui_pkg.video_pose_pipeline import (
-    VideoPosePipeline,
-    VideoProcessingConfig,
-)
+
+# Optional video dependencies — guard so the module can always be imported.
+# When missing, get_video_pipeline() raises 503, which is the correct signal.
+try:
+    from src.shared.python.gui_pkg.video_pose_pipeline import (
+        VideoPosePipeline as _VideoPosePipeline,
+    )
+    from src.shared.python.gui_pkg.video_pose_pipeline import (
+        VideoProcessingConfig,
+    )
+
+    _VIDEO_DEPS_AVAILABLE = True
+except ImportError:
+    _VideoPosePipeline = None  # type: ignore[assignment,misc]
+    VideoProcessingConfig = None  # type: ignore[assignment,misc]
+    _VIDEO_DEPS_AVAILABLE = False
 
 from ..dependencies import get_logger, get_task_manager, get_video_pipeline
 from ..models.responses import VideoAnalysisResponse
@@ -52,7 +64,7 @@ async def analyze_video(
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
     enable_smoothing: bool = True,
-    video_pipeline: VideoPosePipeline = Depends(get_video_pipeline),
+    video_pipeline: Any = Depends(get_video_pipeline),
     logger: Any = Depends(get_logger),
 ) -> VideoAnalysisResponse:
     """Analyze golf swing from uploaded video.
@@ -94,12 +106,21 @@ async def analyze_video(
             temp_file.write(content)
             temp_path = Path(temp_file.name)
 
+        if (
+            not _VIDEO_DEPS_AVAILABLE
+            or VideoProcessingConfig is None
+            or _VideoPosePipeline is None
+        ):
+            raise HTTPException(
+                status_code=503,
+                detail="Video analysis not available: optional video dependencies missing",
+            )
         config = VideoProcessingConfig(
             estimator_type=estimator_type,
             min_confidence=min_confidence,
             enable_temporal_smoothing=enable_smoothing,
         )
-        pipeline = VideoPosePipeline(config)
+        pipeline = _VideoPosePipeline(config)
         result = pipeline.process_video(temp_path)
 
         response = VideoAnalysisResponse(
@@ -161,7 +182,7 @@ async def analyze_video_async(
     file: UploadFile = File(...),
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
-    video_pipeline: VideoPosePipeline = Depends(get_video_pipeline),
+    video_pipeline: Any = Depends(get_video_pipeline),
     task_manager: Any = Depends(get_task_manager),
 ) -> dict[str, str]:
     """Start asynchronous video analysis.
@@ -249,10 +270,16 @@ async def _process_video_background(
             "created_at": created_at,
         }
 
+        if (
+            not _VIDEO_DEPS_AVAILABLE
+            or VideoProcessingConfig is None
+            or _VideoPosePipeline is None
+        ):
+            raise RuntimeError("Video processing dependencies not available")
         config = VideoProcessingConfig(
             estimator_type=estimator_type, min_confidence=min_confidence
         )
-        pipeline = VideoPosePipeline(config)
+        pipeline = _VideoPosePipeline(config)
 
         result = pipeline.process_video(video_path)
 
