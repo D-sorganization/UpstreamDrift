@@ -162,7 +162,17 @@ pub fn simulate_ball_trajectory(
     // Capture by reference using owned copies for the closure
     let ball = ball.clone();
     let air = air.clone();
-    let spin_axis_v = Vector3::new(spin_axis[0], spin_axis[1], spin_axis[2]);
+    // Normalize spin_axis to unit vector; fall back to Z-axis if near-zero
+    let raw_spin = Vector3::new(spin_axis[0], spin_axis[1], spin_axis[2]);
+    let spin_axis_v = {
+        let n =
+            (raw_spin.x * raw_spin.x + raw_spin.y * raw_spin.y + raw_spin.z * raw_spin.z).sqrt();
+        if n > 1e-10 {
+            Vector3::new(raw_spin.x / n, raw_spin.y / n, raw_spin.z / n)
+        } else {
+            Vector3::new(0.0, 0.0, 1.0)
+        }
+    };
     let gravity_v = Vector3::new(gravity[0], gravity[1], gravity[2]);
     let wind_v = Vector3::new(wind[0], wind[1], wind[2]);
 
@@ -199,7 +209,7 @@ pub fn simulate_ball_trajectory(
 
     // Convert IntegrationResult to BallTrajectoryResult
     let state_dim = result.state_dim;
-    let points = result
+    let points: Vec<TrajectoryPoint> = result
         .times
         .iter()
         .zip(result.states.chunks(state_dim))
@@ -214,8 +224,16 @@ pub fn simulate_ball_trajectory(
         })
         .collect();
 
+    // Landing (termination by ground contact) is a successful outcome, not an
+    // aborted integration.  Override completed=true whenever the final point
+    // reached z ≤ 0 after the minimum flight time.
+    let landed = points
+        .last()
+        .map(|p| p.z <= 0.0 && p.t > 0.05)
+        .unwrap_or(false);
+
     BallTrajectoryResult {
-        completed: result.completed,
+        completed: result.completed || landed,
         steps: result.steps_taken,
         points,
     }
@@ -438,6 +456,68 @@ mod tests {
         assert!(
             headwind_range < base_range,
             "Headwind range {headwind_range:.2} should be less than no-wind range {base_range:.2}"
+        );
+    }
+
+    /// Test: normal landing must report completed = true (issue #2484).
+    #[test]
+    fn test_landing_reports_completed_true() {
+        let result = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [20.0, 0.0, 10.0],
+            [0.0, 0.0, 1.0],
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &default_config(),
+        );
+
+        assert!(
+            result.completed,
+            "Ball that lands on the ground must report completed=true, got false"
+        );
+    }
+
+    /// Test: non-unit spin_axis is normalized before force computation (issue #2484).
+    #[test]
+    fn test_non_unit_spin_axis_normalized() {
+        // A spin_axis with magnitude 2.0 should behave identically to magnitude 1.0
+        let result_unit = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [20.0, 0.0, 10.0],
+            [0.0, 0.0, 1.0], // unit axis
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &default_config(),
+        );
+        let result_scaled = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [20.0, 0.0, 10.0],
+            [0.0, 0.0, 2.0], // non-unit axis — should be normalized
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &AeroBallProperties::default(),
+            &AirProperties::default(),
+            &default_config(),
+        );
+
+        assert_eq!(
+            result_unit.steps, result_scaled.steps,
+            "Non-unit spin_axis must be normalized: trajectories must be identical"
+        );
+        let last_unit = result_unit.points.last().unwrap();
+        let last_scaled = result_scaled.points.last().unwrap();
+        assert!(
+            (last_unit.x - last_scaled.x).abs() < 1e-10,
+            "Non-unit spin_axis yields different trajectory: unit.x={} scaled.x={}",
+            last_unit.x,
+            last_scaled.x
         );
     }
 }

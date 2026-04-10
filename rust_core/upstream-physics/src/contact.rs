@@ -37,7 +37,7 @@ impl Default for ContactParameters {
         Self {
             cor: 0.78,                           // Typical golf green COR
             friction: 0.4,                       // Typical grass friction
-            normal: Vector3::new(0.0, 1.0, 0.0), // Flat ground (Y-up)
+            normal: Vector3::new(0.0, 0.0, 1.0), // Flat ground (Z-up, consistent with ball_flight)
         }
     }
 }
