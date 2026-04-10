@@ -108,11 +108,11 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
     try:
         active_keys = (
             db.query(APIKey)
-            .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
+            .filter(APIKey.is_active, APIKey.key_prefix == prefix_hash)
             .all()
         )
     except (RuntimeError, ValueError, OSError):
-        # Fallback: prefix_hash column doesn't exist yet (migration pending)
+        # Fallback: key_prefix column not yet migrated (schema pending)
         active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
     if not active_keys:

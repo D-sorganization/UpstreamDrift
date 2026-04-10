@@ -46,7 +46,9 @@ from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
 from .route_registry import register_routes
+from .routes import chat_ws, simulation_ws
 from .services.analysis_service import AnalysisService
+from .services.chat_service import ChatService
 from .services.simulation_service import SimulationService
 from .task_manager import TaskManager
 from .utils.tracing import RequestTracer
@@ -131,6 +133,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         # Initialize services and store in app.state for dependency injection
         fastapi_app.state.simulation_service = SimulationService(engine_manager)
         fastapi_app.state.analysis_service = AnalysisService(engine_manager)
+        fastapi_app.state.chat_service = ChatService()
         fastapi_app.state.task_manager = active_tasks
         fastapi_app.state.logger = logger
 
@@ -257,6 +260,13 @@ logger.info("Registered %d route modules at root prefix", _root_count)
 # Register all routes under /api/v1/ prefix (versioned API)
 _versioned_count = register_routes(app, prefix=API_PREFIX)
 logger.info("Registered %d route modules under %s", _versioned_count, API_PREFIX)
+
+# WebSocket routes are excluded from auto-discovery and must be registered explicitly.
+# See route_registry._EXCLUDED_MODULES and issue #2448.
+app.include_router(simulation_ws.router, prefix="")
+app.include_router(chat_ws.router, prefix="")
+app.include_router(simulation_ws.router, prefix=API_PREFIX)
+app.include_router(chat_ws.router, prefix=API_PREFIX)
 
 
 if __name__ == "__main__":
