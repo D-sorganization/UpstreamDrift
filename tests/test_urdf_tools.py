@@ -35,7 +35,7 @@ class MockFileDialog:
 @pytest.mark.xfail(
     strict=False, reason="Shared URDF assets not provisioned in CI (#1949)"
 )
-def test_urdf_scanning_logic():
+def test_urdf_scanning_logic() -> None:
     """Test detecting shared URDFs."""
     # Simulate scanning logic used in GUIs
     urdf_dir = get_shared_urdf_path()

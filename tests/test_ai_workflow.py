@@ -41,14 +41,14 @@ class TestAIWorkflowEngine:
         wf.add_step(step2)
         return wf
 
-    def test_workflow_registration(self, engine, basic_workflow):
+    def test_workflow_registration(self, engine, basic_workflow) -> None:
         """Test registering and retrieving workflows."""
         engine.register_workflow(basic_workflow)
         retrieved = engine.get_workflow("test_workflow")
         assert retrieved == basic_workflow
         assert engine.list_workflows()[0].id == "test_workflow"
 
-    def test_start_workflow_success(self, engine, basic_workflow):
+    def test_start_workflow_success(self, engine, basic_workflow) -> None:
         """Test starting a valid workflow."""
         engine.register_workflow(basic_workflow)
         context = MagicMock(spec=ConversationContext)
@@ -62,13 +62,13 @@ class TestAIWorkflowEngine:
         assert execution.state == initial_state
         assert execution.current_step_index == 0
 
-    def test_start_workflow_not_found(self, engine):
+    def test_start_workflow_not_found(self, engine) -> None:
         """Test starting a non-existent workflow raises error."""
         context = MagicMock(spec=ConversationContext)
         with pytest.raises(WorkflowError):
             engine.start_workflow("missing_workflow", context)
 
-    def test_execute_steps_sequential(self, engine, basic_workflow):
+    def test_execute_steps_sequential(self, engine, basic_workflow) -> None:
         """Test executing steps sequentially."""
         engine.register_workflow(basic_workflow)
         context = MagicMock(spec=ConversationContext)
@@ -91,7 +91,7 @@ class TestAIWorkflowEngine:
         assert engine.is_complete(execution)
         assert execution.status == StepStatus.COMPLETED
 
-    def test_execute_step_with_tool(self, engine, mock_tool_registry):
+    def test_execute_step_with_tool(self, engine, mock_tool_registry) -> None:
         """Test executing a step that requires a tool."""
         wf = Workflow(id="tool_wf", name="Tool WF", description="desc")
         tool_step = WorkflowStep(
@@ -117,7 +117,7 @@ class TestAIWorkflowEngine:
             "my_tool", {"existing": "data", "arg": 1}
         )
 
-    def test_step_condition_skip(self, engine):
+    def test_step_condition_skip(self, engine) -> None:
         """Test skipping a step based on condition."""
         wf = Workflow(id="cond_wf", name="Conditional WF", description="desc")
 
@@ -140,7 +140,7 @@ class TestAIWorkflowEngine:
         assert result.status == StepStatus.SKIPPED
         assert engine.is_complete(execution)
 
-    def test_create_first_analysis_workflow(self):
+    def test_create_first_analysis_workflow(self) -> None:
         """Verify the factory function creates the expected workflow."""
         wf = create_first_analysis_workflow()
         assert wf.id == "first_analysis"
@@ -161,7 +161,9 @@ class TestWorkflowEngineFixIssue2504:
     def engine(self, mock_tool_registry):
         return WorkflowEngine(mock_tool_registry)
 
-    def test_step_tool_output_propagated_to_state(self, engine, mock_tool_registry):
+    def test_step_tool_output_propagated_to_state(
+        self, engine, mock_tool_registry
+    ) -> None:
         """Successful step tool output (dict) must be merged into execution.state."""
         mock_tool_registry.execute.return_value = ToolResult(
             tool_call_id="id1",
@@ -180,7 +182,9 @@ class TestWorkflowEngineFixIssue2504:
 
         assert execution.state.get("selected_file") == "sample_A.csv"
 
-    def test_step_tool_non_dict_output_does_not_crash(self, engine, mock_tool_registry):
+    def test_step_tool_non_dict_output_does_not_crash(
+        self, engine, mock_tool_registry
+    ) -> None:
         """Non-dict tool output must not crash; state is unchanged."""
         mock_tool_registry.execute.return_value = ToolResult(
             tool_call_id="id2",
@@ -197,7 +201,7 @@ class TestWorkflowEngineFixIssue2504:
 
         assert execution.state.get("k") == "v"
 
-    def test_skip_of_final_step_sets_completed_status(self, engine):
+    def test_skip_of_final_step_sets_completed_status(self, engine) -> None:
         """Skipping the last step must set execution.status = COMPLETED (not RUNNING)."""
         wf = Workflow(id="skip_final", name="Skip final", description="desc")
         wf.add_step(
@@ -216,7 +220,9 @@ class TestWorkflowEngineFixIssue2504:
 
         assert execution.status == StepStatus.COMPLETED
 
-    def test_skip_of_middle_step_leaves_running(self, engine, mock_tool_registry):
+    def test_skip_of_middle_step_leaves_running(
+        self, engine, mock_tool_registry
+    ) -> None:
         """Skipping a non-final step must leave execution.status = RUNNING."""
         mock_tool_registry.execute.return_value = ToolResult(
             tool_call_id="id3", success=True, result={}
@@ -239,7 +245,9 @@ class TestWorkflowEngineFixIssue2504:
 
         assert execution.status == StepStatus.RUNNING
 
-    def test_later_step_receives_prior_step_output(self, engine, mock_tool_registry):
+    def test_later_step_receives_prior_step_output(
+        self, engine, mock_tool_registry
+    ) -> None:
         """Later step's tool arguments must include output written by earlier step."""
         mock_tool_registry.execute.side_effect = [
             ToolResult(tool_call_id="a", success=True, result={"file": "chosen.csv"}),

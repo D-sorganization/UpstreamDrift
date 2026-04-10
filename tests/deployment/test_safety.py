@@ -138,7 +138,7 @@ class TestCollisionAvoidance:
         from src.deployment.safety import CollisionAvoidance
 
         class MockEngine:
-            def set_joint_positions(self, q):
+            def set_joint_positions(self, q) -> None:
                 pass
 
             def get_link_positions(self):

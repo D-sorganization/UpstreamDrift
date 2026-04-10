@@ -74,7 +74,7 @@ class TestPinocchioGUI:
             gui = PinocchioGUI()
             return gui
 
-    def test_ensure_analyzer_initialized(self, mock_gui):
+    def test_ensure_analyzer_initialized(self, mock_gui) -> None:
         """Test _ensure_analyzer_initialized method."""
         # 1. Model is None, Analyzer is None -> Should remain None
         mock_gui.model = None

@@ -27,7 +27,7 @@ from src.unreal_integration.mesh_loader import (
 class TestMeshFormat:
     """Tests for MeshFormat enum."""
 
-    def test_supported_formats(self):
+    def test_supported_formats(self) -> None:
         """Test all supported formats exist."""
         assert MeshFormat.OBJ is not None
         assert MeshFormat.STL is not None
@@ -37,7 +37,7 @@ class TestMeshFormat:
         assert MeshFormat.COLLADA is not None
         assert MeshFormat.PLY is not None
 
-    def test_format_from_extension(self):
+    def test_format_from_extension(self) -> None:
         """Test format detection from file extension."""
         assert MeshFormat.from_extension(".obj") == MeshFormat.OBJ
         assert MeshFormat.from_extension(".gltf") == MeshFormat.GLTF
@@ -45,17 +45,17 @@ class TestMeshFormat:
         assert MeshFormat.from_extension(".fbx") == MeshFormat.FBX
         assert MeshFormat.from_extension(".dae") == MeshFormat.COLLADA
 
-    def test_format_from_extension_case_insensitive(self):
+    def test_format_from_extension_case_insensitive(self) -> None:
         """Test format detection is case-insensitive."""
         assert MeshFormat.from_extension(".OBJ") == MeshFormat.OBJ
         assert MeshFormat.from_extension(".Gltf") == MeshFormat.GLTF
 
-    def test_format_unknown_extension(self):
+    def test_format_unknown_extension(self) -> None:
         """Test unknown extension raises error."""
         with pytest.raises(UnsupportedFormatError):
             MeshFormat.from_extension(".xyz")
 
-    def test_format_extensions(self):
+    def test_format_extensions(self) -> None:
         """Test format extension properties."""
         assert MeshFormat.OBJ.extension == ".obj"
         assert MeshFormat.GLTF.extension == ".gltf"
@@ -65,7 +65,7 @@ class TestMeshFormat:
 class TestMeshVertex:
     """Tests for MeshVertex data structure."""
 
-    def test_create_vertex(self):
+    def test_create_vertex(self) -> None:
         """Test vertex creation."""
         v = MeshVertex(
             position=np.array([1.0, 2.0, 3.0]),
@@ -76,14 +76,14 @@ class TestMeshVertex:
         assert v.normal[1] == 1.0
         assert v.uv[0] == 0.5
 
-    def test_vertex_without_optional_fields(self):
+    def test_vertex_without_optional_fields(self) -> None:
         """Test vertex creation without optional fields."""
         v = MeshVertex(position=np.array([1.0, 2.0, 3.0]))
         assert v.normal is None
         assert v.uv is None
         assert v.color is None
 
-    def test_vertex_with_color(self):
+    def test_vertex_with_color(self) -> None:
         """Test vertex with vertex color."""
         v = MeshVertex(
             position=np.array([0.0, 0.0, 0.0]),
@@ -92,7 +92,7 @@ class TestMeshVertex:
         assert v.color is not None
         assert v.color[0] == 1.0
 
-    def test_vertex_with_bone_weights(self):
+    def test_vertex_with_bone_weights(self) -> None:
         """Test vertex with skeletal weights."""
         v = MeshVertex(
             position=np.array([0.0, 0.0, 0.0]),
@@ -105,19 +105,19 @@ class TestMeshVertex:
 class TestMeshFace:
     """Tests for MeshFace data structure."""
 
-    def test_create_triangle(self):
+    def test_create_triangle(self) -> None:
         """Test triangle face creation."""
         f = MeshFace(indices=np.array([0, 1, 2]))
         assert len(f.indices) == 3
         assert f.is_triangle
 
-    def test_create_quad(self):
+    def test_create_quad(self) -> None:
         """Test quad face creation."""
         f = MeshFace(indices=np.array([0, 1, 2, 3]))
         assert len(f.indices) == 4
         assert not f.is_triangle
 
-    def test_face_with_material(self):
+    def test_face_with_material(self) -> None:
         """Test face with material index."""
         f = MeshFace(indices=np.array([0, 1, 2]), material_index=1)
         assert f.material_index == 1
@@ -126,7 +126,7 @@ class TestMeshFace:
 class TestMeshMaterial:
     """Tests for MeshMaterial data structure."""
 
-    def test_create_material(self):
+    def test_create_material(self) -> None:
         """Test material creation."""
         m = MeshMaterial(
             name="GolfClub_Metal",
@@ -137,7 +137,7 @@ class TestMeshMaterial:
         assert m.name == "GolfClub_Metal"
         assert m.metallic == 0.9
 
-    def test_material_with_textures(self):
+    def test_material_with_textures(self) -> None:
         """Test material with texture paths."""
         m = MeshMaterial(
             name="GolfShirt",
@@ -147,7 +147,7 @@ class TestMeshMaterial:
         assert m.base_color_texture is not None
         assert m.normal_texture is not None
 
-    def test_default_material(self):
+    def test_default_material(self) -> None:
         """Test default material creation."""
         m = MeshMaterial.default()
         assert m.name == "default"
@@ -157,7 +157,7 @@ class TestMeshMaterial:
 class TestMeshBone:
     """Tests for MeshBone data structure."""
 
-    def test_create_bone(self):
+    def test_create_bone(self) -> None:
         """Test bone creation."""
         b = MeshBone(
             name="shoulder_L",
@@ -168,7 +168,7 @@ class TestMeshBone:
         assert b.name == "shoulder_L"
         assert b.parent_index == 4
 
-    def test_root_bone(self):
+    def test_root_bone(self) -> None:
         """Test root bone (no parent)."""
         b = MeshBone(
             name="root",
@@ -179,7 +179,7 @@ class TestMeshBone:
         assert b.is_root
         assert b.parent_index == -1
 
-    def test_bone_with_inverse_bind(self):
+    def test_bone_with_inverse_bind(self) -> None:
         """Test bone with inverse bind matrix."""
         inv_bind = np.eye(4)
         inv_bind[3, :3] = [0.1, 0.2, 0.3]  # Translation
@@ -196,7 +196,7 @@ class TestMeshBone:
 class TestMeshSkeleton:
     """Tests for MeshSkeleton data structure."""
 
-    def test_create_skeleton(self):
+    def test_create_skeleton(self) -> None:
         """Test skeleton creation."""
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
@@ -207,7 +207,7 @@ class TestMeshSkeleton:
         assert len(skeleton.bones) == 3
         assert skeleton.root_bone.name == "root"
 
-    def test_skeleton_bone_lookup(self):
+    def test_skeleton_bone_lookup(self) -> None:
         """Test bone lookup by name."""
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
@@ -219,7 +219,7 @@ class TestMeshSkeleton:
         assert skeleton.get_bone("shoulder_L") is not None
         assert skeleton.get_bone("nonexistent") is None
 
-    def test_skeleton_hierarchy(self):
+    def test_skeleton_hierarchy(self) -> None:
         """Test skeleton hierarchy traversal."""
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
@@ -235,7 +235,7 @@ class TestMeshSkeleton:
         children = skeleton.get_children(1)  # Children of spine
         assert len(children) == 2
 
-    def test_skeleton_bone_names(self):
+    def test_skeleton_bone_names(self) -> None:
         """Test getting all bone names."""
         bones = [
             MeshBone(name="root", index=0, parent_index=-1, local_transform=np.eye(4)),
@@ -250,7 +250,7 @@ class TestMeshSkeleton:
 class TestLoadedMesh:
     """Tests for LoadedMesh data structure."""
 
-    def test_create_loaded_mesh(self):
+    def test_create_loaded_mesh(self) -> None:
         """Test loaded mesh creation."""
         vertices = [
             MeshVertex(position=np.array([0.0, 0.0, 0.0])),
@@ -268,7 +268,7 @@ class TestLoadedMesh:
         assert mesh.vertex_count == 3
         assert mesh.face_count == 1
 
-    def test_mesh_with_materials(self):
+    def test_mesh_with_materials(self) -> None:
         """Test mesh with materials."""
         vertices = [MeshVertex(position=np.array([0.0, 0.0, 0.0]))]
         faces = [MeshFace(indices=np.array([0, 0, 0]))]
@@ -282,7 +282,7 @@ class TestLoadedMesh:
         )
         assert len(mesh.materials) == 1
 
-    def test_mesh_with_skeleton(self):
+    def test_mesh_with_skeleton(self) -> None:
         """Test mesh with skeleton."""
         vertices = [MeshVertex(position=np.array([0.0, 0.0, 0.0]))]
         faces = [MeshFace(indices=np.array([0, 0, 0]))]
@@ -300,7 +300,7 @@ class TestLoadedMesh:
         assert mesh.has_skeleton
         assert mesh.skeleton.bone_count == 1
 
-    def test_mesh_bounds(self):
+    def test_mesh_bounds(self) -> None:
         """Test mesh bounding box calculation."""
         vertices = [
             MeshVertex(position=np.array([0.0, 0.0, 0.0])),
@@ -315,7 +315,7 @@ class TestLoadedMesh:
         assert bounds["min"][0] == -5.0
         assert bounds["max"][0] == 10.0
 
-    def test_mesh_to_arrays(self):
+    def test_mesh_to_arrays(self) -> None:
         """Test mesh conversion to numpy arrays."""
         vertices = [
             MeshVertex(position=np.array([0.0, 0.0, 0.0])),
@@ -334,12 +334,12 @@ class TestLoadedMesh:
 class TestMeshLoader:
     """Tests for MeshLoader class."""
 
-    def test_create_loader(self):
+    def test_create_loader(self) -> None:
         """Test loader creation."""
         loader = MeshLoader()
         assert loader is not None
 
-    def test_supported_formats(self):
+    def test_supported_formats(self) -> None:
         """Test loader reports supported formats."""
         loader = MeshLoader()
         formats = loader.supported_formats
@@ -347,20 +347,20 @@ class TestMeshLoader:
         assert MeshFormat.GLTF in formats
         assert MeshFormat.GLB in formats
 
-    def test_can_load_format(self):
+    def test_can_load_format(self) -> None:
         """Test format support checking."""
         loader = MeshLoader()
         assert loader.can_load(".obj")
         assert loader.can_load(".gltf")
         assert not loader.can_load(".xyz")
 
-    def test_load_invalid_path(self):
+    def test_load_invalid_path(self) -> None:
         """Test loading nonexistent file."""
         loader = MeshLoader()
         with pytest.raises(FileNotFoundError):
             loader.load("/nonexistent/path/model.obj")
 
-    def test_load_unsupported_format(self, tmp_path: Path):
+    def test_load_unsupported_format(self, tmp_path: Path) -> None:
         """Test loading unsupported format."""
         # Create a fake file
         fake_file = tmp_path / "model.xyz"
@@ -370,7 +370,7 @@ class TestMeshLoader:
         with pytest.raises(UnsupportedFormatError):
             loader.load(str(fake_file))
 
-    def test_load_obj_basic(self, tmp_path: Path):
+    def test_load_obj_basic(self, tmp_path: Path) -> None:
         """Test loading basic OBJ file."""
         obj_content = """
 # Simple triangle
@@ -388,7 +388,7 @@ f 1 2 3
         assert mesh.vertex_count == 3
         assert mesh.face_count == 1
 
-    def test_load_obj_with_normals(self, tmp_path: Path):
+    def test_load_obj_with_normals(self, tmp_path: Path) -> None:
         """Test loading OBJ with normals."""
         obj_content = """
 v 0.0 0.0 0.0
@@ -405,7 +405,7 @@ f 1//1 2//1 3//1
 
         assert mesh.vertices[0].normal is not None
 
-    def test_load_obj_with_uvs(self, tmp_path: Path):
+    def test_load_obj_with_uvs(self, tmp_path: Path) -> None:
         """Test loading OBJ with texture coordinates."""
         obj_content = """
 v 0.0 0.0 0.0
@@ -424,7 +424,7 @@ f 1/1 2/2 3/3
 
         assert mesh.vertices[0].uv is not None
 
-    def test_loader_caching(self, tmp_path: Path):
+    def test_loader_caching(self, tmp_path: Path) -> None:
         """Test mesh caching."""
         obj_content = "v 0.0 0.0 0.0\nf 1 1 1"
         obj_file = tmp_path / "cached.obj"
@@ -440,7 +440,7 @@ f 1/1 2/2 3/3
 
         assert mesh1 is mesh2  # Same object from cache
 
-    def test_loader_cache_invalidation(self, tmp_path: Path):
+    def test_loader_cache_invalidation(self, tmp_path: Path) -> None:
         """Test cache invalidation on file modification."""
         obj_content = "v 0.0 0.0 0.0\nv 1.0 0.0 0.0\nv 0.0 1.0 0.0\nf 1 2 3"
         obj_file = tmp_path / "modified.obj"
@@ -462,7 +462,7 @@ f 1/1 2/2 3/3
         mesh2 = loader.load(str(obj_file))
         assert mesh2.vertex_count == 6  # 2 triangles * 3 vertices each
 
-    def test_loader_clear_cache(self, tmp_path: Path):
+    def test_loader_clear_cache(self, tmp_path: Path) -> None:
         """Test clearing loader cache."""
         obj_content = "v 0.0 0.0 0.0\nf 1 1 1"
         obj_file = tmp_path / "clear_cache.obj"
@@ -479,7 +479,7 @@ f 1/1 2/2 3/3
 class TestMeshLoaderGLTF:
     """Tests for GLTF/GLB loading."""
 
-    def test_create_minimal_gltf(self, tmp_path: Path):
+    def test_create_minimal_gltf(self, tmp_path: Path) -> None:
         """Test loading minimal GLTF file."""
         # Create minimal GLTF JSON
         gltf_content = {
@@ -541,7 +541,7 @@ class TestMeshLoaderGLTF:
         # Note: Full GLTF loading requires trimesh or pygltflib
         # This test validates the structure
 
-    def test_gltf_with_skeleton(self, tmp_path: Path):
+    def test_gltf_with_skeleton(self, tmp_path: Path) -> None:
         """Test loading GLTF with skeleton."""
         # This would test skeleton loading from GLTF
         # Actual implementation depends on trimesh/pygltflib
@@ -550,13 +550,13 @@ class TestMeshLoaderGLTF:
 class TestMeshLoaderContracts:
     """Tests for Design by Contract compliance."""
 
-    def test_load_requires_valid_path(self):
+    def test_load_requires_valid_path(self) -> None:
         """Test load validates path exists."""
         loader = MeshLoader()
         with pytest.raises(FileNotFoundError):
             loader.load("/definitely/does/not/exist.obj")
 
-    def test_load_validates_format(self, tmp_path: Path):
+    def test_load_validates_format(self, tmp_path: Path) -> None:
         """Test load validates file format."""
         bad_file = tmp_path / "bad.unknownformat"
         bad_file.write_text("garbage")
@@ -565,7 +565,7 @@ class TestMeshLoaderContracts:
         with pytest.raises(UnsupportedFormatError):
             loader.load(str(bad_file))
 
-    def test_loaded_mesh_invariants(self, tmp_path: Path):
+    def test_loaded_mesh_invariants(self, tmp_path: Path) -> None:
         """Test loaded mesh maintains invariants."""
         obj_content = "v 0.0 0.0 0.0\nv 1.0 0.0 0.0\nv 0.5 1.0 0.0\nf 1 2 3"
         obj_file = tmp_path / "invariants.obj"

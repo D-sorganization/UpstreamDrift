@@ -17,7 +17,7 @@ from src.shared.python.physics.physics_parameters import (
 class TestPhysicsParameter(unittest.TestCase):
     """Test cases for PhysicsParameter."""
 
-    def test_validation(self):
+    def test_validation(self) -> None:
         """Test parameter validation."""
         param = PhysicsParameter(
             "TEST",
@@ -49,7 +49,7 @@ class TestPhysicsParameter(unittest.TestCase):
         self.assertFalse(valid)
         self.assertIn("must be numeric", msg)
 
-    def test_constant(self):
+    def test_constant(self) -> None:
         """Test constant parameter."""
         param = PhysicsParameter(
             "CONST",
@@ -65,7 +65,7 @@ class TestPhysicsParameter(unittest.TestCase):
         self.assertFalse(valid)
         self.assertIn("is a constant", msg)
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test dictionary conversion."""
         param = PhysicsParameter(
             "TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test"
@@ -78,14 +78,14 @@ class TestPhysicsParameter(unittest.TestCase):
 class TestPhysicsParameterRegistry(unittest.TestCase):
     """Test cases for PhysicsParameterRegistry."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up registry."""
         # Use a fresh registry for each test
         self.registry = PhysicsParameterRegistry()
         # Clear default parameters for cleaner testing, or just use them
         self.registry.parameters = {}
 
-    def test_register_get(self):
+    def test_register_get(self) -> None:
         """Test registering and getting parameters."""
         param = PhysicsParameter(
             "TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test"
@@ -96,7 +96,7 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
         self.assertEqual(retrieved, param)
         self.assertIsNone(self.registry.get("NONEXISTENT"))
 
-    def test_set_value(self):
+    def test_set_value(self) -> None:
         """Test setting parameter values."""
         param = PhysicsParameter(
             "TEST",
@@ -127,7 +127,7 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
         success, msg = self.registry.set("NONEXISTENT", 1.0)
         self.assertFalse(success)
 
-    def test_get_by_category(self):
+    def test_get_by_category(self) -> None:
         """Test filtering by category."""
         p1 = PhysicsParameter("P1", 1.0, "u", ParameterCategory.BALL, "D", "S")
         p2 = PhysicsParameter("P2", 2.0, "u", ParameterCategory.CLUB, "D", "S")
@@ -143,7 +143,7 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
         strict=False,
         reason="builtins.open mock races with log-file open in parallel test run (#1949)",
     )
-    def test_export_import_json(self):
+    def test_export_import_json(self) -> None:
         """Test JSON export and import."""
         p1 = PhysicsParameter("P1", 1.0, "u", ParameterCategory.BALL, "D", "S")
         self.registry.register(p1)
@@ -168,7 +168,7 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
             if param is not None:
                 self.assertEqual(param.value, 2.0)
 
-    def test_get_summary(self):
+    def test_get_summary(self) -> None:
         """Test summary generation."""
         p1 = PhysicsParameter("P1", 1.0, "u", ParameterCategory.BALL, "D", "S")
         self.registry.register(p1)
@@ -178,7 +178,7 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
         self.assertIn("P1", summary)
         self.assertIn("BALL", summary)
 
-    def test_singleton(self):
+    def test_singleton(self) -> None:
         """Test singleton access."""
         reg1 = get_registry()
         reg2 = get_registry()

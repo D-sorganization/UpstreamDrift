@@ -26,16 +26,16 @@ def _pyproject_version() -> str:
 class TestVersionModuleExists:
     """src.api._version provides the canonical version."""
 
-    def test_can_import_version_module(self):
+    def test_can_import_version_module(self) -> None:
         from src.api._version import __version__  # noqa: F401
 
-    def test_version_is_non_empty_string(self):
+    def test_version_is_non_empty_string(self) -> None:
         from src.api._version import __version__
 
         assert isinstance(__version__, str)
         assert len(__version__) > 0
 
-    def test_version_matches_pyproject_toml(self):
+    def test_version_matches_pyproject_toml(self) -> None:
         from src.api._version import __version__
 
         expected = _pyproject_version()
@@ -48,7 +48,7 @@ class TestVersionModuleExists:
 class TestVersionSurfacesAligned:
     """All version surfaces read from the single canonical source."""
 
-    def test_server_py_uses_canonical_version(self):
+    def test_server_py_uses_canonical_version(self) -> None:
         """server.py FastAPI version should not hardcode a stale string."""
         server_src = (_REPO_ROOT / "src" / "api" / "server.py").read_text(
             encoding="utf-8"
@@ -58,7 +58,7 @@ class TestVersionSurfacesAligned:
             "instead of hardcoding a version string"
         )
 
-    def test_server_py_does_not_hardcode_old_version(self):
+    def test_server_py_does_not_hardcode_old_version(self) -> None:
         """3.0.0 (old hardcoded value) is not in server.py."""
         server_src = (_REPO_ROOT / "src" / "api" / "server.py").read_text(
             encoding="utf-8"
@@ -67,7 +67,7 @@ class TestVersionSurfacesAligned:
             "server.py must not hardcode version '3.0.0'; use __version__ from _version.py"
         )
 
-    def test_local_server_py_uses_canonical_version(self):
+    def test_local_server_py_uses_canonical_version(self) -> None:
         """local_server.py FastAPI version should not hardcode a stale string."""
         local_src = (_REPO_ROOT / "src" / "api" / "local_server.py").read_text(
             encoding="utf-8"
@@ -76,7 +76,7 @@ class TestVersionSurfacesAligned:
             "local_server.py must import __version__ from src.api._version"
         )
 
-    def test_local_server_py_does_not_hardcode_old_version(self):
+    def test_local_server_py_does_not_hardcode_old_version(self) -> None:
         """2.0.0 (old hardcoded value) is not in local_server.py."""
         local_src = (_REPO_ROOT / "src" / "api" / "local_server.py").read_text(
             encoding="utf-8"
@@ -85,7 +85,7 @@ class TestVersionSurfacesAligned:
             "local_server.py must not hardcode version '2.0.0'; use __version__"
         )
 
-    def test_core_route_uses_canonical_version(self):
+    def test_core_route_uses_canonical_version(self) -> None:
         """The root endpoint in core.py must not return a hardcoded version."""
         core_src = (_REPO_ROOT / "src" / "api" / "routes" / "core.py").read_text(
             encoding="utf-8"
@@ -95,7 +95,7 @@ class TestVersionSurfacesAligned:
             "not a hardcoded string"
         )
 
-    def test_core_route_does_not_hardcode_old_version(self):
+    def test_core_route_does_not_hardcode_old_version(self) -> None:
         """1.0.0 (old hardcoded value) is not in core.py."""
         core_src = (_REPO_ROOT / "src" / "api" / "routes" / "core.py").read_text(
             encoding="utf-8"

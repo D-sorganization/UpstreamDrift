@@ -1,6 +1,7 @@
 """Tests for unified_launcher.py."""
 
 import sys  # noqa: E402
+from typing import NoReturn
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -27,7 +28,7 @@ def clean_sys_modules():
             del sys.modules[mod]
 
 
-def test_is_pyqt6_available_legacy_override():
+def test_is_pyqt6_available_legacy_override() -> None:
     # Set up legacy module mock
     legacy_mock = MagicMock()
     legacy_mock.PYQT6_AVAILABLE = False
@@ -36,7 +37,7 @@ def test_is_pyqt6_available_legacy_override():
         assert _is_pyqt6_available() is False
 
 
-def test_is_pyqt6_available_using_constant(clean_sys_modules):
+def test_is_pyqt6_available_using_constant(clean_sys_modules) -> None:
     # Ensure no legacy module
     if "launchers.unified_launcher" in sys.modules:
         del sys.modules["launchers.unified_launcher"]
@@ -45,10 +46,10 @@ def test_is_pyqt6_available_using_constant(clean_sys_modules):
         assert _is_pyqt6_available() is True
 
 
-def test_get_golf_main_prefer_legacy(clean_sys_modules):
+def test_get_golf_main_prefer_legacy(clean_sys_modules) -> None:
     legacy_mock = MagicMock()
 
-    def fake_main():
+    def fake_main() -> None:
         pass
 
     legacy_mock.main = fake_main
@@ -58,14 +59,14 @@ def test_get_golf_main_prefer_legacy(clean_sys_modules):
     assert main_func is fake_main
 
 
-def test_get_golf_main_absolute_import():
+def test_get_golf_main_absolute_import() -> None:
     import builtins
 
     orig_import = builtins.__import__
 
     mock_module = MagicMock()
 
-    def fake_main():
+    def fake_main() -> None:
         pass
 
     mock_module.main = fake_main
@@ -86,7 +87,7 @@ def test_get_golf_main_absolute_import():
         assert main_func is fake_main
 
 
-def test_get_golf_main_relative_success(clean_sys_modules):
+def test_get_golf_main_relative_success(clean_sys_modules) -> None:
     with (
         patch("src.launchers.unified_launcher.golf_main", create=True) as mock_main,
         patch.dict(
@@ -97,7 +98,7 @@ def test_get_golf_main_relative_success(clean_sys_modules):
         assert main_func == mock_main
 
 
-def test_get_golf_main_all_imports_fail(clean_sys_modules):
+def test_get_golf_main_all_imports_fail(clean_sys_modules) -> None:
     import builtins
 
     orig_import = builtins.__import__
@@ -118,7 +119,7 @@ def test_get_golf_main_all_imports_fail(clean_sys_modules):
         _get_golf_main()
 
 
-def test_get_golf_main_legacy_no_main():
+def test_get_golf_main_legacy_no_main() -> None:
     legacy_mock = MagicMock()
     del legacy_mock.main
 
@@ -146,7 +147,7 @@ def test_get_golf_main_legacy_no_main():
         assert main_func == "fallback"
 
 
-def test_get_golf_main_module_no_main():
+def test_get_golf_main_module_no_main() -> None:
     import builtins
 
     orig_import = builtins.__import__
@@ -175,7 +176,7 @@ def test_get_golf_main_module_no_main():
         _get_golf_main()
 
 
-def test_unified_launcher_init_fails_if_no_pyqt6():
+def test_unified_launcher_init_fails_if_no_pyqt6() -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=False),
         pytest.raises(ImportError, match="PyQt6 is required"),
@@ -183,7 +184,7 @@ def test_unified_launcher_init_fails_if_no_pyqt6():
         UnifiedLauncher()
 
 
-def test_pyqt6_unavailable_reload(clean_sys_modules):
+def test_pyqt6_unavailable_reload(clean_sys_modules) -> None:
     import src.launchers.unified_launcher
 
     path = src.launchers.unified_launcher.__file__
@@ -211,7 +212,7 @@ def test_pyqt6_unavailable_reload(clean_sys_modules):
     assert namespace.get("QApplication") is None
 
 
-def test_unified_launcher_mainloop():
+def test_unified_launcher_mainloop() -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch("src.launchers.unified_launcher._get_golf_main") as mock_get_main,
@@ -226,7 +227,7 @@ def test_unified_launcher_mainloop():
         mock_main.assert_called_once()
 
 
-def test_unified_launcher_show_status(caplog, capsys):
+def test_unified_launcher_show_status(caplog, capsys) -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch(
@@ -271,7 +272,9 @@ def test_unified_launcher_show_status(caplog, capsys):
             )
 
 
-def test_unified_launcher_show_status_no_engines_and_hidden_dirs(caplog, capsys):
+def test_unified_launcher_show_status_no_engines_and_hidden_dirs(
+    caplog, capsys
+) -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch(
@@ -319,7 +322,7 @@ def test_unified_launcher_show_status_no_engines_and_hidden_dirs(caplog, capsys)
             file_not_dir.is_dir.assert_called_once()
 
 
-def test_unified_launcher_get_version_metadata():
+def test_unified_launcher_get_version_metadata() -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch("importlib.metadata.version", side_effect=["1.2.3"]),
@@ -328,10 +331,10 @@ def test_unified_launcher_get_version_metadata():
         assert launcher.get_version() == "1.2.3"
 
 
-def test_unified_launcher_get_version_metadata_golf_modeling_suite():
+def test_unified_launcher_get_version_metadata_golf_modeling_suite() -> None:
     from importlib.metadata import PackageNotFoundError
 
-    def mock_version(pkg):
+    def mock_version(pkg) -> str:
         if pkg == "upstream-drift":
             raise PackageNotFoundError
         return "1.2.4"
@@ -344,7 +347,7 @@ def test_unified_launcher_get_version_metadata_golf_modeling_suite():
         assert launcher.get_version() == "1.2.4"
 
 
-def test_unified_launcher_get_version_fallback():
+def test_unified_launcher_get_version_fallback() -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch("importlib.metadata.version", side_effect=ImportError("broken")),
@@ -355,10 +358,10 @@ def test_unified_launcher_get_version_fallback():
         assert len(version) > 0
 
 
-def test_unified_launcher_get_version_shared_python():
+def test_unified_launcher_get_version_shared_python() -> None:
     from importlib.metadata import PackageNotFoundError
 
-    def mock_version(pkg):
+    def mock_version(pkg) -> NoReturn:
         raise PackageNotFoundError
 
     try:
@@ -385,10 +388,10 @@ def test_unified_launcher_get_version_shared_python():
                 assert launcher.get_version() == "1.2.5"
 
 
-def test_unified_launcher_get_version_pyproject_toml():
+def test_unified_launcher_get_version_pyproject_toml() -> None:
     from importlib.metadata import PackageNotFoundError
 
-    def mock_version(pkg):
+    def mock_version(pkg) -> NoReturn:
         raise PackageNotFoundError
 
     with (
@@ -416,10 +419,10 @@ def test_unified_launcher_get_version_pyproject_toml():
             assert launcher.get_version() == "1.2.6"
 
 
-def test_unified_launcher_pyproject_toml_error():
+def test_unified_launcher_pyproject_toml_error() -> None:
     from importlib.metadata import PackageNotFoundError
 
-    def mock_version(pkg):
+    def mock_version(pkg) -> NoReturn:
         raise PackageNotFoundError
 
     with (
@@ -445,10 +448,10 @@ def test_unified_launcher_pyproject_toml_error():
             assert launcher.get_version() == "1.0.0-beta"
 
 
-def test_unified_launcher_get_version_hardcoded():
+def test_unified_launcher_get_version_hardcoded() -> None:
     from importlib.metadata import PackageNotFoundError
 
-    def mock_version(pkg):
+    def mock_version(pkg) -> NoReturn:
         raise PackageNotFoundError
 
     with (
@@ -465,7 +468,7 @@ def test_unified_launcher_get_version_hardcoded():
             assert launcher.get_version() == "1.0.0-beta"
 
 
-def test_launch():
+def test_launch() -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=True),
         patch("src.launchers.unified_launcher._get_golf_main") as mock_get_main,
@@ -478,7 +481,7 @@ def test_launch():
         mock_main.assert_called_once()
 
 
-def test_launch_no_pyqt6():
+def test_launch_no_pyqt6() -> None:
     with (
         patch("src.launchers.unified_launcher._is_pyqt6_available", return_value=False),
         patch("src.launchers.unified_launcher._get_golf_main") as mock_get_main,
@@ -487,7 +490,7 @@ def test_launch_no_pyqt6():
         mock_get_main.assert_not_called()
 
 
-def test_show_status_fn():
+def test_show_status_fn() -> None:
     with patch("src.launchers.unified_launcher.UnifiedLauncher.show_status") as mock_ss:
         show_status()
         mock_ss.assert_called_once()

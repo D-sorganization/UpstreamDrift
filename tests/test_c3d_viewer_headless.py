@@ -20,7 +20,7 @@ def import_c3d_viewer():
 
 
 @pytest.mark.skipif(sys.platform == "linux", reason="Requires X11 or Xvfb on Linux")
-def test_c3d_viewer_instantiation(qtbot):
+def test_c3d_viewer_instantiation(qtbot) -> None:
     """Test that the main window can be instantiated without crashing."""
     with patch.dict(sys.modules, {"c3d_reader": MagicMock()}):
         c3d_viewer = import_c3d_viewer()

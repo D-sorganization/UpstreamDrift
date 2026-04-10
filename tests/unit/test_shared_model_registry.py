@@ -11,7 +11,7 @@ from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 class TestModelRegistry(unittest.TestCase):
     """Test cases for ModelRegistry."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.valid_yaml = """
         models:
@@ -33,7 +33,7 @@ class TestModelRegistry(unittest.TestCase):
 
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
-    def test_load_registry_success(self, mock_file, mock_exists):
+    def test_load_registry_success(self, mock_file, mock_exists) -> None:
         """Test successful loading of model registry."""
         mock_exists.return_value = True
         mock_file.return_value.read.return_value = self.valid_yaml
@@ -56,7 +56,7 @@ class TestModelRegistry(unittest.TestCase):
             self.assertEqual(model.type, "urdf")
 
     @patch("pathlib.Path.exists")
-    def test_load_registry_not_found(self, mock_exists):
+    def test_load_registry_not_found(self, mock_exists) -> None:
         """Test loading when registry file does not exist."""
         mock_exists.return_value = False
         registry = ModelRegistry("dummy_path.yaml")
@@ -64,7 +64,7 @@ class TestModelRegistry(unittest.TestCase):
 
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
-    def test_load_registry_invalid_format(self, mock_file, mock_exists):
+    def test_load_registry_invalid_format(self, mock_file, mock_exists) -> None:
         """Test loading registry with invalid format."""
         mock_exists.return_value = True
         with patch("yaml.safe_load", return_value=yaml.safe_load(self.invalid_yaml)):
@@ -74,7 +74,7 @@ class TestModelRegistry(unittest.TestCase):
 
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
-    def test_load_registry_empty(self, mock_file, mock_exists):
+    def test_load_registry_empty(self, mock_file, mock_exists) -> None:
         """Test loading empty registry."""
         mock_exists.return_value = True
         with patch("yaml.safe_load", return_value={}):
@@ -84,7 +84,7 @@ class TestModelRegistry(unittest.TestCase):
 
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
-    def test_load_registry_yaml_error(self, mock_file, mock_exists):
+    def test_load_registry_yaml_error(self, mock_file, mock_exists) -> None:
         """Test loading registry with YAML syntax error raises."""
         mock_exists.return_value = True
         with (
@@ -95,7 +95,7 @@ class TestModelRegistry(unittest.TestCase):
 
     @patch("pathlib.Path.exists")
     @patch("builtins.open", new_callable=mock_open)
-    def test_load_registry_partial_failure(self, mock_file, mock_exists):
+    def test_load_registry_partial_failure(self, mock_file, mock_exists) -> None:
         """Test loading registry where one model is invalid."""
         partial_yaml = """
         models:
@@ -114,7 +114,7 @@ class TestModelRegistry(unittest.TestCase):
         self.assertEqual(len(registry.models), 1)
         self.assertIn("valid_model", registry.models)
 
-    def test_get_methods(self):
+    def test_get_methods(self) -> None:
         """Test retrieval methods."""
         # Setup registry manually
         registry = ModelRegistry("dummy.yaml")

@@ -10,13 +10,13 @@ from src.api.routes.force_overlays import (
 )
 
 
-def test_magnitude_to_color():
+def test_magnitude_to_color() -> None:
     assert _magnitude_to_color(0, 10) == [0.0, 1.0, 1.0, 1.0]
     assert _magnitude_to_color(5, 10) == [1.0, 1.0, 0.0, 1.0]
     assert _magnitude_to_color(10, 10) == [1.0, 0.0, 0.0, 1.0]  # based on t logic
 
 
-def test_resolve_joint_names():
+def test_resolve_joint_names() -> None:
     engine = Mock()
     engine.joint_names = ["j1", "j2"]
     assert _resolve_joint_names(engine, 2) == ["j1", "j2"]
@@ -25,7 +25,7 @@ def test_resolve_joint_names():
     assert _resolve_joint_names(engine, 2) == ["joint_0", "joint_1"]
 
 
-def test_should_include_force_type():
+def test_should_include_force_type() -> None:
     req = ForceOverlayRequest(
         enabled=True,
         force_types=["applied"],
@@ -41,13 +41,13 @@ def test_should_include_force_type():
     assert _should_include_force_type(req, "contact")
 
 
-def test_resolve_body_name():
+def test_resolve_body_name() -> None:
     names = ["j1", "j2"]
     assert _resolve_body_name(names, 0) == "j1"
     assert _resolve_body_name(names, 2) == "joint_2"
 
 
-def test_is_filtered_out():
+def test_is_filtered_out() -> None:
     req = ForceOverlayRequest(
         enabled=True,
         force_types=["all"],

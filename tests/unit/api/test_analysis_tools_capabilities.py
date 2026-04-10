@@ -13,7 +13,7 @@ import pytest
 class TestBodyPositionSupportCheck:
     """set_body_position must surface unsupported-engine errors."""
 
-    def test_check_raises_when_engine_has_neither_setter(self):
+    def test_check_raises_when_engine_has_neither_setter(self) -> None:
         """Engine with no setter methods → HTTPException (not silent success)."""
         from fastapi import HTTPException
 
@@ -29,14 +29,14 @@ class TestBodyPositionSupportCheck:
 
         assert exc_info.value.status_code in (400, 501)
 
-    def test_check_passes_when_engine_has_position_setter(self):
+    def test_check_passes_when_engine_has_position_setter(self) -> None:
         """Engine with set_body_position → no exception raised."""
         from src.api.routes.analysis_tools import _check_position_support
 
         engine = MagicMock(spec=["set_body_position"])
         _check_position_support(engine)  # should not raise
 
-    def test_check_passes_when_engine_has_rotation_setter(self):
+    def test_check_passes_when_engine_has_rotation_setter(self) -> None:
         """Engine with set_body_rotation alone → no exception raised."""
         from src.api.routes.analysis_tools import _check_position_support
 
@@ -47,7 +47,7 @@ class TestBodyPositionSupportCheck:
 class TestBodyMeasurementSupportCheck:
     """measure_distance must raise when engine lacks get_body_position."""
 
-    def test_get_positions_raises_when_engine_has_no_getter(self):
+    def test_get_positions_raises_when_engine_has_no_getter(self) -> None:
         """Engine without get_body_position → HTTPException (not zero vectors)."""
         from fastapi import HTTPException
 
@@ -61,7 +61,7 @@ class TestBodyMeasurementSupportCheck:
 
         assert exc_info.value.status_code in (400, 501)
 
-    def test_get_positions_returns_vectors_when_supported(self):
+    def test_get_positions_returns_vectors_when_supported(self) -> None:
         """Engine with get_body_position → returns actual position vectors."""
         import numpy as np
 
@@ -77,7 +77,7 @@ class TestBodyMeasurementSupportCheck:
         assert pos_a == [1.0, 2.0, 3.0]
         assert pos_b == [4.0, 5.0, 6.0]
 
-    def test_get_positions_handles_none_return(self):
+    def test_get_positions_handles_none_return(self) -> None:
         """Engine with get_body_position returning None → raises HTTPException."""
         from fastapi import HTTPException
 

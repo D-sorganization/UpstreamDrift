@@ -18,7 +18,7 @@ from src.shared.python.validation_pkg.validation_helpers import (
 class TestValidationHelpers:
     """Tests for physics validation helpers."""
 
-    def test_validate_finite(self):
+    def test_validate_finite(self) -> None:
         """Test validate_finite function."""
         valid_array = np.array([1.0, 2.0, 3.0])
         nan_array = np.array([1.0, np.nan, 3.0])
@@ -41,7 +41,7 @@ class TestValidationHelpers:
         with pytest.warns(UserWarning, match="contains NaN or Inf"):
             validate_finite(nan_array, "test", ValidationLevel.PERMISSIVE)
 
-    def test_validate_magnitude(self):
+    def test_validate_magnitude(self) -> None:
         """Test validate_magnitude function."""
         small_array = np.array([1.0, -1.0])
         large_array = np.array([100.0, -100.0])
@@ -70,7 +70,7 @@ class TestValidationHelpers:
                 large_array, "test", threshold, "units", ValidationLevel.PERMISSIVE
             )
 
-    def test_validate_joint_state(self):
+    def test_validate_joint_state(self) -> None:
         """Test validate_joint_state function."""
         qpos = np.zeros(3)
         qvel = np.zeros(3)
@@ -99,7 +99,7 @@ class TestValidationHelpers:
         with pytest.raises(PhysicsValidationError):
             validate_joint_state(qpos, huge_vel, level=ValidationLevel.STRICT)
 
-    def test_validate_cartesian_state(self):
+    def test_validate_cartesian_state(self) -> None:
         """Test validate_cartesian_state function."""
         pos = np.zeros(3)
         vel = np.zeros(3)
@@ -120,7 +120,7 @@ class TestValidationHelpers:
                 acceleration=huge_acc, level=ValidationLevel.STRICT
             )
 
-    def test_validate_model_parameters(self):
+    def test_validate_model_parameters(self) -> None:
         """Test validate_model_parameters function."""
         valid_masses = np.array([10.0, 50.0])
 

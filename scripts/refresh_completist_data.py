@@ -20,7 +20,7 @@ EXCLUDE_DIRS = [
 ]
 
 
-def run_grep(pattern, output_file, extended_regex=False):
+def run_grep(pattern, output_file, extended_regex=False) -> None:
     """Run grep with the given pattern and write results to output_file."""
     if not isinstance(pattern, str):
         raise ValueError("pattern must be a string")
@@ -46,7 +46,7 @@ def run_grep(pattern, output_file, extended_regex=False):
         pass
 
 
-def main():
+def main() -> None:
     """Refresh completist audit data by running grep scans and stub finders."""
 
     # 1. Run find_stubs.py

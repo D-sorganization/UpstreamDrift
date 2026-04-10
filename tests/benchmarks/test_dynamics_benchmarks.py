@@ -74,19 +74,19 @@ def dynamics_setup():
     return model, q, qd, qdd, tau
 
 
-def test_aba_benchmark(benchmark, dynamics_setup):
+def test_aba_benchmark(benchmark, dynamics_setup) -> None:
     """Benchmark the Articulated Body Algorithm."""
     model, q, qd, _, tau = dynamics_setup
     benchmark(aba, model, q, qd, tau)
 
 
-def test_crba_benchmark(benchmark, dynamics_setup):
+def test_crba_benchmark(benchmark, dynamics_setup) -> None:
     """Benchmark the Composite Rigid Body Algorithm."""
     model, q, _, _, _ = dynamics_setup
     benchmark(crba, model, q)
 
 
-def test_rnea_benchmark(benchmark, dynamics_setup):
+def test_rnea_benchmark(benchmark, dynamics_setup) -> None:
     """Benchmark the Recursive Newton-Euler Algorithm."""
     model, q, qd, qdd, _ = dynamics_setup
     benchmark(rnea, model, q, qd, qdd)

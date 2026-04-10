@@ -21,7 +21,7 @@ from src.shared.python.data_io.output_manager import (
 )
 
 
-def _has_parquet_support():
+def _has_parquet_support() -> bool | None:
     """Check if parquet support is available."""
     try:
         import pyarrow  # noqa: F401
@@ -36,7 +36,7 @@ def _has_parquet_support():
             return False
 
 
-def _has_hdf5_support():
+def _has_hdf5_support() -> bool | None:
     """Check if HDF5 support is available."""
     try:
         import tables  # noqa: F401
@@ -83,7 +83,7 @@ def sample_dict_data():
 class TestOutputManager:
     """Test suite for OutputManager class."""
 
-    def test_initialization(self, temp_output_dir):
+    def test_initialization(self, temp_output_dir) -> None:
         """Test initialization and directory creation."""
         manager = OutputManager(base_path=temp_output_dir)
         manager.create_output_structure()
@@ -94,7 +94,7 @@ class TestOutputManager:
         assert (manager.base_path / "analysis").exists()
         assert (manager.base_path / "reports").exists()
 
-    def test_auto_path_resolution(self):
+    def test_auto_path_resolution(self) -> None:
         """Test automatic path resolution when base_path is None."""
         # Use patch to mock Path behavior
         with patch("src.shared.python.data_io.output_manager.Path") as MockPath:
@@ -156,7 +156,7 @@ class TestOutputManager:
             manager = OutputManager()
             assert manager.base_path is not None
 
-    def test_save_load_csv(self, output_manager, sample_data):
+    def test_save_load_csv(self, output_manager, sample_data) -> None:
         """Test saving and loading CSV files."""
         filename = "test_sim"
 
@@ -173,7 +173,7 @@ class TestOutputManager:
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
-    def test_save_load_json(self, output_manager, sample_dict_data):
+    def test_save_load_json(self, output_manager, sample_dict_data) -> None:
         """Test saving and loading JSON files."""
         filename = "test_sim"
 
@@ -193,7 +193,7 @@ class TestOutputManager:
         assert loaded_data["results"]["score"] == 100
         assert loaded_data["array"] == [1, 2, 3]
 
-    def test_save_load_pickle(self, output_manager, sample_dict_data):
+    def test_save_load_pickle(self, output_manager, sample_dict_data) -> None:
         """Test that Pickle format raises security error."""
         filename = "test_sim"
 
@@ -209,7 +209,7 @@ class TestOutputManager:
         not _has_parquet_support(),
         reason="Parquet support not available (missing pyarrow/fastparquet)",
     )
-    def test_save_load_parquet(self, output_manager, sample_data):
+    def test_save_load_parquet(self, output_manager, sample_data) -> None:
         """Test saving and loading Parquet files."""
         filename = "test_sim"
 
@@ -229,7 +229,7 @@ class TestOutputManager:
     @pytest.mark.skipif(
         not _has_hdf5_support(), reason="HDF5 support not available (missing pytables)"
     )
-    def test_save_load_hdf5(self, output_manager, sample_data):
+    def test_save_load_hdf5(self, output_manager, sample_data) -> None:
         """Test saving and loading HDF5 files."""
         filename = "test_sim"
 
@@ -246,7 +246,7 @@ class TestOutputManager:
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
-    def test_save_dict_as_csv(self, output_manager):
+    def test_save_dict_as_csv(self, output_manager) -> None:
         """Test saving dictionary as CSV."""
         data = {"col1": [1, 2], "col2": [3, 4]}
         filename = "test_dict_csv"
@@ -258,7 +258,7 @@ class TestOutputManager:
         assert len(loaded_df) == 2
         assert list(loaded_df.columns) == ["col1", "col2"]
 
-    def test_get_simulation_list(self, output_manager, sample_data):
+    def test_get_simulation_list(self, output_manager, sample_data) -> None:
         """Test listing simulation files."""
         # Create some files
         output_manager.save_simulation_results(
@@ -277,7 +277,7 @@ class TestOutputManager:
         assert any("sim1" in s for s in mujoco_sims)
         assert not any("sim2" in s for s in mujoco_sims)
 
-    def test_export_analysis_report(self, output_manager):
+    def test_export_analysis_report(self, output_manager) -> None:
         """Test exporting analysis reports."""
         data = {"metric": 0.95, "status": "pass"}
         name = "test_report"
@@ -299,7 +299,7 @@ class TestOutputManager:
             assert "metric" in content
             assert "0.95" in content
 
-    def test_cleanup_old_files(self, output_manager, sample_data):
+    def test_cleanup_old_files(self, output_manager, sample_data) -> None:
         """Test cleaning up old files."""
         # Create a file
         filename = "old_sim"
@@ -331,7 +331,7 @@ class TestOutputManager:
         )
         assert archive_path.exists()
 
-    def test_convenience_functions(self, temp_output_dir, sample_data):
+    def test_convenience_functions(self, temp_output_dir, sample_data) -> None:
         """Test global convenience functions."""
         # We need to patch OutputManager to use our temp dir
         with patch(
@@ -346,7 +346,7 @@ class TestOutputManager:
             load_results("test", "csv")
             instance.load_simulation_results.assert_called_once()
 
-    def test_json_serialization_edge_cases(self, output_manager):
+    def test_json_serialization_edge_cases(self, output_manager) -> None:
         """Test JSON serialization of types like datetime and numpy scalar."""
         data = {
             "date": datetime(2023, 1, 1),

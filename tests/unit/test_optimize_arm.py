@@ -35,7 +35,7 @@ for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
         del sys.modules[_key]
 
 
-def setup_module(module):
+def setup_module(module) -> None:
     """Re-install mocks for test execution in this module."""
     for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
         if key in sys.modules:
@@ -45,7 +45,7 @@ def setup_module(module):
     sys.modules["pinocchio.casadi"] = cpin
 
 
-def teardown_module(module):
+def teardown_module(module) -> None:
     """Clean up sys.modules pollution by restoring original modules."""
     for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
         if key in _saved_modules:
@@ -132,7 +132,7 @@ def mock_pinocchio():
     return model
 
 
-def test_main_execution(mock_casadi, mock_pinocchio):
+def test_main_execution(mock_casadi, mock_pinocchio) -> None:
     with (
         patch("os.path.exists", return_value=True),
         patch(
@@ -151,7 +151,7 @@ def test_main_execution(mock_casadi, mock_pinocchio):
         assert mock_save.call_count == 3
 
 
-def test_main_missing_dependencies():
+def test_main_missing_dependencies() -> None:
     with (
         patch(
             "src.shared.python.optimization.examples.optimize_arm.DEPENDENCIES_AVAILABLE",
@@ -172,12 +172,12 @@ def test_main_missing_dependencies():
         )
 
 
-def test_urdf_not_found():
+def test_urdf_not_found() -> None:
     with patch("os.path.exists", return_value=False), pytest.raises(SystemExit):
         main()
 
 
-def test_optimization_failure(mock_casadi, mock_pinocchio):
+def test_optimization_failure(mock_casadi, mock_pinocchio) -> None:
     mock_casadi.solve.side_effect = RuntimeError("Infeasible")
 
     with patch("os.path.exists", return_value=True), pytest.raises(SystemExit):

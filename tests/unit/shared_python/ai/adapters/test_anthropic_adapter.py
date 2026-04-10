@@ -39,7 +39,7 @@ def adapter():
     return AnthropicAdapter(api_key="sk-ant", model="claude-3", timeout=30.0)
 
 
-def test_init(adapter):
+def test_init(adapter) -> None:
     """Test initialization."""
     assert adapter._api_key == "sk-ant"
     assert adapter._model == "claude-3"
@@ -47,7 +47,7 @@ def test_init(adapter):
     assert adapter._client is None
 
 
-def test_get_client(adapter):
+def test_get_client(adapter) -> None:
     sys.modules["anthropic"].Anthropic.reset_mock()
     """Test client lazy loading."""
     client = adapter._get_client()
@@ -62,7 +62,7 @@ def test_get_client(adapter):
     assert client2 == client
 
 
-def test_get_client_import_error():
+def test_get_client_import_error() -> None:
     """Test missing anthropic package."""
     adapter = AnthropicAdapter("sk-ant")
 
@@ -80,7 +80,7 @@ def test_get_client_import_error():
         adapter._get_client()
 
 
-def test_capabilities(adapter):
+def test_capabilities(adapter) -> None:
     """Test capabilities declaration."""
     caps = adapter.capabilities
     assert caps.provider_name == "anthropic"
@@ -90,7 +90,7 @@ def test_capabilities(adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_validate_connection_success(mock_get_client, adapter):
+def test_validate_connection_success(mock_get_client, adapter) -> None:
     """Test validate_connection success."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -110,7 +110,7 @@ def test_validate_connection_success(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_validate_connection_errors(mock_get_client, adapter):
+def test_validate_connection_errors(mock_get_client, adapter) -> None:
     """Test validate_connection error handling."""
     mock_client = MagicMock()
     mock_get_client.return_value = mock_client
@@ -131,7 +131,7 @@ def test_validate_connection_errors(mock_get_client, adapter):
     assert "network error" in msg
 
 
-def test_ensure_alternating_roles(adapter):
+def test_ensure_alternating_roles(adapter) -> None:
     """Test merging of consecutive identical roles."""
     messages = [
         {"role": "user", "content": "hi"},
@@ -164,7 +164,7 @@ def test_ensure_alternating_roles(adapter):
     assert alternated[2]["content"][1]["text"] == "you"
 
 
-def test_format_messages(adapter):
+def test_format_messages(adapter) -> None:
     """Test format_messages mapping tool interactions."""
     ctx = ConversationContext()
     ctx.user_expertise = ExpertiseLevel.EXPERT
@@ -203,7 +203,7 @@ def test_format_messages(adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_send_message_success(mock_get_client, adapter):
+def test_send_message_success(mock_get_client, adapter) -> None:
     """Test send_message success."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -237,7 +237,7 @@ def test_send_message_success(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_send_message_with_tools(mock_get_client, adapter):
+def test_send_message_with_tools(mock_get_client, adapter) -> None:
     """Test send_message receiving a tool call."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -267,7 +267,7 @@ def test_send_message_with_tools(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_send_message_error_handling(mock_get_client, adapter):
+def test_send_message_error_handling(mock_get_client, adapter) -> None:
     """Test error handling in send_message."""
     mock_client = MagicMock()
     mock_get_client.return_value = mock_client
@@ -291,7 +291,7 @@ def test_send_message_error_handling(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_stream_response(mock_get_client, adapter):
+def test_stream_response(mock_get_client, adapter) -> None:
     """Test streaming response."""
     mock_client = MagicMock()
 
@@ -334,7 +334,7 @@ def test_stream_response(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.anthropic_adapter.AnthropicAdapter._get_client")
-def test_stream_error_handling(mock_get_client, adapter):
+def test_stream_error_handling(mock_get_client, adapter) -> None:
     """Test streaming error handling."""
     mock_client = MagicMock()
 

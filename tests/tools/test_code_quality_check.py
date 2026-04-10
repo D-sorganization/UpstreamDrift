@@ -16,7 +16,7 @@ from src.tools.code_quality_check import (
 # ─── is_legitimate_pass_context ────────────────────────────────
 
 
-def test_is_legitimate_pass_context():
+def test_is_legitimate_pass_context() -> None:
     lines = [
         "def foo():",
         "    try:",
@@ -31,38 +31,38 @@ def test_is_legitimate_pass_context():
     assert is_legitimate_pass_context(lines, 7) is True  # inside class
 
 
-def test_legitimate_pass_in_with_block():
+def test_legitimate_pass_in_with_block() -> None:
     lines = ["with open('f') as f:", "    pass"]
     assert is_legitimate_pass_context(lines, 2) is True
 
 
-def test_legitimate_pass_line_too_large():
+def test_legitimate_pass_line_too_large() -> None:
     lines = ["pass"]
     assert is_legitimate_pass_context(lines, 99) is False
 
 
-def test_legitimate_pass_line_zero():
+def test_legitimate_pass_line_zero() -> None:
     lines = ["pass"]
     assert is_legitimate_pass_context(lines, 0) is False
 
 
-def test_non_pass_line_returns_false():
+def test_non_pass_line_returns_false() -> None:
     lines = ["x = 1", "y = 2"]
     assert is_legitimate_pass_context(lines, 1) is False
 
 
-def test_pass_inside_function_is_not_legitimate():
+def test_pass_inside_function_is_not_legitimate() -> None:
     lines = ["def foo():", "    pass"]
     # Inside a function def → NOT legitimate (a stub function)
     assert is_legitimate_pass_context(lines, 2) is False
 
 
-def test_is_legitimate_pass_dbc_non_list():
+def test_is_legitimate_pass_dbc_non_list() -> None:
     with pytest.raises(PreconditionError):
         is_legitimate_pass_context("not a list", 1)  # type: ignore[arg-type]
 
 
-def test_is_legitimate_pass_dbc_non_int():
+def test_is_legitimate_pass_dbc_non_int() -> None:
     with pytest.raises(PreconditionError):
         is_legitimate_pass_context(["pass"], "1")  # type: ignore[arg-type]
 
@@ -70,7 +70,7 @@ def test_is_legitimate_pass_dbc_non_int():
 # ─── check_banned_patterns ─────────────────────────────────────
 
 
-def test_check_banned_patterns():
+def test_check_banned_patterns() -> None:
     lines = ["# TRACKED_TASK: fix this", "def test():", "    ...  ", "    pass"]
     issues = check_banned_patterns(lines, Path("test_file.py"))
     assert len(issues) >= 2
@@ -79,43 +79,43 @@ def test_check_banned_patterns():
     assert any("Ellipsis placeholder" in t for t in types)
 
 
-def test_check_banned_patterns_fixme():
+def test_check_banned_patterns_fixme() -> None:
     lines = ["# TRACKED_DEFECT: broken logic"]
     issues = check_banned_patterns(lines, Path("test.py"))
     assert any("TRACKED_DEFECT" in i[1] for i in issues)
 
 
-def test_check_banned_patterns_not_implemented_error():
+def test_check_banned_patterns_not_implemented_error() -> None:
     lines = ["    raise NotImplementedError"]
     issues = check_banned_patterns(lines, Path("test.py"))
     assert any("NotImplementedError" in i[1] for i in issues)
 
 
-def test_check_banned_patterns_template_placeholder():
+def test_check_banned_patterns_template_placeholder() -> None:
     lines = ["    # Insert your code here"]
     issues = check_banned_patterns(lines, Path("test.py"))
     assert any("placeholder" in i[1].lower() for i in issues)
 
 
-def test_check_banned_patterns_skips_quality_scripts():
+def test_check_banned_patterns_skips_quality_scripts() -> None:
     """Self-referential quality check scripts must be excluded."""
     lines = ["# TRACKED_TASK: internal marker"]
     issues = check_banned_patterns(lines, Path("code_quality_check.py"))
     assert issues == []
 
 
-def test_check_banned_patterns_clean():
+def test_check_banned_patterns_clean() -> None:
     lines = ["def add(x, y):", '    """Add two numbers."""', "    return x + y"]
     issues = check_banned_patterns(lines, Path("math_utils.py"))
     assert issues == []
 
 
-def test_check_banned_patterns_dbc_non_list():
+def test_check_banned_patterns_dbc_non_list() -> None:
     with pytest.raises(PreconditionError):
         check_banned_patterns("not a list", Path("test.py"))  # type: ignore[arg-type]
 
 
-def test_check_banned_patterns_dbc_non_path():
+def test_check_banned_patterns_dbc_non_path() -> None:
     with pytest.raises(PreconditionError):
         check_banned_patterns([], "/not/a/path")  # type: ignore[arg-type]
 
@@ -123,13 +123,13 @@ def test_check_banned_patterns_dbc_non_path():
 # ─── check_magic_numbers ───────────────────────────────────────
 
 
-def test_check_magic_numbers():
+def test_check_magic_numbers() -> None:
     lines = ["x = 3.141 * r", "y = 9.8 * m", "z = 6.67 * x"]
     issues = check_magic_numbers(lines, Path("test_file.py"))
     assert len(issues) == 3
 
 
-def test_check_magic_numbers_in_comment_ignored():
+def test_check_magic_numbers_in_comment_ignored() -> None:
     """Magic numbers only inside comments should not be flagged."""
     lines = ["# constant is 3.141 for pi"]
     issues = check_magic_numbers(lines, Path("test.py"))
@@ -137,24 +137,24 @@ def test_check_magic_numbers_in_comment_ignored():
     assert issues == []
 
 
-def test_check_magic_numbers_skips_quality_scripts():
+def test_check_magic_numbers_skips_quality_scripts() -> None:
     lines = ["x = 3.141 * r"]
     issues = check_magic_numbers(lines, Path("code_quality_check.py"))
     assert issues == []
 
 
-def test_check_magic_numbers_gravity():
+def test_check_magic_numbers_gravity() -> None:
     lines = ["g = 9.81"]
     issues = check_magic_numbers(lines, Path("physics.py"))
     assert any("GRAVITY" in i[1] for i in issues)
 
 
-def test_check_magic_numbers_dbc_non_list():
+def test_check_magic_numbers_dbc_non_list() -> None:
     with pytest.raises(PreconditionError):
         check_magic_numbers("not a list", Path("test.py"))  # type: ignore[arg-type]
 
 
-def test_check_magic_numbers_dbc_non_path():
+def test_check_magic_numbers_dbc_non_path() -> None:
     with pytest.raises(PreconditionError):
         check_magic_numbers([], "/not/a/path")  # type: ignore[arg-type]
 
@@ -162,37 +162,37 @@ def test_check_magic_numbers_dbc_non_path():
 # ─── check_ast_issues ──────────────────────────────────────────
 
 
-def test_check_ast_issues():
+def test_check_ast_issues() -> None:
     content = "def missing_docstring():\n    return 1"
     issues = check_ast_issues(content, Path("test_file.py"))
     assert len(issues) == 1
     assert "missing docstring" in issues[0][1]
 
 
-def test_check_ast_issues_with_docstring():
+def test_check_ast_issues_with_docstring() -> None:
     content = 'def good():\n    """Has docstring."""\n    return 1'
     issues = check_ast_issues(content, Path("test.py"))
     assert not any("missing docstring" in i[1] for i in issues)
 
 
-def test_check_ast_issues_syntax_error():
+def test_check_ast_issues_syntax_error() -> None:
     content = "def :"
     issues = check_ast_issues(content, Path("bad.py"))
     assert any("Syntax error" in i[1] for i in issues)
 
 
-def test_check_ast_issues_skips_quality_scripts():
+def test_check_ast_issues_skips_quality_scripts() -> None:
     content = "def no_docstring():\n    pass"
     issues = check_ast_issues(content, Path("code_quality_check.py"))
     assert issues == []
 
 
-def test_check_ast_issues_dbc_non_string():
+def test_check_ast_issues_dbc_non_string() -> None:
     with pytest.raises(PreconditionError):
         check_ast_issues(123, Path("test.py"))  # type: ignore[arg-type]
 
 
-def test_check_ast_issues_dbc_non_path():
+def test_check_ast_issues_dbc_non_path() -> None:
     with pytest.raises(PreconditionError):
         check_ast_issues("x = 1", "/not/a/path")  # type: ignore[arg-type]
 
@@ -200,30 +200,30 @@ def test_check_ast_issues_dbc_non_path():
 # ─── check_file ────────────────────────────────────────────────
 
 
-def test_check_file_clean(tmp_path):
+def test_check_file_clean(tmp_path) -> None:
     f = tmp_path / "clean.py"
     f.write_text('def add(x, y):\n    """Add two numbers."""\n    return x + y\n')
     issues = check_file(f)
     assert issues == []
 
 
-def test_check_file_with_todo(tmp_path):
+def test_check_file_with_todo(tmp_path) -> None:
     f = tmp_path / "TRACKED_TASK.py"
     f.write_text("# TRACKED_TASK: fix this\n")
     issues = check_file(f)
     assert any("TRACKED_TASK" in i[1] for i in issues)
 
 
-def test_check_file_dbc_non_path():
+def test_check_file_dbc_non_path() -> None:
     with pytest.raises(PreconditionError):
         check_file("/not/a/path/object")  # type: ignore[arg-type]
 
 
-def test_check_file_dbc_missing():
+def test_check_file_dbc_missing() -> None:
     with pytest.raises(PreconditionError):
         check_file(Path("/nonexistent/file.py"))
 
 
-def test_check_file_dbc_directory(tmp_path):
+def test_check_file_dbc_directory(tmp_path) -> None:
     with pytest.raises(PreconditionError):
         check_file(tmp_path)  # directory, not a file

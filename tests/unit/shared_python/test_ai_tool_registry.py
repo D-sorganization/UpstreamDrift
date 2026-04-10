@@ -12,7 +12,7 @@ from src.shared.python.ai.tool_registry import (
 )
 
 
-def test_tool_parameter_to_json():
+def test_tool_parameter_to_json() -> None:
     tp = ToolParameter("p1", "desc", type="string", required=True, default="a")
     js = tp.to_json_schema()
     assert js["type"] == "string"
@@ -25,7 +25,7 @@ def test_tool_parameter_to_json():
     assert js2["enum"] == ["x", "y"]
 
 
-def test_tool_to_json_schema():
+def test_tool_to_json_schema() -> None:
     def handler(a):
         return a
 
@@ -42,7 +42,7 @@ def test_tool_to_json_schema():
     assert "a" in js["parameters"]["required"]
 
 
-def test_tool_formats():
+def test_tool_formats() -> None:
     def handler(a):
         return a
 
@@ -57,7 +57,7 @@ def test_tool_formats():
     assert "input_schema" in anthropic
 
 
-def test_validate_arguments():
+def test_validate_arguments() -> None:
     def handler(a, b=1):
         return a + b
 
@@ -90,7 +90,7 @@ def test_validate_arguments():
     assert t.validate_arguments({"a": 1, "b": "x"}) == []
 
 
-def test_execute():
+def test_execute() -> None:
     def handler(a):
         if a == 0:
             raise ValueError("bad a")
@@ -114,7 +114,7 @@ def test_execute():
     assert "bad a" in res_exc.error
 
 
-def test_registry_extract_parameters():
+def test_registry_extract_parameters() -> None:
     reg = ToolRegistry()
 
     def my_func(a: int, b: str = "yes") -> None:
@@ -131,7 +131,7 @@ def test_registry_extract_parameters():
     assert params[1].required is False
 
 
-def test_registry_register_and_execute():
+def test_registry_register_and_execute() -> None:
     reg = ToolRegistry()
 
     @reg.register("add", "adds")
@@ -149,15 +149,15 @@ def test_registry_register_and_execute():
         reg.execute("missing", {})
 
 
-def test_registry_list_tools():
+def test_registry_list_tools() -> None:
     reg = ToolRegistry()
 
     @reg.register("t1", "desc1", category=ToolCategory.ANALYSIS, expertise_level=1)
-    def t1():
+    def t1() -> None:
         pass
 
     @reg.register("t2", "desc2", category=ToolCategory.SIMULATION, expertise_level=3)
-    def t2():
+    def t2() -> None:
         pass
 
     all_t = reg.list_tools()
@@ -172,11 +172,11 @@ def test_registry_list_tools():
     assert exp_t[0].name == "t1"
 
 
-def test_get_tools_for_provider():
+def test_get_tools_for_provider() -> None:
     reg = ToolRegistry()
 
     @reg.register("tool", "desc")
-    def tool():
+    def tool() -> None:
         pass
 
     assert "type" in reg.get_tools_for_provider("openai")[0]
@@ -184,13 +184,13 @@ def test_get_tools_for_provider():
     assert "type" not in reg.get_tools_for_provider("json")[0]  # JSON schema format
 
 
-def test_global_registry():
+def test_global_registry() -> None:
     r1 = get_global_registry()
     r2 = get_global_registry()
     assert r1 is r2
 
 
-def test_python_type_to_json():
+def test_python_type_to_json() -> None:
     reg = ToolRegistry()
     assert reg._python_type_to_json(str) == "string"
     assert reg._python_type_to_json(int) == "integer"

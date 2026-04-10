@@ -15,7 +15,7 @@ from src.shared.python.core.constants import (
 class TestPhysicalConstantXMLSafety:
     """Test that PhysicalConstants work safely in XML templates."""
 
-    def test_physical_constant_in_f_string_with_float_conversion(self):
+    def test_physical_constant_in_f_string_with_float_conversion(self) -> None:
         """PhysicalConstants must be converted to float in XML f-strings."""
         # Correct usage: explicit float() conversion
         xml_string = f'<option gravity="0 0 -{float(GRAVITY_M_S2)}"/>'
@@ -40,7 +40,7 @@ class TestPhysicalConstantXMLSafety:
         assert gy == 0.0
         assert 9.0 < abs(gz) < 10.0, f"Gravity value {gz} out of expected range"
 
-    def test_physical_constant_without_float_fails(self):
+    def test_physical_constant_without_float_fails(self) -> None:
         """PhysicalConstant __repr__ in XML should be detectable."""
         # Incorrect usage (what we want to prevent)
         xml_string = f'<option gravity="0 0 -{GRAVITY_M_S2}"/>'
@@ -60,7 +60,7 @@ class TestPhysicalConstantXMLSafety:
         # The string will contain "PhysicalConstant(...)"
         assert "PhysicalConstant" in gravity_attr
 
-    def test_all_gravity_usages_in_codebase_pattern(self):
+    def test_all_gravity_usages_in_codebase_pattern(self) -> None:
         """Verify the float() pattern works for various use cases."""
         # MuJoCo XML pattern
         timestep = 0.001
@@ -80,7 +80,7 @@ class TestPhysicalConstantXMLSafety:
         gz = float(gravity.split()[-1])
         assert 9.0 < abs(gz) < 10.0
 
-    def test_multiple_physical_constants_in_xml(self):
+    def test_multiple_physical_constants_in_xml(self) -> None:
         """Multiple PhysicalConstants can be used in same XML."""
         xml = f"""
         <physics>
@@ -117,7 +117,7 @@ class TestPhysicalConstantXMLSafety:
         assert 0.04 < mass < 0.05  # ~45g
         assert 1.0 < density < 1.5  # ~1.225 kg/m³
 
-    def test_physical_constant_arithmetic_in_xml(self):
+    def test_physical_constant_arithmetic_in_xml(self) -> None:
         """PhysicalConstants work in arithmetic expressions."""
         # Compute effective gravity (e.g., for incline)
         angle_rad = np.pi / 6  # 30 degrees
@@ -131,7 +131,7 @@ class TestPhysicalConstantXMLSafety:
         force = float(force_val)
         assert abs(force - (9.80665 * 0.5)) < 0.01
 
-    def test_physical_constant_behaves_as_float(self):
+    def test_physical_constant_behaves_as_float(self) -> None:
         """PhysicalConstants should work in all float contexts."""
         g = GRAVITY_M_S2
 
@@ -153,7 +153,7 @@ class TestPhysicalConstantXMLSafety:
         assert isinstance(float(g), float)
         assert float(g) == pytest.approx(9.80665)
 
-    def test_custom_physical_constant_in_xml(self):
+    def test_custom_physical_constant_in_xml(self) -> None:
         """User-defined PhysicalConstants work the same way."""
         custom_gravity = PhysicalConstant(
             3.71, "m/s^2", "NASA Mars Fact Sheet", "Mars surface gravity"
@@ -167,7 +167,7 @@ class TestPhysicalConstantXMLSafety:
         mars_g = float(mars_g_val)
         assert mars_g == pytest.approx(3.71)
 
-    def test_prevent_accidental_string_concat(self):
+    def test_prevent_accidental_string_concat(self) -> None:
         """Ensure float() prevents string concatenation issues."""
         # Wrong: string concatenation
         bad_xml = '<val>" + str(GRAVITY_M_S2) + "</val>'  # Deliberate bad example  # noqa: F841
@@ -184,7 +184,7 @@ class TestPhysicalConstantXMLSafety:
 class TestPhysicalConstantEdgeCases:
     """Test edge cases and potential failure modes."""
 
-    def test_very_small_physical_constant(self):
+    def test_very_small_physical_constant(self) -> None:
         """Small constants (e.g., epsilon) format correctly."""
         epsilon = PhysicalConstant(
             1e-15, "dimensionless", "Machine precision", "Float64 epsilon"
@@ -197,7 +197,7 @@ class TestPhysicalConstantEdgeCases:
         tol = float(root.text)
         assert tol == 1e-15
 
-    def test_very_large_physical_constant(self):
+    def test_very_large_physical_constant(self) -> None:
         """Large constants (e.g., speed of light) format correctly."""
         from src.shared.python.core.constants import SPEED_OF_LIGHT_M_S
 
@@ -208,7 +208,7 @@ class TestPhysicalConstantEdgeCases:
         speed = float(root.text)
         assert speed == 299792458.0
 
-    def test_negative_physical_constant(self):
+    def test_negative_physical_constant(self) -> None:
         """Negative values (e.g., downward gravity) work."""
         # Gravity pointing down
         gz = -float(GRAVITY_M_S2)
@@ -221,7 +221,7 @@ class TestPhysicalConstantEdgeCases:
         assert val < 0
         assert val == pytest.approx(-9.80665)
 
-    def test_physical_constant_in_attribute_vs_text(self):
+    def test_physical_constant_in_attribute_vs_text(self) -> None:
         """PhysicalConstants work as both attributes and text content."""
         xml = f"""
         <param gravity_attr="{float(GRAVITY_M_S2)}">
@@ -239,7 +239,7 @@ class TestPhysicalConstantEdgeCases:
         assert text_val == pytest.approx(9.80665)
 
 
-def test_regression_pr303_gravity_xml_bug():
+def test_regression_pr303_gravity_xml_bug() -> None:
     """Regression test for PR303 PhysicalConstant XML bug.
 
     Bug: Using {GRAVITY_M_S2} directly in f-string produced:

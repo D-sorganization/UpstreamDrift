@@ -22,7 +22,7 @@ class TestAPIKeyOrmFieldAlignment:
     """APIKey ORM model and dependency layer use the same column name."""
 
     @requires_sqlalchemy
-    def test_apikey_has_key_prefix_column(self):
+    def test_apikey_has_key_prefix_column(self) -> None:
         """ORM model defines key_prefix column (not prefix_hash)."""
         from src.api.auth.models import APIKey
 
@@ -30,14 +30,14 @@ class TestAPIKeyOrmFieldAlignment:
         assert "key_prefix" in col_names
 
     @requires_sqlalchemy
-    def test_apikey_does_not_have_prefix_hash_column(self):
+    def test_apikey_does_not_have_prefix_hash_column(self) -> None:
         """ORM model does not define prefix_hash — that name is wrong."""
         from src.api.auth.models import APIKey
 
         col_names = {c.key for c in APIKey.__table__.columns}
         assert "prefix_hash" not in col_names
 
-    def test_dependency_references_key_prefix_not_prefix_hash(self):
+    def test_dependency_references_key_prefix_not_prefix_hash(self) -> None:
         """_lookup_api_key_by_prefix uses APIKey.key_prefix in its filter call."""
         from pathlib import Path
 
@@ -50,7 +50,7 @@ class TestAPIKeyOrmFieldAlignment:
             "dependencies.py must filter on APIKey.key_prefix"
         )
 
-    def test_dependency_does_not_reference_apikey_prefix_hash(self):
+    def test_dependency_does_not_reference_apikey_prefix_hash(self) -> None:
         """No ORM attribute access APIKey.prefix_hash — that column does not exist."""
         from pathlib import Path
 
@@ -66,7 +66,7 @@ class TestAPIKeyOrmFieldAlignment:
         )
 
     @requires_sqlalchemy
-    def test_lookup_does_not_raise_attribute_error(self):
+    def test_lookup_does_not_raise_attribute_error(self) -> None:
         """Filter on key_prefix succeeds; filter on prefix_hash raises AttributeError."""
         from unittest.mock import MagicMock
 

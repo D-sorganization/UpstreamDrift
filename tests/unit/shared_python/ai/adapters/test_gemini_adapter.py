@@ -15,7 +15,7 @@ import pytest  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
-def reset_mocks():
+def reset_mocks() -> None:
     sys.modules["google.generativeai"].reset_mock()
 
 
@@ -33,7 +33,7 @@ from src.shared.python.ai.types import (  # noqa: E402
 )
 
 
-def test_init_missing_package():
+def test_init_missing_package() -> None:
     """Test behavior when the gemini package is missing."""
     with (
         patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", False),
@@ -46,7 +46,7 @@ def test_init_missing_package():
 
 @patch("src.shared.python.ai.adapters.gemini_adapter.genai.configure")
 @patch("src.shared.python.ai.adapters.gemini_adapter.GenerativeModel")
-def test_init_success(mock_model_cls, mock_configure):
+def test_init_success(mock_model_cls, mock_configure) -> None:
     adapter = GeminiAdapter("sk-gemini", "gemini-test-model")
 
     mock_configure.assert_called_once_with(api_key="sk-gemini")
@@ -56,7 +56,7 @@ def test_init_success(mock_model_cls, mock_configure):
     assert adapter._model_name == "gemini-test-model"
 
 
-def test_capabilities():
+def test_capabilities() -> None:
     """Test capabilities properly define vision and streaming."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk-gemini")
@@ -69,7 +69,7 @@ def test_capabilities():
     assert ProviderCapability.FUNCTION_CALLING not in caps.supported
 
 
-def test_validate_connection_success():
+def test_validate_connection_success() -> None:
     """Test a successful connection validation."""
 
     # The generative model is returned by the class constructor mock
@@ -85,7 +85,7 @@ def test_validate_connection_success():
     mock_model_inst.generate_content.assert_called_once_with("Hello")
 
 
-def test_validate_connection_failure():
+def test_validate_connection_failure() -> None:
     """Test a failed connection validation."""
 
     mock_model_inst = sys.modules["google.generativeai"].GenerativeModel.return_value
@@ -99,7 +99,7 @@ def test_validate_connection_failure():
     assert "Connection failed" in msg
 
 
-def test_build_chat_session():
+def test_build_chat_session() -> None:
     """Test history parser for Gemini chat."""
 
     sys.modules["google.generativeai"].configure.reset_mock()
@@ -126,7 +126,7 @@ def test_build_chat_session():
     assert history_arg[2] == {"role": "model", "parts": ["msg 3"]}
 
 
-def test_send_message_success():
+def test_send_message_success() -> None:
     """Test robust send_message path."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")
@@ -145,7 +145,7 @@ def test_send_message_success():
     mock_chat.send_message.assert_called_once_with("Greetings")
 
 
-def test_send_message_error():
+def test_send_message_error() -> None:
     """Test send_message error trap."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")
@@ -161,7 +161,7 @@ def test_send_message_error():
     assert "Error: Connection refused" in resp.content
 
 
-def test_stream_response():
+def test_stream_response() -> None:
     """Test streaming chunk iterator."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")
@@ -185,7 +185,7 @@ def test_stream_response():
     assert chunks[1].content == "lo"
 
 
-def test_stream_error():
+def test_stream_error() -> None:
     """Test streaming chunk iterator handles generic exceptions safely."""
     sys.modules["google.generativeai"].configure.reset_mock()
     adapter = GeminiAdapter("sk")

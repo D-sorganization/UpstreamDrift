@@ -13,7 +13,7 @@ from fastapi import HTTPException
 class TestErrorCategoryContract:
     """Design by Contract tests for ErrorCategory enum."""
 
-    def test_categories_are_string_enum(self):
+    def test_categories_are_string_enum(self) -> None:
         """Postcondition: All categories are string enum values."""
         from src.api.utils.error_codes import ErrorCategory
 
@@ -21,7 +21,7 @@ class TestErrorCategoryContract:
             assert isinstance(category.value, str)
             assert len(category.value) == 3  # 3-letter category codes
 
-    def test_all_categories_unique(self):
+    def test_all_categories_unique(self) -> None:
         """Postcondition: All category values must be unique."""
         from src.api.utils.error_codes import ErrorCategory
 
@@ -32,7 +32,7 @@ class TestErrorCategoryContract:
 class TestErrorCodeContract:
     """Design by Contract tests for ErrorCode enum."""
 
-    def test_codes_follow_format(self):
+    def test_codes_follow_format(self) -> None:
         """Postcondition: All codes follow GMS-XXX-NNN format."""
         import re
 
@@ -43,14 +43,14 @@ class TestErrorCodeContract:
         for code in ErrorCode:
             assert re.match(pattern, code.value), f"{code.value} doesn't match format"
 
-    def test_all_codes_unique(self):
+    def test_all_codes_unique(self) -> None:
         """Postcondition: All error code values must be unique."""
         from src.api.utils.error_codes import ErrorCode
 
         values = [c.value for c in ErrorCode]
         assert len(values) == len(set(values))
 
-    def test_all_codes_have_metadata(self):
+    def test_all_codes_have_metadata(self) -> None:
         """Postcondition: Every error code must have metadata defined."""
         from src.api.utils.error_codes import ERROR_METADATA, ErrorCode
 
@@ -65,7 +65,7 @@ class TestErrorCodeContract:
 class TestErrorMetadata:
     """Tests for ERROR_METADATA configuration."""
 
-    def test_status_codes_are_valid_http(self):
+    def test_status_codes_are_valid_http(self) -> None:
         """Test that all status codes are valid HTTP status codes."""
         from src.api.utils.error_codes import ERROR_METADATA
 
@@ -88,7 +88,7 @@ class TestErrorMetadata:
                 f"Invalid status code {status} for {code}"
             )
 
-    def test_messages_are_non_empty_strings(self):
+    def test_messages_are_non_empty_strings(self) -> None:
         """Test that all messages are non-empty strings."""
         from src.api.utils.error_codes import ERROR_METADATA
 
@@ -97,7 +97,7 @@ class TestErrorMetadata:
             assert isinstance(message, str)
             assert len(message) > 0
 
-    def test_categories_match_code_prefix(self):
+    def test_categories_match_code_prefix(self) -> None:
         """Test that category matches the code prefix."""
         from src.api.utils.error_codes import ERROR_METADATA, ErrorCategory
 
@@ -127,14 +127,14 @@ class TestErrorMetadata:
 class TestAPIErrorContract:
     """Design by Contract tests for APIError dataclass."""
 
-    def test_from_code_returns_api_error(self):
+    def test_from_code_returns_api_error(self) -> None:
         """Postcondition: from_code returns an APIError instance."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
         result = APIError.from_code(ErrorCode.INTERNAL_ERROR)
         assert isinstance(result, APIError)
 
-    def test_to_dict_returns_dict(self):
+    def test_to_dict_returns_dict(self) -> None:
         """Postcondition: to_dict returns a dictionary."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -142,7 +142,7 @@ class TestAPIErrorContract:
         result = error.to_dict()
         assert isinstance(result, dict)
 
-    def test_to_dict_has_required_fields(self):
+    def test_to_dict_has_required_fields(self) -> None:
         """Postcondition: to_dict includes error code and message."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -157,7 +157,7 @@ class TestAPIErrorContract:
 class TestAPIError:
     """Functional tests for APIError dataclass."""
 
-    def test_from_code_uses_default_message(self):
+    def test_from_code_uses_default_message(self) -> None:
         """Test that from_code uses default message when none provided."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -165,7 +165,7 @@ class TestAPIError:
 
         assert "engine" in error.message.lower() or "not found" in error.message.lower()
 
-    def test_from_code_accepts_custom_message(self):
+    def test_from_code_accepts_custom_message(self) -> None:
         """Test that from_code accepts custom message."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -174,7 +174,7 @@ class TestAPIError:
 
         assert error.message == custom_message
 
-    def test_from_code_accepts_details(self):
+    def test_from_code_accepts_details(self) -> None:
         """Test that from_code accepts additional details."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -183,7 +183,7 @@ class TestAPIError:
 
         assert error.details == details
 
-    def test_to_dict_includes_details_when_present(self):
+    def test_to_dict_includes_details_when_present(self) -> None:
         """Test that to_dict includes details when present."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -193,7 +193,7 @@ class TestAPIError:
 
         assert result["error"]["details"] == details
 
-    def test_to_dict_omits_details_when_empty(self):
+    def test_to_dict_omits_details_when_empty(self) -> None:
         """Test that to_dict omits details when empty."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -202,7 +202,7 @@ class TestAPIError:
 
         assert "details" not in result["error"]
 
-    def test_to_dict_includes_request_id_when_set(self):
+    def test_to_dict_includes_request_id_when_set(self) -> None:
         """Test that to_dict includes request_id when present."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -215,7 +215,7 @@ class TestAPIError:
 
         assert result["error"]["request_id"] == "req_abc123"
 
-    def test_to_dict_omits_request_id_when_empty(self):
+    def test_to_dict_omits_request_id_when_empty(self) -> None:
         """Test that to_dict omits request_id when empty."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -231,7 +231,7 @@ class TestAPIError:
             result = error.to_dict()
             assert "request_id" not in result["error"]
 
-    def test_to_response_returns_json_response(self):
+    def test_to_response_returns_json_response(self) -> None:
         """Test that to_response returns a JSONResponse."""
         from fastapi.responses import JSONResponse
 
@@ -242,7 +242,7 @@ class TestAPIError:
 
         assert isinstance(response, JSONResponse)
 
-    def test_to_response_uses_correct_status_code(self):
+    def test_to_response_uses_correct_status_code(self) -> None:
         """Test that to_response uses the correct status code."""
         from src.api.utils.error_codes import APIError, ErrorCode
 
@@ -260,7 +260,7 @@ class TestAPIError:
             response = error.to_response()
             assert response.status_code == expected_status
 
-    def test_post_init_injects_trace_context(self):
+    def test_post_init_injects_trace_context(self) -> None:
         """Test that __post_init__ injects trace context."""
         from src.api.utils.error_codes import APIError, ErrorCode
         from src.api.utils.tracing import TraceContext
@@ -289,14 +289,14 @@ class TestAPIError:
 class TestAPIExceptionContract:
     """Design by Contract tests for APIException."""
 
-    def test_inherits_from_http_exception(self):
+    def test_inherits_from_http_exception(self) -> None:
         """Postcondition: APIException inherits from HTTPException."""
         from src.api.utils.error_codes import APIException, ErrorCode
 
         exc = APIException(ErrorCode.INTERNAL_ERROR)
         assert isinstance(exc, HTTPException)
 
-    def test_has_error_attribute(self):
+    def test_has_error_attribute(self) -> None:
         """Postcondition: APIException has error attribute."""
         from src.api.utils.error_codes import APIException, ErrorCode
 
@@ -307,7 +307,7 @@ class TestAPIExceptionContract:
 class TestAPIException:
     """Functional tests for APIException."""
 
-    def test_status_code_from_metadata(self):
+    def test_status_code_from_metadata(self) -> None:
         """Test that status code comes from error metadata."""
         from src.api.utils.error_codes import APIException, ErrorCode
 
@@ -322,7 +322,7 @@ class TestAPIException:
             exc = APIException(code)
             assert exc.status_code == expected_status
 
-    def test_detail_is_structured(self):
+    def test_detail_is_structured(self) -> None:
         """Test that detail is a structured error dict."""
         from src.api.utils.error_codes import APIException, ErrorCode
 
@@ -332,7 +332,7 @@ class TestAPIException:
         assert "error" in exc.detail
         assert "code" in exc.detail["error"]
 
-    def test_custom_message_used(self):
+    def test_custom_message_used(self) -> None:
         """Test that custom message is used when provided."""
         from src.api.utils.error_codes import APIException, ErrorCode
 
@@ -341,7 +341,7 @@ class TestAPIException:
 
         assert exc.error.message == custom
 
-    def test_details_included(self):
+    def test_details_included(self) -> None:
         """Test that details are included in error."""
         from src.api.utils.error_codes import APIException, ErrorCode
 
@@ -354,7 +354,7 @@ class TestAPIException:
 class TestRaiseApiErrorContract:
     """Design by Contract tests for raise_api_error function."""
 
-    def test_always_raises(self):
+    def test_always_raises(self) -> None:
         """Postcondition: raise_api_error always raises APIException."""
         from src.api.utils.error_codes import APIException, ErrorCode, raise_api_error
 
@@ -365,7 +365,7 @@ class TestRaiseApiErrorContract:
 class TestRaiseApiError:
     """Functional tests for raise_api_error function."""
 
-    def test_raises_with_correct_code(self):
+    def test_raises_with_correct_code(self) -> None:
         """Test that raise_api_error raises with correct code."""
         from src.api.utils.error_codes import APIException, ErrorCode, raise_api_error
 
@@ -374,7 +374,7 @@ class TestRaiseApiError:
 
         assert exc_info.value.error.code == ErrorCode.ENGINE_NOT_AVAILABLE
 
-    def test_raises_with_custom_message(self):
+    def test_raises_with_custom_message(self) -> None:
         """Test that raise_api_error uses custom message."""
         from src.api.utils.error_codes import APIException, ErrorCode, raise_api_error
 
@@ -384,7 +384,7 @@ class TestRaiseApiError:
 
         assert exc_info.value.error.message == custom
 
-    def test_raises_with_kwargs_as_details(self):
+    def test_raises_with_kwargs_as_details(self) -> None:
         """Test that raise_api_error passes kwargs as details."""
         from src.api.utils.error_codes import APIException, ErrorCode, raise_api_error
 
@@ -401,7 +401,7 @@ class TestRaiseApiError:
         assert details["field"] == "timestep"
         assert details["reason"] == "must be positive"
 
-    def test_no_details_when_no_kwargs(self):
+    def test_no_details_when_no_kwargs(self) -> None:
         """Test that no details when no kwargs provided."""
         from src.api.utils.error_codes import APIException, ErrorCode, raise_api_error
 
@@ -414,7 +414,7 @@ class TestRaiseApiError:
 class TestAllExports:
     """Tests for module __all__ exports."""
 
-    def test_all_exports_importable(self):
+    def test_all_exports_importable(self) -> None:
         """Test that all __all__ exports are importable."""
         import src.api.utils.error_codes as ec
         from src.api.utils.error_codes import __all__
@@ -422,7 +422,7 @@ class TestAllExports:
         for name in __all__:
             assert hasattr(ec, name), f"Missing export: {name}"
 
-    def test_expected_exports_present(self):
+    def test_expected_exports_present(self) -> None:
         """Test that expected exports are in __all__."""
         from src.api.utils.error_codes import __all__
 

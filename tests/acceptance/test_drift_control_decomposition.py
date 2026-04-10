@@ -50,7 +50,7 @@ def _get_engine(engine_name: str):
 class TestDriftControlDecomposition:
     """Unified tests for drift-control decomposition across all engines."""
 
-    def test_superposition(self, engine_name, pendulum_urdf):
+    def test_superposition(self, engine_name, pendulum_urdf) -> None:
         """Verify drift + control = full dynamics. (Requirement F)"""
         engine = _get_engine(engine_name)
 
@@ -119,7 +119,7 @@ class TestDriftControlDecomposition:
             f"{engine_name}: Superposition failed (res={max_res:.2e})"
         )
 
-    def test_zero_control(self, engine_name, pendulum_urdf):
+    def test_zero_control(self, engine_name, pendulum_urdf) -> None:
         """Verify full dynamics with tau=0 equals drift acceleration."""
         engine = _get_engine(engine_name)
         try:
@@ -165,7 +165,7 @@ class TestDriftControlDecomposition:
 
         np.testing.assert_allclose(a_drift, a_full_zero, atol=1e-10)
 
-    def test_interface_compliance(self, engine_name, pendulum_urdf):
+    def test_interface_compliance(self, engine_name, pendulum_urdf) -> None:
         """Verify drift-control API compliance."""
         engine = _get_engine(engine_name)
         assert hasattr(engine, "compute_drift_acceleration")

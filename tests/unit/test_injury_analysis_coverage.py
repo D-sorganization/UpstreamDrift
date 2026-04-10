@@ -21,7 +21,7 @@ def scorer():
     return InjuryRiskScorer()
 
 
-def test_low_risk_scenario(scorer):
+def test_low_risk_scenario(scorer) -> None:
     """Test a scenario where all inputs are safe."""
     spinal = MockSpinalResult(compression=3.0, shear=0.4, twist=40.0)
     # Joint scores < 30 are safe
@@ -33,7 +33,7 @@ def test_low_risk_scenario(scorer):
     assert len(report.recommendations) == 0
 
 
-def test_high_risk_scenario(scorer):
+def test_high_risk_scenario(scorer) -> None:
     """Test a scenario with dangerous values."""
     # Compression 7.0 > 6.0 (High), Shear 1.2 > 1.0 (High)
     spinal = MockSpinalResult(compression=7.0, shear=1.2, twist=60.0)
@@ -48,7 +48,7 @@ def test_high_risk_scenario(scorer):
     assert any("spinal compression" in r.lower() for r in report.recommendations)
 
 
-def test_technique_risks(scorer):
+def test_technique_risks(scorer) -> None:
     """Test swing mechanic risks."""
     metrics = {
         "early_extension": 20.0,  # Threshold high is 15.0
@@ -67,7 +67,7 @@ def test_technique_risks(scorer):
     assert any("early extension" in r.lower() for r in report.recommendations)
 
 
-def test_training_load_spike(scorer):
+def test_training_load_spike(scorer) -> None:
     """Test ACWR spike."""
     load = {"acwr": 1.6}  # High > 1.5
 
@@ -87,7 +87,7 @@ def test_training_load_spike(scorer):
     ],
     ids=["hip_region", "elbow_region"],
 )
-def test_category_weighting(scorer, joint_key, expected_type):
+def test_category_weighting(scorer, joint_key, expected_type) -> None:
     """Ensure different injury types update the correct region scores."""
     joints = {joint_key: MockJointResult(50)}
 

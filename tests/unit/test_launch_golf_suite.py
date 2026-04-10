@@ -4,7 +4,7 @@ from unittest.mock import patch
 import launch_golf_suite
 
 
-def test_parse_arguments():
+def test_parse_arguments() -> None:
     with patch("sys.argv", ["launch_golf_suite.py", "--engine", "mujoco"]):
         args = launch_golf_suite.parse_arguments()
         assert args.engine == "mujoco"
@@ -17,14 +17,14 @@ def test_parse_arguments():
 
 
 @patch("src.shared.python.launcher_factory.launch_engine_directly")
-def test_route_launch_engine(mock_launch, monkeypatch):
+def test_route_launch_engine(mock_launch, monkeypatch) -> None:
     args = argparse.Namespace(engine="mujoco", classic=False, api_only=False)
     launch_golf_suite.route_launch(args)
     mock_launch.assert_called_once_with("mujoco")
 
 
 @patch("src.api.local_server.main")
-def test_route_launch_web_engine(mock_server_main, monkeypatch):
+def test_route_launch_web_engine(mock_server_main, monkeypatch) -> None:
     args = argparse.Namespace(
         engine="matlab_2d", classic=False, api_only=False, port=8000, no_browser=False
     )
@@ -33,21 +33,21 @@ def test_route_launch_web_engine(mock_server_main, monkeypatch):
 
 
 @patch("src.launchers.golf_launcher.main")
-def test_route_launch_classic(mock_classic_main):
+def test_route_launch_classic(mock_classic_main) -> None:
     args = argparse.Namespace(engine=None, classic=True, api_only=False)
     launch_golf_suite.route_launch(args)
     mock_classic_main.assert_called_once()
 
 
 @patch("src.api.local_server.main")
-def test_route_launch_api_only(mock_server_main):
+def test_route_launch_api_only(mock_server_main) -> None:
     args = argparse.Namespace(engine=None, classic=False, api_only=True, port=8080)
     launch_golf_suite.route_launch(args)
     mock_server_main.assert_called_once()
 
 
 @patch("src.api.local_server.main")
-def test_route_launch_default(mock_server_main):
+def test_route_launch_default(mock_server_main) -> None:
     args = argparse.Namespace(
         engine=None, classic=False, api_only=False, port=8000, no_browser=True
     )
@@ -57,7 +57,7 @@ def test_route_launch_default(mock_server_main):
 
 @patch("launch_golf_suite.parse_arguments")
 @patch("launch_golf_suite.route_launch")
-def test_main(mock_route, mock_parse):
+def test_main(mock_route, mock_parse) -> None:
     mock_args = argparse.Namespace()
     mock_parse.return_value = mock_args
     launch_golf_suite.main()

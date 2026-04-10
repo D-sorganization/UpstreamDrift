@@ -23,7 +23,7 @@ class TestEnginesEndpoint:
         manager.get_engine_status.return_value = MagicMock(value="unavailable")
         return manager
 
-    def test_engines_response_structure(self, mock_engine_manager):
+    def test_engines_response_structure(self, mock_engine_manager) -> None:
         """Verify the engines endpoint returns the structure expected by frontend."""
         # The frontend expects this structure:
         # {
@@ -74,7 +74,7 @@ class TestEnginesEndpoint:
         assert engines[1]["name"] == "drake"
         assert engines[1]["available"] is False
 
-    def test_engines_all_fields_present(self, mock_engine_manager):
+    def test_engines_all_fields_present(self, mock_engine_manager) -> None:
         """Ensure all fields expected by frontend are present."""
         from src.shared.python.engine_core.engine_registry import (
             EngineStatus,
@@ -98,7 +98,7 @@ class TestEnginesEndpoint:
         # All required fields must be present
         assert required_fields.issubset(engine_data.keys())
 
-    def test_engine_types_match_frontend_expectations(self):
+    def test_engine_types_match_frontend_expectations(self) -> None:
         """Verify engine type values match what frontend expects."""
         from src.shared.python.engine_core.engine_registry import EngineType
 
@@ -114,7 +114,7 @@ class TestEnginesEndpoint:
 class TestSimulationWebSocketProtocol:
     """Tests for the WebSocket simulation protocol used by useSimulation hook."""
 
-    def test_start_action_config_structure(self):
+    def test_start_action_config_structure(self) -> None:
         """Verify the start action config matches frontend expectations."""
         # Frontend sends this structure on start:
         start_message = {
@@ -132,7 +132,7 @@ class TestSimulationWebSocketProtocol:
         assert "timestep" in start_message["config"]
         assert "live_analysis" in start_message["config"]
 
-    def test_frame_response_structure(self):
+    def test_frame_response_structure(self) -> None:
         """Verify simulation frame response matches frontend expectations."""
         # Backend should send frames in this format:
         frame_response = {
@@ -157,7 +157,7 @@ class TestSimulationWebSocketProtocol:
         if "analysis" in frame_response:
             assert isinstance(frame_response["analysis"], dict)
 
-    def test_status_messages(self):
+    def test_status_messages(self) -> None:
         """Verify status message types match frontend expectations."""
         # Frontend expects these status messages
         status_messages = [
@@ -170,7 +170,7 @@ class TestSimulationWebSocketProtocol:
             assert "status" in msg
             assert msg["status"] in {"complete", "stopped", "paused"}
 
-    def test_control_actions(self):
+    def test_control_actions(self) -> None:
         """Verify control actions match frontend expectations."""
         # Frontend sends these control messages
         control_messages = [
@@ -187,7 +187,7 @@ class TestSimulationWebSocketProtocol:
 class TestSimulationRequestValidation:
     """Tests for simulation request validation."""
 
-    def test_simulation_request_model(self):
+    def test_simulation_request_model(self) -> None:
         """Verify SimulationRequest model accepts frontend parameters."""
         from src.api.models.requests import SimulationRequest
 
@@ -202,7 +202,7 @@ class TestSimulationRequestValidation:
         assert request.duration == 3.0
         assert request.timestep == 0.002
 
-    def test_simulation_request_defaults(self):
+    def test_simulation_request_defaults(self) -> None:
         """Verify SimulationRequest has reasonable defaults."""
         from src.api.models.requests import SimulationRequest
 
@@ -217,7 +217,7 @@ class TestSimulationRequestValidation:
 class TestSimulationResponseFormat:
     """Tests for simulation response format."""
 
-    def test_simulation_response_model(self):
+    def test_simulation_response_model(self) -> None:
         """Verify SimulationResponse model has fields frontend expects."""
         from src.api.models.responses import SimulationResponse
 
@@ -235,7 +235,7 @@ class TestSimulationResponseFormat:
 class TestAPIContractStability:
     """Tests to ensure API contract stability with frontend."""
 
-    def test_engine_status_response_model(self):
+    def test_engine_status_response_model(self) -> None:
         """Verify EngineStatusResponse has all frontend-expected fields."""
         from src.api.models.responses import EngineStatusResponse
 
@@ -258,7 +258,7 @@ class TestAPIContractStability:
         assert response.loaded is True
         assert isinstance(response.capabilities, list)
 
-    def test_cors_allows_frontend_origin(self):
+    def test_cors_allows_frontend_origin(self) -> None:
         """Verify CORS configuration allows frontend requests."""
         from src.api.config import get_cors_origins
 
@@ -271,7 +271,7 @@ class TestAPIContractStability:
 class TestErrorResponses:
     """Tests for error response format expected by frontend."""
 
-    def test_http_exception_format(self):
+    def test_http_exception_format(self) -> None:
         """Verify HTTP exceptions have proper format for frontend error handling."""
         from fastapi import HTTPException
 
@@ -281,7 +281,7 @@ class TestErrorResponses:
         assert exc.status_code == 400
         assert exc.detail == "Invalid parameters"
 
-    def test_validation_error_structure(self):
+    def test_validation_error_structure(self) -> None:
         """Verify validation errors have proper structure."""
         from pydantic import ValidationError
 
@@ -300,7 +300,7 @@ class TestErrorResponses:
 class TestConnectionResilience:
     """Tests for connection handling that frontend relies on."""
 
-    def test_websocket_close_codes(self):
+    def test_websocket_close_codes(self) -> None:
         """Verify WebSocket close codes match frontend expectations."""
         # Standard close codes the frontend handles
         clean_close = 1000  # Normal closure
@@ -310,7 +310,7 @@ class TestConnectionResilience:
         assert clean_close == 1000
         assert abnormal_close == 1006
 
-    def test_frame_history_limit(self):
+    def test_frame_history_limit(self) -> None:
         """Verify backend respects same frame history limit as frontend."""
         # Frontend keeps MAX_FRAMES_HISTORY = 1000
         # Backend should be aware of this for memory efficiency

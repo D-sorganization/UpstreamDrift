@@ -34,7 +34,7 @@ mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 
 
 class TestDrakeStrict:
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Inject mock pydrake into the module namespace."""
         # Use patch.dict context for the import to apply patches
         with patch.dict("sys.modules", module_patches):
@@ -61,10 +61,10 @@ class TestDrakeStrict:
         self.TEST_LINEAR_VAL = 1.0
         self.TEST_ANGULAR_VAL = 2.0
 
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         self.patcher.stop()
 
-    def test_jacobian_standardization_mocked(self):
+    def test_jacobian_standardization_mocked(self) -> None:
         engine = self.DrakePhysicsEngine()
         # Mock internals set by AddMultibodyPlantSceneGraph
         engine.plant = MagicMock()
@@ -87,7 +87,7 @@ class TestDrakeStrict:
         np.testing.assert_allclose(spatial[:3, :], self.TEST_ANGULAR_VAL)
         np.testing.assert_allclose(spatial[3:, :], self.TEST_LINEAR_VAL)
 
-    def test_reset_logs_warning_when_uninitialized(self):
+    def test_reset_logs_warning_when_uninitialized(self) -> None:
         """Drake reset should warn and return when the engine is uninitialized."""
         engine = self.DrakePhysicsEngine()
         engine.context = None  # Force uninitialized

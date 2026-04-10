@@ -23,7 +23,7 @@ class TestSignalProcessing:
     """Test cases for signal processing utilities."""
 
     @pytest.fixture(autouse=True)
-    def setup_data(self):
+    def setup_data(self) -> None:
         """Set up test data."""
         self.fs = 1000.0  # 1 kHz sampling
         self.t = np.arange(0, 1.0, 1 / self.fs)
@@ -32,7 +32,7 @@ class TestSignalProcessing:
             2 * np.pi * 50 * self.t
         )
 
-    def test_compute_psd_logic(self):
+    def test_compute_psd_logic(self) -> None:
         """Test PSD computation logic (peaks)."""
         # Use boxcar window for sharper peaks
         freqs, psd = compute_psd(self.signal, self.fs, window="boxcar", nperseg=256)
@@ -51,7 +51,7 @@ class TestSignalProcessing:
         assert has_10, f"Should have peak near 10 Hz. Found: {peak_freqs}"
         assert has_50, f"Should have peak near 50 Hz. Found: {peak_freqs}"
 
-    def test_compute_psd_mock(self):
+    def test_compute_psd_mock(self) -> None:
         """Test PSD computation using mock to verify call arguments."""
         with patch(
             "src.shared.python.signal_toolkit.signal_processing.welch"
@@ -64,7 +64,7 @@ class TestSignalProcessing:
             assert len(psd) == 129
             assert mock_welch.called
 
-    def test_compute_spectrogram_logic(self):
+    def test_compute_spectrogram_logic(self) -> None:
         """Test spectrogram computation output shapes."""
         f, t, Sxx = compute_spectrogram(self.signal, self.fs, nperseg=256)
 
@@ -73,7 +73,7 @@ class TestSignalProcessing:
         assert Sxx.shape[0] == 129
         assert Sxx.shape[1] > 0
 
-    def test_compute_spectrogram_mock(self):
+    def test_compute_spectrogram_mock(self) -> None:
         """Test Spectrogram computation using mock."""
         data = np.sin(2 * np.pi * 20 * self.t + 2 * np.pi * 40 * self.t**2)
         with patch(
@@ -92,7 +92,7 @@ class TestSignalProcessing:
             assert Sxx.shape == (10, 10)
             assert mock_spec.called
 
-    def test_compute_spectral_arc_length_smooth(self):
+    def test_compute_spectral_arc_length_smooth(self) -> None:
         """Test SAL on a smooth signal."""
         t = np.linspace(0, 1, 100)
         smooth_signal = np.sin(np.pi * t)
@@ -104,7 +104,7 @@ class TestSignalProcessing:
         # Should be a finite number
         assert np.isfinite(sal)
 
-    def test_compute_spectral_arc_length_jerky(self):
+    def test_compute_spectral_arc_length_jerky(self) -> None:
         """Test SAL comparison between smooth and jerky signals."""
         t = np.linspace(0, 1, 100)
         smooth = np.exp(-((t - 0.5) ** 2) / 0.01)
@@ -120,17 +120,17 @@ class TestSignalProcessing:
         # Smooth movement should have higher SAL (closer to 0) than jerky (more negative)
         assert sal_smooth > sal_jerky
 
-    def test_compute_spectral_arc_length_empty(self):
+    def test_compute_spectral_arc_length_empty(self) -> None:
         """Test SAL with empty input."""
         sal = compute_spectral_arc_length(np.array([]), fs=100.0)
         assert sal == 0.0
 
-    def test_compute_spectral_arc_length_zeros(self):
+    def test_compute_spectral_arc_length_zeros(self) -> None:
         """Test SAL with zero signal."""
         sal = compute_spectral_arc_length(np.zeros(100), fs=100.0)
         assert sal == 0.0
 
-    def test_compute_cwt(self):
+    def test_compute_cwt(self) -> None:
         """Test CWT computation."""
         # Just check shape and finiteness
         freqs, times, cwt = compute_cwt(self.signal, self.fs, num_freqs=10)
@@ -139,7 +139,7 @@ class TestSignalProcessing:
         assert cwt.shape == (10, len(self.signal))
         assert np.all(np.isfinite(cwt))
 
-    def test_compute_xwt(self):
+    def test_compute_xwt(self) -> None:
         """Test XWT computation."""
         freqs, times, xwt = compute_xwt(self.signal, self.signal, self.fs, num_freqs=10)
         assert len(freqs) == 10
@@ -151,7 +151,7 @@ class TestSignalProcessing:
         )  # imaginary part should be close to 0
         assert np.all(np.real(xwt) >= -1e-10)
 
-    def test_compute_jerk(self):
+    def test_compute_jerk(self) -> None:
         """Test jerk computation."""
         # Jerk of sin(t) is -cos(t)
         t = np.linspace(0, 2 * np.pi, 1000)
@@ -165,7 +165,7 @@ class TestSignalProcessing:
         short_jerk = compute_jerk(np.array([1, 2, 3]), fs=1.0)
         assert len(short_jerk) == 3
 
-    def test_compute_time_shift(self):
+    def test_compute_time_shift(self) -> None:
         """Test time shift calculation."""
         # Create a simpler, clean signal for time shift testing
         # A simple Gaussian pulse
@@ -185,7 +185,7 @@ class TestSignalProcessing:
         calc_shift = compute_time_shift(x, y, fs)
         assert np.isclose(calc_shift, shift, atol=0.01)
 
-    def test_compute_dtw_distance(self):
+    def test_compute_dtw_distance(self) -> None:
         """Test DTW distance."""
         s1 = np.array([0, 1, 2, 3, 2, 1, 0])
         s2 = np.array([0, 0, 1, 2, 3, 2, 1, 0])  # s1 shifted + stutters
@@ -199,7 +199,7 @@ class TestSignalProcessing:
         # Test with Numba disabled (mocking it if necessary, but tricky since it imports at top level)
         # We can test logic by trusting it runs whatever version is available.
 
-    def test_compute_dtw_path(self):
+    def test_compute_dtw_path(self) -> None:
         """Test DTW path."""
         s1 = np.array([0, 1])
         s2 = np.array([0, 1])
@@ -207,7 +207,7 @@ class TestSignalProcessing:
         assert dist == 0.0
         assert path == [(0, 0), (1, 1)]
 
-    def test_kalman_filter(self):
+    def test_kalman_filter(self) -> None:
         """Test Kalman Filter basic operation."""
         kf = KalmanFilter(dim_x=2, dim_z=1)
         # Constant velocity model

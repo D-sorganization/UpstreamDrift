@@ -62,7 +62,7 @@ def layout_manager(available_models, get_model_func, create_card_func):
     )
 
 
-def test_compute_centered_geometry():
+def test_compute_centered_geometry() -> None:
     # Example 1: Standard layout
     x, y, w, h = compute_centered_geometry(1920, 1080, 1280, 800)
     assert x == (1920 - 1280) // 2
@@ -75,26 +75,26 @@ def test_compute_centered_geometry():
     assert y == LayoutConfig.MIN_WINDOW_Y
 
 
-def test_initialize_model_order(layout_manager):
+def test_initialize_model_order(layout_manager) -> None:
     # Tests that only available models are initialized
     layout_manager.initialize_model_order(["model_2", "non_existent_model"])
     assert layout_manager.model_order == ["model_2"]
 
 
-def test_initialize_model_order_empty(layout_manager, available_models):
+def test_initialize_model_order_empty(layout_manager, available_models) -> None:
     # Using defaults logic
     layout_manager.initialize_model_order(None)
     # The default lists a bunch, maybe none are available, so it's empty
     assert len(layout_manager.model_order) == 0
 
 
-def test_initialize_model_order_all_available(layout_manager, available_models):
+def test_initialize_model_order_all_available(layout_manager, available_models) -> None:
     # Test path where there are no missing defaults
     layout_manager.initialize_model_order(["model_1", "model_2"])
     assert layout_manager.model_order == ["model_1", "model_2"]
 
 
-def test_save_layout_success(layout_manager):
+def test_save_layout_success(layout_manager) -> None:
     layout_manager.model_order = ["model_1"]
     window_state = {"selected_model": "model_1", "geometry": {"x": 0}}
 
@@ -109,20 +109,20 @@ def test_save_layout_success(layout_manager):
     assert "model_1" in written_data
 
 
-def test_save_layout_oserror(layout_manager):
+def test_save_layout_oserror(layout_manager) -> None:
     window_state = {}
     with patch.object(Path, "mkdir", side_effect=OSError("Boom")):
         # Should catch OSError and just log error
         layout_manager.save_layout(window_state)
 
 
-def test_load_layout_no_file(layout_manager):
+def test_load_layout_no_file(layout_manager) -> None:
     with patch.object(Path, "exists", return_value=False):
         result = layout_manager.load_layout()
         assert result is None
 
 
-def test_load_layout_success(layout_manager):
+def test_load_layout_success(layout_manager) -> None:
     layout_data = {
         "model_order": ["model_1", "model_2", "missing_model"],
         "selected_model": "model_1",
@@ -139,7 +139,7 @@ def test_load_layout_success(layout_manager):
         assert layout_manager.model_order == ["model_1", "model_2"]
 
 
-def test_load_layout_json_error(layout_manager):
+def test_load_layout_json_error(layout_manager) -> None:
     with (
         patch.object(Path, "exists", return_value=True),
         patch("builtins.open", mock_open(read_data="{bad_json")),
@@ -148,7 +148,7 @@ def test_load_layout_json_error(layout_manager):
         assert result is None
 
 
-def test_load_layout_no_valid_order(layout_manager):
+def test_load_layout_no_valid_order(layout_manager) -> None:
     # Test path where saved_order ends up empty
     layout_data = {
         "model_order": ["missing_model"],
@@ -164,7 +164,7 @@ def test_load_layout_no_valid_order(layout_manager):
         assert layout_manager.model_order == []
 
 
-def test_sync_model_cards(layout_manager):
+def test_sync_model_cards(layout_manager) -> None:
     layout_manager.model_order = ["model_1"]
 
     # Sync creates a card
@@ -190,14 +190,14 @@ def test_sync_model_cards(layout_manager):
     old_card.deleteLater.assert_called_once()
 
 
-def test_sync_model_cards_model_missing(layout_manager):
+def test_sync_model_cards_model_missing(layout_manager) -> None:
     # Test path where `_get_model` returns None
     layout_manager.model_order = ["missing_model"]
     layout_manager.sync_model_cards()
     assert "missing_model" not in layout_manager.model_cards
 
 
-def test_apply_model_selection(layout_manager):
+def test_apply_model_selection(layout_manager) -> None:
     layout_manager.model_order = ["model_1", "model_2"]
     # User selects model 1 only
     layout_manager.apply_model_selection(["model_1"])
@@ -212,7 +212,7 @@ def test_apply_model_selection(layout_manager):
     assert layout_manager.model_order == ["model_1"]
 
 
-def test_swap_models(layout_manager):
+def test_swap_models(layout_manager) -> None:
     layout_manager.model_order = ["model_1", "model_2"]
 
     # Swap fails if not edit mode
@@ -228,7 +228,7 @@ def test_swap_models(layout_manager):
     assert layout_manager.swap_models("model_1", "missing_model") is False
 
 
-def test_get_filtered_order(layout_manager):
+def test_get_filtered_order(layout_manager) -> None:
     layout_manager.model_order = ["model_1", "model_2"]
 
     # Empty filter
@@ -243,14 +243,14 @@ def test_get_filtered_order(layout_manager):
     assert layout_manager.get_filtered_order() == ["model_1", "model_2"]
 
 
-def test_get_filtered_order_model_missing(layout_manager):
+def test_get_filtered_order_model_missing(layout_manager) -> None:
     # Test path where `_get_model` returns None
     layout_manager.model_order = ["missing_model"]
     layout_manager.update_search_filter("missing")
     assert layout_manager.get_filtered_order() == []
 
 
-def test_rebuild_grid(layout_manager):
+def test_rebuild_grid(layout_manager) -> None:
     grid_layout = MagicMock()
     # Mock it so that count() goes 1 then 0 to test clearing
     grid_layout.count.side_effect = [1, 0, 0]
@@ -271,7 +271,7 @@ def test_rebuild_grid(layout_manager):
     assert grid_layout.addWidget.call_count == 2
 
 
-def test_rebuild_grid_no_widget(layout_manager):
+def test_rebuild_grid_no_widget(layout_manager) -> None:
     # Test when item has no widget, and when takeAt returns None
     grid_layout = MagicMock()
     grid_layout.count.side_effect = [2, 1, 0]
@@ -286,7 +286,7 @@ def test_rebuild_grid_no_widget(layout_manager):
     mock_item.widget.assert_called_once()
 
 
-def test_rebuild_grid_missing_model(layout_manager):
+def test_rebuild_grid_missing_model(layout_manager) -> None:
     # Test paths where model creation fails or is skipped
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
@@ -296,7 +296,7 @@ def test_rebuild_grid_missing_model(layout_manager):
     assert grid_layout.addWidget.call_count == 0
 
 
-def test_rebuild_grid_existing_card(layout_manager):
+def test_rebuild_grid_existing_card(layout_manager) -> None:
     # Test path where card is already in model_cards
     grid_layout = MagicMock()
     grid_layout.count.return_value = 0
@@ -312,7 +312,7 @@ def test_rebuild_grid_existing_card(layout_manager):
         grid_layout.addWidget.assert_called_once_with(mock_card, 0, 0)
 
 
-def test_rebuild_grid_multiple_columns(layout_manager, available_models):
+def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None:
     # Add dummy models to trigger column wrap
     for i in range(5):
         available_models[f"model_{i + 3}"] = MagicMock()
@@ -330,7 +330,7 @@ def test_rebuild_grid_multiple_columns(layout_manager, available_models):
     assert last_call[0][2] == 0  # col
 
 
-def test_set_edit_mode(layout_manager):
+def test_set_edit_mode(layout_manager) -> None:
     layout_manager.model_cards["model_1"] = MagicMock()
     layout_manager.set_edit_mode(True)
     assert layout_manager.edit_mode is True

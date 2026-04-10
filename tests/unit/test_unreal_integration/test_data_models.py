@@ -28,14 +28,14 @@ from src.unreal_integration.data_models import (
 class TestVector3:
     """Tests for Vector3 data model."""
 
-    def test_create_from_values(self):
+    def test_create_from_values(self) -> None:
         """Test Vector3 creation from individual values."""
         v = Vector3(x=1.0, y=2.0, z=3.0)
         assert v.x == 1.0
         assert v.y == 2.0
         assert v.z == 3.0
 
-    def test_create_from_numpy(self):
+    def test_create_from_numpy(self) -> None:
         """Test Vector3 creation from numpy array."""
         arr = np.array([1.0, 2.0, 3.0])
         v = Vector3.from_numpy(arr)
@@ -43,7 +43,7 @@ class TestVector3:
         assert v.y == 2.0
         assert v.z == 3.0
 
-    def test_to_numpy(self):
+    def test_to_numpy(self) -> None:
         """Test Vector3 conversion to numpy array."""
         v = Vector3(x=1.0, y=2.0, z=3.0)
         arr = v.to_numpy()
@@ -51,12 +51,12 @@ class TestVector3:
         assert arr.shape == (3,)
         np.testing.assert_array_equal(arr, [1.0, 2.0, 3.0])
 
-    def test_magnitude(self):
+    def test_magnitude(self) -> None:
         """Test Vector3 magnitude calculation."""
         v = Vector3(x=3.0, y=4.0, z=0.0)
         assert v.magnitude == pytest.approx(5.0)
 
-    def test_normalized(self):
+    def test_normalized(self) -> None:
         """Test Vector3 normalization."""
         v = Vector3(x=3.0, y=4.0, z=0.0)
         n = v.normalized()
@@ -64,13 +64,13 @@ class TestVector3:
         assert n.x == pytest.approx(0.6)
         assert n.y == pytest.approx(0.8)
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test Vector3 serialization to dict."""
         v = Vector3(x=1.0, y=2.0, z=3.0)
         d = v.to_dict()
         assert d == {"x": 1.0, "y": 2.0, "z": 3.0}
 
-    def test_from_dict(self):
+    def test_from_dict(self) -> None:
         """Test Vector3 deserialization from dict."""
         d = {"x": 1.0, "y": 2.0, "z": 3.0}
         v = Vector3.from_dict(d)
@@ -86,7 +86,7 @@ class TestVector3:
         ],
         ids=["addition", "subtraction"],
     )
-    def test_vector_arithmetic(self, op, v1_args, v2_args, expected):
+    def test_vector_arithmetic(self, op, v1_args, v2_args, expected) -> None:
         """Test Vector3 addition and subtraction."""
         v1 = Vector3(x=v1_args[0], y=v1_args[1], z=v1_args[2])
         v2 = Vector3(x=v2_args[0], y=v2_args[1], z=v2_args[2])
@@ -95,7 +95,7 @@ class TestVector3:
         assert result.y == expected[1]
         assert result.z == expected[2]
 
-    def test_scalar_multiplication(self):
+    def test_scalar_multiplication(self) -> None:
         """Test Vector3 scalar multiplication."""
         v = Vector3(x=1.0, y=2.0, z=3.0)
         result = v * 2.0
@@ -103,13 +103,13 @@ class TestVector3:
         assert result.y == 4.0
         assert result.z == 6.0
 
-    def test_dot_product(self):
+    def test_dot_product(self) -> None:
         """Test Vector3 dot product."""
         v1 = Vector3(x=1.0, y=2.0, z=3.0)
         v2 = Vector3(x=4.0, y=5.0, z=6.0)
         assert v1.dot(v2) == pytest.approx(32.0)
 
-    def test_cross_product(self):
+    def test_cross_product(self) -> None:
         """Test Vector3 cross product."""
         v1 = Vector3(x=1.0, y=0.0, z=0.0)
         v2 = Vector3(x=0.0, y=1.0, z=0.0)
@@ -118,7 +118,7 @@ class TestVector3:
         assert result.y == pytest.approx(0.0)
         assert result.z == pytest.approx(1.0)
 
-    def test_zero_vector(self):
+    def test_zero_vector(self) -> None:
         """Test Vector3.zero() factory method."""
         v = Vector3.zero()
         assert v.x == 0.0
@@ -137,7 +137,7 @@ class TestQuaternion:
         ],
         ids=["from-values", "identity"],
     )
-    def test_creation(self, factory, expected_w):
+    def test_creation(self, factory, expected_w) -> None:
         """Test Quaternion creation methods."""
         q = factory()
         assert q.w == expected_w
@@ -145,7 +145,7 @@ class TestQuaternion:
         assert q.y == 0.0
         assert q.z == 0.0
 
-    def test_from_euler(self):
+    def test_from_euler(self) -> None:
         """Test Quaternion creation from Euler angles."""
         # 90 degrees around Z axis
         q = Quaternion.from_euler(roll=0, pitch=0, yaw=math.pi / 2)
@@ -157,7 +157,7 @@ class TestQuaternion:
         [(0.1, 0.2, 0.3), (0.0, 0.0, 0.0), (0.5, -0.3, 0.8)],
         ids=["small-angles", "zero", "mixed"],
     )
-    def test_euler_roundtrip(self, roll, pitch, yaw):
+    def test_euler_roundtrip(self, roll, pitch, yaw) -> None:
         """Test Quaternion Euler conversion roundtrip."""
         q = Quaternion.from_euler(roll=roll, pitch=pitch, yaw=yaw)
         r, p, y = q.to_euler()
@@ -165,19 +165,19 @@ class TestQuaternion:
         assert p == pytest.approx(pitch, abs=1e-6)
         assert y == pytest.approx(yaw, abs=1e-6)
 
-    def test_magnitude(self):
+    def test_magnitude(self) -> None:
         """Test Quaternion magnitude calculation."""
         q = Quaternion.identity()
         assert q.magnitude == pytest.approx(1.0)
 
-    def test_normalized(self):
+    def test_normalized(self) -> None:
         """Test Quaternion normalization."""
         q = Quaternion(w=2.0, x=0.0, y=0.0, z=0.0)
         n = q.normalized()
         assert n.magnitude == pytest.approx(1.0)
         assert n.w == pytest.approx(1.0)
 
-    def test_conjugate(self):
+    def test_conjugate(self) -> None:
         """Test Quaternion conjugate."""
         q = Quaternion(w=1.0, x=2.0, y=3.0, z=4.0)
         c = q.conjugate()
@@ -186,7 +186,7 @@ class TestQuaternion:
         assert c.y == -3.0
         assert c.z == -4.0
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test Quaternion serialization to dict."""
         q = Quaternion(w=1.0, x=0.0, y=0.0, z=0.0)
         d = q.to_dict()
@@ -196,7 +196,7 @@ class TestQuaternion:
 class TestJointState:
     """Tests for JointState data model."""
 
-    def test_create_joint_state(self):
+    def test_create_joint_state(self) -> None:
         """Test JointState creation."""
         js = JointState(
             name="shoulder_L",
@@ -208,7 +208,7 @@ class TestJointState:
         assert js.name == "shoulder_L"
         assert js.position.x == 0.1
 
-    def test_joint_state_with_angle(self):
+    def test_joint_state_with_angle(self) -> None:
         """Test JointState with joint angle."""
         js = JointState(
             name="elbow_L",
@@ -218,7 +218,7 @@ class TestJointState:
         )
         assert js.joint_angle == pytest.approx(1.57)
 
-    def test_joint_state_to_dict(self):
+    def test_joint_state_to_dict(self) -> None:
         """Test JointState serialization."""
         js = JointState(
             name="shoulder_L",
@@ -230,7 +230,7 @@ class TestJointState:
         assert "position" in d
         assert "rotation" in d
 
-    def test_joint_state_from_dict(self):
+    def test_joint_state_from_dict(self) -> None:
         """Test JointState deserialization."""
         d = {
             "name": "shoulder_L",
@@ -245,7 +245,7 @@ class TestJointState:
 class TestForceVector:
     """Tests for ForceVector data model."""
 
-    def test_create_force_vector(self):
+    def test_create_force_vector(self) -> None:
         """Test ForceVector creation."""
         fv = ForceVector(
             origin=Vector3(x=0.0, y=1.0, z=0.0),
@@ -256,7 +256,7 @@ class TestForceVector:
         assert fv.magnitude == 9.81
         assert fv.force_type == "gravity"
 
-    def test_force_vector_endpoint(self):
+    def test_force_vector_endpoint(self) -> None:
         """Test ForceVector endpoint calculation."""
         fv = ForceVector(
             origin=Vector3(x=0.0, y=0.0, z=0.0),
@@ -268,7 +268,7 @@ class TestForceVector:
         assert endpoint.y == pytest.approx(0.0)
         assert endpoint.z == pytest.approx(0.0)
 
-    def test_force_vector_to_dict(self):
+    def test_force_vector_to_dict(self) -> None:
         """Test ForceVector serialization."""
         fv = ForceVector(
             origin=Vector3(x=0.0, y=1.0, z=0.0),
@@ -280,7 +280,7 @@ class TestForceVector:
         assert d["magnitude"] == 9.81
         assert d["force_type"] == "gravity"
 
-    def test_torque_vector(self):
+    def test_torque_vector(self) -> None:
         """Test ForceVector for torque representation."""
         tv = ForceVector(
             origin=Vector3(x=0.0, y=0.0, z=0.0),
@@ -296,7 +296,7 @@ class TestForceVector:
 class TestClubState:
     """Tests for ClubState data model."""
 
-    def test_create_club_state(self):
+    def test_create_club_state(self) -> None:
         """Test ClubState creation."""
         cs = ClubState(
             head_position=Vector3(x=0.5, y=0.8, z=0.1),
@@ -310,7 +310,7 @@ class TestClubState:
         assert len(cs.shaft_flex) == 5
         assert cs.face_angle == 2.5
 
-    def test_club_head_speed(self):
+    def test_club_head_speed(self) -> None:
         """Test ClubState head speed calculation."""
         cs = ClubState(
             head_position=Vector3.zero(),
@@ -318,7 +318,7 @@ class TestClubState:
         )
         assert cs.head_speed == pytest.approx(50.0)  # 3-4-5 triangle
 
-    def test_club_state_to_dict(self):
+    def test_club_state_to_dict(self) -> None:
         """Test ClubState serialization."""
         cs = ClubState(
             head_position=Vector3(x=0.5, y=0.8, z=0.1),
@@ -333,7 +333,7 @@ class TestClubState:
 class TestSwingMetrics:
     """Tests for SwingMetrics data model."""
 
-    def test_create_swing_metrics(self):
+    def test_create_swing_metrics(self) -> None:
         """Test SwingMetrics creation."""
         sm = SwingMetrics(
             club_head_speed=45.2,
@@ -347,7 +347,7 @@ class TestSwingMetrics:
         assert sm.club_head_speed == 45.2
         assert sm.x_factor == 52.3
 
-    def test_swing_metrics_calculated_fields(self):
+    def test_swing_metrics_calculated_fields(self) -> None:
         """Test SwingMetrics with calculated ball speed."""
         sm = SwingMetrics(
             club_head_speed=100.0,
@@ -355,7 +355,7 @@ class TestSwingMetrics:
         )
         assert sm.estimated_ball_speed == pytest.approx(150.0)
 
-    def test_swing_metrics_to_dict(self):
+    def test_swing_metrics_to_dict(self) -> None:
         """Test SwingMetrics serialization."""
         sm = SwingMetrics(
             club_head_speed=45.2,
@@ -369,7 +369,7 @@ class TestSwingMetrics:
 class TestBallState:
     """Tests for BallState data model."""
 
-    def test_create_ball_state(self):
+    def test_create_ball_state(self) -> None:
         """Test BallState creation."""
         bs = BallState(
             position=Vector3(x=0.0, y=0.0, z=0.05),
@@ -380,7 +380,7 @@ class TestBallState:
         assert bs.spin_rate == 2500.0
         assert bs.velocity.x == 60.0
 
-    def test_ball_launch_angle(self):
+    def test_ball_launch_angle(self) -> None:
         """Test BallState launch angle calculation."""
         bs = BallState(
             position=Vector3.zero(),
@@ -392,7 +392,7 @@ class TestBallState:
 class TestTrajectoryPoint:
     """Tests for TrajectoryPoint data model."""
 
-    def test_create_trajectory_point(self):
+    def test_create_trajectory_point(self) -> None:
         """Test TrajectoryPoint creation."""
         tp = TrajectoryPoint(
             time=0.5,
@@ -402,7 +402,7 @@ class TestTrajectoryPoint:
         assert tp.time == 0.5
         assert tp.position.x == 10.0
 
-    def test_trajectory_point_color(self):
+    def test_trajectory_point_color(self) -> None:
         """Test TrajectoryPoint with color."""
         tp = TrajectoryPoint(
             time=0.5,
@@ -415,7 +415,7 @@ class TestTrajectoryPoint:
 class TestEnvironmentState:
     """Tests for EnvironmentState data model."""
 
-    def test_create_environment_state(self):
+    def test_create_environment_state(self) -> None:
         """Test EnvironmentState creation."""
         env = EnvironmentState(
             wind_velocity=Vector3(x=5.0, y=0.0, z=0.0),
@@ -427,7 +427,7 @@ class TestEnvironmentState:
         assert env.wind_velocity.x == 5.0
         assert env.temperature == 20.0
 
-    def test_default_environment(self):
+    def test_default_environment(self) -> None:
         """Test EnvironmentState.default() factory method."""
         env = EnvironmentState.default()
         assert env.temperature == 20.0
@@ -437,7 +437,7 @@ class TestEnvironmentState:
 class TestUnrealDataFrame:
     """Tests for UnrealDataFrame data model."""
 
-    def test_create_data_frame(self):
+    def test_create_data_frame(self) -> None:
         """Test UnrealDataFrame creation."""
         frame = UnrealDataFrame(
             timestamp=0.0167,
@@ -462,7 +462,7 @@ class TestUnrealDataFrame:
         assert frame.frame_number == 1
         assert "shoulder_L" in frame.joints
 
-    def test_data_frame_with_club(self):
+    def test_data_frame_with_club(self) -> None:
         """Test UnrealDataFrame with club state."""
         frame = UnrealDataFrame(
             timestamp=0.5,
@@ -476,7 +476,7 @@ class TestUnrealDataFrame:
         assert frame.club is not None
         assert frame.club.head_position.x == 0.5
 
-    def test_data_frame_with_metrics(self):
+    def test_data_frame_with_metrics(self) -> None:
         """Test UnrealDataFrame with swing metrics."""
         frame = UnrealDataFrame(
             timestamp=1.0,
@@ -490,7 +490,7 @@ class TestUnrealDataFrame:
         assert frame.metrics is not None
         assert frame.metrics.club_head_speed == 45.2
 
-    def test_data_frame_to_json(self):
+    def test_data_frame_to_json(self) -> None:
         """Test UnrealDataFrame JSON serialization."""
         frame = UnrealDataFrame(
             timestamp=0.0167,
@@ -509,7 +509,7 @@ class TestUnrealDataFrame:
         assert data["frame"] == 1
         assert "joints" in data
 
-    def test_data_frame_from_json(self):
+    def test_data_frame_from_json(self) -> None:
         """Test UnrealDataFrame JSON deserialization."""
         json_str = """{
             "timestamp": 0.0167,
@@ -527,7 +527,7 @@ class TestUnrealDataFrame:
         assert frame.frame_number == 1
         assert "shoulder_L" in frame.joints
 
-    def test_data_frame_from_physics_state(self):
+    def test_data_frame_from_physics_state(self) -> None:
         """Test UnrealDataFrame creation from physics state."""
         # Simulated physics state
         q = np.array([0.0, 0.5, 1.0, 0.0, 0.0, 0.0, 1.0])  # 7 DOF
@@ -545,7 +545,7 @@ class TestUnrealDataFrame:
         assert frame.frame_number == 30
         assert len(frame.joints) >= 1
 
-    def test_data_frame_protocol_message(self):
+    def test_data_frame_protocol_message(self) -> None:
         """Test UnrealDataFrame protocol message format."""
         frame = UnrealDataFrame(
             timestamp=0.0167,
@@ -569,18 +569,18 @@ class TestDataModelContracts:
         ],
         ids=["nan", "infinite"],
     )
-    def test_vector3_invalid_values(self, x, match):
+    def test_vector3_invalid_values(self, x, match) -> None:
         """Test Vector3 rejects NaN and infinite values."""
         with pytest.raises(ValueError, match=match):
             Vector3(x=x, y=0.0, z=0.0, validate=True)
 
-    def test_quaternion_normalization_check(self):
+    def test_quaternion_normalization_check(self) -> None:
         """Test Quaternion validates normalization."""
         q = Quaternion(w=2.0, x=0.0, y=0.0, z=0.0, validate=True)
         # Should auto-normalize when validate=True
         assert q.magnitude == pytest.approx(1.0)
 
-    def test_force_vector_positive_magnitude(self):
+    def test_force_vector_positive_magnitude(self) -> None:
         """Test ForceVector requires positive magnitude."""
         with pytest.raises(ValueError, match="positive"):
             ForceVector(
@@ -590,7 +590,7 @@ class TestDataModelContracts:
                 validate=True,
             )
 
-    def test_joint_state_requires_name(self):
+    def test_joint_state_requires_name(self) -> None:
         """Test JointState requires non-empty name."""
         with pytest.raises(ValueError, match="name"):
             JointState(
@@ -608,7 +608,7 @@ class TestDataModelContracts:
         ],
         ids=["negative-timestamp", "negative-frame"],
     )
-    def test_data_frame_invalid_values(self, timestamp, frame_number, match):
+    def test_data_frame_invalid_values(self, timestamp, frame_number, match) -> None:
         """Test UnrealDataFrame rejects invalid timestamp and frame number."""
         with pytest.raises(ValueError, match=match):
             UnrealDataFrame(
@@ -622,7 +622,7 @@ class TestDataModelContracts:
 class TestDataModelPerformance:
     """Performance tests for data models."""
 
-    def test_large_joint_set_serialization(self):
+    def test_large_joint_set_serialization(self) -> None:
         """Test serialization performance with many joints."""
         joints = {}
         for i in range(50):  # Standard humanoid skeleton has ~50 bones
@@ -646,7 +646,7 @@ class TestDataModelPerformance:
         frame2 = UnrealDataFrame.from_json(json_str)
         assert len(frame2.joints) == 50
 
-    def test_trajectory_with_many_points(self):
+    def test_trajectory_with_many_points(self) -> None:
         """Test trajectory with many points."""
         points = []
         for i in range(1000):

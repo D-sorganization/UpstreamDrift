@@ -36,7 +36,7 @@ def create_test_mesh() -> LoadedMesh:
     return LoadedMesh(name="test_mesh", vertices=vertices, faces=faces)
 
 
-def verify_backend(backend_type: str):
+def verify_backend(backend_type: str) -> None:
     """Verify a specific backend."""
     logger.info(f"Verifying {backend_type} backend...")
 
@@ -75,7 +75,7 @@ def verify_backend(backend_type: str):
         logger.error(f"Error during {backend_type} verification: {e}", exc_info=True)
 
 
-def main():
+def main() -> None:
     """Main verification function."""
     verify_backend("mock")
     logger.info("-" * 40)

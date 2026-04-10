@@ -14,7 +14,7 @@ def registry():
     return PhysicsParameterRegistry()
 
 
-def test_registry_initialization(registry):
+def test_registry_initialization(registry) -> None:
     """Test registry loads defaults."""
     assert len(registry.parameters) > 0
     assert registry.get("BALL_MASS") is not None
@@ -46,7 +46,9 @@ def bounded_param():
     ],
     ids=["valid_in_range", "invalid_type", "below_min", "above_max"],
 )
-def test_parameter_validation(bounded_param, test_value, expect_valid, msg_contains):
+def test_parameter_validation(
+    bounded_param, test_value, expect_valid, msg_contains
+) -> None:
     """Test parameter validation logic."""
     valid, msg = bounded_param.validate(test_value)
     assert valid == expect_valid
@@ -54,7 +56,7 @@ def test_parameter_validation(bounded_param, test_value, expect_valid, msg_conta
         assert msg_contains in msg
 
 
-def test_constant_parameter():
+def test_constant_parameter() -> None:
     """Test constant parameter enforcement."""
     param = PhysicsParameter(
         name="CONST",
@@ -71,7 +73,7 @@ def test_constant_parameter():
     assert "constant" in msg
 
 
-def test_registry_set(registry):
+def test_registry_set(registry) -> None:
     """Test setting parameters in registry."""
     # Set valid
     success, msg = registry.set("CLUB_MASS", 0.4)
@@ -88,7 +90,7 @@ def test_registry_set(registry):
     assert not success
 
 
-def test_get_by_category(registry):
+def test_get_by_category(registry) -> None:
     """Test retrieving parameters by category."""
     ball_params = registry.get_by_category(ParameterCategory.BALL)
     assert len(ball_params) > 0
@@ -96,7 +98,7 @@ def test_get_by_category(registry):
         assert param.category == ParameterCategory.BALL
 
 
-def test_export_import_json(registry, tmp_path):
+def test_export_import_json(registry, tmp_path) -> None:
     """Test exporting and importing parameters."""
     json_path = tmp_path / "params.json"
 
@@ -120,7 +122,7 @@ def test_export_import_json(registry, tmp_path):
     assert param is not None and param.value == 0.25
 
 
-def test_get_summary(registry):
+def test_get_summary(registry) -> None:
     """Test summary generation."""
     summary = registry.get_summary()
     assert "Physics Parameter Registry" in summary
@@ -128,7 +130,7 @@ def test_get_summary(registry):
     assert "GRAVITY" in summary
 
 
-def test_global_registry():
+def test_global_registry() -> None:
     """Test global registry singleton."""
     reg1 = get_registry()
     reg2 = get_registry()

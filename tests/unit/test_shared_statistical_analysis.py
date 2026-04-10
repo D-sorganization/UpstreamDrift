@@ -33,26 +33,26 @@ def sample_data():
     )
 
 
-def test_initialization(sample_data):
+def test_initialization(sample_data) -> None:
     assert sample_data.dt > 0
     assert sample_data.duration == 1.0
 
 
-def test_compute_summary_stats(sample_data):
+def test_compute_summary_stats(sample_data) -> None:
     stats = sample_data.compute_summary_stats(sample_data.joint_positions[:, 0])
     assert stats.min == pytest.approx(-1.0, abs=0.01)
     assert stats.max == pytest.approx(1.0, abs=0.01)
     assert stats.range == pytest.approx(2.0, abs=0.02)
 
 
-def test_find_peaks_in_data(sample_data):
+def test_find_peaks_in_data(sample_data) -> None:
     data = sample_data.joint_positions[:, 0]
     peaks = sample_data.find_peaks_in_data(data, height=0.5)
     assert len(peaks) > 0
     assert peaks[0].value > 0.5
 
 
-def test_find_club_head_speed_peak(sample_data):
+def test_find_club_head_speed_peak(sample_data) -> None:
     peak = sample_data.find_club_head_speed_peak()
     assert peak is not None
     assert peak.time == pytest.approx(0.5, abs=0.02)
@@ -65,7 +65,7 @@ def test_find_club_head_speed_peak(sample_data):
     assert analyzer.find_club_head_speed_peak() is None
 
 
-def test_compute_range_of_motion(sample_data):
+def test_compute_range_of_motion(sample_data) -> None:
     min_angle, max_angle, rom = sample_data.compute_range_of_motion(0)
     # sin wave -1 to 1 rad -> -57 to 57 deg. ROM ~ 114
     assert rom == pytest.approx(np.rad2deg(2), abs=1.0)
@@ -75,7 +75,7 @@ def test_compute_range_of_motion(sample_data):
     assert res == (0.0, 0.0, 0.0)
 
 
-def test_compute_tempo():
+def test_compute_tempo() -> None:
     # Construct data where we can predict tempo
     # Use "Plateau - Dip - Ramp" shape to be robust against finding min
     times = np.linspace(0, 2.0, 200)  # dt = 0.01
@@ -122,7 +122,7 @@ def test_compute_tempo():
     assert analyzer_empty.compute_tempo() is None
 
 
-def test_compute_x_factor(sample_data):
+def test_compute_x_factor(sample_data) -> None:
     # 1 joint only, so this will fail or return None if we ask for index 1
     xf = sample_data.compute_x_factor(0, 0)  # Should be 0
     assert np.allclose(xf, 0.0)
@@ -131,12 +131,12 @@ def test_compute_x_factor(sample_data):
     assert xf_none is None
 
 
-def test_detect_impact_time(sample_data):
+def test_detect_impact_time(sample_data) -> None:
     t = sample_data.detect_impact_time()
     assert t == pytest.approx(0.5, abs=0.02)
 
 
-def test_compute_energy_metrics(sample_data):
+def test_compute_energy_metrics(sample_data) -> None:
     ke = np.abs(sample_data.joint_velocities[:, 0])
     pe = np.abs(sample_data.joint_positions[:, 0])
     metrics = sample_data.compute_energy_metrics(ke, pe)
@@ -154,7 +154,7 @@ def test_compute_energy_metrics(sample_data):
     assert metrics_no_chs["energy_efficiency"] == 0.0
 
 
-def test_detect_swing_phases(sample_data):
+def test_detect_swing_phases(sample_data) -> None:
     phases = sample_data.detect_swing_phases()
     assert len(phases) > 0
     assert isinstance(phases[0], SwingPhase)
@@ -168,13 +168,13 @@ def test_detect_swing_phases(sample_data):
     assert phases_empty[0].name == "Complete Swing"
 
 
-def test_compute_phase_statistics(sample_data):
+def test_compute_phase_statistics(sample_data) -> None:
     phases = sample_data.detect_swing_phases()
     stats = sample_data.compute_phase_statistics(phases, sample_data.club_head_speed)
     assert len(stats) == len(phases)
 
 
-def test_generate_comprehensive_report(sample_data):
+def test_generate_comprehensive_report(sample_data) -> None:
     report = sample_data.generate_comprehensive_report()
     assert "club_head_speed" in report
     assert "joints" in report
@@ -184,7 +184,7 @@ def test_generate_comprehensive_report(sample_data):
     assert "peak_value" in report["club_head_speed"]
 
 
-def test_export_statistics_csv(sample_data, tmp_path):
+def test_export_statistics_csv(sample_data, tmp_path) -> None:
     f = tmp_path / "stats.csv"
     sample_data.export_statistics_csv(str(f))
     assert f.exists()
@@ -193,7 +193,7 @@ def test_export_statistics_csv(sample_data, tmp_path):
     assert "Club Head Speed" in content
 
 
-def test_analyze_kinematic_sequence():
+def test_analyze_kinematic_sequence() -> None:
     # Need multiple joints
     times = np.linspace(0, 1, 100)
     # Pelvis peaks early, Thorax later
@@ -214,7 +214,7 @@ def test_analyze_kinematic_sequence():
     assert len(seq_bad) == 0
 
 
-def test_compute_correlations():
+def test_compute_correlations() -> None:
     # Create 2 joints data for matrix
     N = 100
     j1 = np.linspace(0, 1, N)
@@ -237,7 +237,7 @@ def test_compute_correlations():
     assert len(corr_e) == 0
 
 
-def test_frequency_analysis(sample_data):
+def test_frequency_analysis(sample_data) -> None:
     # This might use scipy fallback if shared.python.signal_processing fails or isn't there
     freqs, psd = sample_data.compute_frequency_analysis(
         sample_data.joint_positions[:, 0]
@@ -253,7 +253,7 @@ def test_frequency_analysis(sample_data):
     assert len(f) == 0
 
 
-def test_compute_smoothness_metric(sample_data):
+def test_compute_smoothness_metric(sample_data) -> None:
     score = sample_data.compute_smoothness_metric(sample_data.club_head_speed)
     # SAL is negative
     assert score <= 0.0
@@ -266,7 +266,7 @@ def test_compute_smoothness_metric(sample_data):
     assert s == 0.0
 
 
-def test_compute_work_metrics(sample_data):
+def test_compute_work_metrics(sample_data) -> None:
     # We set torque = velocity in fixture.
     # Power = v^2, which is always positive.
     # So pos_work should be > 0, neg_work = 0
@@ -281,7 +281,7 @@ def test_compute_work_metrics(sample_data):
     assert sample_data.compute_work_metrics(99) is None
 
 
-def test_compute_phase_space_path_length(sample_data):
+def test_compute_phase_space_path_length(sample_data) -> None:
     pl = sample_data.compute_phase_space_path_length(0)
     assert pl > 0.0
 
@@ -289,7 +289,7 @@ def test_compute_phase_space_path_length(sample_data):
     assert sample_data.compute_phase_space_path_length(99) == 0.0
 
 
-def test_compute_joint_power_metrics(sample_data):
+def test_compute_joint_power_metrics(sample_data) -> None:
     # In sample_data, torque = velocity = cos(t).
     # Power = cos^2(t), which is always >= 0.
     metrics = sample_data.compute_joint_power_metrics(0)
@@ -319,7 +319,7 @@ def test_compute_joint_power_metrics(sample_data):
     assert metrics_neg.generation_duration == 0.0
 
 
-def test_compute_impulse_metrics(sample_data):
+def test_compute_impulse_metrics(sample_data) -> None:
     # In sample_data, torque = cos(t) (since vel = cos(t) and torque=vel)
     # Integral of cos^2(t) over 0 to 1 is positive
     # Actually wait, joint_velocities in sample_data is 2*pi*cos(2*pi*t)
@@ -343,12 +343,12 @@ def test_compute_impulse_metrics(sample_data):
     ],
     ids=["invalid_joint_idx", "no_forces_data", "invalid_source_type"],
 )
-def test_compute_impulse_metrics_invalid(sample_data, source_type, joint_idx):
+def test_compute_impulse_metrics_invalid(sample_data, source_type, joint_idx) -> None:
     """Test impulse metrics returns None for invalid inputs."""
     assert sample_data.compute_impulse_metrics(source_type, joint_idx) is None
 
 
-def test_compute_x_factor_stretch():
+def test_compute_x_factor_stretch() -> None:
     # Shoulders (index 0 for test) rotate 2x faster than Hips (index 1 for test)
     # create sample data with 2 joints
     times = np.linspace(0, 1.0, 100)
@@ -369,7 +369,7 @@ def test_compute_x_factor_stretch():
     assert peak == pytest.approx(45.0, abs=5.0)
 
 
-def test_compute_angular_momentum_metrics():
+def test_compute_angular_momentum_metrics() -> None:
     # Create angular momentum data
     N = 100
     times = np.linspace(0, 1, N)
@@ -396,7 +396,7 @@ def test_compute_angular_momentum_metrics():
     assert analyzer_none.compute_angular_momentum_metrics() is None
 
 
-def test_compute_stability_metrics():
+def test_compute_stability_metrics() -> None:
     # CoP and CoM
     N = 100
     times = np.linspace(0, 1, N)
@@ -437,7 +437,7 @@ def test_compute_stability_metrics():
     assert metrics_2d.mean_inclination_angle == 0.0
 
 
-def test_compute_coordination_metrics():
+def test_compute_coordination_metrics() -> None:
     # Create 2 joints
     N = 100
     times = np.linspace(0, 1, N)
@@ -456,7 +456,7 @@ def test_compute_coordination_metrics():
     assert metrics.mean_coupling_angle == pytest.approx(45.0)
 
 
-def test_compute_continuous_relative_phase():
+def test_compute_continuous_relative_phase() -> None:
     N = 100
     times = np.linspace(0, 1, N)
     pos = np.zeros((N, 2))
@@ -480,7 +480,7 @@ def test_compute_continuous_relative_phase():
     assert crp is not None
 
 
-def test_compute_swing_profile():
+def test_compute_swing_profile() -> None:
     # Need speed, torques, velocities, etc.
     N = 100
     times = np.linspace(0, 1, N)

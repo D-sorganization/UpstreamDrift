@@ -26,7 +26,7 @@ class MockQCheckBox:
     def isChecked(self):
         return self._checked
 
-    def setChecked(self, val):
+    def setChecked(self, val) -> None:
         self._checked = val
 
 
@@ -70,7 +70,7 @@ def mocked_launcher():
 
             # Override _launch_docker_container to just return the command checks
             # or we can test the actual method if we mock start_meshcat etc.
-            def _start_meshcat_browser(self, port):
+            def _start_meshcat_browser(self, port) -> None:
                 pass
 
         yield TestLauncher
@@ -80,7 +80,7 @@ def mocked_launcher():
     reason="Launcher refactored to mixin architecture; Popen captures VcXsrv not Docker",
     strict=False,
 )
-def test_live_view_environment_flags(mocked_launcher):
+def test_live_view_environment_flags(mocked_launcher) -> None:
     """Verify LIBGL_ALWAYS_INDIRECT and other flags are present when Live View is enabled on Windows."""
 
     launcher = mocked_launcher()
@@ -130,7 +130,7 @@ def test_live_view_environment_flags(mocked_launcher):
     reason="Launcher refactored to mixin architecture; Popen captures VcXsrv not Docker",
     strict=False,
 )
-def test_headless_environment_flags(mocked_launcher):
+def test_headless_environment_flags(mocked_launcher) -> None:
     """Verify flags for Headless mode."""
     launcher = mocked_launcher()
     launcher.chk_live.setChecked(False)

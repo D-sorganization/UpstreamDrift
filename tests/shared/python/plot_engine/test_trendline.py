@@ -14,7 +14,7 @@ from plot_engine.trendline import TrendlineResult, compute_trendline
 
 
 class TestLinearTrendline:
-    def test_perfect_line(self):
+    def test_perfect_line(self) -> None:
         x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
         y = 2.0 * x + 3.0
         result = compute_trendline(x, y, "linear")
@@ -26,14 +26,14 @@ class TestLinearTrendline:
         assert result.coefficients[0] == pytest.approx(2.0, abs=1e-6)
         assert result.coefficients[1] == pytest.approx(3.0, abs=1e-6)
 
-    def test_equation_format(self):
+    def test_equation_format(self) -> None:
         x = np.array([0.0, 1.0, 2.0, 3.0])
         y = 2.5 * x + 1.0
         result = compute_trendline(x, y, "linear")
         assert "y =" in result.equation
         assert "x" in result.equation
 
-    def test_noisy_data(self):
+    def test_noisy_data(self) -> None:
         rng = np.random.default_rng(42)
         x = np.linspace(0, 10, 100)
         y = 3.0 * x + 5.0 + rng.normal(0, 0.5, 100)
@@ -43,7 +43,7 @@ class TestLinearTrendline:
         assert result.coefficients[0] == pytest.approx(3.0, abs=0.3)
         assert result.coefficients[1] == pytest.approx(5.0, abs=1.0)
 
-    def test_prediction_arrays(self):
+    def test_prediction_arrays(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([0.0, 1.0, 2.0])
         result = compute_trendline(x, y, "linear", n_points=50)
@@ -53,7 +53,7 @@ class TestLinearTrendline:
         assert result.x_pred[0] == pytest.approx(0.0)
         assert result.x_pred[-1] == pytest.approx(2.0)
 
-    def test_negative_intercept(self):
+    def test_negative_intercept(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([-5.0, -3.0, -1.0])
         result = compute_trendline(x, y, "linear")
@@ -64,7 +64,7 @@ class TestLinearTrendline:
 
 
 class TestPolynomialTrendline:
-    def test_perfect_quadratic(self):
+    def test_perfect_quadratic(self) -> None:
         x = np.linspace(-2, 2, 50)
         y = 3.0 * x**2 - 2.0 * x + 1.0
         result = compute_trendline(x, y, "polynomial", degree=2)
@@ -75,19 +75,19 @@ class TestPolynomialTrendline:
         assert result.coefficients[1] == pytest.approx(-2.0, abs=1e-4)
         assert result.coefficients[2] == pytest.approx(1.0, abs=1e-4)
 
-    def test_cubic(self):
+    def test_cubic(self) -> None:
         x = np.linspace(0, 5, 100)
         y = x**3 - 2 * x**2 + x
         result = compute_trendline(x, y, "polynomial", degree=3)
         assert result.r_squared > 0.999
 
-    def test_equation_contains_powers(self):
+    def test_equation_contains_powers(self) -> None:
         x = np.linspace(0, 3, 20)
         y = x**2
         result = compute_trendline(x, y, "polynomial", degree=2)
         assert "x^2" in result.equation
 
-    def test_degree_capped_at_data_size(self):
+    def test_degree_capped_at_data_size(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([0.0, 1.0, 4.0])
         # degree=5 but only 3 points — should cap at degree 2
@@ -99,7 +99,7 @@ class TestPolynomialTrendline:
 
 
 class TestExponentialTrendline:
-    def test_perfect_exponential(self):
+    def test_perfect_exponential(self) -> None:
         x = np.linspace(0, 3, 50)
         y = 2.0 * np.exp(0.5 * x)
         result = compute_trendline(x, y, "exponential")
@@ -109,13 +109,13 @@ class TestExponentialTrendline:
         assert result.coefficients[0] == pytest.approx(2.0, abs=0.1)
         assert result.coefficients[1] == pytest.approx(0.5, abs=0.05)
 
-    def test_equation_format(self):
+    def test_equation_format(self) -> None:
         x = np.linspace(0, 2, 20)
         y = 1.5 * np.exp(0.3 * x)
         result = compute_trendline(x, y, "exponential")
         assert "exp(" in result.equation
 
-    def test_requires_positive_y(self):
+    def test_requires_positive_y(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([-1.0, -2.0, -3.0])
         with pytest.raises(ValueError, match="positive y"):
@@ -126,7 +126,7 @@ class TestExponentialTrendline:
 
 
 class TestPowerTrendline:
-    def test_perfect_power(self):
+    def test_perfect_power(self) -> None:
         x = np.linspace(0.5, 5, 50)
         y = 3.0 * x**2.0
         result = compute_trendline(x, y, "power")
@@ -136,13 +136,13 @@ class TestPowerTrendline:
         assert result.coefficients[0] == pytest.approx(3.0, abs=0.1)
         assert result.coefficients[1] == pytest.approx(2.0, abs=0.05)
 
-    def test_equation_format(self):
+    def test_equation_format(self) -> None:
         x = np.linspace(1, 5, 20)
         y = 2.0 * x**1.5
         result = compute_trendline(x, y, "power")
         assert "x^" in result.equation
 
-    def test_requires_positive_x_and_y(self):
+    def test_requires_positive_x_and_y(self) -> None:
         x = np.array([-1.0, 0.0, 1.0])
         y = np.array([1.0, 0.0, 1.0])
         with pytest.raises(ValueError, match="positive"):
@@ -153,48 +153,48 @@ class TestPowerTrendline:
 
 
 class TestEdgeCases:
-    def test_two_points_linear(self):
+    def test_two_points_linear(self) -> None:
         x = np.array([0.0, 1.0])
         y = np.array([0.0, 5.0])
         result = compute_trendline(x, y, "linear")
         assert result.coefficients[0] == pytest.approx(5.0)
 
-    def test_insufficient_data(self):
+    def test_insufficient_data(self) -> None:
         x = np.array([1.0])
         y = np.array([2.0])
         with pytest.raises(ValueError, match="At least 2"):
             compute_trendline(x, y, "linear")
 
-    def test_empty_arrays(self):
+    def test_empty_arrays(self) -> None:
         with pytest.raises(ValueError):
             compute_trendline(np.array([]), np.array([]), "linear")
 
-    def test_nan_handling(self):
+    def test_nan_handling(self) -> None:
         x = np.array([0.0, 1.0, np.nan, 3.0, 4.0])
         y = np.array([0.0, 2.0, 4.0, np.nan, 8.0])
         result = compute_trendline(x, y, "linear")
         # Should have filtered to 3 valid points: (0,0), (1,2), (4,8)
         assert result.r_squared > 0.9
 
-    def test_all_nan(self):
+    def test_all_nan(self) -> None:
         x = np.array([np.nan, np.nan])
         y = np.array([np.nan, np.nan])
         with pytest.raises(ValueError, match="At least 2"):
             compute_trendline(x, y, "linear")
 
-    def test_unknown_trend_type(self):
+    def test_unknown_trend_type(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([0.0, 1.0, 2.0])
         with pytest.raises(ValueError, match="Unknown"):
             compute_trendline(x, y, "logarithmic")
 
-    def test_default_n_points(self):
+    def test_default_n_points(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([0.0, 1.0, 2.0])
         result = compute_trendline(x, y, "linear")
         assert len(result.x_pred) == 200  # default
 
-    def test_custom_n_points(self):
+    def test_custom_n_points(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([0.0, 1.0, 2.0])
         result = compute_trendline(x, y, "linear", n_points=10)
@@ -205,7 +205,7 @@ class TestEdgeCases:
 
 
 class TestTrendlineResult:
-    def test_fields(self):
+    def test_fields(self) -> None:
         x = np.array([0.0, 1.0, 2.0, 3.0])
         y = np.array([1.0, 3.0, 5.0, 7.0])
         result = compute_trendline(x, y, "linear")
@@ -217,7 +217,7 @@ class TestTrendlineResult:
         assert hasattr(result, "x_pred")
         assert hasattr(result, "y_pred")
 
-    def test_repr_excludes_arrays(self):
+    def test_repr_excludes_arrays(self) -> None:
         x = np.array([0.0, 1.0, 2.0])
         y = np.array([0.0, 1.0, 2.0])
         result = compute_trendline(x, y, "linear")

@@ -8,7 +8,7 @@ class TestToolRegistry:
     def registry(self):
         return ToolRegistry()
 
-    def test_decorator_registration(self, registry):
+    def test_decorator_registration(self, registry) -> None:
         @registry.register("test_tool", "Description")
         def my_tool(arg1: int, arg2: str = "default") -> str:
             return f"{arg1}-{arg2}"
@@ -29,7 +29,7 @@ class TestToolRegistry:
         assert p2.required is False
         assert p2.default == "default"
 
-    def test_execution_success(self, registry):
+    def test_execution_success(self, registry) -> None:
         @registry.register("add", "Add nums")
         def add(a: int, b: int) -> int:
             return a + b
@@ -38,7 +38,7 @@ class TestToolRegistry:
         assert result.success is True
         assert result.result == 8
 
-    def test_execution_param_validation(self, registry):
+    def test_execution_param_validation(self, registry) -> None:
         @registry.register("echo", "Echo")
         def echo(msg: str):
             return msg
@@ -53,9 +53,9 @@ class TestToolRegistry:
         assert res2.success is False
         assert "Unknown parameter" in res2.error
 
-    def test_json_schema_generation(self, registry):
+    def test_json_schema_generation(self, registry) -> None:
         @registry.register("complex", "Complex tool")
-        def complex_tool(req: int, opt: str | None = None):
+        def complex_tool(req: int, opt: str | None = None) -> None:
             pass
 
         tool = registry.get_tool("complex")
@@ -66,9 +66,9 @@ class TestToolRegistry:
         assert "req" in schema["parameters"]["required"]
         assert "opt" not in schema["parameters"]["required"]
 
-    def test_provider_formats(self, registry):
+    def test_provider_formats(self, registry) -> None:
         @registry.register("tool", "desc")
-        def tool(a: int):
+        def tool(a: int) -> None:
             pass
 
         # OpenAI
@@ -81,13 +81,13 @@ class TestToolRegistry:
         assert "input_schema" in anth
         assert "name" in anth
 
-    def test_list_filtering(self, registry):
+    def test_list_filtering(self, registry) -> None:
         @registry.register("t1", "desc", category=ToolCategory.ANALYSIS)
-        def t1():
+        def t1() -> None:
             pass
 
         @registry.register("t2", "desc", category=ToolCategory.VISUALIZATION)
-        def t2():
+        def t2() -> None:
             pass
 
         assert len(registry.list_tools(category=ToolCategory.ANALYSIS)) == 1

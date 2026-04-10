@@ -13,22 +13,22 @@ class MockQWidget:
         """Return a no-op callable for any missing Qt method."""
         return lambda *args, **kwargs: None
 
-    def setAccessibleName(self, name):
+    def setAccessibleName(self, name) -> None:
         pass
 
-    def setAccessibleDescription(self, desc):
+    def setAccessibleDescription(self, desc) -> None:
         pass
 
-    def setObjectName(self, name):
+    def setObjectName(self, name) -> None:
         pass
 
-    def setCursor(self, cursor):
+    def setCursor(self, cursor) -> None:
         pass
 
-    def setFocusPolicy(self, policy):
+    def setFocusPolicy(self, policy) -> None:
         pass
 
-    def setStyleSheet(self, style):
+    def setStyleSheet(self, style) -> None:
         pass
 
 
@@ -36,31 +36,31 @@ class MockQLabel(MockQWidget):
     def __init__(self, text="", parent=None):
         self._text = text
 
-    def setFont(self, font):
+    def setFont(self, font) -> None:
         pass
 
-    def setWordWrap(self, wrap):
+    def setWordWrap(self, wrap) -> None:
         pass
 
-    def setAlignment(self, align):
+    def setAlignment(self, align) -> None:
         pass
 
-    def setStyleSheet(self, style):
+    def setStyleSheet(self, style) -> None:
         pass
 
-    def setFixedWidth(self, w):
+    def setFixedWidth(self, w) -> None:
         pass
 
-    def setFixedSize(self, w, h):
+    def setFixedSize(self, w, h) -> None:
         pass
 
-    def setPixmap(self, pixmap):
+    def setPixmap(self, pixmap) -> None:
         pass
 
-    def setToolTip(self, text):
+    def setToolTip(self, text) -> None:
         pass
 
-    def setText(self, text):
+    def setText(self, text) -> None:
         self._text = text
 
 
@@ -68,16 +68,16 @@ class MockQVBoxLayout:
     def __init__(self, parent=None):
         pass
 
-    def setAlignment(self, *args):
+    def setAlignment(self, *args) -> None:
         pass
 
-    def addWidget(self, widget, *args, **kwargs):
+    def addWidget(self, widget, *args, **kwargs) -> None:
         pass
 
-    def addLayout(self, layout, *args, **kwargs):
+    def addLayout(self, layout, *args, **kwargs) -> None:
         pass
 
-    def setContentsMargins(self, *args):
+    def setContentsMargins(self, *args) -> None:
         pass
 
 
@@ -85,16 +85,16 @@ class MockQHBoxLayout:
     def __init__(self, parent=None):
         pass
 
-    def addStretch(self, *args):
+    def addStretch(self, *args) -> None:
         pass
 
-    def addWidget(self, widget, *args, **kwargs):
+    def addWidget(self, widget, *args, **kwargs) -> None:
         pass
 
-    def addLayout(self, layout, *args, **kwargs):
+    def addLayout(self, layout, *args, **kwargs) -> None:
         pass
 
-    def setContentsMargins(self, *args):
+    def setContentsMargins(self, *args) -> None:
         pass
 
 
@@ -102,7 +102,7 @@ class MockQFrame(MockQWidget):
     def __init__(self, parent=None):
         pass
 
-    def setAcceptDrops(self, accept):
+    def setAcceptDrops(self, accept) -> None:
         pass
 
 
@@ -151,7 +151,7 @@ def mocked_launcher_module():
     reason="Theme colors are dynamic (QSettings-based), cannot validate in mocked env",
     strict=False,
 )
-def test_status_info_contrast(mocked_launcher_module):
+def test_status_info_contrast(mocked_launcher_module) -> None:
     """Test that _get_status_info returns appropriate text colors."""
 
     # Mock model object
@@ -204,7 +204,7 @@ def test_status_info_contrast(mocked_launcher_module):
 @pytest.mark.xfail(
     reason="QShortcut mocking with complex imports is flaky", strict=False
 )
-def test_escape_shortcut_logic(mocked_launcher_module):
+def test_escape_shortcut_logic(mocked_launcher_module) -> None:
     """Test that GolfLauncher sets up the Escape shortcut."""
     with (
         patch("src.launchers.golf_launcher.QShortcut") as MockShortcut,

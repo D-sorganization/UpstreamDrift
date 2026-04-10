@@ -15,14 +15,14 @@ from src.shared.python.spatial_algebra.reference_frames import (
 
 
 class TestReferenceFrames:
-    def test_compute_rotation_matrix_from_axes(self):
+    def test_compute_rotation_matrix_from_axes(self) -> None:
         x = np.array([1, 0, 0])
         y = np.array([0, 1, 0])
         z = np.array([0, 0, 1])
         R = compute_rotation_matrix_from_axes(x, y, z)
         np.testing.assert_array_equal(R, np.eye(3))
 
-    def test_transform_wrench_to_frame(self):
+    def test_transform_wrench_to_frame(self) -> None:
         wrench = WrenchInFrame(
             force=np.array([1, 2, 3], dtype=float),
             torque=np.array([4, 5, 6], dtype=float),
@@ -43,7 +43,7 @@ class TestReferenceFrames:
         assert transformed.point is not None
         np.testing.assert_array_almost_equal(transformed.point, np.array([0, 0, 1]))
 
-    def test_fit_instantaneous_swing_plane(self):
+    def test_fit_instantaneous_swing_plane(self) -> None:
         grip_pos = np.array([0, 0, 1], dtype=float)
         club_pos = np.array([1, 0, 0], dtype=float)
         club_vel = np.array([0, 1, 0], dtype=float)  # velocity in y direction
@@ -71,7 +71,7 @@ class TestReferenceFrames:
             np.array([1, 0, 0]), np.array([0, 0, -1]), np.array([1, 0, 0])
         )
 
-    def test_fit_functional_swing_plane(self):
+    def test_fit_functional_swing_plane(self) -> None:
         t = np.linspace(0, 1, 100)
         # points in x-y plane
         traj = np.column_stack([np.cos(t), np.sin(t), np.zeros_like(t)])
@@ -83,7 +83,7 @@ class TestReferenceFrames:
         # very small window
         fit_functional_swing_plane(traj, t, impact_time=0.5, window_ms=0.1)
 
-    def test_decompose_wrench_in_swing_plane(self):
+    def test_decompose_wrench_in_swing_plane(self) -> None:
         wrench = WrenchInFrame(
             force=np.array([1, 0, 0], dtype=float),
             torque=np.array([0, 1, 0], dtype=float),
@@ -104,7 +104,7 @@ class TestReferenceFrames:
         assert res["torque_in_plane"] == 1.0
         assert res["torque_out_of_plane"] == 0.0
 
-    def test_transformer(self):
+    def test_transformer(self) -> None:
         transformer = ReferenceFrameTransformer()
 
         plane = SwingPlaneFrame(

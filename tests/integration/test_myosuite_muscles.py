@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 
 @pytest.fixture
-def myosuite_env_available():
+def myosuite_env_available() -> bool:
     """Check if MyoSuite is available."""
     if not MYOSUITE_AVAILABLE:
         pytest.skip("MyoSuite not installed")
@@ -32,7 +32,7 @@ def myosuite_env_available():
 class TestMyoSuiteMuscleAnalyzer:
     """Test MyoSuite muscle analysis module."""
 
-    def test_muscle_actuator_identification(self, myosuite_env_available):
+    def test_muscle_actuator_identification(self, myosuite_env_available) -> None:
         """Section K: Identify muscle actuators from MuJoCo model."""
         try:
             import gym
@@ -59,7 +59,7 @@ class TestMyoSuiteMuscleAnalyzer:
             logger.warning(f"MyoSuite environment test failed: {e}")
             pytest.skip("Could not load MyoSuite environment")
 
-    def test_muscle_activation_extraction(self, myosuite_env_available):
+    def test_muscle_activation_extraction(self, myosuite_env_available) -> None:
         """Section K: Extract muscle activations from sim state."""
         try:
             import gym
@@ -87,7 +87,7 @@ class TestMyoSuiteMuscleAnalyzer:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Activation test failed: {e}")
 
-    def test_muscle_force_computation(self, myosuite_env_available):
+    def test_muscle_force_computation(self, myosuite_env_available) -> None:
         """Section K: Compute muscle forces from actuators."""
         try:
             import gym
@@ -119,7 +119,7 @@ class TestMyoSuiteMuscleAnalyzer:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Force test failed: {e}")
 
-    def test_moment_arm_computation(self, myosuite_env_available):
+    def test_moment_arm_computation(self, myosuite_env_available) -> None:
         """Section K: Compute moment arms via finite differences."""
         try:
             import gym
@@ -147,7 +147,7 @@ class TestMyoSuiteMuscleAnalyzer:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Moment arm test failed: {e}")
 
-    def test_muscle_induced_acceleration(self, myosuite_env_available):
+    def test_muscle_induced_acceleration(self, myosuite_env_available) -> None:
         """Section K: Compute muscle-induced accelerations."""
         try:
             import gym
@@ -184,7 +184,7 @@ class TestMyoSuiteMuscleAnalyzer:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Induced acceleration test failed: {e}")
 
-    def test_comprehensive_muscle_analysis(self, myosuite_env_available):
+    def test_comprehensive_muscle_analysis(self, myosuite_env_available) -> None:
         """Section K: Full muscle contribution report."""
         try:
             import gym
@@ -229,7 +229,7 @@ class TestMyoSuiteMuscleAnalyzer:
 class TestMyoSuiteGripModel:
     """Test grip modeling via hand muscles."""
 
-    def test_grip_muscle_identification(self, myosuite_env_available):
+    def test_grip_muscle_identification(self, myosuite_env_available) -> None:
         """Section K1: Identify hand/finger muscles."""
         try:
             import gym
@@ -264,7 +264,7 @@ class TestMyoSuiteGripModel:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Grip muscle test failed: {e}")
 
-    def test_total_grip_force_computation(self, myosuite_env_available):
+    def test_total_grip_force_computation(self, myosuite_env_available) -> None:
         """Section K1: Compute total grip force."""
         try:
             import gym
@@ -306,7 +306,7 @@ class TestMyoSuiteGripModel:
 class TestMyoSuiteEngine:
     """Test MyoSuite engine with muscle integration."""
 
-    def test_drift_control_with_muscles(self, myosuite_env_available):
+    def test_drift_control_with_muscles(self, myosuite_env_available) -> None:
         """Section F + K: Verify drift-control works with muscle model."""
         try:
             from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
@@ -335,7 +335,7 @@ class TestMyoSuiteEngine:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Drift-control test failed: {e}")
 
-    def test_muscle_analyzer_integration(self, myosuite_env_available):
+    def test_muscle_analyzer_integration(self, myosuite_env_available) -> None:
         """Section K: Verify engine provides muscle analyzer."""
         try:
             from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
@@ -356,7 +356,7 @@ class TestMyoSuiteEngine:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Analyzer integration test failed: {e}")
 
-    def test_muscle_activation_setting(self, myosuite_env_available):
+    def test_muscle_activation_setting(self, myosuite_env_available) -> None:
         """Section K: Set muscle activations by name."""
         try:
             from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
@@ -400,14 +400,14 @@ class TestMyoSuiteEngine:
 class TestCrossValidation:
     """Cross-validation with OpenSim."""
 
-    def test_muscle_force_comparison(self):
+    def test_muscle_force_comparison(self) -> None:
         """Section K2: Compare MyoSuite vs OpenSim muscle forces."""
         # This test requires both engines with comparable models
         # Placeholder for future cross-validation
         logger.info("Cross-validation: Placeholder for MyoSuite ↔ OpenSim comparison")
         pytest.skip("Cross-validation test pending matching models")
 
-    def test_grip_force_validation(self):
+    def test_grip_force_validation(self) -> None:
         """Section K1 + J1: Compare grip forces across engines."""
         # Grip force should agree within ±15% (Section K2)
         logger.info("Grip cross-validation: Placeholder")

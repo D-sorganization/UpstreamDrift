@@ -24,7 +24,7 @@ def test_model():
     return model
 
 
-def test_help_dialog_file_exists(qapp):
+def test_help_dialog_file_exists(qapp) -> None:
     """Test HelpDialog when help.md exists."""
     with (
         patch("src.launchers.help_dialogs.Path.exists", return_value=True),
@@ -35,14 +35,14 @@ def test_help_dialog_file_exists(qapp):
         assert "Help" in dialog.text_area.toPlainText()
 
 
-def test_help_dialog_file_missing(qapp):
+def test_help_dialog_file_missing(qapp) -> None:
     """Test HelpDialog when help.md is missing."""
     with patch("src.launchers.help_dialogs.Path.exists", return_value=False):
         dialog = HelpDialog()
         assert "not found" in dialog.text_area.toPlainText()
 
 
-def test_layout_manager_dialog(qapp, test_model):
+def test_layout_manager_dialog(qapp, test_model) -> None:
     """Test LayoutManagerDialog initialization and selection."""
     models = {"test_id": test_model}
     active = ["test_id"]
@@ -57,7 +57,7 @@ def test_layout_manager_dialog(qapp, test_model):
     assert dialog.selected_ids() == ["test_id"]
 
 
-def test_layout_manager_dialog_unchecked(qapp, test_model):
+def test_layout_manager_dialog_unchecked(qapp, test_model) -> None:
     """Test LayoutManagerDialog with unchecked items."""
     models = {"test_id": test_model}
     active = []
@@ -68,7 +68,7 @@ def test_layout_manager_dialog_unchecked(qapp, test_model):
     assert dialog.selected_ids() == []
 
 
-def test_layout_manager_dialog_no_model_id(qapp, test_model):
+def test_layout_manager_dialog_no_model_id(qapp, test_model) -> None:
     """Test LayoutManagerDialog with a checked item having no role data."""
     models = {"test_id": test_model}
     active = ["test_id"]
@@ -79,21 +79,21 @@ def test_layout_manager_dialog_no_model_id(qapp, test_model):
     assert dialog.selected_ids() == []
 
 
-def test_context_help_dock_init(qapp):
+def test_context_help_dock_init(qapp) -> None:
     """Test ContextHelpDock initialization."""
     dock = ContextHelpDock()
     assert dock.windowTitle() == "Quick Help"
     assert "Context Aware Help" in dock.text_area.toPlainText()
 
 
-def test_update_context_no_id(qapp):
+def test_update_context_no_id(qapp) -> None:
     """Test update_context with None."""
     dock = ContextHelpDock()
     dock.update_context(None)
     assert "Context Aware Help" in dock.text_area.toPlainText()
 
 
-def test_update_context_valid_file(qapp):
+def test_update_context_valid_file(qapp) -> None:
     """Test update_context when doc file exists."""
     dock = ContextHelpDock()
 
@@ -106,7 +106,7 @@ def test_update_context_valid_file(qapp):
         assert "Valid doc content" in dock.text_area.toPlainText()
 
 
-def test_update_context_read_error(qapp):
+def test_update_context_read_error(qapp) -> None:
     """Test update_context when doc file exists but cannot be read."""
     dock = ContextHelpDock()
 
@@ -121,7 +121,7 @@ def test_update_context_read_error(qapp):
         )
 
 
-def test_update_context_no_file(qapp):
+def test_update_context_no_file(qapp) -> None:
     """Test update_context when doc file does not exist."""
     dock = ContextHelpDock()
 
@@ -134,7 +134,7 @@ def test_update_context_no_file(qapp):
         assert "No specific documentation available" in dock.text_area.toPlainText()
 
 
-def test_get_doc_file(qapp):
+def test_get_doc_file(qapp) -> None:
     """Test _get_doc_file mapping."""
     dock = ContextHelpDock()
 

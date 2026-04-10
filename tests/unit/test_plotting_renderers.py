@@ -29,7 +29,7 @@ class _MockRecorder:
     def get_induced_acceleration_series(self, source):
         return np.linspace(0, 1, 10), np.zeros((10, 3))
 
-    def set_analysis_config(self, config):
+    def set_analysis_config(self, config) -> None:
         pass
 
 

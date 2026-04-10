@@ -119,7 +119,7 @@ def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
     return recommendations[:10]
 
 
-def main():
+def main() -> int:
     """Finalize and write the comprehensive assessment report."""
     logger.info("Finalizing Comprehensive Assessment Report...")
 

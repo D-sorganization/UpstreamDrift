@@ -58,16 +58,16 @@ class MockRecorder:
 class TestSharedPlottingAdvanced(unittest.TestCase):
     """Test advanced plotting features."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.recorder = MockRecorder()
         self.plotter = GolfSwingPlotter(self.recorder)
         self.fig = plt.figure()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         plt.close(self.fig)
 
     @unittest.skipUnless(_HAS_3D, "mpl_toolkits.mplot3d unavailable")
-    def test_plot_grf_butterfly_diagram(self):
+    def test_plot_grf_butterfly_diagram(self) -> None:
         """Test plotting GRF butterfly diagram."""
         self.plotter.plot_grf_butterfly_diagram(self.fig)
         # Check if axes were created (projection='3d' creates an Axes3D object)
@@ -76,7 +76,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         self.assertEqual(ax.name, "3d")
         self.assertEqual(ax.get_title(), "GRF Butterfly Diagram")
 
-    def test_plot_grf_butterfly_diagram_no_data(self):
+    def test_plot_grf_butterfly_diagram_no_data(self) -> None:
         """Test graceful handling of missing data."""
         empty_recorder = MagicMock()
         empty_recorder.get_time_series.side_effect = KeyError("Data missing")
@@ -87,7 +87,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         # Should catch exception and not crash
 
     @unittest.skipUnless(_HAS_3D, "mpl_toolkits.mplot3d unavailable")
-    def test_plot_angular_momentum_3d(self):
+    def test_plot_angular_momentum_3d(self) -> None:
         """Test plotting 3D angular momentum."""
         self.plotter.plot_angular_momentum_3d(self.fig)
         self.assertTrue(len(self.fig.axes) > 0)
@@ -95,7 +95,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         self.assertEqual(ax.name, "3d")
         self.assertEqual(ax.get_title(), "3D Angular Momentum Trajectory")
 
-    def test_plot_stability_diagram(self):
+    def test_plot_stability_diagram(self) -> None:
         """Test plotting stability diagram."""
         self.plotter.plot_stability_diagram(self.fig)
         self.assertTrue(len(self.fig.axes) > 0)
@@ -103,7 +103,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         self.assertNotEqual(ax.name, "3d")  # Should be 2D
         self.assertEqual(ax.get_title(), "Stability Diagram (CoM vs CoP)")
 
-    def test_plot_stability_diagram_missing_data(self):
+    def test_plot_stability_diagram_missing_data(self) -> None:
         """Test stability diagram with missing data."""
         mock_rec = MagicMock()
         # Return time but empty arrays

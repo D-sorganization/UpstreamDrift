@@ -31,7 +31,7 @@ class DummyAdapter(BaseAgentAdapter):
         return True, "OK"
 
 
-def test_tool_declaration_init():
+def test_tool_declaration_init() -> None:
     """Test ToolDeclaration initialization."""
     tool = ToolDeclaration(
         name="test_tool",
@@ -50,7 +50,7 @@ def test_tool_declaration_init():
     assert tool2.required == []
 
 
-def test_tool_declaration_openai_format():
+def test_tool_declaration_openai_format() -> None:
     """Test converting ToolDeclaration to OpenAI format."""
     tool = ToolDeclaration(
         name="weather_tool",
@@ -73,7 +73,7 @@ def test_tool_declaration_openai_format():
     }
 
 
-def test_tool_declaration_anthropic_format():
+def test_tool_declaration_anthropic_format() -> None:
     """Test converting ToolDeclaration to Anthropic format."""
     tool = ToolDeclaration(
         name="calc_tool",
@@ -93,7 +93,7 @@ def test_tool_declaration_anthropic_format():
     }
 
 
-def test_format_messages_for_provider():
+def test_format_messages_for_provider() -> None:
     """Test formatting conversation history."""
     adapter = DummyAdapter()
 
@@ -115,7 +115,7 @@ def test_format_messages_for_provider():
     assert formatted[2] == {"role": "user", "content": "next message"}
 
 
-def test_build_system_prompt():
+def test_build_system_prompt() -> None:
     """Test building a basic system prompt."""
     adapter = DummyAdapter()
 

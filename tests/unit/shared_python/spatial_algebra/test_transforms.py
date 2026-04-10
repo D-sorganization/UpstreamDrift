@@ -5,7 +5,7 @@ from src.shared.python.spatial_algebra.transforms import inv_xtrans, xlt, xrot, 
 
 
 class TestTransforms:
-    def test_xrot(self):
+    def test_xrot(self) -> None:
         e_rot = np.eye(3, dtype=float)
         res = xrot(e_rot)
         assert res.shape == (6, 6)
@@ -24,7 +24,7 @@ class TestTransforms:
         with pytest.raises(ValueError, match="E may not be a valid rotation"):
             xrot(np.zeros((3, 3)))
 
-    def test_xlt(self):
+    def test_xlt(self) -> None:
         r = np.array([1, 2, 3], dtype=float)
         res = xlt(r)
         assert res.shape == (6, 6)
@@ -39,7 +39,7 @@ class TestTransforms:
         with pytest.raises(ValueError, match="r must be 3x1"):
             xlt(np.array([1, 2]))
 
-    def test_xtrans(self):
+    def test_xtrans(self) -> None:
         e_rot = np.eye(3, dtype=float)
         r = np.array([1, 2, 3], dtype=float)
 
@@ -57,7 +57,7 @@ class TestTransforms:
         with pytest.raises(ValueError, match="r must be 3x1"):
             xtrans(e_rot, np.array([1, 2]))
 
-    def test_inv_xtrans(self):
+    def test_inv_xtrans(self) -> None:
         e_rot = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]], dtype=float)
         r = np.array([1, 2, 3], dtype=float)
 

@@ -30,7 +30,7 @@ if MUJOCO_AVAILABLE:
 class TestSpatialVectors:
     """Test spatial vector operations."""
 
-    def test_spatial_cross_motion(self):
+    def test_spatial_cross_motion(self) -> None:
         """Test motion cross product (v x m)."""
         v1 = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         v2 = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
@@ -42,7 +42,7 @@ class TestSpatialVectors:
         res_self = spatial_vectors.cross_motion(v1, v1)
         np.testing.assert_allclose(res_self, np.zeros(6), atol=1e-10)
 
-    def test_spatial_cross_force(self):
+    def test_spatial_cross_force(self) -> None:
         """Test force cross product (v x* f)."""
         v = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         f = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
@@ -50,7 +50,7 @@ class TestSpatialVectors:
         res = spatial_vectors.cross_force(v, f)
         assert res.shape == (6,)
 
-    def test_mci(self):
+    def test_mci(self) -> None:
         """Test mci (spatial inertia matrix construction)."""
         mass = 1.0
         center_of_mass = np.array([0.1, 0.2, 0.3])
@@ -68,7 +68,7 @@ class TestSpatialVectors:
 class TestTransforms:
     """Test coordinate transforms."""
 
-    def test_xrot(self):
+    def test_xrot(self) -> None:
         """Test X-axis rotation."""
         theta = np.pi / 2
         Rx = np.array(
@@ -86,7 +86,7 @@ class TestTransforms:
 
         np.testing.assert_allclose(X, expected, atol=1e-10)
 
-    def test_xlt(self):
+    def test_xlt(self) -> None:
         """Test spatial transform generation from translation."""
         r = np.array([1.0, 2.0, 3.0])
 
@@ -97,7 +97,7 @@ class TestTransforms:
         X_id = transforms.xlt(np.zeros(3))
         np.testing.assert_allclose(X_id, np.eye(6))
 
-    def test_xtrans(self):
+    def test_xtrans(self) -> None:
         """Test general spatial transform."""
         theta = np.pi / 2
         R = np.array(
@@ -112,7 +112,7 @@ class TestTransforms:
         X = transforms.xtrans(R, r)
         assert X.shape == (6, 6)
 
-    def test_inv_xtrans(self):
+    def test_inv_xtrans(self) -> None:
         """Test inverse transform."""
         theta = np.pi / 4
         R = np.array(
@@ -134,7 +134,7 @@ class TestTransforms:
 class TestJoints:
     """Test joint subspace generation."""
 
-    def test_jcalc_revolute(self):
+    def test_jcalc_revolute(self) -> None:
         """Test revolute joint subspace."""
         X, S, idx = joints.jcalc("Rx", 0.0)
         assert X.shape == (6, 6)
@@ -142,13 +142,13 @@ class TestJoints:
         np.testing.assert_allclose(S, np.array([1, 0, 0, 0, 0, 0]))
         assert idx == 0
 
-    def test_jcalc_prismatic(self):
+    def test_jcalc_prismatic(self) -> None:
         """Test prismatic joint subspace."""
         X, S, idx = joints.jcalc("Px", 0.0)
         np.testing.assert_allclose(S, np.array([0, 0, 0, 1, 0, 0]))
         assert idx == 3
 
-    def test_unknown_joint(self):
+    def test_unknown_joint(self) -> None:
         """Test error handling for unknown joint."""
         with pytest.raises(ValueError):
             joints.jcalc("InvalidType", 0.0)

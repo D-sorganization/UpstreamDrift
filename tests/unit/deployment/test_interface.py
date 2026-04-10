@@ -47,7 +47,7 @@ class MockInputDevice:
         return self.buttons
 
 
-def test_teleoperation_interface_init():
+def test_teleoperation_interface_init() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -57,7 +57,7 @@ def test_teleoperation_interface_init():
     assert not interface.is_recording
 
 
-def test_teleoperation_set_workspace_mapping():
+def test_teleoperation_set_workspace_mapping() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -67,7 +67,7 @@ def test_teleoperation_set_workspace_mapping():
     assert interface._workspace.position_scale == 2.0
 
 
-def test_clutch_control():
+def test_clutch_control() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -83,7 +83,7 @@ def test_clutch_control():
     assert interface.is_clutch_engaged
 
 
-def test_update_position_mode():
+def test_update_position_mode() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -101,7 +101,7 @@ def test_update_position_mode():
     assert cmd.gripper_command == 1.0
 
 
-def test_update_velocity_mode():
+def test_update_velocity_mode() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -114,7 +114,7 @@ def test_update_velocity_mode():
     assert cmd.velocity_targets is not None
 
 
-def test_update_wrench_mode():
+def test_update_wrench_mode() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -127,7 +127,7 @@ def test_update_wrench_mode():
     assert cmd.torque_commands is not None
 
 
-def test_update_impedance_mode():
+def test_update_impedance_mode() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -140,7 +140,7 @@ def test_update_impedance_mode():
     assert cmd.stiffness is not None
 
 
-def test_get_haptic_feedback():
+def test_get_haptic_feedback() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)
@@ -151,7 +151,7 @@ def test_get_haptic_feedback():
     assert feedback[1] == 2.0
 
 
-def test_demonstration_recording():
+def test_demonstration_recording() -> None:
     robot = MockRobot()
     device = MockInputDevice()
     interface = TeleoperationInterface(robot, device)

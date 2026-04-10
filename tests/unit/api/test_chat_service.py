@@ -31,26 +31,26 @@ def chat_service(tmp_path):
 class TestSessionManagement:
     """Tests for session creation, retrieval, and eviction."""
 
-    def test_create_new_session(self, chat_service):
+    def test_create_new_session(self, chat_service) -> None:
         """Creating a session with no ID yields a new ConversationContext."""
         ctx = chat_service.get_or_create_session(None)
         assert ctx is not None
         assert ctx.session_id is not None
         assert len(ctx.messages) == 0
 
-    def test_retrieve_existing_session(self, chat_service):
+    def test_retrieve_existing_session(self, chat_service) -> None:
         """Retrieving a session by its ID returns the same context."""
         ctx1 = chat_service.get_or_create_session(None)
         ctx2 = chat_service.get_or_create_session(ctx1.session_id)
         assert ctx1.session_id == ctx2.session_id
 
-    def test_unknown_session_creates_new(self, chat_service):
+    def test_unknown_session_creates_new(self, chat_service) -> None:
         """Requesting a non-existent session ID creates a new one."""
         ctx = chat_service.get_or_create_session("nonexistent-id-123")
         assert ctx is not None
         assert ctx.session_id is not None
 
-    def test_max_sessions_eviction(self, chat_service):
+    def test_max_sessions_eviction(self, chat_service) -> None:
         """When MAX_SESSIONS is exceeded, oldest sessions are evicted."""
         chat_service.MAX_SESSIONS = 3
         sessions = []
@@ -62,7 +62,7 @@ class TestSessionManagement:
         # Most recent sessions should survive
         assert sessions[-1] in chat_service._sessions
 
-    def test_ttl_eviction(self, chat_service):
+    def test_ttl_eviction(self, chat_service) -> None:
         """Sessions older than TTL are evicted on next access."""
         chat_service.SESSION_TTL_SECONDS = 0  # Immediate expiry
         ctx = chat_service.get_or_create_session(None)
@@ -79,14 +79,14 @@ class TestSessionManagement:
 class TestMessageHandling:
     """Tests for adding messages and retrieving history."""
 
-    def test_add_user_message(self, chat_service):
+    def test_add_user_message(self, chat_service) -> None:
         """Adding a user message returns a message ID."""
         ctx = chat_service.get_or_create_session(None)
         msg_id = chat_service.add_user_message(ctx.session_id, "Hello, world!")
         assert msg_id is not None
         assert len(msg_id) == 12  # hex[:12]
 
-    def test_add_message_with_engine_context(self, chat_service):
+    def test_add_message_with_engine_context(self, chat_service) -> None:
         """Engine context is stored in session metadata."""
         ctx = chat_service.get_or_create_session(None)
         chat_service.add_user_message(
@@ -94,12 +94,12 @@ class TestMessageHandling:
         )
         assert ctx.metadata.get("last_engine") == "mujoco"
 
-    def test_add_message_to_nonexistent_session(self, chat_service):
+    def test_add_message_to_nonexistent_session(self, chat_service) -> None:
         """Adding a message to a non-existent session raises InvalidRequestError."""
         with pytest.raises(InvalidRequestError, match="not found"):
             chat_service.add_user_message("fake-session", "Hello")
 
-    def test_get_session_history(self, chat_service):
+    def test_get_session_history(self, chat_service) -> None:
         """Session history returns messages in order."""
         ctx = chat_service.get_or_create_session(None)
         chat_service.add_user_message(ctx.session_id, "First message")
@@ -111,12 +111,12 @@ class TestMessageHandling:
         assert history[0]["content"] == "First message"
         assert history[1]["content"] == "Second message"
 
-    def test_get_history_nonexistent_session(self, chat_service):
+    def test_get_history_nonexistent_session(self, chat_service) -> None:
         """Getting history for a non-existent session returns empty list."""
         history = chat_service.get_session_history("nonexistent")
         assert history == []
 
-    def test_list_sessions(self, chat_service):
+    def test_list_sessions(self, chat_service) -> None:
         """Listing sessions returns summary info."""
         ctx = chat_service.get_or_create_session(None)
         chat_service.add_user_message(ctx.session_id, "Hello")
@@ -130,7 +130,7 @@ class TestMessageHandling:
 class TestPersistence:
     """Tests for session disk persistence and loading."""
 
-    def test_persist_and_load_session(self, chat_service, tmp_path):
+    def test_persist_and_load_session(self, chat_service, tmp_path) -> None:
         """A persisted session can be loaded from disk."""
         ctx = chat_service.get_or_create_session(None)
         sid = ctx.session_id
@@ -152,7 +152,7 @@ class TestPersistence:
         assert len(loaded.messages) == 1
         assert loaded.messages[0].content == "Persisted message"
 
-    def test_load_nonexistent_session(self, chat_service):
+    def test_load_nonexistent_session(self, chat_service) -> None:
         """Loading a session that doesn't exist on disk returns None."""
         result = chat_service._load_session("does-not-exist")
         assert result is None
@@ -161,7 +161,7 @@ class TestPersistence:
 class TestAdapterLoading:
     """Tests for AI adapter initialization."""
 
-    def test_fallback_to_ollama(self, chat_service):
+    def test_fallback_to_ollama(self, chat_service) -> None:
         """Fallback creates an OllamaAdapter when settings fail."""
         chat_service._adapter = None
         with patch("src.api.services.chat_service.ChatService._fallback_to_ollama"):
@@ -169,7 +169,7 @@ class TestAdapterLoading:
             chat_service._fallback_to_ollama()
         assert True  # No exception raised
 
-    def test_service_works_without_adapter(self, chat_service):
+    def test_service_works_without_adapter(self, chat_service) -> None:
         """ChatService functions for session management even without adapter."""
         chat_service._adapter = None
         ctx = chat_service.get_or_create_session(None)

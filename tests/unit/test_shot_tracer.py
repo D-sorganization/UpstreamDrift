@@ -67,7 +67,7 @@ def widget(qtbot, mock_flight_models):
     return widget
 
 
-def test_initialization(widget):
+def test_initialization(widget) -> None:
     """Test that the widget initializes correctly."""
     assert widget.windowTitle() == ""  # Widget doesn't have a title, Window does
     assert widget.speed_spin.value() == 163.0
@@ -75,7 +75,7 @@ def test_initialization(widget):
     assert len(widget.model_checkboxes) == 3
 
 
-def test_presets(widget):
+def test_presets(widget) -> None:
     """Test that presets update the spin boxes."""
     # Apply 7-Iron preset
     widget._apply_preset("7iron")
@@ -90,7 +90,7 @@ def test_presets(widget):
     assert widget.spin_spin.value() == 2500.0
 
 
-def test_get_selected_models(widget, mock_flight_models):
+def test_get_selected_models(widget, mock_flight_models) -> None:
     """Test retrieval of selected models."""
     mock_registry, _, _, mock_type = mock_flight_models
 
@@ -105,7 +105,7 @@ def test_get_selected_models(widget, mock_flight_models):
     assert mock_type.WATERLOO_PENNER not in selected
 
 
-def test_run_comparison_no_selection(widget, qtbot):
+def test_run_comparison_no_selection(widget, qtbot) -> None:
     """Test running comparison with no models selected."""
     # Uncheck all
     for checkbox in widget.model_checkboxes.values():
@@ -117,7 +117,7 @@ def test_run_comparison_no_selection(widget, qtbot):
         assert "Please select" in mock_warning.call_args[0][2]
 
 
-def test_run_comparison_success(widget, mock_flight_models):
+def test_run_comparison_success(widget, mock_flight_models) -> None:
     """Test successful comparison run."""
     mock_registry, mock_launch, mock_compare, _ = mock_flight_models
 
@@ -148,7 +148,7 @@ def test_run_comparison_success(widget, mock_flight_models):
     assert item.text() == "273.4"
 
 
-def test_clear_visualization(widget, mock_flight_models):
+def test_clear_visualization(widget, mock_flight_models) -> None:
     """Test clearing the visualization."""
     mock_registry, _, mock_compare, _ = mock_flight_models
 
@@ -181,7 +181,7 @@ def test_clear_visualization(widget, mock_flight_models):
     assert widget.results_table.rowCount() == 0
 
 
-def test_window_initialization(qtbot):
+def test_window_initialization(qtbot) -> None:
     """Test the main window initialization."""
     window = MultiModelShotTracerWindow()
     qtbot.addWidget(window)

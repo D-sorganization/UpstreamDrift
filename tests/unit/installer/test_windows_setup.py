@@ -82,7 +82,7 @@ def _load_setup_module(monkeypatch):
     return module, fake_cx_freeze
 
 
-def test_setup_module_uses_real_src_layout(monkeypatch):
+def test_setup_module_uses_real_src_layout(monkeypatch) -> None:
     module, _fake = _load_setup_module(monkeypatch)
     project_root = module.project_root
     config = setup_config.build_setup_configuration(
@@ -106,7 +106,7 @@ def test_setup_module_uses_real_src_layout(monkeypatch):
     )
 
 
-def test_setup_main_builds_using_src_paths(monkeypatch):
+def test_setup_main_builds_using_src_paths(monkeypatch) -> None:
     module, fake_cx_freeze = _load_setup_module(monkeypatch)
     fake_cx_freeze.setup.assert_called_once()
 

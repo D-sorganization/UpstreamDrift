@@ -68,7 +68,7 @@ class TestMuJoCoSimWidget:
     and correctly transforms between simulation and visualization coordinates.
     """
 
-    def test_widget_initialization(self, qapp):
+    def test_widget_initialization(self, qapp) -> None:
         """Test that widget initializes with correct default parameters."""
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import (
             MuJoCoSimWidget,
@@ -89,7 +89,7 @@ class TestMuJoCoSimWidget:
 
         widget.close()
 
-    def test_load_simple_model(self, qapp, tmp_path):
+    def test_load_simple_model(self, qapp, tmp_path) -> None:
         """Test loading a minimal MuJoCo model."""
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import (
             MuJoCoSimWidget,
@@ -119,7 +119,7 @@ class TestMuJoCoSimWidget:
 
         widget.close()
 
-    def test_reset_state_returns_to_initial(self, qapp):
+    def test_reset_state_returns_to_initial(self, qapp) -> None:
         """Test that reset_state returns simulation to initial configuration."""
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import (
             MuJoCoSimWidget,
@@ -164,7 +164,7 @@ class TestMuJoCoSimWidget:
 
         widget.close()
 
-    def test_camera_setting(self, qapp):
+    def test_camera_setting(self, qapp) -> None:
         """Test that camera views can be set correctly."""
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import (
             MuJoCoSimWidget,
@@ -201,7 +201,7 @@ class TestMuJoCoSimWidget:
 
         widget.close()
 
-    def test_get_dof_info_returns_list(self, qapp):
+    def test_get_dof_info_returns_list(self, qapp) -> None:
         """Test that get_dof_info returns meaningful DOF information."""
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import (
             MuJoCoSimWidget,
@@ -243,7 +243,7 @@ class TestHumanoidLauncher:
     operations work correctly.
     """
 
-    def test_launcher_instantiation(self, qapp):
+    def test_launcher_instantiation(self, qapp) -> None:
         """Test that HumanoidLauncher can be instantiated."""
         from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
             HumanoidLauncher,
@@ -258,7 +258,7 @@ class TestHumanoidLauncher:
         # Clean up
         launcher.close()
 
-    def test_launcher_has_required_components(self, qapp):
+    def test_launcher_has_required_components(self, qapp) -> None:
         """Test that launcher has expected UI components."""
         from src.engines.physics_engines.mujoco.python.humanoid_launcher import (
             HumanoidLauncher,
@@ -282,7 +282,7 @@ class TestHumanoidLauncher:
 class TestControlsTab:
     """Tests for the ControlsTab widget."""
 
-    def test_controls_tab_instantiation(self, qapp):
+    def test_controls_tab_instantiation(self, qapp) -> None:
         """Test that ControlsTab can be instantiated with mock dependencies."""
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab import (
             ControlsTab,

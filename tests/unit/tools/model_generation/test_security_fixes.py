@@ -38,13 +38,13 @@ class TestAPIKeyAuthentication:
         )
 
     @patch.dict(os.environ, {"MODEL_GEN_API_KEY": "secret-key-123"})
-    def test_valid_api_key_passes(self):
+    def test_valid_api_key_passes(self) -> None:
         api = self._make_api()
         resp = api.handle_request(self._health_request("secret-key-123"))
         assert resp.status_code == 200
 
     @patch.dict(os.environ, {"MODEL_GEN_API_KEY": "secret-key-123"})
-    def test_invalid_api_key_rejected(self):
+    def test_invalid_api_key_rejected(self) -> None:
         api = self._make_api()
         resp = api.handle_request(self._health_request("wrong-key"))
         assert resp.status_code == 401
@@ -52,12 +52,12 @@ class TestAPIKeyAuthentication:
         assert "error" in resp.body
 
     @patch.dict(os.environ, {"MODEL_GEN_API_KEY": "secret-key-123"})
-    def test_missing_api_key_rejected(self):
+    def test_missing_api_key_rejected(self) -> None:
         api = self._make_api()
         resp = api.handle_request(self._health_request())
         assert resp.status_code == 401
 
-    def test_no_env_key_means_no_auth_required(self):
+    def test_no_env_key_means_no_auth_required(self) -> None:
         """When MODEL_GEN_API_KEY is not set, requests pass through."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -85,7 +85,7 @@ class TestCORSHeaders:
             headers={},
         )
 
-    def test_cors_headers_present_in_response(self):
+    def test_cors_headers_present_in_response(self) -> None:
         """Responses should include CORS headers."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -95,7 +95,7 @@ class TestCORSHeaders:
             resp = api.handle_request(self._health_request())
             assert "Access-Control-Allow-Origin" in resp.headers
 
-    def test_cors_default_origin(self):
+    def test_cors_default_origin(self) -> None:
         """Default allowed origin should be restrictive (not *)."""
         env_overrides = {
             k: v
@@ -109,7 +109,7 @@ class TestCORSHeaders:
             # Default should NOT be wildcard *
             assert origin != "*"
 
-    def test_cors_configurable_origins(self):
+    def test_cors_configurable_origins(self) -> None:
         """CORS origins should be configurable via env var."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -141,7 +141,7 @@ class TestRateLimiting:
             headers={"X-Forwarded-For": client_ip},
         )
 
-    def test_rate_limit_allows_under_threshold(self):
+    def test_rate_limit_allows_under_threshold(self) -> None:
         """Requests under the limit should succeed."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -153,7 +153,7 @@ class TestRateLimiting:
                 resp = api.handle_request(self._health_request())
                 assert resp.status_code == 200
 
-    def test_rate_limit_blocks_over_threshold(self):
+    def test_rate_limit_blocks_over_threshold(self) -> None:
         """Requests over the limit should get 429."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -168,7 +168,7 @@ class TestRateLimiting:
             resp = api.handle_request(self._health_request())
             assert resp.status_code == 429
 
-    def test_no_rate_limit_env_means_unlimited(self):
+    def test_no_rate_limit_env_means_unlimited(self) -> None:
         """Without MODEL_GEN_RATE_LIMIT, no rate limiting occurs."""
         env_overrides = {
             k: v
@@ -200,7 +200,7 @@ class TestInputValidation:
             headers={},
         )
 
-    def test_generate_humanoid_accepts_valid_body(self):
+    def test_generate_humanoid_accepts_valid_body(self) -> None:
         """Valid body should not cause validation error."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -234,7 +234,7 @@ class TestErrorResponseSanitization:
 
         return ModelGenerationAPI()
 
-    def test_production_error_no_stack_trace(self):
+    def test_production_error_no_stack_trace(self) -> None:
         """In production mode, 500 errors should not contain traceback info."""
         env_overrides = {
             k: v for k, v in os.environ.items() if k != "MODEL_GEN_API_KEY"
@@ -257,7 +257,7 @@ class TestErrorResponseSanitization:
                 assert "Traceback" not in error_msg
                 assert "File " not in error_msg
 
-    def test_development_error_may_contain_details(self):
+    def test_development_error_may_contain_details(self) -> None:
         """In development mode, errors may contain details."""
         env_overrides = {
             k: v
@@ -285,7 +285,7 @@ class TestErrorResponseSanitization:
 class TestURLValidation:
     """URL scheme validation in cache and repository."""
 
-    def test_https_url_allowed(self):
+    def test_https_url_allowed(self) -> None:
         from security.security_utils import validate_url_scheme
 
         result = validate_url_scheme(
@@ -293,7 +293,7 @@ class TestURLValidation:
         )
         assert result == "https://example.com/model.urdf"
 
-    def test_http_url_blocked_when_only_https_allowed(self):
+    def test_http_url_blocked_when_only_https_allowed(self) -> None:
         from security.security_utils import validate_url_scheme
 
         with pytest.raises(ValueError, match="not allowed"):
@@ -301,19 +301,19 @@ class TestURLValidation:
                 "http://example.com/model.urdf", allowed_schemes=("https",)
             )
 
-    def test_ftp_url_blocked(self):
+    def test_ftp_url_blocked(self) -> None:
         from security.security_utils import validate_url_scheme
 
         with pytest.raises(ValueError, match="not allowed"):
             validate_url_scheme("ftp://evil.com/payload", allowed_schemes=("https",))
 
-    def test_file_url_blocked(self):
+    def test_file_url_blocked(self) -> None:
         from security.security_utils import validate_url_scheme
 
         with pytest.raises(ValueError, match="not allowed"):
             validate_url_scheme("file:///etc/passwd", allowed_schemes=("https",))
 
-    def test_default_allows_http_and_https(self):
+    def test_default_allows_http_and_https(self) -> None:
         from security.security_utils import validate_url_scheme
 
         assert validate_url_scheme("http://example.com/") == "http://example.com/"
@@ -323,7 +323,7 @@ class TestURLValidation:
 class TestPathTraversalPrevention:
     """Cache key generation should reject path traversal attempts."""
 
-    def test_cache_path_rejects_dot_dot(self):
+    def test_cache_path_rejects_dot_dot(self) -> None:
         """get_cache_path should reject model IDs containing '..'."""
         import tempfile
 
@@ -335,7 +335,7 @@ class TestPathTraversalPrevention:
             with pytest.raises(ValueError, match="[Pp]ath traversal"):
                 cache.get_cache_path("../../etc/passwd")
 
-    def test_cache_path_rejects_encoded_traversal(self):
+    def test_cache_path_rejects_encoded_traversal(self) -> None:
         """get_cache_path should reject encoded path traversal."""
         import tempfile
 
@@ -347,7 +347,7 @@ class TestPathTraversalPrevention:
             with pytest.raises(ValueError, match="[Pp]ath traversal"):
                 cache.get_cache_path("..%2f..%2fetc/passwd")
 
-    def test_cache_path_allows_normal_ids(self):
+    def test_cache_path_allows_normal_ids(self) -> None:
         """Normal model IDs should work fine."""
         import tempfile
 
@@ -360,7 +360,7 @@ class TestPathTraversalPrevention:
             assert ".." not in str(path)
             assert "my-robot-v2" in str(path)
 
-    def test_cache_path_allows_slashes_without_traversal(self):
+    def test_cache_path_allows_slashes_without_traversal(self) -> None:
         """Model IDs with slashes (but no ..) should work."""
         import tempfile
 
@@ -376,7 +376,7 @@ class TestPathTraversalPrevention:
 class TestRepositoryURLRestriction:
     """Repository should restrict remote URLs to https:// only."""
 
-    def test_repository_validate_url_called(self):
+    def test_repository_validate_url_called(self) -> None:
         """GitHubRepository should use validate_url_scheme for URL validation."""
         from model_generation.library.repository import GitHubRepository
 
@@ -394,7 +394,7 @@ class TestRepositoryURLRestriction:
 class TestSMPLXVertexValidation:
     """SMPL-X hardcoded vertex range validation."""
 
-    def test_expected_vertex_count_constant_exists(self):
+    def test_expected_vertex_count_constant_exists(self) -> None:
         """SMPLX_EXPECTED_VERTEX_COUNT should be defined."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,
@@ -403,7 +403,7 @@ class TestSMPLXVertexValidation:
         assert hasattr(SMPLXMeshGenerator, "SMPLX_EXPECTED_VERTEX_COUNT")
         assert SMPLXMeshGenerator.SMPLX_EXPECTED_VERTEX_COUNT == 10475
 
-    def test_vertex_ranges_within_expected_count(self):
+    def test_vertex_ranges_within_expected_count(self) -> None:
         """All vertex ranges should be within [0, SMPLX_EXPECTED_VERTEX_COUNT)."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,
@@ -418,7 +418,7 @@ class TestSMPLXVertexValidation:
             assert 0 < end <= expected, f"{name}: end {end} out of range"
             assert start < end, f"{name}: start {start} >= end {end}"
 
-    def test_validate_vertex_ranges_method_exists(self):
+    def test_validate_vertex_ranges_method_exists(self) -> None:
         """validate_vertex_ranges class method should exist."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,
@@ -426,7 +426,7 @@ class TestSMPLXVertexValidation:
 
         assert hasattr(SMPLXMeshGenerator, "validate_vertex_ranges")
 
-    def test_validate_vertex_ranges_passes_for_matching_count(self):
+    def test_validate_vertex_ranges_passes_for_matching_count(self) -> None:
         """validate_vertex_ranges returns True when vertex count matches."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,
@@ -435,7 +435,7 @@ class TestSMPLXVertexValidation:
         result = SMPLXMeshGenerator.validate_vertex_ranges(10475)
         assert result is True
 
-    def test_validate_vertex_ranges_warns_for_mismatched_count(self):
+    def test_validate_vertex_ranges_warns_for_mismatched_count(self) -> None:
         """validate_vertex_ranges returns False for wrong vertex count."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,
@@ -444,7 +444,7 @@ class TestSMPLXVertexValidation:
         result = SMPLXMeshGenerator.validate_vertex_ranges(5000)
         assert result is False
 
-    def test_load_segmentation_from_file_method_exists(self):
+    def test_load_segmentation_from_file_method_exists(self) -> None:
         """load_part_segmentation classmethod should exist."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,
@@ -452,7 +452,7 @@ class TestSMPLXVertexValidation:
 
         assert hasattr(SMPLXMeshGenerator, "load_part_segmentation")
 
-    def test_load_segmentation_falls_back_to_hardcoded(self):
+    def test_load_segmentation_falls_back_to_hardcoded(self) -> None:
         """When no model file is available, should fall back to hardcoded
         ranges and log a warning."""
         from humanoid_character_builder.generators.mesh_generator import (
@@ -467,7 +467,7 @@ class TestSMPLXVertexValidation:
         # The returned dict should match SMPLX_SEGMENT_VERTEX_RANGES
         assert result == SMPLXMeshGenerator.SMPLX_SEGMENT_VERTEX_RANGES
 
-    def test_load_segmentation_logs_warning_on_fallback(self):
+    def test_load_segmentation_logs_warning_on_fallback(self) -> None:
         """Falling back to hardcoded ranges should produce a warning log."""
         from humanoid_character_builder.generators.mesh_generator import (
             SMPLXMeshGenerator,

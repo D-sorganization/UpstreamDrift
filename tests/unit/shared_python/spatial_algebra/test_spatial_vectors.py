@@ -15,7 +15,7 @@ from src.shared.python.spatial_algebra.spatial_vectors import (
 
 
 class TestSpatialVectors:
-    def test_skew(self):
+    def test_skew(self) -> None:
         v = np.array([1.0, 2.0, 3.0])
         res = skew(v)
         expected = np.array([[0, -3, 2], [3, 0, -1], [-2, 1, 0]], dtype=float)
@@ -24,7 +24,7 @@ class TestSpatialVectors:
         with pytest.raises(ValueError, match="Input must be 3x1"):
             skew(np.array([1, 2]))
 
-    def test_crm(self):
+    def test_crm(self) -> None:
         v = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         res = crm(v)
         assert res.shape == (6, 6)
@@ -38,7 +38,7 @@ class TestSpatialVectors:
         with pytest.raises(ValueError, match="Input must be 6x1"):
             crm(np.array([1, 2]))
 
-    def test_crf(self):
+    def test_crf(self) -> None:
         v = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         res = crf(v)
         assert res.shape == (6, 6)
@@ -49,7 +49,7 @@ class TestSpatialVectors:
         with pytest.raises(ValueError, match="Input must be 6x1"):
             crf(np.array([1, 2]))
 
-    def test_cross_motion(self):
+    def test_cross_motion(self) -> None:
         v = np.array([1, 2, 3, 4, 5, 6], dtype=float)
         m = np.array([6, 5, 4, 3, 2, 1], dtype=float)
 
@@ -61,7 +61,7 @@ class TestSpatialVectors:
         with pytest.raises(ValueError, match="m must be 6x1"):
             cross_motion(v, np.array([1.0]))
 
-    def test_cross_force(self):
+    def test_cross_force(self) -> None:
         v = np.array([1, 2, 3, 4, 5, 6], dtype=float)
         f = np.array([6, 5, 4, 3, 2, 1], dtype=float)
 
@@ -73,7 +73,7 @@ class TestSpatialVectors:
         with pytest.raises(ValueError, match="f must be 6x1"):
             cross_force(v, np.array([1.0]))
 
-    def test_cross_motion_fast(self):
+    def test_cross_motion_fast(self) -> None:
         v = np.array([1, 2, 3, 4, 5, 6], dtype=float)
         m = np.array([6, 5, 4, 3, 2, 1], dtype=float)
         out = np.zeros(6, dtype=float)
@@ -82,7 +82,7 @@ class TestSpatialVectors:
         expected = cross_motion(v, m)
         np.testing.assert_array_equal(out, expected)
 
-    def test_cross_force_fast(self):
+    def test_cross_force_fast(self) -> None:
         v = np.array([1, 2, 3, 4, 5, 6], dtype=float)
         f = np.array([6, 5, 4, 3, 2, 1], dtype=float)
         out = np.zeros(6, dtype=float)
@@ -91,7 +91,7 @@ class TestSpatialVectors:
         expected = cross_force(v, f)
         np.testing.assert_array_equal(out, expected)
 
-    def test_cross_motion_axis(self):
+    def test_cross_motion_axis(self) -> None:
         v = np.array([1, 2, 3, 4, 5, 6], dtype=float)
         val = 2.0
 
@@ -106,7 +106,7 @@ class TestSpatialVectors:
 
             np.testing.assert_array_equal(out, expected)
 
-    def test_spatial_cross(self):
+    def test_spatial_cross(self) -> None:
         v = np.array([1, 2, 3, 4, 5, 6], dtype=float)
         u = np.array([6, 5, 4, 3, 2, 1], dtype=float)
 

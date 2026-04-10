@@ -33,7 +33,7 @@ if not C3D_APPS_AVAILABLE:
 # ---------------------------------------------------------------------------
 
 
-def test_compute_marker_statistics_basic():
+def test_compute_marker_statistics_basic() -> None:
     """Test basic stats computation."""
     t = np.array([0.0, 1.0, 2.0])
     pos = np.array([[0, 0, 0], [1, 0, 0], [3, 0, 0]], dtype=float)
@@ -47,7 +47,7 @@ def test_compute_marker_statistics_basic():
     assert stats["mean_speed"] == pytest.approx(1.5)
 
 
-def test_compute_marker_statistics_empty():
+def test_compute_marker_statistics_empty() -> None:
     """Test stats with empty or single point."""
     t = np.array([0.0])
     pos = np.array([[0, 0, 0]])
@@ -58,7 +58,7 @@ def test_compute_marker_statistics_empty():
     assert np.isnan(stats["max_speed"])
 
 
-def test_compute_marker_statistics_nan_handling():
+def test_compute_marker_statistics_nan_handling() -> None:
     """Test handling of NaN values."""
     t = np.array([0.0, 1.0])
     pos = np.array([[0, 0, 0], [np.nan, 0, 0]])
@@ -76,7 +76,7 @@ def test_compute_marker_statistics_nan_handling():
 
 @patch("apps.services.c3d_loader.C3DDataReader")
 @patch("os.path.exists")
-def test_load_c3d_file_success(mock_exists, mock_reader_cls):
+def test_load_c3d_file_success(mock_exists, mock_reader_cls) -> None:
     """Test successful loading via service."""
     mock_exists.return_value = True
     mock_reader = mock_reader_cls.return_value
@@ -124,7 +124,7 @@ def test_load_c3d_file_success(mock_exists, mock_reader_cls):
 
 
 @patch("os.path.exists")
-def test_load_c3d_file_not_found(mock_exists):
+def test_load_c3d_file_not_found(mock_exists) -> None:
     """Test file not found error."""
     mock_exists.return_value = False
     with pytest.raises(FileNotFoundError):
@@ -140,7 +140,7 @@ def test_load_c3d_file_not_found(mock_exists):
     not PYQT6_AVAILABLE or not PYTEST_QT_AVAILABLE,
     reason="PyQt6 or pytest-qt not available",
 )
-def test_loader_thread(qtbot):
+def test_loader_thread(qtbot) -> None:
     """Test that thread emits signals."""
     # Since we can't reliably import the module statically due to path issues,
 

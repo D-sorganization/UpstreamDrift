@@ -24,7 +24,7 @@ class DummyLauncher(BaseLauncher):
         ]
 
 
-def test_launch_item_init():
+def test_launch_item_init() -> None:
     item = LaunchItem(
         name="Test",
         description="Desc",
@@ -39,7 +39,7 @@ def test_launch_item_init():
     assert item.icon == "icon.png"
 
 
-def test_launch_item_get_full_path():
+def test_launch_item_get_full_path() -> None:
     item = LaunchItem(name="Test", description="Desc", path="tests")
     assert item.get_full_path() is not None
     assert item.get_full_path().name == "tests"  # type: ignore[union-attr]
@@ -54,13 +54,13 @@ def launcher(qapp):
         return DummyLauncher()
 
 
-def test_base_launcher_init(launcher):
+def test_base_launcher_init(launcher) -> None:
     assert launcher.windowTitle() == DummyLauncher.WINDOW_TITLE
     assert launcher.width() == DummyLauncher.WINDOW_WIDTH
     assert launcher.height() == DummyLauncher.WINDOW_HEIGHT
 
 
-def test_base_launcher_center_window(qapp):
+def test_base_launcher_center_window(qapp) -> None:
     launcher = DummyLauncher()
     # It should not crash, it relies on QApplication.primaryScreen()
     launcher.center_window()
@@ -71,32 +71,32 @@ def test_base_launcher_center_window(qapp):
 
 
 @patch("src.launchers.base.QMessageBox.critical")
-def test_base_launcher_show_error(mock_msg, launcher):
+def test_base_launcher_show_error(mock_msg, launcher) -> None:
     launcher.show_error("Title", "Message")
     mock_msg.assert_called_once_with(launcher, "Title", "Message")
 
 
 @patch("src.launchers.base.QMessageBox.warning")
-def test_base_launcher_show_warning(mock_msg, launcher):
+def test_base_launcher_show_warning(mock_msg, launcher) -> None:
     launcher.show_warning("Title", "Message")
     mock_msg.assert_called_once_with(launcher, "Title", "Message")
 
 
 @patch("src.launchers.base.QMessageBox.information")
-def test_base_launcher_show_info(mock_msg, launcher):
+def test_base_launcher_show_info(mock_msg, launcher) -> None:
     launcher.show_info("Title", "Message")
     mock_msg.assert_called_once_with(launcher, "Title", "Message")
 
 
 @patch("src.launchers.base.Path.exists", return_value=False)
-def test_base_launcher_launch_file_not_found(mock_exists, launcher):
+def test_base_launcher_launch_file_not_found(mock_exists, launcher) -> None:
     with patch.object(launcher, "show_error") as mock_err:
         assert launcher.launch_file("missing.txt") is False
         mock_err.assert_called_once()
 
 
 @patch("src.launchers.base.Path.exists", return_value=True)
-def test_base_launcher_launch_file_success_win(mock_exists, launcher):
+def test_base_launcher_launch_file_success_win(mock_exists, launcher) -> None:
     # Pass str
     with patch("sys.platform", "win32"), patch("os.startfile") as mock_start:
         assert launcher.launch_file("C:/absolute/path.txt") is True
@@ -109,7 +109,7 @@ def test_base_launcher_launch_file_success_win(mock_exists, launcher):
 
 
 @patch("src.launchers.base.Path.exists", return_value=True)
-def test_base_launcher_launch_file_success_mac(mock_exists, launcher):
+def test_base_launcher_launch_file_success_mac(mock_exists, launcher) -> None:
     with patch("sys.platform", "darwin"), patch("subprocess.run") as mock_run:
         assert launcher.launch_file("path.txt") is True
         mock_run.assert_called_once()
@@ -117,7 +117,7 @@ def test_base_launcher_launch_file_success_mac(mock_exists, launcher):
 
 
 @patch("src.launchers.base.Path.exists", return_value=True)
-def test_base_launcher_launch_file_success_linux(mock_exists, launcher):
+def test_base_launcher_launch_file_success_linux(mock_exists, launcher) -> None:
     with patch("sys.platform", "linux"), patch("subprocess.run") as mock_run:
         assert launcher.launch_file("path.txt") is True
         mock_run.assert_called_once()
@@ -126,7 +126,7 @@ def test_base_launcher_launch_file_success_linux(mock_exists, launcher):
 
 @patch("src.launchers.base.Path.exists", return_value=True)
 @patch("subprocess.run", side_effect=OSError("Boom"))
-def test_base_launcher_launch_file_failure(mock_run, mock_exists, launcher):
+def test_base_launcher_launch_file_failure(mock_run, mock_exists, launcher) -> None:
     with (
         patch("sys.platform", "linux"),
         patch.object(launcher, "show_error") as mock_err,
@@ -135,20 +135,20 @@ def test_base_launcher_launch_file_failure(mock_run, mock_exists, launcher):
         mock_err.assert_called_once()
 
 
-def test_base_launcher_create_card_widget(launcher):
+def test_base_launcher_create_card_widget(launcher) -> None:
     item = LaunchItem(name="Test", description="Desc", path="path")
     card = launcher.create_card_widget(item)
     assert card is not None
 
 
-def test_base_launcher_on_item_launch_action(launcher):
+def test_base_launcher_on_item_launch_action(launcher) -> None:
     mock_action = MagicMock()
     item = LaunchItem(name="Test", description="Desc", action=mock_action)
     launcher._on_item_launch(item)
     mock_action.assert_called_once()
 
 
-def test_base_launcher_on_item_launch_action_fails(launcher):
+def test_base_launcher_on_item_launch_action_fails(launcher) -> None:
     mock_action = MagicMock(side_effect=RuntimeError("Boom"))
     item = LaunchItem(name="Test", description="Desc", action=mock_action)
     with patch.object(launcher, "show_error") as mock_err:
@@ -156,21 +156,21 @@ def test_base_launcher_on_item_launch_action_fails(launcher):
         mock_err.assert_called_once()
 
 
-def test_base_launcher_on_item_launch_path(launcher):
+def test_base_launcher_on_item_launch_path(launcher) -> None:
     item = LaunchItem(name="Test", description="Desc", path="path")
     with patch.object(launcher, "launch_file") as mock_launch:
         launcher._on_item_launch(item)
         mock_launch.assert_called_once_with("path")
 
 
-def test_base_launcher_on_item_launch_none(launcher):
+def test_base_launcher_on_item_launch_none(launcher) -> None:
     item = LaunchItem(name="Test", description="Desc")
     with patch.object(launcher, "show_warning") as mock_warn:
         launcher._on_item_launch(item)
         mock_warn.assert_called_once()
 
 
-def test_base_launcher_build_grid_layout(launcher):
+def test_base_launcher_build_grid_layout(launcher) -> None:
     items = [
         LaunchItem(name="A", description="A"),
         LaunchItem(name="B", description="B"),
@@ -179,7 +179,7 @@ def test_base_launcher_build_grid_layout(launcher):
     assert grid.count() == 2
 
 
-def test_base_launcher_create_header(launcher):
+def test_base_launcher_create_header(launcher) -> None:
     layout = launcher.create_header("Title", "Subtitle")
     assert layout.count() == 2
 
@@ -187,18 +187,18 @@ def test_base_launcher_create_header(launcher):
     assert layout_no_sub.count() == 1
 
 
-def test_base_launcher_create_separator(launcher):
+def test_base_launcher_create_separator(launcher) -> None:
     sep = launcher.create_separator()
     assert sep is not None
 
 
-def test_base_launcher_init_ui(launcher):
+def test_base_launcher_init_ui(launcher) -> None:
     launcher.init_ui()
     assert len(launcher._items) == 3
 
 
 @patch("src.launchers.base.QApplication")
-def test_run_launcher(mock_qapp):
+def test_run_launcher(mock_qapp) -> None:
     app_instance = MagicMock()
     app_instance.exec.return_value = 0
     mock_qapp.return_value = app_instance
@@ -213,6 +213,6 @@ def test_run_launcher(mock_qapp):
         app_instance.exec.assert_called_once()
 
 
-def test_base_launcher_abstract_method(launcher):
+def test_base_launcher_abstract_method(launcher) -> None:
     # Test the abstractmethod just for coverage of the '...' body
     assert BaseLauncher.get_items(launcher) is None

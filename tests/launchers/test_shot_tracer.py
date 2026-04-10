@@ -40,25 +40,25 @@ def tracer_widget(qapp, mock_flight_models):
         yield widget
 
 
-def test_widget_init(tracer_widget):
+def test_widget_init(tracer_widget) -> None:
     assert len(tracer_widget.model_checkboxes) == 1
     assert tracer_widget.speed_spin.value() == 163.0
 
 
-def test_apply_preset(tracer_widget):
+def test_apply_preset(tracer_widget) -> None:
     tracer_widget._apply_preset("7iron")
     assert tracer_widget.speed_spin.value() == 118.0
     assert tracer_widget.angle_spin.value() == 16.0
     assert tracer_widget.spin_spin.value() == 7000.0
 
 
-def test_apply_preset_unknown(tracer_widget):
+def test_apply_preset_unknown(tracer_widget) -> None:
     tracer_widget.speed_spin.setValue(100.0)
     tracer_widget._apply_preset("unknown_club")
     assert tracer_widget.speed_spin.value() == 100.0
 
 
-def test_get_selected_models(tracer_widget):
+def test_get_selected_models(tracer_widget) -> None:
     models = tracer_widget._get_selected_models()
     assert len(models) == 1
 
@@ -68,7 +68,7 @@ def test_get_selected_models(tracer_widget):
 
 
 @patch("src.launchers.shot_tracer.QMessageBox.warning")
-def test_run_comparison_no_models(mock_warning, tracer_widget):
+def test_run_comparison_no_models(mock_warning, tracer_widget) -> None:
     tracer_widget.model_checkboxes["mock"].setChecked(False)
     tracer_widget._run_comparison()
     mock_warning.assert_called_once()
@@ -77,7 +77,7 @@ def test_run_comparison_no_models(mock_warning, tracer_widget):
 
 @patch("src.launchers.shot_tracer.UnifiedLaunchConditions")
 @patch("src.launchers.shot_tracer.compare_models")
-def test_run_comparison_success(mock_compare, mock_launch, tracer_widget):
+def test_run_comparison_success(mock_compare, mock_launch, tracer_widget) -> None:
     mock_result = MagicMock()
     mock_result.carry_distance = 100.0
     mock_result.max_height = 50.0
@@ -99,7 +99,9 @@ def test_run_comparison_success(mock_compare, mock_launch, tracer_widget):
 @patch("src.launchers.shot_tracer.QMessageBox.warning")
 @patch("src.launchers.shot_tracer.UnifiedLaunchConditions")
 @patch("src.launchers.shot_tracer.compare_models")
-def test_run_comparison_error(mock_compare, mock_launch, mock_warning, tracer_widget):
+def test_run_comparison_error(
+    mock_compare, mock_launch, mock_warning, tracer_widget
+) -> None:
     mock_compare.side_effect = ValueError("Test error")
 
     tracer_widget._run_comparison()
@@ -108,7 +110,7 @@ def test_run_comparison_error(mock_compare, mock_launch, mock_warning, tracer_wi
     assert "Test error" in mock_warning.call_args[0][2]
 
 
-def test_clear_visualization(tracer_widget):
+def test_clear_visualization(tracer_widget) -> None:
     tracer_widget.results = {"test": "result"}
     tracer_widget.results_table.setRowCount(1)
 
@@ -118,7 +120,7 @@ def test_clear_visualization(tracer_widget):
     assert tracer_widget.results_table.rowCount() == 0
 
 
-def test_window_init(qapp, mock_flight_models):
+def test_window_init(qapp, mock_flight_models) -> None:
     with patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", False):
         window = MultiModelShotTracerWindow()
         assert window.windowTitle() == "Golf Shot Tracer - Multi-Model Comparison"
@@ -127,22 +129,22 @@ def test_window_init(qapp, mock_flight_models):
 
 @patch("src.launchers.shot_tracer.PYQTGRAPH_AVAILABLE", True)
 @patch("src.launchers.shot_tracer.gl")
-def test_pyqtgraph_available_visualization(mock_gl, qapp, mock_flight_models):
+def test_pyqtgraph_available_visualization(mock_gl, qapp, mock_flight_models) -> None:
     from PyQt6.QtWidgets import QWidget
 
     parent_widget = QWidget()
 
     class MockGLViewWidget(QWidget):
-        def setCameraPosition(self, **kwargs):
+        def setCameraPosition(self, **kwargs) -> None:
             pass
 
-        def addItem(self, item):
+        def addItem(self, item) -> None:
             pass
 
-        def removeItem(self, item):
+        def removeItem(self, item) -> None:
             pass
 
-        def clear(self):
+        def clear(self) -> None:
             pass
 
     mock_gl.GLViewWidget.return_value = MockGLViewWidget()
@@ -170,7 +172,7 @@ def test_pyqtgraph_available_visualization(mock_gl, qapp, mock_flight_models):
     assert len(widget.trajectory_plots) == 0
 
 
-def test_update_results_table_no_header(tracer_widget):
+def test_update_results_table_no_header(tracer_widget) -> None:
     # Simulate header being None
     tracer_widget.results_table.horizontalHeader = MagicMock(return_value=None)
     tracer_widget.results = {
@@ -185,7 +187,7 @@ def test_update_results_table_no_header(tracer_widget):
 @patch("src.launchers.shot_tracer.QApplication")
 @patch("src.launchers.shot_tracer.MultiModelShotTracerWindow")
 @patch("src.launchers.shot_tracer.sys.exit")
-def test_main(mock_exit, mock_window, mock_app):
+def test_main(mock_exit, mock_window, mock_app) -> None:
     from src.launchers.shot_tracer import main
 
     mock_app_instance = MagicMock()

@@ -19,64 +19,64 @@ class MockQtBase:
     def __getattr__(self, name):
         return MagicMock()
 
-    def setWindowTitle(self, title):
+    def setWindowTitle(self, title) -> None:
         self._window_title = title
 
     def windowTitle(self):
         return self._window_title
 
-    def setWindowIcon(self, icon):
+    def setWindowIcon(self, icon) -> None:
         pass
 
-    def setFont(self, f):
+    def setFont(self, f) -> None:
         pass
 
-    def resize(self, *args):
+    def resize(self, *args) -> None:
         pass
 
-    def setFixedSize(self, *args):
+    def setFixedSize(self, *args) -> None:
         pass
 
-    def setAlignment(self, a):
+    def setAlignment(self, a) -> None:
         pass
 
-    def setWordWrap(self, b):
+    def setWordWrap(self, b) -> None:
         pass
 
-    def setAttribute(self, *args):
+    def setAttribute(self, *args) -> None:
         pass
 
-    def setLayout(self, layout):
+    def setLayout(self, layout) -> None:
         pass
 
-    def setSpacing(self, s):
+    def setSpacing(self, s) -> None:
         pass
 
-    def setContentsMargins(self, left, top, right, bottom):
+    def setContentsMargins(self, left, top, right, bottom) -> None:
         pass
 
-    def addWidget(self, w, *args):
+    def addWidget(self, w, *args) -> None:
         pass
 
-    def addLayout(self, layout, *args):
+    def addLayout(self, layout, *args) -> None:
         pass
 
-    def addStretch(self):
+    def addStretch(self) -> None:
         pass
 
-    def setWidget(self, w):
+    def setWidget(self, w) -> None:
         pass
 
-    def setWidgetResizable(self, b):
+    def setWidgetResizable(self, b) -> None:
         pass
 
-    def setFrameShape(self, s):
+    def setFrameShape(self, s) -> None:
         pass
 
-    def objectName(self):
+    def objectName(self) -> str:
         return ""
 
-    def setObjectName(self, n):
+    def setObjectName(self, n) -> None:
         pass
 
 
@@ -86,13 +86,13 @@ class MockQWidget(MockQtBase):
         self._window_title = ""
         self._style_sheet = ""
 
-    def setWindowTitle(self, title):
+    def setWindowTitle(self, title) -> None:
         self._window_title = title
 
     def windowTitle(self):
         return self._window_title
 
-    def setStyleSheet(self, s):
+    def setStyleSheet(self, s) -> None:
         self._style_sheet = s
 
     def styleSheet(self):
@@ -103,7 +103,7 @@ class MockQMainWindow(MockQWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def setCentralWidget(self, w):
+    def setCentralWidget(self, w) -> None:
         pass
 
 
@@ -114,22 +114,22 @@ class MockQPushButton(MockQWidget):
         self.clicked = MagicMock()
         self._enabled = True
 
-    def setText(self, t):
+    def setText(self, t) -> None:
         self._text = str(t)  # Ensure it's always a string
 
     def text(self):
         return self._text
 
-    def setEnabled(self, b):
+    def setEnabled(self, b) -> None:
         self._enabled = bool(b)
 
     def isEnabled(self):
         return self._enabled
 
-    def setFont(self, f):
+    def setFont(self, f) -> None:
         pass
 
-    def setFixedHeight(self, h):
+    def setFixedHeight(self, h) -> None:
         pass
 
 
@@ -138,13 +138,13 @@ class MockQCheckBox(MockQWidget):
         super().__init__(parent)
         self.checked = False
 
-    def setChecked(self, b):
+    def setChecked(self, b) -> None:
         self.checked = b
 
     def isChecked(self):
         return self.checked
 
-    def setToolTip(self, t):
+    def setToolTip(self, t) -> None:
         pass
 
 
@@ -174,10 +174,10 @@ class MockQLabel(MockQWidget):
         super().__init__(parent)
         self._text = text
 
-    def setText(self, t):
+    def setText(self, t) -> None:
         self._text = t
 
-    def setPixmap(self, p):
+    def setPixmap(self, p) -> None:
         pass
 
 
@@ -285,7 +285,7 @@ class TestGolfLauncherLogic:
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
-    def test_initialization(self, mock_thread, mock_registry):
+    def test_initialization(self, mock_thread, mock_registry) -> None:
         """Test proper initialization of the launcher."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -313,7 +313,7 @@ class TestGolfLauncherLogic:
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
-    def test_model_selection_updates_ui(self, mock_thread, mock_registry):
+    def test_model_selection_updates_ui(self, mock_thread, mock_registry) -> None:
         """Test that selecting a model updates the launch button."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -358,7 +358,9 @@ class TestGolfLauncherLogic:
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
-    def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
+    def test_launch_simulation_constructs_command(
+        self, mock_thread, mock_registry
+    ) -> None:
         """Test launch simulation logic."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -407,7 +409,7 @@ class TestGolfLauncherLogic:
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
-    def test_launch_generic_mjcf(self, mock_thread, mock_registry):
+    def test_launch_generic_mjcf(self, mock_thread, mock_registry) -> None:
         """Test launching a generic MJCF file."""
         from src.launchers.golf_launcher import GolfLauncher
 

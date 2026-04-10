@@ -1,7 +1,7 @@
 import re
 
 
-def refactor_workflow(filepath):
+def refactor_workflow(filepath) -> None:
     """Refactor a GitHub Actions workflow file to add pause checks."""
     with open(filepath) as f:
         content = f.read()

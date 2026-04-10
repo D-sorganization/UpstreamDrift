@@ -38,7 +38,7 @@ _HANDLER_SPEC = ["launch", "stop", "get_name"]
 
 
 @pytest.fixture()
-def _reset_startup_metrics():
+def _reset_startup_metrics() -> None:
     """Reset startup metrics before each test."""
     local_server._startup_metrics.update(
         {

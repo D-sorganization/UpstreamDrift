@@ -435,7 +435,7 @@ def run_all_assessments():
     return reports
 
 
-def generate_issues_locally(json_path):
+def generate_issues_locally(json_path) -> None:
     """Read summary JSON and create issue markdown files for low scores."""
     try:
         with open(json_path) as f:
@@ -459,7 +459,7 @@ def generate_issues_locally(json_path):
         logger.error("Error generating local issues: %s", e)
 
 
-def main():
+def main() -> None:
     """Run all assessments and generate the summary report."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger.info("Starting repository assessment...")

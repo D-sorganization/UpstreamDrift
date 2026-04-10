@@ -36,12 +36,12 @@ _runtime_patcher = patch.dict(sys.modules, _MOCKED_MODULES)
 _mock_opensim = _MOCKED_MODULES["opensim"]
 
 
-def setup_module(module):
+def setup_module(module) -> None:
     _runtime_patcher.start()
     _osim_module.opensim = _mock_opensim
 
 
-def teardown_module(module):
+def teardown_module(module) -> None:
     _runtime_patcher.stop()
     _osim_module.opensim = None
 

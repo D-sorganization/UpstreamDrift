@@ -65,16 +65,16 @@ def plotter(mock_recorder):
     )
 
 
-def test_init(plotter):
+def test_init(plotter) -> None:
     assert len(plotter.joint_names) == 3
 
 
-def test_get_joint_name(plotter):
+def test_get_joint_name(plotter) -> None:
     assert plotter.get_joint_name(0) == "Joint 0"
     assert plotter.get_joint_name(5) == "Joint 5"
 
 
-def test_plot_joint_angles(plotter):
+def test_plot_joint_angles(plotter) -> None:
     fig = Figure()
     plotter.plot_joint_angles(fig)
     assert len(fig.axes) > 0
@@ -105,20 +105,20 @@ def test_plot_joint_angles(plotter):
         "club_head_speed",
     ],
 )
-def test_plot_method_creates_axes(plotter, plot_method):
+def test_plot_method_creates_axes(plotter, plot_method) -> None:
     fig = Figure()
     getattr(plotter, plot_method)(fig)
     assert len(fig.axes) > 0
 
 
 @_skip_no_3d
-def test_plot_club_head_trajectory(plotter):
+def test_plot_club_head_trajectory(plotter) -> None:
     fig = Figure()
     plotter.plot_club_head_trajectory(fig)
     assert len(fig.axes) > 0
 
 
-def test_plot_phase_diagram(plotter):
+def test_plot_phase_diagram(plotter) -> None:
     fig = Figure()
     plotter.plot_phase_diagram(fig, joint_idx=0)
     assert len(fig.axes) > 0
@@ -146,7 +146,7 @@ def test_plot_phase_diagram(plotter):
         "spectrogram",
     ],
 )
-def test_plot_method_creates_axes_extra(plotter, plot_method):
+def test_plot_method_creates_axes_extra(plotter, plot_method) -> None:
     fig = Figure()
     method = getattr(plotter, plot_method)
     if plot_method == "plot_spectrogram":
@@ -161,19 +161,19 @@ def test_plot_method_creates_axes_extra(plotter, plot_method):
     ["velocity", "position", "torque"],
     ids=["freq_velocity", "freq_position", "freq_torque"],
 )
-def test_plot_frequency_analysis(plotter, signal_type):
+def test_plot_frequency_analysis(plotter, signal_type) -> None:
     fig = Figure()
     plotter.plot_frequency_analysis(fig, joint_idx=0, signal_type=signal_type)
     assert len(fig.axes) > 0
 
 
-def test_plot_summary_dashboard(plotter):
+def test_plot_summary_dashboard(plotter) -> None:
     fig = Figure()
     plotter.plot_summary_dashboard(fig)
     assert len(fig.axes) == 6
 
 
-def test_plot_kinematic_sequence(plotter):
+def test_plot_kinematic_sequence(plotter) -> None:
     fig = Figure()
     segment_indices = {"Seg1": 0, "Seg2": 1}
     plotter.plot_kinematic_sequence(fig, segment_indices)
@@ -181,20 +181,20 @@ def test_plot_kinematic_sequence(plotter):
 
 
 @_skip_no_3d
-def test_plot_3d_phase_space(plotter):
+def test_plot_3d_phase_space(plotter) -> None:
     fig = Figure()
     plotter.plot_3d_phase_space(fig, joint_idx=0)
     assert len(fig.axes) > 0
 
 
-def test_plot_correlation_matrix(plotter):
+def test_plot_correlation_matrix(plotter) -> None:
     fig = Figure()
     plotter.plot_correlation_matrix(fig)
     assert len(fig.axes) > 0
 
 
 @_skip_no_3d
-def test_plot_swing_plane(plotter):
+def test_plot_swing_plane(plotter) -> None:
     fig = Figure()
     plotter.plot_swing_plane(fig)
     assert len(fig.axes) > 0
@@ -223,13 +223,13 @@ def test_plot_swing_plane(plotter):
         "cop_vector_field",
     ],
 )
-def test_plot_method_spatial(plotter, plot_method):
+def test_plot_method_spatial(plotter, plot_method) -> None:
     fig = Figure()
     getattr(plotter, plot_method)(fig)
     assert len(fig.axes) > 0
 
 
-def test_plot_radar_chart(plotter):
+def test_plot_radar_chart(plotter) -> None:
     fig = Figure()
     metrics = {"A": 10, "B": 20, "C": 30}
     plotter.plot_radar_chart(fig, metrics)
@@ -249,7 +249,7 @@ def test_plot_radar_chart(plotter):
     ],
     ids=["power_flow", "counterfactual_comparison"],
 )
-def test_plot_method_advanced(plotter, plot_method, args):
+def test_plot_method_advanced(plotter, plot_method, args) -> None:
     fig = Figure()
     getattr(plotter, plot_method)(fig, **args)
     assert len(fig.axes) > 0
@@ -260,7 +260,7 @@ def test_plot_method_advanced(plotter, plot_method, args):
     [0, None],
     ids=["specific_joint", "all_joints"],
 )
-def test_plot_induced_acceleration(plotter, joint_idx):
+def test_plot_induced_acceleration(plotter, joint_idx) -> None:
     fig = Figure()
     plotter.plot_induced_acceleration(fig, "gravity", joint_idx=joint_idx)
     assert len(fig.axes) > 0

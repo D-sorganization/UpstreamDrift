@@ -46,12 +46,12 @@ class TestComparativePlotter:
 
         return fig
 
-    def test_init(self, plotter, mock_analyzer):
+    def test_init(self, plotter, mock_analyzer) -> None:
         """Test initialization."""
         assert plotter.analyzer == mock_analyzer
         assert "a" in plotter.colors
 
-    def test_plot_comparison_success(self, plotter, mock_analyzer, mock_figure):
+    def test_plot_comparison_success(self, plotter, mock_analyzer, mock_figure) -> None:
         """Test plot_comparison with valid data."""
         # Setup mock aligned signals
         aligned = AlignedSignals(
@@ -72,7 +72,7 @@ class TestComparativePlotter:
         assert mock_figure.add_gridspec.called
         assert mock_figure.add_subplot.called
 
-    def test_plot_comparison_no_data(self, plotter, mock_analyzer, mock_figure):
+    def test_plot_comparison_no_data(self, plotter, mock_analyzer, mock_figure) -> None:
         """Test plot_comparison when no data is available."""
         mock_analyzer.align_signals.return_value = None
 
@@ -83,7 +83,7 @@ class TestComparativePlotter:
         ax = mock_figure.add_subplot.return_value
         ax.text.assert_called()
 
-    def test_plot_phase_comparison(self, plotter, mock_analyzer, mock_figure):
+    def test_plot_phase_comparison(self, plotter, mock_analyzer, mock_figure) -> None:
         """Test plot_phase_comparison."""
         aligned = AlignedSignals(
             times=np.linspace(0, 1, 10),
@@ -101,7 +101,9 @@ class TestComparativePlotter:
         mock_analyzer.align_signals.assert_any_call("joint_positions", joint_idx=0)
         mock_analyzer.align_signals.assert_any_call("joint_velocities", joint_idx=0)
 
-    def test_plot_coordination_comparison(self, plotter, mock_analyzer, mock_figure):
+    def test_plot_coordination_comparison(
+        self, plotter, mock_analyzer, mock_figure
+    ) -> None:
         """Test plot_coordination_comparison."""
         aligned = AlignedSignals(
             times=np.linspace(0, 1, 10),
@@ -119,7 +121,9 @@ class TestComparativePlotter:
         mock_analyzer.align_signals.assert_any_call("joint_positions", joint_idx=0)
         mock_analyzer.align_signals.assert_any_call("joint_positions", joint_idx=1)
 
-    def test_plot_3d_trajectory_comparison(self, plotter, mock_analyzer, mock_figure):
+    def test_plot_3d_trajectory_comparison(
+        self, plotter, mock_analyzer, mock_figure
+    ) -> None:
         """Test plot_3d_trajectory_comparison."""
         # Setup recorder mocks within analyzer
         rec_a = MagicMock()
@@ -135,7 +139,7 @@ class TestComparativePlotter:
         rec_a.get_time_series.assert_called_with("club_head_position")
         rec_b.get_time_series.assert_called_with("club_head_position")
 
-    def test_plot_dashboard(self, plotter, mock_analyzer, mock_figure):
+    def test_plot_dashboard(self, plotter, mock_analyzer, mock_figure) -> None:
         """Test plot_dashboard."""
         # Mock metric report
         metric = ComparisonMetric("Test", 1.0, 1.0, 0.0, 0.0)

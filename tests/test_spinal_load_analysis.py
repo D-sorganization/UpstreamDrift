@@ -41,7 +41,7 @@ class TestSpinalLoadAnalysis:
             },
         }
 
-    def test_initialization(self, analyzer):
+    def test_initialization(self, analyzer) -> None:
         """Test analyzer initialization parameters."""
         assert analyzer.body_weight == 80.0
         assert analyzer.height == 1.80
@@ -49,7 +49,7 @@ class TestSpinalLoadAnalysis:
         assert analyzer.trunk_length == pytest.approx(0.288 * 1.80)
         assert len(analyzer.lumbar_segments) == 3
 
-    def test_analyze_structure(self, analyzer, example_data):
+    def test_analyze_structure(self, analyzer, example_data) -> None:
         """Test the analyze method returns correct structure."""
         result = analyzer.analyze(
             joint_angles=example_data["joint_angles"],
@@ -63,7 +63,7 @@ class TestSpinalLoadAnalysis:
         assert "L4-L5" in result.segments
         assert result.peak_compression_bw > 0
 
-    def test_example_analysis(self):
+    def test_example_analysis(self) -> None:
         """Test the integrated example function."""
         analyzer, result = create_example_analysis()
 
@@ -78,7 +78,7 @@ class TestSpinalLoadAnalysis:
         recs = analyzer.get_recommendations(result)
         assert isinstance(recs, list)
 
-    def test_risk_thresholds(self, analyzer, example_data):
+    def test_risk_thresholds(self, analyzer, example_data) -> None:
         """Test that high loads trigger correct risk levels."""
         # Create high compression scenario
         # Force = Compression Threshold * BodyWeight * 9.81
@@ -107,7 +107,7 @@ class TestSpinalLoadAnalysis:
             SpinalRiskLevel.CRITICAL,
         ]
 
-    def test_input_validation_shapes(self, analyzer):
+    def test_input_validation_shapes(self, analyzer) -> None:
         """Test handling of mismatched array shapes (should likely raise error)."""
         time_short = np.linspace(0, 1.0, 10)
 

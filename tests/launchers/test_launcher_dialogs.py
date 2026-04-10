@@ -40,7 +40,7 @@ def launcher(qapp):
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
 @patch("src.shared.python.ui.ToastManager")
-def test_init_ui_components_true(mock_toast, launcher):
+def test_init_ui_components_true(mock_toast, launcher) -> None:
     with patch.object(launcher, "_setup_keyboard_shortcuts") as mock_setup:
         launcher._init_ui_components()
         mock_toast.assert_called_once_with(launcher)
@@ -49,19 +49,19 @@ def test_init_ui_components_true(mock_toast, launcher):
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
-def test_init_ui_components_false(launcher):
+def test_init_ui_components_false(launcher) -> None:
     launcher._init_ui_components()
     assert launcher.toast_manager is None
 
 
-def test_setup_keyboard_shortcuts(launcher):
+def test_setup_keyboard_shortcuts(launcher) -> None:
     with patch("src.launchers.launcher_dialogs.QShortcut") as mock_shortcut:
         launcher._setup_keyboard_shortcuts()
         assert mock_shortcut.call_count == 4
 
 
 @patch("src.launchers.launcher_dialogs.HELP_SYSTEM_AVAILABLE", True)
-def test_show_help_dialog_true(launcher):
+def test_show_help_dialog_true(launcher) -> None:
     with patch("src.shared.python.gui_pkg.help_system.HelpDialog") as mock_dialog:
         instance = MagicMock()
         mock_dialog.return_value = instance
@@ -71,7 +71,7 @@ def test_show_help_dialog_true(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.HELP_SYSTEM_AVAILABLE", False)
-def test_show_help_dialog_false(launcher):
+def test_show_help_dialog_false(launcher) -> None:
     with patch("src.launchers.ui_components.HelpDialog") as mock_dialog:
         instance = MagicMock()
         mock_dialog.return_value = instance
@@ -81,27 +81,27 @@ def test_show_help_dialog_false(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.QDesktopServices.openUrl")
-def test_open_project_map_exists(mock_open, launcher):
+def test_open_project_map_exists(mock_open, launcher) -> None:
     with patch("src.launchers.launcher_dialogs.Path.exists", return_value=True):
         launcher._open_project_map()
         mock_open.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_open_project_map_not_exists(mock_warning, launcher):
+def test_open_project_map_not_exists(mock_warning, launcher) -> None:
     with patch("src.launchers.launcher_dialogs.Path.exists", return_value=False):
         launcher._open_project_map()
         mock_warning.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.QMessageBox.about")
-def test_show_about_dialog(mock_about, launcher):
+def test_show_about_dialog(mock_about, launcher) -> None:
     launcher._show_about_dialog()
     mock_about.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
-def test_show_shortcuts_overlay(launcher):
+def test_show_shortcuts_overlay(launcher) -> None:
     with patch("src.shared.python.ui.ShortcutsOverlay") as mock_overlay:
         instance = MagicMock()
         mock_overlay.return_value = instance
@@ -111,14 +111,14 @@ def test_show_shortcuts_overlay(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
-def test_show_shortcuts_overlay_false(launcher):
+def test_show_shortcuts_overlay_false(launcher) -> None:
     with patch("src.shared.python.ui.ShortcutsOverlay") as mock_overlay:
         launcher._show_shortcuts_overlay()
         mock_overlay.assert_not_called()
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", True)
-def test_show_preferences(launcher):
+def test_show_preferences(launcher) -> None:
     with patch("src.shared.python.ui.PreferencesDialog") as mock_dialog:
         instance = MagicMock()
         mock_dialog.return_value = instance
@@ -127,13 +127,13 @@ def test_show_preferences(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.UI_COMPONENTS_AVAILABLE", False)
-def test_show_preferences_false(launcher):
+def test_show_preferences_false(launcher) -> None:
     with patch("src.shared.python.ui.PreferencesDialog") as mock_dialog:
         launcher._show_preferences()
         mock_dialog.assert_not_called()
 
 
-def test_show_toast(launcher):
+def test_show_toast(launcher) -> None:
     launcher.toast_manager = MagicMock()
     launcher.show_toast("msg", "success")
     launcher.toast_manager.show_success.assert_called_with("msg")
@@ -149,7 +149,7 @@ def test_show_toast(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", True)
-def test_open_ai_settings(launcher):
+def test_open_ai_settings(launcher) -> None:
     with patch("src.shared.python.ai.gui.AISettingsDialog") as mock_dialog:
         instance = MagicMock()
         instance.exec.return_value = True
@@ -159,20 +159,20 @@ def test_open_ai_settings(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", False)
-def test_open_ai_settings_not_available(launcher):
+def test_open_ai_settings_not_available(launcher) -> None:
     with patch("src.shared.python.ai.gui.AISettingsDialog") as mock_dialog:
         launcher._open_ai_settings()
         mock_dialog.assert_not_called()
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", False)
-def test_toggle_ai_assistant_not_available(launcher):
+def test_toggle_ai_assistant_not_available(launcher) -> None:
     launcher.toggle_ai_assistant(True)
     launcher.content_splitter.setSizes.assert_not_called()
 
 
 @patch("src.launchers.launcher_dialogs.AI_AVAILABLE", True)
-def test_toggle_ai_assistant(launcher):
+def test_toggle_ai_assistant(launcher) -> None:
     launcher.content_splitter.width.return_value = 1000
     launcher.btn_ai.isChecked.return_value = False
 
@@ -185,13 +185,13 @@ def test_toggle_ai_assistant(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.QDesktopServices.openUrl")
-def test_report_bug(mock_open, launcher):
+def test_report_bug(mock_open, launcher) -> None:
     launcher._report_bug()
     mock_open.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.SettingsDialog")
-def test_open_settings(mock_dialog, launcher):
+def test_open_settings(mock_dialog, launcher) -> None:
     instance = MagicMock()
     mock_dialog.return_value = instance
     with patch("src.launchers.launcher_diagnostics.LauncherDiagnostics") as mock_diag:
@@ -204,19 +204,19 @@ def test_open_settings(mock_dialog, launcher):
         instance.exec.assert_called_once()
 
 
-def test_open_diagnostics(launcher):
+def test_open_diagnostics(launcher) -> None:
     with patch.object(launcher, "_open_settings") as mock_open:
         launcher.open_diagnostics()
         mock_open.assert_called_with(tab=2)
 
 
-def test_open_environment_manager(launcher):
+def test_open_environment_manager(launcher) -> None:
     with patch.object(launcher, "_open_settings") as mock_open:
         launcher.open_environment_manager()
         mock_open.assert_called_with(tab=1)
 
 
-def test_reset_layout_to_defaults(launcher):
+def test_reset_layout_to_defaults(launcher) -> None:
     with (
         patch("src.launchers.launcher_dialogs.Path.exists", return_value=True),
         patch("src.launchers.launcher_dialogs.Path.with_suffix"),
@@ -236,7 +236,7 @@ def test_reset_layout_to_defaults(launcher):
         launcher._initialize_model_order.assert_called_once()
 
 
-def test_reset_layout_to_defaults_not_exists(launcher):
+def test_reset_layout_to_defaults_not_exists(launcher) -> None:
     with (
         patch("src.launchers.launcher_dialogs.Path.exists", return_value=False),
         patch(
@@ -252,7 +252,7 @@ def test_reset_layout_to_defaults_not_exists(launcher):
         launcher._initialize_model_order.assert_called_once()
 
 
-def test_reset_layout_to_defaults_error(launcher):
+def test_reset_layout_to_defaults_error(launcher) -> None:
     with (
         patch("src.launchers.launcher_dialogs.Path.exists", side_effect=OSError("err")),
         patch.object(launcher, "show_toast") as mock_toast,
@@ -261,14 +261,14 @@ def test_reset_layout_to_defaults_error(launcher):
         mock_toast.assert_called_once()
 
 
-def test_open_help(launcher):
+def test_open_help(launcher) -> None:
     with patch.object(launcher, "_show_help_dialog") as mock_show:
         launcher.open_help()
         mock_show.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.LayoutManagerDialog")
-def test_open_layout_manager(mock_dialog, launcher):
+def test_open_layout_manager(mock_dialog, launcher) -> None:
     instance = MagicMock()
     instance.exec.return_value = True
     instance.selected_ids.return_value = ["m1"]
@@ -283,7 +283,7 @@ def test_open_layout_manager(mock_dialog, launcher):
     assert launcher._apply_model_selection.call_count == 1
 
 
-def test_toggle_layout_mode(launcher):
+def test_toggle_layout_mode(launcher) -> None:
     launcher.toggle_layout_mode(True)
     assert launcher.layout_edit_mode is True
     launcher.btn_customize_tiles.setEnabled.assert_called_with(True)
@@ -292,7 +292,7 @@ def test_toggle_layout_mode(launcher):
     launcher.btn_customize_tiles.setEnabled.assert_called_with(False)
 
 
-def test_on_docker_mode_changed(launcher):
+def test_on_docker_mode_changed(launcher) -> None:
     launcher.chk_wsl.isChecked.return_value = True
     launcher.docker_available = True
     launcher.toast_manager = MagicMock()
@@ -306,7 +306,7 @@ def test_on_docker_mode_changed(launcher):
         launcher.toast_manager.show_info.assert_called()
 
 
-def test_on_docker_mode_changed_disable(launcher):
+def test_on_docker_mode_changed_disable(launcher) -> None:
     launcher.toast_manager = MagicMock()
     with patch.object(launcher, "update_execution_status"):
         launcher._on_docker_mode_changed(0)
@@ -316,14 +316,14 @@ def test_on_docker_mode_changed_disable(launcher):
 
 
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_docker_mode_changed_unavailable(mock_warning, launcher):
+def test_on_docker_mode_changed_unavailable(mock_warning, launcher) -> None:
     launcher.docker_available = False
     launcher._on_docker_mode_changed(2)
     mock_warning.assert_called_once()
 
 
 @patch("src.launchers.launcher_dialogs.subprocess.run")
-def test_on_wsl_mode_changed(mock_run, launcher):
+def test_on_wsl_mode_changed(mock_run, launcher) -> None:
     launcher.chk_docker.isChecked.return_value = True
     launcher.toast_manager = MagicMock()
 
@@ -342,7 +342,7 @@ def test_on_wsl_mode_changed(mock_run, launcher):
 
 
 @patch("src.launchers.launcher_dialogs.subprocess.run")
-def test_on_wsl_mode_changed_utf8_fallback(mock_run, launcher):
+def test_on_wsl_mode_changed_utf8_fallback(mock_run, launcher) -> None:
     launcher.chk_docker.isChecked.return_value = True
 
     mock_result = MagicMock()
@@ -362,20 +362,20 @@ def test_on_wsl_mode_changed_utf8_fallback(mock_run, launcher):
 
 @patch("src.launchers.launcher_dialogs.subprocess.run")
 @patch("src.launchers.launcher_dialogs.QMessageBox.warning")
-def test_on_wsl_mode_changed_error(mock_warning, mock_run, launcher):
+def test_on_wsl_mode_changed_error(mock_warning, mock_run, launcher) -> None:
     mock_run.side_effect = OSError("err")
     launcher._on_wsl_mode_changed(2)
     mock_warning.assert_called_once()
 
 
-def test_on_wsl_mode_changed_disable(launcher):
+def test_on_wsl_mode_changed_disable(launcher) -> None:
     launcher.toast_manager = MagicMock()
     with patch.object(launcher, "update_execution_status"):
         launcher._on_wsl_mode_changed(0)
         launcher.toast_manager.show_info.assert_called_with("Local Windows mode")
 
 
-def test_update_execution_status(launcher):
+def test_update_execution_status(launcher) -> None:
     launcher.chk_wsl.isChecked.return_value = True
     launcher.update_execution_status()
     launcher.lbl_execution_mode.setText.assert_called_with("Mode: WSL (Ubuntu)")
@@ -390,6 +390,6 @@ def test_update_execution_status(launcher):
     launcher.lbl_execution_mode.setText.assert_called_with("Mode: Local (Windows)")
 
 
-def test_update_execution_status_no_label(launcher):
+def test_update_execution_status_no_label(launcher) -> None:
     del launcher.lbl_execution_mode
     launcher.update_execution_status()  # Should simply return

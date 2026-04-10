@@ -49,7 +49,7 @@ def launcher(qapp):
     return DummyLauncher()
 
 
-def test_get_subprocess_env(launcher):
+def test_get_subprocess_env(launcher) -> None:
     with patch("os.environ.copy", return_value={"PYTHONPATH": "old/path"}):
         env = launcher._get_subprocess_env()
         assert "PYTHONPATH" in env
@@ -57,7 +57,7 @@ def test_get_subprocess_env(launcher):
 
 
 @patch("src.launchers.launcher_simulation.subprocess.run")
-def test_check_module_dependencies(mock_run, launcher):
+def test_check_module_dependencies(mock_run, launcher) -> None:
     mock_run.return_value.stdout = "OK"
     success, err = launcher._check_module_dependencies("mjcf")
     assert success is True
@@ -85,7 +85,7 @@ def test_check_module_dependencies(mock_run, launcher):
 
 
 @patch("src.launchers.launcher_simulation.QMessageBox.warning")
-def test_show_dependency_error(mock_warning, launcher):
+def test_show_dependency_error(mock_warning, launcher) -> None:
     launcher._show_dependency_error("m1", "DLL load failed")
     mock_warning.assert_called_once()
 
@@ -93,7 +93,7 @@ def test_show_dependency_error(mock_warning, launcher):
     assert mock_warning.call_count == 2
 
 
-def test_try_launch_special_app(launcher):
+def test_try_launch_special_app(launcher) -> None:
     with patch.object(launcher, "_launch_urdf_generator") as mock_urdf:
         assert launcher._try_launch_special_app("urdf_generator") is True
         mock_urdf.assert_called_once()
@@ -109,7 +109,7 @@ def test_try_launch_special_app(launcher):
     assert launcher._try_launch_special_app("normal_model") is False
 
 
-def test_try_launch_docker(launcher):
+def test_try_launch_docker(launcher) -> None:
     launcher.chk_docker.isChecked.return_value = True
     launcher.docker_available = True
 
@@ -133,7 +133,7 @@ def test_try_launch_docker(launcher):
 
 
 @patch("src.launchers.launcher_simulation.QMessageBox.question")
-def test_check_local_dependencies(mock_question, launcher):
+def test_check_local_dependencies(mock_question, launcher) -> None:
     model = DummyModel("m1", "M1", "mujoco", path="test.xml")
 
     # WSL enabled
@@ -161,7 +161,7 @@ def test_check_local_dependencies(mock_question, launcher):
             assert launcher._check_local_dependencies(model) is False
 
 
-def test_execute_local_launch(launcher):
+def test_execute_local_launch(launcher) -> None:
     model = DummyModel("m1", "M1", "mjcf", path="test.xml")
 
     handler = MagicMock()
@@ -197,7 +197,7 @@ def test_execute_local_launch(launcher):
     launcher.show_toast.assert_called_with("Model path missing.", "error")
 
 
-def test_launch_simulation(launcher):
+def test_launch_simulation(launcher) -> None:
     # No selected model
     launcher.launch_simulation()
 
@@ -242,7 +242,7 @@ def test_launch_simulation(launcher):
 
 
 @patch.dict("sys.modules", {"mujoco": MagicMock(), "mujoco.viewer": MagicMock()})
-def test_launch_generic_mjcf(launcher):
+def test_launch_generic_mjcf(launcher) -> None:
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
         process = MagicMock()
         launcher.process_manager.launch_script.return_value = process
@@ -267,7 +267,7 @@ def test_launch_generic_mjcf(launcher):
 @patch("src.launchers.launcher_process_manager.start_vcxsrv")
 @patch("src.launchers.launcher_simulation.QMessageBox.warning")
 @patch("src.launchers.launcher_simulation.QMessageBox.critical")
-def test_launch_docker_container(mock_crit, mock_warn, mock_start, launcher):
+def test_launch_docker_container(mock_crit, mock_warn, mock_start, launcher) -> None:
     mock_start.return_value = True
     model = DummyModel("m1", "M1", "mjcf", path="test.xml")
     repo_path = Path("test.xml")
@@ -304,7 +304,7 @@ def test_launch_docker_container(mock_crit, mock_warn, mock_start, launcher):
             launcher._launch_docker_container(model, repo_path)
 
 
-def test_launch_script_process(launcher):
+def test_launch_script_process(launcher) -> None:
     # WSL mode
     launcher.chk_wsl.isChecked.return_value = True
     launcher.process_manager.launch_in_wsl.return_value = True
@@ -329,7 +329,7 @@ def test_launch_script_process(launcher):
         mock_crit.assert_called_once()
 
 
-def test_launch_module_process(launcher):
+def test_launch_module_process(launcher) -> None:
     launcher.chk_wsl.isChecked.return_value = True
     launcher.process_manager.launch_module_in_wsl.return_value = True
     launcher._launch_module_process("name", "mod", Path("cwd"))
@@ -347,7 +347,7 @@ def test_launch_module_process(launcher):
         mock_crit.assert_called_once()
 
 
-def test_launch_urdf_generator(launcher):
+def test_launch_urdf_generator(launcher) -> None:
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
         launcher.process_manager.launch_script.return_value = MagicMock()
         launcher._launch_urdf_generator()
@@ -370,7 +370,7 @@ def test_launch_urdf_generator(launcher):
         )
 
 
-def test_launch_c3d_viewer(launcher):
+def test_launch_c3d_viewer(launcher) -> None:
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
         launcher.process_manager.launch_script.return_value = MagicMock()
         launcher._launch_c3d_viewer()
@@ -390,7 +390,7 @@ def test_launch_c3d_viewer(launcher):
         launcher.show_toast.assert_called_with("C3D Viewer script not found.", "error")
 
 
-def test_launch_shot_tracer(launcher):
+def test_launch_shot_tracer(launcher) -> None:
     with patch("src.launchers.launcher_simulation.Path.exists", return_value=True):
         launcher.process_manager.launch_script.return_value = MagicMock()
         launcher._launch_shot_tracer()
@@ -410,7 +410,7 @@ def test_launch_shot_tracer(launcher):
 
 
 @patch("src.launchers.launcher_simulation.secure_popen")
-def test_launch_matlab_app(mock_popen, launcher):
+def test_launch_matlab_app(mock_popen, launcher) -> None:
     model = DummyModel("m2", "M2", "matlab_app", path="test.slx")
     mock_popen.return_value = MagicMock()
 

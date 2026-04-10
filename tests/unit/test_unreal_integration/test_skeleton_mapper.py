@@ -23,14 +23,14 @@ from src.unreal_integration.skeleton_mapper import (
 class TestSkeletonType:
     """Tests for SkeletonType enum."""
 
-    def test_skeleton_types_exist(self):
+    def test_skeleton_types_exist(self) -> None:
         """Test all skeleton types exist."""
         assert SkeletonType.MIXAMO is not None
         assert SkeletonType.UNREAL_MANNEQUIN is not None
         assert SkeletonType.MUJOCO_HUMANOID is not None
         assert SkeletonType.CUSTOM is not None
 
-    def test_skeleton_type_bone_count(self):
+    def test_skeleton_type_bone_count(self) -> None:
         """Test skeleton type bone counts."""
         assert SkeletonType.MIXAMO.standard_bone_count > 0
         assert SkeletonType.UNREAL_MANNEQUIN.standard_bone_count > 0
@@ -39,7 +39,7 @@ class TestSkeletonType:
 class TestBoneMapping:
     """Tests for BoneMapping data structure."""
 
-    def test_create_bone_mapping(self):
+    def test_create_bone_mapping(self) -> None:
         """Test bone mapping creation."""
         mapping = BoneMapping(
             source_bone="mixamorig:Hips",
@@ -50,7 +50,7 @@ class TestBoneMapping:
         assert mapping.source_bone == "mixamorig:Hips"
         assert mapping.target_bone == "pelvis"
 
-    def test_bone_mapping_with_offset(self):
+    def test_bone_mapping_with_offset(self) -> None:
         """Test bone mapping with rotation offset."""
         mapping = BoneMapping(
             source_bone="mixamorig:RightArm",
@@ -59,7 +59,7 @@ class TestBoneMapping:
         )
         assert mapping.rotation_offset[2] == -90.0
 
-    def test_bone_mapping_with_scale(self):
+    def test_bone_mapping_with_scale(self) -> None:
         """Test bone mapping with scale factor."""
         mapping = BoneMapping(
             source_bone="mixamorig:Spine",
@@ -68,7 +68,7 @@ class TestBoneMapping:
         )
         assert mapping.scale_factor == 0.95
 
-    def test_bone_mapping_to_dict(self):
+    def test_bone_mapping_to_dict(self) -> None:
         """Test bone mapping serialization."""
         mapping = BoneMapping(
             source_bone="source",
@@ -78,7 +78,7 @@ class TestBoneMapping:
         assert d["source_bone"] == "source"
         assert d["target_bone"] == "target"
 
-    def test_bone_mapping_from_dict(self):
+    def test_bone_mapping_from_dict(self) -> None:
         """Test bone mapping deserialization."""
         d = {
             "source_bone": "Hips",
@@ -93,7 +93,7 @@ class TestBoneMapping:
 class TestMappingProfile:
     """Tests for MappingProfile."""
 
-    def test_create_mapping_profile(self):
+    def test_create_mapping_profile(self) -> None:
         """Test mapping profile creation."""
         mappings = [
             BoneMapping("Hips", "pelvis"),
@@ -108,7 +108,7 @@ class TestMappingProfile:
         assert profile.name == "test_profile"
         assert len(profile.mappings) == 2
 
-    def test_profile_get_mapping(self):
+    def test_profile_get_mapping(self) -> None:
         """Test getting mapping by source bone."""
         mappings = [
             BoneMapping("Hips", "pelvis"),
@@ -124,7 +124,7 @@ class TestMappingProfile:
         assert mapping is not None
         assert mapping.target_bone == "pelvis"
 
-    def test_profile_has_mapping(self):
+    def test_profile_has_mapping(self) -> None:
         """Test checking for mapping existence."""
         mappings = [BoneMapping("Hips", "pelvis")]
         profile = MappingProfile(
@@ -136,7 +136,7 @@ class TestMappingProfile:
         assert profile.has_mapping("Hips")
         assert not profile.has_mapping("NonExistent")
 
-    def test_profile_serialization(self):
+    def test_profile_serialization(self) -> None:
         """Test profile serialization."""
         mappings = [BoneMapping("Hips", "pelvis")]
         profile = MappingProfile(
@@ -149,7 +149,7 @@ class TestMappingProfile:
         assert d["name"] == "test"
         assert len(d["mappings"]) == 1
 
-    def test_profile_deserialization(self):
+    def test_profile_deserialization(self) -> None:
         """Test profile deserialization."""
         d = {
             "name": "loaded_profile",
@@ -166,7 +166,7 @@ class TestMappingProfile:
 class TestPoseTransform:
     """Tests for PoseTransform data structure."""
 
-    def test_create_pose_transform(self):
+    def test_create_pose_transform(self) -> None:
         """Test pose transform creation."""
         transform = PoseTransform(
             position=np.array([0.0, 1.0, 0.0]),
@@ -174,13 +174,13 @@ class TestPoseTransform:
         )
         assert transform.position[1] == 1.0
 
-    def test_identity_transform(self):
+    def test_identity_transform(self) -> None:
         """Test identity transform creation."""
         transform = PoseTransform.identity()
         assert np.allclose(transform.position, [0, 0, 0])
         assert np.allclose(transform.rotation, [1, 0, 0, 0])
 
-    def test_pose_transform_to_matrix(self):
+    def test_pose_transform_to_matrix(self) -> None:
         """Test conversion to 4x4 transformation matrix."""
         transform = PoseTransform(
             position=np.array([1.0, 2.0, 3.0]),
@@ -192,7 +192,7 @@ class TestPoseTransform:
         assert matrix[1, 3] == 2.0  # Y translation
         assert matrix[2, 3] == 3.0  # Z translation
 
-    def test_pose_transform_from_matrix(self):
+    def test_pose_transform_from_matrix(self) -> None:
         """Test creation from 4x4 transformation matrix."""
         matrix = np.eye(4)
         matrix[:3, 3] = [1.0, 2.0, 3.0]
@@ -203,12 +203,12 @@ class TestPoseTransform:
 class TestSkeletonMapper:
     """Tests for SkeletonMapper class."""
 
-    def test_create_mapper(self):
+    def test_create_mapper(self) -> None:
         """Test mapper creation."""
         mapper = SkeletonMapper()
         assert mapper is not None
 
-    def test_mapper_with_profile(self):
+    def test_mapper_with_profile(self) -> None:
         """Test mapper creation with profile."""
         profile = MappingProfile(
             name="test",
@@ -219,31 +219,31 @@ class TestSkeletonMapper:
         mapper = SkeletonMapper(profile=profile)
         assert mapper.profile is not None
 
-    def test_builtin_mixamo_profile(self):
+    def test_builtin_mixamo_profile(self) -> None:
         """Test built-in Mixamo to physics profile."""
         mapper = SkeletonMapper.for_mixamo()
         assert mapper.profile is not None
         assert mapper.profile.source_type == SkeletonType.MIXAMO
 
-    def test_builtin_unreal_mannequin_profile(self):
+    def test_builtin_unreal_mannequin_profile(self) -> None:
         """Test built-in Unreal Mannequin to physics profile."""
         mapper = SkeletonMapper.for_unreal_mannequin()
         assert mapper.profile is not None
         assert mapper.profile.source_type == SkeletonType.UNREAL_MANNEQUIN
 
-    def test_map_bone_name(self):
+    def test_map_bone_name(self) -> None:
         """Test mapping bone name from source to target."""
         mapper = SkeletonMapper.for_mixamo()
         target = mapper.map_bone_name("mixamorig:Hips")
         assert target == "pelvis"
 
-    def test_map_unknown_bone(self):
+    def test_map_unknown_bone(self) -> None:
         """Test mapping unknown bone name."""
         mapper = SkeletonMapper.for_mixamo()
         target = mapper.map_bone_name("NonExistentBone")
         assert target is None
 
-    def test_apply_pose(self):
+    def test_apply_pose(self) -> None:
         """Test applying pose to skeleton."""
         mapper = SkeletonMapper.for_mixamo()
 
@@ -265,7 +265,7 @@ class TestSkeletonMapper:
         # Should have mapped bones
         assert "pelvis" in target_pose or len(target_pose) > 0
 
-    def test_apply_joint_angles(self):
+    def test_apply_joint_angles(self) -> None:
         """Test applying joint angles from physics to mesh."""
         mapper = SkeletonMapper.for_mixamo()
 
@@ -282,7 +282,7 @@ class TestSkeletonMapper:
         # Should produce rotations for mesh bones
         assert isinstance(bone_rotations, dict)
 
-    def test_get_unmapped_bones(self):
+    def test_get_unmapped_bones(self) -> None:
         """Test getting list of unmapped source bones."""
         mapper = SkeletonMapper.for_mixamo()
         source_bones = ["mixamorig:Hips", "CustomBone1", "CustomBone2"]
@@ -291,7 +291,7 @@ class TestSkeletonMapper:
         assert "CustomBone2" in unmapped
         assert "mixamorig:Hips" not in unmapped
 
-    def test_reverse_mapping(self):
+    def test_reverse_mapping(self) -> None:
         """Test reverse mapping (physics to mesh)."""
         mapper = SkeletonMapper.for_mixamo()
         source = mapper.reverse_map_bone_name("pelvis")
@@ -301,7 +301,7 @@ class TestSkeletonMapper:
 class TestPredefinedMappings:
     """Tests for predefined mapping constants."""
 
-    def test_mixamo_mapping_completeness(self):
+    def test_mixamo_mapping_completeness(self) -> None:
         """Test Mixamo mapping covers major bones."""
         required_bones = [
             "Hips",
@@ -329,7 +329,7 @@ class TestPredefinedMappings:
                 or f"mixamorig:{bone}" in MIXAMO_TO_PHYSICS_MAP
             )
 
-    def test_unreal_mannequin_mapping_completeness(self):
+    def test_unreal_mannequin_mapping_completeness(self) -> None:
         """Test Unreal Mannequin mapping covers major bones."""
         required_bones = [
             "pelvis",
@@ -353,7 +353,7 @@ class TestPredefinedMappings:
         for bone in required_bones:
             assert bone in UNREAL_MANNEQUIN_TO_PHYSICS_MAP
 
-    def test_mujoco_humanoid_joints(self):
+    def test_mujoco_humanoid_joints(self) -> None:
         """Test MuJoCo humanoid joint list."""
         required_joints = [
             "pelvis",
@@ -379,7 +379,7 @@ class TestPredefinedMappings:
 class TestSkeletonMapperContracts:
     """Tests for Design by Contract compliance."""
 
-    def test_mapper_requires_valid_profile(self):
+    def test_mapper_requires_valid_profile(self) -> None:
         """Test mapper validates profile."""
         # Empty mappings should still be valid
         profile = MappingProfile(
@@ -391,7 +391,7 @@ class TestSkeletonMapperContracts:
         mapper = SkeletonMapper(profile=profile)
         assert mapper.profile is not None
 
-    def test_apply_pose_validates_input(self):
+    def test_apply_pose_validates_input(self) -> None:
         """Test apply_pose validates input types."""
         mapper = SkeletonMapper.for_mixamo()
 
@@ -399,7 +399,7 @@ class TestSkeletonMapperContracts:
         with pytest.raises((TypeError, ValueError)):
             mapper.apply_pose("not a dict")  # type: ignore
 
-    def test_bone_mapping_invariants(self):
+    def test_bone_mapping_invariants(self) -> None:
         """Test bone mapping maintains invariants."""
         mapping = BoneMapping(
             source_bone="source",
@@ -415,7 +415,7 @@ class TestSkeletonMapperContracts:
 class TestSkeletonMapperInterpolation:
     """Tests for pose interpolation functionality."""
 
-    def test_interpolate_poses(self):
+    def test_interpolate_poses(self) -> None:
         """Test pose interpolation between frames."""
         mapper = SkeletonMapper.for_mixamo()
 
@@ -438,7 +438,7 @@ class TestSkeletonMapperInterpolation:
         assert "pelvis" in result
         assert result["pelvis"].position[0] == pytest.approx(0.5)
 
-    def test_slerp_rotation(self):
+    def test_slerp_rotation(self) -> None:
         """Test quaternion SLERP interpolation."""
         q_a = np.array([1.0, 0.0, 0.0, 0.0])  # Identity
         q_b = np.array([0.707, 0.707, 0.0, 0.0])  # 90 deg around X

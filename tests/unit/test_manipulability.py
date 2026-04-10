@@ -6,6 +6,8 @@ that implements Guideline C2 for singularity detection.
 
 from __future__ import annotations
 
+from typing import NoReturn
+
 import numpy as np
 import pytest
 
@@ -36,7 +38,7 @@ class MockEngine:
 class TestCheckJacobianConditioning:
     """Test check_jacobian_conditioning function."""
 
-    def test_well_conditioned_jacobian(self):
+    def test_well_conditioned_jacobian(self) -> None:
         """Test with well-conditioned Jacobian (κ < 1e6)."""
         # Identity matrix has κ = 1.0
         J = np.eye(3)
@@ -45,7 +47,7 @@ class TestCheckJacobianConditioning:
 
         assert kappa == pytest.approx(1.0, rel=1e-10)
 
-    def test_near_singularity_warning(self, caplog):
+    def test_near_singularity_warning(self, caplog) -> None:
         """Test warning at near-singularity (κ > 1e6)."""
         # Create matrix with κ ≈ 1e7
         J = np.diag([1.0, 1.0, 1e-7])
@@ -56,7 +58,7 @@ class TestCheckJacobianConditioning:
         assert kappa > SINGULARITY_WARNING_THRESHOLD
         assert "Near-singularity" in caplog.text
 
-    def test_severe_ill_conditioning(self, caplog):
+    def test_severe_ill_conditioning(self, caplog) -> None:
         """Test error logging at severe ill-conditioning (κ > 1e10)."""
         # Create matrix with κ ≈ 1e11
         J = np.diag([1.0, 1.0, 1e-11])
@@ -67,7 +69,7 @@ class TestCheckJacobianConditioning:
         assert kappa > SINGULARITY_FALLBACK_THRESHOLD
         assert "SEVERE ILL-CONDITIONING" in caplog.text
 
-    def test_catastrophic_singularity_raises_error(self):
+    def test_catastrophic_singularity_raises_error(self) -> None:
         """Test that catastrophic singularity raises SingularityError."""
         # Create matrix with κ > 1e12
         J = np.diag([1.0, 1.0, 1e-13])
@@ -75,7 +77,7 @@ class TestCheckJacobianConditioning:
         with pytest.raises(SingularityError, match="CATASTROPHIC SINGULARITY"):
             check_jacobian_conditioning(J, "test_body", warn=True)
 
-    def test_warning_suppression(self, caplog):
+    def test_warning_suppression(self, caplog) -> None:
         """Test that warnings can be suppressed with warn=False."""
         J = np.diag([1.0, 1.0, 1e-7])  # κ > 1e6
 
@@ -90,7 +92,7 @@ class TestCheckJacobianConditioning:
         ]
         assert len(singularity_warnings) == 0
 
-    def test_empty_jacobian(self, caplog):
+    def test_empty_jacobian(self, caplog) -> None:
         """Test handling of empty Jacobian."""
         J = np.array([])
 
@@ -100,7 +102,7 @@ class TestCheckJacobianConditioning:
         assert np.isinf(kappa)
         assert "Empty Jacobian" in caplog.text
 
-    def test_zero_row_jacobian(self, caplog):
+    def test_zero_row_jacobian(self, caplog) -> None:
         """Test handling of Jacobian with zero rows."""
         J = np.zeros((0, 3))
 
@@ -109,7 +111,7 @@ class TestCheckJacobianConditioning:
 
         assert np.isinf(kappa)
 
-    def test_zero_column_jacobian(self, caplog):
+    def test_zero_column_jacobian(self, caplog) -> None:
         """Test handling of Jacobian with zero columns."""
         J = np.zeros((3, 0))
 
@@ -118,7 +120,7 @@ class TestCheckJacobianConditioning:
 
         assert np.isinf(kappa)
 
-    def test_rectangular_jacobian(self):
+    def test_rectangular_jacobian(self) -> None:
         """Test with rectangular Jacobian (typical 6×n)."""
         # 6 rows (spatial) × 3 cols (joints)
         J = np.random.rand(6, 3)
@@ -128,7 +130,7 @@ class TestCheckJacobianConditioning:
         assert kappa > 0
         assert np.isfinite(kappa)
 
-    def test_body_name_in_logs(self, caplog):
+    def test_body_name_in_logs(self, caplog) -> None:
         """Test that body name appears in log messages."""
         J = np.diag([1.0, 1e-7])  # Near-singular
 
@@ -141,7 +143,7 @@ class TestCheckJacobianConditioning:
 class TestGetJacobianConditioning:
     """Test get_jacobian_conditioning function."""
 
-    def test_with_spatial_jacobian(self):
+    def test_with_spatial_jacobian(self) -> None:
         """Test retrieval with spatial Jacobian."""
         J_spatial = np.eye(6)
         engine = MockEngine(jacobian_dict={"spatial": J_spatial})
@@ -150,7 +152,7 @@ class TestGetJacobianConditioning:
 
         assert kappa == pytest.approx(1.0, rel=1e-10)
 
-    def test_with_linear_jacobian_only(self):
+    def test_with_linear_jacobian_only(self) -> None:
         """Test fallback to linear Jacobian when spatial not available."""
         J_linear = np.eye(3)
         engine = MockEngine(jacobian_dict={"linear": J_linear})
@@ -159,7 +161,7 @@ class TestGetJacobianConditioning:
 
         assert kappa == pytest.approx(1.0, rel=1e-10)
 
-    def test_prefers_spatial_over_linear(self):
+    def test_prefers_spatial_over_linear(self) -> None:
         """Test that spatial Jacobian is preferred when both exist."""
         J_spatial = np.diag([1.0, 1.0, 1.0, 1.0, 1.0, 2.0])  # κ = 2
         J_linear = np.diag([1.0, 1.0, 3.0])  # κ = 3
@@ -170,7 +172,7 @@ class TestGetJacobianConditioning:
         # Should use spatial (κ=2) not linear (κ=3)
         assert kappa == pytest.approx(2.0, rel=1e-6)
 
-    def test_body_not_found(self, caplog):
+    def test_body_not_found(self, caplog) -> None:
         """Test handling when body not found in model."""
         engine = MockEngine(jacobian_dict=None)
 
@@ -180,7 +182,7 @@ class TestGetJacobianConditioning:
         assert np.isinf(kappa)
         assert "not found" in caplog.text
 
-    def test_empty_jacobian_dict(self, caplog):
+    def test_empty_jacobian_dict(self, caplog) -> None:
         """Test handling of empty Jacobian dictionary."""
         engine = MockEngine(jacobian_dict={})
 
@@ -194,7 +196,7 @@ class TestGetJacobianConditioning:
 class TestComputeManipulabilityEllipsoid:
     """Test compute_manipulability_ellipsoid function."""
 
-    def test_identity_matrix(self):
+    def test_identity_matrix(self) -> None:
         """Test ellipsoid for identity Jacobian."""
         J = np.eye(3)
 
@@ -206,7 +208,7 @@ class TestComputeManipulabilityEllipsoid:
         # Axes should form orthonormal basis
         assert axes.shape == (3, 3)
 
-    def test_diagonal_matrix(self):
+    def test_diagonal_matrix(self) -> None:
         """Test ellipsoid for diagonal Jacobian."""
         J = np.diag([3.0, 2.0, 1.0])
 
@@ -216,7 +218,7 @@ class TestComputeManipulabilityEllipsoid:
         expected_radii = np.array([3.0, 2.0, 1.0])
         np.testing.assert_allclose(radii, expected_radii, rtol=1e-10)
 
-    def test_rectangular_jacobian(self):
+    def test_rectangular_jacobian(self) -> None:
         """Test with rectangular matrix (6×3)."""
         J = np.random.rand(6, 3)
 
@@ -231,7 +233,7 @@ class TestComputeManipulabilityEllipsoid:
         # All radii should be non-negative
         assert np.all(radii >= 0)
 
-    def test_axes_orthonormal(self):
+    def test_axes_orthonormal(self) -> None:
         """Test that principal axes are orthonormal."""
         J = np.random.rand(5, 4)
 
@@ -241,7 +243,7 @@ class TestComputeManipulabilityEllipsoid:
         should_be_identity = axes.T @ axes
         np.testing.assert_allclose(should_be_identity, np.eye(4), rtol=1e-6, atol=1e-12)
 
-    def test_radii_sorted_descending(self):
+    def test_radii_sorted_descending(self) -> None:
         """Test that radii are sorted in descending order."""
         J = np.diag([5.0, 3.0, 7.0, 1.0])
 
@@ -250,7 +252,7 @@ class TestComputeManipulabilityEllipsoid:
         # SVD returns singular values in descending order
         assert np.all(radii[:-1] >= radii[1:])
 
-    def test_returns_tuple(self):
+    def test_returns_tuple(self) -> None:
         """Test that function returns a tuple of two arrays."""
         J = np.random.rand(3, 3)
 
@@ -265,7 +267,7 @@ class TestComputeManipulabilityEllipsoid:
 class TestComputeManipulabilityIndex:
     """Test compute_manipulability_index function."""
 
-    def test_identity_matrix(self):
+    def test_identity_matrix(self) -> None:
         """Test manipulability index for identity matrix."""
         J = np.eye(3)
 
@@ -274,7 +276,7 @@ class TestComputeManipulabilityIndex:
         # Product of singular values (all 1.0) = 1.0
         assert mu == pytest.approx(1.0, rel=1e-10)
 
-    def test_diagonal_matrix(self):
+    def test_diagonal_matrix(self) -> None:
         """Test manipulability index for diagonal matrix."""
         J = np.diag([2.0, 3.0, 4.0])
 
@@ -284,7 +286,7 @@ class TestComputeManipulabilityIndex:
         expected_mu = 2.0 * 3.0 * 4.0
         assert mu == pytest.approx(expected_mu, rel=1e-10)
 
-    def test_singular_matrix_zero_index(self):
+    def test_singular_matrix_zero_index(self) -> None:
         """Test that singular matrix has zero manipulability index."""
         # Singular matrix (rank deficient)
         J = np.array([[1, 2], [2, 4]])  # Second row is 2x first row
@@ -294,7 +296,7 @@ class TestComputeManipulabilityIndex:
         # Should be approximately zero (within numerical precision)
         assert mu == pytest.approx(0.0, abs=1e-10)
 
-    def test_near_singular_small_index(self):
+    def test_near_singular_small_index(self) -> None:
         """Test that near-singular matrix has small manipulability index."""
         J = np.diag([1.0, 1.0, 1e-10])
 
@@ -303,7 +305,7 @@ class TestComputeManipulabilityIndex:
         # μ = 1 × 1 × 1e-10 = 1e-10
         assert mu < 1e-9
 
-    def test_well_conditioned_large_index(self):
+    def test_well_conditioned_large_index(self) -> None:
         """Test that well-conditioned matrix has reasonable index."""
         J = np.diag([5.0, 5.0, 5.0])
 
@@ -312,7 +314,7 @@ class TestComputeManipulabilityIndex:
         # μ = 5 × 5 × 5 = 125
         assert mu == pytest.approx(125.0, rel=1e-10)
 
-    def test_rectangular_matrix(self):
+    def test_rectangular_matrix(self) -> None:
         """Test with rectangular Jacobian (6×3)."""
         J = np.random.rand(6, 3)
 
@@ -322,7 +324,7 @@ class TestComputeManipulabilityIndex:
         assert np.isfinite(mu)
         assert mu >= 0
 
-    def test_return_type_is_float(self):
+    def test_return_type_is_float(self) -> None:
         """Test that return type is Python float."""
         J = np.eye(3)
 
@@ -330,7 +332,7 @@ class TestComputeManipulabilityIndex:
 
         assert isinstance(mu, float)
 
-    def test_yoshikawa_formula(self):
+    def test_yoshikawa_formula(self) -> None:
         """Test that index matches Yoshikawa's formula: μ = √det(J J^T)."""
         J = np.array([[1, 0], [0, 2], [0, 0]])  # 3×2 matrix
 
@@ -346,13 +348,13 @@ class TestComputeManipulabilityIndex:
 class TestSingularityThresholds:
     """Test that singularity thresholds are correctly defined."""
 
-    def test_thresholds_are_defined(self):
+    def test_thresholds_are_defined(self) -> None:
         """Test that all threshold constants are defined."""
         assert SINGULARITY_WARNING_THRESHOLD == 1e6
         assert SINGULARITY_FALLBACK_THRESHOLD == 1e10
         assert CATASTROPHIC_SINGULARITY_THRESHOLD == 1e12
 
-    def test_thresholds_ordered_correctly(self):
+    def test_thresholds_ordered_correctly(self) -> None:
         """Test that thresholds are in ascending order."""
         assert SINGULARITY_WARNING_THRESHOLD < SINGULARITY_FALLBACK_THRESHOLD
         assert SINGULARITY_FALLBACK_THRESHOLD < CATASTROPHIC_SINGULARITY_THRESHOLD
@@ -361,16 +363,16 @@ class TestSingularityThresholds:
 class TestSingularityError:
     """Test SingularityError exception."""
 
-    def test_exception_can_be_raised(self):
+    def test_exception_can_be_raised(self) -> NoReturn:
         """Test that SingularityError can be raised."""
         with pytest.raises(SingularityError):
             raise SingularityError("Test error")
 
-    def test_exception_inherits_from_exception(self):
+    def test_exception_inherits_from_exception(self) -> None:
         """Test that SingularityError is an Exception."""
         assert issubclass(SingularityError, Exception)
 
-    def test_exception_message_preserved(self):
+    def test_exception_message_preserved(self) -> None:
         """Test that exception message is preserved."""
         msg = "Critical singularity detected"
         try:
@@ -382,7 +384,7 @@ class TestSingularityError:
 class TestPhysicalRealism:
     """Test physical realism and practical use cases."""
 
-    def test_fully_extended_arm_high_condition_number(self):
+    def test_fully_extended_arm_high_condition_number(self) -> None:
         """Test that fully extended configuration has high condition number.
 
         When a robotic arm is fully extended, the Jacobian becomes
@@ -400,7 +402,7 @@ class TestPhysicalRealism:
         # Should have high condition number
         assert kappa > 1e6
 
-    def test_optimal_configuration_low_condition_number(self):
+    def test_optimal_configuration_low_condition_number(self) -> None:
         """Test that well-posed configuration has low condition number."""
         # Jacobian at optimal configuration (well-conditioned)
         J = np.array([[1.0, 0.5], [0.5, 1.0]])
@@ -410,7 +412,7 @@ class TestPhysicalRealism:
         # Should have low condition number (well-conditioned)
         assert kappa < 10
 
-    def test_gimbal_lock_singularity(self):
+    def test_gimbal_lock_singularity(self) -> None:
         """Test detection of gimbal lock configuration."""
         # At gimbal lock, one DOF is lost (two axes align)
         # Use near-singular but not catastrophic matrix
@@ -431,7 +433,7 @@ class TestPhysicalRealism:
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def test_single_column_jacobian(self):
+    def test_single_column_jacobian(self) -> None:
         """Test with single column (1-DOF system)."""
         J = np.array([[1.0], [2.0], [3.0]])
 
@@ -440,7 +442,7 @@ class TestEdgeCases:
         assert radii.shape == (1,)
         assert axes.shape == (1, 1)
 
-    def test_single_row_jacobian(self):
+    def test_single_row_jacobian(self) -> None:
         """Test with single row."""
         J = np.array([[1.0, 2.0, 3.0]])
 
@@ -450,7 +452,7 @@ class TestEdgeCases:
         # axes.shape should be (3, 1) from SVD of (1, 3) matrix
         assert axes.shape == (3, 1)
 
-    def test_very_large_jacobian_values(self):
+    def test_very_large_jacobian_values(self) -> None:
         """Test with large values in Jacobian."""
         J = np.eye(3) * 1e5
 
@@ -459,7 +461,7 @@ class TestEdgeCases:
         # μ = 1e5 × 1e5 × 1e5 = 1e15
         assert mu == pytest.approx(1e15, rel=1e-6)
 
-    def test_very_small_jacobian_values(self):
+    def test_very_small_jacobian_values(self) -> None:
         """Test with small values in Jacobian."""
         J = np.eye(3) * 1e-5
 
@@ -468,7 +470,7 @@ class TestEdgeCases:
         # μ = 1e-5 × 1e-5 × 1e-5 = 1e-15
         assert mu == pytest.approx(1e-15, rel=1e-6)
 
-    def test_mixed_scale_jacobian(self):
+    def test_mixed_scale_jacobian(self) -> None:
         """Test with widely varying scales in Jacobian."""
         J = np.diag([1e-3, 1.0, 1e3])
 

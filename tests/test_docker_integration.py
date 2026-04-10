@@ -36,7 +36,7 @@ def _is_docker_available() -> bool:
 class TestDockerBuild(unittest.TestCase):
     """Test Docker image building and configuration."""
 
-    def test_dockerfile_syntax(self):
+    def test_dockerfile_syntax(self) -> None:
         """Test that Dockerfile has valid syntax."""
         dockerfile_path = get_repo_root() / "Dockerfile"
         self.assertTrue(
@@ -51,7 +51,7 @@ class TestDockerBuild(unittest.TestCase):
         self.assertIn('ENV PYTHONPATH="/workspace"', content)
         self.assertIn("WORKDIR /workspace", content)
 
-    def test_dockerfile_pythonpath_setup(self):
+    def test_dockerfile_pythonpath_setup(self) -> None:
         """Test that Dockerfile sets up PYTHONPATH correctly."""
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
@@ -69,7 +69,7 @@ class TestDockerBuild(unittest.TestCase):
         )
 
     @unittest.skipUnless(_is_docker_available(), "Docker not available")
-    def test_docker_available(self):
+    def test_docker_available(self) -> None:
         """Test that Docker is available for building."""
         result = subprocess.run(
             ["docker", "--version"], capture_output=True, text=True, timeout=10
@@ -81,7 +81,7 @@ class TestDockerBuild(unittest.TestCase):
 class TestDockerLaunchCommands(unittest.TestCase):
     """Test Docker container launch command generation."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         # Mock launcher components
         self.mock_launcher = Mock()
@@ -109,7 +109,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     @_DOCKER_CMD_XFAIL
     @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
-    def test_mujoco_humanoid_command(self):
+    def test_mujoco_humanoid_command(self) -> None:
         """Test MuJoCo humanoid Docker command generation."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -179,7 +179,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     @_DOCKER_CMD_XFAIL
     @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
-    def test_drake_command(self):
+    def test_drake_command(self) -> None:
         """Test Drake Docker command generation."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -250,7 +250,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     @_DOCKER_CMD_XFAIL
     @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
-    def test_pinocchio_command(self):
+    def test_pinocchio_command(self) -> None:
         """Test Pinocchio Docker command generation."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -307,7 +307,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     @_DOCKER_CMD_XFAIL
     @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
-    def test_display_configuration_windows(self):
+    def test_display_configuration_windows(self) -> None:
         """Test Windows display configuration."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -355,7 +355,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     @_DOCKER_CMD_XFAIL
     @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
-    def test_gpu_acceleration_option(self):
+    def test_gpu_acceleration_option(self) -> None:
         """Test GPU acceleration option."""
         from src.launchers.golf_launcher import GolfLauncher
 
@@ -400,7 +400,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 class TestContainerEnvironment(unittest.TestCase):
     """Test container environment setup and module accessibility."""
 
-    def test_pythonpath_environment_variable(self):
+    def test_pythonpath_environment_variable(self) -> None:
         """Test PYTHONPATH environment variable setup."""
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
@@ -421,7 +421,7 @@ class TestContainerEnvironment(unittest.TestCase):
             "PYTHONPATH should be set to /workspace",
         )
 
-    def test_workspace_directory_creation(self):
+    def test_workspace_directory_creation(self) -> None:
         """Test workspace directory structure creation."""
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
@@ -432,7 +432,7 @@ class TestContainerEnvironment(unittest.TestCase):
         self.assertIn("mkdir -p /workspace", content)
         self.assertIn("WORKDIR /workspace", content)
 
-    def test_conda_environment_setup(self):
+    def test_conda_environment_setup(self) -> None:
         """Test conda environment configuration."""
         dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
@@ -451,7 +451,7 @@ class TestContainerEnvironment(unittest.TestCase):
 class TestModuleAccessibility(unittest.TestCase):
     """Test that modules will be accessible in Docker containers."""
 
-    def test_shared_module_structure(self):
+    def test_shared_module_structure(self) -> None:
         """Test shared module directory structure."""
         shared_path = get_src_root() / "shared" / "python"
         self.assertTrue(shared_path.exists(), "Shared python directory should exist")
@@ -474,7 +474,7 @@ class TestModuleAccessibility(unittest.TestCase):
                 module_path.exists(), f"Key module {subdir}/{module} should exist"
             )
 
-    def test_engine_directory_structure(self):
+    def test_engine_directory_structure(self) -> None:
         """Test engine directory structure."""
         engines_path = get_src_root() / "engines"
         self.assertTrue(engines_path.exists(), "Engines directory should exist")
@@ -495,7 +495,7 @@ class TestModuleAccessibility(unittest.TestCase):
                     python_path.exists(), f"{engine} should have python directory"
                 )
 
-    def test_mujoco_module_accessibility(self):
+    def test_mujoco_module_accessibility(self) -> None:
         """Test MuJoCo module structure for container access."""
         mujoco_python_path = (
             get_src_root() / "engines" / "physics_engines" / "mujoco" / "python"

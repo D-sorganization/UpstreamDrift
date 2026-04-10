@@ -24,7 +24,7 @@ class TestValidateModelPathContract:
     - Raises HTTPException with 404 for non-existent files
     """
 
-    def test_returns_string(self, tmp_path):
+    def test_returns_string(self, tmp_path) -> None:
         """Postcondition: Returns a string when path is valid."""
         import src.api.utils.path_validation as pv
         from src.api.utils.path_validation import validate_model_path
@@ -41,7 +41,7 @@ class TestValidateModelPathContract:
         finally:
             pv.ALLOWED_MODEL_DIRS = original_dirs
 
-    def test_rejects_absolute_path(self):
+    def test_rejects_absolute_path(self) -> None:
         """Precondition: Absolute paths must be rejected."""
         import sys
 
@@ -59,7 +59,7 @@ class TestValidateModelPathContract:
         assert exc_info.value.status_code == 400
         assert "absolute" in exc_info.value.detail.lower()
 
-    def test_rejects_parent_directory_traversal(self):
+    def test_rejects_parent_directory_traversal(self) -> None:
         """Precondition: Parent directory references must be rejected."""
         from src.api.utils.path_validation import validate_model_path
 
@@ -69,7 +69,7 @@ class TestValidateModelPathContract:
         assert exc_info.value.status_code == 400
         assert "parent directory" in exc_info.value.detail.lower()
 
-    def test_rejects_invalid_path_type(self):
+    def test_rejects_invalid_path_type(self) -> None:
         """Precondition: Invalid path types must be rejected."""
         from src.api.utils.path_validation import validate_model_path
 
@@ -82,7 +82,7 @@ class TestValidateModelPathContract:
 class TestValidateModelPath:
     """Functional tests for validate_model_path."""
 
-    def test_valid_relative_path_in_allowed_directory(self, tmp_path):
+    def test_valid_relative_path_in_allowed_directory(self, tmp_path) -> None:
         """Test that valid relative path within allowed directory passes."""
         import src.api.utils.path_validation as pv
         from src.api.utils.path_validation import validate_model_path
@@ -101,7 +101,7 @@ class TestValidateModelPath:
         finally:
             pv.ALLOWED_MODEL_DIRS = original_dirs
 
-    def test_valid_nested_path(self, tmp_path):
+    def test_valid_nested_path(self, tmp_path) -> None:
         """Test that nested relative paths work."""
         import src.api.utils.path_validation as pv
         from src.api.utils.path_validation import validate_model_path
@@ -122,7 +122,7 @@ class TestValidateModelPath:
         finally:
             pv.ALLOWED_MODEL_DIRS = original_dirs
 
-    def test_nonexistent_file_raises_404(self, tmp_path):
+    def test_nonexistent_file_raises_404(self, tmp_path) -> None:
         """Test that non-existent files raise 404."""
         import src.api.utils.path_validation as pv
         from src.api.utils.path_validation import validate_model_path
@@ -137,7 +137,7 @@ class TestValidateModelPath:
         finally:
             pv.ALLOWED_MODEL_DIRS = original_dirs
 
-    def test_path_traversal_attack_blocked(self, tmp_path):
+    def test_path_traversal_attack_blocked(self, tmp_path) -> None:
         """Test that path traversal attacks are blocked."""
         from src.api.utils.path_validation import validate_model_path
 
@@ -153,7 +153,7 @@ class TestValidateModelPath:
                 validate_model_path(attack_path)
             assert exc_info.value.status_code == 400
 
-    def test_windows_absolute_path_rejected(self):
+    def test_windows_absolute_path_rejected(self) -> None:
         """Test that Windows absolute paths are rejected."""
         from src.api.utils.path_validation import validate_model_path
 
@@ -162,7 +162,7 @@ class TestValidateModelPath:
 
         assert exc_info.value.status_code == 400
 
-    def test_unix_absolute_path_rejected(self):
+    def test_unix_absolute_path_rejected(self) -> None:
         """Test that Unix absolute paths are rejected."""
         import sys
 
@@ -177,7 +177,7 @@ class TestValidateModelPath:
 
         assert exc_info.value.status_code == 400
 
-    def test_multiple_allowed_directories(self, tmp_path):
+    def test_multiple_allowed_directories(self, tmp_path) -> None:
         """Test file lookup across multiple allowed directories."""
         import src.api.utils.path_validation as pv
         from src.api.utils.path_validation import validate_model_path
@@ -200,7 +200,7 @@ class TestValidateModelPath:
         finally:
             pv.ALLOWED_MODEL_DIRS = original_dirs
 
-    def test_symlink_escape_prevented(self, tmp_path):
+    def test_symlink_escape_prevented(self, tmp_path) -> None:
         """Test that symlinks cannot escape allowed directories."""
         import os
 
@@ -240,14 +240,14 @@ class TestValidateModelPath:
 class TestAllowedModelDirs:
     """Tests for ALLOWED_MODEL_DIRS configuration."""
 
-    def test_allowed_dirs_are_resolved_paths(self):
+    def test_allowed_dirs_are_resolved_paths(self) -> None:
         """Test that allowed directories are resolved (absolute) paths."""
         from src.api.utils.path_validation import ALLOWED_MODEL_DIRS
 
         for allowed_dir in ALLOWED_MODEL_DIRS:
             assert allowed_dir.is_absolute()
 
-    def test_allowed_dirs_are_path_objects(self):
+    def test_allowed_dirs_are_path_objects(self) -> None:
         """Test that allowed directories are Path objects."""
         from src.api.utils.path_validation import ALLOWED_MODEL_DIRS
 

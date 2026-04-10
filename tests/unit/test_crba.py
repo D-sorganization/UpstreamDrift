@@ -52,7 +52,7 @@ def create_random_model(num_bodies=5):
     return model
 
 
-def test_crba_symmetry():
+def test_crba_symmetry() -> None:
     """Test that CRBA produces a symmetric mass matrix."""
     model = create_random_model(10)
     q = np.random.rand(10)
@@ -63,7 +63,7 @@ def test_crba_symmetry():
     assert np.allclose(H, H.T), "Mass matrix must be symmetric"
 
 
-def test_crba_positive_definite():
+def test_crba_positive_definite() -> None:
     """Test that CRBA produces a positive definite mass matrix."""
     model = create_random_model(5)
     q = np.random.rand(5)
@@ -75,7 +75,7 @@ def test_crba_positive_definite():
     assert np.all(eigvals > 0), "Mass matrix must be positive definite"
 
 
-def test_crba_values():
+def test_crba_values() -> None:
     """Test CRBA against a simple analytical case (single pendulum)."""
     # Single body (pendulum)
     # Mass m at distance r

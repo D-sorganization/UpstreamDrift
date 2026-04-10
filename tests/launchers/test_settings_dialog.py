@@ -15,7 +15,7 @@ from src.launchers.settings_dialog import (  # noqa: E402
 )
 
 
-def test_validate_tab_index():
+def test_validate_tab_index() -> None:
     assert validate_tab_index(0) == 0
     assert validate_tab_index(1) == 1
     assert validate_tab_index(2) == 2
@@ -52,7 +52,7 @@ def parent_launcher(qapp):
     return launcher
 
 
-def test_settings_dialog_init(parent_launcher, qapp):
+def test_settings_dialog_init(parent_launcher, qapp) -> None:
     data = {"summary": {"status": "healthy"}}
     dialog = SettingsDialog(
         parent=parent_launcher, diagnostics_data=data, initial_tab=TAB_CONFIG
@@ -67,7 +67,7 @@ def test_settings_dialog_init(parent_launcher, qapp):
     assert dialog.tabs.currentIndex() == TAB_CONFIG
 
 
-def test_on_reset_layout(parent_launcher, qapp):
+def test_on_reset_layout(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_LAYOUT)
 
     mock_slot = MagicMock()
@@ -78,7 +78,7 @@ def test_on_reset_layout(parent_launcher, qapp):
 
 
 @patch("src.launchers.settings_dialog.DockerBuildThread")
-def test_start_build(mock_thread_class, parent_launcher, qapp):
+def test_start_build(mock_thread_class, parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
     mock_thread = MagicMock()
@@ -92,7 +92,7 @@ def test_start_build(mock_thread_class, parent_launcher, qapp):
     mock_thread.start.assert_called_once()
 
 
-def test_on_build_finished(parent_launcher, qapp):
+def test_on_build_finished(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._build_start_time = 0
     dialog._build_timer_id = 123
@@ -109,7 +109,7 @@ def test_on_build_finished(parent_launcher, qapp):
     assert "SUCCESS" in dialog._build_status.text()
 
 
-def test_cancel_build(parent_launcher, qapp):
+def test_cancel_build(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog.build_thread = MagicMock()
     dialog.build_thread.isRunning.return_value = True
@@ -128,7 +128,7 @@ def test_cancel_build(parent_launcher, qapp):
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_load_app_log_success(mock_exists, parent_launcher, qapp):
+def test_load_app_log_success(mock_exists, parent_launcher, qapp) -> None:
     log_content = "Line 1\nLine 2\n"
     with patch("pathlib.Path.read_text", return_value=log_content):
         dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
@@ -136,13 +136,13 @@ def test_load_app_log_success(mock_exists, parent_launcher, qapp):
 
 
 @patch("pathlib.Path.exists", return_value=False)
-def test_load_app_log_fail(mock_exists, parent_launcher, qapp):
+def test_load_app_log_fail(mock_exists, parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
     assert "No log file found" in dialog._log_viewer.toPlainText()
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_load_process_log_success(mock_exists, parent_launcher, qapp):
+def test_load_process_log_success(mock_exists, parent_launcher, qapp) -> None:
     log_content = "Process Line 1\nProcess Line 2\n"
     with patch("pathlib.Path.read_text", return_value=log_content):
         dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
@@ -150,7 +150,7 @@ def test_load_process_log_success(mock_exists, parent_launcher, qapp):
 
 
 @patch("src.launchers.launcher_diagnostics.LauncherDiagnostics")
-def test_refresh_diagnostics(mock_diag_class, parent_launcher, qapp):
+def test_refresh_diagnostics(mock_diag_class, parent_launcher, qapp) -> None:
     mock_diag = MagicMock()
     mock_diag.run_all_checks.return_value = {"summary": {"status": "degraded"}}
     mock_diag_class.return_value = mock_diag
@@ -163,7 +163,7 @@ def test_refresh_diagnostics(mock_diag_class, parent_launcher, qapp):
     assert "degraded" in dialog._diag_browser.toHtml().lower()
 
 
-def test_timer_event(parent_launcher, qapp):
+def test_timer_event(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._build_start_time = time.monotonic() - 5
 
@@ -174,7 +174,7 @@ def test_timer_event(parent_launcher, qapp):
     assert "elapsed" in text
 
 
-def test_settings_dialog_no_launcher():
+def test_settings_dialog_no_launcher() -> None:
     # Test initialization without a parent launcher to cover the 'if launcher' conditions
     dialog = SettingsDialog(parent=None, initial_tab=TAB_CONFIG)
     assert dialog.parent() is None
@@ -234,7 +234,7 @@ def test_settings_dialog_no_launcher():
         assert "Do this" in html
 
 
-def test_load_logs_exceptions(parent_launcher, qapp):
+def test_load_logs_exceptions(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_DIAGNOSTICS)
 
     # Refresh all logs triggers both loading functions
@@ -248,7 +248,7 @@ def test_load_logs_exceptions(parent_launcher, qapp):
     assert "No process output log yet" in dialog._proc_log_viewer.toPlainText()
 
 
-def test_on_build_log(parent_launcher, qapp):
+def test_on_build_log(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
 
     # Should update the text and cursor
@@ -260,7 +260,7 @@ def test_on_build_log(parent_launcher, qapp):
         dialog._on_build_log("Step 2/2")
 
 
-def test_on_build_finished_no_timer(parent_launcher, qapp):
+def test_on_build_finished_no_timer(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog._build_start_time = 0
     # Timer not set
@@ -271,7 +271,7 @@ def test_on_build_finished_no_timer(parent_launcher, qapp):
     assert "FAILED" in dialog._build_status.text()
 
 
-def test_cancel_build_no_timer(parent_launcher, qapp):
+def test_cancel_build_no_timer(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog.build_thread = MagicMock()
     dialog.build_thread.isRunning.return_value = True
@@ -284,7 +284,7 @@ def test_cancel_build_no_timer(parent_launcher, qapp):
     assert "cancelled" in dialog._build_status.text().lower()
 
 
-def test_cancel_build_not_running(parent_launcher, qapp):
+def test_cancel_build_not_running(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     dialog.build_thread = MagicMock()
     dialog.build_thread.isRunning.return_value = False
@@ -294,7 +294,7 @@ def test_cancel_build_not_running(parent_launcher, qapp):
     dialog.build_thread.terminate.assert_not_called()
 
 
-def test_timer_event_no_start_time(parent_launcher, qapp):
+def test_timer_event_no_start_time(parent_launcher, qapp) -> None:
     dialog = SettingsDialog(parent=parent_launcher, initial_tab=TAB_CONFIG)
     if hasattr(dialog, "_build_start_time"):
         del dialog._build_start_time

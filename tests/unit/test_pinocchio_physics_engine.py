@@ -70,14 +70,14 @@ def engine(PinocchioPhysicsEngineClass):
     return PinocchioPhysicsEngineClass()
 
 
-def test_initialization(engine):
+def test_initialization(engine) -> None:
     assert engine.model is None
     assert engine.data is None
     assert engine.time == 0.0
 
 
 @patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin")
-def test_load_from_path(mock_pin, engine):
+def test_load_from_path(mock_pin, engine) -> None:
     engine.load_from_path("test.urdf")
 
     mock_pin.buildModelFromUrdf.assert_called_once_with("test.urdf")
@@ -87,7 +87,7 @@ def test_load_from_path(mock_pin, engine):
 
 
 @patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.pin")
-def test_load_from_string(mock_pin, engine):
+def test_load_from_string(mock_pin, engine) -> None:
     content = "<robot/>"
     mock_model = MagicMock(spec=_PIN_MODEL_SPEC)
     mock_model.nv = 2
@@ -99,7 +99,7 @@ def test_load_from_string(mock_pin, engine):
     assert engine.model is not None
 
 
-def test_step(engine):
+def test_step(engine) -> None:
     engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
     engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     engine.q = np.array([0.0])
@@ -122,7 +122,7 @@ def test_step(engine):
         np.testing.assert_array_equal(engine.v, np.array([0.1]))
 
 
-def test_compute_mass_matrix(engine):
+def test_compute_mass_matrix(engine) -> None:
     engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
     engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     # Mock data.M
@@ -139,7 +139,7 @@ def test_compute_mass_matrix(engine):
         np.testing.assert_array_almost_equal(M, expected)
 
 
-def test_compute_jacobian(engine):
+def test_compute_jacobian(engine) -> None:
     engine.model = MagicMock(spec=_PIN_MODEL_SPEC)
     engine.data = MagicMock(spec=_PIN_DATA_SPEC)
     engine.model.existBodyName.return_value = True

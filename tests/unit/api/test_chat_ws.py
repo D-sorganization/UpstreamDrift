@@ -18,7 +18,7 @@ pytestmark = pytest.mark.anyio
 
 
 @pytest.fixture(scope="module")
-def anyio_backend():
+def anyio_backend() -> str:
     """Use asyncio backend only (trio not installed)."""
     return "asyncio"
 
@@ -81,7 +81,7 @@ def client(app):
 class TestWebSocket:
     """Tests for the WebSocket chat endpoint."""
 
-    def test_connect_new_session(self, client, mock_chat_service):
+    def test_connect_new_session(self, client, mock_chat_service) -> None:
         """Connecting with 'new' creates a new session."""
         with client.websocket_connect("/api/ws/chat/new") as ws:
             data = ws.receive_json()
@@ -90,7 +90,7 @@ class TestWebSocket:
 
         mock_chat_service.get_or_create_session.assert_called_with(None)
 
-    def test_connect_existing_session(self, client, mock_chat_service):
+    def test_connect_existing_session(self, client, mock_chat_service) -> None:
         """Connecting with an existing session ID retrieves it."""
         with client.websocket_connect("/api/ws/chat/test-session-123") as ws:
             data = ws.receive_json()
@@ -99,7 +99,7 @@ class TestWebSocket:
 
         mock_chat_service.get_or_create_session.assert_called_with("test-session-123")
 
-    def test_send_message_and_stream(self, client, mock_chat_service):
+    def test_send_message_and_stream(self, client, mock_chat_service) -> None:
         """Sending a message streams response chunks then complete."""
         with client.websocket_connect("/api/ws/chat/new") as ws:
             # Consume session_info
@@ -127,7 +127,7 @@ class TestWebSocket:
             assert complete["type"] == "complete"
             assert complete["session_id"] == "test-session-123"
 
-    def test_send_empty_message(self, client):
+    def test_send_empty_message(self, client) -> None:
         """Sending an empty message returns an error."""
         with client.websocket_connect("/api/ws/chat/new") as ws:
             ws.receive_json()  # session_info
@@ -137,7 +137,7 @@ class TestWebSocket:
             assert error["type"] == "error"
             assert "Empty" in error["detail"]
 
-    def test_history_action(self, client, mock_chat_service):
+    def test_history_action(self, client, mock_chat_service) -> None:
         """Requesting history returns messages."""
         with client.websocket_connect("/api/ws/chat/new") as ws:
             ws.receive_json()  # session_info
@@ -148,7 +148,7 @@ class TestWebSocket:
             assert len(data["messages"]) == 1
             assert data["messages"][0]["content"] == "Hello"
 
-    def test_new_session_action(self, client, mock_chat_service):
+    def test_new_session_action(self, client, mock_chat_service) -> None:
         """Requesting new_session creates a fresh session."""
         with client.websocket_connect("/api/ws/chat/new") as ws:
             ws.receive_json()  # session_info
@@ -158,7 +158,7 @@ class TestWebSocket:
             assert data["type"] == "session_created"
             assert "session_id" in data
 
-    def test_unknown_action(self, client):
+    def test_unknown_action(self, client) -> None:
         """Sending an unknown action returns an error."""
         with client.websocket_connect("/api/ws/chat/new") as ws:
             ws.receive_json()  # session_info
@@ -172,7 +172,7 @@ class TestWebSocket:
 class TestRESTEndpoints:
     """Tests for the REST fallback endpoints."""
 
-    def test_list_sessions(self, client, mock_chat_service):
+    def test_list_sessions(self, client, mock_chat_service) -> None:
         """GET /chat/sessions returns session list."""
         response = client.get("/api/chat/sessions")
         assert response.status_code == 200
@@ -181,7 +181,7 @@ class TestRESTEndpoints:
         assert data[0]["session_id"] == "test-session-123"
         assert data[0]["engine_contexts"] == ["mujoco"]
 
-    def test_get_history(self, client, mock_chat_service):
+    def test_get_history(self, client, mock_chat_service) -> None:
         """GET /chat/sessions/{id}/history returns messages."""
         response = client.get("/api/chat/sessions/test-session-123/history")
         assert response.status_code == 200

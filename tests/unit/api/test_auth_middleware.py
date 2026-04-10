@@ -12,7 +12,7 @@ import pytest
 class TestIsLocalModeContract:
     """Design by Contract tests for is_local_mode function."""
 
-    def test_returns_bool(self):
+    def test_returns_bool(self) -> None:
         """Postcondition: Returns a boolean."""
         from src.api.auth.middleware import is_local_mode
 
@@ -23,14 +23,14 @@ class TestIsLocalModeContract:
 class TestIsLocalMode:
     """Functional tests for is_local_mode."""
 
-    def test_returns_true_when_golf_suite_mode_local(self):
+    def test_returns_true_when_golf_suite_mode_local(self) -> None:
         """Test returning True when GOLF_SUITE_MODE=local."""
         from src.api.auth.middleware import is_local_mode
 
         with patch.dict(os.environ, {"GOLF_SUITE_MODE": "local"}):
             assert is_local_mode() is True
 
-    def test_returns_true_when_auth_disabled(self):
+    def test_returns_true_when_auth_disabled(self) -> None:
         """Test returning True when GOLF_AUTH_DISABLED=true."""
         from src.api.auth.middleware import is_local_mode
 
@@ -39,7 +39,7 @@ class TestIsLocalMode:
         ):
             assert is_local_mode() is True
 
-    def test_returns_true_when_auth_disabled_uppercase(self):
+    def test_returns_true_when_auth_disabled_uppercase(self) -> None:
         """Test returning True when GOLF_AUTH_DISABLED=TRUE (case insensitive)."""
         from src.api.auth.middleware import is_local_mode
 
@@ -48,7 +48,7 @@ class TestIsLocalMode:
         ):
             assert is_local_mode() is True
 
-    def test_returns_false_when_cloud_mode(self):
+    def test_returns_false_when_cloud_mode(self) -> None:
         """Test returning False when GOLF_SUITE_MODE=cloud."""
         from src.api.auth.middleware import is_local_mode
 
@@ -59,7 +59,7 @@ class TestIsLocalMode:
         ):
             assert is_local_mode() is False
 
-    def test_defaults_to_remote_mode(self):
+    def test_defaults_to_remote_mode(self) -> None:
         """Test defaulting to remote (auth-required) mode when env vars not set."""
         from src.api.auth.middleware import is_local_mode
 
@@ -71,14 +71,14 @@ class TestIsLocalMode:
 class TestLocalUserContract:
     """Design by Contract tests for LocalUser class."""
 
-    def test_instantiates(self):
+    def test_instantiates(self) -> None:
         """Postcondition: LocalUser can be instantiated."""
         from src.api.auth.middleware import LocalUser
 
         user = LocalUser()
         assert user is not None
 
-    def test_has_id(self):
+    def test_has_id(self) -> None:
         """Postcondition: LocalUser has id attribute."""
         from src.api.auth.middleware import LocalUser
 
@@ -86,7 +86,7 @@ class TestLocalUserContract:
         assert hasattr(user, "id")
         assert user.id == "local-user"
 
-    def test_has_email(self):
+    def test_has_email(self) -> None:
         """Postcondition: LocalUser has email attribute."""
         from src.api.auth.middleware import LocalUser
 
@@ -94,7 +94,7 @@ class TestLocalUserContract:
         assert hasattr(user, "email")
         assert user.email == "local@localhost"
 
-    def test_has_role(self):
+    def test_has_role(self) -> None:
         """Postcondition: LocalUser has admin role."""
         from src.api.auth.middleware import LocalUser
 
@@ -102,7 +102,7 @@ class TestLocalUserContract:
         assert hasattr(user, "role")
         assert user.role == "ADMIN"
 
-    def test_has_unlimited_quota(self):
+    def test_has_unlimited_quota(self) -> None:
         """Postcondition: LocalUser has unlimited quota."""
         from src.api.auth.middleware import LocalUser
 
@@ -114,7 +114,7 @@ class TestLocalUserContract:
 class TestLocalUserHasPermission:
     """Tests for LocalUser.has_permission method."""
 
-    def test_has_permission_method(self):
+    def test_has_permission_method(self) -> None:
         """Postcondition: LocalUser has has_permission method."""
         from src.api.auth.middleware import LocalUser
 
@@ -122,7 +122,7 @@ class TestLocalUserHasPermission:
         assert hasattr(user, "has_permission")
         assert callable(user.has_permission)
 
-    def test_always_returns_true(self):
+    def test_always_returns_true(self) -> None:
         """Postcondition: has_permission always returns True for local user."""
         from src.api.auth.middleware import LocalUser
 
@@ -135,7 +135,7 @@ class TestLocalUserHasPermission:
 class TestOptionalAuthContract:
     """Design by Contract tests for OptionalAuth class."""
 
-    def test_inherits_from_http_bearer(self):
+    def test_inherits_from_http_bearer(self) -> None:
         """Postcondition: OptionalAuth inherits from HTTPBearer."""
         from fastapi.security import HTTPBearer
 
@@ -143,14 +143,14 @@ class TestOptionalAuthContract:
 
         assert issubclass(OptionalAuth, HTTPBearer)
 
-    def test_instantiates(self):
+    def test_instantiates(self) -> None:
         """Postcondition: OptionalAuth can be instantiated."""
         from src.api.auth.middleware import OptionalAuth
 
         auth = OptionalAuth()
         assert auth is not None
 
-    def test_accepts_auto_error_parameter(self):
+    def test_accepts_auto_error_parameter(self) -> None:
         """Postcondition: Accepts auto_error parameter."""
         from src.api.auth.middleware import OptionalAuth
 
@@ -165,7 +165,7 @@ pytestmark = pytest.mark.anyio
 
 
 @pytest.fixture(scope="module")
-def anyio_backend():
+def anyio_backend() -> str:
     """Use asyncio backend only."""
     return "asyncio"
 
@@ -173,7 +173,7 @@ def anyio_backend():
 class TestOptionalAuthCall:
     """Tests for OptionalAuth.__call__ method."""
 
-    async def test_returns_local_user_in_local_mode(self):
+    async def test_returns_local_user_in_local_mode(self) -> None:
         """Test returning LocalUser in local mode."""
         from src.api.auth.middleware import LocalUser, OptionalAuth
 
@@ -186,7 +186,7 @@ class TestOptionalAuthCall:
             assert isinstance(result, LocalUser)
             assert result.role == "ADMIN"
 
-    async def test_calls_parent_in_cloud_mode(self):
+    async def test_calls_parent_in_cloud_mode(self) -> None:
         """Test calling parent HTTPBearer in cloud mode."""
         from src.api.auth.middleware import OptionalAuth
 

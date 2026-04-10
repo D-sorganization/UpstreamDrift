@@ -12,13 +12,13 @@ from src.shared.python.ai.exceptions import (
 )
 
 
-def test_aierror_init():
+def test_aierror_init() -> None:
     err = AIError("test msg", details={"k": "v"})
     assert err.message == "test msg"
     assert err.details == {"k": "v"}
 
 
-def test_aierror_str():
+def test_aierror_str() -> None:
     err = AIError("test msg", details={"k": "v", "k2": "v2"})
     assert str(err) == "test msg (k=v, k2=v2)"
 
@@ -26,7 +26,7 @@ def test_aierror_str():
     assert str(err2) == "only msg"
 
 
-def test_aiprovidererror():
+def test_aiprovidererror() -> None:
     err = AIProviderError(
         "prov msg", provider="test_prov", status_code=500, details={"ctx": 1}
     )
@@ -36,28 +36,28 @@ def test_aiprovidererror():
     assert err.details == {"ctx": 1}
 
 
-def test_aiconnectionerror():
+def test_aiconnectionerror() -> None:
     err = AIConnectionError("conn msg", provider="p", status_code=503)
     assert isinstance(err, AIProviderError)
     assert err.message == "conn msg"
     assert err.status_code == 503
 
 
-def test_airatelimiterror():
+def test_airatelimiterror() -> None:
     err = AIRateLimitError("rate msg", provider="p", retry_after=1.5, details={"d": 2})
     assert err.message == "rate msg"
     assert err.status_code == 429
     assert err.retry_after == 1.5
 
 
-def test_aitimeouterror():
+def test_aitimeouterror() -> None:
     err = AITimeoutError("timeout", provider="p", timeout=10.0, details={"d": 3})
     assert err.message == "timeout"
     assert err.timeout == 10.0
     assert err.status_code is None
 
 
-def test_scientificvalidationerror():
+def test_scientificvalidationerror() -> None:
     err = ScientificValidationError(
         "sci_err", check_name="chk", value=1.0, threshold=0.5, details={"ctx": 4}
     )
@@ -68,14 +68,14 @@ def test_scientificvalidationerror():
     assert err.details == {"ctx": 4}
 
 
-def test_workflowerror():
+def test_workflowerror() -> None:
     err = WorkflowError("wf err", "wf123", step_id="step1", details={"c": 5})
     assert err.workflow_id == "wf123"
     assert err.step_id == "step1"
     assert err.message == "wf err"
 
 
-def test_toolexecutionerror():
+def test_toolexecutionerror() -> None:
     err = ToolExecutionError(
         "tool fail", tool_name="my_tool", parameters={"p": 1}, details={"d": 1}
     )

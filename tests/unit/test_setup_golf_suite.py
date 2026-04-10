@@ -8,14 +8,14 @@ from PIL import Image
 import setup_golf_suite
 
 
-def test_apply_icon_optimizations():
+def test_apply_icon_optimizations() -> None:
     # Create dummy image
     img = Image.new("RGBA", (32, 32))
     opt = setup_golf_suite._apply_icon_optimizations(img, 32)
     assert opt is not None
 
 
-def test_create_optimized_icon(tmp_path):
+def test_create_optimized_icon(tmp_path) -> None:
     img = Image.new("RGBA", (256, 256))
     src = tmp_path / "src.png"
     img.save(src)
@@ -26,7 +26,7 @@ def test_create_optimized_icon(tmp_path):
     assert out.exists()
 
 
-def test_create_optimized_icon_missing():
+def test_create_optimized_icon_missing() -> None:
     res = setup_golf_suite.create_optimized_icon(
         pathlib.Path("missing.png"), pathlib.Path("out.ico")
     )
@@ -34,7 +34,7 @@ def test_create_optimized_icon_missing():
 
 
 @patch("subprocess.run")
-def test_create_shortcut_windows(mock_run):
+def test_create_shortcut_windows(mock_run) -> None:
     res = setup_golf_suite.create_shortcut_windows(
         "script.py", pathlib.Path("/wd"), pathlib.Path("/icon.ico"), "desc"
     )
@@ -43,7 +43,7 @@ def test_create_shortcut_windows(mock_run):
 
 
 @patch("subprocess.run")
-def test_create_shortcut_windows_fail(mock_run):
+def test_create_shortcut_windows_fail(mock_run) -> None:
     from subprocess import CalledProcessError
 
     mock_run.side_effect = CalledProcessError(1, "cmd", b"", b"error")
@@ -53,7 +53,7 @@ def test_create_shortcut_windows_fail(mock_run):
     assert res is False
 
 
-def test_find_source_image(tmp_path):
+def test_find_source_image(tmp_path) -> None:
     res = setup_golf_suite._find_source_image(tmp_path)
     assert res is None
 
@@ -67,7 +67,9 @@ def test_find_source_image(tmp_path):
 @patch("setup_golf_suite.git_sync_repository")
 @patch("setup_golf_suite.check_python_dependencies")
 @patch("setup_golf_suite.create_optimized_icon")
-def test_main(mock_create_icon, mock_chk_deps, mock_sync, tmp_path, monkeypatch):
+def test_main(
+    mock_create_icon, mock_chk_deps, mock_sync, tmp_path, monkeypatch
+) -> None:
     monkeypatch.setattr("setup_golf_suite.get_repo_root", lambda: tmp_path)
     mock_chk_deps.return_value = True
 
@@ -88,6 +90,6 @@ def test_main(mock_create_icon, mock_chk_deps, mock_sync, tmp_path, monkeypatch)
 
 @patch("setup_golf_suite.git_sync_repository")
 @patch("setup_golf_suite.check_python_dependencies")
-def test_main_no_deps(mock_chk_deps, mock_sync):
+def test_main_no_deps(mock_chk_deps, mock_sync) -> None:
     mock_chk_deps.return_value = False
     assert setup_golf_suite.main() == 1

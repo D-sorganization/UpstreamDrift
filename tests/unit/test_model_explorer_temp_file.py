@@ -11,6 +11,7 @@ import contextlib
 import sys
 from pathlib import Path
 from types import ModuleType
+from typing import NoReturn
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -60,7 +61,7 @@ class TestIssue2502TempFileHandling:
 
     def test_no_fixed_temp_file_remains_after_success(
         self, offscreen_renderer_class, tmp_path
-    ):
+    ) -> None:
         """_temp_fixed_model.urdf must not exist in the source dir after load."""
         urdf_file = tmp_path / "model.urdf"
         urdf_file.write_text("<robot name='t'><link name='base'/></robot>")
@@ -79,7 +80,7 @@ class TestIssue2502TempFileHandling:
 
     def test_temp_filename_is_not_fixed_string(
         self, offscreen_renderer_class, tmp_path
-    ):
+    ) -> None:
         """The temp file passed to MjModel.from_xml_path must not be the fixed name."""
         urdf_file = tmp_path / "model.urdf"
         urdf_file.write_text("<robot name='t'><link name='base'/></robot>")
@@ -87,7 +88,7 @@ class TestIssue2502TempFileHandling:
         renderer = offscreen_renderer_class()
         captured_names: list[str] = []
 
-        def capture(path_str: str):
+        def capture(path_str: str) -> NoReturn:
             captured_names.append(Path(path_str).name)
             raise RuntimeError("abort after capture")
 

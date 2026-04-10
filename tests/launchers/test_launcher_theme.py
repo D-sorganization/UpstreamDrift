@@ -13,14 +13,14 @@ class DummyLauncher(QWidget, LauncherThemeMixin):
         self.model_cards = {}
         self.selected_model = None
 
-    def select_model(self, model):
+    def select_model(self, model) -> None:
         pass
 
-    def update_launch_button(self):
+    def update_launch_button(self) -> None:
         pass
 
 
-def test_apply_styles_success(qapp):
+def test_apply_styles_success(qapp) -> None:
     launcher = DummyLauncher()
 
     mock_manager = MagicMock()
@@ -43,7 +43,7 @@ def test_apply_styles_success(qapp):
     assert "background-color: #111" in style
 
 
-def test_apply_styles_fallback(qapp):
+def test_apply_styles_fallback(qapp) -> None:
     launcher = DummyLauncher()
 
     with patch(
@@ -56,7 +56,7 @@ def test_apply_styles_fallback(qapp):
     assert "background-color: #1E1E1E" in style
 
 
-def test_apply_theme_system(qapp):
+def test_apply_theme_system(qapp) -> None:
     launcher = DummyLauncher()
 
     mock_manager = MagicMock()
@@ -79,7 +79,7 @@ def test_apply_theme_system(qapp):
 
 
 @patch.object(DummyLauncher, "apply_styles")
-def test_on_theme_changed(mock_apply, qapp):
+def test_on_theme_changed(mock_apply, qapp) -> None:
     launcher = DummyLauncher()
 
     mock_card = MagicMock()
@@ -121,7 +121,7 @@ def test_on_theme_changed(mock_apply, qapp):
     launcher.update_launch_button.assert_called_once()
 
 
-def test_setup_theme_menu_and_plot(qapp):
+def test_setup_theme_menu_and_plot(qapp) -> None:
     launcher = DummyLauncher()
     menu = QMenu()
 
@@ -164,7 +164,7 @@ def test_setup_theme_menu_and_plot(qapp):
         assert menu2.actions()[0].text() == "(Theme system unavailable)"
 
 
-def test_setup_theme_menu_empty_lists(qapp):
+def test_setup_theme_menu_empty_lists(qapp) -> None:
     launcher = DummyLauncher()
     menu = QMenu()
 
@@ -184,7 +184,7 @@ def test_setup_theme_menu_empty_lists(qapp):
     launcher._on_theme_changed({})
 
 
-def test_set_plot_theme(qapp):
+def test_set_plot_theme(qapp) -> None:
     launcher = DummyLauncher()
 
     with (
@@ -218,7 +218,7 @@ def test_set_plot_theme(qapp):
 
 
 @patch("src.shared.python.theme.dialogs.ThemeManagerDialog", create=True)
-def test_open_theme_manager_dialog(mock_dialog_class, qapp):
+def test_open_theme_manager_dialog(mock_dialog_class, qapp) -> None:
     launcher = DummyLauncher()
 
     mock_dialog = MagicMock()

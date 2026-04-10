@@ -21,7 +21,7 @@ from src.launchers.launcher_model_handlers import (  # noqa: E402
 )
 
 
-def test_module_handler():
+def test_module_handler() -> None:
     handler = ModuleHandler({"type1", "type2"}, "my_module", "My Module")
     assert handler.can_handle("type1") is True
     assert handler.can_handle("type3") is False
@@ -36,7 +36,7 @@ def test_module_handler():
     )
 
 
-def test_module_handler_fail():
+def test_module_handler_fail() -> None:
     handler = ModuleHandler({"type1"}, "my_module", "My Module")
     mock_manager = MagicMock()
     mock_manager.launch_module.return_value = None
@@ -44,7 +44,7 @@ def test_module_handler_fail():
     assert handler.launch("model", Path("/repo"), mock_manager) is False
 
 
-def test_script_handler():
+def test_script_handler() -> None:
     handler = ScriptHandler({"drake"}, "script.py", "Drake", cwd_path="dir")
     assert handler.can_handle("drake") is True
     assert handler.can_handle("other") is False
@@ -61,7 +61,7 @@ def test_script_handler():
     )
 
 
-def test_script_handler_fail():
+def test_script_handler_fail() -> None:
     handler = ScriptHandler({"drake"}, "script.py", "Drake")
     mock_manager = MagicMock()
     mock_manager.launch_script.return_value = None
@@ -69,7 +69,7 @@ def test_script_handler_fail():
     assert handler.launch("model", Path("/repo"), mock_manager) is False
 
 
-def test_special_app_handler():
+def test_special_app_handler() -> None:
     handler = SpecialAppHandler()
     assert handler.can_handle("special_app") is True
     assert handler.can_handle("random") is False
@@ -98,7 +98,7 @@ def test_special_app_handler():
         assert handler.launch(DummyModel(), Path("/repo"), mock_manager) is False
 
 
-def test_putting_green_handler():
+def test_putting_green_handler() -> None:
     handler = PuttingGreenHandler()
     assert handler.can_handle("putting_green") is True
 
@@ -125,28 +125,28 @@ def test_putting_green_handler():
 
 @patch("platform.system", return_value="Windows")
 @patch("os.startfile")
-def test_open_with_system_app_win(mock_start, mock_sys):
+def test_open_with_system_app_win(mock_start, mock_sys) -> None:
     assert _open_with_system_app(Path("test.txt"), "Test") is True
     mock_start.assert_called_once()
 
 
 @patch("platform.system", return_value="Darwin")
 @patch("subprocess.Popen")
-def test_open_with_system_app_mac(mock_popen, mock_sys):
+def test_open_with_system_app_mac(mock_popen, mock_sys) -> None:
     assert _open_with_system_app(Path("test.txt"), "Test") is True
     mock_popen.assert_called_once_with(["open", "test.txt"])
 
 
 @patch("platform.system", return_value="Linux")
 @patch("subprocess.Popen")
-def test_open_with_system_app_linux(mock_popen, mock_sys):
+def test_open_with_system_app_linux(mock_popen, mock_sys) -> None:
     assert _open_with_system_app(Path("test.txt"), "Test") is True
     mock_popen.assert_called_once_with(["xdg-open", "test.txt"])
 
 
 @patch("platform.system", return_value="Linux")
 @patch("subprocess.Popen", side_effect=OSError("Boom"))
-def test_open_with_system_app_fail(mock_popen, mock_sys):
+def test_open_with_system_app_fail(mock_popen, mock_sys) -> None:
     assert _open_with_system_app(Path("test.txt"), "Test") is False
 
 
@@ -155,7 +155,7 @@ class DummyMatlabModel:
     id = "slx1"
 
 
-def test_matlab_handler():
+def test_matlab_handler() -> None:
     handler = MatlabFileHandler()
     assert handler.can_handle("matlab_file") is True
 
@@ -183,7 +183,7 @@ class DummyDocModel:
     id = "doc1"
 
 
-def test_document_handler():
+def test_document_handler() -> None:
     handler = DocumentHandler()
     assert handler.can_handle("document") is True
 
@@ -197,7 +197,7 @@ def test_document_handler():
         assert handler.launch(DummyDocModel(), Path("/repo"), MagicMock()) is True
 
 
-def test_protocol_methods():
+def test_protocol_methods() -> None:
     # Only for line coverage on ... in ModelHandler
     class Concrete(ModelHandler):
         pass
@@ -207,7 +207,7 @@ def test_protocol_methods():
     assert c.launch(None, Path(""), MagicMock()) is None
 
 
-def test_registry():
+def test_registry() -> None:
     registry = ModelHandlerRegistry()
 
     mock_handler = MagicMock()

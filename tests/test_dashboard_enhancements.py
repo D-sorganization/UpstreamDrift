@@ -78,7 +78,7 @@ if PYQT6_AVAILABLE:
         def compute_inverse_dynamics(self, qacc):
             return np.zeros(10)
 
-        def compute_jacobian(self, body_name):
+        def compute_jacobian(self, body_name) -> None:
             return None
 
         def compute_drift_acceleration(self):
@@ -108,7 +108,7 @@ if PYQT6_AVAILABLE:
                     existing if isinstance(existing, QtWidgets.QApplication) else None
                 )
 
-        def setUp(self):
+        def setUp(self) -> None:
             self.engine = MockPhysicsEngine()
             self.recorder = GenericPhysicsRecorder(self.engine)
             self.recorder.start()
@@ -121,7 +121,7 @@ if PYQT6_AVAILABLE:
             # Manually populate induced acceleration for testing
             self.recorder.data["induced_accelerations"][0] = np.random.rand(100, 10)
 
-        def test_live_plot_widget_modes(self):
+        def test_live_plot_widget_modes(self) -> None:
             """Test LivePlotWidget new modes."""
             widget = LivePlotWidget(self.recorder)
 
@@ -145,7 +145,7 @@ if PYQT6_AVAILABLE:
             self.assertEqual(len(widget.line_objects), 1)
             self.assertEqual(widget.line_objects[0].get_label(), "Norm")
 
-        def test_live_plot_ground_forces(self):
+        def test_live_plot_ground_forces(self) -> None:
             """Test plotting Ground Forces."""
             widget = LivePlotWidget(self.recorder)
 
@@ -157,7 +157,7 @@ if PYQT6_AVAILABLE:
             # So we expect 3 lines
             self.assertEqual(len(widget.line_objects), 3)
 
-        def test_unified_window_static_plots(self):
+        def test_unified_window_static_plots(self) -> None:
             """Test new static plot options in UnifiedDashboardWindow."""
             window = UnifiedDashboardWindow(self.engine)
 

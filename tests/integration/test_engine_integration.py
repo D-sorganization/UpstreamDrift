@@ -22,7 +22,7 @@ class TestEngineIntegration:
     """Test integration between different physics engines."""
 
     @pytest.mark.integration
-    def test_engine_manager_initialization(self):
+    def test_engine_manager_initialization(self) -> None:
         """Test that engine manager initializes with real project structure.
 
         This is a real integration test - uses actual filesystem.
@@ -41,7 +41,7 @@ class TestEngineIntegration:
         assert len(manager.engine_paths) >= len(EngineType) - 1
 
     @pytest.mark.integration
-    def test_engine_availability_matches_filesystem(self):
+    def test_engine_availability_matches_filesystem(self) -> None:
         """Test that engine availability correctly reflects filesystem state.
 
         This is a real integration test - checks actual directory structure.
@@ -69,7 +69,7 @@ class TestEngineIntegration:
                     )
 
     @pytest.mark.integration
-    def test_engine_probe_consistency(self):
+    def test_engine_probe_consistency(self) -> None:
         """Test that engine probes provide consistent information.
 
         This tests the integration between EngineManager and EngineProbes.
@@ -106,7 +106,7 @@ class TestEngineIntegration:
         assert isinstance(available, list)  # May be empty in minimal CI environment
 
     @pytest.mark.integration
-    def test_engine_parameter_consistency(self):
+    def test_engine_parameter_consistency(self) -> None:
         """Test that all engines accept consistent parameter sets."""
         common_parameters = {
             "swing_speed": 100.0,  # mph
@@ -134,7 +134,7 @@ class TestEngineIntegration:
 
     @pytest.mark.integration
     @pytest.mark.slow
-    def test_performance_comparison(self):
+    def test_performance_comparison(self) -> None:
         """Test performance characteristics of different engines."""
         import time
 
@@ -179,7 +179,7 @@ class TestEngineDataFlow:
     """Test data flow between engines and shared components."""
 
     @pytest.mark.integration
-    def test_shared_data_structures(self):
+    def test_shared_data_structures(self) -> None:
         """Test that all engines work with shared data structures."""
         manager = EngineManager()
         available_engines = manager.get_available_engines()
@@ -203,7 +203,7 @@ class TestEngineDataFlow:
             mock_instance.load_swing_data.assert_called_with(sample_swing_data)
 
     @pytest.mark.integration
-    def test_output_format_consistency(self):
+    def test_output_format_consistency(self) -> None:
         """Test that all engines produce consistent output formats."""
         manager = EngineManager()
         available_engines = manager.get_available_engines()
@@ -238,7 +238,7 @@ class TestEngineDataFlow:
                 assert field in result
 
     @pytest.mark.integration
-    def test_engine_error_handling(self):
+    def test_engine_error_handling(self) -> None:
         """Test error handling consistency across engines."""
         manager = EngineManager()
         available_engines = manager.get_available_engines()
@@ -259,7 +259,7 @@ class TestEngineConfiguration:
     """Test configuration management across engines."""
 
     @pytest.mark.integration
-    def test_unified_configuration(self):
+    def test_unified_configuration(self) -> None:
         """Test that unified configuration works for all engines."""
         manager = EngineManager()
         available_engines = manager.get_available_engines()
@@ -288,7 +288,7 @@ class TestEngineConfiguration:
                 mock_instance.load_config.assert_called_with(engine_config)
 
     @pytest.mark.integration
-    def test_engine_switching(self):
+    def test_engine_switching(self) -> None:
         """Test switching between engines at runtime."""
         manager = EngineManager()
         available_engines = manager.get_available_engines()

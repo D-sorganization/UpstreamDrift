@@ -60,7 +60,7 @@ def pipeline(mock_cv2, mock_output_manager):
     return pipeline
 
 
-def test_initialization(pipeline):
+def test_initialization(pipeline) -> None:
     """Test pipeline initialization."""
     assert pipeline.config.estimator_type == "mediapipe"
     assert pipeline.estimator is not None
@@ -68,13 +68,13 @@ def test_initialization(pipeline):
     pipeline.estimator.load_model.assert_called_once()
 
 
-def test_process_video_file_not_found(pipeline):
+def test_process_video_file_not_found(pipeline) -> None:
     """Test processing a non-existent video."""
     with pytest.raises(FileNotFoundError):
         pipeline.process_video(Path("non_existent.mp4"))
 
 
-def test_process_video_success(pipeline, mock_cv2):
+def test_process_video_success(pipeline, mock_cv2) -> None:
     """Test successful video processing."""
     video_path = Path("test_video.mp4")
 
@@ -118,7 +118,7 @@ def test_process_video_success(pipeline, mock_cv2):
         assert result.average_confidence == 0.9
 
 
-def test_filter_by_quality(pipeline):
+def test_filter_by_quality(pipeline) -> None:
     """Test quality filtering logic."""
     results = [
         PoseEstimationResult(
@@ -138,7 +138,7 @@ def test_filter_by_quality(pipeline):
     assert filtered[1].confidence == 0.8
 
 
-def test_is_outlier(pipeline):
+def test_is_outlier(pipeline) -> None:
     """Test outlier detection."""
     # Create a set of consistent results with slight variance to ensure std > 0
     consistent_results = []
@@ -166,7 +166,7 @@ def test_is_outlier(pipeline):
     assert pipeline._is_outlier(normal, consistent_results) is False
 
 
-def test_process_batch(pipeline):
+def test_process_batch(pipeline) -> None:
     """Test batch processing."""
     video_paths = [Path("vid1.mp4"), Path("vid2.mp4")]
     output_dir = Path("output")

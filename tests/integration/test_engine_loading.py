@@ -27,7 +27,7 @@ def mock_engine_manager():
     return EngineManager(get_src_root())
 
 
-def test_engine_initialization(mock_engine_manager):
+def test_engine_initialization(mock_engine_manager) -> None:
     """Test that EngineManager initializes correctly."""
     assert mock_engine_manager.current_engine is None
     # engine_status might be all UNAVAILABLE if paths don't exist
@@ -38,7 +38,7 @@ def test_engine_initialization(mock_engine_manager):
     [EngineType.MUJOCO, EngineType.DRAKE, EngineType.PINOCCHIO],
     ids=["mujoco", "drake", "pinocchio"],
 )
-def test_engine_loading_success(mock_engine_manager, engine_type):
+def test_engine_loading_success(mock_engine_manager, engine_type) -> None:
     """Test successful engine loading via registry factory mock."""
     # Force engine availability (bypass discovery)
     mock_engine_manager.engine_status[engine_type] = EngineStatus.AVAILABLE
@@ -63,7 +63,7 @@ def test_engine_loading_success(mock_engine_manager, engine_type):
         assert mock_engine_manager.active_physics_engine is not None
 
 
-def test_mujoco_loading_failure_no_registration(mock_engine_manager):
+def test_mujoco_loading_failure_no_registration(mock_engine_manager) -> None:
     """Test MuJoCo loading failure when no registration found."""
     # Force engine availability
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
@@ -82,7 +82,7 @@ def test_mujoco_loading_failure_no_registration(mock_engine_manager):
         assert mock_engine_manager.get_current_engine() is None
 
 
-def test_cleanup_releases_resources(mock_engine_manager):
+def test_cleanup_releases_resources(mock_engine_manager) -> None:
     """Test that cleanup releases resources."""
     # Mock some loaded resources
     mock_matlab = MagicMock(spec=["quit", "exit"])
@@ -97,7 +97,7 @@ def test_cleanup_releases_resources(mock_engine_manager):
     assert mock_engine_manager.current_engine is None
 
 
-def test_cleanup_handles_exceptions(mock_engine_manager):
+def test_cleanup_handles_exceptions(mock_engine_manager) -> None:
     """Test that cleanup handles exceptions during shutdown."""
     mock_matlab = MagicMock(spec=["quit", "exit"])
     mock_matlab.quit.side_effect = RuntimeError("Shutdown error")

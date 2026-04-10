@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import NoReturn
 
 import pytest
 
@@ -11,7 +12,7 @@ from installer.windows.setup_config import (
 )
 
 
-def test_detect_available_engines_core_skips_optional_imports():
+def test_detect_available_engines_core_skips_optional_imports() -> None:
     imported: list[str] = []
 
     def fake_import(name: str):
@@ -29,7 +30,7 @@ def test_detect_available_engines_core_skips_optional_imports():
     assert imported == ["mujoco"]
 
 
-def test_detect_available_engines_hybrid_includes_optional_imports():
+def test_detect_available_engines_hybrid_includes_optional_imports() -> None:
     imported: list[str] = []
 
     def fake_import(name: str):
@@ -44,7 +45,7 @@ def test_detect_available_engines_hybrid_includes_optional_imports():
     assert imported == ["mujoco", "pydrake", "pinocchio", "myosuite", "opensim"]
 
 
-def test_build_setup_configuration_core_omits_api_executable():
+def test_build_setup_configuration_core_omits_api_executable() -> None:
     def fake_import(name: str):
         if name == "mujoco":
             return object()
@@ -57,7 +58,7 @@ def test_build_setup_configuration_core_omits_api_executable():
     assert config.bdist_msi_options["initial_target_dir"].endswith("\\core")
 
 
-def test_build_setup_configuration_full_includes_api_executable():
+def test_build_setup_configuration_full_includes_api_executable() -> None:
     def fake_import(name: str):
         if name in {"mujoco", "pydrake"}:
             return object()
@@ -73,8 +74,8 @@ def test_build_setup_configuration_full_includes_api_executable():
     assert "pydrake" in config.build_exe_options["packages"]
 
 
-def test_build_setup_configuration_requires_core_engine():
-    def missing_import(_: str):
+def test_build_setup_configuration_requires_core_engine() -> None:
+    def missing_import(_: str) -> NoReturn:
         raise ImportError
 
     with pytest.raises(ImportError):

@@ -239,7 +239,7 @@ def run_review(root_path: Path):
     }
 
 
-def generate_markdown_report(results, output_path):
+def generate_markdown_report(results, output_path) -> None:
     """Write the pragmatic review results as a Markdown report."""
     if not isinstance(results, dict):
         raise ValueError("results must be a dictionary")

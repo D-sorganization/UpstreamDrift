@@ -28,14 +28,14 @@ def mock_model():
     return model
 
 
-def test_model_card_init(mock_model, parent_launcher, qapp):
+def test_model_card_init(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
     assert card.model == mock_model
     assert card.parent_launcher == parent_launcher
     assert card.acceptDrops() is True
 
 
-def test_resolve_image_name(mock_model, parent_launcher, qapp):
+def test_resolve_image_name(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
     assert card._resolve_image_name() == "mujoco_humanoid.png"
 
@@ -77,7 +77,7 @@ def test_resolve_image_name(mock_model, parent_launcher, qapp):
 
 
 @patch("src.launchers.model_card.ASSETS_DIR")
-def test_find_image_path(mock_assets_dir, mock_model, parent_launcher, qapp):
+def test_find_image_path(mock_assets_dir, mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     mock_path = MagicMock()
@@ -104,7 +104,7 @@ def test_find_image_path(mock_assets_dir, mock_model, parent_launcher, qapp):
     assert card._find_image_path(None) is None
 
 
-def test_get_status_info(mock_model, parent_launcher, qapp):
+def test_get_status_info(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     mock_model.type = "custom_humanoid"
@@ -134,7 +134,7 @@ def test_get_status_info(mock_model, parent_launcher, qapp):
     assert status == "Unknown"
 
 
-def test_mouse_press_event(mock_model, parent_launcher, qapp):
+def test_mouse_press_event(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     event = MagicMock(spec=QMouseEvent)
@@ -155,7 +155,7 @@ def test_mouse_press_event(mock_model, parent_launcher, qapp):
     card.mousePressEvent(event)  # should not crash
 
 
-def test_mouse_double_click_event(mock_model, parent_launcher, qapp):
+def test_mouse_double_click_event(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     event = MagicMock(spec=QMouseEvent)
@@ -163,7 +163,7 @@ def test_mouse_double_click_event(mock_model, parent_launcher, qapp):
     parent_launcher.launch_model_direct.assert_called_once_with("mujoco_unified")
 
 
-def test_drag_enter_event(mock_model, parent_launcher, qapp):
+def test_drag_enter_event(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     event = MagicMock(spec=QDragEnterEvent)
@@ -175,7 +175,7 @@ def test_drag_enter_event(mock_model, parent_launcher, qapp):
     event.acceptProposedAction.assert_called_once()
 
 
-def test_drop_event(mock_model, parent_launcher, qapp):
+def test_drop_event(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
 
     event = MagicMock(spec=QDropEvent)
@@ -188,7 +188,7 @@ def test_drop_event(mock_model, parent_launcher, qapp):
     event.acceptProposedAction.assert_called_once()
 
 
-def test_no_image_widget(mock_model, parent_launcher, qapp):
+def test_no_image_widget(mock_model, parent_launcher, qapp) -> None:
     with patch(
         "src.launchers.model_card.DraggableModelCard._find_image_path",
         return_value=None,
@@ -199,7 +199,7 @@ def test_no_image_widget(mock_model, parent_launcher, qapp):
         assert img.text() == "No Image"
 
 
-def test_refresh_theme(mock_model, parent_launcher, qapp):
+def test_refresh_theme(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
     with patch("src.launchers.model_card._get_theme_colors") as mock_colors:
         mock_c = MagicMock()
@@ -227,7 +227,7 @@ def test_refresh_theme(mock_model, parent_launcher, qapp):
             card.refresh_theme()
 
 
-def test_mouse_move_event(mock_model, parent_launcher, qapp):
+def test_mouse_move_event(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
     card.drag_start_position = QPoint(0, 0)
 
@@ -271,13 +271,13 @@ def test_mouse_move_event(mock_model, parent_launcher, qapp):
         mock_drag.assert_not_called()
 
 
-def test_mouse_double_click_no_parent(mock_model, qapp):
+def test_mouse_double_click_no_parent(mock_model, qapp) -> None:
     card = DraggableModelCard(mock_model, None)
     event = MagicMock(spec=QMouseEvent)
     card.mouseDoubleClickEvent(event)  # should not crash
 
 
-def test_drag_enter_event_empty(mock_model, parent_launcher, qapp):
+def test_drag_enter_event_empty(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
     card.dragEnterEvent(None)
 
@@ -287,7 +287,7 @@ def test_drag_enter_event_empty(mock_model, parent_launcher, qapp):
     event.acceptProposedAction.assert_not_called()
 
 
-def test_drop_event_empty(mock_model, parent_launcher, qapp):
+def test_drop_event_empty(mock_model, parent_launcher, qapp) -> None:
     card = DraggableModelCard(mock_model, parent_launcher)
     card.dropEvent(None)
 

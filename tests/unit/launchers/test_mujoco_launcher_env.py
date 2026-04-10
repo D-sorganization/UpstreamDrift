@@ -11,13 +11,13 @@ from unittest.mock import patch
 class TestMujocoLauncherEnv:
     """Test that _get_launch_env produces correct PYTHONPATH."""
 
-    def test_get_launch_env_has_pythonpath(self):
+    def test_get_launch_env_has_pythonpath(self) -> None:
         from src.launchers.mujoco_unified_launcher import MujocoUnifiedLauncher
 
         env = MujocoUnifiedLauncher._get_launch_env()
         assert "PYTHONPATH" in env
 
-    def test_get_launch_env_includes_repo_root(self):
+    def test_get_launch_env_includes_repo_root(self) -> None:
         from src.launchers.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
@@ -26,7 +26,7 @@ class TestMujocoLauncherEnv:
         env = MujocoUnifiedLauncher._get_launch_env()
         assert str(REPO_ROOT) in env["PYTHONPATH"]
 
-    def test_get_launch_env_includes_src(self):
+    def test_get_launch_env_includes_src(self) -> None:
         from src.launchers.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
@@ -35,7 +35,7 @@ class TestMujocoLauncherEnv:
         env = MujocoUnifiedLauncher._get_launch_env()
         assert str(REPO_ROOT / "src") in env["PYTHONPATH"]
 
-    def test_get_launch_env_includes_shared_python(self):
+    def test_get_launch_env_includes_shared_python(self) -> None:
         from src.launchers.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
@@ -44,7 +44,7 @@ class TestMujocoLauncherEnv:
         env = MujocoUnifiedLauncher._get_launch_env()
         assert str(REPO_ROOT / "src" / "shared" / "python") in env["PYTHONPATH"]
 
-    def test_get_launch_env_includes_mujoco_python(self):
+    def test_get_launch_env_includes_mujoco_python(self) -> None:
         from src.launchers.mujoco_unified_launcher import (
             REPO_ROOT,
             MujocoUnifiedLauncher,
@@ -56,7 +56,7 @@ class TestMujocoLauncherEnv:
         )
         assert mujoco_path in env["PYTHONPATH"]
 
-    def test_get_launch_env_preserves_existing_pythonpath(self):
+    def test_get_launch_env_preserves_existing_pythonpath(self) -> None:
         from src.launchers.mujoco_unified_launcher import MujocoUnifiedLauncher
 
         with patch.dict(os.environ, {"PYTHONPATH": "/custom/path"}):
@@ -67,12 +67,12 @@ class TestMujocoLauncherEnv:
 class TestSignalToolkitContractsImport:
     """Ensure signal_toolkit can import contracts via absolute path."""
 
-    def test_contracts_require_importable(self):
+    def test_contracts_require_importable(self) -> None:
         from src.shared.python.contracts import require
 
         assert callable(require)
 
-    def test_signal_toolkit_core_importable(self):
+    def test_signal_toolkit_core_importable(self) -> None:
         from src.shared.python.signal_toolkit.core import Signal
 
         assert Signal is not None

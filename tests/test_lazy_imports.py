@@ -2,7 +2,7 @@ import sys
 from unittest.mock import patch
 
 
-def test_lazy_imports_engine_manager():
+def test_lazy_imports_engine_manager() -> None:
     """Test that importing EngineManager does NOT import heavy engine libraries."""
 
     # Ensure modules are not already loaded

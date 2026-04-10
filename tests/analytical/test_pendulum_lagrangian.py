@@ -85,7 +85,7 @@ class TestPendulumAnalyticalDynamics:
             (0.3, 2.0, 1.1e-1),  # Combined case
         ],
     )
-    def test_inverse_dynamics(self, theta: float, acc: float, rtol: float):
+    def test_inverse_dynamics(self, theta: float, acc: float, rtol: float) -> None:
         """Standardized test for inverse dynamics accuracy."""
         self.engine.set_state(np.array([theta, 0.0]), np.array([0.0, 0.0]))
         tau_engine = self.engine.compute_inverse_dynamics(np.array([acc, 0.0]))
@@ -93,7 +93,7 @@ class TestPendulumAnalyticalDynamics:
 
         np.testing.assert_allclose(tau_engine[0], tau_expected, rtol=rtol)
 
-    def test_drift_acceleration(self):
+    def test_drift_acceleration(self) -> None:
         """Verify drift matches analytical free-fall acceleration."""
         theta_rad = 0.2
         self.engine.set_state(np.array([theta_rad, 0.0]), np.array([0.5, 0.0]))
@@ -102,7 +102,7 @@ class TestPendulumAnalyticalDynamics:
 
         np.testing.assert_allclose(a_drift, a_expected, rtol=8e-2)
 
-    def test_ztcf_consistency(self):
+    def test_ztcf_consistency(self) -> None:
         """Consistency check: ZTCF must equal drift acceleration."""
         q_pos = np.array([0.15, 0.0])
         v_vel = np.array([0.3, 0.0])
@@ -115,7 +115,7 @@ class TestPendulumAnalyticalDynamics:
 class TestPendulumEnergy:
     """Numerical stability and energy conservation tests."""
 
-    def test_energy_conservation_free_swing(self):
+    def test_energy_conservation_free_swing(self) -> None:
         """Test energy is conserved during passive swing (no torque)."""
         engine_obj, mass_val, length_val = configure_simple_pendulum()
         g_accel = GRAVITY_M_S2

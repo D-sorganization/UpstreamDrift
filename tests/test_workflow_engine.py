@@ -40,12 +40,12 @@ class TestWorkflowEngine:
         wf.add_step(WorkflowStep("step2", "Step 2", "Do else"))
         return wf
 
-    def test_workflow_registration(self, engine, simple_workflow):
+    def test_workflow_registration(self, engine, simple_workflow) -> None:
         engine.register_workflow(simple_workflow)
         assert engine.get_workflow("test_wf") == simple_workflow
         assert len(engine.list_workflows()) == 1
 
-    def test_start_workflow(self, engine, simple_workflow):
+    def test_start_workflow(self, engine, simple_workflow) -> None:
         engine.register_workflow(simple_workflow)
         ctx = Context(user_id="user1")
 
@@ -57,7 +57,7 @@ class TestWorkflowEngine:
         assert execution.current_step_index == 0
         assert execution.execution_id.startswith("exec_")
 
-    def test_execute_simple_steps(self, engine, simple_workflow):
+    def test_execute_simple_steps(self, engine, simple_workflow) -> None:
         engine.register_workflow(simple_workflow)
         ctx = Context("user1")
         exe = engine.start_workflow("test_wf", ctx)
@@ -75,7 +75,7 @@ class TestWorkflowEngine:
         assert exe.current_step_index == 2
         assert engine.is_complete(exe)
 
-    def test_tool_execution(self, engine, mock_registry):
+    def test_tool_execution(self, engine, mock_registry) -> None:
         wf = Workflow("tool_wf", "Tool WF", "Desc")
         wf.add_step(
             WorkflowStep(
@@ -95,7 +95,7 @@ class TestWorkflowEngine:
         assert res.status == StepStatus.COMPLETED
         assert res.result == "success"
 
-    def test_step_failure_abort(self, engine):
+    def test_step_failure_abort(self, engine) -> None:
         wf = Workflow("fail_wf", "Fail WF", "Desc")
         wf.add_step(
             WorkflowStep(
@@ -118,7 +118,7 @@ class TestWorkflowEngine:
         assert "Tool explosion" in res.error
         assert exe.status == StepStatus.FAILED
 
-    def test_step_condition_skip(self, engine):
+    def test_step_condition_skip(self, engine) -> None:
         wf = Workflow("cond_wf", "Cond WF", "Desc")
         wf.add_step(
             WorkflowStep(
@@ -144,7 +144,7 @@ class TestWorkflowEngine:
         res2 = engine.execute_next_step(exe2)
         assert res2.status == StepStatus.COMPLETED
 
-    def test_educational_content(self, engine):
+    def test_educational_content(self, engine) -> None:
         step = WorkflowStep(
             "edu",
             "Edu",

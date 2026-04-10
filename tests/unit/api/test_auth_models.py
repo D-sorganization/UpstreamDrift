@@ -12,21 +12,21 @@ from pydantic import ValidationError
 class TestUserRoleContract:
     """Design by Contract tests for UserRole enum."""
 
-    def test_is_string_enum(self):
+    def test_is_string_enum(self) -> None:
         """Postcondition: UserRole inherits from str and Enum."""
         from src.api.auth.models import UserRole
 
         assert issubclass(UserRole, str)
         assert UserRole.FREE.value == "free"
 
-    def test_all_values_unique(self):
+    def test_all_values_unique(self) -> None:
         """Postcondition: All role values are unique."""
         from src.api.auth.models import UserRole
 
         values = [r.value for r in UserRole]
         assert len(values) == len(set(values))
 
-    def test_has_required_roles(self):
+    def test_has_required_roles(self) -> None:
         """Postcondition: Has all required roles."""
         from src.api.auth.models import UserRole
 
@@ -40,14 +40,14 @@ class TestUserRoleContract:
 class TestSubscriptionStatusContract:
     """Design by Contract tests for SubscriptionStatus enum."""
 
-    def test_is_string_enum(self):
+    def test_is_string_enum(self) -> None:
         """Postcondition: SubscriptionStatus inherits from str and Enum."""
         from src.api.auth.models import SubscriptionStatus
 
         assert issubclass(SubscriptionStatus, str)
         assert SubscriptionStatus.ACTIVE.value == "active"
 
-    def test_all_values_unique(self):
+    def test_all_values_unique(self) -> None:
         """Postcondition: All status values are unique."""
         from src.api.auth.models import SubscriptionStatus
 
@@ -58,21 +58,21 @@ class TestSubscriptionStatusContract:
 class TestUserBaseContract:
     """Design by Contract tests for UserBase Pydantic model."""
 
-    def test_requires_email(self):
+    def test_requires_email(self) -> None:
         """Precondition: Email is required."""
         from src.api.auth.models import UserBase
 
         with pytest.raises(ValidationError):
             UserBase()  # type: ignore[call-arg]
 
-    def test_validates_email_format(self):
+    def test_validates_email_format(self) -> None:
         """Precondition: Email must be valid format."""
         from src.api.auth.models import UserBase
 
         with pytest.raises(ValidationError):
             UserBase(email="not-an-email")
 
-    def test_accepts_valid_email(self):
+    def test_accepts_valid_email(self) -> None:
         """Postcondition: Valid email is accepted."""
         from src.api.auth.models import UserBase
 
@@ -83,21 +83,21 @@ class TestUserBaseContract:
 class TestUserBase:
     """Functional tests for UserBase model."""
 
-    def test_optional_full_name(self):
+    def test_optional_full_name(self) -> None:
         """Test that full_name is optional."""
         from src.api.auth.models import UserBase
 
         user = UserBase(email="test@example.com")
         assert user.full_name is None
 
-    def test_optional_organization(self):
+    def test_optional_organization(self) -> None:
         """Test that organization is optional."""
         from src.api.auth.models import UserBase
 
         user = UserBase(email="test@example.com")
         assert user.organization is None
 
-    def test_with_all_fields(self):
+    def test_with_all_fields(self) -> None:
         """Test with all fields provided."""
         from src.api.auth.models import UserBase
 
@@ -114,21 +114,21 @@ class TestUserBase:
 class TestUserCreateContract:
     """Design by Contract tests for UserCreate model."""
 
-    def test_requires_password(self):
+    def test_requires_password(self) -> None:
         """Precondition: Password is required."""
         from src.api.auth.models import UserCreate
 
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com")  # type: ignore[call-arg]
 
-    def test_password_minimum_length(self):
+    def test_password_minimum_length(self) -> None:
         """Precondition: Password must be at least 8 characters."""
         from src.api.auth.models import UserCreate
 
         with pytest.raises(ValidationError):
             UserCreate(email="test@example.com", password="short")
 
-    def test_accepts_valid_password(self):
+    def test_accepts_valid_password(self) -> None:
         """Postcondition: Valid password is accepted."""
         from src.api.auth.models import UserCreate
 
@@ -139,7 +139,7 @@ class TestUserCreateContract:
 class TestUserUpdateContract:
     """Design by Contract tests for UserUpdate model."""
 
-    def test_all_fields_optional(self):
+    def test_all_fields_optional(self) -> None:
         """Postcondition: All fields are optional."""
         from src.api.auth.models import UserUpdate
 
@@ -148,7 +148,7 @@ class TestUserUpdateContract:
         assert update.organization is None
         assert update.password is None
 
-    def test_password_minimum_length_if_provided(self):
+    def test_password_minimum_length_if_provided(self) -> None:
         """Precondition: Password must be at least 8 chars if provided."""
         from src.api.auth.models import UserUpdate
 
@@ -159,7 +159,7 @@ class TestUserUpdateContract:
 class TestUserResponseContract:
     """Design by Contract tests for UserResponse model."""
 
-    def test_includes_required_fields(self):
+    def test_includes_required_fields(self) -> None:
         """Postcondition: UserResponse includes all required fields."""
         from src.api.auth.models import (
             SubscriptionStatus,
@@ -187,7 +187,7 @@ class TestUserResponseContract:
 class TestLoginRequestContract:
     """Design by Contract tests for LoginRequest model."""
 
-    def test_requires_email_and_password(self):
+    def test_requires_email_and_password(self) -> None:
         """Precondition: Both email and password required."""
         from src.api.auth.models import LoginRequest
 
@@ -197,7 +197,7 @@ class TestLoginRequestContract:
         with pytest.raises(ValidationError):
             LoginRequest(password="password123")  # type: ignore[call-arg]
 
-    def test_accepts_valid_credentials(self):
+    def test_accepts_valid_credentials(self) -> None:
         """Postcondition: Valid credentials are accepted."""
         from src.api.auth.models import LoginRequest
 
@@ -209,7 +209,7 @@ class TestLoginRequestContract:
 class TestLoginResponseContract:
     """Design by Contract tests for LoginResponse model."""
 
-    def test_has_required_fields(self):
+    def test_has_required_fields(self) -> None:
         """Postcondition: Has all required response fields."""
         from src.api.auth.models import (
             LoginResponse,
@@ -247,21 +247,21 @@ class TestLoginResponseContract:
 class TestAPIKeyCreateContract:
     """Design by Contract tests for APIKeyCreate model."""
 
-    def test_requires_name(self):
+    def test_requires_name(self) -> None:
         """Precondition: Name is required."""
         from src.api.auth.models import APIKeyCreate
 
         with pytest.raises(ValidationError):
             APIKeyCreate()  # type: ignore[call-arg]
 
-    def test_name_min_length(self):
+    def test_name_min_length(self) -> None:
         """Precondition: Name must be at least 1 character."""
         from src.api.auth.models import APIKeyCreate
 
         with pytest.raises(ValidationError):
             APIKeyCreate(name="")
 
-    def test_name_max_length(self):
+    def test_name_max_length(self) -> None:
         """Precondition: Name must be at most 255 characters."""
         from src.api.auth.models import APIKeyCreate
 
@@ -272,7 +272,7 @@ class TestAPIKeyCreateContract:
 class TestUsageQuotasContract:
     """Design by Contract tests for UsageQuotas model."""
 
-    def test_has_all_quota_fields(self):
+    def test_has_all_quota_fields(self) -> None:
         """Postcondition: Has all required quota fields."""
         from src.api.auth.models import UsageQuotas
 
@@ -293,7 +293,7 @@ class TestUsageQuotasContract:
 class TestSubscriptionQuotas:
     """Tests for SUBSCRIPTION_QUOTAS configuration."""
 
-    def test_all_roles_have_quotas(self):
+    def test_all_roles_have_quotas(self) -> None:
         """Postcondition: All roles have defined quotas."""
         from src.api.auth.models import SUBSCRIPTION_QUOTAS, UserRole
 
@@ -301,7 +301,7 @@ class TestSubscriptionQuotas:
         assert UserRole.PROFESSIONAL in SUBSCRIPTION_QUOTAS
         assert UserRole.ENTERPRISE in SUBSCRIPTION_QUOTAS
 
-    def test_enterprise_has_higher_limits_than_professional(self):
+    def test_enterprise_has_higher_limits_than_professional(self) -> None:
         """Postcondition: Enterprise has higher limits."""
         from src.api.auth.models import SUBSCRIPTION_QUOTAS, UserRole
 
@@ -312,7 +312,7 @@ class TestSubscriptionQuotas:
         assert ent.video_analyses_per_month > pro.video_analyses_per_month
         assert ent.simulations_per_month > pro.simulations_per_month
 
-    def test_professional_has_higher_limits_than_free(self):
+    def test_professional_has_higher_limits_than_free(self) -> None:
         """Postcondition: Professional has higher limits than free."""
         from src.api.auth.models import SUBSCRIPTION_QUOTAS, UserRole
 
@@ -327,21 +327,21 @@ class TestSubscriptionQuotas:
 class TestRefreshTokenRequestContract:
     """Design by Contract tests for RefreshTokenRequest (issue #2471)."""
 
-    def test_accepts_valid_token(self):
+    def test_accepts_valid_token(self) -> None:
         """Postcondition: Valid refresh_token is accepted as JSON body field."""
         from src.api.auth.models import RefreshTokenRequest
 
         req = RefreshTokenRequest(refresh_token="sometoken123")
         assert req.refresh_token == "sometoken123"
 
-    def test_requires_refresh_token(self):
+    def test_requires_refresh_token(self) -> None:
         """Precondition: refresh_token field is required."""
         from src.api.auth.models import RefreshTokenRequest
 
         with pytest.raises(ValidationError):
             RefreshTokenRequest()  # type: ignore[call-arg]
 
-    def test_refresh_token_is_body_field(self):
+    def test_refresh_token_is_body_field(self) -> None:
         """Postcondition: refresh_token is a JSON body field, not a query param."""
         from src.api.auth.models import RefreshTokenRequest
 

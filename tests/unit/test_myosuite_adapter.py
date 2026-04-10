@@ -31,14 +31,14 @@ def mock_muscle_system():
 class TestMuscleDrivenEnv:
     """Tests for MuscleDrivenEnv class."""
 
-    def test_initialization(self, mock_muscle_system):
+    def test_initialization(self, mock_muscle_system) -> None:
         """Test environment initialization."""
         env = MuscleDrivenEnv(mock_muscle_system, task="tracking", dt=0.01)
         assert env.task == "tracking"
         assert env.dt == 0.01
         assert env.muscle_system == mock_muscle_system
 
-    def test_reset(self, mock_muscle_system):
+    def test_reset(self, mock_muscle_system) -> None:
         """Test environment reset."""
         env = MuscleDrivenEnv(mock_muscle_system)
         obs = env.reset()
@@ -48,7 +48,7 @@ class TestMuscleDrivenEnv:
         assert env.step_count == 0
 
     @patch("src.shared.python.biomechanics.activation_dynamics.ActivationDynamics")
-    def test_step(self, mock_dynamics_cls, mock_muscle_system):
+    def test_step(self, mock_dynamics_cls, mock_muscle_system) -> None:
         """Test environment step."""
         # Mock ActivationDynamics
         mock_dynamics = mock_dynamics_cls.return_value
@@ -71,7 +71,7 @@ class TestMuscleDrivenEnv:
         # Check if compute_net_torque was called
         mock_muscle_system.compute_net_torque.assert_called()
 
-    def test_action_to_excitations(self, mock_muscle_system):
+    def test_action_to_excitations(self, mock_muscle_system) -> None:
         """Test action conversion."""
         env = MuscleDrivenEnv(mock_muscle_system)
         action = np.array([0.8, 0.2])
@@ -80,7 +80,7 @@ class TestMuscleDrivenEnv:
         assert excitations["muscle1"] == 0.8
         assert excitations["muscle2"] == 0.2
 
-    def test_compute_reward_tracking(self, mock_muscle_system):
+    def test_compute_reward_tracking(self, mock_muscle_system) -> None:
         """Test reward computation for tracking task."""
         env = MuscleDrivenEnv(mock_muscle_system, task="tracking")
         env.reset()
@@ -94,7 +94,7 @@ class TestMuscleDrivenEnv:
         reward = env._compute_reward()
         assert reward == -1.0  # Error of 1.0
 
-    def test_compute_reward_reach(self, mock_muscle_system):
+    def test_compute_reward_reach(self, mock_muscle_system) -> None:
         """Test reward computation for reach task."""
         env = MuscleDrivenEnv(mock_muscle_system, task="reach")
         env.reset()
@@ -112,14 +112,14 @@ class TestTrainMusclePolicy:
     """Tests for train_muscle_policy function."""
 
     @patch("src.shared.python.biomechanics.myosuite_adapter.MYOSUITE_AVAILABLE", False)
-    def test_train_policy_unavailable(self, mock_muscle_system):
+    def test_train_policy_unavailable(self, mock_muscle_system) -> None:
         """Test training when MyoSuite is not available."""
         env = MuscleDrivenEnv(mock_muscle_system)
         model = train_muscle_policy(env)
         assert model is None
 
     @patch("src.shared.python.biomechanics.myosuite_adapter.MYOSUITE_AVAILABLE", True)
-    def test_train_policy_available(self, mock_muscle_system):
+    def test_train_policy_available(self, mock_muscle_system) -> None:
         """Test training when MyoSuite is available."""
         # We need to mock stable_baselines3 import
         mock_sb3 = MagicMock()

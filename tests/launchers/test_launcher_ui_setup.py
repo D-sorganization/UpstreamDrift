@@ -36,7 +36,7 @@ def launcher(qapp):
     return DummyLauncher()
 
 
-def test_init_ui(launcher):
+def test_init_ui(launcher) -> None:
     with patch("src.launchers.launcher_constants.AI_AVAILABLE", False):
         launcher.init_ui()
         assert launcher.content_splitter is not None
@@ -44,13 +44,13 @@ def test_init_ui(launcher):
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
-def test_init_ui_with_ai(launcher):
+def test_init_ui_with_ai(launcher) -> None:
     with patch.object(launcher, "_setup_ai_panel") as mock_ai:
         launcher.init_ui()
         mock_ai.assert_called_once()
 
 
-def test_setup_menu_bar(launcher):
+def test_setup_menu_bar(launcher) -> None:
     launcher._setup_menu_bar()
     menubar = launcher.menuBar()
     actions = menubar.actions()
@@ -58,7 +58,7 @@ def test_setup_menu_bar(launcher):
     assert len(actions) == 4
 
 
-def test_setup_top_bar(launcher):
+def test_setup_top_bar(launcher) -> None:
     with patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", False):
         top_bar = launcher._setup_top_bar()
         assert isinstance(top_bar, QHBoxLayout)
@@ -66,7 +66,7 @@ def test_setup_top_bar(launcher):
 
 @patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", True)
 @patch("src.shared.python.gui_pkg.help_system.TooltipManager.register_tooltip")
-def test_setup_top_bar_with_help(mock_register, launcher):
+def test_setup_top_bar_with_help(mock_register, launcher) -> None:
     with patch("src.launchers.launcher_constants.AI_AVAILABLE", True):
         top_bar = launcher._setup_top_bar()
         assert isinstance(top_bar, QHBoxLayout)
@@ -74,31 +74,31 @@ def test_setup_top_bar_with_help(mock_register, launcher):
         assert hasattr(launcher, "btn_ai")
 
 
-def test_setup_grid_area(launcher):
+def test_setup_grid_area(launcher) -> None:
     layout = QVBoxLayout()
     launcher._setup_grid_area(layout)
     assert hasattr(launcher, "scroll_area")
 
 
-def test_setup_bottom_bar(launcher):
+def test_setup_bottom_bar(launcher) -> None:
     launcher._setup_bottom_bar()
     assert hasattr(launcher, "btn_launch")
 
 
-def test_setup_search_shortcuts(launcher):
+def test_setup_search_shortcuts(launcher) -> None:
     with patch("src.launchers.launcher_ui_setup.QShortcut") as mock_shortcut:
         launcher._setup_search_shortcuts()
         assert mock_shortcut.call_count == 2
 
 
-def test_focus_search(launcher):
+def test_focus_search(launcher) -> None:
     launcher.search_input = MagicMock()
     launcher._focus_search()
     launcher.search_input.setFocus.assert_called_once()
     launcher.search_input.selectAll.assert_called_once()
 
 
-def test_clear_search(launcher):
+def test_clear_search(launcher) -> None:
     launcher.search_input = MagicMock()
     launcher.search_input.hasFocus.return_value = True
     launcher._clear_search()
@@ -111,7 +111,7 @@ def test_clear_search(launcher):
     launcher.search_input.clear.assert_not_called()
 
 
-def test_process_console(launcher):
+def test_process_console(launcher) -> None:
     launcher._setup_process_console()
     assert hasattr(launcher, "_console_dock")
 
@@ -134,12 +134,12 @@ def test_process_console(launcher):
 
 
 @patch("src.launchers.launcher_ui_setup.QTimer.singleShot")
-def test_on_process_output(mock_timer, launcher):
+def test_on_process_output(mock_timer, launcher) -> None:
     launcher._on_process_output("engine", "test")
     mock_timer.assert_called_once()
 
 
-def test_setup_ai_panel_disabled(launcher):
+def test_setup_ai_panel_disabled(launcher) -> None:
     launcher.content_splitter = MagicMock()
     with patch("src.launchers.launcher_constants.AI_AVAILABLE", False):
         launcher._setup_ai_panel()
@@ -147,7 +147,7 @@ def test_setup_ai_panel_disabled(launcher):
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
-def test_setup_ai_panel(launcher):
+def test_setup_ai_panel(launcher) -> None:
     with patch("src.shared.python.ai.gui.AIAssistantPanel"):
         launcher.content_splitter = MagicMock()
         with patch.object(launcher, "_sync_chat_session") as mock_sync:
@@ -157,7 +157,7 @@ def test_setup_ai_panel(launcher):
 
 
 @patch("src.launchers.launcher_constants.AI_AVAILABLE", True)
-def test_setup_ai_panel_error(launcher):
+def test_setup_ai_panel_error(launcher) -> None:
     original_import = __import__
 
     def mock_import(name, globals=None, locals=None, fromlist=(), level=0):
@@ -172,7 +172,7 @@ def test_setup_ai_panel_error(launcher):
 
 
 @patch("urllib.request.urlopen")
-def test_sync_chat_session(mock_urlopen, launcher):
+def test_sync_chat_session(mock_urlopen, launcher) -> None:
     mock_resp = MagicMock()
     mock_resp.read.return_value = b'[{"session_id": "test_id"}]'
     mock_resp.__enter__.return_value = mock_resp
@@ -190,7 +190,7 @@ def test_sync_chat_session(mock_urlopen, launcher):
         launcher._sync_chat_session()
 
 
-def test_init_overlay(launcher):
+def test_init_overlay(launcher) -> None:
     with patch("src.shared.python.ui.overlay.OverlayWidget"):
         launcher._init_overlay()
         assert hasattr(launcher, "overlay")
@@ -199,7 +199,7 @@ def test_init_overlay(launcher):
         launcher.overlay.toggle.assert_called_once()
 
 
-def test_init_overlay_error(launcher):
+def test_init_overlay_error(launcher) -> None:
     original_import = __import__
 
     def mock_import(name, *args, **kwargs):

@@ -19,14 +19,14 @@ def launcher():
     return UnifiedLauncher()
 
 
-def test_initialization(launcher):
+def test_initialization(launcher) -> None:
     """Test UnifiedLauncher initialization succeeds."""
     # UnifiedLauncher now uses lazy initialization - no app/launcher attributes at init
     assert launcher is not None
     assert isinstance(launcher, UnifiedLauncher)
 
 
-def test_mainloop(launcher):
+def test_mainloop(launcher) -> None:
     """Test mainloop execution delegates to golf_launcher.main()."""
     import sys
 
@@ -44,7 +44,7 @@ def test_mainloop(launcher):
             sys.modules[legacy_key] = legacy_saved
 
 
-def test_show_status(launcher):
+def test_show_status(launcher) -> None:
     """Test show_status method."""
     # Mock the EngineManager to avoid actual engine initialization
     with patch(
@@ -57,7 +57,7 @@ def test_show_status(launcher):
         launcher.show_status()
 
 
-def test_get_version(launcher):
+def test_get_version(launcher) -> None:
     """Test version retrieval.
 
     Design-by-Contract:
@@ -83,7 +83,7 @@ def test_get_version(launcher):
         assert "." in fallback, f"Expected SemVer version, got: {fallback!r}"
 
 
-def test_cli_launch():
+def test_cli_launch() -> None:
     """Test CLI launch function."""
     # launch() directly calls golf_launcher.main(), so patch that
     with patch("src.launchers.golf_launcher.main") as mock_main:

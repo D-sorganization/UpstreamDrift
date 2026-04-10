@@ -16,7 +16,7 @@ from src.shared.python.config.model_registry import ModelRegistry
 class TestModelRegistry:
     """Test cases for ModelRegistry."""
 
-    def test_load_valid_registry(self):
+    def test_load_valid_registry(self) -> None:
         """Test loading a valid model registry."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
@@ -43,7 +43,7 @@ class TestModelRegistry:
             assert model.name == "Test Model"
             assert model.type == "mjcf"
 
-    def test_load_empty_registry_file(self):
+    def test_load_empty_registry_file(self) -> None:
         """Test loading an empty registry file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
@@ -52,13 +52,13 @@ class TestModelRegistry:
             registry = ModelRegistry(config_path)
             assert len(registry.models) == 0
 
-    def test_load_missing_registry(self):
+    def test_load_missing_registry(self) -> None:
         """Test loading when registry file doesn't exist."""
         # Using a path that definitely doesn't exist
         registry = ModelRegistry(Path("/nonexistent/path/models.yaml"))
         assert len(registry.models) == 0
 
-    def test_load_malformed_yaml(self):
+    def test_load_malformed_yaml(self) -> None:
         """Test loading a malformed YAML file raises yaml.YAMLError."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
@@ -69,7 +69,7 @@ class TestModelRegistry:
             with pytest.raises(yaml.YAMLError):
                 ModelRegistry(config_path)
 
-    def test_load_invalid_model_format(self):
+    def test_load_invalid_model_format(self) -> None:
         """Test loading registry with invalid model structure."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
@@ -89,7 +89,7 @@ class TestModelRegistry:
             # Should skip the bad model
             assert len(registry.models) == 0
 
-    def test_get_all_models(self):
+    def test_get_all_models(self) -> None:
         """Test retrieving all models."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
@@ -119,7 +119,7 @@ class TestModelRegistry:
             assert len(models) == 2
             assert {m.id for m in models} == {"m1", "m2"}
 
-    def test_get_models_by_type(self):
+    def test_get_models_by_type(self) -> None:
         """Test filtering models by type."""
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"

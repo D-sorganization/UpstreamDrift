@@ -46,13 +46,13 @@ def pennated_muscle():
 class TestEquilibriumSolverInitialization:
     """Test EquilibriumSolver initialization."""
 
-    def test_initialization(self, standard_muscle):
+    def test_initialization(self, standard_muscle) -> None:
         """Test basic initialization."""
         solver = EquilibriumSolver(standard_muscle)
         assert solver.muscle is standard_muscle
         assert isinstance(solver.muscle, HillMuscleModel)
 
-    def test_solver_retains_muscle_parameters(self, standard_muscle):
+    def test_solver_retains_muscle_parameters(self, standard_muscle) -> None:
         """Test that solver retains access to muscle parameters."""
         solver = EquilibriumSolver(standard_muscle)
         assert solver.muscle.params.F_max == 1000.0
@@ -63,7 +63,7 @@ class TestEquilibriumSolverInitialization:
 class TestEquilibriumResidual:
     """Test _equilibrium_residual method."""
 
-    def test_residual_at_equilibrium_is_zero(self, standard_muscle):
+    def test_residual_at_equilibrium_is_zero(self, standard_muscle) -> None:
         """Test that residual is zero when fiber and tendon forces balance."""
         solver = EquilibriumSolver(standard_muscle)
 
@@ -80,7 +80,7 @@ class TestEquilibriumResidual:
             f"Residual should be near zero, got {residual:.6f} N"
         )
 
-    def test_residual_changes_sign_across_equilibrium(self, standard_muscle):
+    def test_residual_changes_sign_across_equilibrium(self, standard_muscle) -> None:
         """Test that residual changes sign across equilibrium point."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -105,7 +105,7 @@ class TestEquilibriumResidual:
             "Residuals should have opposite signs across equilibrium"
         )
 
-    def test_residual_with_pennation(self, pennated_muscle):
+    def test_residual_with_pennation(self, pennated_muscle) -> None:
         """Test residual calculation with pennated muscle."""
         solver = EquilibriumSolver(pennated_muscle)
         l_MT = 0.30
@@ -117,7 +117,7 @@ class TestEquilibriumResidual:
 
         assert abs(residual) < 1.0, "Residual should be small for pennated muscle"
 
-    def test_residual_with_velocity(self, standard_muscle):
+    def test_residual_with_velocity(self, standard_muscle) -> None:
         """Test residual with non-zero fiber velocity."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -140,7 +140,7 @@ class TestEquilibriumResidual:
 class TestSolveFiberLength:
     """Test solve_fiber_length method."""
 
-    def test_convergence_at_optimal_length(self, standard_muscle):
+    def test_convergence_at_optimal_length(self, standard_muscle) -> None:
         """Test solver converges at optimal muscle-tendon length."""
         solver = EquilibriumSolver(standard_muscle)
 
@@ -154,7 +154,7 @@ class TestSolveFiberLength:
         assert 0.05 < l_CE < 0.20, f"l_CE should be near l_opt (0.12m), got {l_CE:.4f}m"
         assert np.isfinite(l_CE), "Solution should be finite"
 
-    def test_convergence_at_different_activations(self, standard_muscle):
+    def test_convergence_at_different_activations(self, standard_muscle) -> None:
         """Test solver converges across different activation levels."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -176,7 +176,7 @@ class TestSolveFiberLength:
             f"(low a: {solutions[0]:.4f}m, high a: {solutions[-1]:.4f}m)"
         )
 
-    def test_convergence_at_different_lengths(self, standard_muscle):
+    def test_convergence_at_different_lengths(self, standard_muscle) -> None:
         """Test solver converges at different muscle-tendon lengths."""
         solver = EquilibriumSolver(standard_muscle)
         activation = 0.5
@@ -196,7 +196,7 @@ class TestSolveFiberLength:
             "Longer muscle-tendon should have longer fiber"
         )
 
-    def test_custom_initial_guess(self, standard_muscle):
+    def test_custom_initial_guess(self, standard_muscle) -> None:
         """Test solver with custom initial guess."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -216,7 +216,7 @@ class TestSolveFiberLength:
             err_msg="Solution should be independent of initial guess",
         )
 
-    def test_zero_activation_uses_passive_force(self, standard_muscle):
+    def test_zero_activation_uses_passive_force(self, standard_muscle) -> None:
         """Test that solver works with zero activation (passive only)."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -228,7 +228,7 @@ class TestSolveFiberLength:
         assert np.isfinite(l_CE), "Should converge with zero activation"
         assert 0.05 < l_CE < 0.20, f"Solution out of range: {l_CE:.4f}m"
 
-    def test_full_activation(self, standard_muscle):
+    def test_full_activation(self, standard_muscle) -> None:
         """Test solver with full activation."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -239,7 +239,7 @@ class TestSolveFiberLength:
         assert np.isfinite(l_CE), "Should converge with full activation"
         assert 0.05 < l_CE < 0.20, f"Solution out of range: {l_CE:.4f}m"
 
-    def test_convergence_failure_raises_error(self, standard_muscle):
+    def test_convergence_failure_raises_error(self, standard_muscle) -> None:
         """Test that convergence failure raises RuntimeError or PostconditionError."""
         solver = EquilibriumSolver(standard_muscle)
 
@@ -258,7 +258,7 @@ class TestSolveFiberLength:
             # Convergence failure or postcondition violation are acceptable
             pass
 
-    def test_solution_satisfies_bounds(self, standard_muscle):
+    def test_solution_satisfies_bounds(self, standard_muscle) -> None:
         """Test that solution is physically reasonable."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -283,7 +283,7 @@ class TestSolveFiberLength:
 class TestSolveFiberVelocity:
     """Test solve_fiber_velocity method."""
 
-    def test_zero_muscle_tendon_velocity(self, standard_muscle):
+    def test_zero_muscle_tendon_velocity(self, standard_muscle) -> None:
         """Test that zero MT velocity gives zero fiber velocity."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -296,7 +296,7 @@ class TestSolveFiberVelocity:
         # Should be exactly zero (no finite difference error for zero input)
         assert abs(v_CE) < 1e-6, f"v_CE should be zero, got {v_CE:.6f} m/s"
 
-    def test_positive_muscle_tendon_velocity(self, standard_muscle):
+    def test_positive_muscle_tendon_velocity(self, standard_muscle) -> None:
         """Test with positive (lengthening) MT velocity."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -310,7 +310,7 @@ class TestSolveFiberVelocity:
         assert np.isfinite(v_CE), "Fiber velocity should be finite"
         # Direction may vary depending on tendon compliance
 
-    def test_negative_muscle_tendon_velocity(self, standard_muscle):
+    def test_negative_muscle_tendon_velocity(self, standard_muscle) -> None:
         """Test with negative (shortening) MT velocity."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -323,7 +323,7 @@ class TestSolveFiberVelocity:
         # Fiber velocity should be finite and generally negative
         assert np.isfinite(v_CE), "Fiber velocity should be finite"
 
-    def test_custom_time_step(self, standard_muscle):
+    def test_custom_time_step(self, standard_muscle) -> None:
         """Test fiber velocity with custom time step."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -343,7 +343,7 @@ class TestSolveFiberVelocity:
             err_msg="Velocities should be similar for different dt",
         )
 
-    def test_velocity_with_different_activations(self, standard_muscle):
+    def test_velocity_with_different_activations(self, standard_muscle) -> None:
         """Test that velocity computation works across activation levels."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -355,7 +355,7 @@ class TestSolveFiberVelocity:
 
             assert np.isfinite(v_CE), f"v_CE should be finite at a={activation}"
 
-    def test_convergence_failure_returns_zero(self, standard_muscle):
+    def test_convergence_failure_returns_zero(self, standard_muscle) -> None:
         """Test that convergence failure returns zero velocity."""
         solver = EquilibriumSolver(standard_muscle)
 
@@ -375,7 +375,7 @@ class TestSolveFiberVelocity:
 class TestComputeEquilibriumState:
     """Test compute_equilibrium_state convenience function."""
 
-    def test_static_equilibrium(self, standard_muscle):
+    def test_static_equilibrium(self, standard_muscle) -> None:
         """Test computing equilibrium state with zero velocity."""
         l_MT = 0.37
         v_MT = 0.0
@@ -387,7 +387,7 @@ class TestComputeEquilibriumState:
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
         assert abs(v_CE) < 1e-6, f"v_CE should be zero for static case, got {v_CE}"
 
-    def test_dynamic_equilibrium(self, standard_muscle):
+    def test_dynamic_equilibrium(self, standard_muscle) -> None:
         """Test computing equilibrium state with non-zero velocity."""
         l_MT = 0.37
         v_MT = 0.1  # m/s
@@ -399,7 +399,7 @@ class TestComputeEquilibriumState:
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
         assert np.isfinite(v_CE), "v_CE should be finite"
 
-    def test_custom_initial_guess(self, standard_muscle):
+    def test_custom_initial_guess(self, standard_muscle) -> None:
         """Test with custom initial fiber length guess."""
         l_MT = 0.37
         v_MT = 0.0
@@ -413,7 +413,7 @@ class TestComputeEquilibriumState:
         # Should converge to same solution
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
 
-    def test_returns_tuple(self, standard_muscle):
+    def test_returns_tuple(self, standard_muscle) -> None:
         """Test that function returns a tuple of two values."""
         l_MT = 0.37
         v_MT = 0.0
@@ -428,7 +428,7 @@ class TestComputeEquilibriumState:
         assert isinstance(l_CE, float), "l_CE should be float"
         assert isinstance(v_CE, float | int), "v_CE should be numeric"
 
-    def test_different_muscle_parameters(self, pennated_muscle):
+    def test_different_muscle_parameters(self, pennated_muscle) -> None:
         """Test with different muscle (pennated)."""
         l_MT = 0.30
         v_MT = 0.0
@@ -444,7 +444,7 @@ class TestComputeEquilibriumState:
 class TestPhysicalRealism:
     """Test physical realism of equilibrium solutions."""
 
-    def test_tendon_bears_load_when_stretched(self, standard_muscle):
+    def test_tendon_bears_load_when_stretched(self, standard_muscle) -> None:
         """Test that tendon force increases when muscle-tendon is stretched."""
         solver = EquilibriumSolver(standard_muscle)
         activation = 0.5
@@ -465,7 +465,7 @@ class TestPhysicalRealism:
             "Longer muscle-tendon should stretch tendon more"
         )
 
-    def test_fiber_length_decreases_with_activation(self, standard_muscle):
+    def test_fiber_length_decreases_with_activation(self, standard_muscle) -> None:
         """Test that fiber shortens with higher activation (for given l_MT).
 
         Higher activation -> more fiber force -> more tendon stretch -> shorter fiber
@@ -482,7 +482,7 @@ class TestPhysicalRealism:
             f"low={l_CE_low:.4f}m, high={l_CE_high:.4f}m"
         )
 
-    def test_equilibrium_force_balance(self, standard_muscle):
+    def test_equilibrium_force_balance(self, standard_muscle) -> None:
         """Test that fiber and tendon forces are balanced at equilibrium."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -512,7 +512,7 @@ class TestPhysicalRealism:
             err_msg="Fiber and tendon forces should balance at equilibrium",
         )
 
-    def test_solution_is_stable(self, standard_muscle):
+    def test_solution_is_stable(self, standard_muscle) -> None:
         """Test that small perturbations don't cause large changes."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -535,7 +535,7 @@ class TestPhysicalRealism:
 class TestNumericalAccuracy:
     """Test numerical accuracy and convergence properties."""
 
-    def test_residual_below_tolerance(self, standard_muscle):
+    def test_residual_below_tolerance(self, standard_muscle) -> None:
         """Test that converged solution has residual below tolerance."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -550,7 +550,7 @@ class TestNumericalAccuracy:
             f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
         )
 
-    def test_repeated_solves_give_consistent_results(self, standard_muscle):
+    def test_repeated_solves_give_consistent_results(self, standard_muscle) -> None:
         """Test that solving the same problem multiple times gives consistent results."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -570,7 +570,7 @@ class TestNumericalAccuracy:
                 err_msg="Repeated solves should give identical results",
             )
 
-    def test_solver_convergence_with_good_guess(self, standard_muscle):
+    def test_solver_convergence_with_good_guess(self, standard_muscle) -> None:
         """Test that solver converges quickly with good initial guess."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -593,7 +593,9 @@ class TestNumericalAccuracy:
         )
 
     @pytest.mark.parametrize("activation", [0.0, 0.25, 0.5, 0.75, 1.0])
-    def test_solver_robustness_across_activations(self, standard_muscle, activation):
+    def test_solver_robustness_across_activations(
+        self, standard_muscle, activation
+    ) -> None:
         """Test solver robustness across full activation range."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37
@@ -612,7 +614,7 @@ class TestNumericalAccuracy:
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def test_very_short_muscle_tendon(self, standard_muscle):
+    def test_very_short_muscle_tendon(self, standard_muscle) -> None:
         """Test with very short muscle-tendon length."""
         solver = EquilibriumSolver(standard_muscle)
 
@@ -628,7 +630,7 @@ class TestEdgeCases:
             # Convergence failure is acceptable for extreme cases
             pass
 
-    def test_very_long_muscle_tendon(self, standard_muscle):
+    def test_very_long_muscle_tendon(self, standard_muscle) -> None:
         """Test with very long muscle-tendon length."""
         solver = EquilibriumSolver(standard_muscle)
 
@@ -642,7 +644,7 @@ class TestEdgeCases:
             "Long muscle-tendon should have stretched fiber"
         )
 
-    def test_pennated_muscle_equilibrium(self, pennated_muscle):
+    def test_pennated_muscle_equilibrium(self, pennated_muscle) -> None:
         """Test equilibrium with pennation angle."""
         solver = EquilibriumSolver(pennated_muscle)
         l_MT = 0.30
@@ -660,7 +662,7 @@ class TestEdgeCases:
 
         assert l_tendon > 0, "Tendon length should be positive"
 
-    def test_minimum_activation(self, standard_muscle):
+    def test_minimum_activation(self, standard_muscle) -> None:
         """Test with minimum activation (passive only)."""
         solver = EquilibriumSolver(standard_muscle)
         l_MT = 0.37

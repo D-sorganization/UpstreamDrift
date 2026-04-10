@@ -36,7 +36,7 @@ def mock_loader_thread():
 class TestHeadlessSuite:
     """Headless integration tests for C3D Viewer."""
 
-    def test_mainwindow_startup(self, qtbot, mock_loader_thread):
+    def test_mainwindow_startup(self, qtbot, mock_loader_thread) -> None:
         """Verify that the main window initializes correctly."""
         window = C3DViewerMainWindow()
         qtbot.addWidget(window)
@@ -54,7 +54,7 @@ class TestHeadlessSuite:
         assert "Overview" in tab_texts
         # "Advanced Plots" might be conditional or pending, but checking core tabs
 
-    def test_file_loading_trigger(self, qtbot, mock_loader_thread):
+    def test_file_loading_trigger(self, qtbot, mock_loader_thread) -> None:
         """Verify that opening a file triggers the loader thread."""
         window = C3DViewerMainWindow()
         qtbot.addWidget(window)
@@ -88,7 +88,7 @@ class TestHeadlessSuite:
             # The status bar message uses os.path.basename, so it should still say "test_capture.c3d"
             assert "Loading test_capture.c3d" in window.statusBar().currentMessage()
 
-    def test_successful_load_ui_update(self, qtbot, mock_loader_thread):
+    def test_successful_load_ui_update(self, qtbot, mock_loader_thread) -> None:
         """Verify UI updates upon successful data load."""
         window = C3DViewerMainWindow()
         qtbot.addWidget(window)
@@ -114,7 +114,7 @@ class TestHeadlessSuite:
         # Verify status bar updated
         assert "Loaded test.c3d successfully" in window.statusBar().currentMessage()
 
-    def test_failed_load_ui_update(self, qtbot, mock_loader_thread):
+    def test_failed_load_ui_update(self, qtbot, mock_loader_thread) -> None:
         """Verify UI updates upon load failure."""
         window = C3DViewerMainWindow()
         qtbot.addWidget(window)

@@ -170,7 +170,7 @@ def _init_and_solve_ik(urdf_path, trajectory):
     return ik_result
 
 
-def _export_results(ik_result, trajectory, output_dir):
+def _export_results(ik_result, trajectory, output_dir) -> None:
     if not (ik_result is not None):
         raise ValueError("ik_result required")
     if not (trajectory is not None):
@@ -211,7 +211,7 @@ def _export_results(ik_result, trajectory, output_dir):
         pass
 
 
-def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback):
+def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback) -> None:
     if visualize:
         try:
             from motion_training.motion_visualizer import MotionVisualizer
@@ -261,7 +261,7 @@ def run_ik_demo(
     return ik_result
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     args = parse_args()
 

@@ -56,7 +56,7 @@ class TestMyoConverterInitialization:
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability"
     )
-    def test_initialization_when_available(self, mock_check):
+    def test_initialization_when_available(self, mock_check) -> None:
         """Test initialization when myoconverter is available."""
         mock_check.return_value = True
 
@@ -68,7 +68,7 @@ class TestMyoConverterInitialization:
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability"
     )
-    def test_initialization_when_unavailable(self, mock_check, caplog):
+    def test_initialization_when_unavailable(self, mock_check, caplog) -> None:
         """Test initialization when myoconverter is not available."""
         mock_check.return_value = False
 
@@ -82,7 +82,7 @@ class TestMyoConverterInitialization:
 class TestCheckAvailability:
     """Test _check_availability method."""
 
-    def test_availability_when_installed(self):
+    def test_availability_when_installed(self) -> None:
         """Test that check returns True when myoconverter can be imported."""
         with patch("builtins.__import__") as mock_import:
             # Mock successful import
@@ -92,7 +92,7 @@ class TestCheckAvailability:
             # The actual check happens in __init__
             assert isinstance(converter.myoconverter_available, bool)
 
-    def test_availability_when_not_installed(self):
+    def test_availability_when_not_installed(self) -> None:
         """Test that check returns False when import fails."""
         with patch(
             "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
@@ -111,7 +111,7 @@ class TestValidateInputs:
     )
     def test_valid_inputs(
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test validation with valid inputs."""
         converter = MyoConverter()
 
@@ -129,7 +129,7 @@ class TestValidateInputs:
     )
     def test_missing_osim_file(
         self, mock_check, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test validation with missing osim file."""
         converter = MyoConverter()
         missing_file = Path("/nonexistent/model.osim")
@@ -145,7 +145,7 @@ class TestValidateInputs:
     )
     def test_wrong_file_extension(
         self, mock_check, tmp_path, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test validation with wrong file extension."""
         converter = MyoConverter()
         wrong_file = tmp_path / "model.txt"
@@ -162,7 +162,7 @@ class TestValidateInputs:
     )
     def test_invalid_xml(
         self, mock_check, tmp_path, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test validation with invalid XML file."""
         converter = MyoConverter()
 
@@ -181,7 +181,7 @@ class TestValidateInputs:
     )
     def test_wrong_root_element(
         self, mock_check, tmp_path, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test validation with wrong root element."""
         converter = MyoConverter()
 
@@ -202,7 +202,7 @@ class TestValidateInputs:
     )
     def test_missing_geometry_folder_warning(
         self, mock_check, temp_osim_file, temp_output_folder, caplog
-    ):
+    ) -> None:
         """Test that missing geometry folder generates warning."""
         converter = MyoConverter()
         missing_geom = Path("/nonexistent/geometry")
@@ -222,7 +222,7 @@ class TestConvertOsimToMujoco:
     )
     def test_raises_error_when_unavailable(
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test that conversion raises error when myoconverter not available."""
         converter = MyoConverter()
 
@@ -238,7 +238,7 @@ class TestConvertOsimToMujoco:
     )
     def test_successful_conversion(
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test successful model conversion (requires myoconverter)."""
         # Skip test body if myoconverter not available
         pytest.skip("Requires myoconverter - pending implementation")
@@ -250,7 +250,7 @@ class TestConvertOsimToMujoco:
     )
     def test_custom_config_passed(
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test that custom configuration is passed to pipeline (requires myoconverter)."""
         # Skip test body if myoconverter not available
         pytest.skip("Requires myoconverter - pending implementation")
@@ -265,7 +265,7 @@ class TestHandleConversionError:
     )
     def test_geometry_error_handling(
         self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    ) -> None:
         """Test handling of geometry-related errors."""
         converter = MyoConverter()
         error = Exception("mesh file not found")
@@ -281,7 +281,7 @@ class TestHandleConversionError:
     )
     def test_muscle_error_handling(
         self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    ) -> None:
         """Test handling of muscle-related errors."""
         converter = MyoConverter()
         error = Exception("muscle path point invalid")
@@ -297,7 +297,7 @@ class TestHandleConversionError:
     )
     def test_constraint_error_handling(
         self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    ) -> None:
         """Test handling of constraint-related errors."""
         converter = MyoConverter()
         error = Exception("constraint violation detected")
@@ -313,7 +313,7 @@ class TestHandleConversionError:
     )
     def test_generic_error_handling(
         self, mock_check, temp_osim_file, temp_geometry_folder
-    ):
+    ) -> None:
         """Test handling of generic errors."""
         converter = MyoConverter()
         error = Exception("unknown error occurred")
@@ -331,7 +331,7 @@ class TestLoadConvertedModelKeyframe:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_generates_valid_code(self, mock_check, tmp_path):
+    def test_generates_valid_code(self, mock_check, tmp_path) -> None:
         """Test that generated code contains required elements."""
         converter = MyoConverter()
         model_path = tmp_path / "model.xml"
@@ -347,7 +347,7 @@ class TestLoadConvertedModelKeyframe:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_code_is_string(self, mock_check, tmp_path):
+    def test_code_is_string(self, mock_check, tmp_path) -> None:
         """Test that return type is string."""
         converter = MyoConverter()
         model_path = tmp_path / "model.xml"
@@ -364,7 +364,7 @@ class TestGetExampleModels:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_returns_dict(self, mock_check):
+    def test_returns_dict(self, mock_check) -> None:
         """Test that method returns a dictionary."""
         converter = MyoConverter()
         models = converter.get_example_models()
@@ -375,7 +375,7 @@ class TestGetExampleModels:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_contains_known_models(self, mock_check):
+    def test_contains_known_models(self, mock_check) -> None:
         """Test that dictionary contains expected model keys."""
         converter = MyoConverter()
         models = converter.get_example_models()
@@ -388,7 +388,7 @@ class TestGetExampleModels:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_urls_are_strings(self, mock_check):
+    def test_urls_are_strings(self, mock_check) -> None:
         """Test that all URLs are strings."""
         converter = MyoConverter()
         models = converter.get_example_models()
@@ -407,7 +407,7 @@ class TestValidateConversion:
     )
     def test_validation_passes_when_files_exist(
         self, mock_check, temp_osim_file, tmp_path
-    ):
+    ) -> None:
         """Test validation passes when both files exist."""
         converter = MyoConverter()
         mujoco_xml = tmp_path / "converted.xml"
@@ -421,7 +421,9 @@ class TestValidateConversion:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_validation_fails_when_mujoco_missing(self, mock_check, temp_osim_file):
+    def test_validation_fails_when_mujoco_missing(
+        self, mock_check, temp_osim_file
+    ) -> None:
         """Test validation fails when MuJoCo file missing."""
         converter = MyoConverter()
         missing_xml = Path("/nonexistent/model.xml")
@@ -434,7 +436,7 @@ class TestValidateConversion:
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=False,
     )
-    def test_validation_fails_when_osim_missing(self, mock_check, tmp_path):
+    def test_validation_fails_when_osim_missing(self, mock_check, tmp_path) -> None:
         """Test validation fails when OpenSim file missing."""
         converter = MyoConverter()
         mujoco_xml = tmp_path / "model.xml"
@@ -449,12 +451,12 @@ class TestValidateConversion:
 class TestInstallMyoconverterInstructions:
     """Test install_myoconverter_instructions function."""
 
-    def test_returns_string(self):
+    def test_returns_string(self) -> None:
         """Test that function returns a string."""
         instructions = install_myoconverter_instructions()
         assert isinstance(instructions, str)
 
-    def test_contains_installation_info(self):
+    def test_contains_installation_info(self) -> None:
         """Test that instructions contain key information."""
         instructions = install_myoconverter_instructions()
 
@@ -463,13 +465,13 @@ class TestInstallMyoconverterInstructions:
         assert "Docker" in instructions
         assert "Linux" in instructions
 
-    def test_contains_verification_step(self):
+    def test_contains_verification_step(self) -> None:
         """Test that instructions include verification."""
         instructions = install_myoconverter_instructions()
 
         assert "import myoconverter" in instructions
 
-    def test_contains_documentation_link(self):
+    def test_contains_documentation_link(self) -> None:
         """Test that instructions include documentation link."""
         instructions = install_myoconverter_instructions()
 
@@ -487,7 +489,7 @@ class TestEdgeCases:
     )
     def test_no_output_file_generated(
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
-    ):
+    ) -> None:
         """Test error when conversion completes but no output file found."""
         # Skip test body if myoconverter not available
         pytest.skip("Requires myoconverter - pending implementation")
@@ -498,7 +500,7 @@ class TestEdgeCases:
     )
     def test_output_folder_created_if_missing(
         self, mock_check, temp_osim_file, temp_geometry_folder, tmp_path
-    ):
+    ) -> None:
         """Test that output folder is created if it doesn't exist."""
         converter = MyoConverter()
         output_folder = tmp_path / "new_folder" / "subfolder"

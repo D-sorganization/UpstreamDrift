@@ -34,7 +34,7 @@ if PYQT6_AVAILABLE:
         )
 
 
-def test_visualization_widget_init(qtbot):
+def test_visualization_widget_init(qtbot) -> None:
     """Test that VisualizationWidget initializes correctly."""
     widget = VisualizationWidget()
     qtbot.addWidget(widget)
@@ -43,7 +43,7 @@ def test_visualization_widget_init(qtbot):
     assert widget.info_label.text() == "No URDF content loaded"
 
 
-def test_visualization_widget_update(qtbot):
+def test_visualization_widget_update(qtbot) -> None:
     """Test updating the visualization."""
     widget = VisualizationWidget()
     qtbot.addWidget(widget)
@@ -65,7 +65,7 @@ def test_visualization_widget_update(qtbot):
     assert "Joints: 1" in widget.info_label.text()
 
 
-def test_visualization_widget_clear(qtbot):
+def test_visualization_widget_clear(qtbot) -> None:
     """Test clearing the visualization."""
     widget = VisualizationWidget()
     qtbot.addWidget(widget)
@@ -77,7 +77,7 @@ def test_visualization_widget_clear(qtbot):
     assert widget.info_label.text() == "No URDF content loaded"
 
 
-def test_visualization_widget_reset_view(qtbot):
+def test_visualization_widget_reset_view(qtbot) -> None:
     """Test resetting the view."""
     widget = VisualizationWidget()
     # Force use_mujoco to False to ensure gl_widget is created for testing fallback
@@ -107,7 +107,7 @@ def test_visualization_widget_reset_view(qtbot):
 class TestVisualizationFlags:
     """Tests for VisualizationFlags dataclass."""
 
-    def test_default_values(self):
+    def test_default_values(self) -> None:
         """Test default visualization flags."""
         flags = VisualizationFlags()
 
@@ -117,7 +117,7 @@ class TestVisualizationFlags:
         assert flags.show_contacts is False
         assert flags.show_com is False
 
-    def test_to_dict(self):
+    def test_to_dict(self) -> None:
         """Test serialization to dictionary."""
         flags = VisualizationFlags(
             show_collision=True,
@@ -137,7 +137,7 @@ class TestVisualizationFlags:
 class TestMuJoCoViewerWidget:
     """Tests for MuJoCo viewer widget and toggles."""
 
-    def test_viewer_init(self, qtbot):
+    def test_viewer_init(self, qtbot) -> None:
         """Test MuJoCo viewer widget initialization."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -152,7 +152,7 @@ class TestMuJoCoViewerWidget:
         assert widget._joints_checkbox is not None
         assert widget._contacts_checkbox is not None
 
-    def test_toggle_collision(self, qtbot):
+    def test_toggle_collision(self, qtbot) -> None:
         """Test collision toggle changes visualization flags."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -168,7 +168,7 @@ class TestMuJoCoViewerWidget:
         widget._collision_checkbox.setChecked(False)
         assert widget._vis_flags.show_collision is False
 
-    def test_toggle_frames(self, qtbot):
+    def test_toggle_frames(self, qtbot) -> None:
         """Test frames toggle changes visualization flags."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -185,7 +185,7 @@ class TestMuJoCoViewerWidget:
         widget._frames_checkbox.setChecked(True)
         assert widget._vis_flags.show_frames is True
 
-    def test_toggle_joints(self, qtbot):
+    def test_toggle_joints(self, qtbot) -> None:
         """Test joint limits toggle changes visualization flags."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -197,7 +197,7 @@ class TestMuJoCoViewerWidget:
         widget._joints_checkbox.setChecked(True)
         assert widget._vis_flags.show_joint_limits is True
 
-    def test_toggle_contacts(self, qtbot):
+    def test_toggle_contacts(self, qtbot) -> None:
         """Test contacts toggle changes visualization flags."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -213,14 +213,14 @@ class TestMuJoCoViewerWidget:
         widget._contacts_checkbox.setChecked(False)
         assert widget._vis_flags.show_contacts is False
 
-    def test_visualization_changed_signal(self, qtbot):
+    def test_visualization_changed_signal(self, qtbot) -> None:
         """Test that visualization_changed signal is emitted on toggle."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
 
         received_flags = []
 
-        def on_changed(flags_dict):
+        def on_changed(flags_dict) -> None:
             received_flags.append(flags_dict)
 
         widget.visualization_changed.connect(on_changed)
@@ -232,7 +232,7 @@ class TestMuJoCoViewerWidget:
         assert len(received_flags) == 1
         assert received_flags[0]["collision"] is True
 
-    def test_set_visualization_flags_programmatic(self, qtbot):
+    def test_set_visualization_flags_programmatic(self, qtbot) -> None:
         """Test setting flags programmatically updates checkboxes."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -256,7 +256,7 @@ class TestMuJoCoViewerWidget:
         assert widget._vis_flags.show_collision is True
         assert widget._vis_flags.show_frames is False
 
-    def test_get_visualization_flags(self, qtbot):
+    def test_get_visualization_flags(self, qtbot) -> None:
         """Test retrieving current flags."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -270,7 +270,7 @@ class TestMuJoCoViewerWidget:
         assert flags.show_contacts is True
         assert flags.show_frames is True  # Default
 
-    def test_is_mujoco_available(self, qtbot):
+    def test_is_mujoco_available(self, qtbot) -> None:
         """Test MuJoCo availability check."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -279,7 +279,7 @@ class TestMuJoCoViewerWidget:
         result = widget.is_mujoco_available()
         assert result == (MUJOCO_AVAILABLE and widget._renderer is not None)
 
-    def test_get_model_info_empty(self, qtbot):
+    def test_get_model_info_empty(self, qtbot) -> None:
         """Test model info with no loaded model."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -291,7 +291,7 @@ class TestMuJoCoViewerWidget:
         assert info["joint_count"] == 0
         assert info["mujoco_available"] == MUJOCO_AVAILABLE
 
-    def test_headless_mode_toggles_disabled(self, qtbot):
+    def test_headless_mode_toggles_disabled(self, qtbot) -> None:
         """Test that toggles are disabled in headless mode."""
         # This test requires MuJoCo to NOT be available
         # We'll simulate by checking the _disable_toggles behavior
@@ -307,7 +307,7 @@ class TestMuJoCoViewerWidget:
             assert widget._contacts_checkbox.isEnabled() is False
             assert widget._launch_btn.isEnabled() is False
 
-    def test_update_visualization(self, qtbot):
+    def test_update_visualization(self, qtbot) -> None:
         """Test updating visualization with URDF content."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -336,7 +336,7 @@ class TestMuJoCoViewerWidget:
             or "failed" in status.lower()
         )
 
-    def test_clear(self, qtbot):
+    def test_clear(self, qtbot) -> None:
         """Test clearing the viewer."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -346,7 +346,7 @@ class TestMuJoCoViewerWidget:
 
         assert widget._urdf_content == ""
 
-    def test_reset_view(self, qtbot):
+    def test_reset_view(self, qtbot) -> None:
         """Test resetting camera view."""
         widget = MuJoCoViewerWidget()
         qtbot.addWidget(widget)
@@ -373,7 +373,7 @@ class TestMuJoCoViewerWidget:
 class TestIssue2502PartialImportCrash:
     """VisualizationWidget must not crash when MuJoCoViewerWidget is None."""
 
-    def test_visualization_widget_with_null_mujoco_viewer(self, qtbot):
+    def test_visualization_widget_with_null_mujoco_viewer(self, qtbot) -> None:
         """If MuJoCoViewerWidget import failed (None), init must not raise TypeError."""
         import src.tools.model_explorer.visualization_widget as vw_module
 
@@ -383,7 +383,9 @@ class TestIssue2502PartialImportCrash:
             # Should fall back to the simple GL view, not crash
             assert widget.use_mujoco is False
 
-    def test_visualization_widget_use_mujoco_false_when_viewer_none(self, qtbot):
+    def test_visualization_widget_use_mujoco_false_when_viewer_none(
+        self, qtbot
+    ) -> None:
         """use_mujoco must be False when MuJoCoViewerWidget is unavailable."""
         import src.tools.model_explorer.visualization_widget as vw_module
 

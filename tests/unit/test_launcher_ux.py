@@ -23,7 +23,7 @@ class TestGolfLauncherUX(unittest.TestCase):
         """Set up QApplication for GUI tests."""
         get_qapp()  # Simplified with utility
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.mock_registry = Mock()
         self.mock_models = []
@@ -50,7 +50,7 @@ class TestGolfLauncherUX(unittest.TestCase):
         "GolfLauncher initialization pipeline was refactored - "
         "model_order depends on LayoutManager which requires deep mocking"
     )
-    def test_empty_state_ux(self):
+    def test_empty_state_ux(self) -> None:
         """Test that empty search state shows actionable UI.
 
         Skipped: GolfLauncher.__init__ was refactored to use LayoutManager,

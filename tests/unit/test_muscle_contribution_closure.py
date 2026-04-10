@@ -51,7 +51,9 @@ if MYOSUITE_AVAILABLE:
             engine.load_from_path("myoElbowPose1D6MRandom-v0")
             return engine
 
-        def test_muscle_induced_acceleration_closure_zero_torque(self, elbow_engine):
+        def test_muscle_induced_acceleration_closure_zero_torque(
+            self, elbow_engine
+        ) -> None:
             """Verify muscle contributions sum to total when no external torques applied.
 
             Physics:
@@ -96,7 +98,7 @@ if MYOSUITE_AVAILABLE:
                 err_msg="Muscle contribution closure failed at zero torque",
             )
 
-        def test_muscle_contribution_closure_with_gravity(self, elbow_engine):
+        def test_muscle_contribution_closure_with_gravity(self, elbow_engine) -> None:
             """Verify closure holds even with gravitational loading.
 
             Gravity adds a bias force g(q). Induced acceleration analysis
@@ -133,7 +135,7 @@ if MYOSUITE_AVAILABLE:
                 err_msg="Muscle contribution closure failed with gravity",
             )
 
-        def test_individual_muscle_contributions_physical(self, elbow_engine):
+        def test_individual_muscle_contributions_physical(self, elbow_engine) -> None:
             """Verify individual muscle contributions are physically reasonable.
 
             Induced accelerations should align with muscle anatomy (e.g., flexors
@@ -172,7 +174,7 @@ if MYOSUITE_AVAILABLE:
         )
         def test_closure_holds_at_different_activations(
             self, elbow_engine, activation_level: float
-        ):
+        ) -> None:
             """Verify closure property at various muscle activation levels.
 
             The closure test should hold regardless of muscle activation state.
@@ -226,7 +228,7 @@ if MYOSUITE_AVAILABLE:
                 ),
             ],
         )
-        def test_closure_across_models(self, model_name: str):
+        def test_closure_across_models(self, model_name: str) -> None:
             """Verify closure holds for various MyoSuite models."""
             engine = _MyoSuitePhysicsEngine()
             try:

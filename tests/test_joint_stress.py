@@ -33,7 +33,7 @@ class TestJointStressAnalyzer:
             "joint_torques": {},
         }
 
-    def test_analyze_all_joints(self, analyzer, mock_data):
+    def test_analyze_all_joints(self, analyzer, mock_data) -> None:
         """Test complete analysis runs without error."""
         results = analyzer.analyze_all_joints(
             mock_data["joint_angles"],
@@ -47,7 +47,7 @@ class TestJointStressAnalyzer:
         assert isinstance(results["hip_lead"], JointStressResult)
         assert results["hip_lead"].side == JointSide.LEAD
 
-    def test_hip_impingement_risk(self, analyzer, mock_data):
+    def test_hip_impingement_risk(self, analyzer, mock_data) -> None:
         """Test hip impingement logic."""
         # High internal rotation + flexion
         mock_data["joint_angles"]["hip_lead_rotation"] = np.radians(
@@ -69,7 +69,7 @@ class TestJointStressAnalyzer:
         assert result.impingement_risk is True
         assert result.risk_score > 0
 
-    def test_elbow_valgus_risk(self, analyzer, mock_data):
+    def test_elbow_valgus_risk(self, analyzer, mock_data) -> None:
         """Test elbow valgus torque risk."""
         # High torque
         mock_data["joint_torques"]["elbow_flexion"] = np.full(
@@ -87,7 +87,7 @@ class TestJointStressAnalyzer:
         assert result.overload_risk is True
         assert result.risk_score > 0
 
-    def test_summary_generation(self, analyzer):
+    def test_summary_generation(self, analyzer) -> None:
         """Test summary report generation."""
         # Create dummy results
         results = {

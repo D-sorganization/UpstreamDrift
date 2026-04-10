@@ -21,7 +21,7 @@ from src.shared.python.engine_core.engine_availability import skip_if_unavailabl
 class TestSynergyResult:
     """Test SynergyResult dataclass."""
 
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test basic initialization of SynergyResult."""
         weights = np.random.rand(10, 3)
         activations = np.random.rand(3, 100)
@@ -43,7 +43,7 @@ class TestSynergyResult:
         assert result.n_synergies == 3
         assert result.muscle_names is None
 
-    def test_with_muscle_names(self):
+    def test_with_muscle_names(self) -> None:
         """Test SynergyResult with muscle names."""
         muscle_names = ["Biceps", "Triceps", "Deltoid"]
         weights = np.random.rand(3, 2)
@@ -61,7 +61,7 @@ class TestSynergyResult:
 
         assert result.muscle_names == muscle_names
 
-    def test_matrix_shapes_consistency(self):
+    def test_matrix_shapes_consistency(self) -> None:
         """Test that matrix shapes are consistent."""
         n_muscles = 5
         n_synergies = 2
@@ -87,7 +87,7 @@ class TestSynergyResult:
 class TestMuscleSynergyAnalyzerInitialization:
     """Test MuscleSynergyAnalyzer initialization."""
 
-    def test_initialization_with_valid_data(self):
+    def test_initialization_with_valid_data(self) -> None:
         """Test initialization with valid non-negative data."""
         data = np.random.rand(100, 5)  # 100 samples, 5 muscles
         analyzer = MuscleSynergyAnalyzer(data)
@@ -96,14 +96,14 @@ class TestMuscleSynergyAnalyzerInitialization:
         assert analyzer.n_muscles == 5
         np.testing.assert_array_equal(analyzer.data, data)
 
-    def test_initialization_generates_muscle_names(self):
+    def test_initialization_generates_muscle_names(self) -> None:
         """Test that muscle names are generated if not provided."""
         data = np.random.rand(50, 3)
         analyzer = MuscleSynergyAnalyzer(data)
 
         assert analyzer.muscle_names == ["Muscle 0", "Muscle 1", "Muscle 2"]
 
-    def test_initialization_with_custom_muscle_names(self):
+    def test_initialization_with_custom_muscle_names(self) -> None:
         """Test initialization with custom muscle names."""
         data = np.random.rand(50, 3)
         names = ["Biceps", "Triceps", "Deltoid"]
@@ -111,7 +111,7 @@ class TestMuscleSynergyAnalyzerInitialization:
 
         assert analyzer.muscle_names == names
 
-    def test_initialization_clips_negative_values(self, caplog):
+    def test_initialization_clips_negative_values(self, caplog) -> None:
         """Test that negative values are clipped to zero with warning."""
         # Create data with some negative values
         data = np.array(
@@ -133,7 +133,7 @@ class TestMuscleSynergyAnalyzerInitialization:
         assert analyzer.data[0, 1] == 0.0  # Was -0.1
         assert analyzer.data[1, 2] == 0.0  # Was -0.2
 
-    def test_initialization_with_list_input(self):
+    def test_initialization_with_list_input(self) -> None:
         """Test that initialization works with list input."""
         data_list = np.array([[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])
         analyzer = MuscleSynergyAnalyzer(data_list)
@@ -142,7 +142,7 @@ class TestMuscleSynergyAnalyzerInitialization:
         assert analyzer.n_muscles == 2
         assert isinstance(analyzer.data, np.ndarray)
 
-    def test_data_shape_extraction(self):
+    def test_data_shape_extraction(self) -> None:
         """Test that data shape is correctly extracted."""
         n_samples, n_muscles = 75, 8
         data = np.random.rand(n_samples, n_muscles)
@@ -157,7 +157,7 @@ class TestMuscleSynergyAnalyzerInitialization:
 class TestExtractSynergies:
     """Test extract_synergies method."""
 
-    def test_extract_single_synergy(self):
+    def test_extract_single_synergy(self) -> None:
         """Test extracting a single synergy."""
         # Create simple synthetic data: 1 synergy
         np.random.seed(42)
@@ -176,7 +176,7 @@ class TestExtractSynergies:
         assert result.activations.shape == (1, n_samples)
         assert result.reconstructed.shape == (n_samples, n_muscles)
 
-    def test_extract_multiple_synergies(self):
+    def test_extract_multiple_synergies(self) -> None:
         """Test extracting multiple synergies."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -189,7 +189,7 @@ class TestExtractSynergies:
         assert result.activations.shape == (3, 100)
         assert result.reconstructed.shape == (100, 5)
 
-    def test_vaf_is_between_zero_and_one(self):
+    def test_vaf_is_between_zero_and_one(self) -> None:
         """Test that Variance Accounted For is between 0 and 1."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -199,7 +199,7 @@ class TestExtractSynergies:
             result = analyzer.extract_synergies(n_synergies=n_syn)
             assert 0.0 <= result.vaf <= 1.0, f"VAF out of range for {n_syn} synergies"
 
-    def test_vaf_increases_with_more_synergies(self):
+    def test_vaf_increases_with_more_synergies(self) -> None:
         """Test that VAF generally increases with more synergies."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -213,7 +213,7 @@ class TestExtractSynergies:
         assert vaf_2 >= vaf_1 - 0.01  # Allow small numerical tolerance
         assert vaf_3 >= vaf_2 - 0.01
 
-    def test_reconstruction_approximates_original(self):
+    def test_reconstruction_approximates_original(self) -> None:
         """Test that reconstruction approximates original data."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -230,7 +230,7 @@ class TestExtractSynergies:
         # Reconstruction shape should match data
         assert result.reconstructed.shape == data.shape
 
-    def test_weights_are_nonnegative(self):
+    def test_weights_are_nonnegative(self) -> None:
         """Test that muscle weights are non-negative (NMF property)."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -240,7 +240,7 @@ class TestExtractSynergies:
 
         assert np.all(result.weights >= 0), "Weights should be non-negative"
 
-    def test_activations_are_nonnegative(self):
+    def test_activations_are_nonnegative(self) -> None:
         """Test that activation profiles are non-negative (NMF property)."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -250,7 +250,7 @@ class TestExtractSynergies:
 
         assert np.all(result.activations >= 0), "Activations should be non-negative"
 
-    def test_invalid_number_of_synergies_too_small(self):
+    def test_invalid_number_of_synergies_too_small(self) -> None:
         """Test that n_synergies < 1 raises PreconditionError."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
@@ -258,7 +258,7 @@ class TestExtractSynergies:
         with pytest.raises(PreconditionError):
             analyzer.extract_synergies(n_synergies=0)
 
-    def test_invalid_number_of_synergies_too_large(self):
+    def test_invalid_number_of_synergies_too_large(self) -> None:
         """Test that n_synergies > n_muscles raises PreconditionError."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
@@ -266,7 +266,7 @@ class TestExtractSynergies:
         with pytest.raises(PreconditionError):
             analyzer.extract_synergies(n_synergies=6)  # > 5 muscles
 
-    def test_custom_max_iterations(self):
+    def test_custom_max_iterations(self) -> None:
         """Test that custom max_iter parameter works."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -276,7 +276,7 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=2, max_iter=500)
         assert result.n_synergies == 2
 
-    def test_result_includes_muscle_names(self):
+    def test_result_includes_muscle_names(self) -> None:
         """Test that result includes muscle names if provided."""
         data = np.random.rand(100, 3)
         names = ["M1", "M2", "M3"]
@@ -285,7 +285,7 @@ class TestExtractSynergies:
         result = analyzer.extract_synergies(n_synergies=2)
         assert result.muscle_names == names
 
-    def test_synergies_with_perfect_rank_1_data(self):
+    def test_synergies_with_perfect_rank_1_data(self) -> None:
         """Test synergy extraction on perfect rank-1 data."""
         np.random.seed(42)
         n_samples, n_muscles = 100, 5
@@ -308,7 +308,7 @@ class TestExtractSynergies:
 class TestFindOptimalSynergies:
     """Test find_optimal_synergies method."""
 
-    def test_finds_synergies_meeting_threshold(self):
+    def test_finds_synergies_meeting_threshold(self) -> None:
         """Test that method finds minimal synergies meeting VAF threshold."""
         np.random.seed(42)
         # Create data that's approximately rank-2
@@ -325,7 +325,7 @@ class TestFindOptimalSynergies:
             result.vaf >= 0.90 or result.n_synergies == 5
         )  # Either meets threshold or uses max
 
-    def test_returns_best_when_threshold_not_met(self, caplog):
+    def test_returns_best_when_threshold_not_met(self, caplog) -> None:
         """Test that method returns best result when threshold not met."""
         np.random.seed(42)
         # Create complex data (hard to approximate with few synergies)
@@ -344,7 +344,7 @@ class TestFindOptimalSynergies:
         # Should warn that threshold not met
         assert "threshold not met" in caplog.text.lower() or result.vaf >= 0.99
 
-    def test_respects_max_synergies_limit(self):
+    def test_respects_max_synergies_limit(self) -> None:
         """Test that method respects max_synergies limit."""
         np.random.seed(42)
         data = np.random.rand(100, 10)
@@ -355,7 +355,7 @@ class TestFindOptimalSynergies:
         # Should not exceed max_synergies
         assert result.n_synergies <= 3
 
-    def test_caps_at_number_of_muscles(self):
+    def test_caps_at_number_of_muscles(self) -> None:
         """Test that max_synergies is capped at n_muscles."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -367,7 +367,7 @@ class TestFindOptimalSynergies:
         # Should not exceed n_muscles (5)
         assert result.n_synergies <= 5
 
-    def test_low_threshold_finds_fewer_synergies(self):
+    def test_low_threshold_finds_fewer_synergies(self) -> None:
         """Test that lower VAF threshold requires fewer synergies."""
         np.random.seed(42)
         data = np.random.rand(100, 8)
@@ -384,7 +384,7 @@ class TestFindOptimalSynergies:
         # Lower threshold should require fewer (or equal) synergies
         assert result_low.n_synergies <= result_high.n_synergies
 
-    def test_threshold_of_one_uses_all_muscles(self):
+    def test_threshold_of_one_uses_all_muscles(self) -> None:
         """Test that VAF threshold of 1.0 tries to use all muscles."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -395,7 +395,7 @@ class TestFindOptimalSynergies:
         # Should use all 5 synergies (or meet threshold early)
         assert result.n_synergies <= 5
 
-    def test_returns_synergy_result(self):
+    def test_returns_synergy_result(self) -> None:
         """Test that method returns a SynergyResult object."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -406,7 +406,7 @@ class TestFindOptimalSynergies:
         assert isinstance(result, SynergyResult)
         assert result.n_synergies >= 1
 
-    def test_invalid_limit_raises_error(self):
+    def test_invalid_limit_raises_error(self) -> None:
         """Test that limit < 1 raises ValueError."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
@@ -420,7 +420,7 @@ class TestFindOptimalSynergies:
 class TestSklearnNotAvailable:
     """Test behavior when sklearn is not installed."""
 
-    def test_extract_synergies_raises_import_error(self):
+    def test_extract_synergies_raises_import_error(self) -> None:
         """Test that extract_synergies raises ImportError without sklearn."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
@@ -428,7 +428,7 @@ class TestSklearnNotAvailable:
         with pytest.raises(ImportError, match="sklearn is required"):
             analyzer.extract_synergies(n_synergies=2)
 
-    def test_find_optimal_synergies_raises_import_error(self):
+    def test_find_optimal_synergies_raises_import_error(self) -> None:
         """Test that find_optimal_synergies raises ImportError without sklearn."""
         data = np.random.rand(100, 5)
         analyzer = MuscleSynergyAnalyzer(data)
@@ -440,7 +440,7 @@ class TestSklearnNotAvailable:
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def test_single_sample_data(self):
+    def test_single_sample_data(self) -> None:
         """Test with single sample (degenerate case)."""
         data = np.array([[0.5, 0.3, 0.8]])  # 1 sample, 3 muscles
         analyzer = MuscleSynergyAnalyzer(data)
@@ -448,7 +448,7 @@ class TestEdgeCases:
         assert analyzer.n_samples == 1
         assert analyzer.n_muscles == 3
 
-    def test_single_muscle_data(self):
+    def test_single_muscle_data(self) -> None:
         """Test with single muscle."""
         data = np.random.rand(100, 1)  # 100 samples, 1 muscle
         analyzer = MuscleSynergyAnalyzer(data)
@@ -461,7 +461,7 @@ class TestEdgeCases:
             result = analyzer.extract_synergies(n_synergies=1)
             assert result.n_synergies == 1
 
-    def test_all_zeros_data(self):
+    def test_all_zeros_data(self) -> None:
         """Test with all-zero data."""
         data = np.zeros((100, 5))
         analyzer = MuscleSynergyAnalyzer(data)
@@ -479,7 +479,7 @@ class TestEdgeCases:
                 # Some NMF implementations may fail on zero data
                 pass
 
-    def test_uniform_activation_data(self):
+    def test_uniform_activation_data(self) -> None:
         """Test with uniform activation (all same value)."""
         data = np.ones((100, 5)) * 0.5
         analyzer = MuscleSynergyAnalyzer(data)
@@ -489,7 +489,7 @@ class TestEdgeCases:
             # Should be able to extract, though VAF might be perfect or undefined
             assert result.n_synergies == 1
 
-    def test_very_large_number_of_muscles(self):
+    def test_very_large_number_of_muscles(self) -> None:
         """Test with large number of muscles."""
         n_muscles = 100
         data = np.random.rand(50, n_muscles)
@@ -502,7 +502,7 @@ class TestEdgeCases:
             result = analyzer.extract_synergies(n_synergies=5)
             assert result.weights.shape == (n_muscles, 5)
 
-    def test_very_long_time_series(self):
+    def test_very_long_time_series(self) -> None:
         """Test with very long time series."""
         n_samples = 10000
         data = np.random.rand(n_samples, 5)
@@ -519,7 +519,7 @@ class TestEdgeCases:
 class TestNumericalAccuracy:
     """Test numerical accuracy and consistency."""
 
-    def test_reproducibility_with_fixed_seed(self):
+    def test_reproducibility_with_fixed_seed(self) -> None:
         """Test that results are reproducible with same random seed."""
         data = np.random.rand(100, 5)
 
@@ -532,7 +532,7 @@ class TestNumericalAccuracy:
         # VAF should be identical (same random_state=42 in NMF)
         np.testing.assert_allclose(result1.vaf, result2.vaf, rtol=1e-10)
 
-    def test_vaf_calculation_correctness(self):
+    def test_vaf_calculation_correctness(self) -> None:
         """Test that VAF is calculated correctly."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -547,7 +547,7 @@ class TestNumericalAccuracy:
 
         np.testing.assert_allclose(result.vaf, vaf_expected, rtol=1e-6)
 
-    def test_reconstruction_via_matrix_multiplication(self):
+    def test_reconstruction_via_matrix_multiplication(self) -> None:
         """Test that W @ H approximates reconstruction."""
         np.random.seed(42)
         data = np.random.rand(100, 5)
@@ -564,7 +564,7 @@ class TestNumericalAccuracy:
         # Should match result.reconstructed
         np.testing.assert_allclose(manual_recon, result.reconstructed, rtol=1e-5)
 
-    def test_max_synergies_equals_muscles_gives_perfect_reconstruction(self):
+    def test_max_synergies_equals_muscles_gives_perfect_reconstruction(self) -> None:
         """Test that using all muscles as synergies gives near-perfect reconstruction."""
         np.random.seed(42)
         n_muscles = 5

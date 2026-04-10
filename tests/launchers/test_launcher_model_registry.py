@@ -37,7 +37,7 @@ def mock_yaml_data():
     }
 
 
-def test_model_spec():
+def test_model_spec() -> None:
     """Test ModelSpec dataclass."""
     spec = ModelSpec(
         id="test",
@@ -50,14 +50,14 @@ def test_model_spec():
     assert spec.engine_type is None
 
 
-def test_model_registry_init():
+def test_model_registry_init() -> None:
     """Test initializing registry."""
     registry = ModelRegistry("custom/path.yaml")
     assert registry.config_path == Path("custom/path.yaml")
     assert not registry._loaded
 
 
-def test_model_registry_load_success(mock_yaml_data):
+def test_model_registry_load_success(mock_yaml_data) -> None:
     """Test parsing yaml config correctly."""
     registry = ModelRegistry()
     mock_file = mock_open(read_data=yaml.dump(mock_yaml_data))
@@ -80,7 +80,7 @@ def test_model_registry_load_success(mock_yaml_data):
     assert len(models) == 2
 
 
-def test_model_registry_load_missing_file():
+def test_model_registry_load_missing_file() -> None:
     """Test behaviour when config file is missing."""
     registry = ModelRegistry()
 
@@ -91,7 +91,7 @@ def test_model_registry_load_missing_file():
     assert len(registry.models) == 0
 
 
-def test_model_registry_yaml_error():
+def test_model_registry_yaml_error() -> None:
     """Test yaml parsing error handling."""
     registry = ModelRegistry()
     mock_file = mock_open(read_data="invalid: yaml: content\n - - -")
@@ -104,7 +104,7 @@ def test_model_registry_yaml_error():
         registry.load(Path("/fake/root"))
 
 
-def test_model_registry_type_error(mock_yaml_data):
+def test_model_registry_type_error(mock_yaml_data) -> None:
     """Test type error when loading."""
     # Introduce bad data to cause TypeError in ModelSpec initialization
     bad_data = {"models": [{"id": "bad", "unknown_arg": "value"}]}
@@ -119,7 +119,7 @@ def test_model_registry_type_error(mock_yaml_data):
         registry.load(Path("/fake/root"))
 
 
-def test_model_registry_os_error():
+def test_model_registry_os_error() -> None:
     """Test OS error when loading file."""
     registry = ModelRegistry()
 
@@ -131,7 +131,7 @@ def test_model_registry_os_error():
         registry.load(Path("/fake/root"))
 
 
-def test_get_model_by_id_not_found(mock_yaml_data):
+def test_get_model_by_id_not_found(mock_yaml_data) -> None:
     """Test getting an unknown model."""
     registry = ModelRegistry()
     mock_file = mock_open(read_data=yaml.dump(mock_yaml_data))
@@ -144,6 +144,6 @@ def test_get_model_by_id_not_found(mock_yaml_data):
     assert registry.get_model_by_id("nonexistent") is None
 
 
-def test_get_global_registry():
+def test_get_global_registry() -> None:
     """Test the global singleton accessor."""
     assert get_model_registry() is _registry

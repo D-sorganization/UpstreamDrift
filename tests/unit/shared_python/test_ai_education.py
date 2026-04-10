@@ -4,7 +4,7 @@ from src.shared.python.ai.education import EducationSystem, GlossaryEntry
 from src.shared.python.ai.types import ExpertiseLevel
 
 
-def test_glossary_entry_get_definition():
+def test_glossary_entry_get_definition() -> None:
     entry = GlossaryEntry(
         term="test",
         category="cat",
@@ -22,13 +22,13 @@ def test_glossary_entry_get_definition():
     assert entry.get_definition(ExpertiseLevel.EXPERT) == "adv"
 
 
-def test_education_system_init():
+def test_education_system_init() -> None:
     edu = EducationSystem()
     assert len(edu) > 0
     assert "inverse_dynamics" in edu
 
 
-def test_education_system_explain():
+def test_education_system_explain() -> None:
     edu = EducationSystem()
 
     # Not found
@@ -52,7 +52,7 @@ def test_education_system_explain():
     assert "Units" in exp_inter
 
 
-def test_education_system_get_entry():
+def test_education_system_get_entry() -> None:
     edu = EducationSystem()
     entry = edu.get_entry("inverse dynamics")
     assert entry is not None
@@ -61,7 +61,7 @@ def test_education_system_get_entry():
     assert edu.get_entry("missing") is None
 
 
-def test_education_system_get_related_terms():
+def test_education_system_get_related_terms() -> None:
     edu = EducationSystem()
     rel = edu.get_related_terms("inverse dynamics")
     assert "forward_dynamics" in rel
@@ -69,7 +69,7 @@ def test_education_system_get_related_terms():
     assert edu.get_related_terms("missing") == []
 
 
-def test_education_system_search():
+def test_education_system_search() -> None:
     edu = EducationSystem()
     results = edu.search("detective")  # in beginner inverse dynamics definition
     assert len(results) > 0
@@ -82,7 +82,7 @@ def test_education_system_search():
     assert edu.search("xyznonexistent") == []
 
 
-def test_education_system_categories():
+def test_education_system_categories() -> None:
     edu = EducationSystem()
     cats = edu.list_categories()
     assert "dynamics" in cats
@@ -90,7 +90,7 @@ def test_education_system_categories():
     assert "golf" in cats
 
 
-def test_education_system_list_terms():
+def test_education_system_list_terms() -> None:
     edu = EducationSystem()
     all_t = edu.list_terms()
     assert "inverse_dynamics" in all_t
@@ -100,7 +100,7 @@ def test_education_system_list_terms():
     assert "inverse_dynamics" not in cat_t
 
 
-def test_education_system_add_entry():
+def test_education_system_add_entry() -> None:
     edu = EducationSystem()
     entry = GlossaryEntry(
         term="New Term", category="cat", definitions={ExpertiseLevel.BEGINNER: "new"}
@@ -111,7 +111,7 @@ def test_education_system_add_entry():
     assert edu.get_entry("new term") == entry
 
 
-def test_load_data_file_entries(monkeypatch):
+def test_load_data_file_entries(monkeypatch) -> None:
     # Coverage for the try-except logic
 
     # We mock get_core_entries and get_extended_entries

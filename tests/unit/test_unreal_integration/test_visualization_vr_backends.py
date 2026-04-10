@@ -51,14 +51,14 @@ from src.unreal_integration.vr_interaction import (
 class TestVisualizationConfig:
     """Tests for VisualizationConfig."""
 
-    def test_default_config(self):
+    def test_default_config(self) -> None:
         """Test default configuration values."""
         config = VisualizationConfig.default()
         assert config.force_scale > 0
         assert config.trajectory_width > 0
         assert len(config.force_color_map) > 0
 
-    def test_vr_config(self):
+    def test_vr_config(self) -> None:
         """Test VR-optimized configuration."""
         config = VisualizationConfig.for_vr()
         # VR should have larger scales for visibility
@@ -69,12 +69,12 @@ class TestVisualizationConfig:
 class TestForceVectorRenderer:
     """Tests for ForceVectorRenderer."""
 
-    def test_create_renderer(self):
+    def test_create_renderer(self) -> None:
         """Test renderer creation."""
         renderer = ForceVectorRenderer()
         assert renderer is not None
 
-    def test_render_single_force(self):
+    def test_render_single_force(self) -> None:
         """Test rendering a single force vector."""
         renderer = ForceVectorRenderer()
         force = ForceVector(
@@ -87,7 +87,7 @@ class TestForceVectorRenderer:
         assert len(results) == 1
         assert results[0].visualization_type == VisualizationType.FORCE_ARROW
 
-    def test_render_torque(self):
+    def test_render_torque(self) -> None:
         """Test rendering a torque vector."""
         renderer = ForceVectorRenderer()
         torque = ForceVector(
@@ -100,7 +100,7 @@ class TestForceVectorRenderer:
         assert len(results) == 1
         assert results[0].visualization_type == VisualizationType.TORQUE_RING
 
-    def test_render_multiple_forces(self):
+    def test_render_multiple_forces(self) -> None:
         """Test rendering multiple forces."""
         renderer = ForceVectorRenderer()
         forces = [
@@ -114,7 +114,7 @@ class TestForceVectorRenderer:
         results = renderer.render(forces)
         assert len(results) == 5
 
-    def test_render_with_custom_color(self):
+    def test_render_with_custom_color(self) -> None:
         """Test rendering with custom color."""
         renderer = ForceVectorRenderer()
         force = ForceVector(
@@ -127,7 +127,7 @@ class TestForceVectorRenderer:
         assert results[0].colors is not None
         assert results[0].colors[0, 0] == 1.0  # Red channel
 
-    def test_render_data_metadata(self):
+    def test_render_data_metadata(self) -> None:
         """Test render data contains expected metadata."""
         renderer = ForceVectorRenderer()
         force = ForceVector(
@@ -146,18 +146,18 @@ class TestForceVectorRenderer:
 class TestTrajectoryRenderer:
     """Tests for TrajectoryRenderer."""
 
-    def test_create_renderer(self):
+    def test_create_renderer(self) -> None:
         """Test renderer creation."""
         renderer = TrajectoryRenderer()
         assert renderer is not None
 
-    def test_render_empty_trajectory(self):
+    def test_render_empty_trajectory(self) -> None:
         """Test rendering empty trajectory."""
         renderer = TrajectoryRenderer()
         result = renderer.render([])
         assert result.vertices.size == 0
 
-    def test_render_trajectory_line(self):
+    def test_render_trajectory_line(self) -> None:
         """Test rendering trajectory as line."""
         renderer = TrajectoryRenderer()
         points = [
@@ -170,7 +170,7 @@ class TestTrajectoryRenderer:
         assert result.visualization_type == VisualizationType.TRAJECTORY_LINE
         assert len(result.vertices) == 10
 
-    def test_render_trajectory_ribbon(self):
+    def test_render_trajectory_ribbon(self) -> None:
         """Test rendering trajectory as ribbon."""
         renderer = TrajectoryRenderer()
         points = [
@@ -182,7 +182,7 @@ class TestTrajectoryRenderer:
         result = renderer.render(points, as_ribbon=True)
         assert result.visualization_type == VisualizationType.TRAJECTORY_RIBBON
 
-    def test_render_with_velocity_colors(self):
+    def test_render_with_velocity_colors(self) -> None:
         """Test trajectory with velocity-based colors."""
         renderer = TrajectoryRenderer()
         points = [
@@ -197,7 +197,7 @@ class TestTrajectoryRenderer:
         assert result.colors is not None
         # Colors should vary with velocity
 
-    def test_render_ball_flight(self):
+    def test_render_ball_flight(self) -> None:
         """Test ball flight trajectory with landing marker."""
         renderer = TrajectoryRenderer()
         points = [
@@ -215,17 +215,17 @@ class TestTrajectoryRenderer:
 class TestHUDDataProvider:
     """Tests for HUDDataProvider."""
 
-    def test_create_provider_metric(self):
+    def test_create_provider_metric(self) -> None:
         """Test provider with metric units."""
         provider = HUDDataProvider(units="metric")
         assert provider.units == "metric"
 
-    def test_create_provider_imperial(self):
+    def test_create_provider_imperial(self) -> None:
         """Test provider with imperial units."""
         provider = HUDDataProvider(units="imperial")
         assert provider.units == "imperial"
 
-    def test_get_hud_data_with_metrics(self):
+    def test_get_hud_data_with_metrics(self) -> None:
         """Test HUD data with swing metrics."""
         provider = HUDDataProvider()
         metrics = SwingMetrics(
@@ -240,21 +240,21 @@ class TestHUDDataProvider:
         assert "panels" in hud
         assert "club_head_speed" in hud["panels"]
 
-    def test_format_value(self):
+    def test_format_value(self) -> None:
         """Test value formatting."""
         provider = HUDDataProvider()
         panel = {"value": 45.234, "unit": "m/s", "format": "{:.1f}"}
         formatted = provider.format_value(panel)
         assert formatted == "45.2 m/s"
 
-    def test_get_compact_hud(self):
+    def test_get_compact_hud(self) -> None:
         """Test compact HUD output."""
         provider = HUDDataProvider()
         metrics = SwingMetrics(club_head_speed=45.0, x_factor=52.0)
         compact = provider.get_compact_hud(metrics)
         assert "Club Head Speed" in compact
 
-    def test_unit_conversion_imperial(self):
+    def test_unit_conversion_imperial(self) -> None:
         """Test unit conversion to imperial."""
         provider = HUDDataProvider(units="imperial")
         metrics = SwingMetrics(club_head_speed=44.7)  # ~100 mph
@@ -272,7 +272,7 @@ class TestHUDDataProvider:
 class TestVRControllerState:
     """Tests for VRControllerState."""
 
-    def test_create_controller_state(self):
+    def test_create_controller_state(self) -> None:
         """Test controller state creation."""
         state = VRControllerState(
             hand=VRControllerHand.LEFT,
@@ -282,7 +282,7 @@ class TestVRControllerState:
         assert state.hand == VRControllerHand.LEFT
         assert state.position.y == 1.0
 
-    def test_trigger_pressed(self):
+    def test_trigger_pressed(self) -> None:
         """Test trigger pressed property."""
         state = VRControllerState(
             hand=VRControllerHand.RIGHT,
@@ -292,7 +292,7 @@ class TestVRControllerState:
         )
         assert state.is_trigger_pressed
 
-    def test_grip_pressed(self):
+    def test_grip_pressed(self) -> None:
         """Test grip pressed property."""
         state = VRControllerState(
             hand=VRControllerHand.LEFT,
@@ -302,7 +302,7 @@ class TestVRControllerState:
         )
         assert state.is_grip_pressed
 
-    def test_to_dict_from_dict(self):
+    def test_to_dict_from_dict(self) -> None:
         """Test serialization round-trip."""
         state = VRControllerState(
             hand=VRControllerHand.RIGHT,
@@ -320,7 +320,7 @@ class TestVRControllerState:
 class TestVRHeadsetState:
     """Tests for VRHeadsetState."""
 
-    def test_create_headset_state(self):
+    def test_create_headset_state(self) -> None:
         """Test headset state creation."""
         state = VRHeadsetState(
             position=Vector3(x=0.0, y=0.0, z=1.7),  # Eye height
@@ -328,7 +328,7 @@ class TestVRHeadsetState:
         )
         assert state.position.z == 1.7
 
-    def test_forward_vector(self):
+    def test_forward_vector(self) -> None:
         """Test forward direction calculation."""
         state = VRHeadsetState(
             position=Vector3.zero(),
@@ -342,13 +342,13 @@ class TestVRHeadsetState:
 class TestVRInteractionManager:
     """Tests for VRInteractionManager."""
 
-    def test_create_manager(self):
+    def test_create_manager(self) -> None:
         """Test manager creation."""
         manager = VRInteractionManager()
         assert manager is not None
         assert manager.locomotion_mode == VRLocomotionMode.TELEPORT
 
-    def test_update_headset(self):
+    def test_update_headset(self) -> None:
         """Test headset update."""
         manager = VRInteractionManager()
         headset = VRHeadsetState(
@@ -358,7 +358,7 @@ class TestVRInteractionManager:
         manager.update_headset(headset, timestamp=0.0)
         assert manager.headset is not None
 
-    def test_update_controller(self):
+    def test_update_controller(self) -> None:
         """Test controller update."""
         manager = VRInteractionManager()
         controller = VRControllerState(
@@ -369,12 +369,12 @@ class TestVRInteractionManager:
         manager.update_controller(controller, timestamp=0.0)
         assert manager.left_controller is not None
 
-    def test_trigger_event_callback(self):
+    def test_trigger_event_callback(self) -> None:
         """Test trigger press event callback."""
         manager = VRInteractionManager()
         events = []
 
-        def on_trigger(event):
+        def on_trigger(event) -> None:
             events.append(event)
 
         manager.on_trigger_press(on_trigger)
@@ -400,7 +400,7 @@ class TestVRInteractionManager:
         assert len(events) == 1
         assert events[0].event_type == "trigger_press"
 
-    def test_set_locomotion_mode(self):
+    def test_set_locomotion_mode(self) -> None:
         """Test locomotion mode change."""
         manager = VRInteractionManager()
         events = []
@@ -410,7 +410,7 @@ class TestVRInteractionManager:
         assert manager.locomotion_mode == VRLocomotionMode.SMOOTH
         assert len(events) == 1
 
-    def test_get_state(self):
+    def test_get_state(self) -> None:
         """Test getting complete VR state."""
         manager = VRInteractionManager()
         state = manager.get_state()
@@ -426,14 +426,14 @@ class TestVRInteractionManager:
 class TestViewerConfig:
     """Tests for ViewerConfig."""
 
-    def test_default_config(self):
+    def test_default_config(self) -> None:
         """Test default configuration."""
         config = ViewerConfig()
         assert config.width == 1280
         assert config.height == 720
         assert config.backend_type == BackendType.MESHCAT
 
-    def test_to_dict_from_dict(self):
+    def test_to_dict_from_dict(self) -> None:
         """Test serialization round-trip."""
         config = ViewerConfig(width=1920, height=1080)
         d = config.to_dict()
@@ -445,7 +445,7 @@ class TestViewerConfig:
 class TestCameraState:
     """Tests for CameraState."""
 
-    def test_default_camera(self):
+    def test_default_camera(self) -> None:
         """Test default camera state."""
         camera = CameraState()
         assert camera.fov == 45.0
@@ -457,13 +457,13 @@ class TestCameraState:
 class TestMockBackend:
     """Tests for MockBackend."""
 
-    def test_create_mock_backend(self):
+    def test_create_mock_backend(self) -> None:
         """Test mock backend creation."""
         backend = MockBackend()
         assert backend is not None
         assert not backend.is_initialized
 
-    def test_initialize_shutdown(self):
+    def test_initialize_shutdown(self) -> None:
         """Test initialization and shutdown."""
         backend = MockBackend()
         backend.initialize()
@@ -471,13 +471,13 @@ class TestMockBackend:
         backend.shutdown()
         assert not backend.is_initialized
 
-    def test_context_manager(self):
+    def test_context_manager(self) -> None:
         """Test context manager usage."""
         with MockBackend() as backend:
             assert backend.is_initialized
         assert not backend.is_initialized
 
-    def test_add_mesh(self):
+    def test_add_mesh(self) -> None:
         """Test adding mesh to mock backend."""
         backend = MockBackend()
         backend.initialize()
@@ -491,7 +491,7 @@ class TestMockBackend:
         assert name is not None
         assert backend.object_count == 1
 
-    def test_remove_mesh(self):
+    def test_remove_mesh(self) -> None:
         """Test removing mesh from mock backend."""
         backend = MockBackend()
         backend.initialize()
@@ -505,7 +505,7 @@ class TestMockBackend:
         assert backend.remove_object(name)
         assert backend.object_count == 0
 
-    def test_clear(self):
+    def test_clear(self) -> None:
         """Test clearing mock backend."""
         backend = MockBackend()
         backend.initialize()
@@ -522,7 +522,7 @@ class TestMockBackend:
         backend.clear()
         assert backend.object_count == 0
 
-    def test_render(self):
+    def test_render(self) -> None:
         """Test mock backend render."""
         backend = MockBackend()
         backend.initialize()
@@ -533,7 +533,7 @@ class TestMockBackend:
         assert image.shape[1] == backend.config.width
         assert backend.render_count == 1
 
-    def test_update_transform(self):
+    def test_update_transform(self) -> None:
         """Test updating object transform."""
         backend = MockBackend()
         backend.initialize()
@@ -551,19 +551,19 @@ class TestMockBackend:
 class TestCreateViewer:
     """Tests for create_viewer factory function."""
 
-    def test_create_mock_viewer(self):
+    def test_create_mock_viewer(self) -> None:
         """Test creating mock viewer."""
         viewer = create_viewer("mock")
         assert isinstance(viewer, MockBackend)
 
-    def test_create_viewer_with_config(self):
+    def test_create_viewer_with_config(self) -> None:
         """Test creating viewer with custom config."""
         config = ViewerConfig(width=800, height=600)
         viewer = create_viewer("mock", config=config)
         assert viewer.config.width == 800
         assert viewer.config.height == 600
 
-    def test_create_unsupported_viewer(self):
+    def test_create_unsupported_viewer(self) -> None:
         """Test creating unsupported viewer raises error."""
         with pytest.raises(ValueError):
             create_viewer("nonexistent_backend")
@@ -572,7 +572,7 @@ class TestCreateViewer:
 class TestRenderData:
     """Tests for RenderData."""
 
-    def test_create_render_data(self):
+    def test_create_render_data(self) -> None:
         """Test render data creation."""
         data = RenderData(
             visualization_type=VisualizationType.FORCE_ARROW,
@@ -581,7 +581,7 @@ class TestRenderData:
         assert data.visualization_type == VisualizationType.FORCE_ARROW
         assert len(data.vertices) == 2
 
-    def test_render_data_to_dict(self):
+    def test_render_data_to_dict(self) -> None:
         """Test render data serialization."""
         data = RenderData(
             visualization_type=VisualizationType.TRAJECTORY_LINE,

@@ -67,12 +67,12 @@ def engine(MuJoCoPhysicsEngineClass):
     return MuJoCoPhysicsEngineClass()
 
 
-def test_initialization(engine):
+def test_initialization(engine) -> None:
     assert engine.model is None
     assert engine.data is None
 
 
-def test_load_from_string(engine, mock_mj):
+def test_load_from_string(engine, mock_mj) -> None:
     xml = "<mujoco/>"
     engine.load_from_string(xml)
 
@@ -81,7 +81,7 @@ def test_load_from_string(engine, mock_mj):
     assert engine.data is not None
 
 
-def test_load_from_path(engine, mock_mj, tmp_path):
+def test_load_from_path(engine, mock_mj, tmp_path) -> None:
     # Use tmp_path so the file lives under /tmp, which is in ALLOWED_MODEL_DIRS
     model_file = tmp_path / "model.xml"
     model_file.write_text("<mujoco/>")
@@ -94,7 +94,7 @@ def test_load_from_path(engine, mock_mj, tmp_path):
     assert engine.xml_path.endswith("model.xml")
 
 
-def test_step(engine, mock_mj):
+def test_step(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
@@ -103,7 +103,7 @@ def test_step(engine, mock_mj):
     mock_mj.mj_step.assert_called_once_with(engine.model, engine.data)
 
 
-def test_reset(engine, mock_mj):
+def test_reset(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
@@ -113,7 +113,7 @@ def test_reset(engine, mock_mj):
     mock_mj.mj_forward.assert_called_once()  # called by forward()
 
 
-def test_set_control(engine):
+def test_set_control(engine) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -125,7 +125,7 @@ def test_set_control(engine):
     np.testing.assert_array_equal(engine.data.ctrl, ctrl)
 
 
-def test_set_control_mismatch(engine):
+def test_set_control_mismatch(engine) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -136,7 +136,7 @@ def test_set_control_mismatch(engine):
         engine.set_control(ctrl)
 
 
-def test_compute_mass_matrix(engine, mock_mj):
+def test_compute_mass_matrix(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -155,7 +155,7 @@ def test_compute_mass_matrix(engine, mock_mj):
     ],
     ids=["bias_forces", "gravity_forces"],
 )
-def test_compute_forces(engine, method, attr, values):
+def test_compute_forces(engine, method, attr, values) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     setattr(engine.data, attr, values)
@@ -164,7 +164,7 @@ def test_compute_forces(engine, method, attr, values):
     np.testing.assert_array_equal(result, values)
 
 
-def test_compute_inverse_dynamics(engine, mock_mj):
+def test_compute_inverse_dynamics(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -180,7 +180,7 @@ def test_compute_inverse_dynamics(engine, mock_mj):
     mock_mj.mj_inverse.assert_called_once()
 
 
-def test_compute_affine_drift(engine, mock_mj):
+def test_compute_affine_drift(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ctrl = np.array([1.0])
@@ -195,7 +195,7 @@ def test_compute_affine_drift(engine, mock_mj):
     assert mock_mj.mj_forward.call_count == 2  # Once for drift, once for restore
 
 
-def test_compute_jacobian(engine, mock_mj):
+def test_compute_jacobian(engine, mock_mj) -> None:
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
