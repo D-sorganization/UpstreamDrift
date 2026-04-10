@@ -49,11 +49,11 @@ class ConcentrationMixin:
         if molecular_weight is None:
             msg = "Molecular weight required for ppm conversion"
             raise ValueError(msg)
-        self._require_positive_finite(molecular_weight, "Molecular weight")
+        self._require_positive_finite(molecular_weight, "Molecular weight")  # type: ignore[attr-defined]
         return molecular_weight
 
     def _ensure_known_concentration_unit(self, unit_key: str, raw_unit: str) -> None:
-        if unit_key not in self.concentration_conversions:
+        if unit_key not in self.concentration_conversions:  # type: ignore[attr-defined]
             msg = f"Unknown concentration unit: {raw_unit}"
             raise ValueError(msg)
 
@@ -66,7 +66,7 @@ class ConcentrationMixin:
         pressure: float,
         molecular_weight: float | None,
     ) -> float:
-        factor = self.concentration_conversions[from_key]
+        factor = self.concentration_conversions[from_key]  # type: ignore[attr-defined]
         if factor is not None:
             return value * factor
         if from_key in {"mg/m³", "mg/m3"}:
@@ -89,7 +89,7 @@ class ConcentrationMixin:
         pressure: float,
         molecular_weight: float | None,
     ) -> float:
-        factor = self.concentration_conversions[to_key]
+        factor = self.concentration_conversions[to_key]  # type: ignore[attr-defined]
         if factor is not None:
             return mg_nm3_value / factor
         if to_key in {"mg/m³", "mg/m3"}:

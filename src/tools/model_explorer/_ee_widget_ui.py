@@ -107,27 +107,27 @@ class _EndEffectorManagerWidgetUIMixin:
 
     def _connect_signals(self) -> None:
         """Connect signals."""
-        self.identify_btn.clicked.connect(self._on_identify_end_effectors)
-        self.remove_ee_btn.clicked.connect(self._on_remove_end_effector)
-        self.extract_btn.clicked.connect(self._on_extract_to_library)
-        self.import_from_file_btn.clicked.connect(self._on_import_from_file)
-        self.attach_btn.clicked.connect(self._on_attach_end_effector)
+        self.identify_btn.clicked.connect(self._on_identify_end_effectors)  # type: ignore[attr-defined]
+        self.remove_ee_btn.clicked.connect(self._on_remove_end_effector)  # type: ignore[attr-defined]
+        self.extract_btn.clicked.connect(self._on_extract_to_library)  # type: ignore[attr-defined]
+        self.import_from_file_btn.clicked.connect(self._on_import_from_file)  # type: ignore[attr-defined]
+        self.attach_btn.clicked.connect(self._on_attach_end_effector)  # type: ignore[attr-defined]
 
         self.current_list.itemSelectionChanged.connect(
-            self._on_current_selection_changed
+            self._on_current_selection_changed  # type: ignore[attr-defined]
         )
         self.builtin_list.itemSelectionChanged.connect(
-            self._on_library_selection_changed
+            self._on_library_selection_changed  # type: ignore[attr-defined]
         )
         self.custom_list.itemSelectionChanged.connect(
-            self._on_library_selection_changed
+            self._on_library_selection_changed  # type: ignore[attr-defined]
         )
 
     def _populate_builtin_list(self) -> None:
         """Populate the built-in end effectors list."""
         self.builtin_list.clear()
-        for key in self.library.get_builtin_names():
-            info = self.library.get_builtin_info(key)
+        for key in self.library.get_builtin_names():  # type: ignore[attr-defined]
+            info = self.library.get_builtin_info(key)  # type: ignore[attr-defined]
             if info:
                 from PyQt6.QtCore import Qt
                 from PyQt6.QtWidgets import QListWidgetItem

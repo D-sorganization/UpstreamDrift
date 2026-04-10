@@ -89,8 +89,8 @@ class SurfaceGeometryMixin:
 
         # Build interpolator
         ny, nx = heightmap.shape
-        x = np.linspace(0, self.width, nx)
-        y = np.linspace(0, self.height, ny)
+        x = np.linspace(0, self.width, nx)  # type: ignore[attr-defined]
+        y = np.linspace(0, self.height, ny)  # type: ignore[attr-defined]
 
         self._heightmap_interpolator = interpolate.RegularGridInterpolator(
             (y, x),
@@ -113,7 +113,7 @@ class SurfaceGeometryMixin:
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        pos = np.clip(position[:2], [0, 0], [self.width, self.height])
+        pos = np.clip(position[:2], [0, 0], [self.width, self.height])  # type: ignore[attr-defined]
 
         # Base elevation from heightmap or contours
         elevation = 0.0

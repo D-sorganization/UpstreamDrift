@@ -485,26 +485,26 @@ class MuJoCoOffscreenRenderer:
 
         try:
             # Configure camera parameters before scene update
-            self._camera.azimuth = self.azimuth
-            self._camera.elevation = self.elevation
-            self._camera.distance = self.distance
-            self._camera.lookat[:] = self.lookat
+            self._camera.azimuth = self.azimuth  # type: ignore[union-attr]
+            self._camera.elevation = self.elevation  # type: ignore[union-attr]
+            self._camera.distance = self.distance  # type: ignore[union-attr]
+            self._camera.lookat[:] = self.lookat  # type: ignore[union-attr]
 
             # Update scene with configured camera and visualization options
             if self._scene_option is not None:
-                self._renderer.update_scene(
+                self._renderer.update_scene(  # type: ignore[union-attr]
                     self._data,
                     camera=self._camera,
                     scene_option=self._scene_option,
                 )
             else:
-                self._renderer.update_scene(
+                self._renderer.update_scene(  # type: ignore[union-attr]
                     self._data,
                     camera=self._camera,
                 )
 
             # Render to RGB array
-            image = self._renderer.render()
+            image = self._renderer.render()  # type: ignore[union-attr]
             return image
 
         except (RuntimeError, ValueError, OSError) as e:

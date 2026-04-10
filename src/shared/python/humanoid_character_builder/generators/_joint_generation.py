@@ -1,0 +1,128 @@
+from __future__ import annotations
+
+from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
+from humanoid_character_builder.core.segment_definitions import (
+    JointDefinition,
+    JointType,
+)
+from humanoid_character_builder.mesh.inertia_calculator import InertiaResult
+
+
+def map_joint_type(joint_type: JointType) -> str:
+    mapping = {
+        JointType.FIXED: "fixed",
+        JointType.REVOLUTE: "revolute",
+        JointType.CONTINUOUS: "continuous",
+        JointType.PRISMATIC: "prismatic",
+        JointType.FLOATING: "floating",
+        JointType.PLANAR: "planar",
+        JointType.UNIVERSAL: "revolute",
+        JointType.GIMBAL: "revolute",
+        JointType.SPHERICAL: "revolute",
+    }
+    return mapping.get(joint_type, "fixed")
+
+
+def generate_single_joint(
+    joint_name: str,
+    joint_def: JointDefinition,
+    joints: list[GeneratedJoint],
+) -> None:
+    urdf_type = map_joint_type(joint_def.joint_type)
+
+    limits = None
+    if urdf_type in ("revolute", "prismatic"):
+        limits = joint_def.limits.as_dict()
+
+    joints.append(
+        GeneratedJoint(
+            name=joint_name,
+            joint_type=urdf_type,
+            parent=joint_def.parent_segment,
+            child=joint_def.child_segment,
+            origin_xyz=joint_def.origin_xyz,
+            origin_rpy=joint_def.origin_rpy,
+            axis=joint_def.axis,
+            limits=limits,
+            dynamics={
+                "damping": joint_def.damping,
+                "friction": joint_def.friction,
+            },
+        )
+    )
+
+
+def expand_composite_joint(
+    joint_name: str,
+    joint_def: JointDefinition,
+    links: dict[str, GeneratedLink],
+    joints: list[GeneratedJoint],
+) -> None:
+    if joint_def.joint_type == JointType.GIMBAL:
+        axes = [
+            joint_def.axis,
+            joint_def.secondary_axis or (0.0, 1.0, 0.0),
+            joint_def.tertiary_axis or (1.0, 0.0, 0.0),
+        ]
+        suffixes = ["_z", "_y", "_x"]
+    elif joint_def.joint_type == JointType.UNIVERSAL:
+        axes = [
+            joint_def.axis,
+            joint_def.secondary_axis or (0.0, 1.0, 0.0),
+        ]
+        suffixes = ["_1", "_2"]
+    else:
+        generate_single_joint(joint_name, joint_def, joints)
+        return
+
+    parent = joint_def.parent_segment
+
+    for i, (axis, suffix) in enumerate(zip(axes, suffixes, strict=True)):
+        is_last = i == len(axes) - 1
+        child = joint_def.child_segment if is_last else f"{joint_name}{suffix}_link"
+
+        if not is_last:
+            links[child] = GeneratedLink(
+                name=child,
+                mass=0.001,
+                inertia=InertiaResult.create_default(0.001),
+                visual_geometry={"type": "sphere", "radius": 0.001},
+                collision_geometry=None,
+                origin_xyz=(0.0, 0.0, 0.0),
+                origin_rpy=(0.0, 0.0, 0.0),
+            )
+
+        origin_xyz = joint_def.origin_xyz if i == 0 else (0.0, 0.0, 0.0)
+        origin_rpy = joint_def.origin_rpy if i == 0 else (0.0, 0.0, 0.0)
+
+        joints.append(
+            GeneratedJoint(
+                name=f"{joint_name}{suffix}",
+                joint_type="revolute",
+                parent=parent,
+                child=child,
+                origin_xyz=origin_xyz,
+                origin_rpy=origin_rpy,
+                axis=axis,
+                limits=joint_def.limits.as_dict(),
+                dynamics={
+                    "damping": joint_def.damping,
+                    "friction": joint_def.friction,
+                },
+            )
+        )
+
+        parent = child
+
+
+def generate_joint(
+    joint_name: str,
+    joint_def: JointDefinition,
+    links: dict[str, GeneratedLink],
+    joints: list[GeneratedJoint],
+    expand_composite: bool,
+) -> None:
+    if joint_def.is_composite() and expand_composite:
+        expand_composite_joint(joint_name, joint_def, links, joints)
+    else:
+        generate_single_joint(joint_name, joint_def, joints)

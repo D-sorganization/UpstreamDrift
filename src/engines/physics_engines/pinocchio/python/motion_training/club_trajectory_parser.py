@@ -402,13 +402,13 @@ class ClubTrajectoryParser:
             raise ValueError("row must be provided")
         get = self._make_row_accessor(row)
 
-        sample = get(self.SAMPLE_COL)
+        sample = get(self.SAMPLE_COL)  # type: ignore[operator]
         if sample is None or not isinstance(sample, (int, float)):
             return None
 
         try:
             sample_idx = int(sample)
-            time = float(get(self.TIME_COL))
+            time = float(get(self.TIME_COL))  # type: ignore[operator]
 
             grip_pos, grip_rot = self._parse_grip_data(get)
             face_pos, face_rot = self._parse_club_face_data(get, grip_pos, grip_rot)

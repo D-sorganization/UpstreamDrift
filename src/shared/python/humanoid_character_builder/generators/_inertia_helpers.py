@@ -1,0 +1,63 @@
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+from typing import Any
+
+from humanoid_character_builder.mesh.inertia_calculator import (
+    InertiaMode,
+    InertiaResult,
+    MeshInertiaCalculator,
+)
+from humanoid_character_builder.mesh.primitive_inertia import (
+    PrimitiveInertiaCalculator,
+    estimate_segment_primitive,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def compute_segment_inertia(
+    segment_name: str,
+    seg_params: Any,
+    mass: float,
+    dimensions: dict[str, float],
+    inertia_mode: InertiaMode,
+    mesh_inertia_calc: MeshInertiaCalculator,
+    primitive_inertia_calc: PrimitiveInertiaCalculator,
+    mesh_dir: Path | str | None,
+) -> InertiaResult:
+    if seg_params.has_inertia_override():
+        override = seg_params.inertia_override
+        return MeshInertiaCalculator.create_manual_inertia(
+            ixx=override.get("ixx", 0.01),
+            iyy=override.get("iyy", 0.01),
+            izz=override.get("izz", 0.01),
+            mass=mass,
+            ixy=override.get("ixy", 0.0),
+            ixz=override.get("ixz", 0.0),
+            iyz=override.get("iyz", 0.0),
+        )
+
+    if (
+        inertia_mode
+        in (InertiaMode.MESH_UNIFORM_DENSITY, InertiaMode.MESH_SPECIFIED_MASS)
+        and mesh_dir
+    ):
+        mesh_path = Path(mesh_dir) / f"{segment_name}.stl"
+        if mesh_path.exists():
+            try:
+                if inertia_mode == InertiaMode.MESH_SPECIFIED_MASS:
+                    return mesh_inertia_calc.compute_from_mesh(mesh_path, mass=mass)
+                return mesh_inertia_calc.compute_from_mesh(mesh_path)
+            except (KeyError, ValueError, TypeError) as e:
+                logger.warning(
+                    f"Mesh inertia calculation failed for {segment_name}: {e}"
+                )
+
+    length = dimensions.get("length", 0.1)
+    width = dimensions.get("width", 0.05)
+    depth = dimensions.get("depth", 0.05)
+
+    shape, shape_dims = estimate_segment_primitive(segment_name, length, width, depth)
+    return primitive_inertia_calc.compute(shape, mass, shape_dims)

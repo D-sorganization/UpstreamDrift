@@ -31,7 +31,7 @@ class SurfaceIOMixin:
 
         if suffix == ".npy":
             heightmap = np.load(filepath)
-            self.set_heightmap(heightmap)
+            self.set_heightmap(heightmap)  # type: ignore[attr-defined]
 
         elif suffix == ".csv":
             self._load_csv_topography(filepath)
@@ -67,7 +67,7 @@ class SurfaceIOMixin:
                     )
                 )
 
-        self.set_contour_points(points)
+        self.set_contour_points(points)  # type: ignore[attr-defined]
 
     def _load_json_topography(self, filepath: Path) -> None:
         """Load topography from JSON file."""
@@ -86,7 +86,7 @@ class SurfaceIOMixin:
                 ContourPoint(x=p["x"], y=p["y"], elevation=p["elevation"])
                 for p in data["contours"]
             ]
-            self.set_contour_points(points)
+            self.set_contour_points(points)  # type: ignore[attr-defined]
 
         # Load slope regions if present
         if "slopes" in data:
@@ -95,7 +95,7 @@ class SurfaceIOMixin:
             )
 
             for s in data["slopes"]:
-                self.add_slope_region(
+                self.add_slope_region(  # type: ignore[attr-defined]
                     SlopeRegion(
                         center=np.array(s["center"]),
                         radius=s["radius"],
@@ -106,7 +106,7 @@ class SurfaceIOMixin:
 
         # Load hole position if present
         if "hole_position" in data:
-            self.set_hole_position(np.array(data["hole_position"]))
+            self.set_hole_position(np.array(data["hole_position"]))  # type: ignore[attr-defined]
 
     def _load_geotiff_topography(self, filepath: Path) -> None:
         """Load topography from GeoTIFF file."""
@@ -123,4 +123,4 @@ class SurfaceIOMixin:
 
         with rasterio.open(filepath) as src:
             heightmap = src.read(1)
-            self.set_heightmap(heightmap)
+            self.set_heightmap(heightmap)  # type: ignore[attr-defined]

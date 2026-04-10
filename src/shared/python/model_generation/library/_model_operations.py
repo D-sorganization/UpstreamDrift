@@ -58,15 +58,15 @@ def add_local_model(
 
     entry = ModelEntry(
         id=model_id,
-        name=name or urdf_path.stem,
+        name=name or urdf_path.stem,  # type: ignore[union-attr]
         description=description,
         category=category,
         source=RepositorySource.LOCAL,
-        source_path=str(urdf_path.parent),
+        source_path=str(urdf_path.parent),  # type: ignore[union-attr]
         urdf_path=urdf_path,
         mesh_dir=(
-            urdf_path.parent / "meshes"
-            if (urdf_path.parent / "meshes").exists()
+            urdf_path.parent / "meshes"  # type: ignore[union-attr]
+            if (urdf_path.parent / "meshes").exists()  # type: ignore[union-attr]
             else None
         ),
         tags=tags or [],

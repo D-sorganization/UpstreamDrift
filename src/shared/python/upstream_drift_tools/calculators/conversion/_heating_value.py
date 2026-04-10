@@ -14,7 +14,7 @@ class HeatingValueMixin:
         if not (value is not None):
             raise ValueError("value must be provided")
         if gas_density_stp is not None:
-            self._require_positive_finite(gas_density_stp, "Gas density")
+            self._require_positive_finite(gas_density_stp, "Gas density")  # type: ignore[attr-defined]
         from_key = from_unit.lower()
         to_key = to_unit.lower()
         if from_key == to_key:
@@ -27,7 +27,7 @@ class HeatingValueMixin:
         return self._heating_from_mj_per_kg(mj_per_kg, to_key, to_unit, gas_density_stp)
 
     def _ensure_known_heating_unit(self, unit_key: str, raw_unit: str) -> None:
-        if unit_key not in self.heating_value_conversions:
+        if unit_key not in self.heating_value_conversions:  # type: ignore[attr-defined]
             msg = f"Unknown heating value unit: {raw_unit}"
             raise ValueError(msg)
 
@@ -38,7 +38,7 @@ class HeatingValueMixin:
         from_unit: str,
         gas_density_stp: float | None,
     ) -> float:
-        factor = self.heating_value_conversions[from_key]
+        factor = self.heating_value_conversions[from_key]  # type: ignore[attr-defined]
         if factor is not None:
             return value * factor
         density = self._require_gas_density(gas_density_stp, from_unit)
@@ -58,7 +58,7 @@ class HeatingValueMixin:
         to_unit: str,
         gas_density_stp: float | None,
     ) -> float:
-        factor = self.heating_value_conversions[to_key]
+        factor = self.heating_value_conversions[to_key]  # type: ignore[attr-defined]
         if factor is not None:
             return mj_per_kg / factor
         density = self._require_gas_density(gas_density_stp, to_unit)

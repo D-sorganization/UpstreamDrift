@@ -18,7 +18,7 @@ class _TopographyIOMixin:
 
     def set_contour_points(self, points: list[ElevationPoint]) -> None: ...
 
-    def to_heightmap(self, resolution: int = 100) -> np.ndarray: ...
+    def to_heightmap(self, resolution: int = 100) -> np.ndarray: ...  # type: ignore[empty-body]
 
     @classmethod
     def from_file(

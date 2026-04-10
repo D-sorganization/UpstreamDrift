@@ -46,7 +46,7 @@ class _URDFValidationMixin:
         messages = []
 
         try:
-            DefusedET.fromstring(self._content)
+            DefusedET.fromstring(self._content)  # type: ignore[attr-defined]
         except ET.ParseError as e:
             # Parse error message for line/column
             error_str = str(e)
@@ -77,7 +77,7 @@ class _URDFValidationMixin:
         messages: list[ValidationMessage] = []
 
         try:
-            root = DefusedET.fromstring(self._content)
+            root = DefusedET.fromstring(self._content)  # type: ignore[attr-defined]
         except ET.ParseError:
             return messages  # Already reported in XML validation
 
@@ -385,7 +385,7 @@ class _URDFValidationMixin:
         tag_start = f"<{elem.tag}"
 
         # Find in content
-        lines = self._content.split("\n")
+        lines = self._content.split("\n")  # type: ignore[attr-defined]
         for idx, line in enumerate(lines, 1):
             if tag_start in line:
                 # Check if attributes match

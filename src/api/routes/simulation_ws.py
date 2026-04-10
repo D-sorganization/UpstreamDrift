@@ -44,7 +44,7 @@ def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
         return
     q = np.array(state_dict.get("q", []), dtype=float)
     v = np.array(state_dict.get("v", []), dtype=float)
-    engine.set_state(q, v)  # type: ignore[attr-defined]
+    engine.set_state(q, v)
 
 
 def _engine_state_to_dict(engine: object) -> dict[str, Any]:
@@ -62,7 +62,7 @@ def _engine_state_to_dict(engine: object) -> dict[str, Any]:
     """
     if not hasattr(engine, "get_state"):
         return {}
-    result = engine.get_state()  # type: ignore[attr-defined]
+    result = engine.get_state()
     if not isinstance(result, (tuple, list)) or len(result) < 2:
         return {}
     q, v = result[0], result[1]

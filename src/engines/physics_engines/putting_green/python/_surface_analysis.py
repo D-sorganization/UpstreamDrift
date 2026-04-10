@@ -32,7 +32,7 @@ class SurfaceAnalysisMixin:
         t_values = np.linspace(0, 1, num_samples)
         positions = [start + t * (end - start) for t in t_values]
 
-        slopes = [self.get_slope_at(p) for p in positions]
+        slopes = [self.get_slope_at(p) for p in positions]  # type: ignore[attr-defined]
 
         # Perpendicular to putt direction
         putt_dir = end - start
@@ -92,8 +92,8 @@ class SurfaceAnalysisMixin:
 
         return {
             "positions": np.array(positions),
-            "elevations": np.array([self.get_elevation_at(p) for p in positions]),
-            "slopes": np.array([self.get_slope_at(p) for p in positions]),
+            "elevations": np.array([self.get_elevation_at(p) for p in positions]),  # type: ignore[attr-defined]
+            "slopes": np.array([self.get_slope_at(p) for p in positions]),  # type: ignore[attr-defined]
             "distance": np.linalg.norm(end - start),
         }
 
@@ -110,13 +110,13 @@ class SurfaceAnalysisMixin:
             raise ValueError("resolution must be provided")
         if not (resolution is not None):
             raise ValueError("resolution must be provided")
-        x = np.linspace(0, self.width, resolution)
-        y = np.linspace(0, self.height, resolution)
+        x = np.linspace(0, self.width, resolution)  # type: ignore[attr-defined]
+        y = np.linspace(0, self.height, resolution)  # type: ignore[attr-defined]
 
         heightmap = np.zeros((resolution, resolution))
 
         for i, yi in enumerate(y):
             for j, xi in enumerate(x):
-                heightmap[i, j] = self.get_elevation_at(np.array([xi, yi]))
+                heightmap[i, j] = self.get_elevation_at(np.array([xi, yi]))  # type: ignore[attr-defined]
 
         return heightmap

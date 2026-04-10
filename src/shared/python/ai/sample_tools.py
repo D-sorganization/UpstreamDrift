@@ -149,7 +149,7 @@ def _register_load_c3d_tool(registry: ToolRegistry) -> None:  # type: ignore[ret
         except ImportError as e:
             return {"success": False, "error": f"Failed to load C3D: {e}"}
 
-    return load_c3d
+    return load_c3d  # type: ignore[return-value]
 
 
 def _register_marker_info_tool(registry: ToolRegistry, load_c3d_fn: Any) -> None:
@@ -224,7 +224,7 @@ def _register_marker_info_tool(registry: ToolRegistry, load_c3d_fn: Any) -> None
 def _register_data_tools(registry: ToolRegistry) -> None:
     """Register data loading and management tools."""
     _register_list_sample_files_tool(registry)
-    load_c3d_fn = _register_load_c3d_tool(registry)
+    load_c3d_fn = _register_load_c3d_tool(registry)  # type: ignore[func-returns-value]
     _register_marker_info_tool(registry, load_c3d_fn)
 
 

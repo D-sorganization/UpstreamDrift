@@ -36,7 +36,7 @@ def renderer() -> MatplotlibRenderer:  # type: ignore[return]
 
 
 @pytest.fixture(autouse=True)
-def _close_figs() -> None:  # type: ignore[return]
+def _close_figs() -> None:  # type: ignore[misc,return]
     """Close all matplotlib figures after each test."""
     yield
     plt.close("all")

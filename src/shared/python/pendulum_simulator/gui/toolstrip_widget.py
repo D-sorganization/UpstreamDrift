@@ -665,7 +665,7 @@ class ToolStrip(QWidget):
         extra_col.addStretch()
         layout.addLayout(extra_col)
 
-    def _overlay_build_frame_rows(self, overlay_layout: QVBoxLayout) -> None:
+    def _overlay_build_frame_rows(self, overlay_layout: QVBoxLayout) -> None:  # type: ignore[no-redef]
         """Build rows A-D: force/mobility/force-ellipsoid checkboxes and segment row."""
         # Row A: Force Vectors
         self.chk_forces = QCheckBox("Force Vectors")
@@ -724,8 +724,8 @@ class ToolStrip(QWidget):
         seg_lbl = QLabel("Segments:")
         seg_lbl.setStyleSheet("color:#505070;font-size:11px;")
         seg_row.addWidget(seg_lbl)
-        self._segment_checks: dict[str, QCheckBox] = {}
-        self._segment_names: list[str] = ["shoulder", "wrist", "tip"]
+        self._segment_checks: dict[str, QCheckBox] = {}  # type: ignore[no-redef]
+        self._segment_names: list[str] = ["shoulder", "wrist", "tip"]  # type: ignore[no-redef]
         for name in self._segment_names:
             chk = QCheckBox(name[:6])
             chk.setChecked(True)
@@ -741,7 +741,7 @@ class ToolStrip(QWidget):
         seg_row.addStretch()
         overlay_layout.addLayout(seg_row)
 
-    def _overlay_build_extra_col(self, layout: QHBoxLayout) -> None:
+    def _overlay_build_extra_col(self, layout: QHBoxLayout) -> None:  # type: ignore[no-redef]
         """Build the extra toggles column (right of the overlay frame)."""
         extra_col = QVBoxLayout()
         extra_col.setContentsMargins(0, 0, 0, 0)

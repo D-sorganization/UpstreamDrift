@@ -80,7 +80,8 @@ if HAS_PYQT:
     BaseClass = BaseCalculatorWidget if BASE_CALCULATOR_AVAILABLE else QWidget
 
     class SyngasCompressionCalculatorWidget(  # type: ignore[valid-type, misc]
-        _SyngasTabsMixin, BaseClass
+        _SyngasTabsMixin,
+        BaseClass,  # type: ignore[misc,valid-type]
     ):
         """Main syngas compression calculator widget."""
 

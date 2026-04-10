@@ -84,8 +84,8 @@ class GasFlowMixin:
             )
         if from_unit in {"Nm3/hr", "Nm³/hr"}:
             return value
-        if from_unit in self.mass_flow_factors:
-            kg_s = value * self.mass_flow_factors[from_unit]
+        if from_unit in self.mass_flow_factors:  # type: ignore[attr-defined]
+            kg_s = value * self.mass_flow_factors[from_unit]  # type: ignore[attr-defined]
             return (kg_s * 3600.0) / density_stp
         msg = f"Unknown gas flow unit: {from_unit}"
         raise UnknownUnitError(msg)
@@ -118,9 +118,9 @@ class GasFlowMixin:
             )
         if to_unit in {"Nm3/hr", "Nm³/hr"}:
             return m3_hr_std
-        if to_unit in self.mass_flow_factors:
+        if to_unit in self.mass_flow_factors:  # type: ignore[attr-defined]
             kg_s = (m3_hr_std * density_stp) / 3600.0
-            return kg_s / self.mass_flow_factors[to_unit]
+            return kg_s / self.mass_flow_factors[to_unit]  # type: ignore[attr-defined]
         msg = f"Unknown gas flow unit: {to_unit}"
         raise UnknownUnitError(msg)
 
@@ -175,8 +175,8 @@ class GasFlowMixin:
             raise ValueError("gas_type must be provided")
         if not (gas_type is not None):
             raise ValueError("gas_type must be provided")
-        self._require_positive_finite(temperature, "temperature")
-        self._require_positive_finite(pressure, "pressure")
+        self._require_positive_finite(temperature, "temperature")  # type: ignore[attr-defined]
+        self._require_positive_finite(pressure, "pressure")  # type: ignore[attr-defined]
         gas_props = GAS_DATABASE.get(gas_type.lower(), GAS_DATABASE["air"])
         Tr = temperature / gas_props.critical_temp
         Pr = pressure / gas_props.critical_pressure

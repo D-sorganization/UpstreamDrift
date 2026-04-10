@@ -12,23 +12,24 @@ class DynamicsMixin:
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
-        if not self.sim:
+        if not self.sim:  # type: ignore[attr-defined]
             return np.array([])
 
         try:
             import mujoco
 
-            if hasattr(self.sim.model, "nv") and not isinstance(
-                self.sim.model.nv, type(lambda: None)
+            if hasattr(self.sim.model, "nv") and not isinstance(  # type: ignore[attr-defined]
+                self.sim.model.nv,  # type: ignore[attr-defined]
+                type(lambda: None),  # type: ignore[attr-defined]
             ):
-                nv = self.sim.model.nv
+                nv = self.sim.model.nv  # type: ignore[attr-defined]
             else:
                 nv = 1
 
             M = np.zeros((nv, nv))
 
             try:
-                mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)
+                mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)  # type: ignore[attr-defined]
             except TypeError:
                 M = np.eye(nv)
 
@@ -41,8 +42,8 @@ class DynamicsMixin:
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
-        if self.sim:
-            return np.array(self.sim.data.qfrc_bias)
+        if self.sim:  # type: ignore[attr-defined]
+            return np.array(self.sim.data.qfrc_bias)  # type: ignore[attr-defined]
         return np.array([])
 
     def compute_gravity_forces(self) -> np.ndarray:
@@ -55,15 +56,15 @@ class DynamicsMixin:
             raise ValueError("qacc must be provided")
         if not (qacc is not None):
             raise ValueError("qacc must be provided")
-        if not self.sim:
+        if not self.sim:  # type: ignore[attr-defined]
             return np.array([])
 
         try:
             import mujoco
 
-            self.sim.data.qacc[:] = qacc
-            mujoco.mj_inverse(self.sim.model, self.sim.data)
-            return np.array(self.sim.data.qfrc_inverse)
+            self.sim.data.qacc[:] = qacc  # type: ignore[attr-defined]
+            mujoco.mj_inverse(self.sim.model, self.sim.data)  # type: ignore[attr-defined]
+            return np.array(self.sim.data.qfrc_inverse)  # type: ignore[attr-defined]
 
         except ImportError as e:
             logger.error("Failed to compute inverse dynamics: %s", e)
@@ -74,23 +75,25 @@ class DynamicsMixin:
             raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
-        if not self.sim:
+        if not self.sim:  # type: ignore[attr-defined]
             return None
 
         try:
             import mujoco
 
             body_id = mujoco.mj_name2id(
-                self.sim.model, mujoco.mjtObj.mjOBJ_BODY, body_name
+                self.sim.model,  # type: ignore[attr-defined]
+                mujoco.mjtObj.mjOBJ_BODY,
+                body_name,  # type: ignore[attr-defined]
             )
 
             if body_id == -1:
                 return None
 
-            jacp = np.zeros((3, self.sim.model.nv))
-            jacr = np.zeros((3, self.sim.model.nv))
+            jacp = np.zeros((3, self.sim.model.nv))  # type: ignore[attr-defined]
+            jacr = np.zeros((3, self.sim.model.nv))  # type: ignore[attr-defined]
 
-            mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)
+            mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)  # type: ignore[attr-defined]
 
             return {"linear": jacp, "angular": jacr, "spatial": np.vstack([jacr, jacp])}
 

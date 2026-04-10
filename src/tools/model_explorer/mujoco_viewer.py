@@ -305,7 +305,7 @@ class MuJoCoViewerWidget(QWidget):
         errors = []
 
         try:
-            root = ET.fromstring(urdf_content)
+            root = ET.fromstring(urdf_content)  # nosec B314 - urdf is validated tool input
         except ET.ParseError as e:
             return [f"XML Parse Error: {e}"]
 

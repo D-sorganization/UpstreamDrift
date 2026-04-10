@@ -11,14 +11,14 @@ logger = get_logger(__name__)
 
 class MuscleInterfaceMixin:
     def get_muscle_analyzer(self) -> Any | None:
-        if not self.sim:
+        if not self.sim:  # type: ignore[attr-defined]
             logger.warning("Cannot create muscle analyzer - simulation not initialized")
             return None
 
         try:
             from .muscle_analysis import MyoSuiteMuscleAnalyzer
 
-            return MyoSuiteMuscleAnalyzer(self.sim)
+            return MyoSuiteMuscleAnalyzer(self.sim)  # type: ignore[attr-defined]
 
         except ImportError as e:
             logger.error(f"Failed to import muscle analyzer: {e}")
@@ -34,7 +34,7 @@ class MuscleInterfaceMixin:
         try:
             from .muscle_analysis import MyoSuiteGripModel
 
-            return MyoSuiteGripModel(self.sim, analyzer)
+            return MyoSuiteGripModel(self.sim, analyzer)  # type: ignore[attr-defined]
 
         except ImportError as e:
             logger.error(f"Failed to import grip model: {e}")
@@ -58,14 +58,14 @@ class MuscleInterfaceMixin:
                 activation_clamped = max(0.0, min(1.0, activation))
 
                 try:
-                    ctrl = self.sim.data.ctrl
+                    ctrl = self.sim.data.ctrl  # type: ignore[attr-defined]
 
                     if (
                         hasattr(ctrl, "__len__")
                         and actuator_id < len(ctrl)
                         or hasattr(ctrl, "__setitem__")
                     ):
-                        self.sim.data.ctrl[actuator_id] = activation_clamped
+                        self.sim.data.ctrl[actuator_id] = activation_clamped  # type: ignore[attr-defined]
 
                 except (TypeError, AttributeError, IndexError):
                     pass
