@@ -1,0 +1,55 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Any
+
+
+@dataclass
+class SteamProperties:
+    """Container for steam thermodynamic properties"""
+
+    temperature: float  # K
+    pressure: float  # Pa
+    density: float  # kg/m³
+    specific_volume: float  # m³/kg
+    enthalpy: float  # J/kg
+    entropy: float  # J/kg-K
+    internal_energy: float  # J/kg
+    cp: float  # J/kg-K (specific heat at constant pressure)
+    cv: float  # J/kg-K (specific heat at constant volume)
+    speed_of_sound: float  # m/s
+    thermal_conductivity: float  # W/m-K
+    dynamic_viscosity: float  # Pa·s
+    kinematic_viscosity: float  # m²/s
+    quality: float  # Steam quality (0-1, if applicable)
+    phase: str  # 'liquid', 'vapor', 'two-phase'
+    # --- new comprehensive fields ---
+    compressibility_factor: float | None = None  # Dimensionless Z
+    prandtl_number: float | None = None  # Dimensionless Pr
+    specific_heat_ratio: float | None = None  # Cp/Cv (k)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for easy export"""
+        return {
+            "Temperature (K)": self.temperature,
+            "Temperature (°C)": self.temperature - 273.15,
+            "Pressure (Pa)": self.pressure,
+            "Pressure (bar)": self.pressure / 1e5,
+            "Density (kg/m³)": self.density,
+            "Specific Volume (m³/kg)": self.specific_volume,
+            "Enthalpy (J/kg)": self.enthalpy,
+            "Enthalpy (kJ/kg)": self.enthalpy / 1000,
+            "Entropy (J/kg-K)": self.entropy,
+            "Internal Energy (J/kg)": self.internal_energy,
+            "Cp (J/kg-K)": self.cp,
+            "Cv (J/kg-K)": self.cv,
+            "Speed of Sound (m/s)": self.speed_of_sound,
+            "Thermal Conductivity (W/m-K)": self.thermal_conductivity,
+            "Dynamic Viscosity (Pa·s)": self.dynamic_viscosity,
+            "Kinematic Viscosity (m²/s)": self.kinematic_viscosity,
+            "Quality": self.quality,
+            "Phase": self.phase,
+            "Compressibility Factor (Z)": self.compressibility_factor,
+            "Prandtl Number": self.prandtl_number,
+            "Cp/Cv (k)": self.specific_heat_ratio,
+        }
