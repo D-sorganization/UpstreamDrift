@@ -33,6 +33,7 @@ class DummyConfig:
 
 def test_ui_build_hook_ci_env(monkeypatch, tmp_path):
     monkeypatch.setenv("CI", "true")
+    (tmp_path / "ui" / "dist").mkdir(parents=True)
     hook = build_hooks.UIBuildHook(str(tmp_path), {})
     hook.initialize("1.0.0", {})
     # Should skip, no error
@@ -40,9 +41,26 @@ def test_ui_build_hook_ci_env(monkeypatch, tmp_path):
 
 def test_ui_build_hook_skip_env(monkeypatch, tmp_path):
     monkeypatch.setenv("SKIP_UI_BUILD", "1")
+    (tmp_path / "ui" / "dist").mkdir(parents=True)
     hook = build_hooks.UIBuildHook(str(tmp_path), {})
     hook.initialize("1.0.0", {})
     # Should skip, no error
+
+
+def test_ui_build_hook_ci_env_without_bundle_fails(monkeypatch, tmp_path):
+    monkeypatch.setenv("CI", "true")
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+
+    with pytest.raises(RuntimeError) as exc:
+        hook.initialize("1.0.0", {})
+
+    assert "UI bundle is missing" in str(exc.value)
+
+
+def test_ui_build_hook_editable_ci_without_bundle_skips(monkeypatch, tmp_path):
+    monkeypatch.setenv("CI", "true")
+    hook = build_hooks.UIBuildHook(str(tmp_path), {})
+    hook.initialize("editable", {})
 
 
 @patch("build_hooks.subprocess.run")

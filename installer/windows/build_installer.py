@@ -5,17 +5,29 @@ with modular physics engine selection and proper dependency management.
 """
 
 import argparse
+import json
+import logging
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
 
+from installer.windows.packaging_profiles import (
+    build_profile_environment,
+    get_packaging_profile,
+    iter_packaging_profile_ids,
+)
+
 # Project paths
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-INSTALLER_DIR = Path(__file__).parent
+_this_file = Path(__file__)
+_installer_dir = _this_file.parent
+PROJECT_ROOT = _installer_dir.parent.parent
+INSTALLER_DIR = _installer_dir
 BUILD_DIR = INSTALLER_DIR / "build"
 DIST_DIR = INSTALLER_DIR / "dist"
+
+logger = logging.getLogger(__name__)
 
 
 def check_prerequisites() -> bool:
@@ -27,7 +39,7 @@ def check_prerequisites() -> bool:
     try:
         import cx_Freeze  # type: ignore[import-not-found]
 
-        print(f"✓ cx_Freeze {cx_Freeze.version}")  # noqa: T201
+        logger.info("cx_Freeze %s", cx_Freeze.version)
     except ImportError:
         return False
 
@@ -89,8 +101,12 @@ def detect_physics_engines() -> list[str]:
     return available
 
 
-def build_executable() -> bool:
+def build_executable(
+    profile_name: str,
+    provider_roots: tuple[str | os.PathLike[str], ...] = (),
+) -> bool:
     """Build the executable using cx_Freeze."""
+    profile = get_packaging_profile(profile_name)
 
     # Change to installer directory
     original_cwd = os.getcwd()
@@ -99,7 +115,10 @@ def build_executable() -> bool:
     try:
         # Run setup.py build
         result = subprocess.run(
-            [sys.executable, "setup.py", "build"], capture_output=True, text=True
+            [sys.executable, "setup.py", "build"],
+            capture_output=True,
+            text=True,
+            env=build_profile_environment(profile, provider_roots),
         )
 
         return result.returncode == 0
@@ -108,8 +127,12 @@ def build_executable() -> bool:
         os.chdir(original_cwd)
 
 
-def build_msi() -> bool:
+def build_msi(
+    profile_name: str,
+    provider_roots: tuple[str | os.PathLike[str], ...] = (),
+) -> bool:
     """Build the MSI installer."""
+    profile = get_packaging_profile(profile_name)
 
     # Change to installer directory
     original_cwd = os.getcwd()
@@ -118,7 +141,10 @@ def build_msi() -> bool:
     try:
         # Run setup.py bdist_msi
         result = subprocess.run(
-            [sys.executable, "setup.py", "bdist_msi"], capture_output=True, text=True
+            [sys.executable, "setup.py", "bdist_msi"],
+            capture_output=True,
+            text=True,
+            env=build_profile_environment(profile, provider_roots),
         )
 
         if result.returncode != 0:
@@ -135,25 +161,41 @@ def build_msi() -> bool:
         os.chdir(original_cwd)
 
 
-def create_installer_info() -> None:
+def create_installer_info(
+    profile_name: str,
+    provider_roots: tuple[str | os.PathLike[str], ...] = (),
+) -> None:
     """Create installer information file."""
+    profile = get_packaging_profile(profile_name)
     available_engines = detect_physics_engines()
     major, minor, micro = sys.version_info[:3]
 
     info = {
         "version": "1.0.0",
         "build_date": "2026-01-12",
+        "packaging_profile": profile.profile_id,
+        "profile_display_name": profile.display_name,
+        "description": profile.description,
+        "discovery_mode": profile.discovery_mode,
         "physics_engines": available_engines,
+        "supported_provider_ids": list(profile.supported_provider_ids),
+        "provider_roots": [str(Path(root)) for root in provider_roots],
         "python_version": f"{major}.{minor}.{micro}",
         "platform": "Windows x64",
     }
 
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     info_file = DIST_DIR / "installer_info.json"
-    import json
 
-    with open(info_file, "w") as f:
+    with open(info_file, "w", encoding="utf-8") as f:
         json.dump(info, f, indent=2)
+
+
+def _log_generated_outputs(output_files: list[Path]) -> None:
+    """Log generated installer artifacts with their sizes."""
+    for file_path in output_files:
+        size_mb = os.path.getsize(file_path) / (1024 * 1024)
+        logger.info("Generated %s (%.2f MB)", file_path.name, size_mb)
 
 
 def main() -> None:
@@ -170,8 +212,21 @@ def main() -> None:
     parser.add_argument(
         "--exe-only", action="store_true", help="Build executable only (no MSI)"
     )
+    parser.add_argument(
+        "--profile",
+        choices=iter_packaging_profile_ids(),
+        default="hybrid",
+        help="Packaging profile to build",
+    )
+    parser.add_argument(
+        "--provider-root",
+        action="append",
+        default=[],
+        help="Optional external provider repository root for hybrid/full builds",
+    )
 
     args = parser.parse_args()
+    provider_roots = tuple(args.provider_root)
 
     # Check prerequisites
     if not check_prerequisites():
@@ -191,23 +246,21 @@ def main() -> None:
         sys.exit(1)
 
     # Build executable
-    if not build_executable():
+    if not build_executable(args.profile, provider_roots):
         sys.exit(1)
 
     # Build MSI (unless exe-only)
     if not args.exe_only:
-        if not build_msi():
+        if not build_msi(args.profile, provider_roots):
             sys.exit(1)
 
         # Create installer info
-        create_installer_info()
+        create_installer_info(args.profile, provider_roots)
 
     # List output files
     output_files = list(DIST_DIR.glob("*"))
     if output_files:
-        for file_path in output_files:
-            size_mb = os.path.getsize(file_path) / (1024 * 1024)
-            print(f"Generated {file_path.name} ({size_mb:.2f} MB)")  # noqa: T201
+        _log_generated_outputs(output_files)
 
 
 if __name__ == "__main__":

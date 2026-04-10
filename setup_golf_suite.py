@@ -175,11 +175,14 @@ def create_shortcut_windows(
 
 def _find_source_image(repo_root: pathlib.Path) -> pathlib.Path | None:
     """Find the best available source image for icon generation."""
+    asset_dir = repo_root / "src" / "launchers" / "assets"
     potential_sources = [
+        asset_dir / "golf_robot_cropped.png",
+        asset_dir / "golf_robot_icon.png",
+        asset_dir / "golf_icon.png",
+        asset_dir / "golf_robot_windows_optimized.png",
+        asset_dir / "golf_robot_ultra_sharp.png",
         repo_root / "GolfingRobot.png",
-        repo_root / "src" / "launchers" / "assets" / "golf_robot_cropped.png",
-        repo_root / "src" / "launchers" / "assets" / "golf_icon.png",
-        repo_root / "src" / "launchers" / "assets" / "golf_robot_icon.png",
     ]
     for src in potential_sources:
         if src.exists():
@@ -207,16 +210,20 @@ def main() -> int:
     source_icon = _find_source_image(repo_root)
     output_icon = repo_root / "src" / "launchers" / "assets" / "golf_suite_unified.ico"
     target_launch_script = repo_root / "launch_golf_suite.py"
+    fallback_icon = repo_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
 
     # 4. Generate Icon
     if source_icon:
-        create_optimized_icon(source_icon, output_icon)
-    elif not output_icon.exists():
-        # Fallback to existing icon if generation impossible
-        fallback = repo_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
-        if fallback.exists():
-            output_icon = fallback
+        if (
+            not create_optimized_icon(source_icon, output_icon)
+            and fallback_icon.exists()
+        ):
+            output_icon = fallback_icon
             logger.info("Using fallback existing icon.")
+    elif not output_icon.exists() and fallback_icon.exists():
+        # Fallback to existing icon if generation impossible
+        output_icon = fallback_icon
+        logger.info("Using fallback existing icon.")
 
     # 5. Create Desktop Shortcut (Windows only)
     if platform.system() == "Windows":
