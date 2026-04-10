@@ -90,6 +90,12 @@
       "owner": "@physics-core",
       "reason": "Pose6DOF at 1229 lines due to comprehensive SE(3) operations. Decomposition pending.",
       "expires_on": "2027-06-30"
+    },
+    {
+      "path": "src/shared/python/physics/terrain_representation.py",
+      "owner": "@physics-core",
+      "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
+      "expires_on": "2027-06-30"
     }
   ]
 }

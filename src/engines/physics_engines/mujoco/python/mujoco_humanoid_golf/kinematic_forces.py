@@ -1,317 +1,34 @@
-"""Kinematic-dependent force analysis for golf swing biomechanics.
+"""Kinematic-dependent force analysis for golf swing biomechanics (coordinator).
 
-This module computes motion-dependent forces that can be calculated from
-kinematics alone, WITHOUT requiring full inverse dynamics:
+See module docstring in _kinematic_force_data.py for unit conventions,
+coordinate frame definitions, numerical tolerances, and known limitations.
 
-- Coriolis forces
-- Centrifugal forces
-- Centripetal accelerations
-- Velocity-dependent forces
-- Gravitational forces (configuration-dependent)
-
-These forces are critical for understanding swing dynamics and can be computed
-even for parallel mechanisms where full inverse dynamics is challenging.
-
-UNIT CONVENTIONS (Addresses Assessment B-006)
-==============================================
-This module uses SI units throughout unless otherwise noted:
-
-Position & Length:
-    - Joint positions (qpos): radians [rad] for revolute, meters [m] for prismatic
-    - Cartesian positions: meters [m]
-    - Segment lengths: meters [m]
-
-Velocity:
-    - Joint velocities (qvel): rad/s for revolute, m/s for prismatic
-    - Cartesian velocities: m/s
-    - Angular velocities: rad/s
-
-Acceleration:
-    - Joint accelerations (qacc): rad/s² for revolute, m/s² for prismatic
-    - Cartesian accelerations: m/s²
-    - Angular accelerations: rad/s²
-
-Force & Torque:
-    - Joint torques: N·m for revolute joints, N for prismatic joints
-    - Cartesian forces: N (Newtons)
-    - Cartesian torques: N·m (Newton-meters)
-
-Mass & Inertia:
-    - Mass: kg (kilograms)
-    - Inertia: kg·m² (about principal axes)
-    - Inertia tensor: kg·m² (3×3 matrix in body frame)
-
-Power & Energy:
-    - Power: W (Watts = J/s)
-    - Energy: J (Joules)
-    - Work: J (Joules)
-
-COORDINATE FRAMES (Addresses Assessment B-003)
-===============================================
-World Frame:
-    - Origin: Arbitrary reference point (typically pelvis or floor contact)
-    - Axes: Z-up (vertical), right-handed coordinate system
-    - Convention: X-forward, Y-left, Z-up for standing humanoid
-    - Gravity: [0, 0, -9.81] m/s² in world frame
-
-Body Frames:
-    - Each body (link) has a local coordinate frame
-    - Origin: Body center of mass (COM) unless specified otherwise in URDF/MJCF
-    - Orientation: Defined by URDF/MJCF model file (varies per model)
-    - Inertia tensors expressed in body-local frame
-
-Jacobian Conventions:
-    - All Jacobians map joint velocities (q̇) to world-frame spatial velocities
-    - Format: 6×nv matrix [angular; linear]
-      (stacked 3×nv rotational, 3×nv translational)
-    - Units: [(rad/s) / (rad or m), (m/s) / (rad or m)]
-    - Sign convention: Positive joint velocity → specified direction in Jacobian
-
-Task Space / End-Effector Frame:
-    - Club head: Local frame attached to club head body
-    - Position: xpos[club_head_id] in world coordinates [m]
-    - Orientation: xmat[club_head_id] as 3×3 rotation matrix (world ← body)
-
-NUMERICAL TOLERANCES (Addresses Assessment B-004, B-007)
-=========================================================
-This module uses the following numerical constants
-(defined in shared/python/numerical_constants.py):
-
-- EPSILON_FINITE_DIFF_JACOBIAN = 1e-6: Finite difference step for Jacobian derivatives
-- EPSILON_SINGULARITY_DETECTION = 1e-10: Threshold for detecting ill-conditioning
-
-See numerical_constants.py for complete documentation of sources and rationale.
-
-PHYSICS CONVENTIONS
-===================
-Coriolis vs. Centrifugal:
-    - The separation is frame-dependent and not unique
-    - This module provides decomposition for analysis purposes
-    - Prefer using total Coriolis forces (compute_coriolis_forces) when possible
-
-Sign Conventions:
-    - Coriolis/centrifugal forces: Oppose motion (negative work in conservative systems)
-    - Gravity: Negative Z-direction in world frame (downward)
-    - Joint torques: Positive = motion in positive joint direction
-
-Power Sign Convention:
-    - Positive power: Energy flowing INTO the system (actuator doing work)
-    - Negative power: Energy flowing OUT (dissipation or external work)
-    - Conservative forces (Coriolis, gravity): Zero net work over closed trajectories
-
-KNOWN LIMITATIONS & WARNINGS
-=============================
-1. decompose_coriolis_forces() is O(N²) (Issue B-002)
-   - Prefer compute_coriolis_forces() which is O(N) via analytical RNE
-
-3. Finite difference Jacobian derivatives (Issue B-009)
-   - First-order accuracy O(ε)
-   - Future: Upgrade to second-order central difference or analytical
-
-TYPICAL USAGE
-=============
-```python
-import mujoco
-from mujoco_humanoid_golf.kinematic_forces import KinematicForceAnalyzer
-
-# Load model
-model = mujoco.MjModel.from_xml_path("humanoid_golf.xml")
-data = mujoco.MjData(model)
-
-# Create analyzer
-analyzer = KinematicForceAnalyzer(model, data)
-
-# Analyze trajectory (from motion capture or simulation)
-results = analyzer.analyze_trajectory(times, positions, velocities, accelerations)
-
-# Access force data
-for result in results:
-    logger.info(f"Time: {result.time:.3f} s")
-    logger.info(f"Coriolis power: {result.coriolis_power:.2f} W")
-    total_ke = (result.rotational_kinetic_energy +
-                result.translational_kinetic_energy)
-    logger.info(f"Total kinetic energy: {total_ke:.2f} J")
-```
-
-REFERENCES
-==========
-- Featherstone, R. "Rigid Body Dynamics Algorithms", Springer 2008
-- Murray, Li, Sastry, "A Mathematical Introduction to Robotic Manipulation",
-  CRC Press 1994
-- MuJoCo Documentation: https://mujoco.readthedocs.io/
+Implementation split across:
+- _kinematic_force_data.py: MjDataContext, KinematicForceData, version check, CSV export
 """
 
 from __future__ import annotations
 
-import csv
 import warnings
-from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import mujoco
 import numpy as np
 
-# Import numerical constants (Assessment B-004, B-007)
 from src.shared.python.core.numerical_constants import (
     EPSILON_FINITE_DIFF_JACOBIAN,
     EPSILON_SINGULARITY_DETECTION,
 )
 
 if TYPE_CHECKING:
-    from types import TracebackType
+    pass
 
-
-def _check_mujoco_version() -> None:
-    """Validate MuJoCo version meets minimum requirements.
-
-    Addresses Issue F-003: Prevents API signature mismatches by enforcing
-    minimum version at runtime.
-
-    Raises:
-        ImportError: If MuJoCo version is too old
-    """
-    try:
-        # MuJoCo version format: "3.3.0" or similar
-        version_str = mujoco.__version__
-        major, minor, *_ = map(int, version_str.split("."))
-
-        # Require MuJoCo 3.3+ for reshaped Jacobian API
-        if (major, minor) < (3, 3):
-            msg = (
-                f"MuJoCo {version_str} detected, but 3.3.0+ is required.\n"
-                f"The reshaped Jacobian API (mj_jacBody with 2D arrays) was "
-                f"introduced in MuJoCo 3.3. Earlier versions use flat arrays "
-                f"which can cause dimension alignment errors.\n"
-                f"Please upgrade: pip install 'mujoco>=3.3.0,<4.0.0'\n"
-                f"See Issue F-003 in Assessment C for details."
-            )
-            raise ImportError(msg)
-
-        # Success - log version
-        # Success - log version
-        import logging
-
-        logger = logging.getLogger(__name__)
-        logger.info(f"MuJoCo version {version_str} validated successfully")
-
-    except (AttributeError, ValueError) as e:
-        # Could not parse version
-        warnings.warn(
-            f"Could not validate MuJoCo version: {e}. "
-            f"Proceeding with fallback Jacobian handling.",
-            category=UserWarning,
-            stacklevel=2,
-        )
-
-
-# Validate MuJoCo version on module import (Issue F-003)
-_check_mujoco_version()
-
-
-class MjDataContext:
-    """Context manager for safe MuJoCo MjData state isolation.
-
-    This context manager saves the current state of MjData on entry and
-    restores it on exit, ensuring that any mutations within the context
-    do not affect the original state.
-
-    Addresses Issues A-001, A-003, F-001, F-002 by providing functional
-    purity guarantees for analysis methods.
-
-    Example:
-        >>> with MjDataContext(model, data):
-        ...     data.qpos[:] = new_positions  # Safe to mutate
-        ...     result = compute_something(model, data)
-        ... # data.qpos is automatically restored here
-
-    This enables:
-    - Safe parallel analysis
-    - No Observer Effect bugs
-    - Scientific reproducibility
-    - Thread-safe computations
-    """
-
-    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
-        """Initialize context manager.
-
-        Args:
-            model: MuJoCo model (needed for forward kinematics)
-            data: MuJoCo data structure to protect
-        """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        self.model = model
-        self.data = data
-        self.qpos_backup: np.ndarray | None = None
-        self.qvel_backup: np.ndarray | None = None
-        self.qacc_backup: np.ndarray | None = None
-        self.ctrl_backup: np.ndarray | None = None
-        self.time_backup: float = 0.0
-
-    def __enter__(self) -> mujoco.MjData:
-        """Save current state on context entry.
-
-        Returns:
-            The data object for convenience
-        """
-        self.qpos_backup = self.data.qpos.copy()
-        self.qvel_backup = self.data.qvel.copy()
-        self.qacc_backup = self.data.qacc.copy()
-        self.ctrl_backup = self.data.ctrl.copy()
-        self.time_backup = self.data.time
-        return self.data
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None:
-        """Restore state on context exit, even if exception occurred.
-
-        Args:
-            exc_type: Exception type if raised
-            exc_val: Exception value if raised
-            exc_tb: Exception traceback if raised
-        """
-        self.data.qpos[:] = self.qpos_backup
-        self.data.qvel[:] = self.qvel_backup
-        self.data.qacc[:] = self.qacc_backup
-        self.data.ctrl[:] = self.ctrl_backup
-        self.data.time = self.time_backup
-
-        # Recompute forward kinematics to sync all derived quantities
-        mujoco.mj_forward(self.model, self.data)
-
-
-@dataclass
-class KinematicForceData:
-    """Container for kinematic-dependent forces at a single time point."""
-
-    time: float
-
-    # Joint-space forces
-    coriolis_forces: np.ndarray  # [nv] - Coriolis and centrifugal forces
-    gravity_forces: np.ndarray  # [nv] - Gravitational forces
-
-    # Decomposed components
-    centrifugal_forces: np.ndarray | None = None  # [nv] - Pure centrifugal
-    velocity_coupling_forces: np.ndarray | None = None  # [nv] - Velocity coupling
-
-    # Task-space forces (end-effector)
-    club_head_coriolis_force: np.ndarray | None = None  # [3] - at club head
-    club_head_centrifugal_force: np.ndarray | None = None  # [3] - at club head
-    club_head_apparent_force: np.ndarray | None = None  # [3] - total apparent force
-
-    # Power contributions
-    coriolis_power: float = 0.0  # Power dissipated by Coriolis forces
-    centrifugal_power: float = 0.0  # Power from centrifugal effects
-
-    # Kinetic energy contributions
-    rotational_kinetic_energy: float = 0.0
-    translational_kinetic_energy: float = 0.0
+# Re-export public names for backward compatibility
+from ._kinematic_force_data import (
+    KinematicForceData,
+    MjDataContext,
+    export_kinematic_forces_to_csv,
+)
 
 
 class KinematicForceAnalyzer:
@@ -1047,80 +764,9 @@ class KinematicForceAnalyzer:
         return self._compute_effective_mass_value(direction, jacp, M)
 
 
-def export_kinematic_forces_to_csv(
-    force_data_list: list[KinematicForceData],
-    filepath: str,
-) -> None:
-    """Export kinematic force analysis to CSV file.
-
-    Args:
-        force_data_list: List of force data
-        filepath: Output CSV file path
-    """
-    with open(filepath, "w", newline="") as f:
-        writer = csv.writer(f)
-
-        # Header
-        header = [
-            "time",
-            "coriolis_power",
-            "centrifugal_power",
-            "rotational_ke",
-            "translational_ke",
-        ]
-
-        # Add joint-wise Coriolis forces
-        nv = len(force_data_list[0].coriolis_forces)
-        for i in range(nv):
-            header.extend(
-                [f"coriolis_force_{i}", f"gravity_force_{i}", f"centrifugal_force_{i}"],
-            )
-
-        # Add club head forces
-        header.extend(
-            [
-                "club_coriolis_x",
-                "club_coriolis_y",
-                "club_coriolis_z",
-                "club_centrifugal_x",
-                "club_centrifugal_y",
-                "club_centrifugal_z",
-            ],
-        )
-
-        writer.writerow(header)
-
-        # Data rows
-        for data in force_data_list:
-            row = [
-                data.time,
-                data.coriolis_power,
-                data.centrifugal_power,
-                data.rotational_kinetic_energy,
-                data.translational_kinetic_energy,
-            ]
-
-            for i in range(nv):
-                row.extend(
-                    [
-                        data.coriolis_forces[i],
-                        data.gravity_forces[i],
-                        (
-                            data.centrifugal_forces[i]
-                            if data.centrifugal_forces is not None
-                            else 0.0
-                        ),
-                    ],
-                )
-
-            if data.club_head_coriolis_force is not None:
-                row.extend(data.club_head_coriolis_force.tolist())
-            else:
-                row.extend([0, 0, 0])
-
-            if data.club_head_centrifugal_force is not None:
-                row.extend(data.club_head_centrifugal_force.tolist())
-            else:
-                row.extend([0, 0, 0])
-
-            writer.writerow(row)
+__all__ = [
+    "KinematicForceAnalyzer",
+    "KinematicForceData",
+    "MjDataContext",
+    "export_kinematic_forces_to_csv",
+]
