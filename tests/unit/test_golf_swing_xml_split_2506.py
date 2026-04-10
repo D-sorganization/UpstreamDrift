@@ -94,11 +94,15 @@ class TestGolfSwingXmlPublicAPI:
         )
 
         assert ADVANCED_BIOMECHANICAL_GOLF_SWING_XML is not None
-        assert "advanced_biomechanical_golf_swing" in ADVANCED_BIOMECHANICAL_GOLF_SWING_XML
+        assert (
+            "advanced_biomechanical_golf_swing" in ADVANCED_BIOMECHANICAL_GOLF_SWING_XML
+        )
 
     @pytest.mark.unit
     def test_club_configs_importable(self) -> None:
-        from src.engines.physics_engines.mujoco.golf_swing_models_xml import CLUB_CONFIGS
+        from src.engines.physics_engines.mujoco.golf_swing_models_xml import (
+            CLUB_CONFIGS,
+        )
 
         assert "driver" in CLUB_CONFIGS
         assert "iron_7" in CLUB_CONFIGS
