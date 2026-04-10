@@ -25,9 +25,7 @@ class ModelSpec:
 class ModelRegistry:
     """Registry for managing available models."""
 
-    def __init__(self, config_path: str = "config/models.yaml") -> None:
-        if not (config_path is not None):
-            raise ValueError("config_path must be provided")
+    def __init__(self, config_path: str = "src/config/models.yaml") -> None:
         if not (config_path is not None):
             raise ValueError("config_path must be provided")
         self.config_path = Path(config_path)

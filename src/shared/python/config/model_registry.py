@@ -33,16 +33,20 @@ class ModelRegistry(ContractChecker):
             - All model IDs in the registry are non-empty strings
     """
 
-    def __init__(self, config_path: str | Path = "config/models.yaml") -> None:
+    # Default: src/config/models.yaml relative to this file's location in src/shared/python/config/
+    _DEFAULT_CONFIG_PATH: Path = (
+        Path(__file__).parent.parent.parent.parent / "config" / "models.yaml"
+    )
+
+    def __init__(self, config_path: str | Path | None = None) -> None:
         """Initialize registry.
 
         Args:
-            config_path: Path to the YAML configuration file.
+            config_path: Path to the YAML configuration file. Defaults to
+                src/config/models.yaml (absolute, resolved from this file).
         """
-        if not (config_path is not None):
-            raise ValueError("config_path must be provided")
-        if not (config_path is not None):
-            raise ValueError("config_path must be provided")
+        if config_path is None:
+            config_path = self._DEFAULT_CONFIG_PATH
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
         self._load_registry()

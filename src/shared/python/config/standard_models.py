@@ -32,8 +32,8 @@ class StandardModelManager:
             suite_root = Path(__file__).parent.parent.parent
 
         self.suite_root = Path(suite_root)
-        self.models_dir = self.suite_root / "shared" / "urdf"
-        self.meshes_dir = self.suite_root / "shared" / "meshes"
+        self.models_dir = self.suite_root / "urdf"
+        self.meshes_dir = self.suite_root / "meshes"
         self.config_file = self.models_dir / "standard_models.yaml"
 
         # Ensure directories exist
