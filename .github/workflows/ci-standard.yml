@@ -52,6 +52,8 @@ jobs:
         run: ruff format --check .
 
       - run: pip install mypy types-PyYAML types-requests
+      - name: Create stub ui/dist for editable install (quality checks only)
+        run: mkdir -p ui/dist
       - run: pip install -e .[dev]
       # Baseline mypy check across all of src/
       - run: mypy src --config-file pyproject.toml
@@ -158,6 +160,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
         run: pip install -e ".[dev,gui-test]"
 
@@ -257,6 +261,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
         run: pip install -e ".[dev,gui-test]"
       - name: Run Shared Tools Consumer Contracts
