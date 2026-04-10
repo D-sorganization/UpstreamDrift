@@ -45,6 +45,73 @@ if TYPE_CHECKING:
 router = APIRouter()
 
 
+def _check_position_support(engine: Any) -> None:
+    """Raise HTTPException 501 when the engine supports neither body-position setter.
+
+    Args:
+        engine: Active physics engine instance.
+
+    Raises:
+        HTTPException: 501 if the engine lacks both set_body_position and
+            set_body_rotation, so callers never silently succeed without moving anything.
+    """
+    if not hasattr(engine, "set_body_position") and not hasattr(
+        engine, "set_body_rotation"
+    ):
+        raise HTTPException(
+            status_code=501,
+            detail=(
+                "Engine does not support body positioning. "
+                "set_body_position and set_body_rotation are not available."
+            ),
+        )
+
+
+def _get_body_position_vectors(
+    engine: Any, body_a: str, body_b: str
+) -> tuple[list[float], list[float]]:
+    """Return the 3-D positions of two named bodies.
+
+    Args:
+        engine: Active physics engine instance.
+        body_a: Name of the first body.
+        body_b: Name of the second body.
+
+    Returns:
+        Tuple of (pos_a, pos_b) as plain Python float lists.
+
+    Raises:
+        HTTPException: 501 if the engine lacks get_body_position.
+        HTTPException: 400 if either position cannot be retrieved (returns None).
+    """
+    if not hasattr(engine, "get_body_position"):
+        raise HTTPException(
+            status_code=501,
+            detail=(
+                "Engine does not support body position queries. "
+                "get_body_position is not available."
+            ),
+        )
+
+    pa = engine.get_body_position(body_a)
+    if pa is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not retrieve position for body '{body_a}'.",
+        )
+
+    pb = engine.get_body_position(body_b)
+    if pb is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not retrieve position for body '{body_b}'.",
+        )
+
+    pos_a: list[float] = pa.tolist() if hasattr(pa, "tolist") else list(pa)
+    pos_b: list[float] = pb.tolist() if hasattr(pb, "tolist") else list(pb)
+    return pos_a, pos_b
+
+
 def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
     """Collect current metrics from the active engine.
 
@@ -390,7 +457,9 @@ async def set_body_position(
     rotation = request.rotation or [0.0, 0.0, 0.0]
 
     try:
-        # Try to set body position via engine API
+        # Raise 501 early if the engine supports neither setter
+        _check_position_support(engine)
+
         if hasattr(engine, "set_body_position"):
             engine.set_body_position(request.body_name, position)
         if hasattr(engine, "set_body_rotation"):
@@ -455,18 +524,10 @@ async def measure_distance(
         )
 
     try:
-        # Get body positions
-        pos_a = [0.0, 0.0, 0.0]
-        pos_b = [0.0, 0.0, 0.0]
-
-        if hasattr(engine, "get_body_position"):
-            pa = engine.get_body_position(request.body_a)
-            if pa is not None:
-                pos_a = pa.tolist() if hasattr(pa, "tolist") else list(pa)
-
-            pb = engine.get_body_position(request.body_b)
-            if pb is not None:
-                pos_b = pb.tolist() if hasattr(pb, "tolist") else list(pb)
+        # Raise 501 if engine doesn't support body position queries
+        pos_a, pos_b = _get_body_position_vectors(
+            engine, request.body_a, request.body_b
+        )
 
         # Compute distance
         delta = [b - a for a, b in zip(pos_a, pos_b, strict=True)]
@@ -480,6 +541,8 @@ async def measure_distance(
             position_b=pos_b,
             delta=delta,
         )
+    except HTTPException:
+        raise
     except (ValueError, RuntimeError, AttributeError) as exc:
         if logger:
             logger.error("Measurement error: %s", exc)
