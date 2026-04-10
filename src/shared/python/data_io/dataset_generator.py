@@ -692,7 +692,7 @@ class DatasetGenerator:
             pass
         with contextlib.suppress(ValueError, RuntimeError, AttributeError):
             buffers["potential_energy"][step] = float(  # type: ignore[index]
-                self.engine.compute_potential_energy()
+                self.engine.compute_potential_energy()  # type: ignore[attr-defined]
             )
 
     def _generate_initial_conditions(

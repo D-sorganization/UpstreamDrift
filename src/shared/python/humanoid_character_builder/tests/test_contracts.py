@@ -72,11 +72,11 @@ def test_invariant() -> None:
         def __init__(self, value):
             self.value = value
 
-        def increment(self) -> None:
+        def increment(self) -> int:
             self.value += 1
             return self.value
 
-        def decrement(self) -> None:
+        def decrement(self) -> int:
             self.value -= 1
             return self.value
 

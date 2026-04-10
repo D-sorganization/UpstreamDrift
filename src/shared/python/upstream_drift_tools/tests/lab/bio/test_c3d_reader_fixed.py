@@ -12,12 +12,12 @@ from upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
 
 class TestC3DDataReader:
     @pytest.fixture
-    def mock_ezc3d(self) -> None:
+    def mock_ezc3d(self):  # type: ignore[return]
         with patch("upstream_drift_tools.lab.bio.c3d_reader.ezc3d") as mock:
             yield mock
 
     @pytest.fixture
-    def sample_c3d_data(self) -> None:
+    def sample_c3d_data(self):  # type: ignore[return]
         # Create a mock C3D structure matching ezc3d output
         return {
             "parameters": {
