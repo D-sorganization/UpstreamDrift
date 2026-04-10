@@ -29,7 +29,9 @@ def save_results(
     )
 
 
-def load_results(filename: str, format_type: str = "csv", engine: str = "mujoco"):
+def load_results(
+    filename: str, format_type: str = "csv", engine: str = "mujoco"
+) -> None:
     """Backward-compatible convenience load helper."""
     if not (filename is not None):
         raise ValueError("filename must be provided")

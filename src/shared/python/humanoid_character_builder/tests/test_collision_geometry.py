@@ -9,17 +9,17 @@ from humanoid_character_builder.mesh.collision_geometry import (
 
 
 @pytest.fixture
-def generator():
+def generator() -> None:
     return CollisionGeometryGenerator()
 
 
 @pytest.fixture
-def box_mesh():
+def box_mesh() -> None:
     return trimesh.creation.box(extents=(1.0, 1.0, 1.0))
 
 
 @pytest.fixture
-def sphere_mesh():
+def sphere_mesh() -> None:
     return trimesh.creation.icosphere(radius=1.0, subdivisions=2)
 
 

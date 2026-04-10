@@ -31,12 +31,12 @@ from plot_engine.specs import (
 
 
 @pytest.fixture()
-def renderer():
+def renderer() -> None:
     return MatplotlibRenderer()
 
 
 @pytest.fixture(autouse=True)
-def _close_figs():
+def _close_figs() -> None:
     """Close all matplotlib figures after each test."""
     yield
     plt.close("all")

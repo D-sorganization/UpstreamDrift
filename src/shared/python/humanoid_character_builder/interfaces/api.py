@@ -266,7 +266,7 @@ class CharacterBuildResult:
             logger.error(f"Simulation failed: {e}")
             return False
 
-    def preview(self, animate: bool = False):
+    def preview(self, animate: bool = False) -> None:
         """
         Open visual preview of the character.
 

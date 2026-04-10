@@ -13,7 +13,7 @@ from upstream_drift_tools.calculators.electrical.glass_interface import (
 
 class TestElectricalModel:
     @pytest.fixture
-    def model(self):
+    def model(self) -> None:
         config = ElectrodeConfig()
         glass = GlassPropertiesInterface()
         return ThreePhaseElectricalModelEnhanced(config, glass)
@@ -49,7 +49,7 @@ class TestElectricalModel:
         rp = model._parallel_resistance(r1, r2)
         assert rp == 50.0  # Parallel of two equal resistors is half
 
-    def test_glass_conductivity(self):
+    def test_glass_conductivity(self) -> None:
         glass = GlassPropertiesInterface()
 
         # Test default Arrhenius behavior

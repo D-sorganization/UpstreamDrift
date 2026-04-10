@@ -24,7 +24,7 @@ from plot_engine.specs import (
 
 
 @pytest.fixture()
-def converter():
+def converter() -> None:
     return PlotlyConverter()
 
 

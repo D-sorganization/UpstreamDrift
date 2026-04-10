@@ -9,7 +9,7 @@ from humanoid_character_builder.contracts import (
 )
 
 
-def test_precondition_valid():
+def test_precondition_valid() -> None:
     @precondition(lambda x: x > 0)
     def func(x):
         return x
@@ -17,7 +17,7 @@ def test_precondition_valid():
     assert func(5) == 5
 
 
-def test_precondition_invalid():
+def test_precondition_invalid() -> None:
     @precondition(lambda x: x > 0)
     def func(x):
         return x
@@ -26,7 +26,7 @@ def test_precondition_invalid():
         func(-1)
 
 
-def test_precondition_argument_binding():
+def test_precondition_argument_binding() -> None:
     @precondition(lambda y: y > 0)
     def func(x, y):
         return x + y
@@ -37,7 +37,7 @@ def test_precondition_argument_binding():
         func(1, -2)
 
 
-def test_precondition_with_kwargs():
+def test_precondition_with_kwargs() -> None:
     @precondition(lambda y: y > 0)
     def func(x, y=10):
         return x + y
@@ -49,7 +49,7 @@ def test_precondition_with_kwargs():
         func(1, y=-1)
 
 
-def test_postcondition_valid():
+def test_postcondition_valid() -> None:
     @postcondition(lambda r: r > 0)
     def func(x):
         return x * x
@@ -57,7 +57,7 @@ def test_postcondition_valid():
     assert func(2) == 4
 
 
-def test_postcondition_invalid():
+def test_postcondition_invalid() -> None:
     @postcondition(lambda r: r > 0)
     def func(x):
         return x
@@ -66,17 +66,17 @@ def test_postcondition_invalid():
         func(-1)
 
 
-def test_invariant():
+def test_invariant() -> None:
     @invariant(lambda self: self.value > 0)
     class Counter:
         def __init__(self, value):
             self.value = value
 
-        def increment(self):
+        def increment(self) -> None:
             self.value += 1
             return self.value
 
-        def decrement(self):
+        def decrement(self) -> None:
             self.value -= 1
             return self.value
 
@@ -91,7 +91,7 @@ def test_invariant():
         c.decrement()  # Becomes 0, fails invariant > 0
 
 
-def test_precondition_message():
+def test_precondition_message() -> None:
     @precondition(lambda x: x > 0, "X must be positive")
     def func(x):
         return x

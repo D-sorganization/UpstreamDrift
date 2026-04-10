@@ -17,11 +17,11 @@ from humanoid_character_builder.validation.physics_validator import (
 
 class TestPhysicsValidator:
     @pytest.fixture
-    def validator(self):
+    def validator(self) -> None:
         return PhysicsValidator()
 
     @pytest.fixture
-    def mock_link(self):
+    def mock_link(self) -> None:
         return GeneratedLink(
             name="test_link",
             mass=1.0,

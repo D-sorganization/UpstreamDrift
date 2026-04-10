@@ -12,12 +12,12 @@ from upstream_drift_tools.lab.bio.c3d_reader import C3DDataReader
 
 class TestC3DDataReader:
     @pytest.fixture
-    def mock_ezc3d(self):
+    def mock_ezc3d(self) -> None:
         with patch("upstream_drift_tools.lab.bio.c3d_reader.ezc3d") as mock:
             yield mock
 
     @pytest.fixture
-    def sample_c3d_data(self):
+    def sample_c3d_data(self) -> None:
         # Create a mock C3D structure matching ezc3d output
         return {
             "parameters": {
@@ -43,7 +43,7 @@ class TestC3DDataReader:
             },
         }
 
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         reader = C3DDataReader("test.c3d")
         assert reader.file_path == Path("test.c3d")
 

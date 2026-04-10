@@ -255,7 +255,7 @@ class ScipyQPSolver(QPSolver):
                 status=f"Solver error: {e}",
             )
 
-    def _build_variable_bounds(self, problem: QPProblem):
+    def _build_variable_bounds(self, problem: QPProblem) -> None:
         if not (problem is not None):
             raise ValueError("problem must be provided")
         if not (problem is not None):

@@ -13,7 +13,7 @@ class TestGitHubImporter:
     """Tests for GitHubImporter."""
 
     @pytest.fixture
-    def mock_library(self):
+    def mock_library(self) -> None:
         """Mock ModelLibrary."""
         return MagicMock()
 
