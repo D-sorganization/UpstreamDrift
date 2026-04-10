@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable, Generator
 from pathlib import Path
+from types import TracebackType
 
 import cv2
 import numpy as np
@@ -367,14 +368,14 @@ class VideoProcessor:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Context manager exit."""
-        if not (exc_type is not None):
-            raise ValueError("exc_type must be provided")
-        if not (exc_type is not None):
-            raise ValueError("exc_type must be provided")
         self.close()
-        return False
 
     def __len__(self) -> int:
         """Return frame count."""

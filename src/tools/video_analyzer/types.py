@@ -255,7 +255,7 @@ class SwingAnalysis:
         """Convert to dictionary for JSON serialization."""
         import dataclasses
 
-        def convert(obj) -> Any:
+        def convert(obj: Any) -> Any:
             """Recursively convert dataclasses and enums to plain dicts."""
             if dataclasses.is_dataclass(obj):
                 return {k: convert(v) for k, v in dataclasses.asdict(obj).items()}  # type: ignore[arg-type]

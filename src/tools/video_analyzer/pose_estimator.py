@@ -8,6 +8,7 @@ extracting 33 body landmarks from video frames.
 from __future__ import annotations
 
 import logging
+from types import TracebackType
 
 import cv2
 import numpy as np
@@ -320,11 +321,11 @@ class PoseEstimator:
         self.initialize()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Context manager exit."""
-        if not (exc_type is not None):
-            raise ValueError("exc_type must be provided")
-        if not (exc_type is not None):
-            raise ValueError("exc_type must be provided")
         self.close()
-        return False

@@ -418,7 +418,11 @@ class WholeBodyController:
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)
 
     def _build_priority_level_cost(
-        self, tasks, n_v, n_vars, accumulated_A
+        self,
+        tasks: list[Task],
+        n_v: int,
+        n_vars: int,
+        accumulated_A: list[NDArray],
     ) -> tuple[NDArray, NDArray, list]:
         if not (tasks is not None):
             raise ValueError("tasks must be provided")
@@ -453,14 +457,23 @@ class WholeBodyController:
 
         return H, g, accumulated_A
 
-    def _apply_regularization(self, H, n_v, n_contact_vars) -> None:
+    def _apply_regularization(self, H: NDArray, n_v: int, n_contact_vars: int) -> None:
         H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
         if n_contact_vars > 0:
             H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
                 n_contact_vars
             )
 
-    def _build_level_qp(self, H, g, n_v, n_contact_vars, M, nle, qd) -> QPProblem:
+    def _build_level_qp(
+        self,
+        H: NDArray,
+        g: NDArray,
+        n_v: int,
+        n_contact_vars: int,
+        M: NDArray,
+        nle: NDArray,
+        qd: NDArray,
+    ) -> QPProblem:
         if not (H is not None):
             raise ValueError("H must be provided")
         if not (H is not None):

@@ -402,7 +402,9 @@ class FootstepPlanner(ContractChecker):
             total_duration=timing,
         )
 
-    def _compute_clamped_step(self, vx, vy, omega) -> tuple[float, float, float]:
+    def _compute_clamped_step(
+        self, vx: float, vy: float, omega: float
+    ) -> tuple[float, float, float]:
         if not (vx is not None):
             raise ValueError("vx must be provided")
         if not (vx is not None):
@@ -415,7 +417,9 @@ class FootstepPlanner(ContractChecker):
         )
         return step_x, step_y, step_yaw
 
-    def _advance_position(self, pos, yaw, step_x, step_y) -> NDArray:
+    def _advance_position(
+        self, pos: NDArray, yaw: float, step_x: float, step_y: float
+    ) -> NDArray:
         if not (pos is not None):
             raise ValueError("pos must be provided")
         if not (pos is not None):
@@ -426,7 +430,7 @@ class FootstepPlanner(ContractChecker):
         pos[1] += sin_yaw * step_x + cos_yaw * step_y
         return pos
 
-    def _compute_foot_position(self, pos, yaw, foot) -> NDArray:
+    def _compute_foot_position(self, pos: NDArray, yaw: float, foot: str) -> NDArray:
         if not (pos is not None):
             raise ValueError("pos must be provided")
         if not (pos is not None):
