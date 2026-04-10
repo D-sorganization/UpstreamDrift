@@ -23,7 +23,7 @@ def _install_fake_simulation_modules() -> None:
     ):
         module = ModuleType(module_name)
         module.make_polynomial_torque = lambda *args, **kwargs: (args, kwargs)
-        module.run_simulation = lambda **kwargs: kwargs
+        module.run_simulation = lambda *args, **kwargs: kwargs
         if module_name.endswith(".simulation"):
             module.SimulationResult = _FakeResultBase
         elif module_name.endswith(".simulation_triple"):
@@ -85,7 +85,65 @@ def _install_fake_perturbation_modules() -> None:
 _install_fake_simulation_modules()
 _install_fake_perturbation_modules()
 
+
+@pytest.fixture(scope="module", autouse=True)
+def cleanup_fakes():
+    yield
+    for m in [
+        "src.shared.python.pendulum_simulator.simulation",
+        "src.shared.python.pendulum_simulator.simulation_triple",
+        "src.shared.python.pendulum_simulator.simulation_golfer",
+        "src.shared.python.pendulum_simulator.perturbation",
+        "src.shared.python.pendulum_simulator.perturbation.config",
+        "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
+        "src.shared.python.pendulum_simulator.perturbation_analysis",
+    ]:
+        sys.modules.pop(m, None)
+
+    # Reload modules that might have been imported with fake submodules
+    if "src.shared.python.pendulum_simulator.gui.panel_builders" in sys.modules:
+        sys.modules.pop("src.shared.python.pendulum_simulator.gui.panel_builders", None)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def _cleanup_sys_modules():
+    yield
+    for m in [
+        "src.shared.python.pendulum_simulator.simulation",
+        "src.shared.python.pendulum_simulator.simulation_triple",
+        "src.shared.python.pendulum_simulator.simulation_golfer",
+        "src.shared.python.pendulum_simulator.perturbation",
+        "src.shared.python.pendulum_simulator.perturbation.config",
+        "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
+        "src.shared.python.pendulum_simulator.perturbation_analysis",
+    ]:
+        sys.modules.pop(m, None)
+
+
 from src.shared.python.pendulum_simulator.gui import panel_builders  # noqa: E402
+
+for m in [
+    "src.shared.python.pendulum_simulator.simulation",
+    "src.shared.python.pendulum_simulator.simulation_triple",
+    "src.shared.python.pendulum_simulator.simulation_golfer",
+    "src.shared.python.pendulum_simulator.perturbation",
+    "src.shared.python.pendulum_simulator.perturbation.config",
+    "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
+    "src.shared.python.pendulum_simulator.perturbation_analysis",
+]:
+    sys.modules.pop(m, None)
+
+
+for m in [
+    "src.shared.python.pendulum_simulator.simulation",
+    "src.shared.python.pendulum_simulator.simulation_triple",
+    "src.shared.python.pendulum_simulator.simulation_golfer",
+    "src.shared.python.pendulum_simulator.perturbation",
+    "src.shared.python.pendulum_simulator.perturbation.config",
+    "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
+    "src.shared.python.pendulum_simulator.perturbation_analysis",
+]:
+    sys.modules.pop(m, None)
 
 
 class _FakeResult:

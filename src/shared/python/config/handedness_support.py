@@ -366,16 +366,11 @@ def validate_mirror_trajectory(
     z_preserved = np.allclose(original_positions[:, 2], mirrored_positions[:, 2])
 
     # Check path length preservation
-    # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1) for small inner dimensions
     original_path_length = np.sum(
-        np.sqrt(
-            np.sum(np.square(np.diff(original_positions, axis=0), dtype=float), axis=1)
-        )
+        np.linalg.norm(np.diff(original_positions, axis=0), axis=1)
     )
     mirrored_path_length = np.sum(
-        np.sqrt(
-            np.sum(np.square(np.diff(mirrored_positions, axis=0), dtype=float), axis=1)
-        )
+        np.linalg.norm(np.diff(mirrored_positions, axis=0), axis=1)
     )
     path_length_preserved = np.isclose(
         original_path_length, mirrored_path_length, rtol=1e-10
