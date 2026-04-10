@@ -296,7 +296,15 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         )
 
     def _start(self) -> None:
+        # Reset state alongside time so forcing functions that depend on t
+        # are evaluated against a consistent (state, time) pair.
         self.time = 0.0
+        self.state_double = DoublePendulumState(
+            theta1=-0.5, theta2=-1.2, omega1=0.0, omega2=0.0
+        )
+        self.state_triple = TriplePendulumState(
+            theta1=-0.5, theta2=-0.8, theta3=-0.6, omega1=0.0, omega2=0.0, omega3=0.0
+        )
         self.timer.start(int(TIME_STEP * 1000))
 
     def _pause(self) -> None:
@@ -355,9 +363,13 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         """Safely evaluate mathematical expression using simpleeval.
 
         Security: Replaced eval() with simpleeval to eliminate code injection risk.
+
+        On failure, records the error in self._last_eval_error and surfaces it
+        to the status label so the user is not silently running with zero torque.
         """
         try:
             result = _EVALUATOR.eval(expression)
+            self._last_eval_error = None
             return float(result)
         except (
             ValueError,
@@ -367,7 +379,10 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
             KeyError,
             Exception,
         ):  # noqa: BLE001
-            logger.debug("Error evaluating expression: %s", expression)
+            msg = f"Invalid expression: {expression}"
+            self._last_eval_error = msg
+            logger.warning("Error evaluating torque expression: %s", expression)
+            self.status_label.setText(f"Error: {msg}")
             return 0.0
 
     def _polynomial_profiles(
@@ -505,7 +520,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
             raise ValueError("state must be provided")
         shoulder = np.array([0.0, 0.0, 0.0])
         params = self.triple_params.segments
-        plane_rotation = self._plane_rotation(35.0)
+        plane_rotation = self._plane_rotation(self.triple_params.plane_inclination_deg)
         p1 = self._point_from_angles(state.theta1, plane_rotation, params[0].length_m)
         p2 = p1 + self._point_from_angles(
             state.theta1 + state.theta2, plane_rotation, params[1].length_m

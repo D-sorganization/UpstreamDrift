@@ -841,7 +841,13 @@ class DoublePendulumApp(PendulumRendererMixin):
             raise RuntimeError(msg) from error
 
     def start(self) -> None:
-        """Start or resume simulation."""
+        """Start or resume simulation.
+
+        Idempotent: calling start() while already running is a no-op, preventing
+        multiple concurrent update loops from being scheduled.
+        """
+        if self.running:
+            return
         self._update_pendulum_immediately()
         self.running = True
         self._update()
