@@ -36,6 +36,7 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 # Configure logging - use centralized logging config
 from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
 
+from ._version import __version__
 from .config import (
     get_allowed_hosts,
     get_cors_origins,
@@ -178,7 +179,7 @@ app = FastAPI(
         f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
         "Legacy un-prefixed routes are maintained for backward compatibility."
     ),
-    version="3.0.0",
+    version=__version__,
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_tags=[
