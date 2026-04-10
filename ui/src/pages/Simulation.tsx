@@ -65,10 +65,15 @@ export function SimulationPage() {
   const handleLoadEngine = useCallback(
     async (engineName: string) => {
       showInfo(`Loading ${engineName}...`);
-      await requestLoad(engineName);
-      showSuccess(`${engineName} engine loaded`);
+      try {
+        await requestLoad(engineName);
+        showSuccess(`${engineName} engine loaded`);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : `Failed to load ${engineName}`;
+        showError(message);
+      }
     },
-    [requestLoad, showInfo, showSuccess]
+    [requestLoad, showInfo, showSuccess, showError]
   );
 
   const handleUnloadEngine = useCallback(

@@ -36,6 +36,10 @@ const ENGINE_DEFAULTS: Record<string, Partial<SimulationParameters>> = {
     duration: 3.0,
     timestep: 0.002,
   },
+  myosuite: {
+    duration: 3.0,
+    timestep: 0.002,
+  },
 };
 
 function getEngineDefaults(engine: string): { duration: number; timestep: number } {

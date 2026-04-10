@@ -105,7 +105,7 @@ async def get_engines(
     )
 
 
-@router.get("/api/engines/{engine_name}/probe")
+@router.get("/engines/{engine_name}/probe")
 @handle_api_errors
 async def probe_engine(
     engine_name: str,
@@ -120,7 +120,7 @@ async def probe_engine(
         return {"available": False, "error": str(e)}
 
 
-@router.post("/api/engines/{engine_name}/load")
+@router.post("/engines/{engine_name}/load")
 @handle_api_errors
 async def load_engine_lazy(
     engine_name: str,

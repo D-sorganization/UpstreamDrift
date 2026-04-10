@@ -73,7 +73,7 @@ export function useEngineCapabilities(
     setError(null);
 
     try {
-      const response = await fetch(`/engines/${engine}/capabilities`);
+      const response = await fetch(`/api/engines/${engine}/capabilities`);
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.detail || `Failed to fetch capabilities for ${engine}`);
