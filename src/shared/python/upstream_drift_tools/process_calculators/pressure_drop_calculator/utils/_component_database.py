@@ -1,0 +1,156 @@
+import logging
+from dataclasses import dataclass
+
+from ....utils.unit_constants import (
+    R_UNIVERSAL_KMOL,
+)
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ComponentProperties:
+    """Thermophysical properties of pure gas components."""
+
+    name: str
+    molecular_weight: float  # kg/kmol
+    critical_temp: float  # K
+    critical_pressure: float  # Pa
+    acentric_factor: float  # dimensionless
+    dipole_moment: float  # Debye
+    ideal_gas_cp_coeffs: tuple[
+        float, float, float, float, float
+    ]  # Shomate equation coefficients
+
+
+GAS_DATABASE: dict[str, ComponentProperties] = {
+    "H2": ComponentProperties(
+        name="Hydrogen",
+        molecular_weight=2.016,
+        critical_temp=33.2,
+        critical_pressure=1.296e6,
+        acentric_factor=-0.216,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(33.066178, -11.363417, 11.432816, -2.772874, -0.158558),
+    ),
+    "CO": ComponentProperties(
+        name="Carbon Monoxide",
+        molecular_weight=28.010,
+        critical_temp=132.9,
+        critical_pressure=3.494e6,
+        acentric_factor=0.048,
+        dipole_moment=0.112,
+        ideal_gas_cp_coeffs=(25.56759, 6.096130, 4.054656, -2.671301, 0.131021),
+    ),
+    "CO2": ComponentProperties(
+        name="Carbon Dioxide",
+        molecular_weight=44.010,
+        critical_temp=304.2,
+        critical_pressure=7.382e6,
+        acentric_factor=0.228,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(24.99735, 55.18696, -33.69137, 7.948387, -0.136638),
+    ),
+    "CH4": ComponentProperties(
+        name="Methane",
+        molecular_weight=16.043,
+        critical_temp=190.6,
+        critical_pressure=4.599e6,
+        acentric_factor=0.011,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(-0.703029, 108.4773, -42.52157, 5.862788, 0.678565),
+    ),
+    "C2H6": ComponentProperties(
+        name="Ethane",
+        molecular_weight=30.070,
+        critical_temp=305.4,
+        critical_pressure=4.880e6,
+        acentric_factor=0.099,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(-4.335729, 178.6345, -112.8668, 30.09716, 0.630798),
+    ),
+    "C2H4": ComponentProperties(
+        name="Ethylene",
+        molecular_weight=28.054,
+        critical_temp=282.4,
+        critical_pressure=5.042e6,
+        acentric_factor=0.087,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(-6.387880, 184.4019, -112.9718, 28.49593, 0.315554),
+    ),
+    "N2": ComponentProperties(
+        name="Nitrogen",
+        molecular_weight=28.014,
+        critical_temp=126.2,
+        critical_pressure=3.394e6,
+        acentric_factor=0.037,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(19.50583, 19.88705, -8.598535, 1.369784, 0.527601),
+    ),
+    "O2": ComponentProperties(
+        name="Oxygen",
+        molecular_weight=31.999,
+        critical_temp=154.6,
+        critical_pressure=5.043e6,
+        acentric_factor=0.022,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(31.32234, -20.23531, 57.86644, -36.50624, -0.007374),
+    ),
+    "H2O": ComponentProperties(
+        name="Water Vapor",
+        molecular_weight=18.015,
+        critical_temp=647.1,
+        critical_pressure=22.064e6,
+        acentric_factor=0.344,
+        dipole_moment=1.85,
+        ideal_gas_cp_coeffs=(30.09200, 6.832514, 6.793435, -2.534480, 0.082139),
+    ),
+    "Ar": ComponentProperties(
+        name="Argon",
+        molecular_weight=39.948,
+        critical_temp=150.9,
+        critical_pressure=4.898e6,
+        acentric_factor=-0.002,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(20.78600, 0.0, 0.0, 0.0, 0.0),
+    ),
+    "H2S": ComponentProperties(
+        name="Hydrogen Sulfide",
+        molecular_weight=34.082,
+        critical_temp=373.5,
+        critical_pressure=9.000e6,
+        acentric_factor=0.094,
+        dipole_moment=0.97,
+        ideal_gas_cp_coeffs=(26.88412, 18.67809, 3.434203, -3.378702, 0.135882),
+    ),
+    "NH3": ComponentProperties(
+        name="Ammonia",
+        molecular_weight=17.031,
+        critical_temp=405.7,
+        critical_pressure=11.357e6,
+        acentric_factor=0.253,
+        dipole_moment=1.47,
+        ideal_gas_cp_coeffs=(19.99563, 49.77119, -15.37599, 1.921168, 0.189174),
+    ),
+    "Air": ComponentProperties(
+        name="Air (Pseudo-component)",
+        molecular_weight=28.97,
+        critical_temp=132.5,
+        critical_pressure=3.774e6,
+        acentric_factor=0.035,
+        dipole_moment=0.0,
+        ideal_gas_cp_coeffs=(28.11, 0.1967e-2, 0.4802e-5, -1.966e-9, 0.0),
+    ),
+}
+
+R_UNIVERSAL = R_UNIVERSAL_KMOL  # J/(kmol·K)
+
+SUTHERLAND_CONSTANTS: dict[str, dict[str, float]] = {
+    "Air": {"S": 110.4, "T_ref": 273.15, "mu_ref": 1.716e-5},
+    "N2": {"S": 111.0, "T_ref": 273.15, "mu_ref": 1.663e-5},
+    "O2": {"S": 127.0, "T_ref": 273.15, "mu_ref": 1.919e-5},
+    "CO2": {"S": 240.0, "T_ref": 273.15, "mu_ref": 1.370e-5},
+    "H2": {"S": 72.0, "T_ref": 273.15, "mu_ref": 8.411e-6},
+    "CO": {"S": 136.0, "T_ref": 273.15, "mu_ref": 1.657e-5},
+    "CH4": {"S": 164.0, "T_ref": 273.15, "mu_ref": 1.027e-5},
+}
