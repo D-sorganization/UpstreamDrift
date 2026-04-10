@@ -1,0 +1,181 @@
+from __future__ import annotations
+
+import logging
+import shutil
+from pathlib import Path
+
+from model_generation.converters.urdf_parser import URDFParser
+from model_generation.library._model_types import (
+    LibraryConfig,
+    ModelCategory,
+    ModelEntry,
+    RepositorySource,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def add_local_model(
+    entries: dict[str, ModelEntry],
+    parser: URDFParser,
+    config: LibraryConfig,
+    urdf_path: str | Path,
+    name: str | None = None,
+    category: ModelCategory = ModelCategory.OTHER,
+    description: str = "",
+    tags: list[str] | None = None,
+    copy_to_library: bool = False,
+) -> ModelEntry:
+    urdf_path = Path(urdf_path)
+    if not urdf_path.exists():
+        raise FileNotFoundError(f"URDF file not found: {urdf_path}")
+
+    model_id = urdf_path.stem.lower().replace(" ", "_")
+    counter = 1
+    while model_id in entries:
+        model_id = f"{urdf_path.stem.lower()}_{counter}"
+        counter += 1
+
+    try:
+        parsed = parser.parse(urdf_path)
+        link_count = len(parsed.links)
+        joint_count = len(parsed.joints)
+        dof_count = sum(j.get_dof_count() for j in parsed.joints)
+    except (OSError, ValueError, KeyError):
+        link_count = joint_count = dof_count = 0
+
+    if copy_to_library:
+        dest_dir = config.cache_dir / model_id
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest_urdf = dest_dir / urdf_path.name
+        shutil.copy2(urdf_path, dest_urdf)
+
+        mesh_dir = urdf_path.parent / "meshes"
+        if mesh_dir.exists():
+            shutil.copytree(mesh_dir, dest_dir / "meshes", dirs_exist_ok=True)
+
+        urdf_path = dest_urdf
+
+    entry = ModelEntry(
+        id=model_id,
+        name=name or urdf_path.stem,
+        description=description,
+        category=category,
+        source=RepositorySource.LOCAL,
+        source_path=str(urdf_path.parent),
+        urdf_path=urdf_path,
+        mesh_dir=(
+            urdf_path.parent / "meshes"
+            if (urdf_path.parent / "meshes").exists()
+            else None
+        ),
+        tags=tags or [],
+        link_count=link_count,
+        joint_count=joint_count,
+        dof_count=dof_count,
+        is_cached=True,
+        is_read_only=False,
+    )
+
+    entries[model_id] = entry
+
+    from model_generation.library._model_registry import save_index
+
+    save_index(config, entries)
+
+    return entry
+
+
+def create_editable_copy(
+    entries: dict[str, ModelEntry],
+    config: LibraryConfig,
+    model_id: str,
+    new_name: str | None = None,
+    destination: Path | None = None,
+) -> ModelEntry | None:
+    if not (model_id is not None):
+        raise ValueError("model_id must be provided")
+    if not (model_id is not None):
+        raise ValueError("model_id must be provided")
+    source_entry = entries.get(model_id)
+    if not source_entry:
+        return None
+
+    if not source_entry.is_cached:
+        from model_generation.library._model_loader import download_model
+
+        download_model(source_entry, config, entries)
+
+    if not source_entry.urdf_path or not source_entry.urdf_path.exists():
+        return None
+
+    new_id = new_name or f"{source_entry.name}_copy"
+    new_id = new_id.lower().replace(" ", "_")
+
+    if destination:
+        dest_dir = Path(destination)
+    else:
+        dest_dir = config.cache_dir / "editable" / new_id
+
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    dest_urdf = dest_dir / source_entry.urdf_path.name
+    shutil.copy2(source_entry.urdf_path, dest_urdf)
+
+    if source_entry.mesh_dir and source_entry.mesh_dir.exists():
+        shutil.copytree(
+            source_entry.mesh_dir,
+            dest_dir / "meshes",
+            dirs_exist_ok=True,
+        )
+
+    new_entry = ModelEntry(
+        id=new_id,
+        name=new_name or f"{source_entry.name} (Copy)",
+        description=f"Copy of {source_entry.name}",
+        category=source_entry.category,
+        source=RepositorySource.LOCAL,
+        urdf_path=dest_urdf,
+        mesh_dir=dest_dir / "meshes" if (dest_dir / "meshes").exists() else None,
+        tags=source_entry.tags.copy(),
+        link_count=source_entry.link_count,
+        joint_count=source_entry.joint_count,
+        dof_count=source_entry.dof_count,
+        is_cached=True,
+        is_read_only=False,
+    )
+
+    entries[new_id] = new_entry
+
+    from model_generation.library._model_registry import save_index
+
+    save_index(config, entries)
+
+    return new_entry
+
+
+def remove_model(
+    entries: dict[str, ModelEntry],
+    config: LibraryConfig,
+    model_id: str,
+    delete_files: bool = False,
+) -> bool:
+    if not (model_id is not None):
+        raise ValueError("model_id must be provided")
+    if not (model_id is not None):
+        raise ValueError("model_id must be provided")
+    entry = entries.get(model_id)
+    if not entry:
+        return False
+
+    if delete_files and entry.urdf_path:
+        cache_dir = entry.urdf_path.parent
+        if cache_dir.is_relative_to(config.cache_dir):
+            shutil.rmtree(cache_dir, ignore_errors=True)
+
+    del entries[model_id]
+
+    from model_generation.library._model_registry import save_index
+
+    save_index(config, entries)
+    return True

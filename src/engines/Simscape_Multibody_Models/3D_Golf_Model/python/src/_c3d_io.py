@@ -12,7 +12,11 @@ except ImportError:
     ezc3d = None  # type: ignore[assignment, unused-ignore]
 
 import numpy as np
-from _c3d_models import C3DEvent, C3DMapping, C3DMetadata
+
+try:
+    from ._c3d_models import C3DEvent, C3DMapping, C3DMetadata
+except ImportError:
+    from _c3d_models import C3DEvent, C3DMapping, C3DMetadata  # type: ignore[no-redef]
 
 
 def load_c3d_file(file_path: Path) -> C3DMapping:

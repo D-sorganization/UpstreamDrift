@@ -1,0 +1,104 @@
+from __future__ import annotations
+
+import logging
+from pathlib import Path
+
+from model_generation.converters.urdf_parser import ParsedModel, URDFParser
+from model_generation.library._model_types import (
+    LibraryConfig,
+    ModelEntry,
+    ModelFormat,
+    RepositorySource,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def load_model(
+    entries: dict[str, ModelEntry],
+    parser: URDFParser,
+    config: LibraryConfig,
+    model_id: str,
+    force_download: bool = False,
+) -> ParsedModel | None:
+    if not (model_id is not None):
+        raise ValueError("model_id must be provided")
+    if not (model_id is not None):
+        raise ValueError("model_id must be provided")
+    entry = entries.get(model_id)
+    if not entry:
+        logger.warning(f"Model not found: {model_id}")
+        return None
+
+    if (
+        not entry.is_cached or force_download
+    ) and entry.source != RepositorySource.LOCAL:
+        download_model(entry, config, entries)
+
+    if not entry.urdf_path or not entry.urdf_path.exists():
+        logger.error(f"Model file not found for model: {model_id}")
+        return None
+
+    try:
+        if entry.model_format == ModelFormat.MJCF:
+            return _load_mjcf(entry.urdf_path, entry.is_read_only)
+        return parser.parse(entry.urdf_path, read_only=entry.is_read_only)
+    except (OSError, ValueError, KeyError) as e:
+        logger.error(f"Failed to load model {model_id}: {e}")
+        return None
+
+
+def _load_mjcf(path: Path, read_only: bool = False) -> ParsedModel:
+    if not (path is not None):
+        raise ValueError("path must be provided")
+    if not (path is not None):
+        raise ValueError("path must be provided")
+    import defusedxml.ElementTree as DefusedET
+    from model_generation.converters.mjcf_converter import MJCFConverter
+
+    converter = MJCFConverter()
+    xml_string = path.read_text()
+    root = DefusedET.fromstring(xml_string)
+    model = converter._parse_mjcf(root)
+    model.source_path = path
+    model.original_xml = xml_string
+    model.read_only = read_only
+    return model
+
+
+def download_model(
+    entry: ModelEntry,
+    config: LibraryConfig,
+    entries: dict[str, ModelEntry],
+) -> bool:
+    if not (entry is not None):
+        raise ValueError("entry must be provided")
+    if not (entry is not None):
+        raise ValueError("entry must be provided")
+    if not entry.source_url:
+        return False
+
+    try:
+        import urllib.request
+
+        cache_dir = config.cache_dir / entry.id.replace("/", "_")
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        urdf_filename = entry.source_url.split("/")[-1]
+        local_path = cache_dir / urdf_filename
+
+        urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310
+
+        entry.urdf_path = local_path
+        entry.is_cached = True
+
+        from model_generation.library._model_registry import save_index
+
+        save_index(config, entries)
+
+        logger.info(f"Downloaded model: {entry.id}")
+        return True
+
+    except (PermissionError, OSError) as e:
+        logger.error(f"Failed to download {entry.id}: {e}")
+        return False

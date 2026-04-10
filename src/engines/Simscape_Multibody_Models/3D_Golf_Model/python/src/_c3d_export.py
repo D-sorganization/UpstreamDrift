@@ -11,11 +11,12 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from _c3d_models import SCHEMA_VERSION
 
 try:
+    from ._c3d_models import SCHEMA_VERSION
     from .logger_utils import log_execution_time
 except ImportError:
+    from _c3d_models import SCHEMA_VERSION  # type: ignore[no-redef]
     from logger_utils import log_execution_time  # type: ignore[no-redef]
 
 

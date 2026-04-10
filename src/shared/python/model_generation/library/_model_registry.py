@@ -1,0 +1,98 @@
+from __future__ import annotations
+
+import json
+import logging
+from pathlib import Path
+from typing import Any
+
+from model_generation.library._model_types import (
+    LibraryConfig,
+    ModelCategory,
+    ModelEntry,
+    ModelFormat,
+    RepositorySource,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def load_index(
+    config: LibraryConfig,
+    entries: dict[str, ModelEntry],
+) -> None:
+    if config.index_file.exists():
+        try:
+            data = json.loads(config.index_file.read_text())
+            for entry_data in data.get("entries", []):
+                entry = ModelEntry.from_dict(entry_data)
+                entries[entry.id] = entry
+            logger.info(f"Loaded {len(entries)} models from index")
+        except (ValueError, KeyError, json.JSONDecodeError, TypeError) as e:
+            logger.warning(f"Failed to load index: {e}")
+
+
+def save_index(
+    config: LibraryConfig,
+    entries: dict[str, ModelEntry],
+) -> None:
+    try:
+        data = {
+            "entries": [e.to_dict() for e in entries.values()],
+            "version": "1.0",
+        }
+        config.index_file.write_text(json.dumps(data, indent=2))
+    except (ValueError, KeyError, json.JSONDecodeError, TypeError) as e:
+        logger.error(f"Failed to save index: {e}")
+
+
+def register_bundled_models(
+    entries: dict[str, ModelEntry],
+) -> None:
+    bundled_dir = Path(__file__).parent / "bundled"
+    manifest_path = bundled_dir / "manifest.json"
+    if not manifest_path.exists():
+        return
+
+    try:
+        manifest: dict[str, Any] = json.loads(manifest_path.read_text())
+    except (ValueError, KeyError, json.JSONDecodeError, TypeError) as exc:
+        logger.warning("Failed to load bundled manifest: %s", exc)
+        return
+
+    for entry_data in manifest.get("models", []):
+        model_id = entry_data["id"]
+        if model_id in entries:
+            continue
+
+        model_path = bundled_dir / entry_data["file"]
+        if not model_path.exists():
+            continue
+
+        fmt_str = entry_data.get("format", "urdf")
+        try:
+            model_format = ModelFormat(fmt_str)
+        except ValueError:
+            model_format = ModelFormat.URDF
+
+        try:
+            category = ModelCategory(entry_data.get("category", "other"))
+        except ValueError:
+            category = ModelCategory.OTHER
+
+        entries[model_id] = ModelEntry(
+            id=model_id,
+            name=entry_data["name"],
+            description=entry_data.get("description", ""),
+            category=category,
+            model_format=model_format,
+            source=RepositorySource.BUNDLED,
+            urdf_path=model_path,
+            author=entry_data.get("author"),
+            license=entry_data.get("license"),
+            tags=entry_data.get("tags", []),
+            link_count=entry_data.get("link_count", 0),
+            joint_count=entry_data.get("joint_count", 0),
+            dof_count=entry_data.get("dof_count", 0),
+            is_cached=True,
+            is_read_only=True,
+        )
