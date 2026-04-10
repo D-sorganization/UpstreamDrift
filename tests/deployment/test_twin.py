@@ -217,3 +217,61 @@ def test_compute_virtual_forces(mock_sim: MagicMock, mock_real: MagicMock) -> No
     v_forces = twin.compute_virtual_forces()
     assert len(v_forces) == 6
     assert np.allclose(v_forces, np.ones(6) * 5.0)
+
+
+class TestIssue2478PredictStateRestoration:
+    """Issue #2478: predict() must fully restore sim state including torques."""
+
+    def test_predict_restores_torques(
+        self, mock_sim: MagicMock, mock_real: MagicMock
+    ) -> None:
+        """After predict(), sim torques must match pre-prediction torques."""
+        from src.deployment.digital_twin.twin import DigitalTwin
+
+        initial_torques = np.ones(7) * 3.0
+        mock_sim.get_joint_torques.return_value = initial_torques.copy()
+        mock_sim.get_joint_positions.return_value = np.zeros(7)
+        mock_sim.get_joint_velocities.return_value = np.zeros(7)
+
+        twin = DigitalTwin(mock_sim, mock_real)
+        control_sequence = np.ones((5, 7)) * 10.0
+
+        twin.predict(horizon=0.005, control_sequence=control_sequence, dt=0.001)
+
+        mock_sim.set_joint_torques.assert_called()
+        last_restore_call = mock_sim.set_joint_torques.call_args_list[-1]
+        restored_torques = last_restore_call[0][0]
+        np.testing.assert_array_almost_equal(
+            restored_torques,
+            initial_torques,
+            err_msg=(
+                "predict() must restore torques to pre-prediction values; "
+                "sim state was contaminated"
+            ),
+        )
+
+    def test_predict_does_not_leave_prediction_torques_in_sim(
+        self, mock_sim: MagicMock, mock_real: MagicMock
+    ) -> None:
+        """Torques applied during rollout must not remain in sim after predict()."""
+        from src.deployment.digital_twin.twin import DigitalTwin
+
+        initial_torques = np.zeros(7)
+        mock_sim.get_joint_torques.return_value = initial_torques.copy()
+        mock_sim.get_joint_positions.return_value = np.zeros(7)
+        mock_sim.get_joint_velocities.return_value = np.zeros(7)
+
+        twin = DigitalTwin(mock_sim, mock_real)
+        # Large control inputs that differ from initial torques
+        control_sequence = np.ones((3, 7)) * 99.0
+
+        twin.predict(horizon=0.003, control_sequence=control_sequence, dt=0.001)
+
+        # The final set_joint_torques call must be the restoration, not a prediction step
+        last_restore_call = mock_sim.set_joint_torques.call_args_list[-1]
+        restored_torques = last_restore_call[0][0]
+        np.testing.assert_array_almost_equal(
+            restored_torques,
+            initial_torques,
+            err_msg="predict() must restore initial torques, not leave prediction torques in sim",
+        )
