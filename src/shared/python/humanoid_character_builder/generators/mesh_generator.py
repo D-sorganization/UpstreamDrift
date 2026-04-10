@@ -870,7 +870,7 @@ def generate_human():
         try:
             h.setDetail(key, value)
         except Exception as exc:  # noqa: BLE001
-            logger.info(f'Warning: modifier {{key}}={{value}}: {{exc}}')
+            print(f'Warning: modifier {{key}}={{value}}: {{exc}}')
 
     exportOBJ(h, '{obj_path_str}')
 
@@ -939,22 +939,22 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
     #: These are estimated based on the 10475-vertex SMPL-X topology.
     #: Values are (start_inclusive, end_exclusive).
     SMPLX_SEGMENT_VERTEX_RANGES: dict[str, tuple[int, int]] = {
-        "head": (8000, 10475),
-        "neck": (7500, 8000),
-        "torso": (4000, 7500),
-        "pelvis": (3000, 4000),
-        "left_upper_arm": (1800, 2400),
-        "right_upper_arm": (5300, 5900),
-        "left_forearm": (2400, 2900),
-        "right_forearm": (5900, 6400),
-        "left_hand": (2900, 3500),
-        "right_hand": (6400, 7000),
-        "left_thigh": (100, 600),
-        "right_thigh": (600, 1100),
-        "left_shin": (1100, 1500),
-        "right_shin": (1500, 1800),
         "left_foot": (0, 100),
-        "right_foot": (50, 150),
+        "right_foot": (100, 200),
+        "left_thigh": (200, 700),
+        "right_thigh": (700, 1200),
+        "left_shin": (1200, 1600),
+        "right_shin": (1600, 1900),
+        "left_upper_arm": (1900, 2500),
+        "left_forearm": (2500, 3000),
+        "left_hand": (3000, 3600),
+        "pelvis": (3600, 4600),
+        "torso": (4600, 5900),
+        "right_upper_arm": (5900, 6500),
+        "right_forearm": (6500, 7000),
+        "right_hand": (7000, 7500),
+        "neck": (7500, 8000),
+        "head": (8000, 10475),
     }
 
     @classmethod
@@ -1005,6 +1005,18 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
                     actual_vertex_count,
                 )
                 return False
+
+        # Check for overlapping segments
+        range_list = list(cls.SMPLX_SEGMENT_VERTEX_RANGES.items())
+        for i, (name_a, (start_a, end_a)) in enumerate(range_list):
+            for name_b, (start_b, end_b) in range_list[i + 1 :]:
+                if max(start_a, start_b) < min(end_a, end_b):
+                    logger.warning(
+                        "Segments '%s' and '%s' overlap — downstream mass/inertia will be incorrect",
+                        name_a,
+                        name_b,
+                    )
+                    return False
         return True
 
     @classmethod
