@@ -333,6 +333,15 @@ class SafetyMonitor:
             if safe_command.torque_commands is not None:
                 safe_command.torque_commands *= self._speed_override
 
+        # Enforce E-stop: freeze position to current and zero feedforward torque
+        if self._emergency_stop:
+            if safe_command.position_targets is not None:
+                safe_command.position_targets = state.joint_positions.copy()
+            if safe_command.feedforward_torque is not None:
+                safe_command.feedforward_torque = np.zeros_like(
+                    safe_command.feedforward_torque
+                )
+
         # Clip torque commands
         if safe_command.torque_commands is not None:
             safe_command.torque_commands = np.clip(

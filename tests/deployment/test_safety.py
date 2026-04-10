@@ -206,3 +206,86 @@ class TestCollisionAvoidance:
         assert obstacle.obstacle_type == ObstacleType.HUMAN
         np.testing.assert_array_equal(obstacle.position, human.position)
         assert obstacle.inflation > 0  # Extra margin for humans
+
+
+class TestIssue2477EStopPositionMode:
+    """Issue #2477: E-stop must neutralize position-controlled motion."""
+
+    def _make_monitor_and_state(self):
+        from src.deployment.realtime import RobotConfig, RobotState
+        from src.deployment.safety import SafetyMonitor
+
+        n = 7
+        config = RobotConfig(name="test", n_joints=n)
+        monitor = SafetyMonitor(config)
+        state = RobotState(
+            timestamp=0.0,
+            joint_positions=np.ones(n) * 0.5,
+            joint_velocities=np.zeros(n),
+            joint_torques=np.zeros(n),
+        )
+        return monitor, state, n
+
+    def test_estop_zeros_position_targets(self) -> None:
+        """After E-stop, position targets must not pass through unchanged."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        monitor, state, n = self._make_monitor_and_state()
+        monitor.trigger_emergency_stop()
+
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+            position_targets=np.ones(n) * 2.0,
+        )
+        safe = monitor.compute_safe_command(cmd, state)
+
+        assert safe.position_targets is not None, (
+            "position_targets should be frozen to current position on E-stop"
+        )
+        np.testing.assert_array_almost_equal(
+            safe.position_targets,
+            state.joint_positions,
+            err_msg=(
+                "E-stop must freeze position targets to current joint positions, "
+                "not pass desired targets through"
+            ),
+        )
+
+    def test_estop_zeros_feedforward_torque(self) -> None:
+        """After E-stop, feedforward torque must be zeroed."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        monitor, state, n = self._make_monitor_and_state()
+        monitor.trigger_emergency_stop()
+
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.TORQUE,
+            feedforward_torque=np.ones(n) * 10.0,
+        )
+        safe = monitor.compute_safe_command(cmd, state)
+
+        if safe.feedforward_torque is not None:
+            np.testing.assert_array_equal(
+                safe.feedforward_torque,
+                np.zeros(n),
+                err_msg="E-stop must zero feedforward torque",
+            )
+
+    def test_non_estop_preserves_position_targets(self) -> None:
+        """Without E-stop, position targets must pass through (clipped to limits)."""
+        from src.deployment.realtime import ControlCommand, ControlMode
+
+        monitor, state, n = self._make_monitor_and_state()
+        targets = np.ones(n) * 0.3
+
+        cmd = ControlCommand(
+            timestamp=0.0,
+            mode=ControlMode.POSITION,
+            position_targets=targets.copy(),
+        )
+        safe = monitor.compute_safe_command(cmd, state)
+
+        assert safe.position_targets is not None
+        np.testing.assert_array_almost_equal(safe.position_targets, targets)
