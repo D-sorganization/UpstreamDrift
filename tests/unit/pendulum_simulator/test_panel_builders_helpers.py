@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import sys
+from importlib import import_module, reload
 from types import ModuleType
 
 import numpy as np
@@ -12,10 +13,11 @@ import pytest
 pytest.importorskip("PyQt6")
 
 
-def _install_fake_simulation_modules() -> None:
+def _make_fake_simulation_modules() -> dict[str, ModuleType]:
     class _FakeResultBase:
         pass
 
+    modules: dict[str, ModuleType] = {}
     for module_name in (
         "src.shared.python.pendulum_simulator.simulation",
         "src.shared.python.pendulum_simulator.simulation_triple",
@@ -23,20 +25,22 @@ def _install_fake_simulation_modules() -> None:
     ):
         module = ModuleType(module_name)
         module.make_polynomial_torque = lambda *args, **kwargs: (args, kwargs)
-        module.run_simulation = lambda *args, **kwargs: kwargs
+        module.run_simulation = lambda *args, **kwargs: {"args": args, "kwargs": kwargs}
         if module_name.endswith(".simulation"):
             module.SimulationResult = _FakeResultBase
         elif module_name.endswith(".simulation_triple"):
             module.TripleSimulationResult = _FakeResultBase
         else:
             module.GolferSimulationResult = _FakeResultBase
-        sys.modules[module_name] = module
+        modules[module_name] = module
+    return modules
 
 
-def _install_fake_perturbation_modules() -> None:
+def _make_fake_perturbation_modules() -> dict[str, ModuleType]:
+    modules: dict[str, ModuleType] = {}
     package = ModuleType("src.shared.python.pendulum_simulator.perturbation")
     package.__path__ = []  # type: ignore[attr-defined]
-    sys.modules["src.shared.python.pendulum_simulator.perturbation"] = package
+    modules["src.shared.python.pendulum_simulator.perturbation"] = package
 
     config_module = ModuleType(
         "src.shared.python.pendulum_simulator.perturbation.config"
@@ -50,9 +54,7 @@ def _install_fake_perturbation_modules() -> None:
 
     config_module.PerturbationConfig = _FakePerturbationConfig
     config_module.PerturbationSummary = _FakePerturbationSummary
-    sys.modules["src.shared.python.pendulum_simulator.perturbation.config"] = (
-        config_module
-    )
+    modules["src.shared.python.pendulum_simulator.perturbation.config"] = config_module
 
     analyzer_module = ModuleType(
         "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer"
@@ -69,81 +71,30 @@ def _install_fake_perturbation_modules() -> None:
             return _FakePerturbationSummary()
 
     analyzer_module.PendulumPerturbationAnalyzer = _FakeAnalyzer
-    sys.modules[
-        "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer"
-    ] = analyzer_module
+    modules["src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer"] = (
+        analyzer_module
+    )
 
     perturbation_analysis_module = ModuleType(
         "src.shared.python.pendulum_simulator.perturbation_analysis"
     )
     perturbation_analysis_module.variability_summary = lambda *args, **kwargs: None
-    sys.modules["src.shared.python.pendulum_simulator.perturbation_analysis"] = (
+    modules["src.shared.python.pendulum_simulator.perturbation_analysis"] = (
         perturbation_analysis_module
     )
+    return modules
 
 
-_install_fake_simulation_modules()
-_install_fake_perturbation_modules()
+@pytest.fixture
+def panel_builders(monkeypatch: pytest.MonkeyPatch):
+    for module_name, module in {
+        **_make_fake_simulation_modules(),
+        **_make_fake_perturbation_modules(),
+    }.items():
+        monkeypatch.setitem(sys.modules, module_name, module)
 
-
-@pytest.fixture(scope="module", autouse=True)
-def cleanup_fakes():
-    yield
-    for m in [
-        "src.shared.python.pendulum_simulator.simulation",
-        "src.shared.python.pendulum_simulator.simulation_triple",
-        "src.shared.python.pendulum_simulator.simulation_golfer",
-        "src.shared.python.pendulum_simulator.perturbation",
-        "src.shared.python.pendulum_simulator.perturbation.config",
-        "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
-        "src.shared.python.pendulum_simulator.perturbation_analysis",
-    ]:
-        sys.modules.pop(m, None)
-
-    # Reload modules that might have been imported with fake submodules
-    if "src.shared.python.pendulum_simulator.gui.panel_builders" in sys.modules:
-        sys.modules.pop("src.shared.python.pendulum_simulator.gui.panel_builders", None)
-
-
-@pytest.fixture(scope="module", autouse=True)
-def _cleanup_sys_modules():
-    yield
-    for m in [
-        "src.shared.python.pendulum_simulator.simulation",
-        "src.shared.python.pendulum_simulator.simulation_triple",
-        "src.shared.python.pendulum_simulator.simulation_golfer",
-        "src.shared.python.pendulum_simulator.perturbation",
-        "src.shared.python.pendulum_simulator.perturbation.config",
-        "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
-        "src.shared.python.pendulum_simulator.perturbation_analysis",
-    ]:
-        sys.modules.pop(m, None)
-
-
-from src.shared.python.pendulum_simulator.gui import panel_builders  # noqa: E402
-
-for m in [
-    "src.shared.python.pendulum_simulator.simulation",
-    "src.shared.python.pendulum_simulator.simulation_triple",
-    "src.shared.python.pendulum_simulator.simulation_golfer",
-    "src.shared.python.pendulum_simulator.perturbation",
-    "src.shared.python.pendulum_simulator.perturbation.config",
-    "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
-    "src.shared.python.pendulum_simulator.perturbation_analysis",
-]:
-    sys.modules.pop(m, None)
-
-
-for m in [
-    "src.shared.python.pendulum_simulator.simulation",
-    "src.shared.python.pendulum_simulator.simulation_triple",
-    "src.shared.python.pendulum_simulator.simulation_golfer",
-    "src.shared.python.pendulum_simulator.perturbation",
-    "src.shared.python.pendulum_simulator.perturbation.config",
-    "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
-    "src.shared.python.pendulum_simulator.perturbation_analysis",
-]:
-    sys.modules.pop(m, None)
+    module = import_module("src.shared.python.pendulum_simulator.gui.panel_builders")
+    return reload(module)
 
 
 class _FakeResult:
@@ -221,7 +172,7 @@ class _FakeOptimizationWidget:
         self.n_torque_params = n_torque_params
 
 
-def test_helper_parsers_and_motion_extraction() -> None:
+def test_helper_parsers_and_motion_extraction(panel_builders) -> None:
     assert panel_builders._parse_coefficients("1.0, 2.5, , 3") == [1.0, 2.5, 3.0]
     assert panel_builders._parse_coefficients("") == [0.0]
     assert panel_builders._chunk_coefficients(np.array([1, 2, 3, 4, 5]), 2) == [
@@ -249,6 +200,7 @@ def test_helper_parsers_and_motion_extraction() -> None:
 
 
 def test_build_double_panel_wires_helper_callbacks(
+    panel_builders,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fake_pendulum = _FakePendulum()

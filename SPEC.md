@@ -27,7 +27,11 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
+<<<<<<< HEAD
+| **Spec Version**        | 1.0.81                                             |
+=======
 | **Spec Version**        | 1.0.79                                             |
+>>>>>>> origin/main
 | **Last Spec Update**    | 2026-04-10                                         |
 
 ## 2. Purpose & Mission
@@ -493,7 +497,9 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-04-10 | 1.0.79  | Test isolation(Drake): expanded the isolated Drake strict-test mock surface to include `pydrake.geometry` and `pydrake.multibody.tree`, reducing cross-test import failures when the optional-stack lane executes strict Drake mocks before the broader Drake wrapper and integration-audit suites. |
+| 2026-04-10 | 1.0.81  | Test framework fix: finalized the pendulum panel-builder helper isolation by reloading `panel_builders` under fixture-scoped fake simulation and perturbation modules, preserving richer fake `run_simulation` results, and removing stale merge-conflict artifacts that broke linting on the branch. |
+| 2026-04-10 | 1.0.80  | Test isolation(Drake): expanded the isolated Drake strict-test mock surface to include `pydrake.geometry` and `pydrake.multibody.tree`, reducing cross-test import failures when the optional-stack lane executes strict Drake mocks before the broader Drake wrapper and integration-audit suites. |
+| 2026-04-10 | 1.0.79  | Test framework fix: tightened pendulum panel-builder helper tests so fake simulation and perturbation modules are fixture-scoped, reload `panel_builders` under the fake environment, and avoid leaking mocked modules or incompatible `run_simulation` signatures into unrelated tests. |
 | 2026-04-10 | 1.0.78  | Test framework fix: Refactored `test_panel_builders_helpers.py` to prevent module-level mocking of `run_simulation` from polluting `sys.modules` and causing cascading failures in other test suites. |
 | 2026-04-10 | 1.0.77  | Optimization: Cached difference vectors and their np.linalg.norm results into local variables inside tight collision-checking loops to eliminate redundant vector subtractions and matrix math operations, halving execution time in these hot paths without sacrificing code readability. |
 | 2026-04-10 | 1.0.76  | Simscape + GUI maintenance: fixed the 3D golf dataset generator defaults to target the bundled `GolfSwing3D_Kinetic` model while keeping legacy `verbose` and newer `verbosity` config paths compatible, and decomposed the launcher dashboard plus pendulum GUI builder/toolstrip code into smaller helpers with focused regression coverage. |
