@@ -33,6 +33,7 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import logging
 import time
@@ -434,6 +435,33 @@ class StreamingProtocol:
         }
 
 
+class _StreamClient:
+    """Thin wrapper around an asyncio StreamWriter that exposes ``send()``.
+
+    Provides the same interface that ``broadcast()`` expects (``await
+    client.send(str)``), backed by a real asyncio TCP connection.
+    """
+
+    def __init__(
+        self,
+        reader: asyncio.StreamReader,
+        writer: asyncio.StreamWriter,
+    ) -> None:
+        self._reader = reader
+        self._writer = writer
+
+    async def send(self, data: str) -> None:
+        """Write *data* to the underlying TCP stream."""
+        self._writer.write(data.encode())
+        await self._writer.drain()
+
+    async def close(self) -> None:
+        """Close the underlying TCP connection."""
+        self._writer.close()
+        with contextlib.suppress(OSError):
+            await self._writer.wait_closed()
+
+
 class UnrealStreamingServer:
     """WebSocket server for streaming to Unreal Engine.
 
@@ -470,7 +498,7 @@ class UnrealStreamingServer:
         self._state = StreamingState.STOPPED
         self._clients: set[Any] = set()
         self._buffer = FrameBuffer(max_size=self.config.buffer_size)
-        self._server = None
+        self._server: asyncio.Server | None = None
         self._playback_speed = 1.0
         self._current_time = 0.0
         self._start_time: float | None = None
@@ -494,6 +522,20 @@ class UnrealStreamingServer:
     def playback_speed(self) -> float:
         """Get current playback speed."""
         return self._playback_speed
+
+    @property
+    def bound_port(self) -> int:
+        """Return the actual port the server is bound to.
+
+        Useful when config.port == 0 (OS-assigned port).  Returns 0 if the
+        server has not been started yet.
+        """
+        if self._server is None:
+            return 0
+        sockets = self._server.sockets
+        if not sockets:
+            return 0
+        return int(sockets[0].getsockname()[1])
 
     def get_statistics(self) -> dict[str, Any]:
         """Get server statistics.
@@ -529,14 +571,38 @@ class UnrealStreamingServer:
         """Async context manager exit."""
         await self.stop()
 
+    async def _handle_new_connection(
+        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ) -> None:
+        """Accept an incoming TCP connection and track it as a client.
+
+        The client object exposes an async ``send(data: str)`` method so it is
+        compatible with the existing ``broadcast()`` call pattern.
+        """
+        client = _StreamClient(reader, writer)
+        await self._add_client(client)
+        try:
+            while True:
+                data = await reader.read(4096)
+                if not data:
+                    break
+        except (OSError, asyncio.IncompleteReadError):
+            pass
+        finally:
+            await self._remove_client(client)
+            await client.close()
+
     async def start(self) -> None:
         """Start the streaming server.
 
+        Binds to the configured host/port before transitioning to RUNNING.
+
         Precondition: Server must be in STOPPED state.
-        Postcondition: Server transitions to RUNNING state.
+        Postcondition: Server transitions to RUNNING state with an active socket.
 
         Raises:
-            RuntimeError: If server is not in STOPPED state.
+            RuntimeError: If server is not in STOPPED state or socket cannot
+                be bound.
         """
         if self._state != StreamingState.STOPPED:
             raise RuntimeError(f"Cannot start server in {self._state} state")
@@ -546,22 +612,33 @@ class UnrealStreamingServer:
         self._frames_sent = 0
 
         try:
-            # In a real implementation, this would start the WebSocket server
-            # For now, we just transition to RUNNING
-            self._state = StreamingState.RUNNING
-            logger.info(
-                f"Streaming server started on {self.config.host}:{self.config.port}"
+            self._server = await asyncio.start_server(
+                self._handle_new_connection,
+                self.config.host,
+                self.config.port,
             )
+            self._state = StreamingState.RUNNING
+            actual_port = self.bound_port
+            logger.info(
+                "Streaming server started on %s:%d", self.config.host, actual_port
+            )
+        except OSError as e:
+            self._state = StreamingState.ERROR
+            logger.error("Failed to bind streaming server: %s", e)
+            raise RuntimeError(
+                f"Cannot bind streaming server to "
+                f"{self.config.host}:{self.config.port}: {e}"
+            ) from e
         except (RuntimeError, TypeError, ValueError) as e:
             self._state = StreamingState.ERROR
-            logger.error(f"Failed to start streaming server: {e}")
+            logger.error("Failed to start streaming server: %s", e)
             raise
 
     async def stop(self) -> None:
         """Stop the streaming server.
 
         Precondition: Server must be in active state.
-        Postcondition: Server transitions to STOPPED state.
+        Postcondition: Server transitions to STOPPED state and the socket is closed.
         """
         if not self._state.is_active and self._state != StreamingState.STARTING:
             return
@@ -571,6 +648,12 @@ class UnrealStreamingServer:
         # Disconnect all clients
         for client in list(self._clients):
             await self._remove_client(client)
+
+        # Close the asyncio server socket
+        if self._server is not None:
+            self._server.close()
+            await self._server.wait_closed()
+            self._server = None
 
         # Clear buffer
         self._buffer.clear()
