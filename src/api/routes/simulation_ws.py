@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 from typing import Any
 
+import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 
@@ -11,6 +12,64 @@ from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 
 router = APIRouter()
+
+
+def _engine_type_from_str(name: str) -> EngineType:
+    """Resolve an engine type string to EngineType, accepting any case.
+
+    Args:
+        name: Engine identifier (e.g. 'mujoco', 'MUJOCO', 'MuJoCo').
+
+    Returns:
+        Matching EngineType enum member.
+
+    Raises:
+        ValueError: If the name does not match any registered engine.
+    """
+    return EngineType(name.lower())
+
+
+def _apply_initial_state(engine: object, state_dict: dict[str, Any]) -> None:
+    """Apply an initial state dict to the engine using the (q, v) contract.
+
+    Engines expose ``set_state(q: np.ndarray, v: np.ndarray)``.  The WebSocket
+    client sends ``{"q": [...], "v": [...]}``; this helper converts and
+    dispatches correctly.
+
+    Args:
+        engine: The active physics engine instance.
+        state_dict: Dict with optional 'q' and 'v' lists.
+    """
+    if not hasattr(engine, "set_state"):
+        return
+    q = np.array(state_dict.get("q", []), dtype=float)
+    v = np.array(state_dict.get("v", []), dtype=float)
+    engine.set_state(q, v)  # type: ignore[attr-defined]
+
+
+def _engine_state_to_dict(engine: object) -> dict[str, Any]:
+    """Serialise engine state to a JSON-safe dict with 'q' and 'v' lists.
+
+    ``engine.get_state()`` returns ``(np.ndarray, np.ndarray)``; raw numpy
+    arrays are not JSON-serialisable, so we convert them to plain Python lists.
+
+    Args:
+        engine: The active physics engine instance.
+
+    Returns:
+        Dict with 'q' and 'v' as plain Python float lists, or empty dict if
+        the engine does not implement get_state.
+    """
+    if not hasattr(engine, "get_state"):
+        return {}
+    result = engine.get_state()  # type: ignore[attr-defined]
+    if not isinstance(result, (tuple, list)) or len(result) < 2:
+        return {}
+    q, v = result[0], result[1]
+    return {
+        "q": q.tolist() if isinstance(q, np.ndarray) else list(q),
+        "v": v.tolist() if isinstance(v, np.ndarray) else list(v),
+    }
 
 
 class SimulationFrame(BaseModel):
@@ -44,7 +103,7 @@ async def _load_simulation_engine(
         engine_type,
     )
     try:
-        enum_type = EngineType(engine_type.upper())
+        enum_type = _engine_type_from_str(engine_type)
         success = engine_manager.switch_engine(enum_type)  # type: ignore[attr-defined]
         if not success:
             raise ValueError("Could not load engine")
@@ -147,9 +206,7 @@ async def _run_simulation_loop(
 
         # Send frame data (throttle to ~60fps for UI)
         if frame % frame_skip == 0:
-            state = {}
-            if hasattr(engine, "get_state"):
-                state = engine.get_state()
+            state = _engine_state_to_dict(engine)
 
             frame_data: dict[str, Any] = {
                 "frame": frame,
@@ -212,9 +269,9 @@ async def simulation_stream(
         if engine is None:
             return
 
-        # Set initial state if provided
-        if "initial_state" in config and hasattr(engine, "set_state"):
-            engine.set_state(config["initial_state"])
+        # Set initial state if provided, using the (q, v) engine contract
+        if "initial_state" in config:
+            _apply_initial_state(engine, config["initial_state"])
 
         # Run simulation loop
         frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)
