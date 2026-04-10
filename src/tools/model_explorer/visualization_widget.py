@@ -81,7 +81,7 @@ class VisualizationWidget(QWidget):
 
         self.urdf_path: str | None = None
 
-        self.use_mujoco = MUJOCO_AVAILABLE
+        self.use_mujoco = MUJOCO_AVAILABLE and MuJoCoViewerWidget is not None
 
         self.mujoco_widget: MuJoCoViewerWidget | None = None  # type: ignore[assignment]
 

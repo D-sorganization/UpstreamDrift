@@ -266,9 +266,17 @@ class MuJoCoOffscreenRenderer:
             urdf_content = Path(urdf_path).read_text(encoding="utf-8")
             fixed_content = self._fix_urdf_inertials(urdf_content)
 
-            # Save to temp file in same directory for mesh resolution
+            # Save to a uniquely-named temp file in the same directory so that
+            # relative mesh paths resolve correctly and parallel runs don't race.
             urdf_dir = Path(urdf_path).parent
-            temp_urdf = urdf_dir / "_temp_fixed_model.urdf"
+            fd, temp_path_str = tempfile.mkstemp(suffix=".urdf", dir=urdf_dir)
+            temp_urdf = Path(temp_path_str)
+            try:
+                import os
+
+                os.close(fd)
+            except OSError:
+                pass
             temp_urdf.write_text(fixed_content, encoding="utf-8")
 
             try:

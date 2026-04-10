@@ -1,7 +1,10 @@
 """Tests for URDF visualization widget.
 
 Issue #755: Added comprehensive tests for MuJoCo preview and visualization toggles.
+Issue #2502: Tests for partial-import crash and unsafe temp-file handling.
 """
+
+from unittest.mock import patch
 
 import pytest
 
@@ -360,3 +363,37 @@ class TestMuJoCoViewerWidget:
             assert widget._renderer.azimuth == 90.0
             assert widget._renderer.elevation == -20.0
             assert widget._renderer.distance == 3.0
+
+
+# =============================================================================
+# Issue #2502: Partial-import crash and unsafe temp-file handling
+# =============================================================================
+
+
+class TestIssue2502PartialImportCrash:
+    """VisualizationWidget must not crash when MuJoCoViewerWidget is None."""
+
+    def test_visualization_widget_with_null_mujoco_viewer(self, qtbot):
+        """If MuJoCoViewerWidget import failed (None), init must not raise TypeError."""
+        import src.tools.model_explorer.visualization_widget as vw_module
+
+        with patch.object(vw_module, "MuJoCoViewerWidget", None):
+            widget = VisualizationWidget()
+            qtbot.addWidget(widget)
+            # Should fall back to the simple GL view, not crash
+            assert widget.use_mujoco is False
+
+    def test_visualization_widget_use_mujoco_false_when_viewer_none(self, qtbot):
+        """use_mujoco must be False when MuJoCoViewerWidget is unavailable."""
+        import src.tools.model_explorer.visualization_widget as vw_module
+
+        with (
+            patch.object(vw_module, "MuJoCoViewerWidget", None),
+            patch.object(vw_module, "MUJOCO_AVAILABLE", True),
+        ):
+            widget = VisualizationWidget()
+            qtbot.addWidget(widget)
+            assert widget.use_mujoco is False
+
+    # Temp file tests are in tests/unit/test_model_explorer_temp_file.py
+    # (no PyQt6 dependency, so they always run)
