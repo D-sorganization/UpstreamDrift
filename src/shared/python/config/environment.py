@@ -504,11 +504,15 @@ def get_golf_port(default: int = 8000) -> int:
     )
 
 
-def get_golf_suite_mode(default: str = "local") -> str:
+def get_golf_suite_mode(default: str = "remote") -> str:
     """Get the Golf Suite operating mode.
 
+    Defaults to ``"remote"`` (auth-required) when ``GOLF_SUITE_MODE`` is not
+    set.  Set ``GOLF_SUITE_MODE=local`` explicitly to enable auth bypass for
+    local development — do not rely on the absence of the variable.
+
     Args:
-        default: Default mode (``"local"``).
+        default: Default mode (``"remote"``).
 
     Returns:
         Mode string (e.g., ``"local"``, ``"remote"``).

@@ -59,13 +59,13 @@ class TestIsLocalMode:
         ):
             assert is_local_mode() is False
 
-    def test_defaults_to_local_mode(self):
-        """Test defaulting to local mode when env vars not set."""
+    def test_defaults_to_remote_mode(self):
+        """Test defaulting to remote (auth-required) mode when env vars not set."""
         from src.api.auth.middleware import is_local_mode
 
         with patch.dict(os.environ, {}, clear=True):
-            # When not set, defaults to "local"
-            assert is_local_mode() is True
+            # When not set, defaults to "remote" (secure default — issue #2449)
+            assert is_local_mode() is False
 
 
 class TestLocalUserContract:
