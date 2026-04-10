@@ -68,18 +68,6 @@
       "expires_on": "2027-03-09"
     },
     {
-      "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
-      "owner": "@character-builder",
-      "reason": "Mesh generation logic (1641 lines) consolidates geometry, UV-mapping, and LOD pipelines. Decomposition into mesh_geometry, mesh_uv, and mesh_lod submodules planned. Tracked in issue #2051.",
-      "expires_on": "2027-03-23"
-    },
-    {
-      "path": "src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/pressure_drop_interface.py",
-      "owner": "@upstream-drift-tools",
-      "reason": "Pressure drop interface (1400 lines) grew due to multi-regime flow models and validation logic. Decomposition into regime-specific calculator modules planned. Tracked in issue #2051.",
-      "expires_on": "2027-03-23"
-    },
-    {
       "path": "src/shared/python/physics/terrain.py",
       "owner": "@physics-core",
       "reason": "Terrain module at 1239 lines due to multi-surface model implementations. Decomposition pending.",
