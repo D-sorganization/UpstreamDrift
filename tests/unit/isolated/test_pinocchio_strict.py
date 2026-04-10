@@ -78,6 +78,7 @@ class TestPinocchioStrict:
         """Test behavior when neither frame nor body exists."""
         engine = self.PinocchioPhysicsEngine()
         engine.model = MagicMock()
+        engine.data = MagicMock()
         engine.model.existFrame.return_value = False
         engine.model.existBodyName.return_value = False
 

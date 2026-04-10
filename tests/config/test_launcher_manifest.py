@@ -275,6 +275,57 @@ models:
         assert tile is not None
         assert tile.status == "runtime_unavailable"
 
+    def test_manifest_loads_utility_provider_tiles_from_known_roots_without_env(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Utility repos should be discoverable through the shared launch path."""
+        workspace_root = tmp_path
+        repo_root = workspace_root / "UpstreamDrift"
+        manifest_path = repo_root / "src" / "config" / "launcher_manifest.json"
+        registry_path = repo_root / "src" / "config" / "models.yaml"
+        manifest_path.parent.mkdir(parents=True)
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+        registry_path.write_text("models: []\n", encoding="utf-8")
+
+        tools_root = workspace_root / "Tools"
+        tools_root.mkdir(parents=True)
+        (tools_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "tools-pack"
+pack_name: "Tools"
+provider: "tools"
+models:
+  - id: "pendulum_suite"
+    name: "Pendulum Suite"
+    description: "Pendulum workflows"
+    type: "special_app"
+    path: "src/pendulum_launcher.py"
+    capabilities: ["pendulum", "simulation"]
+    launcher:
+      category: "tool"
+      logo: "golf_logo.svg"
+      status: "utility"
+      web_route: "/tools/pendulum-suite"
+""".strip(),
+            encoding="utf-8",
+        )
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("pendulum_suite")
+        assert tile is not None
+        assert tile.category == "tool"
+        assert tile.status == "utility"
+        assert tile.web_route == "/tools/pendulum-suite"
+
     def test_manifest_ignores_provider_tiles_when_disabled(
         self,
         tmp_path: Path,

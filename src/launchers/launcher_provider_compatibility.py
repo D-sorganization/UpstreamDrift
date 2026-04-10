@@ -8,6 +8,7 @@ without relying on hardcoded repo-local assumptions.
 from __future__ import annotations
 
 import importlib.util
+import sys
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
@@ -85,7 +86,12 @@ def is_engine_runtime_available(engine_type: str | None) -> bool:
     import_name = _ENGINE_IMPORT_NAMES.get(engine_type.strip().lower())
     if import_name is None:
         return True
-    return importlib.util.find_spec(import_name) is not None
+    if import_name in sys.modules:
+        return True
+    try:
+        return importlib.util.find_spec(import_name) is not None
+    except (ImportError, ValueError):
+        return False
 
 
 def _make_issue(
@@ -104,6 +110,17 @@ def _make_issue(
         message=message,
         context=normalized_context,
     )
+
+
+def _requires_canonical_identity(model: Any) -> bool:
+    """Return whether a provider model should expose cross-engine identity."""
+    launcher = getattr(model, "launcher", None)
+    launcher_category = getattr(launcher, "category", None)
+    if isinstance(launcher_category, str) and launcher_category == "tool":
+        return False
+
+    engine_type = getattr(model, "engine_type", None)
+    return isinstance(engine_type, str) and engine_type.strip() != ""
 
 
 def evaluate_launcher_model_compatibility(
@@ -253,7 +270,14 @@ def validate_provider_manifest(
     aggregated_issues: list[CompatibilityIssue] = []
     for result in results:
         aggregated_issues.extend(result.issues)
-        if result.canonical_id is None:
+        model = next(
+            (entry for entry in manifest.models if entry.id == result.model_id), None
+        )
+        if (
+            model is not None
+            and _requires_canonical_identity(model)
+            and result.canonical_id is None
+        ):
             aggregated_issues.append(
                 _make_issue(
                     "missing_canonical_identity",
@@ -263,9 +287,6 @@ def validate_provider_manifest(
                     provider=result.provider,
                 )
             )
-        model = next(
-            (entry for entry in manifest.models if entry.id == result.model_id), None
-        )
         if model is not None and len(model.capabilities) == 0:
             aggregated_issues.append(
                 _make_issue(

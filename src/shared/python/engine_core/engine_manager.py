@@ -413,10 +413,16 @@ class EngineManager(ContractChecker):
 
     def _get_model_registry_path(self) -> Path | None:
         """Resolve the shared model registry path relative to suite_root."""
-        candidates = (
-            self.suite_root / "src" / "config" / "models.yaml",
-            self.suite_root / "config" / "models.yaml",
-        )
+        if self.suite_root.name == "src":
+            candidates = (
+                self.suite_root / "config" / "models.yaml",
+                self.suite_root.parent / "config" / "models.yaml",
+            )
+        else:
+            candidates = (
+                self.suite_root / "src" / "config" / "models.yaml",
+                self.suite_root / "config" / "models.yaml",
+            )
         for candidate in candidates:
             if candidate.exists():
                 return candidate

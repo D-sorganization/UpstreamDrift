@@ -8,25 +8,38 @@ from pathlib import Path
 from src.shared.python.config.provider_catalog import (
     infer_repo_root_from_config,
     iter_configured_provider_roots,
+    iter_known_engine_provider_ids,
     iter_known_provider_ids,
     iter_known_provider_repo_names,
+    iter_known_utility_provider_ids,
     iter_provider_manifest_specs,
 )
 
 
-def test_iter_known_provider_metadata_covers_engine_model_repos() -> None:
+def test_iter_known_provider_metadata_covers_engine_and_utility_repos() -> None:
     assert iter_known_provider_ids() == (
         "mujoco_models",
         "drake_models",
         "pinocchio_models",
         "opensim_models",
+        "tools",
+        "movement_optimizer",
     )
     assert iter_known_provider_repo_names() == (
         "MuJoCo_Models",
         "Drake_Models",
         "Pinocchio_Models",
         "OpenSim_Models",
+        "Tools",
+        "Movement-Optimizer",
     )
+    assert iter_known_engine_provider_ids() == (
+        "mujoco_models",
+        "drake_models",
+        "pinocchio_models",
+        "opensim_models",
+    )
+    assert iter_known_utility_provider_ids() == ("tools", "movement_optimizer")
 
 
 def test_infer_repo_root_from_standard_models_config(tmp_path: Path) -> None:
@@ -61,6 +74,8 @@ def test_iter_configured_provider_roots_merges_env_and_sibling_defaults(
     assert workspace_root / "Drake_Models" in roots
     assert workspace_root / "Pinocchio_Models" in roots
     assert workspace_root / "OpenSim_Models" in roots
+    assert workspace_root / "Tools" in roots
+    assert workspace_root / "Movement-Optimizer" in roots
 
 
 def test_iter_provider_manifest_specs_supports_hidden_manifest_location(

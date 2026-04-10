@@ -13,29 +13,44 @@ class ProviderRepoDefinition:
 
     provider_id: str
     repo_name: str
-    engine_type: str
+    provider_kind: str
+    engine_type: str | None = None
 
 
 KNOWN_EXTERNAL_MODEL_PROVIDERS: tuple[ProviderRepoDefinition, ...] = (
     ProviderRepoDefinition(
         provider_id="mujoco_models",
         repo_name="MuJoCo_Models",
+        provider_kind="engine",
         engine_type="mujoco",
     ),
     ProviderRepoDefinition(
         provider_id="drake_models",
         repo_name="Drake_Models",
+        provider_kind="engine",
         engine_type="drake",
     ),
     ProviderRepoDefinition(
         provider_id="pinocchio_models",
         repo_name="Pinocchio_Models",
+        provider_kind="engine",
         engine_type="pinocchio",
     ),
     ProviderRepoDefinition(
         provider_id="opensim_models",
         repo_name="OpenSim_Models",
+        provider_kind="engine",
         engine_type="opensim",
+    ),
+    ProviderRepoDefinition(
+        provider_id="tools",
+        repo_name="Tools",
+        provider_kind="utility",
+    ),
+    ProviderRepoDefinition(
+        provider_id="movement_optimizer",
+        repo_name="Movement-Optimizer",
+        provider_kind="utility",
     ),
 )
 
@@ -116,3 +131,21 @@ def iter_known_provider_ids() -> tuple[str, ...]:
 def iter_known_provider_repo_names() -> tuple[str, ...]:
     """Return the expected sibling repo names for the onboarded providers."""
     return tuple(provider.repo_name for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS)
+
+
+def iter_known_engine_provider_ids() -> tuple[str, ...]:
+    """Return provider IDs for engine-backed external repos."""
+    return tuple(
+        provider.provider_id
+        for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
+        if provider.provider_kind == "engine"
+    )
+
+
+def iter_known_utility_provider_ids() -> tuple[str, ...]:
+    """Return provider IDs for utility-backed external repos."""
+    return tuple(
+        provider.provider_id
+        for provider in KNOWN_EXTERNAL_MODEL_PROVIDERS
+        if provider.provider_kind == "utility"
+    )
