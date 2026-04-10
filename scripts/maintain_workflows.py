@@ -48,5 +48,7 @@ def refactor_workflow(filepath):
 
 
 if __name__ == "__main__":
-    # This script is just a placeholder for now, I'll use replace_file_content for precision
-    pass
+    raise NotImplementedError(
+        "maintain_workflows.py is not yet implemented. "
+        "Do not call this script until the refactor_workflow function is completed."
+    )

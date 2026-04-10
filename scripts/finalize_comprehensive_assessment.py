@@ -16,7 +16,7 @@ logger = setup_script_logging(__name__)
 
 DOCS_DIR = _REPO_ROOT / "docs" / "assessments"
 COMPLETIST_REPORT = DOCS_DIR / "completist" / "COMPLETIST_LATEST.md"
-PRAGMATIC_REPORT = DOCS_DIR / "pragmatic_programmer" / "review_2026-01-31.json"
+PRAGMATIC_REPORT = DOCS_DIR / "pragmatic_programmer" / "review.json"
 SUMMARY_JSON = DOCS_DIR / "assessment_summary.json"
 OUTPUT_MD = DOCS_DIR / "Comprehensive_Assessment.md"
 
