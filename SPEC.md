@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.84                                             |
+| **Spec Version**        | 1.0.86                                             |
 | **Last Spec Update**    | 2026-04-10                                         |
 
 ## 2. Purpose & Mission
@@ -493,6 +493,8 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-10 | 1.0.86  | Optional-stack contracts(Pinocchio): preserved root-body MuJoCo joints during URDF export so Pinocchio models retain the MuJoCo velocity-DOF contract, rejected mock-only Pinocchio availability surfaces, and isolated induced-acceleration unit mocks from global `sys.modules` leakage. |
+| 2026-04-10 | 1.0.85  | Optional-stack contracts(Drake): tightened Drake availability probing to reject mock-only or partial `pydrake` surfaces, restored module-scoped Drake dependency mocks for module-scoped tests, and aligned the isolated strict reset test with the initialized-engine precondition. |
 | 2026-04-10 | 1.0.84  | Optional-stack contracts: tightened OpenSim availability probing to reject importable-but-incompatible bindings, exported unlimited MuJoCo hinge joints as URDF `continuous` joints, and aligned Pinocchio/OpenSim audit tests with the implemented engine contracts. |
 | 2026-04-10 | 1.0.83  | CI governance: removed the `**.md` pull-request ignore from CI Standard so required quality-gate checks run for SPEC-only pull requests instead of leaving required checks permanently pending. |
 | 2026-04-10 | 1.0.82  | Refactor(data-fitting): decomposed `validation_pkg/data_fitting.py` into focused data-model, inverse-kinematics, parameter-estimation, sensitivity, and pipeline helper modules while preserving the legacy facade import surface and adding facade regression coverage. |

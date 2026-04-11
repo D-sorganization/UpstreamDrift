@@ -181,10 +181,18 @@ def test_export_to_urdf(mock_mujoco_model: MagicMock) -> None:
         urdf_str = exporter.export_to_urdf("output.urdf", "test_robot")
 
         assert 'robot name="test_robot"' in urdf_str
+        assert 'link name="world"' in urdf_str
         assert 'link name="link1"' in urdf_str
         assert 'link name="link2"' in urdf_str
+        assert 'joint name="joint_0"' in urdf_str
         assert 'joint name="joint_1"' in urdf_str
         assert 'type="prismatic"' in urdf_str
+
+        root = ET.fromstring(urdf_str)
+        root_joint = root.find("./joint[@name='joint_0']")
+        assert root_joint is not None
+        assert root_joint.find("parent").get("link") == "world"
+        assert root_joint.find("child").get("link") == "link1"
 
 
 def test_export_unlimited_hinge_as_continuous(mock_mujoco_model: MagicMock) -> None:

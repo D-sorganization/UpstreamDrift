@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest  # noqa: F401 - required for pytestmark
 
+from src.shared.python.core.contracts.exceptions import PreconditionError
 from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
@@ -89,14 +90,10 @@ class TestDrakeStrict:
         np.testing.assert_allclose(spatial[:3, :], self.TEST_ANGULAR_VAL)
         np.testing.assert_allclose(spatial[3:, :], self.TEST_LINEAR_VAL)
 
-    def test_reset_logs_warning_when_uninitialized(self):
-        """Drake reset should warn and return when the engine is uninitialized."""
+    def test_reset_rejects_uninitialized_engine(self):
+        """Drake reset should enforce the initialized-engine precondition."""
         engine = self.DrakePhysicsEngine()
         engine.context = None  # Force uninitialized
 
-        with patch.object(self.mod, "logger") as mock_logger:
+        with pytest.raises(PreconditionError):
             engine.reset()
-
-        mock_logger.warning.assert_called_once_with(
-            "Attempted to reset Drake engine before initialization."
-        )

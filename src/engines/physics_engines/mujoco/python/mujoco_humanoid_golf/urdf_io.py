@@ -132,6 +132,14 @@ class URDFExporter:
             logger.warning("No root body found, creating default")
             return
 
+        root_jntadr = self.model.body_jntadr[root_body_id]
+        if root_jntadr >= 0:
+            robot.append(ET.Element("link", name=self._body_link_name(0)))
+
+            root_joint = self._create_joint(0, root_body_id)
+            if root_joint is not None:
+                robot.append(root_joint)
+
         # Build link for root body
         root_link = self._create_link(
             root_body_id,
@@ -165,6 +173,13 @@ class URDFExporter:
                 return i
 
         return None
+
+    def _body_link_name(self, body_id: int) -> str:
+        """Return the URDF link name for a MuJoCo body."""
+        return (
+            mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
+            or f"link_{body_id}"
+        )
 
     def _build_children(
         self,

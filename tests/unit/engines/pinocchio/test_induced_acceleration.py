@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
-import sys
+import importlib
 from collections.abc import Generator
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Mock pinocchio before importing
 mock_pin = MagicMock()
-sys.modules["pinocchio"] = mock_pin
+with patch.dict("sys.modules", {"pinocchio": mock_pin}):
+    induced_acceleration_mod = importlib.import_module(
+        "src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration"
+    )
 
-from src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (  # noqa: E402, E501
-    InducedAccelerationAnalyzer,
+InducedAccelerationAnalyzer = (  # noqa: N816
+    induced_acceleration_mod.InducedAccelerationAnalyzer
 )
 
 
@@ -23,11 +25,14 @@ class TestPinocchioInducedAcceleration:
     """Test suite for InducedAccelerationAnalyzer."""
 
     @pytest.fixture(autouse=True)
-    def reset_mocks(self) -> Generator[None, None, None]:
+    def reset_mocks(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> Generator[None, None, None]:
         """Reset mocks before each test."""
         mock_pin.reset_mock()
         mock_pin.aba.side_effect = None
         mock_pin.aba.return_value = MagicMock()  # Default return
+        monkeypatch.setattr(induced_acceleration_mod, "pin", mock_pin)
         yield
 
     @pytest.fixture
