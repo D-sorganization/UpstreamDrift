@@ -459,7 +459,7 @@ def iter_unique_python_path_strings(
 
 def _iter_python_path_values(model: Any) -> tuple[str, ...]:
     raw_values = getattr(model, "python_paths", ())
-    if not isinstance(raw_values, (list, tuple)):
+    if not isinstance(raw_values, list | tuple):
         return ()
     values: list[str] = []
     for raw_value in raw_values:
