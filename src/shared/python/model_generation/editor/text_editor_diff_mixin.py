@@ -4,11 +4,11 @@ Extracts diff generation and side-by-side comparison logic
 from the main editor class to improve single-responsibility adherence.
 """
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: E402, F404
 
-import difflib
-import re
-from typing import TYPE_CHECKING
+import difflib  # noqa: E402
+import re  # noqa: E402
+from typing import TYPE_CHECKING  # noqa: E402
 
 if TYPE_CHECKING:
     from .text_editor import DiffResult
@@ -17,13 +17,22 @@ if TYPE_CHECKING:
 class TextEditorDiffMixin:
     """Mixin providing diff computation for URDFTextEditor."""
 
+    # BEGIN LOCAL MYPY COMPOSITION STATE
+    if TYPE_CHECKING:
+        from .text_editor import EditorVersion
+
+        _content: str
+        _original_content: str
+        _history: list[EditorVersion]
+    # END LOCAL MYPY COMPOSITION STATE
+
     def get_diff_from_original(self) -> DiffResult:
         """Get diff between current content and original.
 
         Returns:
             DiffResult with changes
         """
-        return self._compute_diff(self._original_content, self._content)  # type: ignore[attr-defined]
+        return self._compute_diff(self._original_content, self._content)
 
     def get_diff_between_versions(
         self,
@@ -39,13 +48,13 @@ class TextEditorDiffMixin:
         Returns:
             DiffResult with changes
         """
-        if version_a < 0 or version_a >= len(self._history):  # type: ignore[attr-defined]
+        if version_a < 0 or version_a >= len(self._history):
             raise IndexError(f"Invalid version index: {version_a}")
-        if version_b < 0 or version_b >= len(self._history):  # type: ignore[attr-defined]
+        if version_b < 0 or version_b >= len(self._history):
             raise IndexError(f"Invalid version index: {version_b}")
 
-        content_a = self._history[version_a].content  # type: ignore[attr-defined]
-        content_b = self._history[version_b].content  # type: ignore[attr-defined]
+        content_a = self._history[version_a].content
+        content_b = self._history[version_b].content
         return self._compute_diff(content_a, content_b)
 
     def get_diff_with_string(self, other_content: str) -> DiffResult:
@@ -57,7 +66,7 @@ class TextEditorDiffMixin:
         Returns:
             DiffResult with changes
         """
-        return self._compute_diff(self._content, other_content)  # type: ignore[attr-defined]
+        return self._compute_diff(self._content, other_content)
 
     def _compute_diff(self, original: str, modified: str) -> DiffResult:
         """Compute diff between two strings."""
@@ -159,9 +168,9 @@ class TextEditorDiffMixin:
         if not (context_lines is not None):
             raise ValueError("context_lines must be provided")
         if original is None:
-            original = self._original_content  # type: ignore[attr-defined]
+            original = self._original_content
         if modified is None:
-            modified = self._content  # type: ignore[attr-defined]
+            modified = self._content
 
         original_lines = original.splitlines()
         modified_lines = modified.splitlines()
@@ -171,14 +180,20 @@ class TextEditorDiffMixin:
         result: list[tuple[str | None, str | None, str]] = []
         for opcode, i1, i2, j1, j2 in differ.get_opcodes():
             if opcode == "equal":
-                for i, j in zip(range(i1, i2), range(j1, j2), strict=False):
-                    result.append((original_lines[i], modified_lines[j], "equal"))
+                result.extend(
+                    [
+                        (original_lines[i], modified_lines[j], "equal")
+                        for (i, j) in zip(range(i1, i2), range(j1, j2), strict=False)
+                    ]
+                )
             elif opcode == "insert":
-                for j in range(j1, j2):
-                    result.append((None, modified_lines[j], "insert"))
+                result.extend(
+                    [(None, modified_lines[j], "insert") for j in range(j1, j2)]
+                )
             elif opcode == "delete":
-                for i in range(i1, i2):
-                    result.append((original_lines[i], None, "delete"))
+                result.extend(
+                    [(original_lines[i], None, "delete") for i in range(i1, i2)]
+                )
             elif opcode == "replace":
                 max_len = max(i2 - i1, j2 - j1)
                 for k in range(max_len):
