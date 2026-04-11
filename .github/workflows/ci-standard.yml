@@ -40,6 +40,7 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore:
       - "docs/**"
+      - "**.md"
       - "LICENSE"
       - ".gitignore"
   workflow_dispatch:
@@ -164,12 +165,12 @@ jobs:
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
         run: |
-          python src/tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
+          PYTHONPATH=. python src/tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
 
       - name: MATLAB Quality Check
         continue-on-error: true
         run: |
-          python src/tools/matlab_utilities/scripts/matlab_quality_check.py --output-format text > matlab_quality_report.txt
+          PYTHONPATH=. python src/tools/matlab_utilities/scripts/matlab_quality_check.py --output-format text > matlab_quality_report.txt
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report

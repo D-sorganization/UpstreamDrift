@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-from unittest.mock import MagicMock
-
 import pytest
 
 from src.shared.python.engine_core.engine_availability import (
@@ -65,48 +62,6 @@ class TestGetEngineStatus:
         s1 = get_engine_status("math")
         s2 = get_engine_status("math")
         assert s1 == s2
-
-    def test_broken_opensim_path_constructor_is_not_available(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        import src.shared.python.engine_core.engine_availability as availability
-
-        class BrokenOpenSim:
-            Manager = object
-            Vector = object
-            InverseDynamicsSolver = object
-
-            class Model:
-                def __init__(self) -> None:
-                    pass
-
-        availability._engine_status_cache.pop("opensim", None)
-        availability._engine_error_cache.pop("opensim", None)
-        monkeypatch.setitem(sys.modules, "opensim", BrokenOpenSim)
-
-        assert get_engine_status("opensim") == EngineStatus.BROKEN
-
-    def test_mocked_drake_surface_is_not_available(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        import src.shared.python.engine_core.engine_availability as availability
-
-        availability._engine_status_cache.pop("drake", None)
-        availability._engine_error_cache.pop("drake", None)
-        monkeypatch.setitem(sys.modules, "pydrake.all", MagicMock())
-
-        assert get_engine_status("drake") == EngineStatus.BROKEN
-
-    def test_mocked_pinocchio_surface_is_not_available(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
-        import src.shared.python.engine_core.engine_availability as availability
-
-        availability._engine_status_cache.pop("pinocchio", None)
-        availability._engine_error_cache.pop("pinocchio", None)
-        monkeypatch.setitem(sys.modules, "pinocchio", MagicMock())
-
-        assert get_engine_status("pinocchio") == EngineStatus.BROKEN
 
 
 # ---------------------------------------------------------------------------

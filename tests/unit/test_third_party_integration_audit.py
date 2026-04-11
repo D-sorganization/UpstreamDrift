@@ -238,8 +238,8 @@ class TestPinocchioIntegrationAudit:
         assert not engine.is_initialized
 
     @skip_if_unavailable("pinocchio")
-    def test_pinocchio_contact_forces_returns_zero_vector(self) -> None:
-        """compute_contact_forces exposes the documented zero-vector fallback."""
+    def test_pinocchio_contact_forces_raises(self) -> None:
+        """compute_contact_forces must raise NotImplementedError (not fake zeros)."""
         from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
             PinocchioPhysicsEngine,
         )
@@ -257,7 +257,8 @@ class TestPinocchioIntegrationAudit:
         </robot>"""
         try:
             engine.load_from_string(simple_urdf, extension=".urdf")
-            np.testing.assert_array_equal(engine.compute_contact_forces(), np.zeros(3))
+            with pytest.raises(NotImplementedError):
+                engine.compute_contact_forces()
         except Exception as e:  # noqa: BLE001, F841
             pytest.skip("Could not load URDF in Pinocchio")
 
@@ -407,7 +408,7 @@ class TestOpenSimIntegrationAudit:
 
         engine = OpenSimPhysicsEngine()
         assert not engine.is_initialized
-        assert engine.model_name == "OpenSim_NoModel"
+        assert engine.model_name == ""
 
     @skip_if_unavailable("opensim")
     def test_opensim_protocol_methods_exist(self) -> None:

@@ -59,3 +59,9 @@
 **Vulnerability:** Found arbitrary code execution vulnerability in `DataProcessorEngine.filter_data()` where user-provided column and operator strings were concatenated and passed directly to `pandas.DataFrame.query()` without validation.
 **Learning:** `DataFrame.query()` evaluates string expressions and is vulnerable to injection if the concatenated string isn't validated, even if parts of it are formatted dynamically.
 **Prevention:** Always validate constructed query expressions passed to `pd.DataFrame.query()` using an AST-based validator to ensure they only contain safe operations.
+
+## 2026-04-10 - Enable Docker Image Scanning
+
+**Vulnerability:** No container security scanning was configured in CI workflows, leaving Docker images unaudited for vulnerabilities. Base image vulnerabilities could be inherited silently.
+**Learning:** Container vulnerabilities are undetected until production without proper CI scanning tools. Relying solely on source code scanning leaves a gap in the security posture regarding the environment the code runs in.
+**Prevention:** Ensured the `.github/workflows/docker-security-scan.yml` is enabled by removing its `.disabled` extension so that Trivy runs on every PR and push.

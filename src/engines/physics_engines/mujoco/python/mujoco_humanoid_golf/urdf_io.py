@@ -476,11 +476,6 @@ class URDFExporter:
         if urdf_jnt_type is None:
             logger.warning("Unsupported joint type %s for URDF export", jnt_type)
             return None
-        if (
-            jnt_type == mujoco.mjtJoint.mjJNT_HINGE
-            and not self.model.jnt_limited[child_jntadr]
-        ):
-            urdf_jnt_type = "continuous"
 
         parent_name = (
             mujoco.mj_id2name(

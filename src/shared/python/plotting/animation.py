@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from matplotlib import animation as mpl_animation
 from matplotlib import pyplot as plt
-from matplotlib.lines import Line2D
 
 from src.shared.python.core.contracts import precondition
 
@@ -152,9 +151,7 @@ class SwingAnimator:
         )
         return anim
 
-    def _gather_trajectory_data(
-        self, body_names: list[str] | None
-    ) -> tuple[dict[str, np.ndarray], np.ndarray]:
+    def _gather_trajectory_data(self, body_names):
         if not (body_names is not None):
             raise ValueError("body_names must be provided")
         body_data: dict[str, np.ndarray] = {}
@@ -167,12 +164,7 @@ class SwingAnimator:
                     times = np.asarray(t)
         return body_data, times
 
-    def _plot_desired_trajectories(
-        self,
-        ax: Axes,
-        desired_positions: dict[str, np.ndarray] | None,
-        cfg: AnimationConfig,
-    ) -> None:
+    def _plot_desired_trajectories(self, ax, desired_positions, cfg):
         if not desired_positions:
             return
         for name, pts in desired_positions.items():
@@ -188,16 +180,11 @@ class SwingAnimator:
                     label=f"{name} desired",
                 )
 
-    def _create_body_artists(
-        self,
-        ax: Axes,
-        body_data: dict[str, np.ndarray],
-        cfg: AnimationConfig,
-    ) -> tuple[dict[str, Line2D], dict[str, Line2D]]:
+    def _create_body_artists(self, ax, body_data, cfg):
         if not (ax is not None):
             raise ValueError("ax must be provided")
-        lines: dict[str, Line2D] = {}
-        points: dict[str, Line2D] = {}
+        lines: dict[str, Any] = {}
+        points: dict[str, Any] = {}
         for name in body_data:
             (line,) = ax.plot(
                 [], [], [], linewidth=1.5, color=cfg.actual_color, label=name
@@ -207,9 +194,7 @@ class SwingAnimator:
             points[name] = pt
         return lines, points
 
-    def _set_axis_limits_from_data(
-        self, ax: Axes, body_data: dict[str, np.ndarray]
-    ) -> None:
+    def _set_axis_limits_from_data(self, ax, body_data):
         if not (ax is not None):
             raise ValueError("ax must be provided")
         all_pts = np.vstack(list(body_data.values()))
