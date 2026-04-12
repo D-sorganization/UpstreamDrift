@@ -198,4 +198,3 @@ jobs:
             "This is an automated hotfix. Please review carefully before merging." \
             )"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

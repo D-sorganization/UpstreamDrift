@@ -88,4 +88,3 @@ jobs:
             fi
           done
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

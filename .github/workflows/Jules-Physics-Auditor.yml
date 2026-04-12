@@ -298,4 +298,3 @@ jobs:
           commit_message: "docs(physics): technical physics audit"
           file_pattern: "docs/assessments/physics/*.md"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

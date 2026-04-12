@@ -325,4 +325,3 @@ jobs:
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*Jules Assessment Remediator - Rate limited to prevent PR explosion*" >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

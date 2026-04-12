@@ -183,4 +183,3 @@ jobs:
             ui/src-tauri/target/release/bundle/**/*
           if-no-files-found: warn
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

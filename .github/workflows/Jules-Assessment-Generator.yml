@@ -232,4 +232,3 @@ jobs:
 
           echo "Assessment generation complete. Jules will create a PR with the results."
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

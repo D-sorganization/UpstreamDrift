@@ -206,4 +206,3 @@ jobs:
           commit_message: "docs(sentinel): weekly security audit"
           file_pattern: ".jules/sentinel.md"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

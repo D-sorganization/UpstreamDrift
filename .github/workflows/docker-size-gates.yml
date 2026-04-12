@@ -96,4 +96,3 @@ jobs:
           # We can also check that the API server module is importable
           docker run --rm upstream-drift:runtime python -c "import fastapi; print('FastAPI imported successfully')"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

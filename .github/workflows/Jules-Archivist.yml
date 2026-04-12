@@ -75,4 +75,3 @@ jobs:
             git push origin --delete "$BRANCH" || true
           done
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

@@ -218,4 +218,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "See full report in docs/assessments/documentation/LATEST.md" >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

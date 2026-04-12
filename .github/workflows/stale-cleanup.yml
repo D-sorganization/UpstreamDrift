@@ -139,4 +139,3 @@ jobs:
           exempt-all-pr-milestones: true
           exempt-all-issue-milestones: true
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

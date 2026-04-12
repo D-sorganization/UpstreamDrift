@@ -134,4 +134,3 @@ jobs:
 
           echo "✅ No critical file deletions detected."
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

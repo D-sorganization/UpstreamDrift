@@ -380,4 +380,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Check \`docs/review_archive/\` for the full archive." >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

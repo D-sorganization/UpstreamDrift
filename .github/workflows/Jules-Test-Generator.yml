@@ -92,4 +92,3 @@ jobs:
             --branch ${{ github.ref_name }} \
             --parallel 3
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

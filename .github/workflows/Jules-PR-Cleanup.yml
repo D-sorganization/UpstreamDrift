@@ -190,4 +190,3 @@ jobs:
             echo "Run with \`dry_run=false\` to actually close stale PRs." >> $GITHUB_STEP_SUMMARY
           fi
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

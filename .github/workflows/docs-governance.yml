@@ -66,4 +66,3 @@ jobs:
       - name: Validate docs governance
         run: python3 scripts/check_docs_governance.py
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

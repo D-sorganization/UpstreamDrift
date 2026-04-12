@@ -299,4 +299,3 @@ jobs:
             /tmp/unit-test-results.txt
             /tmp/pinocchio_install.log
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

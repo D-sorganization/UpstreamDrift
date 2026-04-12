@@ -162,4 +162,3 @@ jobs:
             --label "dependencies" \
             --label "automated"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

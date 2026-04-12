@@ -176,4 +176,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Check the Actions tab to monitor progress of individual workflows." >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

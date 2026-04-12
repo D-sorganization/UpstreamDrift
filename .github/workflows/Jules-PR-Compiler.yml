@@ -293,4 +293,3 @@ jobs:
           echo "Individual PRs will be auto-closed when the compiled PR is merged."
           echo "Branch cleanup happens automatically via GitHub's branch deletion on PR merge."
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

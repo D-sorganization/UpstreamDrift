@@ -484,4 +484,3 @@ jobs:
           echo "- **Status:** ${{ steps.repair.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Iterations:** ${{ steps.repair.outputs.iterations || '0' }}" >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

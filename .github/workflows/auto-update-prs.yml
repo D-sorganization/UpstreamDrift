@@ -76,4 +76,3 @@ jobs:
               }
             }
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

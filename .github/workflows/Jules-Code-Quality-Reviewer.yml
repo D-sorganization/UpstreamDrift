@@ -218,4 +218,3 @@ jobs:
           commit_message: "docs(review): code quality review $(date +%Y-%m-%d)"
           file_pattern: "docs/assessments/**/*.md"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

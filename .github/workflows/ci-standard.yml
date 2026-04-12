@@ -543,4 +543,3 @@ jobs:
           echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

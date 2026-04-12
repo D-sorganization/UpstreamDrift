@@ -238,4 +238,3 @@ jobs:
         run: |
           echo "💤 No agent activity in the last week"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

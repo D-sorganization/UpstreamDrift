@@ -124,4 +124,3 @@ jobs:
             --session "Address code review feedback on PR #$PR_NUMBER: $FEEDBACK_CONTENT" \
             --pr "$PR_NUMBER"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

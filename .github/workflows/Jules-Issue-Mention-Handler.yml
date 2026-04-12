@@ -288,4 +288,3 @@ jobs:
             echo "- **PR:** ${{ steps.jules.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY
           fi
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

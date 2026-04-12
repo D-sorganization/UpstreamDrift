@@ -234,4 +234,3 @@ jobs:
             echo "**Triggered CI for PRs**: ${{ steps.find-prs.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
           fi
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

@@ -587,4 +587,3 @@ jobs:
           [View Full Report](https://github.com/${{ github.repository }}/blob/main/${{ steps.report.outputs.report_file }})
           EOF
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

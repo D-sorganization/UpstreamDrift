@@ -178,4 +178,3 @@ jobs:
             echo "   No source files changed — spec update not required."
           fi
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

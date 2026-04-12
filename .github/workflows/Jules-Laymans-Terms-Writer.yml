@@ -463,4 +463,3 @@ jobs:
             echo "No changes to commit"
           fi
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

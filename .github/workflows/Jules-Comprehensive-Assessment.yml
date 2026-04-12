@@ -310,4 +310,3 @@ jobs:
             echo "::warning::Could not find generated PR to rename."
           fi
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

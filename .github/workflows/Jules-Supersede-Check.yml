@@ -189,4 +189,3 @@ jobs:
           echo "**Trigger**: Push to main" >> $GITHUB_STEP_SUMMARY
           echo "**Superseded PRs found**: ${{ steps.find.outputs.superseded_count || 0 }}" >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

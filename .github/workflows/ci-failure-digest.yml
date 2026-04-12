@@ -175,4 +175,3 @@ jobs:
         run: |
           echo "🎉 No CI failures in the last week! Great job team!"
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

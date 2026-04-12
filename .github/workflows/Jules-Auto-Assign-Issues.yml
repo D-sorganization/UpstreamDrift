@@ -120,4 +120,3 @@ jobs:
           # Add label to issue
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "jules-assigned" || true
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

@@ -391,4 +391,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Queue has been cleared. Processed comments archived." >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

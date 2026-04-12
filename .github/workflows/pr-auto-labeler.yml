@@ -144,4 +144,3 @@ jobs:
               console.log('No labels to apply');
             }
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

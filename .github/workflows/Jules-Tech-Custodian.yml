@@ -119,4 +119,3 @@ jobs:
           # We use || true so it doesn't fail if the PR is already ready
           gh pr ready "$PR_URL" || true
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}

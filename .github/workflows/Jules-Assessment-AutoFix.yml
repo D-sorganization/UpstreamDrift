@@ -562,4 +562,3 @@ jobs:
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*Run without dry_run=true to execute these changes*" >> $GITHUB_STEP_SUMMARY
 
-FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
