@@ -88,7 +88,6 @@ jobs:
         id: gather
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           mkdir -p .jules/resolver_data
 
@@ -105,7 +104,6 @@ jobs:
         id: branch
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           # Check for existing open PR from this workflow
           EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
@@ -242,7 +240,6 @@ jobs:
       - name: Commit and Create/Update PR
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           REUSING_PR: ${{ steps.branch.outputs.reusing_pr }}
           EXISTING_PR_NUM: ${{ steps.branch.outputs.existing_pr_num }}
         run: |

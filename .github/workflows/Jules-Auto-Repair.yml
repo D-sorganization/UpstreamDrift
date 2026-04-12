@@ -100,7 +100,6 @@ jobs:
         id: branch
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
           INPUT_BRANCH: ${{ inputs.branch }}
         run: |
@@ -144,7 +143,6 @@ jobs:
         if: steps.branch.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           BRANCH: ${{ steps.branch.outputs.branch }}
         run: |
           HOURS_AGO=$(date -u -d "${{ env.REPAIR_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.REPAIR_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
@@ -171,7 +169,6 @@ jobs:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
           token: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
 
       - uses: actions/setup-python@v6
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
@@ -188,7 +185,6 @@ jobs:
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
         run: |
           if [ -n "$TARGET_RUN_ID" ]; then
@@ -215,7 +211,6 @@ jobs:
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           BRANCH: ${{ steps.branch.outputs.branch }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
@@ -452,7 +447,6 @@ jobs:
         if: steps.branch.outputs.pr_number != '' && steps.repair.outputs.status != ''
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
           STATUS: ${{ steps.repair.outputs.status }}
           ITERATIONS: ${{ steps.repair.outputs.iterations }}

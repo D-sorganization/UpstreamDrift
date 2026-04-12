@@ -68,7 +68,6 @@ jobs:
       - name: Update Pause State
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

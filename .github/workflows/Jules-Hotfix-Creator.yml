@@ -114,7 +114,6 @@ jobs:
         if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           HOTFIX_BRANCH="hotfix/ci-fail-${TIMESTAMP}"
@@ -129,7 +128,6 @@ jobs:
         if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
         run: |
           HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
@@ -155,7 +153,6 @@ jobs:
         if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
           FAILED_BRANCH="${{ steps.branch.outputs.failed_branch }}"

@@ -56,7 +56,6 @@ jobs:
       - name: Scan for Conflicted PRs
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           PRS=$(gh pr list --state open --label "auto-fix" --json number --jq '.[].number')
 

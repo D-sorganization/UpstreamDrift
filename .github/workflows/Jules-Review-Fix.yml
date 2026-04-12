@@ -56,7 +56,6 @@ jobs:
         id: auth
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           LOGIN="${{ github.event.review.user.login }}"
           # Allow trusted quality bots
@@ -88,7 +87,6 @@ jobs:
         id: feedback
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REVIEW_ID: ${{ github.event.review.id }}
           REVIEWER_LOGIN: ${{ github.event.review.user.login }}

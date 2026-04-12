@@ -103,7 +103,6 @@ jobs:
         id: collect
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           mkdir -p .github/review_comments
           mkdir -p docs/review_archive
@@ -141,7 +140,6 @@ jobs:
         id: process
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           ARCHIVE_ONLY: ${{ inputs.archive_only || 'false' }}
           TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -356,7 +354,6 @@ jobs:
       - name: Commit Archive
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"

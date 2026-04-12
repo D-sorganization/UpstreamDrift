@@ -110,7 +110,6 @@ jobs:
         id: branch
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           if [ -n "${{ github.event.inputs.branch }}" ]; then
             BRANCH="${{ github.event.inputs.branch }}"
@@ -148,7 +147,6 @@ jobs:
         if: steps.branch.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           BRANCH: ${{ steps.branch.outputs.branch }}
         run: |
           # Count recent autofix commits on this branch to prevent loops
@@ -178,7 +176,6 @@ jobs:
           ref: ${{ steps.branch.outputs.branch }}
           fetch-depth: 0
           token: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
 
       - name: Setup Python
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
@@ -202,7 +199,6 @@ jobs:
         if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           BRANCH: ${{ steps.branch.outputs.branch }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
           MAX_ITERATIONS: ${{ steps.limits.outputs.remaining_attempts }}
@@ -386,7 +382,6 @@ jobs:
           github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
           STATUS: ${{ steps.fix-loop.outputs.status }}
           ITERATIONS: ${{ steps.fix-loop.outputs.iterations_used }}

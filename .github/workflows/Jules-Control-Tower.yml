@@ -109,7 +109,6 @@ jobs:
         if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           echo "Checking repair iteration limits..."
           BRANCH="${{ github.event.workflow_run.head_branch }}"

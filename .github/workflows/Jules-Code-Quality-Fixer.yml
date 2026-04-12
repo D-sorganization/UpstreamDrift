@@ -90,7 +90,6 @@ jobs:
         id: branch
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           # Check for existing open PR from this workflow
           EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
@@ -121,7 +120,6 @@ jobs:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           ASSESSMENT_FILE: ${{ inputs.assessment_file || 'docs/assessments/Code_Quality_Review_Latest.md' }}
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           set -e
           DATE=$(date +%Y-%m-%d)
@@ -230,7 +228,6 @@ jobs:
       - name: Commit and Create/Update PR
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           REUSING_PR: ${{ steps.branch.outputs.reusing_pr }}
           EXISTING_PR_NUM: ${{ steps.branch.outputs.existing_pr_num }}
         run: |

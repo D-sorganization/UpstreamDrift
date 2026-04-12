@@ -88,7 +88,6 @@ jobs:
       - name: Acknowledge Request
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
@@ -106,7 +105,6 @@ jobs:
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           COMMENT_BODY: ${{ github.event.comment.body }}
@@ -253,7 +251,6 @@ jobs:
         if: steps.jules.outputs.status == 'success'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           PR_URL: ${{ steps.jules.outputs.pr_url }}
         run: |

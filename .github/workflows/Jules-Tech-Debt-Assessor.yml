@@ -490,7 +490,6 @@ jobs:
         if: inputs.create_issues != false
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           DEBT_SCORE: ${{ steps.report.outputs.debt_score }}
           SEVERITY: ${{ steps.report.outputs.severity }}
           REPORT_FILE: ${{ steps.report.outputs.report_file }}
@@ -546,7 +545,6 @@ jobs:
       - name: Commit and Push Report
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

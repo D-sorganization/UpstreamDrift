@@ -94,7 +94,6 @@ jobs:
       - uses: actions/checkout@v6
         with:
           token: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           fetch-depth: 5
 
       - name: Check Loop Prevention
@@ -123,7 +122,6 @@ jobs:
         if: steps.loop-check.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           INPUT_PR: ${{ inputs.pr_number }}
           FORCE: ${{ inputs.force }}
         run: |
@@ -184,7 +182,6 @@ jobs:
         if: steps.loop-check.outputs.skip != 'true' && steps.find-prs.outputs.prs != ''
         env:
           GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           for pr in ${{ steps.find-prs.outputs.prs }}; do
             echo "Triggering CI for PR #$pr"

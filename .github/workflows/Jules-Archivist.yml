@@ -58,7 +58,6 @@ jobs:
       - name: Cleanup Merged Branches
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
           # Fetch list of merged PR branches starting with 'jules/'
           # Note: We filter by the branch prefix used by your agent

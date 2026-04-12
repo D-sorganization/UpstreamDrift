@@ -104,7 +104,6 @@ jobs:
         id: assign
         env:
           GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           MAX_ISSUES: ${{ inputs.max_issues || '1' }}
           PRIORITY_FILTER: ${{ inputs.priority_filter || 'all' }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}

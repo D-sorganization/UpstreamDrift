@@ -101,7 +101,6 @@ jobs:
         if: steps.target.outputs.has_issues == 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           BRANCH: ${{ steps.branch.outputs.branch_name }}
           TARGET: ${{ steps.target.outputs.file }}
         run: |

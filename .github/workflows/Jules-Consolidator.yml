@@ -81,7 +81,6 @@ jobs:
         id: list
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           EXCLUDE_PRS: ${{ inputs.exclude_prs }}
         run: |
           prs=$(gh pr list --base main --state open --json number,title,author,labels,mergeable \
@@ -113,7 +112,6 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
 
       - name: Configure Git
         run: |
@@ -123,7 +121,6 @@ jobs:
       - name: Create and Merge PRs
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
           PR_LIST: ${{ needs.discover.outputs.pr_list }}
         run: |
           BRANCH_NAME="consolidated-prs-$(date +%Y-%m-%d)"
