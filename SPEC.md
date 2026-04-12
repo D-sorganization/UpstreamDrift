@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-11T21:50:57Z
+Last-Updated: 2026-04-12T00:46:05Z
 
 <!--
   TEMPLATE VERSION: 1.0.0
