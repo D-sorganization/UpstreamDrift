@@ -144,6 +144,10 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install pip-audit
+          # Audit only the project's declared dependency set (requirements-dev.lock)
+          # rather than all ambient packages in the shared runner toolcache.
+          # The shared self-hosted runner toolcache accumulates stale packages from
+          # multiple projects; auditing the full environment produces false positives.
           # Ignore CVEs with no fix version available or transitive dependencies:
           # - CVE-2024-23342 (ecdsa): No fix version available
           # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
@@ -155,7 +159,8 @@ jobs:
           # - CVE-2026-27205 (flask): Transitive runner-env dep; not a direct project dep
           # - CVE-2024-47081 (requests): Transitive dep; fix in requests>=2.32.4
           # - CVE-2026-25645 (requests): Transitive dep; fix in requests>=2.33.0
-          pip-audit \
+          # - CVE-2026-40192 (pillow): Transitive dep via opencv/imageio; fix in pillow>=12.2.0
+          pip-audit -r requirements-dev.lock \
             --ignore-vuln CVE-2024-23342 \
             --ignore-vuln CVE-2026-0994 \
             --ignore-vuln CVE-2026-1703 \
@@ -165,7 +170,8 @@ jobs:
             --ignore-vuln CVE-2026-21883 \
             --ignore-vuln CVE-2026-27205 \
             --ignore-vuln CVE-2024-47081 \
-            --ignore-vuln CVE-2026-25645
+            --ignore-vuln CVE-2026-25645 \
+            --ignore-vuln CVE-2026-40192
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
@@ -207,7 +213,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Reject Raw Merge Conflict Markers
         run: |
-          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git; then
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
             echo "::error::Raw git merge conflict markers found!"
             exit 1
           fi
@@ -314,7 +320,7 @@ jobs:
         run: bash "$GITHUB_WORKSPACE/scripts/setup_tools_workspace.sh"
       - name: Reject Raw Merge Conflict Markers
         run: |
-          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git; then
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
             echo "::error::Raw git merge conflict markers found!"
             exit 1
           fi

@@ -96,6 +96,8 @@ dev = [
     "python-multipart>=0.0.26",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
+    # Security: pillow>=12.2.0 fixes CVE-2026-40192 (transitive dep via matplotlib/meshcat)
+    "pillow>=12.2.0",
     # Required for property-based testing
     "hypothesis>=6.0.0",
     # Required for database migration tooling (issue #2078)

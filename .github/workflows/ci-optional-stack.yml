@@ -90,7 +90,7 @@ jobs:
 
       - name: Reject Raw Merge Conflict Markers
         run: |
-          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git; then
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
             echo "::error::Raw git merge conflict markers found!"
             exit 1
           fi
