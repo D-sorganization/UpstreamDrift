@@ -9,7 +9,7 @@ jobs:
     # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
     # Original condition: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'jules:consolidation')
     if: false
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     permissions:
       pull-requests: write
       contents: write

@@ -34,7 +34,7 @@ env:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     outputs:
       violations_found: ${{ steps.analyze.outputs.violations_found }}
       summary: ${{ steps.analyze.outputs.summary }}
@@ -184,7 +184,7 @@ jobs:
   create-issues:
     needs: analyze
     if: needs.analyze.outputs.violations_found == 'true' && inputs.create_issues != false
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     strategy:
       matrix:
         category: [path, logging, imports, datetime, config, exceptions, env]
@@ -259,7 +259,7 @@ jobs:
   summary:
     needs: [analyze, create-issues]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     steps:
       - name: Final Summary
         env:

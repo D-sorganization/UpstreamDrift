@@ -11,15 +11,15 @@ on:
   schedule:
     # OVERNIGHT SCHEDULE - Staggered so each cron maps to exactly one worker via routing switch
     # Runs Sun (0) + Thu (4) at unique UTC times — matches routing logic in triage job
-    - cron: "0 8 * * 0,4"    # 08:00 UTC → assessment-generator
-    - cron: "30 8 * * 0,4"   # 08:30 UTC → code-quality-reviewer
-    - cron: "0 9 * * 0,4"    # 09:00 UTC → completist
-    - cron: "30 9 * * 0,4"   # 09:30 UTC → documentation-auditor
-    - cron: "30 10 * * 0,4"  # 10:30 UTC → sentinel
-    - cron: "0 11 * * 0,4"   # 11:00 UTC → auto-refactor
-    - cron: "30 11 * * 0,4"  # 11:30 UTC → issue-resolver
-    - cron: "0 12 * * 0,4"   # 12:00 UTC → pr-compiler
-    - cron: "0 13 * * 0,4"   # 13:00 UTC → auto-rebase
+    - cron: "0 8 * * 0,4" # 08:00 UTC → assessment-generator
+    - cron: "30 8 * * 0,4" # 08:30 UTC → code-quality-reviewer
+    - cron: "0 9 * * 0,4" # 09:00 UTC → completist
+    - cron: "30 9 * * 0,4" # 09:30 UTC → documentation-auditor
+    - cron: "30 10 * * 0,4" # 10:30 UTC → sentinel
+    - cron: "0 11 * * 0,4" # 11:00 UTC → auto-refactor
+    - cron: "30 11 * * 0,4" # 11:30 UTC → issue-resolver
+    - cron: "0 12 * * 0,4" # 12:00 UTC → pr-compiler
+    - cron: "0 13 * * 0,4" # 13:00 UTC → auto-rebase
   workflow_dispatch:
     inputs:
       target:
@@ -57,10 +57,9 @@ permissions:
   checks: read
 
 jobs:
-
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
   pick-runner:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}

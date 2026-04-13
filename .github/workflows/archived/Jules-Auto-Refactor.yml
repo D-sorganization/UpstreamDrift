@@ -8,7 +8,7 @@ on:
 
 jobs:
   auto-refactor:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     steps:
       - name: Placeholder
         run: |
