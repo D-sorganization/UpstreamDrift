@@ -365,7 +365,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: matlab-actions/setup-matlab@v2
-      - uses: matlab-actions/run-command@v2
+      - uses: matlab-actions/run-command@v3
         with:
           command: |
             addpath('matlab');
