@@ -336,7 +336,7 @@ class Integrator:
             upper_bound=upper_bound,
             cumulative_signal=cumulative_signal,
             area_positive=float(area_positive),
-            area_negative=float(abs(area_negative)),
+            area_negative=float(np.abs(area_negative)),
         )
 
     def cumulative_integral(
