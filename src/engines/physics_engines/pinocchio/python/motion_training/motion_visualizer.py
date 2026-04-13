@@ -582,7 +582,7 @@ class MatplotlibVisualizer:
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_zlabel("Z (m)")
+        ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
         ax.legend()
         ax.set_title("Golf Club Trajectory")
 
@@ -597,7 +597,7 @@ class MatplotlibVisualizer:
         mid = grip_pos.mean(axis=0)
         ax.set_xlim(mid[0] - max_range / 2, mid[0] + max_range / 2)
         ax.set_ylim(mid[1] - max_range / 2, mid[1] + max_range / 2)
-        ax.set_zlim(mid[2] - max_range / 2, mid[2] + max_range / 2)
+        ax.set_zlim(mid[2] - max_range / 2, mid[2] + max_range / 2)  # type: ignore[attr-defined]
 
         return fig
 
