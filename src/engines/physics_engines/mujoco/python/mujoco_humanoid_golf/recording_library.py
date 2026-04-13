@@ -271,9 +271,7 @@ class RecordingLibrary:
         is_safe = self._is_relative_to(resolved_dest, resolved_lib)
 
         if not is_safe:
-            msg = (
-                f"Security violation: Attempt to save file '{filename}' outside library"  # noqa: E501
-            )
+            msg = f"Security violation: Attempt to save file '{filename}' outside library"  # noqa: E501
             logger.warning(msg)
             raise ValueError(msg)
 

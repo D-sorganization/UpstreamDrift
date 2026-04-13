@@ -27,9 +27,9 @@ class TestPyVistaCore:
         assert hasattr(pv, "__version__")
         # We need at least 0.38 for offscreen rendering stability
         major, minor = pv.__version__.split(".")[:2]
-        assert int(major) >= 0 and int(minor) >= 30, (
-            f"PyVista >= 0.30 expected, got {pv.__version__}"
-        )
+        assert (
+            int(major) >= 0 and int(minor) >= 30
+        ), f"PyVista >= 0.30 expected, got {pv.__version__}"
 
     def test_pyvista_create_mesh(self) -> None:
         """PyVista can create basic mesh primitives."""

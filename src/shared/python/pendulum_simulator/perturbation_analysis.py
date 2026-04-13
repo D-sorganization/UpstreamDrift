@@ -141,9 +141,7 @@ def perturb_torque_coeffs(
         "additive",
         "multiplicative",
         "both",
-    }, (
-        f"perturb_mode must be 'additive', 'multiplicative', or 'both'; got {perturb_mode!r}"
-    )
+    }, f"perturb_mode must be 'additive', 'multiplicative', or 'both'; got {perturb_mode!r}"
 
     if noise_amplitude == 0.0:
         return [list(c) for c in coeffs]
@@ -188,9 +186,9 @@ class PerturbationConfig:
 
     def __post_init__(self) -> None:
         assert self.n_trials > 0, f"n_trials must be positive, got {self.n_trials}"
-        assert self.noise_amplitude >= 0, (
-            f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
-        )
+        assert (
+            self.noise_amplitude >= 0
+        ), f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
         assert self.noise_type in {
             "white",
             "pink",

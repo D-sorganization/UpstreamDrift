@@ -377,7 +377,9 @@ class HumanoidURDFGenerator:
 def _is_valid_xml(xml_str: str) -> bool:
     """Return True if *xml_str* is parseable XML."""
     try:
-        ET.fromstring(xml_str)  # nosec B314 — parsing self-generated URDF, not untrusted input
+        ET.fromstring(
+            xml_str
+        )  # nosec B314 — parsing self-generated URDF, not untrusted input
         return True
     except ET.ParseError:
         return False
