@@ -36,7 +36,7 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Update open PR branches
-        uses: actions/github-script@v9
+        uses: actions/github-script@v8
         with:
           script: |
             const pulls = await github.rest.pulls.list({
