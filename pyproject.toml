@@ -26,7 +26,7 @@ dependencies = [
     "httpx>=0.27.0",
 
     # Default physics engine (lightweight, cross-platform)
-    "mujoco>=3.3.0,<4.0.0",
+    "mujoco>=3.6.0,<4.0.0",
 
     # Safe expression evaluation (replaces eval())
     "simpleeval>=1.0.0",
