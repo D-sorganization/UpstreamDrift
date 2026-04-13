@@ -614,3 +614,4 @@ pytest tests/ --cov=src --cov-fail-under=70
   5. VERSION: Bump the Spec Version field when making substantive changes.
      Use semver: major (structure change), minor (new features), patch (corrections).
 -->
+| 2026-04-13 | 1.0.91  | Bolt: Optimized np.sum(..., axis=1) square reductions to np.einsum in Drake PerturbationAnalyzer to improve performance and avoid temporary array allocations.                                                                                                                                                                                                                                                                                                                                                                                                                                |
