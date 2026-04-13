@@ -189,8 +189,8 @@ if HAS_MATPLOTLIB and HAS_PYQT:
         """Comprehensive signal processing toolkit widget."""
 
         # Signals
-        signal_generated = pyqtSignal(str, list)  # joint_name, coefficients
-        signal_updated = pyqtSignal(object)  # Signal object
+        signal_generated = pyqtSignal(str, list)  # type: ignore[assignment]  # joint_name, coefficients
+        signal_updated = pyqtSignal(object)  # type: ignore[assignment]  # Signal object
 
         def __init__(
             self,
