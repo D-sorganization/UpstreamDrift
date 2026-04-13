@@ -95,7 +95,7 @@ dev = [
     # Required for multipart form data in API tests
     "python-multipart>=0.0.26",
     # Required for video/image processing tests
-    "opencv-python-headless>=4.8.0",
+    "opencv-python-headless>=4.13.0.92",
     # Required for property-based testing
     "hypothesis>=6.0.0",
     # Required for database migration tooling (issue #2078)
