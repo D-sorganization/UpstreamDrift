@@ -68,33 +68,17 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
-          MODE="${FLEET_MODE:-hybrid}"
-          echo "Fleet mode: $MODE"
-
-          case "$MODE" in
-            local)
-              echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-              echo "Routing to self-hosted fleet (mode=local)"
-              ;;
-            cloud)
-              echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-              echo "Routing to GitHub-hosted (mode=cloud)"
-              ;;
-            hybrid|*)
-              AVAILABLE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
-                --jq '[.runners[] | select(.status == "online") | select(.busy == false) | select(.labels[].name == "d-sorg-fleet")] | length' \
-                2>/dev/null || echo "0")
-              if [[ "$AVAILABLE" -gt 0 ]]; then
-                echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-                echo "$AVAILABLE idle fleet runner(s) - routing locally"
-              else
-                echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-                echo "No idle fleet runners - falling back to GitHub-hosted"
-              fi
-              ;;
-          esac
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   quality-gate:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
@@ -165,12 +149,7 @@ jobs:
           # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
           # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
           # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          # - CVE-2026-32274 (black): fix 26.3.1 - transitive dev dep, upgrade tracked separately
-          # - CVE-2026-21883 (bokeh): fix 3.8.2 - transitive dep, upgrade tracked separately
-          # - CVE-2026-27205 (flask): fix 3.1.3 - transitive dep, upgrade tracked separately
-          # - CVE-2024-47081 (requests): fix 2.32.4 - upgrade tracked separately
-          # - CVE-2026-25645 (requests): fix 2.33.0 - upgrade tracked separately
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539 --ignore-vuln CVE-2026-32274 --ignore-vuln CVE-2026-21883 --ignore-vuln CVE-2026-27205 --ignore-vuln CVE-2024-47081 --ignore-vuln CVE-2026-25645
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
@@ -547,4 +526,3 @@ jobs:
           echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
-

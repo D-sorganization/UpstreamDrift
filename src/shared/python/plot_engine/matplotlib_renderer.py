@@ -399,7 +399,6 @@ class MatplotlibRenderer:
             )
         elif ax is None:
             ax = fig.add_subplot(111)
-        assert ax is not None  # guaranteed by branches above
         return fig, ax
 
     def _get_theme_colors(self) -> list[str]:

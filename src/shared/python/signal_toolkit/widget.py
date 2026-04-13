@@ -188,9 +188,9 @@ if HAS_MATPLOTLIB and HAS_PYQT:
     ):
         """Comprehensive signal processing toolkit widget."""
 
-        # Signals (pyqtSignal descriptors are rebound by Qt metaclass at runtime)
-        signal_generated = pyqtSignal(str, list)  # type: ignore[assignment]
-        signal_updated = pyqtSignal(object)  # type: ignore[assignment]
+        # Signals
+        signal_generated = pyqtSignal(str, list)  # joint_name, coefficients
+        signal_updated = pyqtSignal(object)  # Signal object
 
         def __init__(
             self,

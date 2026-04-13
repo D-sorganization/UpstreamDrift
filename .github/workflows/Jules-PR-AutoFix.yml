@@ -64,33 +64,17 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          FLEET_MODE: ${{ vars.FLEET_RUNNER_MODE }}
         run: |
-          MODE="${FLEET_MODE:-hybrid}"
-          echo "Fleet mode: $MODE"
-
-          case "$MODE" in
-            local)
-              echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-              echo "Routing to self-hosted fleet (mode=local)"
-              ;;
-            cloud)
-              echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-              echo "Routing to GitHub-hosted (mode=cloud)"
-              ;;
-            hybrid|*)
-              AVAILABLE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
-                --jq '[.runners[] | select(.status == "online") | select(.busy == false) | select(.labels[].name == "d-sorg-fleet")] | length' \
-                2>/dev/null || echo "0")
-              if [[ "$AVAILABLE" -gt 0 ]]; then
-                echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-                echo "$AVAILABLE idle fleet runner(s) - routing locally"
-              else
-                echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-                echo "No idle fleet runners - falling back to GitHub-hosted"
-              fi
-              ;;
-          esac
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   iterative-fix:
     needs: pick-runner
     name: Fix and Verify CI (Iterative)
@@ -269,8 +253,8 @@ jobs:
             # ===== PHASE 2: Mypy Agent (intelligent type error fixing) =====
 
             echo ">>> Running mypy autofix agent..."
-            if command -v mypy-autofix >/dev/null 2>&1; then
-              mypy-autofix \
+            if [ -f "scripts/mypy_autofix_agent.py" ]; then
+              python scripts/mypy_autofix_agent.py \
                 --max-fixes 30 --max-files 20 --verbose \
                 --config-file pyproject.toml $CHANGED_FILES 2>&1 || true
 
@@ -434,4 +418,3 @@ jobs:
           elif [ "${{ steps.fix-loop.outputs.status }}" == "partial" ]; then
             echo "### ⚠️ CI Verification: Partial (manual review needed)" >> $GITHUB_STEP_SUMMARY
           fi
-

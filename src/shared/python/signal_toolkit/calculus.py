@@ -331,12 +331,12 @@ class Integrator:
         area_negative = _trapz(np.minimum(y_range, 0), t_range)
 
         return IntegralResult(
-            value=float(value),
+            value=value,
             lower_bound=lower_bound,
             upper_bound=upper_bound,
             cumulative_signal=cumulative_signal,
-            area_positive=float(area_positive),
-            area_negative=float(np.abs(area_negative)),
+            area_positive=area_positive,
+            area_negative=abs(area_negative),
         )
 
     def cumulative_integral(
@@ -563,7 +563,7 @@ def compute_arc_length(
     # Arc length element: ds = sqrt(1 + (dy/dt)^2) * dt
     ds = np.sqrt(1 + y_prime**2)
 
-    return float(_trapz(ds, signal.time))
+    return _trapz(ds, signal.time)
 
 
 def find_extrema(

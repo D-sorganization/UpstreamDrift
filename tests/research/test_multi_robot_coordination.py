@@ -106,6 +106,6 @@ class TestCooperativeManipulation:
         assert (
             has_closure is True
             or has_closure is False
-            or isinstance(has_closure, bool | np.bool_)
+            or isinstance(has_closure, (bool, np.bool_))
         )
-        assert isinstance(quality, float | np.floating)
+        assert isinstance(quality, (float, np.floating))
