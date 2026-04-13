@@ -42,7 +42,7 @@ jobs:
 
       - name: Analyze CI Failures from Last Week
         id: analyze
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -139,7 +139,7 @@ jobs:
         if: steps.analyze.outputs.has_failures == 'true'
         env:
           REPORT: ${{ steps.analyze.outputs.report }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const report = process.env.REPORT;
