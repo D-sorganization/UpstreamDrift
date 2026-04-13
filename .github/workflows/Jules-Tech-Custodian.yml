@@ -28,7 +28,7 @@ jobs:
           fi
   refactor-worst-file:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     permissions:
       contents: write
       pull-requests: write

@@ -33,7 +33,7 @@ jobs:
           fi
   update-prs:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - name: Update open PR branches
         uses: actions/github-script@v8

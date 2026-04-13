@@ -61,7 +61,7 @@ def generate_noise(
 
         # Normalize to variance=1, then scale
         if np.std(pink) > 0:
-            pink = (pink / np.std(pink)) * amplitude  # type: ignore[operator]
+            pink = (pink / np.std(pink)) * amplitude  # type: ignore[operator,assignment]
         noise = pink  # type: ignore[assignment]
 
     elif noise_type == "brown":

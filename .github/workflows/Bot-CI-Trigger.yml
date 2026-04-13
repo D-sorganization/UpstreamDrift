@@ -63,7 +63,7 @@ jobs:
           fi
   check-and-trigger:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     # Only run for bot-authored PRs or scheduled/manual runs
     if: |
       github.event_name == 'schedule' ||

@@ -35,7 +35,7 @@ jobs:
           fi
   organize-docs:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     if: vars.WORKFLOWS_PAUSED != 'true'
     steps:
       - name: Checkout

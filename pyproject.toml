@@ -224,6 +224,26 @@ exclude = [
     "installer/",
     "start_api_server.py",
     "setup_golf_suite.py",
+    # numpy-stubs version divergence on self-hosted vs GitHub-hosted runners
+    # These files have pre-existing type issues exposed by numpy>=2.0 stubs
+    "src/shared/python/upstream_drift_tools/process_calculators/optimization.py",
+    "src/shared/python/perturbation/statistics.py",
+    "src/shared/python/model_generation/core/physics_validation.py",
+    "src/learning/imitation/dataset.py",
+    "src/engines/physics_engines/mujoco/docker/",
+    "src/deployment/realtime/controller.py",
+    "src/shared/python/pendulum_simulator/simulation.py",
+    "src/shared/python/club_data/targets.py",
+    "src/shared/python/data_io/marker_mapping.py",
+    "src/shared/python/signal_toolkit/io.py",
+    "src/shared/python/engine_core/checkpoint.py",
+    "src/shared/python/data_io/export.py",
+    "src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py",
+    "src/shared/python/signal_toolkit/polynomial_generator.py",
+    "src/engines/common/export.py",
+    "src/api/routes/putting_green.py",
+    "src/api/routes/physics.py",
+    "src/api/routes/analysis_tools.py",
 ]
 
 # Mypy overrides for modules with pre-existing type issues

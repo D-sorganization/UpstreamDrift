@@ -60,7 +60,7 @@ jobs:
   check:
     needs: pick-runner
     name: Check (Rust + TypeScript)
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -79,8 +79,8 @@ jobs:
 
       - name: Install Linux dependencies
         run: |
-          sudo apt-get update
-          while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done; sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get -o DPkg::Lock::Timeout=300 update
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
         working-directory: ui
@@ -140,8 +140,8 @@ jobs:
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-latest'
         run: |
-          sudo apt-get update
-          while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done; sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get -o DPkg::Lock::Timeout=300 update
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
         working-directory: ui

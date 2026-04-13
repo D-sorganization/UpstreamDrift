@@ -42,7 +42,7 @@ jobs:
           fi
   check-mention:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
@@ -63,7 +63,7 @@ jobs:
   fix-issue:
     needs: [pick-runner, check-mention]
     if: needs.check-mention.outputs.should_run == 'true' && !github.event.issue.pull_request
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
         with:

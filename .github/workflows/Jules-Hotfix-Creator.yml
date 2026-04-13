@@ -44,7 +44,7 @@ jobs:
           fi
   create-hotfix:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - name: Validate failed branch
         id: branch

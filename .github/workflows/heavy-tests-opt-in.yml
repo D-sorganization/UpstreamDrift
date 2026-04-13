@@ -48,7 +48,7 @@ jobs:
   run-heavy-tests:
     needs: pick-runner
     name: Heavy Integration Tests
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     timeout-minutes: 90
     env:
       HEAVY_TEST_SLACK_WEBHOOK: ${{ secrets.HEAVY_TEST_SLACK_WEBHOOK }}
@@ -65,8 +65,8 @@ jobs:
 
       - name: Install system display dependencies
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends \
+          sudo apt-get -o DPkg::Lock::Timeout=300 update -qq
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y --no-install-recommends \
             xvfb x11-utils mesa-utils \
             libgl1 libegl1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 \
             libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \

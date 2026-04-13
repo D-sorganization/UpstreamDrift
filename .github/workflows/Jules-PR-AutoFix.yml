@@ -78,7 +78,7 @@ jobs:
   iterative-fix:
     needs: pick-runner
     name: Fix and Verify CI (Iterative)
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     timeout-minutes: 30
     # Only run on failures (not success) for workflow_run events
     if: |

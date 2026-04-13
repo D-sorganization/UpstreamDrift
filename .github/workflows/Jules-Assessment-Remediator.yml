@@ -77,7 +77,7 @@ jobs:
           fi
   remediate:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     timeout-minutes: 10
 
     steps:

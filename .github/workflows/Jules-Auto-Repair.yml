@@ -73,7 +73,7 @@ jobs:
           fi
   intelligent-repair:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     # Prevent multiple repairs on same branch simultaneously
     concurrency:
       group: auto-repair-${{ inputs.branch || github.event.workflow_run.head_branch }}

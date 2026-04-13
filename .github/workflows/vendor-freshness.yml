@@ -46,7 +46,7 @@ jobs:
   check-vendor-freshness:
     needs: pick-runner
     name: Check vendor submodule freshness
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     outputs:
       stale: ${{ steps.check.outputs.stale }}
 
@@ -89,7 +89,7 @@ jobs:
       needs.check-vendor-freshness.outputs.stale == 'true' &&
       (github.event_name == 'schedule' ||
        (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_bump == 'true'))
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - name: Checkout repository with submodules
         uses: actions/checkout@v6

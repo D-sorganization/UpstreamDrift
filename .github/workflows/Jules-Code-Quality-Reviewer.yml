@@ -45,7 +45,7 @@ jobs:
   review:
     needs: pick-runner
     if: false # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
         with:

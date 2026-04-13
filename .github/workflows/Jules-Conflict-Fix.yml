@@ -28,7 +28,7 @@ jobs:
           fi
   find-and-fix-conflicts:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     if: github.actor != 'jules-bot'
     steps:
       - uses: actions/checkout@v6

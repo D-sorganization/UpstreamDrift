@@ -77,7 +77,7 @@ jobs:
   # immediately as failures rather than silently-skipped test entries.
   optional-stack-check:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     timeout-minutes: 30
     continue-on-error: true # Pre-existing optional-stack test failures tracked separately
     strategy:
@@ -88,10 +88,17 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Reject Raw Merge Conflict Markers
+        run: |
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git; then
+            echo "::error::Raw git merge conflict markers found!"
+            exit 1
+          fi
+
       - name: Install System Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
+          sudo apt-get -o DPkg::Lock::Timeout=300 update
+          sudo apt-get -o DPkg::Lock::Timeout=300 install -y \
             libegl1 libgl1 xvfb \
             libxkbcommon-x11-0 \
             libxcb-cursor0 \

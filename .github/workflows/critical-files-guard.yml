@@ -41,7 +41,7 @@ jobs:
   verify-critical-files:
     needs: pick-runner
     name: Verify Critical Files Exist
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6

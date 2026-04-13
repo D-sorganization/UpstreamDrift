@@ -36,7 +36,7 @@ jobs:
           fi
   stale:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - uses: actions/stale@v10
         with:

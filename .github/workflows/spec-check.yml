@@ -48,7 +48,7 @@ jobs:
   spec-freshness:
     needs: pick-runner
     name: Verify SPEC.md freshness
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     # Skip if spec-exempt label is applied
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'spec-exempt') }}
     timeout-minutes: 5

@@ -272,7 +272,7 @@ class CrossEnginePerturbationRunner:
             # Shape (n_steps,) — same torque for all DOF; reshape to (n_steps, 1)
             profile_2d = profile.reshape(-1, 1)
         elif profile.ndim == 2:
-            profile_2d = profile
+            profile_2d = profile  # type: ignore[assignment]
         else:
             raise ValueError(
                 f"base_torque_profile must be 1-D or 2-D, got {profile.ndim}-D"

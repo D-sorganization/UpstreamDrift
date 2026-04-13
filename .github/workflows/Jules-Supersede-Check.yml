@@ -45,7 +45,7 @@ jobs:
   check-superseded:
     needs: pick-runner
     name: Check for Superseded Jules PRs
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     # Skip if the push was from a Jules workflow (avoid closing our own PRs)
     if: |
       !contains(github.event.head_commit.message, 'Co-Authored-By: Jules') &&

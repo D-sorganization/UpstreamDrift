@@ -335,7 +335,7 @@ class SwingOptimizationBridge:
 
                 # Step size with decay
                 alpha = 0.1 / (1.0 + 0.01 * iteration)
-                controls[k] = controls[k] - alpha * gradient
+                controls[k] = controls[k] - alpha * gradient  # type: ignore[assignment]
 
         # Final evaluation
         trajectory, clubhead_vel = self._evaluate_trajectory(controls, initial_state)

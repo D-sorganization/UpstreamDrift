@@ -34,7 +34,7 @@ jobs:
           fi
   archive-tasks:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v6

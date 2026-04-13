@@ -37,7 +37,7 @@ jobs:
           fi
   auto-assign:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     # CHANGED: Only trigger for automated issues or explicit jules-triage label
     # - Issues created by github-actions (from automated assessments)
     # - Issues with 'jules-triage' or 'auto-generated' labels

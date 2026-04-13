@@ -39,7 +39,7 @@ jobs:
           fi
   docs-governance:
     needs: pick-runner
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
         with:

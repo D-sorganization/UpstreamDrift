@@ -67,7 +67,7 @@ class SwingPlaneAnalyzer:
             normal = normal / norm
 
         ensure(
-            abs(np.linalg.norm(normal) - 1.0) < 1e-6,
+            bool(abs(np.linalg.norm(normal) - 1.0) < 1e-6),
             "normal vector must be unit length",
         )
 

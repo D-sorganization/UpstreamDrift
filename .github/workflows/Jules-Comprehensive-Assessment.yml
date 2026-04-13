@@ -37,7 +37,7 @@ jobs:
   comprehensive-assessment:
     needs: pick-runner
     name: Comprehensive Assessment & Audit
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v6

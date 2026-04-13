@@ -57,7 +57,7 @@ jobs:
   cleanup:
     needs: pick-runner
     name: Cleanup Stale Jules PRs
-    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    runs-on: self-hosted
 
     steps:
       - name: Find Stale Jules PRs
