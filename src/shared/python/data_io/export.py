@@ -92,9 +92,7 @@ def export_to_matlab(
 
         return True
 
-    except (
-        Exception
-    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to MATLAB: {e}")
         return False
 
@@ -168,9 +166,7 @@ def export_to_hdf5(
 
         return True
 
-    except (
-        Exception
-    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to HDF5: {e}")
         return False
 
@@ -205,15 +201,25 @@ class CaptureExportData:
 
 
 @precondition(  # fmt: skip
-    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
-        output_path is not None and len(output_path) > 0
-    ),
+    lambda output_path,
+    times,
+    joint_positions,
+    joint_names,
+    forces=None,
+    moments=None,
+    frame_rate=60.0,
+    units=None: (output_path is not None and len(output_path) > 0),
     "Output path must be a non-empty string",
 )
 @precondition(  # fmt: skip
-    lambda output_path, times, joint_positions, joint_names, forces=None, moments=None, frame_rate=60.0, units=None: (
-        frame_rate > 0
-    ),
+    lambda output_path,
+    times,
+    joint_positions,
+    joint_names,
+    forces=None,
+    moments=None,
+    frame_rate=60.0,
+    units=None: (frame_rate > 0),
     "Frame rate must be positive",
 )
 def export_to_c3d(

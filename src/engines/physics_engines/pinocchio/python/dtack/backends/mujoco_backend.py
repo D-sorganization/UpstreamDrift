@@ -41,7 +41,9 @@ class MuJoCoBackend:
         """
         model_path_obj = Path(model_path)
         if not MUJOCO_AVAILABLE:
-            msg = "MuJoCo is required but not installed. Install with: pip install mujoco"  # noqa: E501
+            msg = (
+                "MuJoCo is required but not installed. Install with: pip install mujoco"  # noqa: E501
+            )
             raise ImportError(msg)
         if not model_path_obj.exists():
             msg = f"Model file not found: {model_path}"
