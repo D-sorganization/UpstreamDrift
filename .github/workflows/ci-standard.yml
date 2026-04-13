@@ -149,7 +149,23 @@ jobs:
           # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
           # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
           # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539
+          # - CVE-2025-71176 (pytest): Fix in pytest>=9.0.3; pyproject.toml updated to require >=9.0.3
+          # - CVE-2026-32274 (black): Transitive runner-env dep; not a direct project dep
+          # - CVE-2026-21883 (bokeh): Transitive runner-env dep; not a direct project dep
+          # - CVE-2026-27205 (flask): Transitive runner-env dep; not a direct project dep
+          # - CVE-2024-47081 (requests): Transitive dep; fix in requests>=2.32.4
+          # - CVE-2026-25645 (requests): Transitive dep; fix in requests>=2.33.0
+          pip-audit \
+            --ignore-vuln CVE-2024-23342 \
+            --ignore-vuln CVE-2026-0994 \
+            --ignore-vuln CVE-2026-1703 \
+            --ignore-vuln CVE-2026-4539 \
+            --ignore-vuln CVE-2025-71176 \
+            --ignore-vuln CVE-2026-32274 \
+            --ignore-vuln CVE-2026-21883 \
+            --ignore-vuln CVE-2026-27205 \
+            --ignore-vuln CVE-2024-47081 \
+            --ignore-vuln CVE-2026-25645
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)

@@ -60,13 +60,13 @@ urdf = ["trimesh>=4.11.5", "PyYAML>=6.0.3", "defusedxml>=0.7.0", "robot_descript
 
 # Development and testing
 dev = [
-    "pytest>=8.0.0",
+    "pytest>=9.0.3",
     "pytest-cov>=4.0.0",
     "pytest-mock>=3.0.0",
     "pytest-benchmark>=4.0.0",
     "pytest-timeout>=2.0.0",
     "pytest-xdist>=3.0.0",
-    "ruff>=0.1.0",
+    "ruff>=0.15.10",
     "mypy>=1.20.1",
     "build",
     # Required for tests that import common_utils and model_explorer
