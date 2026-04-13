@@ -311,8 +311,9 @@ def compute_cop_trajectory_length(cops: np.ndarray) -> float:
     diffs = np.diff(cops, axis=0)
 
     # Euclidean distance for each segment
-    # ⚡ Bolt: Explicit element-wise sqrt is ~5-10x faster than np.linalg.norm(..., axis=1) for 3D vectors
-    distances = np.sqrt(diffs[:, 0] ** 2 + diffs[:, 1] ** 2 + diffs[:, 2] ** 2)
+    # ⚡ Bolt: np.sqrt(np.einsum(...)) avoids temporary arrays,
+    # and is much faster than np.linalg.norm(..., axis=1)
+    distances = np.sqrt(np.einsum("ij,ij->i", diffs, diffs))
 
     return float(np.sum(distances))
 
@@ -440,8 +441,9 @@ class GRFAnalyzer:
 
         # Peak forces
         vertical_forces = forces[:, 2]
-        # ⚡ Bolt: Explicit element-wise hypot is ~5-10x faster than np.linalg.norm(..., axis=1) for 2D vectors
-        horizontal_forces = np.hypot(forces[:, 0], forces[:, 1])
+        # ⚡ Bolt: np.sqrt(np.einsum(...)) avoids temporary arrays,
+        # and is much faster than np.linalg.norm(..., axis=1)
+        horizontal_forces = np.sqrt(np.einsum("ij,ij->i", forces[:, :2], forces[:, :2]))
 
         peak_vertical = float(np.max(vertical_forces))
         peak_horizontal = float(np.max(horizontal_forces))
@@ -589,13 +591,10 @@ def validate_grf_cross_engine(
     results = {}
 
     # Force magnitude comparison
-    # ⚡ Bolt: Explicit element-wise sqrt is ~5-10x faster than np.linalg.norm(..., axis=1) for 3D vectors
-    forces_a = np.sqrt(
-        grf_a.forces[:, 0] ** 2 + grf_a.forces[:, 1] ** 2 + grf_a.forces[:, 2] ** 2
-    )
-    forces_b = np.sqrt(
-        grf_b.forces[:, 0] ** 2 + grf_b.forces[:, 1] ** 2 + grf_b.forces[:, 2] ** 2
-    )
+    # ⚡ Bolt: np.sqrt(np.einsum(...)) avoids temporary arrays,
+    # and is much faster than np.linalg.norm(..., axis=1)
+    forces_a = np.sqrt(np.einsum("ij,ij->i", grf_a.forces[:, :3], grf_a.forces[:, :3]))
+    forces_b = np.sqrt(np.einsum("ij,ij->i", grf_b.forces[:, :3], grf_b.forces[:, :3]))
 
     if len(forces_a) == len(forces_b):
         force_diff = np.abs(forces_a - forces_b)
@@ -609,11 +608,11 @@ def validate_grf_cross_engine(
 
     # COP position comparison
     if len(grf_a.cops) == len(grf_b.cops):
-        # ⚡ Bolt: Explicit element-wise sqrt is ~5-10x faster than np.linalg.norm(..., axis=1) for 3D vectors
+        # ⚡ Bolt: np.sqrt(np.einsum(...)) avoids temporary arrays,
+        # and is much faster than np.linalg.norm(..., axis=1)
         cop_diffs = grf_a.cops - grf_b.cops
         cop_diff_mm = (
-            np.sqrt(cop_diffs[:, 0] ** 2 + cop_diffs[:, 1] ** 2 + cop_diffs[:, 2] ** 2)
-            * 1000
+            np.sqrt(np.einsum("ij,ij->i", cop_diffs[:, :3], cop_diffs[:, :3])) * 1000
         )
         results["cop_position"] = bool(np.all(cop_diff_mm < COP_POSITION_TOLERANCE_MM))
     else:

@@ -128,9 +128,10 @@ class SimulationResult:
         if len(self.positions) < 2:
             return 0.0
 
-        # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1)
+        # ⚡ Bolt: np.einsum is much faster than np.sum(np.square(...), axis=-1)
+        # and avoids temporary array allocations
         diffs = np.diff(self.positions, axis=0)
-        distances = np.sqrt(np.sum(np.square(diffs, dtype=float), axis=-1))
+        distances = np.sqrt(np.einsum("...i,...i->...", diffs, diffs))
         return float(np.sum(distances))
 
     @property
