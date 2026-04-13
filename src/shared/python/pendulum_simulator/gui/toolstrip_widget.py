@@ -481,7 +481,10 @@ class ToolStrip(QWidget):
         seg_item = overlay_layout.itemAt(overlay_layout.count() - 1)
         if seg_item is None:
             return None
-        return seg_item.layout()
+        inner = seg_item.layout()
+        if isinstance(inner, QHBoxLayout):
+            return inner
+        return None
 
     def _build_row1(self, layout: QHBoxLayout) -> None:
         """Actions row: Title | Run Reset Play | Speed | [frame slider] | Frame# | Reset View"""
