@@ -73,7 +73,7 @@ dev = [
     "pandas>=2.0.0",
     "defusedxml>=0.7.0",
     # Required for plotting tests
-    "matplotlib>=3.8.0",
+    "matplotlib>=3.10.8",
     # Required for auth/security tests
     "sqlalchemy>=2.0.0",
     "bcrypt>=4.1.0",
