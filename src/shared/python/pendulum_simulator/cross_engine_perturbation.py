@@ -33,7 +33,7 @@ from typing import Protocol, runtime_checkable
 
 import numpy as np
 
-from src.shared.python.pendulum_simulator.perturbation_analysis import (
+from .perturbation_analysis import (
     perturb_torque_profile,
 )
 
