@@ -278,6 +278,24 @@ def precondition(
         if DBC_LEVEL == ContractLevel.OFF:
             return func
 
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                try:
+                    result = _evaluate_precondition(condition, func, args, kwargs)
+                except (TypeError, ValueError) as exc:
+                    _handle_violation(
+                        "pre-condition",
+                        f"Failed to evaluate precondition for {func.__qualname__}: {exc}",
+                    )
+                    return await func(*args, **kwargs)
+                if not result:
+                    _handle_violation("pre-condition", message)
+                return await func(*args, **kwargs)
+
+            return cast(F, async_wrapper)
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
@@ -288,10 +306,8 @@ def precondition(
                     f"Failed to evaluate precondition for {func.__qualname__}: {exc}",
                 )
                 return func(*args, **kwargs)
-
             if not result:
                 _handle_violation("pre-condition", message)
-
             return func(*args, **kwargs)
 
         return cast(F, wrapper)
@@ -312,10 +328,28 @@ def postcondition(
         if DBC_LEVEL == ContractLevel.OFF:
             return func
 
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                result = await func(*args, **kwargs)
+                try:
+                    check = condition(result)
+                except (TypeError, ValueError) as exc:
+                    _handle_violation(
+                        "post-condition",
+                        f"Failed to evaluate postcondition for {func.__qualname__}: {exc}",
+                    )
+                    return result
+                if not check:
+                    _handle_violation("post-condition", message, result)
+                return result
+
+            return cast(F, async_wrapper)
+
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             result = func(*args, **kwargs)
-
             try:
                 check = condition(result)
             except (TypeError, ValueError) as exc:
@@ -324,10 +358,8 @@ def postcondition(
                     f"Failed to evaluate postcondition for {func.__qualname__}: {exc}",
                 )
                 return result
-
             if not check:
                 _handle_violation("post-condition", message, result)
-
             return result
 
         return cast(F, wrapper)
