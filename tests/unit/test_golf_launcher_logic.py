@@ -280,9 +280,13 @@ class TestGolfLauncherLogic:
         src.launchers.ui_components.ContextHelpDock = MagicMock()
         yield
 
-    @pytest.mark.xfail(
-        strict=False,
-        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    @pytest.mark.skip(
+        reason=(
+            "GolfLauncher construction segfaults (SIGABRT) under mixed "
+            "mock/real Qt — xfail cannot catch a native abort, so the "
+            "xdist worker crashes and corrupts the coverage .db. Skip "
+            "until tracked in a dedicated issue."
+        ),
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
@@ -309,9 +313,13 @@ class TestGolfLauncherLogic:
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
 
-    @pytest.mark.xfail(
-        strict=False,
-        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    @pytest.mark.skip(
+        reason=(
+            "GolfLauncher construction segfaults (SIGABRT) under mixed "
+            "mock/real Qt — xfail cannot catch a native abort, so the "
+            "xdist worker crashes and corrupts the coverage .db. Skip "
+            "until tracked in a dedicated issue."
+        ),
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
@@ -355,9 +363,13 @@ class TestGolfLauncherLogic:
         # The button text should contain the NAME, upper case
         assert "TEST MODEL" in launcher.btn_launch.text()
 
-    @pytest.mark.xfail(
-        strict=False,
-        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    @pytest.mark.skip(
+        reason=(
+            "GolfLauncher construction segfaults (SIGABRT) under mixed "
+            "mock/real Qt — xfail cannot catch a native abort, so the "
+            "xdist worker crashes and corrupts the coverage .db. Skip "
+            "until tracked in a dedicated issue."
+        ),
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")
@@ -405,9 +417,13 @@ class TestGolfLauncherLogic:
             idx = args.index("-w")
             assert args[idx + 1] == "/workspace"
 
-    @pytest.mark.xfail(
-        strict=False,
-        reason="GolfLauncher construction hangs in CI (mixed mock/real Qt segfaults)",
+    @pytest.mark.skip(
+        reason=(
+            "GolfLauncher construction segfaults (SIGABRT) under mixed "
+            "mock/real Qt — xfail cannot catch a native abort, so the "
+            "xdist worker crashes and corrupts the coverage .db. Skip "
+            "until tracked in a dedicated issue."
+        ),
     )
     @patch("src.shared.python.config.model_registry.ModelRegistry")
     @patch("src.launchers.golf_launcher.DockerCheckThread")

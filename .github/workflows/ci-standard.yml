@@ -238,7 +238,15 @@ jobs:
           python-version: ${{ matrix.python }}
 
       - name: Install Core Test Dependencies
-        run: pip install -e ".[dev,gui-test]"
+        # Force-reinstall hypothesis + sortedcontainers: the shared self-
+        # hosted toolcache occasionally carries half-installed versions
+        # where the pip metadata says 2.4.0 but the package namespace is
+        # missing exports (e.g. `SortedSet`). A plain `pip install -e` sees
+        # "Requirement already satisfied" and doesn't repair the cache,
+        # which causes hypothesis to fail its terminal-summary import.
+        run: |
+          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          pip install -e ".[dev,gui-test]"
 
       - name: Document Native Engine Coverage In Core Lane
         run: |
@@ -254,6 +262,16 @@ jobs:
           Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &
           sleep 1
           echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name: Clean Stale Coverage Data
+        # Self-hosted runners reuse workspaces across jobs. A crashed
+        # worker from a prior run can leave behind a partially-written
+        # .coverage.<host>.<pid>.<rand> sqlite file with no 'file' table,
+        # which then causes pytest-cov to abort the next run with
+        # "sqlite3.OperationalError: no such table: file". Remove any
+        # stale coverage artefacts before collecting fresh data.
+        run: |
+          rm -f .coverage .coverage.* coverage.xml || true
 
       - name: Run Core Test Suite
         env:
@@ -352,7 +370,12 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install Core Test Dependencies
-        run: pip install -e ".[dev,gui-test]"
+        # See tests/Install Core Test Dependencies for the rationale —
+        # the shared toolcache can carry a stale `sortedcontainers` that
+        # makes hypothesis fail during pytest_terminal_summary.
+        run: |
+          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          pip install -e ".[dev,gui-test]"
       - name: Run Shared Tools Consumer Contracts
         env:
           QT_QPA_PLATFORM: offscreen
