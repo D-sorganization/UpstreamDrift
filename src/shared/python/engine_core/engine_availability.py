@@ -105,6 +105,17 @@ def _probe_engine(
                 raise ImportError(
                     "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
                 )
+        elif import_name == "mediapipe":
+            # mediapipe>=0.10 removed the legacy mp.solutions API.
+            # We probe for mp.solutions.pose to accurately report whether
+            # the version installed is compatible with our estimator code.
+            mp = importlib.import_module("mediapipe")
+            if not hasattr(mp, "solutions") or not hasattr(mp.solutions, "pose"):
+                raise ImportError(
+                    "mediapipe is installed but mp.solutions.pose is not available. "
+                    "mediapipe>=0.10 removed the legacy solutions API. "
+                    "Pin mediapipe<0.10 or update MediaPipeEstimator to use the new Tasks API."
+                )
         else:
             importlib.import_module(import_name)
 

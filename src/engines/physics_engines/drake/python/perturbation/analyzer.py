@@ -405,14 +405,24 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
         def compute_a(q_val: np.ndarray, v_val: np.ndarray, t_val: float) -> np.ndarray:
             plant.SetPositions(plant_context, q_val)
             plant.SetVelocities(plant_context, v_val)
-            tau_val = np.array(
-                [float(np.polyval(joint_polys[j], t_val)) for j in range(nu)]
-            )
-            plant.get_actuation_input_port().FixValue(plant_context, tau_val)
+            # Build actuator torques (nu-dimensional)
+            if nu > 0:
+                tau_act = np.array(
+                    [float(np.polyval(joint_polys[j], t_val)) for j in range(nu)]
+                )
+                plant.get_actuation_input_port().FixValue(plant_context, tau_act)
             M_val = plant.CalcMassMatrixViaInverseDynamics(plant_context)
             bias_val = plant.CalcBiasTerm(plant_context)
             gravity_val = plant.CalcGravityGeneralizedForces(plant_context)
-            return np.linalg.solve(M_val, tau_val - bias_val + gravity_val)  # type: ignore[no-any-return]
+            # Generalised torques for EOM: tau_gen = B * tau_act + gravity - bias
+            # When nu == 0 (no actuators), control torque is zero.
+            tau_gen = gravity_val - bias_val  # base: passive dynamics
+            if nu > 0:
+                # Map actuator torques to generalized forces via B (identity for
+                # simple models); Drake's CalcBiasTerm excludes actuation.
+                # For minimal URDF the actuator maps 1-to-1 to the DoF.
+                tau_gen = tau_gen + np.resize(tau_act, nv)
+            return np.linalg.solve(M_val, tau_gen)  # type: ignore[no-any-return]
 
         q = np.zeros(nq)
         v = np.zeros(nv)

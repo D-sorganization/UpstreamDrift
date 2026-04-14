@@ -297,24 +297,23 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         return cast(np.ndarray, tau)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "Contact forces must contain finite values")
     def compute_contact_forces(self) -> np.ndarray:
         """Compute total contact forces (ground reaction force, GRF).
 
-        Notes:
-            Pinocchio's standard ABA does not compute contact forces
-            without a constraint solver. Return zeros to maintain parity
-            with cross-engine protocol until rigidly implemented.
+        Raises:
+            NotImplementedError: Always. Pinocchio's standard ABA does not
+                compute contact forces without a constraint solver (e.g.,
+                RigidContactModel + ProximalContactSolver). Returning zeros
+                would silently misrepresent the physical state and mask
+                integration failures downstream.
 
-        Returns:
-            f: (3,) vector representing total ground reaction force [N].
+                Use a full contact-aware solver or Drake/MuJoCo for GRF.
         """
-        logger.debug(
-            "PinocchioPhysicsEngine.compute_contact_forces is returning zeros. "
+        raise NotImplementedError(
+            "PinocchioPhysicsEngine.compute_contact_forces is not implemented. "
             "Standard ABA dynamics in Pinocchio do not compute contact forces "
-            "without a constraint solver."
+            "without a constraint solver. Use Drake or MuJoCo for GRF queries."
         )
-        return np.zeros(3)
 
     @precondition(
         lambda self, body_name: self.is_initialized,
