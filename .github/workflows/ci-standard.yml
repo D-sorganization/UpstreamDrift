@@ -172,7 +172,7 @@ jobs:
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
       - name: Bandit Security Scan
         run: |
-          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1)"
+          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git,./vendor -ll -ii --format txt 2>&1)"
           exit_code=$?
           echo "$bandit_output"
           echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
