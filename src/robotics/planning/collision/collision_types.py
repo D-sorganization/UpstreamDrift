@@ -114,7 +114,11 @@ class DistanceResult:
             if self.normal.shape != (3,):
                 raise ValueError("normal must be shape (3,)")
             # Normalize the normal vector
-            norm = np.linalg.norm(self.normal)
+            # ⚡ Bolt: Element-wise norm computation is faster than np.linalg.norm(..., axis=None) for tiny vectors
+            # using math.hypot equivalent
+            norm = float(
+                np.sqrt(self.normal[0] ** 2 + self.normal[1] ** 2 + self.normal[2] ** 2)
+            )
             if norm > 1e-10:
                 object.__setattr__(self, "normal", self.normal / norm)
 

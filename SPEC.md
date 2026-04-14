@@ -29,8 +29,8 @@ Last-Updated: 2026-04-13T12:00:00Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.92                                             |
-| **Last Spec Update**    | 2026-04-13                                         |
+| **Spec Version**        | 1.0.93                                             |
+| **Last Spec Update**    | 2026-04-14                                         |
 
 ## 2. Purpose & Mission
 
@@ -496,6 +496,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-14 | 1.0.93  | Performance optimization: Extracted redundant `np.linalg.norm(pb - pa)` computations to cached local variables inside collision checker hot loops, and optimized `DistanceResult` validation logic with element-wise calculation instead of `np.linalg.norm`. |
 | 2026-04-13 | 1.0.92  | Performance optimization: Replaced `np.sum(..., axis=1)` squared-norm reductions with `np.einsum("ij,ij->i", ...)` in the Drake, MuJoCo, MyoSuite, OpenSim, and Pinocchio perturbation analyzers to reduce temporary allocations in peak-speed and trajectory-deviation metrics. |
 | 2026-04-13 | 1.0.91  | Performance optimization: Replaced `np.linalg.norm(..., axis=1)` with `np.einsum` in `electrical_model.py` for ~35% speedup. |
 | 2026-04-12 | 1.0.89  | Performance optimization: replaced `np.linalg.norm(..., axis=1)`, `np.sum(diff**2, axis=-1)` and explicit array math with dimension-agnostic `np.einsum` to eliminate temporary array allocation overhead when computing Euclidean distances. |
