@@ -18,4 +18,3 @@ This change removes the explicit `dtype=float` upcast that the previous `np.squa
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2662#discussion_r3079016478)
 
 ---
-
