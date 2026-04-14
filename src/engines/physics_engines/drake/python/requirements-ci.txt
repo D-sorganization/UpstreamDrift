@@ -10,14 +10,16 @@ matplotlib==3.9.1
 scipy==1.14.0
 
 # Testing and development
-pytest==8.2.1
+# Security: pytest>=9.0.3 fixes CVE-2025-71176 (GHSA-6w46-j5rx-g56g)
+pytest==9.0.3
 pytest-cov==5.0.0
 pytest-mock==3.14.0
 
 # Code quality and formatting
 # NOTE: ruff version aligned with main project pyproject.toml
 ruff==0.14.10
-black==24.4.2
+# Security: black>=26.3.1 fixes CVE-2026-32274 (GHSA-3936-cmfr-pm3m)
+black==26.3.1
 mypy==1.10.0
 pre-commit==4.0.0
 
