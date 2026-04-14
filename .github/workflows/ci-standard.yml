@@ -192,7 +192,7 @@ jobs:
       - name: MATLAB Quality Check
         continue-on-error: true
         run: |
-          PYTHONPATH=. python src/tools/matlab_utilities/scripts/matlab_quality_check.py --output-format text > matlab_quality_report.txt
+          PYTHONPATH=. python src/tools/matlab_utilities/scripts/matlab_quality_check.py > matlab_quality_report.txt
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report
@@ -249,6 +249,12 @@ jobs:
           echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane." >> "$GITHUB_STEP_SUMMARY"
           echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks." >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &
+          sleep 1
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+
       - name: Run Core Test Suite
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
@@ -262,6 +268,7 @@ jobs:
           # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
           # are intentionally not provisioned here.
           xvfb-run --auto-servernum pytest \
+            -p no:xvfb \
             -n auto \
             --timeout=60 \
             --timeout-method=thread \
@@ -288,6 +295,7 @@ jobs:
           echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
           echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
           xvfb-run --auto-servernum pytest tests/integration/test_cross_engine_validation.py \
+            -p no:xvfb \
             --timeout=60 \
             --timeout-method=thread \
             -v --tb=short 2>&1 | tee cross-engine-results.txt

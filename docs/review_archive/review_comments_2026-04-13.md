@@ -1,36 +1,21 @@
 # Review Comments Archive - 2026-04-13
 
-Generated: 2026-04-13T11:19:59.374737
+Generated: 2026-04-13T18:37:42.999631
 
-## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
 
-### PR #2656: .github/workflows/ci-standard.yml:84
-
-Actionable: No
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Restore dynamic runner selection for required CI jobs**
-
-This job now hardcodes `runs-on: self-hosted`, but the same workflow still has a `pick-runner` dispatcher that explicitly falls back to `ubuntu-latest` when no self-hosted runner is online (`.github/workflows/ci-standard.yml` lines 61-81). That fallback is no longer used, so when the self-hosted fleet is offline or saturated, required CI checks can rema...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2656#discussion_r3074407069)
-
----
-
-### PR #2656: .github/workflows/docker-security-scan.yml:24
+### PR #2660: pyproject.toml:100
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve hosted-runner fallback for Docker security scan**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Regenerate dev lockfile after adding Pillow dependency**
 
-Switching this workflow from `ubuntu-latest` to `self-hosted` removes the only execution path for environments without an online self-hosted runner, because this file has no `pick-runner`/fallback job. In that scenario, scheduled and PR-triggered Trivy scans stop executing, leaving vulnerability reporting coverage unavailable until self-hosted capaci...
+The workflow now audits `requirements-dev.lock` (`pip-audit -r requirements-dev.lock`), but this commit adds `pillow>=12.2.0` only in `pyproject.toml` and does not update the lockfile. In this commit state the lockfile has no Pillow entry, so the security gate can miss vulnerabilities or version drift for the newly declared dependency. Please update `r...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2656#discussion_r3074407073)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2660#discussion_r3076668454)
 
 ---
 
