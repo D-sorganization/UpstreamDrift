@@ -148,10 +148,12 @@ def run_command(
         FileNotFoundError: If the command is not found
 
     """
-    assert cmd, "cmd must be provided"
-    assert isinstance(cmd, list), "cmd must be a list"
-    if cwd is not None:
-        assert isinstance(cwd, Path | str), "cwd must be a Path or str"
+    if not cmd:
+        raise ValueError("cmd must be provided")
+    if not isinstance(cmd, list):
+        raise TypeError("cmd must be a list")
+    if cwd is not None and not isinstance(cwd, (Path, str)):
+        raise TypeError("cwd must be a Path or str")
 
     if logger:
         logger.debug(f"Running command: {' '.join(cmd)}")
@@ -187,10 +189,12 @@ def run_pytest(
     logger: logging.Logger | None = None,
 ) -> bool:
     """Run pytest with consistent configuration."""
-    assert path is not None, "path must be provided"
-    assert isinstance(verbose, bool), "verbose must be a bool"
-    if markers is not None:
-        assert isinstance(markers, str), "markers must be a str"
+    if path is None:
+        raise ValueError("path must be provided")
+    if not isinstance(verbose, bool):
+        raise TypeError("verbose must be a bool")
+    if markers is not None and not isinstance(markers, str):
+        raise TypeError("markers must be a str")
 
     if logger:
         logger.info(f"Running tests in {path}...")
