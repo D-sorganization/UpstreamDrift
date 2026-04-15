@@ -81,7 +81,8 @@ class DashboardRenderer(BaseRenderer):
         times_am, am = self.data.get_series("angular_momentum")
         am = np.asarray(am)
         if len(times_am) > 0 and am.size > 0:
-            am_mag = np.sqrt(np.sum(am**2, axis=1))
+            am_f = am.astype(float, copy=False)
+            am_mag = np.sqrt(np.einsum("...i,...i->...", am_f, am_f))
             ax.plot(
                 times_am,
                 am_mag,

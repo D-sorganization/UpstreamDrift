@@ -329,8 +329,13 @@ class CoordinationMetricsMixin:
         x_diff = x_windows - x_mean
         y_diff = y_windows - y_mean
 
-        numerator = np.sum(x_diff * y_diff, axis=1)
-        denominator = np.sqrt(np.sum(x_diff**2, axis=1) * np.sum(y_diff**2, axis=1))
+        x_f = x_diff.astype(float, copy=False)
+        y_f = y_diff.astype(float, copy=False)
+        numerator = np.einsum("...i,...i->...", x_f, y_f)
+        denominator = np.sqrt(
+            np.einsum("...i,...i->...", x_f, x_f)
+            * np.einsum("...i,...i->...", y_f, y_f)
+        )
 
         with np.errstate(divide="ignore", invalid="ignore"):
             correlations = numerator / denominator

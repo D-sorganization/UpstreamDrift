@@ -419,7 +419,12 @@ class CorrelationTab(QtWidgets.QWidget):
             # Take L2 norm for vectors (forces, etc.)
             # Assuming shape (N, D)
             # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1) for small inner dimensions
-            scalar_vals = np.sqrt(np.sum(vals**2, axis=1)) if vals.ndim > 1 else vals
+            vals_f = vals.astype(float, copy=False)
+            scalar_vals = (
+                np.sqrt(np.einsum("...i,...i->...", vals_f, vals_f))
+                if vals.ndim > 1
+                else vals
+            )
 
             data_dict[label] = scalar_vals
             if len(scalar_vals) < min_len:

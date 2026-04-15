@@ -362,7 +362,8 @@ class BallFlightSimulator:
             else self.environment.wind_velocity
         )
         rel_vel = vel - wind
-        speed = np.sqrt(np.sum(rel_vel**2, axis=0))
+        rv_f = rel_vel.astype(float, copy=False)
+        speed = np.sqrt(np.einsum("i...,i...->...", rv_f, rv_f))
 
         drag = np.zeros(vel.shape)
         magnus = np.zeros(vel.shape)
@@ -389,7 +390,8 @@ class BallFlightSimulator:
 
         axis = spin_axis.reshape(3, 1)
         cross = np.cross(axis, valid_rel_vel / valid_speed, axis=0)
-        cross_norm = np.sqrt(np.sum(cross**2, axis=0))
+        c_f = cross.astype(float, copy=False)
+        cross_norm = np.sqrt(np.einsum("i...,i...->...", c_f, c_f))
         cross_mask = cross_norm > NUMERICAL_EPSILON
 
         if np.any(cross_mask):

@@ -40,7 +40,8 @@ class StabilityRenderer(BaseRenderer):
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec = vec_temp
-        vec_norm = np.sqrt(np.sum(vec**2, axis=1))
+        vec_f = vec.astype(float, copy=False)
+        vec_norm = np.sqrt(np.einsum("...i,...i->...", vec_f, vec_f))
         vec_norm[vec_norm < 1e-6] = 1.0
 
         cos_theta = vec[:, 2] / vec_norm

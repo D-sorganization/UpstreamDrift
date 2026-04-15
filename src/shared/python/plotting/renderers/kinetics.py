@@ -563,7 +563,8 @@ class KineticsRenderer(BaseRenderer):
             ax.text(0.5, 0.5, "No Angular Momentum Data", ha="center", va="center")
             return
 
-        am_mag = np.sqrt(np.sum(am_data**2, axis=1))
+        am_f = am_data.astype(float, copy=False)
+        am_mag = np.sqrt(np.einsum("...i,...i->...", am_f, am_f))
 
         ax = fig.add_subplot(111)
 
@@ -613,7 +614,8 @@ class KineticsRenderer(BaseRenderer):
         sc = ax.scatter(lx, ly, lz, c=times, cmap="viridis", s=20)
         ax.plot(lx, ly, lz, color="gray", alpha=0.3)
 
-        max_idx = np.argmax(np.sum(am_data**2, axis=1))
+        am_f = am_data.astype(float, copy=False)
+        max_idx = np.argmax(np.einsum("...i,...i->...", am_f, am_f))
 
         ax.plot(
             [0, lx[max_idx]],
@@ -777,7 +779,8 @@ class KineticsRenderer(BaseRenderer):
     def _plot_induced_norm(self, ax, times, acc):
         if not (ax is not None):
             raise ValueError("ax must be provided")
-        norm = np.sqrt(np.sum(acc**2, axis=1))
+        acc_f = acc.astype(float, copy=False)
+        norm = np.sqrt(np.einsum("...i,...i->...", acc_f, acc_f))
         ax.plot(
             times,
             norm,

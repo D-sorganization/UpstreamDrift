@@ -212,7 +212,8 @@ class ClubRenderer(BaseRenderer):
             times, acc_vec = self.data.get_club_induced_acceleration_series(comp)
 
             if len(times) > 0 and acc_vec.size > 0:
-                mag = np.sqrt(np.sum(acc_vec**2, axis=1))
+                acc_f = acc_vec.astype(float, copy=False)
+                mag = np.sqrt(np.einsum("...i,...i->...", acc_f, acc_f))
 
                 if np.max(mag) > 1e-4 or comp == "total":
                     ax.plot(

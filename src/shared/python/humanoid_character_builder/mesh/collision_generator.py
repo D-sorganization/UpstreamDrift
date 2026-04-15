@@ -521,7 +521,8 @@ class CollisionGeometryGenerator:
             center = tuple(mesh.centroid.tolist())
             vertices = mesh.vertices - mesh.centroid
             # ⚡ Bolt: Element-wise distance sum is ~5-10x faster than np.linalg.norm(..., axis=1) for 3D coordinates
-            radius = float(np.sqrt(np.max(np.sum(vertices**2, axis=1))))
+            v_f = vertices.astype(float, copy=False)
+            radius = float(np.sqrt(np.max(np.einsum("...i,...i->...", v_f, v_f))))
 
             sphere_volume = (4 / 3) * np.pi * radius**3
             volume_ratio = mesh.volume / sphere_volume
