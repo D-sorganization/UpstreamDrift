@@ -38,8 +38,17 @@ class TestGetRepoRoot:
             found = get_repo_root(subdir)
             assert found == root
 
-    def test_no_root_found_raises_file_not_found(self, tmp_path: Path) -> None:
-        # tmp_path is a fresh directory with no markers
+    def test_no_root_found_raises_file_not_found(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # Patch markers to a sentinel that does not exist anywhere on disk so
+        # upward traversal cannot accidentally match a runner-level file (e.g.
+        # /tmp/pyproject.toml created by editable installs on self-hosted CI).
+        import src.shared.python.upstream_drift_tools.utils.paths as paths_mod
+
+        monkeypatch.setattr(
+            paths_mod, "_REPO_ROOT_MARKERS", (".THIS_MARKER_DOES_NOT_EXIST_ANYWHERE",)
+        )
         deep = tmp_path / "a" / "b" / "c"
         deep.mkdir(parents=True)
         with pytest.raises(FileNotFoundError):
