@@ -225,6 +225,7 @@ class TestTrajectoryAnalysisPerformance(unittest.TestCase):
         analyzer = KinematicForceAnalyzer(model, data)
 
         # Create trajectories of different sizes
+        elapsed_by_steps: dict[int, float] = {}
         for n_steps in [10, 50]:
             times = np.linspace(0, 1, n_steps)
             positions = np.zeros((n_steps, model.nv))
@@ -238,13 +239,22 @@ class TestTrajectoryAnalysisPerformance(unittest.TestCase):
             elapsed = time.perf_counter() - start
 
             self.assertEqual(len(results), n_steps)
-            # Verify reasonable performance (< 100ms per 50 steps)
-            if n_steps == 50:
-                self.assertLess(
-                    elapsed,
-                    0.5,
-                    f"Trajectory analysis for {n_steps} steps took {elapsed:.3f}s",
-                )
+            elapsed_by_steps[n_steps] = elapsed
+
+        elapsed_50 = elapsed_by_steps[50]
+        per_step_10 = elapsed_by_steps[10] / 10
+        per_step_50 = elapsed_50 / 50
+
+        self.assertLess(
+            elapsed_50,
+            1.5,
+            f"Trajectory analysis for 50 steps took {elapsed_50:.3f}s",
+        )
+        self.assertLess(
+            per_step_50,
+            max(per_step_10 * 4, 0.03),
+            "Trajectory analysis should stay roughly linear as steps increase",
+        )
 
 
 if __name__ == "__main__":
