@@ -3,22 +3,21 @@
 Provides text-based editing of URDF files with:
 - Syntax validation (see _text_editor_validation.py)
 - Diff generation between versions (see text_editor_diff_mixin.py)
-- Undo/redo support
+- Undo/redo support (see text_editor_history_mixin.py)
 - Real-time validation feedback
 
 Implementation split across:
 - _text_editor_models.py: data classes
 - _text_editor_validation.py: _URDFValidationMixin
+- text_editor_history_mixin.py: EditorHistoryMixin
 """
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Callable
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -34,15 +33,18 @@ from ._text_editor_models import (
 )
 from ._text_editor_validation import _URDFValidationMixin
 from .text_editor_diff_mixin import TextEditorDiffMixin
+from .text_editor_history_mixin import EditorHistoryMixin
 
 logger = logging.getLogger(__name__)
 
 
-class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
+class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin, EditorHistoryMixin):
     """Text editor for URDF files with validation and diff support.
 
-    Diff operations are provided by :class:`TextEditorDiffMixin`.
-    Validation is provided by :class:`_URDFValidationMixin`.
+    Responsibilities are split across mixins:
+    - :class:`TextEditorDiffMixin` — diff computation and side-by-side views
+    - :class:`_URDFValidationMixin` — XML/URDF structural validation
+    - :class:`EditorHistoryMixin` — undo/redo and version history
 
     Example:
         editor = URDFTextEditor()
@@ -71,9 +73,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Args:
             max_history: Maximum number of undo states to keep
         """
-        if not (max_history is not None):
-            raise ValueError("max_history must be provided")
-        if not (max_history is not None):
+        if max_history is None:
             raise ValueError("max_history must be provided")
         self._content: str = ""
         self._original_content: str = ""
@@ -121,9 +121,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
             content: URDF XML content
             description: Description for history
         """
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self._content = content
         self._original_content = content
@@ -186,9 +184,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             List of validation messages
         """
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         if content == self._content:
             return []
@@ -225,9 +221,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Validation messages
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         new_content = self._content[:position] + text + self._content[position:]
         return self.set_content(new_content, description)
@@ -249,9 +243,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Validation messages
         """
-        if not (start is not None):
-            raise ValueError("start must be provided")
-        if not (start is not None):
+        if start is None:
             raise ValueError("start must be provided")
         new_content = self._content[:start] + self._content[end:]
         return self.set_content(new_content, description)
@@ -275,9 +267,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Validation messages
         """
-        if not (start is not None):
-            raise ValueError("start must be provided")
-        if not (start is not None):
+        if start is None:
             raise ValueError("start must be provided")
         new_content = self._content[:start] + text + self._content[end:]
         return self.set_content(new_content, description)
@@ -299,9 +289,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Validation messages
         """
-        if not (element_name is not None):
-            raise ValueError("element_name must be provided")
-        if not (element_name is not None):
+        if element_name is None:
             raise ValueError("element_name must be provided")
         if old_content not in self._content:
             logger.warning(f"Content not found: {old_content[:50]}...")
@@ -310,121 +298,8 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         content = self._content.replace(old_content, new_content, 1)
         return self.set_content(content, f"Replace {element_name}")
 
-    # ============================================================
-    # History / Undo / Redo
-    # ============================================================
-
-    def undo(self) -> bool:
-        """
-        Undo last change.
-
-        Returns:
-            True if undone
-        """
-        if self._history_index <= 0:
-            logger.warning("Nothing to undo")
-            return False
-
-        self._history_index -= 1
-        self._content = self._history[self._history_index].content
-
-        logger.info(f"Undone to: {self._history[self._history_index].description}")
-        return True
-
-    def redo(self) -> bool:
-        """
-        Redo last undone change.
-
-        Returns:
-            True if redone
-        """
-        if self._history_index >= len(self._history) - 1:
-            logger.warning("Nothing to redo")
-            return False
-
-        self._history_index += 1
-        self._content = self._history[self._history_index].content
-
-        logger.info(f"Redone to: {self._history[self._history_index].description}")
-        return True
-
-    def can_undo(self) -> bool:
-        """Check if undo is available."""
-        return self._history_index > 0
-
-    def can_redo(self) -> bool:
-        """Check if redo is available."""
-        return self._history_index < len(self._history) - 1
-
-    def get_history(self) -> list[dict[str, Any]]:
-        """
-        Get version history.
-
-        Returns:
-            List of version info dicts
-        """
-        return [
-            {
-                "index": idx,
-                "description": v.description,
-                "timestamp": v.timestamp.isoformat(),
-                "checksum": v.checksum[:8],
-                "is_current": idx == self._history_index,
-            }
-            for idx, v in enumerate(self._history)
-        ]
-
-    def go_to_version(self, index: int) -> bool:
-        """
-        Go to a specific version in history.
-
-        Args:
-            index: Version index
-
-        Returns:
-            True if successful
-        """
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if index < 0 or index >= len(self._history):
-            logger.error(f"Invalid version index: {index}")
-            return False
-
-        self._history_index = index
-        self._content = self._history[index].content
-        logger.info(f"Went to version {index}: {self._history[index].description}")
-        return True
-
-    def _add_to_history(self, description: str) -> None:
-        """Add current content to history."""
-        if not (description is not None):
-            raise ValueError("description must be provided")
-        if not (description is not None):
-            raise ValueError("description must be provided")
-        checksum = hashlib.md5(
-            self._content.encode(), usedforsecurity=False
-        ).hexdigest()
-
-        version = EditorVersion(
-            content=self._content,
-            timestamp=datetime.now(),
-            description=description,
-            checksum=checksum,
-        )
-
-        # Remove any redo history
-        if self._history_index < len(self._history) - 1:
-            self._history = self._history[: self._history_index + 1]
-
-        self._history.append(version)
-        self._history_index = len(self._history) - 1
-
-        # Limit history size
-        while len(self._history) > self._max_history:
-            self._history.pop(0)
-            self._history_index -= 1
+    # History / Undo / Redo operations are provided by EditorHistoryMixin
+    # (see text_editor_history_mixin.py).
 
     # ============================================================
     # Callbacks
@@ -462,9 +337,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Line content or None
         """
-        if not (line_number is not None):
-            raise ValueError("line_number must be provided")
-        if not (line_number is not None):
+        if line_number is None:
             raise ValueError("line_number must be provided")
         lines = self._content.splitlines()
         if 1 <= line_number <= len(lines):
@@ -484,9 +357,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             List of (line, column, matched_text) tuples
         """
-        if not (pattern is not None):
-            raise ValueError("pattern must be provided")
-        if not (pattern is not None):
+        if pattern is None:
             raise ValueError("pattern must be provided")
         results = []
         lines = self._content.splitlines()
@@ -523,9 +394,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Number of replacements made
         """
-        if not (search is not None):
-            raise ValueError("search must be provided")
-        if not (search is not None):
+        if search is None:
             raise ValueError("search must be provided")
         if regex:
             new_content, count = re.subn(search, replace, self._content)
@@ -574,9 +443,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         indent: str = "  ",
     ) -> None:
         """Recursively add indentation to XML element."""
-        if not (elem is not None):
-            raise ValueError("elem must be provided")
-        if not (elem is not None):
+        if elem is None:
             raise ValueError("elem must be provided")
         i = "\n" + level * indent
         if len(elem):
@@ -603,9 +470,7 @@ class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin):
         Returns:
             Dict with element info or None
         """
-        if not (line is not None):
-            raise ValueError("line must be provided")
-        if not (line is not None):
+        if line is None:
             raise ValueError("line must be provided")
         lines = self._content.splitlines()
         if line < 1 or line > len(lines):

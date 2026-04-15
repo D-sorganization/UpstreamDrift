@@ -1,0 +1,133 @@
+"""Editor history (undo/redo) mixin for URDFTextEditor.
+
+Extracts history management and undo/redo logic from the main editor class to
+improve single-responsibility adherence.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import logging
+from datetime import datetime
+from typing import Any
+
+logger = logging.getLogger(__name__)
+
+
+class EditorHistoryMixin:
+    """Mixin providing undo/redo and version history for URDFTextEditor."""
+
+    _content: str  # provided by URDFTextEditor
+    _history: list  # list[EditorVersion], provided by URDFTextEditor
+    _history_index: int  # provided by URDFTextEditor
+    _max_history: int  # provided by URDFTextEditor
+
+    def undo(self) -> bool:
+        """
+        Undo last change.
+
+        Returns:
+            True if undone
+        """
+        if self._history_index <= 0:
+            logger.warning("Nothing to undo")
+            return False
+
+        self._history_index -= 1
+        self._content = self._history[self._history_index].content
+
+        logger.info(f"Undone to: {self._history[self._history_index].description}")
+        return True
+
+    def redo(self) -> bool:
+        """
+        Redo last undone change.
+
+        Returns:
+            True if redone
+        """
+        if self._history_index >= len(self._history) - 1:
+            logger.warning("Nothing to redo")
+            return False
+
+        self._history_index += 1
+        self._content = self._history[self._history_index].content
+
+        logger.info(f"Redone to: {self._history[self._history_index].description}")
+        return True
+
+    def can_undo(self) -> bool:
+        """Check if undo is available."""
+        return self._history_index > 0
+
+    def can_redo(self) -> bool:
+        """Check if redo is available."""
+        return self._history_index < len(self._history) - 1
+
+    def get_history(self) -> list[dict[str, Any]]:
+        """
+        Get version history.
+
+        Returns:
+            List of version info dicts
+        """
+        return [
+            {
+                "index": idx,
+                "description": v.description,
+                "timestamp": v.timestamp.isoformat(),
+                "checksum": v.checksum[:8],
+                "is_current": idx == self._history_index,
+            }
+            for idx, v in enumerate(self._history)
+        ]
+
+    def go_to_version(self, index: int) -> bool:
+        """
+        Go to a specific version in history.
+
+        Args:
+            index: Version index
+
+        Returns:
+            True if successful
+        """
+        if index is None:
+            raise ValueError("index must be provided")
+        if index < 0 or index >= len(self._history):
+            logger.error(f"Invalid version index: {index}")
+            return False
+
+        self._history_index = index
+        self._content = self._history[index].content
+        logger.info(f"Went to version {index}: {self._history[index].description}")
+        return True
+
+    def _add_to_history(self, description: str) -> None:
+        """Add current content to history."""
+        from ._text_editor_models import EditorVersion
+
+        if description is None:
+            raise ValueError("description must be provided")
+        checksum = hashlib.md5(
+            self._content.encode(), usedforsecurity=False
+        ).hexdigest()
+
+        version = EditorVersion(
+            content=self._content,
+            timestamp=datetime.now(),
+            description=description,
+            checksum=checksum,
+        )
+
+        # Remove any redo history
+        if self._history_index < len(self._history) - 1:
+            self._history = self._history[: self._history_index + 1]
+
+        self._history.append(version)
+        self._history_index = len(self._history) - 1
+
+        # Limit history size
+        while len(self._history) > self._max_history:
+            self._history.pop(0)
+            self._history_index -= 1

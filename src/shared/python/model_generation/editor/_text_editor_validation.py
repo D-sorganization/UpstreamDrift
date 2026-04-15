@@ -95,9 +95,7 @@ class _URDFValidationMixin:
         messages: list[ValidationMessage],
     ) -> bool:
         """Check root is <robot> with a name. Return False to abort."""
-        if not (root is not None):
-            raise ValueError("root must be provided")
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         if root.tag != "robot":
             messages.append(
@@ -128,9 +126,7 @@ class _URDFValidationMixin:
         messages: list[ValidationMessage],
     ) -> dict[str, ET.Element]:
         """Validate link elements and return name→element map."""
-        if not (root is not None):
-            raise ValueError("root must be provided")
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         links: dict[str, ET.Element] = {}
 
@@ -174,9 +170,7 @@ class _URDFValidationMixin:
         messages: list[ValidationMessage],
     ) -> None:
         """Validate inertial/mass properties of a link."""
-        if not (link_elem is not None):
-            raise ValueError("link_elem must be provided")
-        if not (link_elem is not None):
+        if link_elem is None:
             raise ValueError("link_elem must be provided")
         inertial = link_elem.find("inertial")
         if inertial is None:
@@ -241,9 +235,7 @@ class _URDFValidationMixin:
         messages: list[ValidationMessage],
     ) -> None:
         """Validate joint elements (type, parent/child, limits)."""
-        if not (root is not None):
-            raise ValueError("root must be provided")
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         seen: dict[str, ET.Element] = {}
 
@@ -345,9 +337,7 @@ class _URDFValidationMixin:
         messages: list[ValidationMessage],
     ) -> None:
         """Detect links that are not connected to any joint."""
-        if not (root is not None):
-            raise ValueError("root must be provided")
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         child_links = set()
         for joint_elem in root.findall("joint"):
@@ -377,9 +367,7 @@ class _URDFValidationMixin:
     def _find_element_line(self, elem: ET.Element) -> int:
         """Find the line number of an element (approximate)."""
         # This is a simple heuristic - search for element in content
-        if not (elem is not None):
-            raise ValueError("elem must be provided")
-        if not (elem is not None):
+        if elem is None:
             raise ValueError("elem must be provided")
         ET.tostring(elem, encoding="unicode")
         tag_start = f"<{elem.tag}"
