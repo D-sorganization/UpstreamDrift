@@ -138,6 +138,7 @@ repos:
           tests/unit/core
           tests/unit/utils
           -x -q --tb=short -m "not slow and not integration"
+          -p no:xvfb
           --override-ini="addopts=-ra -q --strict-markers --strict-config --durations=20"
         language: system
         pass_filenames: false

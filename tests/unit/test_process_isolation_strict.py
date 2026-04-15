@@ -20,6 +20,8 @@ TEST_PINOCCHIO_STRICT = ISOLATED_TESTS_DIR / "test_pinocchio_strict.py"
 class TestProcessIsolationStrict:
     """Run specific strict unit tests in isolated subprocesses."""
 
+    pytestmark = pytest.mark.slow
+
     def run_isolated_test(self, test_file: Path):
         """Helper to run pytest on a single file in a subprocess."""
         cmd = [sys.executable, "-m", "pytest", str(test_file), "-v", "--no-cov"]
