@@ -24,6 +24,7 @@ from src.unreal_integration.viewer_backends import (
     BackendType,
     CameraState,
     MockBackend,
+    PyVistaBackend,
     ViewerConfig,
     create_viewer,
 )
@@ -562,6 +563,18 @@ class TestCreateViewer:
         viewer = create_viewer("mock", config=config)
         assert viewer.config.width == 800
         assert viewer.config.height == 600
+
+    def test_create_pyvista_viewer(self):
+        """Test creating PyVista viewer."""
+        viewer = create_viewer("pyvista")
+        assert isinstance(viewer, PyVistaBackend)
+        assert viewer.config.backend_type == BackendType.PYVISTA
+
+    def test_pyvista_backend_exported_from_package_root(self):
+        """Top-level unreal_integration package should export PyVistaBackend."""
+        from src.unreal_integration import PyVistaBackend as RootPyVistaBackend
+
+        assert RootPyVistaBackend is PyVistaBackend
 
     def test_create_unsupported_viewer(self):
         """Test creating unsupported viewer raises error."""

@@ -5,6 +5,7 @@
 [workspace]
 resolver = "2"
 members = ["rust_core/upstream-physics"]
+exclude = ["ui/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"

@@ -16,6 +16,18 @@ def _install_fake_simulation_modules() -> None:
     class _FakeResultBase:
         pass
 
+    simulation_panel_module = ModuleType(
+        "src.shared.python.pendulum_simulator.gui.simulation_panel"
+    )
+
+    class _ImportOnlySimulationPanel:
+        pass
+
+    simulation_panel_module.SimulationPanel = _ImportOnlySimulationPanel
+    sys.modules["src.shared.python.pendulum_simulator.gui.simulation_panel"] = (
+        simulation_panel_module
+    )
+
     for module_name in (
         "src.shared.python.pendulum_simulator.simulation",
         "src.shared.python.pendulum_simulator.simulation_triple",
@@ -91,6 +103,7 @@ _PATCHED_MODULE_NAMES = [
     "src.shared.python.pendulum_simulator.simulation",
     "src.shared.python.pendulum_simulator.simulation_triple",
     "src.shared.python.pendulum_simulator.simulation_golfer",
+    "src.shared.python.pendulum_simulator.gui.simulation_panel",
     "src.shared.python.pendulum_simulator.perturbation",
     "src.shared.python.pendulum_simulator.perturbation.config",
     "src.shared.python.pendulum_simulator.pendulum_perturbation_analyzer",
@@ -103,18 +116,20 @@ _saved_modules: dict[str, ModuleType | None] = {
 _install_fake_simulation_modules()
 _install_fake_perturbation_modules()
 
-from src.shared.python.pendulum_simulator.gui import panel_builders  # noqa: E402
-
-# Restore immediately — panel_builders is now cached in sys.modules and no
-# longer needs the fakes.  This must happen at module level (not in
-# teardown_module) so that xdist workers forked after collection inherit
-# clean sys.modules.
-for _name, _original in _saved_modules.items():
-    if _original is None:
-        sys.modules.pop(_name, None)
-    else:
-        sys.modules[_name] = _original
-del _name, _original
+try:
+    from src.shared.python.pendulum_simulator.gui import panel_builders  # noqa: E402
+finally:
+    # Restore immediately — panel_builders is now cached in sys.modules and no
+    # longer needs the fakes.  This must happen at module level (not in
+    # teardown_module) so that xdist workers forked after collection inherit
+    # clean sys.modules. The finally block also prevents fake modules from
+    # leaking when a GUI import dependency fails during collection.
+    for _name, _original in _saved_modules.items():
+        if _original is None:
+            sys.modules.pop(_name, None)
+        else:
+            sys.modules[_name] = _original
+    del _name, _original
 
 
 class _FakeResult:

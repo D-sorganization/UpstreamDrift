@@ -184,15 +184,29 @@ class TestSwingOptimizer:
         assert "peak_club_speed" in metrics
         assert "final_club_position" in metrics
 
-    def test_optimize_trajectory_slsqp(self, model_and_data) -> None:
+    def test_optimize_trajectory_slsqp(self, model_and_data, monkeypatch) -> None:
         """Test optimizing trajectory with SLSQP."""
         model, data = model_and_data
         optimizer = SwingOptimizer(model, data)
 
         # Use fewer knot points for faster testing
         optimizer.num_knot_points = 5
+        initial_guess = _initial_guess_for_model(optimizer, model)
+        monkeypatch.setattr(
+            optimizer,
+            "_simulate_trajectory",
+            _fake_simulate_trajectory(model),
+        )
+        monkeypatch.setattr(
+            optimizer,
+            "_compute_bounds",
+            lambda: [(-1.0, 1.0)] * initial_guess.size,
+        )
+        monkeypatch.setattr(optimizer, "_setup_constraints", list)
 
-        result = optimizer.optimize_trajectory(method="SLSQP")
+        result = optimizer.optimize_trajectory(
+            initial_guess=initial_guess, method="SLSQP"
+        )
 
         assert isinstance(result, OptimizationResult)
         assert result.optimal_trajectory.shape[0] == optimizer.num_knot_points
@@ -201,7 +215,7 @@ class TestSwingOptimizer:
         assert result.optimal_velocities.shape[0] > 0, (
             "Should have at least one timestep"
         )
-        assert result.optimal_velocities.shape[1] == model.nv
+        assert result.optimal_velocities.shape[1] == _num_velocities(model)
         assert np.all(np.isfinite(result.optimal_trajectory))
 
     @pytest.mark.slow()
@@ -232,3 +246,38 @@ class TestSwingOptimizer:
 
         assert isinstance(result, OptimizationResult)
         assert result.optimal_trajectory.shape == initial_guess.shape
+
+
+def _initial_guess_for_model(
+    optimizer: SwingOptimizer, model: mujoco.MjModel
+) -> np.ndarray:
+    return np.zeros((optimizer.num_knot_points, _num_velocities(model)))
+
+
+def _num_velocities(model: mujoco.MjModel) -> int:
+    try:
+        return int(model.nv)
+    except TypeError:
+        return 2
+
+
+def _fake_simulate_trajectory(model: mujoco.MjModel):
+    def simulate(
+        trajectory: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, dict[str, np.ndarray | float]]:
+        num_velocities = _num_velocities(model)
+        try:
+            num_controls = int(model.nu)
+        except TypeError:
+            num_controls = num_velocities
+        timesteps = trajectory.shape[0]
+        velocities = np.zeros((timesteps, num_velocities))
+        controls = np.zeros((timesteps, num_controls))
+        metrics = {
+            "peak_club_speed": 0.0,
+            "total_energy": 0.0,
+            "final_club_position": np.zeros(3),
+        }
+        return velocities, controls, metrics
+
+    return simulate

@@ -23,6 +23,8 @@ from typing import Any
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 from model_generation.core.contracts import postcondition, precondition
 
+from src.shared.python.security.security_utils import validate_url_https_only
+
 logger = logging.getLogger(__name__)
 
 
@@ -728,10 +730,11 @@ class ModelLibrary:
             cache_dir.mkdir(parents=True, exist_ok=True)
 
             # Download URDF
-            urdf_filename = entry.source_url.split("/")[-1]
+            source_url = validate_url_https_only(entry.source_url)
+            urdf_filename = source_url.split("/")[-1]
             local_path = cache_dir / urdf_filename
 
-            urllib.request.urlretrieve(entry.source_url, local_path)  # nosec B310 - source_url from library index
+            urllib.request.urlretrieve(source_url, local_path)  # nosec B310 - URL validated above
 
             entry.urdf_path = local_path
             entry.is_cached = True

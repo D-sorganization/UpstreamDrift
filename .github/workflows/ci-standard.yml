@@ -215,8 +215,18 @@ jobs:
 
       - name: Install System Dependencies
         run: |
-          sudo apt-get -o DPkg::Lock::Timeout=300 update
-          sudo apt-get -o DPkg::Lock::Timeout=300 install -y \
+          apt_retry() {
+            for attempt in {1..12}; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
             libegl1 libgl1 xvfb \
             libxkbcommon-x11-0 \
             libxcb-cursor0 \
@@ -240,8 +250,9 @@ jobs:
         # "Requirement already satisfied" and doesn't repair the cache,
         # which causes hypothesis to fail its terminal-summary import.
         run: |
-          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          pip install -e ".[dev,gui-test]"
+          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          python -m pip install -e ".[dev,gui-test]"
+          python -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
 
       - name: Document Native Engine Coverage In Core Lane
         run: |
@@ -273,16 +284,18 @@ jobs:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
+          export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+
           # Run the default, dependency-light CI lane:
-          # - Parallel execution (-n auto)
+          # - Serial execution for self-hosted runner and coverage stability
           # - 60 second timeout per test
           # - Skip slow tests in CI for faster feedback
           # - Coverage measurement on src/ (pytest-cov)
           # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
           # are intentionally not provisioned here.
-          xvfb-run --auto-servernum pytest \
+          xvfb-run --auto-servernum python -m pytest \
             -p no:xvfb \
-            -n auto \
+            -n 0 \
             --timeout=60 \
             --timeout-method=thread \
             --ignore=tests/shared_contracts \
@@ -307,7 +320,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
           echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
-          xvfb-run --auto-servernum pytest tests/integration/test_cross_engine_validation.py \
+          xvfb-run --auto-servernum python -m pytest tests/integration/test_cross_engine_validation.py \
             -p no:xvfb \
             --timeout=60 \
             --timeout-method=thread \
@@ -348,8 +361,18 @@ jobs:
 
       - name: Install System Dependencies
         run: |
-          sudo apt-get -o DPkg::Lock::Timeout=300 update
-          sudo apt-get -o DPkg::Lock::Timeout=300 install -y \
+          apt_retry() {
+            for attempt in {1..12}; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
             libegl1 libgl1 xvfb \
             libxkbcommon-x11-0 \
             libxcb-cursor0 \
@@ -368,15 +391,19 @@ jobs:
         # See tests/Install Core Test Dependencies for the rationale —
         # the shared toolcache can carry a stale `sortedcontainers` that
         # makes hypothesis fail during pytest_terminal_summary.
+        # Force-reinstall numpy/scipy to ensure a consistent binary ABI:
+        # the self-hosted toolcache for Python 3.11 carries numpy 2.4.x
+        # which is incompatible with cached scipy wheels built against <2.3.
         run: |
-          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          pip install -e ".[dev,gui-test]"
+          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          python -m pip install -e ".[dev,gui-test]"
+          python -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
       - name: Run Shared Tools Consumer Contracts
         env:
           QT_QPA_PLATFORM: offscreen
           REQUIRE_REAL_TOOLS_REPO: "1"
         run: |
-          xvfb-run --auto-servernum pytest tests/shared_contracts/ \
+          xvfb-run --auto-servernum python -m pytest tests/shared_contracts/ \
             -p no:xvfb \
             --tools-mode=vendored \
             --timeout=60 \
@@ -521,14 +548,13 @@ jobs:
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
 
-      - name: Cache Cargo registry and build
+      - name: Cache Cargo registry
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -551,16 +577,19 @@ jobs:
       - name: Build PyO3 Wheel (Maturin)
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
-          pip install maturin
+          python3 -m venv "$RUNNER_TEMP/rust-venv"
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m pip install --upgrade pip maturin
           cd rust_core/upstream-physics
-          maturin build --features python --release
+          python -m maturin build --interpreter python --features python --release
           echo "Wheel built successfully"
           ls ../../target/wheels/
 
       - name: Verify Python Bindings
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
-          pip install target/wheels/upstream_physics-*.whl
+          source "$RUNNER_TEMP/rust-venv/bin/activate"
+          python -m pip install target/wheels/upstream_physics-*.whl
           python -c "
           import upstream_physics
           # Verify key types are importable

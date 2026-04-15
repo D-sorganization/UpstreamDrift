@@ -385,6 +385,37 @@ class TestRepositoryURLRestriction:
         assert repo.API_BASE.startswith("https://")
         assert repo.RAW_BASE.startswith("https://")
 
+    def test_model_library_download_blocks_non_https_source_url(self, tmp_path):
+        """ModelLibrary should validate source_url before urlretrieve."""
+        from model_generation.library.model_library import (
+            LibraryConfig,
+            ModelEntry,
+            ModelLibrary,
+            RepositorySource,
+        )
+
+        library = ModelLibrary(
+            LibraryConfig(
+                cache_dir=tmp_path / "cache",
+                index_file=tmp_path / "index.json",
+                default_repositories=[],
+            )
+        )
+        entry = ModelEntry(
+            id="evil/model",
+            name="evil",
+            source=RepositorySource.URL,
+            source_url="file:///etc/passwd",
+        )
+
+        with (
+            patch("urllib.request.urlretrieve") as urlretrieve,
+            pytest.raises(ValueError, match="URL scheme 'file' is not allowed"),
+        ):
+            library._download_model(entry)
+
+        urlretrieve.assert_not_called()
+
 
 # ---------------------------------------------------------------------------
 # 3. SMPL-X vertex range validation tests (issue #1691)
