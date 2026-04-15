@@ -250,9 +250,14 @@ jobs:
         # "Requirement already satisfied" and doesn't repair the cache,
         # which causes hypothesis to fail its terminal-summary import.
         run: |
-          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          python -m pip install -e ".[dev,gui-test]"
-          python -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          python -m venv "$RUNNER_TEMP/core-ci-venv"
+          echo "$RUNNER_TEMP/core-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/core-ci-venv" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/core-ci-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/core-ci-venv/bin/python"
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
 
       - name: Document Native Engine Coverage In Core Lane
         run: |
@@ -283,6 +288,7 @@ jobs:
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
 
@@ -300,6 +306,7 @@ jobs:
             --timeout-method=thread \
             --ignore=tests/shared_contracts \
             --ignore=tests/heavy_integration \
+            --ignore=tests/benchmarks \
             -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
             --cov=src \
             --cov-report=term-missing \
@@ -314,6 +321,7 @@ jobs:
         env:
           PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
         run: |
           set -o pipefail
           echo "## Cross-Engine Validator Core Unit Tests" >> "$GITHUB_STEP_SUMMARY"
@@ -395,12 +403,18 @@ jobs:
         # the self-hosted toolcache for Python 3.11 carries numpy 2.4.x
         # which is incompatible with cached scipy wheels built against <2.3.
         run: |
-          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          python -m pip install -e ".[dev,gui-test]"
-          python -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+          python -m venv "$RUNNER_TEMP/shared-contracts-venv"
+          echo "$RUNNER_TEMP/shared-contracts-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/shared-contracts-venv" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
       - name: Run Shared Tools Consumer Contracts
         env:
           QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
           REQUIRE_REAL_TOOLS_REPO: "1"
         run: |
           xvfb-run --auto-servernum python -m pytest tests/shared_contracts/ \
