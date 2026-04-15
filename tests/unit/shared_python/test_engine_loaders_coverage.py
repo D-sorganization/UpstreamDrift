@@ -22,16 +22,27 @@ def test_load_mujoco_success(tmp_path: object) -> None:
     mock_result.is_available.return_value = True
     mock_probe_instance.probe.return_value = mock_result
 
-    # Patch at the canonical import location used by src.engines.loaders
+    physics_engine_module = MagicMock()
+    physics_engine_module.MuJoCoPhysicsEngine = mock_engine_cls
+    engine_probes_module = MagicMock()
+    engine_probes_module.MuJoCoProbe = mock_probe_cls
+    common_utils_module = MagicMock()
+    common_utils_module.GolfModelingError = RuntimeError
+
+    # Patch the import modules directly so the test is independent of whether
+    # the full suite imported the concrete MuJoCo module earlier.
     with (
-        patch.dict(sys.modules, {"mujoco": MagicMock()}),
-        patch(
-            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine",
-            mock_engine_cls,
-        ),
-        patch(
-            "src.shared.python.engine_core.engine_probes.MuJoCoProbe",
-            mock_probe_cls,
+        patch.dict(
+            sys.modules,
+            {
+                "mujoco": MagicMock(),
+                (
+                    "src.engines.physics_engines.mujoco.python."
+                    "mujoco_humanoid_golf.physics_engine"
+                ): physics_engine_module,
+                "src.shared.python.engine_core.engine_probes": engine_probes_module,
+                "src.shared.python.data_io.common_utils": common_utils_module,
+            },
         ),
     ):
         from src.engines.loaders import load_mujoco_engine

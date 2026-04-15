@@ -22,6 +22,7 @@ Preferred imports (direct from package, since src/shared/python is on sys.path):
     from plot_theme import apply_plot_theme
 """
 
+import importlib
 from pathlib import Path
 
 # Suite root — the repository root (3 levels up from src/shared/python)
@@ -33,11 +34,34 @@ OUTPUT_ROOT: Path = SUITE_ROOT / "output"
 __all__ = [
     "SUITE_ROOT",
     "OUTPUT_ROOT",
+    "biomechanics",
     "chat",
     "humanoid_character_builder",
     "model_generation",
     "notes",
+    "pose_estimation",
     "signal_toolkit",
     "theme",
     "upstream_drift_tools",
 ]
+
+_LAZY_SUBPACKAGES = {
+    "biomechanics",
+    "chat",
+    "humanoid_character_builder",
+    "model_generation",
+    "notes",
+    "pose_estimation",
+    "signal_toolkit",
+    "theme",
+    "upstream_drift_tools",
+}
+
+
+def __getattr__(name: str):
+    """Expose shared.python subpackages for import-cache-sensitive patching."""
+    if name in _LAZY_SUBPACKAGES:
+        module = importlib.import_module(f"{__name__}.{name}")
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
