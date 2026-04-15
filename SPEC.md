@@ -29,7 +29,7 @@ Last-Updated: 2026-04-15T00:00:00Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.112                                            |
+| **Spec Version**        | 1.0.113                                            |
 | **Last Spec Update**    | 2026-04-15                                         |
 
 ## 2. Purpose & Mission
@@ -637,3 +637,4 @@ pytest tests/ --cov=src --cov-fail-under=70
 | 2026-04-13 | 1.0.91 | Bolt: Optimized np.sum(..., axis=1) square reductions to np.einsum in Drake PerturbationAnalyzer to improve performance and avoid temporary array allocations. |
 | 2026-04-14 | 1.0.93 | Bolt: Optimized np.sum(np.square(..., dtype=float), axis=1) to np.einsum in 3D_Golf_Model marker statistics analysis to improve performance and avoid type casting errors. |
 | 2026-04-14 | 1.0.112 | fix: prevent test_paths_utils false failure from /tmp/pyproject.toml — test now uses a clean isolated tmp directory instead of relying on /tmp state. |
+| 2026-04-15 | 1.0.113 | Bolt: Optimized `np.sum(np.square(...))` and explicit sum of squares to `np.einsum` in `analysis_tab.py`, `marker_plot_tab.py`, and `motion_capture.py` to improve performance. |

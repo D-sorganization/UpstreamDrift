@@ -1,11 +1,9 @@
+import numpy as np
 import pytest
 
-pytest.importorskip("pinocchio", reason="pinocchio not installed")
+pin = pytest.importorskip("pinocchio", reason="pinocchio not installed")
 
-import numpy as np
-import pinocchio as pin
-
-from src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (
+from src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (  # noqa: E402
     InducedAccelerationAnalyzer,
 )
 
