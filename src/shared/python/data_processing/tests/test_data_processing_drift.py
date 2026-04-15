@@ -1,0 +1,43 @@
+"""Drift guard for data_processing modules synchronized with Tools.
+The baseline hashes were captured from the matching files in the sibling
+Tools repository and should only change when that upstream source changes.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[5 if "tests" in __file__ else 4]
+TOOLS_BASELINE_HASHES: dict[str, str] = {
+    "src/shared/python/data_processing/__init__.py": "2590d7fea9e5d12e6c9569ce1811271239483e1f1aded9ad468a84a72ef8e4d7",
+    "src/shared/python/data_processing/processor.py": "8505d2523ee7cb764df30662fee37c78389f8e22217e56a9fd374ad21bf11925",
+    "src/shared/python/data_processing/tests/__init__.py": "c8061db111018025bf2cc441a14739f890c7ea8980afe9fd569787322290632d",
+    "src/shared/python/data_processing/tests/test_processor.py": "f8ff5d8df67ee00d868c38e774999684cfe7f99c054403cf36b41a1881f61634",
+}
+
+
+def _runtime_equivalent_source(relative_path: str) -> bytes:
+    """Return the source bytes that should match the Tools runtime baseline."""
+    source = (REPO_ROOT / relative_path).read_text(encoding="utf-8")
+    return source.encode("utf-8")
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "expected_sha256"),
+    sorted(TOOLS_BASELINE_HASHES.items()),
+)
+def test_data_processing_modules_match_tools_baseline(
+    relative_path: str,
+    expected_sha256: str,
+) -> None:
+    """Verify the selected leaf modules still match the Tools baseline."""
+    path = REPO_ROOT / relative_path
+    if not path.exists():
+        pytest.fail(f"Missing file: {relative_path}")
+    actual_sha256 = hashlib.sha256(
+        _runtime_equivalent_source(relative_path)
+    ).hexdigest()
+    assert actual_sha256 == expected_sha256, relative_path

@@ -1,0 +1,44 @@
+"""Drift guard for notes modules synchronized with Tools.
+The baseline hashes were captured from the matching files in the sibling
+Tools repository and should only change when that upstream source changes.
+"""
+
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[5 if "tests" in __file__ else 4]
+TOOLS_BASELINE_HASHES: dict[str, str] = {
+    "src/shared/python/notes/__init__.py": "638875bb87492a23297b87e1f695ac386e5917eb0d2f34e9d46d2af91e23db2a",
+    "src/shared/python/notes/integration.py": "454219f096caa3e32284252f37aa1fa4d5f890d629b01e2f171505115d33dab8",
+    "src/shared/python/notes/models.py": "c666e8634782cffc9bb88c64ac8c755118c8e7a5f42fd943a7384d3183678765",
+    "src/shared/python/notes/notes_dock_widget.py": "1607aa935993ac5b7e4c198752d1211eeeca00aab4214a7b1eea9e67197fb79f",
+    "src/shared/python/notes/storage.py": "27fccf123bfe14380185856eddf5a58de95373b2530a14f651b3e049176bd9a6",
+}
+
+
+def _runtime_equivalent_source(relative_path: str) -> bytes:
+    """Return the source bytes that should match the Tools runtime baseline."""
+    source = (REPO_ROOT / relative_path).read_text(encoding="utf-8")
+    return source.encode("utf-8")
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "expected_sha256"),
+    sorted(TOOLS_BASELINE_HASHES.items()),
+)
+def test_notes_modules_match_tools_baseline(
+    relative_path: str,
+    expected_sha256: str,
+) -> None:
+    """Verify the selected leaf modules still match the Tools baseline."""
+    path = REPO_ROOT / relative_path
+    if not path.exists():
+        pytest.fail(f"Missing file: {relative_path}")
+    actual_sha256 = hashlib.sha256(
+        _runtime_equivalent_source(relative_path)
+    ).hexdigest()
+    assert actual_sha256 == expected_sha256, relative_path
