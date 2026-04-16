@@ -140,9 +140,7 @@ def _register_builtins() -> None:
         from .simulation_triple import (
             TripleSimulationResult,
         )
-        from .simulation_triple import (
-            run_simulation as run_triple,
-        )
+        from .simulation_triple import run_simulation as run_triple
 
         register_model(
             "triple",
@@ -164,9 +162,7 @@ def _register_builtins() -> None:
         from .simulation_golfer import (
             GolferSimulationResult,
         )
-        from .simulation_golfer import (
-            run_simulation as run_golfer,
-        )
+        from .simulation_golfer import run_simulation as run_golfer
 
         register_model(
             "golfer",

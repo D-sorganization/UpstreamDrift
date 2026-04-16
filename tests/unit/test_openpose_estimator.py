@@ -16,8 +16,8 @@ mock_op = MagicMock()
 
 with patch.dict(sys.modules, {"pyopenpose": mock_op}):
     # Now import with pyopenpose mocked
-    from src.shared.python.pose_estimation import (
-        openpose_estimator as op_module,  # noqa: E402
+    from src.shared.python.pose_estimation import (  # noqa: E402
+        openpose_estimator as op_module,
     )
     from src.shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
         OpenPoseEstimator,

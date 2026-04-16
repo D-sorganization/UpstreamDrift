@@ -115,8 +115,8 @@ class TestPendulumSimulatorGui:
     def test_pendulum_gui_importable(self, qt_app) -> None:  # noqa: ARG002
         """pendulum_simulator GUI module is importable."""
         try:
-            from src.shared.python.pendulum_simulator.gui import (
-                main_window,  # noqa: F401
+            from src.shared.python.pendulum_simulator.gui import (  # noqa: F401
+                main_window,
             )
         except ImportError as exc:
             pytest.skip(f"pendulum_simulator GUI not importable: {exc}")

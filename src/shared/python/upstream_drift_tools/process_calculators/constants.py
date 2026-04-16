@@ -45,12 +45,8 @@ from upstream_drift_tools.utils.unit_constants import (
 from upstream_drift_tools.utils.unit_constants import (
     DENSITY_WATER_STD as _DENSITY_WATER_STD,
 )
-from upstream_drift_tools.utils.unit_constants import (
-    HOURS_PER_DAY as _HOURS_PER_DAY,
-)
-from upstream_drift_tools.utils.unit_constants import (
-    KG_TO_LB as _KG_TO_LB,
-)
+from upstream_drift_tools.utils.unit_constants import HOURS_PER_DAY as _HOURS_PER_DAY
+from upstream_drift_tools.utils.unit_constants import KG_TO_LB as _KG_TO_LB
 from upstream_drift_tools.utils.unit_constants import (
     R_UNIVERSAL_KMOL as _R_UNIVERSAL_KMOL,
 )

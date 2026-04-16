@@ -9,8 +9,8 @@ from src.launchers.docker_manager import (  # noqa: E402
     DockerCheckThread,
     DockerLauncher,
 )
-from src.shared.python.security.secure_subprocess import (
-    SecureSubprocessError,  # noqa: E402
+from src.shared.python.security.secure_subprocess import (  # noqa: E402
+    SecureSubprocessError,
 )
 
 

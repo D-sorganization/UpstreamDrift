@@ -86,15 +86,9 @@ try:
         _shared_root = _src_root / "shared" / "python"
         if str(_shared_root) not in sys.path:
             sys.path.insert(0, str(_shared_root))
-        from theme import (
-            ThemeManager as _ThemeManager,
-        )
-        from theme import (
-            ThemeManagerDialog as _ThemeManagerDialog,
-        )
-        from theme import (
-            create_theme_menu as _create_theme_menu,
-        )
+        from theme import ThemeManager as _ThemeManager
+        from theme import ThemeManagerDialog as _ThemeManagerDialog
+        from theme import create_theme_menu as _create_theme_menu
 
         ThemeManager = _ThemeManager
         ThemeManagerDialog = _ThemeManagerDialog

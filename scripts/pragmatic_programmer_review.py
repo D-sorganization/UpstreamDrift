@@ -25,9 +25,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-from scripts.script_utils import (
-    find_python_files as _find_python_files,
-)
+from scripts.script_utils import find_python_files as _find_python_files
 from scripts.script_utils import (
     setup_script_logging,
 )

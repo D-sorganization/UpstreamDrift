@@ -28,8 +28,8 @@ from src.shared.python.core.contracts import (  # noqa: E402
     postcondition,
     precondition,
 )
-from src.shared.python.engine_core.engine_availability import (
-    MYOSUITE_AVAILABLE,  # noqa: E402
+from src.shared.python.engine_core.engine_availability import (  # noqa: E402
+    MYOSUITE_AVAILABLE,
 )
 from src.shared.python.engine_core.interfaces import PhysicsEngine  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402

@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 from src.launchers.motion_capture_launcher import MoCapLauncher  # noqa: E402
 from src.launchers.motion_capture_launcher import main as mocap_main  # noqa: E402
 from src.launchers.mujoco_unified_launcher import MujocoUnifiedLauncher  # noqa: E402
-from src.launchers.mujoco_unified_launcher import (
-    main as mujoco_unified_main,  # noqa: E402
+from src.launchers.mujoco_unified_launcher import (  # noqa: E402
+    main as mujoco_unified_main,
 )
 
 

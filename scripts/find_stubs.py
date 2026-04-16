@@ -55,8 +55,37 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
         logger.warning("Error parsing %s: %s", filepath, e)
         return
 
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+    class Visitor(ast.NodeVisitor):
+        def __init__(self) -> None:
+            self.in_protocol = False
+
+        def visit_ClassDef(self, node: ast.ClassDef) -> None:
+            # Check docs
+            if (
+                not ast.get_docstring(node)
+                and not node.name.startswith("_")
+                and "tests" not in filepath
+                and "test_" not in filepath
+            ):
+                docs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
+
+            old_in_protocol = self.in_protocol
+            if any(
+                isinstance(base, ast.Name) and base.id == "Protocol"
+                for base in node.bases
+            ):
+                self.in_protocol = True
+
+            self.generic_visit(node)
+            self.in_protocol = old_in_protocol
+
+        def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+            self._visit_func(node)
+
+        def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
+            self._visit_func(node)
+
+        def _visit_func(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
             # Check docs
             if (
                 not ast.get_docstring(node)
@@ -67,10 +96,18 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
                 docs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
             # Check stubs (functions only)
-            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef) and is_stub(
-                node
-            ):
+            is_valid_stub = is_stub(node)
+            if is_valid_stub:
+                docstring = ast.get_docstring(node)
+                if docstring and "override in subclass if needed" in docstring.lower():
+                    is_valid_stub = False
+
+            if not self.in_protocol and is_valid_stub:
                 stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
+
+            self.generic_visit(node)
+
+    Visitor().visit(tree)
 
 
 def main() -> None:

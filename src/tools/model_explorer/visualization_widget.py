@@ -12,8 +12,8 @@ from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-from src.shared.python.engine_core.engine_availability import (
-    MUJOCO_AVAILABLE,  # noqa: E402
+from src.shared.python.engine_core.engine_availability import (  # noqa: E402
+    MUJOCO_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 

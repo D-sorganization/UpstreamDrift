@@ -16,9 +16,7 @@ from enum import Enum
 
 import numpy as np
 from scipy import signal as scipy_signal
-from scipy.signal import (
-    bessel as _scipy_bessel,
-)
+from scipy.signal import bessel as _scipy_bessel
 from scipy.signal import (
     butter,
     cheby1,

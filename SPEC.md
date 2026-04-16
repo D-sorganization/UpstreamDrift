@@ -29,8 +29,8 @@ Last-Updated: 2026-04-15T00:00:00Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.124                                            |
-| **Last Spec Update**    | 2026-04-15                                         |
+| **Spec Version**        | 1.0.125                                            |
+| **Last Spec Update**    | 2026-04-16                                         |
 
 ## 2. Purpose & Mission
 
@@ -648,3 +648,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 | 2026-04-14 | 1.0.112 | fix: prevent test_paths_utils false failure from /tmp/pyproject.toml — test now uses a clean isolated tmp directory instead of relying on /tmp state. |
 | 2026-04-15 | 1.0.113 | Bolt: Optimized `np.sum(np.square(...))` and explicit sum of squares to `np.einsum` in `analysis_tab.py`, `marker_plot_tab.py`, and `motion_capture.py` to improve performance. |
 | 1.0.124 | 2026-04-16 | Replaced np.sum axis reductions with np.einsum for performance optimization |
+
+
+## Changelog
+- 2026-04-16: Fixed import sorting in analyzer.py, advanced_export.py, and related files; restored completist audit documentation.

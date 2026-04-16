@@ -1,13 +1,14 @@
 ./src/deployment/teleoperation/devices.py:111:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:223:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:230:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:234:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:256:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:273:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:284:    @abstractmethod
-./src/unreal_integration/viewer_backends.py:288:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:54:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:61:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:65:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:87:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:104:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:115:    @abstractmethod
+./src/unreal_integration/viewer_backends/base.py:119:    @abstractmethod
 ./src/launchers/base.py:317:    @abstractmethod
 ./src/launchers/base.py:326:            The @abstractmethod decorator serves as documentation; enforcement
+./src/shared/python/physics/impact_model/models.py:19:    @abstractmethod
 ./src/shared/python/physics/flexible_shaft.py:324:    @abstractmethod
 ./src/shared/python/physics/flexible_shaft.py:328:    @abstractmethod
 ./src/shared/python/physics/flexible_shaft.py:332:    @abstractmethod
@@ -16,7 +17,6 @@
 ./src/shared/python/physics/flight_models.py:167:    @abstractmethod
 ./src/shared/python/physics/flight_models.py:173:    @abstractmethod
 ./src/shared/python/physics/flight_models.py:178:    @abstractmethod
-./src/shared/python/physics/impact_model.py:138:    @abstractmethod
 ./src/shared/python/pendulum_simulator/gui/matrix_widget_base.py:147:    @abstractmethod
 ./src/shared/python/pendulum_simulator/gui/matrix_widget_base.py:157:    @abstractmethod
 ./src/shared/python/pendulum_simulator/gui/matrix_widget_base.py:172:    @abstractmethod
@@ -35,10 +35,10 @@
 ./src/shared/python/model_generation/library/repository.py:59:    @abstractmethod
 ./src/shared/python/model_generation/builders/base_builder.py:190:    @abstractmethod
 ./src/shared/python/model_generation/builders/base_builder.py:200:    @abstractmethod
-./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:92:    @abstractmethod
-./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
-./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:103:    @abstractmethod
-./src/shared/python/humanoid_character_builder/generators/mesh_generator.py:123:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator_models.py:58:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator_models.py:64:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator_models.py:69:    @abstractmethod
+./src/shared/python/humanoid_character_builder/generators/mesh_generator_models.py:89:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:23:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:31:    @abstractmethod
 ./src/shared/python/pose_estimation/interface.py:42:    @abstractmethod
@@ -145,13 +145,28 @@
 ./src/engines/common/export.py:110:    @abstractmethod
 ./src/robotics/sensing/noise_models.py:27:    @abstractmethod
 ./src/robotics/sensing/noise_models.py:39:    @abstractmethod
-./src/robotics/planning/collision/geometric_primitives.py:42:    @abstractmethod
-./src/robotics/planning/collision/geometric_primitives.py:51:    @abstractmethod
-./src/robotics/planning/collision/geometric_primitives.py:63:    @abstractmethod
+./src/robotics/planning/collision/geometric_primitives.py:48:    @abstractmethod
+./src/robotics/planning/collision/geometric_primitives.py:57:    @abstractmethod
+./src/robotics/planning/collision/geometric_primitives.py:69:    @abstractmethod
 ./src/robotics/planning/motion/planner_base.py:203:    @abstractmethod
 ./src/robotics/control/whole_body/qp_solver.py:129:    @abstractmethod
 ./src/robotics/control/whole_body/qp_solver.py:141:    @abstractmethod
 ./scripts/refresh_completist_data.py:69:    run_grep("@abstractmethod", join(DATA_DIR, "abstract_methods.txt"))
 ./scripts/analyze_completist_data.py:204:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
-./.github/workflows/Jules-Completist.yml:86:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
-./.github/workflows/Jules-Comprehensive-Assessment.yml:107:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
+./.github/workflows/Jules-Completist.yml:85:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
+./.github/workflows/Jules-Comprehensive-Assessment.yml:106:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
+./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:20:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:26:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py:31:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:39:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:45:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:50:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/library/repository.py:55:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py:182:    @abstractmethod
+./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py:192:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:67:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:73:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:78:    @abstractmethod
+./vendor/ud-tools/src/shared/python/humanoid_character_builder/generators/mesh_generator.py:98:    @abstractmethod
+./vendor/ud-tools/scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
+./vendor/ud-tools/.github/workflows/Jules-Comprehensive-Assessment.yml:84:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \

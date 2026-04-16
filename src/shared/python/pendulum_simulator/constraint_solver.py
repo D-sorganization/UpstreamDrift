@@ -28,22 +28,14 @@ import logging
 import numpy as np
 
 from . import native_backend as _native_backend
-from .golfer_constraints import (
-    analytical_constraint_jacobian as constraint_jacobian,
-)
+from .golfer_constraints import analytical_constraint_jacobian as constraint_jacobian
 from .golfer_constraints import (
     constraint_vector,
     friction_torque_vector,
 )
-from .golfer_dynamics import (
-    analytical_coriolis as coriolis_matrix,
-)
-from .golfer_dynamics import (
-    analytical_gravity_vector as gravity_vector,
-)
-from .golfer_dynamics import (
-    analytical_mass_matrix as mass_matrix,
-)
+from .golfer_dynamics import analytical_coriolis as coriolis_matrix
+from .golfer_dynamics import analytical_gravity_vector as gravity_vector
+from .golfer_dynamics import analytical_mass_matrix as mass_matrix
 from .physics_golfer import (
     N_CONSTRAINTS,
     N_DOF,

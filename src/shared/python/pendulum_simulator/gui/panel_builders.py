@@ -38,13 +38,9 @@ from ..physics import (
 from ..physics_golfer import GolferParams
 from ..physics_triple import TriplePendulumParams
 from ..simulation import make_polynomial_torque, run_simulation
-from ..simulation_golfer import (
-    make_polynomial_torque as make_polynomial_torque_golfer,
-)
+from ..simulation_golfer import make_polynomial_torque as make_polynomial_torque_golfer
 from ..simulation_golfer import run_simulation as run_simulation_golfer
-from ..simulation_triple import (
-    make_polynomial_torque as make_polynomial_torque_triple,
-)
+from ..simulation_triple import make_polynomial_torque as make_polynomial_torque_triple
 from ..simulation_triple import run_simulation as run_simulation_triple
 from .controls_widget import ControlsWidget
 from .controls_widget_golfer import ControlsWidgetGolfer

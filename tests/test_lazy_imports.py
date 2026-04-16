@@ -1,8 +1,8 @@
 # ruff: noqa: I001
 
-from pathlib import Path
 import sys
 import tempfile
+from pathlib import Path
 
 
 def test_lazy_imports_engine_manager():

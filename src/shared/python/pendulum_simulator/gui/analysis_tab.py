@@ -500,15 +500,9 @@ class AnalysisTab:
         from ..physics_triple import (
             TriplePendulumParams,
         )
-        from ..physics_triple import (
-            forward_kinematics as triple_fk,
-        )
-        from ..physics_triple import (
-            mass_matrix as triple_mm,
-        )
-        from ..physics_triple import (
-            potential_energy as triple_pe,
-        )
+        from ..physics_triple import forward_kinematics as triple_fk
+        from ..physics_triple import mass_matrix as triple_mm
+        from ..physics_triple import potential_energy as triple_pe
 
         params = self._get_params_or_default(
             lambda: TriplePendulumParams(

@@ -19,9 +19,9 @@ pytest.importorskip(
     reason="rotation_converter package not installed",
 )
 
-from src.shared.python.calc_backend.routers.rotation_converter import (
+from src.shared.python.calc_backend.routers.rotation_converter import (  # noqa: E402,I001
     router,
-)  # noqa: E402,I001
+)
 
 _app = FastAPI()
 _app.include_router(router)

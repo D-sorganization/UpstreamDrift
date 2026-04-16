@@ -24,9 +24,7 @@ from PyQt6.QtWidgets import (
 from src.launchers.docker_manager import DockerBuildThread
 from src.launchers.docker_manager import DockerCheckThread as SharedDockerCheckThread
 from src.launchers.launcher_constants import DOCKER_STAGES
-from src.shared.python.docker_config import (
-    DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME,
-)
+from src.shared.python.docker_config import DOCKER_IMAGE_ENGINE as DOCKER_IMAGE_NAME
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 from .startup import REPOS_ROOT

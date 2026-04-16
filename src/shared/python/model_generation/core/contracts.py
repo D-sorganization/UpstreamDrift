@@ -14,7 +14,7 @@ and condition predicates are defined in the single source of truth.
 
 from __future__ import annotations
 
-from src.shared.python.contracts import (  # noqa: F401
+from src.shared.python.contracts import (  # noqa: F401  # noqa: F401  # noqa: F401  # noqa: F401
     CONTRACTS_ENABLED,
     ContractViolationError,
     InvariantError,
@@ -33,9 +33,7 @@ from src.shared.python.contracts import (  # noqa: F401
     require_unit_vector,
     set_contracts_enabled,
 )
-from src.shared.python.contracts import (
-    class_invariant as invariant,
-)
+from src.shared.python.contracts import class_invariant as invariant
 
 # Backward-compatible alias: the old module exposed ``ContractViolation``
 # as its base exception name.
