@@ -84,11 +84,15 @@ def test_mujoco_ballistic_energy_conservation():
 
 
 def test_pinocchio_energy_check():
-    """Verify energy conservation with Pinocchio using explicit integration."""
+    """Verify long-run Pinocchio free-fall energy with the engine RK4 integrator."""
     if not is_engine_available(EngineType.PINOCCHIO):
         pytest.skip("Pinocchio not installed")
 
     import pinocchio
+
+    from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        PinocchioPhysicsEngine,
+    )
 
     if isinstance(pinocchio, MagicMock):
         pytest.skip("pinocchio is mocked")
@@ -133,50 +137,46 @@ def test_pinocchio_energy_check():
     # 2. Initial Conditions
     # q = [x, y, z, qx, qy, qz, qw] (7D for SE3)
     # v = [vx, vy, vz, wx, wy, wz] (6D se3)
-    q = pinocchio.neutral(model)
-    q[2] = 10.0  # z = 10m
+    engine = PinocchioPhysicsEngine()
+    engine.model = model
+    engine.data = data
+    engine.q = pinocchio.neutral(model)
+    engine.q[2] = 10.0  # z = 10m
+    engine.v = np.zeros(model.nv)
+    engine.a = np.zeros(model.nv)
+    engine.tau = np.zeros(model.nv)
 
-    v = np.zeros(model.nv)
-
-    # 3. Simulation Loop (Symplectic Euler / Semi-implicit)
+    # 3. Simulation Loop (RK4)
     dt = 0.001
-    steps = 1000
+    steps = 10_000
 
     # Pinocchio calculates potential energy automatically if gravity is set?
     # No, model.gravity needs to be set.
     model.gravity = pinocchio.Motion(np.array([0, 0, -GRAVITY_M_S2, 0, 0, 0]))
 
     # Pre-compute initial energy
-    pinocchio.computeKineticEnergy(model, data, q, v)
-    pinocchio.computePotentialEnergy(model, data, q)
+    pinocchio.computeKineticEnergy(model, data, engine.q, engine.v)
+    pinocchio.computePotentialEnergy(model, data, engine.q)
     initial_energy = data.kinetic_energy + data.potential_energy
 
     errors = []
 
     for _ in range(steps):
-        # Forward Dynamics (ABA) -> returns acceleration
-        a = pinocchio.aba(model, data, q, v, np.zeros(model.nv))
-
-        # Semi-implicit Euler
-        v_next = v + a * dt
-        q_next = pinocchio.integrate(model, q, v_next * dt)
-
-        q = q_next
-        v = v_next
+        engine.step(dt)
 
         # Check Energy
-        # Note: Symplectic Euler is stable but not perfectly energy conserving
-        # It oscillates around the true energy.
-        pinocchio.computeMechanicalEnergy(model, data, q, v)
+        pinocchio.computeMechanicalEnergy(model, data, engine.q, engine.v)
         current_energy = data.mechanical_energy
 
         errors.append(abs(current_energy - initial_energy))
 
     max_error = np.max(errors)
-    logger.info(f"Max Energy Error (Pinocchio): {max_error:.6f} J")
+    relative_error = max_error / abs(initial_energy)
+    logger.info(f"Max Energy Error (Pinocchio RK4): {relative_error:.6%}")
 
-    # Allow slightly higher error due to simple integrator
-    assert max_error < 0.05, f"Pinocchio energy check failed. Error: {max_error}"
+    assert relative_error < 1e-3, (
+        f"Pinocchio energy check failed. Relative error: {relative_error:.6%}"
+    )
 
 
 def test_drake_energy_conservation():

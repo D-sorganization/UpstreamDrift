@@ -9,7 +9,7 @@ initialization patterns.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import numpy as np
 
@@ -40,6 +40,7 @@ from src.shared.python.core import constants
 logger = get_logger(__name__)
 
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
+PinocchioIntegrator = Literal["semi_implicit", "rk4"]
 
 
 @invariant(
@@ -72,6 +73,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.a: np.ndarray = np.array([])
         self.tau: np.ndarray = np.array([])
         self.time: float = 0.0
+        self.integrator: PinocchioIntegrator = "rk4"
 
     @property
     def is_initialized(self) -> bool:
@@ -159,24 +161,75 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             self.forward()
 
     @precondition(
-        lambda self, dt=None: self.is_initialized,
+        lambda self, dt=None, **kwargs: self.is_initialized,
         "Engine must be initialized",
     )
-    def step(self, dt: float | None = None) -> None:
+    def step(
+        self,
+        dt: float | None = None,
+        *,
+        integrator: PinocchioIntegrator | None = None,
+    ) -> None:
         """Advance the simulation by one time step."""
         if self.model is None or self.data is None:
             return
 
         time_step = dt if dt is not None else DEFAULT_TIME_STEP
+        if time_step <= 0.0:
+            raise ValueError("dt must be positive")
 
-        # Explicit Forward Dynamics: a = ABA(q, v, tau)
-        self.a = pin.aba(self.model, self.data, self.q, self.v, self.tau)
-
-        # Semi-implicit Euler integration
-        self.v += self.a * time_step
-        self.q = pin.integrate(self.model, self.q, self.v * time_step)
+        method = integrator or self.integrator
+        if method == "rk4":
+            self._step_rk4(time_step)
+        elif method == "semi_implicit":
+            self._step_semi_implicit(time_step)
+        else:
+            raise ValueError(f"Unsupported Pinocchio integrator: {method!r}")
 
         self.time += time_step
+        self.forward()
+
+    def _step_semi_implicit(self, dt: float) -> None:
+        """Advance with velocity-first symplectic Euler integration."""
+        if self.model is None or self.data is None:
+            return
+
+        self.a = pin.aba(self.model, self.data, self.q, self.v, self.tau)
+        self.v = self.v + self.a * dt
+        self.q = pin.integrate(self.model, self.q, self.v * dt)
+
+    def _step_rk4(self, dt: float) -> None:
+        """Advance with fourth-order Runge-Kutta on Pinocchio tangent state."""
+        if self.model is None or self.data is None:
+            return
+
+        q0 = self.q.copy()
+        v0 = self.v.copy()
+        tau = self.tau.copy()
+
+        def acceleration(q: np.ndarray, v: np.ndarray) -> np.ndarray:
+            return cast(np.ndarray, pin.aba(self.model, self.data, q, v, tau))
+
+        a1 = acceleration(q0, v0)
+        v2 = v0 + 0.5 * dt * a1
+        q2 = pin.integrate(self.model, q0, 0.5 * dt * v0)
+
+        a2 = acceleration(q2, v2)
+        v3 = v0 + 0.5 * dt * a2
+        q3 = pin.integrate(self.model, q0, 0.5 * dt * v2)
+
+        a3 = acceleration(q3, v3)
+        v4 = v0 + dt * a3
+        q4 = pin.integrate(self.model, q0, dt * v3)
+
+        a4 = acceleration(q4, v4)
+
+        weighted_velocity = (v0 + 2.0 * v2 + 2.0 * v3 + v4) / 6.0
+        weighted_acceleration = (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0
+
+        self.q = pin.integrate(self.model, q0, dt * weighted_velocity)
+        self.v = v0 + dt * weighted_acceleration
+        self.a = a4.copy()
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:

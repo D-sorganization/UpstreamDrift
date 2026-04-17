@@ -40,6 +40,7 @@ Integration Pattern (how shared tools are incorporated)
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -149,6 +150,9 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         self._state: np.ndarray = np.zeros(4)  # [theta1, phi, dtheta1, dphi]
         self.time: float = 0.0
         self._tau: np.ndarray = np.zeros(2)  # [tau_shoulder, tau_wrist]
+        self._torque_profile: Callable[[float], Sequence[float] | np.ndarray] | None = (
+            None
+        )
 
         # Lazy initialisation — avoid PyQt6 import at load time
         self._dynamics: Any = None
@@ -231,7 +235,12 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
         from double_pendulum_golf.physics import equations_of_motion  # noqa: PLC0415
 
-        def torque_func(t: float) -> tuple[float, float]:  # noqa: ARG001
+        def torque_func(t: float) -> tuple[float, float]:
+            if self._torque_profile is not None:
+                tau = self._torque_profile(t)
+                if len(tau) < 2:
+                    raise ValueError("torque profile must return at least two values")
+                return float(tau[0]), float(tau[1])
             return float(self._tau[0]), float(self._tau[1])
 
         deriv = equations_of_motion(
@@ -282,6 +291,14 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         """Set applied torques [tau_shoulder, tau_wrist] (N·m)."""
         if len(u) >= 2:
             self._tau = np.array([float(u[0]), float(u[1])])
+            self._torque_profile = None
+
+    def set_control_profile(
+        self,
+        torque_profile: Callable[[float], Sequence[float] | np.ndarray] | None,
+    ) -> None:
+        """Set a time-varying torque profile sampled by RK4 stage time."""
+        self._torque_profile = torque_profile
 
     def get_time(self) -> float:
         """Return current simulation time (s)."""

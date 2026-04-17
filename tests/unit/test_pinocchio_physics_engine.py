@@ -134,10 +134,10 @@ def test_step(engine: Any) -> None:
         mock_pin.aba.return_value = np.array([1.0])  # acceleration
         mock_pin.integrate.return_value = np.array([0.1])
 
-        engine.step(0.1)
+        engine.step(0.1, integrator="semi_implicit")
 
         mock_pin.aba.assert_called_once()
-        mock_pin.integrate.assert_called_once()
+        assert mock_pin.integrate.call_count == 1
         np.testing.assert_array_equal(engine.a, np.array([1.0]))
         # v = v + a*dt = 0 + 1.0*0.1 = 0.1
         np.testing.assert_array_equal(engine.v, np.array([0.1]))
