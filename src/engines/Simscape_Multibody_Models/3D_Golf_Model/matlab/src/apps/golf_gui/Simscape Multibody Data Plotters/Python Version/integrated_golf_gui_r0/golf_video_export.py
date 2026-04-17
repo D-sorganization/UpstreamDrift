@@ -112,7 +112,7 @@ class VideoExporter(QObject):
                 )  # noqa: E501
 
                 # Write to ffmpeg
-                ffmpeg_process.stdin.write(frame_buffer.tobytes())
+                ffmpeg_process.stdin.write(frame_buffer.tobytes())  # type: ignore[union-attr]
 
                 # Update progress
                 self.progress.emit(i + 1, len(frames_to_export))
@@ -123,7 +123,7 @@ class VideoExporter(QObject):
                     )  # noqa: E501
 
             # Finalize video
-            ffmpeg_process.stdin.close()
+            ffmpeg_process.stdin.close()  # type: ignore[union-attr]
             ffmpeg_process.wait()
 
             if ffmpeg_process.returncode == 0:
@@ -402,7 +402,7 @@ class VideoExportDialog(QDialog):
         super().__init__(parent)
         self.renderer = renderer
         self.frame_processor = frame_processor
-        self.export_thread = None
+        self.export_thread: VideoExportThread | None = None
 
         self.setWindowTitle("Export Golf Swing Video")
         self.setMinimumWidth(500)
@@ -530,10 +530,14 @@ class VideoExportDialog(QDialog):
 
         # Show progress dialog
         progress_dialog = QProgressDialog(
-            "Exporting video...", "Cancel", 0, 100, self.parent()
+            "Exporting video...",
+            "Cancel",
+            0,
+            100,
+            self.parent(),  # type: ignore[arg-type]
         )  # noqa: E501
         progress_dialog.setWindowTitle("Video Export")
-        progress_dialog.setWindowModality(2)  # Application modal
+        progress_dialog.setWindowModality(2)  # type: ignore[arg-type]  # Application modal
         progress_dialog.setMinimumDuration(0)  # Show immediately
 
         # Start export thread
@@ -568,7 +572,7 @@ class VideoExportDialog(QDialog):
         progress_dialog.close()
 
         QMessageBox.information(
-            self.parent(),
+            self.parent(),  # type: ignore[arg-type]
             "Export Complete",
             f"Video exported successfully!\n\n{output_path}\n\n"
             f"You can now play the video in any media player.",
@@ -581,7 +585,7 @@ class VideoExportDialog(QDialog):
         progress_dialog.close()
 
         QMessageBox.critical(
-            self.parent(),
+            self.parent(),  # type: ignore[arg-type]
             "Export Failed",
             f"Video export failed:\n\n{error_msg}\n\n"
             f"Make sure ffmpeg is installed:\nsudo apt install ffmpeg",

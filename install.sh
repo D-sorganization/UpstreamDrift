@@ -1,6 +1,24 @@
 #!/bin/bash
 # Golf Modeling Suite - Quick Install Script
 # Usage: curl -fsSL https://golf-suite.io/install.sh | bash
+#
+# Security / threat model
+# -----------------------
+# This script installs the package with `pipx install .` (preferred) or
+# `pip3 install .`.  Neither step verifies package hashes by default.
+# Trust model: you are running a script fetched directly from the project's
+# official URL over HTTPS; the integrity of that download depends on TLS and
+# the hosting provider.
+#
+# For a higher-assurance install (e.g. in a regulated environment):
+#   1. Download the wheel from the GitHub release and verify its SHA-256
+#      against the value published in the release notes.
+#   2. Install with:  pip3 install --require-hashes upstream_drift-*.whl
+#
+# Dependency hygiene: transitive pip dependencies are resolved at install time
+# and are NOT hash-pinned by this script.  If reproducible installs are
+# required, generate a requirements file with `pip-compile --generate-hashes`
+# and install from that instead.
 
 set -e
 
