@@ -47,7 +47,7 @@ class UIBuildHook(BuildHookInterface):
         return bool(self.config.get("force_ui_build"))
 
     @staticmethod
-    def _npm_error_message(e: subprocess.CalledProcessError) -> str:
+    def _subprocess_error_message(e: subprocess.CalledProcessError) -> str:
         """Extract the most informative message from a CalledProcessError."""
         return e.stderr or e.stdout or str(e)
 
@@ -97,6 +97,6 @@ class UIBuildHook(BuildHookInterface):
             logger.error("Error: %s", msg)
             raise RuntimeError(msg) from None
         except subprocess.CalledProcessError as e:
-            msg = f"UI build failed: {self._npm_error_message(e)}"
+            msg = f"UI build failed: {self._subprocess_error_message(e)}"
             logger.error("Error: %s", msg)
             raise RuntimeError(msg) from e
