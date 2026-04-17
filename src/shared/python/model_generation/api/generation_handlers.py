@@ -19,7 +19,7 @@ class GenerationHandlersMixin:
         """Generate humanoid URDF."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.builders.parametric_builder import ParametricBuilder
 
@@ -57,7 +57,7 @@ class GenerationHandlersMixin:
         """Generate URDF from detailed parameters."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.builders.manual_builder import ManualBuilder
         from model_generation.core.types import (
@@ -104,7 +104,7 @@ class GenerationHandlersMixin:
         """Convert SimScape MDL/SLX to URDF."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.converters.simscape import (
             ConversionConfig,
@@ -159,7 +159,7 @@ class GenerationHandlersMixin:
         """Convert MJCF to URDF."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.converters.mjcf_converter import MJCFConverter
 
@@ -190,7 +190,7 @@ class GenerationHandlersMixin:
         """Convert URDF to MJCF."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.converters.mjcf_converter import MJCFConverter
 

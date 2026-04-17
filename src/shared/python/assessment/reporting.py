@@ -13,7 +13,7 @@ def generate_markdown_report(
     output_dir: Path,
 ) -> Path:
     """Generate a standardized Markdown report for a category."""
-    if not (category_id is not None):
+    if category_id is None:
         raise ValueError("category_id must be provided")
     filename = f"Assessment_{category_id}_{category_name.replace(' ', '_')}.md"
     filepath = output_dir / filename
@@ -44,7 +44,7 @@ def generate_issue_document(
     output_dir: Path,
 ) -> Path:
     """Generate a GitHub issue document for a low-scoring category."""
-    if not (category_id is not None):
+    if category_id is None:
         raise ValueError("category_id must be provided")
     filename = f"ISSUE_Assessment_{category_id}_{category_name.replace(' ', '_')}.md"
     filepath = output_dir / filename

@@ -93,7 +93,7 @@ async def handle_rpc(
         JSON-RPC response(s).
     """
     # Parse request body
-    if not (request is not None):
+    if request is None:
         raise ValueError("request must be provided")
     try:
         body = await request.json()

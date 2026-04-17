@@ -63,7 +63,7 @@ class CentroidalMPC(ModelPredictiveController):
             dt: Timestep.
             n_contacts: Number of contact points (feet).
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         super().__init__(model, horizon, dt)
 
@@ -148,7 +148,7 @@ class CentroidalMPC(ModelPredictiveController):
         Returns:
             Next state.
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         com = x[:3]
         com_vel = x[3:6]
@@ -235,7 +235,7 @@ class CentroidalMPC(ModelPredictiveController):
             x_ref[k, 3:6] = vel
             x_ref[k, 6:9] = 0  # Zero angular momentum
 
-        if not (self._cost is not None):
+        if self._cost is None:
             raise ValueError("Cost function not initialized")
         self._cost.x_ref = x_ref
 
@@ -260,7 +260,7 @@ class WholeBodyMPC(ModelPredictiveController):
             horizon: Prediction horizon.
             dt: Timestep.
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         super().__init__(model, horizon, dt)
 
@@ -320,7 +320,7 @@ class WholeBodyMPC(ModelPredictiveController):
             target_velocities = np.zeros(n_q)
 
         x_ref = np.concatenate([target_positions, target_velocities])
-        if not (self._cost is not None):
+        if self._cost is None:
             raise ValueError("Cost function not initialized")
         self._cost.x_ref = x_ref
 
@@ -335,7 +335,7 @@ class WholeBodyMPC(ModelPredictiveController):
             lower_limits: Lower joint limits.
             upper_limits: Upper joint limits.
         """
-        if not (lower_limits is not None):
+        if lower_limits is None:
             raise ValueError("lower_limits must be provided")
         from src.research.mpc.controller import Constraint
 
@@ -362,7 +362,7 @@ class WholeBodyMPC(ModelPredictiveController):
         Args:
             torque_limits: Maximum torque magnitudes.
         """
-        if not (torque_limits is not None):
+        if torque_limits is None:
             raise ValueError("torque_limits must be provided")
         from src.research.mpc.controller import Constraint
 
@@ -389,7 +389,7 @@ class WholeBodyMPC(ModelPredictiveController):
             MPC solution result.
         """
         # Convert EE targets to joint targets via IK
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         if self._end_effector_targets and hasattr(self.model, "solve_ik"):
             # Use first EE target

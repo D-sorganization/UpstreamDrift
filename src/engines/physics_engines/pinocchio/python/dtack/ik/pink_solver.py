@@ -90,7 +90,7 @@ class PinkSolver:
         Returns:
             New joint configuration q_next
         """
-        if not (q_init is not None):
+        if q_init is None:
             raise ValueError("q_init must be provided")
         if settings is None:
             settings = SolverSettings()

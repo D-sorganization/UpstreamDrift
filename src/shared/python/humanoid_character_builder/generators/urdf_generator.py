@@ -109,7 +109,7 @@ class HumanoidURDFGenerator:
         self, params: BodyParameters, mesh_dir: Path | str | None = None
     ) -> HumanoidModel:
         """Build HumanoidModel from body parameters."""
-        if not (params is not None):
+        if params is None:
             raise ValueError("params must be provided")
         errors = params.validate()
         if errors:
@@ -152,7 +152,7 @@ class HumanoidURDFGenerator:
         mesh_dir: Path | str | None = None,
     ) -> str:
         """Generate URDF from body parameters."""
-        if not (params is not None):
+        if params is None:
             raise ValueError("params must be provided")
         self.build_model(params, mesh_dir)
         urdf_xml = build_urdf_xml(
@@ -174,7 +174,7 @@ class HumanoidURDFGenerator:
         self, dimensions: dict[str, dict[str, float]], params: BodyParameters
     ) -> dict[str, dict[str, float]]:
         """Apply proportion factors to segment dimensions."""
-        if not (dimensions is not None):
+        if dimensions is None:
             raise ValueError("dimensions must be provided")
         scaled = {}
         for seg_name, dims in dimensions.items():
@@ -207,7 +207,7 @@ class HumanoidURDFGenerator:
 
     def _generate_materials(self, params: BodyParameters) -> None:
         """Generate material definitions."""
-        if not (params is not None):
+        if params is None:
             raise ValueError("params must be provided")
         skin = params.appearance.skin_tone
         self._materials["skin"] = skin.as_tuple()
@@ -224,7 +224,7 @@ class HumanoidURDFGenerator:
         mesh_dir: Path | str | None,
     ) -> None:
         """Generate a single URDF link."""
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         seg_params = params.get_segment_params(segment_name)
         final_mass = seg_params.mass_kg if seg_params.has_mass_override() else mass
@@ -266,7 +266,7 @@ class HumanoidURDFGenerator:
         mesh_dir: Path | str | None,
     ) -> InertiaResult:
         """Compute inertia for a segment."""
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         if seg_params.has_inertia_override():
             override = seg_params.inertia_override
@@ -389,7 +389,7 @@ def generate_humanoid_urdf(
     config: URDFGeneratorConfig | None = None,
 ) -> str:
     """Convenience function to generate humanoid URDF."""
-    if not (params is not None):
+    if params is None:
         raise ValueError("params must be provided")
     generator = HumanoidURDFGenerator(config)
     return cast(str, generator.generate(params, output_path))

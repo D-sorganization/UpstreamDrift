@@ -66,7 +66,7 @@ class MoCapLauncher(BaseLauncher):
         Args:
             relative_path: Path relative to REPO_ROOT
         """
-        if not (relative_path is not None):
+        if relative_path is None:
             raise ValueError("relative_path must be provided")
         script_path = REPO_ROOT / relative_path
         if not script_path.exists():

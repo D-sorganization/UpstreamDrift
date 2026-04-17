@@ -25,7 +25,7 @@ class IndexerWorker(QThread):
             root_path: Root directory to index.
             store: RAG store to populate.
         """
-        if not (root_path is not None):
+        if root_path is None:
             raise ValueError("root_path must be provided")
         super().__init__()
         self._root = root_path

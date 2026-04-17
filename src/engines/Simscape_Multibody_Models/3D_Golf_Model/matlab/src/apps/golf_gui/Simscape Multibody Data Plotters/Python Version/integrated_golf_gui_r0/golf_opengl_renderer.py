@@ -169,7 +169,7 @@ class GeometryManager:
     """Fixed geometry management"""
 
     def __init__(self, ctx: mgl.Context) -> None:
-        if not (ctx is not None):
+        if ctx is None:
             raise ValueError("ctx must be provided")
         self.ctx = ctx
         self.geometry_objects: dict[str, GeometryObject] = {}
@@ -332,7 +332,7 @@ class GeometryManager:
         scale: float | np.ndarray,
     ) -> None:
         """Update object transformation efficiently"""
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name not in self.geometry_objects:
             return
@@ -354,7 +354,7 @@ class GeometryManager:
     def get_model_matrix(self, obj: GeometryObject) -> np.ndarray:
         """Calculate model matrix for object"""
         # Translation matrix
-        if not (obj is not None):
+        if obj is None:
             raise ValueError("obj must be provided")
         T = np.eye(4, dtype=np.float32)
         if obj.position is not None:
@@ -413,7 +413,7 @@ class OpenGLRenderer:
 
     def initialize(self, ctx: mgl.Context) -> None:
         """Initialize OpenGL context and resources"""
-        if not (ctx is not None):
+        if ctx is None:
             raise ValueError("ctx must be provided")
         self.ctx = ctx
 
@@ -468,7 +468,7 @@ class OpenGLRenderer:
 
     def set_viewport(self, width: int, height: int) -> None:
         """Set viewport size"""
-        if not (width is not None):
+        if width is None:
             raise ValueError("width must be provided")
         self.viewport_size = (width, height)
         if self.ctx:
@@ -484,7 +484,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render complete frame with all elements"""
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         if not self.ctx or not self.geometry_manager:
             return
@@ -522,7 +522,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render ground plane at proper level with golf grid"""
-        if not (view_matrix is not None):
+        if view_matrix is None:
             raise ValueError("view_matrix must be provided")
         if not self.geometry_manager:
             return
@@ -664,7 +664,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render all body segments"""
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         if not self.geometry_manager:
             return
@@ -733,7 +733,7 @@ class OpenGLRenderer:
         program: mgl.Program,
     ) -> None:
         """Render cylinder between two 3D points"""
-        if not (obj_name is not None):
+        if obj_name is None:
             raise ValueError("obj_name must be provided")
         if not self.geometry_manager:
             return
@@ -803,7 +803,7 @@ class OpenGLRenderer:
         program: mgl.Program,
     ) -> None:
         """Render sphere at specific point"""
-        if not (obj_name is not None):
+        if obj_name is None:
             raise ValueError("obj_name must be provided")
         if not self.geometry_manager:
             return
@@ -857,7 +857,7 @@ class OpenGLRenderer:
 
     def _render_club_face_normal(self, frame_data, face_normal, program) -> None:
         """Render the club face normal vector arrow."""
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         normal_length = 0.1  # 10cm normal vector
         normal_end = frame_data.clubhead + face_normal * normal_length
@@ -880,7 +880,7 @@ class OpenGLRenderer:
 
     def _render_club_ball(self, frame_data, face_normal, program) -> None:
         """Render the golf ball positioned for center strike."""
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         ball_offset = face_normal * 0.05  # 5cm in front of face
         ball_position = frame_data.clubhead + ball_offset
@@ -900,7 +900,7 @@ class OpenGLRenderer:
         view_position: np.ndarray,
     ) -> None:
         """Render golf club with improved geometry and face normal"""
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         if not self.geometry_manager:
             return

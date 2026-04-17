@@ -74,7 +74,7 @@ class UnrealDataFrame:
         validate: bool = False,
     ) -> UnrealDataFrame:
         """Create new UnrealDataFrame with optional validation."""
-        if not (timestamp is not None):
+        if timestamp is None:
             raise ValueError("timestamp must be provided")
         instance = object.__new__(cls)
         return instance
@@ -106,7 +106,7 @@ class UnrealDataFrame:
             environment: Environmental conditions.
             validate: If True, validate inputs.
         """
-        if not (timestamp is not None):
+        if timestamp is None:
             raise ValueError("timestamp must be provided")
         if validate:
             if timestamp < 0:
@@ -178,7 +178,7 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         joints = {
             name: JointState.from_dict(js_dict)
@@ -225,7 +225,7 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        if not (json_str is not None):
+        if json_str is None:
             raise ValueError("json_str must be provided")
         d = json.loads(json_str)
         return cls.from_dict(d, validate=validate)
@@ -256,7 +256,7 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         joints: dict[str, JointState] = {}
 

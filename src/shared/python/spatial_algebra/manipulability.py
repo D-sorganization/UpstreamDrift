@@ -142,7 +142,7 @@ def get_jacobian_conditioning(
         >>> kappa = get_jacobian_conditioning(mujoco_engine, "clubhead")
         >>> print(f"Clubhead Jacobian condition: {kappa:.2e}")
     """
-    if not (engine is not None):
+    if engine is None:
         raise ValueError("engine must be provided")
     jac_dict = engine.compute_jacobian(body_name)
 

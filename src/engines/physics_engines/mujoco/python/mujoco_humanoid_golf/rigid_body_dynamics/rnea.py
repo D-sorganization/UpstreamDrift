@@ -96,7 +96,7 @@ def _rnea_forward_pass_body(
     dof_indices,
     buf: _RneaScratchBuffers,
 ):
-    if not (i is not None):
+    if i is None:
         raise ValueError("i must be provided")
     xj_transform, s_subspace, dof_idx = jcalc(mdl.jtype[i], q[i], out=buf.xj_buf)
     s_subspace_list[i] = s_subspace
@@ -220,7 +220,7 @@ def rnea(
         >>> qdd = np.array([0.5, -0.2])
         >>> tau = rnea(model, q, qd, qdd)
     """
-    if not (model is not None):
+    if model is None:
         raise ValueError("model must be provided")
     q, qd, qdd, nb = _rnea_validate_inputs(model, q, qd, qdd)
 

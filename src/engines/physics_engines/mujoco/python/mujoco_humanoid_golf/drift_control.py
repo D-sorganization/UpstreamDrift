@@ -82,7 +82,7 @@ class DriftControlDecomposer:
         Args:
             model: MuJoCo model
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
 
@@ -97,7 +97,7 @@ class DriftControlDecomposer:
         qvel: np.ndarray,
         ctrl: np.ndarray,
     ) -> np.ndarray:
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._data_full.qpos[:] = qpos
         self._data_full.qvel[:] = qvel
@@ -118,7 +118,7 @@ class DriftControlDecomposer:
     def _compute_drift_acceleration(
         self, qpos: np.ndarray, qvel: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._data_drift.qpos[:] = qpos
         self._data_drift.qvel[:] = qvel
@@ -146,7 +146,7 @@ class DriftControlDecomposer:
     def _validate_superposition(
         self, qacc_full: np.ndarray, qacc_drift: np.ndarray, qacc_control: np.ndarray
     ) -> float:
-        if not (qacc_full is not None):
+        if qacc_full is None:
             raise ValueError("qacc_full must be provided")
         qacc_reconstructed = qacc_drift + qacc_control
         residual = float(np.linalg.norm(qacc_full - qacc_reconstructed))
@@ -185,7 +185,7 @@ class DriftControlDecomposer:
         Raises:
             ValueError: If superposition fails (residual > 1e-5)
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         qacc_full = self._compute_full_acceleration(qpos, qvel, ctrl)
 
@@ -234,7 +234,7 @@ class DriftControlDecomposer:
         Returns:
             List of DriftControlResult for each timestep
         """
-        if not (qpos_traj is not None):
+        if qpos_traj is None:
             raise ValueError("qpos_traj must be provided")
         results = []
 
@@ -267,7 +267,7 @@ class DriftControlDecomposer:
             results: Decomposition results for trajectory
             joint_idx: Joint index to plot
         """
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         try:
             import matplotlib.pyplot as plt

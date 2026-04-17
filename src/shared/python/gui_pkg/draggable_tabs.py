@@ -82,7 +82,7 @@ class DraggableTabWidget(QTabWidget):
 
     def addTab(self, widget: QWidget, *args) -> int:  # type: ignore[override]
         """Override to apply UX enhancements on new tabs."""
-        if not (widget is not None):
+        if widget is None:
             raise ValueError("widget must be provided")
         index = super().addTab(widget, *args)
         self._update_tab_ux(index)
@@ -90,7 +90,7 @@ class DraggableTabWidget(QTabWidget):
 
     def insertTab(self, index: int, widget: QWidget, *args) -> int:  # type: ignore[override]
         """Override to apply UX enhancements on inserted tabs."""
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         ret_index = super().insertTab(index, widget, *args)
         self._update_tab_ux(ret_index)
@@ -98,7 +98,7 @@ class DraggableTabWidget(QTabWidget):
 
     def _update_tab_ux(self, index: int) -> None:
         """Hide close button for core tabs and add tooltip hints."""
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         tab_text = self.tabText(index)
 
@@ -119,7 +119,7 @@ class DraggableTabWidget(QTabWidget):
 
     def close_tab(self, index: int) -> None:
         """Close a non-core tab (with confirmation)."""
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         if index < 0 or index >= self.count():
             return
@@ -154,7 +154,7 @@ class DraggableTabWidget(QTabWidget):
 
     def reopen_closed_tab(self, tab_name: str) -> None:
         """Reopen a previously closed tab by name."""
-        if not (tab_name is not None):
+        if tab_name is None:
             raise ValueError("tab_name must be provided")
         if tab_name not in self.closed_tabs:
             return
@@ -207,7 +207,7 @@ class DraggableTabWidget(QTabWidget):
 
     def detach_tab(self, index: int, pos: QPoint) -> None:
         """Detach a tab into a separate window."""
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         if index < 0 or index >= self.count():
             return
@@ -232,7 +232,7 @@ class DraggableTabWidget(QTabWidget):
 
     def reattach_tab(self, detached_window: DetachedTabWindow) -> None:
         """Reattach a previously detached tab."""
-        if not (detached_window is not None):
+        if detached_window is None:
             raise ValueError("detached_window must be provided")
         if detached_window not in self.detached_tabs:
             return
@@ -257,7 +257,7 @@ class DraggableTabWidget(QTabWidget):
 
     def _show_tab_context_menu(self, position: QPoint) -> None:
         """Show right-click menu for a tab."""
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         bar = self.tabBar()
         if not bar:
@@ -322,7 +322,7 @@ class DetachedTabWindow(QMainWindow):
         icon: QIcon,
         parent_tab_widget: DraggableTabWidget,
     ) -> None:
-        if not (widget is not None):
+        if widget is None:
             raise ValueError("widget must be provided")
         super().__init__()
         self.parent_tab_widget = parent_tab_widget
@@ -385,7 +385,7 @@ class DetachedTabWindow(QMainWindow):
 
     def _show_context_menu(self, position: QPoint) -> None:
         """Right-click context menu for redocking."""
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         menu = QMenu(self)
 
@@ -431,7 +431,7 @@ class DetachedTabWindow(QMainWindow):
 
     def closeEvent(self, event) -> None:  # type: ignore[override]
         """On close: offer redock instead of losing the tab."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         if self.suppress_close_dialog:
             self._trigger_redock()

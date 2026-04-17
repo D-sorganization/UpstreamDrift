@@ -33,7 +33,7 @@ def create_geometry_dict(
     Returns:
         Dict describing the geometry (type + size parameters).
     """
-    if not (segment_def is not None):
+    if segment_def is None:
         raise ValueError("segment_def must be provided")
     geom_spec = (
         segment_def.get_collision_geometry()
@@ -90,7 +90,7 @@ def add_geometry_element(parent: ET.Element, geom: dict[str, Any]) -> None:
         parent: The parent XML element (e.g. <visual> or <collision>).
         geom: Geometry specification dict produced by :func:`create_geometry_dict`.
     """
-    if not (parent is not None):
+    if parent is None:
         raise ValueError("parent must be provided")
     geometry = ET.SubElement(parent, "geometry")
 

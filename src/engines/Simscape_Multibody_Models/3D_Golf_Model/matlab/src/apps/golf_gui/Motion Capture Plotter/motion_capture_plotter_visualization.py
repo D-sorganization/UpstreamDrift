@@ -112,7 +112,7 @@ class MotionCapturePlotterVisualizationMixin:
         Parameters:
             data: full DataFrame of all frames
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.trajectory_check.isChecked() and len(data) > 1:
             # Mid-hands path (blue dashed) - flip X for right-handed swing
@@ -162,7 +162,7 @@ class MotionCapturePlotterVisualizationMixin:
         """Visualize motion capture data (Excel format)."""
         # Use actual mid-hands and club head positions from the data
         # For right-handed golfers: X should be flipped to show proper swing direction
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         mid_hands = np.array(
             [
@@ -193,7 +193,7 @@ class MotionCapturePlotterVisualizationMixin:
 
         Returns a dict mapping joint names to numpy position arrays.
         """
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         joints = {}
         joint_names = [
@@ -228,7 +228,7 @@ class MotionCapturePlotterVisualizationMixin:
             grip_pos: numpy array of grip (left hand) position [x, y, z]
         """
         # Draw club shaft from grip to club head
-        if not (club_head_pos is not None):
+        if club_head_pos is None:
             raise ValueError("club_head_pos must be provided")
         club_points = np.array([grip_pos, club_head_pos])
         self.ax.plot(
@@ -276,7 +276,7 @@ class MotionCapturePlotterVisualizationMixin:
             face_normal: unit numpy array of face normal direction
         """
         # Draw face normal vector (red arrow) - longer and more visible
-        if not (club_head_pos is not None):
+        if club_head_pos is None:
             raise ValueError("club_head_pos must be provided")
         normal_length = 0.25  # 25cm normal vector (longer)
         normal_end = club_head_pos + face_normal * normal_length
@@ -352,7 +352,7 @@ class MotionCapturePlotterVisualizationMixin:
             segment_definitions: list of (start_joint, end_joint, color) tuples
         """
         # Draw body segments
-        if not (joints is not None):
+        if joints is None:
             raise ValueError("joints must be provided")
         for start_joint, end_joint, color in segment_definitions:
             if start_joint in joints and end_joint in joints:
@@ -380,7 +380,7 @@ class MotionCapturePlotterVisualizationMixin:
             data: full DataFrame of all frames
         """
         # Club head trajectory
-        if not (joints is not None):
+        if joints is None:
             raise ValueError("joints must be provided")
         if (
             self.trajectory_check.isChecked()
@@ -442,7 +442,7 @@ class MotionCapturePlotterVisualizationMixin:
             frame_data: current frame's data row
             data: full DataFrame of all frames
         """
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         trace_colors = {
             "club_head": "red",
@@ -492,7 +492,7 @@ class MotionCapturePlotterVisualizationMixin:
     def visualize_simscape_data(self, frame_data, data) -> None:
         """Visualize Simscape multibody data (CSV format)."""
         # Define colors for different body segments
-        if not (frame_data is not None):
+        if frame_data is None:
             raise ValueError("frame_data must be provided")
         colors = {
             "club": "red",
@@ -589,7 +589,7 @@ class MotionCapturePlotterVisualizationMixin:
 
     def set_camera_view(self, view) -> None:
         """Set predefined camera views."""
-        if not (view is not None):
+        if view is None:
             raise ValueError("view must be provided")
         if view == "face_on":
             # Face-on view: looking at golfer from front (toward +X target line)
@@ -624,7 +624,7 @@ class MotionCapturePlotterVisualizationMixin:
 
     def on_scroll(self, event) -> None:
         """Handle mouse scroll for zooming."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         if event.inaxes != self.ax:
             return
@@ -659,7 +659,7 @@ class MotionCapturePlotterVisualizationMixin:
 
     def on_mouse_press(self, event) -> None:
         """Handle mouse button press for rotation/panning."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         if event.inaxes != self.ax:
             return
@@ -673,7 +673,7 @@ class MotionCapturePlotterVisualizationMixin:
 
     def on_mouse_move(self, event) -> None:
         """Handle mouse movement for rotation/panning."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         if event.inaxes != self.ax or self._last_pos is None:
             return

@@ -294,7 +294,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F], F]:
     """Decorator to skip test/function if engine is not available."""
-    if not (engine_name is not None):
+    if engine_name is None:
         raise ValueError("engine_name must be provided")
 
     def decorator(func: F) -> F:

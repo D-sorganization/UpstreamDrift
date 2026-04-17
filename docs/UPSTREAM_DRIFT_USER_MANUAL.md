@@ -263,7 +263,7 @@ Inline equations use `$...$` delimiters and display equations use `$$...$$` deli
 - **[Chapter 24: Contributing and Development Workflow](#chapter-24-contributing-and-development-workflow)**
 
   - [24.1 Development Philosophy](#241-development-philosophy)
-  - [24.2 Code Style and Formatting (Black, Ruff)](#242-code-style-and-formatting-black-ruff)
+  - [24.2 Code Style and Formatting (Ruff)](#242-code-style-and-formatting-ruff)
   - [24.3 Type Checking (mypy)](#243-type-checking-mypy)
   - [24.4 Pre-Commit Hooks](#244-pre-commit-hooks)
   - [24.5 Branch Strategy and Pull Requests](#245-branch-strategy-and-pull-requests)
@@ -1637,7 +1637,7 @@ pre-commit install
 The pre-commit configuration runs the following checks on every commit:
 
 - **ruff**: Fast Python linter (checks for errors, style issues, import ordering)
-- **black**: Code formatter (line length 88, target Python 3.11)
+- **ruff format**: Code formatter (line length 88, target Python 3.11)
 - **mypy**: Static type checker (advisory mode)
 - **Trailing whitespace removal**
 - **YAML validation**
@@ -1665,7 +1665,7 @@ The `Makefile` provides convenient shortcuts for common development tasks:
 make help      # Show all available targets
 make install   # Install dependencies (pip install -r requirements.txt && pip install -e ".[dev]")
 make lint      # Run ruff check and mypy
-make format    # Run black, ruff format, ruff check --fix
+make format    # Run ruff format and ruff check --fix
 make test      # Run full test suite (pytest tests/ -v --tb=short)
 make test-unit # Run unit tests only
 make test-int  # Run integration tests only
@@ -16179,7 +16179,7 @@ conda env create -f environment.yml --name golf-suite-light
 | `help`      | `make help`      | Display available targets and descriptions                                                         |
 | `install`   | `make install`   | Install requirements.txt and package in editable mode with dev extras                              |
 | `lint`      | `make lint`      | Run ruff check and mypy (mypy errors are advisory)                                                 |
-| `format`    | `make format`    | Run black, ruff format, and ruff fix                                                               |
+| `format`    | `make format`    | Run ruff format and ruff check --fix                                                            |
 | `test`      | `make test`      | Run full pytest suite with verbose output                                                          |
 | `test-unit` | `make test-unit` | Run only `tests/unit/`                                                                             |
 | `test-int`  | `make test-int`  | Run only `tests/integration/`                                                                      |

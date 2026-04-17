@@ -68,7 +68,7 @@ class PerturbationAnalyzerBase(ABC):
     def perturb_torque(
         self, config: PerturbationConfig, seed: int
     ) -> dict[str, list[list[float]]]:
-        if not (self._base_coeffs is not None):
+        if self._base_coeffs is None:
             raise ValueError(
                 "set_base_torque_profile() must be called before perturb_torque()"
             )
@@ -82,7 +82,7 @@ class PerturbationAnalyzerBase(ABC):
         return {"coeffs": perturbed}
 
     def run_batch(self, config: PerturbationConfig) -> PerturbationSummary:
-        if not (self._base_coeffs is not None):
+        if self._base_coeffs is None:
             raise ValueError(
                 "set_base_torque_profile() must be called before run_batch()"
             )

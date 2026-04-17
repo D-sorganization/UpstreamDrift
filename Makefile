@@ -16,7 +16,7 @@ help:
 	@echo ""
 	@echo "  make install   - Install dependencies"
 	@echo "  make lint      - Run linters (ruff, mypy)"
-	@echo "  make format    - Format code (black, ruff)"
+	@echo "  make format    - Format code (ruff)"
 	@echo "  make test      - Run pytest"
 	@echo "  make test-unit - Run unit tests only"
 	@echo "  make test-int  - Run integration tests only"
@@ -26,7 +26,7 @@ help:
 	@echo "  make all       - Install, format, lint, test"
 	@echo ""
 
-# Install dependencies (including dev tools: ruff, black, mypy, pytest)
+# Install dependencies (including dev tools: ruff, mypy, pytest)
 install:
 	pip install -r requirements.txt
 	@if [ -f pyproject.toml ] || [ -f setup.py ]; then \
@@ -45,8 +45,6 @@ lint:
 
 # Format code
 format:
-	@echo "Running black..."
-	black .
 	@echo "Running ruff format..."
 	ruff format .
 	@echo "Running ruff fix..."

@@ -94,7 +94,7 @@ class ScrubberEngine:
 
         Returns (packed_height, max_ntu, acid_gas_details, acid_gas_removed).
         """
-        if not (inputs is not None):
+        if inputs is None:
             raise ValueError("inputs must be provided")
         mw_gases = {"HCl": 36.458, "SO2": 64.06, "H2S": 34.08, "HF": 20.01}
         acid_gas_details: list[dict[str, Any]] = []
@@ -149,7 +149,7 @@ class ScrubberEngine:
 
         Returns (naoh_pure, naoh_solution, heat_kw, cooling_L_min, warnings).
         """
-        if not (inputs is not None):
+        if inputs is None:
             raise ValueError("inputs must be provided")
         warnings: list[str] = []
         caustic_req = calculate_caustic_requirement(

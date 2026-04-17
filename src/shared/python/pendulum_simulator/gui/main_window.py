@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
 
     def wheelEvent(self, event: object) -> None:
         """Ctrl+mousewheel scales all UI fonts (#1147)."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         from PyQt6.QtGui import QWheelEvent
 
@@ -201,13 +201,13 @@ class MainWindow(QMainWindow):
 
     def _build_menu(self) -> None:
         _mb = self.menuBar()
-        if not (_mb is not None):
+        if _mb is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         menubar: QMenuBar = _mb
 
         # View menu
         _view = menubar.addMenu("&View")
-        if not (_view is not None):
+        if _view is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         view_menu: QMenu = _view
 
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
 
         # Help menu
         _help = menubar.addMenu("&Help")
-        if not (_help is not None):
+        if _help is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         action_about = QAction("About…", self)
         action_about.triggered.connect(self._show_about)
@@ -408,7 +408,7 @@ class MainWindow(QMainWindow):
         receive the current overlay toggle states from the toolstrip so
         that forces, ellipsoids, COM, etc. match the checkbox display.
         """
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         segment_map = {
             0: self._SEGMENTS_DOUBLE,
@@ -538,7 +538,7 @@ class MainWindow(QMainWindow):
             self._theme_manager.themeChanged.connect(self._on_theme_changed)  # type: ignore[union-attr]
 
             # Use shared helper to build a full theme submenu (window first, then parent)
-            if not (self._quick_theme_menu is not None):
+            if self._quick_theme_menu is None:
                 raise ValueError("DbC Blocked: Precondition failed.")
             if create_theme_menu is not None:
                 create_theme_menu(
@@ -605,7 +605,7 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(geom)
 
     def closeEvent(self, event: object) -> None:
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         settings = QSettings(_SETTINGS_ORG, _SETTINGS_APP)
         settings.setValue("window_geometry", self.saveGeometry())

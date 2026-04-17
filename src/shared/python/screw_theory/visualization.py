@@ -33,7 +33,7 @@ def plot_screw_axis_3d(
         color: Color for the axis
         label: Label for legend
     """
-    if not (screw is not None):
+    if screw is None:
         raise ValueError("screw must be provided")
 
     start, end = compute_screw_endpoints(screw, length)

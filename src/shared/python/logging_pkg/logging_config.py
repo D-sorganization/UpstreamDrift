@@ -103,7 +103,7 @@ class SensitiveDataFilter(logging.Filter):
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
-        if not (record is not None):
+        if record is None:
             raise ValueError("record must be provided")
         if record.args:
             # Format the message first so we can redact the result
@@ -127,7 +127,7 @@ def _structlog_redact_sensitive(
     _logger: Any, _method: str, event_dict: dict[str, Any]
 ) -> dict[str, Any]:
     """Structlog processor that redacts sensitive key-value pairs."""
-    if not (_method is not None):
+    if _method is None:
         raise ValueError("_method must be provided")
     sensitive_keys = {
         "password",
@@ -177,7 +177,7 @@ def _configure_structlog(
     dev_mode: bool,
 ) -> None:
     """Wire up structlog processors and configure the library."""
-    if not (level is not None):
+    if level is None:
         raise ValueError("level must be provided")
     if not _STRUCTLOG_AVAILABLE or _structlog_state["configured"]:
         return
@@ -255,7 +255,7 @@ def _resolve_format_string(
     Returns:
         The resolved format string.
     """
-    if not (use_detailed_format is not None):
+    if use_detailed_format is None:
         raise ValueError("use_detailed_format must be provided")
     if format_string:
         return format_string
@@ -289,7 +289,7 @@ def _build_basic_config_kwargs(
     Returns:
         Dictionary of kwargs ready for ``logging.basicConfig``.
     """
-    if not (log_level is not None):
+    if log_level is None:
         raise ValueError("log_level must be provided")
     config_kwargs: dict = {
         "level": log_level,
@@ -335,7 +335,7 @@ def _quiet_noisy_libraries(
         quiet_libraries: Explicit list of library names to quiet.
         use_qt_handler: When True, automatically quiets matplotlib/PIL.
     """
-    if not (use_qt_handler is not None):
+    if use_qt_handler is None:
         raise ValueError("use_qt_handler must be provided")
     default_quiet: list[str] = []
     if use_qt_handler:
@@ -541,7 +541,7 @@ def add_file_handler(
         logger = get_logger(__name__)
         add_file_handler(logger, "debug.log", LogLevel.DEBUG)
     """
-    if not (filename is not None):
+    if filename is None:
         raise ValueError("filename must be provided")
     if logger is None:
         logger = logging.getLogger()
@@ -593,7 +593,7 @@ def add_rotating_file_handler(
             backup_count=3,
         )
     """
-    if not (filename is not None):
+    if filename is None:
         raise ValueError("filename must be provided")
     if logger is None:
         logger = logging.getLogger()

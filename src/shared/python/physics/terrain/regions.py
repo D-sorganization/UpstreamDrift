@@ -17,7 +17,7 @@ class TerrainPatch:
 
     def contains(self, x: float, y: float) -> bool:
         """Check if a point is within this patch."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         return self.x_min <= x <= self.x_max and self.y_min <= y <= self.y_max
 
@@ -51,7 +51,7 @@ class TerrainPatch:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TerrainPatch":
         """Create patch from dictionary."""
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         terrain_type = TerrainType[data["terrain_type"].upper()]
         material = None
@@ -110,7 +110,7 @@ class TerrainRegion:
 
     def contains(self, x: float, y: float) -> bool:
         """Check if a point is within this region."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.shape_type == "circle":
             cx = self.shape_data["center_x"]
@@ -129,7 +129,7 @@ class TerrainRegion:
         x: float, y: float, vertices: list[tuple[float, float]]
     ) -> bool:
         """Ray casting algorithm for point-in-polygon test."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         n = len(vertices)
         inside = False
@@ -172,7 +172,7 @@ class TerrainRegion:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TerrainRegion":
         """Deserialize region from dictionary."""
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         material = None
         if "material" in data:

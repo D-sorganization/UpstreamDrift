@@ -19,7 +19,7 @@ class StealComponentDialog(QDialog):
         parent: QWidget | None = None,
     ) -> None:
         """Initialize the dialog."""
-        if not (comp_type is not None):
+        if comp_type is None:
             raise ValueError("comp_type must be provided")
         super().__init__(parent)
         self.setWindowTitle("Copy Component")

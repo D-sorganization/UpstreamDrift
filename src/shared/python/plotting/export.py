@@ -67,7 +67,7 @@ def export_figure(
     Returns:
         List of paths to the saved files.
     """
-    if not (fig is not None):
+    if fig is None:
         raise ValueError("fig must be provided")
     config = config or ExportConfig()
     out_dir = Path(config.output_dir)
@@ -113,7 +113,7 @@ def export_plot_data(
     Returns:
         Path to the exported file.
     """
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     config = config or ExportConfig()
     out_dir = Path(config.output_dir)
@@ -183,7 +183,7 @@ def export_all_figures(
     Returns:
         ``{name: [paths]}`` mapping.
     """
-    if not (figures is not None):
+    if figures is None:
         raise ValueError("figures must be provided")
     results: dict[str, list[Path]] = {}
     for name, fig in figures.items():

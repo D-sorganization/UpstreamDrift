@@ -142,7 +142,7 @@ class ControlMessage:
         Returns:
             New ControlMessage instance.
         """
-        if not (json_str is not None):
+        if json_str is None:
             raise ValueError("json_str must be provided")
         d = json.loads(json_str)
         return cls(
@@ -254,7 +254,7 @@ class FrameBuffer:
         Args:
             max_size: Maximum number of frames to store.
         """
-        if not (max_size is not None):
+        if max_size is None:
             raise ValueError("max_size must be provided")
         self.max_size = max_size
         self._buffer: deque[UnrealDataFrame] = deque(maxlen=max_size)
@@ -285,7 +285,7 @@ class FrameBuffer:
         Returns:
             True if frame was added (oldest may have been dropped).
         """
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         self._buffer.append(frame)
         return True
@@ -386,7 +386,7 @@ class StreamingProtocol:
         Returns:
             Protocol-compliant error message.
         """
-        if not (error_code is not None):
+        if error_code is None:
             raise ValueError("error_code must be provided")
         msg: dict[str, Any] = {
             "type": "error",
@@ -588,7 +588,7 @@ class UnrealStreamingServer:
         Args:
             frame: Frame to broadcast.
         """
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if self._state != StreamingState.RUNNING:
             return
@@ -646,7 +646,7 @@ class UnrealStreamingServer:
         Args:
             message: Control message to handle.
         """
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         if self._on_control_message:
             self._on_control_message(message)
@@ -723,7 +723,7 @@ class SimulationStreamer:
         Args:
             server: Streaming server instance.
         """
-        if not (server is not None):
+        if server is None:
             raise ValueError("server must be provided")
         self.server = server
         self._frame_number = 0
@@ -735,7 +735,7 @@ class SimulationStreamer:
         Args:
             frame: Frame to send.
         """
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         await self.server.broadcast(frame)
         self._frame_number = frame.frame_number + 1
@@ -758,7 +758,7 @@ class SimulationStreamer:
             forces: Optional list of force vectors.
             metrics: Optional swing metrics.
         """
-        if not (joints is not None):
+        if joints is None:
             raise ValueError("joints must be provided")
         from src.unreal_integration.data_models import JointState
 

@@ -105,7 +105,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             timeout: Request timeout [s]. Uses OPENAI_TIMEOUT env var or default.
             organization: Organization ID. Uses OPENAI_ORGANIZATION env var if not set.
         """
-        if not (api_key is not None):
+        if api_key is None:
             raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_openai_model()
@@ -167,7 +167,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             AIRateLimitError: If rate limit exceeded.
             AITimeoutError: If request times out.
         """
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
 
@@ -207,7 +207,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message)
@@ -340,7 +340,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for OpenAI.
         """
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
@@ -398,7 +398,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             System message string.
         """
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
 

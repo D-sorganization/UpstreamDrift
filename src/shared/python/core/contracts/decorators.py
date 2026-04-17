@@ -56,7 +56,7 @@ def precondition(
         def sqrt(x: float) -> float:
             return math.sqrt(x)
     """
-    if not (condition is not None):
+    if condition is None:
         raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
@@ -160,7 +160,7 @@ def postcondition(
         def compute_acceleration(self) -> np.ndarray:
             ...
     """
-    if not (condition is not None):
+    if condition is None:
         raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
@@ -255,7 +255,7 @@ def require_state(
         def step(self, dt: float) -> None:
             ...
     """
-    if not (state_check is not None):
+    if state_check is None:
         raise ValueError(_ERR_STATE_CHECK_REQUIRED)
     from .exceptions import StateError
     from .level import get_contract_level  # read live state via function

@@ -53,7 +53,7 @@ class SupportPolygon:
 
     def contains(self, point: tuple[float, float]) -> bool:
         """Check if a point is inside the support polygon."""
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         if len(self.vertices) < 3:
             return False
@@ -87,7 +87,7 @@ class SupportPolygon:
 
     def distance_to_edge(self, point: tuple[float, float]) -> float:
         """Compute minimum distance from point to the polygon edge."""
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         if not self.contains(point):
             return -1.0  # Or positive distance to polygon? Convention usually margin > 0 is stable.
@@ -135,7 +135,7 @@ class HumanoidModel:
         joints: list[GeneratedJoint],
         root_link_name: str = "pelvis",
     ):
-        if not (links is not None):
+        if links is None:
             raise ValueError("links must be provided")
         self.links = links
         self.joints = joints
@@ -239,7 +239,7 @@ class HumanoidModel:
     def _identify_feet_links(self, transforms: dict[str, np.ndarray]) -> list[str]:
         """Identify links that form the support base (feet)."""
         # Heuristic: links containing "foot" in name
-        if not (transforms is not None):
+        if transforms is None:
             raise ValueError("transforms must be provided")
         feet_links = [name for name in self.links if "foot" in name]
 
@@ -261,7 +261,7 @@ class HumanoidModel:
         transforms: dict[str, np.ndarray],
     ) -> list[tuple[float, float]]:
         """Collect 2D footprint points from feet links."""
-        if not (feet_links is not None):
+        if feet_links is None:
             raise ValueError("feet_links must be provided")
         points: list[tuple[float, float]] = []
 
@@ -282,7 +282,7 @@ class HumanoidModel:
 
     def _compute_link_footprint(self, link: GeneratedLink) -> list[list[float]]:
         """Compute local footprint points for a link based on its geometry."""
-        if not (link is not None):
+        if link is None:
             raise ValueError("link must be provided")
         geom = link.collision_geometry or link.visual_geometry
 
@@ -297,7 +297,7 @@ class HumanoidModel:
         self, size: tuple[float, float, float]
     ) -> list[list[float]]:
         """Compute footprint points for box geometry (8 corners)."""
-        if not (size is not None):
+        if size is None:
             raise ValueError("size must be provided")
         sx, sy, sz = size
         footprint = []
@@ -311,7 +311,7 @@ class HumanoidModel:
         self, radius: float, length: float
     ) -> list[list[float]]:
         """Compute footprint points for cylinder/capsule geometry."""
-        if not (radius is not None):
+        if radius is None:
             raise ValueError("radius must be provided")
         footprint = []
         for theta in [0, np.pi / 2, np.pi, 3 * np.pi / 2]:
@@ -327,7 +327,7 @@ class HumanoidModel:
         self, points: list[tuple[float, float]]
     ) -> SupportPolygon:
         """Create support polygon from 2D points using convex hull."""
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         if len(points) < 3:
             return SupportPolygon(points)

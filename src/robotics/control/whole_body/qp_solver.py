@@ -166,7 +166,7 @@ class ScipyQPSolver(QPSolver):
             method: Scipy optimization method ('SLSQP' or 'trust-constr').
             max_iter: Maximum number of iterations.
         """
-        if not (method is not None):
+        if method is None:
             raise ValueError("method must be provided")
         self._method = method
         self._max_iter = max_iter
@@ -194,7 +194,7 @@ class ScipyQPSolver(QPSolver):
         Returns:
             QP solution.
         """
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         import time
 
@@ -253,7 +253,7 @@ class ScipyQPSolver(QPSolver):
             )
 
     def _build_variable_bounds(self, problem: QPProblem) -> Any:
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         from scipy.optimize import Bounds
 
@@ -266,7 +266,7 @@ class ScipyQPSolver(QPSolver):
         return Bounds(lb, ub)
 
     def _build_constraints(self, problem: QPProblem) -> list[dict]:
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         constraints: list[dict] = []
 
@@ -289,7 +289,7 @@ class ScipyQPSolver(QPSolver):
         constraints: list[dict],
         problem: QPProblem,
     ) -> None:
-        if not (constraints is not None):
+        if constraints is None:
             raise ValueError("constraints must be provided")
         lb = (
             problem.lb_ineq
@@ -334,7 +334,7 @@ class NullspaceQPSolver(QPSolver):
         Args:
             regularization: Regularization for matrix inversion.
         """
-        if not (regularization is not None):
+        if regularization is None:
             raise ValueError("regularization must be provided")
         self._reg = regularization
 
@@ -353,7 +353,7 @@ class NullspaceQPSolver(QPSolver):
         Returns:
             QP solution.
         """
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         import time
 

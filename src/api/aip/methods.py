@@ -123,7 +123,7 @@ def _simulation_start(
     Returns:
         Status dict with simulation ID.
     """
-    if not (engine_type is not None):
+    if engine_type is None:
         raise ValueError("engine_type must be provided")
     engine_manager = _get_engine_manager(_context)
 
@@ -175,7 +175,7 @@ def _simulation_step(
     Returns:
         Step result with state data.
     """
-    if not (n_steps is not None):
+    if n_steps is None:
         raise ValueError("n_steps must be provided")
     engine_manager = _get_engine_manager(_context)
     state: dict[str, Any] = {}
@@ -245,7 +245,7 @@ def _simulation_set_control(
     Returns:
         Acknowledgment.
     """
-    if not (actuator_index is not None):
+    if actuator_index is None:
         raise ValueError("actuator_index must be provided")
     engine_manager = _get_engine_manager(_context)
 
@@ -287,7 +287,7 @@ def _model_load(
     Returns:
         Load result with model info.
     """
-    if not (path is not None):
+    if path is None:
         raise ValueError("path must be provided")
     if not path:
         return {"status": "error", "message": "path is required"}
@@ -313,7 +313,7 @@ def _model_query(
     Returns:
         Requested property data.
     """
-    if not (property_name is not None):
+    if property_name is None:
         raise ValueError("property_name must be provided")
     engine_manager = _get_engine_manager(_context)
 

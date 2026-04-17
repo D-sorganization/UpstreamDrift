@@ -100,7 +100,7 @@ class InverseDynamicsSolver:
             model: MuJoCo model
             data: MuJoCo data
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -165,7 +165,7 @@ class InverseDynamicsSolver:
             InverseDynamicsResult with computed torques
         """
         # Set state (Thread-Safe: use private data)
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
@@ -221,7 +221,7 @@ class InverseDynamicsSolver:
         """
         # 1. Compute Primary Task Torques (using standard Inverse Dynamics)
         # Note: This assumes qacc_primary satisfies the task constraints
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         primary_result = self.compute_required_torques(qpos, qvel, qacc_primary)
         tau_primary = primary_result.joint_torques  # Total generalized force
@@ -280,14 +280,14 @@ class InverseDynamicsSolver:
         return g_force
 
     def _compute_coriolis_force(self, g_force: np.ndarray) -> np.ndarray:
-        if not (g_force is not None):
+        if g_force is None:
             raise ValueError("g_force must be provided")
         mujoco.mj_forward(self.model, self._perturb_data)
         bias_force = self._perturb_data.qfrc_bias.copy()
         return bias_force - g_force
 
     def _compute_control_force(self, ctrl: np.ndarray) -> np.ndarray:
-        if not (ctrl is not None):
+        if ctrl is None:
             raise ValueError("ctrl must be provided")
         self._perturb_data.ctrl[:] = 0
         if len(ctrl) == self.model.nu:
@@ -302,7 +302,7 @@ class InverseDynamicsSolver:
         tau_force: np.ndarray,
     ) -> InducedAccelerationResult:
         # Acc_G = M^-1 * (-G), Acc_C = M^-1 * (-C), Acc_Tau = M^-1 * (tau)
-        if not (g_force is not None):
+        if g_force is None:
             raise ValueError("g_force must be provided")
         a_g = (-g_force).copy()
         mujoco.mj_solveM(self.model, self._perturb_data, a_g)
@@ -346,7 +346,7 @@ class InverseDynamicsSolver:
         Returns:
             InducedAccelerationResult with component accelerations.
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
@@ -385,7 +385,7 @@ class InverseDynamicsSolver:
         Returns:
             List of InverseDynamicsResult for each time step
         """
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         results = []
 
@@ -422,7 +422,7 @@ class InverseDynamicsSolver:
             InverseDynamicsResult with partial solution
         """
         # Full inverse dynamics
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         full_result = self.compute_required_torques(qpos, qvel, qacc)
 
@@ -457,7 +457,7 @@ class InverseDynamicsSolver:
         Returns:
             ForceDecomposition with all components
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         result = self.compute_required_torques(qpos, qvel, qacc)
 
@@ -526,7 +526,7 @@ class InverseDynamicsSolver:
             End-effector force [3]
         """
         # Compute required torques
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         result = self.compute_required_torques(qpos, qvel, qacc)
 
@@ -626,7 +626,7 @@ class InverseDynamicsSolver:
         Returns:
             Efficiency metrics
         """
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         torques = result.joint_torques
 
@@ -681,7 +681,7 @@ class RecursiveNewtonEuler:
             model: MuJoCo model
             data: MuJoCo data
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -704,7 +704,7 @@ class RecursiveNewtonEuler:
         """
         # MuJoCo's internal RNE is very efficient
         # We use MuJoCo's inverse dynamics
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self.data.qpos[:] = qpos
         self.data.qvel[:] = qvel
@@ -779,7 +779,7 @@ def _build_inverse_dynamics_csv_row(
     Returns:
         List of float values for the CSV row.
     """
-    if not (result is not None):
+    if result is None:
         raise ValueError("result must be provided")
     row: list[float] = [time_val]
     for i in range(nv):
@@ -818,7 +818,7 @@ def export_inverse_dynamics_to_csv(
         FIXED per Assessment A Finding A-007: Added comprehensive input
         validation to prevent malformed CSV output and silent failures.
     """
-    if not (times is not None):
+    if times is None:
         raise ValueError("times must be provided")
     nv = _validate_inverse_dynamics_export_inputs(times, results)
 
@@ -853,7 +853,7 @@ class InverseDynamicsAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.id_solver = InverseDynamicsSolver(model, data)
         self.kin_analyzer = KinematicForceAnalyzer(model, data)
@@ -881,7 +881,7 @@ class InverseDynamicsAnalyzer:
             Dictionary with comprehensive analysis
         """
         # Kinematic force analysis
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         kinematic_forces = self.kin_analyzer.analyze_trajectory(
             times,
@@ -932,7 +932,7 @@ class InverseDynamicsAnalyzer:
         Returns:
             Comparison metrics
         """
-        if not (swing1_data is not None):
+        if swing1_data is None:
             raise ValueError("swing1_data must be provided")
         stats1 = swing1_data["statistics"]
         stats2 = swing2_data["statistics"]

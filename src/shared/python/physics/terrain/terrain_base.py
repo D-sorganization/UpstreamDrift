@@ -26,19 +26,19 @@ class Terrain:
 
     def get_elevation(self, x: float, y: float) -> float:
         """Get interpolated elevation at a position."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         return self.elevation.get_elevation(x, y)
 
     def get_normal(self, x: float, y: float) -> np.ndarray:
         """Get surface normal vector at a position."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         return self.elevation.get_normal(x, y)
 
     def get_terrain_type(self, x: float, y: float) -> TerrainType:
         """Get terrain type at a position."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         result = self.default_type
 
@@ -54,7 +54,7 @@ class Terrain:
 
     def get_material(self, x: float, y: float) -> SurfaceMaterial:
         """Get surface material at a position."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         for region in reversed(self.regions):
             if region.contains(x, y):
@@ -80,7 +80,7 @@ class Terrain:
 
     def get_contact_params(self, x: float, y: float) -> dict[str, float]:
         """Get physics contact parameters for simulation engines."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.get_material(x, y)
 
@@ -146,7 +146,7 @@ class TerrainConfig:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "TerrainConfig":
         """Create config from dictionary."""
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         return cls(
             name=data["name"],
@@ -164,7 +164,7 @@ class TerrainConfig:
     @classmethod
     def load(cls, path: Path | str) -> "TerrainConfig":
         """Load config from JSON file."""
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         with open(path) as f:
             data = json.load(f)
@@ -201,7 +201,7 @@ def create_flat_terrain(
     resolution: float = 1.0,
 ) -> Terrain:
     """Create a simple flat terrain."""
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     elevation = ElevationMap.flat(width=width, length=length, resolution=resolution)
     patches = [TerrainPatch(terrain_type, 0.0, width, 0.0, length)]
@@ -219,7 +219,7 @@ def create_sloped_terrain(
     resolution: float = 1.0,
 ) -> Terrain:
     """Create a uniformly sloped terrain."""
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     elevation = ElevationMap.sloped(
         width=width,
@@ -245,7 +245,7 @@ def compute_gravity_on_slope(
     gravity: float = float(GRAVITY_M_S2),
 ) -> tuple[float, float]:
     """Compute gravity components on a slope. Cached for performance."""
-    if not (slope_angle_deg is not None):
+    if slope_angle_deg is None:
         raise ValueError("slope_angle_deg must be provided")
     slope_rad = math.radians(slope_angle_deg)
     g_parallel = gravity * math.sin(slope_rad)
@@ -260,7 +260,7 @@ def compute_roll_direction(
     y: float,
 ) -> np.ndarray:
     """Compute ball roll direction on terrain (downhill)."""
-    if not (elevation is not None):
+    if elevation is None:
         raise ValueError("elevation must be provided")
     dzdx, dzdy = elevation.get_gradient(x, y)
 

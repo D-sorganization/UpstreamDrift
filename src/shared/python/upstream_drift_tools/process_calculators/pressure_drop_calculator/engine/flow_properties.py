@@ -134,7 +134,7 @@ def calculate_frictional_pressure_drop(
 
 def calculate_elevation_pressure_drop(density: float, elevation_change: float) -> float:
     """Calculate hydrostatic pressure change due to elevation."""
-    if not (density is not None):
+    if density is None:
         raise ValueError("density must be provided")
     dp_elevation = density * GRAVITY * elevation_change
     logger.debug("Elevation: Δh=%.1fm, ΔP=%.1f Pa", elevation_change, dp_elevation)
@@ -145,7 +145,7 @@ def calculate_erosional_velocity(
     density: float, service_type: str = "continuous"
 ) -> float:
     """Calculate erosional velocity limit using API RP 14E."""
-    if not (density is not None):
+    if density is None:
         raise ValueError("density must be provided")
     if service_type == "continuous":
         coefficient = API_14E_C_CONTINUOUS

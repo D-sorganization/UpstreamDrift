@@ -52,7 +52,7 @@ class LayoutManager:
             get_model_func: Callback to retrieve a model by ID.
             create_card_func: Callback to create a model card widget.
         """
-        if not (config_file is not None):
+        if config_file is None:
             raise ValueError("config_file must be provided")
         self.config_file = config_file
         self.config_dir = config_file.parent
@@ -193,7 +193,7 @@ class LayoutManager:
             The new ordered list of model IDs.
         """
         # Keep existing order for models that are still selected
-        if not (selected_ids is not None):
+        if selected_ids is None:
             raise ValueError("selected_ids must be provided")
         ordered_selection = [
             model_id for model_id in self.model_order if model_id in selected_ids
@@ -217,7 +217,7 @@ class LayoutManager:
         Returns:
             True if swap was successful, False otherwise.
         """
-        if not (source_id is not None):
+        if source_id is None:
             raise ValueError("source_id must be provided")
         if not self.edit_mode:
             return False
@@ -265,7 +265,7 @@ class LayoutManager:
             grid_layout: The Qt grid layout to populate.
         """
         # Clean current layout
-        if not (grid_layout is not None):
+        if grid_layout is None:
             raise ValueError("grid_layout must be provided")
         while grid_layout.count():
             item = grid_layout.takeAt(0)
@@ -304,7 +304,7 @@ class LayoutManager:
         Args:
             enabled: Whether editing is enabled.
         """
-        if not (enabled is not None):
+        if enabled is None:
             raise ValueError("enabled must be provided")
         self.edit_mode = enabled
 
@@ -342,7 +342,7 @@ def compute_centered_geometry(
     Returns:
         Tuple of (x, y, width, height) for centered window.
     """
-    if not (screen_width is not None):
+    if screen_width is None:
         raise ValueError("screen_width must be provided")
     x = screen_x + (screen_width - window_width) // 2
     y = screen_y + (screen_height - window_height) // 2

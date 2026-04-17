@@ -94,7 +94,7 @@ class PendulumRendererMixin:
         npt.NDArray[np.float64], npt.NDArray[np.float64], npt.NDArray[np.float64]
     ]:
         """Calculate the 3D positions of pendulum joints."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         import numpy as np
 
@@ -149,7 +149,7 @@ class PendulumRendererMixin:
         point: npt.NDArray[np.float64], phi: float
     ) -> npt.NDArray[np.float64]:
         """Rotate point around Z axis by phi."""
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         import numpy as np
 
@@ -165,7 +165,7 @@ class PendulumRendererMixin:
         point: npt.NDArray[np.float64], angle: float
     ) -> npt.NDArray[np.float64]:
         """Rotate point around X axis by angle."""
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         import numpy as np
 
@@ -183,7 +183,7 @@ class PendulumRendererMixin:
         theta1: float,
     ) -> None:
         """Draw reference lines and gravity."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         import numpy as np
 
@@ -223,7 +223,7 @@ class PendulumRendererMixin:
         self, pivot: npt.NDArray[np.float64], max_range: float
     ) -> None:
         """Draw the gravity vector and label."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         import numpy as np
 
@@ -271,7 +271,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw the pendulum segments and joints."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         self._draw_upper_segment(pivot, elbow)
         self._draw_lower_segment(elbow, wrist)
@@ -284,7 +284,7 @@ class PendulumRendererMixin:
         elbow: npt.NDArray[np.float64],
     ) -> None:
         """Draw the upper pendulum segment."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         host = typing.cast("RendererProtocol", self)
         host.ax.plot(
@@ -304,7 +304,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw the lower pendulum segment."""
-        if not (elbow is not None):
+        if elbow is None:
             raise ValueError("elbow must be provided")
         host = typing.cast("RendererProtocol", self)
         host.ax.plot(
@@ -325,7 +325,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw the joint markers at pivot, elbow, and wrist."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         host = typing.cast("RendererProtocol", self)
         ax3d = typing.cast(typing.Any, host.ax)
@@ -366,7 +366,7 @@ class PendulumRendererMixin:
         wrist: npt.NDArray[np.float64],
     ) -> None:
         """Draw labels at midpoints of segments."""
-        if not (pivot is not None):
+        if pivot is None:
             raise ValueError("pivot must be provided")
         host = typing.cast("RendererProtocol", self)
         ax3d = typing.cast(typing.Any, host.ax)
@@ -408,7 +408,7 @@ class PendulumRendererMixin:
 
     def _draw_plane(self, size: float) -> None:
         """Draw the inclined plane surface."""
-        if not (size is not None):
+        if size is None:
             raise ValueError("size must be provided")
         import numpy as np
 

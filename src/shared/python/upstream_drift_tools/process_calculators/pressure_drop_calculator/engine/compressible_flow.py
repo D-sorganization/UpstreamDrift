@@ -22,7 +22,7 @@ def _iterate_compressible_pressure(
     tolerance: float = 1.0,
 ) -> tuple[float, bool]:
     """Iteratively solve the isothermal compressible flow equation for P2."""
-    if not (p1 is not None):
+    if p1 is None:
         raise ValueError("P1 must be provided")
 
     p2 = p2_initial
@@ -113,7 +113,7 @@ def calculate_expansion_factor(
 ) -> float:
     """Calculate gas expansion factor Y for compressible flow."""
     del friction_factor, length_over_diameter
-    if not (inlet_pressure is not None):
+    if inlet_pressure is None:
         raise ValueError("inlet_pressure must be provided")
     if inlet_pressure <= 0 or pressure_drop < 0:
         return 1.0

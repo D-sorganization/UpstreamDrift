@@ -52,7 +52,7 @@ def log_errors(
             return Model.load(path)
     """
 
-    if not (message is not None):
+    if message is None:
         raise ValueError("message must be provided")
 
     def decorator(func: F) -> F:
@@ -96,7 +96,7 @@ def handle_import_error(
             return optional_module
     """
 
-    if not (log_warning is not None):
+    if log_warning is None:
         raise ValueError("log_warning must be provided")
 
     def decorator(func: F) -> F:
@@ -138,7 +138,7 @@ def retry_on_error(
         def read_file(path):
             return open(path).read()
     """
-    if not (max_attempts is not None):
+    if max_attempts is None:
         raise ValueError("max_attempts must be provided")
     import time
 
@@ -192,7 +192,7 @@ class ErrorContext:
             reraise: Whether to reraise exceptions
             log_success: Whether to log successful completion
         """
-        if not (operation is not None):
+        if operation is None:
             raise ValueError("operation must be provided")
         self.operation = operation
         self.reraise = reraise

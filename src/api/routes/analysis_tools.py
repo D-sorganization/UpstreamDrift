@@ -123,7 +123,7 @@ def _store_metric_snapshot(
         engine_manager: Engine manager instance.
         metrics: Current metrics snapshot.
     """
-    if not (engine_manager is not None):
+    if engine_manager is None:
         raise ValueError("engine_manager must be provided")
     max_history = 500
     if not hasattr(engine_manager, "_metric_history"):

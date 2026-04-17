@@ -43,7 +43,7 @@ class GlassPropertiesInterface:
             external_calculator: Optional external calculator function
             cache_max_size: Maximum cache entries (default 1000)
         """
-        if not (cache_max_size is not None):
+        if cache_max_size is None:
             raise ValueError("cache_max_size must be provided")
         self.external_calculator = external_calculator
         self._cache_max_size = cache_max_size
@@ -76,7 +76,7 @@ class GlassPropertiesInterface:
 
         Performance: Uses LRU cache with bounded size to prevent memory bloat.
         """
-        if not (temperature_celsius is not None):
+        if temperature_celsius is None:
             raise ValueError("temperature_celsius must be provided")
         if is_metal:
             # Metal has very high conductivity, relatively constant with temperature
@@ -123,7 +123,7 @@ class GlassPropertiesInterface:
 
     def set_external_calculator(self, calculator: Callable) -> None:
         """Set external calculator function"""
-        if not (calculator is not None):
+        if calculator is None:
             raise ValueError("calculator must be provided")
         self.external_calculator = calculator
         # Clear cache when calculator changes
@@ -150,7 +150,7 @@ class GlassPropertiesInterface:
         - Single exp() call path
         """
         # Apply power density heating effect upfront
-        if not (temperature_celsius is not None):
+        if temperature_celsius is None:
             raise ValueError("temperature_celsius must be provided")
         temp_kelvin = temperature_celsius + 273.15
         if power_density > 0:
@@ -174,7 +174,7 @@ class GlassPropertiesInterface:
         is_metal: bool = False,
     ) -> float:
         """Get electrical resistivity (1/conductivity)"""
-        if not (temperature_celsius is not None):
+        if temperature_celsius is None:
             raise ValueError("temperature_celsius must be provided")
         conductivity = self.get_conductivity(
             temperature_celsius,

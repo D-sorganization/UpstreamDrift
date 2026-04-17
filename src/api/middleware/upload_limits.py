@@ -15,7 +15,7 @@ async def validate_upload_size(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     """Reject requests exceeding upload size limits."""
-    if not (request is not None):
+    if request is None:
         raise ValueError("request must be provided")
     content_length = request.headers.get("content-length")
 

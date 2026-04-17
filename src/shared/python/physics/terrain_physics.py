@@ -18,7 +18,7 @@ def compute_gravity_on_slope(
     gravity: float = float(GRAVITY_M_S2),
 ) -> tuple[float, float]:
     """Compute gravity components on a slope."""
-    if not (slope_angle_deg is not None):
+    if slope_angle_deg is None:
         raise ValueError("slope_angle_deg must be provided")
     slope_rad = math.radians(slope_angle_deg)
     g_parallel = gravity * math.sin(slope_rad)
@@ -32,7 +32,7 @@ def compute_roll_direction(
     y: float,
 ) -> np.ndarray:
     """Compute the downhill roll direction on terrain."""
-    if not (elevation is not None):
+    if elevation is None:
         raise ValueError("elevation must be provided")
     dzdx, dzdy = elevation.get_gradient(x, y)
     roll_dir = np.array([-dzdx, -dzdy])

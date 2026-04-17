@@ -18,7 +18,7 @@ class UIBuildHook(BuildHookInterface):
         """Initialize build hook."""
         if not (version):
             raise ValueError("Version parameter must not be empty")
-        if not (build_data is not None):
+        if build_data is None:
             raise ValueError("Build data dictionary must be provided")
 
         ui_dir = Path(self.root) / "ui"

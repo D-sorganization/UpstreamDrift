@@ -48,7 +48,7 @@ class FormationConfig:
         Returns:
             Line formation config.
         """
-        if not (n_robots is not None):
+        if n_robots is None:
             raise ValueError("n_robots must be provided")
         positions = np.zeros((n_robots, 3))
         for i in range(n_robots):
@@ -71,7 +71,7 @@ class FormationConfig:
         Returns:
             Circle formation config.
         """
-        if not (n_robots is not None):
+        if n_robots is None:
             raise ValueError("n_robots must be provided")
         positions = np.zeros((n_robots, 3))
         for i in range(n_robots):
@@ -98,7 +98,7 @@ class FormationConfig:
         Returns:
             Wedge formation config.
         """
-        if not (n_robots is not None):
+        if n_robots is None:
             raise ValueError("n_robots must be provided")
         positions = np.zeros((n_robots, 3))
         positions[0] = [0, 0, 0]  # Leader at front
@@ -135,7 +135,7 @@ class FormationController:
             robots: List of robot IDs.
             formation: Formation configuration.
         """
-        if not (robots is not None):
+        if robots is None:
             raise ValueError("robots must be provided")
         self.robots = robots
         self.formation = formation
@@ -180,7 +180,7 @@ class FormationController:
         Returns:
             Dictionary mapping robot IDs to velocity commands.
         """
-        if not (leader_pose is not None):
+        if leader_pose is None:
             raise ValueError("leader_pose must be provided")
         commands = {}
 
@@ -234,7 +234,7 @@ class FormationController:
         Returns:
             3x3 rotation matrix.
         """
-        if not (quat is not None):
+        if quat is None:
             raise ValueError("quat must be provided")
         w, x, y, z = quat
         return np.array(
@@ -279,7 +279,7 @@ class FormationController:
         Returns:
             Sum of position errors.
         """
-        if not (leader_pose is not None):
+        if leader_pose is None:
             raise ValueError("leader_pose must be provided")
         total_error = 0.0
 
@@ -322,7 +322,7 @@ class CooperativeManipulation:
             robots: List of robot physics engines.
             object_model: Object model identifier.
         """
-        if not (robots is not None):
+        if robots is None:
             raise ValueError("robots must be provided")
         self.robots = robots
         self._object_model = object_model
@@ -345,7 +345,7 @@ class CooperativeManipulation:
             grasp_points: Contact points in object frame.
             grasp_normals: Contact normals (optional).
         """
-        if not (grasp_points is not None):
+        if grasp_points is None:
             raise ValueError("grasp_points must be provided")
         self._grasp_points = grasp_points
 
@@ -372,7 +372,7 @@ class CooperativeManipulation:
         Returns:
             Grasp matrix (6, 3*n_contacts).
         """
-        if not (object_pose is not None):
+        if object_pose is None:
             raise ValueError("object_pose must be provided")
         n_contacts = len(self._grasp_points)
         G = np.zeros((6, 3 * n_contacts))
@@ -439,7 +439,7 @@ class CooperativeManipulation:
         Returns:
             List of force vectors for each contact.
         """
-        if not (desired_object_wrench is not None):
+        if desired_object_wrench is None:
             raise ValueError("desired_object_wrench must be provided")
         G = self.compute_grasp_matrix(object_pose)
         n_contacts = len(self._grasp_points)
@@ -478,7 +478,7 @@ class CooperativeManipulation:
         Returns:
             List of end-effector trajectories, one per robot.
         """
-        if not (object_goal_pose is not None):
+        if object_goal_pose is None:
             raise ValueError("object_goal_pose must be provided")
         n_steps = int(duration / dt)
         n_contacts = len(self._grasp_points)
@@ -537,7 +537,7 @@ class CooperativeManipulation:
         Returns:
             Interpolated quaternion.
         """
-        if not (q0 is not None):
+        if q0 is None:
             raise ValueError("q0 must be provided")
         dot = np.dot(q0, q1)
 
@@ -564,7 +564,7 @@ class CooperativeManipulation:
         quat: NDArray[np.floating],
     ) -> NDArray[np.floating]:
         """Convert quaternion to rotation matrix."""
-        if not (quat is not None):
+        if quat is None:
             raise ValueError("quat must be provided")
         w, x, y, z = quat
         return np.array(
@@ -601,7 +601,7 @@ class CooperativeManipulation:
         Returns:
             Tuple of (has_closure, quality_metric).
         """
-        if not (object_pose is not None):
+        if object_pose is None:
             raise ValueError("object_pose must be provided")
         G = self.compute_grasp_matrix(object_pose)
 

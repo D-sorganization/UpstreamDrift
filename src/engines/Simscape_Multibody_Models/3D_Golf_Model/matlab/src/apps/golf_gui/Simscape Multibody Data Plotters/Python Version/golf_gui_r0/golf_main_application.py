@@ -60,7 +60,7 @@ class EnhancedGolfVisualizerApp(QApplication):
     """Enhanced main application with advanced features"""
 
     def __init__(self, argv) -> None:
-        if not (argv is not None):
+        if argv is None:
             raise ValueError("argv must be provided")
         super().__init__(argv)
 
@@ -371,7 +371,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
 
     def load_data_files(self, file_paths: list[str]) -> bool:
         """Enhanced data loading with validation and preprocessing"""
-        if not (file_paths is not None):
+        if file_paths is None:
             raise ValueError("file_paths must be provided")
         try:
             if len(file_paths) != 3:
@@ -444,7 +444,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
 
     def _on_camera_mode_changed(self, mode: str) -> None:
         """Handle camera mode changes"""
-        if not (mode is not None):
+        if mode is None:
             raise ValueError("mode must be provided")
         self.statusBar().showMessage(f"Camera mode: {mode}")
         logger.info(f"Camera mode changed to: {mode}")
@@ -627,7 +627,7 @@ class SessionManager:
 
     def create_session(self, data_files: list[str]) -> str:
         """Create a new analysis session"""
-        if not (data_files is not None):
+        if data_files is None:
             raise ValueError("data_files must be provided")
         import uuid
 
@@ -686,7 +686,7 @@ class ExportManager:
 
     def export_data(self, data: dict, output_path: str, format: str = "csv") -> None:
         """Export analysis data"""
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if format.lower() == "csv":
             import pandas as pd
@@ -697,7 +697,7 @@ class ExportManager:
 
     def export_images(self, frames: list, output_dir: str, format: str = "png") -> None:
         """Export frame sequence as images"""
-        if not (frames is not None):
+        if frames is None:
             raise ValueError("frames must be provided")
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         # Export logic here
@@ -719,7 +719,7 @@ class PluginManager:
 
     def register_plugin(self, name: str, plugin: object) -> None:
         """Register a plugin"""
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.plugins[name] = plugin
         logger.info(f"Plugin registered: {name}")
@@ -736,7 +736,7 @@ def main() -> int:
     # Setup exception handling
     def handle_exception(exc_type, exc_value, exc_traceback) -> None:
         """Log uncaught exceptions and show an error dialog."""
-        if not (exc_type is not None):
+        if exc_type is None:
             raise ValueError("exc_type must be provided")
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)

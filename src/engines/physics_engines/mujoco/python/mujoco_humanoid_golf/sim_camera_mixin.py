@@ -237,7 +237,7 @@ class SimCameraMixin:
 
     def show_context_menu(self: Any, global_pos: QtCore.QPoint, body_id: int) -> None:
         """Display a right-click context menu for a selected body."""
-        if not (global_pos is not None):
+        if global_pos is None:
             raise ValueError("global_pos must be provided")
         if self.manipulator is None:
             return
@@ -269,7 +269,7 @@ class SimCameraMixin:
 
     def toggle_frame_visibility(self: Any, body_id: int) -> None:
         """Toggle coordinate frame overlay for a body."""
-        if not (body_id is not None):
+        if body_id is None:
             raise ValueError("body_id must be provided")
         if body_id in self.visible_frames:
             self.visible_frames.remove(body_id)
@@ -279,7 +279,7 @@ class SimCameraMixin:
 
     def toggle_com_visibility(self: Any, body_id: int) -> None:
         """Toggle center-of-mass overlay for a body."""
-        if not (body_id is not None):
+        if body_id is None:
             raise ValueError("body_id must be provided")
         if body_id in self.visible_coms:
             self.visible_coms.remove(body_id)

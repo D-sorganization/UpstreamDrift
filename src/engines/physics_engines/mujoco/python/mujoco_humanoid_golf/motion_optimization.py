@@ -97,7 +97,7 @@ class SwingOptimizer:
             objectives: Optimization objectives
             constraints: Optimization constraints
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -122,7 +122,7 @@ class SwingOptimizer:
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern."""
-        if not (name_pattern is not None):
+        if name_pattern is None:
             raise ValueError("name_pattern must be provided")
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
@@ -146,7 +146,7 @@ class SwingOptimizer:
         Returns:
             OptimizationResult with optimal trajectory
         """
-        if not (method is not None):
+        if method is None:
             raise ValueError("method must be provided")
         start_time = time.time()
 
@@ -325,7 +325,7 @@ class SwingOptimizer:
         Returns:
             Objective value (to minimize)
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         trajectory = x.reshape(self.num_knot_points, self.model.nv)
 
@@ -368,7 +368,7 @@ class SwingOptimizer:
     def _interpolate_trajectory(
         self, trajectory: np.ndarray
     ) -> tuple[np.ndarray, float, int]:  # noqa: E501
-        if not (trajectory is not None):
+        if trajectory is None:
             raise ValueError("trajectory must be provided")
         dt = self.model.opt.timestep
         num_steps = int(self.swing_duration / dt)
@@ -408,7 +408,7 @@ class SwingOptimizer:
         jacr_flat: np.ndarray,
         use_flat_jac: bool,
     ) -> float:
-        if not (jacp is not None):
+        if jacp is None:
             raise ValueError("jacp must be provided")
         if use_flat_jac:
             mujoco.mj_jacBody(
@@ -432,7 +432,7 @@ class SwingOptimizer:
         controls: np.ndarray,
         velocities: np.ndarray,
     ) -> dict:
-        if not (club_speeds is not None):
+        if club_speeds is None:
             raise ValueError("club_speeds must be provided")
         peak_club_speed = (
             float(max(float(s) for s in club_speeds)) if club_speeds else 0.0
@@ -458,7 +458,7 @@ class SwingOptimizer:
         Returns:
             Tuple of (velocities, controls, metrics_dict)
         """
-        if not (trajectory is not None):
+        if trajectory is None:
             raise ValueError("trajectory must be provided")
         trajectory_interp, dt, num_steps = self._interpolate_trajectory(trajectory)
 
@@ -518,7 +518,7 @@ class SwingOptimizer:
         Returns:
             Total jerk magnitude
         """
-        if not (trajectory is not None):
+        if trajectory is None:
             raise ValueError("trajectory must be provided")
         dt = self.swing_duration / (self.num_knot_points - 1)
 
@@ -543,7 +543,7 @@ class SwingOptimizer:
             OptimizationResult with speed-optimized trajectory
         """
         # Set objectives for pure speed
-        if not (target_speed is not None):
+        if target_speed is None:
             raise ValueError("target_speed must be provided")
         objectives = OptimizationObjectives(
             maximize_club_speed=True,
@@ -575,7 +575,7 @@ class SwingOptimizer:
         Returns:
             OptimizationResult with accuracy-optimized trajectory
         """
-        if not (target_position is not None):
+        if target_position is None:
             raise ValueError("target_position must be provided")
         objectives = OptimizationObjectives(
             maximize_club_speed=True,
@@ -611,7 +611,7 @@ class SwingOptimizer:
         Returns:
             List of OptimizationResult for different swings
         """
-        if not (num_swings is not None):
+        if num_swings is None:
             raise ValueError("num_swings must be provided")
         if variation == "speed":
             # Vary target speeds
@@ -660,7 +660,7 @@ class MotionPrimitiveLibrary:
             trajectory: Joint trajectory
             metadata: Additional metadata
         """
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.primitives[name] = trajectory
         self.metadata[name] = metadata if metadata is not None else {}
@@ -690,7 +690,7 @@ class MotionPrimitiveLibrary:
         Returns:
             Blended trajectory
         """
-        if not (names is not None):
+        if names is None:
             raise ValueError("names must be provided")
         if weights is None:
             weights = np.ones(len(names)) / len(names)
@@ -721,7 +721,7 @@ class MotionPrimitiveLibrary:
             filename: Output filename (.npz)
         """
         # Convert metadata to a format np.savez can handle
-        if not (filename is not None):
+        if filename is None:
             raise ValueError("filename must be provided")
         metadata_str = json.dumps(self.metadata)
         # Save primitives and metadata separately
@@ -738,7 +738,7 @@ class MotionPrimitiveLibrary:
         """
         # Security: Explicitly disable pickle to prevent arbitrary code execution
         # This file format only contains numpy arrays and JSON strings
-        if not (filename is not None):
+        if filename is None:
             raise ValueError("filename must be provided")
         data = np.load(filename, allow_pickle=False)
 

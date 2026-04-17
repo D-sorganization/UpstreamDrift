@@ -118,7 +118,7 @@ class RealTimeController:
             control_frequency: Control loop frequency in Hz.
             communication_type: Communication protocol.
         """
-        if not (control_frequency is not None):
+        if control_frequency is None:
             raise ValueError("control_frequency must be provided")
         self.control_frequency = control_frequency
         self.dt = 1.0 / control_frequency
@@ -171,7 +171,7 @@ class RealTimeController:
         Returns:
             True if connection successful.
         """
-        if not (robot_config is not None):
+        if robot_config is None:
             raise ValueError("robot_config must be provided")
         self._config = robot_config
 
@@ -388,7 +388,7 @@ class RealTimeController:
         Args:
             command: Control command to send.
         """
-        if not (command is not None):
+        if command is None:
             raise ValueError("command must be provided")
         if self.comm_type == CommunicationType.SIMULATION:
             # Simulated: command is "sent"
@@ -501,7 +501,7 @@ class RealTimeController:
         Returns:
             Robot state or None if timeout.
         """
-        if not (timeout is not None):
+        if timeout is None:
             raise ValueError("timeout must be provided")
         start = time.perf_counter()
         with self._state_lock:

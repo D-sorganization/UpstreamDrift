@@ -29,7 +29,7 @@ class MATLABQualityChecker:
     """Comprehensive MATLAB code quality checker."""
 
     def __init__(self, project_root: Path) -> None:
-        if not (project_root is not None):
+        if project_root is None:
             raise ValueError("project_root must be provided")
         self.project_root = project_root
         self.matlab_dir = project_root / "matlab"
@@ -47,7 +47,7 @@ class MATLABQualityChecker:
     ) -> None:
         """Check for docstrings and arguments block in functions."""
         # Check docstring
-        if not (lines is not None):
+        if lines is None:
             raise ValueError("lines must be provided")
         has_doc = False
         for j in range(i, min(i + 5, len(lines))):
@@ -75,7 +75,7 @@ class MATLABQualityChecker:
     ) -> None:
         """Check for banned placeholders and template patterns."""
         # Pattern strings split to avoid CI placeholder detection
-        if not (line is not None):
+        if line is None:
             raise ValueError("line must be provided")
         banned = [
             (r"\bTO" + r"DO\b", "Placeholder marker (TO-DO) found"),
@@ -93,7 +93,7 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for common MATLAB anti-patterns."""
-        if not (line is not None):
+        if line is None:
             raise ValueError("line must be provided")
         anti = [
             (r"\beval\s*\(", "Avoid eval() - security/performance risk"),
@@ -119,7 +119,7 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for unexplained magic numbers."""
-        if not (line is not None):
+        if line is None:
             raise ValueError("line must be provided")
         acceptable = {
             "0",
@@ -153,7 +153,7 @@ class MATLABQualityChecker:
         self, line: str, i: int, file_name: str, issues: list[str]
     ) -> None:
         """Check for dangerous commands inside functions."""
-        if not (line is not None):
+        if line is None:
             raise ValueError("line must be provided")
         unsafe = [
             (r"\bclear\s+(all|global)\b", "Avoid 'clear all/global' in functions"),
@@ -168,7 +168,7 @@ class MATLABQualityChecker:
 
     def _analyze_matlab_file(self, file_path: Path) -> list[str]:
         """Analyze a single MATLAB file (Decomposed for Orthogonality)."""
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         issues: list[str] = []
         try:

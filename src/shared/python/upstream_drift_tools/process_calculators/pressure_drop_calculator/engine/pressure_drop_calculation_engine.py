@@ -100,7 +100,7 @@ class PressureDropCalculationEngine:
         Returns:
             (dp_friction, dp_fittings, dp_elevation, total_k_factor)
         """
-        if not (inputs is not None):
+        if inputs is None:
             raise ValueError("inputs must be provided")
         dp_friction = calculate_frictional_pressure_drop(
             friction_factor,
@@ -142,7 +142,7 @@ class PressureDropCalculationEngine:
         Returns:
             (total_dp, outlet_pressure, dp_acceleration, warnings)
         """
-        if not (inputs is not None):
+        if inputs is None:
             raise ValueError("inputs must be provided")
         warnings_list: list[str] = []
         pressure_ratio_initial = dp_incompressible / inputs.inlet_pressure

@@ -54,7 +54,7 @@ class Transform6DOF:
 
     @classmethod
     def from_rotation_x(cls, angle: float) -> "Transform6DOF":
-        if not (angle is not None):
+        if angle is None:
             raise ValueError("angle must be provided")
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[1, 0, 0], [0, c, -s], [0, s, c]], dtype=np.float64)
@@ -62,7 +62,7 @@ class Transform6DOF:
 
     @classmethod
     def from_rotation_y(cls, angle: float) -> "Transform6DOF":
-        if not (angle is not None):
+        if angle is None:
             raise ValueError("angle must be provided")
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, 0, s], [0, 1, 0], [-s, 0, c]], dtype=np.float64)
@@ -70,7 +70,7 @@ class Transform6DOF:
 
     @classmethod
     def from_rotation_z(cls, angle: float) -> "Transform6DOF":
-        if not (angle is not None):
+        if angle is None:
             raise ValueError("angle must be provided")
         c, s = np.cos(angle), np.sin(angle)
         R = np.array([[c, -s, 0], [s, c, 0], [0, 0, 1]], dtype=np.float64)
@@ -78,7 +78,7 @@ class Transform6DOF:
 
     @classmethod
     def from_axis_angle(cls, axis: Vec3 | list[float], angle: float) -> "Transform6DOF":
-        if not (axis is not None):
+        if axis is None:
             raise ValueError("axis must be provided")
         R = axis_angle_to_rotation_matrix(axis, angle)
         return cls(rotation=R)
@@ -89,7 +89,7 @@ class Transform6DOF:
         rotation: Mat3,
         translation: Vec3 | list[float] | None = None,
     ) -> "Transform6DOF":
-        if not (rotation is not None):
+        if rotation is None:
             raise ValueError("rotation must be provided")
         if translation is None:
             translation = np.zeros(3)
@@ -97,7 +97,7 @@ class Transform6DOF:
 
     @classmethod
     def from_homogeneous_matrix(cls, H: Mat4) -> "Transform6DOF":
-        if not (H is not None):
+        if H is None:
             raise ValueError("H must be provided")
         H = np.asarray(H, dtype=np.float64)
         return cls(rotation=H[:3, :3], translation=H[:3, 3])
@@ -110,7 +110,7 @@ class Transform6DOF:
     def interpolate(
         cls, t1: "Transform6DOF", t2: "Transform6DOF", alpha: float
     ) -> "Transform6DOF":
-        if not (t1 is not None):
+        if t1 is None:
             raise ValueError("t1 must be provided")
         translation = (1 - alpha) * t1._translation + alpha * t2._translation
 
@@ -137,7 +137,7 @@ class Transform6DOF:
         return H
 
     def compose(self, other: "Transform6DOF") -> "Transform6DOF":
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         R = other._rotation @ self._rotation
         t = other._rotation @ self._translation + other._translation
@@ -149,7 +149,7 @@ class Transform6DOF:
         return Transform6DOF(rotation=R_inv, translation=t_inv)
 
     def transform_point(self, point: Vec3 | list[float]) -> Vec3:
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
         return self._rotation @ point + self._translation
@@ -157,13 +157,13 @@ class Transform6DOF:
     def transform_points(
         self, points: npt.NDArray[np.float64]
     ) -> npt.NDArray[np.float64]:
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         points = np.asarray(points, dtype=np.float64)
         return (self._rotation @ points.T).T + self._translation
 
     def transform_vector(self, vector: Vec3 | list[float]) -> Vec3:
-        if not (vector is not None):
+        if vector is None:
             raise ValueError("vector must be provided")
         vector = np.asarray(vector, dtype=np.float64)
         return self._rotation @ vector

@@ -48,7 +48,7 @@ def compute_jacobian(
         Tuple of (jacp, jacr) as (3, nv) arrays.
         Note: Returns views into the provided buffers or copies depending on usage.
     """
-    if not (body_id is not None):
+    if body_id is None:
         raise ValueError("body_id must be provided")
 
     if use_reshaped_arrays:
@@ -96,7 +96,7 @@ def compute_mass_matrix(
     Returns:
         Mass matrix [nv x nv]
     """
-    if not (qpos is not None):
+    if qpos is None:
         raise ValueError("qpos must be provided")
     perturb_data.qpos[:] = qpos
     mujoco.mj_forward(model, perturb_data)
@@ -127,7 +127,7 @@ def compute_coriolis_matrix(
     Returns:
         Coriolis matrix [nv x nv]
     """
-    if not (qpos is not None):
+    if qpos is None:
         raise ValueError("qpos must be provided")
     epsilon = EPSILON_FINITE_DIFF_JACOBIAN
     C = np.zeros((model.nv, model.nv))

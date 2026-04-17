@@ -55,9 +55,9 @@ class AnalysisMixin:
 
     def _compute_live_analysis(self, q: np.ndarray, v: np.ndarray) -> None:
         """Compute induced accelerations and counterfactuals for the current state."""
-        if not (self.plant is not None):  # type: ignore[attr-defined]
+        if self.plant is None:  # type: ignore[attr-defined]
             raise ValueError("DbC Blocked: Precondition failed.")
-        if not (self.eval_context is not None):  # type: ignore[attr-defined]
+        if self.eval_context is None:  # type: ignore[attr-defined]
             raise ValueError("DbC Blocked: Precondition failed.")
         # Update eval context
         self.plant.SetPositions(self.eval_context, q)  # type: ignore[attr-defined]
@@ -111,9 +111,9 @@ class AnalysisMixin:
             if src:
                 unique_sources.add(str(src))
 
-        if not (self.plant is not None):  # type: ignore[attr-defined]
+        if self.plant is None:  # type: ignore[attr-defined]
             raise ValueError("DbC Blocked: Precondition failed.")
-        if not (self.eval_context is not None):  # type: ignore[attr-defined]
+        if self.eval_context is None:  # type: ignore[attr-defined]
             raise ValueError("DbC Blocked: Precondition failed.")
         for source in unique_sources:
             if source in ["gravity", "velocity", "total"]:

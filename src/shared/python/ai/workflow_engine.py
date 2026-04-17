@@ -194,7 +194,7 @@ class WorkflowExecution:
         Returns:
             StepResult if found, None otherwise.
         """
-        if not (step_id is not None):
+        if step_id is None:
             raise ValueError("step_id must be provided")
         for result in self.step_results:
             if result.step_id == step_id:
@@ -222,7 +222,7 @@ class WorkflowEngine:
         Args:
             tool_registry: Registry of available tools.
         """
-        if not (tool_registry is not None):
+        if tool_registry is None:
             raise ValueError("tool_registry must be provided")
         self._tool_registry = tool_registry
         self._workflows: dict[str, Workflow] = {}
@@ -236,7 +236,7 @@ class WorkflowEngine:
         Args:
             workflow: Workflow to register.
         """
-        if not (workflow is not None):
+        if workflow is None:
             raise ValueError("workflow must be provided")
         self._workflows[workflow.id] = workflow
         logger.debug("Registered workflow: %s", workflow.id)
@@ -264,7 +264,7 @@ class WorkflowEngine:
         Returns:
             List of matching workflows.
         """
-        if not (max_expertise is not None):
+        if max_expertise is None:
             raise ValueError("max_expertise must be provided")
         workflows = list(self._workflows.values())
         workflows = [w for w in workflows if w.expertise_level <= max_expertise]
@@ -330,7 +330,7 @@ class WorkflowEngine:
         Returns:
             True if complete (success or failure).
         """
-        if not (execution is not None):
+        if execution is None:
             raise ValueError("execution must be provided")
         workflow = self.get_workflow(execution.workflow_id)
         if workflow is None:
@@ -350,7 +350,7 @@ class WorkflowEngine:
         Returns:
             Current WorkflowStep, or None if complete.
         """
-        if not (execution is not None):
+        if execution is None:
             raise ValueError("execution must be provided")
         workflow = self.get_workflow(execution.workflow_id)
         if workflow is None:
@@ -420,7 +420,7 @@ class WorkflowEngine:
         execution: WorkflowExecution,
         start_time: float,
     ) -> StepResult | None:
-        if not (step is not None):
+        if step is None:
             raise ValueError("step must be provided")
         import time
 
@@ -446,7 +446,7 @@ class WorkflowEngine:
         execution: WorkflowExecution,
         start_time: float,
     ) -> tuple[ToolResult | None, StepResult | None]:
-        if not (step is not None):
+        if step is None:
             raise ValueError("step must be provided")
         import time
 
@@ -487,7 +487,7 @@ class WorkflowEngine:
         tool_result: ToolResult | None,
         start_time: float,
     ) -> StepResult | None:
-        if not (step is not None):
+        if step is None:
             raise ValueError("step must be provided")
         import time
 
@@ -518,7 +518,7 @@ class WorkflowEngine:
         tool_result: ToolResult | None,
         start_time: float,
     ) -> StepResult:
-        if not (step is not None):
+        if step is None:
             raise ValueError("step must be provided")
         import time
 
@@ -553,7 +553,7 @@ class WorkflowEngine:
         Returns:
             StepResult (possibly modified based on recovery).
         """
-        if not (execution is not None):
+        if execution is None:
             raise ValueError("execution must be provided")
         if step.on_failure == RecoveryStrategy.ABORT:
             execution.status = StepStatus.FAILED
@@ -579,7 +579,7 @@ class WorkflowEngine:
         Returns:
             Progress information dictionary.
         """
-        if not (execution is not None):
+        if execution is None:
             raise ValueError("execution must be provided")
         workflow = self.get_workflow(execution.workflow_id)
         if workflow is None:
@@ -616,7 +616,7 @@ class WorkflowEngine:
         Returns:
             Educational content string.
         """
-        if not (step is not None):
+        if step is None:
             raise ValueError("step must be provided")
         level_key = expertise_level.name.lower()
         if level_key in step.educational_content:

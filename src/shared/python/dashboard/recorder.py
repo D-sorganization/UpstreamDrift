@@ -46,7 +46,7 @@ class GenericPhysicsRecorder:
             max_samples: Maximum allocation size for buffers.
             initial_capacity: Initial buffer size (grows dynamically).
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self.max_samples = max_samples
@@ -110,7 +110,7 @@ class GenericPhysicsRecorder:
 
     def set_analysis_config(self, config: dict[str, Any]) -> None:
         """Update analysis configuration."""
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         self.analysis_config.update(config)
         logger.info(f"Recorder analysis config updated: {self.analysis_config}")
@@ -206,7 +206,7 @@ class GenericPhysicsRecorder:
             q: Position state vector
             v: Velocity state vector
         """
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         nq = len(q)
         nv = len(v)
@@ -294,7 +294,7 @@ class GenericPhysicsRecorder:
 
     def _compute_kinetic_energy(self, v: np.ndarray, M: np.ndarray | None) -> float:
         """Compute kinetic energy from velocity and mass matrix."""
-        if not (v is not None):
+        if v is None:
             raise ValueError("v must be provided")
         if M is not None and M.size > 0:
             try:
@@ -312,7 +312,7 @@ class GenericPhysicsRecorder:
         M: np.ndarray | None,
     ) -> None:
         """Record real-time counterfactual and induced acceleration analysis."""
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
             try:
@@ -353,7 +353,7 @@ class GenericPhysicsRecorder:
         self, idx: int, tau: np.ndarray, M: np.ndarray | None
     ) -> None:
         """Record per-source induced accelerations (vectorized when possible)."""
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
         if sources and M is not None and M.size > 0:
@@ -394,7 +394,7 @@ class GenericPhysicsRecorder:
         tau: np.ndarray,
     ) -> None:
         """Store core state data into recording buffers."""
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         self.data["times"][idx] = t
         self.data["joint_positions"][idx] = q
@@ -432,7 +432,7 @@ class GenericPhysicsRecorder:
         Returns:
             Tuple of (times, values) as NumPy array views
         """
-        if not (field_name is not None):
+        if field_name is None:
             raise ValueError("field_name must be provided")
         if field_name not in self.data:
             return np.array([]), np.array([])
@@ -459,7 +459,7 @@ class GenericPhysicsRecorder:
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced acceleration series."""
-        if not (source_name is not None):
+        if source_name is None:
             raise ValueError("source_name must be provided")
         if source_name not in self.data["induced_accelerations"]:
             # Log when parsing/lookup fails for induced acceleration source
@@ -485,7 +485,7 @@ class GenericPhysicsRecorder:
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual series."""
-        if not (cf_name is not None):
+        if cf_name is None:
             raise ValueError("cf_name must be provided")
         if cf_name not in self.data["counterfactuals"]:
             return np.array([]), np.array([])
@@ -592,7 +592,7 @@ class GenericPhysicsRecorder:
             Dictionary with GRF summary, FSP parameters, and per-frame
             wrench decompositions.
         """
-        if not (fsp_window_ms is not None):
+        if fsp_window_ms is None:
             raise ValueError("fsp_window_ms must be provided")
         if not self._buffers_initialized or self.current_idx == 0:
             logger.warning("No data recorded for GRF/wrench analysis")
@@ -633,7 +633,7 @@ class GenericPhysicsRecorder:
         cops: np.ndarray,
     ) -> Any:
         """Run GRF analysis and return the summary (or None on failure)."""
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         from src.shared.python.physics.ground_reaction_forces import (
             FootSide,
@@ -666,7 +666,7 @@ class GenericPhysicsRecorder:
         n: int,
     ) -> float:
         """Determine impact time from peak vertical force if not provided."""
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         if impact_time is not None:
             return impact_time
@@ -683,7 +683,7 @@ class GenericPhysicsRecorder:
         n: int,
     ) -> Any:
         """Fit a Functional Swing Plane from the clubhead trajectory."""
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
             fit_functional_swing_plane,
@@ -707,7 +707,7 @@ class GenericPhysicsRecorder:
         n: int,
     ) -> dict[str, np.ndarray]:
         """Decompose GRF wrenches into swing-plane components."""
-        if not (forces is not None):
+        if forces is None:
             raise ValueError("forces must be provided")
         from src.shared.python.spatial_algebra.reference_frames import (
             ReferenceFrame,
@@ -757,7 +757,7 @@ class GenericPhysicsRecorder:
         wrench_arrays: dict[str, np.ndarray],
     ) -> dict[str, Any]:
         """Assemble the final result dictionary from analysis components."""
-        if not (wrench_arrays is not None):
+        if wrench_arrays is None:
             raise ValueError("wrench_arrays must be provided")
         result: dict[str, Any] = {
             "grf_analysis": {},

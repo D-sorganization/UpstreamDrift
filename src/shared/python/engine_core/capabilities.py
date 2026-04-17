@@ -137,7 +137,7 @@ class EngineCapabilities:
         Returns:
             EngineCapabilities instance.
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         level_map = {
             "full": CapabilityLevel.FULL,

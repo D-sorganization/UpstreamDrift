@@ -118,7 +118,7 @@ class ElevationMap:
 
     def _to_grid_coords(self, x: float, y: float) -> tuple[float, float]:
         """Convert world coordinates to grid coordinates."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         gx = (x - self.origin_x) / self.resolution
         gy = (y - self.origin_y) / self.resolution
@@ -137,7 +137,7 @@ class ElevationMap:
 
     def get_elevation(self, x: float, y: float) -> float:
         """Get interpolated elevation at a point."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         self._check_bounds(x, y)
 
@@ -168,7 +168,7 @@ class ElevationMap:
 
     def get_gradient(self, x: float, y: float) -> tuple[float, float]:
         """Get elevation gradient (slope) at a point."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         self._check_bounds(x, y)
 
@@ -200,7 +200,7 @@ class ElevationMap:
 
     def get_normal(self, x: float, y: float) -> np.ndarray:
         """Get surface normal vector at a point."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         dzdx, dzdy = self.get_gradient(x, y)
         normal = np.array([-dzdx, -dzdy, 1.0])
@@ -209,7 +209,7 @@ class ElevationMap:
 
     def get_slope_angle(self, x: float, y: float) -> float:
         """Get slope angle at a point."""
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         dzdx, dzdy = self.get_gradient(x, y)
         slope_magnitude = math.sqrt(dzdx**2 + dzdy**2)
@@ -229,7 +229,7 @@ class ElevationMap:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "ElevationMap":
         """Create elevation map from dictionary."""
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         return cls(
             data=np.array(data["data"], dtype=np.float64),

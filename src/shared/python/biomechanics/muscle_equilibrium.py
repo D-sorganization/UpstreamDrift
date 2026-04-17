@@ -82,7 +82,7 @@ class EquilibriumSolver:
             Residual force [N] (zero at equilibrium)
         """
         # Normalize lengths
-        if not (l_CE is not None):
+        if l_CE is None:
             raise ValueError("l_CE must be provided")
         l_CE_norm = l_CE / self.muscle.params.l_opt
         v_CE_norm = v_CE / self.muscle.params.v_max
@@ -145,7 +145,7 @@ class EquilibriumSolver:
         Example:
             >>> l_CE = solver.solve_fiber_length(l_MT=0.37, activation=0.5)
         """
-        if not (l_MT is not None):
+        if l_MT is None:
             raise ValueError("l_MT must be provided")
         require(l_MT > 0, "l_MT must be positive", l_MT)
         require(
@@ -236,7 +236,7 @@ class EquilibriumSolver:
             This is an approximation. For exact v_CE, solve the implicit
             differentiated equilibrium equation (more complex).
         """
-        if not (l_MT is not None):
+        if l_MT is None:
             raise ValueError("l_MT must be provided")
         require(dt > 0, "dt must be positive", dt)
         require(l_CE > 0, "l_CE must be positive", l_CE)
@@ -301,7 +301,7 @@ def compute_equilibrium_state(
         >>> l_CE, v_CE = compute_equilibrium_state(muscle, l_MT=0.37, v_MT=0.0, activation=0.5)
         >>> print(f"Fiber length: {l_CE:.4f} m, velocity: {v_CE:.4f} m/s")
     """
-    if not (muscle is not None):
+    if muscle is None:
         raise ValueError("muscle must be provided")
     require(l_MT > 0, "l_MT must be positive", l_MT)
     require(

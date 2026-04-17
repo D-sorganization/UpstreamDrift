@@ -29,7 +29,7 @@ class EntityPlacement:
         pose: Pose6DOF | None = None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.name = name
         self.pose = pose if pose is not None else Pose6DOF()
@@ -42,7 +42,7 @@ class EntityPlacement:
         self.pose._position += np.array([dx, dy, dz], dtype=np.float64)
 
     def rotate_euler(self, roll: float = 0, pitch: float = 0, yaw: float = 0) -> None:
-        if not (roll is not None):
+        if roll is None:
             raise ValueError("roll must be provided")
         self.pose.euler_angles = np.array([roll, pitch, yaw], dtype=np.float64)
 
@@ -50,7 +50,7 @@ class EntityPlacement:
         self.pose.yaw = yaw
 
     def rotate_axis(self, axis: Vec3 | list[float], angle: float) -> None:
-        if not (axis is not None):
+        if axis is None:
             raise ValueError("axis must be provided")
         R = axis_angle_to_rotation_matrix(axis, angle)
         new_euler = rotation_matrix_to_euler(R @ self.pose.rotation_matrix)
@@ -59,7 +59,7 @@ class EntityPlacement:
     def look_at(
         self, target: Vec3 | list[float], up: Vec3 | list[float] | None = None
     ) -> None:
-        if not (target is not None):
+        if target is None:
             raise ValueError("target must be provided")
         target = np.asarray(target, dtype=np.float64)
         if up is None:
@@ -98,7 +98,7 @@ class EntityPlacement:
         return self.pose.rotation_matrix @ np.array([0, 0, 1], dtype=np.float64)
 
     def distance_to(self, point: Vec3 | list[float]) -> float:
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
         return float(np.linalg.norm(self.pose.position - point))
@@ -128,7 +128,7 @@ class EntityPlacement:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "EntityPlacement":
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         pose = Pose6DOF(
             position=data["position"],
@@ -176,7 +176,7 @@ class PlacementGroup:
         return iter(self._entities.values())
 
     def translate_all(self, offset: Vec3 | list[float]) -> None:
-        if not (offset is not None):
+        if offset is None:
             raise ValueError("offset must be provided")
         offset = np.asarray(offset, dtype=np.float64)
         for entity in self._entities.values():
@@ -188,7 +188,7 @@ class PlacementGroup:
         axis: Vec3 | list[float],
         angle: float,
     ) -> None:
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
         R = axis_angle_to_rotation_matrix(axis, angle)

@@ -70,7 +70,7 @@ class ProcessWorker(QThread):
             cwd: Working directory.
             env: Environment variables (optional).
         """
-        if not (cmd is not None):
+        if cmd is None:
             raise ValueError("cmd must be provided")
         super().__init__()
         self.cmd = cmd

@@ -97,7 +97,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         icon_pixmap: object = None,
     ) -> "QtWidgets.QPushButton":
         """Create a standard engine launch button."""
-        if not (label is not None):
+        if label is None:
             raise ValueError("label must be provided")
         btn = QtWidgets.QPushButton(label)
         btn.setMinimumHeight(40)
@@ -114,7 +114,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_engine_buttons(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create and add all engine launch buttons to the layout."""
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         self.btn_mujoco = self._create_engine_button(
             "Launch &MuJoCo Engine",
@@ -187,7 +187,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_shot_tracer_section(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Add separator and shot tracer button to the layout."""
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         layout.addSpacing(10)
 
@@ -213,7 +213,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_log_area(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create the simulation log group box with copy/clear controls."""
-        if not (layout is not None):
+        if layout is None:
             raise ValueError("layout must be provided")
         layout.addSpacing(20)
 
@@ -296,7 +296,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def log_message(self, message: str) -> None:
         """Add a timestamped message to the log area."""
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         import datetime
 
@@ -368,7 +368,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         )
 
     def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.status.setText(f"Launching {name}...")
         self.log_message(f"Starting {name} engine...")

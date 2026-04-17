@@ -38,7 +38,7 @@ class MeshcatBackend(ViewerBackend):
     @property
     def _visualizer(self) -> Any:
         """Get the meshcat visualizer, asserting it's initialized."""
-        if not (self._vis is not None):
+        if self._vis is None:
             raise ValueError("Meshcat visualizer not initialized")
         return self._vis
 
@@ -89,7 +89,7 @@ class MeshcatBackend(ViewerBackend):
         scale: float = 1.0,
     ) -> str:
         """Add mesh to Meshcat scene."""
-        if not (mesh is not None):
+        if mesh is None:
             raise ValueError("mesh must be provided")
         if not self._is_initialized:
             raise RuntimeError("Backend not initialized")
@@ -170,7 +170,7 @@ class MeshcatBackend(ViewerBackend):
     ) -> None:
         """Apply transform to Meshcat object."""
         # Build transformation matrix
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         T = np.eye(4)
 
@@ -210,7 +210,7 @@ class MeshcatBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove object from Meshcat scene."""
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if not self._is_initialized:
             return False

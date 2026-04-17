@@ -27,7 +27,7 @@ def map_joint_type(joint_type: JointType) -> str:
     Returns:
         URDF joint type string (e.g. "revolute", "fixed").
     """
-    if not (joint_type is not None):
+    if joint_type is None:
         raise ValueError("joint_type must be provided")
     mapping = {
         JointType.FIXED: "fixed",
@@ -56,7 +56,7 @@ def generate_single_joint(
     Returns:
         A GeneratedJoint instance.
     """
-    if not (joint_name is not None):
+    if joint_name is None:
         raise ValueError("joint_name must be provided")
     urdf_type = map_joint_type(joint_def.joint_type)
 
@@ -99,7 +99,7 @@ def expand_composite_joint(
         composite, returns a single joint in the joints list and an empty
         links list.
     """
-    if not (joint_name is not None):
+    if joint_name is None:
         raise ValueError("joint_name must be provided")
 
     if joint_def.joint_type == JointType.GIMBAL:

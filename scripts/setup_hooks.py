@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
-    if not (cmd is not None):
+    if cmd is None:
         raise ValueError("cmd must be provided")
     if not isinstance(cmd, list):
         raise ValueError("cmd must be a list")

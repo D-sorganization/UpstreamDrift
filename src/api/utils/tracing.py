@@ -149,7 +149,7 @@ class RequestTracer:
         Returns:
             Response with tracing headers added
         """
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         import time
 
@@ -247,7 +247,7 @@ def traced_log(
         message: Log message
         **kwargs: Additional fields to include in log
     """
-    if not (level is not None):
+    if level is None:
         raise ValueError("level must be provided")
     extra = dict(kwargs)
 

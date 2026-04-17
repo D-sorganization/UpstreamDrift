@@ -183,7 +183,7 @@ class PuttingGreenSimulator:
             rng: Optional numpy random generator for deterministic scatter
             random_seed: Seed for deterministic randomness (used if rng is None)
         """
-        if not (random_seed is not None):
+        if random_seed is None:
             raise ValueError("random_seed must be provided")
         self.config = config or SimulationConfig()
         self.green = green or GreenSurface(
@@ -246,7 +246,7 @@ class PuttingGreenSimulator:
         Args:
             path: Path to configuration file
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         filepath = Path(path)
 
@@ -262,14 +262,14 @@ class PuttingGreenSimulator:
             content: Configuration content
             extension: Format hint (e.g., "json")
         """
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         data = json.loads(content)
         self._load_from_data(data)
 
     def _load_from_data(self, data: dict[str, Any]) -> None:
         """Load configuration from dictionary."""
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if "green" in data:
             green_data = data["green"]
@@ -327,7 +327,7 @@ class PuttingGreenSimulator:
             width: Physical width [m] (uses current if None)
             height: Physical height [m] (uses current if None)
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         filepath = Path(path)
         suffix = filepath.suffix.lower()
@@ -422,7 +422,7 @@ class PuttingGreenSimulator:
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set current state."""
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         self._ball_state.position = np.array(q)
         self._ball_state.velocity = np.array(v)
@@ -430,7 +430,7 @@ class PuttingGreenSimulator:
     def set_control(self, u: np.ndarray) -> None:
         """Apply control input (force on ball)."""
         # Not typically used for putting, but implemented for protocol
-        if not (u is not None):
+        if u is None:
             raise ValueError("u must be provided")
         accel = u / self.ball_mass
         self._ball_state.velocity += accel * self.config.timestep
@@ -470,7 +470,7 @@ class PuttingGreenSimulator:
             SimulationResult with trajectory and outcome
         """
         # Set ball position
-        if not (stroke_params is not None):
+        if stroke_params is None:
             raise ValueError("stroke_params must be provided")
         if ball_position is not None:
             self.set_ball_position(ball_position)
@@ -563,7 +563,7 @@ class PuttingGreenSimulator:
 
     def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Restore state from checkpoint."""
-        if not (checkpoint is not None):
+        if checkpoint is None:
             raise ValueError("checkpoint must be provided")
         self._ball_state.position = checkpoint.get_q()
         self._ball_state.velocity = checkpoint.get_v()
@@ -592,7 +592,7 @@ class PuttingGreenSimulator:
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute Jacobian (identity for ball)."""
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if body_name == "ball":
             return {
@@ -611,7 +611,7 @@ class PuttingGreenSimulator:
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-torque counterfactual (drift only)."""
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         temp_state = BallState(q, v, self._ball_state.spin)
         return self._physics.compute_total_acceleration(temp_state)
@@ -633,7 +633,7 @@ class PuttingGreenSimulator:
             speed: Wind speed [m/s]
             direction: Wind direction (unit vector)
         """
-        if not (speed is not None):
+        if speed is None:
             raise ValueError("speed must be provided")
         self._wind_speed = speed
         mag = np.linalg.norm(direction)
@@ -679,7 +679,7 @@ class PuttingGreenSimulator:
         Returns:
             Dictionary with result and feedback
         """
-        if not (stroke_params is not None):
+        if stroke_params is None:
             raise ValueError("stroke_params must be provided")
         result = self.simulate_putt(stroke_params)
 
@@ -731,7 +731,7 @@ class PuttingGreenSimulator:
         Returns:
             List of simulation results
         """
-        if not (start_position is not None):
+        if start_position is None:
             raise ValueError("start_position must be provided")
         results = []
         rng = rng or self._rng
@@ -774,7 +774,7 @@ class PuttingGreenSimulator:
         Returns:
             Dictionary with aim information
         """
-        if not (ball_position is not None):
+        if ball_position is None:
             raise ValueError("ball_position must be provided")
         target = self.green.hole_position
 
@@ -813,7 +813,7 @@ class PuttingGreenSimulator:
         Returns:
             Green reading with slopes and recommendations
         """
-        if not (ball_position is not None):
+        if ball_position is None:
             raise ValueError("ball_position must be provided")
         reading = self.green.read_putt_line(ball_position, target)
         break_info = self.green.calculate_break(ball_position, target)

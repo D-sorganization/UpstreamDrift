@@ -112,7 +112,7 @@ class Signal:
         Returns:
             New Signal with the sliced data.
         """
-        if not (t_start is not None):
+        if t_start is None:
             raise ValueError("t_start must be provided")
         mask = (self.time >= t_start) & (self.time <= t_end)
         return Signal(
@@ -132,7 +132,7 @@ class Signal:
         Returns:
             New Signal with resampled data.
         """
-        if not (new_fs is not None):
+        if new_fs is None:
             raise ValueError("new_fs must be provided")
         require(new_fs > 0, "new_fs must be positive", new_fs)
         new_dt = 1.0 / new_fs
@@ -148,7 +148,7 @@ class Signal:
 
     def __add__(self, other: Signal | float | np.ndarray) -> Signal:
         """Add two signals or add a constant."""
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         if isinstance(other, Signal):
             if not np.allclose(self.time, other.time):
@@ -171,7 +171,7 @@ class Signal:
 
     def __mul__(self, other: Signal | float | np.ndarray) -> Signal:
         """Multiply two signals or multiply by a constant."""
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         if isinstance(other, Signal):
             if not np.allclose(self.time, other.time):
@@ -250,7 +250,7 @@ class SignalGenerator:
         Returns:
             Signal: y = amplitude * sin(2*pi*frequency*t + phase) + offset
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         values = amplitude * np.sin(2 * np.pi * frequency * t + phase) + offset
         return Signal(time=t, values=values, name=name)
@@ -277,7 +277,7 @@ class SignalGenerator:
         Returns:
             Signal: y = amplitude * cos(2*pi*frequency*t + phase) + offset
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         values = amplitude * np.cos(2 * np.pi * frequency * t + phase) + offset
         return Signal(time=t, values=values, name=name)
@@ -302,7 +302,7 @@ class SignalGenerator:
         Returns:
             Signal: y = amplitude * exp(-decay_rate * t) + offset
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         t_shifted = t - t[0]  # Start from t=0
         values = amplitude * np.exp(-decay_rate * t_shifted) + offset
@@ -326,7 +326,7 @@ class SignalGenerator:
         Returns:
             Signal: y = slope * t + intercept
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         t_shifted = t - t[0]  # Start from t=0
         values = slope * t_shifted + intercept
@@ -349,7 +349,7 @@ class SignalGenerator:
         Returns:
             Signal with polynomial values.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         coeffs = np.asarray(coefficients)
         t_shifted = t - t[0]  # Start from t=0
@@ -376,7 +376,7 @@ class SignalGenerator:
         Returns:
             Signal with step at step_time.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         values = np.where(t >= step_time, step_value, initial_value)
         return Signal(time=t, values=values, name=name)
@@ -403,7 +403,7 @@ class SignalGenerator:
         Returns:
             Signal with rectangular pulse.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         values = np.where(
             (t >= start_time) & (t < start_time + duration),
@@ -434,7 +434,7 @@ class SignalGenerator:
         Returns:
             Signal with chirp waveform.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         t_shifted = t - t[0]
         t_end = t_shifted[-1]
@@ -477,7 +477,7 @@ class SignalGenerator:
         Returns:
             Signal with sawtooth waveform.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         period = 1.0 / frequency
         t_shifted = t - t[0]
@@ -505,7 +505,7 @@ class SignalGenerator:
         Returns:
             Signal with triangle waveform.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         period = 1.0 / frequency
         t_shifted = t - t[0]
@@ -536,7 +536,7 @@ class SignalGenerator:
         Returns:
             Signal with square waveform.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         period = 1.0 / frequency
         t_shifted = t - t[0]
@@ -560,7 +560,7 @@ class SignalGenerator:
         Returns:
             Signal with values from the function.
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         values = func(t)
         return Signal(time=t, values=values, name=name)

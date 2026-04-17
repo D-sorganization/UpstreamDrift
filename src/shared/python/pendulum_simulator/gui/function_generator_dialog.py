@@ -198,7 +198,7 @@ class FunctionGeneratorDialog(QDialog):
 
     def _on_signal_applied(self, joint_name: str, coefficients: list) -> None:
         """Handle signal emissions from either widget."""
-        if not (joint_name is not None):
+        if joint_name is None:
             raise ValueError("joint_name must be provided")
         logger.info("Signal applied to %s: %s", joint_name, coefficients)
         # Normalize joint name to lowercase for consistency

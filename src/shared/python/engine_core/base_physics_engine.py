@@ -56,7 +56,7 @@ class EngineState:
             nq: Number of position coordinates
             nv: Number of velocity coordinates
         """
-        if not (nq is not None):
+        if nq is None:
             raise ValueError("nq must be provided")
         self.q: np.ndarray = np.zeros(nq)  # Positions
         self.v: np.ndarray = np.zeros(nv)  # Velocities
@@ -211,7 +211,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         # Verify postconditions
         if not (self._is_initialized):
             raise ValueError("Postcondition: engine must be initialized after load")
-        if not (self.model is not None):
+        if self.model is None:
             raise ValueError("Postcondition: model must be loaded")
 
         logger.info(f"Successfully loaded model: {self.model_name}")
@@ -251,7 +251,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         # Verify postconditions
         if not (self._is_initialized):
             raise ValueError("Postcondition: engine must be initialized after load")
-        if not (self.model is not None):
+        if self.model is None:
             raise ValueError("Postcondition: model must be loaded")
 
         logger.info("Successfully loaded model from string")
@@ -438,7 +438,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         Args:
             checkpoint: Checkpoint to restore from.
         """
-        if not (checkpoint is not None):
+        if checkpoint is None:
             raise ValueError("checkpoint must be provided")
         if not checkpoint.engine_state:
             return
@@ -549,7 +549,7 @@ class SimulationMixin:
         Args:
             dt: Time step size
         """
-        if not (dt is not None):
+        if dt is None:
             raise ValueError("dt must be provided")
         self._simulation_time += dt
         self._step_count += 1

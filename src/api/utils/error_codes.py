@@ -366,7 +366,7 @@ class APIError:
         Returns:
             APIError instance
         """
-        if not (code is not None):
+        if code is None:
             raise ValueError("code must be provided")
         metadata = ERROR_METADATA.get(code, {})
         return cls(
@@ -421,7 +421,7 @@ class APIException(HTTPException):
             message: Optional custom message
             details: Additional error details
         """
-        if not (code is not None):
+        if code is None:
             raise ValueError("code must be provided")
         self.error = APIError.from_code(code, message, details)
         metadata = ERROR_METADATA.get(code, {})

@@ -179,7 +179,7 @@ class LauncherDialogsMixin:
         Args:
             checked: Whether the button is checked.
         """
-        if not (checked is not None):
+        if checked is None:
             raise ValueError("checked must be provided")
         if not AI_AVAILABLE or not hasattr(self, "ai_panel"):
             return
@@ -218,7 +218,7 @@ class LauncherDialogsMixin:
         Args:
             tab: Initial tab index (0=Diagnostics, 1=Rebuild Environment).
         """
-        if not (tab is not None):
+        if tab is None:
             raise ValueError("tab must be provided")
         diagnostics_data = None
         try:
@@ -295,7 +295,7 @@ class LauncherDialogsMixin:
 
     def toggle_layout_mode(self, checked: bool) -> None:
         """Toggle tile editing mode."""
-        if not (checked is not None):
+        if checked is None:
             raise ValueError("checked must be provided")
         self.layout_edit_mode = checked
         self.layout_manager.set_edit_mode(checked)
@@ -315,7 +315,7 @@ class LauncherDialogsMixin:
         Args:
             state: Qt checkbox state (0=unchecked, 2=checked)
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         use_docker = state == 2
         if use_docker:
@@ -358,7 +358,7 @@ class LauncherDialogsMixin:
         Args:
             state: Qt checkbox state (0=unchecked, 2=checked)
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         use_wsl = state == 2
 

@@ -217,7 +217,7 @@ class DragModel:
             ball_radius: Ball radius [m]
             reynolds_correction: Apply Reynolds number correction
         """
-        if not (base_coefficient is not None):
+        if base_coefficient is None:
             raise ValueError("base_coefficient must be provided")
         self.base_coefficient = base_coefficient
         self.ball_area = ball_area
@@ -269,7 +269,7 @@ class DragModel:
         Returns:
             Effective drag coefficient
         """
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         if not self.reynolds_correction:
             return self.base_coefficient
@@ -324,7 +324,7 @@ class LiftModel:
             ball_radius: Ball radius [m]
             max_coefficient: Maximum lift coefficient (saturation)
         """
-        if not (base_coefficient is not None):
+        if base_coefficient is None:
             raise ValueError("base_coefficient must be provided")
         self.base_coefficient = base_coefficient
         self.ball_area = ball_area
@@ -385,7 +385,7 @@ class LiftModel:
             Lift coefficient
         """
         # Empirical relationship: Cl saturates at high spin
-        if not (spin_ratio is not None):
+        if spin_ratio is None:
             raise ValueError("spin_ratio must be provided")
         cl = self.max_coefficient * (1 - math.exp(-spin_ratio / 0.1))
         return min(cl, self.max_coefficient)
@@ -413,7 +413,7 @@ class MagnusModel:
             ball_area: Cross-sectional area [m^2]
             ball_radius: Ball radius [m]
         """
-        if not (coefficient is not None):
+        if coefficient is None:
             raise ValueError("coefficient must be provided")
         self.coefficient = coefficient
         self.ball_area = ball_area
@@ -500,7 +500,7 @@ class WindGust:
             duration: Total gust duration [s]
             peak_velocity: Maximum gust velocity [m/s]
         """
-        if not (start_time is not None):
+        if start_time is None:
             raise ValueError("start_time must be provided")
         self.start_time = start_time
         self.duration = duration
@@ -522,7 +522,7 @@ class WindGust:
         Returns:
             Gust velocity at time t [m/s]
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         if t < self.start_time or t > self.end_time:
             return np.zeros(3)
@@ -553,7 +553,7 @@ class TurbulenceModel:
             intensity: Turbulence intensity scale [m/s]
             seed: Random seed for reproducibility
         """
-        if not (intensity is not None):
+        if intensity is None:
             raise ValueError("intensity must be provided")
         self.intensity = intensity
         self._rng = np.random.default_rng(seed)
@@ -576,7 +576,7 @@ class TurbulenceModel:
         Returns:
             Turbulence velocity perturbation [m/s]
         """
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         if self.intensity < 1e-10:
             return np.zeros(3)
@@ -640,7 +640,7 @@ class WindModel:
             Wind velocity [m/s]
         """
         # Start with base wind
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         wind = self.config.base_velocity.copy()
 
@@ -669,7 +669,7 @@ class WindModel:
             Total gust velocity [m/s]
         """
         # Maybe spawn new gust
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         self._maybe_spawn_gust(t)
 
@@ -693,7 +693,7 @@ class WindModel:
             t: Current time [s]
         """
         # Compute time since last check
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         if self._last_check_time < 0:
             self._last_check_time = t
@@ -793,7 +793,7 @@ class EnvironmentRandomizer:
         Returns:
             Randomized air density [kg/m^3]
         """
-        if not (base_density is not None):
+        if base_density is None:
             raise ValueError("base_density must be provided")
         if not self.config.enabled or self.config.air_density_variance <= 0:
             return base_density
@@ -811,7 +811,7 @@ class EnvironmentRandomizer:
         Returns:
             Randomized temperature [C]
         """
-        if not (base_temperature is not None):
+        if base_temperature is None:
             raise ValueError("base_temperature must be provided")
         if not self.config.enabled or self.config.temperature_variance <= 0:
             return base_temperature
@@ -829,7 +829,7 @@ class EnvironmentRandomizer:
         Returns:
             Randomized wind configuration
         """
-        if not (base_config is not None):
+        if base_config is None:
             raise ValueError("base_config must be provided")
         if not self.config.enabled:
             return base_config
@@ -934,7 +934,7 @@ class AerodynamicsEngine:
             randomization: Environment randomizer
             air_density: Base air density [kg/m^3]
         """
-        if not (air_density is not None):
+        if air_density is None:
             raise ValueError("air_density must be provided")
         self.config = config or AerodynamicsConfig()
         self.wind_model = wind_model
@@ -1068,7 +1068,7 @@ class AerodynamicsEngine:
         Raises:
             PreconditionError: If mass <= 0
         """
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
         forces = self.compute_forces(velocity, spin, t, position, resample)
         return forces["total"] / mass

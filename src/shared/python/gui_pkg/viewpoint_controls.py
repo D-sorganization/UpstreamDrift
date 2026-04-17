@@ -121,7 +121,7 @@ def spherical_to_cartesian(
     Returns:
         Camera position in world frame [m] (3,)
     """
-    if not (azimuth_deg is not None):
+    if azimuth_deg is None:
         raise ValueError("azimuth_deg must be provided")
     az = np.radians(azimuth_deg)
     el = np.radians(elevation_deg)
@@ -151,7 +151,7 @@ def get_preset_camera_params(
     Returns:
         Tuple of (azimuth_deg, elevation_deg, look_at_point)
     """
-    if not (preset is not None):
+    if preset is None:
         raise ValueError("preset must be provided")
     if golfer_position is None:
         golfer_position = DEFAULT_GOLFER_POSITION.copy()
@@ -219,7 +219,7 @@ def create_camera_from_preset(
     Returns:
         CameraState configured for the preset
     """
-    if not (preset is not None):
+    if preset is None:
         raise ValueError("preset must be provided")
     azimuth, elevation, look_at = get_preset_camera_params(
         preset, golfer_position, target_direction, distance
@@ -255,7 +255,7 @@ def create_custom_camera(
     Returns:
         CameraState with custom configuration
     """
-    if not (azimuth_deg is not None):
+    if azimuth_deg is None:
         raise ValueError("azimuth_deg must be provided")
     position = spherical_to_cartesian(azimuth_deg, elevation_deg, distance, look_at)
 
@@ -283,7 +283,7 @@ def interpolate_camera_states(
     Returns:
         Interpolated camera state
     """
-    if not (start is not None):
+    if start is None:
         raise ValueError("start must be provided")
     t = np.clip(t, 0.0, 1.0)
 
@@ -322,7 +322,7 @@ def create_transition_sequence(
     Returns:
         List of interpolated camera states
     """
-    if not (start is not None):
+    if start is None:
         raise ValueError("start must be provided")
     if num_frames < 2:
         return [end]
@@ -358,7 +358,7 @@ def compute_tracking_look_at(
     Returns:
         Look-at point [m] (3,)
     """
-    if not (target is not None):
+    if target is None:
         raise ValueError("target must be provided")
     if target == TrackingTarget.CLUBHEAD and clubhead_position is not None:
         return clubhead_position.copy()
@@ -396,7 +396,7 @@ def create_multiview_layout(
     Returns:
         ViewportLayout with camera states
     """
-    if not (presets is not None):
+    if presets is None:
         raise ValueError("presets must be provided")
     n = len(presets)
 
@@ -507,7 +507,7 @@ class ViewpointController:
         Returns:
             New camera state (or first frame of transition)
         """
-        if not (preset is not None):
+        if preset is None:
             raise ValueError("preset must be provided")
         target_camera = create_camera_from_preset(
             preset, self.golfer_position, self.target_direction, distance
@@ -542,7 +542,7 @@ class ViewpointController:
         Returns:
             New camera state
         """
-        if not (azimuth_deg is not None):
+        if azimuth_deg is None:
             raise ValueError("azimuth_deg must be provided")
         if look_at is None:
             look_at = self.golfer_position + np.array([0.0, 0.0, 1.0])

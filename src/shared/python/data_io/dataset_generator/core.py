@@ -47,7 +47,7 @@ class DatasetGenerator:
         Raises:
             ValueError: If engine has no model loaded.
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
@@ -85,7 +85,7 @@ class DatasetGenerator:
         Raises:
             RuntimeError: If simulation fails for all samples.
         """
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         rng = np.random.default_rng(config.seed)
 
@@ -215,19 +215,19 @@ class DatasetGenerator:
             "control_type": profile.profile_type,
         }
 
-        if not (buffers["times"] is not None):
+        if buffers["times"] is None:
             raise ValueError("times buffer must not be None")
-        if not (buffers["positions"] is not None):
+        if buffers["positions"] is None:
             raise ValueError("positions buffer must not be None")
-        if not (buffers["velocities"] is not None):
+        if buffers["velocities"] is None:
             raise ValueError("velocities buffer must not be None")
-        if not (buffers["accelerations"] is not None):
+        if buffers["accelerations"] is None:
             raise ValueError("accelerations buffer must not be None")
-        if not (buffers["torques"] is not None):
+        if buffers["torques"] is None:
             raise ValueError("torques buffer must not be None")
-        if not (buffers["kinetic_energy"] is not None):
+        if buffers["kinetic_energy"] is None:
             raise ValueError("kinetic_energy buffer must not be None")
-        if not (buffers["potential_energy"] is not None):
+        if buffers["potential_energy"] is None:
             raise ValueError("potential_energy buffer must not be None")
 
         return SimulationSample(
@@ -352,7 +352,7 @@ class DatasetGenerator:
             v: Current velocity vector.
             buffers: Pre-allocated recording buffers (modified in-place).
         """
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         if config.record_mass_matrix and buffers["mass_matrices"] is not None:
             with contextlib.suppress(ValueError, RuntimeError, AttributeError):
@@ -409,7 +409,7 @@ class DatasetGenerator:
         Returns:
             Tuple of (initial_positions, initial_velocities).
         """
-        if not (config is not None):
+        if config is None:
             raise ValueError("config must be provided")
         if config.vary_initial_positions and config.position_ranges:
             q0 = np.zeros(n_q)
@@ -496,7 +496,7 @@ class DatasetGenerator:
         Raises:
             ImportError: If h5py is not available.
         """
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         try:
             import h5py
@@ -523,7 +523,7 @@ class DatasetGenerator:
     @staticmethod
     def _write_hdf5_metadata(f: Any, dataset: TrainingDataset) -> None:
         """Write dataset-level metadata to an HDF5 file."""
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         meta = f.create_group("metadata")
         meta.attrs["model_name"] = dataset.model_name
@@ -544,7 +544,7 @@ class DatasetGenerator:
     @staticmethod
     def _write_hdf5_sample(samples_grp: Any, sample: SimulationSample) -> None:
         """Write a single sample's data to an HDF5 samples group."""
-        if not (sample is not None):
+        if sample is None:
             raise ValueError("sample must be provided")
         s_grp = samples_grp.create_group(f"sample_{sample.sample_id:06d}")
         s_grp.create_dataset("times", data=sample.times, compression="gzip")
@@ -586,7 +586,7 @@ class DatasetGenerator:
         Returns:
             Path to the created SQLite database.
         """
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         output_path = Path(output_path)
         if not output_path.suffix:
@@ -652,7 +652,7 @@ class DatasetGenerator:
         cursor: sqlite3.Cursor, dataset: TrainingDataset
     ) -> None:
         """Insert dataset-level metadata into the SQLite database."""
-        if not (cursor is not None):
+        if cursor is None:
             raise ValueError("cursor must be provided")
         meta_items = [
             ("model_name", dataset.model_name),
@@ -673,7 +673,7 @@ class DatasetGenerator:
     @staticmethod
     def _insert_sqlite_sample(cursor: sqlite3.Cursor, sample: SimulationSample) -> None:
         """Insert a single sample and its frames into the SQLite database."""
-        if not (cursor is not None):
+        if cursor is None:
             raise ValueError("cursor must be provided")
         n_steps = len(sample.times)
         n_q = sample.positions.shape[1] if sample.positions.ndim > 1 else 0
@@ -723,7 +723,7 @@ class DatasetGenerator:
         Returns:
             Path to the output directory.
         """
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

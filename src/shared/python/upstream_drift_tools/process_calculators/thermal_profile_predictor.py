@@ -19,7 +19,7 @@ def _heating_ode(
     power_func: Callable[[float], float],
 ) -> Sequence[float]:
     """ODE for simple vessel heating."""
-    if not (t is not None):
+    if t is None:
         raise ValueError("t must be provided")
     q_in = power_func(t)
     dTdt = (q_in - heat_loss_coeff * (y[0] - ambient_temp)) / thermal_mass
@@ -37,7 +37,7 @@ def predict_temperature_profile(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Predict temperature profile for a heated vessel."""
 
-    if not (t_span is not None):
+    if t_span is None:
         raise ValueError("t_span must be provided")
 
     def rhs(t: float, y: Any) -> Any:
@@ -60,7 +60,7 @@ def fit_heating_parameters(
 ) -> tuple[float, float]:
     """Fit thermal_mass and heat_loss_coeff to observed data."""
 
-    if not (times is not None):
+    if times is None:
         raise ValueError("times must be provided")
 
     def model(t: Any, thermal_mass: float, heat_loss_coeff: float) -> np.ndarray:
@@ -69,7 +69,7 @@ def fit_heating_parameters(
         Returns:
             None
         """
-        if not (thermal_mass is not None):
+        if thermal_mass is None:
             raise ValueError("thermal_mass must be provided")
         _, temps = predict_temperature_profile(
             (t[0], t[-1]),

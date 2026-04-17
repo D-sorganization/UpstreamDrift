@@ -159,7 +159,7 @@ class MotionPlanner(ABC):
             collision_checker: Collision checking interface.
             config: Planner configuration.
         """
-        if not (collision_checker is not None):
+        if collision_checker is None:
             raise ValueError("collision_checker must be provided")
         self._collision_checker = collision_checker
         self._config = config or PlannerConfig()
@@ -239,7 +239,7 @@ class MotionPlanner(ABC):
         Returns:
             Sampled configuration (may be goal).
         """
-        if not (q_goal is not None):
+        if q_goal is None:
             raise ValueError("q_goal must be provided")
         if self._rng.random() < self._config.goal_bias:
             return q_goal.copy()
@@ -255,7 +255,7 @@ class MotionPlanner(ABC):
             True if configuration is valid.
         """
         # Check bounds
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if (
             self._lower_bounds is not None
@@ -284,7 +284,7 @@ class MotionPlanner(ABC):
         Returns:
             New configuration in direction of target.
         """
-        if not (q_from is not None):
+        if q_from is None:
             raise ValueError("q_from must be provided")
         max_distance = max_distance or self._config.step_size
         direction = q_to - q_from
@@ -321,7 +321,7 @@ class MotionPlanner(ABC):
         Returns:
             True if path is collision-free.
         """
-        if not (q_from is not None):
+        if q_from is None:
             raise ValueError("q_from must be provided")
         is_free, _ = self._collision_checker.check_path_collision(
             q_from,
@@ -339,7 +339,7 @@ class MotionPlanner(ABC):
         Returns:
             Total path length.
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         if len(path) < 2:
             return 0.0

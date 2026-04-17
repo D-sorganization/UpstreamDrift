@@ -504,7 +504,7 @@ async def set_simulation_speed(
     Returns:
         Applied speed factor and status.
     """
-    if not (request is not None):
+    if request is None:
         raise ValueError("request must be provided")
     engine_manager._speed_factor = request.speed_factor  # type: ignore[attr-defined]
 

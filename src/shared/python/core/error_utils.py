@@ -58,7 +58,7 @@ class EngineNotAvailableError(GolfSuiteError):
         operation: str | None = None,
         install_hint: str | None = None,
     ) -> None:
-        if not (engine_name is not None):
+        if engine_name is None:
             raise ValueError("engine_name must be provided")
         self.engine_name = engine_name
         self.operation = operation
@@ -95,7 +95,7 @@ class ConfigurationError(GolfSuiteError):
         expected: Any = None,
         actual: Any = None,
     ) -> None:
-        if not (config_key is not None):
+        if config_key is None:
             raise ValueError("config_key must be provided")
         self.config_key = config_key
         self.reason = reason
@@ -124,7 +124,7 @@ class ValidationError(GolfSuiteError):
         valid_values: list[Any] | None = None,
         message: str | None = None,
     ) -> None:
-        if not (field is not None):
+        if field is None:
             raise ValueError("field must be provided")
         self.field = field
         self.value = value
@@ -155,7 +155,7 @@ class ModelError(GolfSuiteError):
         operation: str,
         details: str | None = None,
     ) -> None:
-        if not (model_name is not None):
+        if model_name is None:
             raise ValueError("model_name must be provided")
         self.model_name = model_name
         self.operation = operation
@@ -177,7 +177,7 @@ class SimulationError(GolfSuiteError):
         time_step: float | None = None,
         state: dict[str, Any] | None = None,
     ) -> None:
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         self.time_step = time_step
         self.state = state
@@ -198,7 +198,7 @@ class FileOperationError(GolfSuiteError):
         operation: str,
         reason: str | None = None,
     ) -> None:
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         self.path = Path(path)
         self.operation = operation
@@ -232,7 +232,7 @@ def format_import_error(
     Example:
         raise ImportError(format_import_error("mujoco", "physics simulation"))
     """
-    if not (module_name is not None):
+    if module_name is None:
         raise ValueError("module_name must be provided")
     message = f"Module '{module_name}' is not installed"
     if feature:
@@ -263,7 +263,7 @@ def format_file_error(
     Example:
         raise FileNotFoundError(format_file_error("config.json", "read"))
     """
-    if not (path is not None):
+    if path is None:
         raise ValueError("path must be provided")
     message = f"Cannot {operation} file: {path}"
     if reason:
@@ -310,7 +310,7 @@ def format_type_error(
     Example:
         raise TypeError(format_type_error("position", "ndarray", type(value)))
     """
-    if not (field is not None):
+    if field is None:
         raise ValueError("field must be provided")
     expected = (
         expected_type if isinstance(expected_type, str) else expected_type.__name__
@@ -339,7 +339,7 @@ def format_range_error(
     Example:
         raise ValueError(format_range_error("angle", 400, 0, 360))
     """
-    if not (field is not None):
+    if field is None:
         raise ValueError("field must be provided")
     message = f"Value for '{field}' ({value}) is out of range"
     if min_value is not None and max_value is not None:
@@ -408,7 +408,7 @@ class EnvironmentError(ConfigurationError):
         expected: str | None = None,
         actual: str | None = None,
     ) -> None:
-        if not (var_name is not None):
+        if var_name is None:
             raise ValueError("var_name must be provided")
         super().__init__(
             config_key=var_name,
@@ -426,7 +426,7 @@ class IOError(GolfSuiteError):
     """
 
     def __init__(self, message: str, path: Path | str | None = None) -> None:
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         self.path = Path(path) if path else None
         if self.path:
@@ -441,7 +441,7 @@ class FileNotFoundIOError(IOError):
     """
 
     def __init__(self, path: Path | str, context: str | None = None) -> None:
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         self.context = context
         message = "File not found"
@@ -462,7 +462,7 @@ class FileParseError(IOError):
         format_type: str,
         details: str | None = None,
     ) -> None:
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         self.format_type = format_type
         self.details = details
@@ -484,7 +484,7 @@ class PhysicalValidationError(ValidationError):
         value: Any = None,
         physical_constraint: str | None = None,
     ) -> None:
-        if not (field is not None):
+        if field is None:
             raise ValueError("field must be provided")
         super().__init__(
             field=field,
@@ -506,7 +506,7 @@ class DataFormatError(GolfSuiteError):
         expected_format: str | None = None,
         actual_format: str | None = None,
     ) -> None:
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         self.expected_format = expected_format
         self.actual_format = actual_format
@@ -532,7 +532,7 @@ class EngineLaunchError(PhysicsSimulationError):
     """Raised when a physics engine fails to initialize."""
 
     def __init__(self, engine_type: str, reason: str = "") -> None:
-        if not (engine_type is not None):
+        if engine_type is None:
             raise ValueError("engine_type must be provided")
         self.engine_type = engine_type
         msg = f"Failed to launch engine '{engine_type}'"
@@ -545,7 +545,7 @@ class SimulationStepError(PhysicsSimulationError):
     """Raised when a simulation step fails to complete."""
 
     def __init__(self, step: int, reason: str = "") -> None:
-        if not (step is not None):
+        if step is None:
             raise ValueError("step must be provided")
         self.step = step
         msg = f"Simulation failed at step {step}"
@@ -558,7 +558,7 @@ class ModelLoadError(PhysicsSimulationError):
     """Raised when a model file cannot be loaded."""
 
     def __init__(self, model_path: str, reason: str = "") -> None:
-        if not (model_path is not None):
+        if model_path is None:
             raise ValueError("model_path must be provided")
         self.model_path = model_path
         msg = f"Failed to load model '{model_path}'"
@@ -571,7 +571,7 @@ class SimulationTimeoutError(PhysicsSimulationError):
     """Raised when a simulation exceeds its time budget."""
 
     def __init__(self, timeout_seconds: float) -> None:
-        if not (timeout_seconds is not None):
+        if timeout_seconds is None:
             raise ValueError("timeout_seconds must be provided")
         self.timeout_seconds = timeout_seconds
         super().__init__(f"Simulation timed out after {timeout_seconds}s")
@@ -606,7 +606,7 @@ class TimeoutError(GolfSuiteError):
         timeout_seconds: float,
         details: str | None = None,
     ) -> None:
-        if not (operation is not None):
+        if operation is None:
             raise ValueError("operation must be provided")
         self.operation = operation
         self.timeout_seconds = timeout_seconds
@@ -630,7 +630,7 @@ class ResourceError(GolfSuiteError):
         resource_type: str,
         reason: str | None = None,
     ) -> None:
-        if not (resource_type is not None):
+        if resource_type is None:
             raise ValueError("resource_type must be provided")
         self.resource_type = resource_type
         self.reason = reason

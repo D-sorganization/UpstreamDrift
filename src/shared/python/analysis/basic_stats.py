@@ -38,7 +38,7 @@ class BasicStatsMixin:
         Returns:
             SummaryStatistics object
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         require(len(data) > 0, "data must be non-empty")
 
@@ -83,7 +83,7 @@ class BasicStatsMixin:
         Returns:
             List of PeakInfo objects
         """
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         peaks, properties = find_peaks(
             data,

@@ -65,7 +65,7 @@ def train_policy(
     Returns:
         Trained SAC model.
     """
-    if not (env is not None):
+    if env is None:
         raise ValueError("env must be provided")
     logger.info("Training SAC policy for %d timesteps...", total_timesteps)
     logger.info("=" * 60)
@@ -114,7 +114,7 @@ def evaluate_policy(model: SAC, env: gym.Env, n_episodes: int = 5) -> None:
         env: Gym environment.
         n_episodes: Number of evaluation episodes.
     """
-    if not (model is not None):
+    if model is None:
         raise ValueError("model must be provided")
     logger.info("Evaluating policy for %d episodes...", n_episodes)
     logger.info("=" * 60)

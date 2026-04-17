@@ -466,7 +466,7 @@ def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[float, float, float, f
     Returns:
         Tuple of (r, g, b, a) with values 0-1 for matplotlib
     """
-    if not (hex_color is not None):
+    if hex_color is None:
         raise ValueError("hex_color must be provided")
     hex_color = hex_color.lstrip("#")
 

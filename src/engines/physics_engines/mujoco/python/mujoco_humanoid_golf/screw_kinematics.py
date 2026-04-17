@@ -62,7 +62,7 @@ class ScrewKinematicsAnalyzer:
         Args:
             model: MuJoCo model
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
 
@@ -93,7 +93,7 @@ class ScrewKinematicsAnalyzer:
         Returns:
             Twist with angular and linear velocities
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         import mujoco
 
@@ -158,7 +158,7 @@ class ScrewKinematicsAnalyzer:
         Returns:
             Dict mapping body name to (twist, screw_axis) tuple
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         import mujoco
 
@@ -205,7 +205,7 @@ class ScrewKinematicsAnalyzer:
         Returns:
             Manipulability measure (dimensionless)
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         import mujoco
 

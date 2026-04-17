@@ -405,7 +405,7 @@ class SwingOptimizationBridge:
             is a list of state vectors and *clubhead_velocity* is the
             speed of the last joint at the terminal time-step.
         """
-        if not (controls is not None):
+        if controls is None:
             raise ValueError("controls must be provided")
         n = self._config.n_joints
         dt = self._config.dt

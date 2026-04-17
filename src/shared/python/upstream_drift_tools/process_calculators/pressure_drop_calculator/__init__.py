@@ -233,7 +233,7 @@ class PressureDropCalculator:
     ) -> PressureDropResult:
         """Calculate pressure drop using Darcy-Weisbach equation."""
         # Calculate gas properties (Z=1.0 assumption - Ideal Gas)
-        if not (pipe_diameter_m is not None):
+        if pipe_diameter_m is None:
             raise ValueError("pipe_diameter_m must be provided")
         Z = 1.0
         density = (pressure_pa * molecular_weight_kg_mol) / (

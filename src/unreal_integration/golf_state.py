@@ -89,7 +89,7 @@ class ClubState:
         Returns:
             New ClubState instance.
         """
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         return cls(
             head_position=Vector3.from_dict(d["head_position"]),
@@ -176,7 +176,7 @@ class SwingMetrics:
         Returns:
             New SwingMetrics instance.
         """
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         return cls(
             club_head_speed=d.get("club_head_speed"),
@@ -261,7 +261,7 @@ class BallState:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> BallState:
         """Create BallState from dictionary."""
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         return cls(
             position=Vector3.from_dict(d["position"]),
@@ -310,7 +310,7 @@ class TrajectoryPoint:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> TrajectoryPoint:
         """Create TrajectoryPoint from dictionary."""
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         color = tuple(d["color"]) if "color" in d else None
         return cls(
@@ -380,7 +380,7 @@ class EnvironmentState:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> EnvironmentState:
         """Create EnvironmentState from dictionary."""
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         return cls(
             wind_velocity=Vector3.from_dict(d["wind_velocity"]),

@@ -114,7 +114,7 @@ def cross_motion(
     out: npt.NDArray[np.float64] | None = None,
 ) -> npt.NDArray[np.float64]:
     """Compute spatial cross product v x m efficiently."""
-    if not (v is not None):
+    if v is None:
         raise ValueError("v must be provided")
     v = np.asarray(v)
     if v.shape != (6,):
@@ -151,7 +151,7 @@ def cross_force(
     out: npt.NDArray[np.float64] | None = None,
 ) -> npt.NDArray[np.float64]:
     """Compute spatial force cross product v x* f efficiently."""
-    if not (v is not None):
+    if v is None:
         raise ValueError("v must be provided")
     v = np.asarray(v)
     if v.shape != (6,):
@@ -186,7 +186,7 @@ def cross_motion_fast(
     v: npt.NDArray[np.float64], m: npt.NDArray[np.float64], out: npt.NDArray[np.float64]
 ) -> None:
     """Optimized version of cross_motion without shape checks."""
-    if not (v is not None):
+    if v is None:
         raise ValueError("v must be provided")
     out[0] = v[1] * m[2] - v[2] * m[1]
     out[1] = v[2] * m[0] - v[0] * m[2]
@@ -201,7 +201,7 @@ def cross_force_fast(
     v: npt.NDArray[np.float64], f: npt.NDArray[np.float64], out: npt.NDArray[np.float64]
 ) -> None:
     """Optimized version of cross_force without shape checks."""
-    if not (v is not None):
+    if v is None:
         raise ValueError("v must be provided")
     out[0] = v[1] * f[2] - v[2] * f[1] + v[4] * f[5] - v[5] * f[4]
     out[1] = v[2] * f[0] - v[0] * f[2] + v[5] * f[3] - v[3] * f[5]

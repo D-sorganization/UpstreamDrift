@@ -28,7 +28,7 @@ from src.shared.python.physics.aerodynamics import (  # noqa: E402
 
 def _report_forces(engine: AerodynamicsEngine, speed_ms: float, label: str) -> None:
     """Print force components for a ball travelling at *speed_ms* m/s."""
-    if not (engine is not None):
+    if engine is None:
         raise ValueError("Engine must be provided")
     if not (speed_ms >= 0.0):
         raise ValueError("Speed must be non-negative")

@@ -612,7 +612,7 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
 
 def _format_details(details: dict[str, Any], indent: int = 2) -> str:
     """Format details dictionary for display."""
-    if not (details is not None):
+    if details is None:
         raise ValueError("details must be provided")
     import json
 

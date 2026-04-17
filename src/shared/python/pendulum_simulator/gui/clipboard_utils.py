@@ -59,7 +59,7 @@ def scalar_dict_to_text(d: dict[str, float], title: str = "") -> str:
     Pre: all values are numeric.
     Post: returned string contains one line per key-value pair.
     """
-    if not (d is not None):
+    if d is None:
         raise ValueError("d must be provided")
     lines = []
     if title:

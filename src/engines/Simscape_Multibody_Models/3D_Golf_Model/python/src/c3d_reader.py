@@ -40,7 +40,7 @@ BIOMECHANICAL_MARKER_MAX_M = 10.0  # 10m maximum - detects unrealistic scales
 
 
 def _force_plate_columns(include_time: bool, compute_cop: bool) -> list[str]:
-    if not (include_time is not None):
+    if include_time is None:
         raise ValueError("include_time must be provided")
     columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
     if include_time:
@@ -57,7 +57,7 @@ def _write_sidecar_metadata(path: Path, metadata: dict[str, Any]) -> None:
 
 
 def _add_cop_columns(plate_df: pd.DataFrame, ground_height: float) -> None:
-    if not (plate_df is not None):
+    if plate_df is None:
         raise ValueError("plate_df must be provided")
     fz = plate_df["fz"].to_numpy()
     mx = plate_df["mx"].to_numpy()
@@ -140,7 +140,7 @@ class C3DDataReader:
 
     def __init__(self, file_path: Path | str) -> None:
         """Initialize the C3D data reader with a file path."""
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         self.file_path = Path(file_path)
         self._c3d_data: C3DMapping | None = None
@@ -198,7 +198,7 @@ class C3DDataReader:
             ``residual`` (EzC3D stores residuals in the fourth point channel), and
             an optional ``time`` column in seconds.
         """
-        if not (include_time is not None):
+        if include_time is None:
             raise ValueError("include_time must be provided")
         c3d_data = self._load()
         metadata = self.get_metadata()
@@ -302,7 +302,7 @@ class C3DDataReader:
         metadata: C3DMetadata,
         include_time: bool,
     ) -> pd.DataFrame:
-        if not (sorted_labels is not None):
+        if sorted_labels is None:
             raise ValueError("sorted_labels must be provided")
         current_marker_count = len(sorted_labels)
         frame_indices = np.repeat(np.arange(metadata.frame_count), current_marker_count)
@@ -335,7 +335,7 @@ class C3DDataReader:
         components can easily plot synchronized sensor traces.
         """
 
-        if not (include_time is not None):
+        if include_time is None:
             raise ValueError("include_time must be provided")
         c3d_data = self._load()
         metadata = self.get_metadata()
@@ -400,7 +400,7 @@ class C3DDataReader:
             CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
 
-        if not (output_path is not None):
+        if output_path is None:
             raise ValueError("output_path must be provided")
         dataframe = self.points_dataframe(
             include_time=include_time,
@@ -434,7 +434,7 @@ class C3DDataReader:
             CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
 
-        if not (output_path is not None):
+        if output_path is None:
             raise ValueError("output_path must be provided")
         dataframe = self.analog_dataframe(include_time=include_time)
         return self._export_dataframe(
@@ -528,7 +528,7 @@ class C3DDataReader:
             - mx, my, mz: Moment components [N·m]
             - cop_x, cop_y, cop_z: COP position [m] (if compute_cop=True)
         """
-        if not (include_time is not None):
+        if include_time is None:
             raise ValueError("include_time must be provided")
         plate_channels = self.get_force_plate_channels()
 
@@ -583,7 +583,7 @@ class C3DDataReader:
         compute_cop: bool,
         ground_height: float,
     ) -> list[pd.DataFrame]:
-        if not (plate_channels is not None):
+        if plate_channels is None:
             raise ValueError("plate_channels must be provided")
         required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
         result_dfs: list[pd.DataFrame] = []
@@ -768,7 +768,7 @@ class C3DDataReader:
 
         Includes validation, versioning, and telemetry.
         """
-        if not (dataframe is not None):
+        if dataframe is None:
             raise ValueError("dataframe must be provided")
         path = Path(output_path).resolve()
         self._validate_export_path(path)
@@ -846,7 +846,7 @@ class C3DDataReader:
         metadata: dict[str, Any],
         sanitize: bool,
     ) -> None:
-        if not (dataframe is not None):
+        if dataframe is None:
             raise ValueError("dataframe must be provided")
         df_to_export = dataframe.copy() if sanitize else dataframe
         if sanitize:
@@ -870,7 +870,7 @@ class C3DDataReader:
     def _export_npz(
         dataframe: pd.DataFrame, path: Path, metadata: dict[str, Any]
     ) -> None:  # noqa: E501
-        if not (dataframe is not None):
+        if dataframe is None:
             raise ValueError("dataframe must be provided")
         arrays = {column: dataframe[column].to_numpy() for column in dataframe}
         np.savez(path, _metadata=json.dumps(metadata), **arrays)

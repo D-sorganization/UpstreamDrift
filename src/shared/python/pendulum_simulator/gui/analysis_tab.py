@@ -199,7 +199,7 @@ class AnalysisTab:
 
         Pre: result has .t, .states, and data_extractor-compatible API.
         """
-        if not (model_type is not None):
+        if model_type is None:
             raise ValueError("model_type must be provided")
         self._result = result
         old_model = self._model_type
@@ -390,7 +390,7 @@ class AnalysisTab:
         zlabel: str,
     ) -> None:
         """Compute a parameter sweep and render the 3D surface."""
-        if not (x_key is not None):
+        if x_key is None:
             raise ValueError("x_key must be provided")
         x_vals = np.linspace(x_range[0], x_range[1], n_pts)
         y_vals = np.linspace(y_range[0], y_range[1], n_pts)
@@ -424,7 +424,7 @@ class AnalysisTab:
         Pre:  z_key is a valid surface output key.
         Post: Returns a callable or None.
         """
-        if not (z_key is not None):
+        if z_key is None:
             raise ValueError("z_key must be provided")
         if self._model_type == "double":
             return self._evaluator_double(z_key)
@@ -442,7 +442,7 @@ class AnalysisTab:
 
     def _evaluator_double(self, z_key: str) -> Any:
         """Return surface evaluator for the double pendulum model."""
-        if not (z_key is not None):
+        if z_key is None:
             raise ValueError("z_key must be provided")
         from ..physics import (
             PendulumParams,
@@ -495,7 +495,7 @@ class AnalysisTab:
 
     def _evaluator_triple(self, z_key: str) -> Any:
         """Return surface evaluator for the triple pendulum model."""
-        if not (z_key is not None):
+        if z_key is None:
             raise ValueError("z_key must be provided")
         from ..physics_triple import (
             TriplePendulumParams,
@@ -559,7 +559,7 @@ class AnalysisTab:
 
     def _evaluator_golfer(self, z_key: str) -> Any:
         """Return surface evaluator for the golfer upper-body model."""
-        if not (z_key is not None):
+        if z_key is None:
             raise ValueError("z_key must be provided")
         from ..golfer_dynamics import potential_energy_from_q
         from ..physics_golfer import GolferParams
@@ -667,7 +667,7 @@ class AnalysisTab:
         Returns w = sqrt(det(J J^T)) where J is the 2 × n_dof Jacobian
         approximated by central differences.
         """
-        if not (tip_key is not None):
+        if tip_key is None:
             raise ValueError("tip_key must be provided")
         eps = 1e-7
         n_dof = len(angle_keys)
@@ -696,7 +696,7 @@ class AnalysisTab:
         zlabel: str,
     ) -> None:
         """Render a 3D surface on the embedded canvas."""
-        if not (X is not None):
+        if X is None:
             raise ValueError("X must be provided")
         ax = self._ax_3d
         ax.clear()
@@ -734,7 +734,7 @@ class AnalysisTab:
 
     def plot_2d(self, x_key: str, y_key: str) -> None:
         """Programmatic 2D plot (for external callers)."""
-        if not (x_key is not None):
+        if x_key is None:
             raise ValueError("x_key must be provided")
         if self._result is None:
             logger.warning("No result loaded")

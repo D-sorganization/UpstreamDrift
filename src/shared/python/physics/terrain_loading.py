@@ -21,7 +21,7 @@ def create_flat_terrain(
     resolution: float = 1.0,
 ) -> Terrain:
     """Create a simple flat terrain."""
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     elevation = ElevationMap.flat(width=width, length=length, resolution=resolution)
     patches = [TerrainPatch(terrain_type, 0.0, width, 0.0, length)]
@@ -38,7 +38,7 @@ def create_sloped_terrain(
     resolution: float = 1.0,
 ) -> Terrain:
     """Create a uniformly sloped terrain."""
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     elevation = ElevationMap.sloped(
         width=width,

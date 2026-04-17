@@ -54,7 +54,7 @@ def check_python_dependencies(
     Returns:
         True if all modules are available (or installed), False otherwise.
     """
-    if not (required_modules is not None):
+    if required_modules is None:
         raise ValueError("required_modules must be provided")
     missing = []
     for module in required_modules:
@@ -134,7 +134,7 @@ def ensure_environment_var(
     Returns:
         The current or default value of the environment variable.
     """
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     value = os.getenv(name)
     if value:

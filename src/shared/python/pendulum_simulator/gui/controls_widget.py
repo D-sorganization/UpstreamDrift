@@ -70,7 +70,7 @@ class LabeledInput(QWidget):
         label_width: int = 80,
         parent: QWidget | None = None,
     ) -> None:
-        if not (label is not None):
+        if label is None:
             raise ValueError("label must be provided")
         super().__init__(parent)
         layout = QHBoxLayout(self)
@@ -572,7 +572,7 @@ class ControlsWidget(ControlsWidgetBase):
         }
 
     def _apply_preset(self, name: str) -> None:
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name not in self.PRESETS:
             return
@@ -610,7 +610,7 @@ class ControlsWidget(ControlsWidgetBase):
     @staticmethod
     def _uai_or_parse(widget: object, label: str) -> float:
         """Extract SI value from UnitAwareInput or parse from LabeledInput."""
-        if not (widget is not None):
+        if widget is None:
             raise ValueError("widget must be provided")
         if _HAS_UAI and isinstance(widget, UnitAwareInput):
             return widget.value_si()
@@ -707,7 +707,7 @@ class ControlsWidget(ControlsWidgetBase):
     # ------------------------------------------------------------------
 
     def _on_play_toggled(self, checked: bool) -> None:
-        if not (checked is not None):
+        if checked is None:
             raise ValueError("checked must be provided")
         self._is_playing = checked
         self.btn_play.setText("⏸ Pause" if checked else "▶ Play")

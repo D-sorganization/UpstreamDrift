@@ -40,7 +40,7 @@ class AnalysisMixin:
         """Append a message to the log or process a data stream packet."""
         # Check for JSON data stream
 
-        if not (msg is not None):
+        if msg is None:
             raise ValueError("msg must be provided")
         if msg.startswith("DATA_JSON:"):
             try:
@@ -75,7 +75,7 @@ class AnalysisMixin:
 
     def set_btn_color(self, btn: QPushButton, rgba: Sequence[float]) -> None:
         """Apply an RGBA color swatch to a button's background."""
-        if not (btn is not None):
+        if btn is None:
             raise ValueError("btn must be provided")
         r, g, b = (int(c * 255) for c in rgba[:3])
 
@@ -83,7 +83,7 @@ class AnalysisMixin:
 
     def pick_color(self, key: str, btn: QPushButton) -> None:
         """Open a color picker dialog and store the chosen color."""
-        if not (key is not None):
+        if key is None:
             raise ValueError("key must be provided")
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])
 
@@ -109,7 +109,7 @@ class AnalysisMixin:
 
         based on the selected control mode."""
 
-        if not (mode is not None):
+        if mode is None:
             raise ValueError("mode must be provided")
         descriptions = {
             "pd": "Proportional-Derivative control (Target Pose tracking).",
@@ -202,7 +202,7 @@ class AnalysisMixin:
 
         def on_polynomial_generated(joint_name: str, coefficients: list[float]) -> None:
             """Save generated polynomial coefficients to config."""
-            if not (joint_name is not None):
+            if joint_name is None:
                 raise ValueError("joint_name must be provided")
             self.config.polynomial_coefficients[joint_name] = coefficients
             self.save_config()
@@ -269,7 +269,7 @@ class AnalysisMixin:
         def on_signal_generated(joint_name: str, coefficients: list[float]) -> None:
             """Save generated polynomial coefficients to config."""
 
-            if not (joint_name is not None):
+            if joint_name is None:
                 raise ValueError("joint_name must be provided")
             self.config.polynomial_coefficients[joint_name] = coefficients
 
@@ -293,7 +293,7 @@ class AnalysisMixin:
 
     def browse_file(self, line_edit: QLineEdit, save: bool = False) -> None:
         """Open a file dialog and write the selected path to a line edit."""
-        if not (line_edit is not None):
+        if line_edit is None:
             raise ValueError("line_edit must be provided")
         if save:
             path, _ = QFileDialog.getSaveFileName(
@@ -370,7 +370,7 @@ class AnalysisMixin:
             self.log(f"Error saving config: {e}")
 
     def _extract_iaa_joints_from_headers(self, headers: list[str]) -> list[str]:
-        if not (headers is not None):
+        if headers is None:
             raise ValueError("headers must be provided")
         joints = set()
         for h in headers:
@@ -384,7 +384,7 @@ class AnalysisMixin:
     def _read_iaa_data(
         self, csv_path: Path, joint: str
     ) -> tuple[list[float], list[float], list[float], list[float], list[float]]:
-        if not (csv_path is not None):
+        if csv_path is None:
             raise ValueError("csv_path must be provided")
         times: list[float] = []
         g_vals: list[float] = []
@@ -421,7 +421,7 @@ class AnalysisMixin:
         t_vals: list[float],
         tot_vals: list[float],
     ) -> None:
-        if not (joint is not None):
+        if joint is None:
             raise ValueError("joint must be provided")
         plt.figure(figsize=(10, 6))
         plt.plot(times, g_vals, label="Gravity", linestyle="--")

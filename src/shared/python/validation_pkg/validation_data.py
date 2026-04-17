@@ -75,7 +75,7 @@ class ValidationDataPoint:
         Returns:
             True if within tolerance
         """
-        if not (predicted_m is not None):
+        if predicted_m is None:
             raise ValueError("predicted_m must be provided")
         lower = self.carry_distance_m * (1 - self.carry_tolerance_pct / 100)
         upper = self.carry_distance_m * (1 + self.carry_tolerance_pct / 100)

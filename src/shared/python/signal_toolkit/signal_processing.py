@@ -88,7 +88,7 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     Returns:
         DTW distance (float)
     """
-    if not (series1 is not None):
+    if series1 is None:
         raise ValueError("series1 must be provided")
     n = len(series1)
     m = len(series2)
@@ -163,7 +163,7 @@ def _dtw_path_core(
         tuple: (distance, path_i, path_j)
         path_i, path_j are arrays of indices (reversed order)
     """
-    if not (series1 is not None):
+    if series1 is None:
         raise ValueError("series1 must be provided")
     n = len(series1)
     m = len(series2)
@@ -291,7 +291,7 @@ def compute_coherence(
     Returns:
         tuple: (frequencies, coherence_values)
     """
-    if not (x is not None):
+    if x is None:
         raise ValueError("x must be provided")
     require(fs > 0, "Sampling frequency must be positive", fs)
     require(len(x) > 0, "Input x must be non-empty")
@@ -437,7 +437,7 @@ def _morlet2_impl(M: int, s: float, w: float = 5.0) -> np.ndarray:
 
     PERFORMANCE FIX: Added LRU cache to avoid recomputing wavelets.
     """
-    if not (M is not None):
+    if M is None:
         raise ValueError("M must be provided")
     x = np.arange(0, M) - (M - 1.0) / 2
     x = x / s
@@ -468,7 +468,7 @@ def _get_cached_wavelet(M: int, s_int: int, w0_int: int, n_fft: int) -> np.ndarr
     Returns:
         Wavelet FFT (complex array)
     """
-    if not (M is not None):
+    if M is None:
         raise ValueError("M must be provided")
     s = s_int / 1000.0
     w0 = w0_int / 100.0
@@ -493,7 +493,7 @@ def _validate_cwt_inputs(fs, freq_range):
 
 
 def _prepare_cwt_fft(data, freqs, w0, fs):
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     n_data = len(data)
 
@@ -514,7 +514,7 @@ def _prepare_cwt_fft(data, freqs, w0, fs):
 
 
 def _convolve_wavelet_at_scale(data_fft, n_fft, n_data, s, w0):
-    if not (data_fft is not None):
+    if data_fft is None:
         raise ValueError("data_fft must be provided")
     M = int(2 * 5 * s + 1)
 
@@ -578,7 +578,7 @@ def compute_cwt(
         times: Array of time points
         cwt_matrix: Complex CWT coefficients (freqs x time)
     """
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     _validate_cwt_inputs(fs, freq_range)
 
@@ -620,7 +620,7 @@ def compute_xwt(
         (freqs, times, xwt_matrix)
         xwt_matrix is complex. Magnitude is cross-power, Angle is relative phase.
     """
-    if not (data1 is not None):
+    if data1 is None:
         raise ValueError("data1 must be provided")
     f1, t1, w1 = compute_cwt(data1, fs, freq_range, num_freqs, w0)
     f2, t2, w2 = compute_cwt(data2, fs, freq_range, num_freqs, w0)
@@ -768,7 +768,7 @@ def compute_dtw_distance(
     Returns:
         DTW distance (float)
     """
-    if not (series1 is not None):
+    if series1 is None:
         raise ValueError("series1 must be provided")
     n = len(series1)
     m = len(series2)
@@ -828,7 +828,7 @@ def compute_dtw_path(
         Tuple (distance, path). Path is list of (i, j) indices.
     """
     # Ensure inputs are float64 arrays for Numba
-    if not (series1 is not None):
+    if series1 is None:
         raise ValueError("series1 must be provided")
     s1 = np.asarray(series1, dtype=np.float64)
     s2 = np.asarray(series2, dtype=np.float64)
@@ -889,7 +889,7 @@ class KalmanFilter:
             P: Error covariance matrix (dim_x, dim_x)
             x: Initial state (dim_x,)
         """
-        if not (dim_x is not None):
+        if dim_x is None:
             raise ValueError("dim_x must be provided")
         self.dim_x = dim_x
         self.dim_z = dim_z
@@ -924,7 +924,7 @@ class KalmanFilter:
             z: Measurement vector
         """
         # System uncertainty
-        if not (z is not None):
+        if z is None:
             raise ValueError("z must be provided")
         S = self.H @ self.P @ self.H.T + self.R
 

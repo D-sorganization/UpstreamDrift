@@ -127,7 +127,7 @@ class _ComparisonWorker(QObject):
         preset_jobs: list[tuple[str, list[list[float]], Callable, Callable]],
         config: PerturbationConfig,
     ) -> None:
-        if not (preset_jobs is not None):
+        if preset_jobs is None:
             raise ValueError("preset_jobs must be provided")
         super().__init__()
         self._jobs = preset_jobs  # [(name, base_coeffs, simulate_fn, extract_fn)]
@@ -212,7 +212,7 @@ class SwingComparisonDialog(QDialog):
         extract_fn: Callable,
         parent: QWidget | None = None,
     ) -> None:
-        if not (preset_names is not None):
+        if preset_names is None:
             raise ValueError("preset_names must be provided")
         super().__init__(parent)
         if not (len(preset_names) >= 2):
@@ -411,7 +411,7 @@ class SwingComparisonDialog(QDialog):
         self._status.setText("Cancelling…")
 
     def _on_preset_progress(self, name: str, trial: int) -> None:
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self._completed_trials += 1
         pct = int(100 * self._completed_trials / max(self._total_trials, 1))
@@ -422,7 +422,7 @@ class SwingComparisonDialog(QDialog):
         self._results.append((name, summary))
 
     def _on_all_done(self, results: list) -> None:
-        if not (results is not None):
+        if results is None:
             raise ValueError("results must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
@@ -437,7 +437,7 @@ class SwingComparisonDialog(QDialog):
         self._status.setText(f"Done — {len(results)} presets compared")
 
     def _on_error(self, msg: str) -> None:
-        if not (msg is not None):
+        if msg is None:
             raise ValueError("msg must be provided")
         self._run_btn.setEnabled(True)
         self._cancel_btn.setEnabled(False)
@@ -448,7 +448,7 @@ class SwingComparisonDialog(QDialog):
     # ------------------------------------------------------------------
 
     def _display_results(self, results: list[tuple[str, dict]]) -> None:
-        if not (results is not None):
+        if results is None:
             raise ValueError("results must be provided")
         sorted_results = sorted(results, key=lambda x: x[1]["tip_speed_cv"])
         _hdr = f"{'Preset':<35} {'Mean':>8} {'Std':>8} {'CV%':>7} {'Min':>8} {'Max':>8}"
@@ -468,7 +468,7 @@ class SwingComparisonDialog(QDialog):
         self._results_text.setPlainText("\n".join(lines))
 
     def _update_chart(self, results: list[tuple[str, dict]]) -> None:
-        if not (results is not None):
+        if results is None:
             raise ValueError("results must be provided")
         self._ax.clear()
         self._ax.set_facecolor("#1a1a2e")

@@ -65,7 +65,7 @@ def build_joint_mapping(sim: object, model: object) -> tuple[list[int], list[int
             handles: list of joint handles in same order as Pinocchio velocity indices.
             pin_indices: list of indices into q/nv to update.
     """
-    if not (sim is not None):
+    if sim is None:
         raise ValueError("sim must be provided")
     handles: list[int] = []
     pin_indices: list[int] = []
@@ -119,7 +119,7 @@ def read_joint_positions(sim: object, handles: list[int]) -> npt.NDArray[np.floa
     Returns:
         Array of joint positions in radians
     """
-    if not (sim is not None):
+    if sim is None:
         raise ValueError("sim must be provided")
     q_joint: list[float] = []
     for h in handles:

@@ -57,7 +57,7 @@ class _AnalysisWorker(QThread):
         config: dict[str, Any],
         parent: QThread | None = None,
     ) -> None:
-        if not (video_path is not None):
+        if video_path is None:
             raise ValueError("video_path must be provided")
         super().__init__(parent)
         self._video_path = video_path
@@ -229,7 +229,7 @@ class MediaPipeGUI(QMainWindow):
 
     def _on_progress(self, current: int, total: int, message: str) -> None:
         """Handle progress updates from the worker thread."""
-        if not (current is not None):
+        if current is None:
             raise ValueError("current must be provided")
         if total > 0:
             pct = min(int((current / total) * 100), 100)
@@ -238,7 +238,7 @@ class MediaPipeGUI(QMainWindow):
 
     def _on_finished(self, results: list[Any]) -> None:
         """Handle analysis completion."""
-        if not (results is not None):
+        if results is None:
             raise ValueError("results must be provided")
         self.progress.setValue(100)
         self.log(f"Analysis complete! Processed {len(results)} frames.")
@@ -276,7 +276,7 @@ class MediaPipeGUI(QMainWindow):
 
     def _on_error(self, message: str) -> None:
         """Handle analysis errors."""
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         self.log(f"ERROR: {message}")
         self.btn_run.setEnabled(True)

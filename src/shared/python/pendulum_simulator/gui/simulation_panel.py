@@ -65,7 +65,7 @@ class _SimWorker(QObject):
         run_fn: Any,
         run_kwargs: dict,
     ) -> None:
-        if not (run_kwargs is not None):
+        if run_kwargs is None:
             raise ValueError("run_kwargs must be provided")
         super().__init__()
         self._run_fn = run_fn
@@ -121,7 +121,7 @@ class SimulationPanel(QWidget):
         objective_builder: Any | None = None,
         parent: QWidget | None = None,
     ) -> None:
-        if not (controls is not None):
+        if controls is None:
             raise ValueError("controls must be provided")
         super().__init__(parent)
         self.controls = controls
@@ -227,7 +227,7 @@ class SimulationPanel(QWidget):
 
         Must be called after construction but before the widget is shown.
         """
-        if not (panel is not None):
+        if panel is None:
             raise ValueError("perturbation panel must not be None")
         self.perturbation_panel = panel
         scroll = QScrollArea()
@@ -401,7 +401,7 @@ class SimulationPanel(QWidget):
 
         Pre: result has n_steps, t, states attributes (TrajectoryResultMixin).
         """
-        if not (result is not None):
+        if result is None:
             raise ValueError("Simulation result must not be None")
         if not hasattr(result, "n_steps"):
             raise ValueError("Result must have n_steps attribute")
@@ -445,7 +445,7 @@ class SimulationPanel(QWidget):
 
     def _on_sim_error(self, msg: str) -> None:
         """Called on the main thread when simulation fails."""
-        if not (msg is not None):
+        if msg is None:
             raise ValueError("msg must be provided")
         from .diagnostics import get_tracker
 
@@ -465,7 +465,7 @@ class SimulationPanel(QWidget):
 
     def _show_busy(self, busy: bool) -> None:
         """Show / hide a 'Simulating…' indicator in the top-right."""
-        if not (busy is not None):
+        if busy is None:
             raise ValueError("busy must be provided")
         if not hasattr(self, "_busy_label"):
             self._busy_label = QLabel("⏳  Simulating…", self)
@@ -532,7 +532,7 @@ class SimulationPanel(QWidget):
         self._playback_speed = speed
 
     def _on_frame_change(self, frame: int) -> None:
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if self._result is None:
             return
@@ -599,7 +599,7 @@ class SimulationPanel(QWidget):
         self.controls.set_slider_value(self._anim_idx)
 
     def _display_frame(self, idx: int) -> None:
-        if not (self._result is not None):
+        if self._result is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         idx = max(0, min(idx, self._result.n_steps - 1))
         self.pendulum.set_frame(idx)
@@ -610,7 +610,7 @@ class SimulationPanel(QWidget):
 
     def scrub_to_frame(self, idx: int) -> None:
         """Jump to a specific frame index (called by toolstrip slider)."""
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         if self._result is None:
             return
@@ -634,7 +634,7 @@ class SimulationPanel(QWidget):
         Pre: result has 'coeffs' key with a numpy array.
         Closes #1151.
         """
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         import logging
 
@@ -742,7 +742,7 @@ class SimulationPanel(QWidget):
 
     def _export_as_svg(self, path: str) -> None:
         """Export the pendulum widget as an SVG image."""
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         from PyQt6.QtCore import QRect
         from PyQt6.QtGui import QPainter
@@ -766,7 +766,7 @@ class SimulationPanel(QWidget):
 
     def _export_as_pdf(self, path: str) -> None:
         """Export the pendulum widget as a PDF (via QPrinter)."""
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         from PyQt6.QtCore import QMarginsF
         from PyQt6.QtGui import QPainter

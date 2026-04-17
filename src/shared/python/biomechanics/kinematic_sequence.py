@@ -105,7 +105,7 @@ class SegmentTimingAnalyzer:
         Returns:
             KinematicSequenceResult object
         """
-        if not (segment_velocities is not None):
+        if segment_velocities is None:
             raise ValueError("segment_velocities must be provided")
         require(len(times) > 0, "times array must be non-empty")
 
@@ -172,7 +172,7 @@ class SegmentTimingAnalyzer:
         Returns:
             List of SegmentPeak objects with normalized velocities.
         """
-        if not (segment_velocities is not None):
+        if segment_velocities is None:
             raise ValueError("segment_velocities must be provided")
         peaks: list[SegmentPeak] = []
         max_overall_velocity = 0.0
@@ -217,7 +217,7 @@ class SegmentTimingAnalyzer:
             segment_velocities: Dict mapping segment name to velocity array (1D)
             times: Time array corresponding to velocities
         """
-        if not (peaks is not None):
+        if peaks is None:
             raise ValueError("peaks must be provided")
         peak_map = {p.name: p for p in peaks}
 
@@ -288,7 +288,7 @@ class SegmentTimingAnalyzer:
         Returns:
             Tuple of (sequence_consistency, is_valid_sequence).
         """
-        if not (peaks is not None):
+        if peaks is None:
             raise ValueError("peaks must be provided")
         if not self.expected_order:
             return 0.0, False
@@ -338,7 +338,7 @@ class SegmentTimingAnalyzer:
         Returns:
             (segment_velocities, times)
         """
-        if not (segment_indices is not None):
+        if segment_indices is None:
             raise ValueError("segment_indices must be provided")
         times, joint_velocities = recorder.get_time_series("joint_velocities")
         joint_velocities = np.asarray(joint_velocities)

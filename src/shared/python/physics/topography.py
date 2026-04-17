@@ -171,7 +171,7 @@ class TopographyData:
             smooth: Whether to smooth the heightmap
             smooth_sigma: Gaussian smoothing sigma
         """
-        if not (heightmap is not None):
+        if heightmap is None:
             raise ValueError("heightmap must be provided")
         if smooth:
             heightmap = ndimage.gaussian_filter(heightmap, sigma=smooth_sigma)
@@ -205,7 +205,7 @@ class TopographyData:
         Args:
             points: List of ElevationPoint objects
         """
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         self._contour_points = points
 
@@ -249,7 +249,7 @@ class TopographyData:
         Returns:
             Elevation [m]
         """
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         if not self._is_loaded or self._interpolator is None:
             return 0.0
@@ -281,7 +281,7 @@ class TopographyData:
         Returns:
             [dz/dx, dz/dy] gradient vector
         """
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         pos = position[:2]
 
@@ -307,7 +307,7 @@ class TopographyData:
         Returns:
             [nx, ny, nz] unit normal vector
         """
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         gradient = self.get_gradient_at(position)
 
@@ -345,7 +345,7 @@ class TopographyData:
         Returns:
             TopographyData instance
         """
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         filepath = Path(filepath)
         suffix = filepath.suffix.lower()
@@ -373,7 +373,7 @@ class TopographyData:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from NumPy file."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         heightmap = np.load(filepath, allow_pickle=False)
 
@@ -393,7 +393,7 @@ class TopographyData:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from CSV file with x, y, elevation columns."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         import csv
 
@@ -423,7 +423,7 @@ class TopographyData:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from JSON file."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         with open(filepath) as f:
             data = json.load(f)
@@ -452,7 +452,7 @@ class TopographyData:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from GeoTIFF file."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         try:
             import rasterio  # type: ignore[import-untyped]
@@ -483,7 +483,7 @@ class TopographyData:
         self, filepath: Path, width: float | None, height: float | None
     ) -> None:
         """Load from image file (grayscale as elevation)."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         try:
             from PIL import Image  # type: ignore[import-untyped]
@@ -517,7 +517,7 @@ class TopographyData:
             filepath: Output file path
             format: Output format ("npy", "csv", "json") - auto-detected from suffix if None
         """
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         filepath = Path(filepath)
         fmt = format or filepath.suffix.lower().lstrip(".")
@@ -536,7 +536,7 @@ class TopographyData:
 
     def _save_csv(self, filepath: Path) -> None:
         """Save to CSV file."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         import csv
 
@@ -557,7 +557,7 @@ class TopographyData:
 
     def _save_json(self, filepath: Path) -> None:
         """Save to JSON file."""
-        if not (filepath is not None):
+        if filepath is None:
             raise ValueError("filepath must be provided")
         heightmap = (
             self._heightmap if self._heightmap is not None else self.to_heightmap()
@@ -594,7 +594,7 @@ class TopographyData:
         Returns:
             Array of shape (ny, nx) with elevations
         """
-        if not (nx is not None):
+        if nx is None:
             raise ValueError("nx must be provided")
         if not self._is_loaded or self._interpolator is None:
             return np.zeros((ny, nx))
@@ -652,7 +652,7 @@ def create_flat_terrain(
     Returns:
         TopographyData with flat surface
     """
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     topo = TopographyData(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
@@ -681,7 +681,7 @@ def create_sloped_terrain(
     Returns:
         TopographyData with sloped surface
     """
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     topo = TopographyData(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)
@@ -721,7 +721,7 @@ def create_undulating_terrain(
     Returns:
         TopographyData with undulating surface
     """
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     topo = TopographyData(
         bounds=TopographyBounds(min_x=0, max_x=width, min_y=0, max_y=height)

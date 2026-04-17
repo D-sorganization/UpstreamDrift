@@ -51,7 +51,7 @@ class DataLoadingThread(QThread):
     loadingError = pyqtSignal(str)
 
     def __init__(self, excel_file_path: str, config: WiffleDataConfig) -> None:
-        if not (excel_file_path is not None):
+        if excel_file_path is None:
             raise ValueError("excel_file_path must be provided")
         super().__init__()
         self.excel_file_path = excel_file_path
@@ -399,7 +399,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _load_excel_file(self, file_path: str = None) -> None:
         """Load Excel file with Wiffle_ProV1 data"""
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         if file_path is None:
             file_path, _ = QFileDialog.getOpenFileName(
@@ -435,14 +435,14 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_loading_progress(self, message: str) -> None:
         """Handle loading progress updates"""
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         self.progress_text.append(message)
         self.statusBar().showMessage(message)
 
     def _on_data_loaded(self, baseq, ztcfq, deltaq) -> None:
         """Handle successful data loading"""
-        if not (baseq is not None):
+        if baseq is None:
             raise ValueError("baseq must be provided")
         self.baseq_data = baseq
         self.ztcfq_data = ztcfq
@@ -474,7 +474,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_loading_error(self, error_message: str) -> None:
         """Handle loading errors"""
-        if not (error_message is not None):
+        if error_message is None:
             raise ValueError("error_message must be provided")
         self.progress_bar.setVisible(False)
         self.progress_text.setVisible(False)
@@ -483,7 +483,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_ball_type_changed(self, ball_type: str) -> None:
         """Handle ball type selection change"""
-        if not (ball_type is not None):
+        if ball_type is None:
             raise ValueError("ball_type must be provided")
         if not self.data_loaded:
             return
@@ -603,7 +603,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _update_frame_metrics(self, frame_idx: int) -> None:
         """Update metrics for current frame"""
-        if not (frame_idx is not None):
+        if frame_idx is None:
             raise ValueError("frame_idx must be provided")
         if not self.data_loaded or frame_idx >= len(self.baseq_data):
             return

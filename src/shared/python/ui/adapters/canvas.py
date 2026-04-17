@@ -60,7 +60,7 @@ class CanvasAdapter(ABC):
             height: Figure height in inches
             dpi: Dots per inch
         """
-        if not (width is not None):
+        if width is None:
             raise ValueError("width must be provided")
         self.width = width
         self.height = height
@@ -86,7 +86,7 @@ class CanvasAdapter(ABC):
             path: Output file path
             **kwargs: Additional arguments for savefig
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         fig = self.get_figure()
         fig.savefig(path, dpi=kwargs.pop("dpi", self.dpi), **kwargs)
@@ -127,7 +127,7 @@ class HeadlessCanvas(CanvasAdapter):
             height: Figure height in inches
             dpi: Dots per inch
         """
-        if not (width is not None):
+        if width is None:
             raise ValueError("width must be provided")
         super().__init__(width, height, dpi)
 
@@ -180,7 +180,7 @@ class QtCanvas(CanvasAdapter):
         Raises:
             RuntimeError: If Qt is not available
         """
-        if not (width is not None):
+        if width is None:
             raise ValueError("width must be provided")
         super().__init__(width, height, dpi)
 
@@ -270,7 +270,7 @@ def get_canvas_adapter(
     Returns:
         Appropriate CanvasAdapter implementation
     """
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     if force_headless or is_headless() or not is_qt_available():
         logger.debug("Using HeadlessCanvas")

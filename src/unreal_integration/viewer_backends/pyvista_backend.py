@@ -38,7 +38,7 @@ class PyVistaBackend(ViewerBackend):
     @property
     def plotter(self) -> Any:
         """Get the PyVista plotter, asserting it's initialized."""
-        if not (self._plotter is not None):
+        if self._plotter is None:
             raise ValueError("PyVista plotter not initialized")
         return self._plotter
 
@@ -90,7 +90,7 @@ class PyVistaBackend(ViewerBackend):
         scale: float = 1.0,
     ) -> str:
         """Add mesh to PyVista scene."""
-        if not (mesh is not None):
+        if mesh is None:
             raise ValueError("mesh must be provided")
         if not self._is_initialized:
             raise RuntimeError("Backend not initialized")
@@ -174,7 +174,7 @@ class PyVistaBackend(ViewerBackend):
     ) -> None:
         """Apply transform to PyVista actor."""
         # Build transformation matrix
-        if not (scale is not None):
+        if scale is None:
             raise ValueError("scale must be provided")
         T = np.eye(4)
 
@@ -215,7 +215,7 @@ class PyVistaBackend(ViewerBackend):
 
     def remove_object(self, name: str) -> bool:
         """Remove object from PyVista scene."""
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if not self._is_initialized:
             return False

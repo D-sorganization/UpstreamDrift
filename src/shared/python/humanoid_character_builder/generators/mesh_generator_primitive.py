@@ -72,7 +72,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
         **kwargs: Any,
     ) -> GeneratedMeshResult:
         """Generate primitive meshes for body segments."""
-        if not (params is not None):
+        if params is None:
             raise ValueError("params must be provided")
         if not self.is_available:
             return GeneratedMeshResult(

@@ -45,7 +45,7 @@ class RigidBodyImpactModel(ImpactModel):
         # Known limitation: this uses a simplified scalar effective mass model.
         # It ignores the full 3D inertia tensor and the direction of the impact force.
         # Should be replaced with J = (1/m + r x (I^-1 * (r x n)))^-1 * (1 + e) * v_rel
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         m_club = pre_state.clubhead_mass
         club_moi = pre_state.clubhead_moi
@@ -63,7 +63,7 @@ class RigidBodyImpactModel(ImpactModel):
         m_club_effective: float,
         cor: float,
     ) -> tuple[float, float]:
-        if not (v_rel is not None):
+        if v_rel is None:
             raise ValueError("v_rel must be provided")
         v_approach = np.dot(v_rel, n)
         m_eff = (GOLF_BALL_MASS_KG * m_club_effective) / (
@@ -81,7 +81,7 @@ class RigidBodyImpactModel(ImpactModel):
         j: float,
         friction_coefficient: float,
     ) -> np.ndarray:
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         v_tangent = v_rel - v_approach * n
         tangent_mag = np.linalg.norm(v_tangent)
@@ -105,7 +105,7 @@ class RigidBodyImpactModel(ImpactModel):
         pre_ball_velocity: np.ndarray,
         post_ball_velocity: np.ndarray,
     ) -> float:
-        if not (pre_ball_velocity is not None):
+        if pre_ball_velocity is None:
             raise ValueError("pre_ball_velocity must be provided")
         ke_pre = 0.5 * GOLF_BALL_MASS_KG * np.dot(pre_ball_velocity, pre_ball_velocity)
         ke_post = (
@@ -205,7 +205,7 @@ class SpringDamperImpactModel(ImpactModel):
         Args:
             dt: Integration time step [s]. Default: 0.1 μs (1e-7 s).
         """
-        if not (dt is not None):
+        if dt is None:
             raise ValueError("dt must be provided")
         self.dt = dt
 
@@ -231,7 +231,7 @@ class SpringDamperImpactModel(ImpactModel):
         Returns:
             Post-impact state
         """
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         m_ball = GOLF_BALL_MASS_KG
         m_club = pre_state.clubhead_mass
@@ -338,7 +338,7 @@ class FiniteTimeImpactModel(ImpactModel):
         """
         # For finite-time model, we use the rigid body result
         # but report the specified contact duration
-        if not (pre_state is not None):
+        if pre_state is None:
             raise ValueError("pre_state must be provided")
         rigid_model = RigidBodyImpactModel()
         result = rigid_model.solve(pre_state, params)

@@ -174,7 +174,7 @@ def axis_angle_to_rotation_matrix(axis: Vec3 | list[float], angle: float) -> Mat
 
 
 def quaternion_multiply(q1: Quat | list[float], q2: Quat | list[float]) -> Quat:
-    if not (q1 is not None):
+    if q1 is None:
         raise ValueError("q1 must be provided")
     q1 = np.asarray(q1, dtype=np.float64)
     q2 = np.asarray(q2, dtype=np.float64)
@@ -199,7 +199,7 @@ def quaternion_inverse(q: Quat | list[float]) -> Quat:
 
 
 def slerp(q1: Quat, q2: Quat, t: float) -> Quat:
-    if not (q1 is not None):
+    if q1 is None:
         raise ValueError("q1 must be provided")
     q1 = np.asarray(q1, dtype=np.float64)
     q2 = np.asarray(q2, dtype=np.float64)

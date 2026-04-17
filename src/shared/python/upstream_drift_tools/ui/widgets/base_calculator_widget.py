@@ -42,7 +42,7 @@ class BaseCalculatorWindow(QMainWindow, BaseCalculatorMixin):
         min_size: tuple[int, int] = (1000, 700),
         parent: QWidget | None = None,
     ) -> None:
-        if not (calculator_name is not None):
+        if calculator_name is None:
             raise ValueError("calculator_name must be provided")
         QMainWindow.__init__(self, parent)
         BaseCalculatorMixin.__init__(self, calculator_name)

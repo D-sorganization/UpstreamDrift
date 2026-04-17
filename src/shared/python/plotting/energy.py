@@ -65,7 +65,7 @@ def plot_energy_overview(
     Returns:
         Tuple of (figure, axes)
     """
-    if not (recorder is not None):
+    if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
 
@@ -145,7 +145,7 @@ def plot_energy_breakdown(
     Returns:
         Tuple of (figure, axes)
     """
-    if not (recorder is not None):
+    if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
 
@@ -211,7 +211,7 @@ def plot_power_analysis(
     Returns:
         Tuple of (figure, axes)
     """
-    if not (recorder is not None):
+    if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
 
@@ -270,7 +270,7 @@ def plot_cumulative_work(
     Returns:
         Tuple of (figure, axes)
     """
-    if not (recorder is not None):
+    if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
 
@@ -333,7 +333,7 @@ def plot_energy_flow(
     Returns:
         Tuple of (figure, axes)
     """
-    if not (recorder is not None):
+    if recorder is None:
         raise ValueError("recorder must be provided")
     fig, ax, config = resolve_figure(ax, config)
 

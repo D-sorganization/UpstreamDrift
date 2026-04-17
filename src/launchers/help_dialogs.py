@@ -61,7 +61,7 @@ class LayoutManagerDialog(QDialog):
         active_models: list[str],
         parent: QWidget | None,
     ) -> None:
-        if not (available_models is not None):
+        if available_models is None:
             raise ValueError("available_models must be provided")
         super().__init__(parent)
         self.setWindowTitle("Customize Launcher Tiles")
@@ -161,7 +161,7 @@ class ContextHelpDock(QDockWidget):
             )
 
     def _get_doc_file(self, model_id: str) -> Path | None:
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         docs_dir = REPOS_ROOT / "docs" / "engines"
 

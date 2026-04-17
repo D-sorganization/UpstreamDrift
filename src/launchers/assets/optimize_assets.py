@@ -61,7 +61,7 @@ def optimize_png(path: Path, quality: int = 85, aggressive: bool = False) -> int
     Returns:
         Bytes saved
     """
-    if not (path is not None):
+    if path is None:
         raise ValueError("path must be provided")
     from PIL import Image
 

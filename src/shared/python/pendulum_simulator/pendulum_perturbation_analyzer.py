@@ -252,7 +252,7 @@ class PendulumPerturbationAnalyzer:
         Pre:  ``set_base_torque_profile`` has been called.
         Post: returned dict has same structure as the base profile.
         """
-        if not (self._base_coeffs is not None):
+        if self._base_coeffs is None:
             raise ValueError("Call set_base_torque_profile() before perturb_torque()")
         perturbed = _perturb_coeffs_by_mode(self._base_coeffs, config, seed)
         return {"coeffs": perturbed}
@@ -380,7 +380,7 @@ class PendulumPerturbationAnalyzer:
         Post: summary.metrics contains all MANDATORY_METRICS.
         Post: summary.robustness_score in [0.0, 1.0].
         """
-        if not (self._base_coeffs is not None):
+        if self._base_coeffs is None:
             raise ValueError("Call set_base_torque_profile() before run_batch()")
         if not (config.n_trials > 0):
             raise ValueError("DbC Blocked: Precondition failed.")

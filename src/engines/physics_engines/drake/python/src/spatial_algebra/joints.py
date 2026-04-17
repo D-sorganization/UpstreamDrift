@@ -20,7 +20,7 @@ def jcalc(
     jtype: str, q: float
 ) -> tuple[npt.NDArray[np.float64], npt.NDArray[np.float64]]:  # noqa: E501
     """Return transform and motion subspace for the joint type."""
-    if not (jtype is not None):
+    if jtype is None:
         raise ValueError("jtype must be provided")
     xj_transform, s_subspace, _ = _shared_jcalc(jtype, q)
     return xj_transform, s_subspace

@@ -13,7 +13,7 @@ def compute_marker_statistics(
     - max speed
     - mean speed
     """
-    if not (pos is not None):
+    if pos is None:
         raise ValueError("pos must be provided")
     if pos.shape[0] < 2 or time is None or len(time) != pos.shape[0]:
         return {

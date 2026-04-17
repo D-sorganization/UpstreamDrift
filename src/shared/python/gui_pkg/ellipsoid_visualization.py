@@ -111,7 +111,7 @@ def compute_velocity_ellipsoid(
         >>> print(f"Max velocity reach: {ellipsoid.radii.max():.3f} m/s")
         >>> print(f"Min velocity reach: {ellipsoid.radii.min():.3f} m/s")
     """
-    if not (engine is not None):
+    if engine is None:
         raise ValueError("engine must be provided")
     jac_dict = engine.compute_jacobian(body_name)
     if jac_dict is None:
@@ -179,7 +179,7 @@ def compute_force_ellipsoid(
         >>> ellipsoid = compute_force_ellipsoid(engine, "clubhead")
         >>> print(f"Max force capability: {ellipsoid.radii.max():.3f} N")
     """
-    if not (engine is not None):
+    if engine is None:
         raise ValueError("engine must be provided")
     jac_dict = engine.compute_jacobian(body_name)
     if jac_dict is None:
@@ -255,7 +255,7 @@ def export_ellipsoid_sequence_json(
         sequence: EllipsoidSequence to export
         output_path: Path to output JSON file
     """
-    if not (sequence is not None):
+    if sequence is None:
         raise ValueError("sequence must be provided")
     data = {
         "body_name": sequence.body_name,
@@ -292,7 +292,7 @@ def generate_ellipsoid_mesh(
             faces: (M, 3) array of triangle face indices
     """
     # Generate unit sphere vertices
-    if not (ellipsoid is not None):
+    if ellipsoid is None:
         raise ValueError("ellipsoid must be provided")
     phi = np.linspace(0, np.pi, n_parallels + 1)
     theta = np.linspace(0, 2 * np.pi, n_meridians + 1)
@@ -365,7 +365,7 @@ def export_ellipsoid_obj(
         ellipsoid: EllipsoidData to export
         output_path: Path to output OBJ file
     """
-    if not (ellipsoid is not None):
+    if ellipsoid is None:
         raise ValueError("ellipsoid must be provided")
     vertices, faces = generate_ellipsoid_mesh(ellipsoid)
 
@@ -408,7 +408,7 @@ def export_ellipsoid_stl(
         >>> ellipsoid = compute_velocity_ellipsoid(engine, "clubhead")
         >>> export_ellipsoid_stl(ellipsoid, "clubhead_velocity.stl")
     """
-    if not (ellipsoid is not None):
+    if ellipsoid is None:
         raise ValueError("ellipsoid must be provided")
     vertices, faces = generate_ellipsoid_mesh(ellipsoid)
 
@@ -430,7 +430,7 @@ def _write_stl_binary(
     ellipsoid: EllipsoidData,
 ) -> None:
     """Write binary STL file."""
-    if not (vertices is not None):
+    if vertices is None:
         raise ValueError("vertices must be provided")
     import struct
 
@@ -523,7 +523,7 @@ class EllipsoidVisualizer:
         Args:
             engine: Physics engine with loaded model
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self.ellipsoid_cache: dict[str, EllipsoidData] = {}
@@ -538,7 +538,7 @@ class EllipsoidVisualizer:
         Returns:
             Dictionary mapping body names to their EllipsoidData
         """
-        if not (body_names is not None):
+        if body_names is None:
             raise ValueError("body_names must be provided")
         results = {}
         for name in body_names:
@@ -557,7 +557,7 @@ class EllipsoidVisualizer:
         Args:
             body_names: List of body names to record
         """
-        if not (body_names is not None):
+        if body_names is None:
             raise ValueError("body_names must be provided")
         t = self.engine.get_time()
 
@@ -597,7 +597,7 @@ class EllipsoidVisualizer:
             output_dir: Directory to save JSON files
         """
         # Ensure timesteps are converted to arrays
-        if not (output_dir is not None):
+        if output_dir is None:
             raise ValueError("output_dir must be provided")
         self.finalize_sequences()
 
@@ -615,7 +615,7 @@ class EllipsoidVisualizer:
         Returns:
             Dictionary with manipulability metrics, or None if not computed
         """
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if body_name not in self.ellipsoid_cache:
             return None

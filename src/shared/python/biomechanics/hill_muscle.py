@@ -93,7 +93,7 @@ class HillMuscleModel:
             Force multiplier [0, 1]
         """
         # Width of the force-length curve
-        if not (l_norm is not None):
+        if l_norm is None:
             raise ValueError("l_norm must be provided")
         width = 0.56
         return float(np.exp(-((l_norm - 1.0) ** 2) / width**2))
@@ -107,7 +107,7 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, inf)
         """
-        if not (l_norm is not None):
+        if l_norm is None:
             raise ValueError("l_norm must be provided")
         if l_norm <= 1.0:
             return 0.0
@@ -129,7 +129,7 @@ class HillMuscleModel:
             Force multiplier [0, 1.8]
         """
         # Concentric (shortening)
-        if not (v_norm is not None):
+        if v_norm is None:
             raise ValueError("v_norm must be provided")
         if v_norm < 0:
             # Hill's hyperbola: clamp v_norm to prevent division by zero
@@ -151,7 +151,7 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, inf)
         """
-        if not (l_tendon_norm is not None):
+        if l_tendon_norm is None:
             raise ValueError("l_tendon_norm must be provided")
         if l_tendon_norm <= 1.0:
             return 0.0
@@ -176,7 +176,7 @@ class HillMuscleModel:
         Returns:
             Force at the tendon [N]
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         require(
             0.0 <= state.activation <= 1.0,

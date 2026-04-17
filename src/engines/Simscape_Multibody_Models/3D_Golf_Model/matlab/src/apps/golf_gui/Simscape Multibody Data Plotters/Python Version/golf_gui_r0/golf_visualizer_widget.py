@@ -154,7 +154,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
 
     def wheelEvent(self, event) -> None:
         """Handle mouse wheel for camera zoom"""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         delta = event.angleDelta().y() / 120
         self.camera_distance = np.clip(self.camera_distance - delta * 0.2, 0.5, 10.0)

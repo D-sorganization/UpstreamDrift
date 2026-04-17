@@ -67,7 +67,7 @@ class VideoProcessor:
         Returns:
             True if video loaded successfully, False otherwise.
         """
-        if not (video_path is not None):
+        if video_path is None:
             raise ValueError("video_path must be provided")
         path = Path(video_path)
 
@@ -145,7 +145,7 @@ class VideoProcessor:
         Returns:
             BGR image frame, or None if frame not available.
         """
-        if not (frame_number is not None):
+        if frame_number is None:
             raise ValueError("frame_number must be provided")
         if not self.is_loaded:
             return None
@@ -168,7 +168,7 @@ class VideoProcessor:
         Returns:
             BGR image frame, or None if not available.
         """
-        if not (time_ms is not None):
+        if time_ms is None:
             raise ValueError("time_ms must be provided")
         frame_number = int((time_ms / 1000) * self._fps)
         return self.get_frame(frame_number)
@@ -190,7 +190,7 @@ class VideoProcessor:
         Yields:
             Tuple of (frame, frame_number, timestamp_ms)
         """
-        if not (start_frame is not None):
+        if start_frame is None:
             raise ValueError("start_frame must be provided")
         if not self.is_loaded:
             return
@@ -233,7 +233,7 @@ class VideoProcessor:
         Returns:
             List of PoseFrame objects with valid poses.
         """
-        if not (start_frame is not None):
+        if start_frame is None:
             raise ValueError("start_frame must be provided")
         if not self.is_loaded:
             return []
@@ -282,7 +282,7 @@ class VideoProcessor:
         Returns:
             True if export successful.
         """
-        if not (frame_number is not None):
+        if frame_number is None:
             raise ValueError("frame_number must be provided")
         frame = self.get_frame(frame_number)
         if frame is None:
@@ -317,7 +317,7 @@ class VideoProcessor:
         Returns:
             True if export successful.
         """
-        if not (output_path is not None):
+        if output_path is None:
             raise ValueError("output_path must be provided")
         if not self.is_loaded:
             return False

@@ -21,7 +21,7 @@ class LibraryHandlersMixin:
         """Validate URDF content."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.editor.text_editor import (
             URDFTextEditor,
@@ -67,7 +67,7 @@ class LibraryHandlersMixin:
         """Parse URDF and return structure."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.converters.urdf_parser import URDFParser
 
@@ -103,7 +103,7 @@ class LibraryHandlersMixin:
         """Calculate inertia for primitive shape."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.core.types import Inertia
 
@@ -163,7 +163,7 @@ class LibraryHandlersMixin:
         """Calculate inertia from mesh file."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         body = request.body or {}
 
@@ -218,7 +218,7 @@ class LibraryHandlersMixin:
         """List models in library."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.library import ModelLibrary
 
@@ -261,7 +261,7 @@ class LibraryHandlersMixin:
         """Get model details."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.library import ModelLibrary
 
@@ -292,7 +292,7 @@ class LibraryHandlersMixin:
         """Add model to library."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.library import ModelLibrary
 
@@ -329,7 +329,7 @@ class LibraryHandlersMixin:
         """Remove model from library."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.library import ModelLibrary
 
@@ -349,7 +349,7 @@ class LibraryHandlersMixin:
         """Download model URDF."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.library import ModelLibrary
 
@@ -371,7 +371,7 @@ class LibraryHandlersMixin:
         """Compose model from multiple sources."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.editor import FrankensteinEditor
 
@@ -429,7 +429,7 @@ class LibraryHandlersMixin:
         """Compare two URDF files."""
         from .rest_api import APIResponse
 
-        if not (request is not None):
+        if request is None:
             raise ValueError("request must be provided")
         from model_generation.editor.text_editor import URDFTextEditor
 

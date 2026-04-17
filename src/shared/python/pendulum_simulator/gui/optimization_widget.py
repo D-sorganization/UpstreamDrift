@@ -124,7 +124,7 @@ def _cmaes_step(
 
     Returns updated state and fitness values for the population.
     """
-    if not (state is not None):
+    if state is None:
         raise ValueError("state must be provided")
     n = len(state.mean)
     mu = pop_size // 2  # number of parents
@@ -259,7 +259,7 @@ class _OptimizerWorker(QObject):
         use_native_batch: bool = False,
         native_batch_config: dict | None = None,
     ) -> None:
-        if not (objective_fn is not None):
+        if objective_fn is None:
             raise ValueError("objective_fn must be provided")
         super().__init__()
         self._objective = objective_fn
@@ -361,7 +361,7 @@ class _OptimizerWorker(QObject):
         history: list[float] = []
 
         def callback(xk: Any, convergence: float = 0.0) -> bool:
-            if not (convergence is not None):
+            if convergence is None:
                 raise ValueError("convergence must be provided")
             history.append(float(convergence))
             self.iteration_done.emit(len(history), convergence)
@@ -402,7 +402,7 @@ class _OptimizerWorker(QObject):
 
     def _run_scipy(self, method: str) -> None:
         """Run a scipy.optimize.minimize method."""
-        if not (method is not None):
+        if method is None:
             raise ValueError("method must be provided")
         from scipy.optimize import minimize
 
@@ -467,7 +467,7 @@ class OptimizationWidget(QWidget):
         n_torque_params: int = 2,
         parent: QWidget | None = None,
     ) -> None:
-        if not (model_name is not None):
+        if model_name is None:
             raise ValueError("model_name must be provided")
         super().__init__(parent)
         self._model_name = model_name
@@ -705,7 +705,7 @@ class OptimizationWidget(QWidget):
         self._lbl_status.setText("Cancelling...")
 
     def _on_iteration(self, iteration: int, loss: float) -> None:
-        if not (iteration is not None):
+        if iteration is None:
             raise ValueError("iteration must be provided")
         max_iter = self._spin_iters.value()
         pct = min(100, int(100 * iteration / max_iter))
@@ -751,7 +751,7 @@ class OptimizationWidget(QWidget):
         self.optimized_coefficients.emit(result)
 
     def _on_error(self, msg: str) -> None:
-        if not (msg is not None):
+        if msg is None:
             raise ValueError("msg must be provided")
         self._btn_run.setEnabled(True)
         self._btn_cancel.setEnabled(False)

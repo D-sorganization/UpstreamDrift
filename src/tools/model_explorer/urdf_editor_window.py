@@ -51,7 +51,7 @@ class URDFEditorWindow(QMainWindow):
 
     def _show_status(self, message: str) -> None:
         """Show a message in the status bar."""
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         status_bar = self.statusBar()
         if status_bar:
@@ -269,7 +269,7 @@ class URDFEditorWindow(QMainWindow):
 
     def _on_content_changed(self, content: str) -> None:
         """Handle code editor content change."""
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self.urdf_content = content
         self._is_modified = True
@@ -278,7 +278,7 @@ class URDFEditorWindow(QMainWindow):
 
     def _on_urdf_modified(self, content: str) -> None:
         """Handle URDF modification from any tool."""
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         self.urdf_content = content
         self._is_modified = True
@@ -319,7 +319,7 @@ class URDFEditorWindow(QMainWindow):
 
     def _on_tab_changed(self, index: int) -> None:
         """Handle tab change."""
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         current_widget = self.central_tabs.currentWidget()
 

@@ -589,7 +589,7 @@ def register_theme(name: str, theme: PlotTheme) -> None:
         name: Theme identifier (will be normalized)
         theme: PlotTheme instance
     """
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     normalized = name.lower().replace("-", "_").replace(" ", "_")
     PLOT_THEMES[normalized] = theme

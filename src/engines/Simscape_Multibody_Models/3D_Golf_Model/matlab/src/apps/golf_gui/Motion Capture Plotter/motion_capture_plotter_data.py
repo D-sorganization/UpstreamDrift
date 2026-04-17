@@ -52,7 +52,7 @@ class MotionCapturePlotterDataMixin:
 
     def on_data_source_changed(self, source) -> None:
         """Handle data source change."""
-        if not (source is not None):
+        if source is None:
             raise ValueError("source must be provided")
         self.current_data_source = source
         logger.info(f"Data source changed to: {source}")
@@ -88,7 +88,7 @@ class MotionCapturePlotterDataMixin:
 
     def _process_excel_sheet(self, filename, sheet_name) -> None:
         """Process a single Excel sheet and store parsed frames in swing_data."""
-        if not (filename is not None):
+        if filename is None:
             raise ValueError("filename must be provided")
         result = process_excel_sheet(filename, sheet_name)
         if result is not None:
@@ -265,7 +265,7 @@ class MotionCapturePlotterDataMixin:
 
     def on_frame_change(self, frame) -> None:
         """Handle frame slider change."""
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         self.current_frame = frame
         self.frame_label.setText(str(frame))
@@ -273,7 +273,7 @@ class MotionCapturePlotterDataMixin:
 
     def on_speed_change(self, speed) -> None:
         """Handle speed slider change."""
-        if not (speed is not None):
+        if speed is None:
             raise ValueError("speed must be provided")
         self.speed_label.setText(str(speed))
         if self.is_playing:
@@ -281,7 +281,7 @@ class MotionCapturePlotterDataMixin:
 
     def on_scale_change(self, scale) -> None:
         """Handle motion scale change."""
-        if not (scale is not None):
+        if scale is None:
             raise ValueError("scale must be provided")
         self.motion_scale = scale
         self.scale_label.setText(f"{scale}x")
@@ -289,7 +289,7 @@ class MotionCapturePlotterDataMixin:
 
     def on_club_length_change(self, length_cm) -> None:
         """Handle club length change."""
-        if not (length_cm is not None):
+        if length_cm is None:
             raise ValueError("length_cm must be provided")
         self.shaft_length = length_cm / 100.0  # Convert cm to meters
         self.club_label.setText(f"{self.shaft_length:.1f}m")

@@ -60,9 +60,9 @@ class OpenSimScrewKinematics:
                 "opensim is not installed. "
                 "Install the OpenSim Python bindings to use OpenSimScrewKinematics."
             )
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         self.model = model
         self.state = state

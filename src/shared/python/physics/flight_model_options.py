@@ -63,7 +63,7 @@ def compute_air_density_at_altitude(
         Air density at altitude [kg/m³]
     """
     # Scale height for isothermal atmosphere ≈ 8500m
-    if not (sea_level_density is not None):
+    if sea_level_density is None:
         raise ValueError("sea_level_density must be provided")
     scale_height = 8500.0
     return sea_level_density * math.exp(-altitude_m / scale_height)

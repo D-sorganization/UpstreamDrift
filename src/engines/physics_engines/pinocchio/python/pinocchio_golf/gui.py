@@ -210,7 +210,7 @@ class PinocchioGUI(
 
     def log_write(self, text: str) -> None:
         """Append a message to the log panel and logger."""
-        if not (text is not None):
+        if text is None:
             raise ValueError("text must be provided")
         self.log.append(text)
         logger.info(text)

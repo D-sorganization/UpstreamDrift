@@ -306,7 +306,7 @@ async def get_green_contours(
 
     See issue #1206
     """
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     from src.engines.physics_engines.putting_green.python.green_surface import (
         GreenSurface,

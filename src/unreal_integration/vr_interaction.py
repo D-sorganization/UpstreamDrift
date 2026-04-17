@@ -159,7 +159,7 @@ class VRControllerState:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VRControllerState:
         """Create from dictionary."""
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         buttons = {k: VRButtonState[v.upper()] for k, v in d.get("buttons", {}).items()}
         return cls(
@@ -232,7 +232,7 @@ class VRHeadsetState:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> VRHeadsetState:
         """Create from dictionary."""
-        if not (d is not None):
+        if d is None:
             raise ValueError("d must be provided")
         return cls(
             position=Vector3.from_dict(d["position"]),
@@ -306,7 +306,7 @@ class VRInteractionManager:
         Args:
             locomotion_mode: Default locomotion mode.
         """
-        if not (locomotion_mode is not None):
+        if locomotion_mode is None:
             raise ValueError("locomotion_mode must be provided")
         self.locomotion_mode = locomotion_mode
         self.interaction_mode = VRInteractionMode.IDLE
@@ -347,7 +347,7 @@ class VRInteractionManager:
             state: New headset state.
             timestamp: Update timestamp.
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         self._headset = state
         self._current_time = timestamp
@@ -359,7 +359,7 @@ class VRInteractionManager:
             state: New controller state.
             timestamp: Update timestamp.
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         self._current_time = timestamp
 
@@ -385,7 +385,7 @@ class VRInteractionManager:
         prev: VRControllerState | None,
     ) -> None:
         """Process trigger state changes."""
-        if not (current is not None):
+        if current is None:
             raise ValueError("current must be provided")
         curr_pressed = current.is_trigger_pressed
         prev_pressed = prev.is_trigger_pressed if prev else False
@@ -415,7 +415,7 @@ class VRInteractionManager:
         prev: VRControllerState | None,
     ) -> None:
         """Process grip state changes."""
-        if not (current is not None):
+        if current is None:
             raise ValueError("current must be provided")
         curr_pressed = current.is_grip_pressed
         prev_pressed = prev.is_grip_pressed if prev else False
@@ -470,7 +470,7 @@ class VRInteractionManager:
         prev: VRControllerState | None,
     ) -> None:
         """Process thumbstick movement."""
-        if not (current is not None):
+        if current is None:
             raise ValueError("current must be provided")
         x, y = current.thumbstick
         if abs(x) > 0.5 or abs(y) > 0.5:
@@ -485,7 +485,7 @@ class VRInteractionManager:
 
     def _emit_event(self, event: VRInteractionEvent) -> None:
         """Emit interaction event to callbacks."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         event_type = event.event_type
         if event_type in self._callbacks:
@@ -512,7 +512,7 @@ class VRInteractionManager:
             event_type: Event type to listen for ("*" for all).
             callback: Callback function.
         """
-        if not (event_type is not None):
+        if event_type is None:
             raise ValueError("event_type must be provided")
         if event_type not in self._callbacks:
             self._callbacks[event_type] = []
@@ -547,7 +547,7 @@ class VRInteractionManager:
         Args:
             mode: New locomotion mode.
         """
-        if not (mode is not None):
+        if mode is None:
             raise ValueError("mode must be provided")
         self.locomotion_mode = mode
         self._emit_event(
@@ -564,7 +564,7 @@ class VRInteractionManager:
         Args:
             mode: New interaction mode.
         """
-        if not (mode is not None):
+        if mode is None:
             raise ValueError("mode must be provided")
         prev_mode = self.interaction_mode
         self.interaction_mode = mode

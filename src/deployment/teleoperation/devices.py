@@ -125,7 +125,7 @@ class SpaceMouseInput(BaseInputDevice):
         Args:
             device_index: Device index if multiple connected.
         """
-        if not (device_index is not None):
+        if device_index is None:
             raise ValueError("device_index must be provided")
         super().__init__()
         self._device_index = device_index
@@ -175,7 +175,7 @@ class VRControllerInput(BaseInputDevice):
             hand: "left" or "right" hand.
             tracking_system: VR tracking system.
         """
-        if not (hand is not None):
+        if hand is None:
             raise ValueError("hand must be provided")
         super().__init__()
         self._hand = hand
@@ -236,7 +236,7 @@ class HapticDeviceInput(BaseInputDevice):
         Args:
             device_name: Device identifier.
         """
-        if not (device_name is not None):
+        if device_name is None:
             raise ValueError("device_name must be provided")
         super().__init__()
         self._device_name = device_name
@@ -267,7 +267,7 @@ class HapticDeviceInput(BaseInputDevice):
         Args:
             wrench: Desired force/torque.
         """
-        if not (wrench is not None):
+        if wrench is None:
             raise ValueError("wrench must be provided")
         if not self._is_connected:
             return

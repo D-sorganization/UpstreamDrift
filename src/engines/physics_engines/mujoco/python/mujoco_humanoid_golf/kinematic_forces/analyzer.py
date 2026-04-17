@@ -36,7 +36,7 @@ class KinematicForceAnalyzer:
             model: MuJoCo model
             data: MuJoCo data (shared reference, not modified by compute methods)
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -62,7 +62,7 @@ class KinematicForceAnalyzer:
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern."""
-        if not (name_pattern is not None):
+        if name_pattern is None:
             raise ValueError("name_pattern must be provided")
         for i in range(self.model.nbody):
             body_name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
@@ -118,7 +118,7 @@ class KinematicForceAnalyzer:
         Returns:
             Coriolis forces [nv]
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
@@ -142,7 +142,7 @@ class KinematicForceAnalyzer:
         Returns:
             Gravity forces [nv]
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = 0.0
@@ -164,7 +164,7 @@ class KinematicForceAnalyzer:
         Returns:
             Tuple of (centrifugal_forces [nv], coupling_forces [nv])
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         centrifugal = np.zeros(self.model.nv)
         total_coriolis = self.compute_coriolis_forces(qpos, qvel)
@@ -219,7 +219,7 @@ class KinematicForceAnalyzer:
         Returns:
             Tuple of (coriolis_force [3], centrifugal_force [3], total_apparent [3])
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         if self.club_head_id is None:
             return np.zeros(3), np.zeros(3), np.zeros(3)
@@ -280,7 +280,7 @@ class KinematicForceAnalyzer:
         Returns:
             Dictionary with power contributions
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         coriolis_forces = self.compute_coriolis_forces(qpos, qvel)
         coriolis_power = np.dot(coriolis_forces, qvel)
@@ -314,7 +314,7 @@ class KinematicForceAnalyzer:
         Returns:
             Dictionary with kinetic energy components
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
@@ -359,7 +359,7 @@ class KinematicForceAnalyzer:
         Returns:
             List of KinematicForceData for each time step
         """
-        if not (times is not None):
+        if times is None:
             raise ValueError("times must be provided")
         results = []
 
@@ -428,7 +428,7 @@ class KinematicForceAnalyzer:
         Returns:
             Effective mass in that direction [kg]
         """
-        if not (qpos is not None):
+        if qpos is None:
             raise ValueError("qpos must be provided")
         if body_id is None:
             body_id = self.club_head_id

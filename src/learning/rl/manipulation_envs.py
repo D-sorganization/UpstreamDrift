@@ -59,7 +59,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
             reward_config: Reward configuration.
             render_mode: Render mode.
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self._object_pos = object_initial_pos or np.array([0.5, 0.0, 0.1])
         self._target_pos = target_pos or np.array([0.5, 0.3, 0.1])
@@ -90,7 +90,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
     def _apply_action(self, action: NDArray[np.floating]) -> None:
         """Apply action to robot arm."""
         # Split action into arm control and gripper
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         arm_action = action[:-1] if len(action) > self._n_actuators - 1 else action
         gripper_action = action[-1] if len(action) > self._n_actuators - 1 else 0.0
@@ -198,7 +198,7 @@ class ManipulationPickPlaceEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for pick and place task."""
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         reward = 0.0
 
@@ -305,7 +305,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
             reward_config: Reward configuration.
             render_mode: Render mode.
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         task_config = TaskConfig(
             task_type=TaskType.MANIPULATION,
@@ -348,7 +348,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
 
     def _apply_action(self, action: NDArray[np.floating]) -> None:
         """Apply actions to both arms."""
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         n = len(action) // 2
         left_action = action[:n]
@@ -459,12 +459,12 @@ class DualArmManipulationEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for coordinated manipulation."""
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         reward = 0.0
 
         obj_pos = self._get_object_position()
-        if not (self.task_config.target_position is not None):
+        if self.task_config.target_position is None:
             raise ValueError("target_position must be set")
         target_pos = self.task_config.target_position
 
@@ -543,7 +543,7 @@ class DualArmManipulationEnv(RoboticsGymEnv):
         info["right_grasped"] = self._right_grasped
         info["object_lifted"] = self._object_lifted
         info["object_position"] = obj_pos.tolist()
-        if not (self.task_config.target_position is not None):
+        if self.task_config.target_position is None:
             raise ValueError("target_position must be set")
         info["distance_to_target"] = float(
             np.linalg.norm(obj_pos - self.task_config.target_position)

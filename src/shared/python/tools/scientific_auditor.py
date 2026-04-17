@@ -28,7 +28,7 @@ class ScienceAuditor(ast.NodeVisitor):
     def visit_BinOp(self, node: ast.BinOp) -> None:
         """Check for potentially unsafe divisions."""
         # 1. Division Safety
-        if not (node is not None):
+        if node is None:
             raise ValueError("node must be provided")
         if isinstance(node.op, ast.Div):
             # Check if denominator is a variable or a zero constant
@@ -48,7 +48,7 @@ class ScienceAuditor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         """Check for trig function unit ambiguity."""
         # 2. Trig Safety (sin, cos, tan)
-        if not (node is not None):
+        if node is None:
             raise ValueError("node must be provided")
         trig_functions = {"sin", "cos", "tan"}
         func_name = ""

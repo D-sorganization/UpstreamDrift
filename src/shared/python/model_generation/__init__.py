@@ -325,7 +325,7 @@ def quick_build(
     Example:
         result = quick_build(height_m=1.80, output_path="./humanoid.urdf")
     """
-    if not (height_m is not None):
+    if height_m is None:
         raise ValueError("height_m must be provided")
     from pathlib import Path
 

@@ -71,7 +71,7 @@ class DifferentiableEngine:
             engine: Physics engine to wrap.
             backend: Autodiff backend ("jax", "torch", "numpy").
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         self.engine = engine
         self._backend = AutodiffBackend(backend)
@@ -106,7 +106,7 @@ class DifferentiableEngine:
         Returns:
             State trajectory (T+1, n_x).
         """
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         T = len(controls)
         trajectory = np.zeros((T + 1, self._n_x))
@@ -165,7 +165,7 @@ class DifferentiableEngine:
         Returns:
             Gradient of loss w.r.t. controls (T, n_u).
         """
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         eps = 1e-5
         T, n_u = controls.shape
@@ -194,7 +194,7 @@ class DifferentiableEngine:
         v: NDArray[np.floating],
         torques: NDArray[np.floating],
     ) -> None:
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if hasattr(self.engine, "set_joint_positions"):
             self.engine.set_joint_positions(q)
@@ -209,7 +209,7 @@ class DifferentiableEngine:
         v: NDArray[np.floating],
         dt: float,
     ) -> NDArray[np.floating]:
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if hasattr(self.engine, "step"):
             self.engine.step(dt)
@@ -232,7 +232,7 @@ class DifferentiableEngine:
         control: NDArray[np.floating],
         dt: float,
     ) -> NDArray[np.floating]:
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         q = state[: self._n_q]
         v = state[self._n_q :]
@@ -247,7 +247,7 @@ class DifferentiableEngine:
         dt: float,
         eps: float,
     ) -> NDArray[np.floating]:
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         A = np.zeros((self._n_x, self._n_x))
         for i in range(self._n_x):
@@ -271,7 +271,7 @@ class DifferentiableEngine:
         dt: float,
         eps: float,
     ) -> NDArray[np.floating]:
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         q = state[: self._n_q]
         v = state[self._n_q :]
@@ -302,7 +302,7 @@ class DifferentiableEngine:
         Returns:
             Tuple of (df/dx, df/du) Jacobians.
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         eps = 1e-5
         x_next = self._compute_nominal_next_state(state, control, dt)
@@ -335,7 +335,7 @@ class DifferentiableEngine:
             Optimization result.
         """
         # Initialize controls
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         controls = np.zeros((horizon, self._n_u))
 
@@ -421,7 +421,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
             contact_method: "smoothed", "randomized", or "stochastic".
             smoothing_factor: Smoothing parameter.
         """
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         super().__init__(engine)
         self.contact_method = contact_method
@@ -445,7 +445,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         Returns:
             Smoothed gradient.
         """
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         if self.contact_method == "randomized":
             # Randomized smoothing: average gradients with noise
@@ -511,7 +511,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         Returns:
             Optimization result.
         """
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         original_smoothing = self.smoothing_factor
 
@@ -582,7 +582,7 @@ class ContactDifferentiableEngine(DifferentiableEngine):
         original_smoothing: float,
         contact_smoothing_multiplier: float,
     ) -> tuple[NDArray[np.floating], float, float, int]:
-        if not (initial_state is not None):
+        if initial_state is None:
             raise ValueError("initial_state must be provided")
         m = np.zeros_like(controls)
         v = np.zeros_like(controls)

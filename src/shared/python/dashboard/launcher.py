@@ -29,7 +29,7 @@ def launch_dashboard(
         engine_args: Optional positional arguments for the engine constructor.
         engine_kwargs: Optional keyword arguments for the engine constructor.
     """
-    if not (engine_class is not None):
+    if engine_class is None:
         raise ValueError("engine_class must be provided")
     configure_gui_logging()
 

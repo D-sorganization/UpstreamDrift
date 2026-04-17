@@ -104,7 +104,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         Returns:
             True if all ranges are valid, False otherwise.
         """
-        if not (actual_vertex_count is not None):
+        if actual_vertex_count is None:
             raise ValueError("actual_vertex_count must be provided")
         if actual_vertex_count != cls.SMPLX_EXPECTED_VERTEX_COUNT:
             logger.warning(
@@ -156,7 +156,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             Mapping of segment names to (start_inclusive, end_exclusive)
             vertex index ranges.
         """
-        if not (model_dir is not None):
+        if model_dir is None:
             raise ValueError("model_dir must be provided")
         import json
 
@@ -320,7 +320,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
             re-indexed relative to segment_vertices.
         """
         # Find faces where ALL vertices are inside the range
-        if not (vertices is not None):
+        if vertices is None:
             raise ValueError("vertices must be provided")
         in_range = (faces >= vertex_start) & (faces < vertex_end)
         face_mask = in_range.all(axis=1)
@@ -347,7 +347,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         **kwargs: Any,
     ) -> GeneratedMeshResult:
         """Generate meshes using SMPL-X body model."""
-        if not (params is not None):
+        if params is None:
             raise ValueError("params must be provided")
         if not SMPLX_AVAILABLE:
             return GeneratedMeshResult(
@@ -485,7 +485,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         Uses _segment_mesh() + _trimesh_module to build per-segment meshes
         without calling mesh.submesh(), which is not always available.
         """
-        if not (visual_dir is not None):
+        if visual_dir is None:
             raise ValueError("visual_dir must be provided")
         from humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,
@@ -576,7 +576,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         valid_segments: Any,
     ) -> tuple[dict[str, Path], dict[str, Path]]:
         """Extract and export individual segment meshes from SMPL-X vertex groups."""
-        if not (visual_dir is not None):
+        if visual_dir is None:
             raise ValueError("visual_dir must be provided")
         mesh_paths: dict[str, Path] = {}
         collision_paths: dict[str, Path] = {}
@@ -620,7 +620,7 @@ class SMPLXMeshGenerator(MeshGeneratorInterface):
         params: BodyParameters,
     ) -> GeneratedMeshResult:
         """Fallback segmentation using z-coordinate slicing."""
-        if not (visual_dir is not None):
+        if visual_dir is None:
             raise ValueError("visual_dir must be provided")
         from humanoid_character_builder.core.segment_definitions import (
             HUMANOID_SEGMENTS,

@@ -82,7 +82,7 @@ class DrakeMotionOptimizer:
             cost_function: Function that computes cost from trajectory
             target_value: Optional target value for the objective
         """
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         objective = OptimizationObjective(
             name=name,
@@ -110,7 +110,7 @@ class DrakeMotionOptimizer:
             lower_bound: Lower bound for inequality/bounds constraints
             upper_bound: Upper bound for inequality/bounds constraints
         """
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         constraint = OptimizationConstraint(
             name=name,
@@ -216,7 +216,7 @@ class DrakeMotionOptimizer:
         return total_cost
 
     def _build_scipy_constraints(self, traj_shape: tuple) -> list[dict]:
-        if not (traj_shape is not None):
+        if traj_shape is None:
             raise ValueError("traj_shape must be provided")
         scipy_constraints: list[dict] = []
         for con in self.constraints:
@@ -255,7 +255,7 @@ class DrakeMotionOptimizer:
         return scipy_constraints
 
     def _evaluate_objectives(self, optimal_trajectory: np.ndarray) -> dict[str, float]:
-        if not (optimal_trajectory is not None):
+        if optimal_trajectory is None:
             raise ValueError("optimal_trajectory must be provided")
         objective_values = {}
         for obj in self.objectives:
@@ -266,7 +266,7 @@ class DrakeMotionOptimizer:
     def _evaluate_constraint_violations(
         self, optimal_trajectory: np.ndarray, tolerance: float
     ) -> tuple[dict[str, float], bool]:
-        if not (optimal_trajectory is not None):
+        if optimal_trajectory is None:
             raise ValueError("optimal_trajectory must be provided")
         constraint_violations = {}
         all_satisfied = True
@@ -337,7 +337,7 @@ class DrakeMotionOptimizer:
         Returns:
             OptimizationResult with optimization results
         """
-        if not (initial_trajectory is not None):
+        if initial_trajectory is None:
             raise ValueError("initial_trajectory must be provided")
         from scipy.optimize import minimize as scipy_minimize
 
@@ -398,7 +398,7 @@ class DrakeMotionOptimizer:
             OptimizationResult optimized for distance
         """
         # Clear existing objectives and add distance-specific ones
-        if not (initial_trajectory is not None):
+        if initial_trajectory is None:
             raise ValueError("initial_trajectory must be provided")
         self.objectives.clear()
 
@@ -429,7 +429,7 @@ class DrakeMotionOptimizer:
             OptimizationResult optimized for accuracy
         """
         # Clear existing objectives and add accuracy-specific ones
-        if not (initial_trajectory is not None):
+        if initial_trajectory is None:
             raise ValueError("initial_trajectory must be provided")
         self.objectives.clear()
 
@@ -457,7 +457,7 @@ class DrakeMotionOptimizer:
             result: Optimization results to export
             output_path: Path to save results
         """
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         import json
         from pathlib import Path

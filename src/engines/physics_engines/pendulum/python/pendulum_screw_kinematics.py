@@ -64,7 +64,7 @@ class PendulumScrewKinematics:
                       attribute (arm length) and ``parameters.lower_segment``
                       (shaft/club parameters) are accessible.
         """
-        if not (dynamics is not None):
+        if dynamics is None:
             raise ValueError("dynamics must be provided")
         self.dynamics = dynamics
         self._l1: float = float(dynamics._l1)
@@ -122,9 +122,9 @@ class PendulumScrewKinematics:
         Raises:
             ValueError: If ``body_name`` is not recognised.
         """
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
-        if not (v is not None):
+        if v is None:
             raise ValueError("v must be provided")
         theta1, theta2 = float(q[0]), float(q[1])
         omega1, omega2 = float(v[0]), float(v[1])
@@ -183,7 +183,7 @@ class PendulumScrewKinematics:
         Returns:
             Dict mapping body name → (Twist, ScrewAxis).
         """
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         results: dict[str, tuple[Twist, ScrewAxis]] = {}
         for name in (self.BODY_ARM_TIP, self.BODY_CLUBHEAD):

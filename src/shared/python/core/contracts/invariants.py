@@ -93,7 +93,7 @@ class ContractChecker:
         Raises:
             InvariantError: If any invariant is violated.
         """
-        if not (method_name is not None):
+        if method_name is None:
             raise ValueError("method_name must be provided")
         from .level import DBC_LEVEL  # re-import to capture runtime changes
 
@@ -188,7 +188,7 @@ def invariant(
                 self.timestep = timestep
                 self.model = model
     """
-    if not (condition is not None):
+    if condition is None:
         raise ValueError("condition must be provided")
     from .level import DBC_LEVEL  # defer to capture runtime changes
 

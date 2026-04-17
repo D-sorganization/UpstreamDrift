@@ -61,7 +61,7 @@ class OpenSimMuscleAnalyzer:
             model: OpenSim model with muscles
             state: Current state of the simulation
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.state = state
@@ -187,7 +187,7 @@ class OpenSimMuscleAnalyzer:
         Args:
             activations: Dictionary mapping muscle names to desired activation [0-1]
         """
-        if not (activations is not None):
+        if activations is None:
             raise ValueError("activations must be provided")
         if opensim is None:
             return
@@ -333,7 +333,7 @@ class OpenSimGripModel:
         Args:
             model: OpenSim model (should have grip body and hand muscles)
         """
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
 
@@ -356,7 +356,7 @@ class OpenSimGripModel:
             length: Wrap cylinder length [m]
             location: (x, y, z) location in grip body frame [m]
         """
-        if not (muscle_name is not None):
+        if muscle_name is None:
             raise ValueError("muscle_name must be provided")
         if opensim is None:
             logger.warning("OpenSim not installed - cannot add wrap")
@@ -404,7 +404,7 @@ class OpenSimGripModel:
         Returns:
             Dictionary mapping constraint names to reaction forces [N]
         """
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         if opensim is None:
             return {}
@@ -429,7 +429,7 @@ class OpenSimGripModel:
             Dictionary with grip analysis metrics
         """
         # Get forces from grip-related muscles
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         muscle_forces = analyzer.get_muscle_forces()
 

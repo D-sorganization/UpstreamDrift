@@ -166,7 +166,7 @@ def compute_indexed_acceleration_from_engine(
         >>> indexed.assert_closure(mujoco_engine.compute_forward_dynamics())
     """
     # Get drift and control components
-    if not (tau is not None):
+    if tau is None:
         raise ValueError("tau must be provided")
     a_drift = engine.compute_drift_acceleration()
     a_control = engine.compute_control_acceleration(tau)

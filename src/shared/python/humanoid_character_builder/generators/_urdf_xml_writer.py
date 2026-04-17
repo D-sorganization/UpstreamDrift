@@ -25,7 +25,7 @@ class URDFXMLWriter:
         joints: list[GeneratedJoint],
     ) -> str:
         """Build the complete URDF XML document."""
-        if not (robot_name is not None):
+        if robot_name is None:
             raise ValueError("robot_name must be provided")
         root = ET.Element("robot", name=robot_name)
 
@@ -49,7 +49,7 @@ class URDFXMLWriter:
 
     def add_link_element(self, root: ET.Element, link: GeneratedLink) -> None:
         """Append a URDF link element."""
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         link_elem = ET.SubElement(root, "link", name=link.name)
 
@@ -84,7 +84,7 @@ class URDFXMLWriter:
 
     def add_geometry_element(self, parent: ET.Element, geom: dict[str, Any]) -> None:
         """Append a URDF geometry element."""
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         geometry = ET.SubElement(parent, "geometry")
 
@@ -116,7 +116,7 @@ class URDFXMLWriter:
 
     def add_joint_element(self, root: ET.Element, joint: GeneratedJoint) -> None:
         """Append a URDF joint element."""
-        if not (root is not None):
+        if root is None:
             raise ValueError("root must be provided")
         joint_elem = ET.SubElement(
             root, "joint", name=joint.name, type=joint.joint_type

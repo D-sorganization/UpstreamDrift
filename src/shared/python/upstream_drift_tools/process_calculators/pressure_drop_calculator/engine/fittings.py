@@ -21,7 +21,7 @@ def calculate_fitting_pressure_drop(
     diameter_inches: float,
 ) -> float:
     """Calculate total pressure drop across fittings and valves."""
-    if not (fittings is not None):
+    if fittings is None:
         raise ValueError("fittings must be provided")
 
     total_k = 0.0

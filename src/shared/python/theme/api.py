@@ -119,7 +119,7 @@ def _register_builtin_endpoints(router: APIRouter, theme_manager: Any) -> None:
 def _register_custom_endpoints(router: APIRouter, theme_manager: Any) -> None:
     """Register custom theme CRUD endpoints."""
 
-    if not (router is not None):
+    if router is None:
         raise ValueError("router must be provided")
 
     @router.get(
@@ -181,7 +181,7 @@ def _register_custom_endpoints(router: APIRouter, theme_manager: Any) -> None:
 def _register_active_and_list_endpoints(router: APIRouter, theme_manager: Any) -> None:
     """Register active theme and full listing endpoints."""
 
-    if not (router is not None):
+    if router is None:
         raise ValueError("router must be provided")
 
     @router.get(

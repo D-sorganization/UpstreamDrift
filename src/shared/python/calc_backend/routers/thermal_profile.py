@@ -48,7 +48,7 @@ def _solve_thermal_profile(
     t_amb = request.ambient_temp_c
 
     def deriv(t: float, temp: float) -> float:
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         q_in = power_func(t)
         q_loss = h * (temp - t_amb)

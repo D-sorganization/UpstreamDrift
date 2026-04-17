@@ -79,7 +79,7 @@ class TerrainAwareEngine:
             stiffness: Contact stiffness (N/m)
             damping: Contact damping (N*s/m)
         """
-        if not (stiffness is not None):
+        if stiffness is None:
             raise ValueError("stiffness must be provided")
         self.terrain: Terrain | None = terrain
         self.default_stiffness = stiffness
@@ -91,7 +91,7 @@ class TerrainAwareEngine:
         Args:
             terrain: Terrain configuration
         """
-        if not (terrain is not None):
+        if terrain is None:
             raise ValueError("terrain must be provided")
         self.terrain = terrain
         logger.info(f"Terrain set: {terrain.name}")
@@ -106,7 +106,7 @@ class TerrainAwareEngine:
         Returns:
             Ground height (meters)
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return 0.0
@@ -127,7 +127,7 @@ class TerrainAwareEngine:
         Returns:
             Unit normal vector (3,)
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return np.array([0.0, 0.0, 1.0])
@@ -147,7 +147,7 @@ class TerrainAwareEngine:
         Returns:
             Friction coefficient
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return 0.5
@@ -165,7 +165,7 @@ class TerrainAwareEngine:
         Returns:
             Coefficient of restitution
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return 0.6
@@ -183,7 +183,7 @@ class TerrainAwareEngine:
         Returns:
             Dictionary of terrain properties
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self.terrain is None:
             return {
@@ -239,7 +239,7 @@ class TerrainContactModel:
         Returns:
             True if in contact
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
@@ -264,7 +264,7 @@ class TerrainContactModel:
         Returns:
             Penetration depth (positive when penetrating, meters)
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         ground_height = self.terrain.get_elevation(x, y)
         contact_height = z - radius
@@ -293,7 +293,7 @@ class TerrainContactModel:
         Returns:
             Contact force vector (3,) [N]
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         penetration = self.compute_penetration(x, y, z, radius)
 
@@ -351,7 +351,7 @@ class TerrainContactModel:
             Friction force vector (3,) [N]
         """
         # Get normal force if not provided
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if normal_force is None:
             normal_force = self.compute_contact_force(x, y, z, radius, velocity)
@@ -422,7 +422,7 @@ class CompressibleTurfModel:
             Dictionary with compression_depth, effective_stiffness,
             max_compression, and compression_ratio
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         ground_height = self.terrain.get_elevation(x, y)
@@ -480,7 +480,7 @@ class CompressibleTurfModel:
         Returns:
             Contact force vector (3,) [N]
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         state = self.get_compression_state(x, y, z, radius)
@@ -540,7 +540,7 @@ class CompressibleTurfModel:
             Dictionary with lie_type, sitting_depth, grass_interference,
             and playability_factor
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         terrain_type = self.terrain.get_terrain_type(x, y)
@@ -615,7 +615,7 @@ class CompressibleTurfModel:
             Dictionary with kinetic_energy, absorbed_energy,
             remaining_energy, and energy_absorption_ratio
         """
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         material = self.terrain.get_material(x, y)
         normal = self.terrain.get_normal(x, y)
@@ -666,7 +666,7 @@ class TerrainGeometryGenerator:
         Args:
             terrain: Terrain configuration
         """
-        if not (terrain is not None):
+        if terrain is None:
             raise ValueError("terrain must be provided")
         self.terrain = terrain
 
@@ -739,7 +739,7 @@ class TerrainGeometryGenerator:
         Returns:
             XML string for inclusion in MuJoCo model
         """
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         elev = self.terrain.elevation
         n_rows, n_cols = elev.data.shape
@@ -779,7 +779,7 @@ class TerrainGeometryGenerator:
         Returns:
             URDF XML snippet
         """
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         elev = self.terrain.elevation
         h_max = float(elev.data.max())
@@ -814,7 +814,7 @@ def apply_terrain_to_engine(
         x: X position (meters)
         y: Y position (meters)
     """
-    if not (terrain is not None):
+    if terrain is None:
         raise ValueError("terrain must be provided")
     height = terrain.get_elevation(x, y)
     material = terrain.get_material(x, y)
@@ -844,7 +844,7 @@ def validate_terrain(
     Returns:
         List of error/warning messages (empty if valid)
     """
-    if not (terrain is not None):
+    if terrain is None:
         raise ValueError("terrain must be provided")
     messages = []
 

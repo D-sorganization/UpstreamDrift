@@ -139,7 +139,7 @@ class PopOutChart:
 
         Returns (x_fit, y_fit) or None if no data.
         """
-        if not (degree is not None):
+        if degree is None:
             raise ValueError("degree must be provided")
         if self._x is None or self._y is None:
             return None

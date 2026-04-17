@@ -78,7 +78,7 @@ class Demonstration:
         Returns:
             Dictionary with frame data.
         """
-        if not (idx is not None):
+        if idx is None:
             raise ValueError("idx must be provided")
         frame = {
             "timestamp": self.timestamps[idx],
@@ -100,7 +100,7 @@ class Demonstration:
         Returns:
             Subsampled demonstration.
         """
-        if not (factor is not None):
+        if factor is None:
             raise ValueError("factor must be provided")
         indices = np.arange(0, len(self.timestamps), factor)
         return Demonstration(
@@ -241,7 +241,7 @@ class DemonstrationDataset:
         Returns:
             Filtered dataset.
         """
-        if not (task_id is not None):
+        if task_id is None:
             raise ValueError("task_id must be provided")
         filtered = [d for d in self.demonstrations if d.task_id == task_id]
         return DemonstrationDataset(filtered)
@@ -323,7 +323,7 @@ class DemonstrationDataset:
         Returns:
             Augmented dataset.
         """
-        if not (noise_std is not None):
+        if noise_std is None:
             raise ValueError("noise_std must be provided")
         if rng is None:
             rng = np.random.default_rng()
@@ -367,7 +367,7 @@ class DemonstrationDataset:
         Args:
             path: Path to save file (JSON format).
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path = Path(path)
         data = {
@@ -388,7 +388,7 @@ class DemonstrationDataset:
         Returns:
             Loaded dataset.
         """
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         path = Path(path)
         with open(path) as f:
@@ -411,7 +411,7 @@ class DemonstrationDataset:
         Returns:
             Sampled dataset.
         """
-        if not (n is not None):
+        if n is None:
             raise ValueError("n must be provided")
         if rng is None:
             rng = np.random.default_rng()

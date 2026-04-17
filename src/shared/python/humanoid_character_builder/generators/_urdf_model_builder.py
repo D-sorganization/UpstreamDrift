@@ -57,7 +57,7 @@ class URDFModelBuilder:
         params: BodyParameters,
     ) -> dict[str, dict[str, float]]:
         """Apply body proportion factors to segment dimensions."""
-        if not (dimensions is not None):
+        if dimensions is None:
             raise ValueError("dimensions must be provided")
         scaled = {}
 
@@ -96,7 +96,7 @@ class URDFModelBuilder:
 
     def generate_materials(self, params: BodyParameters) -> None:
         """Populate reusable material definitions."""
-        if not (params is not None):
+        if params is None:
             raise ValueError("params must be provided")
         self.materials["skin"] = params.appearance.skin_tone.as_tuple()
         self.materials["default"] = (0.7, 0.7, 0.7, 1.0)
@@ -112,7 +112,7 @@ class URDFModelBuilder:
         mesh_dir: Path | str | None,
     ) -> None:
         """Generate a single URDF link."""
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         seg_params = params.get_segment_params(segment_name)
         final_mass = seg_params.mass_kg if seg_params.has_mass_override() else mass
@@ -165,7 +165,7 @@ class URDFModelBuilder:
     ) -> InertiaResult:
         """Compute inertia for a segment."""
         del segment_def, gender_factor
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         if seg_params.has_inertia_override():
             override = seg_params.inertia_override
@@ -215,7 +215,7 @@ class URDFModelBuilder:
         is_collision: bool,
     ) -> dict[str, Any]:
         """Create a normalized geometry specification dictionary."""
-        if not (segment_def is not None):
+        if segment_def is None:
             raise ValueError("segment_def must be provided")
         geom_spec = (
             segment_def.get_collision_geometry()
@@ -271,7 +271,7 @@ class URDFModelBuilder:
         joint_def: JointDefinition,
     ) -> None:
         """Generate a single URDF joint."""
-        if not (joint_name is not None):
+        if joint_name is None:
             raise ValueError("joint_name must be provided")
 
         urdf_type = map_joint_type(joint_def.joint_type)
@@ -302,7 +302,7 @@ class URDFModelBuilder:
         joint_def: JointDefinition,
     ) -> None:
         """Expand a composite joint into URDF-compatible revolute joints."""
-        if not (joint_name is not None):
+        if joint_name is None:
             raise ValueError("joint_name must be provided")
 
         if joint_def.joint_type == JointType.GIMBAL:
@@ -360,7 +360,7 @@ class URDFModelBuilder:
 
 def map_joint_type(joint_type: JointType) -> str:
     """Map internal joint types to URDF joint type strings."""
-    if not (joint_type is not None):
+    if joint_type is None:
         raise ValueError("joint_type must be provided")
     mapping = {
         JointType.FIXED: "fixed",

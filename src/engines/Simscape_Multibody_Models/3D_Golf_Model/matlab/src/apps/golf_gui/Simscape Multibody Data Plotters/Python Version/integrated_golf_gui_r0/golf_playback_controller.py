@@ -33,7 +33,7 @@ class SmoothPlaybackController(QObject):
     positionChanged = pyqtSignal(float)  # Emits current position (0.0 to total_frames)
 
     def __init__(self, parent=None) -> None:
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         super().__init__(parent)
 
@@ -54,7 +54,7 @@ class SmoothPlaybackController(QObject):
 
     def load_frame_processor(self, frame_processor: FrameProcessor) -> None:
         """Load frame processor with motion data."""
-        if not (frame_processor is not None):
+        if frame_processor is None:
             raise ValueError("frame_processor must be provided")
         self.frame_processor = frame_processor
         self.stop()
@@ -72,7 +72,7 @@ class SmoothPlaybackController(QObject):
     @position.setter
     def position(self, value: float) -> None:
         """Set playback position with interpolation."""
-        if not (value is not None):
+        if value is None:
             raise ValueError("value must be provided")
         if self.frame_processor is None:
             return
@@ -142,7 +142,7 @@ class SmoothPlaybackController(QObject):
 
     def seek(self, position: float) -> None:
         """Seek to specific frame position."""
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         if self.frame_processor is None:
             return
@@ -159,7 +159,7 @@ class SmoothPlaybackController(QObject):
 
     def set_playback_speed(self, speed: float) -> None:
         """Set playback speed multiplier (0.5 = half speed, 2.0 = double speed)."""
-        if not (speed is not None):
+        if speed is None:
             raise ValueError("speed must be provided")
         self._playback_speed = np.clip(speed, 0.1, 10.0)
 
@@ -217,7 +217,7 @@ class SmoothPlaybackController(QObject):
         Returns:
             Interpolated frame data
         """
-        if not (frame_a is not None):
+        if frame_a is None:
             raise ValueError("frame_a must be provided")
         result = copy(frame_a)
 

@@ -308,7 +308,7 @@ def save_preset_to_file(
         file_path: Output file path
         format: Output format (yaml or json)
     """
-    if not (params is not None):
+    if params is None:
         raise ValueError("params must be provided")
     import json
 

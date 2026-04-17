@@ -108,7 +108,7 @@ class SkeletonConfig:
         Returns:
             List of joint names from root to end.
         """
-        if not (end_joint is not None):
+        if end_joint is None:
             raise ValueError("end_joint must be provided")
         chain: list[str] = []
         idx = self.get_joint_index(end_joint)
@@ -273,7 +273,7 @@ class MotionRetargeter:
             source_skeleton: Source skeleton configuration.
             target_skeleton: Target skeleton configuration.
         """
-        if not (source_skeleton is not None):
+        if source_skeleton is None:
             raise ValueError("source_skeleton must be provided")
         self.source = source_skeleton
         self.target = target_skeleton
@@ -353,7 +353,7 @@ class MotionRetargeter:
         Returns:
             Target joint angles (T, n_target).
         """
-        if not (source_motion is not None):
+        if source_motion is None:
             raise ValueError("source_motion must be provided")
         n_frames = source_motion.shape[0]
         target_motion = np.zeros((n_frames, self.target.n_joints))
@@ -387,7 +387,7 @@ class MotionRetargeter:
         Returns:
             Optimized target motion.
         """
-        if not (source_motion is not None):
+        if source_motion is None:
             raise ValueError("source_motion must be provided")
         n_frames = source_motion.shape[0]
         target_motion = np.zeros((n_frames, self.target.n_joints))
@@ -428,7 +428,7 @@ class MotionRetargeter:
         Returns:
             Dictionary of end-effector positions.
         """
-        if not (joint_angles is not None):
+        if joint_angles is None:
             raise ValueError("joint_angles must be provided")
         positions = {}
 
@@ -474,7 +474,7 @@ class MotionRetargeter:
         Returns:
             Optimized joint angles.
         """
-        if not (initial_angles is not None):
+        if initial_angles is None:
             raise ValueError("initial_angles must be provided")
         angles = initial_angles.copy()
         step_size = 0.01
@@ -557,7 +557,7 @@ class MotionRetargeter:
         Returns:
             Retargeted joint angles.
         """
-        if not (marker_positions is not None):
+        if marker_positions is None:
             raise ValueError("marker_positions must be provided")
         n_frames = marker_positions.shape[0]
         target_motion = np.zeros((n_frames, self.target.n_joints))
@@ -591,7 +591,7 @@ class MotionRetargeter:
         Returns:
             Mapping dictionary.
         """
-        if not (marker_names is not None):
+        if marker_names is None:
             raise ValueError("marker_names must be provided")
         mapping = {}
         common_mappings = {
@@ -632,7 +632,7 @@ class MotionRetargeter:
             Joint angles.
         """
         # Start with zero angles
-        if not (joint_positions is not None):
+        if joint_positions is None:
             raise ValueError("joint_positions must be provided")
         angles = np.zeros(self.target.n_joints)
 

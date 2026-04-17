@@ -21,7 +21,7 @@ def save_results(
     results, filename: str, format_type: str = "csv", engine: str = "mujoco"
 ) -> str:
     """Backward-compatible convenience save helper."""
-    if not (results is not None):
+    if results is None:
         raise ValueError("results must be provided")
     manager = OutputManager()
     return str(
@@ -40,7 +40,7 @@ def load_results(
     engine: str = "mujoco",
 ) -> pd.DataFrame | dict[str, Any] | list[dict[str, Any]]:
     """Backward-compatible convenience load helper."""
-    if not (filename is not None):
+    if filename is None:
         raise ValueError("filename must be provided")
     manager = OutputManager()
     return manager.load_simulation_results(filename, OutputFormat(format_type), engine)

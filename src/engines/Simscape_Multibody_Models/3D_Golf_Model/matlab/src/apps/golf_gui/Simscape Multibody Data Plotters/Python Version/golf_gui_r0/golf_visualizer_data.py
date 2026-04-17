@@ -29,7 +29,7 @@ class DataProcessor:
         self, baseq_file: str, ztcfq_file: str, delta_file: str
     ) -> tuple[pd.DataFrame, ...]:
         """Fast MATLAB data loading with error handling"""
-        if not (baseq_file is not None):
+        if baseq_file is None:
             raise ValueError("baseq_file must be provided")
         datasets: dict[str, pd.DataFrame] = {}
         files = {"BASEQ": baseq_file, "ZTCFQ": ztcfq_file, "DELTAQ": delta_file}
@@ -96,7 +96,7 @@ class DataProcessor:
         self, frame_idx: int, datasets: dict[str, pd.DataFrame]
     ) -> FrameData:
         """Extract and process single frame data efficiently"""
-        if not (frame_idx is not None):
+        if frame_idx is None:
             raise ValueError("frame_idx must be provided")
         if frame_idx in self.cache:
             return self.cache[frame_idx]
@@ -155,7 +155,7 @@ class DataProcessor:
         self, dataset: pd.DataFrame, frame_idx: int, column: str
     ) -> np.ndarray:  # noqa: E501
         """Safely extract 3D point with fallbacks"""
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         try:
             point = dataset[column].iloc[frame_idx]
@@ -169,7 +169,7 @@ class DataProcessor:
         self, dataset: pd.DataFrame, frame_idx: int, column: str
     ) -> np.ndarray:  # noqa: E501
         """Safely extract 3D vector with fallbacks"""
-        if not (dataset is not None):
+        if dataset is None:
             raise ValueError("dataset must be provided")
         try:
             vector = dataset[column].iloc[frame_idx]

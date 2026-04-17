@@ -50,7 +50,7 @@ class ArrayDimensionError(GolfSuiteError):
         actual_shape: tuple[int, ...] | None = None,
         message: str | None = None,
     ) -> None:
-        if not (array_name is not None):
+        if array_name is None:
             raise ValueError("array_name must be provided")
         self.expected_shape = expected_shape
         self.actual_shape = actual_shape

@@ -75,7 +75,7 @@ class ObservationConfig:
         Returns:
             Total observation dimension.
         """
-        if not (n_joints is not None):
+        if n_joints is None:
             raise ValueError("n_joints must be provided")
         dim = 0
         if self.include_joint_pos:
@@ -122,7 +122,7 @@ class ActionConfig:
             Processed action.
         """
         # Clip
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         action = np.clip(action, -self.action_clip, self.action_clip)
         # Scale
@@ -182,7 +182,7 @@ class RewardConfig:
         Returns:
             Smoothness penalty value.
         """
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         if prev_action is None:
             return 0.0
