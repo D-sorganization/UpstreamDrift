@@ -10,8 +10,9 @@ Migration:
 """
 
 from src.shared.python.engine_core.capabilities import (
+    SPATIAL_JACOBIAN_ORDER,
     CapabilityLevel,
     EngineCapabilities,
 )
 
-__all__ = ["CapabilityLevel", "EngineCapabilities"]
+__all__ = ["CapabilityLevel", "EngineCapabilities", "SPATIAL_JACOBIAN_ORDER"]

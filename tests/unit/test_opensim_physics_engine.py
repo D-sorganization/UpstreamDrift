@@ -205,7 +205,7 @@ def test_compute_mass_matrix(engine):
     assert M.shape == (2, 2)
 
 
-def test_compute_jacobian_scales_finite_difference_step(engine):
+def test_compute_jacobian_uses_stable_central_difference_step(engine):
     model = MagicMock(spec=_OSIM_MODEL_SPEC + ["getBodySet"])
     state = MagicMock(spec=_OSIM_STATE_SPEC + ["getNQ", "getNU", "updQ"])
     engine._model = model
@@ -247,9 +247,10 @@ def test_compute_jacobian_scales_finite_difference_step(engine):
     with patch.object(engine, "_rotation_difference", return_value=np.zeros(3)):
         jacobian = engine.compute_jacobian("pelvis")
 
-    expected_eps = np.sqrt(np.finfo(float).eps) * abs(q_current[0])
+    expected_eps = 1e-4 * abs(q_current[0])
     assert jacobian is not None
     np.testing.assert_allclose(jacobian["linear"], np.array([[1.0], [0.0], [0.0]]))
     np.testing.assert_allclose(jacobian["angular"], np.zeros((3, 1)))
     assert q_write_history[0] == pytest.approx(1000.0 + expected_eps)
+    assert q_write_history[1] == pytest.approx(1000.0 - expected_eps)
     assert q_write_history[-1] == pytest.approx(1000.0)

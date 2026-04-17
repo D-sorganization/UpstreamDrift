@@ -398,7 +398,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             "linear": jacp,
             "angular": jacr,
             "spatial": np.vstack([jacr, jacp]),
-            # Standardized to [Angular; Linear] (Drake convention)
+            # Suite spatial convention: [Angular; Linear].
         }
 
     def compute_contact_forces(self) -> np.ndarray:
@@ -427,9 +427,10 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             f_local = c_force[:3]
             f_world = contact_frame.T @ f_local
 
-            # The ground reaction force (GRF) acting ON the system (geom2 usually)
-            # is the negative of the force exerted BY geom2 on the ground (geom1).
-            total_force -= f_world
+            # MuJoCo reports the contact force exerted by geom2 on geom1.
+            # For foot-ground contacts where the foot is geom1, this is already
+            # the upward ground reaction force acting on the modeled body.
+            total_force += f_world
 
         return total_force
 

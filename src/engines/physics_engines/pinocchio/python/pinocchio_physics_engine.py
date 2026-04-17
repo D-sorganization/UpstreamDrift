@@ -22,6 +22,10 @@ from src.shared.python.core.contracts import (
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
@@ -85,6 +89,18 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model:
             return cast(str, self.model.name)
         return self.model_name_str
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Pinocchio capabilities, including lack of contact GRF support."""
+        return EngineCapabilities(
+            engine_name="Pinocchio",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.NONE,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            extra={"spatial_jacobian_order": "angular_linear"},
+        )
 
     def _load_from_path_impl(self, path: str) -> None:
         """Pinocchio-specific model loading from URDF file path.

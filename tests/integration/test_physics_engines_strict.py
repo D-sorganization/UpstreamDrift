@@ -110,7 +110,10 @@ TEST_ANGULAR_VAL = 2.0
 class TestMuJoCoStrict:
     def setup_method(self):
         """Enforce strict patching via direct dependency injection."""
-        # 1. Ensure the module is loaded (using whatever state sys.modules is in)
+        self.patcher = patch.dict("sys.modules", module_patches)
+        self.patcher.start()
+
+        # 1. Ensure the module is loaded with mocked heavy dependencies.
         import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
         # 2. Force the module's 'mujoco' reference to be OUR mock
@@ -125,6 +128,7 @@ class TestMuJoCoStrict:
         # Restore original if needed (though we mostly don't care in strict/mocked env)
         if hasattr(self, "original_mujoco"):
             setattr(self.mod, "mujoco", self.original_mujoco)  # noqa: B010
+        self.patcher.stop()
 
     def test_jacobian_standardization_mocked(self):
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
@@ -180,6 +184,26 @@ class TestMuJoCoStrict:
 
         sensors = engine.get_sensors()
         assert sensors["sensor_0"] == 0.123
+
+    def test_contact_forces_preserve_mujoco_grf_sign(self):
+        """MuJoCo GRF should point in the same world direction as the contact force."""
+        engine = self.MuJoCoPhysicsEngine()
+        engine.model = MagicMock()
+        engine.data = MagicMock()
+        engine.data.ncon = 1
+
+        contact = MagicMock()
+        contact.frame = np.eye(3).reshape(-1)
+        engine.data.contact = [contact]
+
+        def side_effect_contact_force(model, data, index, c_force):
+            c_force[:3] = np.array([0.0, 0.0, 735.75])
+
+        mock_mujoco.mj_contactForce.side_effect = side_effect_contact_force
+
+        force = engine.compute_contact_forces()
+
+        np.testing.assert_allclose(force, np.array([0.0, 0.0, 735.75]))
 
 
 class TestOpenSimStrict:

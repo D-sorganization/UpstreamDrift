@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 from src.shared.python.engine_core.capabilities import (
+    SPATIAL_JACOBIAN_ORDER,
     CapabilityLevel,
     EngineCapabilities,
 )
@@ -136,8 +137,27 @@ class TestEngineCapabilitiesToDict:
             "force_visualization",
             "model_positioning",
             "measurements",
+            "spatial_jacobian_order",
         ):
             assert key in d
+
+    def test_spatial_jacobian_order_is_documented(self) -> None:
+        caps = EngineCapabilities(jacobian=CapabilityLevel.FULL)
+        assert SPATIAL_JACOBIAN_ORDER == ("angular", "linear")
+        assert caps.to_dict()["spatial_jacobian_order"] == "angular_linear"
+
+
+class TestPinocchioCapabilities:
+    def test_pinocchio_reports_contact_forces_unavailable(self) -> None:
+        from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            PinocchioPhysicsEngine,
+        )
+
+        caps = PinocchioPhysicsEngine().get_capabilities()
+
+        assert caps.engine_name == "Pinocchio"
+        assert caps.contact_forces == CapabilityLevel.NONE
+        assert caps.extra["spatial_jacobian_order"] == "angular_linear"
 
 
 class TestEngineCapabilitiesFromDict:
