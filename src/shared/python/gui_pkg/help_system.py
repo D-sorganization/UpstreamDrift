@@ -358,8 +358,7 @@ class HelpDialog(QDialog):
 
     def _apply_styles(self) -> None:
         """Apply CSS styles to the dialog."""
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QDialog {
                 background-color: #1E1E1E;
             }
@@ -439,8 +438,7 @@ class HelpDialog(QDialog):
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 14px;
             }
-        """
-        )
+        """)
 
     def _load_topics(self) -> None:
         """Load available topics into the UI."""
@@ -580,8 +578,7 @@ class HelpButton(QToolButton):
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Style
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QToolButton {
                 background-color: #3C3C3C;
                 color: #0A84FF;
@@ -595,8 +592,7 @@ class HelpButton(QToolButton):
                 color: white;
                 border: 1px solid #0A84FF;
             }
-        """
-        )
+        """)
 
         # Connect click
         self.clicked.connect(self._on_clicked)

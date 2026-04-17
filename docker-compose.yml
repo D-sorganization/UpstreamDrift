@@ -1,3 +1,9 @@
+# WARNING: LOCAL DEVELOPMENT ONLY
+# This compose file is intended for local developer workflows only.
+# Before using in any shared or internet-facing environment:
+#   - Change port bindings from 127.0.0.1 to an appropriate reverse-proxy.
+#   - Remove or set GOLF_AUTH_DISABLED=false if present in your .env.
+#   - Remove --reload from the uvicorn command.
 version: "3.8"
 
 services:
@@ -10,7 +16,8 @@ services:
     image: upstream-drift:runtime
     container_name: upstream-drift-backend
     ports:
-      - "8001:8001"
+      # Bind to loopback only — not exposed on all host interfaces.
+      - "127.0.0.1:8001:8001"
     volumes:
       - .:/workspace:delegated
       - ./data:/workspace/data
@@ -34,17 +41,21 @@ services:
     networks:
       - upstream-drift
 
-  # Frontend UI (optional - can also run locally)
+  # Frontend UI (optional — can also run locally outside Docker).
+  # node_modules are cached in a named volume so `npm install` does not re-run
+  # on every `docker compose up`. Run `docker compose run frontend npm install`
+  # once after cloning or after changing package.json.
   frontend:
     image: node:20-alpine
     container_name: upstream-drift-frontend
     ports:
-      - "5180:5180"
+      - "127.0.0.1:5180:5180"
     volumes:
       - ./ui:/app:delegated
-      - /app/node_modules
+      # Named volume so npm install is not repeated on every start.
+      - frontend_node_modules:/app/node_modules
     working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    command: npm run dev -- --host 0.0.0.0
     environment:
       - VITE_API_URL=http://backend:8001
     depends_on:
@@ -78,4 +89,5 @@ networks:
     driver: bridge
 
 volumes:
-  node_modules:
+  # Cached node_modules for the frontend service.  Reset: docker compose down -v
+  frontend_node_modules:

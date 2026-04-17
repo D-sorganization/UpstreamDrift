@@ -668,7 +668,7 @@ def main() -> None:
     try:
         # Create loader and load data
         loader = MotionDataLoader()
-        excel_data = loader.load_excel_data(excel_file)
+        excel_data = loader.load_excel_data(excel_file)  # type: ignore[arg-type]
 
         # Convert to GUI format
         baseq, ztcfq, deltaq = loader.convert_to_gui_format(excel_data)

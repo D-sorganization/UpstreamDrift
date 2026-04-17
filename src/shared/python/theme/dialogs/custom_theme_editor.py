@@ -66,8 +66,7 @@ class ColorPickerButton(QPushButton):
         qcolor = QColor(self._color)
         text_color = "#ffffff" if qcolor.lightness() < 128 else "#000000"
 
-        self.setStyleSheet(
-            f"""
+        self.setStyleSheet(f"""
             QPushButton {{
                 background-color: {self._color};
                 color: {text_color};
@@ -79,8 +78,7 @@ class ColorPickerButton(QPushButton):
             QPushButton:hover {{
                 border: 2px solid #333333;
             }}
-        """
-        )
+        """)
         self.setText(self._color.upper())
 
     def _open_color_picker(self) -> None:

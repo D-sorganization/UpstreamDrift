@@ -216,7 +216,7 @@ def main() -> None:
         logger.info("❌ Could not extract usable data from the files")
         logger.info("The data structure may need special handling in the GUI")
 
-    return len(extracted_data) > 0
+    return  # noqa: RET502
 
 
 if __name__ == "__main__":

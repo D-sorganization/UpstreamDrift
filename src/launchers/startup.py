@@ -16,7 +16,9 @@ from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_run
 
 if TYPE_CHECKING:
-    from src.shared.python.theme.theme_manager import ThemeColors
+    from src.shared.python.theme.theme_manager import (  # type: ignore[attr-defined]
+        ThemeColors,
+    )
 
 logger = get_logger(__name__)
 
@@ -26,7 +28,7 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 
 # Theme availability check
 try:
-    from src.shared.python.theme import (
+    from src.shared.python.theme import (  # type: ignore[attr-defined]
         Colors,
         Sizes,
         Weights,
@@ -42,9 +44,11 @@ except ImportError:
 def _get_theme_colors() -> ThemeColors:
     """Get current theme colors, with fallback to dark theme defaults."""
     try:
-        from src.shared.python.theme import get_current_colors
+        from src.shared.python.theme import (  # type: ignore[attr-defined]
+            get_current_colors,
+        )
 
-        return get_current_colors()
+        return get_current_colors()  # type: ignore[attr-defined]
     except ImportError:
         from src.shared.python.theme import DARK_THEME
 

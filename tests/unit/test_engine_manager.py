@@ -101,8 +101,7 @@ class TestEngineManager:
 
             models_yaml = temp_path / "src" / "config" / "models.yaml"
             models_yaml.write_text(
-                textwrap.dedent(
-                    """
+                textwrap.dedent("""
                     models:
                       - id: drake_provider_model
                         name: Drake Provider Model
@@ -113,8 +112,7 @@ class TestEngineManager:
                         capabilities: [swing]
                         source_root: provider_roots/Drake_Models
                         working_dir: python
-                    """
-                ).strip()
+                    """).strip()
                 + "\n",
                 encoding="utf-8",
             )
@@ -134,8 +132,7 @@ class TestEngineManager:
             (temp_path / "src" / "config").mkdir(parents=True)
             models_yaml = temp_path / "src" / "config" / "models.yaml"
             models_yaml.write_text(
-                textwrap.dedent(
-                    """
+                textwrap.dedent("""
                     models:
                       - id: drake_provider_model
                         name: Drake Provider Model
@@ -146,8 +143,7 @@ class TestEngineManager:
                         capabilities: [swing]
                         source_root: provider_roots/Drake_Models
                         working_dir: python
-                    """
-                ).strip()
+                    """).strip()
                 + "\n",
                 encoding="utf-8",
             )
