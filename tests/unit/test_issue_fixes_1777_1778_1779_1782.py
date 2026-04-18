@@ -52,18 +52,18 @@ class TestSecretKeyNotStaticFallback:
         """
         from src.api.auth import security
 
-        assert len(security.SECRET_KEY) >= 32, (
-            f"SECRET_KEY length {len(security.SECRET_KEY)} is below minimum 32 characters"
-        )
+        assert (
+            len(security.SECRET_KEY) >= 32
+        ), f"SECRET_KEY length {len(security.SECRET_KEY)} is below minimum 32 characters"
 
     def test_dev_secret_key_is_not_the_old_development_string(self) -> None:
         """No legacy 'development-secret-key' constant must exist."""
         from src.api.auth import security
 
         forbidden_prefix = "development-secret-key"
-        assert not security.SECRET_KEY.lower().startswith(forbidden_prefix), (
-            f"SECRET_KEY must not start with '{forbidden_prefix}'"
-        )
+        assert not security.SECRET_KEY.lower().startswith(
+            forbidden_prefix
+        ), f"SECRET_KEY must not start with '{forbidden_prefix}'"
 
     def test_security_manager_rejects_known_static_key_tokens(self) -> None:
         """JWT signed with the known static key must not be accepted by a real manager.
@@ -142,13 +142,13 @@ class TestAuthCacheSHA256CacheKey:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_testkey_for_sha256_verification"
+        api_key = "gms_testkey_for_sha256_verification"  # nosec B105 - test fixture
         token = cache._cache_lookup_token(api_key)
         expected = hashlib.sha256(api_key.encode()).hexdigest()
 
-        assert token == expected, (
-            f"Cache key '{token}' != SHA-256('{api_key}') = '{expected}'"
-        )
+        assert (
+            token == expected
+        ), f"Cache key '{token}' != SHA-256('{api_key}') = '{expected}'"
 
     def test_cache_key_is_64_hex_chars(self) -> None:
         """SHA-256 output is 32 bytes = 64 hex characters."""
@@ -158,16 +158,16 @@ class TestAuthCacheSHA256CacheKey:
         token = cache._cache_lookup_token("any_api_key_value")
 
         assert len(token) == 64, f"Expected 64-char hex digest, got {len(token)}"
-        assert all(c in "0123456789abcdef" for c in token), (
-            "Token must be lowercase hex"
-        )
+        assert all(
+            c in "0123456789abcdef" for c in token
+        ), "Token must be lowercase hex"
 
     def test_cache_key_is_deterministic(self) -> None:
         """Same input must always produce the same cache key."""
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_determinism_check"
+        api_key = "gms_determinism_check"  # nosec B105 - test fixture
 
         keys = [cache._cache_lookup_token(api_key) for _ in range(5)]
         assert len(set(keys)) == 1, "Cache key is not deterministic across calls"
@@ -187,21 +187,21 @@ class TestAuthCacheSHA256CacheKey:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_builtin_hash_check"
+        api_key = "gms_builtin_hash_check"  # nosec B105 - test fixture
         token = cache._cache_lookup_token(api_key)
 
         # Python's hash() prefix would appear as a numeric string
         python_hash_str = str(hash(api_key))
-        assert not token.startswith(python_hash_str), (
-            "Cache token must not be derived from Python's built-in hash()"
-        )
+        assert not token.startswith(
+            python_hash_str
+        ), "Cache token must not be derived from Python's built-in hash()"
 
     def test_auth_cache_round_trip_with_sha256_key(self) -> None:
         """set() then get() must return the stored value using SHA-256 keying."""
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_roundtrip_sha256"
+        api_key = "gms_roundtrip_sha256"  # nosec B105 - test fixture
         user_id = 99
 
         cache.set(api_key, user_id)
@@ -493,9 +493,9 @@ class TestMotionTrainingExportsNotNone:
         for name in mt.__all__:
             try:
                 obj = getattr(mt, name)
-                assert obj is not None, (
-                    f"__getattr__('{name}') returned None – the import delegation is broken"
-                )
+                assert (
+                    obj is not None
+                ), f"__getattr__('{name}') returned None – the import delegation is broken"
             except (ImportError, ModuleNotFoundError):
                 # Acceptable: optional deps (pinocchio, pink, meshcat) not installed
                 pass

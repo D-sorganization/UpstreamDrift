@@ -36,7 +36,7 @@ def test_compute_prefix_hash() -> None:
 
 def test_password_hashing() -> None:
     """Test bcrypt password hashing and verification."""
-    password = "my_secure_password"
+    password = "my_secure_password"  # nosec B105 - test fixture, not a real credential
     hashed = security_manager.hash_password(password)
 
     assert hashed != password

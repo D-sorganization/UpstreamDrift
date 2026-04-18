@@ -67,9 +67,9 @@ class TestDragParity:
         expected_mag = 0.5 * 1.225 * expected_cd * ball.area * speed**2
         actual_mag = np.linalg.norm(drag_py)
 
-        assert abs(actual_mag - expected_mag) / expected_mag < 0.01, (
-            f"Laminar drag magnitude mismatch: {actual_mag} vs {expected_mag}"
-        )
+        assert (
+            abs(actual_mag - expected_mag) / expected_mag < 0.01
+        ), f"Laminar drag magnitude mismatch: {actual_mag} vs {expected_mag}"
 
 
 class TestLiftParity:
@@ -147,9 +147,9 @@ class TestCoefficientConsistency:
         """Lift coefficient saturates near Cl_max = 0.4."""
         cl_max = 0.4
         cl_very_high = cl_max * (1 - math.exp(-10.0 / 0.1))
-        assert abs(cl_very_high - 0.4) < 0.01, (
-            f"Cl should saturate near 0.4, got {cl_very_high}"
-        )
+        assert (
+            abs(cl_very_high - 0.4) < 0.01
+        ), f"Cl should saturate near 0.4, got {cl_very_high}"
 
     def test_magnus_coefficient_capped(self) -> None:
         """Magnus coefficient caps at 0.4 * 0.5 = 0.2."""
