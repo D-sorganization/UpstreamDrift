@@ -139,9 +139,12 @@ jobs:
         # Force-reinstall sortedcontainers + hypothesis first: the shared
         # toolcache can carry a half-installed sortedcontainers that is missing
         # SortedSet, causing hypothesis to fail its import at pytest startup.
+        env:
+          PYTHONNOUSERSITE: "1"
         run: |
-          pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
-          pip install -e ".[dev,gui-test]"
+          python -m pip install --upgrade --force-reinstall pip setuptools wheel
+          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          python -m pip install -e ".[dev,gui-test]"
 
       - name: Install API Extras
         # Install full FastAPI stack for API-path tests.
@@ -149,9 +152,11 @@ jobs:
         # Force-reinstall idna[uts46]: the toolcache may carry a minimal idna
         # (installed as a transitive dep) that lacks uts46_remap, breaking
         # email-validator which email validation tests depend on.
+        env:
+          PYTHONNOUSERSITE: "1"
         run: |
-          pip install "fastapi[all]" httpx
-          pip install --force-reinstall "idna[uts46]>=3.4" "email-validator>=2.0.0"
+          python -m pip install "fastapi[all]" httpx
+          python -m pip install --force-reinstall "idna[uts46]>=3.4" "email-validator>=2.0.0"
 
       - name: Attempt Pinocchio Ecosystem Installation
         # Pinocchio, Pink, and Crocoddyl are not on PyPI for all platforms.
@@ -160,8 +165,10 @@ jobs:
         # On runners where conda-forge is available this will succeed.
         id: pinocchio_install
         continue-on-error: true
+        env:
+          PYTHONNOUSERSITE: "1"
         run: |
-          pip install pin pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log
+          python -m pip install pin pink crocoddyl 2>&1 | tee /tmp/pinocchio_install.log
           if python3 -c "import pinocchio" 2>/dev/null; then
             echo "available=true" >> "$GITHUB_OUTPUT"
             echo "Pinocchio installation: SUCCESS"
