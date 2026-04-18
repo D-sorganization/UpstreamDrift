@@ -82,7 +82,9 @@ class PinocchioBackend:
             FileNotFoundError: If model file does not exist
         """
         if not PINOCCHIO_AVAILABLE:
-            msg = "Pinocchio is required but not installed. Install with: pip install pin"  # noqa: E501
+            msg = (
+                "Pinocchio is required but not installed. Install with: pip install pin"  # noqa: E501
+            )
             raise ImportError(msg)
 
         model_path_obj = Path(model_path)
