@@ -94,6 +94,26 @@ class KinematicForceAnalyzer:
             self.nv,
         )
 
+    def _clamp_to_joint_limits(self, qpos: np.ndarray) -> np.ndarray:
+        """Clamp joint positions to the model's limited joint ranges."""
+        if qpos is None:
+            raise ValueError("qpos must be provided")
+
+        q_clamped = qpos.copy()
+        for joint_id in range(self.model.njnt):
+            if not self.model.jnt_limited[joint_id]:
+                continue
+
+            qpos_addr = self.model.jnt_qposadr[joint_id]
+            if qpos_addr >= len(q_clamped):
+                continue
+
+            q_min = self.model.jnt_range[joint_id, 0]
+            q_max = self.model.jnt_range[joint_id, 1]
+            q_clamped[qpos_addr] = np.clip(q_clamped[qpos_addr], q_min, q_max)
+
+        return q_clamped
+
     def compute_coriolis_forces(self, qpos: np.ndarray, qvel: np.ndarray) -> np.ndarray:
         """Compute Coriolis and centrifugal forces.
 
@@ -224,6 +244,8 @@ class KinematicForceAnalyzer:
         if self.club_head_id is None:
             return np.zeros(3), np.zeros(3), np.zeros(3)
 
+        qpos = self._clamp_to_joint_limits(qpos)
+
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
@@ -234,7 +256,7 @@ class KinematicForceAnalyzer:
         club_pos = self._perturb_data.xpos[self.club_head_id].copy()
         epsilon = EPSILON_FINITE_DIFF_JACOBIAN
 
-        self._perturb_data.qpos[:] = qpos + epsilon * qvel
+        self._perturb_data.qpos[:] = self._clamp_to_joint_limits(qpos + epsilon * qvel)
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
         jacp_forward, _ = self._compute_jacobian(
@@ -242,7 +264,7 @@ class KinematicForceAnalyzer:
         )
         jacp_forward = jacp_forward.copy()
 
-        self._perturb_data.qpos[:] = qpos - epsilon * qvel
+        self._perturb_data.qpos[:] = self._clamp_to_joint_limits(qpos - epsilon * qvel)
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
         jacp_backward, _ = self._compute_jacobian(
