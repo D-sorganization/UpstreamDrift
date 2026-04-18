@@ -38,9 +38,18 @@ mimetypes.add_type("image/png", ".png")
 mimetypes.add_type("image/jpeg", ".jpg")
 mimetypes.add_type("image/x-icon", ".ico")
 
-# Ensure we're running in local mode
+# Ensure we're running in local mode with explicit security configuration
 os.environ.setdefault("GOLF_SUITE_MODE", "local")
-os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
+# Auth is disabled ONLY in local mode for development convenience.
+# This is an intentional security boundary: local servers have NO auth by design.
+# Production servers MUST NOT use local_server.py and MUST enforce authentication.
+# See issue #2714 for security hardening requirements.
+if os.environ.get("GOLF_SUITE_MODE") == "local":
+    os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
+else:
+    # Production and other modes: auth is REQUIRED unless explicitly overridden
+    # by deployment configuration (e.g., cloud IAM, OAuth2 middleware)
+    os.environ.setdefault("GOLF_AUTH_DISABLED", "false")
 
 # NOTE: These imports are placed after env setup intentionally
 # The environment variables must be set before FastAPI initialization

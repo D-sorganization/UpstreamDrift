@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-17T00:00:00Z
+Last-Updated: 2026-04-18T00:00:00Z
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-17T00:00:00Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.131                                            |
+| **Spec Version**        | 1.0.132                                            |
 | **Last Spec Update**    | 2026-04-18                                         |
 
 ## 2. Purpose & Mission
@@ -243,7 +243,7 @@ UpstreamDrift/
 
 Configuration is managed through:
 
-- **Environment Variables**: `UPSTREAM_DRIFT_ENGINE` (default: mujoco), `UPSTREAM_DRIFT_API_PORT` (default: 8000)
+- **Environment Variables**: `UPSTREAM_DRIFT_ENGINE` (default: mujoco), `UPSTREAM_DRIFT_API_PORT` (default: 8000), `GOLF_SUITE_MODE` (local server defaults to `local`), and `GOLF_AUTH_DISABLED` (local server defaults to `true` only when `GOLF_SUITE_MODE=local`; non-local modes default to `false` unless deployment configuration explicitly overrides authentication)
 - **YAML Config Files**: `~/.upstream_drift/config.yaml` with engine-specific sections
 - **Model Pack Manifests**: versioned YAML manifests in `src/shared/python/config/model_pack_manifest.py` shape, with compatibility support for legacy `config/models.yaml` registries during migration
 - **Launcher Source Metadata**: model entries may optionally declare `provider`, `source_root`, `working_dir`, and `python_paths` so launcher processes can execute from external provider repos without assuming all assets live inside `UpstreamDrift`
@@ -497,6 +497,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-18 | 1.0.132 | API security hardening: `src/api/local_server.py` now makes the local-development authentication boundary explicit by defaulting `GOLF_AUTH_DISABLED=true` only when `GOLF_SUITE_MODE=local`; non-local modes default authentication to enabled unless deployment configuration deliberately overrides it.                                                                                                                                                                                                                                                                             |
 | 2026-04-18 | 1.0.131 | Performance optimization: Replaced a slow Python list comprehension executing `np.linalg.norm` iteratively with a fully vectorized NumPy calculation using `np.einsum` in the putting green `scatter_analysis` route, reducing calculation time and avoiding intermediate array allocations. Also added a safety check for empty result sets.                                                                                                                                                                                                       |
 | 2026-04-17 | 1.0.130 | Physics robustness: MuJoCo kinematic-force central-difference perturbations now detect joint bounds and fall back to forward or backward finite differences near lower or upper limits, preserving in-bounds analyzer inputs while retaining centered differences away from limits. Regression coverage exercises lower-limit, upper-limit, interior, and zero-width-limit behavior.                                                                                                                                                                                                                                                                     |
 | 2026-04-17 | 1.0.130 | Local deployment hardening: `docker-compose.yml` now bootstraps frontend dependencies inside the UI service when the bind-mounted workspace lacks `node_modules`, preserving the named dependency cache while keeping fresh local checkouts runnable through Compose. Regression coverage verifies the dependency bootstrap command and volume wiring.                                                                                                                                                                                                                                                                                                  |
