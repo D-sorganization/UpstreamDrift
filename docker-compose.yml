@@ -43,8 +43,8 @@ services:
 
   # Frontend UI (optional — can also run locally outside Docker).
   # node_modules are cached in a named volume so `npm install` does not re-run
-  # on every `docker compose up`. Run `docker compose run frontend npm install`
-  # once after cloning or after changing package.json.
+  # on every `docker compose up`, while `npm ci` bootstraps fresh volumes and
+  # refreshes dependencies after package-lock.json changes.
   frontend:
     image: node:20-alpine
     container_name: upstream-drift-frontend
@@ -55,7 +55,7 @@ services:
       # Named volume so npm install is not repeated on every start.
       - frontend_node_modules:/app/node_modules
     working_dir: /app
-    command: npm run dev -- --host 0.0.0.0
+    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
     environment:
       - VITE_API_URL=http://backend:8001
     depends_on:

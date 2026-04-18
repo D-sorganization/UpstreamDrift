@@ -53,6 +53,9 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Enable long Git paths
+        run: git config --global core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
