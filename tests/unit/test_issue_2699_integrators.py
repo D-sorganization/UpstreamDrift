@@ -100,3 +100,50 @@ def test_golf_pendulum_rk4_samples_torque_profile_at_stage_times(
         (1.1, (1.1, -1.1)),
         (1.2, (1.2, -1.2)),
     ]
+
+
+def test_golf_pendulum_reset_clears_torque_profile(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from src.engines.physics_engines.pendulum.python import (
+        golf_swing_physics_engine,
+    )
+
+    sampled: list[tuple[float, tuple[float, float]]] = []
+
+    def equations_of_motion(
+        state: np.ndarray,
+        time: float,
+        params: Any,
+        torque_func: Any,
+    ) -> np.ndarray:
+        del state, params
+        sampled.append((time, torque_func(time)))
+        return np.zeros(4)
+
+    package = ModuleType("double_pendulum_golf")
+    physics = ModuleType("double_pendulum_golf.physics")
+    physics.equations_of_motion = equations_of_motion  # type: ignore[attr-defined]
+    physics.PendulumParams = lambda **kwargs: kwargs  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "double_pendulum_golf", package)
+    monkeypatch.setitem(sys.modules, "double_pendulum_golf.physics", physics)
+    monkeypatch.setattr(golf_swing_physics_engine, "_TOOLS_PENDULUM_AVAILABLE", None)
+
+    engine = golf_swing_physics_engine.GolfSwingPendulumEngine()
+    engine._is_initialized = True
+    engine._pendulum_params = object()
+    engine.time = 1.0
+    engine.set_control_profile(lambda _t: (7.0, -7.0))
+    engine.reset()
+    engine.set_control(np.array([2.0, -3.0]))
+
+    assert engine._torque_profile is None
+
+    engine.step(0.2)
+
+    assert sampled == [
+        (0.0, (2.0, -3.0)),
+        (0.1, (2.0, -3.0)),
+        (0.1, (2.0, -3.0)),
+        (0.2, (2.0, -3.0)),
+    ]

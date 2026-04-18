@@ -221,6 +221,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         self._state = np.zeros(4)
         self.time = 0.0
         self._tau = np.zeros(2)
+        self._torque_profile = None
 
     def step(self, dt: float | None = None) -> None:
         """Advance state by one RK4 step.
