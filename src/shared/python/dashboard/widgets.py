@@ -11,7 +11,7 @@ Contains:
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -519,7 +519,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             if self.comparison_label:
                 title += f" vs {self.comparison_label}"
                 # Create secondary axis
-                self.ax2 = self.ax.twinx()
+                self.ax2 = cast(Axes, self.ax.twinx())
             self.ax.set_xlabel("Time (s)")
 
         self.ax.set_title(title)

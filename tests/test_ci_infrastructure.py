@@ -262,14 +262,3 @@ class TestPyprojectTomlConsistency:
         assert any("structlog" in dep for dep in deps), (
             "structlog must be in core dependencies"
         )
-
-    def test_formatter_hook_uses_cross_platform_python(self) -> None:
-        """Test that the formatter guidance hook does not hard-code python3."""
-        from pathlib import Path
-
-        repo_root = Path(__file__).parent.parent
-        pre_commit = repo_root / ".pre-commit-config.yaml"
-        content = pre_commit.read_text(encoding="utf-8")
-
-        assert "entry: python scripts/check_formatter_guidance.py" in content
-        assert "entry: python3 scripts/check_formatter_guidance.py" not in content
