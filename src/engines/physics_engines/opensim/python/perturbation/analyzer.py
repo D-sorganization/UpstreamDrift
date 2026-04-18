@@ -38,6 +38,8 @@ from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exp
     MANDATORY_METRICS,
     ComparisonReport,  # noqa: F401
     PerturbationAnalyzerBase,
+    build_joint_polys,
+    compute_ee_velocity_fd,
 )
 
 logger = logging.getLogger(__name__)
@@ -396,14 +398,8 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
         force_set = model.getForceSet()
         nu = force_set.getSize()
 
-        # Build per-actuator polynomial arrays
-        n_coeff_sets = len(coeffs)
-        joint_polys: list[np.ndarray] = []
-        for j in range(nu):
-            if j < n_coeff_sets:
-                joint_polys.append(np.array(coeffs[j][::-1]))  # high→low for polyval
-            else:
-                joint_polys.append(np.array([0.0]))
+        # Build per-actuator polynomial arrays (ascending → reversed for polyval)
+        joint_polys = build_joint_polys(coeffs, nu)
 
         dt = self._dt
         n_steps = max(2, int(self._t_end / dt))
@@ -525,10 +521,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
         pe_arr = np.array(pe_list)
 
         # EE velocities via finite difference
-        ee_vel_arr = np.zeros_like(ee_pos_arr)
-        for i in range(1, len(t_arr)):
-            dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
-            ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
+        ee_vel_arr = compute_ee_velocity_fd(ee_pos_arr, t_arr)
 
         return OpenSimSimResult(
             t=t_arr,

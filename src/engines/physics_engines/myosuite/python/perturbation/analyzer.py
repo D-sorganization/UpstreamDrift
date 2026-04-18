@@ -45,6 +45,8 @@ from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exp
     MANDATORY_METRICS,
     ComparisonReport,  # noqa: F401
     PerturbationAnalyzerBase,
+    build_joint_polys,
+    compute_ee_velocity_fd,
 )
 
 logger = logging.getLogger(__name__)
@@ -370,13 +372,7 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         env.reset()
 
         nu = self._nu
-        n_coeff_sets = len(coeffs)
-        joint_polys: list[np.ndarray] = []
-        for j in range(nu):
-            if j < n_coeff_sets:
-                joint_polys.append(np.array(coeffs[j][::-1]))
-            else:
-                joint_polys.append(np.array([0.0]))
+        joint_polys = build_joint_polys(coeffs, nu)
 
         dt_env = getattr(env, "dt", 0.005)
         n_steps = max(2, int(self._t_end / dt_env))
@@ -449,13 +445,7 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         data = mujoco.MjData(model)
 
         nu = model.nu
-        n_coeff_sets = len(coeffs)
-        joint_polys: list[np.ndarray] = []
-        for j in range(nu):
-            if j < n_coeff_sets:
-                joint_polys.append(np.array(coeffs[j][::-1]))
-            else:
-                joint_polys.append(np.array([0.0]))
+        joint_polys = build_joint_polys(coeffs, nu)
 
         dt = float(model.opt.timestep)
         n_steps = max(2, int(self._t_end / dt))
@@ -516,10 +506,7 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         ke_arr = np.array(ke_list)
         pe_arr = np.array(pe_list)
 
-        ee_vel_arr = np.zeros_like(ee_pos_arr)
-        for i in range(1, len(t_arr)):
-            dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
-            ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
+        ee_vel_arr = compute_ee_velocity_fd(ee_pos_arr, t_arr)
 
         return MyoSuiteSimResult(
             t=t_arr,

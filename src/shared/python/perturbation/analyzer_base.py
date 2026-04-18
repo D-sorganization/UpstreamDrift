@@ -23,6 +23,49 @@ from src.shared.python.perturbation.statistics import (
 
 logger = logging.getLogger(__name__)
 
+
+def build_joint_polys(coeffs: list[list[float]], n_joints: int) -> list[np.ndarray]:
+    """Build per-joint polynomial arrays for use with ``np.polyval``.
+
+    Converts ascending-order coefficient lists ``[c0, c1, c2, ...]`` to
+    descending order (reversed) as required by ``np.polyval``.  Missing joints
+    are padded with a zero polynomial.
+
+    Args:
+        coeffs: Per-joint coefficient lists in ascending order.
+        n_joints: Number of joints (DoF / actuators) in the model.
+
+    Returns:
+        List of length *n_joints* where each entry is an ``np.ndarray`` of
+        reversed coefficients suitable for ``np.polyval``.
+    """
+    polys: list[np.ndarray] = []
+    for j in range(n_joints):
+        if j < len(coeffs):
+            polys.append(np.array(coeffs[j][::-1]))
+        else:
+            polys.append(np.array([0.0]))
+    return polys
+
+
+def compute_ee_velocity_fd(ee_pos_arr: np.ndarray, t_arr: np.ndarray) -> np.ndarray:
+    """Compute end-effector velocity via first-order finite differences.
+
+    Args:
+        ee_pos_arr: Array of shape ``(N, 3)`` with end-effector positions.
+        t_arr: Array of shape ``(N,)`` with corresponding timestamps.
+
+    Returns:
+        Array of shape ``(N, 3)`` with finite-difference velocities.
+        The first element is always zero (no preceding sample).
+    """
+    ee_vel_arr = np.zeros_like(ee_pos_arr)
+    for i in range(1, len(t_arr)):
+        dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
+        ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
+    return ee_vel_arr
+
+
 MANDATORY_METRICS: tuple[str, ...] = (
     "end_effector_position_final",
     "end_effector_velocity_final",

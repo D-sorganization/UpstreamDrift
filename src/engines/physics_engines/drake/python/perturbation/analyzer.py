@@ -39,6 +39,8 @@ from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exp
     MANDATORY_METRICS,
     ComparisonReport,  # noqa: F401
     PerturbationAnalyzerBase,
+    build_joint_polys,
+    compute_ee_velocity_fd,
 )
 
 logger = logging.getLogger(__name__)
@@ -393,13 +395,7 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
         nu = plant.num_actuators()
 
         # Build per-joint polynomial arrays (ascending → reversed for polyval)
-        n_joints = len(coeffs)
-        joint_polys: list[np.ndarray] = []
-        for j in range(nu):
-            if j < n_joints:
-                joint_polys.append(np.array(coeffs[j][::-1]))
-            else:
-                joint_polys.append(np.array([0.0]))
+        joint_polys = build_joint_polys(coeffs, nu)
 
         # Runge-Kutta 4 integration
         def compute_a(q_val: np.ndarray, v_val: np.ndarray, t_val: float) -> np.ndarray:
@@ -480,10 +476,7 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
         ee_pos_arr = np.array(ee_pos_list)
 
         # EE velocities via finite difference
-        ee_vel_arr = np.zeros_like(ee_pos_arr)
-        for i in range(1, len(t_arr)):
-            dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
-            ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
+        ee_vel_arr = compute_ee_velocity_fd(ee_pos_arr, t_arr)
 
         # Kinetic and potential energy
         ke_list = []
