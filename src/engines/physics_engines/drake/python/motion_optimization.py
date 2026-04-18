@@ -238,9 +238,7 @@ class DrakeMotionOptimizer:
                             "type": "ineq",
                             "fun": lambda x, c=con: (
                                 c.upper_bound
-                                - c.constraint_function(
-                                    x.reshape(traj_shape)
-                                )  # noqa: E501
+                                - c.constraint_function(x.reshape(traj_shape))  # noqa: E501
                             ),
                         }
                     )

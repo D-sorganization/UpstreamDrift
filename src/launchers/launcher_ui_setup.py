@@ -495,9 +495,7 @@ class LauncherUISetupMixin:
 
             url = "http://127.0.0.1:8000/api/chat/sessions"
             req = urllib.request.Request(url, method="GET")
-            with urllib.request.urlopen(
-                req, timeout=2
-            ) as resp:  # nosec B310 - hardcoded localhost URL, no external input
+            with urllib.request.urlopen(req, timeout=2) as resp:  # nosec B310 - hardcoded localhost URL, no external input
                 sessions = json.loads(resp.read().decode("utf-8"))
 
             session_id = sessions[0]["session_id"] if sessions else None
