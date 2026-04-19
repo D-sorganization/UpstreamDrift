@@ -10,3 +10,11 @@
 **Learning:** When using `np.sum(diff**2, axis=-1)` or `np.linalg.norm(..., axis=1/2)` on multi-dimensional array operations (such as computing segment lengths or marker error metrics), using `np.einsum('...i,...i->...', diff, diff)` provides a ~2x speedup and avoids temporary array allocations. For Euclidean distances, using `np.sqrt(np.einsum(...))` is the fastest method while remaining dimension-agnostic, reducing memory pressure.
 
 **Action:** Consistently replace `np.sum((a - b)**2, axis=-1)` and `np.linalg.norm(..., axis=X)` with `np.sqrt(np.einsum('...i,...i->...', diff, diff))` when performing reductions across small inner dimensions (like 3D coordinates).
+
+## 2026-04-17 - Optimize squared distance calculation with np.einsum
+**Learning:** Explicit element-wise sum of squares using `np.einsum("ij,ij->i", diff, diff)` is ~2x faster than `np.sum(diff ** 2, axis=1)` because it avoids intermediate array allocations from computing the square matrix before summation.
+**Action:** Default to using `np.einsum` when computing reductions like sum of squared differences over small inner dimensions.
+
+## 2026-04-18 - Vectorize List Comprehensions with np.einsum
+**Learning:** Using `np.linalg.norm` inside a list comprehension for arrays of vectors causes excessive overhead. Vectorizing this by constructing a 2D array and using `np.sqrt(np.einsum('ij,ij->i', arr, arr))` is roughly ~7x faster.
+**Action:** Replace `np.mean([np.linalg.norm(v) for v in array_list])` with `np.mean(np.sqrt(np.einsum('ij,ij->i', arr, arr)))` where `arr` is `np.array(array_list)`.
