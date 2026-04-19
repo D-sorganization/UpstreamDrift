@@ -2,9 +2,9 @@
 
 ## Launcher / Process-Manager: Races, UI Thread Blocking, Unclean Subprocess Handling
 
-**Author:** Claude Code Agent  
-**Date:** 2026-04-18  
-**Priority:** HIGH  
+**Author:** Claude Code Agent
+**Date:** 2026-04-18
+**Priority:** HIGH
 **Related:** #2715 (professional-grade audit)
 
 ---
@@ -21,18 +21,18 @@ This document outlines a comprehensive remediation strategy for 14 concurrency, 
 
 ### 1. Non-thread-safe `running_processes` dict
 
-**Location:** `src/launchers/launcher_process_manager.py:103-112`  
-**Severity:** HIGH  
+**Location:** `src/launchers/launcher_process_manager.py:103-112`
+**Severity:** HIGH
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 The `running_processes` dict is accessed and mutated across multiple threads without a lock:
 
 - Modified in `launch_script()`, `launch_module()`, `attach_process()`
 - Read in `_cleanup_processes()` (called from Qt event loop via QTimer)
 - Concurrent modifications can cause KeyError, race conditions on iteration
 
-**Solution:**  
+**Solution:**
 Guard all access with a `threading.RLock`:
 
 ```python
@@ -57,11 +57,11 @@ def _cleanup_processes(self):
 
 ### 2. Subprocess failure does not clean up entry
 
-**Location:** `src/launchers/launcher_process_manager.py:353`  
-**Severity:** MEDIUM  
+**Location:** `src/launchers/launcher_process_manager.py:353`
+**Severity:** MEDIUM
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 If `Popen` raises after `self.running_processes[name] = process`, the dict entry is stale:
 
 ```python
@@ -74,7 +74,7 @@ except Exception:
     return None  # Entry left in dict!
 ```
 
-**Solution:**  
+**Solution:**
 Assign to dict only after successful initialization of output threads:
 
 ```python
@@ -98,11 +98,11 @@ except Exception as e:
 
 ### 3. UI timer blocks on subprocess I/O
 
-**Location:** `src/launchers/golf_launcher.py:130-132, 593-605`  
-**Severity:** HIGH  
+**Location:** `src/launchers/golf_launcher.py:130-132, 593-605`
+**Severity:** HIGH
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 `_cleanup_processes()` is called by QTimer every 10 seconds in the event loop:
 
 ```python
@@ -115,7 +115,7 @@ def _cleanup_processes(self) -> None:
 
 If a subprocess is hung or slow to terminate, `poll()` can block, freezing the GUI.
 
-**Solution:**  
+**Solution:**
 Move cleanup to a `QThreadPool` worker; post results back to main thread:
 
 ```python
@@ -153,11 +153,11 @@ def _on_cleanup_finished(self, finished_keys):
 
 ### 4. Docker build thread never joined
 
-**Location:** `src/launchers/docker_dialog.py:92-108`  
-**Severity:** MEDIUM  
+**Location:** `src/launchers/docker_dialog.py:92-108`
+**Severity:** MEDIUM
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 `start_build()` creates a `DockerBuildThread` and calls `.start()`, but the dialog never waits for it on close:
 
 ```python
@@ -168,7 +168,7 @@ def start_build(self) -> None:
 
 On dialog close, the thread continues in background, consuming resources.
 
-**Solution:**  
+**Solution:**
 Join the thread with a timeout in `closeEvent()`:
 
 ```python
@@ -190,11 +190,11 @@ Disable Build button while building to prevent rapid re-triggers.
 
 ### 5. Race in `DockerBuildThread.start_build`
 
-**Location:** `src/launchers/docker_dialog.py:92-108`  
-**Severity:** MEDIUM  
+**Location:** `src/launchers/docker_dialog.py:92-108`
+**Severity:** MEDIUM
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 Multiple rapid calls can overwrite `self.build_thread`:
 
 ```python
@@ -205,7 +205,7 @@ def start_build(self) -> None:
 
 The previous thread is orphaned; signals get lost.
 
-**Solution:**  
+**Solution:**
 Serialize with a flag; ignore calls if build is already running:
 
 ```python
@@ -233,11 +233,11 @@ def start_build(self) -> None:
 
 ### 6. Missing `TimeoutExpired` exception handler
 
-**Location:** `src/launchers/docker_manager.py:70-131`  
-**Severity:** MEDIUM  
+**Location:** `src/launchers/docker_manager.py:70-131`
+**Severity:** MEDIUM
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 `DockerBuildThread.run()` calls `process.wait()` without a timeout; if docker hangs, the thread hangs indefinitely:
 
 ```python
@@ -246,7 +246,7 @@ process = subprocess.Popen(...)
 process.wait()  # <- No timeout; blocks forever on hang
 ```
 
-**Solution:**  
+**Solution:**
 Add timeout and catch `TimeoutExpired`:
 
 ```python
@@ -274,11 +274,11 @@ except Exception as e:
 
 ### 7. Task manager mixes `threading.Lock` with `asyncio.Semaphore`
 
-**Location:** `src/api/task_manager.py:76-78, 128-133`  
-**Severity:** HIGH  
+**Location:** `src/api/task_manager.py:76-78, 128-133`
+**Severity:** HIGH
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 Mixing sync and async primitives creates deadlock potential:
 
 ```python
@@ -292,7 +292,7 @@ async def some_method(self):
             ...
 ```
 
-**Solution:**  
+**Solution:**
 Use only `asyncio.Lock` (requires `TaskManager` to be async-aware):
 
 ```python
@@ -315,11 +315,11 @@ If sync access is needed, use `asyncio.to_thread()` or maintain separate sync/as
 
 ### 8. PYTHONPATH concatenation without quoting
 
-**Location:** `src/launchers/launcher_process_manager.py:122-162`  
-**Severity:** MEDIUM (Security)  
+**Location:** `src/launchers/launcher_process_manager.py:122-162`
+**Severity:** MEDIUM (Security)
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 User-provided paths are concatenated without shell quoting:
 
 ```python
@@ -331,7 +331,7 @@ def _merge_python_paths(self, existing_path, extra_python_paths):
 
 Paths with `:` (Windows drive letters) or spaces break downstream.
 
-**Solution:**  
+**Solution:**
 Quote each path when constructing PYTHONPATH:
 
 ```python
@@ -357,18 +357,18 @@ def get_subprocess_env(self, extra_python_paths=()):
 
 ### 9. `context_path` (cwd) unvalidated
 
-**Location:** `src/launchers/launcher_process_manager.py:102-113`  
-**Severity:** MEDIUM (Security)  
+**Location:** `src/launchers/launcher_process_manager.py:102-113`
+**Severity:** MEDIUM (Security)
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 If `context_path` is attacker-controlled, arbitrary subprocess cwd is possible:
 
 ```python
 process = subprocess.Popen(..., cwd=str(cwd))  # <- No validation!
 ```
 
-**Solution:**  
+**Solution:**
 Validate against an allowlist; reject symlinks:
 
 ```python
@@ -401,11 +401,11 @@ def launch_script(self, name, script_path, cwd, ...):
 
 ### 10. Log-file truncation reads entire file into RAM
 
-**Location:** `src/launchers/launcher_process_manager.py:200-212`  
-**Severity:** LOW (but high impact on long-running processes)  
+**Location:** `src/launchers/launcher_process_manager.py:200-212`
+**Severity:** LOW (but high impact on long-running processes)
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 Keeping last 500 lines by reading entire file into memory:
 
 ```python
@@ -417,7 +417,7 @@ def _init_log_file(self) -> None:
 
 On a 100 MB log file, this crashes.
 
-**Solution:**  
+**Solution:**
 Use `logging.handlers.RotatingFileHandler`:
 
 ```python
@@ -445,11 +445,11 @@ def _init_log_file(self) -> None:
 
 ### 11. Stacked asyncio.Semaphore, no explicit cleanup
 
-**Location:** `src/api/task_manager.py:76-78`  
-**Severity:** LOW  
+**Location:** `src/api/task_manager.py:76-78`
+**Severity:** LOW
 **Status:** FIXED
 
-**Problem:**  
+**Problem:**
 Multiple `TaskManager` instances accumulate `asyncio.Semaphore` objects with no cleanup:
 
 ```python
@@ -460,7 +460,7 @@ class TaskManager:
 
 Each instance holds a semaphore; no `__del__` or context manager.
 
-**Solution:**  
+**Solution:**
 Implement `__del__` or use a context manager:
 
 ```python
@@ -497,10 +497,10 @@ async with TaskManager() as tm:
 - `src/launchers/mujoco_dashboard.py`
 - `src/launchers/pinocchio_dashboard.py`
 
-**Severity:** HIGH  
+**Severity:** HIGH
 **Status:** DEFERRED (complex refactoring required)
 
-**Problem:**  
+**Problem:**
 Button callbacks directly invoke long-running simulations:
 
 ```python
@@ -508,7 +508,7 @@ def on_simulate_button_clicked(self):
     result = self.engine_manager.run_simulation(model)  # Blocks UI!
 ```
 
-**Solution:**  
+**Solution:**
 Use `QThreadPool` + `QRunnable`:
 
 ```python
@@ -549,14 +549,14 @@ def _on_simulation_finished(self, result):
 
 ### 13. Archived directory in source tree
 
-**Location:** `src/launchers/_archive/`  
-**Severity:** LOW (housekeeping)  
+**Location:** `src/launchers/_archive/`
+**Severity:** LOW (housekeeping)
 **Status:** DEFERRED
 
-**Problem:**  
+**Problem:**
 `_archive/` is in the tree but appears inactive.
 
-**Solution:**  
+**Solution:**
 Either resurrect it (git-history recovery) or delete it:
 
 ```bash
@@ -574,11 +574,11 @@ git rm -r src/launchers/_archive/
 
 ### 14. Launchers assume repo layout
 
-**Location:** `src/launchers/golf_suite_launcher.py` and similar  
-**Severity:** MEDIUM  
+**Location:** `src/launchers/golf_suite_launcher.py` and similar
+**Severity:** MEDIUM
 **Status:** DEFERRED (requires packaging refactor)
 
-**Problem:**  
+**Problem:**
 Launchers shell out with relative paths that assume unpacked repo:
 
 ```python
@@ -588,7 +588,7 @@ scripts_dir = repo_root / "src" / "launchers" / "..."
 
 Moving the installation breaks paths.
 
-**Solution:**  
+**Solution:**
 Use `importlib.resources` or package data:
 
 ```python
