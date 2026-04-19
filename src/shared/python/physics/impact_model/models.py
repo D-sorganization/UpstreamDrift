@@ -241,10 +241,10 @@ class SpringDamperImpactModel(ImpactModel):
         )
 
         # Initial state - place ball at contact
-        x_ball = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
-        v_ball = pre_state.ball_velocity.copy()
-        x_club = np.zeros(3)
-        v_club = pre_state.clubhead_velocity.copy()
+        x_ball: np.ndarray = GOLF_BALL_RADIUS_M * n  # Ball surface at origin
+        v_ball: np.ndarray = pre_state.ball_velocity.copy()
+        x_club: np.ndarray = np.zeros(3)
+        v_club: np.ndarray = pre_state.clubhead_velocity.copy()
 
         # Integration
         contact_time = 0.0

@@ -115,6 +115,17 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      - name: Prepare Optional-Stack Venv
+        # The shared self-hosted runner can expose partially installed ambient
+        # site-packages (for example matplotlib without a RECORD file), which
+        # breaks editable installs before tests even start. Use an isolated venv
+        # so this lane only sees the packages it installs itself.
+        run: |
+          python -m venv "$RUNNER_TEMP/optional-stack-venv"
+          echo "$RUNNER_TEMP/optional-stack-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/optional-stack-venv" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/optional-stack-venv/bin/python" -m pip install --upgrade pip
+
       - name: Document Optional-Stack Lane Identity
         run: |
           echo "## Optional-Stack Verification Lane" >> "$GITHUB_STEP_SUMMARY"

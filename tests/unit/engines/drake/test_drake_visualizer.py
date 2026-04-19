@@ -4,17 +4,14 @@ from __future__ import annotations
 
 import sys
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Mock pydrake before importing
-mock_pydrake = MagicMock()
-sys.modules["pydrake"] = mock_pydrake
-sys.modules["pydrake.all"] = mock_pydrake
 
-
+# Per CLAUDE.md: never module-level sys.modules mocking.
+# Use patch.dict context managers instead.
 # Fix mocking for class methods and types
 # RotationMatrix needs to be a class with MakeYRotation classmethod
 class MockRotationMatrix:
@@ -39,9 +36,6 @@ class MockRotationMatrix:
         """Initialize mock rotation matrix."""
 
 
-mock_pydrake.RotationMatrix = MockRotationMatrix
-
-
 # RigidTransform needs to handle numpy array inputs without inspecting them for
 # coroutines (which causes ValueError on .T).
 # So we make it a simple class or function that returns a mock.
@@ -52,15 +46,22 @@ class MockRigidTransform:
         """Initialize mock rigid transform."""
 
 
-mock_pydrake.RigidTransform = MockRigidTransform
-mock_pydrake.Cylinder = MagicMock()
-mock_pydrake.Sphere = MagicMock()
-mock_pydrake.Rgba = MagicMock()
+_MOCK_PYDRAKE = MagicMock()
+_MOCK_PYDRAKE.RotationMatrix = MockRotationMatrix
+_MOCK_PYDRAKE.RigidTransform = MockRigidTransform
+_MOCK_PYDRAKE.Cylinder = MagicMock()
+_MOCK_PYDRAKE.Sphere = MagicMock()
+_MOCK_PYDRAKE.Rgba = MagicMock()
 
+_PYDRAKE_MOCK = {
+    "pydrake": _MOCK_PYDRAKE,
+    "pydrake.all": _MOCK_PYDRAKE,
+}
 
-from src.engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
-    DrakeVisualizer,
-)
+with patch.dict(sys.modules, _PYDRAKE_MOCK):
+    from src.engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
+        DrakeVisualizer,
+    )
 
 
 class TestDrakeVisualizer:
