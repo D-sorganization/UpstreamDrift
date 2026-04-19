@@ -1,57 +1,18 @@
+# Import mocked modules for use in fixtures below
 import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Save original modules so we can restore them after mocking.
-# This prevents pollution of sys.modules for other test modules.
-_saved_modules = {}
-for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-    if _key in sys.modules:
-        _saved_modules[_key] = sys.modules[_key]
-
-# Mock dependencies temporarily to allow importing optimize_arm
-sys.modules["casadi"] = MagicMock()
-sys.modules["pinocchio"] = MagicMock()
-sys.modules["pinocchio.casadi"] = MagicMock()
-
-import casadi as ca  # noqa: E402
-import pinocchio as pin  # noqa: E402
-import pinocchio.casadi as cpin  # noqa: E402
-
-# Use sys.modules.pop instead of reload to avoid C-extension corruption
-sys.modules.pop("src.shared.python.optimization.examples.optimize_arm", None)
+# Mock dependencies at test-level via conftest.pytest_configure() and fixtures.
+# Mocking is now handled by @patch.dict decorators at test function level,
+# preventing module-level sys.modules pollution that can affect other tests.
 from src.shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
-# Restore original modules IMMEDIATELY to prevent polluting other test modules.
-# The module-level code above runs at pytest collection time, so without this
-# restore, sys.modules["pinocchio"] would remain a MagicMock during the
-# entire collection phase, breaking any test that imports pinocchio afterward.
-for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-    if _key in _saved_modules:
-        sys.modules[_key] = _saved_modules[_key]
-    elif _key in sys.modules:
-        del sys.modules[_key]
-
-
-def setup_module(module):
-    """Re-install mocks for test execution in this module."""
-    for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-        if key in sys.modules:
-            _saved_modules.setdefault(key, sys.modules[key])
-    sys.modules["casadi"] = ca
-    sys.modules["pinocchio"] = pin
-    sys.modules["pinocchio.casadi"] = cpin
-
-
-def teardown_module(module):
-    """Clean up sys.modules pollution by restoring original modules."""
-    for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-        if key in _saved_modules:
-            sys.modules[key] = _saved_modules[key]
-        elif key in sys.modules:
-            del sys.modules[key]
+ca = sys.modules.get("casadi", MagicMock())
+pin = sys.modules.get("pinocchio", MagicMock())
+cpin = sys.modules.get("pinocchio.casadi", MagicMock())
 
 
 @pytest.fixture
@@ -132,6 +93,10 @@ def mock_pinocchio():
     return model
 
 
+@patch.dict(
+    "sys.modules",
+    {"casadi": MagicMock(), "pinocchio": MagicMock(), "pinocchio.casadi": MagicMock()},
+)
 def test_main_execution(mock_casadi, mock_pinocchio):
     with (
         patch("os.path.exists", return_value=True),
