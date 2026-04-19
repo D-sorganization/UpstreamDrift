@@ -28,13 +28,9 @@ RUN conda install -y -c conda-forge \
     python=3.12 \
     numpy \
     scipy \
-    matplotlib \
-    pandas \
-    sympy \
     pyqt6 \
     opencv \
     pyyaml \
-    defusedxml \
     h5py \
     scikit-learn \
     pillow \
