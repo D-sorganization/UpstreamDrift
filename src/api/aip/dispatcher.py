@@ -54,7 +54,7 @@ def make_response(
     Returns:
         Response dictionary.
     """
-    if result is not None or error is None:
+    if result is None and error is None:
         raise ValueError("result or error must be provided")
     resp: dict[str, Any] = {"jsonrpc": "2.0", "id": request_id}
     if error is not None:

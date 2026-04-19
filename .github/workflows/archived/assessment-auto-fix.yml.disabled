@@ -189,7 +189,7 @@ jobs:
 
       - name: Install tools
         run: |
-          pip install ruff>=0.15.10
+          pip install ruff==0.14.10
 
       - name: Run comprehensive auto-fixes
         run: |
