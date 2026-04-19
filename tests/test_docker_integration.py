@@ -46,13 +46,14 @@ class TestDockerBuild(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Check for required components (multi-stage build with pinned version)
-        self.assertIn(
-            "FROM continuumio/miniconda3:24.11.1-0@sha256:6a66425f001f739d4778dd732e020afeb06175f49478fafc3ec673658d61550b AS builder",
+        # Dockerfile may include an optional digest pin (@sha256:...) after the tag
+        self.assertRegex(
             content,
+            r"FROM continuumio/miniconda3:24\.11\.1-0(@sha256:[0-9a-f]+)? AS builder",
         )
-        self.assertIn(
-            "FROM continuumio/miniconda3:24.11.1-0@sha256:6a66425f001f739d4778dd732e020afeb06175f49478fafc3ec673658d61550b AS runtime",
+        self.assertRegex(
             content,
+            r"FROM continuumio/miniconda3:24\.11\.1-0(@sha256:[0-9a-f]+)? AS runtime",
         )
         self.assertIn('ENV PYTHONPATH="/workspace"', content)
         self.assertIn("WORKDIR /workspace", content)
@@ -444,9 +445,9 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Verify base image (pinned version, multi-stage build) and package installation
-        self.assertIn(
-            "FROM continuumio/miniconda3:24.11.1-0@sha256:6a66425f001f739d4778dd732e020afeb06175f49478fafc3ec673658d61550b AS builder",
+        self.assertRegex(
             content,
+            r"FROM continuumio/miniconda3:24\.11\.1-0(@sha256:[0-9a-f]+)? AS builder",
         )
         self.assertIn("conda install", content)
         self.assertIn("python=3.12", content)

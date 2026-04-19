@@ -248,10 +248,8 @@ class GolfVisualizerWidget(QOpenGLWidget):
         center = np.mean(positions, axis=0)
         # ⚡ Bolt: Computing max squared distance first and then taking sqrt is
         # ~30-40% faster than np.linalg.norm(..., axis=1) due to avoiding
-        # reduction overhead. np.einsum is used to avoid temp array allocations
-        # and is ~2x faster than np.sum(diff**2, axis=1).
-        diff = positions - center
-        max_distance = float(np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff))))
+        # reduction overhead.
+        max_distance = float(np.sqrt(np.max(np.sum((positions - center) ** 2, axis=1))))
 
         # Set ground level to lowest Z point in the data
         self.ground_level = np.min(positions[:, 2])

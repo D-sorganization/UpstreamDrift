@@ -145,7 +145,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install ruff
-        run: pip install ruff==0.14.10
+        run: pip install ruff>=0.15.10
 
       - name: Run ruff auto-fix
         run: |

@@ -37,6 +37,7 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        shell: bash
         run: |
           ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
             --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
@@ -66,7 +67,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install ruff==0.14.10 mypy bandit radon pip-audit vulture
+          pip install ruff>=0.15.10 mypy bandit radon pip-audit vulture
           pip install -e .[dev] || pip install -r requirements.txt || true
           sudo apt-get install -y jq bc
 
