@@ -276,12 +276,12 @@ async def scatter_analysis(
     holed_count = sum(1 for r in results if r.holed)
     hole_pos = green.hole_position
 
-    # ⚡ Bolt: einsum is ~35% faster than np.linalg.norm(..., axis=1) for small inner dimensions
     if final_positions:
-        diffs = np.array(final_positions) - hole_pos
+        # Vectorized sum of squares avoids repeated np.linalg.norm calls.
+        diffs = np.array(final_positions, dtype=float) - hole_pos
         avg_dist = float(np.mean(np.sqrt(np.einsum("ij,ij->i", diffs, diffs))))
     else:
-        avg_dist = 0.0
+        avg_dist = float("nan")
 
     return ScatterAnalysisResponse(
         final_positions=final_positions,

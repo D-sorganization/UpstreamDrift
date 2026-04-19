@@ -592,9 +592,12 @@ class GripContactExporter:
             if state.contacts
             else np.zeros((0, 3))
         )
-        slip_velocities = np.array(
-            [np.linalg.norm(c.slip_velocity) for c in state.contacts]
-        )
+        if not state.contacts:
+            slip_velocities = np.array([], dtype=float)
+        else:
+            # ⚡ Bolt: Vectorized sum of squares is faster than repeated np.linalg.norm
+            vels = np.array([c.slip_velocity for c in state.contacts], dtype=float)
+            slip_velocities = np.sqrt(np.einsum("ij,ij->i", vels, vels))
 
         timestep = GripContactTimestep(
             timestamp=state.timestamp,
