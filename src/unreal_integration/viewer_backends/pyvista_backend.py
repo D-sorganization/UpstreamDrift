@@ -53,7 +53,7 @@ class PyVistaBackend(ViewerBackend):
             # Initialize plotter with config
             self._plotter = pv.Plotter(
                 off_screen=True,  # Default to off-screen for safety
-                window_size=(self.config.width, self.config.height),
+                window_size=[self.config.width, self.config.height],
             )
             self._plotter.background_color = self.config.background_color
 

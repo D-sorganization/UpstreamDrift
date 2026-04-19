@@ -104,6 +104,8 @@ class ProcessManager:
         self.output_callback = output_callback
         self.use_separate_terminals = use_separate_terminals
         self._output_threads: dict[str, threading.Thread] = {}
+        # Thread-safe guard for running_processes dict (issue #2715)
+        self._process_lock = threading.RLock()
 
         # Persistent log file for all process output
         self._log_dir = Path.home() / ".golf_modeling_suite"
@@ -179,6 +181,39 @@ class ProcessManager:
 
         return env
 
+    def _validate_context_path(self, context_path: Path) -> Path:
+        """Validate subprocess working directory against allowlist (issue #2715).
+
+        Args:
+            context_path: Proposed working directory.
+
+        Returns:
+            Resolved path if valid.
+
+        Raises:
+            ValueError: If path is outside repo_root, is a symlink, or unresolvable.
+        """
+        try:
+            resolved = context_path.resolve()
+        except (RuntimeError, OSError) as e:
+            raise ValueError(f"Cannot resolve path {context_path}: {e}") from e
+
+        repo_root_resolved = self.repo_root.resolve()
+
+        # Reject if not within repo_root
+        try:
+            resolved.relative_to(repo_root_resolved)
+        except ValueError as e:
+            raise ValueError(
+                f"Path {context_path} is outside repo_root {self.repo_root}"
+            ) from e
+
+        # Reject if original is a symlink (prevents symlink-escape bypasses)
+        if context_path.is_symlink():
+            raise ValueError(f"Symlinks not allowed for subprocess cwd: {context_path}")
+
+        return resolved
+
     def _init_log_file(self) -> None:
         """Initialize the persistent process output log file."""
         try:
@@ -231,7 +266,9 @@ class ProcessManager:
         """
         if name is None:
             raise ValueError("name must be provided")
-        self.running_processes[name] = process
+        # Guard running_processes dict with lock (issue #2715)
+        with self._process_lock:
+            self.running_processes[name] = process
         t = threading.Thread(
             target=self._stream_output,
             args=(name, process),
@@ -295,6 +332,9 @@ class ProcessManager:
             # Validate script path to prevent path-traversal / injection.
             validate_script_path(script_path, self.repo_root)
 
+            # Validate working directory (issue #2715: reject paths outside repo)
+            cwd = self._validate_context_path(cwd)
+
             # Diagnostic: log full launch details for debugging silent failures
             logger.info(
                 "Launching script %s: cmd=[%s, %s], cwd=%s, PYTHONPATH=%s",
@@ -350,7 +390,9 @@ class ProcessManager:
                 t.start()
                 self._output_threads[name] = t
 
-            self.running_processes[name] = process
+            # Guard running_processes dict with lock (issue #2715)
+            with self._process_lock:
+                self.running_processes[name] = process
             logger.info(f"Launched {name} (PID: {process.pid})")
             return process
 
@@ -359,6 +401,7 @@ class ProcessManager:
             PermissionError,
             OSError,
             SecureSubprocessError,
+            ValueError,
         ) as e:
             logger.error(f"Failed to launch {name}: {e}")
             return None
@@ -388,6 +431,9 @@ class ProcessManager:
         """
         try:
             process_env = env or self.get_subprocess_env(extra_python_paths)
+
+            # Validate working directory (issue #2715: reject paths outside repo)
+            cwd = self._validate_context_path(cwd)
 
             # Validate module name: must be a dotted Python identifier.
             if not _MODULE_NAME_RE.match(module_name):
@@ -470,7 +516,9 @@ class ProcessManager:
                 t.start()
                 self._output_threads[name] = t
 
-            self.running_processes[name] = process
+            # Guard running_processes dict with lock (issue #2715)
+            with self._process_lock:
+                self.running_processes[name] = process
             logger.info(f"Launched module {name} (PID: {process.pid})")
             return process
 
@@ -479,6 +527,7 @@ class ProcessManager:
             PermissionError,
             OSError,
             SecureSubprocessError,
+            ValueError,
         ) as e:
             logger.error(f"Failed to launch {name}: {e}")
             return None

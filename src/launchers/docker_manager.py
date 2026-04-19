@@ -118,7 +118,18 @@ class DockerBuildThread(QThread):
                         self.log_signal.emit(line.strip())
                 process.stdout.close()
 
-            process.wait()
+            # Add timeout to prevent indefinite hangs (issue #2715)
+            try:
+                process.wait(timeout=3600)  # 1-hour limit
+            except subprocess.TimeoutExpired:
+                self.log_signal.emit(
+                    "Build timed out after 1 hour; terminating process"
+                )
+                process.kill()
+                self.finished_signal.emit(
+                    False, "Build timed out (exceeded 1 hour limit)"
+                )
+                return
 
             if process.returncode == 0:
                 self.finished_signal.emit(True, "Build successful.")

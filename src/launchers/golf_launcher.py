@@ -24,7 +24,7 @@ import sys
 from typing import Any
 
 # Add current directory to path so we can import ui_components if needed locally
-from PyQt6.QtCore import QEventLoop, QTimer
+from PyQt6.QtCore import QEventLoop, QRunnable, QThreadPool, QTimer, pyqtSignal
 from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
 
@@ -69,6 +69,29 @@ __all__ = [
     "DOCKER_STAGES",
     "main",
 ]
+
+
+class ProcessCleanupWorker(QRunnable):
+    """Worker thread for process cleanup (issue #2715).
+
+    Runs process polling in a background thread to prevent UI blocking.
+    """
+
+    finished = pyqtSignal(list)  # type: ignore[attr-defined]
+
+    def __init__(self, running_processes: dict, process_lock) -> None:
+        super().__init__()
+        self.running_processes = running_processes
+        self.process_lock = process_lock
+
+    def run(self) -> None:
+        """Poll processes for completion without blocking UI."""
+        finished_keys = []
+        with self.process_lock:
+            for key, proc in list(self.running_processes.items()):
+                if proc.poll() is not None:
+                    finished_keys.append(key)
+        self.finished.emit(finished_keys)
 
 
 class GolfLauncher(
@@ -127,8 +150,9 @@ class GolfLauncher(
 
         self._load_layout()
 
+        # Setup process cleanup timer (issue #2715: moved to thread pool to prevent UI blocking)
         self.cleanup_timer = QTimer(self)
-        self.cleanup_timer.timeout.connect(self._cleanup_processes)
+        self.cleanup_timer.timeout.connect(self._schedule_cleanup)
         self.cleanup_timer.start(10000)
 
         self.toast_manager = None
@@ -590,19 +614,32 @@ class GolfLauncher(
 
     # -- Cleanup --
 
-    def _cleanup_processes(self) -> None:
-        """Remove finished processes from tracking."""
-        finished = []
-        for key, proc in self.running_processes.items():
-            if proc.poll() is not None:
-                finished.append(key)
+    def _schedule_cleanup(self) -> None:
+        """Schedule process cleanup in a worker thread (issue #2715).
 
-        for key in finished:
-            del self.running_processes[key]
+        Prevents UI blocking when checking process status.
+        """
+        worker = ProcessCleanupWorker(
+            self.running_processes, self.process_manager._process_lock
+        )
+        worker.finished.connect(self._on_cleanup_finished)
+        QThreadPool.globalInstance().start(worker)
+
+    def _on_cleanup_finished(self, finished_keys: list[str]) -> None:
+        """Handle cleanup completion from worker thread."""
+        with self.process_manager._process_lock:
+            for key in finished_keys:
+                if key in self.running_processes:
+                    del self.running_processes[key]
 
         if not self.running_processes and hasattr(self, "lbl_status"):
             self.lbl_status.setText("Ready")
             self.lbl_status.setStyleSheet(Styles.STATUS_INACTIVE)
+
+    def _cleanup_processes(self) -> None:
+        """Legacy cleanup method. Use _schedule_cleanup instead."""
+        # Kept for backward compatibility with mixins
+        self._schedule_cleanup()
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""

@@ -47,6 +47,7 @@ class EnvironmentDialog(QDialog):
         self.build_thread: DockerBuildThread | None = None
         self._build_start_time: float = 0.0
         self._elapsed_timer_id: int | None = None
+        self._building = False  # Guard against concurrent builds (issue #2715)
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -90,7 +91,16 @@ class EnvironmentDialog(QDialog):
         layout.addWidget(close_btn)
 
     def start_build(self) -> None:
-        """Launch the Docker build process in a background thread."""
+        """Launch the Docker build process in a background thread (issue #2715).
+
+        Prevents concurrent builds and ensures thread cleanup.
+        """
+        # Serialize: ignore if build already in progress
+        if self._building:
+            logger.warning("Build already in progress; ignoring request")
+            return
+
+        self._building = True
         self.console.clear()
         self.btn_build.setEnabled(False)
         self.btn_cancel.setEnabled(True)
@@ -121,6 +131,7 @@ class EnvironmentDialog(QDialog):
             raise ValueError("success must be provided")
         self.btn_build.setEnabled(True)
         self.btn_cancel.setEnabled(False)
+        self._building = False
         if self._elapsed_timer_id is not None:
             self.killTimer(self._elapsed_timer_id)
             self._elapsed_timer_id = None
@@ -135,9 +146,21 @@ class EnvironmentDialog(QDialog):
             self.build_status_label.setText("Build cancelled.")
             self.btn_build.setEnabled(True)
             self.btn_cancel.setEnabled(False)
+            self._building = False
             if self._elapsed_timer_id is not None:
                 self.killTimer(self._elapsed_timer_id)
                 self._elapsed_timer_id = None
+
+    def closeEvent(self, event: Any) -> None:
+        """Handle dialog close event to clean up threads (issue #2715)."""
+        # Join the build thread with timeout to prevent orphans
+        if self.build_thread and self.build_thread.isRunning():
+            logger.info("Waiting for Docker build thread to finish...")
+            if not self.build_thread.wait(5000):  # 5 second timeout
+                logger.warning("Docker build thread did not exit; terminating")
+                self.build_thread.terminate()
+                self.build_thread.wait(1000)
+        super().closeEvent(event)
 
     def timerEvent(self, event: Any) -> None:
         """Update the elapsed-time label on each timer tick."""
