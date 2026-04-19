@@ -39,6 +39,29 @@ class _KFACoreMixin:
             self._jacp = np.zeros(3 * self.nv)
             self._jacr = np.zeros(3 * self.nv)
 
+    def _clamp_to_joint_limits(self, qpos: np.ndarray) -> np.ndarray:
+        """Clamp joint positions to the model's limited joint ranges.
+
+        Returns a copy of *qpos* with each limited joint clamped to
+        [jnt_range_min, jnt_range_max].  Free/ball/slide joints that have no
+        range are left unchanged.
+        """
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+
+        q_clamped = qpos.copy()
+        for joint_id in range(self.model.njnt):
+            if not self.model.jnt_limited[joint_id]:
+                continue
+            qpos_addr = self.model.jnt_qposadr[joint_id]
+            if qpos_addr >= len(q_clamped):
+                continue
+            q_min = self.model.jnt_range[joint_id, 0]
+            q_max = self.model.jnt_range[joint_id, 1]
+            q_clamped[qpos_addr] = np.clip(q_clamped[qpos_addr], q_min, q_max)
+
+        return q_clamped
+
     def _find_body_id(self, name_pattern: str) -> int | None:
         if not (name_pattern is not None):
             raise ValueError("name_pattern must be provided")

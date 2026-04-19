@@ -7,6 +7,7 @@ including links, joints, and the model itself.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -101,23 +102,26 @@ class SupportPolygon:
         n = len(self.vertices)
         min_dist = float("inf")
 
-        # Distance from point to line segment P1-P2
+        # Distance from point to line segment P1-P2 using scalar arithmetic
         for i in range(n):
-            p1 = np.array(self.vertices[i])
-            p2 = np.array(self.vertices[(i + 1) % n])
-            p = np.array([px, py])
+            p1x, p1y = self.vertices[i]
+            p2x, p2y = self.vertices[(i + 1) % n]
 
-            # Project p onto line containing p1-p2
-            l2 = np.sum((p1 - p2) ** 2)
+            dx = p2x - p1x
+            dy = p2y - p1y
+            l2 = dx * dx + dy * dy
+
             if l2 == 0:
-                dist = np.linalg.norm(p - p1)
+                # Degenerate edge: both endpoints are the same
+                dist = math.hypot(px - p1x, py - p1y)
             else:
-                t = max(0, min(1, np.dot(p - p1, p2 - p1) / l2))
-                projection = p1 + t * (p2 - p1)
-                dist = np.linalg.norm(p - projection)
+                t = max(0.0, min(1.0, ((px - p1x) * dx + (py - p1y) * dy) / l2))
+                proj_x = p1x + t * dx
+                proj_y = p1y + t * dy
+                dist = math.hypot(px - proj_x, py - proj_y)
 
             if dist < min_dist:
-                min_dist = float(dist)
+                min_dist = dist
 
         return min_dist
 

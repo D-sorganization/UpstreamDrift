@@ -27,6 +27,9 @@ class _KFAAnalysisMixin:
         if self.club_head_id is None:
             return np.zeros(3), np.zeros(3), np.zeros(3)
 
+        # Clamp the reference state to valid joint limits before any evaluation.
+        qpos = self._clamp_to_joint_limits(qpos)
+
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
@@ -38,7 +41,19 @@ class _KFAAnalysisMixin:
 
         epsilon = EPSILON_FINITE_DIFF_JACOBIAN
 
-        self._perturb_data.qpos[:] = qpos + epsilon * qvel
+        # Clamp the perturbed states and measure the *effective* step so that
+        # the finite-difference denominator matches the actual perturbation when
+        # a joint is at its limit and one side clips.
+        qpos_fwd = self._clamp_to_joint_limits(qpos + epsilon * qvel)
+        qpos_bwd = self._clamp_to_joint_limits(qpos - epsilon * qvel)
+        # Per-DOF effective half-step; fall back to epsilon where qvel is zero.
+        step_fwd = qpos_fwd - qpos
+        step_bwd = qpos - qpos_bwd
+        # Total step size across each DOF; avoid division by zero.
+        total_step = step_fwd + step_bwd
+        effective_denom = np.where(np.abs(total_step) > 0.0, total_step, 2.0 * epsilon)
+
+        self._perturb_data.qpos[:] = qpos_fwd
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
 
@@ -47,7 +62,7 @@ class _KFAAnalysisMixin:
         )
         jacp_forward = jacp_forward.copy()
 
-        self._perturb_data.qpos[:] = qpos - epsilon * qvel
+        self._perturb_data.qpos[:] = qpos_bwd
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
 
@@ -55,7 +70,8 @@ class _KFAAnalysisMixin:
             self.club_head_id, data=self._perturb_data
         )
 
-        jacp_dot = (jacp_forward - jacp_backward) / (2.0 * epsilon)
+        # Broadcast effective_denom (shape nv) across the 3-row Jacobian rows.
+        jacp_dot = (jacp_forward - jacp_backward) / effective_denom[np.newaxis, :]
 
         coriolis_accel = jacp_dot @ qvel
 

@@ -251,7 +251,8 @@ class GolfVisualizerWidget(QOpenGLWidget):
 
         positions = np.array(positions)
         center = np.mean(positions, axis=0)
-        max_distance = np.max(np.linalg.norm(positions - center, axis=1))
+        diff = positions - center
+        max_distance = np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff)))
 
         # Set ground level to lowest Z point in the data
         self.ground_level = np.min(positions[:, 2])

@@ -269,8 +269,8 @@ class SwingAnalyzer:
         bc = (c.x - b.x, c.y - b.y, c.z - b.z)
 
         dot = ba[0] * bc[0] + ba[1] * bc[1] + ba[2] * bc[2]
-        mag_ba = math.sqrt(ba[0] ** 2 + ba[1] ** 2 + ba[2] ** 2)
-        mag_bc = math.sqrt(bc[0] ** 2 + bc[1] ** 2 + bc[2] ** 2)
+        mag_ba = math.hypot(ba[0], ba[1], ba[2])
+        mag_bc = math.hypot(bc[0], bc[1], bc[2])
 
         if mag_ba == 0 or mag_bc == 0:
             return 0
@@ -604,9 +604,7 @@ class SwingAnalyzer:
             max_movement: float = 0.0
             for pose in poses:
                 nose = pose.landmarks[self.NOSE]
-                dist = math.sqrt(
-                    (nose.x - address_nose.x) ** 2 + (nose.y - address_nose.y) ** 2
-                )
+                dist = math.hypot(nose.x - address_nose.x, nose.y - address_nose.y)
                 max_movement = max(max_movement, dist)
             head_stability = max(0.0, 100.0 - max_movement * 500)
 
