@@ -29,7 +29,7 @@ Last-Updated: 2026-04-20T08:56:58.3577735Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.138                                            |
+| **Spec Version**        | 1.0.139                                            |
 | **Last Spec Update**    | 2026-04-20                                         |
 
 ## 2. Purpose & Mission
@@ -672,6 +672,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 | 1.0.124 | 2026-04-16 | Replaced np.sum axis reductions with np.einsum for performance optimization |
 
 ## Changelog
+- 2026-04-20: Bolt: Optimized np.sum(x**2) to np.vdot(x, x) in RL action penalties to improve performance and eliminate temporary allocations.
 
 - 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
 - 2026-04-20: Lazy-imported the video pose pipeline so the API video analysis route stays registered in slim runtime images and returns a 503 with a video extras hint when cv2/mediapipe is unavailable.
