@@ -166,6 +166,34 @@ class RigidBodyImpactModel(ImpactModel):
             j,
             params.friction_coefficient,
         )
+
+        club_spin = pre_state.clubhead_angular_velocity.copy()
+        if pre_state.clubhead_moi > 0:
+            # Equal and opposite angular momentum from friction spin on ball
+            delta_l_ball = GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 * (
+                ball_spin - pre_state.ball_angular_velocity
+            )
+            club_spin -= delta_l_ball / pre_state.clubhead_moi
+
+            # Torque from the linear impulse if offset
+            if (
+                pre_state.impact_offset is not None
+                and np.linalg.norm(pre_state.impact_offset) > 1e-6
+            ):
+                up = np.array([0.0, 0.0, 1.0])
+                horizontal = np.cross(n, up)
+                if np.linalg.norm(horizontal) < 1e-6:
+                    horizontal = np.array([0.0, 1.0, 0.0])
+                else:
+                    horizontal /= np.linalg.norm(horizontal)
+
+                offset_3d = (
+                    pre_state.impact_offset[0] * horizontal
+                    + pre_state.impact_offset[1] * up
+                )
+                torque_impulse = np.cross(offset_3d, -j * n)
+                club_spin += torque_impulse / pre_state.clubhead_moi
+
         energy_transfer = self._compute_energy_transfer(
             pre_state.ball_velocity,
             v_ball_post,
@@ -181,7 +209,7 @@ class RigidBodyImpactModel(ImpactModel):
             ball_velocity=v_ball_post,
             ball_angular_velocity=ball_spin,
             clubhead_velocity=v_club_post,
-            clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
+            clubhead_angular_velocity=club_spin,
             contact_duration=0.0,
             energy_transfer=energy_transfer,
             impact_location=impact_loc,
