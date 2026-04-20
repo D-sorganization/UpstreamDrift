@@ -242,6 +242,96 @@ class TestKinematicForceAnalyzer:
         for q_sample in observed_qpos:
             assert q_min - 1e-12 <= q_sample[0] <= q_max + 1e-12
 
+    def test_apparent_forces_use_effective_step_when_clamped(
+        self,
+        monkeypatch,
+    ) -> None:
+        """Clamped finite differences must divide by the actual post-clamp step.
+
+        Regression for issue #2766: at a joint limit with outward velocity,
+        clamping produces an asymmetric perturbation (one side pinned to the
+        boundary, the other free). Dividing the Jacobian difference by the
+        nominal 2 * epsilon denominator then systematically underestimates
+        jacp_dot. The fix uses the effective displacement projected onto qvel.
+        """
+        model = create_limited_club_model()
+        # Start at the positive joint limit so forward perturbation clips.
+        qpos_start = np.array([0.1, 0.0, 0.0])
+        data = SimpleNamespace(
+            qpos=qpos_start.copy(),
+            qvel=np.zeros(model.nv),
+            qacc=np.zeros(model.nv),
+            xpos=np.zeros((model.nbody, 3)),
+            ctrl=np.zeros(model.nu),
+            time=0.0,
+        )
+
+        monkeypatch.setattr(
+            mujoco,
+            "MjData",
+            lambda _model: SimpleNamespace(
+                qpos=np.zeros(_model.nq),
+                qvel=np.zeros(_model.nv),
+                qacc=np.zeros(_model.nv),
+                xpos=np.zeros((_model.nbody, 3)),
+                ctrl=np.zeros(_model.nu),
+                time=0.0,
+            ),
+        )
+        monkeypatch.setattr(
+            mujoco,
+            "mj_id2name",
+            lambda _model, _obj, body_id: "club_head" if body_id == 1 else "world",
+        )
+        monkeypatch.setattr(mujoco, "mj_forward", lambda _model, _data: None)
+        analyzer = KinematicForceAnalyzer(model, data)
+
+        # Outward velocity on the first joint means `qpos + epsilon * qvel` is
+        # clamped to the boundary while `qpos - epsilon * qvel` is not.
+        qvel = np.array([1.0, 0.0, 0.0])
+        qacc = np.zeros(model.nv)
+
+        call_count = {"n": 0}
+
+        def fake_compute_jacobian(body_id: int, data=None):
+            """Return a Jacobian that depends linearly on qpos[0].
+
+            With jacp[0,0] = qpos[0], the true dJ/dqpos[0] is 1.0, so
+            jacp_dot @ qvel along qvel = [1, 0, 0] should equal [1, 0, 0].
+            A bug using 2 * epsilon when forward-clamp is active would report
+            a smaller value proportional to the asymmetry.
+            """
+            assert data is not None
+            call_count["n"] += 1
+            jacp = np.zeros((3, model.nv))
+            jacp[0, 0] = float(data.qpos[0])
+            return jacp, np.zeros((3, model.nv))
+
+        monkeypatch.setattr(analyzer, "_compute_jacobian", fake_compute_jacobian)
+        monkeypatch.setattr(
+            analyzer,
+            "compute_coriolis_forces",
+            lambda _qpos, _qvel: np.zeros(model.nv),
+        )
+
+        coriolis, _, _ = analyzer.compute_club_head_apparent_forces(
+            qpos_start.copy(),
+            qvel,
+            qacc,
+        )
+
+        # With true dJ/dqpos[0] = 1 and qvel[0] = 1, coriolis_accel = [1, 0, 0]
+        # and coriolis_force = -club_head_mass * coriolis_accel = [-1, 0, 0].
+        # The buggy 2*epsilon denominator would give a magnitude strictly less
+        # than 1 because the forward perturbation is clipped to the limit.
+        assert call_count["n"] >= 3
+        assert np.isclose(coriolis[0], -1.0, atol=1e-6), (
+            f"expected coriolis force magnitude ~1.0 with effective-step "
+            f"correction, got {coriolis[0]}"
+        )
+        assert np.isclose(coriolis[1], 0.0, atol=1e-9)
+        assert np.isclose(coriolis[2], 0.0, atol=1e-9)
+
     def test_analyze_trajectory(self, model_and_data) -> None:
         """Test analyzing trajectory."""
         model, data = model_and_data

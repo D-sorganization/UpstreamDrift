@@ -256,7 +256,8 @@ class KinematicForceAnalyzer:
         club_pos = self._perturb_data.xpos[self.club_head_id].copy()
         epsilon = EPSILON_FINITE_DIFF_JACOBIAN
 
-        self._perturb_data.qpos[:] = self._clamp_to_joint_limits(qpos + epsilon * qvel)
+        qpos_forward = self._clamp_to_joint_limits(qpos + epsilon * qvel)
+        self._perturb_data.qpos[:] = qpos_forward
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
         jacp_forward, _ = self._compute_jacobian(
@@ -264,14 +265,33 @@ class KinematicForceAnalyzer:
         )
         jacp_forward = jacp_forward.copy()
 
-        self._perturb_data.qpos[:] = self._clamp_to_joint_limits(qpos - epsilon * qvel)
+        qpos_backward = self._clamp_to_joint_limits(qpos - epsilon * qvel)
+        self._perturb_data.qpos[:] = qpos_backward
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
         jacp_backward, _ = self._compute_jacobian(
             self.club_head_id, data=self._perturb_data
         )
 
-        jacp_dot = (jacp_forward - jacp_backward) / (2.0 * epsilon)
+        # Use the effective post-clamp step along the qvel direction rather than
+        # the nominal 2 * epsilon denominator. Clamping can make one-sided
+        # (or zero-sided) perturbations at joint limits; dividing by the fixed
+        # nominal step then systematically underestimates jacp_dot. Projecting
+        # the actual displacement (qpos_forward - qpos_backward) onto qvel and
+        # dividing by ||qvel||^2 recovers the scalar step along qvel. Falls back
+        # to the nominal denominator when qvel is (near-)zero or the effective
+        # step collapses to zero (both sides clamped to the same limit).
+        qvel_norm_sq = float(np.dot(qvel, qvel))
+        if qvel_norm_sq > EPSILON_SINGULARITY_DETECTION:
+            effective_step = float(
+                np.dot(qpos_forward - qpos_backward, qvel) / qvel_norm_sq
+            )
+            if abs(effective_step) < EPSILON_SINGULARITY_DETECTION:
+                effective_step = 2.0 * epsilon
+        else:
+            effective_step = 2.0 * epsilon
+
+        jacp_dot = (jacp_forward - jacp_backward) / effective_step
         coriolis_accel = jacp_dot @ qvel
 
         club_head_mass = self.model.body_mass[self.club_head_id]
