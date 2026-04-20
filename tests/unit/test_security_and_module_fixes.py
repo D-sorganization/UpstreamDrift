@@ -367,7 +367,7 @@ class TestBarePassExceptionHandlers:
 # ---------------------------------------------------------------------------
 
 PHYSICS_MODULES = [
-    "src/shared/python/physics/aerodynamics.py",
+    "src/shared/python/physics/aerodynamics/__init__.py",
     "src/shared/python/physics/ball_flight_physics.py",
     "src/shared/python/physics/energy_monitor.py",
     "src/shared/python/physics/equipment.py",
@@ -376,7 +376,7 @@ PHYSICS_MODULES = [
     "src/shared/python/physics/flight_models.py",
     "src/shared/python/physics/grip_contact_model.py",
     "src/shared/python/physics/ground_reaction_forces.py",
-    "src/shared/python/physics/impact_model.py",
+    "src/shared/python/physics/impact_model/__init__.py",
     "src/shared/python/physics/physics_parameters.py",
     "src/shared/python/physics/physics_validation.py",
     "src/shared/python/physics/rust_kernel.py",
