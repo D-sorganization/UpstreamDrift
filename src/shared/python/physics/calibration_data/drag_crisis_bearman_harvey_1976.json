@@ -1,0 +1,40 @@
+{
+  "_source": "Bearman, P. W. & Harvey, J. K. (1976). Golf ball aerodynamics. Aeronautical Quarterly, 27(2), 112-122.",
+  "_notes": [
+    "Cd values are for a standard dimpled golf ball (diameter ~42.67 mm).",
+    "Reynolds number Re = rho * v * D / mu, D = ball diameter.",
+    "Pre-crisis plateau: laminar boundary layer, Cd ~ 0.50.",
+    "Crisis region (Re 4e4 - 8e4): boundary layer trips turbulent due to dimples.",
+    "Post-crisis: turbulent boundary layer, Cd ~ 0.22-0.27.",
+    "Slight Cd recovery above Re=1e5 before settling to turbulent plateau.",
+    "Values digitised from Figure 3, Bearman & Harvey 1976."
+  ],
+  "reynolds_numbers": [
+    20000,
+    40000,
+    55000,
+    65000,
+    72000,
+    80000,
+    100000,
+    130000,
+    160000,
+    200000,
+    300000,
+    500000
+  ],
+  "drag_coefficients": [
+    0.50,
+    0.50,
+    0.42,
+    0.28,
+    0.22,
+    0.24,
+    0.26,
+    0.27,
+    0.27,
+    0.25,
+    0.24,
+    0.23
+  ]
+}

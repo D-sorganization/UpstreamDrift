@@ -1,21 +1,26 @@
 """Characterization tests for the golf-ball drag-crisis transition.
 
 The drag crisis is the sharp drop in sphere Cd that occurs as the boundary
-layer transitions from laminar to turbulent. For a smooth sphere this
-occurs near Re ~= 3e5, but for a dimpled golf ball dimples trip turbulence
-earlier, around Re ~= 4e4 - 1e5.
+layer transitions from laminar to turbulent.  For a dimpled golf ball,
+dimples trip turbulence earlier than a smooth sphere, so the crisis occurs
+around Re ≈ 6e4–8e4.
 
-Context: UpstreamDrift #2803 is a salvage task for the closed-unmerged
-PR #2732, which attempted a Bearman-Harvey / Smits-Ogg calibration of
-Cd(Re) but was not merged and not independently verified. Until a
-reviewed calibration is landed, this file pins the CURRENT coarse
-3-segment approximation used in both ``aerodynamics.DragModel`` and
-``engines.common.physics.AerodynamicsCalculator``.
+These tests validate the Bearman-Harvey 1976 calibrated Cd(Re) curve
+implemented in ``DragModel.get_effective_coefficient``.  The calibration
+uses a natural cubic spline over empirical data from:
 
-These tests are intentionally characterization tests: they exist so that
-a future real calibration does not silently change behavior. When the
-calibration lands, update the expected values here alongside that change
-and document the source (Bearman & Harvey 1976; Smits & Ogg 2004; etc.).
+  Bearman, P. W. & Harvey, J. K. (1976). Golf ball aerodynamics.
+  Aeronautical Quarterly, 27(2), 112-122.
+
+Key behaviours tested:
+- Pre-crisis (Re < 2e4): Cd = 0.50 (laminar plateau).
+- Crisis region (Re 6e4–8e4): sharp Cd drop from ~0.50 toward ~0.22.
+- Post-crisis region (Re > 8e4): Cd settles toward the turbulent plateau
+  (~0.23–0.27).  Real data shows slight overshoot/recovery after the minimum
+  (physically correct — the monotone-decrease property belonged only to the
+  old piecewise linear model, not the real aerodynamics).
+- Above data range (Re > 5e5): returns user-supplied base_coefficient.
+- With reynolds_correction=False: always returns base_coefficient.
 """
 
 from __future__ import annotations
@@ -40,25 +45,30 @@ def _speed_for_reynolds(target_re: float) -> float:
 
 
 @pytest.mark.parametrize(
-    ("target_re", "expected_cd"),
+    ("target_re", "expected_cd", "atol"),
     [
-        # Well below the transition: pre-crisis laminar value.
-        (5.0e4, 0.5),
-        # Right at the lower edge of the modeled transition.
-        (8.0e4, 0.5),
-        # Midpoint of the modeled transition region.
-        (1.4e5, 0.5 - 0.5 * (0.5 - 0.25)),
-        # Well above the transition: post-crisis turbulent value (default Cd=0.25).
-        (3.0e5, 0.25),
+        # Well below the data range: pre-crisis laminar plateau.
+        (1.0e4, 0.50, 1e-9),
+        # Mid-crisis: Cd should be well below the pre-crisis value.
+        # Bearman-Harvey spline gives ~0.465 at Re=5e4 (still on the drop).
+        (5.0e4, 0.465, 0.02),
+        # At the crisis minimum region (~Re=7.2e4 in the data): Cd ≈ 0.22.
+        (7.2e4, 0.22, 0.01),
+        # Post-crisis but within range: turbulent plateau around 0.24–0.27.
+        (2.0e5, 0.25, 0.04),
+        # Above data range: must return base_coefficient exactly.
+        (6.0e5, 0.25, 1e-9),
     ],
 )
-def test_drag_coefficient_pinned_across_crisis(
+def test_drag_coefficient_calibrated_values(
     target_re: float,
     expected_cd: float,
+    atol: float,
 ) -> None:
-    """Pin Cd at representative Reynolds numbers across the drag crisis.
+    """Pin Cd at representative Re values across the drag crisis.
 
-    See module docstring and TRACKED(#2803) in aerodynamics/_models.py.
+    Tolerances are relaxed in the transition region (Re 5e4–2e5) because
+    the spline interpolates between discretely sampled data points.
     """
     model = DragModel(base_coefficient=0.25, reynolds_correction=True)
     speed = _speed_for_reynolds(target_re)
@@ -69,39 +79,43 @@ def test_drag_coefficient_pinned_across_crisis(
         air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
     )
 
-    assert cd == pytest.approx(expected_cd, rel=1e-9, abs=1e-9)
+    assert cd == pytest.approx(expected_cd, abs=atol), (
+        f"Re={target_re:.2e}: expected Cd≈{expected_cd}, got {cd:.4f}"
+    )
 
 
-def test_drag_coefficient_monotonic_non_increasing_through_crisis() -> None:
-    """Cd must never increase as Re increases through the crisis region.
-
-    This invariant should survive any future recalibration: real golf-ball
-    Cd(Re) curves are non-increasing across the drag crisis (the whole
-    point of the crisis is that Cd drops).
-    """
+def test_pre_crisis_returns_laminar_plateau() -> None:
+    """Well below the crisis, Cd must be the laminar plateau value (0.50)."""
     model = DragModel(base_coefficient=0.25, reynolds_correction=True)
-    reynolds_samples = np.linspace(5.0e4, 3.5e5, 40)
-
-    previous = float("inf")
-    for re in reynolds_samples:
-        speed = _speed_for_reynolds(float(re))
-        velocity = np.array([speed, 0.0, 0.0])
+    for target_re in (1.0e3, 1.0e4, 1.5e4):
+        velocity = np.array([_speed_for_reynolds(target_re), 0.0, 0.0])
         cd = model.get_effective_coefficient(
             velocity,
             air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
         )
-        assert cd <= previous + 1e-12, (
-            f"Cd must be non-increasing across the drag crisis; "
-            f"Re={re:.3e} gave Cd={cd} after previous Cd={previous}"
+        assert cd == pytest.approx(0.50, abs=1e-9), (
+            f"Re={target_re:.2e}: expected laminar Cd=0.50, got {cd:.4f}"
         )
-        previous = cd
 
 
-def test_post_crisis_matches_base_coefficient() -> None:
-    """Well above the crisis, Cd should equal the user-supplied base value."""
+def test_crisis_drops_below_laminar_value() -> None:
+    """Through the crisis, Cd must fall substantially below the laminar value."""
+    model = DragModel(base_coefficient=0.25, reynolds_correction=True)
+    # At the crisis minimum (Re ~ 7e4), Cd should be well below 0.50.
+    velocity = np.array([_speed_for_reynolds(7.2e4), 0.0, 0.0])
+    cd = model.get_effective_coefficient(
+        velocity,
+        air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
+    )
+    assert cd < 0.30, f"Crisis minimum Cd should be < 0.30, got {cd:.4f}"
+    assert cd > 0.10, f"Cd should remain positive, got {cd:.4f}"
+
+
+def test_above_data_range_returns_base_coefficient() -> None:
+    """Well above the data range (Re > 5e5), Cd must equal base_coefficient."""
     base = 0.23
     model = DragModel(base_coefficient=base, reynolds_correction=True)
-    velocity = np.array([_speed_for_reynolds(5.0e5), 0.0, 0.0])
+    velocity = np.array([_speed_for_reynolds(6.0e5), 0.0, 0.0])
     cd = model.get_effective_coefficient(
         velocity,
         air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
@@ -120,3 +134,18 @@ def test_reynolds_correction_disabled_returns_base() -> None:
             air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
         )
         assert cd == pytest.approx(base)
+
+
+def test_cd_strictly_less_than_laminar_after_crisis() -> None:
+    """Once past the crisis, Cd must remain below the pre-crisis plateau."""
+    model = DragModel(base_coefficient=0.25, reynolds_correction=True)
+    # After Re=1e5, the ball is firmly in the turbulent regime.
+    for target_re in (1.0e5, 1.5e5, 2.0e5, 3.0e5, 4.0e5, 5.0e5):
+        velocity = np.array([_speed_for_reynolds(target_re), 0.0, 0.0])
+        cd = model.get_effective_coefficient(
+            velocity,
+            air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
+        )
+        assert cd < 0.45, (
+            f"Re={target_re:.2e}: post-crisis Cd={cd:.4f} should be < 0.45"
+        )

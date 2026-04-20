@@ -5,9 +5,13 @@ Each model calculates one orthogonal force type from ball velocity and spin.
 
 from __future__ import annotations
 
+import json
 import math
+from functools import lru_cache
+from pathlib import Path
 
 import numpy as np
+from scipy.interpolate import CubicSpline
 
 from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
@@ -18,6 +22,23 @@ from src.shared.python.core.physics_constants import (
     GOLF_BALL_RADIUS_M,
     MAGNUS_COEFFICIENT,
 )
+
+_CALIBRATION_DATA_DIR = Path(__file__).parent.parent / "calibration_data"
+_BEARMAN_HARVEY_FILE = _CALIBRATION_DATA_DIR / "drag_crisis_bearman_harvey_1976.json"
+
+
+@lru_cache(maxsize=1)
+def _load_bearman_harvey_spline() -> CubicSpline:
+    """Load and return a natural cubic spline fit of Bearman & Harvey 1976 Cd(Re) data.
+
+    Source: Bearman, P. W. & Harvey, J. K. (1976). Golf ball aerodynamics.
+    Aeronautical Quarterly, 27(2), 112-122.
+    """
+    with _BEARMAN_HARVEY_FILE.open() as f:
+        data = json.load(f)
+    re_values = np.array(data["reynolds_numbers"], dtype=float)
+    cd_values = np.array(data["drag_coefficients"], dtype=float)
+    return CubicSpline(re_values, cd_values, bc_type="natural", extrapolate=False)
 
 
 class DragModel:
@@ -88,22 +109,24 @@ class DragModel:
         diameter = 2 * self.ball_radius
         re = air_density * speed * diameter / viscosity
 
-        # TRACKED(#2803): Replace this 3-segment piecewise with a calibrated
-        # Cd(Re) curve over the drag-crisis region. Recommended references
-        # for golf-ball specific data:
-        #   - Bearman, P. W. & Harvey, J. K. (1976). "Golf ball aerodynamics."
-        #     Aeronautical Quarterly, 27(2), 112-122.
-        #   - Smits, A. J. & Ogg, S. (2004). "Aerodynamics of the golf ball."
-        #     in "Biomedical Engineering Principles in Sports", pp. 3-27.
-        laminar_cd = 0.5
-        turbulent_cd = self.base_coefficient
+        # Bearman-Harvey 1976 calibrated Cd(Re) curve for a dimpled golf ball.
+        # Natural cubic spline over tabulated empirical data from:
+        #   Bearman, P. W. & Harvey, J. K. (1976). "Golf ball aerodynamics."
+        #   Aeronautical Quarterly, 27(2), 112-122.
+        #
+        # Boundary conditions:
+        #  Re < 2e4 (below data range): laminar plateau, Cd = 0.50.
+        #  Re > 5e5 (above data range): fully turbulent, Cd = base_coefficient.
+        #  Within range: cubic spline interpolation, clamped to [0.10, 0.50].
+        re_min, re_max = 2e4, 5e5
+        if re <= re_min:
+            return 0.50
+        if re >= re_max:
+            return self.base_coefficient
 
-        if re < 8e4:
-            return laminar_cd
-        if re < 2e5:
-            fraction = (re - 8e4) / (2e5 - 8e4)
-            return laminar_cd - fraction * (laminar_cd - turbulent_cd)
-        return turbulent_cd
+        spline = _load_bearman_harvey_spline()
+        cd_calibrated = float(spline(re))
+        return float(np.clip(cd_calibrated, 0.10, 0.50))
 
 
 class LiftModel:
