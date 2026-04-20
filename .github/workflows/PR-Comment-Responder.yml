@@ -102,37 +102,26 @@ jobs:
       - name: Analyze Comment
         id: analyze
         if: steps.filter.outputs.is_bot != 'true' && steps.pr_state.outputs.should_skip != 'true'
+        env:
+          COMMENT_BODY_JSON: ${{ toJson(github.event.comment.body) }}
         run: |
-          # Get comment body
-          if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
-            COMMENT_BODY="${{ github.event.comment.body }}"
-            COMMENT_PATH="${{ github.event.comment.path }}"
-            COMMENT_LINE="${{ github.event.comment.line }}"
-            COMMENT_TYPE="review"
-          else
-            COMMENT_BODY="${{ github.event.comment.body }}"
-            COMMENT_PATH=""
-            COMMENT_LINE=""
-            COMMENT_TYPE="pr"
-          fi
-
           # Check if comment is actionable (contains request-like words)
-          BODY_LOWER=$(echo "$COMMENT_BODY" | tr '[:upper:]' '[:lower:]')
+          BODY_LOWER=$(printf '%s' "$COMMENT_BODY_JSON" | tr '[:upper:]' '[:lower:]')
 
           IS_ACTIONABLE=false
           for word in "please" "should" "could you" "can you" "fix" "change" "update" "add" "remove" "consider" "suggest" "recommend"; do
-            if echo "$BODY_LOWER" | grep -q "$word"; then
+            if printf '%s' "$BODY_LOWER" | grep -q "$word"; then
               IS_ACTIONABLE=true
               break
             fi
           done
 
           # Also check for question marks (requests for clarification/changes)
-          if echo "$COMMENT_BODY" | grep -q "?"; then
+          if printf '%s' "$COMMENT_BODY_JSON" | grep -q "?"; then
             IS_ACTIONABLE=true
           fi
 
-          echo "is_actionable=$IS_ACTIONABLE" >> $GITHUB_OUTPUT
+          echo "is_actionable=$IS_ACTIONABLE" >> "$GITHUB_OUTPUT"
 
           if [ "$IS_ACTIONABLE" = "false" ]; then
             echo "::notice::Comment does not appear actionable, skipping"
@@ -145,6 +134,7 @@ jobs:
           steps.analyze.outputs.is_actionable == 'true'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          COMMENT_BODY_JSON: ${{ toJson(github.event.comment.body) }}
         run: |
           mkdir -p .jules/pending
           QUEUE_FILE=".jules/pending/pr_comments.json"
@@ -160,14 +150,12 @@ jobs:
 
           if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
             COMMENT_ID="${{ github.event.comment.id }}"
-            COMMENT_BODY=$(echo '${{ toJson(github.event.comment.body) }}')
             COMMENT_PATH="${{ github.event.comment.path }}"
             COMMENT_LINE="${{ github.event.comment.line }}"
             COMMENT_TYPE="review"
             COMMENT_AUTHOR="${{ github.event.comment.user.login }}"
           else
             COMMENT_ID="${{ github.event.comment.id }}"
-            COMMENT_BODY=$(echo '${{ toJson(github.event.comment.body) }}')
             COMMENT_PATH=""
             COMMENT_LINE=""
             COMMENT_TYPE="pr"
@@ -180,6 +168,7 @@ jobs:
           import os
 
           queue_file = "$QUEUE_FILE"
+          comment_body = json.loads(os.environ["COMMENT_BODY_JSON"])
 
           # Load existing queue
           try:
@@ -201,7 +190,7 @@ jobs:
                   "pr_number": int("$PR_NUMBER"),
                   "type": "$COMMENT_TYPE",
                   "author": "$COMMENT_AUTHOR",
-                  "body": $COMMENT_BODY,
+                  "body": comment_body,
                   "path": "$COMMENT_PATH" if "$COMMENT_PATH" else None,
                   "line": int("$COMMENT_LINE") if "$COMMENT_LINE" else None,
                   "queued_at": "$TIMESTAMP",

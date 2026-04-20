@@ -124,7 +124,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           ARCHIVE_ONLY: ${{ inputs.archive_only || 'false' }}
-          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref_name }}
         run: |
           # Write Python script to temp file to avoid YAML heredoc issues
           cat > /tmp/process_comments.py << 'SCRIPT_EOF'
@@ -337,7 +337,7 @@ jobs:
       - name: Commit Archive
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-          TARGET_BRANCH: ${{ github.head_ref || github.ref_name }}
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
