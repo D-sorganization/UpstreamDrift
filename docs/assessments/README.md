@@ -175,6 +175,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-26.md`                 |
 | 2026-03-27 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-27.md`                 |
 | 2026-04-05 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-05.md`                 |
+| 2026-04-17 | A-N Comprehensive Assessment             | `docs/assessments/A-N_Assessment_2026-04-17.md`                               |
 
 ---
 
@@ -260,6 +261,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 3.5     | 2026-03 | Added Completist Report 2026-03-27 + 32 incomplete-stub issues (#2194-#2243)       |
 | 3.6     | 2026-04 | Added Completist Report 2026-04-05                                                 |
 | 3.7     | 2026-04 | Added A-N comprehensive review 2026-04-09 (`A-N_Assessment_2026-04-09.md`)         |
+| 3.8     | 2026-04 | Added A-N comprehensive review 2026-04-17 (`A-N_Assessment_2026-04-17.md`)         |
 
 ---
 
