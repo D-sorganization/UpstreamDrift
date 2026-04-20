@@ -601,3 +601,71 @@ class TestIssue2499ContactManagerStateRestoration:
 
         q_after, _ = mock_engine.get_state()
         np.testing.assert_array_equal(q_after, q_orig)
+
+
+class TestContactManagerBugFixes:
+    """Regression tests for bug fixes in contact_manager.py (#2706)."""
+
+    def _make_engine(self) -> object:
+        """Return a minimal mock engine satisfying RoboticsCapable protocol."""
+        from unittest.mock import MagicMock
+
+        from src.robotics.core.protocols import RoboticsCapable
+
+        engine = MagicMock(spec=RoboticsCapable)
+        engine.get_state.return_value = (np.zeros(3), np.zeros(3))
+        return engine
+
+    def test_negative_normal_force_logs_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Negative raw normal force must log a WARNING and clip to zero."""
+        import logging
+
+        from src.robotics.contact.contact_manager import ContactManager
+
+        manager = ContactManager(self._make_engine())
+
+        info = {
+            "body_a": "club",
+            "body_b": "ground",
+            "position": [0.0, 0.0, 0.0],
+            "normal": [0.0, 0.0, 1.0],
+            "force": [0.0, 0.0, -5.0],  # separating — negative normal component
+        }
+
+        with caplog.at_level(
+            logging.WARNING, logger="src.robotics.contact.contact_manager"
+        ):
+            state = manager._create_contact_from_info(info)
+
+        assert state.normal_force == 0.0, "Negative normal force must clip to 0"
+        assert any("negative" in record.message.lower() for record in caplog.records), (
+            "Expected a WARNING log for negative normal force"
+        )
+
+    def test_positive_normal_force_no_warning(
+        self, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Positive normal force must not trigger a warning."""
+        import logging
+
+        from src.robotics.contact.contact_manager import ContactManager
+
+        manager = ContactManager(self._make_engine())
+
+        info = {
+            "body_a": "club",
+            "body_b": "ground",
+            "position": [0.0, 0.0, 0.0],
+            "normal": [0.0, 0.0, 1.0],
+            "force": [0.0, 0.0, 10.0],  # compressive — normal force = 10
+        }
+
+        with caplog.at_level(
+            logging.WARNING, logger="src.robotics.contact.contact_manager"
+        ):
+            state = manager._create_contact_from_info(info)
+
+        assert state.normal_force == pytest.approx(10.0)
+        assert not any("negative" in r.message.lower() for r in caplog.records)
