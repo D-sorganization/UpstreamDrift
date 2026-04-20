@@ -29,7 +29,7 @@ dependencies = [
     "mujoco>=3.6.0,<4.0.0",
 
     # Safe expression evaluation (replaces eval())
-    "simpleeval>=1.0.0",
+    "simpleeval>=1.0.5",
 
     # Structured logging (OBS-001: required for observability)
     "structlog>=24.1.0",

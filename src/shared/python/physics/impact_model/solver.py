@@ -161,25 +161,15 @@ class ImpactSolverAPI:
         self.recorder = ImpactRecorder()
 
     @precondition(  # fmt: skip
-        lambda self,
-        timestamp,
-        clubhead_velocity,
-        clubhead_orientation,
-        ball_velocity=None,
-        ball_angular_velocity=None,
-        clubhead_mass=0.200,
-        record=True: (clubhead_mass > 0),
+        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
+            clubhead_mass > 0
+        ),
         "Clubhead mass must be positive",
     )
     @precondition(  # fmt: skip
-        lambda self,
-        timestamp,
-        clubhead_velocity,
-        clubhead_orientation,
-        ball_velocity=None,
-        ball_angular_velocity=None,
-        clubhead_mass=0.200,
-        record=True: (timestamp >= 0),
+        lambda self, timestamp, clubhead_velocity, clubhead_orientation, ball_velocity=None, ball_angular_velocity=None, clubhead_mass=0.200, record=True: (
+            timestamp >= 0
+        ),
         "Timestamp must be non-negative",
     )
     def solve_impact(
@@ -282,11 +272,29 @@ class ImpactSolverAPI:
         )
 
         # Create modified post-state with gear effect
+        club_spin = post_state.clubhead_angular_velocity.copy()
+        from src.shared.python.core.physics_constants import (
+            GOLF_BALL_MOMENT_OF_INERTIA_KG_M2,
+        )
+
+        if hasattr(self.params, "clubhead_moi"):
+            moi = self.params.clubhead_moi
+        else:
+            # Fallback if params doesn't carry it (it's in PreImpactState normally)
+            # but we know driver MOI
+            from src.shared.python.core.physics_constants import DRIVER_MOI_KG_M2
+
+            moi = DRIVER_MOI_KG_M2
+
+        if moi > 0:
+            delta_l_gear = GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 * gear_spin
+            club_spin -= delta_l_gear / moi
+
         modified_post = PostImpactState(
             ball_velocity=post_state.ball_velocity,
             ball_angular_velocity=post_state.ball_angular_velocity + gear_spin,
             clubhead_velocity=post_state.clubhead_velocity,
-            clubhead_angular_velocity=post_state.clubhead_angular_velocity,
+            clubhead_angular_velocity=club_spin,
             contact_duration=post_state.contact_duration,
             energy_transfer=post_state.energy_transfer,
             impact_location=np.asarray(impact_offset),

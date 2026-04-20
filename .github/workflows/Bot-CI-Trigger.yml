@@ -74,6 +74,9 @@ jobs:
         github.event.pull_request.user.type == 'Bot'))
 
     steps:
+      - name: Clear Windows credential helper (WSL runner fix)
+        run: git config --global credential.helper ""
+
       - uses: actions/checkout@v6
         with:
           token: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
