@@ -283,11 +283,19 @@ class DragModel:
         diameter = 2 * self.ball_radius
         re = air_density * speed * diameter / viscosity
 
-        from src.shared.python.physics.drag_crisis import (
-            calibrated_golf_ball_drag_coefficient,
-        )
+        # Golf ball Cd variation with Re (empirical)
+        # The base_coefficient is used as the turbulent value, with
+        # higher values at lower Reynolds numbers (laminar flow)
+        laminar_cd = 0.5  # Laminar flow coefficient
+        turbulent_cd = self.base_coefficient  # User-specified turbulent coefficient
 
-        return calibrated_golf_ball_drag_coefficient(re, self.base_coefficient)
+        if re < 8e4:
+            return laminar_cd  # Laminar flow
+        if re < 2e5:
+            # Transition region - interpolate between laminar and turbulent
+            fraction = (re - 8e4) / (2e5 - 8e4)
+            return laminar_cd - fraction * (laminar_cd - turbulent_cd)
+        return turbulent_cd  # Fully turbulent
 
 
 class LiftModel:

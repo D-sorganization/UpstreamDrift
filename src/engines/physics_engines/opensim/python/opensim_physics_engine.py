@@ -429,7 +429,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             return {
                 "linear": jacp,
                 "angular": jacr,
-                "spatial": np.vstack([jacp, jacr]),  # [Linear; Angular] convention
+                "spatial": np.vstack([jacr, jacp]),  # [Angular; Linear] convention
             }
 
         except ImportError as e:

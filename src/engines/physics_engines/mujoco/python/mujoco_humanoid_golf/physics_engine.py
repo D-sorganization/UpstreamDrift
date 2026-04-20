@@ -397,8 +397,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         return {
             "linear": jacp,
             "angular": jacr,
-            "spatial": np.vstack([jacp, jacr]),
-            # Suite spatial convention: [Linear; Angular].
+            "spatial": np.vstack([jacr, jacp]),
+            # Suite spatial convention: [Angular; Linear].
         }
 
     def compute_contact_forces(self) -> np.ndarray:

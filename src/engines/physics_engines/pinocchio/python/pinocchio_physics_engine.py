@@ -416,8 +416,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         jac_linear = J[:3, :]
         jac_angular = J[3:, :]
 
-        # Standardize on [Linear; Angular] for "spatial" key
-        J_aligned = np.vstack([jac_linear, jac_angular])
+        # Standardize on [Angular; Linear] for "spatial" key
+        J_aligned = np.vstack([jac_angular, jac_linear])
 
         return {
             "linear": cast(np.ndarray, jac_linear),

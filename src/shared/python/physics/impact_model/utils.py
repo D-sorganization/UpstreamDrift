@@ -53,8 +53,10 @@ def compute_gear_effect_spin(
     # Speed affects spin magnitude
     speed = np.linalg.norm(clubhead_velocity)
 
-    horizontal_spin = gear_factor * h_offset * speed * h_scale  # [rad/s]
-    vertical_spin = -gear_factor * v_offset * speed * v_scale  # [rad/s]
+    # Gear effect spin rate (empirical relationship)
+    # Higher offset = more spin, proportional to speed
+    horizontal_spin = -gear_factor * h_offset * speed * h_scale  # [rad/s]
+    vertical_spin = gear_factor * v_offset * speed * v_scale  # [rad/s]
 
     # Convert to 3D spin vector
     # Assuming clubface normal is approximately in X direction

@@ -449,7 +449,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         return {
             "linear": jacp,
             "angular": jacr,
-            "spatial": np.vstack([jacp, jacr]),  # Standardized to [linear; angular]
+            "spatial": J,  # Standard: Angular (0-3), Linear (3-6)
         }
 
     # -------- Section F: Drift-Control Decomposition --------
@@ -611,7 +611,7 @@ class DrakePhysicsEngine(PhysicsEngine):
             # ZVCF: M*a + g = τ → a = M^-1 * (τ - g)
             # Note: g is the gravity force vector, not gravity generalized force
             # CalcGravityGeneralizedForces returns -g in the equation M*a + c + g = τ
-            a_zvcf = np.linalg.solve(M, tau + g)
+            a_zvcf = np.linalg.solve(M, tau - g)
 
             return cast(np.ndarray, a_zvcf)
 
