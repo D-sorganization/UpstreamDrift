@@ -53,16 +53,14 @@ RUN grep -v '^#' /tmp/requirements.txt | grep -v '^$' > /tmp/filtered_requiremen
     pip install --no-cache-dir -r /tmp/filtered_requirements.txt
 
 # Install additional physics engines and API server dependencies
-# Note: opensim is excluded because it is not reliably pip-installable;
-#       install it via conda or from source if needed.
-RUN pip install --no-cache-dir \
+# We explicitly include runtime packages needed by API import paths: pandas, matplotlib, sympy, and defusedxml
+RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu \
     mujoco>=3.2.3 \
     drake \
     meshcat \
     pin-pink \
     qpsolvers \
     osqp \
-    myosuite \
     mediapipe>=0.10.0 \
     "imageio[ffmpeg]>=2.31.0" \
     trimesh>=4.0.0 \
@@ -91,33 +89,12 @@ FROM continuumio/miniconda3:24.11.1-0 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Runtime system dependencies only
-# - GL libraries for MuJoCo/Visualization
-# - X11/XCB libraries for PyQt6
-# - FFmpeg for video processing (OpenPose inputs)
-# - curl for health checks
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1-mesa-dev \
+# Upgrade openssl to fix Debian vulnerabilities
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
-    libosmesa6-dev \
-    libglew-dev \
-    libegl1 \
     libglib2.0-0 \
-    libxkbcommon-x11-0 \
-    libxcb-cursor0 \
-    libxcb-icccm4 \
-    libxcb-keysyms1 \
-    libxcb-image0 \
-    libxcb-randr0 \
-    libxcb-render-util0 \
-    libxcb-shape0 \
-    libxcb-xfixes0 \
-    libxcb-xinerama0 \
-    libxcb-xkb1 \
-    libdbus-1-3 \
-    patchelf \
     ffmpeg \
-    xvfb \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
