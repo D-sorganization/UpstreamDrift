@@ -150,7 +150,8 @@ items:
   - id: GH2034
     title: "Reduce 1227 type:ignore comments systematically"
     priority: medium
-    status: refined
+    status: in_progress
+    started_at: "2026-04-20T06:47:47Z"
     github_issue: 2034
     artefact: .gaai/project/contexts/artefacts/stories/GH2034.story.md
     dependencies: []
