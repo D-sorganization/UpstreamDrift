@@ -311,15 +311,18 @@ class AerodynamicsCalculator:
         # Reynolds number
         Re = self.air.density * speed * (2 * self.ball.radius) / self.air.viscosity
 
-        # Golf ball Cd variation with Re (empirical fit)
-        # Below critical Re (~8e4): higher drag (laminar)
-        # Above critical Re: lower drag (turbulent, dimple effect)
+        # Golf ball Cd variation with Re (coarse empirical approximation).
+        # TRACKED(#2803): Calibrate against Bearman & Harvey (1976) or
+        # Smits & Ogg (2004) golf-ball Cd(Re) data across the drag-crisis
+        # region (~Re 4e4-2e5). PR #2732 attempted this but was closed
+        # unmerged; its table was not independently verified. Behavior is
+        # pinned by tests/unit/test_drag_crisis_calibration.py.
         if Re < 8e4:
-            return 0.5  # Laminar flow
+            return 0.5  # Pre-crisis (laminar boundary layer)
         if Re < 2e5:
-            # Transition region
+            # Transition through drag-crisis region (linear interpolation).
             return 0.5 - 0.25 * (Re - 8e4) / (2e5 - 8e4)
-        return self.ball.drag_coefficient  # Fully turbulent
+        return self.ball.drag_coefficient  # Post-crisis (fully turbulent)
 
     def _compute_lift_coefficient(self, spin_ratio: float) -> float:
         """Compute lift coefficient based on spin ratio.

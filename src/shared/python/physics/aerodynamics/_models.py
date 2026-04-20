@@ -88,6 +88,13 @@ class DragModel:
         diameter = 2 * self.ball_radius
         re = air_density * speed * diameter / viscosity
 
+        # TRACKED(#2803): Replace this 3-segment piecewise with a calibrated
+        # Cd(Re) curve over the drag-crisis region. Recommended references
+        # for golf-ball specific data:
+        #   - Bearman, P. W. & Harvey, J. K. (1976). "Golf ball aerodynamics."
+        #     Aeronautical Quarterly, 27(2), 112-122.
+        #   - Smits, A. J. & Ogg, S. (2004). "Aerodynamics of the golf ball."
+        #     in "Biomedical Engineering Principles in Sports", pp. 3-27.
         laminar_cd = 0.5
         turbulent_cd = self.base_coefficient
 
