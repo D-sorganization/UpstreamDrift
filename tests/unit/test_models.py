@@ -1,15 +1,18 @@
 """Unit tests for C3D Viewer data models."""
 
+import importlib.util
+
 import numpy as np
 import pytest
 
-try:
-    from apps.core.models import AnalogData, C3DDataModel, MarkerData  # noqa: E402
-except (ImportError, ModuleNotFoundError):
-    pytest.skip(
-        "Simscape apps module not available",
-        allow_module_level=True,
-    )
+_simscape_available = importlib.util.find_spec("apps") is not None
+pytestmark = pytest.mark.skipif(
+    not _simscape_available,
+    reason="Simscape apps module not available",
+)
+
+if _simscape_available:
+    from apps.core.models import AnalogData, C3DDataModel, MarkerData
 
 
 class TestModels:

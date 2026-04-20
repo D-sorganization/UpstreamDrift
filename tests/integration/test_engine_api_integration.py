@@ -11,19 +11,27 @@ with HTTP-level verification.
 Fixes #1119
 """
 
+import importlib.util
 import time
 from collections.abc import Generator
 
 import pytest
 
-try:
+from src.shared.python.engine_core.engine_registry import EngineType
+
+_api_deps_available = (
+    importlib.util.find_spec("fastapi") is not None
+    and importlib.util.find_spec("src.api.server") is not None
+)
+pytestmark = pytest.mark.skipif(
+    not _api_deps_available,
+    reason="API server deps not available",
+)
+
+if _api_deps_available:
     from fastapi.testclient import TestClient
 
     from src.api.server import app
-except ImportError:
-    pytest.skip("API server deps not available", allow_module_level=True)
-
-from src.shared.python.engine_core.engine_registry import EngineType
 
 
 @pytest.fixture(scope="module")
@@ -104,9 +112,9 @@ class TestEngineRegistryConsistency:
         for engine_type in EngineType:
             if engine_type in skip_types:
                 continue
-            assert (
-                engine_type in LOADER_MAP
-            ), f"{engine_type.value} missing from LOADER_MAP"
+            assert engine_type in LOADER_MAP, (
+                f"{engine_type.value} missing from LOADER_MAP"
+            )
 
     def test_loader_map_values_are_callable(self) -> None:
         """All LOADER_MAP values are callable functions."""

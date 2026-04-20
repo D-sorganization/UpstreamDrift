@@ -232,6 +232,9 @@ class TestConvertOsimToMujoco:
             )
 
     @skip_if_unavailable("myoconverter")
+    @pytest.mark.xfail(
+        strict=False, reason="Requires myoconverter - pending implementation"
+    )
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
@@ -240,10 +243,12 @@ class TestConvertOsimToMujoco:
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
     ) -> None:
         """Test successful model conversion (requires myoconverter)."""
-        # Skip test body if myoconverter not available
-        pytest.skip("Requires myoconverter - pending implementation")
+        raise NotImplementedError("Requires myoconverter - pending implementation")
 
     @skip_if_unavailable("myoconverter")
+    @pytest.mark.xfail(
+        strict=False, reason="Requires myoconverter - pending implementation"
+    )
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
@@ -252,8 +257,7 @@ class TestConvertOsimToMujoco:
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
     ) -> None:
         """Test that custom configuration is passed to pipeline (requires myoconverter)."""
-        # Skip test body if myoconverter not available
-        pytest.skip("Requires myoconverter - pending implementation")
+        raise NotImplementedError("Requires myoconverter - pending implementation")
 
 
 class TestHandleConversionError:
@@ -483,6 +487,9 @@ class TestEdgeCases:
     """Test edge cases and error conditions."""
 
     @skip_if_unavailable("myoconverter")
+    @pytest.mark.xfail(
+        strict=False, reason="Requires myoconverter - pending implementation"
+    )
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
@@ -491,8 +498,7 @@ class TestEdgeCases:
         self, mock_check, temp_osim_file, temp_geometry_folder, temp_output_folder
     ) -> None:
         """Test error when conversion completes but no output file found."""
-        # Skip test body if myoconverter not available
-        pytest.skip("Requires myoconverter - pending implementation")
+        raise NotImplementedError("Requires myoconverter - pending implementation")
 
     @patch(
         "src.shared.python.biomechanics.myoconverter_integration.MyoConverter._check_availability",

@@ -123,18 +123,21 @@ class TestBasicContactPhysics:
         )
 
         # Ball should be near ground (not still at 1m)
-        assert (
-            final_height < 0.1
-        ), f"Ball should settle near ground: height={final_height:.3f}m"
+        assert final_height < 0.1, (
+            f"Ball should settle near ground: height={final_height:.3f}m"
+        )
 
         # Log for cross-engine comparison
         np.sqrt(E_final / E_initial)
 
     @pytest.mark.slow
+    @pytest.mark.xfail(
+        strict=False, reason="Drake contact model testing - not yet implemented"
+    )
     def test_drake_ball_drop_energy_dissipation(self, ball_urdf) -> None:
         """Verify Drake contact dissipates energy."""
-        pytest.skip("Drake contact model testing - implementation pending")
         # Expected behavior: Similar to MuJoCo but may use different contact model
+        raise NotImplementedError("Drake contact model testing - not yet implemented")
 
     @pytest.mark.slow
     def test_pinocchio_contact_behavior(self, ball_urdf) -> None:
@@ -158,9 +161,9 @@ class TestBasicContactPhysics:
         assert isinstance(contact_forces, np.ndarray), "Should return a numpy array"
         assert contact_forces.shape == (3,), "Should return a 3-element force vector"
         # Since it's a known limitation in ABA without constraint solver, we expect 0 natively
-        assert np.all(
-            contact_forces == 0
-        ), "Currently expects zero forces without constraint solver"
+        assert np.all(contact_forces == 0), (
+            "Currently expects zero forces without constraint solver"
+        )
 
 
 class TestCrossEngineContactComparison:

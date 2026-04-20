@@ -1,5 +1,6 @@
 """Tests for C3D export security, versioning, and telemetry features."""
 
+import importlib.util
 import json
 from collections.abc import Generator
 from pathlib import Path
@@ -10,13 +11,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-try:
-    from c3d_reader import SCHEMA_VERSION, C3DDataReader  # noqa: E402
-except (ImportError, ModuleNotFoundError):
-    pytest.skip(
-        "c3d_reader module not available (requires c3d/ezc3d)",
-        allow_module_level=True,
-    )
+_c3d_available = importlib.util.find_spec("c3d_reader") is not None
+pytestmark = pytest.mark.skipif(
+    not _c3d_available,
+    reason="c3d_reader module not available (requires c3d/ezc3d)",
+)
+
+if _c3d_available:
+    from c3d_reader import SCHEMA_VERSION, C3DDataReader
 
 
 class TestCaptureExportFeatures:

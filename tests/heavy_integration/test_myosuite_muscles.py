@@ -389,9 +389,9 @@ class TestMyoSuiteEngine:
             ):
                 actuator_id = analyzer.muscle_actuator_ids[0]
                 ctrl_value = engine.sim.data.ctrl[actuator_id]
-                assert (
-                    0.7 <= ctrl_value <= 0.9
-                ), f"Activation not set correctly: {ctrl_value}"
+                assert 0.7 <= ctrl_value <= 0.9, (
+                    f"Activation not set correctly: {ctrl_value}"
+                )
 
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Activation setting test failed: {e}")
@@ -400,18 +400,22 @@ class TestMyoSuiteEngine:
 class TestCrossValidation:
     """Cross-validation with OpenSim."""
 
+    @pytest.mark.xfail(
+        strict=False, reason="Cross-validation test pending matching models"
+    )
     def test_muscle_force_comparison(self) -> None:
         """Section K2: Compare MyoSuite vs OpenSim muscle forces."""
         # This test requires both engines with comparable models
         # Placeholder for future cross-validation
         logger.info("Cross-validation: Placeholder for MyoSuite ↔ OpenSim comparison")
-        pytest.skip("Cross-validation test pending matching models")
+        raise NotImplementedError("Cross-validation requires matching models")
 
+    @pytest.mark.xfail(strict=False, reason="Pending multi-engine grip models")
     def test_grip_force_validation(self) -> None:
         """Section K1 + J1: Compare grip forces across engines."""
         # Grip force should agree within ±15% (Section K2)
         logger.info("Grip cross-validation: Placeholder")
-        pytest.skip("Pending multi-engine grip models")
+        raise NotImplementedError("Pending multi-engine grip models")
 
 
 pytestmark = pytest.mark.live_simulation

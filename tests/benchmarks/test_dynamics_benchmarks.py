@@ -8,11 +8,15 @@ import pytest
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 
-# Check if pytest-benchmark is installed, otherwise skip
-if importlib.util.find_spec("pytest_benchmark") is None:
-    pytest.skip("pytest-benchmark not installed", allow_module_level=True)
+_pytest_benchmark_available = importlib.util.find_spec("pytest_benchmark") is not None
 
-if MUJOCO_AVAILABLE:
+# Skip entire module if pytest-benchmark or MuJoCo not available
+pytestmark = pytest.mark.skipif(
+    not _pytest_benchmark_available or not MUJOCO_AVAILABLE,
+    reason="pytest-benchmark or MuJoCo not installed",
+)
+
+if _pytest_benchmark_available and MUJOCO_AVAILABLE:
     try:
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (
             aba,
@@ -28,8 +32,6 @@ if MUJOCO_AVAILABLE:
             "MuJoCo dynamics internal imports not available",
             allow_module_level=True,
         )
-else:
-    pytest.skip("MuJoCo dynamics modules not available", allow_module_level=True)
 
 
 def create_random_model(num_bodies: int = 10) -> dict:

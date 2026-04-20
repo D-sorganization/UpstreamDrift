@@ -66,9 +66,9 @@ class TestDriftControlDecomposer:
         )
 
         # Guideline F requires residual < 1e-5
-        assert (
-            result.residual < 1e-5
-        ), f"Residual {result.residual:.2e} exceeds Guideline F tolerance 1e-5"
+        assert result.residual < 1e-5, (
+            f"Residual {result.residual:.2e} exceeds Guideline F tolerance 1e-5"
+        )
 
     def test_zero_control_gives_drift_only(self, simple_pendulum_model) -> None:
         """Test that zero control gives drift-only acceleration."""
@@ -81,9 +81,9 @@ class TestDriftControlDecomposer:
         result = decomposer.decompose(qpos, qvel, ctrl)
 
         # With zero control, control acceleration should be near zero
-        assert np.allclose(
-            result.control_acceleration, 0, atol=1e-6
-        ), f"Expected zero control acceleration, got {result.control_acceleration}"
+        assert np.allclose(result.control_acceleration, 0, atol=1e-6), (
+            f"Expected zero control acceleration, got {result.control_acceleration}"
+        )
 
         # Full should equal drift
         assert np.allclose(
@@ -175,9 +175,9 @@ class TestDriftControlDecomposer:
 
         # All should satisfy superposition
         for r in results:
-            assert (
-                r.residual < 1e-5
-            ), f"Trajectory point failed superposition: residual={r.residual:.2e}"
+            assert r.residual < 1e-5, (
+                f"Trajectory point failed superposition: residual={r.residual:.2e}"
+            )
 
     def test_decomposition_is_reproducible(self, simple_pendulum_model) -> None:
         """Test that decomposition gives same results with same inputs."""
@@ -200,13 +200,16 @@ class TestDriftControlDecomposer:
 class TestDriftControlPhysics:
     """Integration tests for drift-control physics validation."""
 
+    @pytest.mark.xfail(
+        strict=False,
+        reason="Requires energy calculation utilities - not yet implemented",
+    )
     def test_passive_pendulum_drift_matches_energy_conservation(
         self, simple_pendulum_model
     ) -> None:
         """Test drift component matches energy-conserving motion."""
-        pytest.skip("Requires energy calculation utilities - implement in follow-up")
-
         # (modulo damping losses if present)
+        raise NotImplementedError("Requires energy calculation utilities")
 
     def test_control_enables_upward_swing(self, simple_pendulum_model) -> None:
         """Test that control can drive pendulum upward against gravity."""
@@ -222,11 +225,11 @@ class TestDriftControlPhysics:
         result = decomposer.decompose(qpos, qvel, ctrl)
 
         # Control component should dominate and be positive (upward)
-        assert (
-            result.control_acceleration[0] > result.drift_acceleration[0]
-        ), "Control should dominate drift for strong actuation"
+        assert result.control_acceleration[0] > result.drift_acceleration[0], (
+            "Control should dominate drift for strong actuation"
+        )
 
         # Total should be positive (accelerating upward)
-        assert (
-            result.full_acceleration[0] > 0
-        ), "Strong torque should accelerate pendulum upward"
+        assert result.full_acceleration[0] > 0, (
+            "Strong torque should accelerate pendulum upward"
+        )
