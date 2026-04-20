@@ -857,6 +857,22 @@
     <limit lower="0.0" upper="1.57" effort="1000.0" velocity="10.0"/>
     <dynamics damping="0.5"/>
   </joint>
+  <!-- right_grip_attachment: massless hook point at the top of the grip where the right
+       hand contacts the shaft (approx. 0.03 m below left-hand grip origin).
+       URDF is a tree — this link establishes the right-hand kinematic attachment point.
+       Closed-loop enforcement (right_grip_attachment ↔ club_shaft) must be applied by
+       the physics engine as a loop-closure constraint (e.g., Pinocchio RigidConstraint). -->
+  <joint name="hand_right_to_right_grip_attachment" type="fixed">
+    <parent link="hand_right"/>
+    <child link="right_grip_attachment"/>
+    <origin xyz="0.0 0.0 -0.12" rpy="0.0 0.0 0.0"/>
+  </joint>
+  <link name="right_grip_attachment">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="1e-06" ixy="0.0" ixz="0.0" iyy="1e-06" iyz="0.0" izz="1e-06"/>
+    </inertial>
+  </link>
   <link name="fingers_right">
     <inertial>
       <mass value="0.2"/>

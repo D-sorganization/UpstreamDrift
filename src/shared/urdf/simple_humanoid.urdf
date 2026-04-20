@@ -1,4 +1,12 @@
 <?xml version="1.0"?>
+<!--
+  smoke_test_humanoid: Minimal 5-DOF humanoid for parser/API smoke tests ONLY.
+  NOT suitable for biomechanical simulation — no elbows, knees, wrists, or spine.
+  Mass properties derived from de Leva 1996 (Table 4, male) at 70 kg reference body mass.
+  Inertia tensors computed analytically from the link geometries below.
+  Source: de Leva P (1996). "Adjustments to Zatsiorsky-Seluyanov's segment inertia
+  parameters." J Biomech 29(9): 1223-1230.
+-->
 <robot name="simple_humanoid">
 
   <!-- Materials -->
@@ -9,7 +17,8 @@
     <color rgba="1 1 1 1"/>
   </material>
 
-  <!-- Torso -->
+  <!-- Torso: 43.46% BM = 30.42 kg (de Leva 1996 male trunk).
+       Box 0.2 x 0.4 x 0.6 m. ixx=m(y²+z²)/12, iyy=m(x²+z²)/12, izz=m(x²+y²)/12 -->
   <link name="torso">
     <visual>
       <geometry>
@@ -25,12 +34,13 @@
       <origin rpy="0 0 0" xyz="0 0 0.3"/>
     </collision>
     <inertial>
-      <mass value="10"/>
-      <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.2"/>
+      <mass value="30.42"/>
+      <inertia ixx="1.318" ixy="0.0" ixz="0.0" iyy="1.014" iyz="0.0" izz="0.507"/>
     </inertial>
   </link>
 
-  <!-- Head -->
+  <!-- Head: 6.94% BM = 4.86 kg (de Leva 1996 male head).
+       Sphere r=0.12 m. I = 2/5 * m * r² -->
   <link name="head">
     <visual>
       <geometry>
@@ -46,8 +56,8 @@
       <origin rpy="0 0 0" xyz="0 0 0.12"/>
     </collision>
     <inertial>
-      <mass value="2"/>
-      <inertia ixx="0.02" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.02"/>
+      <mass value="4.86"/>
+      <inertia ixx="0.028" ixy="0.0" ixz="0.0" iyy="0.028" iyz="0.0" izz="0.028"/>
     </inertial>
   </link>
 
@@ -59,7 +69,9 @@
     <limit lower="-1.57" upper="1.57" effort="10" velocity="1"/>
   </joint>
 
-  <!-- Right Arm -->
+  <!-- Right Arm: 2.80% BM = 1.96 kg (de Leva 1996 male upper arm).
+       Cylinder r=0.05 m, l=0.3 m, long axis along x (rpy="0 1.57 0").
+       ixx=0.5*m*r², iyy=izz=m(3r²+l²)/12 -->
   <link name="right_upper_arm">
     <visual>
       <geometry>
@@ -75,8 +87,8 @@
       <origin rpy="0 1.57 0" xyz="0.15 0 0"/>
     </collision>
     <inertial>
-      <mass value="1"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.005"/>
+      <mass value="1.96"/>
+      <inertia ixx="0.0025" ixy="0.0" ixz="0.0" iyy="0.016" iyz="0.0" izz="0.016"/>
     </inertial>
   </link>
 
@@ -88,7 +100,7 @@
     <limit lower="-3.14" upper="3.14" effort="30" velocity="1"/>
   </joint>
 
-  <!-- Left Arm -->
+  <!-- Left Arm: 2.80% BM = 1.96 kg (de Leva 1996 male upper arm). Same geometry. -->
   <link name="left_upper_arm">
     <visual>
       <geometry>
@@ -104,8 +116,8 @@
       <origin rpy="0 -1.57 0" xyz="-0.15 0 0"/>
     </collision>
     <inertial>
-      <mass value="1"/>
-      <inertia ixx="0.01" ixy="0.0" ixz="0.0" iyy="0.01" iyz="0.0" izz="0.005"/>
+      <mass value="1.96"/>
+      <inertia ixx="0.0025" ixy="0.0" ixz="0.0" iyy="0.016" iyz="0.0" izz="0.016"/>
     </inertial>
   </link>
 
@@ -117,7 +129,9 @@
     <limit lower="-3.14" upper="3.14" effort="30" velocity="1"/>
   </joint>
 
-  <!-- Right Leg -->
+  <!-- Right Leg: 10.00% BM = 7.0 kg (de Leva 1996 male thigh).
+       Cylinder r=0.07 m, l=0.4 m, long axis along z.
+       izz=0.5*m*r², ixx=iyy=m(3r²+l²)/12 -->
   <link name="right_upper_leg">
     <visual>
       <geometry>
@@ -133,8 +147,8 @@
       <origin rpy="0 0 0" xyz="0 0 -0.2"/>
     </collision>
     <inertial>
-      <mass value="3"/>
-      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.01"/>
+      <mass value="7.0"/>
+      <inertia ixx="0.102" ixy="0.0" ixz="0.0" iyy="0.102" iyz="0.0" izz="0.017"/>
     </inertial>
   </link>
 
@@ -146,7 +160,7 @@
     <limit lower="-1.57" upper="1.57" effort="50" velocity="1"/>
   </joint>
 
-  <!-- Left Leg -->
+  <!-- Left Leg: 10.00% BM = 7.0 kg (de Leva 1996 male thigh). Same geometry. -->
   <link name="left_upper_leg">
     <visual>
       <geometry>
@@ -162,8 +176,8 @@
       <origin rpy="0 0 0" xyz="0 0 -0.2"/>
     </collision>
     <inertial>
-      <mass value="3"/>
-      <inertia ixx="0.05" ixy="0.0" ixz="0.0" iyy="0.05" iyz="0.0" izz="0.01"/>
+      <mass value="7.0"/>
+      <inertia ixx="0.102" ixy="0.0" ixz="0.0" iyy="0.102" iyz="0.0" izz="0.017"/>
     </inertial>
   </link>
 
