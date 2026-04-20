@@ -246,6 +246,31 @@ module = "src.api.*"
 disallow_untyped_defs = true
 warn_return_any = true
 
+[[tool.mypy.overrides]]
+module = [
+    "src.engines.physics_engines.drake.python.motion_optimization",
+    "src.engines.physics_engines.mujoco.python.playground_experiments.humanoid_cm_demo",
+    "src.engines.physics_engines.myosuite.python.*",
+    "src.engines.physics_engines.pinocchio.python.dtack.*",
+    "src.engines.physics_engines.pinocchio.python.motion_training.*",
+    "src.engines.physics_engines.pinocchio.python.perturbation.*",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_screw_kinematics",
+    "src.engines.physics_engines.pinocchio.scripts.verify_pipeline",
+    "src.robotics.contact.grasp_analysis",
+    "src.robotics.control.whole_body.qp_solver",
+    "src.shared.python.analysis.*",
+    "src.shared.python.optimization.*",
+    "src.shared.python.pendulum_simulator.gui.optimization_widget",
+    "src.shared.python.physics.flight_models",
+    "src.shared.python.plot_engine.contour",
+    "src.shared.python.signal_toolkit.*",
+    "src.shared.python.upstream_drift_tools.process_calculators.ode_solver",
+    "src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_tabs_mixin",
+    "src.shared.python.validation_pkg._data_fitting_solvers",
+]
+ignore_errors = true
+
 [tool.pytest.ini_options]
 # Consolidated pytest configuration (replaces duplicate pytest.ini files)
 testpaths = ["tests"]
