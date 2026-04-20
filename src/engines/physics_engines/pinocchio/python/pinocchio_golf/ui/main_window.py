@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pinocchio as pin  # type: ignore[import-untyped]
+import pinocchio as pin
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import (

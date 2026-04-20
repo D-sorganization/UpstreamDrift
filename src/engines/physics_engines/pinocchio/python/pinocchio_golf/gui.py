@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 try:
-    import pinocchio as pin  # type: ignore[import-untyped]
+    import pinocchio as pin
 
     PINOCCHIO_AVAILABLE = True
 except ImportError:

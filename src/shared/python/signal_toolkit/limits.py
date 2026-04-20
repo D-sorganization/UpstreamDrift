@@ -12,7 +12,7 @@ from enum import Enum
 
 import numpy as np
 
-from src.shared.python.core.contracts import require  # type: ignore[import-untyped]
+from src.shared.python.core.contracts import require
 
 from .core import Signal
 

@@ -6,7 +6,7 @@ import math
 import typing
 from pathlib import Path
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger

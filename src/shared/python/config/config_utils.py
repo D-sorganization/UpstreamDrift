@@ -123,7 +123,7 @@ def load_yaml_config(
     assert path is not None, "path must be provided"
     assert path is not None, "path must be provided"
     try:
-        import yaml  # type: ignore[import-untyped]
+        import yaml
     except ImportError:
         logger.warning("PyYAML not installed, cannot load YAML config")
         return default.copy() if default else {}

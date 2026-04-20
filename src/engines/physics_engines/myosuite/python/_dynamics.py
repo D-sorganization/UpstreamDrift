@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
 
 from src.shared.python.core.contracts import check_finite, postcondition, precondition
@@ -9,27 +11,32 @@ logger = get_logger(__name__)
 
 
 class DynamicsMixin:
+    # Attributes provided by EngineInitMixin.__init__; declared here for type checking.
+    if TYPE_CHECKING:
+        sim: Any
+        is_initialized: bool
+
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Mass matrix must contain finite values")
     def compute_mass_matrix(self) -> np.ndarray:
-        if not self.sim:  # type: ignore[attr-defined]
+        if not self.sim:
             return np.array([])
 
         try:
             import mujoco
 
-            if hasattr(self.sim.model, "nv") and not isinstance(  # type: ignore[attr-defined]
-                self.sim.model.nv,  # type: ignore[attr-defined]
-                type(lambda: None),  # type: ignore[attr-defined]
+            if hasattr(self.sim.model, "nv") and not isinstance(
+                self.sim.model.nv,
+                type(lambda: None),
             ):
-                nv = self.sim.model.nv  # type: ignore[attr-defined]
+                nv = self.sim.model.nv
             else:
                 nv = 1
 
             M = np.zeros((nv, nv))
 
             try:
-                mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)  # type: ignore[attr-defined]
+                mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)
             except TypeError:
                 M = np.eye(nv)
 
@@ -42,8 +49,8 @@ class DynamicsMixin:
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "Bias forces must contain finite values")
     def compute_bias_forces(self) -> np.ndarray:
-        if self.sim:  # type: ignore[attr-defined]
-            return np.array(self.sim.data.qfrc_bias)  # type: ignore[attr-defined]
+        if self.sim:
+            return np.array(self.sim.data.qfrc_bias)
         return np.array([])
 
     def compute_gravity_forces(self) -> np.ndarray:
@@ -56,15 +63,15 @@ class DynamicsMixin:
             raise ValueError("qacc must be provided")
         if not (qacc is not None):
             raise ValueError("qacc must be provided")
-        if not self.sim:  # type: ignore[attr-defined]
+        if not self.sim:
             return np.array([])
 
         try:
             import mujoco
 
-            self.sim.data.qacc[:] = qacc  # type: ignore[attr-defined]
-            mujoco.mj_inverse(self.sim.model, self.sim.data)  # type: ignore[attr-defined]
-            return np.array(self.sim.data.qfrc_inverse)  # type: ignore[attr-defined]
+            self.sim.data.qacc[:] = qacc
+            mujoco.mj_inverse(self.sim.model, self.sim.data)
+            return np.array(self.sim.data.qfrc_inverse)
 
         except ImportError as e:
             logger.error("Failed to compute inverse dynamics: %s", e)
@@ -75,25 +82,25 @@ class DynamicsMixin:
             raise ValueError("body_name must be provided")
         if not (body_name is not None):
             raise ValueError("body_name must be provided")
-        if not self.sim:  # type: ignore[attr-defined]
+        if not self.sim:
             return None
 
         try:
             import mujoco
 
             body_id = mujoco.mj_name2id(
-                self.sim.model,  # type: ignore[attr-defined]
+                self.sim.model,
                 mujoco.mjtObj.mjOBJ_BODY,
-                body_name,  # type: ignore[attr-defined]
+                body_name,
             )
 
             if body_id == -1:
                 return None
 
-            jacp = np.zeros((3, self.sim.model.nv))  # type: ignore[attr-defined]
-            jacr = np.zeros((3, self.sim.model.nv))  # type: ignore[attr-defined]
+            jacp = np.zeros((3, self.sim.model.nv))
+            jacr = np.zeros((3, self.sim.model.nv))
 
-            mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)  # type: ignore[attr-defined]
+            mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)
 
             return {"linear": jacp, "angular": jacr, "spatial": np.vstack([jacr, jacp])}
 

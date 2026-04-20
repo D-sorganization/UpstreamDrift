@@ -38,7 +38,7 @@ from ..core.error_utils import IOError as IOUtilsError
 from ..engine_core.engine_availability import YAML_AVAILABLE
 
 if YAML_AVAILABLE:
-    import yaml  # type: ignore[import-untyped]
+    import yaml
 
 
 # Re-export for backwards compatibility
@@ -211,9 +211,7 @@ def load_yaml(
 
     try:
         with file_path.open("r", encoding=encoding) as f:
-            return yaml.load(
-                f, Loader=yaml_loader
-            )  # nosec B506 - Loader defaults to yaml.SafeLoader
+            return yaml.load(f, Loader=yaml_loader)  # nosec B506 - Loader defaults to yaml.SafeLoader
     except yaml.YAMLError as e:
         raise FileParseError(file_path, "YAML", str(e)) from e
 

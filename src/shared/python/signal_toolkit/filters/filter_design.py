@@ -16,7 +16,7 @@ from scipy.signal import (
     lfilter,
 )
 
-from src.shared.python.core.contracts import require  # type: ignore[import-untyped]
+from src.shared.python.core.contracts import require
 
 
 class FilterType(Enum):

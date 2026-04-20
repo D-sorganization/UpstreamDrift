@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -10,15 +10,19 @@ logger = get_logger(__name__)
 
 
 class MuscleInterfaceMixin:
+    # Attributes provided by EngineInitMixin.__init__; declared here for type checking.
+    if TYPE_CHECKING:
+        sim: Any
+
     def get_muscle_analyzer(self) -> Any | None:
-        if not self.sim:  # type: ignore[attr-defined]
+        if not self.sim:
             logger.warning("Cannot create muscle analyzer - simulation not initialized")
             return None
 
         try:
             from .muscle_analysis import MyoSuiteMuscleAnalyzer
 
-            return MyoSuiteMuscleAnalyzer(self.sim)  # type: ignore[attr-defined]
+            return MyoSuiteMuscleAnalyzer(self.sim)
 
         except ImportError as e:
             logger.error(f"Failed to import muscle analyzer: {e}")
@@ -34,7 +38,7 @@ class MuscleInterfaceMixin:
         try:
             from .muscle_analysis import MyoSuiteGripModel
 
-            return MyoSuiteGripModel(self.sim, analyzer)  # type: ignore[attr-defined]
+            return MyoSuiteGripModel(self.sim, analyzer)
 
         except ImportError as e:
             logger.error(f"Failed to import grip model: {e}")
@@ -58,14 +62,14 @@ class MuscleInterfaceMixin:
                 activation_clamped = max(0.0, min(1.0, activation))
 
                 try:
-                    ctrl = self.sim.data.ctrl  # type: ignore[attr-defined]
+                    ctrl = self.sim.data.ctrl
 
                     if (
                         hasattr(ctrl, "__len__")
                         and actuator_id < len(ctrl)
                         or hasattr(ctrl, "__setitem__")
                     ):
-                        self.sim.data.ctrl[actuator_id] = activation_clamped  # type: ignore[attr-defined]
+                        self.sim.data.ctrl[actuator_id] = activation_clamped
 
                 except (TypeError, AttributeError, IndexError):
                     pass

@@ -100,6 +100,9 @@ dev = [
     "hypothesis>=6.0.0",
     # Required for database migration tooling (issue #2078)
     "alembic>=1.13.0",
+    # Type stubs for untyped third-party packages (GH2034)
+    "types-PyYAML>=6.0",
+    "scipy-stubs>=1.13.0",
 ]
 
 # GUI testing (requires PyQt6)
@@ -192,6 +195,7 @@ exclude = '''
 
 [tool.mypy]
 python_version = "3.10"
+mypy_path = "stubs"
 ignore_missing_imports = true
 check_untyped_defs = true
 disallow_untyped_defs = false
