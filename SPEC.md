@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-20T05:00:00Z
+Last-Updated: 2026-04-20T08:56:58.3577735Z
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-20T05:00:00Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.136                                            |
+| **Spec Version**        | 1.0.137                                            |
 | **Last Spec Update**    | 2026-04-20                                         |
 
 ## 2. Purpose & Mission
@@ -196,6 +196,9 @@ UpstreamDrift/
 - `POST /trajectory-optimize` — Optimize trajectory subject to constraints
 - `GET /engines` — List available physics engines and their status
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
+- `GET /api/launcher/manifest` — Return launcher tile metadata for the UI shell
+- `GET /api/launcher/logos/{logo_name}` — Serve launcher logos only from approved asset roots using traversal-safe path resolution
+- SPA/static asset fallback serving under `ui/dist` resolves requested paths through traversal-safe joins and refuses absolute paths, `..` escapes, NUL bytes, and symlink escapes
 
 **GUI Interface (PyQt6)**:
 
@@ -667,5 +670,6 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
 - 2026-04-20: Guarded Pinocchio energy checks behind complete finite-state verification and aligned RK4 torque sampling test coverage in pendulum engine probes.
 - 2026-04-16: Fixed import sorting in analyzer.py, advanced_export.py, and related files; restored completist audit documentation.

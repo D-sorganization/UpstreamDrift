@@ -165,23 +165,60 @@ def _load_launcher_manifest() -> dict[str, Any]:
         return {"version": "1.0.0", "tiles": []}
 
 
+def _safe_join(root: Path, user_path: str) -> Path | None:
+    """Join ``user_path`` onto ``root`` while rejecting traversal.
+
+    Normalizes the combined path and verifies it remains within ``root``.
+    Returns ``None`` if the request is unsafe (absolute path, traversal via
+    ``..``, ``NUL`` byte, symlink escape) so the caller can emit a 404.
+
+    Args:
+        root: Trusted root directory the file must live under.
+        user_path: Caller-supplied relative path fragment.
+
+    Returns:
+        The resolved absolute path if it is inside ``root``, else ``None``.
+    """
+    if not user_path or "\x00" in user_path:
+        return None
+    # Reject explicitly absolute requests. ``Path.is_absolute`` catches
+    # POSIX/Windows absolutes; the drive/root checks catch Windows-style
+    # roots that may not register as absolute on POSIX hosts.
+    candidate = Path(user_path)
+    if candidate.is_absolute() or candidate.drive or candidate.root:
+        return None
+    try:
+        resolved_root = root.resolve(strict=False)
+        resolved = (resolved_root / candidate).resolve(strict=False)
+    except (OSError, RuntimeError):
+        return None
+    try:
+        resolved.relative_to(resolved_root)
+    except ValueError:
+        return None
+    return resolved
+
+
 def _find_logo_file(logo_name: str) -> Path | None:
     """Search for a logo file in known asset directories.
+
+    The caller-supplied ``logo_name`` is joined onto each candidate root via
+    :func:`_safe_join` so that ``..`` traversal, absolute paths, and symlink
+    escape are rejected before touching the filesystem.
 
     Args:
         logo_name: Filename of the logo to find.
 
     Returns:
-        Path to the logo file, or None if not found.
+        Path to the logo file, or None if not found or rejected as unsafe.
     """
-    logos_dir = Path(__file__).parent.parent.parent / "assets" / "logos"
-    logo_path = logos_dir / logo_name
-    if logo_path.exists() and logo_path.is_file():
-        return logo_path
-    launcher_logos = Path(__file__).parent.parent / "launchers" / "assets"
-    alt_path = launcher_logos / logo_name
-    if alt_path.exists() and alt_path.is_file():
-        return alt_path
+    for root in (
+        Path(__file__).parent.parent.parent / "assets" / "logos",
+        Path(__file__).parent.parent / "launchers" / "assets",
+    ):
+        resolved = _safe_join(root, logo_name)
+        if resolved is not None and resolved.exists() and resolved.is_file():
+            return resolved
     return None
 
 
@@ -470,9 +507,14 @@ def _register_spa_catch_all(app: FastAPI, ui_path: Path) -> None:
                     status_code=404,
                     content={"detail": "API route not found", "path": full_path},
                 )
-            static_file = ui_path / full_path
-            if full_path and static_file.exists() and static_file.is_file():
-                return FileResponse(str(static_file))
+            if full_path:
+                static_file = _safe_join(ui_path, full_path)
+                if (
+                    static_file is not None
+                    and static_file.exists()
+                    and static_file.is_file()
+                ):
+                    return FileResponse(str(static_file))
             return FileResponse(str(index_html))
 
 
