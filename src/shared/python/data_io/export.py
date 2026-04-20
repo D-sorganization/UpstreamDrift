@@ -19,10 +19,12 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_availability import (
     C3D_AVAILABLE,
     EZC3D_AVAILABLE,
-    SCIPY_AVAILABLE,
 )
 from src.shared.python.engine_core.engine_availability import (
     HDF5_AVAILABLE as H5PY_AVAILABLE,
+)
+from src.shared.python.engine_core.engine_availability import (
+    SCIPY_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 
