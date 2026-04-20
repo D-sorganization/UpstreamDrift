@@ -1,0 +1,10 @@
+reynolds_number,drag_coefficient,source_note
+30000,0.50,"Subcritical dimpled golf-ball drag before the crisis; digitized engineering table from Bearman & Harvey 1976 summary curves"
+50000,0.47,"Approach to dimple-triggered transition"
+60000,0.34,"Critical-region drop reported for dimpled golf balls"
+70000,0.24,"Near drag-crisis minimum for a dimpled golf ball"
+90000,0.225,"Post-crisis recovery from the minimum"
+120000,0.235,"Post-crisis moderate-speed golf-ball value"
+160000,0.25,"Reference region for existing simulator default Cd"
+200000,0.255,"High-speed post-crisis trend"
+300000,0.27,"Upper flight-speed extrapolation anchor"
