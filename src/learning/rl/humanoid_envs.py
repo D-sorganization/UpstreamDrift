@@ -168,7 +168,8 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
         target_vel = self.task_config.target_velocity
         vel_error = np.linalg.norm(base_vel[:2] - target_vel[:2])
-        vel_reward = np.exp(-vel_error)
+        # Squared-error exponential so reward drops steeply beyond ~1 m/s error
+        vel_reward = np.exp(-(vel_error**2))
         reward += vel_reward * self.reward_config.task_reward_weight
 
         # Alive bonus
@@ -215,9 +216,10 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         # Check base tilt
         if hasattr(self.engine, "get_base_orientation"):
             quat = self.engine.get_base_orientation()
-            # Check z-component of up vector after rotation
-            # Simplified: check quaternion indicates large tilt
-            up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
+            # Convention assumed: [w, x, y, z] (scalar-first).
+            # R[2,2] = 1 - 2*(x^2 + y^2) gives the cosine of tilt from vertical.
+            q_x, q_y = float(quat[1]), float(quat[2])
+            up_z = 1.0 - 2.0 * (q_x**2 + q_y**2)
             if up_z < self._base_tilt_threshold:
                 return True
 

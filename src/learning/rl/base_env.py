@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections import deque
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -104,6 +105,11 @@ class RoboticsGymEnv:
         self._prev_action: NDArray[np.floating] | None = None
         self._prev_potential: float = 0.0
 
+        # Observation history buffer for history_length > 1 stacking
+        self._obs_history: deque[NDArray[np.floating]] = deque(
+            maxlen=self.obs_config.history_length
+        )
+
         # Initialize random generator
         self._np_random: np.random.Generator | None = None
 
@@ -176,7 +182,7 @@ class RoboticsGymEnv:
         self._step_simulation()
 
         # Get observation
-        obs = self._get_observation()
+        obs = self._get_stacked_observation()
 
         # Compute reward
         reward = self._compute_reward(processed_action)
@@ -221,9 +227,10 @@ class RoboticsGymEnv:
         self._step_count = 0
         self._prev_action = None
         self._prev_potential = self._compute_potential()
+        self._obs_history.clear()
 
-        # Get initial observation
-        obs = self._get_observation()
+        # Get initial observation (fills history buffer with first frame repeated)
+        obs = self._get_stacked_observation()
         info = self._get_info()
 
         return obs, info
@@ -266,6 +273,23 @@ class RoboticsGymEnv:
     @abstractmethod
     def _step_simulation(self) -> None:
         """Advance the simulation by one timestep."""
+
+    def _get_stacked_observation(self) -> NDArray[np.floating]:
+        """Get observation, stacking history_length frames.
+
+        When the buffer is not yet full (e.g. at reset), the most
+        recent frame is repeated to fill missing slots.
+
+        Returns:
+            Stacked observation array of shape (obs_dim * history_length,).
+        """
+        current = self._get_observation()
+        self._obs_history.append(current)
+        if self.obs_config.history_length <= 1:
+            return current
+        padding = self.obs_config.history_length - len(self._obs_history)
+        frames = [current] * padding + list(self._obs_history)
+        return np.concatenate(frames)
 
     @abstractmethod
     def _get_observation(self) -> NDArray[np.floating]:
