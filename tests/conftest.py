@@ -198,7 +198,7 @@ class MockPhysicsEngine:
     pass
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def mock_drake_dependencies():
     """Fixture to mock pydrake and interfaces safely.
 
@@ -228,7 +228,7 @@ def mock_drake_dependencies():
         yield mock_pydrake, mock_interfaces
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def mock_mujoco_dependencies():
     """Fixture to mock mujoco and interfaces safely.
 
