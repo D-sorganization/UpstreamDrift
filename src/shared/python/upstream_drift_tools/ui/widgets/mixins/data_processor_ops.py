@@ -221,15 +221,13 @@ class DataProcessorOpsMixin:
 
         result = self.engine.fit_curve(x_col, y_col, fit_type, degree)
         if result:
-            self.fit_results_text.setHtml(
-                f"""
+            self.fit_results_text.setHtml(f"""
                 <h4>Fit Results</h4>
                 <p><b>Equation:</b> {result.equation}</p>
                 <p><b>R-squared:</b> {result.r_squared:.6f}</p>
                 <p><b>Coefficients:</b> {", ".join(f"{c:.6f}" for c in result.coefficients)}</p>
                 <p><b>Residual Sum:</b> {sum(result.residuals**2):.6f}</p>
-            """
-            )
+            """)
             self._set_status(f"Curve fit: R² = {result.r_squared:.4f}", success=True)
         else:
             self.fit_results_text.setText("Curve fitting failed. Check your data.")

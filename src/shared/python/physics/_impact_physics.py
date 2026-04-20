@@ -173,6 +173,26 @@ class RigidBodyImpactModel(ImpactModel):
         j = (1 + cor) * m_eff * v_approach
         return j, v_approach
 
+    def _compute_friction_data(
+        self,
+        v_rel: np.ndarray,
+        v_approach: float,
+        n: np.ndarray,
+        j: float,
+        friction_coefficient: float,
+    ) -> tuple[np.ndarray | None, float]:
+        """Return (tangent_dir, j_friction) for sliding contact, else (None, 0.0)."""
+        v_tangent = v_rel - v_approach * n
+        tangent_mag = np.linalg.norm(v_tangent)
+        if tangent_mag <= 1e-6:
+            return None, 0.0
+        tangent_dir = v_tangent / tangent_mag
+        j_friction = min(
+            float(friction_coefficient * j),
+            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
+        )
+        return tangent_dir, j_friction
+
     def _compute_friction_spin(
         self,
         pre_state: PreImpactState,
@@ -186,18 +206,15 @@ class RigidBodyImpactModel(ImpactModel):
             raise ValueError("pre_state must be provided")
         if not (pre_state is not None):
             raise ValueError("pre_state must be provided")
-        v_tangent = v_rel - v_approach * n
-        tangent_mag = np.linalg.norm(v_tangent)
-
-        if tangent_mag <= 1e-6:
+        tangent_dir, j_friction = self._compute_friction_data(
+            v_rel, v_approach, n, j, friction_coefficient
+        )
+        if tangent_dir is None:
             return pre_state.ball_angular_velocity.copy()
 
-        tangent_dir = v_tangent / tangent_mag
-        j_friction = min(
-            float(friction_coefficient * j),
-            float(GOLF_BALL_MASS_KG * tangent_mag * 0.4),
-        )
-        spin_axis = np.cross(n, tangent_dir)
+        # Torque on ball: τ = r × F with r = -R·n, F = j_friction·tangent_dir
+        # → τ = -R·(n × tangent_dir) → spin_axis = tangent_dir × n
+        spin_axis = np.cross(tangent_dir, n)
         spin_magnitude = j_friction / (
             GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 / GOLF_BALL_RADIUS_M
         )
@@ -276,6 +293,40 @@ class RigidBodyImpactModel(ImpactModel):
             j,
             params.friction_coefficient,
         )
+
+        # Apply friction reaction torque to club (Newton's 3rd law).
+        # Moment arm is the impact offset in the face plane; for center
+        # strikes (offset=0 or None) the contribution is zero.
+        tangent_dir, j_friction = self._compute_friction_data(
+            v_rel, v_approach, n, j, params.friction_coefficient
+        )
+        if (
+            tangent_dir is not None
+            and j_friction > 0.0
+            and pre_state.impact_offset is not None
+            and np.linalg.norm(pre_state.impact_offset) > 1e-6
+            and pre_state.clubhead_moi > 0.0
+        ):
+            up = np.array([0.0, 0.0, 1.0])
+            right = np.cross(n, up)
+            right_mag = float(np.linalg.norm(right))
+            if right_mag > 1e-6:
+                right /= right_mag
+                face_up = np.cross(right, n)
+            else:
+                right = np.array([0.0, 1.0, 0.0])
+                face_up = np.cross(right, n)
+            r_contact = (
+                pre_state.impact_offset[0] * right
+                + pre_state.impact_offset[1] * face_up
+            )
+            angular_impulse_club = np.cross(r_contact, -j_friction * tangent_dir)
+            club_omega = pre_state.clubhead_angular_velocity + (
+                angular_impulse_club / pre_state.clubhead_moi
+            )
+        else:
+            club_omega = pre_state.clubhead_angular_velocity.copy()
+
         energy_transfer = self._compute_energy_transfer(
             pre_state.ball_velocity,
             v_ball_post,
@@ -291,7 +342,7 @@ class RigidBodyImpactModel(ImpactModel):
             ball_velocity=v_ball_post,
             ball_angular_velocity=ball_spin,
             clubhead_velocity=v_club_post,
-            clubhead_angular_velocity=pre_state.clubhead_angular_velocity.copy(),
+            clubhead_angular_velocity=club_omega,
             contact_duration=0.0,
             energy_transfer=energy_transfer,
             impact_location=impact_loc,

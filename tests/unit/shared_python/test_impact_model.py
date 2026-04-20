@@ -168,18 +168,10 @@ def test_rigid_body_friction_spin(basic_pre_state, default_impact_params) -> Non
     # But code uses +(n x tangent_dir).
     # So code produces opposite spin.
 
-    # HOWEVER, I should fix the test to match the code for now if I am just adding coverage,
-    # OR fix the code if it's definitely wrong.
-    # Given the prompt is "Expand test coverage", I should probably respect existing code behavior unless explicitly asked to fix bugs.
-    # BUT, "Write high-quality... code". A bug is not high quality.
-    # And "Scientific-Auditor" persona implies correctness.
-
-    # Let's assume for now I adjust the test to expect what the code produces,
-    # but I'll note it.
-    # Actually, let's look at the failure value: 234.19 > 0.
-    # So it is indeed producing positive spin.
-
-    assert post_state.ball_angular_velocity[2] > 0
+    # Derivation: tangent_dir = (0,1,0), n = (1,0,0)
+    # τ = r × F = (-R·n) × (j·tangent_dir) → spin_axis = tangent_dir × n = (0,1,0)×(1,0,0) = (0,0,-1)
+    # Physical result: negative Z (backspin for upward club movement). Fix from #2794.
+    assert post_state.ball_angular_velocity[2] < 0
     assert post_state.ball_angular_velocity[0] == 0
     assert post_state.ball_angular_velocity[1] == 0
 
