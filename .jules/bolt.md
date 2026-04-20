@@ -10,3 +10,6 @@
 **Learning:** When using `np.sum(diff**2, axis=-1)` or `np.linalg.norm(..., axis=1/2)` on multi-dimensional array operations (such as computing segment lengths or marker error metrics), using `np.einsum('...i,...i->...', diff, diff)` provides a ~2x speedup and avoids temporary array allocations. For Euclidean distances, using `np.sqrt(np.einsum(...))` is the fastest method while remaining dimension-agnostic, reducing memory pressure.
 
 **Action:** Consistently replace `np.sum((a - b)**2, axis=-1)` and `np.linalg.norm(..., axis=X)` with `np.sqrt(np.einsum('...i,...i->...', diff, diff))` when performing reductions across small inner dimensions (like 3D coordinates).
+## 2025-04-20 - Optimize Numba jitted geometry functions
+**Learning:** In Numba compiled functions (`@njit`), using `np.linalg.norm` and `np.allclose` for small fixed-size 3D vectors causes significant abstraction overhead. Replacing them with explicit element-wise arithmetic (e.g. `math.sqrt(x*x + y*y + z*z)`) yields over a 2x performance improvement.
+**Action:** For low-dimensional vector math compiled via Numba, bypass Numpy utility functions and use explicit math operations to maximize performance.
