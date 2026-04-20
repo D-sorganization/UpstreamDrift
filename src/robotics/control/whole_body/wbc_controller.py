@@ -47,6 +47,7 @@ class WBCConfig:
     acceleration_limits: NDArray[np.float64] | None = None
     contact_force_regularization: float = 1e-4
     use_hierarchical: bool = True
+    nullspace_damping: float = 1e-3
 
 
 @dataclass
@@ -318,17 +319,12 @@ class WholeBodyController:
             target = task.target  # Desired task-space acceleration
             W = task.get_weight_matrix()  # Diagonal weight matrix
 
-            # Task dimension
-            J.shape[0]
-
-            # Ensure dimensions match
             if J.shape[1] != n_v:
-                continue
+                raise ValueError(
+                    f"Task '{task.name}': Jacobian column width {J.shape[1]} != n_v {n_v}."
+                    " Update the task Jacobian to match the current model DOF count."
+                )
 
-            # Cost: ||J @ qdd - target||^2_W = (J @ qdd - target)^T @ W @ (J @ qdd - target)
-            # Expanded: qdd^T @ J^T @ W @ J @ qdd - 2 * target^T @ W @ J @ qdd + const
-            # H contribution: J^T @ W @ J
-            # g contribution: -J^T @ W @ target
             H[:n_v, :n_v] += J.T @ W @ J
             g[:n_v] += -J.T @ W @ target
 
@@ -403,7 +399,7 @@ class WholeBodyController:
         accumulated_A: list[NDArray[np.float64]] = []
         x_solution = np.zeros(n_vars)
 
-        for _priority, tasks in sorted(priority_groups.items(), reverse=True):
+        for priority, tasks in sorted(priority_groups.items(), reverse=True):
             H, g, accumulated_A = self._build_priority_level_cost(
                 tasks, n_v, n_vars, accumulated_A
             )
@@ -412,8 +408,17 @@ class WholeBodyController:
             problem = self._build_level_qp(H, g, n_v, n_contact_vars, M, nle, qd)
             qp_solution = self._solver.solve(problem)
 
-            if qp_solution.success and qp_solution.x is not None:
-                x_solution = qp_solution.x  # type: ignore[assignment]
+            if not qp_solution.success or qp_solution.x is None:
+                import logging
+
+                logging.getLogger(__name__).warning(
+                    "HQP infeasible at priority %d: %s", priority, qp_solution.status
+                )
+                return WBCSolution(
+                    success=False,
+                    status=f"HQP infeasible at priority {priority}: {qp_solution.status}",
+                )
+            x_solution = qp_solution.x  # type: ignore[assignment]
 
         return self._extract_solution_from_x(x_solution, n_v, n_contact_vars, M, nle)
 
@@ -437,7 +442,10 @@ class WholeBodyController:
 
             J = task.jacobian
             if J.shape[1] != n_v:
-                continue
+                raise ValueError(
+                    f"Task '{task.name}': Jacobian column width {J.shape[1]} != n_v {n_v}."
+                    " Update the task Jacobian to match the current model DOF count."
+                )
 
             J_full = np.zeros((J.shape[0], n_vars))
             J_full[:, :n_v] = J
@@ -640,12 +648,18 @@ class WholeBodyController:
             x_lb[:n_v] = -lim
             x_ub[:n_v] = lim
 
-        # Velocity limits translated to acceleration
+        # Velocity limits translated to acceleration.
+        # Clamp so lb <= ub even when qd is outside [-v_lim, v_lim] (e.g. after
+        # velocity reversal), which would otherwise produce inverted bounds.
         if self._config.velocity_limits is not None:
             dt = self._config.dt
             v_lim = self._config.velocity_limits
             qdd_lb_from_v = (-v_lim - qd) / dt
             qdd_ub_from_v = (v_lim - qd) / dt
+            qdd_lb_from_v, qdd_ub_from_v = (
+                np.minimum(qdd_lb_from_v, qdd_ub_from_v),
+                np.maximum(qdd_lb_from_v, qdd_ub_from_v),
+            )
             x_lb[:n_v] = np.maximum(x_lb[:n_v], qdd_lb_from_v)
             x_ub[:n_v] = np.minimum(x_ub[:n_v], qdd_ub_from_v)
 
@@ -808,7 +822,9 @@ class WholeBodyController:
         A: NDArray[np.float64],
         n: int,
     ) -> NDArray[np.float64]:
-        """Compute nullspace projector N = I - pinv(A) @ A.
+        """Compute nullspace projector N = I - A^T (A A^T + λ²I)^{-1} A.
+
+        Uses damped least-squares to avoid numerical blow-up near singularities.
 
         Args:
             A: Constraint matrix.
@@ -817,9 +833,10 @@ class WholeBodyController:
         Returns:
             Nullspace projector matrix (n, n).
         """
-        if not (A is not None):
+        if A is None:
             raise ValueError("A must be provided")
-        if not (A is not None):
-            raise ValueError("A must be provided")
-        A_pinv = np.linalg.pinv(A)
-        return np.eye(n) - A_pinv @ A
+        lam = self._config.nullspace_damping
+        m = A.shape[0]
+        # Damped pseudo-inverse: A^+ = A^T (A A^T + λ²I)^{-1}
+        A_pinv_damped = A.T @ np.linalg.inv(A @ A.T + lam**2 * np.eye(m))
+        return np.eye(n) - A_pinv_damped @ A
