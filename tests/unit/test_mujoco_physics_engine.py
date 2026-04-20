@@ -212,3 +212,33 @@ def test_compute_jacobian(engine, mock_mj) -> None:
     assert "spatial" in jac
     assert jac["linear"].shape == (3, 2)
     mock_mj.mj_jacBody.assert_called_once()
+
+
+def test_compute_contact_forces_grf_sign(engine, mock_mj) -> None:
+    """GRF must be positive (upward) for a downward-pressing contact.
+
+    MuJoCo mj_contactForce returns force exerted BY geom2 ON geom1.
+    When geom1=foot and geom2=ground the returned force is the GRF on the
+    foot (positive Z for a humanoid standing upright).  Summing with +=
+    preserves the correct sign; the prior -= was inverted. (Issue #2698.)
+    """
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock()
+
+    # One contact; normal force pointing +Z in the local contact frame.
+    engine.data.ncon = 1
+    contact = MagicMock()
+    # Identity rotation → world frame == local frame.
+    contact.frame = np.eye(3).flatten()
+    engine.data.contact = [contact]
+
+    # mj_contactForce fills c_force[:3] with the normal force; use +Z.
+    def fill_c_force(model, data, i, c_force):
+        c_force[:] = [0.0, 0.0, 735.0, 0.0, 0.0, 0.0]
+
+    mock_mj.mj_contactForce.side_effect = fill_c_force
+
+    grf = engine.compute_contact_forces()
+
+    assert grf[2] > 0.0, "GRF must point upward for ground contact (fix #2698)"
+    assert abs(grf[2] - 735.0) < 1e-9

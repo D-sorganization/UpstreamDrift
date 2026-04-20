@@ -56,9 +56,7 @@ class DataReader:
         if fmt == "json":
             return pd.read_json(path, **kwargs)
         if fmt == "pickle":
-            return pd.read_pickle(
-                path
-            )  # nosec B301 - caller explicitly requests pickle format; for trusted data only
+            return pd.read_pickle(path)  # nosec B301 - caller explicitly requests pickle format; for trusted data only
         if fmt == "numpy":
             data = np.load(path, allow_pickle=False)
             if isinstance(data, np.ndarray):

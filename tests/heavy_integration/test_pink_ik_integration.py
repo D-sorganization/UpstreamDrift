@@ -25,9 +25,9 @@ class TestPinkIKSolver:
         except ImportError:
             pytest.skip("pink not installed")
 
-        assert hasattr(pink, "solve_ik") or hasattr(
-            pink, "Configuration"
-        ), f"Pink API unexpected: {[a for a in dir(pink) if not a.startswith('_')]}"
+        assert hasattr(pink, "solve_ik") or hasattr(pink, "Configuration"), (
+            f"Pink API unexpected: {[a for a in dir(pink) if not a.startswith('_')]}"
+        )
 
     def test_pink_configuration_from_pinocchio_model(self) -> None:
         """Pink Configuration wraps a Pinocchio model without error."""
@@ -80,9 +80,9 @@ class TestPinkIKSolver:
             pytest.skip("pink.tasks not available in this version")
 
         task_module = pink.tasks
-        assert hasattr(task_module, "FrameTask") or hasattr(
-            pink, "FrameTask"
-        ), "Pink should provide FrameTask"
+        assert hasattr(task_module, "FrameTask") or hasattr(pink, "FrameTask"), (
+            "Pink should provide FrameTask"
+        )
 
 
 @pytest.mark.live_simulation

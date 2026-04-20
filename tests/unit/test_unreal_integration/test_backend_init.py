@@ -50,9 +50,9 @@ class TestUnrealBridgeBackendInitFailure:
             with contextlib.suppress(RuntimeError, OSError):
                 backend.initialize()
 
-            assert (
-                backend._is_initialized is False
-            ), "_is_initialized must remain False when server.start() failed"
+            assert backend._is_initialized is False, (
+                "_is_initialized must remain False when server.start() failed"
+            )
 
     def test_is_initialized_true_when_server_starts_successfully(self) -> None:
         """_is_initialized must be True after a successful initialize()."""

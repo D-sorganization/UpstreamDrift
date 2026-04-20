@@ -423,13 +423,12 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             # frame rows: normal, tangent1, tangent2
             contact_frame = self.data.contact[i].frame.reshape(3, 3)
 
-            # Force exerted BY geom2 ON geom1
+            # mj_contactForce returns force exerted BY geom2 ON geom1.
+            # geom1 = body/foot, geom2 = ground → this is the GRF on the body.
             f_local = c_force[:3]
             f_world = contact_frame.T @ f_local
 
-            # The ground reaction force (GRF) acting ON the system (geom2 usually)
-            # is the negative of the force exerted BY geom2 on the ground (geom1).
-            total_force -= f_world
+            total_force += f_world
 
         return total_force
 
