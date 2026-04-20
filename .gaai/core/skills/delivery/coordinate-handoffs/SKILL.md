@@ -78,8 +78,8 @@ The Orchestrator cannot proceed to the next phase until it has validated the cur
      8. After successful merge: verify staging deploy CI (`gh run list --branch staging --limit 1`)
         - If staging deploy fails → **ESCALATE** with deploy logs (do not attempt infra fixes)
      9. If `{id}.memory-delta.md` exists in `contexts/artefacts/memory-deltas/`, flag it in the completion report for Discovery to action via `memory-ingest`.
-    10. Update backlog (push with retry-rebase pattern), cleanup worktree + delete remote branch
-     **NEVER leave a PR open. NEVER merge to production (staging only).**
+   10. Update backlog (push with retry-rebase pattern), cleanup worktree + delete remote branch
+       **NEVER leave a PR open. NEVER merge to production (staging only).**
    - **FAIL**: spawn count < 2? → **RE-SPAWN** Implementation Sub-Agent with qa-report, then re-spawn QA Sub-Agent
    - **FAIL** after 2 cycles: → **ESCALATE**
    - **ESCALATE**: → **ESCALATE** (pass QA's escalation reason to human)
@@ -96,19 +96,20 @@ The Orchestrator cannot proceed to the next phase until it has validated the cur
 
 ## Retry Limits
 
-| Phase | Max re-spawns |
-|-------|--------------|
-| Planning Sub-Agent | 1 retry (2 total) |
-| Implementation Sub-Agent | 1 retry per QA cycle (2 total) |
-| QA Sub-Agent | Re-runs after each Implementation retry |
-| QA FAIL cycles | 2 (before ESCALATE) |
-| MicroDelivery Sub-Agent | 1 retry (2 total) |
+| Phase                    | Max re-spawns                           |
+| ------------------------ | --------------------------------------- |
+| Planning Sub-Agent       | 1 retry (2 total)                       |
+| Implementation Sub-Agent | 1 retry per QA cycle (2 total)          |
+| QA Sub-Agent             | Re-runs after each Implementation retry |
+| QA FAIL cycles           | 2 (before ESCALATE)                     |
+| MicroDelivery Sub-Agent  | 1 retry (2 total)                       |
 
 ---
 
 ## Escalation Package
 
 When escalating, the Orchestrator surfaces to the human:
+
 - Story ID and title
 - Phase where escalation occurred
 - Handoff artefact path (for full context)
@@ -120,6 +121,7 @@ When escalating, the Orchestrator surfaces to the human:
 ## Non-Goals
 
 This skill must NOT:
+
 - Make product decisions about what to implement
 - Modify acceptance criteria
 - Skip QA validation even under time pressure

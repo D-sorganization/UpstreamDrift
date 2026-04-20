@@ -14,7 +14,7 @@ metadata:
   required_capability: browser-automation
 inputs:
   - contexts/artefacts/stories/**
-  - deployed_application_url  # Provided by the invoking agent from the staging deploy output. Not supplied manually.
+  - deployed_application_url # Provided by the invoking agent from the staging deploy output. Not supplied manually.
 outputs:
   - contexts/artefacts/test-evidence/{story_id}/journey-test-report.md
 ---
@@ -26,6 +26,7 @@ outputs:
 Activate after implementation to validate real user experience — not just code logic.
 
 Use when:
+
 - Stories describe user-facing flows
 - Acceptance criteria can only be verified through UI interaction
 - Regression testing requires end-to-end validation
@@ -38,12 +39,13 @@ Complements (does not replace) `qa-review`.
 
 **CRITICAL — Anti-Collision Guard (MUST execute before writing any output file):**
 Before writing `contexts/artefacts/test-evidence/{story_id}/journey-test-report.md`, check if the target file already exists on disk:
+
 - If it does NOT exist → proceed normally.
 - If it DOES exist → **read the existing file first**. Then decide:
   - If the existing content is from a **different entity** (different story ID, different epic) → **STOP immediately**, surface the ID collision to the human, do not proceed.
   - If the existing content is from the **same entity** and an update is warranted (e.g., re-run after a fix) → proceed, but preserve any prior evidence or notes that remain relevant. Treat this as an **update**, not a replacement.
   - If the existing content is identical or still valid → skip writing, report "no changes needed".
-This guard prevents the silent data loss incident of 2026-03-17 where concurrent sessions overwrote story files.
+    This guard prevents the silent data loss incident of 2026-03-17 where concurrent sessions overwrote story files.
 
 For each Story:
 
@@ -103,6 +105,7 @@ For each Story:
 ## Non-Goals
 
 This skill must NOT:
+
 - Replace unit or integration tests
 - Make product decisions about UX issues
 - Run tests against non-deployed code

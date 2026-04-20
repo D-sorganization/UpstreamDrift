@@ -23,6 +23,7 @@ Any artefact violating these rules is **invalid by design**.
 ## 🎯 Purpose of Artefacts
 
 Artefacts exist to provide:
+
 - execution evidence
 - rationale and explanation
 - traceability
@@ -30,6 +31,7 @@ Artefacts exist to provide:
 - support for agent reasoning
 
 Artefacts do **not** exist to:
+
 - drive orchestration
 - decide actions
 - control workflow
@@ -48,6 +50,7 @@ Artefacts never hold authority.
 ### R1 — Artefacts Never Decide
 
 An artefact MUST NOT:
+
 - decide priorities or scope
 - approve or reject execution
 - override agent decisions
@@ -57,6 +60,7 @@ All authority belongs to **agents**.
 ### R2 — Artefacts Never Orchestrate
 
 An artefact MUST NOT:
+
 - trigger execution
 - change backlog state
 - be used by cron or automation as a signal
@@ -69,6 +73,7 @@ Only the **backlog** may be used for orchestration.
 ### R3 — Mandatory Frontmatter
 
 Every artefact MUST contain YAML frontmatter declaring at minimum:
+
 - `gaai.type: artefact`
 - `artefact_type` — must be one of: `epic | story | plan | report | prd | marketing | strategy | evaluation`
 - `track`
@@ -82,6 +87,7 @@ Frontmatter is **machine-readable**. Markdown body is **explanatory only**.
 
 Artefacts MAY include local status fields (e.g. `draft`, `final`).
 Such statuses are:
+
 - informational only
 - non-canonical
 - never consumed by automation
@@ -100,6 +106,7 @@ Such statuses are:
 ### R6 — Artefacts Are Not Memory
 
 Artefacts MUST NOT:
+
 - be treated as long-term memory
 - be auto-ingested into memory
 - bypass memory governance rules
@@ -110,21 +117,21 @@ Only agents may decide if an artefact should be summarized into memory.
 
 Every artefact type has **one and only one** target directory. This table is the single source of truth for artefact placement. Agents MUST write to these paths — no exceptions.
 
-| Artefact type | Directory | Written by |
-|---|---|---|
-| `{id}.execution-plan.md` | `contexts/artefacts/plans/` | Planning Sub-Agent |
-| `{id}.plan-blocked.md` | `contexts/artefacts/plans/` | Planning Sub-Agent |
-| `{id}.approach-evaluation.md` | `contexts/artefacts/evaluations/` | Planning Sub-Agent |
-| `{id}.impl-report.md` | `contexts/artefacts/impl-reports/` | Implementation Sub-Agent |
-| `{id}.specialist-{domain}.md` | `contexts/artefacts/impl-reports/` | Specialist Sub-Agent |
-| `{id}.qa-report.md` | `contexts/artefacts/qa-reports/` | QA Sub-Agent |
-| `{id}.memory-delta.md` | `contexts/artefacts/memory-deltas/` | QA Sub-Agent (PASS only) |
-| `{id}.micro-delivery-report.md` | `contexts/artefacts/delivery/` | MicroDelivery Sub-Agent |
-| `{id}.story.md` | `contexts/artefacts/stories/` | Discovery Agent |
-| `{id}.epic.md` | `contexts/artefacts/epics/` | Discovery Agent |
-| `{id}-thread.md` | `contexts/artefacts/content/drafts/` | Delivery Orchestrator (via `generate-build-in-public-content`) |
-| `{id}-blog.md` | `contexts/artefacts/content/drafts/` | Delivery Orchestrator (milestone stories only) |
-| `week-{N}-metrics.md` | `contexts/artefacts/content/drafts/` | Delivery Orchestrator (weekly cadence) |
+| Artefact type                   | Directory                            | Written by                                                     |
+| ------------------------------- | ------------------------------------ | -------------------------------------------------------------- |
+| `{id}.execution-plan.md`        | `contexts/artefacts/plans/`          | Planning Sub-Agent                                             |
+| `{id}.plan-blocked.md`          | `contexts/artefacts/plans/`          | Planning Sub-Agent                                             |
+| `{id}.approach-evaluation.md`   | `contexts/artefacts/evaluations/`    | Planning Sub-Agent                                             |
+| `{id}.impl-report.md`           | `contexts/artefacts/impl-reports/`   | Implementation Sub-Agent                                       |
+| `{id}.specialist-{domain}.md`   | `contexts/artefacts/impl-reports/`   | Specialist Sub-Agent                                           |
+| `{id}.qa-report.md`             | `contexts/artefacts/qa-reports/`     | QA Sub-Agent                                                   |
+| `{id}.memory-delta.md`          | `contexts/artefacts/memory-deltas/`  | QA Sub-Agent (PASS only)                                       |
+| `{id}.micro-delivery-report.md` | `contexts/artefacts/delivery/`       | MicroDelivery Sub-Agent                                        |
+| `{id}.story.md`                 | `contexts/artefacts/stories/`        | Discovery Agent                                                |
+| `{id}.epic.md`                  | `contexts/artefacts/epics/`          | Discovery Agent                                                |
+| `{id}-thread.md`                | `contexts/artefacts/content/drafts/` | Delivery Orchestrator (via `generate-build-in-public-content`) |
+| `{id}-blog.md`                  | `contexts/artefacts/content/drafts/` | Delivery Orchestrator (milestone stories only)                 |
+| `week-{N}-metrics.md`           | `contexts/artefacts/content/drafts/` | Delivery Orchestrator (weekly cadence)                         |
 
 **R7 — No artefact may be written to the root of `contexts/artefacts/`.** Every artefact must be placed in its designated subdirectory.
 
@@ -133,6 +140,7 @@ Every artefact type has **one and only one** target directory. This table is the
 ## 🚫 Forbidden Artefact Behaviors (Hard Fail)
 
 The following behaviors are **explicitly forbidden**:
+
 - triggering execution
 - updating backlog state
 - ingesting memory directly

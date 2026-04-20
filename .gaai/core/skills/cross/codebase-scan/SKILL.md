@@ -23,6 +23,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate:
+
 - During Bootstrap initialization (before architecture extraction)
 - When onboarding GAAI onto an existing codebase
 - When the project structure is unknown
@@ -58,6 +59,7 @@ Activate:
 ## Non-Goals
 
 This skill must NOT:
+
 - Interpret architecture decisions (use `architecture-extract`)
 - Read file contents in depth
 - Make recommendations

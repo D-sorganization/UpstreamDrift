@@ -24,6 +24,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - An Epic is defined
 - Adding or refining functionality
 - Preparing work items for AI implementation
@@ -37,6 +38,7 @@ Stories are the **contract between Discovery and Delivery**. They must be the ma
 1. Read the Story template at `contexts/artefacts/stories/_template.story.md`. Read the parent Epic file. Derive story IDs using the parent Epic ID prefix (e.g., Epic E01 produces stories E01S01, E01S02, etc.).
 
    **CRITICAL — Collision Guard (MUST execute before writing any file):**
+
    - **a)** Scan `contexts/backlog/active.backlog.yaml` for any existing entries with the same Epic ID prefix. If entries exist, determine the **next available story number** (e.g., if E52S01–E52S05 exist, start at E52S06).
    - **b)** For each story file to be created, **check if the file already exists** on disk at `contexts/artefacts/stories/{id}.story.md`. If the file exists and its `id` frontmatter matches a **different** epic or title, **STOP immediately** — this means an ID collision between two epics. Surface the conflict to the human and do not proceed.
    - **c)** If the file exists and its content matches the current Epic (same epic ID, same intent), treat it as an update — read the existing content first and preserve any human edits.
@@ -50,6 +52,7 @@ Stories are the **contract between Discovery and Delivery**. They must be the ma
 7. For each story, answer: "What should the user be able to do or experience?"
 8. Output using canonical Story template
 9. **MANDATORY — Register in backlog.** After writing all story files, add each story to `contexts/backlog/active.backlog.yaml` with:
+
    - `id`, `epic`, `title` (from story frontmatter)
    - `status: refined` (if validated) or `status: draft` (if pending validation)
    - `priority` (derived from Epic priority or explicit input)
@@ -101,6 +104,7 @@ Acceptance Criteria:
 ## Non-Goals
 
 This skill must NOT:
+
 - Define architecture or implementation approach
 - Generate Epics (use `generate-epics`)
 - Produce stories without a parent Epic

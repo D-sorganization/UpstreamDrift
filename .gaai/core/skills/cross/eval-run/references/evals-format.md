@@ -20,21 +20,21 @@ An `evals.yaml` file contains a set of assertions to be run against a single out
 ## Top-Level Structure
 
 ```yaml
-skill: {skill-name}           # The name of the skill whose output is being evaluated
-version: "1.0"                # Version of this evals file (semantic version string)
-description: {string}         # One-sentence description of what this eval set covers
+skill: { skill-name } # The name of the skill whose output is being evaluated
+version: "1.0" # Version of this evals file (semantic version string)
+description: { string } # One-sentence description of what this eval set covers
 assertions:
-  - {assertion}               # One or more assertions (see below)
+  - { assertion } # One or more assertions (see below)
 ```
 
 ### Required Fields
 
-| Field | Type | Description |
-|---|---|---|
-| `skill` | string | Name of the target skill (must match `SKILL.md` `name` field) |
-| `version` | string | Semantic version of this evals file |
-| `description` | string | One sentence describing what is being evaluated |
-| `assertions` | list | One or more assertion objects (see assertion types below) |
+| Field         | Type   | Description                                                   |
+| ------------- | ------ | ------------------------------------------------------------- |
+| `skill`       | string | Name of the target skill (must match `SKILL.md` `name` field) |
+| `version`     | string | Semantic version of this evals file                           |
+| `description` | string | One sentence describing what is being evaluated               |
+| `assertions`  | list   | One or more assertion objects (see assertion types below)     |
 
 ---
 
@@ -47,25 +47,25 @@ Two assertion types are supported: `code` and `llm-judge`.
 Mechanically verifiable assertions that do not require LLM evaluation. The `eval-run` skill executes these deterministically using counts, regex matching, or structural checks.
 
 ```yaml
-- id: {assertion-id}          # Unique identifier within this evals file (e.g. A01)
+- id: { assertion-id } # Unique identifier within this evals file (e.g. A01)
   type: code
-  description: {string}       # Human-readable description of what is being checked
-  check: {check-type}         # One of: word_count, char_count, regex_match, regex_not_match, structure_present, structure_absent
+  description: { string } # Human-readable description of what is being checked
+  check: { check-type } # One of: word_count, char_count, regex_match, regex_not_match, structure_present, structure_absent
   params:
-    {param-key}: {param-value} # Parameters required by the check type (see below)
-  expected: {pass-condition}  # Description of the condition that constitutes PASS
+    { param-key }: { param-value } # Parameters required by the check type (see below)
+  expected: { pass-condition } # Description of the condition that constitutes PASS
 ```
 
 #### Supported `check` Values and Their `params`
 
-| `check` | Required `params` | Description |
-|---|---|---|
-| `word_count` | `min`, `max` | Word count must be within [min, max] (inclusive) |
-| `char_count` | `min`, `max` | Character count must be within [min, max] (inclusive) |
-| `regex_match` | `pattern` | The output must contain at least one match for `pattern` |
-| `regex_not_match` | `pattern` | The output must contain zero matches for `pattern` |
-| `structure_present` | `marker` | The output must contain the literal string `marker` (e.g., a required section heading) |
-| `structure_absent` | `marker` | The output must NOT contain the literal string `marker` |
+| `check`             | Required `params` | Description                                                                            |
+| ------------------- | ----------------- | -------------------------------------------------------------------------------------- |
+| `word_count`        | `min`, `max`      | Word count must be within [min, max] (inclusive)                                       |
+| `char_count`        | `min`, `max`      | Character count must be within [min, max] (inclusive)                                  |
+| `regex_match`       | `pattern`         | The output must contain at least one match for `pattern`                               |
+| `regex_not_match`   | `pattern`         | The output must contain zero matches for `pattern`                                     |
+| `structure_present` | `marker`          | The output must contain the literal string `marker` (e.g., a required section heading) |
+| `structure_absent`  | `marker`          | The output must NOT contain the literal string `marker`                                |
 
 #### Example
 
@@ -103,19 +103,20 @@ Mechanically verifiable assertions that do not require LLM evaluation. The `eval
 Assertions that require LLM judgment to evaluate. The `eval-run` skill uses a structured prompt pattern to produce a binary PASS/FAIL result with a rationale.
 
 ```yaml
-- id: {assertion-id}          # Unique identifier within this evals file
+- id: { assertion-id } # Unique identifier within this evals file
   type: llm-judge
-  description: {string}       # Human-readable description of what is being evaluated
+  description: { string } # Human-readable description of what is being evaluated
   prompt: |
     {evaluation prompt}       # The prompt given to the LLM judge. Must end with a binary question.
-  rubric:                     # Criteria that define PASS
-    pass_if: {string}         # The condition under which the LLM judge should answer PASS
-    fail_if: {string}         # The condition under which the LLM judge should answer FAIL
+  rubric: # Criteria that define PASS
+    pass_if: { string } # The condition under which the LLM judge should answer PASS
+    fail_if: { string } # The condition under which the LLM judge should answer FAIL
 ```
 
 #### Prompt Pattern Rules
 
 The `prompt` field must:
+
 1. Provide the context needed to evaluate the output (e.g., "You are evaluating a LinkedIn post draft")
 2. State the criterion being evaluated clearly
 3. End with a binary question: "Does the output [criterion]? Answer PASS or FAIL, then explain in one sentence."

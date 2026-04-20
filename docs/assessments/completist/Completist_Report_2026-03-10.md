@@ -1,13 +1,16 @@
 # Completist Report: 2026-03-10
 
 ## Executive Summary
+
 - **Critical Gaps**: 416
 - **Feature Gaps (TRACKED_TASK)**: 88
 - **Technical Debt**: 32
 - **Documentation Gaps**: 520
 
 ## Visualization
+
 ### Status Overview
+
 ```mermaid
 pie title Completion Status
     "Impl Gaps (Critical)" : 416
@@ -17,6 +20,7 @@ pie title Completion Status
 ```
 
 ### Top Impacted Modules
+
 ```mermaid
 pie title Issues by Module
     "src" : 356
@@ -27,150 +31,154 @@ pie title Issues by Module
 ```
 
 ## Critical Incomplete (Top 50)
-| File | Line | Type | Impact | Coverage | Complexity |
-|---|---|---|---|---|---|
-| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | 29 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | 33 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | 45 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | 58 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py` | 62 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 40 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 46 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 51 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py` | 56 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py` | 183 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py` | 193 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 21 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 27 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 32 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py` | 36 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_clipboard.py` | 35 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py` | 41 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py` | 43 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py` | 45 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py` | 47 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py` | 35 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py` | 48 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py` | 61 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py` | 65 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 78 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 83 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 87 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 91 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 108 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 121 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 134 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 138 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py` | 151 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/calculators/base.py` | 20 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py` | 787 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py` | 790 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/__init__.py` | 221 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py` | 156 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/mixins/calculator_state_mixin.py` | 433 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/data_processor_widget.py` | 594 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py` | 53 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py` | 54 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py` | 55 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py` | 56 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/theme/protocols.py` | 28 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/theme/protocols.py` | 32 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/theme/protocols.py` | 37 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/theme/protocols.py` | 50 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/theme/protocols.py` | 54 | Stub | 5 | 3 | 4 |
-| `./vendor/ud-tools/src/shared/python/theme/protocols.py` | 67 | Stub | 5 | 3 | 4 |
+
+| File                                                                                                                | Line | Type | Impact | Coverage | Complexity |
+| ------------------------------------------------------------------------------------------------------------------- | ---- | ---- | ------ | -------- | ---------- |
+| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py`                                                      | 29   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py`                                                      | 33   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py`                                                      | 45   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py`                                                      | 58   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/plot_engine/protocols.py`                                                      | 62   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                        | 40   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                        | 46   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                        | 51   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/library/repository.py`                                        | 56   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py`                                     | 183  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/builders/base_builder.py`                                     | 193  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                          | 21   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                          | 27   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                          | 32   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/plugins/__init__.py`                                          | 36   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_clipboard.py`                                   | 35   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py`                               | 41   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py`                               | 43   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py`                               | 45   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_modifications.py`                               | 47   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py`                                                     | 35   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py`                                                     | 48   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py`                                                     | 61   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/calc_backend/protocols.py`                                                     | 65   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 78   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 83   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 87   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 91   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 108  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 121  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 134  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 138  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/protocols.py`                                             | 151  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/calculators/base.py`                                      | 20   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py`      | 787  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/acid_gas_dewpoint_calculator.py`      | 790  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/pressure_drop_calculator/__init__.py` | 221  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/process_calculators/psa_package/psa_gui.py`               | 156  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/mixins/calculator_state_mixin.py`                      | 433  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/data_processor_widget.py`                      | 594  | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py`                  | 53   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py`                  | 54   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py`                  | 55   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/upstream_drift_tools/ui/widgets/mixins/data_processor_ops.py`                  | 56   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/theme/protocols.py`                                                            | 28   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/theme/protocols.py`                                                            | 32   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/theme/protocols.py`                                                            | 37   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/theme/protocols.py`                                                            | 50   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/theme/protocols.py`                                                            | 54   | Stub | 5      | 3        | 4          |
+| `./vendor/ud-tools/src/shared/python/theme/protocols.py`                                                            | 67   | Stub | 5      | 3        | 4          |
 
 ## Feature Gap Matrix
-| Module | Feature Gap | Type |
-|---|---|---|
-| `./REVIEW_SUMMARY.txt` | 4. TRACKED_TASK/TRACKED_DEFECT blocker too aggressive (doesn't allow issue references) | TRACKED_TASK |
-| `./scripts/refresh_completist_data.py` | "TRACKED_TASK\|TRACKED_DEFECT\|XXX\|HACK\|TEMP", | TRACKED_TASK |
-| `./scripts/pragmatic_programmer_review.py` | """Report high TRACKED_TASK counts as a technical debt indicator.""" | TRACKED_TASK |
-| `./scripts/pragmatic_programmer_review.py` | if "TRACKED_TASK" in content: | TRACKED_TASK |
-| `./scripts/pragmatic_programmer_review.py` | "title": f"High TRACKED_TASK count ({len(todos)})", | TRACKED_TASK |
-| `./scripts/generate_todo_fixme_register.py` | ["rg", "-n", "TRACKED_TASK\|TRACKED_DEFECT", "src", "tests", "scripts"], | TRACKED_TASK |
-| `./scripts/generate_todo_fixme_register.py` | "# TRACKED_TASK/TRACKED_DEFECT Debt Register", | TRACKED_TASK |
-| `./scripts/generate_todo_fixme_register.py` | "This register is generated from inline TRACKED_TASK/TRACKED_DEFECT markers.", | TRACKED_TASK |
-| `./scripts/generate_todo_fixme_register.py` | marker = "TRACKED_TASK" if "TRACKED_TASK" in text else "TRACKED_DEFECT" | TRACKED_TASK |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - Placeholder (TRACKED_TASK/TRACKED_DEFECT) blocker | TRACKED_TASK |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. **TRACKED_TASK/TRACKED_DEFECT check is blocking:** CI fails if any TODOs found | TRACKED_TASK |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | 3. TRACKED_TASK/TRACKED_DEFECT blocker is too aggressive | TRACKED_TASK |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - **Fix:** Update check to allow `TRACKED_TASK #123` format | TRACKED_TASK |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | echo "::error::Orphaned placeholders. Link to GitHub issues: # TRACKED_TASK #123" | TRACKED_TASK |
-| `./BUILD_INFRASTRUCTURE_REVIEW.md` | - [ ] Fix TRACKED_TASK/TRACKED_DEFECT check to allow references: `# TRACKED_TASK #123` | TRACKED_TASK |
-| `./tests/tools/test_code_quality_check.py` | lines = ["# TRACKED_TASK: fix this", "def test():", "    ...  ", "    pass"] | TRACKED_TASK |
-| `./tests/tools/test_code_quality_check.py` | assert any("TRACKED_TASK placeholder" in t for t in types) | TRACKED_TASK |
-| `./tests/tools/test_code_quality_check.py` | lines = ["# TRACKED_TASK: internal marker"] | TRACKED_TASK |
-| `./tests/tools/test_code_quality_check.py` | f.write_text("# TRACKED_TASK: fix this\n") | TRACKED_TASK |
-| `./tests/tools/test_code_quality_check.py` | assert any("TRACKED_TASK" in i[1] for i in issues) | TRACKED_TASK |
-| `./vendor/ud-tools/drafts/Jules-Code-Quality-Reviewer.yml` | 5. **Placeholders**: Identify placeholder code (TRACKED_TASK, TRACKED_DEFECT, NotImplemented, pass statements) | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | stats["todos"] += content.count("TRACKED_TASK") | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | grades["O"] = (max(0, score_o), f"Technical Debt (TRACKED_TASK+TRACKED_DEFECT): {debt}") | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | - **Markers**: 445 `TRACKED_TASK` and 140 `TRACKED_DEFECT` markers indicate significant unfinished work. | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | -   445 `TRACKED_TASK` markers. | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | -   Convert valid `TRACKED_TASK` items into GitHub Issues. | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | f.write("    - **Issue**: 445 `TRACKED_TASK` markers.\n") | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/generate_fresh_assessments.py` | stats["todos"] += content.count("TRACKED_TASK") | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | if "TRACKED_TASK" in content: | TRACKED_TASK |
-| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py` | "title": f"High TRACKED_TASK count ({len(todos)})", | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | Path("script.m"), "% TRACKED_TASK: fix this", 5, issues | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | assert "TRACKED_TASK" in issues[0] | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | "% TRACKED_TASK", | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | """m-file with TRACKED_TASK must produce at least one issue.""" | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | (matlab / "dirty.m").write_text("function y = foo(x)\n% TRACKED_TASK: fix\ny = x;\nend\n") | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | "function bad()\n% TRACKED_TASK: fill in\nglobal myVar\neval('x+1');\nend\n" | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | lines = ["# TRACKED_TASK: fix this eventually"] | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | assert "TRACKED_TASK" in issues[0][1] | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | lines = ["# TRACKED_TASK: something"] | TRACKED_TASK |
-| `./vendor/ud-tools/tests/tools/test_quality_utils.py` | f.write_text("# TRACKED_TASK: clean me up\n", encoding="utf-8") | TRACKED_TASK |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - **NEVER USE PLACEHOLDERS** → No `TRACKED_TASK`, `TRACKED_DEFECT`, `...`, `pass`, `NotImplementedError`, `<your-valu | TRACKED_TASK |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | - [X] Zero TRACKED_TASK/TRACKED_DEFECT/pass in diff | TRACKED_TASK |
-| `./vendor/ud-tools/.cursor/rules/.cursorrules.md` | # TRACKED_TASK: implement this properly | TRACKED_TASK |
-| `./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/script_generator.py` | f"{prefix}# TRACKED_TASK: Implement custom operation", | TRACKED_TASK |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | swingType: SwingType.UNKNOWN, // TRACKED_TASK: Implement swing type detection | TRACKED_TASK |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts` | armHang: 'good', // TRACKED_TASK: Implement arm hang detection | TRACKED_TASK |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts` | // TRACKED_TASK: Parse and validate RGB values | TRACKED_TASK |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TRACKED_TASK: Move fps to client-side config or use from video metadata | TRACKED_TASK |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TRACKED_TASK(#663): Save to database when backend API is available. | TRACKED_TASK |
-| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx` | // TRACKED_TASK(#663): Save pose data to database when backend API is available. | TRACKED_TASK |
+
+| Module                                                                                                | Feature Gap                                                                                                           | Type         |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `./REVIEW_SUMMARY.txt`                                                                                | 4. TRACKED_TASK/TRACKED_DEFECT blocker too aggressive (doesn't allow issue references)                                | TRACKED_TASK |
+| `./scripts/refresh_completist_data.py`                                                                | "TRACKED_TASK\|TRACKED_DEFECT\|XXX\|HACK\|TEMP",                                                                      | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py`                                                            | """Report high TRACKED_TASK counts as a technical debt indicator."""                                                  | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py`                                                            | if "TRACKED_TASK" in content:                                                                                         | TRACKED_TASK |
+| `./scripts/pragmatic_programmer_review.py`                                                            | "title": f"High TRACKED_TASK count ({len(todos)})",                                                                   | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py`                                                           | ["rg", "-n", "TRACKED_TASK\|TRACKED_DEFECT", "src", "tests", "scripts"],                                              | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py`                                                           | "# TRACKED_TASK/TRACKED_DEFECT Debt Register",                                                                        | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py`                                                           | "This register is generated from inline TRACKED_TASK/TRACKED_DEFECT markers.",                                        | TRACKED_TASK |
+| `./scripts/generate_todo_fixme_register.py`                                                           | marker = "TRACKED_TASK" if "TRACKED_TASK" in text else "TRACKED_DEFECT"                                               | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md`                                                                    | - Placeholder (TRACKED_TASK/TRACKED_DEFECT) blocker                                                                   | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md`                                                                    | 3. **TRACKED_TASK/TRACKED_DEFECT check is blocking:** CI fails if any TODOs found                                     | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md`                                                                    | 3. TRACKED_TASK/TRACKED_DEFECT blocker is too aggressive                                                              | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md`                                                                    | - **Fix:** Update check to allow `TRACKED_TASK #123` format                                                           | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md`                                                                    | echo "::error::Orphaned placeholders. Link to GitHub issues: # TRACKED_TASK #123"                                     | TRACKED_TASK |
+| `./BUILD_INFRASTRUCTURE_REVIEW.md`                                                                    | - [ ] Fix TRACKED_TASK/TRACKED_DEFECT check to allow references: `# TRACKED_TASK #123`                                | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py`                                                            | lines = ["# TRACKED_TASK: fix this", "def test():", " ... ", " pass"]                                                 | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py`                                                            | assert any("TRACKED_TASK placeholder" in t for t in types)                                                            | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py`                                                            | lines = ["# TRACKED_TASK: internal marker"]                                                                           | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py`                                                            | f.write_text("# TRACKED_TASK: fix this\n")                                                                            | TRACKED_TASK |
+| `./tests/tools/test_code_quality_check.py`                                                            | assert any("TRACKED_TASK" in i[1] for i in issues)                                                                    | TRACKED_TASK |
+| `./vendor/ud-tools/drafts/Jules-Code-Quality-Reviewer.yml`                                            | 5. **Placeholders**: Identify placeholder code (TRACKED_TASK, TRACKED_DEFECT, NotImplemented, pass statements)        | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py`                                      | stats["todos"] += content.count("TRACKED_TASK")                                                                       | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py`                                      | grades["O"] = (max(0, score_o), f"Technical Debt (TRACKED_TASK+TRACKED_DEFECT): {debt}")                              | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                   | - **Markers**: 445 `TRACKED_TASK` and 140 `TRACKED_DEFECT` markers indicate significant unfinished work.              | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                   | - 445 `TRACKED_TASK` markers.                                                                                         | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                   | - Convert valid `TRACKED_TASK` items into GitHub Issues.                                                              | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                                                   | f.write(" - **Issue**: 445 `TRACKED_TASK` markers.\n")                                                                | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/generate_fresh_assessments.py`                                             | stats["todos"] += content.count("TRACKED_TASK")                                                                       | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py`                                            | if "TRACKED_TASK" in content:                                                                                         | TRACKED_TASK |
+| `./vendor/ud-tools/scripts/pragmatic_programmer_review.py`                                            | "title": f"High TRACKED_TASK count ({len(todos)})",                                                                   | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`                                          | Path("script.m"), "% TRACKED_TASK: fix this", 5, issues                                                               | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`                                          | assert "TRACKED_TASK" in issues[0]                                                                                    | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`                                          | "% TRACKED_TASK",                                                                                                     | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`                                          | """m-file with TRACKED_TASK must produce at least one issue."""                                                       | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`                                          | (matlab / "dirty.m").write_text("function y = foo(x)\n% TRACKED_TASK: fix\ny = x;\nend\n")                            | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`                                          | "function bad()\n% TRACKED_TASK: fill in\nglobal myVar\neval('x+1');\nend\n"                                          | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py`                                                 | lines = ["# TRACKED_TASK: fix this eventually"]                                                                       | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py`                                                 | assert "TRACKED_TASK" in issues[0][1]                                                                                 | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py`                                                 | lines = ["# TRACKED_TASK: something"]                                                                                 | TRACKED_TASK |
+| `./vendor/ud-tools/tests/tools/test_quality_utils.py`                                                 | f.write_text("# TRACKED_TASK: clean me up\n", encoding="utf-8")                                                       | TRACKED_TASK |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md`                                                     | - **NEVER USE PLACEHOLDERS** → No `TRACKED_TASK`, `TRACKED_DEFECT`, `...`, `pass`, `NotImplementedError`, `<your-valu | TRACKED_TASK |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md`                                                     | - [X] Zero TRACKED_TASK/TRACKED_DEFECT/pass in diff                                                                   | TRACKED_TASK |
+| `./vendor/ud-tools/.cursor/rules/.cursorrules.md`                                                     | # TRACKED_TASK: implement this properly                                                                               | TRACKED_TASK |
+| `./vendor/ud-tools/src/data_processing/data_processor/python/data_processor/core/script_generator.py` | f"{prefix}# TRACKED_TASK: Implement custom operation",                                                                | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts`           | swingType: SwingType.UNKNOWN, // TRACKED_TASK: Implement swing type detection                                         | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/golf/swingAnalyzer.ts`           | armHang: 'good', // TRACKED_TASK: Implement arm hang detection                                                        | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/lib/sanitize.ts`                     | // TRACKED_TASK: Parse and validate RGB values                                                                        | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx`                        | // TRACKED_TASK: Move fps to client-side config or use from video metadata                                            | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx`                        | // TRACKED_TASK(#663): Save to database when backend API is available.                                                | TRACKED_TASK |
+| `./vendor/ud-tools/src/media_processing/video_processor/apps/web/app/page.tsx`                        | // TRACKED_TASK(#663): Save pose data to database when backend API is available.                                      | TRACKED_TASK |
 
 ## Technical Debt Register
-| File | Line | Issue | Type |
-|---|---|---|---|
-| `./full_collect.txt` | 4666 | Postcondition: All codes follow GMS-XXX-NNN format. | XXX |
-| `./full_collect.txt` | 17580 | Every error code must follow GMS-XXX-NNN pattern. | XXX |
-| `./tests/tools/test_code_quality_check.py` | 83 | lines = ["# TRACKED_DEFECT: broken logic"] | TRACKED_DEFECT |
-| `./tests/tools/test_code_quality_check.py` | 85 | assert any("TRACKED_DEFECT" in i[1] for i in issues) | TRACKED_DEFECT |
-| `./tests/unit/utils/test_error_codes.py` | 39 | """Every error code must follow GMS-XXX-NNN pattern.""" | XXX |
-| `./tests/unit/utils/test_error_codes.py` | 42 | assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN" | XXX |
-| `./tests/unit/api/test_error_codes.py` | 36 | """Postcondition: All codes follow GMS-XXX-NNN format.""" | XXX |
-| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py` | 143 | stats["fixmes"] += content.count("TRACKED_DEFECT") | TRACKED_DEFECT |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | 214 | -   140 `TRACKED_DEFECT` markers. | TRACKED_DEFECT |
-| `./vendor/ud-tools/scripts/generate_assessments.py` | 217 | -   Audit all `TRACKED_DEFECT` items and resolve high-priority ones. | TRACKED_DEFECT |
-| `./vendor/ud-tools/scripts/generate_fresh_assessments.py` | 121 | stats["fixmes"] += content.count("TRACKED_DEFECT") | TRACKED_DEFECT |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | 95 | Path("script.m"), "% TRACKED_DEFECT: broken", 3, issues | TRACKED_DEFECT |
-| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py` | 97 | assert any("TRACKED_DEFECT" in i for i in issues) | TRACKED_DEFECT |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 320 | (r"\bFIXME\b", "TRACKED_DEFECT placeholder found"), | TRACKED_DEFECT |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 321 | (r"\bHACK\b", "HACK comment found"), | HACK |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py` | 322 | (r"\bXXX\b", "XXX comment found"), | XXX |
-| `./vendor/ud-tools/src/tools/quality_utils.py` | 51 | "Angle bracket TRACKED_DEFECT placeholder", | TRACKED_DEFECT |
-| `./pytest_collect_out.txt` | 4666 | Postcondition: All codes follow GMS-XXX-NNN format. | XXX |
-| `./pytest_collect_out.txt` | 17420 | Every error code must follow GMS-XXX-NNN pattern. | XXX |
-| `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /* HACK: Temporary fix for CONF-15412 */ | HACK |
-| `./src/api/utils/error_codes.py` | 53 | # General Errors (GMS-GEN-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 59 | # Engine Errors (GMS-ENG-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 67 | # Simulation Errors (GMS-SIM-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 76 | # Video Errors (GMS-VID-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 83 | # Analysis Errors (GMS-ANL-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 88 | # Auth Errors (GMS-AUT-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 95 | # Validation Errors (GMS-VAL-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 101 | # Resource Errors (GMS-RES-XXX) | XXX |
-| `./src/api/utils/error_codes.py` | 106 | # System Errors (GMS-SYS-XXX) | XXX |
-| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py` | 77 | (r"\bHACK\b", "HACK comment found"), | HACK |
-| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py` | 78 | (r"\bXXX\b", "XXX comment found"), | XXX |
-| `./src/shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /* HACK: Temporary fix for CONF-15412 */ | HACK |
+
+| File                                                                       | Line  | Issue                                                              | Type           |
+| -------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------ | -------------- |
+| `./full_collect.txt`                                                       | 4666  | Postcondition: All codes follow GMS-XXX-NNN format.                | XXX            |
+| `./full_collect.txt`                                                       | 17580 | Every error code must follow GMS-XXX-NNN pattern.                  | XXX            |
+| `./tests/tools/test_code_quality_check.py`                                 | 83    | lines = ["# TRACKED_DEFECT: broken logic"]                         | TRACKED_DEFECT |
+| `./tests/tools/test_code_quality_check.py`                                 | 85    | assert any("TRACKED_DEFECT" in i[1] for i in issues)               | TRACKED_DEFECT |
+| `./tests/unit/utils/test_error_codes.py`                                   | 39    | """Every error code must follow GMS-XXX-NNN pattern."""            | XXX            |
+| `./tests/unit/utils/test_error_codes.py`                                   | 42    | assert len(parts) == 3, f"{code.name} doesn't follow GMS-XXX-NNN"  | XXX            |
+| `./tests/unit/api/test_error_codes.py`                                     | 36    | """Postcondition: All codes follow GMS-XXX-NNN format."""          | XXX            |
+| `./vendor/ud-tools/scripts/generate_comprehensive_assessment.py`           | 143   | stats["fixmes"] += content.count("TRACKED_DEFECT")                 | TRACKED_DEFECT |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                        | 214   | - 140 `TRACKED_DEFECT` markers.                                    | TRACKED_DEFECT |
+| `./vendor/ud-tools/scripts/generate_assessments.py`                        | 217   | - Audit all `TRACKED_DEFECT` items and resolve high-priority ones. | TRACKED_DEFECT |
+| `./vendor/ud-tools/scripts/generate_fresh_assessments.py`                  | 121   | stats["fixmes"] += content.count("TRACKED_DEFECT")                 | TRACKED_DEFECT |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`               | 95    | Path("script.m"), "% TRACKED_DEFECT: broken", 3, issues            | TRACKED_DEFECT |
+| `./vendor/ud-tools/tests/tools/test_matlab_quality_utils.py`               | 97    | assert any("TRACKED_DEFECT" in i for i in issues)                  | TRACKED_DEFECT |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                      | 320   | (r"\bFIXME\b", "TRACKED_DEFECT placeholder found"),                | TRACKED_DEFECT |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                      | 321   | (r"\bHACK\b", "HACK comment found"),                               | HACK           |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                      | 322   | (r"\bXXX\b", "XXX comment found"),                                 | XXX            |
+| `./vendor/ud-tools/src/tools/quality_utils.py`                             | 51    | "Angle bracket TRACKED_DEFECT placeholder",                        | TRACKED_DEFECT |
+| `./pytest_collect_out.txt`                                                 | 4666  | Postcondition: All codes follow GMS-XXX-NNN format.                | XXX            |
+| `./pytest_collect_out.txt`                                                 | 17420 | Every error code must follow GMS-XXX-NNN pattern.                  | XXX            |
+| `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css`     | 3404  | html body { /_ HACK: Temporary fix for CONF-15412 _/               | HACK           |
+| `./src/api/utils/error_codes.py`                                           | 53    | # General Errors (GMS-GEN-XXX)                                     | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 59    | # Engine Errors (GMS-ENG-XXX)                                      | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 67    | # Simulation Errors (GMS-SIM-XXX)                                  | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 76    | # Video Errors (GMS-VID-XXX)                                       | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 83    | # Analysis Errors (GMS-ANL-XXX)                                    | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 88    | # Auth Errors (GMS-AUT-XXX)                                        | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 95    | # Validation Errors (GMS-VAL-XXX)                                  | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 101   | # Resource Errors (GMS-RES-XXX)                                    | XXX            |
+| `./src/api/utils/error_codes.py`                                           | 106   | # System Errors (GMS-SYS-XXX)                                      | XXX            |
+| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py`             | 77    | (r"\bHACK\b", "HACK comment found"),                               | HACK           |
+| `./src/tools/matlab_utilities/scripts/matlab_quality_check.py`             | 78    | (r"\bXXX\b", "XXX comment found"),                                 | XXX            |
+| `./src/shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404  | html body { /_ HACK: Temporary fix for CONF-15412 _/               | HACK           |
 
 ## Recommended Implementation Order
+
 Prioritized by Impact (High) and Complexity (Low).
 | Priority | File | Issue | Metrics (I/C/C) |
 |---|---|---|---|
@@ -196,6 +204,7 @@ Prioritized by Impact (High) and Complexity (Low).
 | 20 | `./vendor/ud-tools/src/shared/python/model_generation/editor/editor_clipboard.py` | get_connecting_joint | 5/3/4 |
 
 ## Issues Created
+
 - Created `docs/assessments/issues/Issue_2123_Incomplete_Stub_in_protocols_py_29.md`
 - Created `docs/assessments/issues/Issue_2124_Incomplete_Stub_in_protocols_py_33.md`
 - Created `docs/assessments/issues/Issue_2125_Incomplete_Stub_in_protocols_py_45.md`

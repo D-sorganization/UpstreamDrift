@@ -24,6 +24,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate this skill when:
+
 - Intent is unclear or broad
 - Multiple discovery steps are required
 - You don't know which skills to run first
@@ -86,6 +87,7 @@ Blocking Reasons (if any):
 ## Non-Goals
 
 This skill must NOT:
+
 - Generate epics, stories, or PRDs
 - Make product decisions
 - Execute other skills

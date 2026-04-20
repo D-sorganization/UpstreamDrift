@@ -22,6 +22,7 @@ It is the **single source of truth** for orchestration behavior.
 ## 🎯 Purpose
 
 The orchestration rules ensure that:
+
 - agents have **clear and non-overlapping responsibilities**
 - no action is implicit or magical
 - long-term behavior remains predictable
@@ -40,17 +41,20 @@ The orchestration rules ensure that:
 Discovery is the **only human-facing agent**.
 
 Discovery is responsible for:
+
 - interpreting human intent
 - determining task complexity (quick fix vs new story)
 - creating and validating backlog entries
 - deciding what knowledge becomes long-term memory
 
 Discovery **may trigger**:
+
 - backlog creation / update
 - `memory-ingest.skill.md`
 - `memory-retrieve.skill.md`
 
 Discovery **must NOT**:
+
 - implement code
 - execute tests
 - directly modify artefacts
@@ -61,6 +65,7 @@ Discovery **must NOT**:
 Delivery is a **pure execution agent**.
 
 Delivery is responsible for:
+
 - consuming ready backlog items
 - analyzing technical feasibility
 - implementing code
@@ -68,12 +73,14 @@ Delivery is responsible for:
 - iterating until acceptance criteria PASS
 
 Delivery **may trigger**:
+
 - code changes
 - test execution
 - artefact generation
 - status updates in backlog
 
 Delivery **must NOT**:
+
 - interact directly with humans
 - create or modify long-term memory
 - ingest decisions into memory
@@ -127,6 +134,7 @@ All AI-driven execution targets the **`staging`** branch. The `production` branc
   This prevents chained branch conflicts and ensures each story builds on a clean staging base.
 
 > **Concurrent mode note:** This sequential constraint applies in `--max-concurrent 1` mode (default). In concurrent delivery (`--max-concurrent > 1`), each session manages its own branch independently from staging HEAD; conflicts are resolved at PR merge time via the retry-with-rebase pattern (see delivery-loop.workflow.md §Staging Push Retry Pattern).
+
 - After creating a PR, immediately enable GitHub auto-merge: `gh pr merge --auto --squash story/{id}`.
   This ensures PRs merge automatically when CI passes, without human intervention.
 
@@ -156,18 +164,20 @@ This rule applies to **domains not yet covered** in `contexts/memory/`. For well
 
 → Defined in `base.rules.md` (loaded at session startup). Applies in both structured flows and conversational mode.
 
-**Discovery does NOT need to verify skill coverage** — it defines *what* to build, not *how* to build it. Skill coverage is Delivery's responsibility.
+**Discovery does NOT need to verify skill coverage** — it defines _what_ to build, not _how_ to build it. Skill coverage is Delivery's responsibility.
 
 ### Skill Coverage (Delivery — during `evaluate-story`)
 
 During `evaluate-story`, the Delivery Orchestrator must verify that all skills required for the identified domains exist in `skills-index.yaml`.
 
 If a required skill is absent:
+
 - The Story is marked `blocked` with an explicit gap report (which skill is missing, for which domain)
 - The gap is escalated to Discovery, which creates a Story for the missing skill via `create-skill`
 - The original Story resumes only when the dependency is delivered and the skill exists in the index
 
 If required knowledge is absent (detected during evaluation, not caught by Discovery):
+
 - Same escalation pattern: `blocked` + gap report → Discovery remediates
 
 ---
@@ -179,6 +189,7 @@ Cron jobs and the **Delivery Daemon** are **allowed and encouraged**, but limite
 ### Delivery Daemon (`scripts/delivery-daemon.sh`)
 
 The daemon automates backlog polling and AI agent session launch:
+
 - Polls staging for `refined` stories at a configurable interval
 - Marks stories `in_progress` on staging before launch (cross-device coordination)
 - Launches the AI coding agent in isolated worktrees
@@ -190,11 +201,13 @@ The daemon is a **governance automation** — it does not reason, implement, or 
 ### Other Cron Jobs
 
 Cron MAY trigger:
+
 - backlog polling (check for `refined` items)
 - `memory-refresh.skill`
 - `memory-compact.skill`
 
 Cron MUST NOT:
+
 - create new stories
 - ingest new project knowledge
 - modify decisions
@@ -237,6 +250,7 @@ Cron MUST NOT:
 ## 🚫 Forbidden Patterns
 
 The following are explicitly forbidden:
+
 - agents auto-loading full memory
 - skills accessing memory implicitly
 - Delivery ingesting memory (exception: `decision-extraction` post-QA-PASS — see §Memory Ingestion)

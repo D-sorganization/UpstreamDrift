@@ -9,6 +9,7 @@ Activate the Discovery Agent to clarify intent and produce governed artefacts.
 ## What This Does
 
 Activates the Discovery Agent to:
+
 1. Understand what you want to build and why
 2. Create a Discovery action plan
 3. Produce Epics and Stories with acceptance criteria
@@ -24,6 +25,7 @@ Activates the Discovery Agent to:
 ## How to Trigger
 
 Just describe your intent:
+
 - "I want to add user authentication"
 - "Users are abandoning the checkout flow"
 - "We need to improve the onboarding experience"

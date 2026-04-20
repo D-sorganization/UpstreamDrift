@@ -130,16 +130,18 @@ class DifferentiableEngine:
             if hasattr(self.engine, "step"):
                 self.engine.step(dt)
 
-            # Record state
-            if hasattr(self.engine, "get_joint_positions"):
-                q = self.engine.get_joint_positions()
-            else:
-                q = trajectory[t, : self._n_q]
-
-            if hasattr(self.engine, "get_joint_velocities"):
-                v = self.engine.get_joint_velocities()
-            else:
-                v = trajectory[t, self._n_q :]
+            # Record state — engine must expose these; silently falling back to
+            # the previous state would produce a meaningless trajectory.
+            if not hasattr(self.engine, "get_joint_positions"):
+                raise NotImplementedError(
+                    f"{type(self.engine).__name__} must implement get_joint_positions"
+                )
+            if not hasattr(self.engine, "get_joint_velocities"):
+                raise NotImplementedError(
+                    f"{type(self.engine).__name__} must implement get_joint_velocities"
+                )
+            q = self.engine.get_joint_positions()
+            v = self.engine.get_joint_velocities()
 
             trajectory[t + 1] = np.concatenate([q, v])
 
@@ -169,24 +171,24 @@ class DifferentiableEngine:
             raise ValueError("initial_state must be provided")
         if not (initial_state is not None):
             raise ValueError("initial_state must be provided")
-        eps = 1e-5
         T, n_u = controls.shape
         gradient = np.zeros_like(controls)
 
-        # Baseline trajectory and loss
-        baseline_traj = self.simulate_trajectory(initial_state, controls, dt)
-        baseline_loss = loss_fn(baseline_traj)
-
-        # Numerical gradient
+        # Central-difference numerical gradient with per-element scaled epsilon.
+        # Fixed epsilon causes catastrophic cancellation when control magnitudes
+        # vary across orders of magnitude; scale-relative eps avoids this.
         for t in range(T):
             for i in range(n_u):
+                eps = max(1e-8, abs(float(controls[t, i])) * 1e-5)
+
                 controls_plus = controls.copy()
                 controls_plus[t, i] += eps
+                controls_minus = controls.copy()
+                controls_minus[t, i] -= eps
 
                 traj_plus = self.simulate_trajectory(initial_state, controls_plus, dt)
-                loss_plus = loss_fn(traj_plus)
-
-                gradient[t, i] = (loss_plus - baseline_loss) / eps
+                traj_minus = self.simulate_trajectory(initial_state, controls_minus, dt)
+                gradient[t, i] = (loss_fn(traj_plus) - loss_fn(traj_minus)) / (2 * eps)
 
         return gradient
 

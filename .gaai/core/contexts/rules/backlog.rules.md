@@ -29,6 +29,7 @@ Any behavior violating these rules is **invalid by design**.
 ### R1 — Discovery Owns the Backlog
 
 Only the **Discovery Agent** may:
+
 - create backlog items
 - modify scope or acceptance criteria
 - validate and refine items
@@ -39,11 +40,13 @@ No other agent or skill has this authority.
 ### R2 — Delivery Executes the Backlog
 
 The **Delivery Agent** may:
+
 - consume items marked `refined`
 - update execution status (`in_progress`, `done`, `failed`)
 - attach execution artefacts or notes
 
 Delivery MUST NOT:
+
 - change scope or acceptance criteria
 - validate items
 - create new backlog entries
@@ -62,25 +65,25 @@ Any state → cancelled | superseded
 
 No primary state may be skipped.
 
-| State | Description |
-|---|---|
-| `draft` | Item is being shaped by Discovery; acceptance criteria incomplete |
-| `refined` | Story is validated, acceptance criteria present and unambiguous, ready for Delivery |
-| `in_progress` | Delivery is actively executing |
-| `done` | Acceptance criteria PASS; moved to `done/` archive |
-| `failed` | Execution failed; requires human intervention |
-| `blocked` | Delivery cannot proceed — dependency unmet, skill missing, or external blocker. Resolves to `refined` when unblocked by Discovery. |
-| `cancelled` | Deliberately removed from backlog by Discovery. Terminal state. |
-| `superseded` | Replaced by a newer backlog item. Must reference replacement ID. Terminal state. |
+| State         | Description                                                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `draft`       | Item is being shaped by Discovery; acceptance criteria incomplete                                                                  |
+| `refined`     | Story is validated, acceptance criteria present and unambiguous, ready for Delivery                                                |
+| `in_progress` | Delivery is actively executing                                                                                                     |
+| `done`        | Acceptance criteria PASS; moved to `done/` archive                                                                                 |
+| `failed`      | Execution failed; requires human intervention                                                                                      |
+| `blocked`     | Delivery cannot proceed — dependency unmet, skill missing, or external blocker. Resolves to `refined` when unblocked by Discovery. |
+| `cancelled`   | Deliberately removed from backlog by Discovery. Terminal state.                                                                    |
+| `superseded`  | Replaced by a newer backlog item. Must reference replacement ID. Terminal state.                                                   |
 
 ### Auxiliary State Transitions
 
-| Transition | Who | Condition |
-|---|---|---|
-| `in_progress` → `blocked` | Delivery | Dependency unmet, required skill absent, or external blocker |
-| `blocked` → `refined` | Discovery | Blocker resolved; item re-enters the ready pool |
-| any → `cancelled` | Discovery | Deliberate removal; must include rationale |
-| any → `superseded` | Discovery | Replaced by newer item; must reference replacement ID |
+| Transition                | Who       | Condition                                                    |
+| ------------------------- | --------- | ------------------------------------------------------------ |
+| `in_progress` → `blocked` | Delivery  | Dependency unmet, required skill absent, or external blocker |
+| `blocked` → `refined`     | Discovery | Blocker resolved; item re-enters the ready pool              |
+| any → `cancelled`         | Discovery | Deliberate removal; must include rationale                   |
+| any → `superseded`        | Discovery | Replaced by newer item; must reference replacement ID        |
 
 ## 🧭 Orchestration Rules
 
@@ -95,6 +98,7 @@ If execution occurs, it MUST be traceable to a backlog item.
 ### R4 — No Parallel Sources of Truth
 
 The backlog MUST NOT be duplicated.
+
 - Artefacts may reference backlog IDs
 - Memory may summarize backlog outcomes
 - No other file may represent execution state
@@ -102,6 +106,7 @@ The backlog MUST NOT be duplicated.
 ## 📑 Backlog Item Structure
 
 Each backlog item MUST declare:
+
 - unique ID
 - type (`story`, `task`, `fix`)
 - description
@@ -113,6 +118,7 @@ Each backlog item MUST declare:
 ## 🚫 Forbidden Backlog Behaviors
 
 The following are **explicitly forbidden**:
+
 - execution without a backlog item
 - skills modifying backlog state
 - cron creating or validating backlog items

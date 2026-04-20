@@ -34,15 +34,16 @@ Read `skills-index.yaml` for a fast aggregated view, or scan `SKILL.md` frontmat
 
 Frontmatter fields available for filtering:
 
-| Field | Values | Use for |
-|---|---|---|
-| `metadata.category` | `discovery` \| `delivery` \| `cross` | Narrow by agent track |
-| `metadata.track` | `discovery` \| `delivery` \| `cross-cutting` | Secondary filter |
-| `metadata.tags` | list of keywords | Cross-cutting capability search |
-| `description` | one sentence | **Primary relevance signal** — what it does + when to activate |
-| `metadata.id` | `SKILL-{CAT}-{NNN}` | Exact lookup by ID |
+| Field               | Values                                       | Use for                                                        |
+| ------------------- | -------------------------------------------- | -------------------------------------------------------------- |
+| `metadata.category` | `discovery` \| `delivery` \| `cross`         | Narrow by agent track                                          |
+| `metadata.track`    | `discovery` \| `delivery` \| `cross-cutting` | Secondary filter                                               |
+| `metadata.tags`     | list of keywords                             | Cross-cutting capability search                                |
+| `description`       | one sentence                                 | **Primary relevance signal** — what it does + when to activate |
+| `metadata.id`       | `SKILL-{CAT}-{NNN}`                          | Exact lookup by ID                                             |
 
 **Directive:**
+
 1. Use `metadata.category` to scope to the right directory first
 2. Read `description` to confirm relevance — it is the single most important field
 3. Use `metadata.tags` for cross-cutting capabilities (e.g. `memory`, `governance`, `qa`)
@@ -73,10 +74,10 @@ Load files in `references/` or `assets/` only during execution, never at discove
 
 ### When to add a skill vs. when to add a rule
 
-| You want to... | Use... |
-|---|---|
-| Add a new **execution capability** (something an agent will *do*) | `create-skill` |
-| Add a new **constraint** (something an agent must *not* do, or a standard it must follow) | `rules-normalize` |
+| You want to...                                                                            | Use...            |
+| ----------------------------------------------------------------------------------------- | ----------------- |
+| Add a new **execution capability** (something an agent will _do_)                         | `create-skill`    |
+| Add a new **constraint** (something an agent must _not_ do, or a standard it must follow) | `rules-normalize` |
 
 **Skills** are procedural: they perform a defined operation and produce outputs. They live in `.gaai/core/skills/`.
 
@@ -84,7 +85,7 @@ Load files in `references/` or `assets/` only during execution, never at discove
 
 ### Decision test
 
-Ask: "Does this describe *how to do something*, or *whether something is allowed*?"
+Ask: "Does this describe _how to do something_, or _whether something is allowed_?"
 
 - "How to generate a Story from an Epic" → skill (`generate-stories`)
 - "Stories must have acceptance criteria before entering the backlog" → rule (`orchestration.rules.md`)
@@ -119,26 +120,26 @@ To regenerate after adding or modifying a skill:
 
 ## Delivery Skills
 
-| Skill | ID | Description |
-|---|---|---|
-| `browser-journey-test` | — | Browser-based journey testing for UI validation |
-| `ci-watch-and-fix` | SKILL-DELIVERY-CI-WATCH-001 | Watch GitHub Actions CI after PR creation, detect failures, extract logs, apply minimal fixes, and re-push — up to 3 cycles before escalating |
-| `compose-team` | — | Read specialists registry and select the sub-agent team for a Story |
-| `coordinate-handoffs` | SKILL-DEL-009 | Validate sub-agent handoff artefacts, sequence phase transitions, manage retry and escalation logic |
-| `delivery-high-level-plan` | SKILL-DELIVERY-HIGH-LEVEL-PLAN-001 | Transform validated Stories into a clear, minimal, governed execution plan |
-| `evaluate-story` | — | Assess complexity, identify domains, determine delivery tier |
-| `frontend-design` | — | Domain-specific skill for frontend UI implementation |
-| `implement` | — | Implement a Story from an execution plan |
-| `prepare-execution-plan` | — | File-level decomposition of a high-level plan for Tier 2/3 Stories |
-| `qa-review` | SKILL-QA-REVIEW-001 | Validate implemented code against acceptance criteria — the hard quality gate |
-| `remediate-failures` | SKILL-REMEDIATE-FAILURES-001 | Correct failures detected during QA review |
+| Skill                      | ID                                 | Description                                                                                                                                   |
+| -------------------------- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `browser-journey-test`     | —                                  | Browser-based journey testing for UI validation                                                                                               |
+| `ci-watch-and-fix`         | SKILL-DELIVERY-CI-WATCH-001        | Watch GitHub Actions CI after PR creation, detect failures, extract logs, apply minimal fixes, and re-push — up to 3 cycles before escalating |
+| `compose-team`             | —                                  | Read specialists registry and select the sub-agent team for a Story                                                                           |
+| `coordinate-handoffs`      | SKILL-DEL-009                      | Validate sub-agent handoff artefacts, sequence phase transitions, manage retry and escalation logic                                           |
+| `delivery-high-level-plan` | SKILL-DELIVERY-HIGH-LEVEL-PLAN-001 | Transform validated Stories into a clear, minimal, governed execution plan                                                                    |
+| `evaluate-story`           | —                                  | Assess complexity, identify domains, determine delivery tier                                                                                  |
+| `frontend-design`          | —                                  | Domain-specific skill for frontend UI implementation                                                                                          |
+| `implement`                | —                                  | Implement a Story from an execution plan                                                                                                      |
+| `prepare-execution-plan`   | —                                  | File-level decomposition of a high-level plan for Tier 2/3 Stories                                                                            |
+| `qa-review`                | SKILL-QA-REVIEW-001                | Validate implemented code against acceptance criteria — the hard quality gate                                                                 |
+| `remediate-failures`       | SKILL-REMEDIATE-FAILURES-001       | Correct failures detected during QA review                                                                                                    |
 
 ---
 
 ## Cross Skills (selected)
 
-| Skill | ID | Description |
-|---|---|---|
+| Skill      | ID            | Description                                                                                                                                                                                                                                                   |
+| ---------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `eval-run` | SKILL-CRS-025 | Evaluate any output file against a structured evals.yaml assertions file and produce a score report with per-assertion pass/fail results. Activate when the Discovery Agent runs the Skill Optimize protocol to measure output quality or detect regressions. |
 
 ---

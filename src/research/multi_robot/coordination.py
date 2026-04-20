@@ -244,6 +244,10 @@ class FormationController:
             raise ValueError("quat must be provided")
         if not (quat is not None):
             raise ValueError("quat must be provided")
+        norm = float(np.linalg.norm(quat))
+        if norm < 1e-10:
+            raise ValueError("quat has near-zero norm; cannot normalize")
+        quat = quat / norm
         w, x, y, z = quat
         return np.array(
             [
@@ -590,6 +594,10 @@ class CooperativeManipulation:
             raise ValueError("quat must be provided")
         if not (quat is not None):
             raise ValueError("quat must be provided")
+        norm = float(np.linalg.norm(quat))
+        if norm < 1e-10:
+            raise ValueError("quat has near-zero norm; cannot normalize")
+        quat = quat / norm
         w, x, y, z = quat
         return np.array(
             [

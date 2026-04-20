@@ -25,6 +25,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - Starting a new product
 - Launching a major new initiative
 - Facing strategic uncertainty
@@ -51,6 +52,7 @@ Skip when adding small features, tweaking existing flows, or implementing obviou
 Produces a file at `contexts/artefacts/prd/{name}.prd.md` using `contexts/artefacts/prd/_template.prd.md`:
 
 Key sections:
+
 - Vision
 - User Problem
 - Target Users
@@ -75,6 +77,7 @@ Key sections:
 ## Non-Goals
 
 This skill must NOT:
+
 - Generate Epics or Stories (separate skills)
 - Make architectural decisions
 - Be invoked for small feature additions

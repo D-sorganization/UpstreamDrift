@@ -28,6 +28,7 @@ outputs:
 Activate as the **first action** of every Delivery Orchestration cycle, before any sub-agent is spawned.
 
 The Orchestrator needs to know:
+
 1. What tier applies (MicroDelivery / Core Team / Core Team + Specialists)
 2. Which domains are involved (for specialist registry matching)
 3. Whether any pre-flight risk analysis is warranted
@@ -42,12 +43,12 @@ Read the full Story artefact: acceptance criteria, complexity field, `depends_on
 
 ### 2. Assess complexity
 
-| Signal | Weight |
-|--------|--------|
-| `complexity` field in backlog item | Primary signal |
-| Number of acceptance criteria | Secondary signal |
-| Number of files mentioned in criteria | Secondary signal |
-| Cross-cutting concerns (API + DB + UI) | Complexity escalator |
+| Signal                                                  | Weight               |
+| ------------------------------------------------------- | -------------------- |
+| `complexity` field in backlog item                      | Primary signal       |
+| Number of acceptance criteria                           | Secondary signal     |
+| Number of files mentioned in criteria                   | Secondary signal     |
+| Cross-cutting concerns (API + DB + UI)                  | Complexity escalator |
 | Prior QA failures on similar work (check decisions log) | Complexity escalator |
 
 ### 3. Scan for domain triggers
@@ -59,10 +60,12 @@ Read `agents/specialists.registry.yaml`. Scan the Story's acceptance criteria an
 Read both `core/skills/skills-index.yaml` and `project/skills/skills-index.yaml`. For each domain identified in Step 3, verify that at least one skill in either index covers the required capability.
 
 Check:
+
 - Do the identified domains map to existing skills (by `description`, `tags`, or `category`)?
 - Are there specialist-triggered domains with no corresponding skill?
 
 If a required skill is missing:
+
 - Record the gap: which capability is needed, for which domain
 - This will be reported in the output as `skill_gaps`
 
@@ -86,6 +89,7 @@ complexity ≥ 8  OR  multiple specialist triggers  OR  cross-cutting at scale
 ### 6. Determine pre-flight risk analysis
 
 Risk analysis is warranted when:
+
 - Story touches security, auth, payments, PII
 - Schema or API contract changes
 - Blast radius is unclear

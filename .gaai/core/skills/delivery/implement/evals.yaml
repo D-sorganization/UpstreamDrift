@@ -2,7 +2,6 @@ skill: implement
 version: "1.0"
 description: "Baseline eval set for implementation reports — validates structure, AC mapping, scope discipline, and commit format"
 assertions:
-
   - id: A01
     type: code
     description: "Implementation report lists files changed"

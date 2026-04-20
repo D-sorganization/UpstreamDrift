@@ -23,6 +23,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - `/gaai-status` reports files on disk not registered in `index.md`
 - After a batch of DEC files were created outside the `decision-extraction` skill
 - As a lightweight post-delivery gate to confirm index integrity
@@ -65,6 +66,7 @@ Re-count all `DEC-*.md` files on disk. Update the Shared Categories table file c
 ### Step 5 — Index Frontmatter Update
 
 Update `index.md` frontmatter `updated_at` field:
+
 - Format: `{YYYY-MM-DD} ({N} entries synced, {M} anomalies flagged)` — or `(no drift — confirmed clean)` if nothing changed
 
 ---
@@ -101,6 +103,7 @@ Update `index.md` frontmatter `updated_at` field:
 ## Non-Goals
 
 This skill must NOT:
+
 - Create new DEC files (use `decision-extraction`)
 - Ingest new knowledge (use `memory-ingest`)
 - Compact or archive memory (use `memory-compact` or `memory-refresh`)

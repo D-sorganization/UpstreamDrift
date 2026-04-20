@@ -14,12 +14,14 @@ they protect direction, quality, and alignment across Discovery and Delivery.
 Rules are **explicit constraints**, not prompts.
 
 They:
+
 - define what is allowed or forbidden
 - apply to specific phases and artefacts
 - are versioned and auditable
 - are readable by humans and usable by any AI tool
 
 Rules do **not**:
+
 - contain workflows (belongs in `workflows/`)
 - contain personas or reasoning (belongs in `agents/`)
 - implement tool-specific logic
@@ -65,6 +67,7 @@ updated_at: YYYY-MM-DD
 ## Adding a New Rule
 
 Before creating a new rule file:
+
 1. Read this index — verify no existing rule already covers the intent
 2. Identify the correct `category` (orchestration, skills, backlog, artefacts, memory)
 3. Use the file format above with a new `id` following the sequence

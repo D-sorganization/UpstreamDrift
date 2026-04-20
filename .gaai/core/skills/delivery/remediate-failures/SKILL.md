@@ -28,6 +28,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - QA review returns FAIL
 - Acceptance criteria are unmet
 - Rules are violated
@@ -86,6 +87,7 @@ Activate when:
 ## Non-Goals
 
 This skill must NOT:
+
 - Add new features
 - Reinterpret product intent
 - Weaken rules

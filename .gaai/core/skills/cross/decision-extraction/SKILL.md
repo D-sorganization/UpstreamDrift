@@ -25,6 +25,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate after:
+
 - Discovery produces epics, scope clarifications, or priorities
 - Delivery resolves technical trade-offs or architectural constraints
 - QA surfaces systemic issues requiring policy decisions
@@ -37,6 +38,7 @@ Do NOT use for trivial steps, implementation details, brainstorming, or reversib
 ## Process
 
 0. **Decision Consistency Gate (mandatory).** Before extracting any new decision:
+
    - Read `contexts/memory/index.md` → scan the Decision Registry by domain to identify relevant existing decisions
    - Load the specific `decisions/DEC-{ID}.md` files for decisions in the affected domain(s)
    - Verify the proposed decision does NOT contradict any active decision
@@ -47,7 +49,7 @@ Do NOT use for trivial steps, implementation details, brainstorming, or reversib
 1. Scan outputs for explicit or implicit decisions: architectural choices, accepted trade-offs, scope boundaries, prioritization shifts, constraints introduced
 2. Filter strictly for **durable, governance-relevant decisions**
 3. **Deduplication check:** Scan the Decision Registry in `index.md` for existing entries covering the same topic. If found: (a) if the new decision supersedes the old, update the old `DEC-{ID}.md` file's frontmatter (`status: superseded`, `superseded_by: DEC-{new-id}`) and record the supersession in the new entry's `supersedes` field; (b) if the new decision confirms the old, skip writing a duplicate.
-3b. **Cross-reference assignment:** For the new decision, populate `related_to` with up to 5 DEC IDs that are directly related (same domain cluster, supersession chain, or shared concern). Only include decisions the new entry explicitly builds on, refines, or constrains. If no strong relation exists, leave as `[]`.
+   3b. **Cross-reference assignment:** For the new decision, populate `related_to` with up to 5 DEC IDs that are directly related (same domain cluster, supersession chain, or shared concern). Only include decisions the new entry explicitly builds on, refines, or constrains. If no strong relation exists, leave as `[]`.
 4. Convert each into a structured ADR file (see Output Format below):
    - Context
    - Decision
@@ -75,23 +77,19 @@ created_by: discovery
 created_at: YYYY-MM-DD
 last_updated_by: discovery
 last_updated_at: YYYY-MM-DD
-supersedes: null          # or DEC-{old-id} if replacing
+supersedes: null # or DEC-{old-id} if replacing
 superseded_by: null
 tags:
-  - {relevant tags}
-related_to: []            # optional — max 5 DEC IDs
+  - { relevant tags }
+related_to: [] # optional — max 5 DEC IDs
 ---
-
 # DEC-{N} — Decision Title
 
 ## Context
-...
-
+---
 ## Decision
-...
-
+---
 ## Impact
-...
 ```
 
 ---
@@ -108,6 +106,7 @@ related_to: []            # optional — max 5 DEC IDs
 ## Non-Goals
 
 This skill must NOT:
+
 - Summarize entire sessions
 - Capture raw logs
 - Duplicate existing decisions

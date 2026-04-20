@@ -41,6 +41,7 @@ This skill determines what goes into each sub-agent's context bundle.
 Read `contexts/memory/index.md`. For each bundle below that references a memory category, resolve the actual file path from the index before including it. Never hardcode memory file paths — the index is the source of truth.
 
 Key categories to resolve:
+
 - `project` category → project context file (stack, architecture, constraints)
 - `decisions` category → decisions log
 - `patterns` category → conventions and code patterns
@@ -52,6 +53,7 @@ If a category is absent from the index, omit it from the bundle silently — do 
 ### For Tier 1 (MicroDelivery)
 
 MicroDelivery bundle (minimal):
+
 ```
 - Story artefact
 - patterns category file (resolved from index.md)
@@ -62,6 +64,7 @@ MicroDelivery bundle (minimal):
 ### For Tier 2 / Tier 3 (Core Team)
 
 **Planning Sub-Agent bundle:**
+
 ```
 - Story artefact
 - orchestration.rules.md + artefacts.rules.md
@@ -74,6 +77,7 @@ MicroDelivery bundle (minimal):
 If `risk_analysis_required: true` from evaluate-story, unconditionally include the decisions category from memory in the Planning Sub-Agent bundle, regardless of other relevance filtering.
 
 **Implementation Sub-Agent bundle:**
+
 ```
 - Story artefact
 - {id}.execution-plan.md (from Planning Sub-Agent)
@@ -83,6 +87,7 @@ If `risk_analysis_required: true` from evaluate-story, unconditionally include t
 ```
 
 **QA Sub-Agent bundle:**
+
 ```
 - Story artefact (acceptance criteria is the test spec)
 - {id}.execution-plan.md (test checkpoints)
@@ -91,6 +96,7 @@ If `risk_analysis_required: true` from evaluate-story, unconditionally include t
 ```
 
 **On remediation pass (QA re-spawn):**
+
 ```
 QA bundle + {id}.qa-report.md (prior failure record)
 Implementation bundle + {id}.qa-report.md (failure diagnosis)
@@ -99,6 +105,7 @@ Implementation bundle + {id}.qa-report.md (failure diagnosis)
 ### For Tier 3 Specialists
 
 For each specialist in `specialists_triggered`:
+
 - Read specialist entry from `agents/specialists.registry.yaml`
 - Add `context_bundle` files from registry entry to Implementation Sub-Agent bundle
 - Record which specialists are activated (for impl-report)
@@ -116,6 +123,7 @@ Not written to file — this is the Orchestrator's coordination state, not a dur
 ## Non-Goals
 
 This skill must NOT:
+
 - Enrich bundles beyond what is listed for each tier — more context is not better context
 - Load full memory archives into any bundle
 - Make strategic decisions about which specialists to include (the Orchestrator decides based on evaluate-story output)

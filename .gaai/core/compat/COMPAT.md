@@ -8,12 +8,12 @@ The installer (`core/scripts/install.sh`) deploys the correct adapter to the rig
 
 ## Compatibility Matrix
 
-| Tool | Adapter File | Deployed To | Status |
-|---|---|---|---|
-| Claude Code | `claude-code.md` | `CLAUDE.md` (project root) + `.claude/commands/` | ✅ Supported |
-| Cursor | `cursor.mdc` | `.cursor/rules/gaai.mdc` | ✅ Supported |
-| Windsurf / Generic | `windsurf.md` | `AGENTS.md` (project root) | ✅ Supported |
-| Other tools | `windsurf.md` | Rename as needed | ⚠ Manual setup |
+| Tool               | Adapter File     | Deployed To                                      | Status          |
+| ------------------ | ---------------- | ------------------------------------------------ | --------------- |
+| Claude Code        | `claude-code.md` | `CLAUDE.md` (project root) + `.claude/commands/` | ✅ Supported    |
+| Cursor             | `cursor.mdc`     | `.cursor/rules/gaai.mdc`                         | ✅ Supported    |
+| Windsurf / Generic | `windsurf.md`    | `AGENTS.md` (project root)                       | ✅ Supported    |
+| Other tools        | `windsurf.md`    | Rename as needed                                 | ⚠ Manual setup |
 
 ---
 
@@ -22,6 +22,7 @@ The installer (`core/scripts/install.sh`) deploys the correct adapter to the rig
 Each adapter is a **thin wrapper** that points to the canonical GAAI files in `.gaai/`. No content is duplicated — adapters only provide tool-specific entry points.
 
 The canonical source of truth is always in `.gaai/`:
+
 - Rules → `.gaai/core/contexts/rules/`
 - Skills → `.gaai/core/skills/`
 - Agents → `.gaai/core/agents/`
@@ -32,6 +33,7 @@ The canonical source of truth is always in `.gaai/`:
 ## Manual Setup (Other Tools)
 
 If your tool is not listed above:
+
 1. Copy `windsurf.md` to your tool's equivalent of an `AGENTS.md` or system prompt file
 2. Adjust the file paths if your project structure differs
 3. The adapter content works with any tool that supports markdown-based instructions
@@ -60,6 +62,7 @@ There is no separate `deploy-adapter.sh` script. `core/scripts/install.sh` is th
 ## After Deployment
 
 Once installed, your AI tool will:
+
 1. Load the GAAI agent identity and authority model
 2. Know which skills are available and how to invoke them
 3. Respect the backlog as the authorization mechanism

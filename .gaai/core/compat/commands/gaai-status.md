@@ -9,6 +9,7 @@ Show current GAAI project state: backlog, memory, and health.
 ## What This Does
 
 Runs a quick status report:
+
 1. Active backlog summary (total items, ready count, in-progress)
 2. Memory state (files present, last updated)
 3. Recent decisions

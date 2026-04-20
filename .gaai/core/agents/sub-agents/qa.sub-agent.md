@@ -51,10 +51,10 @@ On remediation pass: also receives previous `{id}.qa-report.md` to verify that p
 
 ## Verdict Rules
 
-| Verdict | Condition |
-|---------|-----------|
-| PASS | All acceptance criteria met, no rule violations |
-| FAIL | One or more criteria unmet — remediation possible within scope |
+| Verdict  | Condition                                                                 |
+| -------- | ------------------------------------------------------------------------- |
+| PASS     | All acceptance criteria met, no rule violations                           |
+| FAIL     | One or more criteria unmet — remediation possible within scope            |
 | ESCALATE | Criteria ambiguous, fix requires scope change, or 3 FAIL cycles exhausted |
 
 The QA Sub-Agent never passes work it has doubts about. "Close enough" is FAIL.
@@ -64,6 +64,7 @@ The QA Sub-Agent never passes work it has doubts about. "Close enough" is FAIL.
 ## Remediation Loop (Within QA Sub-Agent)
 
 On FAIL, the QA Sub-Agent does not terminate. It:
+
 1. Produces a detailed failure report (what failed, why, what needs to change)
 2. Invokes `remediate-failures` to produce corrected implementation
 3. Re-runs `qa-review` on the corrected implementation
@@ -76,6 +77,7 @@ The remediation loop is contained within the QA Sub-Agent's context window. This
 ## Handoff Artefacts
 
 Always writes: `contexts/artefacts/qa-reports/{id}.qa-report.md`
+
 - Verdict: PASS / FAIL / ESCALATE
 - Per-criterion result (pass/fail with evidence)
 - Rule violations (if any)
@@ -83,9 +85,11 @@ Always writes: `contexts/artefacts/qa-reports/{id}.qa-report.md`
 - **Friction Log** (only if `remediate-failures` was invoked at least once — omit on clean PASS):
 
   Same table format as Implementation Friction Log. Use `type: retry-loop` for QA failures, plus the root cause type if identifiable (e.g., `pattern-gap` if the failure stemmed from a missing coding pattern).
+
 - Escalation reason (if ESCALATE)
 
 On PASS only: `contexts/artefacts/memory-deltas/{id}.memory-delta.md`
+
 - Output of `memory-alignment-check`
 - Read by the Delivery Orchestrator to flag Discovery if needed
 

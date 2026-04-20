@@ -181,10 +181,12 @@ ESCALATE:
 ## Flaky Test Detection Heuristic (AC4)
 
 A CI failure is classified as **likely flaky** if:
+
 1. The same CI check fails in the current cycle AND
 2. A previous cycle saw a failure in that same check with an **identical error message** (matched via the first 100 characters of the failure log for that check)
 
 When a likely-flaky failure is detected:
+
 - Do **NOT** apply code changes
 - Push an empty commit to re-trigger CI: `git commit --allow-empty -m "ci: retry (suspected flaky)"`
 - Count this as consuming the **flaky retry slot** (max 1 flaky retry total per story)
@@ -195,6 +197,7 @@ When a likely-flaky failure is detected:
 ## Fix Principles
 
 When applying corrective code changes for non-flaky failures:
+
 - **Minimal change only** — fix what CI identifies, nothing more
 - **No scope expansion** — do not refactor, add features, or change behavior beyond the CI failure
 - **Commit message convention:** `fix(ci/<story-id>): <description>` — distinguishable from feature commits
@@ -205,6 +208,7 @@ When applying corrective code changes for non-flaky failures:
 ## Outputs
 
 **CI PASS:**
+
 ```
 status: CI PASS
 cycles_used: <n>
@@ -212,6 +216,7 @@ flaky_retry_used: <true|false>
 ```
 
 **CI FAIL:**
+
 ```
 status: CI FAIL
 cycles_used: 3
@@ -225,6 +230,7 @@ remediation_report: docs/ci-failures/<story-id>-<timestamp>.md
 ## Non-Goals
 
 This skill must NOT:
+
 - Modify acceptance criteria or product scope
 - Apply fixes to pre-existing CI failures unrelated to this story's changes
 - Attempt to fix infrastructure failures (missing secrets, missing bindings, quota limits, billing limits) — these are ESCALATE conditions (detected via Step 4b fast-path; do NOT burn retry cycles)

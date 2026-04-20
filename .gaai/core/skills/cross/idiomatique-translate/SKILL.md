@@ -24,17 +24,17 @@ Translate copy from any source language to any target language with idiomatic fl
 ```json
 {
   "source_string": "You pay $0.50 per direct link request",
-  "source_language": null,                    // null = auto-detect, or explicit: "en", "fr", "de", "es"
-  "target_language": "fr",                    // required: "en", "fr", "de", "es", "it", "pt", "nl", etc.
+  "source_language": null, // null = auto-detect, or explicit: "en", "fr", "de", "es"
+  "target_language": "fr", // required: "en", "fr", "de", "es", "it", "pt", "nl", etc.
   "context": {
-    "domain": "billing",                       // domain expertise context
+    "domain": "billing", // domain expertise context
     "component": "PricingCard",
-    "tone": "transparent",                     // transparent, benevolent, precise, casual, formal, technical
-    "audience": "expert",                      // expert, prospect, admin, user
+    "tone": "transparent", // transparent, benevolent, precise, casual, formal, technical
+    "audience": "expert", // expert, prospect, admin, user
     "key": "billing.directLink.perRequest"
   },
   "glossary": {
-    "direct link": "lien direct",              // source term : target term (or multi-lang)
+    "direct link": "lien direct", // source term : target term (or multi-lang)
     "request": "demande",
     "lead": "prospect",
     "milestone": "jalon"
@@ -42,9 +42,9 @@ Translate copy from any source language to any target language with idiomatic fl
     // "direct link": { "fr": "lien direct", "de": "direkter Link", "es": "enlace directo" }
   },
   "regional_preferences": {
-    "currency": "EUR",                         // override default currency ($→€, etc.)
+    "currency": "EUR", // override default currency ($→€, etc.)
     "date_format": "DD/MM/YYYY",
-    "number_format": "de_DE"                   // locale code for number formatting
+    "number_format": "de_DE" // locale code for number formatting
   },
   "notes": "Avoid formal 'vous' / use informal 'tu', clarify that €0.50 is machine cost not per-lead"
 }
@@ -57,8 +57,8 @@ Translate copy from any source language to any target language with idiomatic fl
   "translated_string": "Tu paies 0,50 € par demande traitée",
   "source_language_detected": "en",
   "target_language": "fr",
-  "confidence": "high",                         // high, medium, low
-  "idiomaticity_score": 4.5,                    // 1-5 scale (5 = native speaker fluency)
+  "confidence": "high", // high, medium, low
+  "idiomaticity_score": 4.5, // 1-5 scale (5 = native speaker fluency)
   "notes": "Changed 'requête' to 'demande' (more natural in billing context). Used '€' instead of '$' for FR audience. Used informal 'tu' per context. Tone: factual, reassuring.",
   "alternatives": [
     {
@@ -79,6 +79,7 @@ Translate copy from any source language to any target language with idiomatic fl
 ## Translation Principles (Universal)
 
 ### 1. **Idiomatic > Literal**
+
 - ❌ "You pay $0.50 per request" → literal French: "Vous payez 0,50 $ par requête"
 - ✅ "You pay $0.50 per request" → idiomatic French: "Vous payez 0,50 € par demande"
 
@@ -89,18 +90,19 @@ Translate copy from any source language to any target language with idiomatic fl
 ### 2. **Domain-Aware Glossary Alignment**
 
 Glossary can be:
+
 - **Flat (single language pair):** `{ "source": "target" }`
 - **Multi-language keyed:** `{ "term": { "en": "...", "fr": "...", "de": "..." } }`
 
 Example (project domain):
 
-| EN | FR | DE | ES |
-|---|---|---|---|
-| **Lead** | prospect | Lead / Interessent | prospecto |
-| **Direct link** | lien direct | direkter Link | enlace directo |
-| **Milestone** | jalon | Meilenstein | hito |
-| **Expertise** | domaine de compétence | Fachgebiet | área de expertise |
-| **Spending limit** | limite de dépenses | Ausgabenlimit | límite de gasto |
+| EN                 | FR                    | DE                 | ES                |
+| ------------------ | --------------------- | ------------------ | ----------------- |
+| **Lead**           | prospect              | Lead / Interessent | prospecto         |
+| **Direct link**    | lien direct           | direkter Link      | enlace directo    |
+| **Milestone**      | jalon                 | Meilenstein        | hito              |
+| **Expertise**      | domaine de compétence | Fachgebiet         | área de expertise |
+| **Spending limit** | limite de dépenses    | Ausgabenlimit      | límite de gasto   |
 
 **Skill behavior:** Always check glossary first. If term exists in target language, use it. If not, translate idiomatically and flag for glossary update.
 
@@ -108,16 +110,17 @@ Example (project domain):
 
 Define voice once, apply across all languages:
 
-| Attribute | Principle | EN Example | FR Example | DE Example |
-|---|---|---|---|---|
-| **Transparent** | Explain the WHY | "You pay for qualified leads" | "Vous payez pour les prospects qualifiés" | "Sie zahlen für qualifizierte Leads" |
-| **Benevolent** | Avoid blame | "Honest experts get better leads" | "Les experts honnêtes reçoivent de meilleurs prospects" | "Ehrliche Experten erhalten bessere Leads" |
-| **Precise** | Avoid vague terms | "50 free requests" | "50 demandes gratuites" | "50 kostenlose Anfragen" |
-| **Multi-lang ready** | Avoid untranslatable idioms | Prefer universal phrasing | Structure that works across languages | Cultural idioms verified in target lang |
+| Attribute            | Principle                   | EN Example                        | FR Example                                              | DE Example                                 |
+| -------------------- | --------------------------- | --------------------------------- | ------------------------------------------------------- | ------------------------------------------ |
+| **Transparent**      | Explain the WHY             | "You pay for qualified leads"     | "Vous payez pour les prospects qualifiés"               | "Sie zahlen für qualifizierte Leads"       |
+| **Benevolent**       | Avoid blame                 | "Honest experts get better leads" | "Les experts honnêtes reçoivent de meilleurs prospects" | "Ehrliche Experten erhalten bessere Leads" |
+| **Precise**          | Avoid vague terms           | "50 free requests"                | "50 demandes gratuites"                                 | "50 kostenlose Anfragen"                   |
+| **Multi-lang ready** | Avoid untranslatable idioms | Prefer universal phrasing         | Structure that works across languages                   | Cultural idioms verified in target lang    |
 
 ### 4. **Context-Aware Adaptation**
 
 These apply to ANY language pair:
+
 - **Audience:** Expert (formal) vs Prospect (friendly) → affects formality level
 - **Urgency:** Error message (concise) vs Help text (detailed) → affects length
 - **Domain:** Billing (precise) vs Onboarding (encouraging) → affects tone
@@ -142,6 +145,7 @@ These apply to ANY language pair:
 ## Output Format
 
 Always return:
+
 1. **translated_string** — the translated text in target language
 2. **source_language_detected** — auto-detected or confirmed source language (ISO 639-1: en, fr, de, es, etc.)
 3. **target_language** — target language (as requested)
@@ -208,6 +212,7 @@ Finalize: Choose final translation or iterate with skill
 ## Language Coverage & Auto-Detection
 
 **Supported languages (confidence > 95%):**
+
 - EN (English), FR (Français), DE (Deutsch), ES (Español), IT (Italiano), PT (Português), NL (Nederlands)
 - Extensible to others (JA, ZH, etc.) with similar workflow
 

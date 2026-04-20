@@ -210,6 +210,12 @@ class SoftBody(DeformableObject):
         super().__init__(mesh, material)
         self._tetrahedra = tetrahedra
         self._rest_volumes = self._compute_volumes(self._rest_mesh)
+        inverted = np.where(self._rest_volumes <= 0)[0]
+        if len(inverted) > 0:
+            raise ValueError(
+                f"Tetrahedra {inverted.tolist()} have non-positive volume — "
+                "mesh contains inverted or degenerate elements"
+            )
         self._B_matrices = self._compute_shape_matrices()
 
     def _compute_volumes(self, positions: NDArray[np.floating]) -> NDArray[np.floating]:

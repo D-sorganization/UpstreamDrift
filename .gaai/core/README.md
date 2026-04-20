@@ -17,6 +17,7 @@
 ## Framework Sync (Automatic)
 
 When you commit changes to `.gaai/core/`, a post-commit hook automatically:
+
 1. Detects `.gaai/core/` was modified
 2. Clones the OSS repo (shallow)
 3. Replaces `core/` with your local version

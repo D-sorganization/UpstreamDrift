@@ -4,11 +4,11 @@ Each agent has a skill index recommending which skills to load and when.
 
 ## Agent Skill Indices
 
-| Agent | File | Skills | Required |
-|---|---|---|---|
+| Agent         | File                                            | Skills       | Required   |
+| ------------- | ----------------------------------------------- | ------------ | ---------- |
 | **Discovery** | `.gaai/core/agents/discovery.agent-skills.yaml` | 10 available | 2 required |
-| **Delivery** | `.gaai/core/agents/delivery.agent-skills.yaml` | 11 available | 2 required |
-| **Bootstrap** | `.gaai/core/agents/bootstrap.agent-skills.yaml` | 4 available | 2 required |
+| **Delivery**  | `.gaai/core/agents/delivery.agent-skills.yaml`  | 11 available | 2 required |
+| **Bootstrap** | `.gaai/core/agents/bootstrap.agent-skills.yaml` | 4 available  | 2 required |
 
 ## How to Use These Indices
 
@@ -17,11 +17,13 @@ Each agent has a skill index recommending which skills to load and when.
 When an agent starts (e.g., Discovery Agent invoked):
 
 1. **Load agent skills index:**
+
    ```yaml
    load: .gaai/core/agents/{agent}.agent-skills.yaml
    ```
 
 2. **Identify required skills:**
+
    ```
    required_skills: [SKILL-VALIDATE-ARTEFACTS-001, ...]
    action: Preload these (non-negotiable)
@@ -50,12 +52,15 @@ When an agent starts (e.g., Discovery Agent invoked):
 ## Skill Categories
 
 ### Core Skills
+
 Skills from `.gaai/core/skills/` (framework-level, generic)
 
 ### Project Skills
+
 Skills from `.gaai/project/skills/` (project-specific, domain knowledge)
 
 ### Cross Skills
+
 Reusable across agents (content, analysis, validation, governance)
 
 ## Required vs Optional
@@ -64,6 +69,7 @@ Reusable across agents (content, analysis, validation, governance)
 - **Optional:** Load on-demand when task context matches "when" condition
 
 Example from Delivery Agent:
+
 ```yaml
 required_skills:
   - remediate-failures  (always needed for QA loop)
@@ -77,6 +83,7 @@ optional_skills:
 ## Customization Per Project
 
 Project teams can extend or override agent skills:
+
 - Create `.gaai/project/agents/discovery.agent-skills.yaml`
 - Override or add project-specific skills
 - Example: Add `content-plan` as required for Discovery Agent on this project

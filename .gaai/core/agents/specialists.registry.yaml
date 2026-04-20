@@ -23,7 +23,6 @@
 # Specialists are not agents — they are scoped execution units with no authority.
 
 specialists:
-
   - id: db-migration
     description: Schema changes, migrations, database-level operations
     triggers:
@@ -38,7 +37,7 @@ specialists:
     skills:
       - implement
     context_bundle:
-      - contexts/memory/patterns/conventions.md  # db conventions if present
+      - contexts/memory/patterns/conventions.md # db conventions if present
       - contexts/rules/artefacts.rules.md
 
   - id: api-integration
@@ -56,7 +55,7 @@ specialists:
     skills:
       - implement
     context_bundle:
-      - contexts/memory/patterns/conventions.md  # api conventions if present
+      - contexts/memory/patterns/conventions.md # api conventions if present
       - contexts/rules/orchestration.rules.md
 
   - id: ui-component
@@ -74,9 +73,9 @@ specialists:
       - client-side
     skills:
       - implement
-      - frontend-design  # SKILL-FRONTEND-DESIGN-001 — distinctive UI, avoids generic AI aesthetics
+      - frontend-design # SKILL-FRONTEND-DESIGN-001 — distinctive UI, avoids generic AI aesthetics
     context_bundle:
-      - contexts/memory/patterns/conventions.md  # ui conventions if present
+      - contexts/memory/patterns/conventions.md # ui conventions if present
 
   - id: security-sensitive
     description: Authentication, authorization, secrets handling, PII, encryption
@@ -96,7 +95,7 @@ specialists:
       - security-audit
     context_bundle:
       - contexts/rules/orchestration.rules.md
-      - contexts/memory/decisions/_log.md  # security decisions are critical
+      - contexts/memory/decisions/_log.md # security decisions are critical
 
   - id: performance-critical
     description: Performance-sensitive paths, caching, query optimization, profiling
@@ -135,14 +134,14 @@ specialists:
       - article
       - newsletter
     skills:
-      - google-trends      # CNT-012 — trend intelligence via Playwright
-      - social-adapt       # CNT-007 — transform content for X/LinkedIn/Reddit
-      - repurpose          # CNT-010 — repurposing cadence and decision tree
-      - content-plan       # CNT-011 — monthly content planning
+      - google-trends # CNT-012 — trend intelligence via Playwright
+      - social-adapt # CNT-007 — transform content for X/LinkedIn/Reddit
+      - repurpose # CNT-010 — repurposing cadence and decision tree
+      - content-plan # CNT-011 — monthly content planning
     skill_paths:
-      - project/skills/domains/content-production/  # override: domain skills live here, not in core/skills/
+      - project/skills/domains/content-production/ # override: domain skills live here, not in core/skills/
     context_bundle:
-      - contexts/memory/project/brand-identity.md                   # governing authority — values, doctrine, journalist test
+      - contexts/memory/project/brand-identity.md # governing authority — values, doctrine, journalist test
       - contexts/memory/domains/content-production/index.md
       - contexts/memory/domains/content-production/voice-guide.md
-      - contexts/memory/domains/content-production/gap-analysis.md  # skill coverage map
+      - contexts/memory/domains/content-production/gap-analysis.md # skill coverage map

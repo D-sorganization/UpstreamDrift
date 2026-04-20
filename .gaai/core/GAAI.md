@@ -71,12 +71,14 @@ Welcome. This is the `.gaai/` folder — the GAAI framework living inside your p
 ## First Steps
 
 **Existing project (onboarding GAAI onto an existing codebase):**
+
 1. Activate the Bootstrap Agent. Read `core/agents/bootstrap.agent.md`.
 2. Follow `core/workflows/context-bootstrap.workflow.md` — the Bootstrap Agent will scan, extract, and structure your project's knowledge.
 3. Bootstrap fills `project/contexts/memory/project/context.md`, `project/contexts/memory/decisions/_log.md`, and `project/contexts/rules/` automatically.
 4. Once Bootstrap passes, switch to Discovery or Delivery.
 
 **New project (starting from scratch):**
+
 1. Activate the Discovery Agent. Read `core/agents/discovery.agent.md`.
 2. Describe your project idea. The Discovery Agent will ask questions to understand your project and seed the memory automatically.
 3. Once memory is seeded, start creating Epics and Stories.
@@ -94,6 +96,7 @@ production  ←── Deploy via GitHub Actions
 ```
 
 The **Delivery Daemon** automates delivery end-to-end:
+
 - Polls the backlog for `refined` stories
 - Marks them `in_progress` on staging (cross-device coordination via git push)
 - Launches AI agent sessions in isolated worktrees
@@ -106,6 +109,7 @@ Usage: `/gaai-daemon` to start, `/gaai-daemon --stop` to stop. One-time setup: `
 Git hooks are managed via dispatchers in `.githooks/` that delegate to scripts in `.gaai/core/hooks/<hook>.d/` (framework) and `.gaai/project/hooks/<hook>.d/` (project-specific). The installer (`install.sh`) sets up all dispatchers automatically.
 
 Active hooks:
+
 - **pre-push** — blocks pushes to protected branches (`production`, `main`) via `core/hooks/pre-push.d/01-block-production.sh`
 - **post-commit** — runs framework maintenance (skills index, lint, memory check) and project hooks
 
@@ -126,6 +130,7 @@ Each git hook in `.githooks/` is a thin dispatcher — it does not contain busin
 **To add a new hook type** (e.g. `pre-commit`):
 
 1. Create the dispatcher template in `.gaai/core/hooks/pre-commit`:
+
    ```bash
    #!/bin/bash
    # pre-commit dispatcher — executes hooks from core/ then project/
@@ -142,6 +147,7 @@ Each git hook in `.githooks/` is a thin dispatcher — it does not contain busin
    done
    exit 0
    ```
+
 2. Create `.gaai/core/hooks/pre-commit.d/` and add your scripts.
 3. Run `install.sh` — it auto-discovers all dispatcher templates in `core/hooks/` and installs them to `.githooks/`.
 

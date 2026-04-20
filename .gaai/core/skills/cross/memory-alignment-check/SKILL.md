@@ -41,6 +41,7 @@ This skill checks that both remain consistent after each delivery.
 ### 1. Extract Implementation Footprint
 
 From `{id}.impl-report.md`:
+
 - Files modified or created
 - New modules or services introduced
 - Patterns applied during implementation
@@ -50,6 +51,7 @@ From `{id}.impl-report.md`:
 ### 2. Retrieve Relevant Memory (Selective)
 
 Using `contexts/memory/index.md`:
+
 - Identify memory entries whose tags intersect the Story's scope and touched modules
 - Load only those entries — do not load all memory
 - Scope: project context, patterns, decisions relevant to the implementation footprint
@@ -70,6 +72,7 @@ For each relevant memory entry, assign one verdict:
 ### 4. Identify New Knowledge Not Yet in Memory
 
 From the implementation footprint, extract candidates not present in memory:
+
 - New patterns introduced not in `contexts/memory/patterns/`
 - New architectural or technical decisions not in `contexts/memory/decisions/`
 - New constraints or conventions applied for the first time
@@ -89,7 +92,6 @@ story_id: E01S01
 generated_at: YYYY-MM-DD
 verdict: ALIGNED | DRIFT_DETECTED | NEW_KNOWLEDGE_FOUND | DRIFT_AND_NEW_KNOWLEDGE
 ---
-
 ## Confirmed Entries
 
 - memory_id: PATTERNS-001
@@ -119,12 +121,12 @@ verdict: ALIGNED | DRIFT_DETECTED | NEW_KNOWLEDGE_FOUND | DRIFT_AND_NEW_KNOWLEDG
 
 ## Verdict Logic
 
-| Verdict | Condition |
-|---|---|
-| `ALIGNED` | No contradictions, no new knowledge candidates |
-| `DRIFT_DETECTED` | One or more memory entries contradicted by the implementation |
-| `NEW_KNOWLEDGE_FOUND` | New knowledge candidates identified, no contradictions |
-| `DRIFT_AND_NEW_KNOWLEDGE` | Both contradictions and new knowledge candidates present |
+| Verdict                   | Condition                                                     |
+| ------------------------- | ------------------------------------------------------------- |
+| `ALIGNED`                 | No contradictions, no new knowledge candidates                |
+| `DRIFT_DETECTED`          | One or more memory entries contradicted by the implementation |
+| `NEW_KNOWLEDGE_FOUND`     | New knowledge candidates identified, no contradictions        |
+| `DRIFT_AND_NEW_KNOWLEDGE` | Both contradictions and new knowledge candidates present      |
 
 ---
 
@@ -141,6 +143,7 @@ verdict: ALIGNED | DRIFT_DETECTED | NEW_KNOWLEDGE_FOUND | DRIFT_AND_NEW_KNOWLEDG
 ## Non-Goals
 
 This skill must NOT:
+
 - Write or update any memory file
 - Trigger `memory-ingest` directly (only Discovery may do so)
 - Scan the full codebase

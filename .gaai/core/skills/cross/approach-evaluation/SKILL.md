@@ -25,6 +25,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when the invoking agent identifies a technical or architectural decision point where:
+
 - Multiple viable implementation approaches exist and the best choice is non-obvious
 - A technology, library, or service is being introduced for the first time in the project
 - No established convention exists in `conventions.md` for the problem domain
@@ -32,6 +33,7 @@ Activate when the invoking agent identifies a technical or architectural decisio
 - A prior approach failed or showed limitations (post-mortem driven re-evaluation)
 
 Do NOT activate when:
+
 - A convention already exists in `conventions.md` for this exact problem
 - The approach is explicitly defined in the Story or a prior decision
 - The Story is Tier 1 / MicroDelivery with obvious implementation
@@ -50,7 +52,7 @@ Do NOT activate when:
    - The `project` category file → extract tech stack, architectural boundaries, known constraints
    - The `patterns` category file → extract established patterns and conventions
    - The `decisions` category file → extract prior decisions on related topics
-   Do not assume specific file paths — resolve from index.
+     Do not assume specific file paths — resolve from index.
 3. Define evaluation criteria specific to this problem. Always include:
    - **Stack compatibility** — does it work with the project's tech stack? (read from project context file, not hardcoded here)
    - **Constraint alignment** — does it respect the architectural boundaries described in the project context?
@@ -102,10 +104,10 @@ Do NOT activate when:
 
 ## Evaluation Criteria
 
-| # | Criterion | Weight | Source |
-|---|-----------|--------|--------|
-| C1 | {criterion} | must-have / important / nice-to-have | {project context reference} |
-| C2 | {criterion} | must-have / important / nice-to-have | {project context reference} |
+| #   | Criterion   | Weight                               | Source                      |
+| --- | ----------- | ------------------------------------ | --------------------------- |
+| C1  | {criterion} | must-have / important / nice-to-have | {project context reference} |
+| C2  | {criterion} | must-have / important / nice-to-have | {project context reference} |
 
 ## Approaches Identified
 
@@ -129,19 +131,21 @@ Do NOT activate when:
 
 ## Comparison Matrix
 
-| Criterion | Approach A | Approach B | Approach C |
-|-----------|-----------|-----------|-----------|
+| Criterion  | Approach A           | Approach B           | Approach C           |
+| ---------- | -------------------- | -------------------- | -------------------- |
 | C1: {name} | {factual assessment} | {factual assessment} | {factual assessment} |
 | C2: {name} | {factual assessment} | {factual assessment} | {factual assessment} |
 
 ## Trade-offs
 
 ### Approach A
+
 - **Gains:** {what you get}
 - **Costs:** {what you accept}
 - **Lock-in:** {reversibility assessment}
 
 ### Approach B
+
 - **Gains:** {what you get}
 - **Costs:** {what you accept}
 - **Lock-in:** {reversibility assessment}
@@ -176,6 +180,7 @@ Saves to `contexts/artefacts/evaluations/{id}.approach-evaluation.md`.
 ## Non-Goals
 
 This skill must NOT:
+
 - Recommend or decide — the agent decides after reading the evaluation
 - Invent criteria not grounded in project context
 - Hallucinate library capabilities or industry practices — cite sources

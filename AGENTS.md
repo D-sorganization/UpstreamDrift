@@ -68,11 +68,13 @@ project_name/
 **MANDATORY**: All new code must follow the Test-Driven Development methodology:
 
 1. **🔴 RED - Write a Failing Test First**
+
    - Before writing any production code, write a unit test that defines the new functionality or behavior.
    - The test MUST fail initially because the production code has not yet been written.
    - This ensures you understand the requirements before implementation.
 
 2. **🟢 GREEN - Make the Test Pass**
+
    - Write the **minimal** amount of production code necessary to make the failing test pass.
    - The goal is purely to pass the test, not to write perfect or optimized code.
    - Resist the temptation to add features not covered by tests.

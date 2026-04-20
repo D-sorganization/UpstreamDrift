@@ -27,6 +27,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - A Story is validated for implementation
 - An execution plan exists decomposing the Story into actionable steps
 - Relevant memory, rules, and constraints are available
@@ -54,6 +55,7 @@ Only proceed when all prerequisites are present and unambiguous.
 **`test_artifacts`** — test files (unit/integration) aligned with acceptance criteria
 
 **`implementation_report`** — human-readable summary including:
+
 - Mapping to plan steps
 - Rules applied
 - Memory constraints referenced
@@ -78,6 +80,7 @@ Only proceed when all prerequisites are present and unambiguous.
 ## Non-Goals
 
 This skill must NOT:
+
 - Redefine product intent
 - Add unrequested features
 - Bypass governance rules

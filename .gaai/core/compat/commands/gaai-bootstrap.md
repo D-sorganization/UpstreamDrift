@@ -9,6 +9,7 @@ Activate the Bootstrap Agent to initialize or refresh project context.
 ## What This Does
 
 Runs the Bootstrap Agent workflow to:
+
 1. Scan the codebase structure (`codebase-scan`)
 2. Extract architecture understanding (`architecture-extract`)
 3. Extract durable decisions (`decision-extraction`)

@@ -13,6 +13,7 @@ A workflow answers one question:
 > "What is the next step, and under what constraints?"
 
 Workflows:
+
 - Make the process explicit
 - Prevent skipping steps
 - Guarantee Discovery precedes Delivery
@@ -35,12 +36,12 @@ Each track has its own workflow, agents, rules, and artefacts.
 
 ## Workflow Index
 
-| File | Purpose | Track |
-|---|---|---|
-| `context-bootstrap.workflow.md` | Initialize project context on an existing codebase | Cross |
-| `delivery-loop.workflow.md` | Autopiloted delivery with QA gating | Delivery |
-| `discovery-to-delivery.workflow.md` | Handoff protocol from Discovery to Delivery | Cross |
-| `emergency-rollback.workflow.md` | What to do when delivery goes wrong | Cross |
+| File                                | Purpose                                            | Track    |
+| ----------------------------------- | -------------------------------------------------- | -------- |
+| `context-bootstrap.workflow.md`     | Initialize project context on an existing codebase | Cross    |
+| `delivery-loop.workflow.md`         | Autopiloted delivery with QA gating                | Delivery |
+| `discovery-to-delivery.workflow.md` | Handoff protocol from Discovery to Delivery        | Cross    |
+| `emergency-rollback.workflow.md`    | What to do when delivery goes wrong                | Cross    |
 
 ---
 

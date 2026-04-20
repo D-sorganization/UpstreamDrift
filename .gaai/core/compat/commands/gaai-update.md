@@ -30,6 +30,7 @@ Look for `.gaai/core/scripts/install.sh` in the current working directory. If it
 **Step 2 — Ask what to update**
 
 Ask the user:
+
 - "Update framework core from a source repo? If so, provide the path to the GAAI framework repo (e.g., `/tmp/gaai`)."
 - "Or just redeploy adapters for a different AI tool? If so, which tool: claude-code, cursor, windsurf, or other?"
 

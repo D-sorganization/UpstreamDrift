@@ -25,6 +25,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate:
+
 - After major discovery or delivery phases
 - When memory exceeds comfortable context size
 - Periodically on active projects (weekly or per sprint)
@@ -42,12 +43,12 @@ This skill governs and optimizes **existing memory only** — it does not create
 5. **Compact with R7 category-aware rules:**
    - **Durable memory** (decisions, patterns, project, ops, contacts, domains): only entries with explicit supersession markers (`> SUPERSEDED by DEC-XX`, `> RETRACTED`, `> OBSOLETE — {reason}`) may be archived. All other entries are ACTIVE and MUST NOT be archived. Decisions are already individual ADR files (`decisions/DEC-{N}.md`) — no compaction needed. For other oversized durable files → domain-split, not archive.
    - **Ephemeral memory** (sessions): standard compaction — summarize and archive.
-5b. **Summary lifecycle — mandatory when extending summary coverage:** When creating or extending a decisions summary file that supersedes an existing one (e.g., `decisions-90-145.summary.md` → `decisions-90-155.summary.md`):
-   a. Write the new summary file with updated frontmatter (`id`, `updated_at`, source range).
-   b. Update `index.md` Summaries section: replace the old filename with the new one.
-   c. Delete the old summary file from disk (it is now superseded; do not leave orphan files).
-   d. Verify: confirm old filename is gone from disk AND `index.md` pointer is updated before proceeding.
-   Also check `decisions/_log.md` for any `⚠️ PENDING: extend summary range` notes — process them and remove the notes once handled.
+     5b. **Summary lifecycle — mandatory when extending summary coverage:** When creating or extending a decisions summary file that supersedes an existing one (e.g., `decisions-90-145.summary.md` → `decisions-90-155.summary.md`):
+     a. Write the new summary file with updated frontmatter (`id`, `updated_at`, source range).
+     b. Update `index.md` Summaries section: replace the old filename with the new one.
+     c. Delete the old summary file from disk (it is now superseded; do not leave orphan files).
+     d. Verify: confirm old filename is gone from disk AND `index.md` pointer is updated before proceeding.
+     Also check `decisions/_log.md` for any `⚠️ PENDING: extend summary range` notes — process them and remove the notes once handled.
 6. **Update memory index:** update `index.md` frontmatter `updated_at` to reflect this refresh run.
 
 ---
@@ -66,6 +67,7 @@ This skill governs and optimizes **existing memory only** — it does not create
 ## Non-Goals
 
 This skill must NOT:
+
 - Create new project memory
 - Record new decisions (use `memory-ingest` or `decision-extraction`)
 - Generate architecture context

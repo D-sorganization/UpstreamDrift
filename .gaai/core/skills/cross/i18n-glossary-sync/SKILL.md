@@ -27,10 +27,17 @@ Ensure all domain-specific terms used in i18n translations are documented in the
   "glossary_path": "domains/i18n/glossary.md",
   "languages": ["en", "fr", "de", "es"],
   "domain_terms": [
-    "lead", "prospect", "expert", "milestone", "direct link",
-    "spending limit", "flag", "qualification rate", "trust score"
+    "lead",
+    "prospect",
+    "expert",
+    "milestone",
+    "direct link",
+    "spending limit",
+    "flag",
+    "qualification rate",
+    "trust score"
   ],
-  "analysis_mode": "comprehensive",  // or "quick" (just check coverage)
+  "analysis_mode": "comprehensive", // or "quick" (just check coverage)
   "output_format": "json"
 }
 ```
@@ -40,7 +47,7 @@ Ensure all domain-specific terms used in i18n translations are documented in the
 ```json
 {
   "glossary_summary": {
-    "status": "NEEDS_UPDATE",         // UP_TO_DATE, NEEDS_UPDATE, CRITICAL_GAPS
+    "status": "NEEDS_UPDATE", // UP_TO_DATE, NEEDS_UPDATE, CRITICAL_GAPS
     "glossary_terms": 28,
     "translations_found": 26,
     "missing_translations": 2,
@@ -67,7 +74,7 @@ Ensure all domain-specific terms used in i18n translations are documented in the
         },
         "fr": {
           "usage_count": 11,
-          "variants": ["prospect", "prospects", "Leads"],  // ❌ "Leads" is variant
+          "variants": ["prospect", "prospects", "Leads"], // ❌ "Leads" is variant
           "consistent": false,
           "inconsistent_instances": [
             {
@@ -105,10 +112,26 @@ Ensure all domain-specific terms used in i18n translations are documented in the
         "es": "hito"
       },
       "actual_usage": {
-        "en": { "usage_count": 24, "variants": ["milestone", "milestones"], "consistent": true },
-        "fr": { "usage_count": 24, "variants": ["jalon", "jalons"], "consistent": true },
-        "de": { "usage_count": 24, "variants": ["Meilenstein", "Meilensteine"], "consistent": true },
-        "es": { "usage_count": 24, "variants": ["hito", "hitos"], "consistent": true }
+        "en": {
+          "usage_count": 24,
+          "variants": ["milestone", "milestones"],
+          "consistent": true
+        },
+        "fr": {
+          "usage_count": 24,
+          "variants": ["jalon", "jalons"],
+          "consistent": true
+        },
+        "de": {
+          "usage_count": 24,
+          "variants": ["Meilenstein", "Meilensteine"],
+          "consistent": true
+        },
+        "es": {
+          "usage_count": 24,
+          "variants": ["hito", "hitos"],
+          "consistent": true
+        }
       },
       "recommendations": []
     },
@@ -117,15 +140,31 @@ Ensure all domain-specific terms used in i18n translations are documented in the
       "status": "MISSING_TRANSLATION",
       "glossary": {
         "en": "qualification rate",
-        "fr": null,                   // ❌ missing
-        "de": null,                   // ❌ missing
-        "es": null                    // ❌ missing
+        "fr": null, // ❌ missing
+        "de": null, // ❌ missing
+        "es": null // ❌ missing
       },
       "actual_usage": {
-        "en": { "usage_count": 5, "variants": ["qualification rate", "qualification_rate"], "consistent": true },
-        "fr": { "usage_count": 4, "variants": ["taux de qualification"], "consistent": true },
-        "de": { "usage_count": 4, "variants": ["Qualifizierungsquote"], "consistent": true },
-        "es": { "usage_count": 4, "variants": ["tasa de calificación"], "consistent": true }
+        "en": {
+          "usage_count": 5,
+          "variants": ["qualification rate", "qualification_rate"],
+          "consistent": true
+        },
+        "fr": {
+          "usage_count": 4,
+          "variants": ["taux de qualification"],
+          "consistent": true
+        },
+        "de": {
+          "usage_count": 4,
+          "variants": ["Qualifizierungsquote"],
+          "consistent": true
+        },
+        "es": {
+          "usage_count": 4,
+          "variants": ["tasa de calificación"],
+          "consistent": true
+        }
       },
       "recommendations": [
         "Add FR translation to glossary: 'taux de qualification'",
@@ -180,7 +219,7 @@ Ensure all domain-specific terms used in i18n translations are documented in the
     ]
   },
   "statistics": {
-    "glossary_coverage": "92.8%",     // terms in glossary / discovered terms
+    "glossary_coverage": "92.8%", // terms in glossary / discovered terms
     "translation_coverage": {
       "fr": "100%",
       "de": "92.8%",
@@ -260,6 +299,7 @@ locales/fr/dashboard.json should use "prospect", not "Leads" or "client"
 Different languages handle pluralization differently. Options:
 
 **Option A: Manual (current MVP approach)**
+
 ```json
 {
   "leads.singular": "1 lead",
@@ -268,6 +308,7 @@ Different languages handle pluralization differently. Options:
 ```
 
 **Option B: i18next-plural (recommended post-MVP)**
+
 ```json
 {
   "lead_one": "1 lead",
@@ -326,17 +367,17 @@ Canonical format (Markdown with YAML table):
 
 ## Domain Terms
 
-| Term | EN | FR | DE | ES | Context | Notes | Variants |
-|---|---|---|---|---|---|---|---|
-| dashboard | dashboard | tableau de bord | Dashboard | panel | Navigation | Main overview screen | dashboard, dashboards |
+| Term      | EN        | FR                | DE             | ES                 | Context      | Notes                        | Variants              |
+| --------- | --------- | ----------------- | -------------- | ------------------ | ------------ | ---------------------------- | --------------------- |
+| dashboard | dashboard | tableau de bord   | Dashboard      | panel              | Navigation   | Main overview screen         | dashboard, dashboards |
 | workspace | workspace | espace de travail | Arbeitsbereich | espacio de trabajo | Multi-tenant | Container for projects/users | workspace, workspaces |
-| plan | plan | forfait | Tarif | plan | Billing | Subscription tier name | plan, plans |
+| plan      | plan      | forfait           | Tarif          | plan               | Billing      | Subscription tier name       | plan, plans           |
 
 ## Deprecation Log
 
-| Deprecated | Replaced By | Deprecation Date | Removal Date |
-|---|---|---|---|
-| matchable | profil visible | 2026-03-02 | 2026-06-02 |
+| Deprecated | Replaced By    | Deprecation Date | Removal Date |
+| ---------- | -------------- | ---------------- | ------------ |
+| matchable  | profil visible | 2026-03-02       | 2026-06-02   |
 ```
 
 ---
@@ -354,6 +395,7 @@ Canonical format (Markdown with YAML table):
 ## Notes for Delivery Agent
 
 This skill is **audit + proposal only**. Delivery Agent must:
+
 1. Run this skill (generates report + proposals)
 2. Review "glossary_update_proposal" section
 3. Manually update `domains/i18n/glossary.md` (or use glossary editor UI post-MVP)

@@ -23,6 +23,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - The Discovery Agent runs the Skill Optimize protocol and needs to score a skill output
 - A skill's instructions have been modified and a before/after quality comparison is needed
 - A baseline score is being established for a skill that has never been evaluated
@@ -53,14 +54,14 @@ For each assertion where `type: code`:
 
 1. Read the `check` field. Execute the corresponding mechanical verification:
 
-   | `check` | Verification method |
-   |---|---|
-   | `word_count` | Count whitespace-separated tokens in the output file. Compare against `params.min` and `params.max`. |
-   | `char_count` | Count all characters in the output file. Compare against `params.min` and `params.max`. |
-   | `regex_match` | Apply `params.pattern` as a regex to the full output text. PASS if at least one match found. |
-   | `regex_not_match` | Apply `params.pattern` as a regex to the full output text. PASS if zero matches found. |
-   | `structure_present` | Search the output text for the literal string `params.marker`. PASS if found. |
-   | `structure_absent` | Search the output text for the literal string `params.marker`. PASS if NOT found. |
+   | `check`             | Verification method                                                                                  |
+   | ------------------- | ---------------------------------------------------------------------------------------------------- |
+   | `word_count`        | Count whitespace-separated tokens in the output file. Compare against `params.min` and `params.max`. |
+   | `char_count`        | Count all characters in the output file. Compare against `params.min` and `params.max`.              |
+   | `regex_match`       | Apply `params.pattern` as a regex to the full output text. PASS if at least one match found.         |
+   | `regex_not_match`   | Apply `params.pattern` as a regex to the full output text. PASS if zero matches found.               |
+   | `structure_present` | Search the output text for the literal string `params.marker`. PASS if found.                        |
+   | `structure_absent`  | Search the output text for the literal string `params.marker`. PASS if NOT found.                    |
 
 2. Record the result:
    - PASS: the assertion result is PASS with the measured value (e.g., word count = 1247)
@@ -71,6 +72,7 @@ For each assertion where `type: code`:
 For each assertion where `type: llm-judge`:
 
 1. Construct the evaluation prompt:
+
    ```
    {assertion.prompt}
 
@@ -122,17 +124,18 @@ The skill produces a score report in the following structured Markdown format:
 
 ## Results
 
-| ID | Type | Description | Result | Details |
-|----|------|-------------|--------|---------|
-| A01 | code | Word count within ±15% of target | PASS | 1247 words (range: 1020–1380) |
-| A02 | code | Kill list word 'leverage' absent | FAIL | 2 matches found |
-| A03 | llm-judge | Post stands alone without prior context | PASS | "The post opens with a clear hook and requires no prior context to understand." |
+| ID  | Type      | Description                             | Result | Details                                                                         |
+| --- | --------- | --------------------------------------- | ------ | ------------------------------------------------------------------------------- |
+| A01 | code      | Word count within ±15% of target        | PASS   | 1247 words (range: 1020–1380)                                                   |
+| A02 | code      | Kill list word 'leverage' absent        | FAIL   | 2 matches found                                                                 |
+| A03 | llm-judge | Post stands alone without prior context | PASS   | "The post opens with a clear hook and requires no prior context to understand." |
 
 ---
 
 ## Failed Assertions
 
 ### A02 — Kill list word 'leverage' absent
+
 - **Type:** code
 - **Check:** regex_not_match
 - **Pattern:** `\bleverag(e|ing|ed)\b`
@@ -145,9 +148,9 @@ The score report may also be emitted as structured YAML if the invoking agent re
 eval_report:
   skill: content-draft
   evals_version: "1.0"
-  output_file: {path}
-  evals_file: {path}
-  run_date: {ISO 8601}
+  output_file: { path }
+  evals_file: { path }
+  run_date: { ISO 8601 }
   score:
     passed: 4
     total: 5
@@ -177,6 +180,7 @@ eval_report:
 ## Non-Goals
 
 This skill must NOT:
+
 - Modify the output file being evaluated
 - Modify the source skill whose output is being evaluated
 - Invoke any other skill (skills never chain)

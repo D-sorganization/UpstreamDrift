@@ -28,6 +28,7 @@ outputs:
 ## Purpose / When to Activate
 
 Activate when:
+
 - A new agent or sub-agent definition is created
 - An agent's frontmatter is modified (role, id, track, lifecycle)
 - A specialist entry is added, modified, or removed in `specialists.registry.yaml`
@@ -46,6 +47,7 @@ available in the GAAI framework. Consumed by `gaai-status` and agent onboarding 
 
 Traverse `.gaai/core/agents/` recursively. Collect every `.md` file except `README.agents.md`.
 This includes:
+
 - Primary agents: `discovery.agent.md`, `delivery.agent.md`, `bootstrap.agent.md`
 - Sub-agents: `sub-agents/*.sub-agent.md`
 
@@ -56,16 +58,16 @@ Ignore non-.md files and the README.
 For each agent `.md` file, read the YAML frontmatter block (between `---` delimiters).
 Extract the following fields:
 
-| Field | Source | Notes |
-|---|---|---|
-| `type` | frontmatter `type` | `agent` or `sub-agent` |
-| `id` | frontmatter `id` | Required |
-| `role` | frontmatter `role` | Required |
-| `track` | frontmatter `track` | Required |
-| `parent` | frontmatter `parent` | Sub-agents only; absent for primary agents |
-| `lifecycle` | frontmatter `lifecycle` | e.g. `ephemeral`, `persistent` |
-| `updated_at` | frontmatter `updated_at` | May be absent |
-| `path` | derived — relative path from `.gaai/core/agents/` | e.g. `sub-agents/planning.sub-agent.md` |
+| Field        | Source                                            | Notes                                      |
+| ------------ | ------------------------------------------------- | ------------------------------------------ |
+| `type`       | frontmatter `type`                                | `agent` or `sub-agent`                     |
+| `id`         | frontmatter `id`                                  | Required                                   |
+| `role`       | frontmatter `role`                                | Required                                   |
+| `track`      | frontmatter `track`                               | Required                                   |
+| `parent`     | frontmatter `parent`                              | Sub-agents only; absent for primary agents |
+| `lifecycle`  | frontmatter `lifecycle`                           | e.g. `ephemeral`, `persistent`             |
+| `updated_at` | frontmatter `updated_at`                          | May be absent                              |
+| `path`       | derived — relative path from `.gaai/core/agents/` | e.g. `sub-agents/planning.sub-agent.md`    |
 
 If a required field is missing, log a warning inline in the entry but do not skip it.
 
@@ -83,6 +85,7 @@ Overwrite any existing file — this is a fully derived artifact.
 ### Step 5 — Report
 
 Return to the invoking agent:
+
 - Count of agents, sub-agents, and specialists indexed
 - Any entries with missing required fields
 - Any duplicate `id` values
@@ -155,6 +158,7 @@ specialists:
 ## Non-Goals
 
 This skill must NOT:
+
 - Edit any agent .md file or specialists.registry.yaml
 - Make decisions about which agents are valid or active
 - Merge conflicting entries — only report them

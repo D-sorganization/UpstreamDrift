@@ -70,6 +70,7 @@ The Implementation Sub-Agent waits for each specialist handoff before proceeding
 Writes to: `contexts/artefacts/impl-reports/{id}.impl-report.md`
 
 The artefact must include:
+
 - Summary of changes made (files created/modified)
 - Mapping of each change to its acceptance criterion
 - Rules applied
@@ -77,10 +78,11 @@ The artefact must include:
 - Specialist sub-agents invoked (if any) and their outputs
 - **Friction Log** (if any friction occurred — omit entirely if delivery was smooth):
 
-  | # | phase | type | description | workaround | signal |
-  |---|-------|------|-------------|------------|--------|
+  | #   | phase | type | description | workaround | signal |
+  | --- | ----- | ---- | ----------- | ---------- | ------ |
 
   Controlled vocabulary:
+
   - **phase:** `planning` | `implementation` | `integration`
   - **type:** `ac-ambiguity` | `missing-context` | `tool-failure` | `rule-conflict` | `scope-drift` | `pattern-gap` | `retry-loop`
   - **signal:** `low` (one-off) | `medium` (could recur) | `high` (systemic, will recur)
