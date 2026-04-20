@@ -8,16 +8,28 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-# Mock pydrake before importing the module under test
+_PYDRAKE_MOCKED_KEYS = ["pydrake", "pydrake.all"]
+_pydrake_saved: dict[str, object] = {
+    k: sys.modules[k] for k in _PYDRAKE_MOCKED_KEYS if k in sys.modules
+}
+# Mock pydrake before importing the module under test.
+# teardown_module() removes these entries from sys.modules afterward.
 mock_pydrake = MagicMock()
-sys.modules["pydrake"] = mock_pydrake
-sys.modules["pydrake.all"] = mock_pydrake
+for _k in _PYDRAKE_MOCKED_KEYS:
+    sys.modules[_k] = mock_pydrake
 
-# Now import the module under test
-# We use 'src' as a package anchor if possible, or relative import if path is set
 from src.engines.physics_engines.drake.python.src.induced_acceleration import (  # noqa: E402
     DrakeInducedAccelerationAnalyzer,
 )
+
+
+def teardown_module(module) -> None:
+    """Remove pydrake mock from sys.modules to avoid polluting other tests."""
+    for k in _PYDRAKE_MOCKED_KEYS:
+        if k in _pydrake_saved:
+            sys.modules[k] = _pydrake_saved[k]
+        else:
+            sys.modules.pop(k, None)
 
 
 class TestDrakeInducedAcceleration:

@@ -9,10 +9,15 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-# Mock pydrake before importing
+_PYDRAKE_MOCKED_KEYS = ["pydrake", "pydrake.all"]
+_pydrake_saved: dict[str, object] = {
+    k: sys.modules[k] for k in _PYDRAKE_MOCKED_KEYS if k in sys.modules
+}
+# Mock pydrake before importing the module under test.
+# teardown_module() removes these entries from sys.modules afterward.
 mock_pydrake = MagicMock()
-sys.modules["pydrake"] = mock_pydrake
-sys.modules["pydrake.all"] = mock_pydrake
+for _k in _PYDRAKE_MOCKED_KEYS:
+    sys.modules[_k] = mock_pydrake
 
 
 # Fix mocking for class methods and types
@@ -236,3 +241,12 @@ class TestDrakeVisualizer:
         assert len(visualizer.visible_coms) == 0
         assert len(visualizer.visible_ellipsoids) == 0
         mock_meshcat.Delete.assert_called_with("visual_overlays")
+
+
+def teardown_module(module) -> None:
+    """Remove pydrake mock from sys.modules to avoid polluting other tests."""
+    for k in _PYDRAKE_MOCKED_KEYS:
+        if k in _pydrake_saved:
+            sys.modules[k] = _pydrake_saved[k]
+        else:
+            sys.modules.pop(k, None)
