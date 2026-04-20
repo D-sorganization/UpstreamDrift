@@ -11,6 +11,7 @@ High-performance data handling with optimized MATLAB loading and frame processin
 from __future__ import annotations
 
 import logging
+import math
 import threading
 import time
 import warnings
@@ -734,31 +735,39 @@ class GeometryUtils:
         # Normalize input vectors
         if vec1 is None:
             raise ValueError("vec1 must be provided")
-        v1 = vec1 / np.linalg.norm(vec1)
-        v2 = vec2 / np.linalg.norm(vec2)
-
-        # If vectors are already aligned
-        if np.allclose(v1, v2):
-            return np.eye(3, dtype=np.float32)
-
-        # If vectors are opposite
-        if np.allclose(v1, -v2):
-            # Find any perpendicular vector
-            if abs(v1[0]) < 0.9:
-                perpendicular = np.array([1.0, 0.0, 0.0], dtype=np.float32)
-            else:
-                perpendicular = np.array([0.0, 1.0, 0.0], dtype=np.float32)
-
-            v = np.cross(v1, perpendicular)
-            v = v / np.linalg.norm(v)
-
-            # 180 degree rotation
-            return 2 * np.outer(v, v) - np.eye(3, dtype=np.float32)
+        n1 = math.sqrt(vec1[0] * vec1[0] + vec1[1] * vec1[1] + vec1[2] * vec1[2])
+        n2 = math.sqrt(vec2[0] * vec2[0] + vec2[1] * vec2[1] + vec2[2] * vec2[2])
+        v1 = vec1 / n1
+        v2 = vec2 / n2
 
         # General case using Rodrigues formula
         v = np.cross(v1, v2)
-        s = np.linalg.norm(v)
-        c = np.dot(v1, v2)
+        s = math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2])
+
+        if s < 1e-6:
+            # ⚡ Bolt: Using math.sqrt and manual dot product instead of np.linalg.norm
+            # and np.allclose avoids heavy numpy abstraction overhead inside Numba
+            c = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
+            if c > 0:
+                return np.eye(3, dtype=np.float32)
+            else:
+                # Find any perpendicular vector
+                if abs(v1[0]) < 0.9:
+                    perpendicular = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+                else:
+                    perpendicular = np.array([0.0, 1.0, 0.0], dtype=np.float32)
+
+                v_perp = np.cross(v1, perpendicular)
+                v_perp = v_perp / math.sqrt(
+                    v_perp[0] * v_perp[0]
+                    + v_perp[1] * v_perp[1]
+                    + v_perp[2] * v_perp[2]
+                )
+                return (
+                    2 * np.outer(v_perp, v_perp) - np.eye(3, dtype=np.float32)
+                ).astype(np.float32)
+
+        c = v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2]
 
         vx = np.array(
             [[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]], dtype=np.float32
