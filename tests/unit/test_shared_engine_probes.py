@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -174,6 +175,19 @@ def test_pinocchio_probe_missing_dir(tmp_path):
         result = probe.probe()
         assert result.status == ProbeStatus.MISSING_ASSETS
         assert "engine directory" in result.missing_dependencies
+
+
+def test_pinocchio_probe_rejects_wrong_package(tmp_path):
+    engine_dir = tmp_path / "engines/physics_engines/pinocchio"
+    (engine_dir / "python/pinocchio_golf").mkdir(parents=True)
+    wrong_package = SimpleNamespace(__version__="0.4.3")
+
+    with patch.dict(sys.modules, {"pinocchio": wrong_package}):
+        probe = PinocchioProbe(tmp_path)
+        result = probe.probe()
+
+    assert result.status == ProbeStatus.NOT_INSTALLED
+    assert "missing required rigid-body API" in result.diagnostic_message
 
 
 # Test PendulumProbe

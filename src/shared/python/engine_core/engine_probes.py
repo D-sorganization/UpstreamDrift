@@ -342,6 +342,20 @@ class PinocchioProbe(EngineProbe):
                 diagnostic_message="Pinocchio Python package not installed. "
                 "Install with: pip install pin",
             )
+        required_api = ("Model", "buildModelFromUrdf", "aba", "integrate")
+        missing_api = [name for name in required_api if not hasattr(pinocchio, name)]
+        if missing_api:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=version,
+                missing_dependencies=["pinocchio"],
+                diagnostic_message=(
+                    "Incorrect pinocchio package: missing required rigid-body "
+                    f"API {', '.join(missing_api)}. Install Pinocchio from "
+                    "conda-forge."
+                ),
+            )
 
         # Check for engine directory
         engine_dir = self.suite_root / "engines" / "physics_engines" / "pinocchio"

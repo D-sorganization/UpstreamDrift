@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-19T00:00:00Z
+Last-Updated: 2026-04-20T05:00:00Z
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-19T00:00:00Z
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.135                                            |
+| **Spec Version**        | 1.0.136                                            |
 | **Last Spec Update**    | 2026-04-20                                         |
 
 ## 2. Purpose & Mission
@@ -667,4 +667,5 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-20: Guarded Pinocchio energy checks behind complete finite-state verification and aligned RK4 torque sampling test coverage in pendulum engine probes.
 - 2026-04-16: Fixed import sorting in analyzer.py, advanced_export.py, and related files; restored completist audit documentation.
