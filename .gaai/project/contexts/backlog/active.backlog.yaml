@@ -141,11 +141,12 @@ items:
     title: "Audit and reduce 310 pytest.skip calls"
     priority: medium
     status: done
-    started_at: "2026-04-20T08:42:49Z"
-    completed_at: "2026-04-20T09:03:00Z"
+    started_at: "2026-04-20T01:42:49-07:00"
+    completed_at: "2026-04-20T02:03:26-07:00"
     pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2841"
     pr_number: 2841
     pr_status: "open"
+    cost_usd: 3.5061
     github_issue: 2035
     artefact: .gaai/project/contexts/artefacts/stories/GH2035.story.md
     dependencies: []
