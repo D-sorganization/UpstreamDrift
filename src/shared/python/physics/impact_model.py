@@ -23,6 +23,7 @@ Physics implementations are split across:
 from __future__ import annotations
 
 from ._impact_physics import (
+    SMASH_FACTOR_PHYSICAL_MAX,
     FiniteTimeImpactModel,
     ImpactModel,
     ImpactModelType,
@@ -31,6 +32,7 @@ from ._impact_physics import (
     PreImpactState,
     RigidBodyImpactModel,
     SpringDamperImpactModel,
+    check_smash_factor,
     compute_gear_effect_spin,
     create_impact_model,
     validate_energy_balance,
@@ -38,6 +40,7 @@ from ._impact_physics import (
 from ._impact_recorder import ImpactEvent, ImpactRecorder, ImpactSolverAPI
 
 __all__ = [
+    "SMASH_FACTOR_PHYSICAL_MAX",
     "FiniteTimeImpactModel",
     "ImpactEvent",
     "ImpactModel",
@@ -49,6 +52,7 @@ __all__ = [
     "PreImpactState",
     "RigidBodyImpactModel",
     "SpringDamperImpactModel",
+    "check_smash_factor",
     "compute_gear_effect_spin",
     "create_impact_model",
     "validate_energy_balance",

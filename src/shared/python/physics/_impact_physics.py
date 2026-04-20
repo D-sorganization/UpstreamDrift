@@ -131,6 +131,37 @@ class ImpactModel(ABC):
         ...
 
 
+SMASH_FACTOR_PHYSICAL_MAX: float = 1.56
+"""Physical upper bound on smash factor (ball_speed_post / club_speed_pre).
+
+Corresponds to the maximum COR of 0.83 permitted under R&A/USGA rules at
+the 1.5x smash-factor limit.  Values above this indicate a unit mismatch or
+COR > 1 (energy creation), which is non-physical.
+"""
+
+
+def check_smash_factor(ball_speed_post: float, club_speed_pre: float) -> None:
+    """Raise ValueError if the post-impact smash factor is non-physical.
+
+    Args:
+        ball_speed_post: Ball speed immediately after impact [m/s].
+        club_speed_pre: Clubhead speed immediately before impact [m/s].
+
+    Raises:
+        ValueError: If smash factor exceeds SMASH_FACTOR_PHYSICAL_MAX.
+    """
+    if club_speed_pre > 1e-6:
+        smash = ball_speed_post / club_speed_pre
+        if smash > SMASH_FACTOR_PHYSICAL_MAX:
+            raise ValueError(
+                f"Smash factor {smash:.3f} exceeds the physical maximum of "
+                f"{SMASH_FACTOR_PHYSICAL_MAX} "
+                f"(ball_speed_post={ball_speed_post:.2f} m/s, "
+                f"club_speed_pre={club_speed_pre:.2f} m/s) — likely a unit "
+                "mismatch or unrealistic COR > 1"
+            )
+
+
 class RigidBodyImpactModel(ImpactModel):
     """Rigid body collision with coefficient of restitution.
 
@@ -284,6 +315,11 @@ class RigidBodyImpactModel(ImpactModel):
 
         v_ball_post = pre_state.ball_velocity + (j / GOLF_BALL_MASS_KG) * n
         v_club_post = pre_state.clubhead_velocity - (j / pre_state.clubhead_mass) * n
+
+        check_smash_factor(
+            float(np.linalg.norm(v_ball_post)),
+            float(np.linalg.norm(pre_state.clubhead_velocity)),
+        )
 
         ball_spin = self._compute_friction_spin(
             pre_state,
@@ -545,9 +581,12 @@ class FiniteTimeImpactModel(ImpactModel):
 
 
 @precondition(
-    lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=100.0, v_scale=50.0: (
-        0 <= gear_factor <= 1
-    ),
+    lambda impact_offset,
+    clubhead_velocity,
+    clubface_normal,
+    gear_factor=0.5,
+    h_scale=100.0,
+    v_scale=50.0: (0 <= gear_factor <= 1),
     "Gear effect factor must be between 0 and 1",
 )
 def compute_gear_effect_spin(

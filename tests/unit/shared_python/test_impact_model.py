@@ -275,3 +275,49 @@ def test_create_impact_model() -> None:
         # Use a type annotation to tell mypy we're testing invalid input
         invalid_type: ImpactModelType = "invalid_type"  # type: ignore[assignment]
         create_impact_model(invalid_type)
+
+
+# ---------------------------------------------------------------------------
+# Smash factor bound tests
+# ---------------------------------------------------------------------------
+
+
+class TestSmashFactorBound:
+    def test_valid_smash_accepted(self):
+        from src.shared.python.physics.impact_model import check_smash_factor
+
+        check_smash_factor(77.0, 50.0)  # smash = 1.54 — below 1.56 limit
+
+    def test_too_high_smash_raises(self):
+        from src.shared.python.physics.impact_model import check_smash_factor
+
+        with pytest.raises(ValueError, match="Smash factor"):
+            check_smash_factor(100.0, 50.0)  # smash = 2.0
+
+    def test_zero_club_speed_no_check(self):
+        from src.shared.python.physics.impact_model import check_smash_factor
+
+        check_smash_factor(50.0, 0.0)  # should not raise
+
+    def test_smash_factor_constant_value(self):
+        from src.shared.python.physics.impact_model import SMASH_FACTOR_PHYSICAL_MAX
+
+        assert pytest.approx(1.56) == SMASH_FACTOR_PHYSICAL_MAX
+
+    def test_rigid_body_model_normal_shot_passes(self):
+        """Normal driver shot should not trigger smash-factor check."""
+        model = RigidBodyImpactModel()
+        pre = PreImpactState(
+            ball_velocity=np.zeros(3),
+            ball_angular_velocity=np.zeros(3),
+            clubhead_velocity=np.array([50.0, 0.0, 0.0]),
+            clubhead_angular_velocity=np.zeros(3),
+            clubhead_mass=0.2,
+            clubhead_moi=0.002,
+            clubhead_orientation=np.array([1.0, 0.0, 0.0]),
+            ball_position=np.zeros(3),
+            impact_offset=None,
+        )
+        params = ImpactParameters(cor=0.83, friction_coefficient=0.15)
+        result = model.solve(pre, params)
+        assert result.ball_velocity[0] > 0
