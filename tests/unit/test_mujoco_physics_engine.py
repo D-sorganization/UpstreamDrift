@@ -31,6 +31,8 @@ _MJ_DATA_SPEC = [
     "time",
     "xpos",
     "xquat",
+    "ncon",
+    "contact",
 ]
 
 
@@ -210,3 +212,25 @@ def test_compute_jacobian(engine, mock_mj):
     assert "spatial" in jac
     assert jac["linear"].shape == (3, 2)
     mock_mj.mj_jacBody.assert_called_once()
+
+
+def test_compute_contact_forces_preserves_mujoco_contact_sign(engine, mock_mj):
+    """MuJoCo contact force on geom1 is already the GRF on the modeled body."""
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
+    engine.data.ncon = 1
+
+    contact = MagicMock()
+    contact.frame = np.eye(3).reshape(-1)
+    engine.data.contact = [contact]
+
+    def set_contact_force(model, data, index, c_force):
+        del model, data, index
+        c_force[:3] = np.array([0.0, 0.0, 735.75])
+
+    mock_mj.mj_contactForce.side_effect = set_contact_force
+
+    force = engine.compute_contact_forces()
+
+    np.testing.assert_allclose(force, np.array([0.0, 0.0, 735.75]))
+    mock_mj.mj_contactForce.assert_called_once()
