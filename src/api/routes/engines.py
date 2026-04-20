@@ -28,6 +28,20 @@ from ..models.responses import (
 )
 from ..utils.path_validation import validate_model_path
 
+# Capability levels that may appear in a CapabilityLevelResponse.
+# See src/shared/python/engine_core/capabilities.py::CapabilityLevel.
+_VALID_CAPABILITY_LEVELS: frozenset[str] = frozenset({"full", "partial", "none"})
+
+# Keys emitted by EngineCapabilities.to_dict() that are metadata and must NOT
+# be surfaced as CapabilityLevelResponse entries. Their values do not follow
+# the capability-level schema (full/partial/none). See issue #2797, #2743.
+_NON_LEVEL_METADATA_KEYS: frozenset[str] = frozenset(
+    {
+        "engine_name",
+        "spatial_jacobian_order",
+    }
+)
+
 
 def _sanitize_for_json(obj: Any) -> Any:
     """Recursively convert numpy arrays and other non-JSON types to native Python."""
@@ -279,11 +293,13 @@ async def get_engine_capabilities(
     capability_list = []
     summary = {"full": 0, "partial": 0, "none": 0}
 
-    valid_levels = {"full", "partial", "none"}
     for key, level in caps_dict.items():
-        if key in ("engine_name", "spatial_jacobian_order"):
+        if key in _NON_LEVEL_METADATA_KEYS:
             continue
-        if level not in valid_levels:
+        # Defensive: skip any value that is not a recognized level. This
+        # filters out future metadata keys that might be added to
+        # EngineCapabilities.to_dict() without an explicit allow-list update.
+        if not isinstance(level, str) or level not in _VALID_CAPABILITY_LEVELS:
             continue
         supported = level != "none"
         capability_list.append(
