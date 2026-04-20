@@ -166,7 +166,23 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Default command — starts the FastAPI server on port 8001.
 # Override with `docker run ... /bin/bash` for an interactive shell.
-CMD ["python3", "-m", "uvicorn", "src.api.server:app", "--host", "0.0.0.0", "--port", "8001"]
+#
+# Hardening flags (salvaged from stale PR #2723, issue #2786):
+# - --workers 1: single worker keeps HEALTHCHECK and in-process state
+#   (rate limiter, engine registry) consistent; scale horizontally instead.
+# - --proxy-headers: honor X-Forwarded-For / X-Forwarded-Proto when the
+#   container sits behind a reverse proxy, so access logs and client IP
+#   rate limiting reflect the real client.
+# - --forwarded-allow-ips=*: accept proxy headers from any upstream inside
+#   the container network; operators should pin this at the proxy layer.
+# - --access-log: keep structured request logs on stdout for observability.
+CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
+     "--host", "0.0.0.0", \
+     "--port", "8001", \
+     "--workers", "1", \
+     "--proxy-headers", \
+     "--forwarded-allow-ips", "*", \
+     "--access-log"]
 
 
 # Stage 3: Training stage for advanced ML workflows

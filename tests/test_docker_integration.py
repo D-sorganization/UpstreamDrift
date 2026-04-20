@@ -84,6 +84,53 @@ class TestDockerBuild(unittest.TestCase):
         self.assertIn("Docker version", result.stdout)
 
 
+class TestDockerRuntimeEntrypoint(unittest.TestCase):
+    """Regression tests for the hardened runtime API entrypoint (#2786).
+
+    Salvaged from stale PR #2723: the runtime image must default to the
+    FastAPI server (not an interactive shell), bound to 0.0.0.0:8001, and
+    must carry production hardening flags (proxy headers, single worker,
+    access logs) that match the documented SPEC behavior.
+    """
+
+    def setUp(self):
+        self.content = (get_repo_root() / "Dockerfile").read_text()
+
+    def test_runtime_cmd_invokes_uvicorn_api_server(self):
+        """CMD must launch src.api.server:app via uvicorn."""
+        self.assertIn('"python3", "-m", "uvicorn"', self.content)
+        self.assertIn('"src.api.server:app"', self.content)
+
+    def test_runtime_cmd_binds_public_host_and_port(self):
+        """CMD must bind 0.0.0.0:8001 to match EXPOSE/HEALTHCHECK."""
+        self.assertIn('"--host", "0.0.0.0"', self.content)
+        self.assertIn('"--port", "8001"', self.content)
+
+    def test_runtime_cmd_single_worker_for_healthcheck(self):
+        """Single worker keeps in-process state + HEALTHCHECK aligned."""
+        self.assertIn('"--workers", "1"', self.content)
+
+    def test_runtime_cmd_proxy_headers_hardening(self):
+        """Proxy-aware flags must be present for reverse-proxy deployments."""
+        self.assertIn('"--proxy-headers"', self.content)
+        self.assertIn('"--forwarded-allow-ips"', self.content)
+        self.assertIn('"--access-log"', self.content)
+
+    def test_runtime_healthcheck_hits_health_endpoint(self):
+        """HEALTHCHECK must probe /health on the same port as CMD."""
+        self.assertIn("curl -f http://localhost:8001/health", self.content)
+
+    def test_runtime_does_not_default_to_interactive_shell(self):
+        """Runtime stage must not default CMD to /bin/bash."""
+        # Extract the runtime stage (between `AS runtime` and the next `FROM`).
+        runtime_start = self.content.index("AS runtime")
+        next_from = self.content.find("\nFROM ", runtime_start)
+        runtime_block = self.content[
+            runtime_start : next_from if next_from != -1 else None
+        ]
+        self.assertNotIn('CMD ["/bin/bash"]', runtime_block)
+
+
 class TestDockerLaunchCommands(unittest.TestCase):
     """Test Docker container launch command generation."""
 

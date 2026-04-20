@@ -17,10 +17,10 @@ from typing import Any
 from src.shared.python.data_io.export import (
     export_recording_all_formats as _shared_export_all,
 )
-from src.shared.python.data_io.export import export_to_c3d  # noqa: F401
-from src.shared.python.data_io.export import export_to_hdf5  # noqa: F401
-from src.shared.python.data_io.export import export_to_matlab  # noqa: F401
 from src.shared.python.data_io.export import (  # noqa: F401
+    export_to_c3d,  # noqa: F401
+    export_to_hdf5,  # noqa: F401
+    export_to_matlab,  # noqa: F401
     get_available_export_formats,
 )
 

@@ -319,9 +319,9 @@ class TestParametricBuilderRoundtrip:
         assert parsed.name == "humanoid"
 
         # Must have multiple links (humanoid skeleton)
-        assert (
-            len(parsed.links) > 10
-        ), f"Expected >10 links for humanoid, got {len(parsed.links)}"
+        assert len(parsed.links) > 10, (
+            f"Expected >10 links for humanoid, got {len(parsed.links)}"
+        )
 
         # Must have joints connecting them
         assert len(parsed.joints) >= len(parsed.links) - 1
@@ -353,9 +353,9 @@ class TestParametricBuilderRoundtrip:
         assert total_mass > 0, "Total mass must be positive"
         # Allow generous tolerance since parametric builder distributes mass
         # across many segments with approximation
-        assert (
-            total_mass > target_mass * 0.5
-        ), f"Total mass {total_mass} is less than 50% of target {target_mass}"
+        assert total_mass > target_mass * 0.5, (
+            f"Total mass {total_mass} is less than 50% of target {target_mass}"
+        )
 
     def test_parametric_height_affects_geometry(self) -> None:
         """Different heights produce different link dimensions."""
@@ -379,9 +379,9 @@ class TestParametricBuilderRoundtrip:
         assert thigh_tall is not None
 
         # Taller person should have greater thigh inertia (larger segment)
-        assert (
-            thigh_tall.inertia.ixx > thigh_short.inertia.ixx
-        ), "Taller model should have larger thigh inertia"
+        assert thigh_tall.inertia.ixx > thigh_short.inertia.ixx, (
+            "Taller model should have larger thigh inertia"
+        )
 
     def test_parametric_builder_produces_valid_xml(self) -> None:
         """Parametric URDF is always well-formed XML with <robot> root."""
@@ -400,15 +400,15 @@ class TestParametricBuilderRoundtrip:
         # Every link must have an inertial element
         for link_elem in root.findall(".//link"):
             inertial = link_elem.find("inertial")
-            assert (
-                inertial is not None
-            ), f"Link '{link_elem.get('name')}' missing <inertial>"
+            assert inertial is not None, (
+                f"Link '{link_elem.get('name')}' missing <inertial>"
+            )
             mass = inertial.find("mass")
             assert mass is not None
             mass_val = float(mass.get("value", "0"))
-            assert (
-                mass_val > 0
-            ), f"Link '{link_elem.get('name')}' has non-positive mass {mass_val}"
+            assert mass_val > 0, (
+                f"Link '{link_elem.get('name')}' has non-positive mass {mass_val}"
+            )
 
     def test_parametric_custom_segment_roundtrip(self) -> None:
         """Custom segments added via add_segment survive roundtrip."""
@@ -589,9 +589,9 @@ class TestCompositeJointExpansion:
             current = parents[current]
             if current in visited:
                 break  # Avoid infinite loop
-        assert (
-            current == "base"
-        ), f"Arm's ancestor chain does not reach 'base': ended at '{current}'"
+        assert current == "base", (
+            f"Arm's ancestor chain does not reach 'base': ended at '{current}'"
+        )
 
     def test_gimbal_joint_expands_to_three_revolute(self) -> None:
         """A gimbal joint should expand to 3 revolute joints + 2 intermediate links."""
