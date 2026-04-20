@@ -194,11 +194,6 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
 
   unloadEngine: async (engineName) => {
     const { selectedEngine } = get();
-    try {
-      await fetch(`/api/engines/${engineName}/unload`, { method: 'POST' });
-    } catch {
-      // Best-effort: still update client state even if backend call fails
-    }
     set((state) => ({
       engines: state.engines.map((e) =>
         e.name === engineName
@@ -208,6 +203,11 @@ export const useEngineStore = create<EngineStore>((set, get) => ({
       selectedEngine:
         selectedEngine === engineName ? null : selectedEngine,
     }));
+    try {
+      await fetch(`/api/engines/${engineName}/unload`, { method: 'POST' });
+    } catch {
+      // Best-effort: still update client state even if backend call fails
+    }
   },
 
   resetEngines: () =>
