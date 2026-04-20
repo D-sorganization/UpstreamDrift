@@ -140,8 +140,8 @@ items:
   - id: GH2035
     title: "Audit and reduce 310 pytest.skip calls"
     priority: medium
-    status: refined
-    started_at: "2026-04-20T06:47:44Z"
+    status: in_progress
+    started_at: "2026-04-20T08:42:49Z"
     github_issue: 2035
     artefact: .gaai/project/contexts/artefacts/stories/GH2035.story.md
     dependencies: []
