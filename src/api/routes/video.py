@@ -10,7 +10,7 @@ import tempfile
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
 
@@ -22,25 +22,57 @@ from src.api.config import (
 )
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
-from src.shared.python.gui_pkg.video_pose_pipeline import (
-    VideoPosePipeline,
-    VideoProcessingConfig,
-)
 
 from ..dependencies import get_logger, get_task_manager, get_video_pipeline
 from ..models.responses import VideoAnalysisResponse
 
+if TYPE_CHECKING:
+    from src.shared.python.gui_pkg.video_pose_pipeline import VideoPosePipeline
+
 router = APIRouter()
+
+
+def _load_video_pipeline_classes() -> tuple[type, type]:
+    """Lazily import the video pose pipeline classes.
+
+    The pipeline transitively requires ``cv2`` (and ``mediapipe``). In the slim
+    runtime image these are intentionally absent to keep the image small
+    (see issue #2809). Importing them eagerly at module load time caused the
+    entire route module to be skipped during route discovery, which produced
+    404s on ``/api/v1/video/*`` instead of a meaningful error.
+
+    By deferring the import to request time we can keep the route registered
+    and return a 503 with a clear message when the optional dependencies are
+    not installed.
+
+    Returns:
+        ``(VideoPosePipeline, VideoProcessingConfig)`` classes.
+
+    Raises:
+        HTTPException: 503 when optional video dependencies are missing.
+    """
+    try:
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+            VideoProcessingConfig,
+        )
+    except ImportError as exc:  # pragma: no cover - exercised only in slim image
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Video analysis is unavailable in this runtime image: optional "
+                "dependency missing ("
+                f"{exc.name or exc}"
+                "). Install the 'video' extras (opencv-python, mediapipe) or "
+                "use the video-enabled runtime image."
+            ),
+        ) from exc
+    return VideoPosePipeline, VideoProcessingConfig
 
 
 @router.post("/analyze/video", response_model=VideoAnalysisResponse)
 @precondition(  # fmt: skip
-    lambda file=None,
-    estimator_type="mediapipe",
-    min_confidence=0.5,
-    enable_smoothing=True,
-    video_pipeline=None,
-    logger=None: (
+    lambda file=None, estimator_type="mediapipe", min_confidence=0.5, enable_smoothing=True, video_pipeline=None, logger=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
@@ -94,12 +126,13 @@ async def analyze_video(
             temp_file.write(content)
             temp_path = Path(temp_file.name)
 
-        config = VideoProcessingConfig(
+        video_pipeline_cls, video_config_cls = _load_video_pipeline_classes()
+        config = video_config_cls(
             estimator_type=estimator_type,
             min_confidence=min_confidence,
             enable_temporal_smoothing=enable_smoothing,
         )
-        pipeline = VideoPosePipeline(config)
+        pipeline = video_pipeline_cls(config)
         result = pipeline.process_video(temp_path)
 
         response = VideoAnalysisResponse(
@@ -144,12 +177,7 @@ async def analyze_video(
 
 @router.post("/analyze/video/async")
 @precondition(  # fmt: skip
-    lambda background_tasks=None,
-    file=None,
-    estimator_type="mediapipe",
-    min_confidence=0.5,
-    video_pipeline=None,
-    task_manager=None: (
+    lambda background_tasks=None, file=None, estimator_type="mediapipe", min_confidence=0.5, video_pipeline=None, task_manager=None: (
         estimator_type is not None
         and len(estimator_type.strip()) > 0
         and 0.0 <= min_confidence <= 1.0
@@ -249,6 +277,11 @@ async def _process_video_background(
             "created_at": created_at,
         }
 
+        from src.shared.python.gui_pkg.video_pose_pipeline import (
+            VideoPosePipeline,
+            VideoProcessingConfig,
+        )
+
         config = VideoProcessingConfig(
             estimator_type=estimator_type, min_confidence=min_confidence
         )
@@ -271,7 +304,7 @@ async def _process_video_background(
             },
         }
 
-    except (RuntimeError, ValueError, OSError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError) as e:
         task_data = task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 

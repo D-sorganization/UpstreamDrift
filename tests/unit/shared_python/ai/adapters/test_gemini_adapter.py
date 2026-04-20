@@ -47,7 +47,9 @@ def test_init_missing_package():
 @patch("src.shared.python.ai.adapters.gemini_adapter.genai.configure")
 @patch("src.shared.python.ai.adapters.gemini_adapter.GenerativeModel")
 def test_init_success(mock_model_cls, mock_configure):
-    adapter = GeminiAdapter("sk-gemini", "gemini-test-model")  # nosec B106 - test fixture
+    adapter = GeminiAdapter(
+        "sk-gemini", "gemini-test-model"
+    )  # nosec B106 - test fixture
 
     mock_configure.assert_called_once_with(api_key="sk-gemini")
     mock_model_cls.assert_called_once_with("gemini-test-model")

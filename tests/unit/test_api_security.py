@@ -308,7 +308,9 @@ class TestPasswordSecurity:
         """Test that passwords are hashed with bcrypt."""
         security_manager = SecurityManager()
 
-        password = "test_password_123!@#"  # nosec B105 - test fixture, not a real credential
+        password = (
+            "test_password_123!@#"  # nosec B105 - test fixture, not a real credential
+        )
         hashed = security_manager.hash_password(password)
 
         # Verify bcrypt format
@@ -443,12 +445,12 @@ class TestSecurityBestPractices:
         ]
 
         for pattern in suspicious_patterns:
-            assert pattern not in security_source.lower(), (
-                f"Found suspicious pattern in security.py: {pattern}"
-            )
-            assert pattern not in dependencies_source.lower(), (
-                f"Found suspicious pattern in dependencies.py: {pattern}"
-            )
+            assert (
+                pattern not in security_source.lower()
+            ), f"Found suspicious pattern in security.py: {pattern}"
+            assert (
+                pattern not in dependencies_source.lower()
+            ), f"Found suspicious pattern in dependencies.py: {pattern}"
 
     def test_secure_random_generation(self) -> None:
         """Test that secrets module is used for random generation."""
