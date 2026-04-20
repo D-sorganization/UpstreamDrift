@@ -40,6 +40,7 @@ Integration Pattern (how shared tools are incorporated)
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -218,10 +219,21 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         self.time = 0.0
         self._tau = np.zeros(2)
 
-    def step(self, dt: float | None = None) -> None:
+    def step(
+        self,
+        dt: float | None = None,
+        torque_callback: Callable[[float], tuple[float, float]] | None = None,
+    ) -> None:
         """Advance state by one RK4 step.
 
-        Precondition: engine must be initialised.
+        Args:
+            dt: Time step [s]. Defaults to 0.01.
+            torque_callback: Optional function ``τ(t) → (τ1, τ2)`` that
+                returns joint torques as a function of time.  When provided,
+                each RK4 stage samples torque at the correct Butcher-tableau
+                time point so time-varying swing controllers are integrated
+                accurately.  When ``None``, the stored ``self._tau`` array is
+                used (constant-torque assumption).
         """
         if not self._is_initialized:
             logger.warning("GolfSwingPendulumEngine: step called before init.")
@@ -231,32 +243,50 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
         from double_pendulum_golf.physics import equations_of_motion  # noqa: PLC0415
 
-        def torque_func(t: float) -> tuple[float, float]:  # noqa: ARG001
-            return float(self._tau[0]), float(self._tau[1])
+        if torque_callback is not None:
+            # Time-varying torque: sample τ at each Butcher stage time
+            def _tau_at(t: float) -> tuple[float, float]:
+                return torque_callback(t)
+        else:
+            # Constant-torque: always return the stored array
+            tau0, tau1 = float(self._tau[0]), float(self._tau[1])
 
-        deriv = equations_of_motion(
-            self._state, self.time, self._pendulum_params, torque_func
+            def _tau_at(t: float) -> tuple[float, float]:  # noqa: ARG001
+                return tau0, tau1
+
+        t0 = self.time
+        t_half = t0 + 0.5 * step_size
+        t_full = t0 + step_size
+
+        def _make_torque_func(t: float) -> Callable[[float], tuple[float, float]]:
+            tau_val = _tau_at(t)
+
+            def _f(_t: float) -> tuple[float, float]:  # noqa: ARG001
+                return tau_val
+
+            return _f
+
+        # RK4 integration — torque sampled at canonical Butcher-tableau times
+        k1 = equations_of_motion(
+            self._state, t0, self._pendulum_params, _make_torque_func(t0)
         )
-
-        # RK4 integration
-        k1 = deriv
         k2 = equations_of_motion(
             self._state + 0.5 * step_size * k1,
-            self.time + 0.5 * step_size,
+            t_half,
             self._pendulum_params,
-            torque_func,
+            _make_torque_func(t_half),
         )
         k3 = equations_of_motion(
             self._state + 0.5 * step_size * k2,
-            self.time + 0.5 * step_size,
+            t_half,
             self._pendulum_params,
-            torque_func,
+            _make_torque_func(t_half),
         )
         k4 = equations_of_motion(
             self._state + step_size * k3,
-            self.time + step_size,
+            t_full,
             self._pendulum_params,
-            torque_func,
+            _make_torque_func(t_full),
         )
 
         self._state = self._state + (step_size / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)

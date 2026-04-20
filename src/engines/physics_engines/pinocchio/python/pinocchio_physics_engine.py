@@ -9,7 +9,7 @@ initialization patterns.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import numpy as np
 
@@ -147,24 +147,70 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             self.forward()
 
     @precondition(
-        lambda self, dt=None: self.is_initialized,
+        lambda self, dt=None, integrator="semi_implicit": self.is_initialized,
         "Engine must be initialized",
     )
-    def step(self, dt: float | None = None) -> None:
-        """Advance the simulation by one time step."""
+    def step(
+        self,
+        dt: float | None = None,
+        integrator: Literal["semi_implicit", "rk4"] = "semi_implicit",
+    ) -> None:
+        """Advance the simulation by one time step.
+
+        Args:
+            dt: Time step size [s]. Defaults to DEFAULT_TIME_STEP.
+            integrator: Integration scheme — ``"semi_implicit"`` (symplectic
+                Euler, O(dt), energy-stable) or ``"rk4"`` (classic 4th-order
+                Runge-Kutta, O(dt^4), more accurate for large dt or
+                validation).
+        """
         if self.model is None or self.data is None:
             return
 
         time_step = dt if dt is not None else DEFAULT_TIME_STEP
 
-        # Explicit Forward Dynamics: a = ABA(q, v, tau)
-        self.a = pin.aba(self.model, self.data, self.q, self.v, self.tau)
+        if integrator == "rk4":
+            self._step_rk4(time_step)
+        else:
+            self._step_semi_implicit(time_step)
 
-        # Semi-implicit Euler integration
+        self.time += time_step
+
+    def _step_semi_implicit(self, time_step: float) -> None:
+        """Symplectic (semi-implicit) Euler: velocity-first, then position."""
+        self.a = pin.aba(self.model, self.data, self.q, self.v, self.tau)
         self.v += self.a * time_step
         self.q = pin.integrate(self.model, self.q, self.v * time_step)
 
-        self.time += time_step
+    def _step_rk4(self, time_step: float) -> None:
+        """Classic RK4 integration over Pinocchio's Lie-group configuration."""
+        q0, v0 = self.q.copy(), self.v.copy()
+        tau = self.tau
+
+        def dv(q: np.ndarray, v: np.ndarray) -> np.ndarray:
+            return pin.aba(self.model, self.data, q, v, tau).copy()
+
+        # k1
+        a1 = dv(q0, v0)
+        # k2
+        v_k2 = v0 + 0.5 * time_step * a1
+        q_k2 = pin.integrate(self.model, q0, 0.5 * time_step * v0)
+        a2 = dv(q_k2, v_k2)
+        # k3
+        v_k3 = v0 + 0.5 * time_step * a2
+        q_k3 = pin.integrate(self.model, q0, 0.5 * time_step * v_k2)
+        a3 = dv(q_k3, v_k3)
+        # k4
+        v_k4 = v0 + time_step * a3
+        q_k4 = pin.integrate(self.model, q0, time_step * v_k3)
+        a4 = dv(q_k4, v_k4)
+
+        # Weighted update — velocity in R^n, position on Lie group
+        dv_weighted = (time_step / 6.0) * (a1 + 2 * a2 + 2 * a3 + a4)
+        dq_weighted = (time_step / 6.0) * (v0 + 2 * v_k2 + 2 * v_k3 + v_k4)
+        self.v = v0 + dv_weighted
+        self.q = pin.integrate(self.model, q0, dq_weighted)
+        self.a = a4
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:

@@ -256,3 +256,70 @@ def test_drake_energy_conservation() -> None:
     logger.info(f"Drake Energy Error: {error:.6f} J")
 
     assert error < 0.01, f"Drake energy conservation failed. Error: {error}"
+
+
+def test_pinocchio_10s_rk4_energy_conservation() -> None:
+    """10-second ballistic free-fall with Pinocchio RK4 integrator.
+
+    Validates that the RK4 path in PinocchioPhysicsEngine.step() conserves
+    energy to within 0.5% over a 10-second integration horizon (10 000 steps
+    at dt=0.001).  Semi-implicit Euler is only expected to oscillate, not
+    drift monotonically, so the same model is run with both integrators and
+    both are checked.
+    """
+    if not is_engine_available(EngineType.PINOCCHIO):
+        pytest.skip("Pinocchio not installed")
+
+    import pinocchio
+
+    if isinstance(pinocchio, MagicMock):
+        pytest.skip("pinocchio is mocked")
+
+    from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        PinocchioPhysicsEngine,
+    )
+
+    # Build a minimal single-body free-flyer model
+    model = pinocchio.Model()
+    mass = 1.0
+    joint_id = model.addJoint(
+        0, pinocchio.JointModelFreeFlyer(), pinocchio.SE3.Identity(), "body_joint"
+    )
+    inertia = pinocchio.Inertia.FromSphere(mass, 0.1)
+    model.appendBodyToJoint(joint_id, inertia, pinocchio.SE3.Identity())
+    model.gravity = pinocchio.Motion(np.array([0, 0, -GRAVITY_M_S2, 0, 0, 0]))
+
+    dt = 0.001
+    total_time = 10.0
+    steps = int(total_time / dt)
+
+    for scheme in ("semi_implicit", "rk4"):
+        eng = PinocchioPhysicsEngine()
+        eng.model = model
+        eng.data = model.createData()
+        eng.q = pinocchio.neutral(model)
+        eng.q[2] = 10.0  # start 10 m above ground
+        eng.v = np.zeros(model.nv)
+        eng.a = np.zeros(model.nv)
+        eng.tau = np.zeros(model.nv)
+        eng.time = 0.0
+        eng._is_initialized = True  # noqa: SLF001
+
+        pinocchio.computeKineticEnergy(model, eng.data, eng.q, eng.v)
+        pinocchio.computePotentialEnergy(model, eng.data, eng.q)
+        e0 = eng.data.kinetic_energy + eng.data.potential_energy
+
+        errors = []
+        for _ in range(steps):
+            eng.step(dt=dt, integrator=scheme)  # type: ignore[call-arg]
+            pinocchio.computeKineticEnergy(model, eng.data, eng.q, eng.v)
+            pinocchio.computePotentialEnergy(model, eng.data, eng.q)
+            e = eng.data.kinetic_energy + eng.data.potential_energy
+            errors.append(abs(e - e0))
+
+        max_err = float(np.max(errors))
+        pct = max_err / abs(e0) * 100.0
+        logger.info(f"Pinocchio 10-s energy error [{scheme}]: {pct:.4f}%")
+        # Both schemes must stay within 0.5% over 10 s
+        msg = f"Energy drift too large ({pct:.4f}%) with integrator={scheme!r}"
+        assert pct < 0.5, msg
