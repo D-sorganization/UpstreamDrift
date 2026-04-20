@@ -299,16 +299,16 @@ class TestCostMatrices:
     def test_q_positive_semi_definite(self, bridge: SwingOptimizationBridge) -> None:
         Q, _ = bridge._build_cost_matrices(7)
         eigenvalues = np.linalg.eigvalsh(Q)
-        assert np.all(
-            eigenvalues >= -1e-12
-        ), f"Q is not PSD: min eigenvalue = {eigenvalues.min()}"
+        assert np.all(eigenvalues >= -1e-12), (
+            f"Q is not PSD: min eigenvalue = {eigenvalues.min()}"
+        )
 
     def test_r_positive_semi_definite(self, bridge: SwingOptimizationBridge) -> None:
         _, R = bridge._build_cost_matrices(7)
         eigenvalues = np.linalg.eigvalsh(R)
-        assert np.all(
-            eigenvalues >= -1e-12
-        ), f"R is not PSD: min eigenvalue = {eigenvalues.min()}"
+        assert np.all(eigenvalues >= -1e-12), (
+            f"R is not PSD: min eigenvalue = {eigenvalues.min()}"
+        )
 
     def test_r_diagonal_values(self, bridge: SwingOptimizationBridge) -> None:
         _, R = bridge._build_cost_matrices(7)
