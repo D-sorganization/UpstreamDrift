@@ -43,8 +43,11 @@ services:
 
   # Frontend UI (optional — can also run locally outside Docker).
   # node_modules are cached in a named volume so `npm install` does not re-run
-  # on every `docker compose up`, while `npm ci` bootstraps fresh volumes and
-  # refreshes dependencies after package-lock.json changes.
+  # on every `docker compose up`. `npm ci` runs only when the volume is empty
+  # (first boot / after `docker compose down -v`) or when package-lock.json is
+  # newer than the cached lockfile snapshot (`node_modules/.package-lock.json`),
+  # which npm writes after every successful install. This preserves cache hits
+  # across restarts and keeps startup fast and offline-capable once populated.
   frontend:
     image: node:20-alpine
     container_name: upstream-drift-frontend
@@ -55,7 +58,15 @@ services:
       # Named volume so npm install is not repeated on every start.
       - frontend_node_modules:/app/node_modules
     working_dir: /app
-    command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    command: >-
+      sh -c "if [ ! -f node_modules/.package-lock.json ] ||
+               [ package-lock.json -nt node_modules/.package-lock.json ]; then
+               echo '[frontend] installing dependencies (first boot or lockfile changed)';
+               npm ci;
+             else
+               echo '[frontend] node_modules cache is up-to-date, skipping npm ci';
+             fi &&
+             npm run dev -- --host 0.0.0.0"
     environment:
       - VITE_API_URL=http://backend:8001
     depends_on:
