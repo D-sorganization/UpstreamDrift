@@ -7,6 +7,7 @@ including links, joints, and the model itself.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -97,23 +98,35 @@ class SupportPolygon:
         n = len(self.vertices)
         min_dist = float("inf")
 
-        # Distance from point to line segment P1-P2
+        # Distance from point to line segment P1-P2 — scalar math avoids
+        # allocating NumPy temporaries for each edge of the polygon.
         for i in range(n):
-            p1 = np.array(self.vertices[i])
-            p2 = np.array(self.vertices[(i + 1) % n])
-            p = np.array([px, py])
+            p1x, p1y = self.vertices[i]
+            p2x, p2y = self.vertices[(i + 1) % n]
 
-            # Project p onto line containing p1-p2
-            l2 = np.sum((p1 - p2) ** 2)
-            if l2 == 0:
-                dist = np.linalg.norm(p - p1)
+            ex = p2x - p1x
+            ey = p2y - p1y
+            l2 = ex * ex + ey * ey
+
+            dx = px - p1x
+            dy = py - p1y
+
+            if l2 == 0.0:
+                # Degenerate edge (p1 == p2): distance to the shared point.
+                dist = math.hypot(dx, dy)
             else:
-                t = max(0, min(1, np.dot(p - p1, p2 - p1) / l2))
-                projection = p1 + t * (p2 - p1)
-                dist = np.linalg.norm(p - projection)
+                # Project p onto line containing p1-p2, clamped to [0, 1].
+                t = (dx * ex + dy * ey) / l2
+                if t < 0.0:
+                    t = 0.0
+                elif t > 1.0:
+                    t = 1.0
+                proj_x = p1x + t * ex
+                proj_y = p1y + t * ey
+                dist = math.hypot(px - proj_x, py - proj_y)
 
             if dist < min_dist:
-                min_dist = float(dist)
+                min_dist = dist
 
         return min_dist
 

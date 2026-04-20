@@ -8,7 +8,9 @@
 #          that are excluded from ci-standard.yml via paths-ignore.
 #
 # NOTE: If a PR includes BOTH source changes AND doc changes, ci-standard.yml
-#       handles both jobs and this workflow is skipped (paths filter is exclusive).
+#       handles the substantive checks. This workflow exits successfully after
+#       detecting source changes so its duplicate branch-protection check does
+#       not block mixed PRs that correctly update SPEC.md.
 
 name: Docs CI
 
@@ -87,9 +89,8 @@ jobs:
           done <<< "$CHANGED"
 
           if [[ "$SOURCE_CHANGED" == "true" ]]; then
-            echo "::error::Source files changed — this PR should run ci-standard.yml, not docs-ci.yml."
-            echo "Check that ci-standard.yml paths-ignore does not exclude your changed files."
-            exit 1
+            echo "::notice::Source files changed; ci-standard.yml is responsible for substantive checks."
+            exit 0
           fi
 
           echo "Docs-only PR confirmed — quality gate passes."
