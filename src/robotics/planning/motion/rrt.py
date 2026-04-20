@@ -10,6 +10,7 @@ Reference:
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass
 
@@ -23,6 +24,8 @@ from src.robotics.planning.motion.planner_base import (
     PlannerStatus,
 )
 from src.shared.python.core.contracts import invariant
+
+_log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -135,12 +138,29 @@ class RRTPlanner(MotionPlanner):
 
         goal_idx = -1
         iterations = 0
+        _log_interval = max(1, self._config.max_iterations // 10)
 
         while iterations < self._config.max_iterations:
-            if time.perf_counter() - start_time > self._config.max_time:
+            elapsed = time.perf_counter() - start_time
+            if elapsed > self._config.max_time:
+                _log.warning(
+                    "RRT timeout after %.2f s (%d iterations, %d nodes)",
+                    elapsed,
+                    iterations,
+                    len(self._nodes),
+                )
                 return self._timeout_result(iterations, start_time)
 
             iterations += 1
+
+            if iterations % _log_interval == 0:
+                _log.debug(
+                    "RRT iteration %d/%d: %d nodes, %.2f s elapsed",
+                    iterations,
+                    self._config.max_iterations,
+                    len(self._nodes),
+                    elapsed,
+                )
 
             new_idx, new_cost = self._expand_tree(q_goal)
             if new_idx < 0:
@@ -148,6 +168,12 @@ class RRTPlanner(MotionPlanner):
 
             goal_idx = self._try_connect_goal(new_idx, new_cost, q_goal)
             if goal_idx >= 0:
+                _log.debug(
+                    "RRT found path after %d iterations (%.2f s, %d nodes)",
+                    iterations,
+                    time.perf_counter() - start_time,
+                    len(self._nodes),
+                )
                 break
 
         return self._build_result(goal_idx, iterations, start_time)
@@ -274,6 +300,9 @@ class RRTPlanner(MotionPlanner):
     def _find_nearest(self, q: np.ndarray) -> int:
         """Find index of nearest node in tree.
 
+        Uses scipy.spatial.cKDTree when available (O(log n) average) and
+        falls back to brute-force linear scan when scipy is absent.
+
         Args:
             q: Query configuration.
 
@@ -284,15 +313,24 @@ class RRTPlanner(MotionPlanner):
             raise ValueError("q must be provided")
         if not (q is not None):
             raise ValueError("q must be provided")
+
+        try:
+            from scipy.spatial import cKDTree  # type: ignore[import-untyped]
+
+            configs = np.array([node.config for node in self._nodes])
+            tree = cKDTree(configs)
+            _, idx = tree.query(q)
+            return int(idx)
+        except ImportError:
+            pass
+
         min_dist = float("inf")
         min_idx = 0
-
         for i, node in enumerate(self._nodes):
             dist = self._distance(node.config, q)
             if dist < min_dist:
                 min_dist = dist
                 min_idx = i
-
         return min_idx
 
     def _extract_path(self, goal_idx: int) -> list[np.ndarray]:

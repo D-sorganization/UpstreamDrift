@@ -317,6 +317,53 @@ class TestRRTPlanner:
             assert isinstance(child, np.ndarray)
 
 
+class TestRRTPlannerBugFixes:
+    """Regression tests for planner improvements from issue #2709."""
+
+    @pytest.fixture
+    def collision_checker(self) -> MockCollisionChecker:
+        return MockCollisionChecker()
+
+    def test_nearest_neighbor_returns_valid_index(
+        self, collision_checker: MockCollisionChecker
+    ) -> None:
+        """Bug #3: _find_nearest must return a valid index (cKDTree or brute-force)."""
+        from src.robotics.planning.motion.rrt import RRTConfig, RRTPlanner
+
+        config = RRTConfig(max_iterations=50, step_size=0.5)
+        planner = RRTPlanner(collision_checker, config)
+        planner.set_bounds(np.array([-5.0, -5.0]), np.array([5.0, 5.0]))
+        planner.set_seed(0)
+        result = planner.plan(np.array([0.0, 0.0]), np.array([2.0, 2.0]))
+        assert result.num_nodes >= 1
+
+    def test_progress_logging_on_timeout(
+        self,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Bug #7: planner must log a WARNING when it times out."""
+        import logging
+
+        from src.robotics.planning.motion.rrt import RRTConfig, RRTPlanner
+
+        # Free space but tiny step_size + short timeout so planner can't reach distant goal
+        checker = MockCollisionChecker(obstacles=[])
+        config = RRTConfig(
+            max_iterations=10**6, max_time=0.05, step_size=0.001, goal_tolerance=0.001
+        )
+        planner = RRTPlanner(checker, config)
+        # Goal is 100 m away; with step=0.001 it takes ~100 000 steps — won't finish in 0.05 s
+        planner.set_bounds(np.array([-200.0, -200.0]), np.array([200.0, 200.0]))
+        planner.set_seed(0)
+        with caplog.at_level(
+            logging.WARNING, logger="src.robotics.planning.motion.rrt"
+        ):
+            result = planner.plan(np.array([0.0, 0.0]), np.array([100.0, 100.0]))
+        assert result.status.name == "TIMEOUT"
+        timeout_msgs = [r for r in caplog.records if "timeout" in r.message.lower()]
+        assert len(timeout_msgs) >= 1, "Expected a timeout WARNING log message"
+
+
 class TestRRTConfig:
     """Tests for RRTConfig."""
 
