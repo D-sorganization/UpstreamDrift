@@ -45,6 +45,7 @@ from ._shaft_properties import (
     compute_section_area,
     compute_section_inertia,
     create_standard_shaft,
+    recommend_shaft_flex,
 )
 from ._shaft_utils import compute_static_deflection, create_shaft_model
 
@@ -74,4 +75,5 @@ __all__ = [
     "compute_static_deflection",
     "create_shaft_model",
     "create_standard_shaft",
+    "recommend_shaft_flex",
 ]

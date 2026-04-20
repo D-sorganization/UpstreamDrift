@@ -161,6 +161,16 @@ class SwingMetrics:
         ):
             self.smash_factor = self.ball_speed_mph / self.club_head_speed_mph
 
+        # Guard against unit mismatch: legal smash factor range is 1.0–1.5.
+        # A value outside [0.5, 2.0] almost certainly means one speed is in
+        # mph and the other in m/s (ratio would be ~3.6 or ~0.28).
+        if self.smash_factor != 0 and not (0.5 <= self.smash_factor <= 2.0):
+            raise ValueError(
+                f"smash_factor={self.smash_factor:.3f} is outside the physical range "
+                "[0.5, 2.0] — likely a unit mismatch between club_head_speed and "
+                "ball_speed (ensure both are in mph or both in m/s)"
+            )
+
     def to_dict(self) -> dict[str, float]:
         """Convert to dictionary."""
         return {

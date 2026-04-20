@@ -486,3 +486,46 @@ class TestFiniteElementShaftModel:
             # Should be able to compute solution
             state = model.get_state()
             assert len(state.deflections) == n_elem + 1
+
+
+class TestRecommendShaftFlexBugFix:
+    """Regression tests for recommend_shaft_flex and shaft-length constants (#2704)."""
+
+    def test_shaft_length_driver_is_tour_average(self) -> None:
+        from src.shared.python.physics.flexible_shaft import SHAFT_LENGTH_DRIVER
+
+        assert abs(SHAFT_LENGTH_DRIVER - 1.1557) < 1e-4, (
+            f'Expected ~1.1557 m (45.5" tour average), got {SHAFT_LENGTH_DRIVER}'
+        )
+
+    def test_shaft_length_iron_is_tour_average(self) -> None:
+        from src.shared.python.physics.flexible_shaft import SHAFT_LENGTH_IRON
+
+        assert abs(SHAFT_LENGTH_IRON - 0.9398) < 1e-4, (
+            f'Expected ~0.9398 m (37" tour average), got {SHAFT_LENGTH_IRON}'
+        )
+
+    def test_recommend_shaft_flex_speed_breakpoints(self) -> None:
+        from src.shared.python.physics.flexible_shaft import recommend_shaft_flex
+
+        assert recommend_shaft_flex(55) == "Ladies"
+        assert recommend_shaft_flex(66) == "Senior"
+        assert recommend_shaft_flex(78) == "Regular"
+        assert recommend_shaft_flex(90) == "Stiff"
+        assert recommend_shaft_flex(100) == "X-Stiff"
+
+    def test_recommend_shaft_flex_slow_tempo_shifts_stiffer(self) -> None:
+        from src.shared.python.physics.flexible_shaft import recommend_shaft_flex
+
+        assert recommend_shaft_flex(78, tempo_ms=1500) == "Stiff"
+
+    def test_recommend_shaft_flex_early_release_shifts_softer(self) -> None:
+        from src.shared.python.physics.flexible_shaft import recommend_shaft_flex
+
+        assert recommend_shaft_flex(90, release_timing_ms=150) == "Regular"
+
+    def test_recommend_shaft_flex_negative_speed_raises(self) -> None:
+        from src.shared.python.physics.flexible_shaft import recommend_shaft_flex
+
+        with pytest.raises(ValueError):
+            recommend_shaft_flex(-1.0)

@@ -11,8 +11,8 @@ from src.shared.python.core.physics_constants import (
 
 from ._shaft_data import ShaftMaterial, ShaftProperties
 
-SHAFT_LENGTH_DRIVER = 1.168  # [m] 46" driver shaft
-SHAFT_LENGTH_IRON = 0.965  # [m] 38" 7-iron shaft
+SHAFT_LENGTH_DRIVER = 1.1557  # [m] 45.5" tour-average driver shaft
+SHAFT_LENGTH_IRON = 0.9398  # [m] 37" tour-average 7-iron shaft
 STEEL_DENSITY = 7850  # [kg/m³]
 GRAPHITE_DENSITY = int(GRAPHITE_DENSITY_KG_M3)  # [kg/m³] from physics_constants
 STEEL_E = 200e9  # [Pa] Young's modulus for steel
@@ -184,3 +184,60 @@ def create_standard_shaft(
         youngs_modulus=E,
         density=density,
     )
+
+
+# Swing-speed thresholds (mph) for shaft-flex recommendation.
+_FLEX_THRESHOLDS_MPH = {
+    "Ladies": 60.0,
+    "Senior": 72.0,
+    "Regular": 84.0,
+    "Stiff": 96.0,
+}
+
+
+def recommend_shaft_flex(
+    swing_speed_mph: float,
+    tempo_ms: float | None = None,
+    release_timing_ms: float | None = None,
+) -> str:
+    """Return a recommended shaft flex based on swing parameters.
+
+    Rule-based logic using industry-standard swing-speed breakpoints with
+    optional corrections for slow tempo (shift one flex stiffer) or early
+    release (shift one flex softer).
+
+    Args:
+        swing_speed_mph: Driver club-head speed at impact in mph.
+        tempo_ms: Total swing duration in milliseconds. Slow tempo (>1400 ms)
+            shifts recommendation one category stiffer; fast tempo (<1000 ms)
+            shifts softer.
+        release_timing_ms: Time from top-of-backswing to ball-strike in ms.
+            Early release (< 200 ms) shifts recommendation one category softer.
+
+    Returns:
+        Flex category string: one of "Ladies", "Senior", "Regular",
+        "Stiff", "X-Stiff".
+    """
+    if swing_speed_mph < 0:
+        raise ValueError("swing_speed_mph must be non-negative")
+
+    flex_order = ["Ladies", "Senior", "Regular", "Stiff", "X-Stiff"]
+
+    base = "X-Stiff"
+    for flex, threshold in _FLEX_THRESHOLDS_MPH.items():
+        if swing_speed_mph < threshold:
+            base = flex
+            break
+
+    idx = flex_order.index(base)
+
+    if tempo_ms is not None:
+        if tempo_ms > 1400:
+            idx = min(idx + 1, len(flex_order) - 1)
+        elif tempo_ms < 1000:
+            idx = max(idx - 1, 0)
+
+    if release_timing_ms is not None and release_timing_ms < 200:
+        idx = max(idx - 1, 0)
+
+    return flex_order[idx]
