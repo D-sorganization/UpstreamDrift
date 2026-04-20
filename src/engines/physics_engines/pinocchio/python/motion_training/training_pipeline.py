@@ -92,9 +92,7 @@ class MotionTrainingPipeline:
     4. Visualize and export results
     """
 
-    DEFAULT_URDF = (
-        "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"  # noqa: E501
-    )
+    DEFAULT_URDF = "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf"  # noqa: E501
 
     def __init__(self, config: PipelineConfig | None = None) -> None:
         """Initialize the pipeline.

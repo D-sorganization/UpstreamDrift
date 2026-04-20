@@ -84,6 +84,10 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 20
     steps:
+      - name: Enable Windows long paths
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
@@ -205,6 +209,10 @@ jobs:
       matrix:
         python: ["3.10", "3.11", "3.12"]
     steps:
+      - name: Enable Windows long paths
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - uses: actions/checkout@v6
       - name: Reject Raw Merge Conflict Markers
         run: |
@@ -504,6 +512,10 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
+      - name: Enable Windows long paths
+        if: runner.os == 'Windows'
+        run: git config --system core.longpaths true
+
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
