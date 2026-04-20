@@ -172,19 +172,39 @@ class AerodynamicsEngine:
         forces = self.compute_forces(velocity, spin, t, position, resample)
         return forces["total"] / mass
 
-    def compute_spin_decay(self, spin: np.ndarray, dt: float) -> np.ndarray:
+    def compute_spin_decay(
+        self,
+        spin: np.ndarray,
+        dt: float,
+        velocity_magnitude: float | None = None,
+    ) -> np.ndarray:
         """Compute spin decay over time step (exponential decay).
+
+        When *velocity_magnitude* is supplied the decay rate is scaled
+        linearly by ``v / V_REF`` so that the stored ``spin_decay_rate``
+        is calibrated at ``V_REF = 70 m/s`` (mid-trajectory driver speed).
+        At lower speeds (e.g. descent) spin decays more slowly; at higher
+        speeds it decays faster — consistent with viscous aerodynamic drag
+        on a spinning sphere.
 
         Args:
             spin: Current angular velocity [rad/s]
             dt: Time step [s]
+            velocity_magnitude: Ball speed [m/s]. If None, uses constant rate.
 
         Returns:
             Updated spin after decay [rad/s]
         """
         if spin is None:
             raise ValueError("spin must be provided")
-        decay_factor = math.exp(-self.config.spin_decay_rate * dt)
+        if velocity_magnitude is not None and velocity_magnitude < 0:
+            raise ValueError("velocity_magnitude must be non-negative")
+        _V_REF = 70.0  # m/s — calibration reference speed
+        if velocity_magnitude is not None:
+            effective_rate = self.config.spin_decay_rate * velocity_magnitude / _V_REF
+        else:
+            effective_rate = self.config.spin_decay_rate
+        decay_factor = math.exp(-effective_rate * dt)
         return spin * decay_factor
 
 
