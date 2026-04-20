@@ -34,18 +34,10 @@ from .physics import (
 from .physics_triple import (
     TriplePendulumParams,
 )
-from .physics_triple import (
-    coriolis_vector as coriolis_vector_triple,
-)
-from .physics_triple import (
-    gravity_vector as gravity_vector_triple,
-)
-from .physics_triple import (
-    mass_matrix as mass_matrix_triple,
-)
-from .physics_triple import (
-    net_joint_forces as net_joint_forces_triple,
-)
+from .physics_triple import coriolis_vector as coriolis_vector_triple
+from .physics_triple import gravity_vector as gravity_vector_triple
+from .physics_triple import mass_matrix as mass_matrix_triple
+from .physics_triple import net_joint_forces as net_joint_forces_triple
 
 # Note: physics_triple does not model joint friction (no friction_torque_vector)
 

@@ -66,9 +66,7 @@ _PolyWidget: type | None = None
 _SignalWidget: type | None = None
 
 try:
-    from signal_toolkit.polynomial_generator import (
-        PolynomialGeneratorWidget as _PW,
-    )
+    from signal_toolkit.polynomial_generator import PolynomialGeneratorWidget as _PW
 
     _PolyWidget = _PW
     _HAS_POLY_WIDGET = True

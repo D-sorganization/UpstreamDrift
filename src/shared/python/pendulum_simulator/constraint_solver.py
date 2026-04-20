@@ -28,22 +28,14 @@ import logging
 import numpy as np
 
 from . import native_backend as _native_backend
-from .golfer_constraints import (
-    analytical_constraint_jacobian as constraint_jacobian,
-)
+from .golfer_constraints import analytical_constraint_jacobian as constraint_jacobian
 from .golfer_constraints import (
     constraint_vector,
     friction_torque_vector,
 )
-from .golfer_dynamics import (
-    analytical_coriolis as coriolis_matrix,
-)
-from .golfer_dynamics import (
-    analytical_gravity_vector as gravity_vector,
-)
-from .golfer_dynamics import (
-    analytical_mass_matrix as mass_matrix,
-)
+from .golfer_dynamics import analytical_coriolis as coriolis_matrix
+from .golfer_dynamics import analytical_gravity_vector as gravity_vector
+from .golfer_dynamics import analytical_mass_matrix as mass_matrix
 from .physics_golfer import (
     N_CONSTRAINTS,
     N_DOF,
@@ -113,9 +105,9 @@ def _solve_constrained_dynamics(
     if native_result is not None:
         qddot, lambda_forces = native_result
         assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
-        assert np.all(np.isfinite(lambda_forces)), (
-            f"Constraint forces have non-finite values: {lambda_forces}"
-        )
+        assert np.all(
+            np.isfinite(lambda_forces)
+        ), f"Constraint forces have non-finite values: {lambda_forces}"
         return qddot, lambda_forces
 
     # Compute dynamic terms
@@ -165,9 +157,9 @@ def _solve_constrained_dynamics(
     lambda_forces = sol[n:]
 
     assert np.all(np.isfinite(qddot)), f"qddot has non-finite values: {qddot}"
-    assert np.all(np.isfinite(lambda_forces)), (
-        f"Constraint forces have non-finite values: {lambda_forces}"
-    )
+    assert np.all(
+        np.isfinite(lambda_forces)
+    ), f"Constraint forces have non-finite values: {lambda_forces}"
     return qddot, lambda_forces
 
 

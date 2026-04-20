@@ -18,8 +18,8 @@ from __future__ import annotations
 # Re-export shared constants (used by consumers that import from models directly)
 from src.shared.python.core import constants  # noqa: F401
 from src.shared.python.physics.equipment import CLUB_CONFIGS  # noqa: F401
-from src.shared.python.physics.physics_parameters import (
-    get_parameter_registry,  # noqa: F401
+from src.shared.python.physics.physics_parameters import (  # noqa: F401
+    get_parameter_registry,
 )
 
 from .models_advanced import (  # noqa: F401

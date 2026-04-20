@@ -323,8 +323,9 @@ class DoublePendulumDynamics:
     def __init__(
         self,
         parameters: DoublePendulumParameters | None = None,
-        forcing_functions: tuple[Callable[[float, DoublePendulumState], float], ...]
-        | None = None,
+        forcing_functions: (
+            tuple[Callable[[float, DoublePendulumState], float], ...] | None
+        ) = None,
     ) -> None:
         self.parameters = parameters or DoublePendulumParameters.default()
         self._cache_parameters()
@@ -575,9 +576,7 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(
-    shoulder_expression: str, wrist_expression: str
-) -> tuple[
+def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:

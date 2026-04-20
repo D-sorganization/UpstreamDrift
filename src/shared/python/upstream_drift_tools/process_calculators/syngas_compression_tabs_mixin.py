@@ -33,8 +33,8 @@ try:
     from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 except ImportError:
     try:
-        from matplotlib.backends.backend_agg import (  # type: ignore[assignment]
-            FigureCanvasAgg as FigureCanvas,
+        from matplotlib.backends.backend_agg import (
+            FigureCanvasAgg as FigureCanvas,  # type: ignore[assignment]
         )
     except ImportError:
         FigureCanvas = None  # type: ignore[assignment,misc]
