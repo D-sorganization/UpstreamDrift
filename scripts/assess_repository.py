@@ -176,22 +176,38 @@ def assess_F():
     findings = []
     score = 8.0
 
-    # Look for actual hardcoded string literal assignments in src/ only.
+    # Look for actual hardcoded string literal assignments across the repo.
     # Pattern requires a string value of 8+ chars to avoid matching docstring
     # examples, type annotations, and function parameter names.
-    # Test files are excluded because they legitimately use fake placeholder values.
+    # Test/fixture/vendored directories are excluded because they legitimately
+    # use fake placeholder values; everything else (src, scripts, tooling) is
+    # scanned so hardcoded credentials outside src/ are not silently ignored.
+    secret_scan_excludes = (
+        "tests",
+        "test",
+        "fixtures",
+        "vendor",
+        "vendored",
+        "third_party",
+        "node_modules",
+        ".venv",
+        "venv",
+    )
     hardcoded_secrets = grep_count(
         REPO_ROOT,
         r'(?:password|secret|api_key|token)\s*=\s*["\'][^"\']{8,}["\']',
-        "src/**/*.py",
+        "**/*.py",
+        exclude_parts=secret_scan_excludes,
     )
     if hardcoded_secrets > 0:
         findings.append(
-            f"Potential hardcoded secrets found in {hardcoded_secrets} src files (needs verification)."
+            f"Potential hardcoded secrets found in {hardcoded_secrets} files (needs verification)."
         )
         score -= 1
     else:
-        findings.append("No obvious hardcoded secrets patterns found in src/ files.")
+        findings.append(
+            "No obvious hardcoded secret patterns found outside of test fixtures."
+        )
 
     recs = [
         "Run bandit security analysis regularly.",
