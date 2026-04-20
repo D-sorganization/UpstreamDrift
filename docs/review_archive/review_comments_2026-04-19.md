@@ -1,36 +1,21 @@
 # Review Comments Archive - 2026-04-19
 
-Generated: 2026-04-19T11:37:23.982728
+Generated: 2026-04-19T20:52:43.804377
 
-## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
 
-### PR #2773: tests/unit/conftest.py:35
-
-Actionable: No
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Stop faking optional deps during collection**
-
-Injecting `pinocchio`/`casadi` into `sys.modules` in `pytest_configure` makes optional-dependency gating inaccurate across the unit suite: `engine_availability._probe_engine()` treats a `MagicMock` as valid (its `hasattr(..., "buildModelFromUrdf")` check passes), so tests marked with `@skip_if_unavailable("pinocchio")` run instead of skipping when Pinocchio is no...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2773#discussion_r3106016221)
-
----
-
-### PR #2773: tests/unit/conftest.py:55
+### PR #2830: src/robotics/sensing/noise_models.py:374
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Avoid clobbering real modules in autouse reset fixture**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Handle shape changes across `measure` calls**
 
-The autouse reset fixture overwrites any already-loaded `pydrake`, `casadi`, and `pinocchio` entries with fresh `MagicMock` instances before every test, which can invalidate tests that are supposed to exercise real integrations when those dependencies are installed. This turns imports into fake modules suite-wide and can both hide real regressions and ...
+The state initialization short-circuits after the first call, so `_bias` and `_scale_factor` keep their original shape forever. If later `measure()` calls use a different `raw.shape`, NumPy broadcasting can silently return the wrong output shape (for example, first call with shape `(3,)`, later call with `(1,)` yields a `(3,)` result) or apply incorrect shared bi...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2773#discussion_r3106016224)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2830#discussion_r3108141090)
 
 ---
 
