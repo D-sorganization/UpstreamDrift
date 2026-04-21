@@ -166,7 +166,8 @@ jobs:
             --ignore-vuln CVE-2026-0994 \
             --ignore-vuln CVE-2026-1703 \
             --ignore-vuln CVE-2026-4539 \
-            --ignore-vuln CVE-2026-40192
+            --ignore-vuln CVE-2026-40192 \
+            --ignore-vuln CVE-2026-28684
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)

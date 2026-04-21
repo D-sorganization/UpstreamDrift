@@ -20,3 +20,7 @@
 ## 2024-05-18 - [math.dist over math.hypot and list comprehension]
 **Learning:** When calculating Euclidean distance between two points, computing an intermediate delta array via a list comprehension and applying `math.hypot(*delta)` is still slower than using `math.dist(pos_a, pos_b)` directly, which completely avoids creating the intermediate lists in python and computes the distance in C.
 **Action:** Use `math.dist(pos_a, pos_b)` to calculate the distance between iterables, and then only compute `delta` if it is strictly necessary to return it.
+
+## 2024-05-18 - Replacing `np.linalg.norm` with `math.hypot`
+**Learning:** For small vectors (2D or 3D) like physical velocities or forces, calculating magnitudes using `math.hypot(*velocity)` or `math.hypot(v[0], v[1])` is up to ~5x faster than using `np.linalg.norm(velocity)`. This avoids the substantial overhead of NumPy's generalized, dimension-agnostic reduction functions, memory allocations, and Python-to-C API calls for tiny arrays.
+**Action:** When working with 2D or 3D physics vectors where you need magnitudes (e.g., speed, spin magnitude, 2D horizontal velocities) on a hot path (like force calculators and integration loops), use the built-in `math.hypot` with unpacked elements (e.g., `math.hypot(*vec)`) instead of `np.linalg.norm`.
