@@ -14,6 +14,8 @@ import math
 import numpy as np
 import pytest
 
+_API = "/api"
+
 # ---------------------------------------------------------------------------
 # Test Vectors
 # ---------------------------------------------------------------------------
@@ -168,7 +170,7 @@ class TestPendulumSimulationAPI:
     def test_api_simulate_returns_success(self, client) -> None:
         """POST /simulate with pendulum engine should return success."""
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "pendulum",
                 "duration": 0.1,
@@ -188,7 +190,7 @@ class TestPendulumSimulationAPI:
     def test_api_simulate_returns_data_fields(self, client) -> None:
         """API response should contain expected data fields."""
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "pendulum",
                 "duration": 0.05,
@@ -205,7 +207,7 @@ class TestPendulumSimulationAPI:
     def test_api_rejects_invalid_engine(self, client) -> None:
         """API should reject requests for non-existent engines."""
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "nonexistent_engine_xyz",
                 "duration": 0.1,
@@ -219,7 +221,7 @@ class TestPendulumSimulationAPI:
     def test_api_rejects_zero_duration(self, client) -> None:
         """API should reject zero or negative duration."""
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "pendulum",
                 "duration": 0.0,
@@ -231,7 +233,7 @@ class TestPendulumSimulationAPI:
     def test_api_matches_vector(self, client, vector) -> None:
         """API response should match test vector expectations."""
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "pendulum",
                 "duration": vector["duration"],
@@ -267,7 +269,7 @@ class TestPendulumEngineAPIConsistency:
 
         # API
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "pendulum",
                 "duration": duration,
@@ -292,7 +294,7 @@ class TestPendulumEngineAPIConsistency:
 
         # API
         response = client.post(
-            "/simulate",
+            f"{_API}/simulate",
             json={
                 "engine_type": "pendulum",
                 "duration": 0.1,

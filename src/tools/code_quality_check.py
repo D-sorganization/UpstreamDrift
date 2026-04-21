@@ -33,6 +33,8 @@ class Colors:
 BANNED_PATTERNS = [
     (re.compile(r"\b" + "TO" + "DO" + r"\b"), "TO" + "DO placeholder found"),
     (re.compile(r"\b" + "FIX" + "ME" + r"\b"), "FIX" + "ME placeholder found"),
+    (re.compile(r"\bTRACKED_TASK\b"), "TRACKED_TASK placeholder found"),
+    (re.compile(r"\bTRACKED_DEFECT\b"), "TRACKED_DEFECT placeholder found"),
     (re.compile(r"^\s*\.\.\.\s*$"), "Ellipsis placeholder"),
     (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
     (re.compile(r"your.*here", re.IGNORECASE), "Template placeholder"),

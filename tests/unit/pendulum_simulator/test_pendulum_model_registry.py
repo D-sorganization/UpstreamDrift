@@ -81,11 +81,11 @@ class TestRegisterAndGet:
         assert list_models() == []
 
     def test_register_empty_name_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             register_model("", _make_config())
 
     def test_register_wrong_type_raises(self) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             register_model("bad", {"not": "a ModelConfig"})  # type: ignore[arg-type]
 
     def test_list_models_returns_list(self) -> None:

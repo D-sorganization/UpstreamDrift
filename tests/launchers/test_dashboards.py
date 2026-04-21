@@ -22,7 +22,21 @@ def test_mujoco_dashboard_main() -> None:
 
 
 def test_pinocchio_dashboard_main() -> None:
-    with patch("src.launchers.pinocchio_dashboard.launch_dashboard") as mock_launch:
+    mock_cls = MagicMock()
+    mock_cls.__name__ = "PinocchioPhysicsEngine"
+    mock_module = MagicMock()
+    mock_module.PinocchioPhysicsEngine = mock_cls
+    _fake_mods = {
+        "src.engines": MagicMock(),
+        "src.engines.physics_engines": MagicMock(),
+        "src.engines.physics_engines.pinocchio": MagicMock(),
+        "src.engines.physics_engines.pinocchio.python": MagicMock(),
+        "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine": mock_module,
+    }
+    with (
+        patch.dict("sys.modules", _fake_mods),
+        patch("src.launchers.pinocchio_dashboard.launch_dashboard") as mock_launch,
+    ):
         pinocchio_main()
         mock_launch.assert_called_once()
         _, kwargs = mock_launch.call_args

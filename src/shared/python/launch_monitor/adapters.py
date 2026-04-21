@@ -150,9 +150,9 @@ class TrackManAdapter:
             total_spin_rpm=total_spin,
             carry_m=(carry_yards or 0.0) * _YARDS_TO_METERS,
             total_m=total_yards * _YARDS_TO_METERS if total_yards is not None else None,
-            max_height_m=max_h_yards * _YARDS_TO_METERS
-            if max_h_yards is not None
-            else None,
+            max_height_m=(
+                max_h_yards * _YARDS_TO_METERS if max_h_yards is not None else None
+            ),
             landing_angle_deg=_float_or_none(get("landing_angle_deg")),
             flight_time_s=_float_or_none(get("flight_time_s")),
             attack_angle_deg=_float_or_none(get("attack_angle_deg")) or 0.0,
@@ -351,9 +351,11 @@ class FlightScopeAdapter:
                     spin_axis_deg=spin_axis,
                     total_spin_rpm=total_spin,
                     carry_m=(carry_yards or 0.0) * _YARDS_TO_METERS,
-                    total_m=total_yards * _YARDS_TO_METERS
-                    if total_yards is not None
-                    else None,
+                    total_m=(
+                        total_yards * _YARDS_TO_METERS
+                        if total_yards is not None
+                        else None
+                    ),
                     max_height_m=(
                         max_h_yards * _YARDS_TO_METERS
                         if max_h_yards is not None

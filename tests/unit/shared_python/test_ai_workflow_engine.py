@@ -152,7 +152,7 @@ class TestWorkflowExecution:
             workflow_id="wf1",
             context=context,
         )
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             exe.get_step_result(None)  # type: ignore[arg-type]
 
 

@@ -247,6 +247,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
             # Time-varying torque: sample τ at each Butcher stage time
             def _tau_at(t: float) -> tuple[float, float]:
                 return torque_callback(t)
+
         else:
             # Constant-torque: always return the stored array
             tau0, tau1 = float(self._tau[0]), float(self._tau[1])

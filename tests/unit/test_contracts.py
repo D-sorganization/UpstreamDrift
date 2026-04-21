@@ -34,14 +34,17 @@ def _enforce_contracts() -> Generator[None, None, None]:
     set_contract_level() updates sys.modules[__name__], but in a namespace-package
     environment the module may be loaded under two names, so require.__globals__ can
     be a different dict.  Patching __globals__ directly is always correct.
+
+    Note: after the contracts refactor, require.__globals__ no longer contains a
+    module-level DBC_LEVEL variable — enforcement state lives exclusively in
+    _ContractState.level.  Only patch _ContractState.
     """
     _g = require.__globals__  # the actual dict require/ensure/_handle_violation read
-    original_dbc = _g["DBC_LEVEL"]
-    _g["DBC_LEVEL"] = _g["ContractLevel"].ENFORCE
-    _g["_ContractState"].level = _g["ContractLevel"].ENFORCE
+    _cs = _g["_ContractState"]
+    original_level = _cs.level
+    _cs.level = _g["ContractLevel"].ENFORCE
     yield
-    _g["DBC_LEVEL"] = original_dbc
-    _g["_ContractState"].level = original_dbc
+    _cs.level = original_level
 
 
 class TestRequire:

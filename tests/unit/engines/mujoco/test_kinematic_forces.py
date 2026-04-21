@@ -219,12 +219,13 @@ class TestKinematicForceAnalyzer:
 # ---------------------------------------------------------------------------
 
 #: Minimal MuJoCo model with one limited hinge joint (range [-1, 1] rad).
+#  MuJoCo stores hinge joint ranges in degrees; 57.2957... deg = 1 rad.
 _LIMITED_JOINT_XML = """
 <mujoco model="limited_hinge_test">
   <worldbody>
     <body name="link" pos="0 0 0.5">
       <joint name="hinge" type="hinge" axis="0 0 1"
-             limited="true" range="-1 1" damping="0.1"/>
+             limited="true" range="-57.29578 57.29578" damping="0.1"/>
       <geom type="capsule" size="0.05 0.2"/>
     </body>
   </worldbody>

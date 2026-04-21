@@ -167,7 +167,7 @@ class TestEnginePerformanceBenchmarks:
     def test_engine_list_latency(self, client: TestClient) -> None:
         """Engine list responds within 3 seconds."""
         start = time.time()
-        resp = client.get("/engines")
+        resp = client.get("/api/engines")
         elapsed = time.time() - start
         assert resp.status_code == 200
         assert elapsed < 3.0

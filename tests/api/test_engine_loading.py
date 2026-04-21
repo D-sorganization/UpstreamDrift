@@ -8,6 +8,8 @@ from collections.abc import Generator
 
 import pytest
 
+_API = "/api"
+
 try:
     from fastapi.testclient import TestClient
 
@@ -123,7 +125,7 @@ class TestEngineList:
 
     def test_get_engines_list(self, client) -> None:
         """Test GET /api/engines returns all configured engines."""
-        response = client.get("/engines")
+        response = client.get(f"{_API}/engines")
         assert response.status_code == 200
 
         data = response.json()

@@ -99,7 +99,7 @@ class TestPlotJointForceVectors:
         assert len(fig.get_axes()) > 0
 
     def test_none_figure_raises(self, renderer: ForceVectorRenderer) -> None:
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             renderer.plot_joint_force_vectors(None, frame_idx=0)  # type: ignore[arg-type]
 
 

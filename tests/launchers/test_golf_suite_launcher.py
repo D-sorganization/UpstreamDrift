@@ -3,7 +3,7 @@
 import sys  # noqa: E402
 from collections.abc import Generator  # noqa: E402
 from pathlib import Path  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
+from unittest.mock import ANY, MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
@@ -113,7 +113,7 @@ def test_launch_script_success(launcher) -> None:
         launcher._launch_script("Test Engine", fake_path, fake_cwd)
 
         mock_popen.assert_called_once_with(
-            [sys.executable, str(fake_path)], cwd=str(fake_cwd)
+            [sys.executable, str(fake_path)], cwd=str(fake_cwd), env=ANY
         )
         launcher.status.setText.assert_called_with("Test Engine Launched")
 

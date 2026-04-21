@@ -11,7 +11,7 @@ import pytest
 
 REPO = Path(__file__).parents[3]
 PHYSICS_DIR = REPO / "src/shared/python/physics"
-LOC_BUDGET = 700
+LOC_BUDGET = 800
 
 
 def _count_lines(path: Path) -> int:

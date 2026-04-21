@@ -77,35 +77,35 @@ class TestPendulumParams:
         """Negative m1 raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             PendulumParams(m1=-1.0, m2=1.0, L1=1.0, L2=1.0)
 
     def test_negative_m2_raises(self) -> None:
         """Negative m2 raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             PendulumParams(m1=1.0, m2=-0.1, L1=1.0, L2=1.0)
 
     def test_negative_L1_raises(self) -> None:
         """Negative L1 raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             PendulumParams(m1=1.0, m2=1.0, L1=-0.5, L2=1.0)
 
     def test_negative_L2_raises(self) -> None:
         """Negative L2 raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             PendulumParams(m1=1.0, m2=1.0, L1=1.0, L2=-1.0)
 
     def test_negative_mclub_raises(self) -> None:
         """Negative mClub raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import PendulumParams
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             PendulumParams(m1=1.0, m2=1.0, L1=1.0, L2=1.0, mClub=-0.1)
 
     def test_zero_mclub_allowed(self) -> None:
@@ -156,14 +156,14 @@ class TestJointLimits:
         """phi_min >= phi_max raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import JointLimits
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             JointLimits(phi_min=1.0, phi_max=-1.0)
 
     def test_zero_stiffness_raises(self) -> None:
         """Zero stiffness raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import JointLimits
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             JointLimits(stiffness=0.0)
 
 
@@ -222,7 +222,7 @@ class TestJointLimitsNDOF:
         """Mismatched min/max shapes raise AssertionError."""
         from src.shared.python.pendulum_simulator.physics import JointLimitsNDOF
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             JointLimitsNDOF(
                 angle_min=np.array([-1.0, -1.0]),
                 angle_max=np.array([1.0, 1.0, 1.0]),
@@ -232,7 +232,7 @@ class TestJointLimitsNDOF:
         """angle_min >= angle_max raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import JointLimitsNDOF
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             JointLimitsNDOF(
                 angle_min=np.array([1.0, 1.0]),
                 angle_max=np.array([-1.0, -1.0]),
@@ -280,7 +280,7 @@ class TestMassMatrix:
         """Infinite phi raises AssertionError."""
         from src.shared.python.pendulum_simulator.physics import mass_matrix
 
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             mass_matrix(float("inf"), basic_params)
 
     def test_components_match(self, basic_params) -> None:

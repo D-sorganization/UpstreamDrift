@@ -375,8 +375,9 @@ class TestRunSimulationBackground:
 
             await service.run_simulation_background("task_456", request, active_tasks)
 
-            # Task completes but the result indicates failure
-            assert active_tasks["task_456"]["status"] == "completed"
+            # Task completes but the result indicates failure — service sets
+            # status="failed" when result.success is False.
+            assert active_tasks["task_456"]["status"] == "failed"
             assert active_tasks["task_456"]["result"]["success"] is False
 
     async def test_handles_uncaught_exception_in_background(

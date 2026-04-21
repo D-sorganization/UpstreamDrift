@@ -87,7 +87,7 @@ class TestAssertClose:
     def test_zero_expected(self) -> None:
         """When expected is 0, only atol matters."""
         assert_close(0.0, 0.0)
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             assert_close(0.1, 0.0)  # default atol=0
 
     def test_integers(self) -> None:

@@ -43,7 +43,7 @@ class TestCross2d:
     def test_wrong_shape_raises(self) -> None:
         r = np.array([1.0, 0.0, 0.0])  # shape (3,)
         f = np.array([0.0, 1.0, 0.0])
-        with pytest.raises(AssertionError):
+        with pytest.raises((AssertionError, ValueError)):
             cross_2d(r, f)
 
 

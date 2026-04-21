@@ -232,11 +232,11 @@ class TestSetBaseProfile:
         analyzer.set_base_torque_profile(_ZERO_PROFILE)  # no exception
 
     def test_requires_dict(self, analyzer) -> None:  # type: ignore[no-untyped-def]
-        with pytest.raises((AssertionError, TypeError)):
+        with pytest.raises((AssertionError, TypeError, ValueError)):
             analyzer.set_base_torque_profile("not_a_dict")  # type: ignore[arg-type]
 
     def test_requires_coeffs_key(self, analyzer) -> None:  # type: ignore[no-untyped-def]
-        with pytest.raises((AssertionError, KeyError)):
+        with pytest.raises((AssertionError, KeyError, ValueError)):
             analyzer.set_base_torque_profile({"bad_key": []})
 
     def test_stores_base_coeffs(self, analyzer) -> None:  # type: ignore[no-untyped-def]
@@ -282,7 +282,7 @@ class TestExtractMetrics:
                 assert np.isfinite(float(val)), f"Non-finite scalar metric: {name}"
 
     def test_rejects_invalid_input(self, analyzer_with_profile) -> None:  # type: ignore[no-untyped-def]
-        with pytest.raises((AssertionError, AttributeError)):
+        with pytest.raises((AssertionError, AttributeError, ValueError)):
             analyzer_with_profile.extract_metrics("bad_input")  # type: ignore[arg-type]
 
     def test_motion_duration_positive(self, analyzer_with_profile) -> None:  # type: ignore[no-untyped-def]

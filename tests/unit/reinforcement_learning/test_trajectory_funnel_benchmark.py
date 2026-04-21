@@ -13,7 +13,7 @@ def test_initialization() -> None:
     bench2 = TrajectoryFunnelBenchmark("setpoint")
     assert bench2.mode == "setpoint"
 
-    with pytest.raises(AssertionError):
+    with pytest.raises((AssertionError, ValueError)):
         TrajectoryFunnelBenchmark("invalid")
 
 
@@ -26,7 +26,7 @@ def test_setpoint_reward() -> None:
     res = bench.setpoint_reward(current, target)
     assert res == -1.0
 
-    with pytest.raises(AssertionError):
+    with pytest.raises((AssertionError, ValueError)):
         bench.setpoint_reward(None, target)
 
 
