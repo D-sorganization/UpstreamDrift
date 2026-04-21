@@ -636,6 +636,55 @@ To maintain a clean repository root, all development-related documentation (summ
 - **DO NOT** create new `.md` files in the root unless they are critical project-wide files (e.g., README, AGENTS, CHANGELOG).
 - Prefer creating issues for task tracking rather than temporary markdown files.
 
+<!-- BEGIN FLEET-MANAGED: network-api-hygiene -->
+## 🛑 NETWORK & API HYGIENE (CRITICAL)
+
+> This section is managed centrally by Repository_Management and synced fleet-wide.
+> Do NOT edit it directly in individual repositories — edit the source in Repository_Management/AGENTS.md.
+
+### GitHub API Quotas
+
+| API Type | Quota | Consumed By |
+|----------|-------|-------------|
+| REST (`gh api repos/...`) | 5,000 req/hr | Safe for polling |
+| GraphQL | 5,000 req/hr | `gh pr list --json`, `gh pr checks`, `gh pr create`, `gh pr merge` |
+
+GraphQL and REST have **separate** quotas. Exhausting GraphQL blocks PR creation and merging fleet-wide for an entire hour.
+
+### Mandatory Rules
+
+- **NO MASS POLLING**: Agents MUST NEVER use `gh pr list`, `gh issue list`, or arbitrary REST/GraphQL loops to "scan" or "sweep" the repository fleet. Single, scoped repository lookups are allowed when needed.
+- **LOCAL FIRST**: Rely on local `.md` files, previously generated `issues.json` artifacts, or user assistance to find task context — do not query GitHub to discover what to work on.
+- **NO PARALLELIZED GITHUB CLI**: Never write or execute scripts that loop over multiple repositories performing `gh` operations (automated PR merge scripts, fleet-wide status sweeps, etc.).
+- **NO TIGHT POLLING LOOPS**: Never implement `while true; do gh pr checks $PR; sleep 30; done` patterns. Each iteration of such a loop costs 1–3 GraphQL calls; at 30-second intervals that drains the 5,000/hr quota in under 3 hours.
+  - ❌ `while true; do gh pr checks; sleep 30; done`
+  - ✅ `gh run watch <run-id>` — streams CI events without polling
+  - ✅ Check status once at natural work breakpoints (after completing other tasks)
+- **BATCHING**: If remote information is absolutely necessary, use a single focused query — not a loop of queries.
+- **REST OVER GRAPHQL FOR CI STATUS**: Use REST endpoints for CI polling; they don't consume the GraphQL quota.
+  - ❌ `gh pr checks <N>` (GraphQL)
+  - ✅ `gh api repos/OWNER/REPO/actions/runs` (REST)
+  - ✅ `gh api repos/OWNER/REPO/actions/jobs/<id>/logs` (REST)
+- **STOP MONITORS IMMEDIATELY**: When using background monitor tasks, call `TaskStop <id>` the moment the monitored condition is satisfied. Do not leave monitors running "just in case."
+- **LONG POLLING INTERVALS**: Background monitors must use ≥270-second intervals (keeps the prompt cache warm). Default to 1200–1800 s for idle monitoring. Never chain short sleeps to work around the 60-second minimum.
+- **SILENT FAILURES**: If an API rate limit is hit, HALT NETWORK ACTIVITY IMMEDIATELY. Do not write retry-loops that further exhaust the quota. Alert the user and pivot to local work.
+
+### Checking Rate Limit Status
+
+```bash
+gh api rate_limit | python3 -c "
+import json, sys, datetime
+d = json.load(sys.stdin)['resources']
+for k in ['core', 'graphql']:
+    r = d[k]
+    reset = datetime.datetime.fromtimestamp(r['reset']).strftime('%H:%M:%S')
+    print(f'{k}: {r["remaining"]}/{r["limit"]} remaining — resets {reset}')
+"
+```
+
+<!-- END FLEET-MANAGED: network-api-hygiene -->
+---
+
 ## Specification
 
 This repository's specification is defined in `SPEC.md` at the repo root.
