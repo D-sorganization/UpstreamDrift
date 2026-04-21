@@ -34,7 +34,6 @@ from pathlib import Path
 
 import numpy as np
 
-from src.shared.python.engine_core.engine_availability import is_engine_available
 from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exported for test imports
     MANDATORY_METRICS,
     ComparisonReport,  # noqa: F401
@@ -178,15 +177,15 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
         ee_body_name : str, optional
             Name of the end-effector body.  Defaults to last moving body.
         """
-        if not is_engine_available("drake"):
+        try:
+            from pydrake.all import (  # noqa: PLC0415
+                AddMultibodyPlantSceneGraph,
+                DiagramBuilder,
+                Parser,
+            )
+        except ImportError as _e:
             msg = "pydrake is not installed.  Install it with: pip install drake"
-            raise ImportError(msg)
-
-        from pydrake.all import (  # noqa: PLC0415
-            AddMultibodyPlantSceneGraph,
-            DiagramBuilder,
-            Parser,
-        )
+            raise ImportError(msg) from _e
         from pydrake.multibody.tree import BodyIndex  # noqa: PLC0415
 
         self._t_end = t_end

@@ -111,12 +111,14 @@ class InducedAccelerationAnalyzer:
         """Compute acceleration due to external forces only."""
         # a_ext = M^{-1} @ sum(J_i^T @ f_ext_i)
         pin.computeAllTerms(self.model, self.data, q, v)
-        M = self.data.M
+        # data.M is upper-triangular only after crba/computeAllTerms; symmetrize.
+        M = np.asarray(self.data.M)
+        M = M + M.T - np.diag(np.diag(M))
         tau_ext = np.zeros(self.model.nv)
         for frame_id, wrench in f_ext.items():
             # use pin.LOCAL for reference_frame if needed, else try default
-            J = pin.computeFrameJacobian(self.model, self.data, q, frame_id)
-            tau_ext += J.T @ wrench
+            J = np.asarray(pin.computeFrameJacobian(self.model, self.data, q, frame_id))
+            tau_ext = tau_ext + J.T @ np.asarray(wrench)
         return np.linalg.solve(M, tau_ext)
 
     def compute_specific_control(

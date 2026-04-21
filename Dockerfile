@@ -28,6 +28,8 @@ RUN conda install -y -c conda-forge \
     python=3.12 \
     numpy \
     scipy \
+    matplotlib \
+    pandas \
     pyqt6 \
     opencv \
     pyyaml \
