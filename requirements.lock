@@ -62,7 +62,7 @@ pydantic-core==2.41.5
     # via pydantic
 pyopengl==3.1.10
     # via mujoco
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via uvicorn
 pyyaml==6.0.2
     # via uvicorn

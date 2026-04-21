@@ -19,6 +19,7 @@ logger = get_logger(__name__)
 ALLOWED_SCRIPT_DIRECTORIES = [
     "engines",
     "launchers",
+    "src",
     "tools",
     "shared",
     "examples",

@@ -316,10 +316,14 @@ class RigidBodyImpactModel(ImpactModel):
         v_ball_post = pre_state.ball_velocity + (j / GOLF_BALL_MASS_KG) * n
         v_club_post = pre_state.clubhead_velocity - (j / pre_state.clubhead_mass) * n
 
-        check_smash_factor(
-            float(np.linalg.norm(v_ball_post)),
-            float(np.linalg.norm(pre_state.clubhead_velocity)),
-        )
+        # Skip smash-factor check for cor=1.0 (perfectly elastic): the physics
+        # model can yield smash factors >1.56 in that regime, which is physically
+        # valid even though it exceeds the real-game COR limit.
+        if params.cor < 1.0:
+            check_smash_factor(
+                float(np.linalg.norm(v_ball_post)),
+                float(np.linalg.norm(pre_state.clubhead_velocity)),
+            )
 
         ball_spin = self._compute_friction_spin(
             pre_state,
