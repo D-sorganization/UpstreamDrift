@@ -269,8 +269,10 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         """Automatically load data from default location if available."""
         if self._data_dir is None:
             try:
+                # Resolve repo root: src/shared/python/club_data/<this file>
+                # five levels up from this file reaches the repository root
                 current = Path(__file__).resolve()
-                project_root = current.parent.parent.parent.parent.parent
+                project_root = current.parents[4]
                 self._data_dir = project_root / "data"
             except (FileNotFoundError, OSError):
                 return

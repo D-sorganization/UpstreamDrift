@@ -93,7 +93,9 @@ def get_cmu_joint_names(env) -> list[str]:
     # If explicit names aren't in named.data, we might need a hardcoded
     # mapping or try to print them.
     try:
-        names = env.physics.named.data.qpos.axes.row.names
+        named_data = env.physics.named.data
+        qpos_axes = named_data.qpos.axes
+        names = qpos_axes.row.names
         return list(names)
     except (RuntimeError, ValueError, OSError):
         return []
@@ -156,10 +158,11 @@ def main() -> None:
             # However, for kinematic animation, we can just write to known
             # named joints.
             # Apply pose directly to qpos
+            named_qpos = env.physics.named.data.qpos
             for joint_name, angle in interpolated.items():
                 try:
-                    if joint_name in env.physics.named.data.qpos:
-                        env.physics.named.data.qpos[joint_name] = angle
+                    if joint_name in named_qpos:
+                        named_qpos[joint_name] = angle
                 except (RuntimeError, ValueError, AttributeError):
                     pass
 

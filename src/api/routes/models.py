@@ -26,6 +26,7 @@ from ..models.responses import (
     URDFLinkGeometry,
     URDFModelResponse,
 )
+from ._route_utils import find_project_root
 
 router = APIRouter()
 
@@ -39,14 +40,7 @@ _MODEL_DIRS = [
 
 def _find_project_root() -> Path:
     """Find the project root directory by looking for known markers."""
-    # Walk up from this file's location
-    current = Path(__file__).resolve()
-    for parent in current.parents:
-        if (parent / "src" / "shared" / "urdf").exists():
-            return parent
-        if (parent / "pyproject.toml").exists():
-            return parent
-    return Path.cwd()
+    return find_project_root()
 
 
 def _discover_models() -> list[dict[str, str]]:
