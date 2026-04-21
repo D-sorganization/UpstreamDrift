@@ -64,7 +64,7 @@ def buildModelFromUrdf(
 def buildModelsFromUrdf(
     filename: str,
     geom_types: Any = ...,
-) -> tuple[Model, GeometryModel]: ...
+) -> tuple[Model, GeometryModel, GeometryModel]: ...
 def buildGeomFromUrdf(
     model: Model,
     filename: str,
@@ -121,6 +121,7 @@ def aba(
     q: np.ndarray,
     v: np.ndarray,
     tau: np.ndarray,
+    f_ext: Any = ...,
 ) -> np.ndarray: ...
 def crba(
     model: Model,

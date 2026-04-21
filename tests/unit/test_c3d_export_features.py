@@ -1,5 +1,7 @@
 """Tests for C3D export security, versioning, and telemetry features."""
 
+from __future__ import annotations
+
 import importlib.util
 import json
 from collections.abc import Generator
