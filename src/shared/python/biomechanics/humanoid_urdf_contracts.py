@@ -228,6 +228,19 @@ def _check_bilateral_symmetry(
                     ),
                 )
             )
+
+    # Also catch right-side-only links that have no left_ counterpart.
+    for name in masses:
+        if not name.startswith("right_"):
+            continue
+        mirror = "left_" + name[len("right_") :]
+        if mirror not in masses:
+            violations.append(
+                ContractViolation(
+                    category="asymmetric_limbs",
+                    message=(f"link '{name}' has no mirror '{mirror}'"),
+                )
+            )
     return violations
 
 
