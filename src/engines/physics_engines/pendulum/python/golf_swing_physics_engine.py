@@ -57,13 +57,12 @@ logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 
 _TOOLS_PENDULUM_AVAILABLE: bool | None = None
+# Resolve repo root: src/engines/physics_engines/pendulum/python/<this file>
+# seven levels up from this file reaches the repository root
+_THIS_FILE = Path(__file__).resolve()
+_REPO_ROOT = _THIS_FILE.parents[6]
 _TOOLS_PACKAGE_ROOT = (
-    Path(__file__).parent.parent.parent.parent.parent.parent.parent
-    / "vendor"
-    / "ud-tools"
-    / "src"
-    / "pendulum_simulator"
-    / "src"
+    _REPO_ROOT / "vendor" / "ud-tools" / "src" / "pendulum_simulator" / "src"
 )
 
 

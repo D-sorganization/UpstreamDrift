@@ -13,8 +13,9 @@ Cost Model:
     - Typical workflow: ~$0.30-0.70
 
 Example:
+    >>> import os
     >>> from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
-    >>> adapter = AnthropicAdapter(api_key="your-api-key-here")
+    >>> adapter = AnthropicAdapter(api_key=os.environ["ANTHROPIC_API_KEY"])
     >>> response = adapter.send_message("Analyze this swing", context, tools)
 """
 
@@ -72,7 +73,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         timeout: Request timeout [s].
 
     Example:
-        >>> adapter = AnthropicAdapter(api_key="your-api-key-here")
+        >>> import os
+        >>> adapter = AnthropicAdapter(api_key=os.environ["ANTHROPIC_API_KEY"])
         >>> success, message = adapter.validate_connection()
         >>> if success:
         ...     response = adapter.send_message(

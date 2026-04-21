@@ -242,9 +242,8 @@ class URDFEditorWindow(QMainWindow):
         self.code_editor.validation_changed.connect(self._on_validation_changed)
 
         # Frankenstein signals
-        self.frankenstein.right_panel.tree.itemSelectionChanged.connect(
-            self._on_frankenstein_update
-        )
+        frankenstein_tree = self.frankenstein.right_panel.tree
+        frankenstein_tree.itemSelectionChanged.connect(self._on_frankenstein_update)
 
         # Chain manipulation signals
         self.chain_tools.chain_modified.connect(self._on_urdf_modified)

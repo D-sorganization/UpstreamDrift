@@ -23,13 +23,17 @@ def main() -> None:
     # We can also iterate over physics.named.data.qpos
     logger.info("\nNamed Joints (qpos):")
     try:
-        logger.info("%s", env.physics.named.data.qpos.axes.row.names)
+        named_data = env.physics.named.data
+        qpos_row_names = named_data.qpos.axes.row.names
+        logger.info("%s", qpos_row_names)
     except (RuntimeError, ValueError, OSError):
         logger.error("Could not access named qpos.")
 
     logger.info("\nNamed Controls (ctrl):")
     try:
-        logger.info("%s", env.physics.named.data.ctrl.axes.row.names)
+        named_data = env.physics.named.data
+        ctrl_row_names = named_data.ctrl.axes.row.names
+        logger.info("%s", ctrl_row_names)
     except (RuntimeError, ValueError, OSError):
         logger.error("Could not access named ctrl.")
 
