@@ -499,7 +499,7 @@ class TestContainerEnvironment(unittest.TestCase):
         self.assertIn("python=3.12", content)
 
         # Check for required packages
-        required_packages = ["numpy", "scipy", "pyqt6", "scikit-learn", "pillow"]
+        required_packages = ["numpy", "scipy", "matplotlib", "pandas", "pyqt6"]
         for package in required_packages:
             self.assertIn(package, content, f"Should install {package}")
 
