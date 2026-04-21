@@ -11,6 +11,8 @@ with HTTP-level verification.
 Fixes #1119
 """
 
+from __future__ import annotations
+
 import importlib.util
 import time
 from collections.abc import Generator

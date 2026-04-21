@@ -424,11 +424,18 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             contact_frame = self.data.contact[i].frame.reshape(3, 3)
 
             # mj_contactForce returns force exerted BY geom2 ON geom1.
-            # geom1 = body/foot, geom2 = ground → this is the GRF on the body.
+            # Contact ordering is not fixed: either geom may be the foot.
+            # If geom1 is the dynamic body (non-world), the force is the GRF (+).
+            # If geom1 is the world body (ground), the force is reaction on ground;
+            # negate to get GRF on the dynamic body (-).
             f_local = c_force[:3]
             f_world = contact_frame.T @ f_local
 
-            total_force += f_world
+            geom1_body = self.model.geom_bodyid[self.data.contact[i].geom1]
+            if geom1_body == 0:  # geom1 is ground: force direction is reversed
+                total_force -= f_world
+            else:
+                total_force += f_world
 
         return total_force
 

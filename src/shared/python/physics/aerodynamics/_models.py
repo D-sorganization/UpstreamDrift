@@ -126,7 +126,11 @@ class DragModel:
 
         spline = _load_bearman_harvey_spline()
         cd_calibrated = float(spline(re))
-        return float(np.clip(cd_calibrated, 0.10, 0.50))
+        # Scale by base_coefficient relative to spline's turbulent-regime value so
+        # that tunability is preserved across the calibrated range.
+        cd_at_max_re = float(spline(re_max))
+        cd_effective = cd_calibrated * (self.base_coefficient / cd_at_max_re)
+        return float(np.clip(cd_effective, 0.10, 0.50))
 
 
 class LiftModel:
