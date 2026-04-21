@@ -26,16 +26,8 @@ _VALIDATE_SCRIPT = "src.launchers.launcher_process_manager.validate_script_path"
 
 @pytest.fixture
 def manager():
-    with (
-        patch.object(Path, "mkdir"),
-        patch.object(Path, "exists", return_value=False),
-        patch.object(
-            ProcessManager,
-            "_validate_context_path",
-            side_effect=lambda p: p,
-        ),
-    ):
-        yield ProcessManager(repo_root=PureWindowsPath("/fake/repo"))  # type: ignore[arg-type]
+    with patch.object(Path, "mkdir"), patch.object(Path, "exists", return_value=False):
+        return ProcessManager(repo_root=PureWindowsPath("/fake/repo"))  # type: ignore[arg-type]
 
 
 def test_init_log_file_truncates_if_large():

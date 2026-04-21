@@ -374,7 +374,6 @@ class TestProcessImmediateDeathDetection:
         pm = ProcessManager(REPO_ROOT)
         with (
             patch("src.launchers.launcher_process_manager.validate_script_path"),
-            patch.object(pm, "_validate_context_path", return_value=tmp_path),
             patch(
                 "src.launchers.launcher_process_manager.secure_popen",
                 side_effect=lambda cmd, cwd=None, suite_root=None, **kw: __import__(
@@ -418,7 +417,6 @@ class TestProcessImmediateDeathDetection:
 
         pm = ProcessManager(REPO_ROOT)
         with (
-            patch.object(pm, "_validate_context_path", return_value=tmp_path),
             patch(
                 "src.launchers.launcher_process_manager.secure_popen",
                 side_effect=lambda cmd, cwd=None, suite_root=None, **kw: __import__(
