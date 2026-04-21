@@ -112,9 +112,11 @@ def test_bilateral_mass_asymmetry_is_reported() -> None:
     links = _valid_link_set()
     # Inflate right_hip_link mass to break symmetry
     links = [
-        ("right_hip_link", 20.0, (0.01, 0.01, 0.01))
-        if n == "right_hip_link"
-        else (n, m, i)
+        (
+            ("right_hip_link", 20.0, (0.01, 0.01, 0.01))
+            if n == "right_hip_link"
+            else (n, m, i)
+        )
         for (n, m, i) in links
     ]
     urdf = _build_urdf(joints=_valid_joint_set(), links=links)

@@ -674,6 +674,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 | 1.0.124 | 2026-04-16 | Replaced np.sum axis reductions with np.einsum for performance optimization |
 | 1.0.140 | 2026-04-20 | Bolt: Replaced `np.linalg.norm` with `math.hypot` for 2D/3D physics vectors in aerodynamics and ball flight simulation for a ~5x performance speedup. |
 | 1.0.139 | 2026-04-20 | Bolt: Optimized Numba-compiled `rotation_matrix_from_vectors` in `golf_data_core.py` by replacing `np.linalg.norm` and `np.allclose` with explicit element-wise math.sqrt and dot products for a 2x+ speedup. |
+| 1.0.140 | 2026-04-21 | Bolt: Optimized `np.sum(forces * velocities, axis=1)` to `np.einsum` in `dynamics_quantities.py` for performance. |
 
 ## Changelog
 

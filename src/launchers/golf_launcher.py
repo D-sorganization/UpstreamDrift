@@ -83,6 +83,7 @@ class ProcessCleanupWorker(QRunnable):
 
     def __init__(self, running_processes: dict, process_lock) -> None:
         super().__init__()
+        self.signals = ProcessCleanupWorkerSignals()
         self.running_processes = running_processes
         self.process_lock = process_lock
         self.signals = ProcessCleanupWorkerSignals()
