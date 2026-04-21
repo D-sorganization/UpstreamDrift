@@ -63,6 +63,7 @@ def test_drake_dashboard_main_no_args():
     reason="DrakePhysicsEngine class identity mismatch in parallel test run (namespace pkg)",
 )
 def test_drake_dashboard_main_no_args_dialog_canceled():
+    """main() with no CLI args and dialog canceled still calls launch_dashboard."""
     with (
         patch.object(sys, "argv", ["drake_dashboard.py"]),
         patch("src.launchers.drake_dashboard.get_qapp"),
