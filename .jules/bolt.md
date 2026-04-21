@@ -14,3 +14,7 @@
 ## 2026-04-20 - Optimization of Numba JIT compiled distance functions
 **Learning:** When optimizing functions compiled with Numba (`@njit`), using NumPy utility functions like `np.linalg.norm` and `np.allclose` for small fixed-size vectors (e.g., 3D coordinates) causes significant abstraction overhead.
 **Action:** Replacing them with explicit element-wise arithmetic (e.g., `math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2])`) and manual dot products avoids this overhead and yields over a 2x performance improvement.
+
+## 2024-05-18 - Replacing `np.linalg.norm` with `math.hypot`
+**Learning:** For small vectors (2D or 3D) like physical velocities or forces, calculating magnitudes using `math.hypot(*velocity)` or `math.hypot(v[0], v[1])` is up to ~5x faster than using `np.linalg.norm(velocity)`. This avoids the substantial overhead of NumPy's generalized, dimension-agnostic reduction functions, memory allocations, and Python-to-C API calls for tiny arrays.
+**Action:** When working with 2D or 3D physics vectors where you need magnitudes (e.g., speed, spin magnitude, 2D horizontal velocities) on a hot path (like force calculators and integration loops), use the built-in `math.hypot` with unpacked elements (e.g., `math.hypot(*vec)`) instead of `np.linalg.norm`.

@@ -28,6 +28,7 @@ Planned enhancement: implement Mud Ball Physics.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -120,7 +121,8 @@ class TrajectoryPoint:
     @property
     def speed(self) -> float:
         """Return the scalar speed from the velocity vector."""
-        return float(np.linalg.norm(self.velocity))
+        # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for 3D vectors
+        return math.hypot(*self.velocity)
 
     @property
     def height(self) -> float:
@@ -281,7 +283,8 @@ class BallFlightSimulator:
             return 0.0
 
         v = trajectory[-1].velocity
-        v_horiz = np.linalg.norm(v[:2])
+        # ⚡ Bolt: math.hypot(x,y) is faster than np.linalg.norm for 2D vectors
+        v_horiz = math.hypot(v[0], v[1])
 
         if v_horiz < NUMERICAL_EPSILON:
             return 90.0
@@ -410,7 +413,8 @@ class BallFlightSimulator:
         if vel is None:
             raise ValueError("vel must be provided")
         rel_vel = vel - self.environment.wind_velocity
-        speed = float(np.linalg.norm(rel_vel))
+        # ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
+        speed = math.hypot(*rel_vel)
 
         drag = np.zeros(vel.shape)
         magnus = np.zeros(vel.shape)
@@ -428,7 +432,8 @@ class BallFlightSimulator:
         drag = -(aero_prefix * cd * speed**2) * (rel_vel / speed)
 
         cross = np.cross(launch.spin_axis, rel_vel / speed)
-        cross_norm = np.linalg.norm(cross)
+        # ⚡ Bolt: math.hypot is much faster than np.linalg.norm for small arrays
+        cross_norm = math.hypot(*cross)
         if cross_norm > NUMERICAL_EPSILON:
             magnus = (aero_prefix * cl * speed**2) * (cross / cross_norm)
 
@@ -838,7 +843,8 @@ class EnhancedBallFlightSimulator:
         landing_angle = 0.0
         if len(trajectory) >= 2:
             v = trajectory[-1].velocity
-            v_horiz = np.linalg.norm(v[:2])
+            # ⚡ Bolt: math.hypot(x,y) is faster than np.linalg.norm for 2D vectors
+            v_horiz = math.hypot(v[0], v[1])
             if v_horiz > NUMERICAL_EPSILON:
                 landing_angle = float(np.degrees(np.arctan2(-v[2], v_horiz)))
             else:

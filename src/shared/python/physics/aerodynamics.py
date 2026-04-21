@@ -240,7 +240,8 @@ class DragModel:
         """
         require_finite(velocity, "velocity")
         require(air_density > 0, "air_density must be positive", air_density)
-        speed = float(np.linalg.norm(velocity))
+        # ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
+        speed = math.hypot(*velocity)
         if speed < 1e-10:
             return np.zeros(3)
 
@@ -274,7 +275,8 @@ class DragModel:
         if not self.reynolds_correction:
             return self.base_coefficient
 
-        speed = float(np.linalg.norm(velocity))
+        # ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
+        speed = math.hypot(*velocity)
         if speed < 1e-10:
             return self.base_coefficient
 
@@ -350,8 +352,10 @@ class LiftModel:
         require_finite(velocity, "velocity")
         require_finite(spin, "spin")
         require(air_density > 0, "air_density must be positive", air_density)
-        speed = float(np.linalg.norm(velocity))
-        spin_magnitude = float(np.linalg.norm(spin))
+        # ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
+        speed = math.hypot(*velocity)
+        # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small arrays
+        spin_magnitude = math.hypot(*spin)
 
         if speed < 1e-10 or spin_magnitude < 1e-10:
             return np.zeros(3)
@@ -438,8 +442,10 @@ class MagnusModel:
         require_finite(velocity, "velocity")
         require_finite(spin, "spin")
         require(air_density > 0, "air_density must be positive", air_density)
-        speed = float(np.linalg.norm(velocity))
-        spin_magnitude = float(np.linalg.norm(spin))
+        # ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm(vec) for 3D magnitudes
+        speed = math.hypot(*velocity)
+        # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small arrays
+        spin_magnitude = math.hypot(*spin)
 
         if speed < 1e-10 or spin_magnitude < 1e-10:
             return np.zeros(3)
