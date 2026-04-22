@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from src.shared.python.upstream_drift_tools.process_calculators.analysis_utils import (
+    evaluate_compression_result,
     evaluate_output,
 )
 
@@ -123,3 +124,70 @@ class TestEvaluateOutput:
         _, state, comp = evaluate_output(engine, self._BASE, 0.0, "efficiency")
         assert state == {"x": 1.0}
         assert comp == {"H2": 0.5}
+
+
+class TestEvaluateCompressionResult:
+    def test_reports_expected_concerns_and_recommendations(self) -> None:
+        compression_result = {
+            "final_temperature": 530.0,
+            "final_pressure": 120.0,
+            "total_power_hp": 1200.0,
+            "stages": [
+                {
+                    "work_isentropic": 100.0,
+                    "work_actual": 60.0,
+                    "water_dropout": {"water_dropout": 0.2},
+                },
+                {
+                    "work_isentropic": None,
+                    "work_actual": 80.0,
+                    "water_dropout": {"water_dropout": 0.0},
+                },
+            ],
+        }
+
+        result = evaluate_compression_result(compression_result)
+
+        assert (
+            "High final temperature may cause material degradation"
+            in result["concerns"]
+        )
+        assert (
+            "High pressure requires special equipment and safety measures"
+            in result["concerns"]
+        )
+        assert (
+            "High power requirement - consider multiple compressors"
+            in result["concerns"]
+        )
+        assert "Low compression efficiency detected" in result["concerns"]
+        assert (
+            "CRITICAL: Temperature exceeds safe operating limits" in result["warnings"]
+        )
+        assert "Water dropout detected: 0.20 mol%" in result["warnings"]
+        assert (
+            "Install water knockout drums and drainage systems"
+            in result["recommendations"]
+        )
+        assert result["total_water_dropout"] == 0.2
+        assert result["average_efficiency"] == 0.6
+
+    def test_no_isentropic_stages_yields_none_average_efficiency(self) -> None:
+        compression_result = {
+            "final_temperature": 450.0,
+            "final_pressure": 80.0,
+            "total_power_hp": 200.0,
+            "stages": [
+                {
+                    "work_isentropic": None,
+                    "work_actual": 55.0,
+                    "water_dropout": {"water_dropout": 0.0},
+                }
+            ],
+        }
+
+        result = evaluate_compression_result(compression_result)
+
+        assert result["average_efficiency"] is None
+        assert result["concerns"] == []
+        assert result["warnings"] == []
