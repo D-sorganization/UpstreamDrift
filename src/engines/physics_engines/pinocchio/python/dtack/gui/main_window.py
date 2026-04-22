@@ -131,9 +131,9 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         self.recorder = GuiRecorder(self.recorded_data)
 
         # Physics Engine
-        self.model = None
-        self.data = None
-        self.dynamics_engine = None
+        self.model: pin.Model | None = None
+        self.data: pin.Data | None = None
+        self.dynamics_engine: DynamicsEngine | None = None
 
         # Create tabs
         self._create_model_viewer_tab()

@@ -16,9 +16,9 @@ try:
 except ImportError as e:
     DEPENDENCIES_AVAILABLE = False
     MISSING_DEP_ERROR = e
-    ca = None
-    pin = None
-    cpin = None
+    ca = None  # type: ignore[assignment]
+    pin = None  # type: ignore[assignment]
+    cpin = None  # type: ignore[assignment]
 
 
 logger = logging.getLogger(__name__)

@@ -11,6 +11,8 @@ with HTTP-level verification.
 Fixes #1119
 """
 
+from __future__ import annotations
+
 import time
 
 import pytest

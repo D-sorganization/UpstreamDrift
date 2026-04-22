@@ -208,7 +208,7 @@ class PinocchioBackend:
         self,
         q: npt.NDArray[np.float64],
         frame_id: int | str,
-        reference_frame: int = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+        reference_frame: pin.ReferenceFrame = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
     ) -> npt.NDArray[np.float64]:
         """Compute frame Jacobian.
 
