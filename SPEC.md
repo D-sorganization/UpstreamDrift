@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.151                                            |
+| **Spec Version**        | 1.0.152                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -162,6 +162,7 @@ UpstreamDrift/
 | Provider Compatibility Harness | `src/launchers/launcher_provider_compatibility.py`         | Validates that launcher model entries expose resolvable provider roots, artifacts, working directories, and import paths                  |
 | Humanoid URDF Generator        | `src/shared/python/humanoid_character_builder/generators/` | Generates humanoid URDFs via a thin public orchestrator backed by focused model-building and XML-emission helpers                         |
 | URDF Models                    | `shared/models/`                                           | Canonical model definitions (URDF format) for golf swings, human body, pendulums                                                          |
+| Development Audit Notes        | `docs/development/`                                        | Captures bounded audit findings, including justified generated or vendored documentation asset hotspots                                   |
 
 ## 5. Desired Functionality
 
