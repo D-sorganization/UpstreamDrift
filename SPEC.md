@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.146                                            |
+| **Spec Version**        | 1.0.147                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -501,6 +501,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.147 | Type-check configuration cleanup: removed the global `mypy_path = "stubs"` setting so repository-local stubs are no longer injected into every mypy invocation after the Pinocchio follow-up branch was reduced to configuration cleanup. |
 | 2026-04-22 | 1.0.146 | Issue #2918/#2919/#2922/#2928 follow-up: MuJoCo contact-force accumulation now uses contact geom body ownership to return the force on the modeled system for either world-as-geom ordering, and humanoid URDF contract parsing now safely falls back from invalid filesystem paths to raw XML text parsing. |
 | 2026-04-22 | 1.0.145 | Pinocchio integration hardening: explicit `step(..., integrator=...)` overrides now accept only `rk4` and `semi_implicit`; unsupported or empty values raise `ValueError` instead of silently falling back to the engine default. |
 | 2026-04-21 | 1.0.144 | Launcher security: subprocess script validation now allows repository-local scripts under `src/` so launcher handlers can execute valid source-tree scripts while preserving the existing suite-root and top-level allowlist checks. |
@@ -684,6 +685,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-22: Removed global mypy `stubs` path injection after Pinocchio follow-up cleanup so type-checking uses default import resolution unless a caller opts in.
 - 2026-04-22: Corrected MuJoCo ground-reaction force sign handling for both world contact orderings and made humanoid URDF contract parsing tolerant of invalid path-like XML strings.
 - 2026-04-22: Allowed launcher-managed Python scripts under `src/` through secure subprocess path validation while preserving suite-root containment checks.
 - 2026-04-22: Rejected unsupported explicit Pinocchio step integrators instead of falling back to the default RK4 mode.
