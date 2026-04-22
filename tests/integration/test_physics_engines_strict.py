@@ -194,7 +194,10 @@ class TestMuJoCoStrict:
 
         contact = MagicMock()
         contact.frame = np.eye(3).reshape(-1)
+        contact.geom1 = 1
+        contact.geom2 = 0
         engine.data.contact = [contact]
+        engine.model.geom_bodyid = [0, 1]
 
         def side_effect_contact_force(model, data, index, c_force):
             c_force[:3] = np.array([0.0, 0.0, 735.75])
