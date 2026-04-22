@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING
 from fastapi import Depends
 
 from src.api.auth.dependencies import CheckSimulationQuota, CheckVideoQuota
+from src.shared.python.config.environment import is_auth_disabled
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -75,6 +76,12 @@ _ROUTE_DEPENDENCIES: dict[str, tuple[Callable[..., object], ...]] = {
     "simulation": (CheckSimulationQuota.dependency,),
     "video": (CheckVideoQuota.dependency,),
 }
+
+
+def _dependencies_for_route(module_name: str) -> tuple[Callable[..., object], ...]:
+    if is_auth_disabled():
+        return ()
+    return _ROUTE_DEPENDENCIES.get(module_name, ())
 
 
 def discover_routes(
@@ -175,7 +182,7 @@ def register_routes(
             prefix=prefix,
             dependencies=[
                 Depends(dependency)
-                for dependency in _ROUTE_DEPENDENCIES.get(module_name, ())
+                for dependency in _dependencies_for_route(module_name)
             ],
         )
         logger.debug("Registered router from %s with prefix '%s'", module_name, prefix)
