@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -120,3 +121,32 @@ def test_local_app_description_mentions_versioning(monkeypatch, tmp_path) -> Non
     app = local_server.create_local_app()
     assert "v1" in app.description
     assert "/api/v1/" in app.description
+
+
+def test_local_app_initializes_simulation_and_analysis_services(
+    monkeypatch, tmp_path
+) -> None:
+    """create_local_app wires simulation/analysis services for DI (issue #3011)."""
+    from src.api.dependencies import get_analysis_service, get_simulation_service
+
+    missing_ui_path = tmp_path / "ui" / "dist"
+    monkeypatch.setenv("GOLF_UI_DIST", str(missing_ui_path))
+
+    local_server._startup_metrics.update(
+        {
+            "startup_time": None,
+            "static_files_mounted": False,
+            "ui_path": None,
+            "engines_loaded": [],
+            "errors": [],
+        }
+    )
+
+    app = local_server.create_local_app()
+    request = SimpleNamespace(app=app)
+
+    simulation_service = get_simulation_service(request)
+    analysis_service = get_analysis_service(request)
+
+    assert simulation_service is app.state.simulation_service
+    assert analysis_service is app.state.analysis_service
