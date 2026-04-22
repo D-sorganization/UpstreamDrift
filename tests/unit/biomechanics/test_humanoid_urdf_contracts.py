@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import biomechanics.humanoid_urdf_contracts as urdf_contracts
 import pytest
 from biomechanics.humanoid_urdf_contracts import (
     ContractViolation,
@@ -161,3 +164,18 @@ def test_invalid_xml_raises() -> None:
 
     with pytest.raises(ET.ParseError):
         validate_humanoid_urdf("<<not xml>>")
+
+
+def test_existing_path_permission_error_is_not_masked(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Filesystem errors from ET.parse(path) must surface for real paths."""
+    monkeypatch.setattr(urdf_contracts.Path, "exists", lambda _self: True)
+    monkeypatch.setattr(
+        urdf_contracts.ET,
+        "parse",
+        lambda _path: (_ for _ in ()).throw(PermissionError("denied")),
+    )
+
+    with pytest.raises(PermissionError, match="denied"):
+        validate_humanoid_urdf(Path("robot.urdf"))

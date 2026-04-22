@@ -68,10 +68,12 @@ def _parse_root(source: str | Path | ET.Element) -> ET.Element:
         return source
     try:
         path = Path(source)
-        if path.exists():
-            return ET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
-    except (OSError, ValueError):
-        pass
+    except (TypeError, ValueError):
+        # Not path-like; treat as raw XML text.
+        return ET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
+    if path.exists():
+        # For existing files, surface real parse/I/O failures directly.
+        return ET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
     # Fall back to treating the argument as raw XML text.
     return ET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
 
