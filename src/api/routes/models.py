@@ -26,6 +26,7 @@ from ..models.responses import (
     URDFLinkGeometry,
     URDFModelResponse,
 )
+from ..utils.path_validation import validate_path_within_root
 
 router = APIRouter()
 
@@ -66,6 +67,12 @@ def _discover_models() -> list[dict[str, str]]:
 
         for ext in ("*.urdf", "*.xml"):
             for filepath in full_dir.rglob(ext):
+                if not filepath.exists():
+                    continue
+                try:
+                    validate_path_within_root(filepath, root)
+                except HTTPException:
+                    continue
                 name = filepath.stem
                 if name in seen_names:
                     # Disambiguate with parent directory
@@ -425,7 +432,8 @@ async def get_model_urdf(
         )
 
     try:
-        urdf_content = filepath.read_text(encoding="utf-8")
+        validated_path = validate_path_within_root(filepath, root)
+        urdf_content = validated_path.read_text(encoding="utf-8")
         result = _parse_urdf(urdf_content)
         return result
     except ValueError as exc:

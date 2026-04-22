@@ -10,7 +10,11 @@ See issue #1201, #1203, #1179
 
 from __future__ import annotations
 
+import asyncio
+from pathlib import Path
+
 import pytest
+from fastapi import HTTPException
 from pydantic import ValidationError
 
 from src.api.models.requests import (
@@ -671,3 +675,89 @@ class TestModelDiscovery:
         urdf_models = [m for m in models if m["format"] == "urdf"]
         # There are URDF files in the test fixtures
         assert len(urdf_models) > 0
+
+
+class TestModelDiscoveryContainment:
+    """Regression tests for symlink containment in model serving."""
+
+    def test_discover_models_skips_symlink_escape(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        """Discovery should not advertise symlinks that resolve outside the root."""
+        import src.api.routes.models as models_route
+        import src.api.utils.path_validation as path_validation
+
+        models_dir = tmp_path / "models"
+        models_dir.mkdir()
+
+        safe_model = models_dir / "safe.urdf"
+        safe_model.write_text('<robot name="safe" />', encoding="utf-8")
+
+        outside_model = tmp_path.parent / "outside.urdf"
+        outside_model.write_text('<robot name="outside" />', encoding="utf-8")
+
+        escape_model = models_dir / "escape.urdf"
+        escape_model.write_text('<robot name="escape" />', encoding="utf-8")
+
+        original_resolve = models_route.Path.resolve
+
+        def fake_resolve(self: Path, strict: bool = False) -> Path:
+            if self == escape_model:
+                return outside_model
+            return original_resolve(self, strict=strict)
+
+        monkeypatch.setattr(models_route, "_MODEL_DIRS", [Path("models")])
+        monkeypatch.setattr(models_route, "_find_project_root", lambda: tmp_path)
+        monkeypatch.setattr(path_validation.Path, "resolve", fake_resolve)
+
+        discovered = models_route._discover_models()
+        discovered_names = {entry["name"] for entry in discovered}
+
+        assert "safe" in discovered_names
+        assert "escape" not in discovered_names
+
+    def test_get_model_urdf_rejects_symlink_escape(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        tmp_path: Path,
+    ) -> None:
+        """Serving should reject a model path whose resolved target escapes the root."""
+        import src.api.routes.models as models_route
+        import src.api.utils.path_validation as path_validation
+
+        models_dir = tmp_path / "models"
+        models_dir.mkdir()
+
+        outside_model = tmp_path.parent / "outside.urdf"
+        outside_model.write_text('<robot name="outside" />', encoding="utf-8")
+
+        escape_model = models_dir / "escape.urdf"
+        escape_model.write_text('<robot name="escape" />', encoding="utf-8")
+
+        original_resolve = models_route.Path.resolve
+
+        def fake_resolve(self: Path, strict: bool = False) -> Path:
+            if self == escape_model:
+                return outside_model
+            return original_resolve(self, strict=strict)
+
+        monkeypatch.setattr(models_route, "_find_project_root", lambda: tmp_path)
+        monkeypatch.setattr(
+            models_route,
+            "_discover_models",
+            lambda: [
+                {
+                    "name": "escape",
+                    "format": "urdf",
+                    "path": "models/escape.urdf",
+                }
+            ],
+        )
+        monkeypatch.setattr(path_validation.Path, "resolve", fake_resolve)
+
+        with pytest.raises(HTTPException) as exc_info:
+            asyncio.run(models_route.get_model_urdf("escape", logger=None))
+
+        assert exc_info.value.status_code == 400

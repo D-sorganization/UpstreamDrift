@@ -198,6 +198,7 @@ UpstreamDrift/
 - `POST /trajectory-optimize` — Optimize trajectory subject to constraints
 - `GET /engines` — List available physics engines and their status
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
+- `GET /models` and `GET /models/{model_name}/urdf` — List and serve URDF/MJCF models only after resolving each candidate within approved model roots, rejecting symlink escapes before listing or reading
 
 **GUI Interface (PyQt6)**:
 
