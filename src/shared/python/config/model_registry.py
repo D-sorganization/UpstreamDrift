@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -27,6 +27,39 @@ from src.shared.python.config.provider_catalog import iter_provider_manifest_spe
 from src.shared.python.core.contracts import ContractChecker, require
 
 _DISCOVERY_MODES = {"local-only", "hybrid", "provider-first"}
+_STRICT_TRUE_VALUES = {"1", "true", "yes", "on"}
+
+
+class ModelRegistryLoadError(ValueError):
+    """Raised when strict model registry validation finds load errors."""
+
+
+def _strict_mode_from_env(raw_value: str | None) -> bool:
+    """Return whether strict registry validation is enabled by environment."""
+    return raw_value is not None and raw_value.strip().lower() in _STRICT_TRUE_VALUES
+
+
+def _normalize_required_model_ids(values: Iterable[str]) -> tuple[str, ...]:
+    """Normalize caller-required model identifiers into deterministic order."""
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        require(
+            isinstance(value, str) and bool(value.strip()),
+            "required model ids must be non-empty strings",
+            value,
+        )
+        model_id = value.strip()
+        if model_id in seen:
+            continue
+        seen.add(model_id)
+        normalized.append(model_id)
+    return tuple(normalized)
+
+
+def _format_registry_errors(errors: list[str]) -> str:
+    """Build a compact strict-load error summary."""
+    return "Model registry strict validation failed: " + "; ".join(errors)
 
 
 def _normalize_legacy_model_entry(model_data: dict[str, Any]) -> dict[str, Any]:
@@ -82,16 +115,32 @@ class ModelRegistry(ContractChecker):
             - All model IDs in the registry are non-empty strings
     """
 
-    def __init__(self, config_path: str | Path = "config/models.yaml") -> None:
+    def __init__(
+        self,
+        config_path: str | Path = "config/models.yaml",
+        *,
+        strict: bool | None = None,
+        required_model_ids: Iterable[str] = (),
+    ) -> None:
         """Initialize registry.
 
         Args:
             config_path: Path to the YAML configuration file.
+            strict: Whether load errors should fail instead of logging and skipping.
+            required_model_ids: Model IDs that strict validation callers require.
         """
         if config_path is None:
             raise ValueError("config_path must be provided")
         self.config_path = Path(config_path)
         self.models: dict[str, ModelConfig] = {}
+        self.strict = (
+            _strict_mode_from_env(
+                os.environ.get("UPSTREAM_DRIFT_MODEL_REGISTRY_STRICT")
+            )
+            if strict is None
+            else strict
+        )
+        self.required_model_ids = _normalize_required_model_ids(required_model_ids)
         self.discovery_mode = _normalize_discovery_mode(
             os.environ.get("UPSTREAM_DRIFT_DISCOVERY_MODE")
         )
@@ -118,6 +167,10 @@ class ModelRegistry(ContractChecker):
                 lambda: self.discovery_mode in _DISCOVERY_MODES,
                 "discovery_mode must be one of local-only, hybrid, provider-first",
             ),
+            (
+                lambda: isinstance(self.strict, bool),
+                "strict must be a boolean",
+            ),
         ]
 
     def _load_registry(self) -> None:
@@ -133,9 +186,13 @@ class ModelRegistry(ContractChecker):
         from ..core import setup_logging
 
         logger = setup_logging(__name__)
+        errors: list[str] = []
 
         if not self.config_path.exists():
-            logger.warning(f"Model registry not found: {self.config_path}")
+            message = f"Model registry not found: {self.config_path}"
+            if self.strict:
+                raise ModelRegistryLoadError(message)
+            logger.warning(message)
             return
 
         try:
@@ -143,23 +200,41 @@ class ModelRegistry(ContractChecker):
                 data = yaml.safe_load(f)
 
             if not data:
-                logger.warning(f"Empty model registry: {self.config_path}")
+                message = f"Empty model registry: {self.config_path}"
+                if self.strict:
+                    raise ModelRegistryLoadError(message)
+                logger.warning(message)
+                return
+
+            if not isinstance(data, dict):
+                message = f"Invalid registry format: root must be a mapping in {self.config_path}"
+                if self.strict:
+                    raise ModelRegistryLoadError(message)
+                logger.error(message)
                 return
 
             if "models" not in data:
-                logger.error(
-                    f"Invalid registry format: missing 'models' key in {self.config_path}"
-                )
+                message = f"Invalid registry format: missing 'models' key in {self.config_path}"
+                if self.strict:
+                    raise ModelRegistryLoadError(message)
+                logger.error(message)
                 return
 
             models_raw = data["models"]
             if self.discovery_mode == "provider-first":
-                self._load_provider_manifests()
-                self._load_legacy_models(models_raw, overwrite_existing=False)
+                errors.extend(self._load_provider_manifests())
+                errors.extend(
+                    self._load_legacy_models(models_raw, overwrite_existing=False)
+                )
             else:
-                self._load_legacy_models(models_raw, overwrite_existing=True)
+                errors.extend(
+                    self._load_legacy_models(models_raw, overwrite_existing=True)
+                )
                 if self.discovery_mode == "hybrid":
-                    self._load_provider_manifests()
+                    errors.extend(self._load_provider_manifests())
+            self._validate_required_models(errors)
+            if self.strict and errors:
+                raise ModelRegistryLoadError(_format_registry_errors(errors))
             logger.info(f"Loaded {len(self.models)} models from {self.config_path}")
 
         except yaml.YAMLError as e:
@@ -270,16 +345,18 @@ class ModelRegistry(ContractChecker):
         models_raw: Any,
         *,
         overwrite_existing: bool,
-    ) -> None:
+    ) -> list[str]:
         """Load legacy models.yaml entries with explicit overwrite policy."""
         from ..core import setup_logging
 
         logger = setup_logging(__name__)
-        require(
-            isinstance(models_raw, list), "legacy models must be a list", models_raw
-        )
+        errors: list[str] = []
+        if not isinstance(models_raw, list):
+            message = f"legacy models must be a list in {self.config_path}"
+            logger.error(message)
+            return [message]
 
-        for model_data in models_raw:
+        for index, model_data in enumerate(models_raw):
             try:
                 if not isinstance(model_data, dict):
                     raise ValueError("legacy model entries must be mappings")
@@ -297,7 +374,15 @@ class ModelRegistry(ContractChecker):
                 self.models[model.id] = model
                 logger.debug(f"Loaded model: {model.id}")
             except (TypeError, ValueError) as e:
-                logger.error(f"Invalid model configuration: {model_data} - {e}")
+                model_id = (
+                    model_data.get("id")
+                    if isinstance(model_data, dict)
+                    else f"entry[{index}]"
+                )
+                message = f"legacy model entry {model_id!r} in {self.config_path}: {e}"
+                logger.error("Invalid model configuration: %s", message)
+                errors.append(message)
+        return errors
 
     def _iter_provider_manifest_specs(self) -> tuple[tuple[Path, Path], ...]:
         """Discover external provider manifests from env and sibling repos."""
@@ -306,11 +391,12 @@ class ModelRegistry(ContractChecker):
             os.environ.get("UPSTREAM_DRIFT_PROVIDER_ROOTS"),
         )
 
-    def _load_provider_manifests(self) -> None:
+    def _load_provider_manifests(self) -> list[str]:
         """Load external provider manifests configured for the launcher migration."""
         from ..core import setup_logging
 
         logger = setup_logging(__name__)
+        errors: list[str] = []
 
         for provider_root, manifest_path in self._iter_provider_manifest_specs():
             try:
@@ -346,8 +432,20 @@ class ModelRegistry(ContractChecker):
                     manifest_path,
                 )
             except (OSError, ValueError, yaml.YAMLError) as e:
-                logger.warning(
-                    "Skipping provider manifest %s due to load failure: %s",
-                    manifest_path,
-                    e,
-                )
+                message = f"provider manifest {manifest_path}: {e}"
+                logger.warning("Skipping %s", message)
+                errors.append(message)
+        return errors
+
+    def _validate_required_models(self, errors: list[str]) -> None:
+        """Append an error when strict callers require absent model IDs."""
+        if not self.required_model_ids:
+            return
+
+        missing = [
+            model_id
+            for model_id in self.required_model_ids
+            if model_id not in self.models
+        ]
+        if missing:
+            errors.append(f"Missing required model ids: {', '.join(missing)}")

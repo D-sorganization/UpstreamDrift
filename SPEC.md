@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.158                                            |
+| **Spec Version**        | 1.0.159                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -263,6 +263,7 @@ Configuration is managed through:
 - **Known Provider Catalog**: `provider_catalog.py` defines the conventional sibling-repo onboarding map for `MuJoCo_Models`, `Drake_Models`, `Pinocchio_Models`, `OpenSim_Models`, `Tools`, and `Movement-Optimizer` so local development can discover engine and utility provider manifests without extra env wiring
 - **Provider Onboarding Guide**: `docs/development/external_provider_onboarding.md` documents the sibling-repo layout, explicit override roots, unavailable-runtime status behavior, the utility-provider compatibility rules, and the packaged-distribution bridge for future installer work
 - **Discovery Mode Flag**: `UPSTREAM_DRIFT_DISCOVERY_MODE` explicitly controls launcher model discovery during migration via `local-only`, `hybrid` (default), and `provider-first` rollout modes
+- **Strict Model Registry Validation**: `UPSTREAM_DRIFT_MODEL_REGISTRY_STRICT=true` or `ModelRegistry(..., strict=True)` makes malformed legacy entries, malformed provider manifests, missing registry files, missing `models` roots, and absent caller-required model IDs fail fast with actionable `ModelRegistryLoadError` diagnostics; launcher/UI discovery remains lenient unless strict mode is explicitly enabled
 - **Provider-Backed Engine Discovery**: `EngineManager` consults provider-backed model packs from `src/config/models.yaml` so external engine repos can surface availability and validation paths without being copied into `src/engines`
 - **API Request Parameters**: Engine selection, model path, solver options passed as JSON
 - **GUI Settings**: Stored in `~/.upstream_drift/gui_settings.json` (viewport, window size, recent files)
@@ -507,6 +508,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.159 | Issue #2988: model registry loading now supports explicit strict validation for CI/cross-engine paths, including malformed legacy entries, malformed provider manifests, missing required model IDs, and nightly cross-engine validation env wiring. |
 | 2026-04-22 | 1.0.158 | Issue #2986 follow-up: Rust and Python `ContactParameters` defaults now use the same z-up surface normal as ball-flight gravity/height conventions, while explicit y-up contact tests continue to pass with explicit normals. |
 | 2026-04-22 | 1.0.157 | Issue #2984 follow-up: URDF/MJCF model discovery and serving now reject symlink escapes outside approved model roots while preserving contained nested models, and tuned drag coefficients remain continuous across the Reynolds transition. |
 | 2026-04-22 | 1.0.156 | Issue #2968 follow-up: added CI regression coverage in `tests/test_ci_infrastructure.py` to prevent reintroducing global mypy stub-path injection (`mypy_path` / `mypypath`) that can make incomplete Pinocchio stubs authoritative outside scoped checks. |

@@ -99,6 +99,7 @@ jobs:
       - name: Verify native engine imports
         env:
           UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
+          UPSTREAM_DRIFT_MODEL_REGISTRY_STRICT: "true"
         run: |
           python scripts/check_native_engine_imports.py \
             --json-output test-results/native-engine-imports.json \
@@ -108,6 +109,7 @@ jobs:
         id: validation
         env:
           UPSTREAM_DRIFT_STRICT_ENGINE_PROBES: "true"
+          UPSTREAM_DRIFT_MODEL_REGISTRY_STRICT: "true"
         run: |
           pytest tests/heavy_integration/test_cross_engine_integration.py \
             -v \
