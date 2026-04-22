@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.79                                             |
+| **Spec Version**        | 1.0.80                                             |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -171,6 +171,14 @@ UpstreamDrift/
 | F14 | Reinforcement learning integration | 🔄     | Gym-compatible interface for RL-based controller learning and policy optimization                   |
 
 ### API / Interface Contract
+
+**Engine Adapter Contract**:
+
+- Pinocchio state, control, and counterfactual vector inputs are validated
+  against the loaded model dimensions in initialized paths. Dimension
+  mismatches raise `ValueError` messages that identify the vector name,
+  expected one-dimensional size, and actual shape; mutating setters must not
+  silently retain stale state after rejecting invalid input.
 
 **REST API Endpoints (FastAPI)**:
 
@@ -465,6 +473,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.80  | Hardened Pinocchio adapter dimension validation so wrong-sized control, control-acceleration, ZTCF, and ZVCF vectors raise explicit `ValueError` exceptions instead of silently preserving stale torque state or returning empty arrays.                                                                                                                                                                                                                                                                                                                                  |
 | 2026-04-22 | 1.0.79  | Fixed tuned DragModel Reynolds correction so the low-Re laminar plateau uses the same base-coefficient scaling as the calibrated Bearman-Harvey spline range, preserving drag coefficient continuity at the Re=2e4 boundary.                                                                                                                                                                                                                                                                                                                                              |
 | 2026-04-02 | 1.0.12  | fix(#2273): Extracted `PerturbationAnalyzerBase` to `src/shared/python/perturbation/perturbation_base.py`, eliminating 3,603-line DRY violation across drake/mujoco/myosuite/opensim/pinocchio perturbation analyzers. Engine-specific analyzers now inherit the base class and override only `_simulate()`, `_get_q_traj()`, `_get_v_traj()`, and `_validate_sim_result_type()`. Removed ARCHITECTURE_DEBT headers from all five analyzer files. Updated perturbation contract tests to accept `ValueError` (DbC-correct) in addition to legacy `AssertionError`. Added 42 unit tests for `PerturbationAnalyzerBase`.                |
 | 2026-04-02 | 1.0.11  | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit squared distances in `trajectory_funnel_benchmark.py` to avoid expensive reduction and sqrt overhead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |

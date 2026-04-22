@@ -38,6 +38,22 @@ logger = get_logger(__name__)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 
+def _require_vector_shape(
+    name: str, value: np.ndarray, expected_size: int
+) -> np.ndarray:
+    """Return a one-dimensional vector or raise a dimension-specific error."""
+    if value is None:
+        raise ValueError(f"{name} must be provided")
+
+    vector = np.asarray(value)
+    if vector.ndim != 1 or vector.shape[0] != expected_size:
+        actual_shape = tuple(vector.shape)
+        raise ValueError(
+            f"{name} expected 1-D size {expected_size}; actual shape {actual_shape}"
+        )
+    return vector
+
+
 @invariant(
     lambda self: self.model is None or self.data is not None,
     "If model is loaded, data must also be initialized",
@@ -228,32 +244,29 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state and refresh derived kinematics."""
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
-        if not (q is not None):
-            raise ValueError("q must be provided")
+        if v is None:
+            raise ValueError("v must be provided")
         if self.model is None:
             return
 
-        if len(q) != self.model.nq:
-            raise ValueError(f"q size {len(q)} does not match model nq={self.model.nq}")
-        if len(v) != self.model.nv:
-            raise ValueError(f"v size {len(v)} does not match model nv={self.model.nv}")
-        self.q = q.copy()
-        self.v = v.copy()
+        q_vector = _require_vector_shape("q", q, self.model.nq)
+        v_vector = _require_vector_shape("v", v, self.model.nv)
+        self.q = q_vector.copy()
+        self.v = v_vector.copy()
         # Refresh derived kinematics so Jacobians and frame placements are current
         self.forward()
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
-        if not (u is not None):
-            raise ValueError("u must be provided")
-        if not (u is not None):
+        if u is None:
             raise ValueError("u must be provided")
         if self.model is None:
             return
-        if len(u) == self.model.nv:
-            self.tau = u.copy()
+
+        control = _require_vector_shape("u", u, self.model.nv)
+        self.tau = control.copy()
 
     def get_time(self) -> float:
         """Get the current simulation time."""
@@ -456,14 +469,13 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        if len(tau) != self.model.nv:
-            return np.array([])
+        tau_vector = _require_vector_shape("tau", tau, self.model.nv)
 
         M = self.compute_mass_matrix()
         if M.size == 0:
             return np.array([])
 
-        a_control = np.linalg.solve(M, tau)
+        a_control = np.linalg.solve(M, tau_vector)
 
         return a_control
 
@@ -486,11 +498,11 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        if len(q) != self.model.nq or len(v) != self.model.nv:
-            return np.array([])
+        q_vector = _require_vector_shape("q", q, self.model.nq)
+        v_vector = _require_vector_shape("v", v, self.model.nv)
 
         tau_zero = np.zeros(self.model.nv)
-        a_ztcf = pin.aba(self.model, self.data, q, v, tau_zero)
+        a_ztcf = pin.aba(self.model, self.data, q_vector, v_vector, tau_zero)
 
         return cast(np.ndarray, a_ztcf)
 
@@ -512,15 +524,14 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        if len(q) != self.model.nq:
-            return np.array([])
+        q_vector = _require_vector_shape("q", q, self.model.nq)
 
         v_zero = np.zeros(self.model.nv)
 
         # Use current control (preserved for ZVCF)
         tau = self.tau.copy()
 
-        a_zvcf = pin.aba(self.model, self.data, q, v_zero, tau)
+        a_zvcf = pin.aba(self.model, self.data, q_vector, v_zero, tau)
 
         return cast(np.ndarray, a_zvcf)
 

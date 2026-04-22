@@ -92,3 +92,84 @@ class TestIssue2483PinocchioSetStateInvariants:
 
         np.testing.assert_array_almost_equal(engine.q, new_q)
         np.testing.assert_array_almost_equal(engine.v, new_v)
+
+
+class TestIssue2985PinocchioDimensionErrors:
+    """Issue #2985: Pinocchio dimension mismatches must fail explicitly."""
+
+    def _make_engine_with_mock_model(self) -> Any:
+        """Create a PinocchioPhysicsEngine with a mocked Pinocchio model."""
+        try:
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+                PinocchioPhysicsEngine,
+            )
+        except ImportError:
+            pytest.skip("Pinocchio not available")
+
+        from unittest.mock import MagicMock
+
+        import numpy as np
+
+        engine = PinocchioPhysicsEngine.__new__(PinocchioPhysicsEngine)
+        engine._initialized = True
+        engine.time = 0.0
+        engine.q = np.zeros(7)
+        engine.v = np.zeros(6)
+        engine.a = np.zeros(6)
+        engine.tau = np.arange(6, dtype=float)
+
+        mock_model = MagicMock()
+        mock_model.nq = 7
+        mock_model.nv = 6
+        engine.model = mock_model
+        engine.data = MagicMock()
+
+        return engine
+
+    def test_set_control_wrong_size_raises_and_preserves_prior_tau(self) -> None:
+        """set_control() must not silently keep stale torque after bad input."""
+        import numpy as np
+
+        engine = self._make_engine_with_mock_model()
+        prior_tau = engine.tau.copy()
+
+        with pytest.raises(ValueError, match="u expected 1-D size 6"):
+            engine.set_control(np.ones(3))
+
+        np.testing.assert_array_equal(engine.tau, prior_tau)
+
+    def test_compute_control_acceleration_wrong_size_raises(self) -> None:
+        """Control acceleration must report wrong generalized-force length."""
+        import numpy as np
+
+        engine = self._make_engine_with_mock_model()
+
+        with pytest.raises(ValueError, match="tau expected 1-D size 6"):
+            engine.compute_control_acceleration(np.ones(3))
+
+    def test_compute_ztcf_wrong_q_size_raises(self) -> None:
+        """ZTCF must report wrong q length instead of returning an empty array."""
+        import numpy as np
+
+        engine = self._make_engine_with_mock_model()
+
+        with pytest.raises(ValueError, match="q expected 1-D size 7"):
+            engine.compute_ztcf(np.ones(5), np.zeros(6))
+
+    def test_compute_ztcf_wrong_v_size_raises(self) -> None:
+        """ZTCF must report wrong v length instead of returning an empty array."""
+        import numpy as np
+
+        engine = self._make_engine_with_mock_model()
+
+        with pytest.raises(ValueError, match="v expected 1-D size 6"):
+            engine.compute_ztcf(np.zeros(7), np.ones(3))
+
+    def test_compute_zvcf_wrong_q_size_raises(self) -> None:
+        """ZVCF must report wrong q length instead of returning an empty array."""
+        import numpy as np
+
+        engine = self._make_engine_with_mock_model()
+
+        with pytest.raises(ValueError, match="q expected 1-D size 7"):
+            engine.compute_zvcf(np.ones(5))
