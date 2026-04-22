@@ -66,9 +66,12 @@ def _parse_root(source: str | Path | ET.Element) -> ET.Element:
     """Return the ``<robot>`` root element for ``source``."""
     if isinstance(source, ET.Element):
         return source
-    path = Path(source)
-    if path.exists():
-        return ET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
+    try:
+        path = Path(source)
+        if path.exists():
+            return ET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
+    except (OSError, ValueError):
+        pass
     # Fall back to treating the argument as raw XML text.
     return ET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
 

@@ -2,7 +2,7 @@
 
 **Generated:** 2026-04-19
 **Source issue:** #2717 ("CI / docs / hygiene: 56 workflows, formatter drift, committed artifacts, duplicate LICENSE")
-**Actual count at audit time:** 57 workflow files under `.github/workflows/` (+ 12 under `.github/workflows/archived/`)
+**Actual count at audit time:** 56 workflow files under `.github/workflows/` (+ 12 under `.github/workflows/archived/`)
 
 This document is an audit of every workflow file in the repository. It is the
 authoritative map of triggers, purposes, and naming groups. It is the intended
@@ -159,7 +159,7 @@ not in subdirectories, so these are inert. Retained for historical reference.
 1. **Naming convention drift** — three conventions coexist. `Jules-*` files
    are Title-Case-Dashed and the rest is split between Title-Case-Dashed and
    kebab-case. A rename-only PR must coordinate with Control Tower.
-2. **Trigger-less workflows** — none found at audit time; all 57 active files
+2. **Trigger-less workflows** — none found at audit time; all 56 active files
    have at least one trigger. (The archived set is intentionally inert.)
 3. **Likely overlap candidates** — `Maintenance-Global-Control.yml` and
    `Manual-Run-All.yml` both fan out to other workflows via `WD`; consider

@@ -427,10 +427,18 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             f_local = c_force[:3]
             f_world = contact_frame.T @ f_local
 
-            # MuJoCo reports the contact force exerted by geom2 on geom1.
-            # For foot-ground contacts where the foot is geom1, this is already
-            # the upward ground reaction force acting on the modeled body.
-            total_force += f_world
+            contact = self.data.contact[i]
+            geom1_body = self.model.geom_bodyid[contact.geom1]
+            geom2_body = self.model.geom_bodyid[contact.geom2]
+
+            # mj_contactForce returns the force exerted BY geom2 ON geom1.
+            if geom2_body == 0:
+                # World is geom2. Force ON system (geom1) is +f_world.
+                total_force += f_world
+            elif geom1_body == 0:
+                # World is geom1. Force ON world is +f_world.
+                # Force ON system (geom2) is therefore -f_world.
+                total_force -= f_world
 
         return total_force
 

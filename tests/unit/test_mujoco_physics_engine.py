@@ -226,11 +226,17 @@ def test_compute_contact_forces_preserves_mujoco_contact_sign(engine, mock_mj):
 
     def set_contact_force(model, data, index, c_force):
         del model, data, index
-        c_force[:3] = np.array([0.0, 0.0, 735.75])
+        # MuJoCo contact frame is [normal, tangent1, tangent2]
+        c_force[:3] = np.array([735.75, 0.0, 0.0])
 
     mock_mj.mj_contactForce.side_effect = set_contact_force
 
+    # Simulate world is geom2 (0) and system is geom1 (1)
+    engine.model.geom_bodyid = np.array([1, 0])
+    contact.geom1 = 0
+    contact.geom2 = 1
+
     force = engine.compute_contact_forces()
 
-    np.testing.assert_allclose(force, np.array([0.0, 0.0, 735.75]))
+    np.testing.assert_allclose(force, np.array([735.75, 0.0, 0.0]))
     mock_mj.mj_contactForce.assert_called_once()
