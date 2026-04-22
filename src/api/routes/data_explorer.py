@@ -19,6 +19,7 @@ from fastapi import APIRouter, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.middleware.upload_limits import read_upload_file_bytes
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -308,7 +309,7 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
             detail=f"Unsupported format: {suffix}. Use .csv or .json",
         )
 
-    content = (await file.read()).decode("utf-8")
+    content = (await read_upload_file_bytes(file)).decode("utf-8")
 
     if suffix == ".csv":
         columns, rows = _parse_csv_content(content)

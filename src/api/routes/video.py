@@ -6,6 +6,7 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import os
 import tempfile
 import uuid
 from datetime import datetime
@@ -20,6 +21,7 @@ from src.api.config import (
     MIN_CONFIDENCE,
     VALID_ESTIMATOR_TYPES,
 )
+from src.api.middleware.upload_limits import write_upload_file_to_path
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
 
@@ -126,10 +128,10 @@ async def analyze_video(
 
     temp_path: Path | None = None
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-            content = await file.read()
-            temp_file.write(content)
-            temp_path = Path(temp_file.name)
+        temp_fd, temp_file_name = tempfile.mkstemp(suffix=".mp4")
+        os.close(temp_fd)
+        temp_path = Path(temp_file_name)
+        await write_upload_file_to_path(file, temp_path)
 
         video_pipeline_cls, video_config_cls = _load_video_pipeline_classes()
         config = video_config_cls(
@@ -236,10 +238,10 @@ async def analyze_video_async(
 
     task_id = str(uuid.uuid4())
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-        content = await file.read()
-        temp_file.write(content)
-        temp_path = Path(temp_file.name)
+    temp_fd, temp_file_name = tempfile.mkstemp(suffix=".mp4")
+    os.close(temp_fd)
+    temp_path = Path(temp_file_name)
+    await write_upload_file_to_path(file, temp_path)
 
     task_manager[task_id] = {
         "status": "started",
