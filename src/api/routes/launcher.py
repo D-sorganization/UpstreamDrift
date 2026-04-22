@@ -16,7 +16,7 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
-router = APIRouter(prefix="/api/launcher", tags=["launcher"])
+router = APIRouter(prefix="/launcher", tags=["launcher"])
 
 # Cache the manifest in memory (singleton holder avoids 'global')
 _launcher_state: dict[str, LauncherManifest | None] = {"manifest": None}

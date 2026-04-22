@@ -90,6 +90,34 @@ class TestRouteRegistry:
         prefixed = [p for p in route_paths if p.startswith("/api/v1")]
         assert len(prefixed) > 0
 
+    def test_tooling_routes_do_not_double_api_prefix(self) -> None:
+        """Tooling routers mount once under the versioned API prefix."""
+        from fastapi import FastAPI
+
+        from src.api.route_registry import register_routes
+
+        test_app = FastAPI()
+        register_routes(test_app, prefix="/api/v1")
+        route_paths = {r.path for r in test_app.routes if hasattr(r, "path")}
+
+        expected_paths = {
+            "/api/v1/tools/data-explorer/datasets",
+            "/api/v1/terrain/presets",
+            "/api/v1/tools/putting-green/simulate",
+            "/api/v1/tools/motion-capture/sources",
+            "/api/v1/launcher/manifest",
+        }
+        double_prefixed_paths = {
+            "/api/v1/api/tools/data-explorer/datasets",
+            "/api/v1/api/terrain/presets",
+            "/api/v1/api/tools/putting-green/simulate",
+            "/api/v1/api/tools/motion-capture/sources",
+            "/api/v1/api/launcher/manifest",
+        }
+
+        assert expected_paths <= route_paths
+        assert route_paths.isdisjoint(double_prefixed_paths)
+
     def test_expensive_route_modules_receive_quota_dependencies(self) -> None:
         """Simulation and video routes receive quota dependencies at registration."""
         from fastapi import FastAPI

@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T15:02:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.162                                            |
+| **Spec Version**        | 1.0.163                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -511,6 +511,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.163 | Issue #3015: tooling route modules now mount relative to the API registry prefix instead of hardcoding an extra `/api` segment, restoring versioned data-explorer, terrain, putting-green, motion-capture, and launcher endpoints under `/api/v1/...` without double-prefixed `/api/v1/api/...` paths. |
 | 2026-04-22 | 1.0.162 | Issue #3011: `create_local_app()` now initializes `SimulationService` and `AnalysisService` in app state, aligning local-server startup with dependency-injection requirements so simulation/analysis dependencies no longer raise 503 due to missing service wiring. Added a local-server regression test that resolves both services via dependency helpers. |
 | 2026-04-22 | 1.0.161 | Issue #3016: `GET /dataset/features` now accepts omitted/null `category` query parameters as intended by the route signature, removing contradictory route-level `ValueError` guards and adding route regression coverage for default and explicit `category=None` handling. |
 | 2026-04-22 | 1.0.159 | Issue #2988: model registry loading now supports explicit strict validation for CI/cross-engine paths, including malformed legacy entries, malformed provider manifests, missing required model IDs, and nightly cross-engine validation env wiring. |
