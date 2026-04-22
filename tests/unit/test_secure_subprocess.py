@@ -29,6 +29,7 @@ class TestSecureSubprocess(unittest.TestCase):
         (self.suite_root / "engines").mkdir()
         (self.suite_root / "launchers").mkdir()
         (self.suite_root / "tools").mkdir()
+        (self.suite_root / "src").mkdir()
 
         # Create test scripts
         self.test_script = self.suite_root / "engines" / "test_script.py"
@@ -66,6 +67,14 @@ class TestSecureSubprocess(unittest.TestCase):
         """Test that scripts in allowed directories pass validation."""
         # Should not raise exception
         validate_script_path(self.test_script, self.suite_root)
+
+    def test_validate_script_path_allows_src_scripts(self):
+        """Launcher handlers may resolve valid scripts under src/."""
+        src_script = self.suite_root / "src" / "launchers" / "script.py"
+        src_script.parent.mkdir(parents=True)
+        src_script.write_text("print('src script')")
+
+        validate_script_path(src_script, self.suite_root)
 
     def test_validate_script_path_outside_suite(self):
         """Test that scripts outside suite directory are rejected."""

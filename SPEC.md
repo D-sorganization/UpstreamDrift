@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-21T17:12:00-07:00
+Last-Updated: 2026-04-21T17:36:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-21T17:12:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.143                                            |
+| **Spec Version**        | 1.0.144                                            |
 | **Last Spec Update**    | 2026-04-21                                         |
 
 ## 2. Purpose & Mission
@@ -501,6 +501,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-21 | 1.0.144 | Launcher security: subprocess script validation now allows repository-local scripts under `src/` so launcher handlers can execute valid source-tree scripts while preserving the existing suite-root and top-level allowlist checks. |
 | 2026-04-21 | 1.0.143 | Test governance: `tests/test_urdf_tools.py::test_urdf_scanning_logic` is a blocking assertion again, so shared URDF discovery regressions fail CI instead of being masked by a non-strict xfail. |
 | 2026-04-21 | 1.0.142 | Physics validation: altitude-density correction now rejects altitudes outside the documented ISA troposphere range of 0 to 11000 m in both shared flight-model options and common air-property construction. |
 | 2026-04-20 | 1.0.141 | Bolt: Optimized `linear_power_series` in `src/shared/python/pendulum_simulator/dynamics_quantities.py` by replacing `np.sum(forces * velocities, axis=1)` with `np.einsum('...i,...i->...', forces, velocities)`. This avoids temporary array allocations and yields a ~3x performance improvement in physics simulation loops. |

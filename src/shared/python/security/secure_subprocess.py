@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 # Allowed script directories (whitelist approach)
 ALLOWED_SCRIPT_DIRECTORIES = [
+    "src",
     "engines",
     "launchers",
     "tools",
