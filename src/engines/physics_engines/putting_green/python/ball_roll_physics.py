@@ -70,9 +70,11 @@ class BallState:
 
     def __post_init__(self) -> None:
         """Ensure arrays are numpy."""
-        self.position = np.array(self.position, dtype=np.float64)
-        self.velocity = np.array(self.velocity, dtype=np.float64)
-        self.spin = np.array(self.spin, dtype=np.float64)
+        # Normalize incoming vectors (including column/row vectors) to 1D so
+        # scalar math (math.hypot) and downstream indexing stay consistent.
+        self.position = np.asarray(self.position, dtype=np.float64).reshape(-1)
+        self.velocity = np.asarray(self.velocity, dtype=np.float64).reshape(-1)
+        self.spin = np.asarray(self.spin, dtype=np.float64).reshape(-1)
 
     @property
     def speed(self) -> float:

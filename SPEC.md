@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.154                                            |
+| **Spec Version**        | 1.0.155                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -505,6 +505,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.155 | Putting-green ball physics now normalizes BallState position, velocity, and spin inputs to 1D arrays so row and column vector inputs preserve speed and direction calculations. |
 | 2026-04-22 | 1.0.154 | Bolt: Optimize ball roll physics vector magnitudes using math.hypot. |
 | 2026-04-22 | 1.0.151 | Issue #2956 duplicate filename cluster review: documented the intentional `__main__`, analyzer/base, `code_quality_check`, and MATLAB `codeIssuesGUI` filename clusters and added unit regression coverage for shared code-quality delegation plus mirrored MATLAB GUI copies. |
 | 2026-04-22 | 1.0.147 | Type-check configuration cleanup: removed the global `mypy_path = "stubs"` setting so repository-local stubs are no longer injected into every mypy invocation after the Pinocchio follow-up branch was reduced to configuration cleanup. |
