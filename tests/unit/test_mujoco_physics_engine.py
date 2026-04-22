@@ -240,3 +240,29 @@ def test_compute_contact_forces_preserves_mujoco_contact_sign(engine, mock_mj):
 
     np.testing.assert_allclose(force, np.array([735.75, 0.0, 0.0]))
     mock_mj.mj_contactForce.assert_called_once()
+
+
+def test_compute_contact_forces_skips_non_geom_contact_ids(engine, mock_mj):
+    """Negative MuJoCo contact geom IDs must not index geom_bodyid."""
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
+    engine.data.ncon = 1
+
+    contact = MagicMock()
+    contact.frame = np.eye(3).reshape(-1)
+    contact.geom1 = -1
+    contact.geom2 = 1
+    engine.data.contact = [contact]
+
+    def set_contact_force(model, data, index, c_force):
+        del model, data, index
+        c_force[:3] = np.array([735.75, 0.0, 0.0])
+
+    mock_mj.mj_contactForce.side_effect = set_contact_force
+
+    engine.model.geom_bodyid = np.array([1, 0])
+
+    force = engine.compute_contact_forces()
+
+    np.testing.assert_allclose(force, np.zeros(3))
+    mock_mj.mj_contactForce.assert_called_once()

@@ -428,6 +428,9 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             f_world = contact_frame.T @ f_local
 
             contact = self.data.contact[i]
+            if contact.geom1 < 0 or contact.geom2 < 0:
+                continue
+
             geom1_body = self.model.geom_bodyid[contact.geom1]
             geom2_body = self.model.geom_bodyid[contact.geom2]
 
