@@ -50,6 +50,7 @@ from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
 from .task_manager import TaskManager
 from .utils.tracing import RequestTracer
+from .versioning import get_app_version
 
 setup_logging()
 logger = get_logger(__name__)
@@ -175,7 +176,7 @@ app = FastAPI(
         f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
         "Legacy un-prefixed routes are maintained for backward compatibility."
     ),
-    version="3.0.0",
+    version=get_app_version(),
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_tags=[

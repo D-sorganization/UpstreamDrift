@@ -74,6 +74,7 @@ from src.api.routes import (  # noqa: E402
     simulation_ws,
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
+from src.api.versioning import get_app_version  # noqa: E402
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
@@ -743,7 +744,7 @@ def create_local_app() -> FastAPI:
             f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
             "Legacy `/api/` routes are maintained for backward compatibility."
         ),
-        version="2.0.0",
+        version=get_app_version(),
         docs_url="/api/docs",  # Swagger UI available locally
         redoc_url="/api/redoc",
     )
