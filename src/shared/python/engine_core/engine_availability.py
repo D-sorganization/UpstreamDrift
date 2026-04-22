@@ -80,7 +80,13 @@ def _probe_engine(
 
     try:
         if import_name == "drake":
-            importlib.import_module("pydrake.all")
+            pydrake_module = importlib.import_module("pydrake")
+            drake_all_module = importlib.import_module("pydrake.all")
+            if (
+                type(pydrake_module).__module__ == "unittest.mock"
+                or type(drake_all_module).__module__ == "unittest.mock"
+            ):
+                raise ImportError("mocked pydrake module detected")
         elif import_name == "torch":
             importlib.import_module("torch")
         elif import_name == "tf":

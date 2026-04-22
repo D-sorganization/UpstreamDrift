@@ -43,7 +43,7 @@ _SMALL_CONFIG = PerturbationConfig(
 # ---------------------------------------------------------------------------
 
 try:
-    from pydrake.all import MultibodyPlant  # noqa: F401
+    import pydrake.multibody.tree  # noqa: F401
 
     _DRAKE_AVAILABLE = True
 except ImportError:
