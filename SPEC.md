@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.157                                            |
+| **Spec Version**        | 1.0.158                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -507,6 +507,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.158 | Issue #2986 follow-up: Rust and Python `ContactParameters` defaults now use the same z-up surface normal as ball-flight gravity/height conventions, while explicit y-up contact tests continue to pass with explicit normals. |
 | 2026-04-22 | 1.0.157 | Issue #2984 follow-up: URDF/MJCF model discovery and serving now reject symlink escapes outside approved model roots while preserving contained nested models, and tuned drag coefficients remain continuous across the Reynolds transition. |
 | 2026-04-22 | 1.0.156 | Issue #2968 follow-up: added CI regression coverage in `tests/test_ci_infrastructure.py` to prevent reintroducing global mypy stub-path injection (`mypy_path` / `mypypath`) that can make incomplete Pinocchio stubs authoritative outside scoped checks. |
 | 2026-04-22 | 1.0.155 | Putting-green ball physics now normalizes BallState position, velocity, and spin inputs to 1D arrays so row and column vector inputs preserve speed and direction calculations. |

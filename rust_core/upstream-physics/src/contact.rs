@@ -37,7 +37,7 @@ impl Default for ContactParameters {
         Self {
             cor: 0.78,                           // Typical golf green COR
             friction: 0.4,                       // Typical grass friction
-            normal: Vector3::new(0.0, 1.0, 0.0), // Flat ground (Y-up)
+            normal: Vector3::new(0.0, 0.0, 1.0), // Flat ground (Z-up)
         }
     }
 }
@@ -61,7 +61,7 @@ impl ContactParameters {
         Ok(Self {
             cor,
             friction,
-            normal: Vector3::new(0.0, 1.0, 0.0),
+            normal: Vector3::new(0.0, 0.0, 1.0),
         })
     }
 }
@@ -223,6 +223,29 @@ pub fn wasm_calculate_impact(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_default_contact_parameters_use_z_up_normal() {
+        let params = ContactParameters::default();
+
+        assert_eq!(params.normal.x, 0.0);
+        assert_eq!(params.normal.y, 0.0);
+        assert_eq!(params.normal.z, 1.0);
+    }
+
+    #[test]
+    fn test_default_contact_reflects_descending_z_velocity() {
+        let params = ContactParameters::default();
+        let v_in = Vector3::new(1.0, 0.0, -10.0);
+
+        let result = calculate_impact(&v_in, 0.0, &params);
+
+        assert!(
+            result.velocity.z > 0.0,
+            "default contact normal should reflect descending z velocity, got {}",
+            result.velocity.z
+        );
+    }
 
     /// Test 1: Perfectly elastic bounce (COR=1) conserves normal speed.
     #[test]
