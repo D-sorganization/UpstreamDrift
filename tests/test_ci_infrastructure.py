@@ -10,6 +10,7 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import sys
+from typing import Any
 
 import pytest
 
@@ -109,7 +110,7 @@ class TestStructuredLogging:
         """Test that logger accepts keyword arguments for structured data."""
         from src.shared.python.core import get_logger
 
-        logger = get_logger(__name__)
+        logger: Any = get_logger(__name__)
         # Should not raise exceptions
         logger.info("test_event", key1="value1", key2=123)
 
