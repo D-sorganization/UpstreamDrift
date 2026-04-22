@@ -15,7 +15,8 @@ Architecture (#1485):
 
 API Versioning (#1488):
     All routes are served under ``/api/v1/`` prefix for forward compatibility.
-    Legacy un-prefixed routes are also registered for backward compatibility.
+    Legacy un-prefixed and ``/api/`` routes are also registered for backward
+    compatibility.
 """
 
 from collections.abc import AsyncGenerator
@@ -174,7 +175,8 @@ app = FastAPI(
         "## Versioning\n"
         f"Current API version: **{API_VERSION}**. "
         f"All endpoints are available under `{API_PREFIX}/` prefix.\n"
-        "Legacy un-prefixed routes are maintained for backward compatibility."
+        "Legacy un-prefixed and `/api/` routes are maintained for backward "
+        "compatibility."
     ),
     version=get_app_version(),
     docs_url="/docs",
@@ -249,11 +251,15 @@ app.middleware("http")(_tracer.trace_request)
 
 # ── Route Registration ──────────────────────────────────────────
 # Use plugin-style auto-discovery instead of 20+ explicit imports (#1485).
-# Routes are registered both at root (backward compat) and under /api/v1/ (#1488).
+# Routes are registered at root, /api, and /api/v1 (#1488).
 
 # Register all routes at root level (backward compatibility)
 _root_count = register_routes(app, prefix="")
 logger.info("Registered %d route modules at root prefix", _root_count)
+
+# Register all routes under /api prefix (legacy API compatibility)
+_legacy_api_count = register_routes(app, prefix="/api")
+logger.info("Registered %d route modules under /api", _legacy_api_count)
 
 # Register all routes under /api/v1/ prefix (versioned API)
 _versioned_count = register_routes(app, prefix=API_PREFIX)

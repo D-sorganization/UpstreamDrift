@@ -141,9 +141,17 @@ class TestRouteRegistry:
             dep.call for dep in simulation_route.dependant.dependencies
         ]
         video_dependencies = [dep.call for dep in video_route.dependant.dependencies]
+        simulation_enforced_dependencies = [
+            getattr(dependency, "enforced_dependency", None)
+            for dependency in simulation_dependencies
+        ]
+        video_enforced_dependencies = [
+            getattr(dependency, "enforced_dependency", None)
+            for dependency in video_dependencies
+        ]
 
-        assert CheckSimulationQuota.dependency in simulation_dependencies
-        assert CheckVideoQuota.dependency in video_dependencies
+        assert CheckSimulationQuota.dependency in simulation_enforced_dependencies
+        assert CheckVideoQuota.dependency in video_enforced_dependencies
 
 
 # ── Task Manager Tests ────────────────────────────────────────────
