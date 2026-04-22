@@ -209,11 +209,10 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
             else:
                 import tempfile
 
-                tmp = tempfile.NamedTemporaryFile(
+                with tempfile.NamedTemporaryFile(
                     suffix=".urdf", mode="w", delete=False
-                )
-                tmp.write(self._MINIMAL_URDF)
-                tmp.close()
+                ) as tmp:
+                    tmp.write(self._MINIMAL_URDF)
                 Parser(plant).AddModels(tmp.name)
 
         plant.Finalize()
@@ -372,16 +371,18 @@ class DrakePerturbationAnalyzer(PerturbationAnalyzerBase):
         import tempfile
 
         if hasattr(self, "_urdf_str"):
-            tmp = tempfile.NamedTemporaryFile(suffix=".urdf", mode="w", delete=False)
-            tmp.write(self._urdf_str)
-            tmp.close()
+            with tempfile.NamedTemporaryFile(
+                suffix=".urdf", mode="w", delete=False
+            ) as tmp:
+                tmp.write(self._urdf_str)
             Parser(plant).AddModels(tmp.name)
         else:
             # Re-finalize fresh from existing plant's URDF path stored at init
             # Fall back to minimal URDF
-            tmp = tempfile.NamedTemporaryFile(suffix=".urdf", mode="w", delete=False)
-            tmp.write(self._MINIMAL_URDF)
-            tmp.close()
+            with tempfile.NamedTemporaryFile(
+                suffix=".urdf", mode="w", delete=False
+            ) as tmp:
+                tmp.write(self._MINIMAL_URDF)
             Parser(plant).AddModels(tmp.name)
 
         plant.Finalize()
