@@ -37,6 +37,14 @@ class TestAirProperties:
         assert high.density < sea_level.density
         assert high.temperature < sea_level.temperature
 
+    @pytest.mark.parametrize("altitude_m", [-1.0, 11000.1])
+    def test_from_altitude_rejects_outside_troposphere_range(
+        self, altitude_m: float
+    ) -> None:
+        """ISA model is only valid within the documented troposphere range."""
+        with pytest.raises(ValueError, match="ISA troposphere range"):
+            AirProperties.from_altitude(altitude_m)
+
 
 class TestBallProperties:
     """Tests for BallProperties dataclass."""

@@ -34,6 +34,8 @@ from src.shared.python.core.contracts import postcondition, precondition
 STANDARD_GRAVITY: float = 9.80665  # m/s² (exact, per NIST)
 GRAVITY_APPROX: float = 9.81  # m/s² (common approximation)
 GRAVITY_VECTOR: np.ndarray = np.array([0.0, 0.0, -GRAVITY_APPROX])
+MIN_VALID_ALTITUDE_M: float = 0.0
+MAX_VALID_TROPOSPHERE_ALTITUDE_M: float = 11_000.0
 
 
 @dataclass(frozen=True)
@@ -65,6 +67,10 @@ class AirProperties:
         # International Standard Atmosphere model
         if altitude_m is None:
             raise ValueError("altitude_m must be provided")
+        if not MIN_VALID_ALTITUDE_M <= altitude_m <= MAX_VALID_TROPOSPHERE_ALTITUDE_M:
+            raise ValueError(
+                "altitude_m must be within the ISA troposphere range [0, 11000]"
+            )
         T0 = 288.15  # K
         P0 = 101325.0  # Pa
         L = 0.0065  # Temperature lapse rate [K/m]
