@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.160                                            |
+| **Spec Version**        | 1.0.161                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -200,6 +200,7 @@ UpstreamDrift/
 - `GET /api/launcher/manifest` — Return launcher tile metadata for the UI shell
 - `GET /api/launcher/logos/{logo_name}` — Serve launcher logos only from approved asset roots using traversal-safe path resolution
 - Local launcher account authentication remains disabled in local mode, but mutating launcher subprocess endpoints (`POST /api/launcher/launch/{tile_id}` and `POST /api/launcher/stop/{name}`) require the startup launcher capability token in the custom header advertised by `/api/launcher/manifest`; browser requests with non-loopback `Origin` or `Referer` values are rejected before launch/stop side effects.
+- Local server startup and request diagnostics use the shared structured logger from `src/shared/python/logging_pkg/logging_config.py`; `src/api/local_server.py` keeps a single module logger binding to avoid silently shadowing handlers or log levels.
 - SPA/static asset fallback serving under `ui/dist` resolves requested paths through traversal-safe joins and refuses absolute paths, `..` escapes, NUL bytes, and symlink escapes
 - URDF/MJCF model discovery and `/models/{model_name}/urdf` serving resolve candidates through approved model roots, reject symlink escapes outside those roots, and re-check containment immediately before reading file contents
 - Pinocchio adapter vector APIs fail fast on dimension mismatch. `set_control`, `compute_control_acceleration`, `compute_ztcf`, and `compute_zvcf` raise `ValueError` before mutating or dispatching when vector lengths do not match the loaded model, and the message names the vector plus the expected and actual dimensions.
@@ -701,6 +702,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-22: Removed the duplicate `logging.getLogger(__name__)` assignment from `src/api/local_server.py` so the local server consistently uses the shared structured logger, with regression coverage guarding against logger shadowing.
 - 2026-04-22: Added release-mode validation for Rust upstream-physics public RK4, aerodynamic, and ball-flight inputs so Python/WASM constructors return typed boundary errors and invalid simulation parameters fail before producing NaNs or repeated states.
 - 2026-04-22: Guarded MuJoCo contact-force body lookups against negative non-geom contact IDs so flex or other non-geom contacts are skipped instead of indexing the wrong `geom_bodyid` entry.
 - 2026-04-22: Updated humanoid URDF contract parseroot behavior to preserve real filesystem/permission I/O errors for existing path inputs while retaining raw-XML fallback for non-path-like or non-existent path inputs.

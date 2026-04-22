@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -43,6 +44,13 @@ def test_api_version_constants() -> None:
     """Local server exposes API_VERSION and API_PREFIX constants (#2070)."""
     assert local_server.API_VERSION == "v1"
     assert local_server.API_PREFIX == "/api/v1"
+
+
+def test_local_server_has_single_logger_assignment() -> None:
+    """local_server should not keep a dead logging.getLogger overwrite (#3008)."""
+    source = Path(local_server.__file__).read_text(encoding="utf-8")
+    assert "logger = logging.getLogger(__name__)" not in source
+    assert source.count("logger = get_logger(__name__)") == 1
 
 
 def test_local_app_registers_versioned_routes(monkeypatch, tmp_path) -> None:
