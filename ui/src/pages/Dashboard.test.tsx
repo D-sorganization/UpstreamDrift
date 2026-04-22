@@ -46,6 +46,8 @@ const mockManifest = {
     loadState: 'loaded' as const,
     error: null,
     manifest: null,
+    launcherCsrfToken: 'test-token',
+    launcherCsrfHeader: 'X-Launcher-CSRF-Token',
     refetch: vi.fn(),
 };
 

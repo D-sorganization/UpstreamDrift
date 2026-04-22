@@ -79,6 +79,22 @@ def client(_reset_startup_metrics):
             tc._mock_process_manager = app.state.process_manager
             tc._mock_handler_registry = mock_registry
             tc._mock_handler = mock_handler
+            tc._launcher_headers = {
+                local_server.LAUNCHER_CSRF_HEADER: app.state.launcher_csrf_token
+            }
+            original_post = tc.post
+
+            def post_with_launcher_token(url, *args, **kwargs):
+                """Preserve existing launcher mutation tests as authorized UI calls."""
+                if (
+                    isinstance(url, str)
+                    and url.startswith(("/api/launcher/launch/", "/api/launcher/stop/"))
+                    and "headers" not in kwargs
+                ):
+                    kwargs["headers"] = tc._launcher_headers
+                return original_post(url, *args, **kwargs)
+
+            tc.post = post_with_launcher_token
             yield tc
 
 
@@ -105,6 +121,47 @@ def manifest(manifest_path: Path) -> dict[str, Any]:
 
 class TestLaunchEndpoint:
     """Test POST /api/launcher/launch/{tile_id}."""
+
+    def test_manifest_exposes_launcher_mutation_token(self, client) -> None:
+        """Manifest gives the same-origin UI the token/header needed for mutations."""
+        resp = client.get("/api/launcher/manifest")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["launcher_csrf_header"] == local_server.LAUNCHER_CSRF_HEADER
+        assert data["launcher_csrf_token"] == client.app.state.launcher_csrf_token
+
+    def test_launch_without_token_returns_403(self, client) -> None:
+        """Cross-site form POSTs cannot launch subprocesses without the token."""
+        resp = client.request("POST", "/api/launcher/launch/mujoco_unified")
+        assert resp.status_code == 403
+        client._mock_handler.launch.assert_not_called()
+
+    def test_launch_with_hostile_origin_returns_403(self, client) -> None:
+        """A valid token is still rejected when the browser Origin is off-site."""
+        headers = {
+            **client._launcher_headers,
+            "Origin": "https://evil.example",
+        }
+        resp = client.request(
+            "POST",
+            "/api/launcher/launch/mujoco_unified",
+            headers=headers,
+        )
+        assert resp.status_code == 403
+        client._mock_handler.launch.assert_not_called()
+
+    def test_launch_with_loopback_origin_and_token_succeeds(self, client) -> None:
+        """The local UI can launch when it presents the startup capability token."""
+        headers = {
+            **client._launcher_headers,
+            "Origin": "http://127.0.0.1:8000",
+        }
+        resp = client.request(
+            "POST",
+            "/api/launcher/launch/mujoco_unified",
+            headers=headers,
+        )
+        assert resp.status_code == 200
 
     def test_launch_mujoco_success(self, client) -> None:
         """Launching MuJoCo by tile ID returns 200 with status=launched."""
@@ -163,9 +220,9 @@ class TestLaunchEndpoint:
         """Every tile in the manifest can be launched (handler returns True)."""
         for tile in manifest["tiles"]:
             resp = client.post(f"/api/launcher/launch/{tile['id']}")
-            assert resp.status_code == 200, (
-                f"Failed to launch tile '{tile['id']}': {resp.json()}"
-            )
+            assert (
+                resp.status_code == 200
+            ), f"Failed to launch tile '{tile['id']}': {resp.json()}"
             data = resp.json()
             assert data["tile_id"] == tile["id"]
 
@@ -247,6 +304,24 @@ class TestProcessesEndpoint:
 
 class TestStopEndpoint:
     """Test POST /api/launcher/stop/{name}."""
+
+    def test_stop_without_token_returns_403(self, client) -> None:
+        """Cross-site form POSTs cannot stop subprocesses without the token."""
+        resp = client.request("POST", "/api/launcher/stop/nonexistent_engine")
+        assert resp.status_code == 403
+
+    def test_stop_with_hostile_referer_returns_403(self, client) -> None:
+        """A token-bearing request is rejected when Referer is off-site."""
+        headers = {
+            **client._launcher_headers,
+            "Referer": "https://evil.example/attack.html",
+        }
+        resp = client.request(
+            "POST",
+            "/api/launcher/stop/nonexistent_engine",
+            headers=headers,
+        )
+        assert resp.status_code == 403
 
     def test_stop_running_process(self, client) -> None:
         """Stopping a running process returns 200 with status=stopped."""

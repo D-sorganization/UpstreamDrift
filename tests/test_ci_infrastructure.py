@@ -260,9 +260,9 @@ class TestPyprojectTomlConsistency:
 
         deps = data["project"]["dependencies"]
         # Check that structlog is in the dependencies
-        assert any("structlog" in dep for dep in deps), (
-            "structlog must be in core dependencies"
-        )
+        assert any(
+            "structlog" in dep for dep in deps
+        ), "structlog must be in core dependencies"
 
     def test_mypy_config_does_not_force_global_stub_path(self) -> None:
         """Guard against global Pinocchio stub shadowing (issue #2968)."""

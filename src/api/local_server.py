@@ -24,9 +24,12 @@ from __future__ import annotations
 import logging
 import mimetypes
 import os
+import secrets
 import time
 from pathlib import Path
+from secrets import compare_digest
 from typing import Any
+from urllib.parse import urlparse
 
 # Fix MIME types for JavaScript modules on Windows
 # Windows registry often has incorrect/missing MIME types for .js files
@@ -53,7 +56,7 @@ else:
 
 # NOTE: These imports are placed after env setup intentionally
 # The environment variables must be set before FastAPI initialization
-from fastapi import FastAPI, Request  # noqa: E402
+from fastapi import FastAPI, HTTPException, Request  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
@@ -81,6 +84,7 @@ logger = get_logger(__name__)
 # API versioning constants (#2070)
 API_VERSION = "v1"
 API_PREFIX = f"/api/{API_VERSION}"
+LAUNCHER_CSRF_HEADER = "X-Launcher-CSRF-Token"
 
 
 # Track startup metrics for diagnostics
@@ -163,6 +167,50 @@ def _load_launcher_manifest() -> dict[str, Any]:
     except (FileNotFoundError, ValueError, OSError) as exc:
         logger.error("[launch] Failed to load launcher manifest: %s", exc)
         return {"version": "1.0.0", "tiles": []}
+
+
+def _new_launcher_csrf_token() -> str:
+    """Generate the local launcher capability token for mutating endpoints."""
+    return secrets.token_urlsafe(32)
+
+
+def _is_loopback_origin(value: str) -> bool:
+    """Return True when an Origin/Referer value points at a loopback host."""
+    parsed = urlparse(value)
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    hostname = parsed.hostname
+    return hostname in {"localhost", "127.0.0.1", "::1"}
+
+
+def _enforce_launcher_mutation_guard(request: Request) -> None:
+    """Require a local capability token and reject browser cross-site writes."""
+    if request is None:
+        raise ValueError("request must be provided")
+
+    expected_token = getattr(request.app.state, "launcher_csrf_token", "")
+    provided_token = request.headers.get(LAUNCHER_CSRF_HEADER, "")
+    if not expected_token or not compare_digest(provided_token, expected_token):
+        raise HTTPException(
+            status_code=403,
+            detail="Launcher mutation token is required",
+        )
+
+    for header_name in ("origin", "referer"):
+        header_value = request.headers.get(header_name)
+        if header_value and not _is_loopback_origin(header_value):
+            raise HTTPException(
+                status_code=403,
+                detail="Launcher mutation origin is not allowed",
+            )
+
+
+def _with_launcher_csrf_token(manifest: dict[str, Any], token: str) -> dict[str, Any]:
+    """Attach the local UI capability token without mutating cached manifest data."""
+    response = dict(manifest)
+    response["launcher_csrf_token"] = token
+    response["launcher_csrf_header"] = LAUNCHER_CSRF_HEADER
+    return response
 
 
 def _safe_join(root: Path, user_path: str) -> Path | None:
@@ -314,11 +362,15 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
     _repo_root = Path(__file__).parent.parent.parent
     _launcher_service = LauncherService(repo_root=_repo_root)
     app.state.process_manager = _launcher_service.process_manager
+    app.state.launcher_csrf_token = _new_launcher_csrf_token()
 
     @app.get("/api/launcher/manifest")
     async def get_launcher_manifest() -> dict[str, Any]:
         """Return the launcher manifest (tile configuration) for the web UI."""
-        return _load_launcher_manifest()
+        return _with_launcher_csrf_token(
+            _load_launcher_manifest(),
+            app.state.launcher_csrf_token,
+        )
 
     @app.get("/api/launcher/logos/{logo_name:path}")
     async def get_launcher_logo(logo_name: str) -> Any:
@@ -333,12 +385,15 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         )
 
     @app.post("/api/launcher/launch/{tile_id}", response_model=None)
-    async def launch_tile(tile_id: str) -> dict[str, Any] | JSONResponse:
+    async def launch_tile(
+        request: Request, tile_id: str
+    ) -> dict[str, Any] | JSONResponse:
         """Launch an engine or tool by tile ID.
 
         Looks up the tile in the launcher manifest and uses the model
         handler registry to spawn it as a subprocess.
         """
+        _enforce_launcher_mutation_guard(request)
         logger.info("[launch] Received launch request for tile_id=%s", tile_id)
 
         manifest, tile = _find_tile_in_manifest(tile_id)
@@ -362,8 +417,11 @@ def _register_launcher_endpoints(app: FastAPI) -> None:
         return {"processes": _launcher_service.get_running_processes()}
 
     @app.post("/api/launcher/stop/{name}", response_model=None)
-    async def stop_process(name: str) -> dict[str, Any] | JSONResponse:
+    async def stop_process(
+        request: Request, name: str
+    ) -> dict[str, Any] | JSONResponse:
         """Stop a running engine/tool process by name."""
+        _enforce_launcher_mutation_guard(request)
         if not _launcher_service.stop_process(name):
             logger.warning("[stop] Process not found: %s", name)
             return JSONResponse(

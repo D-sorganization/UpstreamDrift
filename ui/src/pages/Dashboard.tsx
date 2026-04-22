@@ -11,7 +11,14 @@ import { LauncherDashboard } from '@/components/simulation/LauncherDashboard';
 import { useToast } from '@/components/ui/Toast';
 
 export function DashboardPage() {
-    const { tiles, loadState, error, refetch } = useLauncherManifest();
+    const {
+        tiles,
+        launcherCsrfToken,
+        launcherCsrfHeader,
+        loadState,
+        error,
+        refetch,
+    } = useLauncherManifest();
     const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
     const { showInfo, showError } = useToast();
 
@@ -25,7 +32,10 @@ export function DashboardPage() {
 
             // Launch all engines/tools as subprocesses via the backend API
             showInfo(`Launching ${tile.name}...`);
-            fetch(`/api/launcher/launch/${tile.id}`, { method: 'POST' })
+            fetch(`/api/launcher/launch/${tile.id}`, {
+                method: 'POST',
+                headers: launcherCsrfToken ? { [launcherCsrfHeader]: launcherCsrfToken } : {},
+            })
                 .then((res) => {
                     if (!res.ok) {
                         return res.json().then((body) => {
@@ -41,7 +51,7 @@ export function DashboardPage() {
                     showError(`Failed to launch ${tile.name}: ${err.message}`);
                 });
         },
-        [tiles, showInfo, showError]
+        [tiles, launcherCsrfToken, launcherCsrfHeader, showInfo, showError]
     );
 
     const handleShowHelp = useCallback(() => {

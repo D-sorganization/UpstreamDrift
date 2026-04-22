@@ -199,6 +199,7 @@ UpstreamDrift/
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
 - `GET /api/launcher/manifest` — Return launcher tile metadata for the UI shell
 - `GET /api/launcher/logos/{logo_name}` — Serve launcher logos only from approved asset roots using traversal-safe path resolution
+- Local launcher account authentication remains disabled in local mode, but mutating launcher subprocess endpoints (`POST /api/launcher/launch/{tile_id}` and `POST /api/launcher/stop/{name}`) require the startup launcher capability token in the custom header advertised by `/api/launcher/manifest`; browser requests with non-loopback `Origin` or `Referer` values are rejected before launch/stop side effects.
 - SPA/static asset fallback serving under `ui/dist` resolves requested paths through traversal-safe joins and refuses absolute paths, `..` escapes, NUL bytes, and symlink escapes
 - URDF/MJCF model discovery and `/models/{model_name}/urdf` serving resolve candidates through approved model roots, reject symlink escapes outside those roots, and re-check containment immediately before reading file contents
 - Pinocchio adapter vector APIs fail fast on dimension mismatch. `set_control`, `compute_control_acceleration`, `compute_ztcf`, and `compute_zvcf` raise `ValueError` before mutating or dispatching when vector lengths do not match the loaded model, and the message names the vector plus the expected and actual dimensions.
@@ -706,6 +707,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 - 2026-04-22: Removed global mypy `stubs` path injection after Pinocchio follow-up cleanup so type-checking uses default import resolution unless a caller opts in.
 - 2026-04-22: Corrected MuJoCo ground-reaction force sign handling for both world contact orderings and made humanoid URDF contract parsing tolerant of invalid path-like XML strings.
 - 2026-04-22: Allowed launcher-managed Python scripts under `src/` through secure subprocess path validation while preserving suite-root containment checks.
+- 2026-04-22: Protected local launcher subprocess mutations with a startup capability token and loopback `Origin`/`Referer` checks so cross-site browser posts cannot launch or stop local processes while local account auth stays disabled.
 - 2026-04-22: Rejected unsupported explicit Pinocchio step integrators instead of falling back to the default RK4 mode.
 - 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
 - 2026-04-22: Hardened URDF/MJCF model discovery and serving so model endpoints only list and read files that resolve inside approved model roots, rejecting symlink escapes both during discovery and immediately before file reads.

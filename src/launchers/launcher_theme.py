@@ -40,9 +40,7 @@ class LauncherThemeMixin:
             border_strong = colors.get("border_strong", colors.get("focus", "#0078D4"))
             text_sec = colors.get("text_secondary", "#AAAAAA")
 
-            self.setStyleSheet(
-                manager.get_current_stylesheet()
-                + f"""
+            self.setStyleSheet(manager.get_current_stylesheet() + f"""
                 QScrollArea {{ border: none; }}
                 QMenu::separator {{
                     height: 1px;
@@ -60,8 +58,7 @@ class LauncherThemeMixin:
                 QLabel#CardDescription {{
                     color: {text_sec};
                 }}
-            """
-            )
+            """)
         except (ImportError, AttributeError):
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
