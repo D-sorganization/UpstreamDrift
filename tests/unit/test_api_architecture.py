@@ -531,8 +531,6 @@ class TestOpenAPIEnhancements:
 
     def test_openapi_has_global_responses(self, client) -> None:
         """OpenAPI schema includes version info."""
-        from src.api.versioning import get_app_version
-
         response = client.get("/openapi.json")
         data = response.json()
-        assert data["info"]["version"] == get_app_version()
+        assert data["info"]["version"] == client.app.version

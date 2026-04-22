@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-22T16:10:00-07:00
+Last-Updated: 2026-04-22T16:30:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T16:10:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.165                                            |
+| **Spec Version**        | 1.0.166                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -513,6 +513,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.166 | Post-merge CI follow-up: OpenAPI version metadata coverage now compares `/openapi.json` against the instantiated FastAPI app version, preventing unrelated version resolver cache/mocking state from making full-suite runs fail while preserving the app metadata contract.                                                                                                                                                                                                                                                                                                                                                                      |
 | 2026-04-22 | 1.0.165 | Post-merge CI follow-up: restored legacy `/api/...` route registration alongside root and `/api/v1/...`, and moved simulation/video quota enforcement to request-time auth-mode checks so current cloud-mode requests reject missing credentials without breaking local no-auth validation semantics.                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-22 | 1.0.164 | Issue #3013: API OpenAPI `info.version` now resolves from a shared source (`src/api/versioning.py`) backed by package metadata (`importlib.metadata`) with `pyproject.toml` fallback, eliminating version drift between `pyproject.toml`, `server.py`, and `local_server.py`; added targeted versioning unit coverage and updated OpenAPI version assertion to use the shared resolver.                                                                                                                                                                                                                                                           |
 | 2026-04-22 | 1.0.163 | Issue #3015: tooling route modules now mount relative to the API registry prefix instead of hardcoding an extra `/api` segment, restoring versioned data-explorer, terrain, putting-green, motion-capture, and launcher endpoints under `/api/v1/...` without double-prefixed `/api/v1/api/...` paths.                                                                                                                                                                                                                                                                                                                                            |
