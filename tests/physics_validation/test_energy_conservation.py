@@ -174,9 +174,9 @@ def test_pinocchio_energy_check():
     relative_error = max_error / abs(initial_energy)
     logger.info(f"Max Energy Error (Pinocchio RK4): {relative_error:.6%}")
 
-    assert (
-        relative_error < 1e-3
-    ), f"Pinocchio energy check failed. Relative error: {relative_error:.6%}"
+    assert relative_error < 1e-3, (
+        f"Pinocchio energy check failed. Relative error: {relative_error:.6%}"
+    )
 
 
 def test_drake_energy_conservation():

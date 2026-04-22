@@ -303,6 +303,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Perturbation Analyzer Tests**: Engine-specific analyzer paths validate optimized squared-norm reductions for peak-speed and trajectory-deviation metrics across Drake, MuJoCo, MyoSuite, OpenSim, and Pinocchio
 - **Kinematic Force Analyzer Tests**: MuJoCo kinematic-force central-difference calculations switch to one-sided perturbations near joint limits so finite-difference inputs stay within model bounds
 - **CI Expectation Drift Tests**: Baseline tests keep MuJoCo contact-force mocks, launcher process cleanup assertions, and Docker dependency provenance aligned with the current implementation
+- **CI Import-Order Hygiene**: Ruff import-order checks run across source and test modules so generated compatibility wrappers and launcher tests remain consistent with repository lint policy
 - **Duplicate Filename Cluster Tests**: Regression coverage documents intentional repeated wrappers and mirrored MATLAB GUI copies so future refactors preserve shared delegation boundaries
 
 ### Test Organization
