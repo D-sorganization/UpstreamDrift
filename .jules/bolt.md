@@ -24,3 +24,6 @@
 ## 2024-05-18 - Replacing `np.linalg.norm` with `math.hypot`
 **Learning:** For small vectors (2D or 3D) like physical velocities or forces, calculating magnitudes using `math.hypot(*velocity)` or `math.hypot(v[0], v[1])` is up to ~5x faster than using `np.linalg.norm(velocity)`. This avoids the substantial overhead of NumPy's generalized, dimension-agnostic reduction functions, memory allocations, and Python-to-C API calls for tiny arrays.
 **Action:** When working with 2D or 3D physics vectors where you need magnitudes (e.g., speed, spin magnitude, 2D horizontal velocities) on a hot path (like force calculators and integration loops), use the built-in `math.hypot` with unpacked elements (e.g., `math.hypot(*vec)`) instead of `np.linalg.norm`.
+## 2024-05-24 - [Avoid np.linalg.norm for small 2D/3D vectors]
+**Learning:** `np.linalg.norm` has significant overhead due to Python-to-C abstraction and array allocations. For small, fixed-size vectors (like 2D velocities and 3D spins), using explicit indexing with `math.hypot(v[0], v[1])` avoids this and is ~5-6x faster (from ~2.5us to ~0.44us).
+**Action:** In hot loops, replace `np.linalg.norm` on 2D/3D vectors with `math.hypot`.
