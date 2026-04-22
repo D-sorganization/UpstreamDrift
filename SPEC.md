@@ -714,4 +714,5 @@ pytest tests/ --cov=src --cov-fail-under=70
 - 2026-04-16: Fixed import sorting in analyzer.py, advanced_export.py, and related files; restored completist audit documentation.
 
 ## API Governance Update (2026-04-22)
+- Enforced production auth quota defaults across simulation and video API routes with parity and dependency coverage tests.
 - Enforced streamed upload byte-limit validation in upload-related API handlers and tests for robust production quota enforcement.

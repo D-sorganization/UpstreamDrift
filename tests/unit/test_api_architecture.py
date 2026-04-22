@@ -90,6 +90,33 @@ class TestRouteRegistry:
         prefixed = [p for p in route_paths if p.startswith("/api/v1")]
         assert len(prefixed) > 0
 
+    def test_expensive_route_modules_receive_quota_dependencies(self) -> None:
+        """Simulation and video routes receive quota dependencies at registration."""
+        from fastapi import FastAPI
+
+        from src.api.auth.dependencies import CheckSimulationQuota, CheckVideoQuota
+        from src.api.route_registry import register_routes
+
+        test_app = FastAPI()
+        register_routes(test_app, prefix="/test")
+
+        simulation_route = next(
+            r for r in test_app.routes if getattr(r, "path", "") == "/test/simulate"
+        )
+        video_route = next(
+            r
+            for r in test_app.routes
+            if getattr(r, "path", "") == "/test/analyze/video"
+        )
+
+        simulation_dependencies = [
+            dep.call for dep in simulation_route.dependant.dependencies
+        ]
+        video_dependencies = [dep.call for dep in video_route.dependant.dependencies]
+
+        assert CheckSimulationQuota.dependency in simulation_dependencies
+        assert CheckVideoQuota.dependency in video_dependencies
+
 
 # ── Task Manager Tests ────────────────────────────────────────────
 

@@ -21,8 +21,12 @@ from __future__ import annotations
 
 import importlib
 import pkgutil
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from fastapi import Depends
+
+from src.api.auth.dependencies import CheckSimulationQuota, CheckVideoQuota
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -66,6 +70,11 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "data_explorer",
     "motion_capture",
 )
+
+_ROUTE_DEPENDENCIES: dict[str, tuple[Callable[..., object], ...]] = {
+    "simulation": (CheckSimulationQuota.dependency,),
+    "video": (CheckVideoQuota.dependency,),
+}
 
 
 def discover_routes(
@@ -161,6 +170,13 @@ def register_routes(
     """
     routes = discover_routes(exclude=exclude)
     for module_name, router in routes:
-        app.include_router(router, prefix=prefix)
+        app.include_router(
+            router,
+            prefix=prefix,
+            dependencies=[
+                Depends(dependency)
+                for dependency in _ROUTE_DEPENDENCIES.get(module_name, ())
+            ],
+        )
         logger.debug("Registered router from %s with prefix '%s'", module_name, prefix)
     return len(routes)

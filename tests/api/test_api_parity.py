@@ -16,7 +16,9 @@ Tests cover:
 Fixes #1133
 """
 
+import os
 import time
+from unittest.mock import patch
 
 import pytest
 
@@ -123,7 +125,7 @@ class TestSimulationEndpoints:
     def test_simulate_missing_body(self, client: TestClient) -> None:
         """POST /simulate rejects empty body."""
         response = client.post("/simulate", json={})
-        assert response.status_code == 422  # Pydantic validation
+        assert response.status_code in [401, 403, 422]
 
     def test_simulate_invalid_engine(self, client: TestClient) -> None:
         """POST /simulate with unknown engine returns an error indicator."""
@@ -137,7 +139,41 @@ class TestSimulationEndpoints:
             # If 200, the response body should signal the error
             assert "error" in data or "status" in data or data.get("success") is False
         else:
-            assert response.status_code in [400, 422, 500]
+            assert response.status_code in [400, 401, 403, 422, 500]
+
+
+class TestProductionRouteProtection:
+    """Production mode should reject unauthenticated expensive route access."""
+
+    def test_simulate_requires_auth_in_cloud_mode(self, client: TestClient) -> None:
+        """POST /api/v1/simulate returns 401/403 without credentials in cloud mode."""
+        with patch.dict(
+            os.environ,
+            {"GOLF_SUITE_MODE": "cloud", "GOLF_AUTH_DISABLED": "false"},
+            clear=False,
+        ):
+            response = client.post(
+                "/api/v1/simulate",
+                json={"engine_type": "mujoco"},
+            )
+
+        assert response.status_code in [401, 403]
+
+    def test_video_analysis_requires_auth_in_cloud_mode(
+        self, client: TestClient
+    ) -> None:
+        """POST /api/v1/analyze/video returns 401/403 without credentials."""
+        with patch.dict(
+            os.environ,
+            {"GOLF_SUITE_MODE": "cloud", "GOLF_AUTH_DISABLED": "false"},
+            clear=False,
+        ):
+            response = client.post(
+                "/api/v1/analyze/video",
+                files={"file": ("sample.mp4", b"not-a-real-video", "video/mp4")},
+            )
+
+        assert response.status_code in [401, 403]
 
 
 # ──────────────────────────────────────────────────────────────
