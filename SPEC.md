@@ -171,7 +171,7 @@ UpstreamDrift/
 | --- | ---------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
 | F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, world-contact ground-reaction force sign handling, muscle actuators, and sensor simulation |
 | F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems             |
-| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation, with explicit rejection of unsupported step integrators |
+| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation, including induced-acceleration handling that treats empty external-force contributions and zero-sized mass matrices as zero acceleration |
 | F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis             |
 | F5  | MyoSuite engine integration        | 🔄     | Experimental MyoSuite integration for detailed muscle physiology and motor control                  |
 | F6  | Cross-engine validation            | ✅     | Automated cross-validation framework comparing results across all engines with tolerance thresholds |

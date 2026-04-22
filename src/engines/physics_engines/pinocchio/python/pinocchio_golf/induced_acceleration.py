@@ -112,11 +112,22 @@ class InducedAccelerationAnalyzer:
         # a_ext = M^{-1} @ sum(J_i^T @ f_ext_i)
         pin.computeAllTerms(self.model, self.data, q, v)
         M = self.data.M
-        tau_ext = np.zeros(self.model.nv)
+        nv = int(self.model.nv)
+        if nv == 0:
+            return np.zeros(0, dtype=float)
+
+        tau_ext = np.zeros(nv, dtype=float)
         for frame_id, wrench in f_ext.items():
             # use pin.LOCAL for reference_frame if needed, else try default
             J = pin.computeFrameJacobian(self.model, self.data, q, frame_id)
-            tau_ext += J.T @ wrench
+            contribution = np.asarray(J.T @ wrench, dtype=float).reshape(-1)
+            if contribution.size == 0:
+                contribution = np.zeros_like(tau_ext)
+            tau_ext += contribution
+
+        if np.asarray(M).ndim < 2 or np.asarray(M).size == 0:
+            return np.zeros_like(tau_ext)
+
         return np.linalg.solve(M, tau_ext)
 
     def compute_specific_control(
