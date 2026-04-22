@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.144                                            |
+| **Spec Version**        | 1.0.145                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -146,7 +146,7 @@ UpstreamDrift/
 | ------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | MuJoCo Engine Adapter          | `src/engines/physics_engines/mujoco_engine.py`             | Primary physics engine integration with full support for contact dynamics and muscle models                                               |
 | Drake Engine Adapter           | `src/engines/physics_engines/drake_engine.py`              | Extended Drake support for trajectory optimization and manipulation tasks                                                                 |
-| Pinocchio Engine Adapter       | `src/engines/physics_engines/pinocchio_engine.py`          | Extended Pinocchio support for efficient rigid-body dynamics computation                                                                  |
+| Pinocchio Engine Adapter       | `src/engines/physics_engines/pinocchio_engine.py`          | Extended Pinocchio support for efficient rigid-body dynamics computation; step integration accepts only `rk4` and `semi_implicit` modes   |
 | OpenSim Engine Adapter         | `src/engines/physics_engines/opensim_engine.py`            | Experimental OpenSim integration for clinical biomechanics workflows                                                                      |
 | MyoSuite Engine Adapter        | `src/engines/physics_engines/myosuite_engine.py`           | Experimental MyoSuite integration for detailed muscle physiology simulation                                                               |
 | Pendulum Models                | `src/engines/pendulum_models/`                             | Educational simplified models for learning and quick prototyping                                                                          |
@@ -171,7 +171,7 @@ UpstreamDrift/
 | --- | ---------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
 | F1  | MuJoCo engine integration          | ✅     | Full support for MuJoCo 3.3.0+ with contact dynamics, muscle actuators, and sensor simulation       |
 | F2  | Drake engine integration           | ✅     | Extended Drake support for trajectory optimization, manipulation, and planning problems             |
-| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation               |
+| F3  | Pinocchio engine integration       | ✅     | Extended Pinocchio support for efficient rigid-body dynamics and jacobian computation, with explicit rejection of unsupported step integrators |
 | F4  | OpenSim engine integration         | 🔄     | Experimental OpenSim integration for clinical biomechanics and musculoskeletal analysis             |
 | F5  | MyoSuite engine integration        | 🔄     | Experimental MyoSuite integration for detailed muscle physiology and motor control                  |
 | F6  | Cross-engine validation            | ✅     | Automated cross-validation framework comparing results across all engines with tolerance thresholds |
@@ -501,6 +501,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.145 | Pinocchio integration hardening: explicit `step(..., integrator=...)` overrides now accept only `rk4` and `semi_implicit`; unsupported or empty values raise `ValueError` instead of silently falling back to the engine default. |
 | 2026-04-21 | 1.0.144 | Launcher security: subprocess script validation now allows repository-local scripts under `src/` so launcher handlers can execute valid source-tree scripts while preserving the existing suite-root and top-level allowlist checks. |
 | 2026-04-21 | 1.0.143 | Test governance: `tests/test_urdf_tools.py::test_urdf_scanning_logic` is a blocking assertion again, so shared URDF discovery regressions fail CI instead of being masked by a non-strict xfail. |
 | 2026-04-21 | 1.0.142 | Physics validation: altitude-density correction now rejects altitudes outside the documented ISA troposphere range of 0 to 11000 m in both shared flight-model options and common air-property construction. |
@@ -683,6 +684,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 ## Changelog
 
 - 2026-04-22: Allowed launcher-managed Python scripts under `src/` through secure subprocess path validation while preserving suite-root containment checks.
+- 2026-04-22: Rejected unsupported explicit Pinocchio step integrators instead of falling back to the default RK4 mode.
 - 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
 - 2026-04-20: Lazy-imported the video pose pipeline so the API video analysis route stays registered in slim runtime images and returns a 503 with a video extras hint when cv2/mediapipe is unavailable.
 - 2026-04-20: Guarded Pinocchio energy checks behind complete finite-state verification and aligned RK4 torque sampling test coverage in pendulum engine probes.

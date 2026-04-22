@@ -178,7 +178,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if time_step <= 0.0:
             raise ValueError("dt must be positive")
 
-        method = integrator or self.integrator
+        method = self.integrator if integrator is None else integrator
         if method == "rk4":
             self._step_rk4(time_step)
         elif method == "semi_implicit":

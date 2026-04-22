@@ -59,6 +59,30 @@ def test_pinocchio_semi_implicit_integrator_remains_available(
     np.testing.assert_allclose(engine.v, np.array([0.1]))
 
 
+@pytest.mark.parametrize("bad_integrator", ["RK4", "rkk4", ""])
+def test_pinocchio_rejects_unsupported_integrators(
+    monkeypatch: pytest.MonkeyPatch,
+    bad_integrator: str,
+) -> None:
+    from src.engines.physics_engines.pinocchio.python import pinocchio_physics_engine
+
+    engine = pinocchio_physics_engine.PinocchioPhysicsEngine()
+    engine.model = MagicMock(nq=1, nv=1)
+    engine.data = MagicMock()
+    engine.q = np.array([0.0])
+    engine.v = np.array([0.0])
+    engine.tau = np.array([0.0])
+
+    mock_pin = MagicMock()
+    monkeypatch.setattr(pinocchio_physics_engine, "pin", mock_pin, raising=False)
+
+    with pytest.raises(ValueError, match="Unsupported Pinocchio integrator"):
+        engine.step(0.1, integrator=bad_integrator)  # type: ignore[arg-type]
+
+    assert mock_pin.aba.call_count == 0
+    assert mock_pin.integrate.call_count == 0
+
+
 def test_golf_pendulum_rk4_samples_torque_profile_at_stage_times(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
