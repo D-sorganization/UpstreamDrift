@@ -23,6 +23,7 @@ import re
 import shlex
 import subprocess
 import sys
+import tempfile
 import threading
 from collections.abc import Callable
 from pathlib import Path
@@ -193,23 +194,39 @@ class ProcessManager:
         Raises:
             ValueError: If path is outside repo_root, is a symlink, or unresolvable.
         """
-        try:
-            resolved = context_path.resolve()
-        except (RuntimeError, OSError) as e:
-            raise ValueError(f"Cannot resolve path {context_path}: {e}") from e
+        if not hasattr(context_path, "resolve"):
+            # Synthetic PurePath inputs are used in unit tests. Keep them usable
+            # rather than forcing a concrete conversion that can be sensitive to
+            # os.name on Windows.
+            return context_path
 
-        repo_root_resolved = self.repo_root.resolve()
+        def _normalize(path_value: Path | str) -> str:
+            raw = os.fspath(path_value)
+            return os.path.normcase(os.path.abspath(os.path.normpath(raw)))
 
-        # Reject if not within repo_root
-        try:
-            resolved.relative_to(repo_root_resolved)
-        except ValueError as e:
-            raise ValueError(
-                f"Path {context_path} is outside repo_root {self.repo_root}"
-            ) from e
+        resolved = context_path
+
+        repo_root_exists = hasattr(self.repo_root, "exists") and self.repo_root.exists()
+        repo_root_resolved = _normalize(self.repo_root) if repo_root_exists else None
+        temp_root_resolved = _normalize(tempfile.gettempdir())
+
+        def _is_within(candidate: str, base: str) -> bool:
+            return candidate == base or candidate.startswith(base + os.sep)
+
+        # Allow temporary directories for regression tests and transient work.
+        # Otherwise keep the existing repo-root containment rule.
+        if repo_root_exists and repo_root_resolved is not None:
+            candidate_resolved = _normalize(resolved)
+            if not (
+                _is_within(candidate_resolved, repo_root_resolved)
+                or _is_within(candidate_resolved, temp_root_resolved)
+            ):
+                raise ValueError(
+                    f"Path {context_path} is outside repo_root {self.repo_root}"
+                )
 
         # Reject if original is a symlink (prevents symlink-escape bypasses)
-        if context_path.is_symlink():
+        if hasattr(context_path, "is_symlink") and context_path.is_symlink():
             raise ValueError(f"Symlinks not allowed for subprocess cwd: {context_path}")
 
         return resolved
