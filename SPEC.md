@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T00:00:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.148                                            |
+| **Spec Version**        | 1.0.149                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -297,6 +297,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Property-Based Tests**: Hypothesis-driven fuzzing for robustness
 - **Perturbation Analyzer Tests**: Engine-specific analyzer paths validate optimized squared-norm reductions for peak-speed and trajectory-deviation metrics across Drake, MuJoCo, MyoSuite, OpenSim, and Pinocchio
 - **Kinematic Force Analyzer Tests**: MuJoCo kinematic-force central-difference calculations switch to one-sided perturbations near joint limits so finite-difference inputs stay within model bounds
+- **CI Expectation Drift Tests**: Baseline tests keep MuJoCo contact-force mocks, launcher process cleanup assertions, and Docker dependency provenance aligned with the current implementation
 
 ### Test Organization
 
