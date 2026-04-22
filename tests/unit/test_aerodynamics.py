@@ -15,6 +15,7 @@ Following Pragmatic Programmer principles:
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -22,6 +23,7 @@ import pytest
 
 from src.shared.python.core.constants import AIR_VISCOSITY_KG_M_S
 from src.shared.python.physics.aerodynamics import (
+    MIN_AIR_DENSITY_KG_M3,
     AerodynamicsConfig,
     AerodynamicsEngine,
     DragModel,
@@ -292,6 +294,30 @@ class TestDragModel:
 
         # At high Re (turbulent), golf ball has lower Cd
         assert cd_high < cd_low
+
+    def test_vector_inputs_accept_column_shapes(self) -> None:
+        """Test vector-magnitude helpers accept non-1D velocity arrays."""
+        velocity = np.array([[50.0], [0.0], [10.0]])
+        spin = np.array([[0.0], [-200.0], [0.0]])
+
+        drag_model = DragModel()
+        lift_model = LiftModel()
+        magnus_model = MagnusModel()
+
+        drag = drag_model.calculate(velocity, air_density=1.225)
+        lift = lift_model.calculate(velocity, spin, air_density=1.225)
+        magnus = magnus_model.calculate(velocity, spin, air_density=1.225)
+        drag_cd = drag_model.get_effective_coefficient(velocity, air_density=1.225)
+
+        expected_shape = velocity.reshape(-1).shape
+        assert drag.shape == expected_shape
+        assert lift.shape == expected_shape
+        assert magnus.shape == expected_shape
+        assert np.isfinite(drag_cd)
+        assert drag_cd > 0
+        assert np.all(np.isfinite(drag))
+        assert np.all(np.isfinite(lift))
+        assert np.all(np.isfinite(magnus))
 
 
 # =============================================================================
@@ -691,6 +717,17 @@ class TestEnvironmentRandomizer:
         assert min(results) != max(results)
         # Should be centered around base
         assert np.mean(results) == pytest.approx(base_density, rel=0.1)
+
+    def test_randomize_air_density_clamps_to_positive_floor(self) -> None:
+        """Test random air density never falls below the physical floor."""
+        config = RandomizationConfig(enabled=True, air_density_variance=0.5)
+        randomizer = EnvironmentRandomizer(config, seed=42)
+        randomizer._rng = SimpleNamespace(normal=lambda *args, **kwargs: -1.0)  # type: ignore[assignment]
+
+        result = randomizer.randomize_air_density(1.225)
+
+        assert result == pytest.approx(MIN_AIR_DENSITY_KG_M3)
+        assert result > 0
 
     def test_reproducibility_with_seed(self) -> None:
         """Test same seed gives same randomization."""
