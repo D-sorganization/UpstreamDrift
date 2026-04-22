@@ -5,6 +5,7 @@ This module defines data structures for collision queries and results.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -116,9 +117,7 @@ class DistanceResult:
             # Normalize the normal vector
             # ⚡ Bolt: Element-wise norm computation is faster than np.linalg.norm(..., axis=None) for tiny vectors
             # using math.hypot equivalent
-            norm = float(
-                np.sqrt(self.normal[0] ** 2 + self.normal[1] ** 2 + self.normal[2] ** 2)
-            )
+            norm = float(math.hypot(*self.normal))
             if norm > 1e-10:
                 object.__setattr__(self, "normal", self.normal / norm)
 

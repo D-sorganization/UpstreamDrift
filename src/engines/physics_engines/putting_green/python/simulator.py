@@ -636,7 +636,7 @@ class PuttingGreenSimulator:
         if speed is None:
             raise ValueError("speed must be provided")
         self._wind_speed = speed
-        mag = np.linalg.norm(direction)
+        mag = np.sqrt(np.vdot(direction, direction))
         if mag > 0:
             self._wind_direction = direction / mag
 
@@ -655,7 +655,7 @@ class PuttingGreenSimulator:
         relative_v = (
             self._wind_direction * self._wind_speed - self._ball_state.velocity[:2]
         )
-        rel_speed = np.linalg.norm(relative_v)
+        rel_speed = np.sqrt(np.vdot(relative_v, relative_v))
 
         if rel_speed < 0.1:
             return np.zeros(2)

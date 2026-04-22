@@ -355,12 +355,8 @@ class SwingOptimizer:
 
         # Accuracy (hit target)
         if self.objectives.target_ball_position is not None:
-            distance_error = float(
-                np.linalg.norm(
-                    metrics["final_club_position"]
-                    - self.objectives.target_ball_position,  # noqa: E501
-                ),
-            )
+            diff = metrics["final_club_position"] - self.objectives.target_ball_position
+            distance_error = float(np.sqrt(np.vdot(diff, diff)))
             objective += self.objectives.weight_accuracy * distance_error
 
         return objective
