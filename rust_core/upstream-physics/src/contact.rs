@@ -61,7 +61,7 @@ impl ContactParameters {
         Ok(Self {
             cor,
             friction,
-            normal: Vector3::new(0.0, 1.0, 0.0),
+            normal: ContactParameters::default().normal,
         })
     }
 }
@@ -195,9 +195,9 @@ pub fn calculate_impact(
 /// # JS API
 /// ```js
 /// const result = calculateImpact(
-///   { x: 0, y: -10, z: 0 },  // velocity
+///   { x: 0, y: 0, z: -10 },  // velocity
 ///   3000.0,                    // spin_rate
-///   { cor: 0.78, friction: 0.4, normal: { x: 0, y: 1, z: 0 } }
+///   { cor: 0.78, friction: 0.4, normal: { x: 0, y: 0, z: 1 } }
 /// );
 /// // result = { velocity: { x, y, z }, spin_rate, energy_lost, is_rolling }
 /// ```
@@ -223,6 +223,42 @@ pub fn wasm_calculate_impact(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Test 0: Rust default contact normal is z-up for ball-flight composition.
+    #[test]
+    fn test_default_contact_parameters_normal_is_z_up() {
+        let params = ContactParameters::default();
+
+        assert_eq!(params.normal.x, 0.0);
+        assert_eq!(params.normal.y, 0.0);
+        assert_eq!(params.normal.z, 1.0);
+    }
+
+    /// Test 0b: Python constructor defaults match Rust z-up contact defaults.
+    #[cfg(feature = "python")]
+    #[test]
+    fn test_python_contact_parameters_default_normal_is_z_up() {
+        let params = ContactParameters::py_new(0.78, 0.4).expect("valid defaults");
+
+        assert_eq!(params.normal.x, 0.0);
+        assert_eq!(params.normal.y, 0.0);
+        assert_eq!(params.normal.z, 1.0);
+    }
+
+    /// Test 0c: Default contact composes with z-up ball-flight impact velocity.
+    #[test]
+    fn test_default_contact_bounces_descending_z_velocity() {
+        let params = ContactParameters::default();
+        let v_in = Vector3::new(15.0, 0.0, -8.0);
+
+        let result = calculate_impact(&v_in, 3000.0, &params);
+
+        assert!(
+            result.velocity.z > 0.0,
+            "Expected default z-up contact to reflect descending vz, got {}",
+            result.velocity.z
+        );
+    }
 
     /// Test 1: Perfectly elastic bounce (COR=1) conserves normal speed.
     #[test]
@@ -294,7 +330,7 @@ mod tests {
     fn test_typical_green_impact() {
         let params = ContactParameters::default(); // COR=0.78, friction=0.4
 
-        let v_in = Vector3::new(15.0, -8.0, 0.0);
+        let v_in = Vector3::new(15.0, 0.0, -8.0);
         let result = calculate_impact(&v_in, 3000.0, &params);
 
         // Post-impact should have reduced speed
@@ -310,7 +346,7 @@ mod tests {
     fn test_rolling_threshold() {
         let params = ContactParameters::default();
 
-        let v_in = Vector3::new(0.3, -0.1, 0.0); // Below threshold
+        let v_in = Vector3::new(0.3, 0.0, -0.1); // Below threshold
         let result = calculate_impact(&v_in, 100.0, &params);
 
         assert!(result.is_rolling, "Ball should be rolling at low speed");
