@@ -25,6 +25,10 @@ from src.shared.python.core.physics_constants import (
 
 _CALIBRATION_DATA_DIR = Path(__file__).parent.parent / "calibration_data"
 _BEARMAN_HARVEY_FILE = _CALIBRATION_DATA_DIR / "drag_crisis_bearman_harvey_1976.json"
+_BEARMAN_HARVEY_RE_MIN = 2e4
+_BEARMAN_HARVEY_RE_MAX = 5e5
+_DRAG_CD_MIN = 0.10
+_DRAG_CD_MAX = 0.50
 
 
 @lru_cache(maxsize=1)
@@ -39,6 +43,14 @@ def _load_bearman_harvey_spline() -> CubicSpline:
     re_values = np.array(data["reynolds_numbers"], dtype=float)
     cd_values = np.array(data["drag_coefficients"], dtype=float)
     return CubicSpline(re_values, cd_values, bc_type="natural", extrapolate=False)
+
+
+def _scale_drag_coefficient(
+    coefficient: float, base_coefficient: float, anchor_coefficient: float
+) -> float:
+    """Scale calibrated drag coefficients while preserving empirical bounds."""
+    cd_effective = coefficient * (base_coefficient / anchor_coefficient)
+    return float(np.clip(cd_effective, _DRAG_CD_MIN, _DRAG_CD_MAX))
 
 
 class DragModel:
@@ -115,22 +127,23 @@ class DragModel:
         #   Aeronautical Quarterly, 27(2), 112-122.
         #
         # Boundary conditions:
-        #  Re < 2e4 (below data range): laminar plateau, Cd = 0.50.
+        #  Re < 2e4 (below data range): scaled laminar plateau.
         #  Re > 5e5 (above data range): fully turbulent, Cd = base_coefficient.
         #  Within range: cubic spline interpolation, clamped to [0.10, 0.50].
-        re_min, re_max = 2e4, 5e5
-        if re <= re_min:
-            return 0.50
-        if re >= re_max:
+        if re >= _BEARMAN_HARVEY_RE_MAX:
             return self.base_coefficient
 
         spline = _load_bearman_harvey_spline()
+        cd_at_max_re = float(spline(_BEARMAN_HARVEY_RE_MAX))
+        if re <= _BEARMAN_HARVEY_RE_MIN:
+            return _scale_drag_coefficient(
+                _DRAG_CD_MAX, self.base_coefficient, cd_at_max_re
+            )
+
         cd_calibrated = float(spline(re))
-        # Scale by base_coefficient relative to spline's turbulent-regime value so
-        # that tunability is preserved across the calibrated range.
-        cd_at_max_re = float(spline(re_max))
-        cd_effective = cd_calibrated * (self.base_coefficient / cd_at_max_re)
-        return float(np.clip(cd_effective, 0.10, 0.50))
+        return _scale_drag_coefficient(
+            cd_calibrated, self.base_coefficient, cd_at_max_re
+        )
 
 
 class LiftModel:

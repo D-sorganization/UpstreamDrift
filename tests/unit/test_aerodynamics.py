@@ -265,6 +265,24 @@ class TestDragModel:
         # At high Re (turbulent), golf ball has lower Cd
         assert cd_high < cd_low
 
+    def test_tuned_drag_coefficient_is_continuous_at_low_re_boundary(self) -> None:
+        """Tuned coefficients preserve continuity at the low-Re spline boundary."""
+        model = DragModel(base_coefficient=0.20, reynolds_correction=True)
+        air_density = 1.225
+        re_min = 2e4
+        boundary_speed = re_min * 1.81e-5 / (air_density * 2 * model.ball_radius)
+
+        cd_below = model.get_effective_coefficient(
+            np.array([boundary_speed * 0.999, 0.0, 0.0]),
+            air_density=air_density,
+        )
+        cd_above = model.get_effective_coefficient(
+            np.array([boundary_speed * 1.001, 0.0, 0.0]),
+            air_density=air_density,
+        )
+
+        assert cd_below == pytest.approx(cd_above, abs=0.01)
+
 
 # =============================================================================
 # LiftModel Tests
