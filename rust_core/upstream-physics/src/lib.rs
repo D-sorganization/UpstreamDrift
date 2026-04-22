@@ -12,7 +12,7 @@
 //! ## Design Principles
 //!
 //! - **TDD**: Tests written before implementation
-//! - **DbC**: Precondition validation via `debug_assert!`
+//! - **DbC**: Public precondition validation runs in release and debug builds
 //! - **DRY**: Consumes `tools-core` for math primitives
 
 pub mod aerodynamics;
@@ -102,6 +102,7 @@ pub fn create_integrator_config(dt: f64, max_steps: u32) -> Result<JsValue, JsVa
         dt,
         max_steps: max_steps as usize,
     };
+    config.validate().map_err(|e| JsValue::from_str(&e))?;
     serde_wasm_bindgen::to_value(&config)
         .map_err(|e| JsValue::from_str(&format!("Failed to serialize IntegratorConfig: {e}")))
 }
@@ -133,11 +134,20 @@ pub fn wasm_compute_aero_forces(
 ) -> Result<JsValue, JsValue> {
     let velocity = Vector3::new(vx, vy, vz);
     let spin = Vector3::new(sx, sy, sz);
+    if ![vx, vy, vz, sx, sy, sz]
+        .iter()
+        .all(|value| value.is_finite())
+    {
+        return Err(JsValue::from_str(
+            "velocity and spin components must be finite",
+        ));
+    }
     let ball = aerodynamics::AeroBallProperties::default();
     let air = aerodynamics::AirProperties {
         density: air_density,
         ..Default::default()
     };
+    air.validate().map_err(|e| JsValue::from_str(&e))?;
     let forces = aerodynamics::compute_aero_forces(&velocity, &spin, &ball, &air);
     serde_wasm_bindgen::to_value(&forces)
         .map_err(|e| JsValue::from_str(&format!("Failed to serialize AeroForces: {e}")))

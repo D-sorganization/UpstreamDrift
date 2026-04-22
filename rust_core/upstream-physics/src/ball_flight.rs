@@ -144,17 +144,36 @@ pub fn simulate_ball_trajectory(
     air: &AirProperties,
     config: &IntegratorConfig,
 ) -> BallTrajectoryResult {
-    debug_assert!(
+    assert!(
         pos0.iter().all(|v| v.is_finite()),
         "DbC: initial position must be finite"
     );
-    debug_assert!(
+    assert!(
         vel0.iter().all(|v| v.is_finite()),
         "DbC: initial velocity must be finite"
     );
-    debug_assert!(omega0 >= 0.0, "DbC: omega0 must be non-negative");
-    debug_assert!(ball.mass > 0.0, "DbC: ball mass must be positive");
-    debug_assert!(air.density >= 0.0, "DbC: air density must be non-negative");
+    assert!(
+        spin_axis.iter().all(|v| v.is_finite()),
+        "DbC: spin axis must be finite"
+    );
+    assert!(
+        omega0.is_finite() && omega0 >= 0.0,
+        "DbC: omega0 must be finite and non-negative"
+    );
+    assert!(
+        gravity.iter().all(|v| v.is_finite()),
+        "DbC: gravity must be finite"
+    );
+    assert!(
+        wind.iter().all(|v| v.is_finite()),
+        "DbC: wind must be finite"
+    );
+    ball.validate()
+        .expect("invalid aerodynamic ball properties");
+    air.validate().expect("invalid air properties");
+    config
+        .validate()
+        .expect("invalid RK4 integrator configuration");
 
     // State: [x, y, z, vx, vy, vz, omega]
     let y0 = [pos0[0], pos0[1], pos0[2], vel0[0], vel0[1], vel0[2], omega0];
@@ -234,6 +253,26 @@ mod tests {
             dt: 0.01,
             max_steps: 2_000,
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid aerodynamic ball properties")]
+    fn test_simulation_rejects_invalid_mass_in_release_mode() {
+        let ball = AeroBallProperties {
+            mass: 0.0,
+            ..AeroBallProperties::default()
+        };
+        let _ = simulate_ball_trajectory(
+            [0.0, 0.0, 0.5],
+            [10.0, 0.0, 10.0],
+            [0.0, 1.0, 0.0],
+            100.0,
+            [0.0, 0.0, -9.81],
+            [0.0, 0.0, 0.0],
+            &ball,
+            &AirProperties::default(),
+            &default_config(),
+        );
     }
 
     /// Test 1: Basic trajectory — ball launched at 45° should travel ~20-50m in range.
