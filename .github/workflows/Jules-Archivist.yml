@@ -19,7 +19,7 @@ jobs:
       - name: Check for self-hosted runner
         id: check
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
         run: |
           ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
             --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
@@ -40,7 +40,7 @@ jobs:
 
       - name: Cleanup Merged Branches
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
         run: |
           # Fetch list of merged PR branches starting with 'jules/'
           # Note: We filter by the branch prefix used by your agent
