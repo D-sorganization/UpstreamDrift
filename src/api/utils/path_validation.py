@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -11,6 +12,39 @@ ALLOWED_MODEL_DIRS = [
     Path("models").resolve(),
     Path("data").resolve(),
 ]
+
+
+def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
+    """Resolve a candidate path and ensure it stays under an allowed root."""
+    try:
+        resolved_candidate = candidate.resolve()
+    except (ValueError, OSError) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path format",
+        ) from exc
+
+    for allowed_dir in allowed_dirs:
+        try:
+            resolved_allowed_dir = allowed_dir.resolve()
+        except (ValueError, OSError) as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid path format",
+            ) from exc
+
+        try:
+            resolved_candidate.relative_to(resolved_allowed_dir)
+        except ValueError:
+            continue
+
+        if resolved_candidate.exists():
+            return resolved_candidate
+
+    raise HTTPException(
+        status_code=404,
+        detail="Model file not found in allowed directories",
+    )
 
 
 def validate_model_path(model_path: str) -> str:
@@ -37,21 +71,11 @@ def validate_model_path(model_path: str) -> str:
         )
 
     for allowed_dir in ALLOWED_MODEL_DIRS:
+        candidate = allowed_dir / user_path
         try:
-            candidate = (allowed_dir / user_path).resolve()
-        except (ValueError, OSError) as exc:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid path format",
-            ) from exc
-
-        try:
-            candidate.relative_to(allowed_dir)
-        except ValueError:
+            return str(resolve_contained_path(candidate, [allowed_dir]))
+        except HTTPException:
             continue
-
-        if candidate.exists():
-            return str(candidate)
 
     raise HTTPException(
         status_code=404,

@@ -200,6 +200,8 @@ UpstreamDrift/
 - `GET /api/launcher/manifest` — Return launcher tile metadata for the UI shell
 - `GET /api/launcher/logos/{logo_name}` — Serve launcher logos only from approved asset roots using traversal-safe path resolution
 - SPA/static asset fallback serving under `ui/dist` resolves requested paths through traversal-safe joins and refuses absolute paths, `..` escapes, NUL bytes, and symlink escapes
+- URDF/MJCF model discovery and `/models/{model_name}/urdf` serving resolve candidates through approved model roots, reject symlink escapes outside those roots, and re-check containment immediately before reading file contents
+- Pinocchio adapter vector APIs fail fast on dimension mismatch. `set_control`, `compute_control_acceleration`, `compute_ztcf`, and `compute_zvcf` raise `ValueError` before mutating or dispatching when vector lengths do not match the loaded model, and the message names the vector plus the expected and actual dimensions.
 
 **GUI Interface (PyQt6)**:
 
@@ -702,6 +704,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 - 2026-04-22: Allowed launcher-managed Python scripts under `src/` through secure subprocess path validation while preserving suite-root containment checks.
 - 2026-04-22: Rejected unsupported explicit Pinocchio step integrators instead of falling back to the default RK4 mode.
 - 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
+- 2026-04-22: Hardened URDF/MJCF model discovery and serving so model endpoints only list and read files that resolve inside approved model roots, rejecting symlink escapes both during discovery and immediately before file reads.
 - 2026-04-20: Lazy-imported the video pose pipeline so the API video analysis route stays registered in slim runtime images and returns a 503 with a video extras hint when cv2/mediapipe is unavailable.
 - 2026-04-20: Guarded Pinocchio energy checks behind complete finite-state verification and aligned RK4 torque sampling test coverage in pendulum engine probes.
 - 2026-04-16: Fixed import sorting in analyzer.py, advanced_export.py, and related files; restored completist audit documentation.

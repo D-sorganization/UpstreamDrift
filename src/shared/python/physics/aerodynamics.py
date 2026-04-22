@@ -286,10 +286,12 @@ class DragModel:
         re = air_density * speed * diameter / viscosity
 
         # Golf ball Cd variation with Re (empirical)
-        # The base_coefficient is used as the turbulent value, with
-        # higher values at lower Reynolds numbers (laminar flow)
-        laminar_cd = 0.5  # Laminar flow coefficient
+        # Scale the low-Re branch with the same tuning factor as the
+        # turbulent anchor so coefficient adjustments remain continuous.
         turbulent_cd = self.base_coefficient  # User-specified turbulent coefficient
+        cd_anchor = float(GOLF_BALL_DRAG_COEFFICIENT)
+        cd_scale = turbulent_cd / cd_anchor if cd_anchor > 0 else 1.0
+        laminar_cd = float(np.clip(0.5 * cd_scale, 0.10, 0.50))
 
         if re < 8e4:
             return laminar_cd  # Laminar flow

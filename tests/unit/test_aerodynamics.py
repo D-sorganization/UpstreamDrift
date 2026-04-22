@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
+from src.shared.python.core.constants import AIR_VISCOSITY_KG_M_S
 from src.shared.python.physics.aerodynamics import (
     AerodynamicsConfig,
     AerodynamicsEngine,
@@ -243,6 +244,39 @@ class TestDragModel:
         drag_high = np.linalg.norm(model_high.calculate(v, air_density=1.225))
 
         assert drag_high > drag_low
+
+    def test_reynolds_transition_remains_continuous_for_tuned_cd(self) -> None:
+        """Test tuned Cd scales smoothly through the Reynolds transition."""
+        air_density = 1.225
+        model_default = DragModel()
+        model_tuned = DragModel(base_coefficient=0.20)
+        probe_velocity = np.array([10.0, 0.0, 0.0])
+
+        default_cd = model_default.get_effective_coefficient(
+            probe_velocity, air_density=air_density
+        )
+        tuned_cd = model_tuned.get_effective_coefficient(
+            probe_velocity, air_density=air_density
+        )
+
+        assert tuned_cd == pytest.approx(default_cd * 0.8, rel=1e-6)
+
+        boundary_re = 8e4
+        diameter = 2 * model_tuned.ball_radius
+        boundary_speed = (
+            boundary_re * float(AIR_VISCOSITY_KG_M_S) / (air_density * diameter)
+        )
+        just_below = np.array([boundary_speed * 0.999999, 0.0, 0.0])
+        just_above = np.array([boundary_speed * 1.000001, 0.0, 0.0])
+
+        cd_below = model_tuned.get_effective_coefficient(
+            just_below, air_density=air_density
+        )
+        cd_above = model_tuned.get_effective_coefficient(
+            just_above, air_density=air_density
+        )
+
+        assert cd_below == pytest.approx(cd_above, rel=1e-4, abs=1e-4)
 
     def test_reynolds_number_correction(self) -> None:
         """Test Reynolds number affects drag coefficient."""

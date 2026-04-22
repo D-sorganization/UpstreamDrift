@@ -92,6 +92,32 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             return cast(str, self.model.name)
         return self.model_name_str
 
+    def _require_vector(
+        self,
+        name: str,
+        value: np.ndarray,
+        expected_length: int,
+    ) -> np.ndarray:
+        """Validate that an input is a one-dimensional vector of expected length."""
+        if value is None:
+            raise ValueError(f"{name} must be provided")
+
+        value_arr = np.asarray(value, dtype=np.float64)
+        if value_arr.ndim != 1:
+            raise ValueError(
+                f"{name} dimension mismatch: expected length {expected_length}, "
+                f"got shape {value_arr.shape}"
+            )
+
+        actual_length = int(value_arr.shape[0])
+        if actual_length != expected_length:
+            raise ValueError(
+                f"{name} dimension mismatch: expected length {expected_length}, "
+                f"got {actual_length}"
+            )
+
+        return value_arr
+
     def get_capabilities(self) -> EngineCapabilities:
         """Report Pinocchio capabilities, including lack of contact GRF support."""
         return EngineCapabilities(
@@ -259,12 +285,10 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
-        if u is None:
-            raise ValueError("u must be provided")
         if self.model is None:
             return
-        if len(u) == self.model.nv:
-            self.tau = u.copy()
+        u_arr = self._require_vector("u", u, self.model.nv)
+        self.tau = u_arr.copy()
 
     def get_time(self) -> float:
         """Get the current simulation time."""
@@ -459,19 +483,16 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_control: Control acceleration vector (nv,)
         """
-        if tau is None:
-            raise ValueError("tau must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        if len(tau) != self.model.nv:
-            return np.array([])
+        tau_arr = self._require_vector("tau", tau, self.model.nv)
 
         M = self.compute_mass_matrix()
         if M.size == 0:
             return np.array([])
 
-        a_control = np.linalg.solve(M, tau)
+        a_control = np.linalg.solve(M, tau_arr)
 
         return a_control
 
@@ -489,16 +510,14 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZTCF: Acceleration under zero torque (n_v,)
         """
-        if q is None:
-            raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        if len(q) != self.model.nq or len(v) != self.model.nv:
-            return np.array([])
+        q_arr = self._require_vector("q", q, self.model.nq)
+        v_arr = self._require_vector("v", v, self.model.nv)
 
         tau_zero = np.zeros(self.model.nv)
-        a_ztcf = pin.aba(self.model, self.data, q, v, tau_zero)
+        a_ztcf = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
 
         return cast(np.ndarray, a_ztcf)
 
@@ -515,20 +534,17 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZVCF: Acceleration with v=0 (n_v,)
         """
-        if q is None:
-            raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        if len(q) != self.model.nq:
-            return np.array([])
+        q_arr = self._require_vector("q", q, self.model.nq)
 
         v_zero = np.zeros(self.model.nv)
 
         # Use current control (preserved for ZVCF)
         tau = self.tau.copy()
 
-        a_zvcf = pin.aba(self.model, self.data, q, v_zero, tau)
+        a_zvcf = pin.aba(self.model, self.data, q_arr, v_zero, tau)
 
         return cast(np.ndarray, a_zvcf)
 

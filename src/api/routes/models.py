@@ -26,6 +26,7 @@ from ..models.responses import (
     URDFLinkGeometry,
     URDFModelResponse,
 )
+from ..utils.path_validation import resolve_contained_path
 from ._route_utils import find_project_root
 
 router = APIRouter()
@@ -52,6 +53,12 @@ def _discover_models() -> list[dict[str, str]]:
     root = _find_project_root()
     models: list[dict[str, str]] = []
     seen_names: set[str] = set()
+    allowed_roots: list[Path] = []
+
+    for model_dir in _MODEL_DIRS:
+        full_dir = root / model_dir
+        if full_dir.exists():
+            allowed_roots.append(full_dir)
 
     for model_dir in _MODEL_DIRS:
         full_dir = root / model_dir
@@ -60,6 +67,11 @@ def _discover_models() -> list[dict[str, str]]:
 
         for ext in ("*.urdf", "*.xml"):
             for filepath in full_dir.rglob(ext):
+                try:
+                    resolve_contained_path(filepath, allowed_roots)
+                except HTTPException:
+                    continue
+
                 name = filepath.stem
                 if name in seen_names:
                     # Disambiguate with parent directory
@@ -419,6 +431,18 @@ async def get_model_urdf(
         )
 
     try:
+        model_roots = [
+            (root / model_dir)
+            for model_dir in _MODEL_DIRS
+            if (root / model_dir).exists()
+        ]
+        try:
+            filepath = resolve_contained_path(filepath, model_roots)
+        except HTTPException as exc:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Model file not found: {model_entry['path']}",
+            ) from exc
         urdf_content = filepath.read_text(encoding="utf-8")
         result = _parse_urdf(urdf_content)
         return result
