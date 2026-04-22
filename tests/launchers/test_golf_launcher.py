@@ -327,11 +327,20 @@ def test_menu_toggles(qapp):
 def test_cleanup_processes(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
-        launcher._schedule_cleanup = MagicMock()
+        proc1 = MagicMock()
+        proc1.poll.return_value = 0  # Finished
+        proc2 = MagicMock()
+        proc2.poll.return_value = None  # Running
 
+        launcher.running_processes = {"p1": proc1, "p2": proc2}
         launcher._cleanup_processes()
+        assert "p1" not in launcher.running_processes
+        assert "p2" in launcher.running_processes
+
+        proc2.poll.return_value = 0
         launcher._cleanup_processes()
-        assert launcher._schedule_cleanup.call_count == 2
+        assert not launcher.running_processes
+        assert launcher.lbl_status.text() == "Ready"
 
 
 def test_on_cleanup_finished_updates_running_processes(qapp):

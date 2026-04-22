@@ -488,7 +488,9 @@ class TestContainerEnvironment(unittest.TestCase):
     def test_conda_environment_setup(self):
         """Test conda environment configuration."""
         dockerfile_path = get_repo_root() / "Dockerfile"
+        lockfile_path = get_repo_root() / "requirements.lock"
         content = dockerfile_path.read_text()
+        lockfile_content = lockfile_path.read_text()
 
         # Verify base image (pinned version, multi-stage build) and package installation
         self.assertIn(
@@ -498,10 +500,23 @@ class TestContainerEnvironment(unittest.TestCase):
         self.assertIn("conda install", content)
         self.assertIn("python=3.12", content)
 
-        # Check for required packages
-        required_packages = ["numpy", "scipy", "matplotlib", "pandas", "pyqt6"]
+        # Check for required packages that are installed directly by the Dockerfile.
+        required_packages = [
+            "numpy",
+            "scipy",
+            "pyqt6",
+            "opencv",
+            "pyyaml",
+            "h5py",
+            "scikit-learn",
+            "pillow",
+            "ezc3d",
+        ]
         for package in required_packages:
             self.assertIn(package, content, f"Should install {package}")
+
+        # matplotlib is pulled in through the pinned requirements lockfile.
+        self.assertIn("matplotlib", lockfile_content)
 
 
 class TestModuleAccessibility(unittest.TestCase):
