@@ -372,10 +372,6 @@ async def list_features(
     Exposes all hidden engine capabilities for discoverability.
     Feature availability is checked against the currently loaded engine.
     """
-    if available_only is None:
-        raise ValueError("available_only must be provided")
-    if category is None:
-        raise ValueError("category must be provided")
     engine = _require_active_engine(engine_manager)
 
     try:

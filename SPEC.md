@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-22T00:00:00-07:00
+Last-Updated: 2026-04-22T14:20:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -511,6 +511,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.161 | Issue #3016: `GET /dataset/features` now accepts omitted/null `category` query parameters as intended by the route signature, removing contradictory route-level `ValueError` guards and adding route regression coverage for default and explicit `category=None` handling. |
 | 2026-04-22 | 1.0.159 | Issue #2988: model registry loading now supports explicit strict validation for CI/cross-engine paths, including malformed legacy entries, malformed provider manifests, missing required model IDs, and nightly cross-engine validation env wiring. |
 | 2026-04-22 | 1.0.158 | Issue #2986 follow-up: Rust and Python `ContactParameters` defaults now use the same z-up surface normal as ball-flight gravity/height conventions, while explicit y-up contact tests continue to pass with explicit normals. |
 | 2026-04-22 | 1.0.157 | Issue #2984 follow-up: URDF/MJCF model discovery and serving now reject symlink escapes outside approved model roots while preserving contained nested models, and tuned drag coefficients remain continuous across the Reynolds transition. |
