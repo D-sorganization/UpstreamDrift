@@ -31,7 +31,8 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Build Docker image
-        run: docker build -t upstreamdrift:ci .
+        # --target runtime avoids pulling in the ~10 GB training stage (PyTorch + CUDA)
+        run: docker build --target runtime -t upstreamdrift:ci .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
