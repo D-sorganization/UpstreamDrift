@@ -81,6 +81,11 @@ coverage.xml
 coverage.json
 htmlcov/
 
+# Generated security scan artifacts
+reports/bandit.json
+reports/pip_audit.json
+reports/semgrep.json
+
 # Test output debris (prevent accumulation at root)
 test_*.txt
 *_output.txt

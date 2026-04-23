@@ -11,9 +11,9 @@
 #
 # Usage:
 #   From Windows Git Bash or WSL:
-#     bash start-gaai-daemon.sh            # interactive (status output)
-#     bash start-gaai-daemon.sh --dry-run  # show what would launch, no action
-#     bash start-gaai-daemon.sh --status   # check active sessions
+#     bash scripts/maintenance/start-gaai-daemon.sh            # interactive (status output)
+#     bash scripts/maintenance/start-gaai-daemon.sh --dry-run  # show what would launch, no action
+#     bash scripts/maintenance/start-gaai-daemon.sh --status   # check active sessions
 #
 # Monitor overnight:
 #   tmux attach -t gaai-daemon
@@ -107,7 +107,7 @@ echo ""
 echo "Useful commands:"
 echo "  tmux attach -t $SESSION_NAME           # watch live"
 echo "  Ctrl+B then D                           # detach without stopping"
-echo "  bash start-gaai-daemon.sh --status      # check what's running"
+echo "  bash scripts/maintenance/start-gaai-daemon.sh --status      # check what's running"
 echo "  tail -f .gaai/project/contexts/backlog/.delivery-logs/*.log  # story logs"
 echo ""
 echo "Attaching now... (Ctrl+B D to detach)"
