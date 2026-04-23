@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-22T19:40:00-07:00
+Last-Updated: 2026-04-22T21:14:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,8 +29,8 @@ Last-Updated: 2026-04-22T19:40:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.170                                            |
-| **Last Spec Update**    | 2026-04-22                                         |
+| **Spec Version**        | 1.0.171                                            |
+| **Last Spec Update**    | 2026-04-23                                         |
 
 ## 2. Purpose & Mission
 
@@ -713,6 +713,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-23: Removed tracked generated analysis artifacts and added a forbidden-artifact guard so CI rejects regenerated reports, coverage dumps, temp IDs, and NumPy scratch outputs before they can re-enter version control.
 - 2026-04-22: Removed the duplicate `logging.getLogger(__name__)` assignment from `src/api/local_server.py` so the local server consistently uses the shared structured logger, with regression coverage guarding against logger shadowing.
 - 2026-04-22: Hardened aerodynamics vector magnitude helpers so drag, lift, Magnus, and Reynolds correction accept column-vector or other non-1D inputs, and clamped randomized air density to a positive minimum.
 - 2026-04-22: Added release-mode validation for Rust upstream-physics public RK4, aerodynamic, and ball-flight inputs so Python/WASM constructors return typed boundary errors and invalid simulation parameters fail before producing NaNs or repeated states.
