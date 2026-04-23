@@ -86,6 +86,11 @@ quality_report*.txt
 black_report*.txt
 coverage.xml
 coverage.json
+bandit_results.json
+reports/bandit.json
+temp_id.txt
+matlab_quality_report.txt
+test.npz
 htmlcov/
 
 # Test output debris (prevent accumulation at root)
@@ -103,6 +108,7 @@ run_log.txt
 
 # Generated agent memory
 .jules/bolt.md
+.jules/completist_data/
 
 # Jules generated files
 .jules/bolt*
