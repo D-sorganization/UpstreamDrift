@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import time
+import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
@@ -14,6 +15,7 @@ from src.shared.python.pendulum_simulator.perturbation_analysis import (
 from src.shared.python.perturbation.config import (
     PerturbationConfig,
     PerturbationSummary,
+    TrialFailure,
 )
 from src.shared.python.perturbation.robustness_score import compute_robustness_score
 from src.shared.python.perturbation.statistics import (
@@ -88,6 +90,30 @@ class ComparisonReport:
     confidence: float
     metric_comparisons: dict[str, Any] = field(default_factory=dict)
     pvalues: dict[str, float] = field(default_factory=dict)
+    failures: list[TrialFailure] = field(default_factory=list)
+
+
+class PartialResultsWarning(UserWarning):
+    """Warning emitted when perturbation analysis returns partial trial results."""
+
+
+class PartialResultsError(RuntimeError):
+    """Raised when partial perturbation results violate the configured threshold."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        operation: str,
+        success_rate: float,
+        threshold: float,
+        failures: list[TrialFailure],
+    ) -> None:
+        super().__init__(message)
+        self.operation = operation
+        self.success_rate = success_rate
+        self.threshold = threshold
+        self.failures = failures
 
 
 class PerturbationAnalyzerBase(ABC):
@@ -107,6 +133,98 @@ class PerturbationAnalyzerBase(ABC):
     @abstractmethod
     def set_base_torque_profile(self, profile: object) -> None:
         pass
+
+    def _build_trial_failure(
+        self,
+        *,
+        trial_index: int,
+        seed: int,
+        stage: str,
+        exc: Exception,
+    ) -> TrialFailure:
+        return TrialFailure(
+            trial_index=trial_index,
+            seed=seed,
+            stage=stage,
+            error_type=type(exc).__name__,
+            message=str(exc),
+        )
+
+    def _handle_partial_results(
+        self,
+        *,
+        operation: str,
+        config: PerturbationConfig,
+        requested_trials: int,
+        failures: list[TrialFailure],
+    ) -> float:
+        if requested_trials <= 0:
+            return 0.0
+
+        success_rate = (requested_trials - len(failures)) / requested_trials
+        if not failures or success_rate >= config.min_success_rate:
+            return success_rate
+
+        message = (
+            f"{operation} for {self.ENGINE_NAME} returned partial results: "
+            f"{requested_trials - len(failures)}/{requested_trials} trials succeeded "
+            f"(success_rate={success_rate:.3f}, "
+            f"threshold={config.min_success_rate:.3f})"
+        )
+        logger.warning(message)
+        if config.raise_on_partial_results:
+            raise PartialResultsError(
+                message,
+                operation=operation,
+                success_rate=success_rate,
+                threshold=config.min_success_rate,
+                failures=failures,
+            )
+        warnings.warn(message, PartialResultsWarning, stacklevel=3)
+        return success_rate
+
+    def _collect_batch_metrics(
+        self,
+        config: PerturbationConfig,
+        metric_lists: dict[str, list[float]],
+    ) -> list[TrialFailure]:
+        if self._base_coeffs is None:
+            raise ValueError(
+                "set_base_torque_profile() must be called before _collect_batch_metrics()"
+            )
+
+        base_coeffs = self._base_coeffs
+        base_seed = config.seed if config.seed is not None else 0
+        failures: list[TrialFailure] = []
+
+        for trial_index in range(config.n_trials):
+            perturbed = perturb_torque_coeffs(
+                base_coeffs,
+                noise_amplitude=config.noise_amplitude,
+                noise_type=config.noise_type,
+                seed=base_seed + trial_index,
+                perturb_mode=config.perturb_mode,
+            )
+            try:
+                sim = self._simulate(perturbed)
+                metrics = self.extract_metrics(sim)
+                for metric_name in metric_lists:
+                    metric_value = metrics[metric_name]
+                    if isinstance(metric_value, np.ndarray):
+                        metric_value = float(np.linalg.norm(metric_value))
+                    metric_lists[metric_name].append(float(metric_value))
+            except Exception as exc:  # noqa: BLE001
+                failures.append(
+                    self._build_trial_failure(
+                        trial_index=trial_index,
+                        seed=base_seed + trial_index,
+                        stage="run_batch",
+                        exc=exc,
+                    )
+                )
+                logger.debug("Trial %d failed", trial_index, exc_info=True)
+
+        return failures
 
     def perturb_torque(
         self, config: PerturbationConfig, seed: int
@@ -131,8 +249,6 @@ class PerturbationAnalyzerBase(ABC):
             )
 
         t_start = time.monotonic()
-        base_seed = config.seed if config.seed is not None else 0
-
         scalar_metric_names = [
             m
             for m in MANDATORY_METRICS
@@ -146,31 +262,15 @@ class PerturbationAnalyzerBase(ABC):
         ]
 
         metric_lists: dict[str, list[float]] = {m: [] for m in scalar_metric_names}
-        n_success = 0
+        failures = self._collect_batch_metrics(config, metric_lists)
+        success_rate = self._handle_partial_results(
+            operation="run_batch",
+            config=config,
+            requested_trials=config.n_trials,
+            failures=failures,
+        )
 
-        for i in range(config.n_trials):
-            perturbed = perturb_torque_coeffs(
-                self._base_coeffs,
-                noise_amplitude=config.noise_amplitude,
-                noise_type=config.noise_type,
-                seed=base_seed + i,
-                perturb_mode=config.perturb_mode,
-            )
-            try:
-                sim = self._simulate(perturbed)
-                metrics = self.extract_metrics(sim)
-                for m in scalar_metric_names:
-                    v = metrics[m]
-                    if isinstance(v, np.ndarray):
-                        v = float(np.linalg.norm(v))
-                    metric_lists[m].append(float(v))
-                n_success += 1
-            except Exception:
-                logger.debug("Trial %d failed", i, exc_info=True)
-
-        success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
-
-        if n_success == 0:
+        if not any(metric_lists.values()):
             logger.warning("All trials failed — returning zero-robustness summary")
             return PerturbationSummary(
                 engine_name=self.ENGINE_NAME,
@@ -179,13 +279,13 @@ class PerturbationAnalyzerBase(ABC):
                 metrics={},
                 success_rate=0.0,
                 execution_time_sec=time.monotonic() - t_start,
+                failures=failures,
             )
 
         metric_stats: dict[str, MetricStatistics] = {}
-        for m, values in metric_lists.items():
+        for metric_name, values in metric_lists.items():
             if values:
-                arr = np.array(values)
-                metric_stats[m] = compute_metric_statistics(arr)
+                metric_stats[metric_name] = compute_metric_statistics(np.array(values))
 
         cv_values = []
         for stats in metric_stats.values():
@@ -207,7 +307,60 @@ class PerturbationAnalyzerBase(ABC):
             metrics=metric_stats,
             success_rate=success_rate,
             execution_time_sec=time.monotonic() - t_start,
+            failures=failures,
         )
+
+    def _collect_scalar_trials(
+        self,
+        *,
+        profile: object,
+        metric: str,
+        profile_name: str,
+        config: PerturbationConfig,
+    ) -> tuple[np.ndarray, list[TrialFailure]]:
+        self.set_base_torque_profile(profile)
+        if self._base_coeffs is None:
+            raise ValueError(
+                "set_base_torque_profile() must populate _base_coeffs before compare_profiles()"
+            )
+
+        base_coeffs = self._base_coeffs
+        values: list[float] = []
+        failures: list[TrialFailure] = []
+        base_seed = config.seed if config.seed is not None else 0
+
+        for trial_index in range(config.n_trials):
+            seed = base_seed + trial_index
+            perturbed = perturb_torque_coeffs(
+                base_coeffs,
+                noise_amplitude=config.noise_amplitude,
+                noise_type=config.noise_type,
+                seed=seed,
+                perturb_mode=config.perturb_mode,
+            )
+            try:
+                sim = self._simulate(perturbed)
+                metric_dict = self.extract_metrics(sim)
+                metric_value = metric_dict[metric]
+                if isinstance(metric_value, np.ndarray):
+                    metric_value = float(np.linalg.norm(metric_value))
+                values.append(float(metric_value))
+            except Exception as exc:  # noqa: BLE001
+                failures.append(
+                    self._build_trial_failure(
+                        trial_index=trial_index,
+                        seed=seed,
+                        stage=f"compare_profiles:{profile_name}:{metric}",
+                        exc=exc,
+                    )
+                )
+                logger.debug(
+                    "Trial %d failed during profile comparison metric collection",
+                    trial_index,
+                    exc_info=True,
+                )
+
+        return (np.array(values) if values else np.array([0.0])), failures
 
     def compare_profiles(
         self,
@@ -232,37 +385,23 @@ class PerturbationAnalyzerBase(ABC):
             "trajectory_max_deviation",
         ]
 
-        base_seed = config.seed if config.seed is not None else 0
-
-        def _collect_scalar(profile: object, metric: str) -> np.ndarray:
-            self.set_base_torque_profile(profile)
-            values = []
-            for i in range(config.n_trials):
-                perturbed = perturb_torque_coeffs(
-                    self._base_coeffs,  # type: ignore[arg-type]
-                    noise_amplitude=config.noise_amplitude,
-                    noise_type=config.noise_type,
-                    seed=base_seed + i,
-                    perturb_mode=config.perturb_mode,
-                )
-                try:
-                    sim = self._simulate(perturbed)
-                    m_dict = self.extract_metrics(sim)
-                    v = m_dict[metric]
-                    if isinstance(v, np.ndarray):
-                        v = float(np.linalg.norm(v))
-                    values.append(float(v))
-                except Exception:  # noqa: BLE001
-                    logger.debug(
-                        "Trial %d failed during profile comparison metric collection",
-                        i,
-                        exc_info=True,
-                    )
-            return np.array(values) if values else np.array([0.0])
+        failures: list[TrialFailure] = []
 
         for metric in scalar_metrics:
-            vals_a = _collect_scalar(profile_a, metric)
-            vals_b = _collect_scalar(profile_b, metric)
+            vals_a, failures_a = self._collect_scalar_trials(
+                profile=profile_a,
+                metric=metric,
+                profile_name="A",
+                config=config,
+            )
+            vals_b, failures_b = self._collect_scalar_trials(
+                profile=profile_b,
+                metric=metric,
+                profile_name="B",
+                config=config,
+            )
+            failures.extend(failures_a)
+            failures.extend(failures_b)
 
             try:
                 _stat, pval = _stats.mannwhitneyu(
@@ -285,12 +424,21 @@ class PerturbationAnalyzerBase(ABC):
                 "mean_b": mean_b,
                 "winner": winner_metric,
                 "pvalue": float(pval),
+                "failures_a": len(failures_a),
+                "failures_b": len(failures_b),
             }
 
             if winner_metric == "A":
                 a_wins += 1
             else:
                 b_wins += 1
+
+        self._handle_partial_results(
+            operation="compare_profiles",
+            config=config,
+            requested_trials=config.n_trials * len(scalar_metrics) * 2,
+            failures=failures,
+        )
 
         winner = name_a if a_wins >= b_wins else name_b
         confidence = 1.0 - float(np.median(list(pvalues.values())))
@@ -301,4 +449,5 @@ class PerturbationAnalyzerBase(ABC):
             confidence=confidence,
             metric_comparisons=metric_comparisons,
             pvalues=pvalues,
+            failures=failures,
         )

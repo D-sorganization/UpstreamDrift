@@ -731,6 +731,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 - 2026-04-22: Protected local launcher subprocess mutations with a startup capability token and loopback `Origin`/`Referer` checks so cross-site browser posts cannot launch or stop local processes while local account auth stays disabled.
 - 2026-04-22: Rejected unsupported explicit Pinocchio step integrators instead of falling back to the default RK4 mode.
 - 2026-04-22: Normalized import ordering in perturbation analyzer modules, shared export utilities, and C3D integration tests to keep adversarial remediation branches compliant with CI quality gates.
+- 2026-04-23: Tightened perturbation profile comparison so analyzer implementations must populate base torque coefficients before partial-results sampling proceeds, keeping the partial-failure reporting path aligned with runtime contracts and mypy enforcement.
 - 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
 - 2026-04-22: Hardened URDF/MJCF model discovery and serving so model endpoints only list and read files that resolve inside approved model roots, rejecting symlink escapes both during discovery and immediately before file reads.
 - 2026-04-20: Lazy-imported the video pose pipeline so the API video analysis route stays registered in slim runtime images and returns a 503 with a video extras hint when cv2/mediapipe is unavailable.
