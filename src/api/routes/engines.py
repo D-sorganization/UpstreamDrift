@@ -139,10 +139,13 @@ async def probe_engine(
 @handle_api_errors
 async def load_engine_lazy(
     engine_name: str,
+    model_path: str | None = None,
     engine_manager: EngineManager = Depends(get_engine_manager),
 ) -> dict[str, Any]:
     """Load an engine (for lazy loading UI)."""
     try:
+        if model_path:
+            validate_model_path(model_path)
         workflow = EngineWorkflowAdapter(engine_manager)
         result = workflow.load(engine_name)
         if not result.ok:
