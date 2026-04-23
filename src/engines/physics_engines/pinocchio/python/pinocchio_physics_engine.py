@@ -22,6 +22,7 @@ from src.shared.python.core.contracts import (
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
@@ -370,24 +371,29 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         return cast(np.ndarray, tau)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "Contact forces must contain finite values")
     def compute_contact_forces(self) -> np.ndarray:
-        """Compute total contact forces (ground reaction force, GRF).
+        """Raise NotImplementedError — contact forces are unsupported.
 
-        Notes:
-            Pinocchio's standard ABA does not compute contact forces
-            without a constraint solver. Return zeros to maintain parity
-            with cross-engine protocol until rigidly implemented.
+        Pinocchio's standard ABA algorithm does not compute contact / ground
+        reaction forces without a dedicated constraint solver.
+        ``CONTACT_FORCES`` is intentionally absent from
+        :meth:`capabilities`; callers **must** check capabilities before
+        invoking this method::
 
-        Returns:
-            f: (3,) vector representing total ground reaction force [N].
+            if Capability.CONTACT_FORCES in engine.capabilities():
+                forces = engine.compute_contact_forces()
+
+        Raises:
+            NotImplementedError: Always.  Use a MuJoCo or OpenSim engine
+                for contact-force queries, or check ``capabilities()``
+                before calling this method.
         """
-        logger.debug(
-            "PinocchioPhysicsEngine.compute_contact_forces is returning zeros. "
-            "Standard ABA dynamics in Pinocchio do not compute contact forces "
-            "without a constraint solver."
+        raise NotImplementedError(
+            "PinocchioPhysicsEngine does not support compute_contact_forces. "
+            "Standard ABA dynamics do not compute contact forces without a "
+            "constraint solver.  Check engine.capabilities() before calling "
+            "this method; CONTACT_FORCES is not in the Pinocchio capability set."
         )
-        return np.zeros(3)
 
     @precondition(
         lambda self, body_name: self.is_initialized,
@@ -554,3 +560,29 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns empty dict for parity with unconfigured MuJoCo models.
         """
         return {}
+
+    def capabilities(self) -> frozenset:
+        """Return the set of capabilities this engine supports.
+
+        Pinocchio supports forward dynamics, mass matrix, inverse dynamics,
+        Jacobian computation, drift-control decomposition, and counterfactual
+        experiments via ABA.  Contact forces are **not** supported — standard
+        ABA does not compute constraint reactions without a dedicated contact
+        solver.  Callers must check this set before invoking optional methods::
+
+            if Capability.CONTACT_FORCES in engine.capabilities():
+                forces = engine.compute_contact_forces()
+
+        Returns:
+            frozenset of supported :class:`Capability` members.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.MASS_MATRIX,
+                Capability.INVERSE_DYNAMICS,
+                Capability.JACOBIAN,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
+        )

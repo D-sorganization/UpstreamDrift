@@ -23,6 +23,7 @@ from src.shared.python.core.contracts import (
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -318,6 +319,26 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
             self._pendulum_state.theta2 = theta2_orig
             self._pendulum_state.omega1 = omega1_orig
             self._pendulum_state.omega2 = omega2_orig
+
+    def capabilities(self) -> frozenset:
+        """Return the set of capabilities this engine supports.
+
+        The double-pendulum engine implements forward dynamics, mass matrix,
+        inverse dynamics, drift-control decomposition, and counterfactual
+        experiments.  Jacobian and contact-force queries are not supported.
+
+        Returns:
+            frozenset of supported :class:`Capability` members.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.MASS_MATRIX,
+                Capability.INVERSE_DYNAMICS,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
+        )
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual - Guideline G2.

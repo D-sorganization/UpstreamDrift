@@ -483,6 +483,21 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             checkpoint: Checkpoint with engine-specific state data.
         """
 
+    def capabilities(self) -> frozenset:
+        """Return the set of ``Capability`` members this engine supports.
+
+        Callers should check this before invoking optional methods::
+
+            if Capability.CONTACT_FORCES in engine.capabilities():
+                forces = engine.compute_contact_forces()
+
+        Returns:
+            A ``frozenset[Capability]`` of supported capabilities.
+            The base implementation returns an empty frozenset; concrete
+            engines override this to declare what they actually support.
+        """
+        return frozenset()
+
     def __repr__(self) -> str:
         """String representation of engine."""
         status = "initialized" if self._is_initialized else "uninitialized"

@@ -25,6 +25,43 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+class Capability(Enum):
+    """Discrete physics-engine capabilities used by ``BasePhysicsEngine.capabilities()``.
+
+    Each member maps to a concrete method that callers may invoke.
+    If a capability is *not* in the set returned by ``capabilities()``,
+    the corresponding method is unsupported and may raise
+    ``NotImplementedError``.
+
+    Usage::
+
+        engine = PinocchioPhysicsEngine()
+        if Capability.CONTACT_FORCES in engine.capabilities():
+            forces = engine.compute_contact_forces()
+
+    Members:
+        FORWARD_DYNAMICS: ``step()`` / ``forward()`` are implemented.
+        INVERSE_DYNAMICS: ``compute_inverse_dynamics()`` is implemented.
+        CONTACT_FORCES: ``compute_contact_forces()`` returns real data.
+        ENERGY_COMPUTATION: kinetic / potential energy queries are available.
+        MASS_MATRIX: ``compute_mass_matrix()`` is implemented.
+        JACOBIAN: ``compute_jacobian()`` is implemented.
+        DRIFT_CONTROL: ``compute_drift_acceleration()`` /
+            ``compute_control_acceleration()`` are implemented.
+        COUNTERFACTUAL: ``compute_ztcf()`` / ``compute_zvcf()`` are
+            implemented.
+    """
+
+    FORWARD_DYNAMICS = auto()
+    INVERSE_DYNAMICS = auto()
+    CONTACT_FORCES = auto()
+    ENERGY_COMPUTATION = auto()
+    MASS_MATRIX = auto()
+    JACOBIAN = auto()
+    DRIFT_CONTROL = auto()
+    COUNTERFACTUAL = auto()
+
+
 class CapabilityLevel(Enum):
     """Support level for an engine capability.
 
