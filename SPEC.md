@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-22T21:14:00-07:00
+Last-Updated: 2026-04-23T07:12:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T21:14:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.171                                            |
+| **Spec Version**        | 1.0.172                                            |
 | **Last Spec Update**    | 2026-04-23                                         |
 
 ## 2. Purpose & Mission
@@ -379,7 +379,7 @@ Beyond standard tools, CI enforces custom checks:
 
 | Workflow                       | Trigger                                | Purpose                                                                                                                                                       | Blocking?          |
 | ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests (core deps only — no optional extras)                                                                                | Yes                |
+| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests (core deps only — no optional extras), and blocking `pip-audit` with waiver IDs generated from `.github/security/pip-audit-ignore.yml` after expiry validation | Yes                |
 | `ci-optional-stack.yml`        | Push/PR/weekly Wednesday               | **Optional-stack verification lane** (issue #2368): installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras; exercises tests skipped in `ci-standard` | Yes                |
 | `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                                                                                            | No (opt-in)        |
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                                                                                               | No (informational) |
@@ -513,6 +513,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-23 | 1.0.172 | fix(ci): Moved `pip-audit` waivers into `.github/security/pip-audit-ignore.yml`, added `scripts/check_pip_audit_waivers.py` to enforce expiry dates before CI runs, and generated workflow ignore flags from that validated waiver ledger.                                                                                                                                                                                                                                                                                                                                            |
 | 2026-04-22 | 1.0.170 | Docker security follow-up: the runtime image now upgrades the base interpreter's global pip to 25.3 in addition to the copied virtual environment, preventing Trivy from flagging the `python:3.12-slim` bundled pip metadata after the slim multi-stage migration.                                                                                                                                                                                                                                                                                                                |
 | 2026-04-22 | 1.0.168 | Adversarial review remediation: removed coverage exclusions that hid no-op blocks, made contract precondition evaluation fail closed on broken predicates, re-enabled mypy coverage for engine routes, replaced vacuous DbC architecture tests with meaningful contract cases, and archived five follow-up issue briefs for larger type-safety, LoD, TDD, DbC, and DRY cleanup tracks.                                                                                                                                                                                                                                                                 |
 | 2026-04-22 | 1.0.167 | Post-merge CI follow-up: lazy engine load route now validates optional `model_path` inputs before loading, preserving path-traversal rejection even though the lazy route is registered before the compatibility engine-load handler.                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -713,6 +714,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-23: Moved `pip-audit` waivers into `.github/security/pip-audit-ignore.yml` and added `scripts/check_pip_audit_waivers.py` so CI fails on expired waivers before generating `--ignore-vuln` flags.
 - 2026-04-23: Removed tracked generated analysis artifacts and added a forbidden-artifact guard so CI rejects regenerated reports, coverage dumps, temp IDs, and NumPy scratch outputs before they can re-enter version control.
 - 2026-04-22: Removed the duplicate `logging.getLogger(__name__)` assignment from `src/api/local_server.py` so the local server consistently uses the shared structured logger, with regression coverage guarding against logger shadowing.
 - 2026-04-22: Hardened aerodynamics vector magnitude helpers so drag, lift, Magnus, and Reynolds correction accept column-vector or other non-1D inputs, and clamped randomized air density to a positive minimum.

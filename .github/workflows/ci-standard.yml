@@ -154,23 +154,14 @@ jobs:
           # rather than all ambient packages in the shared runner toolcache.
           # The shared self-hosted runner toolcache accumulates stale packages from
           # multiple projects; auditing the full environment produces false positives.
-          # Ignore CVEs with no fix version available:
-          # - CVE-2024-23342 (ecdsa): No fix version available
-          # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
-          # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
-          # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          # - CVE-2026-40192 (pillow): Transitive dep via opencv/imageio; fix in pillow>=12.2.0
+          # Ignore waivers are tracked in .github/security/pip-audit-ignore.yml
+          # with expiry dates so stale exceptions fail the build.
           # Resolved CVEs (issue #2653): black>=26.3.1, bokeh>=3.8.2, flask>=3.1.3, requests>=2.33.0
           # are now pinned in pyproject.toml dev deps and requirements-dev.lock.
           # Resolved CVE (Dependabot remediation 2026-04-14):
           # - CVE-2025-71176 (pytest): now pinned to pytest>=9.0.3 in requirements-dev.lock
-          python -m pip_audit -r requirements-dev.lock \
-            --ignore-vuln CVE-2024-23342 \
-            --ignore-vuln CVE-2026-0994 \
-            --ignore-vuln CVE-2026-1703 \
-            --ignore-vuln CVE-2026-4539 \
-            --ignore-vuln CVE-2026-40192 \
-            --ignore-vuln CVE-2026-28684
+          mapfile -t PIP_AUDIT_FLAGS < <(python scripts/check_pip_audit_waivers.py)
+          python -m pip_audit -r requirements-dev.lock "${PIP_AUDIT_FLAGS[@]}"
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
