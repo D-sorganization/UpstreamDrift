@@ -15,7 +15,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 # Core API + physics stack from lockfile
 COPY requirements.lock /tmp/requirements.lock
-RUN pip install -r /tmp/requirements.lock
+RUN pip install --upgrade pip==25.3 && \
+    pip install -r /tmp/requirements.lock
 
 # Auth and server extensions not yet in lockfile
 RUN pip install \

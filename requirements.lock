@@ -68,13 +68,13 @@ pydantic-core==2.41.5
     # via pydantic
 pyopengl==3.1.10
     # via mujoco
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via uvicorn
 pyyaml==6.0.2
     # via uvicorn
 scipy==1.13.1
     # via upstream-drift (pyproject.toml)
-simpleeval==1.0.3
+simpleeval==1.0.5
     # via upstream-drift (pyproject.toml)
 sympy==1.14.0
     # via issue #2808 runtime lock
