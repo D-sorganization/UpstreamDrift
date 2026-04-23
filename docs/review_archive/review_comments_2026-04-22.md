@@ -1,21 +1,21 @@
 # Review Comments Archive - 2026-04-22
 
-Generated: 2026-04-22T05:32:13.446175
+Generated: 2026-04-22T17:43:43.831988
 
 ## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
 
-### PR #2965: src/engines/physics_engines/putting_green/python/ball_roll_physics.py:81
+### PR #3029: tests/test_architecture_dbc.py:22
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Handle non-1D velocity inputs before using math.hypot**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Fix failing assertion regex in new DbC architecture test**
 
-`BallState.__post_init__` converts inputs to `np.array` but does not enforce a 1-D shape, and callers like `PuttingGreenSimulator.set_state` can pass column vectors. With a `(2,1)` velocity, `self.velocity[0]`/`[1]` are 1-D arrays, so `math.hypot(...)` raises `TypeError` (`only 0-dimensional arrays can be converted to Python scalars`), whereas the previ...
+The new test expects `_evaluate_precondition` to raise `PreconditionError` with text matching `"could not be evaluated"`, but this code path currently raises with `"Precondition evaluation failed ..."` for the provided lambda arity mismatch. In practice, `pytest tests/test_architecture_dbc.py` fails on this assertion, so the commit introduces a red t...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/2965#discussion_r3123828302)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3029#discussion_r3127649011)
 
 ---
 

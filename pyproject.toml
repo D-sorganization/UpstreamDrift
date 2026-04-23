@@ -269,11 +269,15 @@ exclude = [
 module = [
     "src.shared.python.plotting.*",
     "src.shared.python.ui.*",
-    "src.shared.python.spatial_algebra.*",
     "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.*",
     "src.engines.physics_engines.pinocchio.python.pinocchio_golf.*",
 ]
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "src.shared.python.spatial_algebra.*"
+warn_return_any = true
+disable_error_code = ["arg-type", "no-any-return"]
 
 [[tool.mypy.overrides]]
 module = "src.api.*"
@@ -364,8 +368,6 @@ exclude_lines = [
     "def __repr__",
     "if __name__ == .__main__.",
     "raise NotImplementedError",
-    "pass",
-    "except ImportError",
     "if TYPE_CHECKING:",
 ]
 

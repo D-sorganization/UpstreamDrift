@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-22T17:05:00-07:00
+Last-Updated: 2026-04-22T17:35:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-22T17:05:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.167                                            |
+| **Spec Version**        | 1.0.168                                            |
 | **Last Spec Update**    | 2026-04-22                                         |
 
 ## 2. Purpose & Mission
@@ -513,6 +513,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-22 | 1.0.168 | Adversarial review remediation: removed coverage exclusions that hid no-op blocks, made contract precondition evaluation fail closed on broken predicates, re-enabled mypy coverage for engine routes, replaced vacuous DbC architecture tests with meaningful contract cases, and archived five follow-up issue briefs for larger type-safety, LoD, TDD, DbC, and DRY cleanup tracks.                                                                                                                                                                                                                                                                 |
 | 2026-04-22 | 1.0.167 | Post-merge CI follow-up: lazy engine load route now validates optional `model_path` inputs before loading, preserving path-traversal rejection even though the lazy route is registered before the compatibility engine-load handler.                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-22 | 1.0.166 | Post-merge CI follow-up: OpenAPI version metadata coverage now compares `/openapi.json` against the instantiated FastAPI app version, preventing unrelated version resolver cache/mocking state from making full-suite runs fail while preserving the app metadata contract.                                                                                                                                                                                                                                                                                                                                                                      |
 | 2026-04-22 | 1.0.165 | Post-merge CI follow-up: restored legacy `/api/...` route registration alongside root and `/api/v1/...`, and moved simulation/video quota enforcement to request-time auth-mode checks so current cloud-mode requests reject missing credentials without breaking local no-auth validation semantics.                                                                                                                                                                                                                                                                                                                                             |
