@@ -541,22 +541,6 @@ jobs:
           components: rustfmt, clippy
           targets: wasm32-unknown-unknown
 
-      # Clone Tools repo for tools-core dependency
-      - name: Checkout Tools (tools-core dependency)
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/checkout@v6
-        with:
-          repository: D-sorganization/Tools
-          path: _tools_dep
-          sparse-checkout: |
-            rust_core
-            Cargo.toml
-            rust-toolchain.toml
-
-      - name: Symlink Tools for Cargo path resolution
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
-
       - name: Cache Cargo registry
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/cache@v5
@@ -627,3 +611,74 @@ jobs:
           echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+
+  rust-quickstart:
+    name: Rust Quickstart
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for Rust changes
+        id: rust-changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+            RUST_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            RUST_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          else
+            RUST_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || echo "")
+          fi
+
+          if [ -n "$RUST_FILES" ] && [ -f "Cargo.toml" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "$RUST_FILES"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust changes detected — skipping Rust quickstart."
+          fi
+
+      - name: Setup Python
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install Rust toolchain
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: rust-quickstart-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
+          restore-keys: |
+            rust-quickstart-${{ runner.os }}-
+
+      - name: Cargo build from clean clone
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: cargo build
+
+      - name: Maturin develop from clean clone
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: |
+          python -m venv "$RUNNER_TEMP/rust-quickstart-venv"
+          source "$RUNNER_TEMP/rust-quickstart-venv/bin/activate"
+          python -m pip install --upgrade pip maturin
+          cd rust_core/upstream-physics
+          python -m maturin develop --features python
+          python -c "
+          import upstream_physics
+          print(upstream_physics.IntegratorConfig())
+          "

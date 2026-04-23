@@ -33,6 +33,27 @@ pip install -e ".[dev,all-engines]"
 See `docs/engines/support_tiers.md` before enabling heavier or experimental
 engine combinations.
 
+### Rust kernel development
+
+The Rust workspace no longer requires a sibling `../Tools` checkout just to
+build `upstream-physics`. `tools-core` is fetched automatically from a pinned
+git revision of `D-sorganization/Tools`, so the clean-clone workflow is:
+
+```bash
+cargo build
+
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip maturin
+
+cd rust_core/upstream-physics
+python -m maturin develop --features python
+```
+
+If you need editable cross-repository Python integration code from
+`D-sorganization/Tools`, run `scripts/setup_tools_workspace.sh` to attach the
+optional sibling workspace and helper `PYTHONPATH` entries.
+
 ## ✅ Code Standards
 
 ### Python

@@ -109,6 +109,29 @@ export GOLF_USE_MOCK_ENGINE=1
 
 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
 
+### Rust Kernel Quickstart
+
+Rust development now works from a clean `UpstreamDrift` clone. The shared
+`tools-core` crate is fetched automatically from a pinned `D-sorganization/Tools`
+git revision, so you do not need a sibling `../Tools` checkout just to run the
+Rust build or Python bindings workflow.
+
+```bash
+cargo build
+
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip maturin
+
+cd rust_core/upstream-physics
+python -m maturin develop --features python
+python -c "import upstream_physics; print(upstream_physics.IntegratorConfig())"
+```
+
+If you are also iterating on local cross-repository Python integrations from
+`D-sorganization/Tools`, use `scripts/setup_tools_workspace.sh` to wire the
+optional sibling workspace and `PYTHONPATH` helpers.
+
 ### Supported Engine Tiers
 
 | Tier         | Engines           | Install Profile                        | Validation                                              |
