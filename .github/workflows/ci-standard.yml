@@ -117,6 +117,9 @@ jobs:
       - name: Changed-File Size Budget Check
         run: python3 scripts/check_file_size_budget.py
 
+      - name: Agent Docs Consistency Check
+        run: python3 scripts/check_agent_docs_consistency.py
+
       - name: Module Size Budget Check
         run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
 
