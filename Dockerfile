@@ -59,6 +59,10 @@ FROM python:3.12-slim AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Keep the base interpreter's bundled pip aligned with the venv so image
+# scanners do not report the runtime layer's global site-packages as stale.
+RUN python -m pip install --upgrade --no-cache-dir pip==25.3
+
 # MuJoCo headless rendering + health check
 # X11/XCB/PyQt6 libs removed — not needed in a headless API server
 RUN apt-get update && apt-get install -y --no-install-recommends \

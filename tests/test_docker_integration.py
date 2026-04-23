@@ -482,6 +482,9 @@ class TestContainerEnvironment(unittest.TestCase):
         self.assertIn("FROM python:3.12-slim AS builder", content)
         self.assertIn("FROM python:3.12-slim AS runtime", content)
         self.assertIn("python -m venv /opt/venv", content)
+        self.assertIn(
+            "python -m pip install --upgrade --no-cache-dir pip==25.3", content
+        )
         self.assertIn("pip install -r /tmp/requirements.lock", content)
 
         # Check for required packages that are installed directly by the Dockerfile.
