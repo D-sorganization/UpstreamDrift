@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import typing
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -13,6 +14,7 @@ import pytest
 try:
     from c3d_reader import SCHEMA_VERSION, C3DDataReader  # noqa: E402
 except (ImportError, ModuleNotFoundError):
+    C3DDataReader = typing.Any  # type: ignore
     pytest.skip(
         "c3d_reader module not available (requires c3d/ezc3d)",
         allow_module_level=True,

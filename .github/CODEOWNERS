@@ -3,7 +3,7 @@
 scripts/ @dieterolson
 
 # Core / critical surface
-src/ @dieterolson
+/src/ @dieterolson
 
 # No blanket *.py owner — rely on per-package ownership above to reduce
 # bus-factor risk (issue #3074).
