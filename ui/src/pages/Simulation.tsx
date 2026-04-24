@@ -10,6 +10,7 @@ import { Scene3D } from '@/components/visualization/Scene3D';
 import { ForceOverlayPanel } from '@/components/visualization/ForceOverlayPanel';
 import type { ForceVector3D } from '@/components/visualization/ForceOverlay';
 import { LivePlot } from '@/components/analysis/LivePlot';
+import { SummaryPanel } from '@/components/analysis/SummaryPanel';
 import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
 import { useToast } from '@/components/ui/Toast';
 
@@ -54,11 +55,21 @@ export function SimulationPage() {
     currentFrame,
     frames,
     connectionStatus,
+    runSummary,
     start,
     stop,
     pause,
     resume,
   } = useSimulation(activeEngine);
+
+  const [showSummary, setShowSummary] = useState(false);
+
+  // Show summary panel when a new run summary arrives
+  useEffect(() => {
+    if (runSummary) {
+      setShowSummary(true);
+    }
+  }, [runSummary]);
 
   // ── Event handlers ────────────────────────────────────────────────────
 
@@ -242,6 +253,16 @@ export function SimulationPage() {
             isRunning={isRunning}
           />
         </div>
+
+        {/* Post-simulation summary (issue #3174) */}
+        {showSummary && runSummary && (
+          <div className="mb-4">
+            <SummaryPanel
+              summary={runSummary}
+              onDismiss={() => setShowSummary(false)}
+            />
+          </div>
+        )}
 
         <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Live Analysis</h3>
 

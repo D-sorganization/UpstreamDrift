@@ -6,12 +6,38 @@ from typing import Any
 
 import numpy as np
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from src.shared.python.core.contracts import require
 from src.shared.python.engine_core.engine_registry import EngineType
 
 router = APIRouter()
+
+
+class RunSummary(BaseModel):
+    """Post-simulation summary returned after a run completes.
+
+    Postcondition: all numeric fields are non-negative.
+    """
+
+    engine: str = Field(..., description="Physics engine used for this run")
+    duration_s: float = Field(..., description="Simulated duration in seconds")
+    steps: int = Field(..., description="Total simulation steps executed")
+    max_torques: list[float] = Field(
+        default_factory=list,
+        description="Peak joint torques observed (N·m), one per DOF",
+    )
+    energy: float = Field(
+        default=0.0, description="Total mechanical energy at end of run (J)"
+    )
+    trajectory: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Sampled trajectory states [{time, q, v}, …]",
+    )
+    next_steps: list[str] = Field(
+        default_factory=list,
+        description="Suggested follow-up actions based on the run",
+    )
 
 
 def _engine_type_from_str(name: str) -> EngineType:
@@ -155,11 +181,14 @@ async def _wait_for_resume_or_stop(websocket: WebSocket) -> bool:
             return True
 
 
+_TRAJECTORY_SAMPLE_INTERVAL = 50  # Record one state snapshot every N steps
+
+
 async def _run_simulation_loop(
     websocket: WebSocket,
     engine: object,
     config: dict[str, Any],
-) -> tuple[int, float]:
+) -> tuple[int, float, list[dict[str, Any]], list[float]]:
     """Execute the simulation loop, streaming frames to the client.
 
     Args:
@@ -168,7 +197,8 @@ async def _run_simulation_loop(
         config: Simulation configuration dict.
 
     Returns:
-        Tuple of (frame_count, time_elapsed).
+        Tuple of (frame_count, time_elapsed, trajectory_samples, peak_torques).
+        peak_torques holds the per-joint absolute maximum observed over the run.
     """
     if not (websocket is not None):
         raise ValueError("websocket must be provided")
@@ -182,6 +212,8 @@ async def _run_simulation_loop(
 
     time_elapsed = 0.0
     frame = 0
+    trajectory_samples: list[dict[str, Any]] = []
+    peak_torques: list[float] = []
 
     # Calculate frame skip for ~60fps UI updates
     target_fps = 60
@@ -203,6 +235,24 @@ async def _run_simulation_loop(
 
         time_elapsed += timestep
         frame += 1
+
+        # Track peak per-joint torques over the entire run
+        if hasattr(engine, "get_torques"):
+            raw = engine.get_torques()
+            if isinstance(raw, list | np.ndarray):
+                arr = np.asarray(raw, dtype=float)
+                step_abs = [float(abs(v)) for v in arr]
+                if not peak_torques:
+                    peak_torques = step_abs
+                else:
+                    peak_torques = [
+                        max(a, b) for a, b in zip(peak_torques, step_abs, strict=False)
+                    ]
+
+        # Collect sparse trajectory samples for the RunSummary
+        if frame % _TRAJECTORY_SAMPLE_INTERVAL == 0:
+            state = _engine_state_to_dict(engine)
+            trajectory_samples.append({"time": round(time_elapsed, 4), **state})
 
         # Send frame data (throttle to ~60fps for UI)
         if frame % frame_skip == 0:
@@ -231,7 +281,72 @@ async def _run_simulation_loop(
 
             await websocket.send_json(frame_data)
 
-    return frame, time_elapsed
+    return frame, time_elapsed, trajectory_samples, peak_torques
+
+
+def _build_run_summary(
+    engine_type: str,
+    duration_s: float,
+    steps: int,
+    engine: object,
+    trajectory: list[dict[str, Any]],
+    peak_torques: list[float] | None = None,
+) -> dict[str, Any]:
+    """Build a RunSummary dict from post-loop engine state.
+
+    Args:
+        engine_type: Engine identifier string.
+        duration_s: Total simulated time.
+        steps: Number of simulation steps completed.
+        engine: The physics engine instance.
+        trajectory: Sparse trajectory sample list.
+        peak_torques: Per-joint absolute peak torques tracked during the run.
+            When provided, used directly; otherwise falls back to a single
+            post-loop sample from the engine.
+
+    Returns:
+        RunSummary-compatible dict ready for JSON serialisation.
+    """
+    if peak_torques is not None:
+        max_torques = peak_torques
+    elif hasattr(engine, "get_torques"):
+        raw = engine.get_torques()
+        if isinstance(raw, list | np.ndarray):
+            arr = np.asarray(raw, dtype=float)
+            max_torques = [float(abs(v)) for v in arr]
+        else:
+            max_torques = []
+    else:
+        max_torques = []
+
+    energy = 0.0
+    if hasattr(engine, "get_energy"):
+        raw_energy = engine.get_energy()
+        if isinstance(raw_energy, int | float):
+            energy = float(raw_energy)
+
+    next_steps: list[str] = []
+    if duration_s > 0 and steps > 0:
+        if max_torques and max(max_torques) > 100.0:
+            next_steps.append(
+                "High peak torques detected — consider reducing duration or timestep"
+            )
+        if energy > 1000.0:
+            next_steps.append("High mechanical energy — review initial conditions")
+        if not next_steps:
+            next_steps.append(
+                "Run looks nominal — try increasing duration or adjusting parameters"
+            )
+
+    return RunSummary(
+        engine=engine_type,
+        duration_s=round(duration_s, 4),
+        steps=steps,
+        max_torques=max_torques,
+        energy=round(energy, 4),
+        trajectory=trajectory,
+        next_steps=next_steps,
+    ).model_dump()
 
 
 @router.websocket("/ws/simulate/{engine_type}")
@@ -274,14 +389,27 @@ async def simulation_stream(
             _apply_initial_state(engine, config["initial_state"])
 
         # Run simulation loop
-        frame, time_elapsed = await _run_simulation_loop(websocket, engine, config)
+        frame, time_elapsed, trajectory, peak_torques = await _run_simulation_loop(
+            websocket, engine, config
+        )
 
-        # Send completion
+        # Build post-simulation summary
+        summary = _build_run_summary(
+            engine_type=engine_type,
+            duration_s=time_elapsed,
+            steps=frame,
+            engine=engine,
+            trajectory=trajectory,
+            peak_torques=peak_torques,
+        )
+
+        # Send completion with embedded RunSummary
         await websocket.send_json(
             {
                 "status": "complete",
                 "total_frames": frame,
                 "total_time": round(time_elapsed, 4),
+                "summary": summary,
             }
         )
 

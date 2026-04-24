@@ -12,11 +12,14 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import re
+import shutil
 from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field, field_validator
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import postcondition, precondition
@@ -28,6 +31,45 @@ from ..models.responses import (
     ModelExplorerResponse,
     URDFTreeNode,
 )
+
+_SAFE_STEM_RE = re.compile(r"^[\w\-]{1,64}$")
+
+
+class ModelDuplicateRequest(BaseModel):
+    """Request body for duplicating a URDF model.
+
+    Preconditions:
+        - source_path must be a non-empty string
+        - new_name must be 1-64 safe alphanumeric characters
+    """
+
+    source_path: str = Field(
+        ..., description="Relative path to the source URDF/MJCF model"
+    )
+    new_name: str = Field(
+        ...,
+        description="File stem for the copy (1-64 chars, alphanumeric/hyphen/underscore)",
+        min_length=1,
+        max_length=64,
+    )
+
+    @field_validator("new_name")
+    @classmethod
+    def validate_new_name(cls, v: str) -> str:
+        """Precondition: new_name must use safe characters."""
+        if not _SAFE_STEM_RE.match(v):
+            raise ValueError(
+                "new_name must be 1-64 characters (alphanumeric, hyphens, underscores)"
+            )
+        return v
+
+
+class ModelDuplicateResponse(BaseModel):
+    """Response for a successful model duplicate."""
+
+    source_path: str = Field(..., description="Original model path")
+    copy_path: str = Field(..., description="Path of the new copy")
+
 
 router = APIRouter()
 
@@ -419,4 +461,83 @@ async def compare_models(
         shared_joints=shared,
         unique_to_a=only_a,
         unique_to_b=only_b,
+    )
+
+
+@router.post(
+    "/models/duplicate", response_model=ModelDuplicateResponse, status_code=201
+)
+async def duplicate_model(
+    request: ModelDuplicateRequest,
+    logger: Any = Depends(get_logger),
+) -> ModelDuplicateResponse:
+    """Duplicate a URDF/MJCF model file under a new name in the same directory.
+
+    The copy is written alongside the original with the given stem.
+    The file extension is preserved from the source.
+
+    Args:
+        request: Source path and desired name for the copy.
+        logger: Injected logger.
+
+    Returns:
+        Paths to the original and the newly created copy.
+
+    Raises:
+        HTTPException 404: Source model not found.
+        HTTPException 409: Destination file already exists.
+        HTTPException 422: Unsafe file name or path traversal attempt.
+    """
+    if not (request is not None):
+        raise ValueError("request must be provided")
+
+    _ALLOWED_MODEL_EXTENSIONS = frozenset({".urdf", ".mjcf", ".xml", ".sdf"})
+
+    project_root = _find_project_root()
+    source = (project_root / request.source_path).resolve()
+
+    # Guard against path traversal
+    try:
+        source.relative_to(project_root.resolve())
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=422, detail="source_path must be within the project directory"
+        ) from exc
+
+    # Restrict to model file types only
+    if source.suffix.lower() not in _ALLOWED_MODEL_EXTENSIONS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Only model files are supported ({', '.join(sorted(_ALLOWED_MODEL_EXTENSIONS))})",
+        )
+
+    if not source.exists() or not source.is_file():
+        raise HTTPException(
+            status_code=404, detail=f"Model not found: {request.source_path}"
+        )
+
+    dest = source.parent / f"{request.new_name}{source.suffix}"
+
+    if dest.exists():
+        raise HTTPException(
+            status_code=409,
+            detail=f"A model named '{request.new_name}' already exists in that directory",
+        )
+
+    try:
+        shutil.copy2(str(source), str(dest))
+    except OSError as exc:
+        if logger:
+            logger.error("Failed to duplicate model %s: %s", request.source_path, exc)
+        raise HTTPException(
+            status_code=500, detail="Failed to write model copy"
+        ) from exc
+
+    relative_dest = str(dest.relative_to(project_root.resolve()))
+    if logger:
+        logger.info("Duplicated model %s -> %s", request.source_path, relative_dest)
+
+    return ModelDuplicateResponse(
+        source_path=request.source_path,
+        copy_path=relative_dest,
     )

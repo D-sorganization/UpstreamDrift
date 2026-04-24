@@ -1,4 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import type { RunSummary } from '@/components/analysis/SummaryPanel';
+
+export type { RunSummary };
 
 export interface SimulationFrame {
   frame: number;
@@ -51,6 +54,7 @@ export function useSimulation(engineType: string) {
   const [currentFrame, setCurrentFrame] = useState<SimulationFrame | null>(null);
   const [frames, setFrames] = useState<SimulationFrame[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('disconnected');
+  const [runSummary, setRunSummary] = useState<RunSummary | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
@@ -108,6 +112,7 @@ export function useSimulation(engineType: string) {
       setConnectionStatus('connected');
       setIsRunning(true);
       setFrames([]);
+      setRunSummary(null);
 
       ws.send(JSON.stringify({
         action: 'start',
@@ -127,6 +132,9 @@ export function useSimulation(engineType: string) {
 
         if (data.status === 'complete' || data.status === 'stopped') {
           setIsRunning(false);
+          if (data.status === 'complete' && data.summary != null) {
+            setRunSummary(data.summary as RunSummary);
+          }
           return;
         }
         if (data.status === 'paused') {
@@ -251,9 +259,10 @@ export function useSimulation(engineType: string) {
     currentFrame,
     frames,
     connectionStatus,
+    runSummary,
     start,
     stop,
     pause,
-    resume
+    resume,
   };
 }

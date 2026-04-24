@@ -61,6 +61,8 @@ from src.api.routes import (  # noqa: E402
     engines,
     export,
     glossary,
+    model_explorer,
+    presets,
     simulation,
     simulation_ws,
 )
@@ -134,6 +136,10 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
     app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
     app.include_router(glossary.router, prefix=API_PREFIX, tags=["Glossary"])
+    app.include_router(presets.router, prefix=API_PREFIX, tags=["Presets"])
+    app.include_router(
+        model_explorer.router, prefix=API_PREFIX, tags=["Model Explorer"]
+    )
 
     # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
@@ -145,6 +151,8 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
     app.include_router(glossary.router, prefix="/api", tags=["Glossary"])
+    app.include_router(presets.router, prefix="/api", tags=["Presets"])
+    app.include_router(model_explorer.router, prefix="/api", tags=["Model Explorer"])
 
 
 def _load_launcher_manifest() -> dict[str, Any]:

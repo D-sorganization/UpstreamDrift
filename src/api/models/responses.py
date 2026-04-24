@@ -653,3 +653,37 @@ class AIPJsonRpcResponse(BaseModel):
     result: Any | None = Field(None, description="Method result (on success)")
     error: dict[str, Any] | None = Field(None, description="Error object (on failure)")
     id: int | str | None = Field(None, description="Matching request ID")
+
+
+# ──────────────────────────────────────────────────────────────
+#  Issue #3174: Post-simulation summary
+# ──────────────────────────────────────────────────────────────
+
+
+class RunSummary(BaseModel):
+    """Post-simulation summary returned after a simulation run completes.
+
+    Postconditions:
+        - steps >= 0
+        - duration_s >= 0
+    """
+
+    engine: str = Field(..., description="Physics engine used")
+    duration_s: float = Field(..., description="Simulated time in seconds", ge=0)
+    steps: int = Field(..., description="Total simulation steps executed", ge=0)
+    max_torques: list[float] = Field(
+        default_factory=list,
+        description="Per-joint peak absolute torque (N*m)",
+    )
+    energy: dict[str, float] = Field(
+        default_factory=dict,
+        description="Energy summary: kinetic, potential keys (J)",
+    )
+    trajectory: dict[str, list[float]] = Field(
+        default_factory=dict,
+        description="Sampled trajectory data keyed by metric name",
+    )
+    next_steps: list[str] = Field(
+        default_factory=list,
+        description="Suggested follow-up actions for the user",
+    )
