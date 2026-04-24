@@ -20,6 +20,7 @@ from src.shared.python.core.contracts import (
     precondition,
 )
 from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -792,3 +793,20 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         except (ValueError, TypeError, RuntimeError) as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])
+
+    def capabilities(self) -> frozenset:
+        """Return the set of Capability members this engine supports.
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by OpenSim.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.INVERSE_DYNAMICS,
+                Capability.MASS_MATRIX,
+                Capability.JACOBIAN,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
+        )

@@ -372,3 +372,157 @@ class TestEngineCapabilityContractGeneral:
 
         engine = PendulumPhysicsEngine()
         self._check_engine(engine, np.zeros(2))
+
+
+# ---------------------------------------------------------------------------
+# Tests for MuJoCoPhysicsEngine capabilities
+# ---------------------------------------------------------------------------
+
+
+class TestMuJoCoCapabilityContract:
+    """MuJoCo engine capability declarations must match its implementations."""
+
+    def _make_mujoco_engine(self):  # type: ignore[return]
+        try:
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+                MuJoCoPhysicsEngine,
+            )
+
+            return MuJoCoPhysicsEngine()
+        except ImportError as exc:
+            pytest.skip(f"MuJoCo not available: {exc}")
+
+    def test_capabilities_returns_frozenset(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert isinstance(engine.capabilities(), frozenset)
+
+    def test_forward_dynamics_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.FORWARD_DYNAMICS in engine.capabilities()
+
+    def test_inverse_dynamics_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.INVERSE_DYNAMICS in engine.capabilities()
+
+    def test_contact_forces_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.CONTACT_FORCES in engine.capabilities()
+
+    def test_mass_matrix_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.MASS_MATRIX in engine.capabilities()
+
+    def test_jacobian_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.JACOBIAN in engine.capabilities()
+
+    def test_drift_control_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.DRIFT_CONTROL in engine.capabilities()
+
+    def test_counterfactual_declared(self) -> None:
+        engine = self._make_mujoco_engine()
+        assert Capability.COUNTERFACTUAL in engine.capabilities()
+
+
+# ---------------------------------------------------------------------------
+# Tests for DrakePhysicsEngine capabilities
+# ---------------------------------------------------------------------------
+
+
+class TestDrakeCapabilityContract:
+    """Drake engine capability declarations must match its implementations."""
+
+    def _make_drake_engine(self):  # type: ignore[return]
+        try:
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
+                DrakePhysicsEngine,
+            )
+
+            return DrakePhysicsEngine()
+        except ImportError as exc:
+            pytest.skip(f"Drake not available: {exc}")
+
+    def test_capabilities_returns_frozenset(self) -> None:
+        engine = self._make_drake_engine()
+        assert isinstance(engine.capabilities(), frozenset)
+
+    def test_forward_dynamics_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.FORWARD_DYNAMICS in engine.capabilities()
+
+    def test_inverse_dynamics_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.INVERSE_DYNAMICS in engine.capabilities()
+
+    def test_contact_forces_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.CONTACT_FORCES in engine.capabilities()
+
+    def test_mass_matrix_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.MASS_MATRIX in engine.capabilities()
+
+    def test_jacobian_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.JACOBIAN in engine.capabilities()
+
+    def test_drift_control_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.DRIFT_CONTROL in engine.capabilities()
+
+    def test_counterfactual_declared(self) -> None:
+        engine = self._make_drake_engine()
+        assert Capability.COUNTERFACTUAL in engine.capabilities()
+
+
+# ---------------------------------------------------------------------------
+# Tests for OpenSimPhysicsEngine capabilities
+# ---------------------------------------------------------------------------
+
+
+class TestOpenSimCapabilityContract:
+    """OpenSim engine capability declarations must match its implementations."""
+
+    def _make_opensim_engine(self):  # type: ignore[return]
+        try:
+            from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
+                OpenSimPhysicsEngine,
+            )
+
+            return OpenSimPhysicsEngine()
+        except ImportError as exc:
+            pytest.skip(f"OpenSim not available: {exc}")
+
+    def test_capabilities_returns_frozenset(self) -> None:
+        engine = self._make_opensim_engine()
+        assert isinstance(engine.capabilities(), frozenset)
+
+    def test_forward_dynamics_declared(self) -> None:
+        engine = self._make_opensim_engine()
+        assert Capability.FORWARD_DYNAMICS in engine.capabilities()
+
+    def test_inverse_dynamics_declared(self) -> None:
+        engine = self._make_opensim_engine()
+        assert Capability.INVERSE_DYNAMICS in engine.capabilities()
+
+    def test_contact_forces_not_declared(self) -> None:
+        """OpenSim does not implement compute_contact_forces."""
+        engine = self._make_opensim_engine()
+        assert Capability.CONTACT_FORCES not in engine.capabilities()
+
+    def test_mass_matrix_declared(self) -> None:
+        engine = self._make_opensim_engine()
+        assert Capability.MASS_MATRIX in engine.capabilities()
+
+    def test_jacobian_declared(self) -> None:
+        engine = self._make_opensim_engine()
+        assert Capability.JACOBIAN in engine.capabilities()
+
+    def test_drift_control_declared(self) -> None:
+        engine = self._make_opensim_engine()
+        assert Capability.DRIFT_CONTROL in engine.capabilities()
+
+    def test_counterfactual_declared(self) -> None:
+        engine = self._make_opensim_engine()
+        assert Capability.COUNTERFACTUAL in engine.capabilities()

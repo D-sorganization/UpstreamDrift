@@ -57,6 +57,7 @@ if DRAKE_AVAILABLE:
 
 from src.shared.python.core import constants
 from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
@@ -708,3 +709,21 @@ class DrakePhysicsEngine(PhysicsEngine):
             # Restore original state
             self.plant.SetPositions(self.plant_context, saved_q)
             self.plant.SetVelocities(self.plant_context, saved_v)
+
+    def capabilities(self) -> frozenset:
+        """Return the set of Capability members this engine supports.
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by Drake.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.INVERSE_DYNAMICS,
+                Capability.CONTACT_FORCES,
+                Capability.MASS_MATRIX,
+                Capability.JACOBIAN,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
+        )

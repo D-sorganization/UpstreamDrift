@@ -26,6 +26,7 @@ from src.shared.python.core.contracts import (
     precondition,
 )
 from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.security_utils import validate_path
@@ -724,3 +725,21 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             "velocity": velocity,
             "modal_amplitudes": state["amplitudes"].copy(),
         }
+
+    def capabilities(self) -> frozenset:
+        """Return the set of Capability members this engine supports.
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by MuJoCo.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.INVERSE_DYNAMICS,
+                Capability.CONTACT_FORCES,
+                Capability.MASS_MATRIX,
+                Capability.JACOBIAN,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
+        )
