@@ -1,23 +1,9 @@
-# Completist Report: 2026-04-16
-
-## Executive Summary
-
-- **Critical Gaps**: 216
-- **Feature Gaps (TRACKED_TASK)**: 1
-- **Technical Debt**: 27
-- **Documentation Gaps**: 610
-
-## Visualization
-
-### Status Overview
-
-```mermaid
-pie title Completion Status
     "Impl Gaps (Critical)" : 216
     "Feature Requests (TRACKED_TASK)" : 1
     "Technical Debt (TRACKED_DEFECT)" : 27
     "Doc Gaps" : 610
-```
+
+````
 
 ### Top Impacted Modules
 
@@ -28,7 +14,7 @@ pie title Issues by Module
     "scripts" : 4
     ".gaai" : 4
     "tests" : 3
-```
+````
 
 ## Critical Incomplete (Top 50)
 
@@ -201,3 +187,7 @@ Prioritized by Impact (High) and Complexity (Low).
 - Created `docs/assessments/issues/Issue_2357_Incomplete_Stub_in_analyzer_base_py_61.md`
 - Created `docs/assessments/issues/Issue_2358_Incomplete_Stub_in_analyzer_base_py_65.md`
 - Created `docs/assessments/issues/Issue_2359_Incomplete_Stub_in_protocols_py_35.md`
+
+```
+
+```

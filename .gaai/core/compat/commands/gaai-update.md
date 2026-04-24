@@ -30,28 +30,3 @@ Look for `.gaai/core/scripts/install.sh` in the current working directory. If it
 **Step 2 — Ask what to update**
 
 Ask the user:
-
-- "Update framework core from a source repo? If so, provide the path to the GAAI framework repo (e.g., `/tmp/gaai`)."
-- "Or just redeploy adapters for a different AI tool? If so, which tool: claude-code, cursor, windsurf, or other?"
-
-Wait for their answer.
-
-**Step 3 — Run the installer**
-
-If updating from a source repo:
-
-```bash
-bash <source-repo>/.gaai/core/scripts/install.sh --target . --tool claude-code --yes
-```
-
-If just redeploying adapters (same project):
-
-```bash
-bash .gaai/core/scripts/install.sh --target . --tool <chosen-tool> --yes
-```
-
-**Step 4 — Report outcome**
-
-If the update succeeded (exit code 0), confirm success and show the health check results.
-
-If it failed, show the error output and suggest checking permissions or file integrity.

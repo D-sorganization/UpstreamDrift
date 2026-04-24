@@ -57,32 +57,22 @@ The Orchestrator cannot proceed to the next phase until it has validated the cur
 
 ### After QA Sub-Agent terminates
 
-1. Read verdict from `{id}.qa-report.md`:
-   - **PASS**: → **INTEGRATE, MERGE & COMPLETE Story**:
-     1. **Rebase on staging** (in worktree): `git merge staging` into story branch
-     2. **Verify build**: `npx tsc --noEmit` in worktree
-        - If fails with errors **introduced by this story** → fix and re-commit
-        - If fails with **pre-existing errors only** → proceed (not this story's problem)
-        - If unclear → **ESCALATE** with error list
-     3. **Verify tests**: `npx vitest run` in worktree
-        - Same triage: story-introduced failures → fix; pre-existing → proceed; unclear → **ESCALATE**
-     4. Push story branch to origin
-     5. `gh pr create --base staging --head story/{id}`
-     6. Wait for PR CI check to reach a terminal state (`gh run watch`)
-        - If CI fails → diagnose: same triage as steps 2–3 (fix story issues, ignore pre-existing)
-        - If CI fails on infra (missing secrets, missing bindings) → **ESCALATE** with logs
-     7. `gh pr merge --squash` — immediate merge to staging
-        - If merge fails (conflict): merge staging into branch, resolve, push, retry merge
-        - If merge still fails after 2 attempts: **ESCALATE** with conflict details
-        - If merge rejected (branch protection / checks required): wait for checks, then retry
-     8. After successful merge: verify staging deploy CI (`gh run list --branch staging --limit 1`)
-        - If staging deploy fails → **ESCALATE** with deploy logs (do not attempt infra fixes)
-     9. If `{id}.memory-delta.md` exists in `contexts/artefacts/memory-deltas/`, flag it in the completion report for Discovery to action via `memory-ingest`.
-   10. Update backlog (push with retry-rebase pattern), cleanup worktree + delete remote branch
-       **NEVER leave a PR open. NEVER merge to production (staging only).**
-   - **FAIL**: spawn count < 2? → **RE-SPAWN** Implementation Sub-Agent with qa-report, then re-spawn QA Sub-Agent
-   - **FAIL** after 2 cycles: → **ESCALATE**
-   - **ESCALATE**: → **ESCALATE** (pass QA's escalation reason to human)
+1.  Read verdict from `{id}.qa-report.md`:
+
+    - **PASS**: → **INTEGRATE, MERGE & COMPLETE Story**: 1. **Rebase on staging** (in worktree): `git merge staging` into story branch 2. **Verify build**: `npx tsc --noEmit` in worktree - If fails with errors **introduced by this story** → fix and re-commit - If fails with **pre-existing errors only** → proceed (not this story's problem) - If unclear → **ESCALATE** with error list 3. **Verify tests**: `npx vitest run` in worktree - Same triage: story-introduced failures → fix; pre-existing → proceed; unclear → **ESCALATE** 4. Push story branch to origin 5. `gh pr create --base staging --head story/{id}` 6. Wait for PR CI check to reach a terminal state (`gh run watch`) - If CI fails → diagnose: same triage as steps 2–3 (fix story issues, ignore pre-existing) - If CI fails on infra (missing secrets, missing bindings) → **ESCALATE** with logs 7. `gh pr merge --squash` — immediate merge to staging - If merge fails (conflict): merge staging into branch, resolve, push, retry merge - If merge still fails after 2 attempts: **ESCALATE** with conflict details - If merge rejected (branch protection / checks required): wait for checks, then retry 8. After successful merge: verify staging deploy CI (`gh run list --branch staging --limit 1`) - If staging deploy fails → **ESCALATE** with deploy logs (do not attempt infra fixes) 9. If `{id}.memory-delta.md` exists in `contexts/artefacts/memory-deltas/`, flag it in the completion report for Discovery to action via `memory-ingest`.
+      <<<<<<< HEAD
+
+          10. Update backlog (push with retry-rebase pattern), cleanup worktree + delete remote branch
+           **NEVER leave a PR open. NEVER merge to production (staging only).**
+
+      ======= 10. Update backlog (push with retry-rebase pattern), cleanup worktree + delete remote branch
+      **NEVER leave a PR open. NEVER merge to production (staging only).**
+
+      > > > > > > > origin/staging
+
+    - **FAIL**: spawn count < 2? → **RE-SPAWN** Implementation Sub-Agent with qa-report, then re-spawn QA Sub-Agent
+    - **FAIL** after 2 cycles: → **ESCALATE**
+    - **ESCALATE**: → **ESCALATE** (pass QA's escalation reason to human)
 
 ### After MicroDelivery Sub-Agent terminates (Tier 1)
 
@@ -95,43 +85,3 @@ The Orchestrator cannot proceed to the next phase until it has validated the cur
 ---
 
 ## Retry Limits
-
-| Phase                    | Max re-spawns                           |
-| ------------------------ | --------------------------------------- |
-| Planning Sub-Agent       | 1 retry (2 total)                       |
-| Implementation Sub-Agent | 1 retry per QA cycle (2 total)          |
-| QA Sub-Agent             | Re-runs after each Implementation retry |
-| QA FAIL cycles           | 2 (before ESCALATE)                     |
-| MicroDelivery Sub-Agent  | 1 retry (2 total)                       |
-
----
-
-## Escalation Package
-
-When escalating, the Orchestrator surfaces to the human:
-
-- Story ID and title
-- Phase where escalation occurred
-- Handoff artefact path (for full context)
-- Specific failure reason
-- Recommended next action (back to Discovery / manual fix / scope clarification)
-
----
-
-## Non-Goals
-
-This skill must NOT:
-
-- Make product decisions about what to implement
-- Modify acceptance criteria
-- Skip QA validation even under time pressure
-- Delete worktrees containing uncommitted work without confirmation
-
----
-
-## Quality Checks
-
-- No phase transition occurs without a validated handoff artefact
-- Retry counts are tracked across the full Story lifecycle (not reset between phases)
-- Escalation always includes a specific, actionable failure reason
-- PASS is never issued unless `{id}.qa-report.md` contains explicit PASS verdict

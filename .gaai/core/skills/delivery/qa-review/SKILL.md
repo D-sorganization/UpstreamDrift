@@ -35,12 +35,20 @@ Activate after implementation is complete. This is a **hard quality gate**.
 
 ### 1. Story Compliance Check
 
+# <<<<<<< HEAD
+
+> > > > > > > origin/staging
+
 - Parse Story YAML frontmatter
 - Extract acceptance criteria
 - Validate each criterion is demonstrably satisfied in code
 - Any criterion unclear or unmet → FAIL immediately
 
 ### 2. Scope Integrity Check
+
+# <<<<<<< HEAD
+
+> > > > > > > origin/staging
 
 - Only files within Story scope were modified
 - No feature creep introduced
@@ -49,17 +57,29 @@ Activate after implementation is complete. This is a **hard quality gate**.
 
 ### 3. Rule Enforcement
 
+# <<<<<<< HEAD
+
+> > > > > > > origin/staging
+
 - Confirm compliance with each applicable rule
 - Surface violations explicitly
 - Any broken rule → FAIL
 
 ### 4. Regression Scan
 
+# <<<<<<< HEAD
+
+> > > > > > > origin/staging
+
 - Broken tests → FAIL
 - Behavior drift → FAIL
 - Known risk patterns from memory → FAIL
 
 ### 5. Quality Checks
+
+# <<<<<<< HEAD
+
+> > > > > > > origin/staging
 
 - Error-prone operations lack error handling → FAIL
 - External input enters functions without validation → FAIL
@@ -73,40 +93,3 @@ Activate after implementation is complete. This is a **hard quality gate**.
 ## Outputs
 
 **If PASS:**
-
-```
-status: PASS
-validated_stories:
-  - E01S01
-notes:
-  - All acceptance criteria satisfied
-  - No rule violations
-  - No regressions detected
-```
-
-**If FAIL:**
-
-```
-status: FAIL
-blocking_issues:
-  - Story E01S01: acceptance criterion #2 not satisfied
-  - Rule code-style violated in services/api/user.ts
-  - Unexpected file modified: services/payments/
-recommended_actions:
-  - Fix acceptance behavior
-  - Revert out-of-scope change
-  - Apply code rule formatting
-```
-
----
-
-## Hard Rules
-
-This skill must NEVER:
-
-- Modify code
-- Reinterpret Stories
-- Negotiate acceptance criteria
-- Approve partial conformance
-
-**If it's not explicitly validated → it's broken. If it's broken → it doesn't ship.**

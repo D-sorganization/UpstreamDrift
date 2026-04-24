@@ -2,10 +2,6 @@
 <<<<<<<< HEAD:docs/assessments/issues/Issue_2151_Incomplete_Stub_in_flexible_shaft_py_326.md
 title: "Incomplete Stub in flexible_shaft.py:326"
 labels: ['incomplete-implementation', 'critical', 'high-impact']
-========
-title: "Incomplete Stub in flexible_shaft.py:365"
-labels: ["incomplete-implementation", "critical", "high-impact"]
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2153_Incomplete_Stub_in_flexible_shaft_py_365.md
 assignee: "unassigned"
 status: "open"
 ---
