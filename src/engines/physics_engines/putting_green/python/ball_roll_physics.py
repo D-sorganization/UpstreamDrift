@@ -34,6 +34,9 @@ from src.engines.physics_engines.putting_green.python.green_surface import Green
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
+from src.shared.python.core.numerical_constants import (
+    EPSILON_TIME_STEP,
+)
 from src.shared.python.core.physics_constants import (
     GOLF_BALL_MASS_KG,
     GOLF_BALL_RADIUS_M,
@@ -77,7 +80,7 @@ class BallState:
     @property
     def is_moving(self) -> bool:
         """Check if ball is moving (above threshold)."""
-        return self.speed > 0.005  # 5mm/s threshold
+        return self.speed > 0.005
 
     @property
     def direction(self) -> np.ndarray:
@@ -412,15 +415,24 @@ class BallRollPhysics:
 
         Args:
             state: Current ball state
-            dt: Time step [s]
+            dt: Time step [s]. Must be > EPSILON_TIME_STEP.
 
         Returns:
             New ball state
+
+        Raises:
+            ValueError: If dt is not positive or state is invalid.
         """
         if not (state is not None):
             raise ValueError("state must be provided")
         if not (state is not None):
             raise ValueError("state must be provided")
+
+        # Guard against invalid time steps (Issue #3054)
+        if dt <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {dt}. Minimum supported: {EPSILON_TIME_STEP}"
+            )
         if self.integrator == "rk4":
             return self._step_rk4(state, dt)
         if self.integrator == "verlet":

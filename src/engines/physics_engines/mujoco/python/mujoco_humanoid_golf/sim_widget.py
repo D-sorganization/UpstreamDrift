@@ -303,10 +303,14 @@ class MuJoCoSimWidget(  # type: ignore[misc]
                 project_root = Path(__file__).parent.parent.parent
                 xml_path = str(project_root / xml_path)
 
-            if not os.path.exists(xml_path):
-                raise FileNotFoundError(f"Model file not found: {xml_path}")
+            # EAFP (TOCTOU race fix #3054): directly attempt to load instead of
+            # checking os.path.exists() first. This prevents TOCTOU races where
+            # the file disappears between check and open.
+            try:
+                new_model = mujoco.MjModel.from_xml_path(xml_path)
+            except (OSError, FileNotFoundError) as e:
+                raise FileNotFoundError(f"Model file not found: {xml_path}") from e
 
-            new_model = mujoco.MjModel.from_xml_path(xml_path)
             new_data = mujoco.MjData(new_model)
             self._finalize_model_load(new_model, new_data)
         except (FileNotFoundError, OSError) as e:

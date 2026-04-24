@@ -54,6 +54,7 @@ from src.engines.physics_engines.putting_green.python.putter_stroke import (
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     TurfProperties,
 )
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 
 
@@ -198,9 +199,18 @@ class PuttingGreenSimulator:
         """Advance simulation by one time step.
 
         Args:
-            dt: Time step (uses config default if None)
+            dt: Time step [s]. Must be > EPSILON_TIME_STEP if provided.
+
+        Raises:
+            ValueError: If dt is not positive.
         """
         dt = dt or self.config.timestep
+
+        # Guard against invalid time steps (Issue #3054)
+        if dt <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {dt}. Minimum supported: {EPSILON_TIME_STEP}"
+            )
 
         if self._wind_speed > 0 and self._ball_state.is_moving:
             wind_force = compute_wind_force(

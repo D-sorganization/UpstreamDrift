@@ -28,6 +28,8 @@ from src.shared.python.core.contracts import (
 )
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics.aerodynamics._config import AerodynamicsConfig
+from src.shared.python.physics.aerodynamics._engine import AerodynamicsEngine
 
 # Pydrake imports - only import if available
 if DRAKE_AVAILABLE:
@@ -50,6 +52,7 @@ if DRAKE_AVAILABLE:
     from pydrake.multibody.tree import JointActuatorIndex
 
 from src.shared.python.core import constants
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
@@ -96,6 +99,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         self.model_name_str: str = ""
         self._is_finalized = False
         self.simulator: analysis.Simulator | None = None
+        self.aero_engine: AerodynamicsEngine | None = None
 
     @property
     def is_initialized(self) -> bool:
@@ -216,7 +220,16 @@ class DrakePhysicsEngine(PhysicsEngine):
         lambda self, dt=None: self.is_initialized, "Engine must be initialized"
     )
     def step(self, dt: float | None = None) -> None:
-        """Advance the simulation by one time step."""
+        """Advance the simulation by one time step.
+
+        Integrates aerodynamic forces after the main physics step.
+
+        Args:
+            dt: Time step [s]. Must be > EPSILON_TIME_STEP if provided.
+
+        Raises:
+            ValueError: If dt is not positive.
+        """
         self._ensure_finalized()
 
         if not self.simulator or not self.context:
@@ -225,7 +238,18 @@ class DrakePhysicsEngine(PhysicsEngine):
 
         current_time = self.context.get_time()
         step_size = dt if dt is not None else self.plant.time_step()
+
+        # Guard against invalid time steps (Issue #3054)
+        if step_size <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {step_size}. "
+                f"Minimum supported: {EPSILON_TIME_STEP}"
+            )
+
         self.simulator.AdvanceTo(current_time + step_size)
+
+        # Apply aerodynamics if configured (Issue #3167)
+        self._apply_aerodynamics(step_size)
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
@@ -298,6 +322,71 @@ class DrakePhysicsEngine(PhysicsEngine):
         if self.context:
             return cast(float, self.context.get_time())
         return 0.0
+
+    def enable_aerodynamics(self, config: AerodynamicsConfig | None = None) -> None:
+        """Enable aerodynamic force simulation (Issue #3167).
+
+        Args:
+            config: Aerodynamics configuration. If None, uses defaults.
+        """
+        self.aero_engine = AerodynamicsEngine(config)
+        logger.debug("Aerodynamics enabled in Drake engine")
+
+    def disable_aerodynamics(self) -> None:
+        """Disable aerodynamic force simulation."""
+        self.aero_engine = None
+        logger.debug("Aerodynamics disabled in Drake engine")
+
+    def _apply_aerodynamics(self, dt: float) -> None:
+        """Apply aerodynamic forces to ball state.
+
+        This method applies aerodynamic damping to generalized velocities.
+        For a full implementation with ball-specific tracking, extend to
+        identify ball body and apply forces directly (tracked in issue #3167).
+
+        Args:
+            dt: Time step [s]
+        """
+        if self.aero_engine is None or self.plant_context is None or self.plant is None:
+            return
+
+        try:
+            # Get velocities from Drake plant context
+            v = self.plant.GetVelocities(self.plant_context)
+
+            # First 6: [v_x, v_y, v_z, omega_x, omega_y, omega_z]
+            if len(v) >= 6:
+                vel_indices = slice(0, 3)
+                spin_indices = slice(3, 6)
+
+                ball_vel = v[vel_indices].copy()
+                ball_spin = v[spin_indices].copy()
+                t = self.context.get_time() if self.context else 0.0
+
+                # Compute aerodynamic forces
+                forces = self.aero_engine.compute_forces(
+                    ball_vel, ball_spin, t, np.zeros(3)
+                )
+                total_force = forces["total"]
+
+                # Apply as damping to velocities
+                if np.linalg.norm(ball_vel) > 1e-6:
+                    ball_mass = 0.04593  # Standard golf ball mass [kg]
+                    aero_accel = total_force / ball_mass
+                    v_new = v.copy()
+                    v_new[vel_indices] += aero_accel * dt
+
+                    # Decay spin
+                    new_spin = self.aero_engine.compute_spin_decay(
+                        ball_spin, dt, np.linalg.norm(ball_vel)
+                    )
+                    v_new[spin_indices] = new_spin
+
+                    # Update velocities in context
+                    self.plant.SetVelocities(self.plant_context, v_new)
+
+        except Exception as e:
+            logger.warning("Aerodynamics application failed: %s", e)
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""

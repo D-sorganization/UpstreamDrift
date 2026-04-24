@@ -15,6 +15,7 @@ from src.shared.python.core.contracts import (
     postcondition,
     precondition,
 )
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 from src.shared.python.engine_core.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -127,11 +128,26 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         lambda self, dt=None: self.is_initialized, "Engine must be initialized"
     )
     def step(self, dt: float | None = None) -> None:
-        """Integrate the simulation forward by one time step."""
+        """Integrate the simulation forward by one time step.
+
+        Args:
+            dt: Time step [s]. Must be > EPSILON_TIME_STEP if provided.
+
+        Raises:
+            ValueError: If dt is not positive.
+        """
         if not self._model or not self._state:
             return
 
         step_size = dt if dt is not None else self._time_step
+
+        # Guard against invalid time steps (Issue #3054)
+        if step_size <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {step_size}. "
+                f"Minimum supported: {EPSILON_TIME_STEP}"
+            )
+
         current_time = self._state.getTime()
 
         # Integrate to new time

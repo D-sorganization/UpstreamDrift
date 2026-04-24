@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -30,8 +31,24 @@ class SimulationCoreMixin:
         lambda self, dt=None: self.env is not None, "Environment must be loaded"
     )
     def step(self, dt: float | None = None) -> None:
+        """Step the environment forward.
+
+        Args:
+            dt: Time step [s]. When provided, must be > EPSILON_TIME_STEP.
+                Note: MuJoCo does not support runtime dt modification;
+                dt is logged but not applied.
+
+        Raises:
+            ValueError: If dt is not positive.
+        """
         if not self.env:
             return
+
+        # Guard against invalid time steps (Issue #3054)
+        if dt is not None and dt <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {dt}. Minimum supported: {EPSILON_TIME_STEP}"
+            )
 
         if dt is not None and dt != getattr(self, "_dt", None):
             logger.warning(

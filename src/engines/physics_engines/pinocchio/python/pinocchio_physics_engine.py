@@ -27,12 +27,15 @@ from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.physics.aerodynamics._config import AerodynamicsConfig
+from src.shared.python.physics.aerodynamics._engine import AerodynamicsEngine
 
 # Pinocchio imports - only import if available
 if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
 
 from src.shared.python.core import constants
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 
 logger = get_logger(__name__)
 
@@ -85,6 +88,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.a: np.ndarray = np.array([])
         self.tau: np.ndarray = np.array([])
         self.time: float = 0.0
+        self.aero_engine: AerodynamicsEngine | None = None
 
     @property
     def is_initialized(self) -> bool:
@@ -174,17 +178,30 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     ) -> None:
         """Advance the simulation by one time step.
 
+        Integrates aerodynamic forces after the main physics step.
+
         Args:
-            dt: Time step size [s]. Defaults to DEFAULT_TIME_STEP.
+            dt: Time step size [s]. Must be > EPSILON_TIME_STEP.
+                Defaults to DEFAULT_TIME_STEP.
             integrator: Integration scheme — ``"semi_implicit"`` (symplectic
                 Euler, O(dt), energy-stable) or ``"rk4"`` (classic 4th-order
                 Runge-Kutta, O(dt^4), more accurate for large dt or
                 validation).
+
+        Raises:
+            ValueError: If dt is not positive.
         """
         if self.model is None or self.data is None:
             return
 
         time_step = dt if dt is not None else DEFAULT_TIME_STEP
+
+        # Guard against invalid time steps (Issue #3054)
+        if time_step <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {time_step}. "
+                f"Minimum supported: {EPSILON_TIME_STEP}"
+            )
 
         if integrator == "rk4":
             self._step_rk4(time_step)
@@ -192,6 +209,9 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             self._step_semi_implicit(time_step)
 
         self.time += time_step
+
+        # Apply aerodynamics if configured (Issue #3167)
+        self._apply_aerodynamics(time_step)
 
     def _step_semi_implicit(self, time_step: float) -> None:
         """Symplectic (semi-implicit) Euler: velocity-first, then position."""
@@ -272,6 +292,63 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     def get_time(self) -> float:
         """Get the current simulation time."""
         return self.time
+
+    def enable_aerodynamics(self, config: AerodynamicsConfig | None = None) -> None:
+        """Enable aerodynamic force simulation (Issue #3167).
+
+        Args:
+            config: Aerodynamics configuration. If None, uses defaults.
+        """
+        self.aero_engine = AerodynamicsEngine(config)
+        logger.debug("Aerodynamics enabled in Pinocchio engine")
+
+    def disable_aerodynamics(self) -> None:
+        """Disable aerodynamic force simulation."""
+        self.aero_engine = None
+        logger.debug("Aerodynamics disabled in Pinocchio engine")
+
+    def _apply_aerodynamics(self, dt: float) -> None:
+        """Apply aerodynamic forces to ball state.
+
+        This method applies aerodynamic damping to generalized velocities.
+        For a full implementation with ball-specific tracking, extend to
+        identify ball body and apply forces directly (tracked in issue #3167).
+
+        Args:
+            dt: Time step [s]
+        """
+        if self.aero_engine is None or self.model is None:
+            return
+
+        try:
+            # First 6: [v_x, v_y, v_z, omega_x, omega_y, omega_z]
+            if self.v.shape[0] >= 6:
+                vel_indices = slice(0, 3)
+                spin_indices = slice(3, 6)
+
+                ball_vel = self.v[vel_indices].copy()
+                ball_spin = self.v[spin_indices].copy()
+
+                # Compute aerodynamic forces
+                forces = self.aero_engine.compute_forces(
+                    ball_vel, ball_spin, self.time, np.zeros(3)
+                )
+                total_force = forces["total"]
+
+                # Apply as damping to velocities
+                if np.linalg.norm(ball_vel) > 1e-6:
+                    ball_mass = 0.04593  # Standard golf ball mass [kg]
+                    aero_accel = total_force / ball_mass
+                    self.v[vel_indices] += aero_accel * dt
+
+                    # Decay spin
+                    new_spin = self.aero_engine.compute_spin_decay(
+                        ball_spin, dt, np.linalg.norm(ball_vel)
+                    )
+                    self.v[spin_indices] = new_spin
+
+        except Exception as e:
+            logger.warning("Aerodynamics application failed: %s", e)
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""

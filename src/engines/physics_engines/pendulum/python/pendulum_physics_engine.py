@@ -20,6 +20,7 @@ from src.shared.python.core.contracts import (
     postcondition,
     precondition,
 )
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
@@ -117,8 +118,22 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         self.control = np.zeros(2)
 
     def step(self, dt: float | None = None) -> None:
-        """Step the simulation forward."""
+        """Step the simulation forward.
+
+        Args:
+            dt: Time step [s]. Must be > EPSILON_TIME_STEP if provided.
+
+        Raises:
+            ValueError: If dt is not positive.
+        """
         step_size = dt if dt is not None else 0.01
+
+        # Guard against invalid time steps (Issue #3054)
+        if step_size <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {step_size}. "
+                f"Minimum supported: {EPSILON_TIME_STEP}"
+            )
 
         # The dynamics step returns a NEW state object (functional style)
         self._pendulum_state = self.dynamics.step(

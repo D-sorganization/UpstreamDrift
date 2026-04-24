@@ -378,28 +378,42 @@ def save_state(physics: typing.Any, filename: str) -> None:
 
 
 def load_state(physics: typing.Any, filename: str) -> None:
-    """Load simulation state from file."""
-    if os.path.exists(filename):
-        try:
-            with open(filename) as f:
-                state_list = json.load(f)
-            # Convert back to numpy array
-            state = np.array(state_list)
-            physics.set_state(state)
-            logger.info("State loaded from %s", filename)
-        except ImportError as e:
-            logger.error("Error loading state: %s", e)
+    """Load simulation state from file.
+
+    Uses LBYL-to-EAFP (TOCTOU race fix #3054): instead of checking
+    os.path.exists() before opening, directly attempts to open and
+    catches FileNotFoundError. This prevents TOCTOU races where the
+    file disappears between check and open.
+    """
+    try:
+        with open(filename) as f:
+            state_list = json.load(f)
+        # Convert back to numpy array
+        state = np.array(state_list)
+        physics.set_state(state)
+        logger.info("State loaded from %s", filename)
+    except FileNotFoundError:
+        logger.debug("State file not found: %s", filename)
+    except (ImportError, json.JSONDecodeError, ValueError) as e:
+        logger.error("Error loading state: %s", e)
 
 
 def _load_simulation_config() -> dict:
-    """Load and return the simulation configuration from disk."""
+    """Load and return the simulation configuration from disk.
+
+    Uses EAFP (TOCTOU race fix #3054): directly attempts to open and
+    catches FileNotFoundError instead of checking os.path.exists() first.
+    This prevents TOCTOU races where the config file disappears between
+    check and open.
+    """
     config = {}
-    if os.path.exists("simulation_config.json"):
-        try:
-            with open("simulation_config.json") as f:
-                config = json.load(f)
-        except (FileNotFoundError, PermissionError, OSError) as exc:
-            logger.debug("Could not load simulation_config.json: %s", exc)
+    try:
+        with open("simulation_config.json") as f:
+            config = json.load(f)
+    except FileNotFoundError:
+        logger.debug("simulation_config.json not found")
+    except (PermissionError, OSError, json.JSONDecodeError) as exc:
+        logger.debug("Could not load simulation_config.json: %s", exc)
     return config
 
 
