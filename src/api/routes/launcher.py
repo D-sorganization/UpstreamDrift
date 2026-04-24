@@ -40,10 +40,9 @@ def _get_manifest() -> LauncherManifest:
                 status_code=500,
                 detail=f"Launcher manifest error: {e}",
             ) from e
-    # Guaranteed non-None after the check above
-    manifest = _launcher_state["manifest"]
-    assert manifest is not None  # for mypy
-    return manifest
+    result = _launcher_state["manifest"]
+    assert result is not None  # guaranteed: loaded above or HTTPException raised
+    return result
 
 
 @router.get("/manifest")
