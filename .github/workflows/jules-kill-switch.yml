@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: 'Kill switch action'
+        description: "Kill switch action"
         required: true
         type: choice
         options:
-          - 'enable'
-          - 'disable'
-          - 'status'
+          - "enable"
+          - "disable"
+          - "status"
 
 permissions:
   contents: write
