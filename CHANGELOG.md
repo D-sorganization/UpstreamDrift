@@ -7,9 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### April 2026
+
+#### Added
+
+- GitHub Actions pinning to commit SHAs for supply chain security (#3210)
+- Comprehensive pytest markers added to 937+ test files for better test organization
+- Aerodynamics engine integration with BallFlightSimulator for consistent wind/ball settings (#3204)
+
+#### Fixed
+
+- CI/CD gaps: added proper gating on build success before release artifacts (#3210)
+- MyPy exclusion list reduced from 65+ to targeted disable_error_code directives (#3075, #3207)
+- Pip-audit CVE ignore list cleaned up with proper dependency upgrades (#3208)
+- Removed sys.path hacks from examples for clean package install (#3049, #3209)
+- Pinocchio zero-force fallback for unsupported contact-force queries (#3201, #3211)
+- verify_installation.py expanded with comprehensive environment checks (#3172, #3203)
+- basic_flight_simulation.py example now produces output instead of silent execution (#3171)
+- HelpPanel populated with substantive content and contextual bindings (#3170)
+- Tutorial imports fixed: broken URLs and incorrect module paths corrected (#3169)
+- UI README replaced Vite template with UpstreamDrift developer guide (#3176)
+- Silent failure paths replaced with actionable error messages (#3175)
+- Aerodynamics and impact models wired into physics engine step() (#3167)
+- Four React Tool pages (DataExplorer, MotionCapture, VideoAnalyzer, PuttingGreen) backend implementation (#3166)
+- RAG store wired on startup and glossary endpoint added (#3164, #3165)
+- Tool calling enabled in chat service streaming (#3162, #3163)
+- ChatPanel component shipped in React/Tauri web UI (#3161)
+- AI assistant core extracted for dashboard-help integrations (#3145)
+- Model editor with duplicate, parameter presets, and post-sim summary (#3174, #3190)
+- Orphan root-level scripts cleaned up and reorganized (#3070)
+- Test pollution eliminated: sys.modules mocking replaced with proper patching (#3212)
+
+#### Documentation
+
+- Updated SPEC.md for accuracy with current implementation (#3071)
+- Removed orphan root scripts and tracked junk files (#3070)
+- Added docs hub for navigable documentation tree (#3213)
+
+### February-March 2026
+
+- Initial assessment framework (Adversarial Review A-O)
+- Cross-engine parity testing infrastructure
+- Physics correctness validation framework
+- Refactored launcher consolidation
+- Humanoid builder consolidation
+
 ### Security (CRITICAL - January 13, 2026)
 
-**Security Grade Improvement: D+ (68/100) → A- (92/100)**
+Critical security fixes for authentication, data exposure, and dependency vulnerabilities.
 
 #### Added
 
