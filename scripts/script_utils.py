@@ -148,12 +148,10 @@ def run_command(
         FileNotFoundError: If the command is not found
 
     """
-    if not cmd:
-        raise ValueError("cmd must be provided")
-    if not isinstance(cmd, list):
-        raise TypeError("cmd must be a list")
-    if cwd is not None and not isinstance(cwd, Path | str):
-        raise TypeError("cwd must be a Path or str")
+    assert cmd, "cmd must be provided"
+    assert isinstance(cmd, list), "cmd must be a list"
+    if cwd is not None:
+        assert isinstance(cwd, Path | str), "cwd must be a Path or str"
 
     if logger:
         logger.debug(f"Running command: {' '.join(cmd)}")

@@ -187,8 +187,6 @@ class DrakePhysicsEngine(PhysicsEngine):
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step.
 
-        Integrates aerodynamic forces after the main physics step.
-
         Args:
             dt: Time step [s]. Must be > EPSILON_TIME_STEP if provided.
 

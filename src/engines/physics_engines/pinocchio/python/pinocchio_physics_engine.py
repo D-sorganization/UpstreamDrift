@@ -36,6 +36,7 @@ if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
 
 from src.shared.python.core import constants
+from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 
 logger = get_logger(__name__)
 
@@ -196,13 +197,32 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         *,
         integrator: PinocchioIntegrator | None = None,
     ) -> None:
-        """Advance the simulation by one time step."""
+        """Advance the simulation by one time step.
+
+        Args:
+            dt: Time step size [s]. Must be > EPSILON_TIME_STEP.
+                Defaults to DEFAULT_TIME_STEP.
+            integrator: Integration scheme — ``"semi_implicit"`` (symplectic
+                Euler, O(dt), energy-stable) or ``"rk4"`` (classic 4th-order
+                Runge-Kutta, O(dt^4), more accurate for large dt or
+                validation).
+
+        Raises:
+            ValueError: If dt is not positive.
+        """
         if self.model is None or self.data is None:
             return
 
         time_step = dt if dt is not None else DEFAULT_TIME_STEP
         if time_step <= 0.0:
             raise ValueError("dt must be positive")
+
+        # Guard against invalid time steps (Issue #3054)
+        if time_step <= EPSILON_TIME_STEP:
+            raise ValueError(
+                f"dt must be positive, got {time_step}. "
+                f"Minimum supported: {EPSILON_TIME_STEP}"
+            )
 
         method = self.integrator if integrator is None else integrator
         if method == "rk4":

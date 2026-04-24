@@ -382,7 +382,7 @@ class ClubTrajectoryParser:
             raise ValueError("row must be provided")
         get = self._make_row_accessor(row)
 
-        sample = get(self.SAMPLE_COL)
+        sample = get(self.SAMPLE_COL)  # type: ignore[operator]
         if sample is None or not isinstance(sample, int | float):
             return None
 
