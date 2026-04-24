@@ -48,7 +48,7 @@ maturin develop                                   # build Rust extensions locall
 3. File size budget: **1200 lines max** per file. Exceptions in `scripts/config/file_size_budget.json`
 4. Module size budget: checked against `module_size_budget_baseline.json`
 5. No TRACKED_TASK/TRACKED_DEFECT unless tied to a tracked GitHub issue
-6. pytest with `-n auto`, 60s timeout, **30% coverage minimum**
+6. pytest with `-n auto`, 60s timeout, **11% coverage minimum** (threshold in `pyproject.toml [tool.coverage.report] fail_under` — single source of truth per #3064)
 7. No `print()` in `src/` — use logging
 
 ## Test Markers

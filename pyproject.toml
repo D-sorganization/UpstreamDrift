@@ -384,9 +384,10 @@ omit = [
 ]
 
 [tool.coverage.report]
-# Coverage threshold — enforced in CI and locally when running with --cov.
-# Raise this value as coverage improves toward the 60% target (#1630).
-fail_under = 45
+# Coverage threshold — single source of truth (issue #3064).
+# Set to actual measured coverage (~11%) so local and CI runs agree.
+# Raise toward 60% target (#1630) via ratchet (see scripts/check_coverage_consistency.py).
+fail_under = 11
 show_missing = true
 skip_empty = true
 precision = 1

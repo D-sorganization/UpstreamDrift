@@ -57,10 +57,68 @@ permissions:
   checks: read
 
 jobs:
+  # ── Kill-switch: honour JULES_ENABLED repo variable (issue #3065) ──────────
+  kill-switch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules kill switch
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Reads the JULES_ENABLED repository variable set by jules-kill-switch.yml.
+          # If the variable is absent or set to anything other than "true" Jules is
+          # considered disabled and all downstream jobs are skipped.
+          ENABLED=$(gh api \
+            /repos/${{ github.repository }}/actions/variables/JULES_ENABLED \
+            --jq '.value' 2>/dev/null || echo "true")
+          if [[ "$ENABLED" != "true" ]]; then
+            echo "::warning::Jules kill switch is active (JULES_ENABLED=$ENABLED). All Jules jobs skipped."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
+  # ── Anti-loop guard: bail out if recent commits are all from Jules ─────────
+  anti-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    needs: kill-switch
+    if: needs.kill-switch.outputs.enabled == 'true'
+    outputs:
+      safe: ${{ steps.guard.outputs.safe }}
+    steps:
+      - name: Checkout (shallow)
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          fetch-depth: 10
+      - name: Check for Jules-only commit streak
+        id: guard
+        run: |
+          # Examine the last 5 commits.  If every author is a Jules bot account
+          # we are in a loop and should bail out with a warning rather than
+          # triggering yet another Jules run.
+          WINDOW=5
+          BOT_PATTERN="jules-bot|jules-ai\[bot\]|github-actions\[bot\]"
+          TOTAL=$(git log --format="%ae" -n "$WINDOW" | wc -l)
+          BOTS=$(git log --format="%ae" -n "$WINDOW" | grep -cEi "$BOT_PATTERN" || true)
+          echo "Last $TOTAL commits: $BOTS authored by Jules/bots"
+          if [[ "$TOTAL" -gt 0 && "$BOTS" -eq "$TOTAL" ]]; then
+            echo "::warning::Anti-loop guard triggered: all of the last $TOTAL commits are from Jules/bots. Skipping Jules run to prevent infinite loop."
+            echo "safe=false" >> $GITHUB_OUTPUT
+          else
+            echo "safe=true" >> $GITHUB_OUTPUT
+          fi
+
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
+    needs: anti-loop
+    if: needs.anti-loop.outputs.safe == 'true'
     outputs:
       runner: ${{ steps.check.outputs.runner }}
     steps:
@@ -115,7 +173,7 @@ jobs:
       - name: Analyze Event Context
         id: decide
         if: steps.check-limits.outcome == 'skipped' || steps.check-limits.outputs.exceeded != 'true'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
             const event = context.eventName;

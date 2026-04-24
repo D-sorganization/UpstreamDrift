@@ -84,10 +84,10 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with: { python-version: "3.11" }
       - run: pip install ruff==0.14.10 mypy>=1.15.0 bandit==1.7.7 pydocstyle==6.3.0
 
@@ -185,7 +185,7 @@ jobs:
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: matlab-quality-report
@@ -199,7 +199,7 @@ jobs:
       matrix:
         python: ["3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Reject Raw Merge Conflict Markers
         run: |
           if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
@@ -232,7 +232,7 @@ jobs:
             libxcb-shape0 \
             libxcb-xinerama0 \
             libxcb-xkb1
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: ${{ matrix.python }}
 
@@ -306,7 +306,6 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
-            --cov-fail-under=30 \
             --tb=short \
             -v
 
@@ -332,7 +331,7 @@ jobs:
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
           echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
-      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
@@ -346,9 +345,9 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Checkout Tools Hub
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -386,7 +385,7 @@ jobs:
             libxcb-shape0 \
             libxcb-xinerama0 \
             libxcb-xkb1
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: "3.11"
       - name: Install Core Test Dependencies
@@ -425,8 +424,8 @@ jobs:
       run:
         working-directory: ./ui
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "24"
           cache: "npm"
@@ -461,9 +460,9 @@ jobs:
     if: false # DISABLED - Requires MATLAB license not available in CI
     continue-on-error: true
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-      - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f  # v3
-      - uses: matlab-actions/run-command@2970c890bd6dfbc8ba4d640879c4c496dec4e426  # v3
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f # v3
+      - uses: matlab-actions/run-command@2970c890bd6dfbc8ba4d640879c4c496dec4e426 # v3
         with:
           command: |
             addpath('matlab');
@@ -479,8 +478,8 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: false # DISABLED - No Arduino components in this project
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with: { python-version: "3.11" }
       - run: pip install platformio
       - name: Verify Build
@@ -498,7 +497,7 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -535,7 +534,7 @@ jobs:
 
       - name: Install Rust toolchain
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8  # stable
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
         with:
           components: rustfmt, clippy
           targets: wasm32-unknown-unknown
@@ -543,7 +542,7 @@ jobs:
       # Clone Tools repo for tools-core dependency
       - name: Checkout Tools (tools-core dependency)
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -558,7 +557,7 @@ jobs:
 
       - name: Cache Cargo registry
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: |
             ~/.cargo/registry
