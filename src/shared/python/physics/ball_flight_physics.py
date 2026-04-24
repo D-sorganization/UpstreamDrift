@@ -144,6 +144,33 @@ class BallFlightSimulator:
         self.ball = ball or BallProperties()
         self.environment = env or environment or EnvironmentalConditions()
 
+        # Initialize aerodynamics engine to ensure wind and ball settings
+        # are threaded through force calculations during Rust integration
+        from src.shared.python.physics.aerodynamics import (
+            AerodynamicsConfig,
+            AerodynamicsEngine,
+            WindConfig,
+            WindModel,
+        )
+
+        # Create basic wind config from environment wind velocity
+        wind_config = WindConfig(
+            base_velocity=self.environment.wind_velocity,
+            gust_enabled=False,
+        )
+        wind_model = WindModel(wind_config)
+
+        # Initialize aerodynamics with wind and ball properties
+        self._aero_engine = AerodynamicsEngine(
+            config=AerodynamicsConfig(
+                drag_enabled=True,
+                lift_enabled=True,
+                magnus_enabled=True,
+            ),
+            wind_model=wind_model,
+            air_density=self.environment.air_density,
+        )
+
     @precondition(
         lambda self, launch, max_time=10.0, dt=0.01: (
             launch is not None and launch.velocity >= 0
@@ -236,17 +263,42 @@ class BallFlightSimulator:
     def _post_process_rust(
         self, rust_result: Any, launch: LaunchConditions
     ) -> list[TrajectoryPoint]:
-        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects."""
+        """Convert a Rust BallTrajectoryResult to a list of TrajectoryPoint objects.
+
+        Uses the initialized aerodynamics engine to ensure wind and ball
+        settings are consistently applied to force calculations.
+        """
         if launch is None:
             raise ValueError("launch must be provided")
         points = []
         for p in rust_result.get_points():
             pos = np.array([p.x, p.y, p.z])
             vel = np.array([p.vx, p.vy, p.vz])
-            forces = self._calculate_forces(vel, launch)
-            acc = (
-                forces["gravity"] + forces["drag"] + forces["magnus"]
-            ) / self.ball.mass
+
+            # Compute forces using aerodynamics engine with wind and ball settings
+            omega = launch.spin_rate * 2 * np.pi / 60
+            spin = launch.spin_axis * omega
+
+            aero_forces = self._aero_engine.compute_forces(
+                vel, spin, t=p.t, position=pos
+            )
+
+            # Gravity force
+            gravity_force = np.array(
+                [0.0, 0.0, -self.ball.mass * self.environment.gravity]
+            )
+
+            # Combine forces
+            forces = {
+                "gravity": gravity_force,
+                "drag": aero_forces["drag"],
+                "magnus": aero_forces["magnus"],
+            }
+
+            # Compute acceleration
+            total_force = gravity_force + aero_forces["drag"] + aero_forces["magnus"]
+            acc = total_force / self.ball.mass
+
             points.append(TrajectoryPoint(p.t, pos, vel, acc, forces))
         return points
 

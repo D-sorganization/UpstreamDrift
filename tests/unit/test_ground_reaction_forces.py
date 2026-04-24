@@ -381,3 +381,21 @@ class TestCrossEngineValidation:
         results = validate_grf_cross_engine(data_a, data_b)
 
         assert results["cop_position"] is False
+
+    def test_unsupported_engine_zero_force_fallback(self) -> None:
+        """When engine returns zero contact forces, should fall back to gravity."""
+        # Create an engine that returns zero (unsupported contact queries like Pinocchio)
+        engine = MagicMock()
+        engine.get_time.return_value = 0.5
+        engine.compute_contact_forces.return_value = np.zeros(3)
+        engine.compute_gravity_forces.return_value = np.array([-9.81])
+        jac = {"linear": np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])}
+        engine.compute_jacobian.return_value = jac
+
+        # extract_grf_from_contacts should handle zero forces gracefully
+        grf = extract_grf_from_contacts(engine, ["left_foot"])
+
+        # Should have fallen back to gravity-based estimate (z > 0)
+        engine.compute_gravity_forces.assert_called()
+        assert grf.force[2] > 0  # Vertical force from gravity fallback
+        assert grf.timestamp == 0.5
