@@ -499,8 +499,23 @@ class EnhancedBallFlightSimulator:
 
         self.ball = ball or BallProperties()
         self.environment = environment or EnvironmentalConditions()
-        self.aero_config = aero_config or AerodynamicsConfig()
-        self.wind_config = wind_config or WindConfig()
+        # When no aero_config is supplied, seed ball_radius/ball_area from the
+        # actual BallProperties so that custom-ball configurations are honoured.
+        if aero_config is None:
+            self.aero_config = AerodynamicsConfig(
+                ball_radius=self.ball.radius,
+                ball_area=self.ball.cross_sectional_area,
+            )
+        else:
+            self.aero_config = aero_config
+        # When no wind_config is supplied, seed the base_velocity from the
+        # environment wind so that non-zero wind reaches the AerodynamicsEngine.
+        if wind_config is None:
+            self.wind_config = WindConfig(
+                base_velocity=self.environment.wind_velocity.copy(),
+            )
+        else:
+            self.wind_config = wind_config
         self.randomization_config = randomization_config or RandomizationConfig()
         self._seed = seed
 

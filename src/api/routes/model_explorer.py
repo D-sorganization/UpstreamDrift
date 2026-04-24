@@ -12,11 +12,14 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import re
+import shutil
 from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as ElementTree
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 from src.api.middleware.error_handler import handle_api_errors
 from src.shared.python.core.contracts import postcondition, precondition
@@ -29,6 +32,33 @@ from ..models.responses import (
     URDFTreeNode,
 )
 from ._route_utils import find_project_root
+
+# ---------------------------------------------------------------------------
+# Model duplicate endpoint helpers
+# ---------------------------------------------------------------------------
+
+# Only alphanumeric characters, hyphens, and underscores are permitted as a
+# new model stem (no slashes, dots, or path-traversal sequences).
+_SAFE_STEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_\-]{0,63}$")
+
+# Restrict duplication to known model-asset extensions only.
+_ALLOWED_MODEL_EXTENSIONS = {".urdf", ".mjcf", ".xml"}
+
+
+class ModelDuplicateRequest(BaseModel):
+    """Request body for POST /models/duplicate."""
+
+    source_path: str
+    new_name: str
+
+
+class ModelDuplicateResponse(BaseModel):
+    """Response body for POST /models/duplicate."""
+
+    source_path: str
+    copy_path: str
+    new_name: str
+
 
 router = APIRouter()
 
@@ -414,4 +444,99 @@ async def compare_models(
         shared_joints=shared,
         unique_to_a=only_a,
         unique_to_b=only_b,
+    )
+
+
+@router.post(
+    "/models/duplicate",
+    response_model=ModelDuplicateResponse,
+    status_code=201,
+)
+@handle_api_errors
+async def duplicate_model(
+    request: ModelDuplicateRequest,
+    logger: Any = Depends(get_logger),
+) -> ModelDuplicateResponse:
+    """Duplicate a URDF/MJCF model asset under a new name.
+
+    Only files inside an approved model directory and with an allowed
+    extension (.urdf, .mjcf, .xml) may be duplicated.  Arbitrary repo
+    files are rejected even when they reside inside the checkout.
+
+    Args:
+        request: Duplicate request with source_path and new_name.
+        logger: Injected logger.
+
+    Returns:
+        ModelDuplicateResponse with source and copy paths.
+
+    Raises:
+        HTTPException 400: new_name contains unsafe characters.
+        HTTPException 404: source_path not found or not a model asset.
+        HTTPException 409: destination file already exists.
+        HTTPException 422: source file has a disallowed extension.
+    """
+    if request is None:
+        raise ValueError("request must be provided")
+
+    # Validate new_name against the safe-stem allowlist.
+    if not _SAFE_STEM_RE.match(request.new_name):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "new_name must start with an alphanumeric character and "
+                "contain only letters, digits, hyphens, and underscores "
+                "(max 64 chars)."
+            ),
+        )
+
+    root = _find_project_root()
+    approved_roots = [
+        root / model_dir for model_dir in _MODEL_DIRS if (root / model_dir).exists()
+    ]
+
+    # Resolve and validate source_path — must be inside an approved model dir.
+    source = (root / request.source_path).resolve()
+    if not any(
+        source.is_relative_to(approved_root.resolve())
+        for approved_root in approved_roots
+    ):
+        raise HTTPException(
+            status_code=404,
+            detail=f"source_path '{request.source_path}' is not inside an approved model directory.",
+        )
+
+    if not source.exists() or not source.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Model file not found: {request.source_path}",
+        )
+
+    # Restrict to model asset extensions.
+    if source.suffix.lower() not in _ALLOWED_MODEL_EXTENSIONS:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"Extension '{source.suffix}' is not an allowed model type. "
+                f"Allowed: {sorted(_ALLOWED_MODEL_EXTENSIONS)}"
+            ),
+        )
+
+    dest = source.parent / (request.new_name + source.suffix)
+
+    if dest.exists():
+        raise HTTPException(
+            status_code=409,
+            detail=f"Destination '{dest.relative_to(root)}' already exists.",
+        )
+
+    shutil.copy2(source, dest)
+
+    if logger:
+        logger.info("Duplicated model %s -> %s", source, dest)
+
+    return ModelDuplicateResponse(
+        source_path=str(source.relative_to(root)),
+        copy_path=str(dest.relative_to(root)),
+        new_name=request.new_name,
     )
