@@ -123,31 +123,71 @@ class TestBasicContactPhysics:
         )
 
         # Ball should be near ground (not still at 1m)
-        assert final_height < 0.1, (
-            f"Ball should settle near ground: height={final_height:.3f}m"
-        )
+        assert (
+            final_height < 0.1
+        ), f"Ball should settle near ground: height={final_height:.3f}m"
 
         # Log for cross-engine comparison
         np.sqrt(E_final / E_initial)
 
     @pytest.mark.slow
-    @pytest.mark.xfail(
-        strict=False, reason="Drake contact model testing - not yet implemented"
-    )
     def test_drake_ball_drop_energy_dissipation(self, ball_urdf) -> None:
-        """Verify Drake contact dissipates energy."""
-        # Expected behavior: Similar to MuJoCo but may use different contact model
-        raise NotImplementedError("Drake contact model testing - not yet implemented")
+        """Verify Drake contact dissipates energy (ball doesn't bounce forever)."""
+        try:
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
+                DrakePhysicsEngine,
+            )
+        except ImportError:
+            pytest.skip("Drake not installed")
+
+        engine = DrakePhysicsEngine()
+        try:
+            engine.load_from_path(ball_urdf)
+        except Exception as e:  # noqa: BLE001
+            pytest.skip(f"Drake URDF loading failed: {e}")
+
+        # Drop ball from 1m height
+        initial_height = 1.0
+        # State: [x, y, z, qw, qx, qy, qz]
+        q_init = np.array([0, 0, initial_height, 1, 0, 0, 0])
+        v_init = np.zeros(6)  # Zero velocity
+        engine.set_state(q_init, v_init)
+
+        # Simulate for 1.5s at 1ms steps to capture ball drop and bounces
+        # Free-fall time from 1m: t = sqrt(2*1.0/9.81) ≈ 0.45s
+        dt = 0.001
+        num_steps = int(1.5 / dt)
+        for _ in range(num_steps):
+            engine.step(dt=dt)
+
+        q_final, _ = engine.get_state()
+        final_height = q_final[2]
+
+        # Check that contact dissipates energy: final height << initial height
+        # After 1.5s, ball should have settled significantly (multiple bounces)
+        if final_height > BOUNCE_HEIGHT_THRESHOLD_M:  # Still bouncing
+            # Energy dissipation: measure bounce height decline
+            energy_ratio = final_height / initial_height
+            # Drake's contact should dissipate energy (e.g., e ≈ 0.6-0.8 per bounce)
+            assert energy_ratio < 0.9, (
+                f"Drake contact should dissipate energy after {num_steps} steps; "
+                f"final height {final_height:.6f} too close to initial {initial_height}"
+            )
+        else:
+            # Ball settled to ground - contact dissipation working
+            assert final_height < BOUNCE_HEIGHT_THRESHOLD_M
 
     @pytest.mark.slow
     def test_pinocchio_contact_behavior(self, ball_urdf) -> None:
-        """Document Pinocchio contact behavior."""
+        """Verify Pinocchio properly declares contact force unsupport via Capability."""
         try:
             from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
         except ImportError:
             pytest.skip("Pinocchio not installed")
+
+        from src.shared.python.engine_core.capabilities import Capability
 
         engine = PinocchioPhysicsEngine()
         try:
@@ -156,14 +196,17 @@ class TestBasicContactPhysics:
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Pinocchio URDF loading failed/broken: {e}")
 
-        # Ensure DbC logic works and it doesn't crash on contact calculation
-        contact_forces = engine.compute_contact_forces()
-        assert isinstance(contact_forces, np.ndarray), "Should return a numpy array"
-        assert contact_forces.shape == (3,), "Should return a 3-element force vector"
-        # Since it's a known limitation in ABA without constraint solver, we expect 0 natively
-        assert np.all(contact_forces == 0), (
-            "Currently expects zero forces without constraint solver"
-        )
+        # Verify contract (issue #3052): CONTACT_FORCES not in capabilities
+        caps = engine.capabilities()
+        assert (
+            Capability.CONTACT_FORCES not in caps
+        ), "Pinocchio declares CONTACT_FORCES despite not supporting it"
+
+        # Verify NotImplementedError is raised when caller ignores capability check
+        with pytest.raises(
+            NotImplementedError, match="does not support compute_contact_forces"
+        ):
+            engine.compute_contact_forces()
 
 
 class TestCrossEngineContactComparison:

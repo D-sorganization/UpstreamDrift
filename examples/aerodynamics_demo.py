@@ -10,15 +10,9 @@ ball speeds, and shows the effect of toggling individual force components.
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+import numpy as np
 
-project_root = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(project_root))
-
-import numpy as np  # noqa: E402
-
-from src.shared.python.physics.aerodynamics import (  # noqa: E402
+from src.shared.python.physics.aerodynamics import (
     AerodynamicsConfig,
     AerodynamicsEngine,
 )

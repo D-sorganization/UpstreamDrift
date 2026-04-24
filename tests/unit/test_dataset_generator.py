@@ -504,9 +504,9 @@ class TestIssue2472DatasetGeneratorInvariants:
         dataset = gen.generate(config)
 
         sample = dataset.samples[0]
-        assert "potential" in sample.energies, (
-            "potential_energy must be present in sample.energies"
-        )
-        assert np.any(sample.energies["potential"] != 0.0), (
-            "potential_energy must not be all zeros when engine provides it"
-        )
+        assert (
+            "potential" in sample.energies
+        ), "potential_energy must be present in sample.energies"
+        assert np.any(
+            sample.energies["potential"] != 0.0
+        ), "potential_energy must not be all zeros when engine provides it"

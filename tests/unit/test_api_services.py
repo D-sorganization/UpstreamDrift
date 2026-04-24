@@ -208,9 +208,9 @@ class TestSimulationService:
         ):
             await service.run_simulation_background(task_id, request, active_tasks)
 
-        assert active_tasks[task_id]["status"] == "failed", (
-            "Failed simulation must not be stored as 'completed'"
-        )
+        assert (
+            active_tasks[task_id]["status"] == "failed"
+        ), "Failed simulation must not be stored as 'completed'"
 
 
 class TestAnalysisService:

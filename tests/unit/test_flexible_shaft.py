@@ -494,16 +494,16 @@ class TestRecommendShaftFlexBugFix:
     def test_shaft_length_driver_is_tour_average(self) -> None:
         from src.shared.python.physics.flexible_shaft import SHAFT_LENGTH_DRIVER
 
-        assert abs(SHAFT_LENGTH_DRIVER - 1.1557) < 1e-4, (
-            f'Expected ~1.1557 m (45.5" tour average), got {SHAFT_LENGTH_DRIVER}'
-        )
+        assert (
+            abs(SHAFT_LENGTH_DRIVER - 1.1557) < 1e-4
+        ), f'Expected ~1.1557 m (45.5" tour average), got {SHAFT_LENGTH_DRIVER}'
 
     def test_shaft_length_iron_is_tour_average(self) -> None:
         from src.shared.python.physics.flexible_shaft import SHAFT_LENGTH_IRON
 
-        assert abs(SHAFT_LENGTH_IRON - 0.9398) < 1e-4, (
-            f'Expected ~0.9398 m (37" tour average), got {SHAFT_LENGTH_IRON}'
-        )
+        assert (
+            abs(SHAFT_LENGTH_IRON - 0.9398) < 1e-4
+        ), f'Expected ~0.9398 m (37" tour average), got {SHAFT_LENGTH_IRON}'
 
     def test_recommend_shaft_flex_speed_breakpoints(self) -> None:
         from src.shared.python.physics.flexible_shaft import recommend_shaft_flex

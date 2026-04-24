@@ -10,15 +10,9 @@ at a grid of sample points, and prints a small ASCII cross-section.
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
+import numpy as np
 
-project_root = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(project_root))
-
-import numpy as np  # noqa: E402
-
-from src.shared.python.physics.topography import (  # noqa: E402
+from src.shared.python.physics.topography import (
     create_flat_terrain,
     create_sloped_terrain,
     create_undulating_terrain,
