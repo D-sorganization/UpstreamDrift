@@ -73,6 +73,10 @@ class DrakePhysicsEngine(PhysicsEngine):
         Args:
             time_step: Simulation time step in seconds.
         """
+        if not DRAKE_AVAILABLE:
+            raise ImportError(
+                "Drake is not installed. Install pydrake to use DrakePhysicsEngine."
+            )
         if not (time_step is not None):
             raise ValueError("time_step must be provided")
         if not (time_step is not None):
