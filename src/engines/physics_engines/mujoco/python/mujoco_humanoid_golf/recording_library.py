@@ -632,26 +632,27 @@ class RecordingLibrary:
         if field is None:
             raise ValueError("field must be provided")
 
-        allowed_fields = {
-            "golfer_name",
-            "club_type",
-            "model_name",
-            "swing_type",
-            "tags",
-            "notes",
+        query_map = {
+            "golfer_name": "SELECT DISTINCT golfer_name FROM recordings "
+            "WHERE golfer_name != ''",
+            "club_type": "SELECT DISTINCT club_type FROM recordings "
+            "WHERE club_type != ''",
+            "model_name": "SELECT DISTINCT model_name FROM recordings "
+            "WHERE model_name != ''",
+            "swing_type": "SELECT DISTINCT swing_type FROM recordings "
+            "WHERE swing_type != ''",
+            "tags": "SELECT DISTINCT tags FROM recordings WHERE tags != ''",
+            "notes": "SELECT DISTINCT notes FROM recordings WHERE notes != ''",
         }
 
-        if field not in allowed_fields:
+        if field not in query_map:
             return []
 
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        # Safe: field is validated against whitelist above
-        query = (
-            f"SELECT DISTINCT {field} "  # nosec B608
-            f"FROM recordings WHERE {field} != ''"
-        )
+        # Safe: query is explicitly selected from a hardcoded map of safe queries
+        query = query_map[field]
         cursor.execute(query)
         values = [row[0] for row in cursor.fetchall()]
 

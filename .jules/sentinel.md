@@ -65,3 +65,8 @@
 **Vulnerability:** No container security scanning was configured in CI workflows, leaving Docker images unaudited for vulnerabilities. Base image vulnerabilities could be inherited silently.
 **Learning:** Container vulnerabilities are undetected until production without proper CI scanning tools. Relying solely on source code scanning leaves a gap in the security posture regarding the environment the code runs in.
 **Prevention:** Ensured the `.github/workflows/docker-security-scan.yml` is enabled by removing its `.disabled` extension so that Trivy runs on every PR and push.
+
+## 2024-04-24 - Fix SQL Injection Vulnerability in Recording Library
+**Vulnerability:** String-based query construction with `f-strings` in `get_unique_values` (Bandit B608).
+**Learning:** Even when input is validated against a whitelist, security scanners will flag string-based SQL query construction. Using a hardcoded mapping of query strings eliminates both the actual risk and the static analysis warnings.
+**Prevention:** Use hardcoded SQL query maps for column names (which cannot be parameterized in standard SQL bindings) instead of dynamic string construction.

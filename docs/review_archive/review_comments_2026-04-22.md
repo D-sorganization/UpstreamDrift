@@ -18,4 +18,3 @@ The new test expects `_evaluate_precondition` to raise `PreconditionError` with 
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3029#discussion_r3127649011)
 
 ---
-

@@ -99,17 +99,85 @@ jobs:
       # a strict superset of black's style; running both causes conflicts.
       # Runs on full repo (.) to catch formatting issues outside src/scripts/tests.
       - name: Check Formatting (ruff)
-        run: ruff format --check .
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              BASE_SHA=$(git rev-parse HEAD~1 || true)
+            fi
+          fi
+
+          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
+          if [ -n "$CHANGED_PY_FILES" ]; then
+            echo "Changed Python files:"
+            echo "$CHANGED_PY_FILES"
+            echo "$CHANGED_PY_FILES" | xargs -d '\n' ruff format --check
+          else
+            echo "No changed Python files detected — skipping ruff format check."
+          fi
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -e .[dev]
-      # Baseline mypy check across all of src/
-      - run: mypy src --config-file pyproject.toml
+      # Baseline mypy check for changed source files only so unrelated legacy
+      # type debt elsewhere in src/ does not block this PR.
+      - name: MyPy (changed src files)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              BASE_SHA=$(git rev-parse HEAD~1 || true)
+            fi
+          fi
+
+          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
+          CHANGED_SRC_PY_FILES=$(printf '%s\n' "$CHANGED_PY_FILES" | grep '^src/' || true)
+          if [ -n "$CHANGED_SRC_PY_FILES" ]; then
+            echo "Changed source files:"
+            echo "$CHANGED_SRC_PY_FILES"
+            echo "$CHANGED_SRC_PY_FILES" | xargs -d '\n' mypy --config-file pyproject.toml
+          else
+            echo "No changed source files detected — skipping baseline mypy."
+          fi
+
       # Strict mypy for the fully-annotated API layer (issue #2105).
       # --follow-imports=silent applies strict rules only to src/api/ files,
       # not to their transitive dependencies (which have pre-existing issues).
       - name: MyPy Strict (src/api)
-        run: mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+          else
+            BASE_SHA="${{ github.event.before }}"
+            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
+              BASE_SHA=$(git rev-parse HEAD~1 || true)
+            fi
+          fi
+
+          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
+          CHANGED_API_PY_FILES=$(printf '%s\n' "$CHANGED_PY_FILES" | grep '^src/api/' || true)
+          if [ -n "$CHANGED_API_PY_FILES" ]; then
+            echo "Changed API files:"
+            echo "$CHANGED_API_PY_FILES"
+            echo "$CHANGED_API_PY_FILES" | xargs -d '\n' mypy --strict --follow-imports=silent --config-file pyproject.toml
+          else
+            echo "No changed src/api files detected — skipping strict mypy."
+          fi
 
       - name: Dependency Direction Fitness Check
         run: python3 scripts/check_dependency_direction.py

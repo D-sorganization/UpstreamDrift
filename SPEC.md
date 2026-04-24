@@ -29,8 +29,8 @@ Last-Updated: 2026-04-23T12:49:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.174                                            |
-| **Last Spec Update**    | 2026-04-23                                         |
+| **Spec Version**        | 1.0.175                                            |
+| **Last Spec Update**    | 2026-04-24                                         |
 
 ## 2. Purpose & Mission
 
@@ -715,6 +715,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-24: Fixed SQL injection vulnerability in recording library by replacing f-strings with a hardcoded map of queries.
 - 2026-04-23: Replaced the Rust workspace's sibling `../Tools` path dependency with a pinned git dependency on `tools-core`, documented clean-clone `cargo build` and `maturin develop` steps, added ADR 0005, and removed Rust/Tauri CI symlink workarounds in favor of a clean-clone Rust quickstart lane.
 - 2026-04-23: Moved `pip-audit` waivers into `.github/security/pip-audit-ignore.yml` and added `scripts/check_pip_audit_waivers.py` so CI fails on expired waivers before generating `--ignore-vuln` flags.
 - 2026-04-23: Removed tracked generated analysis artifacts and added a forbidden-artifact guard so CI rejects regenerated reports, coverage dumps, temp IDs, and NumPy scratch outputs before they can re-enter version control.

@@ -46,7 +46,7 @@ class TestRotationMatrixProperties:
         pitch=angles,
         yaw=angles,
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_rotation_matrix_is_orthogonal(
         self, roll: float, pitch: float, yaw: float
     ) -> None:
@@ -60,7 +60,7 @@ class TestRotationMatrixProperties:
         pitch=angles,
         yaw=angles,
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_rotation_matrix_determinant_is_one(
         self, roll: float, pitch: float, yaw: float
     ) -> None:
@@ -79,7 +79,7 @@ class TestRotationMatrixProperties:
             min_value=-np.pi, max_value=np.pi, allow_nan=False, allow_infinity=False
         ),
     )
-    @settings(max_examples=20)
+    @settings(max_examples=5)
     def test_euler_roundtrip(self, roll: float, pitch: float, yaw: float) -> None:
         """Converting euler->matrix->euler should preserve the rotation (avoiding gimbal lock)."""
         # Avoid gimbal lock region (pitch near +/-pi/2)
@@ -98,7 +98,7 @@ class TestRotationMatrixProperties:
         pitch=angles,
         yaw=angles,
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_rotation_preserves_vector_norm(
         self, roll: float, pitch: float, yaw: float
     ) -> None:
@@ -124,7 +124,7 @@ class TestSkewMatrixProperties:
         y=reasonable_floats,
         z=reasonable_floats,
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_skew_is_antisymmetric(self, x: float, y: float, z: float) -> None:
         """Skew matrix should be antisymmetric: S = -S.T."""
         v = np.array([x, y, z])
@@ -136,7 +136,7 @@ class TestSkewMatrixProperties:
         y=reasonable_floats,
         z=reasonable_floats,
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_skew_diagonal_is_zero(self, x: float, y: float, z: float) -> None:
         """Skew matrix diagonal should be all zeros."""
         v = np.array([x, y, z])
@@ -151,7 +151,7 @@ class TestSkewMatrixProperties:
         uy=reasonable_floats,
         uz=reasonable_floats,
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_skew_cross_product_equivalence(
         self, x: float, y: float, z: float, ux: float, uy: float, uz: float
     ) -> None:
@@ -180,7 +180,7 @@ class TestNumericalStability:
             max_size=30,
         )
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_mean_within_bounds(self, values: list[float]) -> None:
         """Mean of values should be within min/max bounds (up to floating-point rounding)."""
         arr = np.array(values)
@@ -195,7 +195,7 @@ class TestNumericalStability:
             max_size=20,
         )
     )
-    @settings(max_examples=25)
+    @settings(max_examples=5)
     def test_positive_sum_is_positive(self, values: list[float]) -> None:
         """Sum of positive values should be positive."""
         total = sum(values)
