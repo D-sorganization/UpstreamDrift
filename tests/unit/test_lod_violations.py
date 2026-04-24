@@ -30,7 +30,7 @@ class TestAntagonistPairMuscleNames:
         method_names = [
             n.name
             for n in ast.walk(pair_class)
-            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+            if isinstance(n, ast.FunctionDef | ast.AsyncFunctionDef)
         ]
         assert "muscle_names" in method_names, (
             "AntagonistPair must have a muscle_names property to avoid "

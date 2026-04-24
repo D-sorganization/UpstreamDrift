@@ -63,7 +63,7 @@ def _engine_state_to_dict(engine: object) -> dict[str, Any]:
     if not hasattr(engine, "get_state"):
         return {}
     result = engine.get_state()
-    if not isinstance(result, (tuple, list)) or len(result) < 2:
+    if not isinstance(result, tuple | list) or len(result) < 2:
         return {}
     q, v = result[0], result[1]
     return {

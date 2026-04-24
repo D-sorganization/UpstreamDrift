@@ -165,12 +165,15 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install pip-audit
-          # Ignore CVEs with no fix version available or transitive dependencies:
-          # - CVE-2024-23342 (ecdsa): No fix version available
-          # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
-          # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
-          # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539
+          # Upgrade transitive deps to patched releases before auditing:
+          # - protobuf>=5.29.4 patches CVE-2026-0994 (fixed upstream)
+          # - pygments>=2.19.1 patches CVE-2026-4539 (fixed upstream)
+          # - pip upgrade above patches CVE-2026-1703 (pip itself, now resolved)
+          pip install --upgrade "protobuf>=5.29.4" "pygments>=2.19.1"
+          # CVE-2024-23342 (ecdsa): No fix version available upstream; ecdsa is a
+          # transitive dependency with no maintained replacement at this time.
+          # Retained ignore per issue #3076 until upstream resolves.
+          pip-audit --ignore-vuln CVE-2024-23342
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)

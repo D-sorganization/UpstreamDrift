@@ -403,7 +403,7 @@ class ClubTrajectoryParser:
         get = self._make_row_accessor(row)
 
         sample = get(self.SAMPLE_COL)  # type: ignore[operator]
-        if sample is None or not isinstance(sample, (int, float)):
+        if sample is None or not isinstance(sample, int | float):
             return None
 
         try:

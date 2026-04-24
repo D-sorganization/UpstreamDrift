@@ -64,9 +64,9 @@ class TestMassMatrixFormula:
         """m22 = I2 (proximal inertia of arm 2) — independent of configuration."""
         for theta2 in [0.0, math.pi / 4, -math.pi / 3, math.pi / 2, -math.pi]:
             _, _, m22 = _correct_mass_matrix(theta2)
-            assert m22 == pytest.approx(
-                I2, rel=1e-12
-            ), f"m22 != I2 at theta2={theta2:.3f}"
+            assert m22 == pytest.approx(I2, rel=1e-12), (
+                f"m22 != I2 at theta2={theta2:.3f}"
+            )
 
     def test_m12_equals_m21(self) -> None:
         """Mass matrix is symmetric: m12 = m21."""
@@ -83,9 +83,9 @@ class TestMassMatrixFormula:
             m11, m12, m22 = _correct_mass_matrix(theta2)
             M = [[m11, m12], [m12, m22]]
             eigvals = np.linalg.eigvalsh(M)
-            assert all(
-                ev > 0 for ev in eigvals
-            ), f"Not positive-definite at theta2={theta2:.2f}: {eigvals}"
+            assert all(ev > 0 for ev in eigvals), (
+                f"Not positive-definite at theta2={theta2:.2f}: {eigvals}"
+            )
 
     def test_known_values_at_theta2_zero(self) -> None:
         """At theta2=0 (segments aligned), verify exact formula values."""
@@ -117,15 +117,15 @@ class TestMassMatrixFormula:
         for theta2 in [0.0, math.pi / 4, -math.pi / 3]:
             m11_ok, m12_ok, m22_ok = _correct_mass_matrix(theta2)
             m11_bad, m12_bad, m22_bad = _buggy_mass_matrix(theta2)
-            assert m11_ok != pytest.approx(
-                m11_bad, rel=1e-3
-            ), f"Buggy m11 unexpectedly matches correct m11 at theta2={theta2:.3f}"
-            assert m12_ok != pytest.approx(
-                m12_bad, rel=1e-3
-            ), f"Buggy m12 unexpectedly matches correct m12 at theta2={theta2:.3f}"
-            assert m22_ok != pytest.approx(
-                m22_bad, rel=1e-3
-            ), f"Buggy m22 unexpectedly matches correct m22 at theta2={theta2:.3f}"
+            assert m11_ok != pytest.approx(m11_bad, rel=1e-3), (
+                f"Buggy m11 unexpectedly matches correct m11 at theta2={theta2:.3f}"
+            )
+            assert m12_ok != pytest.approx(m12_bad, rel=1e-3), (
+                f"Buggy m12 unexpectedly matches correct m12 at theta2={theta2:.3f}"
+            )
+            assert m22_ok != pytest.approx(m22_bad, rel=1e-3), (
+                f"Buggy m22 unexpectedly matches correct m22 at theta2={theta2:.3f}"
+            )
 
     def test_buggy_overestimates_inertia(self) -> None:
         """Buggy formula produces higher (wrong) inertias — pendulum too sluggish."""

@@ -223,7 +223,7 @@ def safe_bool(
     if isinstance(value, bool):
         return value
 
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return bool(value)
 
     if isinstance(value, str):
@@ -312,7 +312,7 @@ def ensure_list(value: Any) -> list[Any]:
     if isinstance(value, str):
         return [value]
 
-    if isinstance(value, (tuple, set, frozenset)):
+    if isinstance(value, tuple | set | frozenset):
         return list(value)
 
     if hasattr(value, "__iter__"):
@@ -423,7 +423,7 @@ def is_numeric(value: Any) -> bool:
         >>> is_numeric("hello")
         False
     """
-    if isinstance(value, (int, float)):
+    if isinstance(value, int | float):
         return True
     return safe_float(value, default=None) is not None
 

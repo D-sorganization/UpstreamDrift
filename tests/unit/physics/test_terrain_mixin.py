@@ -82,7 +82,7 @@ class TestTerrainMixinQueries:
     def test_get_ground_height_returns_float(self) -> None:
         mixin = self._mixin_with_terrain()
         h = mixin.get_ground_height(0.0, 0.0)
-        assert isinstance(h, (int, float))
+        assert isinstance(h, int | float)
 
     def test_get_ground_height_no_terrain_returns_zero(self) -> None:
         mixin = _SimpleMixin()

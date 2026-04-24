@@ -792,12 +792,12 @@ class TestIssue2501NullspaceAndTorqueLimits:
 
         assert solution.success
         assert solution.x is not None
-        assert np.all(
-            solution.x >= x_lb - 1e-9
-        ), f"x={solution.x} violates lb={x_lb}: NullspaceQPSolver must clamp to bounds"
-        assert np.all(
-            solution.x <= x_ub + 1e-9
-        ), f"x={solution.x} violates ub={x_ub}: NullspaceQPSolver must clamp to bounds"
+        assert np.all(solution.x >= x_lb - 1e-9), (
+            f"x={solution.x} violates lb={x_lb}: NullspaceQPSolver must clamp to bounds"
+        )
+        assert np.all(solution.x <= x_ub + 1e-9), (
+            f"x={solution.x} violates ub={x_ub}: NullspaceQPSolver must clamp to bounds"
+        )
 
     def test_torque_limits_enforced_in_wbc_solution(self) -> None:
         """WBC with torque_limits set must clip joint_torques to those limits."""
@@ -865,9 +865,9 @@ class TestWBCBugFixes:
 
         # Operator norm (largest singular value) must be ≤ 1 + small tolerance
         sv_max = np.linalg.norm(N, ord=2)
-        assert (
-            sv_max <= 1.0 + 1e-6
-        ), f"Nullspace projector norm {sv_max} > 1 near singularity"
+        assert sv_max <= 1.0 + 1e-6, (
+            f"Nullspace projector norm {sv_max} > 1 near singularity"
+        )
 
     def test_jacobian_column_mismatch_reported_not_dropped(self) -> None:
         """Tasks with Jacobian width != n_v must report the error in solution status."""
@@ -900,9 +900,9 @@ class TestWBCBugFixes:
 
         # Joint 0 velocity greatly exceeds the limit
         x_lb, x_ub = wbc._build_variable_bounds(n_v, 0, np.array([5.0, 0.0]))
-        assert np.all(
-            x_lb[:n_v] <= x_ub[:n_v]
-        ), f"Bounds inverted: lb={x_lb[:n_v]}, ub={x_ub[:n_v]}"
+        assert np.all(x_lb[:n_v] <= x_ub[:n_v]), (
+            f"Bounds inverted: lb={x_lb[:n_v]}, ub={x_ub[:n_v]}"
+        )
 
     def test_hqp_infeasibility_sets_status(self) -> None:
         """HQP failure must return success=False with a non-empty status string."""

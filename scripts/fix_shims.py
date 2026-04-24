@@ -24,7 +24,7 @@ def get_public_names(module_path: Path) -> list[str]:
     names: list[str] = []
 
     for node in ast.iter_child_nodes(tree):
-        if isinstance(node, (ast.FunctionDef | ast.AsyncFunctionDef, ast.ClassDef)):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
             if not node.name.startswith("_"):
                 names.append(node.name)
         elif isinstance(node, ast.Assign):

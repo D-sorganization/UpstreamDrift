@@ -199,9 +199,9 @@ class TestAngularMomentumConservation:
         )
         post = RigidBodyImpactModel().solve(pre, ImpactParameters())
         # Friction reaction torque must shift club omega away from zero.
-        assert not np.allclose(
-            post.clubhead_angular_velocity, pre_omega
-        ), "Off-center friction impulse must react on club (Newton's 3rd law)."
+        assert not np.allclose(post.clubhead_angular_velocity, pre_omega), (
+            "Off-center friction impulse must react on club (Newton's 3rd law)."
+        )
 
 
 class TestLoftAndLieUnusedKnownDefect:

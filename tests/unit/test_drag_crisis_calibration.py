@@ -79,9 +79,9 @@ def test_drag_coefficient_calibrated_values(
         air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
     )
 
-    assert cd == pytest.approx(
-        expected_cd, abs=atol
-    ), f"Re={target_re:.2e}: expected Cd≈{expected_cd}, got {cd:.4f}"
+    assert cd == pytest.approx(expected_cd, abs=atol), (
+        f"Re={target_re:.2e}: expected Cd≈{expected_cd}, got {cd:.4f}"
+    )
 
 
 def test_pre_crisis_returns_laminar_plateau() -> None:
@@ -93,9 +93,9 @@ def test_pre_crisis_returns_laminar_plateau() -> None:
             velocity,
             air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
         )
-        assert cd == pytest.approx(
-            0.50, abs=1e-9
-        ), f"Re={target_re:.2e}: expected laminar Cd=0.50, got {cd:.4f}"
+        assert cd == pytest.approx(0.50, abs=1e-9), (
+            f"Re={target_re:.2e}: expected laminar Cd=0.50, got {cd:.4f}"
+        )
 
 
 def test_crisis_drops_below_laminar_value() -> None:
@@ -146,6 +146,6 @@ def test_cd_strictly_less_than_laminar_after_crisis() -> None:
             velocity,
             air_density=float(AIR_DENSITY_SEA_LEVEL_KG_M3),
         )
-        assert (
-            cd < 0.45
-        ), f"Re={target_re:.2e}: post-crisis Cd={cd:.4f} should be < 0.45"
+        assert cd < 0.45, (
+            f"Re={target_re:.2e}: post-crisis Cd={cd:.4f} should be < 0.45"
+        )
