@@ -716,6 +716,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-24: Fixed tutorial setup imports to match current UpstreamDrift repository structure and entry points; added documentation regression guard via `check_tutorial_imports.py` wired into CI.
 - 2026-04-24: Fixed SQL injection vulnerability in recording library by replacing f-strings with a hardcoded map of queries.
 - 2026-04-23: Replaced the Rust workspace's sibling `../Tools` path dependency with a pinned git dependency on `tools-core`, documented clean-clone `cargo build` and `maturin develop` steps, added ADR 0005, and removed Rust/Tauri CI symlink workarounds in favor of a clean-clone Rust quickstart lane.
 - 2026-04-23: Moved `pip-audit` waivers into `.github/security/pip-audit-ignore.yml` and added `scripts/check_pip_audit_waivers.py` so CI fails on expired waivers before generating `--ignore-vuln` flags.

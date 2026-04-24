@@ -174,7 +174,8 @@ from src.shared.python.marker_mapping import (
     MarkerMapping,
     RegistrationResult,
 )
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 def setup_marker_mappings() -> list:
@@ -434,7 +435,8 @@ import json
 
 from src.shared.python.video_pose_pipeline import VideoPosePipeline, VideoProcessingConfig
 from src.shared.python.marker_mapping import MarkerToModelMapper, MarkerMapping
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 def main():

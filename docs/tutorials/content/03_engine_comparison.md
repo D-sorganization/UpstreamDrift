@@ -83,7 +83,8 @@ from pathlib import Path
 import numpy as np
 from typing import Optional
 
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 def run_simulation_on_engine(
@@ -316,7 +317,8 @@ def demonstrate_jacobian_conventions(engine_manager, model_path):
 from pathlib import Path
 import numpy as np
 
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 from src.shared.python.cross_engine_validator import CrossEngineValidator
 
 

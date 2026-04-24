@@ -773,7 +773,7 @@ class PinocchioRoboticsAdapter(RoboticsAdapter):
 ```python
 # src/robotics/factory.py
 
-from src.shared.python.engine_manager import EngineType
+from src.shared.python.engine_core.engine_registry import EngineType
 from src.robotics.adapters.base import RoboticsAdapter
 from src.robotics.adapters.mujoco_adapter import MuJoCoRoboticsAdapter
 from src.robotics.adapters.pinocchio_adapter import PinocchioRoboticsAdapter
