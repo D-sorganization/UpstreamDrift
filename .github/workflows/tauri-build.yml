@@ -63,6 +63,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+      - name: Checkout Tools (tools-core dependency)
+        uses: actions/checkout@v6
+        with:
+          repository: D-sorganization/Tools
+          path: _tools_dep
+          sparse-checkout: |
+            rust_core
+            Cargo.toml
+            rust-toolchain.toml
+      - name: Symlink Tools for Cargo path resolution
+        run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -123,6 +134,17 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
+      - name: Checkout Tools (tools-core dependency)
+        uses: actions/checkout@v6
+        with:
+          repository: D-sorganization/Tools
+          path: _tools_dep
+          sparse-checkout: |
+            rust_core
+            Cargo.toml
+            rust-toolchain.toml
+      - name: Symlink Tools for Cargo path resolution
+        run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

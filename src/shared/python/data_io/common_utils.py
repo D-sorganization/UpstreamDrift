@@ -287,10 +287,6 @@ def get_shared_urdf_path() -> Path | None:
             for parent in current_file.parents:
                 if (parent / "shared" / "urdf").exists():
                     return parent / "shared" / "urdf"
-            logger.warning(
-                "shared/urdf directory not found: could not locate 'shared' "
-                "parent in filesystem traversal"
-            )
             return None
 
         urdf_dir = shared_dir / "urdf"
@@ -300,8 +296,4 @@ def get_shared_urdf_path() -> Path | None:
     except (FileNotFoundError, OSError):
         pass
 
-    logger.warning(
-        "shared/urdf directory not found at expected path relative to %s",
-        __file__,
-    )
     return None

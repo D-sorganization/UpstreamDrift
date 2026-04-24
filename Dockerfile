@@ -1,25 +1,71 @@
-# Stage 1: Builder — install all Python dependencies into an isolated venv
-FROM python:3.12-slim AS builder
+# Comprehensive Dockerfile for Golf Modeling Suite
+# Unifies Robotics (MuJoCo, Drake, Pinocchio) and Biomechanics (OpenSim, MyoSim)
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    PIP_NO_CACHE_DIR=1
+# Stage 1: Builder stage with full development tools
+# Digest pinned to continuumio/miniconda3:24.11.1-0 (all-platform manifest).
+# To rotate: run `docker manifest inspect continuumio/miniconda3:<new-tag>` and
+# update both the tag and the digest here; review conda/Python release notes.
+FROM continuumio/miniconda3:24.11.1-0@sha256:6a66425f001f739d4778dd732e020afeb06175f49478fafc3ec673658d61550b AS builder
 
-# Build tools for packages that compile C extensions (cryptography, etc.)
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System dependencies for building
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     git \
+    build-essential \
+    cmake \
+    pkg-config \
+    libeigen3-dev \
+    libboost-all-dev \
+    liburdfdom-dev \
+    liboctomap-dev \
+    libassimp-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+# Create comprehensive environment
+# Install core scientific packages via conda
+RUN conda install -y -c conda-forge \
+    python=3.12 \
+    numpy \
+    scipy \
+    pyqt6 \
+    opencv \
+    pyyaml \
+    h5py \
+    scikit-learn \
+    pillow \
+    ezc3d \
+    && conda clean --all --yes
 
-# Core API + physics stack from lockfile
-COPY requirements.lock /tmp/requirements.lock
-RUN pip install --upgrade pip==25.3 && \
-    pip install -r /tmp/requirements.lock
+# Install Pinocchio ecosystem via conda-forge (recommended for better compatibility)
+RUN conda install -y -c conda-forge \
+    pinocchio \
+    crocoddyl \
+    && conda clean --all --yes
 
-# Auth and server extensions not yet in lockfile
-RUN pip install \
+# Copy requirements file
+COPY requirements.lock /tmp/requirements.txt
+
+# Install Python dependencies from requirements.txt
+# Filter out comments, WSL/Linux notes, and blank lines
+RUN grep -v '^#' /tmp/requirements.txt | grep -v '^$' > /tmp/filtered_requirements.txt && \
+    pip install --no-cache-dir -r /tmp/filtered_requirements.txt
+
+# Install additional physics engines and API server dependencies
+# We explicitly include runtime packages needed by API import paths: pandas, matplotlib, sympy, and defusedxml
+RUN pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu \
+    mujoco>=3.2.3 \
+    drake \
+    meshcat \
+    pin-pink \
+    qpsolvers \
+    osqp \
+    mediapipe>=0.10.0 \
+    "imageio[ffmpeg]>=2.31.0" \
+    trimesh>=4.0.0 \
+    robot_descriptions>=1.12.0 \
+    fastapi>=0.126.0 \
+    "uvicorn[standard]>=0.24.0" \
     slowapi>=0.1.9 \
     "pydantic[email]>=2.5.0" \
     python-multipart \
@@ -27,55 +73,33 @@ RUN pip install \
     bcrypt>=4.1.0 \
     "PyJWT>=2.10.1" \
     "cryptography>=44.0.1" \
+    httpx>=0.25.0 \
     aiofiles \
     python-dateutil \
+    websockets \
+    simpleeval>=0.9.13 \
     structlog>=24.1.0 \
-    colorama>=0.4.6
-
-# Shared-code runtime deps imported at module top-level by
-# src/shared/python (pandas, matplotlib, sympy) and API routes that parse
-# XML (defusedxml). These used to come from the conda base; keep them
-# explicit for the slim build so the API import chain resolves.
-RUN pip install \
-    "pandas>=2.0.0" \
-    "matplotlib>=3.7.0" \
-    "sympy>=1.12" \
-    "defusedxml>=0.7.1"
-
-# Pinocchio via pip (binary wheels available since 2024 — no conda needed)
-RUN pip install \
-    pin \
-    pin-pink \
-    qpsolvers \
-    osqp \
-    meshcat \
-    "robot_descriptions>=1.12.0" \
-    "imageio[ffmpeg]>=2.31.0" \
-    "trimesh>=4.0.0"
+    colorama>=0.4.6 \
+    && echo "Physics engines and API dependencies installed successfully"
 
 
-# Stage 2: Runtime — slim production image for the API server
-FROM python:3.12-slim AS runtime
+# Stage 2: Runtime stage with minimal footprint
+# Same digest as builder — keep both in sync when rotating.
+FROM continuumio/miniconda3:24.11.1-0@sha256:6a66425f001f739d4778dd732e020afeb06175f49478fafc3ec673658d61550b AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Keep the base interpreter's bundled pip aligned with the venv so image
-# scanners do not report the runtime layer's global site-packages as stale.
-RUN python -m pip install --upgrade --no-cache-dir pip==25.3
-
-# MuJoCo headless rendering + health check
-# X11/XCB/PyQt6 libs removed — not needed in a headless API server
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 \
+# Upgrade openssl to fix Debian vulnerabilities
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     libosmesa6 \
-    libglew2.2 \
-    libegl1 \
-    libglib2.0-0t64 \
-    patchelf \
     ffmpeg \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user for security
 ARG USER_NAME=golfer
 ARG USER_ID=1000
 ARG GROUP_ID=1000
@@ -83,28 +107,37 @@ ARG GROUP_ID=1000
 RUN groupadd -g ${GROUP_ID} ${USER_NAME} && \
     useradd -m -u ${USER_ID} -g ${GROUP_ID} -s /bin/bash ${USER_NAME}
 
-# Copy only the venv — no conda overhead
-COPY --from=builder /opt/venv /opt/venv
+# Copy conda environment from builder
+COPY --from=builder /opt/conda /opt/conda
 
-# /workspace is the project root; "from src.xxx" imports resolve here
-ENV PATH="/opt/venv/bin:$PATH" \
-    PYTHONPATH="/workspace"
+# Set up Python path for shared modules
+# /workspace is the project root (src/ lives here), enabling "from src.xxx" imports
+ENV PYTHONPATH="/workspace"
+ENV PATH="/opt/conda/bin:$PATH"
 
-RUN mkdir -p /workspace && chown -R ${USER_NAME}:${USER_NAME} /workspace
+# Create workspace directory structure with proper ownership
+RUN mkdir -p /workspace && \
+    chown -R ${USER_NAME}:${USER_NAME} /workspace
 
+# Set working directory
 WORKDIR /workspace
 
-# src/engines/Simscape_Multibody_Models/ (MATLAB) excluded via .dockerignore
+# Copy application source code and configuration
 COPY --chown=${USER_NAME}:${USER_NAME} src/ ./src/
 COPY --chown=${USER_NAME}:${USER_NAME} pyproject.toml ./
 COPY --chown=${USER_NAME}:${USER_NAME} launch_golf_suite.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} start_api_server.py ./
+COPY --chown=${USER_NAME}:${USER_NAME} conftest.py ./
+COPY --chown=${USER_NAME}:${USER_NAME} build_hooks.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} .env.example ./.env.example
 
+# Switch to non-root user
 USER ${USER_NAME}
 
+# Expose default port (if running web server)
 EXPOSE 8001
 
+# Health check for container monitoring
 # The core routes register /health on the FastAPI app (src/api/routes/core.py)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8001/health || exit 1
@@ -130,20 +163,26 @@ CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
      "--access-log"]
 
 
-# Stage 3: Training — adds PyTorch + RL stack for GPU training workflows
+# Stage 3: Training stage for advanced ML workflows
 FROM runtime AS training
 
 USER root
 
-# PyTorch cu124 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
-RUN /opt/venv/bin/pip install --no-cache-dir \
-    "torch>=2.3.0" --index-url https://download.pytorch.org/whl/cu124
+# Install CUDA toolkit via conda for GPU training support
+RUN conda install -y -c pytorch -c nvidia -c conda-forge \
+    cuda-toolkit \
+    cudnn \
+    pytorch \
+    pytorch-cuda=12.4 \
+    && conda clean --all --yes
 
-RUN /opt/venv/bin/pip install --no-cache-dir \
-    "gymnasium>=0.29.0" \
-    "stable-baselines3>=2.0.0" \
+# Install heavy ML dependencies specifically for training workloads
+RUN pip install --no-cache-dir \
+    gymnasium>=0.29.0 \
+    stable-baselines3>=2.0.0 \
     "tensorboard>=2.14.0" \
-    "ray[rllib]>=2.9.0"
+    "ray[rllib]>=2.9.0" \
+    && echo "Training dependencies installed successfully"
 
 USER ${USER_NAME}
 

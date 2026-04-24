@@ -16,9 +16,11 @@ repository = "https://github.com/D-sorganization/UpstreamDrift"
 
 [workspace.dependencies]
 # Shared kernel from D-sorganization/Tools repository.
-# Pin the git revision so a clean UpstreamDrift clone can build Rust crates
-# without requiring a sibling Tools checkout or ad hoc CI symlinks.
-tools-core = { git = "https://github.com/D-sorganization/Tools.git", rev = "ea2690362481379b94135894f9dfac2b70d1bc65" }
+# Requires Tools checked out as a sibling directory (../Tools).
+# CI overrides this path via .cargo/config.toml [patch] table — see that file
+# for setup instructions and the rationale for this layout.
+# To set up locally: git clone git@github.com:D-sorganization/Tools.git ../Tools
+tools-core = { path = "../Tools/rust_core/tools-core" }
 pyo3 = { version = "0.24", features = ["extension-module"] }
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"

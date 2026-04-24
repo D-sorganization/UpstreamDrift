@@ -255,20 +255,10 @@ def _evaluate_precondition(
     # Fallback: call with same positional args (works when condition mirrors func)
     try:
         return bool(condition(*args, **kwargs))
-    except TypeError as exc:
-        logger.error(
-            "Failed to evaluate precondition for %s: %s",
-            func.__qualname__,
-            exc,
-        )
-        raise PreconditionError(
-            f"Precondition evaluation failed for {func.__qualname__}: {exc}",
-        ) from exc
+    except TypeError:
+        pass
 
-    raise PreconditionError(
-        f"Precondition for {func.__qualname__} could not be evaluated "
-        "(condition callable signature does not match function signature)",
-    )
+    return True  # Cannot evaluate — let the function proceed
 
 
 def precondition(

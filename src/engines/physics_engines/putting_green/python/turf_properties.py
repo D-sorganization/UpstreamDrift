@@ -15,7 +15,6 @@ References:
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -134,7 +133,7 @@ class TurfProperties:
             )
 
         # Normalize grain direction
-        grain_mag = math.hypot(self.grain_direction[0], self.grain_direction[1])
+        grain_mag = np.linalg.norm(self.grain_direction)
         if grain_mag > 0:
             object.__setattr__(
                 self, "grain_direction", self.grain_direction / grain_mag
@@ -203,11 +202,10 @@ class TurfProperties:
         """
         if velocity_direction is None:
             raise ValueError("velocity_direction must be provided")
-        v_mag = math.hypot(velocity_direction[0], velocity_direction[1])
-        if v_mag < 1e-10:
+        if np.linalg.norm(velocity_direction) < 1e-10:
             return 0.0
 
-        v_dir = velocity_direction / v_mag
+        v_dir = velocity_direction / np.linalg.norm(velocity_direction)
         # Dot product gives alignment: +1 with grain, -1 against grain
         alignment = np.dot(v_dir, self.grain_direction)
 
@@ -225,7 +223,7 @@ class TurfProperties:
         """
         if velocity is None:
             raise ValueError("velocity must be provided")
-        speed = math.hypot(velocity[0], velocity[1])
+        speed = np.linalg.norm(velocity)
         if speed < 1e-10:
             return np.zeros(2)
 
@@ -253,7 +251,7 @@ class TurfProperties:
         Returns:
             Modified velocity with grain effect
         """
-        speed = math.hypot(velocity[0], velocity[1])
+        speed = np.linalg.norm(velocity)
         if speed < 0.05:  # Grain effect negligible at very low speeds
             return velocity
 
@@ -262,7 +260,7 @@ class TurfProperties:
         # Cross-grain component causes slight curve
         # Perpendicular to velocity in direction of grain
         cross_grain = self.grain_direction - np.dot(self.grain_direction, v_dir) * v_dir
-        cross_mag = math.hypot(cross_grain[0], cross_grain[1])
+        cross_mag = np.linalg.norm(cross_grain)
 
         if cross_mag < 1e-10:
             return velocity

@@ -48,10 +48,12 @@ class TestTrajectoryFunnelBenchmark:
 
     def test_simulate_agent_training_mock_transverse(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="transverse")
-        with pytest.raises(NotImplementedError, match="real Stable Baselines3"):
-            bench.simulate_agent_training_mock()
+        result = bench.simulate_agent_training_mock()
+        assert "convergence_epochs" in result
+        assert "terminal_variance" in result
+        assert result["convergence_epochs"] < 5000
 
     def test_simulate_agent_training_mock_setpoint(self) -> None:
         bench = TrajectoryFunnelBenchmark(mode="setpoint")
-        with pytest.raises(NotImplementedError, match="real Stable Baselines3"):
-            bench.simulate_agent_training_mock()
+        result = bench.simulate_agent_training_mock()
+        assert result["convergence_epochs"] > 10000

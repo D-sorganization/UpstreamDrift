@@ -24,7 +24,7 @@ permissions:
 jobs:
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
   pick-runner:
-    runs-on: d-sorg-fleet
+    runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
@@ -47,7 +47,7 @@ jobs:
   spec-freshness:
     needs: pick-runner
     name: Verify SPEC.md freshness
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Skip if spec-exempt label is applied
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'spec-exempt') }}
     timeout-minutes: 5

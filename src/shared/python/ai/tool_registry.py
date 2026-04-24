@@ -446,6 +446,35 @@ class ToolRegistry:
 
         return sorted(tools, key=lambda t: t.name)
 
+    def declarations(self, max_expertise: int = 4) -> list[Any]:
+        """Return tools as :class:`~src.shared.python.ai.adapters.base.ToolDeclaration` objects.
+
+        This method bridges the registry to the adapter protocol: adapters
+        expect ``ToolDeclaration`` instances, while the registry stores the
+        richer ``Tool`` dataclass.
+
+        Args:
+            max_expertise: Maximum expertise level of tools to include (1–4).
+
+        Returns:
+            List of ``ToolDeclaration`` instances for all matching tools.
+        """
+        from src.shared.python.ai.adapters.base import ToolDeclaration
+
+        result: list[ToolDeclaration] = []
+        for tool in self.list_tools(max_expertise=max_expertise):
+            schema = tool.to_json_schema()
+            params = schema.get("parameters", {})
+            result.append(
+                ToolDeclaration(
+                    name=tool.name,
+                    description=tool.description,
+                    parameters=params.get("properties", {}),
+                    required=params.get("required", []),
+                )
+            )
+        return result
+
     def get_tools_for_provider(
         self,
         provider_format: str = "openai",

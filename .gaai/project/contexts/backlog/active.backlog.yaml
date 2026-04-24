@@ -70,7 +70,7 @@ items:
     pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2031"
     pr_number: 2031
     pr_status: "open"
-    cost_usd: 7.4021
+    cost_usd: 7.48
     github_issue: 1744
     artefact: .gaai/project/contexts/artefacts/stories/GH1744.story.md
     dependencies: []

@@ -426,12 +426,6 @@ class EngineManager(ContractChecker):
         for candidate in candidates:
             if candidate.exists():
                 return candidate
-        logger.warning(
-            "model_registry_not_found suite_root=%s candidates=%s — "
-            "provider engine paths will be empty",
-            self.suite_root,
-            [str(c) for c in candidates],
-        )
         return None
 
     def probe_all_engines(self) -> dict[EngineType, Any]:

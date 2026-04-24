@@ -18,6 +18,10 @@ This workflow handles: unrecoverable failures, out-of-scope drift, corrupted con
 ## When to Use
 
 Activate this workflow when:
+<<<<<<< HEAD
+=======
+
+> > > > > > > origin/staging
 
 - QA fails after 3 remediation attempts
 - Implementation has drifted from product intent
@@ -31,6 +35,10 @@ Activate this workflow when:
 ## Escalation Signals
 
 The Delivery Agent MUST surface these to a human:
+<<<<<<< HEAD
+=======
+
+> > > > > > > origin/staging
 
 - `ESCALATE: scope-change-required`
 - `ESCALATE: rule-violation-unresolvable`
@@ -49,6 +57,10 @@ Immediately halt the Delivery Agent. No further code changes.
 ### 2. Assess the Situation
 
 Human reviews:
+<<<<<<< HEAD
+=======
+
+> > > > > > > origin/staging
 
 - What was the last PASS state?
 - What changed since then?
@@ -92,17 +104,32 @@ git reset --hard <commit>  # only if changes are not pushed
 
 Depending on diagnosis:
 
-| Root Cause                       | Action                                             |
+<<<<<<< HEAD
+| Root Cause | Action |
+|---|---|
+| Story was ambiguous | Return to Discovery — use `refine-scope` |
+| Acceptance criteria were missing | Return to Discovery — update Story |
+| Rule was missing or weak | Invoke `rules-normalize`, update `contexts/rules/` |
+| Memory was stale or wrong | Invoke `memory-refresh`, correct memory |
+| Architectural decision needed | Surface to human, record in `decision-extraction` |
+=======
+| Root Cause | Action |
 | -------------------------------- | -------------------------------------------------- |
-| Story was ambiguous              | Return to Discovery — use `refine-scope`           |
-| Acceptance criteria were missing | Return to Discovery — update Story                 |
-| Rule was missing or weak         | Invoke `rules-normalize`, update `contexts/rules/` |
-| Memory was stale or wrong        | Invoke `memory-refresh`, correct memory            |
-| Architectural decision needed    | Surface to human, record in `decision-extraction`  |
+| Story was ambiguous | Return to Discovery — use `refine-scope` |
+| Acceptance criteria were missing | Return to Discovery — update Story |
+| Rule was missing or weak | Invoke `rules-normalize`, update `contexts/rules/` |
+| Memory was stale or wrong | Invoke `memory-refresh`, correct memory |
+| Architectural decision needed | Surface to human, record in `decision-extraction` |
+
+> > > > > > > origin/staging
 
 ### 6. Re-validate Before Resuming
 
 Before restarting Delivery:
+<<<<<<< HEAD
+=======
+
+> > > > > > > origin/staging
 
 - Run `validate-artefacts` on affected Stories
 - Confirm root cause is resolved
@@ -111,6 +138,10 @@ Before restarting Delivery:
 ### 7. Resume Delivery
 
 Only resume `delivery-loop.workflow.md` when:
+<<<<<<< HEAD
+=======
+
+> > > > > > > origin/staging
 
 - ✅ Root cause is resolved
 - ✅ Artefacts are re-validated
