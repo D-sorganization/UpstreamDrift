@@ -56,9 +56,9 @@ class TestTwistCalculations:
         twist = analyzer.compute_twist(qpos, qvel, body_id)
 
         # For hinge joint about Y-axis, angular velocity should be [0, 2.0, 0]
-        assert (
-            abs(twist.angular[1] - 2.0) < 0.1
-        ), f"Expected ω_y ≈ 2.0, got {twist.angular[1]}"
+        assert abs(twist.angular[1] - 2.0) < 0.1, (
+            f"Expected ω_y ≈ 2.0, got {twist.angular[1]}"
+        )
 
     def test_twist_includes_reference_point(
         self, simple_pendulum: mujoco.MjModel
@@ -96,9 +96,9 @@ class TestScrewAxisCalculations:
 
         # For revolute joint, pitch should be close to zero
         # (some numerical tolerance due to COM offset)
-        assert (
-            abs(screw.pitch) < 1.0
-        ), f"Expected pitch ≈ 0 for pure rotation, got {screw.pitch}"
+        assert abs(screw.pitch) < 1.0, (
+            f"Expected pitch ≈ 0 for pure rotation, got {screw.pitch}"
+        )
         assert not screw.is_singular
 
     def test_pure_translation_is_singular(
@@ -135,9 +135,9 @@ class TestScrewAxisCalculations:
 
         if not screw.is_singular:
             axis_norm = np.linalg.norm(screw.axis_direction)
-            assert (
-                abs(axis_norm - 1.0) < 1e-6
-            ), f"Axis direction should be unit vector, got norm={axis_norm}"
+            assert abs(axis_norm - 1.0) < 1e-6, (
+                f"Axis direction should be unit vector, got norm={axis_norm}"
+            )
 
     def test_pitch_formula(self, simple_pendulum: mujoco.MjModel) -> None:
         """Test pitch calculation: h = (ω · v) / |ω|²."""
@@ -158,9 +158,9 @@ class TestScrewAxisCalculations:
 
         # Expected: h = (ω · v) / |ω|² = 2.0 / 4.0 = 0.5
         expected_pitch = np.dot(ω, v) / np.dot(ω, ω)
-        assert (
-            abs(screw.pitch - expected_pitch) < 1e-6
-        ), f"Expected pitch {expected_pitch}, got {screw.pitch}"
+        assert abs(screw.pitch - expected_pitch) < 1e-6, (
+            f"Expected pitch {expected_pitch}, got {screw.pitch}"
+        )
 
 
 class TestKeyPointAnalysis:
@@ -242,9 +242,9 @@ class TestVisualization:
 
         # Direction should be along X (velocity direction)
         direction = (end - start) / np.linalg.norm(end - start)
-        assert (
-            abs(direction[0] - 1.0) < 1e-6
-        ), "Singular axis should align with velocity direction"
+        assert abs(direction[0] - 1.0) < 1e-6, (
+            "Singular axis should align with velocity direction"
+        )
 
 
 class TestManipulability:

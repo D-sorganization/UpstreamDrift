@@ -89,9 +89,9 @@ class TestTerrainConsistency:
         for x, y in test_points:
             normal = sloped_terrain.elevation.get_normal(x, y)
             magnitude = np.linalg.norm(normal)
-            assert (
-                abs(magnitude - 1.0) < 1e-6
-            ), f"Normal at ({x}, {y}) not unit: {magnitude}"
+            assert abs(magnitude - 1.0) < 1e-6, (
+                f"Normal at ({x}, {y}) not unit: {magnitude}"
+            )
 
     def test_gradient_consistency(self, sloped_terrain: Terrain) -> None:
         """Gradient should be consistent with elevation differences."""

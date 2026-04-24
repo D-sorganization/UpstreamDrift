@@ -94,9 +94,7 @@ class ConstraintManagerMixin:
                         maintain_orientation=True,
                     )
 
-            elif (
-                constraint.constraint_type == ConstraintType.RELATIVE_TO_BODY
-            ):  # noqa: SIM102
+            elif constraint.constraint_type == ConstraintType.RELATIVE_TO_BODY:  # noqa: SIM102
                 if (
                     constraint.reference_body_id is not None
                     and constraint.relative_position is not None

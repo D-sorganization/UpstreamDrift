@@ -40,23 +40,23 @@ class TestPressureDropEngineFileSizes:
     @pytest.mark.unit
     def test_engine_coordinator_loc(self) -> None:
         loc = _count_lines(ENGINE_DIR / "pressure_drop_calculation_engine.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"pressure_drop_calculation_engine.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"pressure_drop_calculation_engine.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_friction_factors_loc(self) -> None:
         loc = _count_lines(ENGINE_DIR / "_friction_factors.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_friction_factors.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_friction_factors.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_flow_calculations_loc(self) -> None:
         loc = _count_lines(ENGINE_DIR / "_flow_calculations.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_flow_calculations.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_flow_calculations.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
 
 class TestPressureDropEnginePublicAPI:

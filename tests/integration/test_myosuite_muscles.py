@@ -339,9 +339,9 @@ class TestMyoSuiteEngine:
         if hasattr(analyzer, "muscle_actuator_ids") and analyzer.muscle_actuator_ids:
             actuator_id = analyzer.muscle_actuator_ids[0]
             ctrl_value = engine.sim.data.ctrl[actuator_id]
-            assert (
-                0.7 <= ctrl_value <= 0.9
-            ), f"Activation not set correctly: {ctrl_value}"
+            assert 0.7 <= ctrl_value <= 0.9, (
+                f"Activation not set correctly: {ctrl_value}"
+            )
 
 
 class TestCrossValidation:
