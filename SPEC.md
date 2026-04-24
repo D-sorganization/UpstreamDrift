@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-22T17:05:00-07:00
+Last-Updated: 2026-04-23T08:40:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,8 +29,8 @@ Last-Updated: 2026-04-22T17:05:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.167                                            |
-| **Last Spec Update**    | 2026-04-22                                         |
+| **Spec Version**        | 1.0.175                                            |
+| **Last Spec Update**    | 2026-04-23                                         |
 
 ## 2. Purpose & Mission
 
@@ -377,15 +377,15 @@ Beyond standard tools, CI enforces custom checks:
 
 ### CI/CD Pipeline
 
-| Workflow                       | Trigger                                | Purpose                                                                                                                                                       | Blocking?          |
-| ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests (core deps only — no optional extras)                                                                                | Yes                |
-| `ci-optional-stack.yml`        | Push/PR/weekly Wednesday               | **Optional-stack verification lane** (issue #2368): installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras; exercises tests skipped in `ci-standard` | Yes                |
-| `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                                                                                            | No (opt-in)        |
-| `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                                                                                               | No (informational) |
-| `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                                                                                                    | Yes (for releases) |
-| `vendor-freshness.yml`         | Weekly                                 | Check for stale dependencies and security updates                                                                                                             | No (warning-only)  |
-| `docker-size-gates.yml`        | Push                                   | Ensure Docker image size stays <800 MB                                                                                                                        | Yes                |
+| Workflow                       | Trigger                                | Purpose                                                                                                                                                                                                 | Blocking?          |
+| ------------------------------ | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests (core deps only — no optional extras), and blocking `pip-audit` with waiver IDs generated from `.github/security/pip-audit-ignore.yml` after expiry validation | Yes                |
+| `ci-optional-stack.yml`        | Push/PR/weekly Wednesday               | **Optional-stack verification lane** (issue #2368): installs Pinocchio, Pink, Crocoddyl, PyQt6, and full API extras; exercises tests skipped in `ci-standard`                                           | Yes                |
+| `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)                                                                                                                                                      | No (opt-in)        |
+| `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations                                                                                                                                         | No (informational) |
+| `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                                                                                                                                                              | Yes (for releases) |
+| `vendor-freshness.yml`         | Weekly                                 | Check for stale dependencies and security updates                                                                                                                                                       | No (warning-only)  |
+| `docker-size-gates.yml`        | Push                                   | Ensure Docker image size stays <800 MB                                                                                                                                                                  | Yes                |
 
 ## 9. Dependencies
 
@@ -508,11 +508,16 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## 12. Change Log
 
+| 2026-04-23 | 1.0.175 | fix(ci): Shrunk `pyproject.toml` mypy exclusion list by promoting previously suppressed modules to per-file overrides, reducing the global `ignore_errors` footprint toward zero. |
 | 2026-04-22 | 1.0.153 | Performance optimization: Replaced `np.linalg.norm(x)` with `np.sqrt(np.vdot(x, x))` and updated `np.sqrt(sum of squares)` to `math.hypot(*x)` for faster array reduction computations. |
+| 2026-04-23 | 1.0.173 | Performance optimization: Replaced `np.linalg.norm` with `math.hypot` for small 2D vectors in putting green engine. |
 | 2026-04-20 | 1.0.95 | Performance optimization: Replaced generator expression `math.sqrt(sum(...))` with `math.dist(a,b)` for distance calculations to push execution entirely into C, resulting in an ~8x speedup. |
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-23 | 1.0.172 | fix(ci): Moved `pip-audit` waivers into `.github/security/pip-audit-ignore.yml`, added `scripts/check_pip_audit_waivers.py` to enforce expiry dates before CI runs, and generated workflow ignore flags from that validated waiver ledger.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 2026-04-22 | 1.0.170 | Docker security follow-up: the runtime image now upgrades the base interpreter's global pip to 25.3 in addition to the copied virtual environment, preventing Trivy from flagging the `python:3.12-slim` bundled pip metadata after the slim multi-stage migration.                                                                                                                                                                                                                                                                                                                                                                               |
+| 2026-04-22 | 1.0.168 | Adversarial review remediation: removed coverage exclusions that hid no-op blocks, made contract precondition evaluation fail closed on broken predicates, re-enabled mypy coverage for engine routes, replaced vacuous DbC architecture tests with meaningful contract cases, and archived five follow-up issue briefs for larger type-safety, LoD, TDD, DbC, and DRY cleanup tracks.                                                                                                                                                                                                                                                            |
 | 2026-04-22 | 1.0.167 | Post-merge CI follow-up: lazy engine load route now validates optional `model_path` inputs before loading, preserving path-traversal rejection even though the lazy route is registered before the compatibility engine-load handler.                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-22 | 1.0.166 | Post-merge CI follow-up: OpenAPI version metadata coverage now compares `/openapi.json` against the instantiated FastAPI app version, preventing unrelated version resolver cache/mocking state from making full-suite runs fail while preserving the app metadata contract.                                                                                                                                                                                                                                                                                                                                                                      |
 | 2026-04-22 | 1.0.165 | Post-merge CI follow-up: restored legacy `/api/...` route registration alongside root and `/api/v1/...`, and moved simulation/video quota enforcement to request-time auth-mode checks so current cloud-mode requests reject missing credentials without breaking local no-auth validation semantics.                                                                                                                                                                                                                                                                                                                                             |
@@ -711,6 +716,9 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## Changelog
 
+- 2026-04-23: Replaced the Rust workspace's sibling `../Tools` path dependency with a pinned git dependency on `tools-core`, documented clean-clone `cargo build` and `maturin develop` steps, added ADR 0005, and removed Rust/Tauri CI symlink workarounds in favor of a clean-clone Rust quickstart lane.
+- 2026-04-23: Moved `pip-audit` waivers into `.github/security/pip-audit-ignore.yml` and added `scripts/check_pip_audit_waivers.py` so CI fails on expired waivers before generating `--ignore-vuln` flags.
+- 2026-04-23: Removed tracked generated analysis artifacts and added a forbidden-artifact guard so CI rejects regenerated reports, coverage dumps, temp IDs, and NumPy scratch outputs before they can re-enter version control.
 - 2026-04-22: Removed the duplicate `logging.getLogger(__name__)` assignment from `src/api/local_server.py` so the local server consistently uses the shared structured logger, with regression coverage guarding against logger shadowing.
 - 2026-04-22: Hardened aerodynamics vector magnitude helpers so drag, lift, Magnus, and Reynolds correction accept column-vector or other non-1D inputs, and clamped randomized air density to a positive minimum.
 - 2026-04-22: Added release-mode validation for Rust upstream-physics public RK4, aerodynamic, and ball-flight inputs so Python/WASM constructors return typed boundary errors and invalid simulation parameters fail before producing NaNs or repeated states.
@@ -724,6 +732,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 - 2026-04-22: Protected local launcher subprocess mutations with a startup capability token and loopback `Origin`/`Referer` checks so cross-site browser posts cannot launch or stop local processes while local account auth stays disabled.
 - 2026-04-22: Rejected unsupported explicit Pinocchio step integrators instead of falling back to the default RK4 mode.
 - 2026-04-22: Normalized import ordering in perturbation analyzer modules, shared export utilities, and C3D integration tests to keep adversarial remediation branches compliant with CI quality gates.
+- 2026-04-23: Tightened perturbation profile comparison so analyzer implementations must populate base torque coefficients before partial-results sampling proceeds, keeping the partial-failure reporting path aligned with runtime contracts and mypy enforcement.
 - 2026-04-20: Hardened local server asset serving by routing launcher logos and SPA/static-file lookups through traversal-safe path joins, closing path traversal and symlink escape vectors in the local UI shell.
 - 2026-04-22: Hardened URDF/MJCF model discovery and serving so model endpoints only list and read files that resolve inside approved model roots, rejecting symlink escapes both during discovery and immediately before file reads.
 - 2026-04-20: Lazy-imported the video pose pipeline so the API video analysis route stays registered in slim runtime images and returns a 503 with a video extras hint when cv2/mediapipe is unavailable.

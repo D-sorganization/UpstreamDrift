@@ -1,14 +1,12 @@
 ---
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2151_Incomplete_Stub_in_flexible_shaft_py_326.md
 title: "Incomplete Stub in flexible_shaft.py:326"
-labels: ['incomplete-implementation', 'critical', 'high-impact']
+labels: ["incomplete-implementation", "critical", "high-impact"]
 assignee: "unassigned"
 status: "open"
 ---
 
 # Issue Description
 
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2151_Incomplete_Stub_in_flexible_shaft_py_326.md
 Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 326.
 
 ## Context

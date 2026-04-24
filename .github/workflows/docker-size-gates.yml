@@ -51,9 +51,8 @@ jobs:
 
       - name: Verify Image Size Budget
         run: |
-          # Set the maximum allowed size in MB (e.g., 16000 MB = 16GB)
-          # Increased to 16GB to accommodate large dependencies (Drake, MuJoCo, PyTorch)
-          MAX_SIZE_MB=16000
+          # Runtime image budget: slim venv (~1 GB) + src/ models (~650 MB) + base + libs ≈ 4 GB
+          MAX_SIZE_MB=4000
 
           # Get size in bytes
           IMAGE_SIZE_BYTES=$(docker image inspect upstream-drift:runtime --format='{{.Size}}')
@@ -73,8 +72,6 @@ jobs:
 
       - name: Run Basic Health Checks
         run: |
-          # Run a simple Python command importing key libraries to verify the environment works 
-          docker run --rm upstream-drift:runtime python -c "import mujoco, numpy, scipy; print('Core ML/Physics imports successful!')"
-
-          # We can also check that the API server module is importable
-          docker run --rm upstream-drift:runtime python -c "import fastapi; print('FastAPI imported successfully')"
+          docker run --rm upstream-drift:runtime python -c "import mujoco, numpy, scipy; print('Core physics stack OK')"
+          docker run --rm upstream-drift:runtime python -c "import fastapi, uvicorn; print('API server stack OK')"
+          docker run --rm upstream-drift:runtime python -c "import pinocchio; print('Pinocchio OK')"

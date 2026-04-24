@@ -1,20 +1,34 @@
-    "Impl Gaps (Critical)" : 216
-    "Feature Requests (TRACKED_TASK)" : 1
-    "Technical Debt (TRACKED_DEFECT)" : 27
-    "Doc Gaps" : 610
+# Completist Report: 2026-04-23
 
-````
+## Executive Summary
+
+- **Critical Gaps**: 242
+- **Feature Gaps (TRACKED_TASK)**: 2
+- **Technical Debt**: 27
+- **Documentation Gaps**: 765
+
+## Visualization
+
+### Status Overview
+
+```mermaid
+pie title Completion Status
+    "Impl Gaps (Critical)" : 242
+    "Feature Requests (TRACKED_TASK)" : 2
+    "Technical Debt (TRACKED_DEFECT)" : 27
+    "Doc Gaps" : 765
+```
 
 ### Top Impacted Modules
 
 ```mermaid
 pie title Issues by Module
     "src" : 199
-    "vendor" : 31
+    "vendor" : 60
     "scripts" : 4
     ".gaai" : 4
     "tests" : 3
-````
+```
 
 ## Critical Incomplete (Top 50)
 
@@ -66,16 +80,17 @@ pie title Issues by Module
 | `./src/shared/python/pose_estimation/interface.py`                                   | 24   | Stub | 5      | 3        | 4          |
 | `./src/shared/python/pose_estimation/interface.py`                                   | 32   | Stub | 5      | 3        | 4          |
 | `./src/shared/python/pose_estimation/interface.py`                                   | 43   | Stub | 5      | 3        | 4          |
-| `./src/shared/python/perturbation/analyzer_base.py`                                  | 57   | Stub | 5      | 3        | 4          |
-| `./src/shared/python/perturbation/analyzer_base.py`                                  | 61   | Stub | 5      | 3        | 4          |
-| `./src/shared/python/perturbation/analyzer_base.py`                                  | 65   | Stub | 5      | 3        | 4          |
+| `./src/shared/python/perturbation/analyzer_base.py`                                  | 100  | Stub | 5      | 3        | 4          |
+| `./src/shared/python/perturbation/analyzer_base.py`                                  | 104  | Stub | 5      | 3        | 4          |
+| `./src/shared/python/perturbation/analyzer_base.py`                                  | 108  | Stub | 5      | 3        | 4          |
 | `./src/shared/python/calc_backend/protocols.py`                                      | 35   | Stub | 5      | 3        | 4          |
 
 ## Feature Gap Matrix
 
-| Module                                                   | Feature Gap                           | Type         |
-| -------------------------------------------------------- | ------------------------------------- | ------------ |
-| `./vendor/ud-tools/src/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders | TRACKED_TASK |
+| Module                                                   | Feature Gap                                               | Type         |
+| -------------------------------------------------------- | --------------------------------------------------------- | ------------ |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`    | """Check for TODO, FIXME, HACK, XXX, and placeholders.""" | TRACKED_TASK |
+| `./vendor/ud-tools/src/tools/matlab_utilities/README.md` | - TODO, FIXME, HACK, XXX placeholders                     | TRACKED_TASK |
 
 ## Technical Debt Register
 
@@ -99,8 +114,8 @@ pie title Issues by Module
 | `./src/tools/matlab_utilities/scripts/matlab_quality_check.py`                     | 84   | (r"\bXXX\b", "XXX comment found"),                                                                   | XXX  |
 | `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css`             | 3404 | html body { /_ HACK: Temporary fix for CONF-15412 _/                                                 | HACK |
 | `./scripts/refresh_completist_data.py`                                             | 60   | "TRACKED_TASK\|TRACKED_DEFECT\|XXX\|HACK\|TEMP",                                                     | XXX  |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                              | 232  | (r"\bHACK\b", "HACK comment found"),                                                                 | HACK |
-| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                              | 233  | (r"\bXXX\b", "XXX comment found"),                                                                   | XXX  |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                              | 321  | (r"\bHACK\b", "HACK comment found"),                                                                 | HACK |
+| `./vendor/ud-tools/src/tools/matlab_quality_utils.py`                              | 322  | (r"\bXXX\b", "XXX comment found"),                                                                   | XXX  |
 | `./.gaai/core/skills/cross/friction-retrospective/SKILL.md`                        | 58   | - `signal: high` → automatic promotion candidate (CAND-XXX)                                          | XXX  |
 | `./.gaai/core/skills/cross/friction-retrospective/SKILL.md`                        | 64   | - **High-Signal Events (CAND-XXX):** each candidate with evidence, proposed promotion target, and re | XXX  |
 | `./.gaai/core/skills/cross/friction-retrospective/SKILL.md`                        | 91   | - Promotion candidates (CAND-XXX) with evidence and recommended targets                              | XXX  |
@@ -183,11 +198,7 @@ Prioritized by Impact (High) and Complexity (Low).
 - Created `docs/assessments/issues/Issue_2353_Incomplete_Stub_in_interface_py_24.md`
 - Created `docs/assessments/issues/Issue_2354_Incomplete_Stub_in_interface_py_32.md`
 - Created `docs/assessments/issues/Issue_2355_Incomplete_Stub_in_interface_py_43.md`
-- Created `docs/assessments/issues/Issue_2356_Incomplete_Stub_in_analyzer_base_py_57.md`
-- Created `docs/assessments/issues/Issue_2357_Incomplete_Stub_in_analyzer_base_py_61.md`
-- Created `docs/assessments/issues/Issue_2358_Incomplete_Stub_in_analyzer_base_py_65.md`
+- Created `docs/assessments/issues/Issue_2406_Incomplete_Stub_in_analyzer_base_py_100.md`
+- Created `docs/assessments/issues/Issue_2407_Incomplete_Stub_in_analyzer_base_py_104.md`
+- Created `docs/assessments/issues/Issue_2408_Incomplete_Stub_in_analyzer_base_py_108.md`
 - Created `docs/assessments/issues/Issue_2359_Incomplete_Stub_in_protocols_py_35.md`
-
-```
-
-```

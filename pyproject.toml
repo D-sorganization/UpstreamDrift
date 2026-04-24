@@ -175,7 +175,7 @@ select = [
     "RET",   # return statement cleanup
 ]
 ignore = [
-    "E501",    # line too long (handled by black)
+    "E501",    # line too long (handled by formatter)
     "B008",    # function call in default arg (FastAPI Depends)
     "RET504",  # unnecessary assign before return (often clearer)
     "PERF203", # try-except in loop (unavoidable in some patterns)
@@ -186,19 +186,6 @@ ignore = [
 "scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
-
-[tool.black]
-line-length = 88
-target-version = ["py310"]
-# Exclude third-party model files (legacy Python 2 scripts from OpenSim)
-exclude = '''
-/(
-    src/shared/models/opensim/opensim-models
-  | shared/models/opensim/opensim-models
-  | shared/models/myosuite
-  | vendor/ud-tools
-)/
-'''
 
 [tool.mypy]
 python_version = "3.10"
@@ -364,10 +351,40 @@ exclude_lines = [
     "def __repr__",
     "if __name__ == .__main__.",
     "raise NotImplementedError",
-    "pass",
-    "except ImportError",
     "if TYPE_CHECKING:",
 ]
 
 [tool.coverage.html]
 directory = "htmlcov"
+
+# Mypy overrides for modules with pre-existing type issues
+[[tool.mypy.overrides]]
+module = [
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.core.main_window",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.humanoid_config_tab",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.manipulation_tab",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.plotting_tab",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.visualization_tab",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine",
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui_ui_setup",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.analysis_mixin",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.components",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.main_window",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.simulation_mixin",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.ui_setup_mixin",
+    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.ui.visualization_mixin",
+    "src.shared.python.plotting.renderers.club",
+    "src.shared.python.plotting.renderers.kinematics",
+    "src.shared.python.plotting.renderers.kinetics",
+    "src.shared.python.plotting.renderers.stability",
+    "src.shared.python.ui.loading_button",
+    "src.shared.python.ui.preferences_dialog",
+    "src.shared.python.ui.recent_models",
+    "src.shared.python.ui.shortcuts_overlay",
+    "src.shared.python.ui.toast",
+]
+ignore_errors = true

@@ -103,6 +103,7 @@ run_log.txt
 
 # Generated agent memory
 .jules/bolt.md
+.jules/completist_data/
 
 # Jules generated files
 .jules/bolt*
