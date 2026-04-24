@@ -7,9 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Security (CRITICAL - January 13, 2026)
+### April 2026
 
-**Security Grade Improvement: D+ (68/100) → A- (92/100)**
+#### Added
+
+- `BaseEngineAdapter` abstract base class with `NotImplementedError` stubs for engine interchange layer (#3051, PR #3206)
+- Choose-your-engine tutorial and demo script in `docs/examples/` (#3050, PR #3205)
+- Launcher README cataloguing all five launchers and the canonical `upstream-drift` entry point (#3058, PR #3200)
+- `docs/README.md` navigable index for the `docs/` tree (#3073)
+
+#### Fixed
+
+- Shrunk `pyproject.toml` mypy exclusion list; promoted suppressed modules to per-file `disable_error_code` overrides (#3207)
+- Deprecation notices added to duplicate humanoid builders; `contracts.py` audited (#3057, PR #3199)
+- Orphan root-level scripts (`setup_golf_suite.py`, `start_api_server.py`) relocated to `scripts/chore/` (#3070)
+
+#### Changed
+
+- SPEC.md module map, lock-file reference, and Python version brought in line with the actual codebase (#3071)
+
+---
+
+### Security (January 13, 2026)
+
+> Note: the security hardening below was an internal engineering effort. No independent audit certificate is available at this time; the grade figures quoted previously have been removed pending a linked audit artifact.
 
 #### Added
 
@@ -57,8 +78,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ CWE-94 (Code Injection - archived/warned)
 - ✅ Python Security Best Practices
 - ✅ FastAPI Security Guidelines
-
-**Production Ready**: Previously unsuitable for production → Now production-ready ✅
 
 ---
 

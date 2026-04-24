@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Golf Modeling Suite - Unified Setup Script.
+"""Unified setup helper — moved from repo root to scripts/chore/ (issue #3070).
+
+Run this manually after cloning to sync repository state, generate optimized
+icons, and create desktop shortcuts.  It is NOT part of the normal install
+path (see install.sh) and is NOT invoked by CI.
+
+Last-verified: 2026-04-24
 
 Syncs repository state, generates optimized icons, and creates desktop shortcuts.
 

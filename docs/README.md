@@ -1,290 +1,110 @@
-# Golf Modeling Suite Documentation
+# UpstreamDrift Documentation Hub
 
-> **January 2026** | Local-First API Architecture
+> Updated: 2026-04-24 | Closes #3073
 
-Welcome to the Golf Modeling Suite - a professional biomechanical analysis and physics simulation platform.
-
-## Quick Navigation
-
-| I want to...            | Go to...                                            |
-| ----------------------- | --------------------------------------------------- |
-| Get started quickly     | [Quick Start](#quick-start)                         |
-| Understand the API      | [API Architecture](api/API_ARCHITECTURE.md)         |
-| Develop new features    | [Development Guide](api/DEVELOPMENT.md)             |
-| Choose a physics engine | [Engine Selection Guide](engine_selection_guide.md) |
-| Troubleshoot issues     | [Troubleshooting](troubleshooting/)                 |
+This index is the single starting point for all UpstreamDrift documentation.
+Start here, then follow the links to the area you need.
 
 ---
 
-## Quick Start
+## Quick navigation
 
-### 1. Start the API Server
-
-```bash
-cd /home/user/Golf_Modeling_Suite
-python start_api_server.py
-```
-
-### 2. Access the API
-
-- **API Base**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-
-### 3. Run a Simulation
-
-```bash
-curl -X POST http://localhost:8000/simulate \
-  -H "Content-Type: application/json" \
-  -d '{"engine_type": "mujoco", "duration": 1.0}'
-```
+| I want to…                         | Go to                            |
+| ---------------------------------- | -------------------------------- |
+| Install and run the project        | [installation/](installation/)   |
+| Understand the system architecture | [architecture/](architecture/)   |
+| Read per-engine reference docs     | [engines/](engines/)             |
+| Follow a hands-on tutorial         | [tutorials/](tutorials/)         |
+| Browse the REST API reference      | [api/](api/)                     |
+| Read Architecture Decision Records | [adr/](adr/)                     |
+| Contribute / develop               | [development/](development/)     |
+| Security policies                  | [../SECURITY.md](../SECURITY.md) |
+| Understand the full spec           | [../SPEC.md](../SPEC.md)         |
 
 ---
 
-## Documentation Structure
+## Directory reference
 
-```
-docs/
-├── README.md              ← You are here
-│
-├── api/                   # API Reference
-│   ├── API_ARCHITECTURE.md   # Complete API architecture
-│   ├── DEVELOPMENT.md        # Developer guide
-│   ├── engines.md            # Engine APIs
-│   └── shared.md             # Shared utilities
-│
-├── user_guide/            # End User Documentation
-│   ├── installation.md       # Setup instructions
-│   ├── getting_started.md    # First steps
-│   └── launchers.md          # GUI launchers
-│
-├── engines/               # Physics Engine Docs
-│   ├── mujoco.md            # MuJoCo integration
-│   ├── drake.md             # Drake integration
-│   ├── pinocchio.md         # Pinocchio integration
-│   ├── opensim.md           # OpenSim integration
-│   └── simscape.md          # MATLAB Simscape
-│
-├── development/           # Developer Resources
-│   ├── architecture.md      # System design
-│   ├── design_by_contract.md # DbC patterns
-│   ├── contributing.md      # Contribution guide
-│   └── agent_templates/     # AI agent templates
-│
-├── architecture/          # Technical Architecture
-│   ├── system_overview.md
-│   ├── engine_loading_flow.md
-│   └── data_pipeline.md
-│
-├── troubleshooting/       # Problem Solving
-│   └── (troubleshooting guides)
-│
-└── archive/               # Historical Documentation
-    ├── assessments_jan2026/
-    ├── phase_plans/
-    └── historical/
-```
+### Active documentation
 
----
+| Directory                                    | Contents                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `adr/`                                       | Architecture Decision Records (ADR-0001 through ADR-0005)                                   |
+| `ai_implementation/`                         | Notes on AI/ML integration patterns                                                         |
+| `api/`                                       | REST API architecture and endpoint reference                                                |
+| `architecture/`                              | System diagrams, project map, orthogonality review, data pipeline                           |
+| `deployment/`                                | Docker, GPU, and production deployment guides                                               |
+| `design/`                                    | Design guidelines and proposals                                                             |
+| `development/`                               | Contributing guide, getting started, configuration reference, external provider onboarding  |
+| `engines/`                                   | Per-engine reference docs (MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite) and selection guide |
+| `examples/`                                  | Runnable example scripts and notebooks                                                      |
+| `governance/`                                | Documentation governance policies                                                           |
+| `help/`                                      | User-facing help and FAQ                                                                    |
+| `installation/`                              | Installation instructions for all platforms                                                 |
+| `legal/`                                     | License and compliance notes                                                                |
+| `motion_training/`                           | Motion capture and training data documentation                                              |
+| `operations/`                                | Operational runbooks                                                                        |
+| `perturbation_analysis_parity_guidelines.md` | Guidelines for perturbation-analysis parity across engines                                  |
+| `physics/`                                   | Physics modeling reference                                                                  |
+| `proposals/`                                 | Feature proposals under consideration                                                       |
+| `references/`                                | External references and bibliography                                                        |
+| `specs/`                                     | Additional spec fragments                                                                   |
+| `technical/`                                 | Technical deep-dives                                                                        |
+| `technical_debt/`                            | Tracked technical debt items                                                                |
+| `testing/`                                   | Test strategy and coverage guidance                                                         |
+| `troubleshooting/`                           | Common issues and resolution steps                                                          |
+| `tutorials/`                                 | Step-by-step tutorials (humanoid, golf, pendulum, choose-your-engine)                       |
+| `user_guide/`                                | Task-oriented user guide                                                                    |
+| `workflows/`                                 | CI/CD and development workflow documentation                                                |
+| `engine_selection_guide.md`                  | How to choose the right physics engine                                                      |
+| `docker-gpu.md`                              | GPU Docker setup                                                                            |
+| `index.md`                                   | Legacy index (superseded by this file)                                                      |
+| `UPSTREAM_DRIFT_USER_MANUAL.md`              | Full user manual                                                                            |
+| `USER_MANUAL.md`                             | Condensed user manual                                                                       |
+| `BUILD_INFRASTRUCTURE_REVIEW.md`             | Build infrastructure review notes                                                           |
+| `CONFIG_ISSUES_QUICK_REFERENCE.md`           | Quick reference for common config issues                                                    |
+| `IDEAS.md`                                   | Feature ideas parking lot                                                                   |
+| `INFRASTRUCTURE_REVIEW_INDEX.md`             | Index of infrastructure review documents                                                    |
+| `project_design_guidelines.qmd`              | Quarto project design guidelines                                                            |
 
-## Core Concepts
+### [ARCHIVED] — historical / superseded content
 
-### Local-First API
+The directories below contain documents from January–February 2026 planning
+sessions that have been superseded by GitHub issues under the #3045 umbrella.
+They are retained for historical reference only and should not be used as
+authoritative guidance.
 
-The Golf Modeling Suite uses a **local-first architecture**:
+| Directory               | Reason archived                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `plans/`                | 13 "master plan" documents (Jan 2026) — open items migrated to GitHub issues    |
+| `assessments/`          | Point-in-time codebase assessments (Jan–Apr 2026) — superseded by issue tracker |
+| `audit_reports/`        | Audit snapshots — superseded by ongoing CI and issue tracker                    |
+| `reviews/`              | Ad-hoc review documents — findings tracked in issues                            |
+| `review_archive/`       | Older review documents — archived                                               |
+| `status_quo_analysis/`  | Status snapshots — superseded by current SPEC.md and README                     |
+| `historical/`           | Previously archived documents                                                   |
+| `competitive_analysis/` | Competitive landscape analysis (Jan 2026)                                       |
+| `strategic/`            | Strategic planning documents (Jan 2026)                                         |
+| `engineering/`          | Engineering process notes (Jan 2026) — superseded by `development/`             |
+| `code-quality/`         | Code quality reports — superseded by CI and issue tracker                       |
+| `issues/`               | Issue staging area — use GitHub Issues instead                                  |
 
-- **No cloud required** for local development
-- **Optional cloud mode** for production scaling
-- **Same API** whether local or cloud
+### Sphinx API docs
 
-### Multi-Engine Support
-
-Choose from 6+ physics engines:
-
-| Engine        | Best For                         |
-| ------------- | -------------------------------- |
-| **MuJoCo**    | Full musculoskeletal simulation  |
-| **Drake**     | Trajectory optimization, control |
-| **Pinocchio** | Fast rigid body dynamics         |
-| **OpenSim**   | Biomechanical validation         |
-| **MyoSuite**  | 290-muscle body models           |
-| **MATLAB**    | Simscape Multibody models        |
-
-See [Engine Selection Guide](engine_selection_guide.md) for details.
-
-### Design Principles
-
-The codebase follows three key principles:
-
-1. **DRY** - Shared utilities in `src/api/utils/`
-2. **Orthogonality** - Decoupled, replaceable components
-3. **Design by Contract** - Formal validation with contracts
-
-See [Design by Contract Guide](development/design_by_contract.md).
+`sphinx/` contains a Sphinx configuration (`conf.py`) and pre-generated HTML.
+The Sphinx build is not currently wired into CI. Until `docs-ci.yml` publishes
+it automatically, treat the HTML as a best-effort snapshot and refer to the
+inline docstrings in `src/` as the authoritative API reference.
 
 ---
 
-## Key Features
+## A new contributor's path (3 clicks)
 
-### Physics Simulation
-
-- Multi-engine physics with unified interface
-- Real-time and batch simulation modes
-- Async task support for long simulations
-
-### Video Analysis
-
-- Pose estimation (MediaPipe, OpenPose, MoveNet)
-- Swing sequence detection
-- Biomechanical analysis
-
-### Diagnostics
-
-- Structured error codes (GMS-XXX-YYY)
-- Request tracing (correlation IDs)
-- Built-in health checks
-
-### Security
-
-- JWT authentication (cloud mode)
-- Rate limiting
-- CORS and security headers
+1. **[installation/](installation/)** — get the project running locally
+2. **[tutorials/](tutorials/)** — follow the `choose_your_engine` tutorial
+3. **[development/getting_started.md](development/getting_started.md)** — understand the contribution workflow
 
 ---
 
-## API Overview
-
-### Endpoints
-
-| Route                        | Purpose                |
-| ---------------------------- | ---------------------- |
-| `GET /health`                | System health check    |
-| `GET /engines`               | List available engines |
-| `POST /engines/{type}/load`  | Load an engine         |
-| `POST /simulate`             | Run simulation         |
-| `POST /analyze/biomechanics` | Biomechanical analysis |
-| `POST /analyze/video`        | Video pose analysis    |
-| `GET /export/{task_id}`      | Export results         |
-
-### Error Handling
-
-All errors include:
-
-- **Error code**: `GMS-ENG-003`
-- **Message**: Human-readable description
-- **Request ID**: For log correlation
-- **Details**: Additional context
-
-Example:
-
-```json
-{
-  "error": {
-    "code": "GMS-ENG-003",
-    "message": "Failed to load physics engine",
-    "request_id": "req_abc123",
-    "details": { "engine": "drake" }
-  }
-}
-```
-
----
-
-## For Developers
-
-### Getting Started
-
-1. Read [API Architecture](api/API_ARCHITECTURE.md)
-2. Follow [Development Guide](api/DEVELOPMENT.md)
-3. Understand [Design by Contract](development/design_by_contract.md)
-
-### Key Files
-
-| File                                  | Purpose              |
-| ------------------------------------- | -------------------- |
-| `src/api/server.py`                   | FastAPI application  |
-| `src/api/utils/`                      | Shared utilities     |
-| `src/shared/python/contracts.py`      | DbC decorators       |
-| `src/shared/python/engine_manager.py` | Engine orchestration |
-
-### Running Tests
-
-```bash
-pytest tests/
-pytest tests/unit/test_api/ --cov=src/api
-```
-
----
-
-## For AI Agents
-
-See [AGENTS.md](../AGENTS.md) in the project root for:
-
-- Agent coding guidelines
-- Important files reference
-- Testing requirements
-- PR workflow
-
----
-
-## Detailed Documentation
-
-### [User Guide](user_guide/README.md)
-
-- [Installation](user_guide/installation.md) - Setup instructions
-- [Getting Started](user_guide/getting_started.md) - First simulation
-- [Launchers](user_guide/launchers.md) - GUI options
-
-### [Engines](engines/README.md)
-
-- [MuJoCo](engines/mujoco.md) - High-performance physics
-- [Drake](engines/drake.md) - Model-based design
-- [Pinocchio](engines/pinocchio.md) - Rigid body algorithms
-- [OpenSim](engines/opensim.md) - Biomechanical validation
-- [Engine Capabilities](engine_capabilities.md) - Feature comparison
-
-### [Development](development/README.md)
-
-- [Architecture](development/architecture.md) - System design
-- [Contributing](development/contributing.md) - Contribution guide
-- [Design by Contract](development/design_by_contract.md) - DbC patterns
-- [AI Agents](development/AGENTS.md) - Agent guidelines
-
-### [Technical](technical/README.md)
-
-- [Control Strategies](technical/control-strategies-summary.md)
-- Engine reports and assessments
-
-### [Integration Guides]
-
-- [MyoSuite Integration](MYOSUITE_INTEGRATION.md) - 290-muscle models
-- [OpenSim Integration](OPENSIM_INTEGRATION.md) - Musculoskeletal
-
----
-
-## Recent Updates (January 2026)
-
-- **API Architecture Upgrade** - Local-first FastAPI implementation
-- **Diagnostics Enhancement** - Structured error codes, request tracing
-- **Design by Contract** - Comprehensive contract infrastructure
-- **Documentation Reorganization** - Archived old docs, new clear structure
-
----
-
-## Archived Documentation
-
-Historical assessments, phase plans, and old implementation reports have been moved to [archive/](archive/).
-
----
-
-## Getting Help
-
-- **API Docs**: http://localhost:8000/docs
-- **GitHub Issues**: Report bugs and request features
-- **Troubleshooting**: See [troubleshooting/](troubleshooting/)
-
----
-
-## License
-
-MIT License - See [LICENSE](../LICENSE)
+_This file is maintained by the UpstreamDrift team. If you find a broken link
+or a missing directory, please open an issue referencing #3073._

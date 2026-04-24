@@ -26,7 +26,7 @@ Last-Updated: 2026-04-23T08:40:00-07:00
 | **Repository Name**     | `UpstreamDrift`                                    |
 | **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift` |
 | **Owner**               | D-sorganization                                    |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
+| **Primary Language(s)** | Python 3.11+ (3.13 recommended), Rust, TypeScript  |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
 | **Spec Version**        | 1.0.175                                            |
@@ -54,7 +54,9 @@ UpstreamDrift is a multi-physics golf swing biomechanical simulation platform th
 ### Non-Goals
 
 - Not a general-purpose physics engine; focused exclusively on biomechanical simulation
-- Not intended for non-biomechanical simulations (rigid body dynamics, fluid dynamics, etc.)
+- Not intended for non-biomechanical simulations (fluid dynamics, electromagnetic, etc.); note that
+  rigid-body dynamics engines (Drake, Pinocchio) are included as biomechanical backends — they are
+  in-scope as physics engine substrates, not as general rigid-body simulation targets
 - Not a replacement for domain-specific tools (OpenSim for clinical analysis, MATLAB for controls research)
 
 ## 4. Architecture Overview
@@ -70,11 +72,12 @@ UpstreamDrift/
 ├── src/
 │   ├── engines/
 │   │   ├── physics_engines/        # Engine adapters and integrations
-│   │   │   ├── mujoco_engine.py    # MuJoCo backend (supported)
-│   │   │   ├── drake_engine.py     # Drake backend (extended)
-│   │   │   ├── pinocchio_engine.py # Pinocchio backend (extended)
-│   │   │   ├── opensim_engine.py   # OpenSim backend (experimental)
-│   │   │   └── myosuite_engine.py  # MyoSuite backend (experimental)
+│   │   │   │                       # Each engine lives in its own subpackage, e.g.:
+│   │   │   ├── mujoco/python/      # MuJoCo backend subpackage (supported)
+│   │   │   ├── drake/python/       # Drake backend subpackage (extended)
+│   │   │   ├── pinocchio/python/   # Pinocchio backend subpackage (extended)
+│   │   │   ├── opensim/python/     # OpenSim backend subpackage (experimental)
+│   │   │   └── myosuite/python/    # MyoSuite backend subpackage (experimental)
 │   │   └── pendulum_models/        # Simplified educational models
 │   │       ├── twodof_pendulum.py
 │   │       └── biomechanical_pendulum.py
@@ -135,7 +138,8 @@ UpstreamDrift/
 │       ├── vendor-freshness.yml
 │       └── docker-size-gates.yml
 ├── pyproject.toml
-├── poetry.lock
+├── requirements.lock               # pip-compile pinned runtime deps
+├── requirements-dev.lock           # pip-compile pinned dev deps
 ├── SPEC.md                         # This file
 └── README.md
 ```
@@ -438,7 +442,7 @@ Beyond standard tools, CI enforces custom checks:
 
 ```bash
 # Prerequisites
-- Python 3.10 or later
+- Python 3.11 or later (3.13 recommended)
 - MuJoCo 3.3.0+ with license (community or pro)
 - Optional: Drake, Pinocchio, OpenSim binaries on PATH
 - For Tauri desktop app: Node.js 16+, Rust toolchain

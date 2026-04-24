@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Golf Modeling Suite - API Server Startup Script.
+"""Development API server startup helper — moved from repo root to scripts/chore/ (issue #3070).
+
+Use this script to manually start the FastAPI server during local development.
+For production use, prefer the uvicorn invocation documented in SPEC.md §10 or
+the `upstream-drift --api-only` CLI flag.  This script is NOT invoked by CI.
+
+Last-verified: 2026-04-24
 
 Handles environment configuration, dependency validation, and server launch.
 

@@ -219,8 +219,8 @@ exclude = [
     "src/engines/physics_engines/drake/python/tests/",
     # Root/example scripts use runtime src.-prefixed imports
     "installer/",
-    "start_api_server.py",
-    "setup_golf_suite.py",
+    "scripts/chore/start_api_server.py",
+    "scripts/chore/setup_golf_suite.py",
     # numpy-stubs version divergence on self-hosted vs GitHub-hosted runners
     # These files have pre-existing type issues exposed by numpy>=2.0 stubs
     "src/shared/python/upstream_drift_tools/process_calculators/optimization.py",
