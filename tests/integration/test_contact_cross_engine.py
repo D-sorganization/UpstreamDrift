@@ -168,12 +168,12 @@ class TestBasicContactPhysics:
         # Check that contact dissipates energy: final height << initial height
         # After 1.5s, ball should have settled significantly (multiple bounces)
         if final_height > BOUNCE_HEIGHT_THRESHOLD_M:  # Still bouncing
-            # Energy dissipation: measure bounce height decline
+            # Energy dissipation: require at least 50% height reduction (meaningful dissipation).
+            # A ratio < 0.5 rules out near-elastic bounce (e≈1) and tunneling artifacts.
             energy_ratio = final_height / initial_height
-            # Drake's contact should dissipate energy (e.g., e ≈ 0.6-0.8 per bounce)
-            assert energy_ratio < 0.9, (
-                f"Drake contact should dissipate energy after {num_steps} steps; "
-                f"final height {final_height:.6f} too close to initial {initial_height}"
+            assert energy_ratio < 0.5, (
+                f"Drake contact should dissipate significant energy after {num_steps} steps; "
+                f"final height {final_height:.6f} must be < 50% of initial {initial_height}"
             )
         else:
             # Ball settled to ground - contact dissipation working
