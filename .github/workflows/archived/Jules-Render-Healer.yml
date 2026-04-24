@@ -7,7 +7,7 @@ jobs:
     if:
       github.event.deployment.environment == 'production' && github.event.deployment_status.state ==
       'failure'
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     steps:
       - uses: actions/checkout@v6
       - run: npm install -g @google/jules

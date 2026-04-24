@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.upstream_drift_tools.calculators.electrical.config import (
     ElectrodeConfig,
@@ -14,8 +13,6 @@ from src.shared.python.upstream_drift_tools.calculators.electrical.electrical_mo
 from src.shared.python.upstream_drift_tools.calculators.electrical.glass_interface import (
     GlassPropertiesInterface,
 )
-
-pytestmark = pytest.mark.unit
 
 
 def _make_model() -> ThreePhaseElectricalModelEnhanced:

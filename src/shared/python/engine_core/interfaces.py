@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Unified Abstract Interface for Physics Engines.
 
 This module defines the Protocol that all physics engines (MuJoCo, Drake, Pinocchio, etc.)

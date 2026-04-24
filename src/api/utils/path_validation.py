@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 
 from fastapi import HTTPException
@@ -13,37 +14,37 @@ ALLOWED_MODEL_DIRS = [
 ]
 
 
-def validate_path_within_root(candidate_path: Path, root_dir: Path) -> Path:
-    """Validate that a resolved path stays within a root directory.
-
-    Args:
-        candidate_path: Path to validate.
-        root_dir: Approved root directory for the candidate.
-
-    Returns:
-        The resolved candidate path when it remains within the approved root.
-
-    Raises:
-        HTTPException: If the path cannot be resolved or escapes the root.
-    """
-    if not isinstance(candidate_path, Path) or not isinstance(root_dir, Path):
-        raise HTTPException(status_code=400, detail="Invalid path format")
-
+def resolve_contained_path(candidate: Path, allowed_dirs: Iterable[Path]) -> Path:
+    """Resolve a candidate path and ensure it stays under an allowed root."""
     try:
-        resolved_candidate = candidate_path.resolve(strict=False)
-        resolved_root = root_dir.resolve()
-    except (OSError, RuntimeError, ValueError) as exc:
-        raise HTTPException(status_code=400, detail="Invalid path format") from exc
-
-    try:
-        resolved_candidate.relative_to(resolved_root)
-    except ValueError as exc:
+        resolved_candidate = candidate.resolve()
+    except (ValueError, OSError) as exc:
         raise HTTPException(
             status_code=400,
-            detail="Model path escapes approved model roots",
+            detail="Invalid path format",
         ) from exc
 
-    return resolved_candidate
+    for allowed_dir in allowed_dirs:
+        try:
+            resolved_allowed_dir = allowed_dir.resolve()
+        except (ValueError, OSError) as exc:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid path format",
+            ) from exc
+
+        try:
+            resolved_candidate.relative_to(resolved_allowed_dir)
+        except ValueError:
+            continue
+
+        if resolved_candidate.exists():
+            return resolved_candidate
+
+    raise HTTPException(
+        status_code=404,
+        detail="Model file not found in allowed directories",
+    )
 
 
 def validate_model_path(model_path: str) -> str:
@@ -70,21 +71,11 @@ def validate_model_path(model_path: str) -> str:
         )
 
     for allowed_dir in ALLOWED_MODEL_DIRS:
+        candidate = allowed_dir / user_path
         try:
-            candidate = (allowed_dir / user_path).resolve()
-        except (ValueError, OSError) as exc:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid path format",
-            ) from exc
-
-        try:
-            candidate.relative_to(allowed_dir)
-        except ValueError:
+            return str(resolve_contained_path(candidate, [allowed_dir]))
+        except HTTPException:
             continue
-
-        if candidate.exists():
-            return str(candidate)
 
     raise HTTPException(
         status_code=404,

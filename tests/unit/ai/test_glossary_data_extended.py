@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.ai.glossary_data_extended import get_extended_entries
-
-pytestmark = pytest.mark.unit
 
 
 class TestGetExtendedEntries:

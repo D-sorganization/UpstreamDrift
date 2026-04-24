@@ -3,10 +3,7 @@
 Computes Force and Mobility ellipsoids/matrices using Drake's MultibodyPlant.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Any
 
 import numpy as np
 
@@ -60,9 +57,7 @@ class DrakeManipulabilityAnalyzer:
 
     def __init__(self, plant: MultibodyPlant) -> None:
         """Initialize with a Drake MultibodyPlant."""
-        if not (plant is not None):
-            raise ValueError("plant must be provided")
-        if not (plant is not None):
+        if plant is None:
             raise ValueError("plant must be provided")
         self.plant = plant
         if DRAKE_AVAILABLE:
@@ -93,9 +88,7 @@ class DrakeManipulabilityAnalyzer:
 
         return sorted(bodies, key=sort_key)
 
-    def _compute_translational_jacobian(
-        self, context: Context, body: Any
-    ) -> np.ndarray:
+    def _compute_translational_jacobian(self, context: Context, body):
         return self.plant.CalcJacobianTranslationalVelocity(
             context,
             JacobianWrtVariable.kV,
@@ -105,12 +98,8 @@ class DrakeManipulabilityAnalyzer:
             self.world_frame,
         )
 
-    def _decompose_mobility_matrix(
-        self, mobility_matrix: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
-        if not (mobility_matrix is not None):
-            raise ValueError("mobility_matrix must be provided")
-        if not (mobility_matrix is not None):
+    def _decompose_mobility_matrix(self, mobility_matrix):
+        if mobility_matrix is None:
             raise ValueError("mobility_matrix must be provided")
         eigvals_v, eigvecs_v = np.linalg.eigh(mobility_matrix)
         idx = np.argsort(eigvals_v)[::-1]
@@ -119,10 +108,8 @@ class DrakeManipulabilityAnalyzer:
         radii_v = np.sqrt(np.maximum(eigvals_v, 1e-9))
         return radii_v, eigvecs_v
 
-    def _check_condition_number(self, name: str, cond: float) -> bool:
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+    def _check_condition_number(self, name, cond):
+        if name is None:
             raise ValueError("name must be provided")
         if cond > 1e6:
             logger.warning(
@@ -140,17 +127,9 @@ class DrakeManipulabilityAnalyzer:
         return True
 
     def _build_result_for_body(
-        self,
-        context: Context,
-        name: str,
-        body: Any,
-        radii_v: np.ndarray,
-        eigvecs_v: np.ndarray,
-        cond: float,
-    ) -> ManipulabilityResult:
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        self, context: Context, name, body, radii_v, eigvecs_v, cond
+    ):  # noqa: E501
+        if context is None:
             raise ValueError("context must be provided")
         isotropy = 1.0 / cond if cond > 0 else 0.0
         manip_index = np.prod(radii_v)
@@ -181,9 +160,7 @@ class DrakeManipulabilityAnalyzer:
         Returns:
             List of ManipulabilityResult.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         if not DRAKE_AVAILABLE:
             return []
@@ -210,7 +187,7 @@ class DrakeManipulabilityAnalyzer:
 
             res = self._build_result_for_body(
                 context, name, body, radii_v, eigvecs_v, cond
-            )
+            )  # noqa: E501
             results.append(res)
 
         return results

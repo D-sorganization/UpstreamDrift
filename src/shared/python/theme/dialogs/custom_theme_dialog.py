@@ -81,9 +81,7 @@ class ColorFieldEditor(QWidget):
     """Composite widget that allows text or colour-wheel selection."""
 
     def __init__(self, initial_colour: str, parent: QWidget | None = None) -> None:
-        if not (initial_colour is not None):
-            raise ValueError("initial_colour must be provided")
-        if not (initial_colour is not None):
+        if initial_colour is None:
             raise ValueError("initial_colour must be provided")
         super().__init__(parent)
 
@@ -135,9 +133,7 @@ class ColorFieldEditor(QWidget):
     # ------------------------------------------------------------------
     def _handle_text_changed(self, text: str) -> None:
         """Update preview when text changes."""
-        if not (text is not None):
-            raise ValueError("text must be provided")
-        if not (text is not None):
+        if text is None:
             raise ValueError("text must be provided")
         colour = _colour_from_text(text)
         if colour is None:
@@ -161,9 +157,7 @@ class ColorFieldEditor(QWidget):
 
     def _update_button_style(self, hex_colour: str) -> None:
         """Update button background and text colour for contrast."""
-        if not (hex_colour is not None):
-            raise ValueError("hex_colour must be provided")
-        if not (hex_colour is not None):
+        if hex_colour is None:
             raise ValueError("hex_colour must be provided")
         try:
             r, g, b = (int(hex_colour[i : i + 2], 16) for i in (1, 3, 5))
@@ -202,9 +196,7 @@ class CustomThemeDialog(QDialog):
         theme_manager: ThemeManager,
         parent: QWidget | None = None,
     ) -> None:
-        if not (theme_manager is not None):
-            raise ValueError("theme_manager must be provided")
-        if not (theme_manager is not None):
+        if theme_manager is None:
             raise ValueError("theme_manager must be provided")
         super().__init__(parent)
 
@@ -298,9 +290,7 @@ class CustomThemeDialog(QDialog):
 
     def _initialise_default_name(self, current_theme: str) -> None:
         """Suggest a unique name for the new theme."""
-        if not (current_theme is not None):
-            raise ValueError("current_theme must be provided")
-        if not (current_theme is not None):
+        if current_theme is None:
             raise ValueError("current_theme must be provided")
         suggestion = f"{current_theme} Custom"
         reserved = set(self.theme_manager.get_builtin_themes())

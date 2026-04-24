@@ -14,9 +14,7 @@ class ClubRenderer(BaseRenderer):
 
     def plot_club_head_speed(self, fig: Figure) -> None:
         """Plot club head speed over time."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, speeds = self.data.get_series("club_head_speed")
 
@@ -54,9 +52,7 @@ class ClubRenderer(BaseRenderer):
 
     def plot_club_head_trajectory(self, fig: Figure) -> None:
         """Plot 3D club head trajectory."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, positions = self.data.get_series("club_head_position")
 
@@ -106,9 +102,7 @@ class ClubRenderer(BaseRenderer):
 
     def plot_swing_plane(self, fig: Figure) -> None:
         """Plot fitted swing plane and trajectory deviation."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, positions = self.data.get_series("club_head_position")
 
@@ -189,9 +183,7 @@ class ClubRenderer(BaseRenderer):
         breakdown_mode: bool = True,
     ) -> None:
         """Plot club head task-space induced accelerations."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         ax = fig.add_subplot(111)
 
@@ -220,7 +212,8 @@ class ClubRenderer(BaseRenderer):
             times, acc_vec = self.data.get_club_induced_acceleration_series(comp)
 
             if len(times) > 0 and acc_vec.size > 0:
-                mag = np.sqrt(np.sum(acc_vec**2, axis=1))
+                acc_f = acc_vec.astype(float, copy=False)
+                mag = np.sqrt(np.einsum("...i,...i->...", acc_f, acc_f))
 
                 if np.max(mag) > 1e-4 or comp == "total":
                     ax.plot(

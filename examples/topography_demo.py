@@ -10,14 +10,17 @@ at a grid of sample points, and prints a small ASCII cross-section.
 
 from __future__ import annotations
 
-import pathlib
 import sys
+from pathlib import Path
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+_this_file = Path(__file__).resolve()
+_parents = _this_file.parents
+project_root = _parents[1]
+sys.path.insert(0, str(project_root))
 
-import numpy as np
+import numpy as np  # noqa: E402
 
-from src.shared.python.physics.topography import (
+from src.shared.python.physics.topography import (  # noqa: E402
     create_flat_terrain,
     create_sloped_terrain,
     create_undulating_terrain,
@@ -26,7 +29,7 @@ from src.shared.python.physics.topography import (
 
 def _ascii_profile(terrain, y: float = 50.0, n_samples: int = 20) -> str:
     """Return a one-line ASCII elevation profile along x at fixed y."""
-    if not (terrain is not None):
+    if terrain is None:
         raise ValueError("Terrain object must be provided")
     if not (n_samples > 1):
         raise ValueError("n_samples must be greater than 1")
@@ -45,7 +48,7 @@ def _ascii_profile(terrain, y: float = 50.0, n_samples: int = 20) -> str:
 def _show_terrain(name: str, terrain) -> None:
     if not (name):
         raise ValueError("Name must not be empty")
-    if not (terrain is not None):
+    if terrain is None:
         raise ValueError("Terrain object must be provided")
     xs = np.linspace(0, 100, 6)
     ys = np.linspace(0, 100, 6)

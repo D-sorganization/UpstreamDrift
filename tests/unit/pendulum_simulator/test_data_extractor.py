@@ -10,8 +10,6 @@ from src.shared.python.pendulum_simulator.data_extractor import (
     list_available_series,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class _MockDoubleResult:
     """Minimal mock of a double-pendulum simulation result."""

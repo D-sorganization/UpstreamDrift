@@ -14,8 +14,6 @@ from src.shared.python.config.handedness_support import (
     mirror_velocity,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestHandednessEnum:
     def test_right_handed_exists(self) -> None:

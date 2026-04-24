@@ -29,7 +29,7 @@ def ensure_imports(*modules: str) -> dict[str, bool]:
     Example:
         available = ensure_imports("numpy", "matplotlib", "torch")
         if not available["torch"]:
-            print("PyTorch not available")
+            logger.info("PyTorch not available")
     """
     results = {}
 
@@ -131,7 +131,7 @@ def get_module_version(module_name: str) -> str | None:
 
     Example:
         version = get_module_version("numpy")
-        print(f"NumPy version: {version}")
+        logger.info(f"NumPy version: {version}")
     """
     try:
         module = __import__(module_name)
@@ -161,8 +161,8 @@ def check_minimum_version(
         if check_minimum_version("numpy", "1.20.0"):
             use_new_api()
     """
-    assert module_name is not None, "module_name must be provided"
-    assert module_name is not None, "module_name must be provided"
+    if module_name is None:
+        raise ValueError("module_name must be provided")
     from packaging import version
 
     current_version = get_module_version(module_name)

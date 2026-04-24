@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.assessment.constants import (
     CATEGORIES,
     GROUP_MAPPING,
     GROUP_WEIGHTS,
     PRAGMATIC_PRINCIPLES,
 )
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # CATEGORIES

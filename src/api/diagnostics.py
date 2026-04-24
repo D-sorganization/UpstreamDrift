@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Diagnostic utilities for Golf Modeling Suite API.
 
@@ -608,7 +612,7 @@ def get_diagnostic_endpoint_html(results: dict[str, Any]) -> str:
 
 def _format_details(details: dict[str, Any], indent: int = 2) -> str:
     """Format details dictionary for display."""
-    if not (details is not None):
+    if details is None:
         raise ValueError("details must be provided")
     import json
 

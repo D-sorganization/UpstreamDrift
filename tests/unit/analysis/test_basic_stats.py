@@ -7,8 +7,6 @@ import pytest
 
 from src.shared.python.analysis.basic_stats import BasicStatsMixin
 
-pytestmark = pytest.mark.unit
-
 
 class _Concrete(BasicStatsMixin):
     """Minimal concrete subclass for testing BasicStatsMixin."""

@@ -84,7 +84,7 @@ class AnalysisMixin:
         if self.recorder.get_num_frames() == 0:
             QtWidgets.QMessageBox.warning(
                 self, "No Data", "No simulation data recorded yet."
-            )
+            )  # noqa: E501
             return
 
         self.canvas.fig.clear()
@@ -129,9 +129,7 @@ class AnalysisMixin:
 
     def _plot_swing_profile(self: PinocchioGUI, plotter: GolfSwingPlotter) -> None:
         """Plot the Swing Profile radar chart."""
-        if not (plotter is not None):
-            raise ValueError("plotter must be provided")
-        if not (plotter is not None):
+        if plotter is None:
             raise ValueError("plotter must be provided")
         times, positions = self.recorder.get_time_series("joint_positions")
         _, velocities = self.recorder.get_time_series("joint_velocities")
@@ -238,7 +236,7 @@ class AnalysisMixin:
         if has_specific:
             times, spec_vals = self.recorder.get_induced_acceleration_series(
                 "specific_control"
-            )
+            )  # noqa: E501
             if len(times) > 0 and spec_vals.size > 0:
                 ax = self.canvas.fig.axes[0]
                 if v_idx < spec_vals.shape[1]:
@@ -277,7 +275,7 @@ class AnalysisMixin:
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
         plotter.plot_counterfactual_comparison(
             self.canvas.fig, "dual", metric_idx=v_idx
-        )
+        )  # noqa: E501
 
     def _ensure_analysis_data_populated(self: PinocchioGUI) -> None:
         """Populate recorder frames with analysis data if missing."""

@@ -12,15 +12,12 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
 
 from src.shared.python.core.contracts import invariant
-
-if TYPE_CHECKING:
-    from scipy.optimize import Bounds
 
 
 @dataclass
@@ -169,9 +166,7 @@ class ScipyQPSolver(QPSolver):
             method: Scipy optimization method ('SLSQP' or 'trust-constr').
             max_iter: Maximum number of iterations.
         """
-        if not (method is not None):
-            raise ValueError("method must be provided")
-        if not (method is not None):
+        if method is None:
             raise ValueError("method must be provided")
         self._method = method
         self._max_iter = max_iter
@@ -199,9 +194,7 @@ class ScipyQPSolver(QPSolver):
         Returns:
             QP solution.
         """
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         import time
 
@@ -259,10 +252,8 @@ class ScipyQPSolver(QPSolver):
                 status=f"Solver error: {e}",
             )
 
-    def _build_variable_bounds(self, problem: QPProblem) -> Bounds | None:  # type: ignore[return]
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
-        if not (problem is not None):
+    def _build_variable_bounds(self, problem: QPProblem) -> Any:
+        if problem is None:
             raise ValueError("problem must be provided")
         from scipy.optimize import Bounds
 
@@ -275,9 +266,7 @@ class ScipyQPSolver(QPSolver):
         return Bounds(lb, ub)
 
     def _build_constraints(self, problem: QPProblem) -> list[dict]:
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         constraints: list[dict] = []
 
@@ -300,9 +289,7 @@ class ScipyQPSolver(QPSolver):
         constraints: list[dict],
         problem: QPProblem,
     ) -> None:
-        if not (constraints is not None):
-            raise ValueError("constraints must be provided")
-        if not (constraints is not None):
+        if constraints is None:
             raise ValueError("constraints must be provided")
         lb = (
             problem.lb_ineq
@@ -347,9 +334,7 @@ class NullspaceQPSolver(QPSolver):
         Args:
             regularization: Regularization for matrix inversion.
         """
-        if not (regularization is not None):
-            raise ValueError("regularization must be provided")
-        if not (regularization is not None):
+        if regularization is None:
             raise ValueError("regularization must be provided")
         self._reg = regularization
 
@@ -357,29 +342,18 @@ class NullspaceQPSolver(QPSolver):
         """Always available (uses numpy only)."""
         return True
 
-    def _apply_variable_bounds(self, x: np.ndarray, problem: QPProblem) -> np.ndarray:
-        """Clamp x to variable bounds [x_lb, x_ub] if set."""
-        if problem.x_lb is not None:
-            x = np.maximum(x, problem.x_lb)
-        if problem.x_ub is not None:
-            x = np.minimum(x, problem.x_ub)
-        return x
-
     def solve(self, problem: QPProblem) -> QPSolution:
         """Solve QP using nullspace method.
 
-        Handles equality constraints via KKT system. Variable bounds
-        are enforced by post-solve clamping (best-effort).
+        Only handles equality constraints and soft bounds.
 
         Args:
-            problem: QP problem.
+            problem: QP problem (equality constraints only).
 
         Returns:
             QP solution.
         """
-        if not (problem is not None):
-            raise ValueError("problem must be provided")
-        if not (problem is not None):
+        if problem is None:
             raise ValueError("problem must be provided")
         import time
 
@@ -409,7 +383,7 @@ class NullspaceQPSolver(QPSolver):
 
             try:
                 solution = np.linalg.solve(KKT, rhs)
-                x = self._apply_variable_bounds(solution[:n], problem)
+                x = solution[:n]
                 dual = solution[n:]
 
                 cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
@@ -436,9 +410,7 @@ class NullspaceQPSolver(QPSolver):
         else:
             # Unconstrained: solve H @ x = -g
             try:
-                x = self._apply_variable_bounds(
-                    np.asarray(np.linalg.solve(H, -g), dtype=np.float64), problem
-                )
+                x = np.asarray(np.linalg.solve(H, -g), dtype=np.float64)
                 cost = float(0.5 * x @ problem.H @ x + problem.g @ x)
 
                 solve_time = time.perf_counter() - start_time

@@ -1,11 +1,7 @@
 import sys
-import types
-from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
-
-pytestmark = pytest.mark.unit
 
 
 # Mock Qt classes — use __getattr__ catch-all to handle any missing Qt methods
@@ -17,22 +13,22 @@ class MockQWidget:
         """Return a no-op callable for any missing Qt method."""
         return lambda *args, **kwargs: None
 
-    def setAccessibleName(self, name) -> None:
+    def setAccessibleName(self, name):
         pass
 
-    def setAccessibleDescription(self, desc) -> None:
+    def setAccessibleDescription(self, desc):
         pass
 
-    def setObjectName(self, name) -> None:
+    def setObjectName(self, name):
         pass
 
-    def setCursor(self, cursor) -> None:
+    def setCursor(self, cursor):
         pass
 
-    def setFocusPolicy(self, policy) -> None:
+    def setFocusPolicy(self, policy):
         pass
 
-    def setStyleSheet(self, style) -> None:
+    def setStyleSheet(self, style):
         pass
 
 
@@ -40,31 +36,31 @@ class MockQLabel(MockQWidget):
     def __init__(self, text="", parent=None):
         self._text = text
 
-    def setFont(self, font) -> None:
+    def setFont(self, font):
         pass
 
-    def setWordWrap(self, wrap) -> None:
+    def setWordWrap(self, wrap):
         pass
 
-    def setAlignment(self, align) -> None:
+    def setAlignment(self, align):
         pass
 
-    def setStyleSheet(self, style) -> None:
+    def setStyleSheet(self, style):
         pass
 
-    def setFixedWidth(self, w) -> None:
+    def setFixedWidth(self, w):
         pass
 
-    def setFixedSize(self, w, h) -> None:
+    def setFixedSize(self, w, h):
         pass
 
-    def setPixmap(self, pixmap) -> None:
+    def setPixmap(self, pixmap):
         pass
 
-    def setToolTip(self, text) -> None:
+    def setToolTip(self, text):
         pass
 
-    def setText(self, text) -> None:
+    def setText(self, text):
         self._text = text
 
 
@@ -72,16 +68,16 @@ class MockQVBoxLayout:
     def __init__(self, parent=None):
         pass
 
-    def setAlignment(self, *args) -> None:
+    def setAlignment(self, *args):
         pass
 
-    def addWidget(self, widget, *args, **kwargs) -> None:
+    def addWidget(self, widget, *args, **kwargs):
         pass
 
-    def addLayout(self, layout, *args, **kwargs) -> None:
+    def addLayout(self, layout, *args, **kwargs):
         pass
 
-    def setContentsMargins(self, *args) -> None:
+    def setContentsMargins(self, *args):
         pass
 
 
@@ -89,16 +85,16 @@ class MockQHBoxLayout:
     def __init__(self, parent=None):
         pass
 
-    def addStretch(self, *args) -> None:
+    def addStretch(self, *args):
         pass
 
-    def addWidget(self, widget, *args, **kwargs) -> None:
+    def addWidget(self, widget, *args, **kwargs):
         pass
 
-    def addLayout(self, layout, *args, **kwargs) -> None:
+    def addLayout(self, layout, *args, **kwargs):
         pass
 
-    def setContentsMargins(self, *args) -> None:
+    def setContentsMargins(self, *args):
         pass
 
 
@@ -106,12 +102,12 @@ class MockQFrame(MockQWidget):
     def __init__(self, parent=None):
         pass
 
-    def setAcceptDrops(self, accept) -> None:
+    def setAcceptDrops(self, accept):
         pass
 
 
 @pytest.fixture
-def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
+def mocked_launcher_module():
     """Import golf_launcher with mocked Qt modules."""
     mock_qt_core = MagicMock()
     mock_qt_core.Qt = MagicMock()
@@ -155,7 +151,7 @@ def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
     reason="Theme colors are dynamic (QSettings-based), cannot validate in mocked env",
     strict=False,
 )
-def test_status_info_contrast(mocked_launcher_module) -> None:
+def test_status_info_contrast(mocked_launcher_module):
     """Test that _get_status_info returns appropriate text colors."""
 
     # Mock model object
@@ -208,14 +204,14 @@ def test_status_info_contrast(mocked_launcher_module) -> None:
 @pytest.mark.xfail(
     reason="QShortcut mocking with complex imports is flaky", strict=False
 )
-def test_escape_shortcut_logic(mocked_launcher_module) -> None:
+def test_escape_shortcut_logic(mocked_launcher_module):
     """Test that GolfLauncher sets up the Escape shortcut."""
     with (
         patch("src.launchers.golf_launcher.QShortcut") as MockShortcut,
         patch("src.launchers.golf_launcher.QKeySequence") as MockKeySequence,
     ):
         # Setup QKeySequence to return identifiable mocks
-        def key_seq_side_effect(arg) -> MagicMock:
+        def key_seq_side_effect(arg):
             m = MagicMock()
             m.key_str = arg
             return m

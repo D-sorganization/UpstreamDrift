@@ -3,40 +3,23 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.unit
+# Per CLAUDE.md: never module-level sys.modules mocking.
+# Use patch.dict context managers instead.
+_PYDRAKE_MOCK = {
+    "pydrake": MagicMock(),
+    "pydrake.all": MagicMock(),
+}
 
-_PYDRAKE_MOCKED_KEYS = ["pydrake", "pydrake.all"]
-
-
-@pytest.fixture(autouse=True)
-def _mock_pydrake() -> Generator[None, None, None]:
-    """Mock pydrake for every test in this module using patch.dict.
-
-    patch.dict auto-restores sys.modules after each test so no pollution leaks
-    to other modules.
-    """
-    mock_pydrake = MagicMock()
-    with patch.dict("sys.modules", dict.fromkeys(_PYDRAKE_MOCKED_KEYS, mock_pydrake)):
-        yield
-
-
-@pytest.fixture
-def _drake_analyzer_class():
-    """Return DrakeInducedAccelerationAnalyzer under active mocks."""
-    # Evict any cached module so it re-imports with the current sys.modules mocks.
-    mod_key = "src.engines.physics_engines.drake.python.src.induced_acceleration"
-    sys.modules.pop(mod_key, None)
-    from src.engines.physics_engines.drake.python.src.induced_acceleration import (
+# Import the module under test with patched sys.modules
+with patch.dict(sys.modules, _PYDRAKE_MOCK):
+    from src.engines.physics_engines.drake.python.src.induced_acceleration import (  # noqa: E402
         DrakeInducedAccelerationAnalyzer,
     )
-
-    return DrakeInducedAccelerationAnalyzer
 
 
 class TestDrakeInducedAcceleration:
@@ -52,9 +35,9 @@ class TestDrakeInducedAcceleration:
         return plant
 
     @pytest.fixture
-    def analyzer(self, _drake_analyzer_class, mock_plant):
+    def analyzer(self, mock_plant) -> DrakeInducedAccelerationAnalyzer:
         """Create analyzer instance."""
-        return _drake_analyzer_class(mock_plant)
+        return DrakeInducedAccelerationAnalyzer(mock_plant)
 
     def test_initialization(self, analyzer, mock_plant) -> None:
         """Test initialization."""

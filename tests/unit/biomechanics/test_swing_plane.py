@@ -10,8 +10,6 @@ from src.shared.python.biomechanics.swing_plane_analysis import (
     SwingPlaneMetrics,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_planar_points(n: int = 50) -> np.ndarray:
     """Create points lying in the XZ plane (y=0)."""

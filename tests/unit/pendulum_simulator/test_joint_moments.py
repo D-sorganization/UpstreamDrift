@@ -13,8 +13,6 @@ from src.shared.python.pendulum_simulator.joint_moments import (
     triple_pendulum_moments,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestCross2d:
     def test_orthogonal_unit_vectors(self) -> None:
@@ -45,7 +43,7 @@ class TestCross2d:
     def test_wrong_shape_raises(self) -> None:
         r = np.array([1.0, 0.0, 0.0])  # shape (3,)
         f = np.array([0.0, 1.0, 0.0])
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(AssertionError):
             cross_2d(r, f)
 
 

@@ -15,8 +15,6 @@ from src.shared.python.signal_toolkit.filters import (
     create_butterworth_filter,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_signal(n: int = 200, fs: float = 200.0) -> Signal:
     """Sinusoidal signal at 5 Hz with 200 Hz sampling."""

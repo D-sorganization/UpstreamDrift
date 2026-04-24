@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """AI Assistant Settings Dialog.
 
 Provides configuration for AI provider selection, API key management,
@@ -213,9 +217,7 @@ def set_api_key(provider: AIProvider, key: str) -> bool:
     Returns:
         True if successful, False otherwise.
     """
-    if not (provider is not None):
-        raise ValueError("provider must be provided")
-    if not (provider is not None):
+    if provider is None:
         raise ValueError("provider must be provided")
     info = PROVIDER_INFO.get(provider)
     if not info or not info.get("requires_key"):
@@ -285,9 +287,7 @@ class ProviderConfigWidget(QWidget):
             provider: The provider this widget configures.
             parent: Parent widget.
         """
-        if not (provider is not None):
-            raise ValueError("provider must be provided")
-        if not (provider is not None):
+        if provider is None:
             raise ValueError("provider must be provided")
         super().__init__(parent)
         self._provider = provider
@@ -731,9 +731,7 @@ class AISettingsDialog(QDialog):
 
     def _on_provider_changed(self, index: int) -> None:
         """Handle provider selection change."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         provider_data = self._provider_combo.itemData(index)
         if provider_data is None or not isinstance(provider_data, AIProvider):

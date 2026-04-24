@@ -82,8 +82,8 @@ class DrakeMotionOptimizer:
             cost_function: Function that computes cost from trajectory
             target_value: Optional target value for the objective
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if name is None:
+            raise ValueError("name must be provided")
         objective = OptimizationObjective(
             name=name,
             weight=weight,
@@ -110,8 +110,8 @@ class DrakeMotionOptimizer:
             lower_bound: Lower bound for inequality/bounds constraints
             upper_bound: Upper bound for inequality/bounds constraints
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if name is None:
+            raise ValueError("name must be provided")
         constraint = OptimizationConstraint(
             name=name,
             constraint_type=constraint_type,
@@ -130,7 +130,10 @@ class DrakeMotionOptimizer:
             """Compute negative peak speed as a cost to maximize."""
             # Placeholder: compute ball speed from trajectory
             # In real implementation, this would extract ball velocity at impact
-            return float(-np.max(np.linalg.norm(np.diff(trajectory, axis=0), axis=1)))
+            # ⚡ Bolt: Computing max of np.einsum first, then sqrt,
+            # is much faster than np.max(np.linalg.norm(..., axis=1))
+            diff = np.diff(trajectory, axis=0)
+            return float(-np.sqrt(np.max(np.einsum("ij,ij->i", diff, diff))))
 
         self.add_objective(
             name="ball_speed",
@@ -157,7 +160,15 @@ class DrakeMotionOptimizer:
             if len(trajectory) < 3:
                 return 0.0
             second_derivatives = np.diff(trajectory, n=2, axis=0)
-            return float(np.sum(np.linalg.norm(second_derivatives, axis=1)))
+            # ⚡ Bolt: np.sqrt(np.einsum(...)) avoids temp arrays,
+            # and is much faster than np.linalg.norm(..., axis=1)
+            return float(
+                np.sum(
+                    np.sqrt(
+                        np.einsum("ij,ij->i", second_derivatives, second_derivatives)
+                    )
+                )
+            )
 
         self.add_objective(name="smoothness", weight=0.5, cost_function=smoothness_cost)
 
@@ -192,7 +203,7 @@ class DrakeMotionOptimizer:
 
     def _build_total_cost_function(
         self, traj_shape: tuple
-    ) -> Callable[[np.ndarray], float]:
+    ) -> Callable[[np.ndarray], float]:  # noqa: E501
         def total_cost(x: np.ndarray) -> float:
             """Combined weighted objective function."""
             traj = x.reshape(traj_shape)
@@ -205,8 +216,8 @@ class DrakeMotionOptimizer:
         return total_cost
 
     def _build_scipy_constraints(self, traj_shape: tuple) -> list[dict]:
-        assert traj_shape is not None, "traj_shape must be provided"
-        assert traj_shape is not None, "traj_shape must be provided"
+        if traj_shape is None:
+            raise ValueError("traj_shape must be provided")
         scipy_constraints: list[dict] = []
         for con in self.constraints:
             if con.constraint_function is None:
@@ -217,7 +228,7 @@ class DrakeMotionOptimizer:
                         "type": "eq",
                         "fun": lambda x, c=con: c.constraint_function(
                             x.reshape(traj_shape)
-                        ),
+                        ),  # noqa: E501
                     }
                 )
             elif con.constraint_type == "inequality":
@@ -227,7 +238,7 @@ class DrakeMotionOptimizer:
                             "type": "ineq",
                             "fun": lambda x, c=con: (
                                 c.upper_bound
-                                - c.constraint_function(x.reshape(traj_shape))
+                                - c.constraint_function(x.reshape(traj_shape))  # noqa: E501
                             ),
                         }
                     )
@@ -237,15 +248,15 @@ class DrakeMotionOptimizer:
                             "type": "ineq",
                             "fun": lambda x, c=con: (
                                 c.constraint_function(x.reshape(traj_shape))
-                                - c.lower_bound
+                                - c.lower_bound  # noqa: E501
                             ),
                         }
                     )
         return scipy_constraints
 
     def _evaluate_objectives(self, optimal_trajectory: np.ndarray) -> dict[str, float]:
-        assert optimal_trajectory is not None, "optimal_trajectory must be provided"
-        assert optimal_trajectory is not None, "optimal_trajectory must be provided"
+        if optimal_trajectory is None:
+            raise ValueError("optimal_trajectory must be provided")
         objective_values = {}
         for obj in self.objectives:
             if obj.cost_function is not None:
@@ -255,8 +266,8 @@ class DrakeMotionOptimizer:
     def _evaluate_constraint_violations(
         self, optimal_trajectory: np.ndarray, tolerance: float
     ) -> tuple[dict[str, float], bool]:
-        assert optimal_trajectory is not None, "optimal_trajectory must be provided"
-        assert optimal_trajectory is not None, "optimal_trajectory must be provided"
+        if optimal_trajectory is None:
+            raise ValueError("optimal_trajectory must be provided")
         constraint_violations = {}
         all_satisfied = True
         for con in self.constraints:
@@ -326,8 +337,8 @@ class DrakeMotionOptimizer:
         Returns:
             OptimizationResult with optimization results
         """
-        assert initial_trajectory is not None, "initial_trajectory must be provided"
-        assert initial_trajectory is not None, "initial_trajectory must be provided"
+        if initial_trajectory is None:
+            raise ValueError("initial_trajectory must be provided")
         from scipy.optimize import minimize as scipy_minimize
 
         self.logger.info(
@@ -387,8 +398,8 @@ class DrakeMotionOptimizer:
             OptimizationResult optimized for distance
         """
         # Clear existing objectives and add distance-specific ones
-        assert initial_trajectory is not None, "initial_trajectory must be provided"
-        assert initial_trajectory is not None, "initial_trajectory must be provided"
+        if initial_trajectory is None:
+            raise ValueError("initial_trajectory must be provided")
         self.objectives.clear()
 
         def distance_cost(trajectory: np.ndarray) -> float:
@@ -418,8 +429,8 @@ class DrakeMotionOptimizer:
             OptimizationResult optimized for accuracy
         """
         # Clear existing objectives and add accuracy-specific ones
-        assert initial_trajectory is not None, "initial_trajectory must be provided"
-        assert initial_trajectory is not None, "initial_trajectory must be provided"
+        if initial_trajectory is None:
+            raise ValueError("initial_trajectory must be provided")
         self.objectives.clear()
 
         def accuracy_cost(trajectory: np.ndarray) -> float:
@@ -439,15 +450,15 @@ class DrakeMotionOptimizer:
 
     def export_optimization_results(
         self, result: OptimizationResult, output_path: str
-    ) -> None:
+    ) -> None:  # noqa: E501
         """Export optimization results for analysis.
 
         Args:
             result: Optimization results to export
             output_path: Path to save results
         """
-        assert result is not None, "result must be provided"
-        assert result is not None, "result must be provided"
+        if result is None:
+            raise ValueError("result must be provided")
         import json
         from pathlib import Path
 

@@ -146,7 +146,7 @@ class TestAuthCacheSHA256CacheKey:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_testkey_for_sha256_verification"
+        api_key = "gms_testkey_for_sha256_verification"  # nosec B105 - test fixture
         token = cache._cache_lookup_token(api_key)
         expected = hashlib.sha256(api_key.encode()).hexdigest()
 
@@ -171,7 +171,7 @@ class TestAuthCacheSHA256CacheKey:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_determinism_check"
+        api_key = "gms_determinism_check"  # nosec B105 - test fixture
 
         keys = [cache._cache_lookup_token(api_key) for _ in range(5)]
         assert len(set(keys)) == 1, "Cache key is not deterministic across calls"
@@ -191,7 +191,7 @@ class TestAuthCacheSHA256CacheKey:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_builtin_hash_check"
+        api_key = "gms_builtin_hash_check"  # nosec B105 - test fixture
         token = cache._cache_lookup_token(api_key)
 
         # Python's hash() prefix would appear as a numeric string
@@ -205,7 +205,7 @@ class TestAuthCacheSHA256CacheKey:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_roundtrip_sha256"
+        api_key = "gms_roundtrip_sha256"  # nosec B105 - test fixture
         user_id = 99
 
         cache.set(api_key, user_id)

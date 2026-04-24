@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.capabilities import CapabilityLevel, EngineCapabilities
-
-pytestmark = pytest.mark.unit
 
 
 class TestCapabilitiesShim:

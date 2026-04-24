@@ -60,9 +60,7 @@ class ComparativeSwingAnalyzer:
             name_a: Label for first swing
             name_b: Label for second swing
         """
-        if not (recorder_a is not None):
-            raise ValueError("recorder_a must be provided")
-        if not (recorder_a is not None):
+        if recorder_a is None:
             raise ValueError("recorder_a must be provided")
         self.recorder_a = recorder_a
         self.recorder_b = recorder_b
@@ -86,9 +84,7 @@ class ComparativeSwingAnalyzer:
             AlignedSignals object or None if data missing
         """
         # Get data
-        if not (field_name is not None):
-            raise ValueError("field_name must be provided")
-        if not (field_name is not None):
+        if field_name is None:
             raise ValueError("field_name must be provided")
         t_a, data_a = self.recorder_a.get_time_series(field_name)
         t_b, data_b = self.recorder_b.get_time_series(field_name)
@@ -157,9 +153,7 @@ class ComparativeSwingAnalyzer:
         Returns:
             ComparisonMetric object
         """
-        if not (metric_name is not None):
-            raise ValueError("metric_name must be provided")
-        if not (metric_name is not None):
+        if metric_name is None:
             raise ValueError("metric_name must be provided")
         diff = val_a - val_b
         mean = (val_a + val_b) / 2.0
@@ -228,8 +222,14 @@ class ComparativeSwingAnalyzer:
             am_a = np.asarray(am_a)
             am_b = np.asarray(am_b)
             # Compare max magnitude
-            max_am_a = float(np.max(np.linalg.norm(am_a, axis=1)))
-            max_am_b = float(np.max(np.linalg.norm(am_b, axis=1)))
+            # PERFORMANCE: Explicit computation instead of np.linalg.norm(..., axis=1)
+            # which has high reduction overhead on small axes.
+            max_am_a = float(
+                np.max(np.sqrt(am_a[:, 0] ** 2 + am_a[:, 1] ** 2 + am_a[:, 2] ** 2))
+            )
+            max_am_b = float(
+                np.max(np.sqrt(am_b[:, 0] ** 2 + am_b[:, 1] ** 2 + am_b[:, 2] ** 2))
+            )
             metrics.append(
                 self.compare_scalars("Max Angular Momentum", max_am_a, max_am_b)
             )
@@ -243,7 +243,10 @@ class ComparativeSwingAnalyzer:
 
             def path_len(c: np.ndarray) -> float:
                 """Calculate path length of a trajectory."""
-                return float(np.sum(np.linalg.norm(np.diff(c[:, :2], axis=0), axis=1)))
+                # PERFORMANCE: Explicit computation using hypot instead of np.linalg.norm(..., axis=1)
+                # to avoid reduction overhead on a small axis.
+                diff = np.diff(c[:, :2], axis=0)
+                return float(np.sum(np.hypot(diff[:, 0], diff[:, 1])))
 
             metrics.append(
                 self.compare_scalars(
@@ -273,9 +276,7 @@ class ComparativeSwingAnalyzer:
             Tuple of (distance, path). Path is list of (i, j) indices.
         """
         # Get data
-        if not (field_name is not None):
-            raise ValueError("field_name must be provided")
-        if not (field_name is not None):
+        if field_name is None:
             raise ValueError("field_name must be provided")
         _, data_a_raw = self.recorder_a.get_time_series(field_name)
         _, data_b_raw = self.recorder_b.get_time_series(field_name)

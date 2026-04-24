@@ -34,8 +34,6 @@ from src.shared.python.perturbation.cross_engine_runner import (
 )
 from src.shared.python.perturbation.statistics import MetricStatistics
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -394,21 +392,21 @@ class _MockAnalyzer:
 class TestCrossEnginePerturbationRunner:
     def test_requires_profile_before_run(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             runner.run_all(_SMALL_CONFIG)
 
     def test_set_profile_validates_dict(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             runner.set_profile("not_a_dict")  # type: ignore[arg-type]
 
     def test_set_profile_requires_coeffs(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             runner.set_profile({"bad_key": []})
 
     def test_rejects_unknown_engine(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             CrossEnginePerturbationRunner(engines=["nonexistent_engine"])
 
     def test_run_all_with_mocked_analyzers(self) -> None:
@@ -477,7 +475,7 @@ class TestCrossEnginePerturbationRunner:
 
     def test_run_single_requires_profile(self) -> None:
         runner = CrossEnginePerturbationRunner(engines=["mujoco"])
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             runner.run_single("mujoco", _SMALL_CONFIG)
 
 

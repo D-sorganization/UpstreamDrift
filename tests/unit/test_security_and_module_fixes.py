@@ -107,7 +107,7 @@ class TestAuthCacheCryptoHash:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_testkey_abc123"
+        api_key = "gms_testkey_abc123"  # nosec B105 - test fixture
 
         key1 = cache._cache_lookup_token(api_key)
         key2 = cache._cache_lookup_token(api_key)
@@ -124,7 +124,7 @@ class TestAuthCacheCryptoHash:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_testkey_abc123"
+        api_key = "gms_testkey_abc123"  # nosec B105 - test fixture
         token = cache._cache_lookup_token(api_key)
 
         # The token must not be derived solely from Python's hash()
@@ -138,7 +138,7 @@ class TestAuthCacheCryptoHash:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_testkey_abc123"
+        api_key = "gms_testkey_abc123"  # nosec B105 - test fixture
         token = cache._cache_lookup_token(api_key)
 
         expected = hashlib.sha256(api_key.encode()).hexdigest()
@@ -149,7 +149,7 @@ class TestAuthCacheCryptoHash:
         from src.api.auth.security import AuthCache
 
         cache = AuthCache()
-        api_key = "gms_roundtrip_key"
+        api_key = "gms_roundtrip_key"  # nosec B105 - test fixture
         user_id = 42
 
         cache.set(api_key, user_id)
@@ -382,7 +382,8 @@ PHYSICS_MODULES = [
     "src/shared/python/physics/physics_parameters.py",
     "src/shared/python/physics/physics_validation.py",
     "src/shared/python/physics/rust_kernel.py",
-    "src/shared/python/physics/terrain.py",
+    "src/shared/python/physics/terrain_physics.py",
+    "src/shared/python/physics/terrain/__init__.py",
     "src/shared/python/physics/terrain_engine.py",
     "src/shared/python/physics/terrain_mixin.py",
     "src/shared/python/physics/topography.py",

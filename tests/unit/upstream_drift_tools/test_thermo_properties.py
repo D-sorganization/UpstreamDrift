@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.upstream_drift_tools.calculators.thermo.thermo_properties import (
     MOLAR_CP_298,
     MOLECULAR_WEIGHTS,
@@ -11,8 +9,6 @@ from src.shared.python.upstream_drift_tools.calculators.thermo.thermo_properties
     ThermoPropertiesCalculator,
     ThermoResult,
 )
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Constants

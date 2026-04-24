@@ -86,7 +86,7 @@ class MuJoCoMeshcatAdapter:
             # Material/Color
             material = g.MeshPhongMaterial(
                 color=self._rgba_to_hex(rgba), opacity=rgba[3]
-            )
+            )  # noqa: E501
 
             shape = None
 
@@ -146,9 +146,7 @@ class MuJoCoMeshcatAdapter:
         """
         Updates geometry transforms from MuJoCo data.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or data is None or self.model is None:
             return
@@ -182,9 +180,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws force/torque vectors at joints.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or self.model is None:
             return
@@ -216,12 +212,12 @@ class MuJoCoMeshcatAdapter:
             if show_force and np.linalg.norm(f) > 1e-3:
                 self._draw_arrow(
                     f"overlays/forces/{body_name}", pos, f * force_scale, 0xFF0000
-                )
+                )  # noqa: E501
 
             if show_torque and np.linalg.norm(t) > 1e-3:
                 self._draw_arrow(
                     f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
-                )
+                )  # noqa: E501
 
     def draw_induced_vectors(
         self,
@@ -233,9 +229,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws induced acceleration vectors.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or self.model is None:
             return
@@ -290,7 +284,7 @@ class MuJoCoMeshcatAdapter:
             # Magenta
             self._draw_arrow(
                 f"overlays/induced/joint_{j}", joint_pos, arrow_dir, 0xFF00FF
-            )
+            )  # noqa: E501
 
     def draw_cf_vectors(
         self,
@@ -302,9 +296,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws Counterfactual vectors.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         if self.vis is None or self.model is None:
             return
@@ -352,9 +344,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws an ellipsoid at the specified position/orientation.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None:
             return
@@ -390,9 +380,7 @@ class MuJoCoMeshcatAdapter:
             color: Hex color for the plane surface.
             opacity: Transparency (0=invisible, 1=opaque).
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None:
             return
@@ -424,9 +412,7 @@ class MuJoCoMeshcatAdapter:
             points: (N, 3) trajectory positions [m].
             color: Hex color for the line.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None or len(points) < 2:
             return
@@ -455,9 +441,7 @@ class MuJoCoMeshcatAdapter:
             end: End position [m] (3,).
             color: Hex color.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self.vis is None:
             return
@@ -480,10 +464,8 @@ class MuJoCoMeshcatAdapter:
 
     def _draw_arrow(
         self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
-    ) -> None:
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+    ) -> None:  # noqa: E501
+        if path is None:
             raise ValueError("path must be provided")
         if self.vis is None:
             return

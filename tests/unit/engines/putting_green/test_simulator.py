@@ -506,6 +506,8 @@ class TestPuttingGreenSimulatorIO:
 class TestPuttingGreenSimulatorAdvanced:
     """Advanced feature tests."""
 
+    pytestmark = pytest.mark.slow
+
     @pytest.fixture
     def simulator(self) -> PuttingGreenSimulator:
         green = GreenSurface(

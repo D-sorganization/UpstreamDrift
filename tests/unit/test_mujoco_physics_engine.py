@@ -3,8 +3,6 @@
 Uses shared module-level mocks for the mujoco dependency from conftest.py.
 """
 
-from collections.abc import Generator
-from typing import Any
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -33,11 +31,13 @@ _MJ_DATA_SPEC = [
     "time",
     "xpos",
     "xquat",
+    "ncon",
+    "contact",
 ]
 
 
 @pytest.fixture(scope="module")
-def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies) -> Generator[type, None, None]:
+def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
     """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
     import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
@@ -52,7 +52,7 @@ def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies) -> Generator[type, None, 
 
 
 @pytest.fixture
-def mock_mj(mock_mujoco_dependencies) -> MagicMock:
+def mock_mj(mock_mujoco_dependencies):
     """Return the shared mujoco mock **and** reset its call tracking.
 
     This avoids ghostly cross-test state while still using a single mock
@@ -64,17 +64,17 @@ def mock_mj(mock_mujoco_dependencies) -> MagicMock:
 
 
 @pytest.fixture
-def engine(MuJoCoPhysicsEngineClass) -> Any:
+def engine(MuJoCoPhysicsEngineClass):
     """Fixture to provide a MuJoCoPhysicsEngine instance."""
     return MuJoCoPhysicsEngineClass()
 
 
-def test_initialization(engine) -> None:
+def test_initialization(engine):
     assert engine.model is None
     assert engine.data is None
 
 
-def test_load_from_string(engine, mock_mj) -> None:
+def test_load_from_string(engine, mock_mj):
     xml = "<mujoco/>"
     engine.load_from_string(xml)
 
@@ -83,7 +83,7 @@ def test_load_from_string(engine, mock_mj) -> None:
     assert engine.data is not None
 
 
-def test_load_from_path(engine, mock_mj, tmp_path) -> None:
+def test_load_from_path(engine, mock_mj, tmp_path):
     # Use tmp_path so the file lives under /tmp, which is in ALLOWED_MODEL_DIRS
     model_file = tmp_path / "model.xml"
     model_file.write_text("<mujoco/>")
@@ -96,7 +96,7 @@ def test_load_from_path(engine, mock_mj, tmp_path) -> None:
     assert engine.xml_path.endswith("model.xml")
 
 
-def test_step(engine, mock_mj) -> None:
+def test_step(engine, mock_mj):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
@@ -105,7 +105,7 @@ def test_step(engine, mock_mj) -> None:
     mock_mj.mj_step.assert_called_once_with(engine.model, engine.data)
 
 
-def test_reset(engine, mock_mj) -> None:
+def test_reset(engine, mock_mj):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
 
@@ -115,7 +115,7 @@ def test_reset(engine, mock_mj) -> None:
     mock_mj.mj_forward.assert_called_once()  # called by forward()
 
 
-def test_set_control(engine) -> None:
+def test_set_control(engine):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -127,7 +127,7 @@ def test_set_control(engine) -> None:
     np.testing.assert_array_equal(engine.data.ctrl, ctrl)
 
 
-def test_set_control_mismatch(engine) -> None:
+def test_set_control_mismatch(engine):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nu = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -138,7 +138,7 @@ def test_set_control_mismatch(engine) -> None:
         engine.set_control(ctrl)
 
 
-def test_compute_mass_matrix(engine, mock_mj) -> None:
+def test_compute_mass_matrix(engine, mock_mj):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -157,7 +157,7 @@ def test_compute_mass_matrix(engine, mock_mj) -> None:
     ],
     ids=["bias_forces", "gravity_forces"],
 )
-def test_compute_forces(engine, method, attr, values) -> None:
+def test_compute_forces(engine, method, attr, values):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     setattr(engine.data, attr, values)
@@ -166,7 +166,7 @@ def test_compute_forces(engine, method, attr, values) -> None:
     np.testing.assert_array_equal(result, values)
 
 
-def test_compute_inverse_dynamics(engine, mock_mj) -> None:
+def test_compute_inverse_dynamics(engine, mock_mj):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -182,7 +182,7 @@ def test_compute_inverse_dynamics(engine, mock_mj) -> None:
     mock_mj.mj_inverse.assert_called_once()
 
 
-def test_compute_affine_drift(engine, mock_mj) -> None:
+def test_compute_affine_drift(engine, mock_mj):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ctrl = np.array([1.0])
@@ -197,7 +197,7 @@ def test_compute_affine_drift(engine, mock_mj) -> None:
     assert mock_mj.mj_forward.call_count == 2  # Once for drift, once for restore
 
 
-def test_compute_jacobian(engine, mock_mj) -> None:
+def test_compute_jacobian(engine, mock_mj):
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
     engine.model.nv = 2
     engine.data = MagicMock(spec=_MJ_DATA_SPEC)
@@ -214,31 +214,55 @@ def test_compute_jacobian(engine, mock_mj) -> None:
     mock_mj.mj_jacBody.assert_called_once()
 
 
-def test_compute_contact_forces_grf_sign(engine, mock_mj) -> None:
-    """GRF must be positive (upward) for a downward-pressing contact.
-
-    MuJoCo mj_contactForce returns force exerted BY geom2 ON geom1.
-    When geom1=foot and geom2=ground the returned force is the GRF on the
-    foot (positive Z for a humanoid standing upright).  Summing with +=
-    preserves the correct sign; the prior -= was inverted. (Issue #2698.)
-    """
+def test_compute_contact_forces_preserves_mujoco_contact_sign(engine, mock_mj):
+    """MuJoCo contact force on geom1 is already the GRF on the modeled body."""
     engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
-    engine.data = MagicMock()
-
-    # One contact; normal force pointing +Z in the local contact frame.
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
     engine.data.ncon = 1
+
     contact = MagicMock()
-    # Identity rotation → world frame == local frame.
-    contact.frame = np.eye(3).flatten()
+    contact.frame = np.eye(3).reshape(-1)
     engine.data.contact = [contact]
 
-    # mj_contactForce fills c_force[:3] with the normal force; use +Z.
-    def fill_c_force(model, data, i, c_force):
-        c_force[:] = [0.0, 0.0, 735.0, 0.0, 0.0, 0.0]
+    def set_contact_force(model, data, index, c_force):
+        del model, data, index
+        # MuJoCo contact frame is [normal, tangent1, tangent2]
+        c_force[:3] = np.array([735.75, 0.0, 0.0])
 
-    mock_mj.mj_contactForce.side_effect = fill_c_force
+    mock_mj.mj_contactForce.side_effect = set_contact_force
 
-    grf = engine.compute_contact_forces()
+    # Simulate world is geom2 (0) and system is geom1 (1)
+    engine.model.geom_bodyid = np.array([1, 0])
+    contact.geom1 = 0
+    contact.geom2 = 1
 
-    assert grf[2] > 0.0, "GRF must point upward for ground contact (fix #2698)"
-    assert abs(grf[2] - 735.0) < 1e-9
+    force = engine.compute_contact_forces()
+
+    np.testing.assert_allclose(force, np.array([735.75, 0.0, 0.0]))
+    mock_mj.mj_contactForce.assert_called_once()
+
+
+def test_compute_contact_forces_skips_non_geom_contact_ids(engine, mock_mj):
+    """Negative MuJoCo contact geom IDs must not index geom_bodyid."""
+    engine.model = MagicMock(spec=_MJ_MODEL_SPEC)
+    engine.data = MagicMock(spec=_MJ_DATA_SPEC)
+    engine.data.ncon = 1
+
+    contact = MagicMock()
+    contact.frame = np.eye(3).reshape(-1)
+    contact.geom1 = -1
+    contact.geom2 = 1
+    engine.data.contact = [contact]
+
+    def set_contact_force(model, data, index, c_force):
+        del model, data, index
+        c_force[:3] = np.array([735.75, 0.0, 0.0])
+
+    mock_mj.mj_contactForce.side_effect = set_contact_force
+
+    engine.model.geom_bodyid = np.array([1, 0])
+
+    force = engine.compute_contact_forces()
+
+    np.testing.assert_allclose(force, np.zeros(3))
+    mock_mj.mj_contactForce.assert_called_once()

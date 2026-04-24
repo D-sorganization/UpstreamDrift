@@ -7,8 +7,6 @@ import pytest
 
 from src.shared.python.analysis.stability_metrics import StabilityMetricsMixin
 
-pytestmark = pytest.mark.unit
-
 
 class _Concrete(StabilityMetricsMixin):
     """Minimal concrete subclass for testing StabilityMetricsMixin."""

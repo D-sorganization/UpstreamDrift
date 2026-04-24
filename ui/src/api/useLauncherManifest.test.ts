@@ -12,6 +12,8 @@ import type { LauncherManifest } from './useLauncherManifest';
 const MOCK_MANIFEST: LauncherManifest = {
     version: '1.0.0',
     description: 'Test manifest',
+    launcher_csrf_token: 'test-token',
+    launcher_csrf_header: 'X-Launcher-CSRF-Token',
     tiles: [
         {
             id: 'model_explorer',
@@ -95,6 +97,8 @@ describe('useLauncherManifest', () => {
 
         expect(result.current.manifest).not.toBeNull();
         expect(result.current.tiles).toHaveLength(4);
+        expect(result.current.launcherCsrfToken).toBe('test-token');
+        expect(result.current.launcherCsrfHeader).toBe('X-Launcher-CSRF-Token');
     });
 
     it('returns tiles sorted by order', async () => {

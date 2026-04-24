@@ -22,40 +22,25 @@ from src.shared.python.core.contracts import (
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
-from src.shared.python.engine_core.capabilities import Capability
+from src.shared.python.engine_core.capabilities import (
+    CapabilityLevel,
+    EngineCapabilities,
+)
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
-from src.shared.python.physics.aerodynamics._config import AerodynamicsConfig
-from src.shared.python.physics.aerodynamics._engine import AerodynamicsEngine
 
 # Pinocchio imports - only import if available
 if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
 
 from src.shared.python.core import constants
-from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 
 logger = get_logger(__name__)
 
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
-
-
-def _require_vector_shape(
-    name: str, value: np.ndarray, expected_size: int
-) -> np.ndarray:
-    """Return a one-dimensional vector or raise a dimension-specific error."""
-    if value is None:
-        raise ValueError(f"{name} must be provided")
-
-    vector = np.asarray(value)
-    if vector.ndim != 1 or vector.shape[0] != expected_size:
-        actual_shape = tuple(vector.shape)
-        raise ValueError(
-            f"{name} expected 1-D size {expected_size}; actual shape {actual_shape}"
-        )
-    return vector
+PinocchioIntegrator = Literal["semi_implicit", "rk4"]
 
 
 @invariant(
@@ -88,7 +73,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         self.a: np.ndarray = np.array([])
         self.tau: np.ndarray = np.array([])
         self.time: float = 0.0
-        self.aero_engine: AerodynamicsEngine | None = None
+        self.integrator: PinocchioIntegrator = "rk4"
 
     @property
     def is_initialized(self) -> bool:
@@ -107,15 +92,51 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             return cast(str, self.model.name)
         return self.model_name_str
 
+    def _require_vector(
+        self,
+        name: str,
+        value: np.ndarray,
+        expected_length: int,
+    ) -> np.ndarray:
+        """Validate that an input is a one-dimensional vector of expected length."""
+        if value is None:
+            raise ValueError(f"{name} must be provided")
+
+        value_arr = np.asarray(value, dtype=np.float64)
+        if value_arr.ndim != 1:
+            raise ValueError(
+                f"{name} dimension mismatch: expected length {expected_length}, "
+                f"got shape {value_arr.shape}"
+            )
+
+        actual_length = int(value_arr.shape[0])
+        if actual_length != expected_length:
+            raise ValueError(
+                f"{name} dimension mismatch: expected length {expected_length}, "
+                f"got {actual_length}"
+            )
+
+        return value_arr
+
+    def get_capabilities(self) -> EngineCapabilities:
+        """Report Pinocchio capabilities, including lack of contact GRF support."""
+        return EngineCapabilities(
+            engine_name="Pinocchio",
+            mass_matrix=CapabilityLevel.FULL,
+            jacobian=CapabilityLevel.FULL,
+            contact_forces=CapabilityLevel.NONE,
+            inverse_dynamics=CapabilityLevel.FULL,
+            drift_acceleration=CapabilityLevel.FULL,
+            extra={"spatial_jacobian_order": "angular_linear"},
+        )
+
     def _load_from_path_impl(self, path: str) -> None:
         """Pinocchio-specific model loading from URDF file path.
 
         Args:
             path: Validated path to URDF model file.
         """
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         if not path.endswith(".urdf"):
             logger.warning("Pinocchio loader expects URDF, got: %s", path)
@@ -138,9 +159,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             content: Model definition string (URDF/XML).
             extension: File extension hint.
         """
-        if not (content is not None):
-            raise ValueError("content must be provided")
-        if not (content is not None):
+        if content is None:
             raise ValueError("content must be provided")
         if extension != "urdf":
             logger.warning("Pinocchio load_from_string mostly supports URDF.")
@@ -168,86 +187,75 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             self.forward()
 
     @precondition(
-        lambda self, dt=None, integrator="semi_implicit": self.is_initialized,
+        lambda self, dt=None, **kwargs: self.is_initialized,
         "Engine must be initialized",
     )
     def step(
         self,
         dt: float | None = None,
-        integrator: Literal["semi_implicit", "rk4"] = "semi_implicit",
+        *,
+        integrator: PinocchioIntegrator | None = None,
     ) -> None:
-        """Advance the simulation by one time step.
-
-        Integrates aerodynamic forces after the main physics step.
-
-        Args:
-            dt: Time step size [s]. Must be > EPSILON_TIME_STEP.
-                Defaults to DEFAULT_TIME_STEP.
-            integrator: Integration scheme — ``"semi_implicit"`` (symplectic
-                Euler, O(dt), energy-stable) or ``"rk4"`` (classic 4th-order
-                Runge-Kutta, O(dt^4), more accurate for large dt or
-                validation).
-
-        Raises:
-            ValueError: If dt is not positive.
-        """
+        """Advance the simulation by one time step."""
         if self.model is None or self.data is None:
             return
 
         time_step = dt if dt is not None else DEFAULT_TIME_STEP
+        if time_step <= 0.0:
+            raise ValueError("dt must be positive")
 
-        # Guard against invalid time steps (Issue #3054)
-        if time_step <= EPSILON_TIME_STEP:
-            raise ValueError(
-                f"dt must be positive, got {time_step}. "
-                f"Minimum supported: {EPSILON_TIME_STEP}"
-            )
-
-        if integrator == "rk4":
+        method = self.integrator if integrator is None else integrator
+        if method == "rk4":
             self._step_rk4(time_step)
-        else:
+        elif method == "semi_implicit":
             self._step_semi_implicit(time_step)
+        else:
+            raise ValueError(f"Unsupported Pinocchio integrator: {method!r}")
 
         self.time += time_step
+        self.forward()
 
-        # Apply aerodynamics if configured (Issue #3167)
-        self._apply_aerodynamics(time_step)
+    def _step_semi_implicit(self, dt: float) -> None:
+        """Advance with velocity-first symplectic Euler integration."""
+        if self.model is None or self.data is None:
+            return
 
-    def _step_semi_implicit(self, time_step: float) -> None:
-        """Symplectic (semi-implicit) Euler: velocity-first, then position."""
         self.a = pin.aba(self.model, self.data, self.q, self.v, self.tau)
-        self.v += self.a * time_step
-        self.q = pin.integrate(self.model, self.q, self.v * time_step)
+        self.v = self.v + self.a * dt
+        self.q = pin.integrate(self.model, self.q, self.v * dt)
 
-    def _step_rk4(self, time_step: float) -> None:
-        """Classic RK4 integration over Pinocchio's Lie-group configuration."""
-        q0, v0 = self.q.copy(), self.v.copy()
-        tau = self.tau
+    def _step_rk4(self, dt: float) -> None:
+        """Advance with fourth-order Runge-Kutta on Pinocchio tangent state."""
+        if self.model is None or self.data is None:
+            return
 
-        def dv(q: np.ndarray, v: np.ndarray) -> np.ndarray:
-            return pin.aba(self.model, self.data, q, v, tau).copy()
+        q0 = self.q.copy()
+        v0 = self.v.copy()
+        tau = self.tau.copy()
 
-        # k1
-        a1 = dv(q0, v0)
-        # k2
-        v_k2 = v0 + 0.5 * time_step * a1
-        q_k2 = pin.integrate(self.model, q0, 0.5 * time_step * v0)
-        a2 = dv(q_k2, v_k2)
-        # k3
-        v_k3 = v0 + 0.5 * time_step * a2
-        q_k3 = pin.integrate(self.model, q0, 0.5 * time_step * v_k2)
-        a3 = dv(q_k3, v_k3)
-        # k4
-        v_k4 = v0 + time_step * a3
-        q_k4 = pin.integrate(self.model, q0, time_step * v_k3)
-        a4 = dv(q_k4, v_k4)
+        def acceleration(q: np.ndarray, v: np.ndarray) -> np.ndarray:
+            return cast(np.ndarray, pin.aba(self.model, self.data, q, v, tau))
 
-        # Weighted update — velocity in R^n, position on Lie group
-        dv_weighted = (time_step / 6.0) * (a1 + 2 * a2 + 2 * a3 + a4)
-        dq_weighted = (time_step / 6.0) * (v0 + 2 * v_k2 + 2 * v_k3 + v_k4)
-        self.v = v0 + dv_weighted
-        self.q = pin.integrate(self.model, q0, dq_weighted)
-        self.a = a4
+        a1 = acceleration(q0, v0)
+        v2 = v0 + 0.5 * dt * a1
+        q2 = pin.integrate(self.model, q0, 0.5 * dt * v0)
+
+        a2 = acceleration(q2, v2)
+        v3 = v0 + 0.5 * dt * a2
+        q3 = pin.integrate(self.model, q0, 0.5 * dt * v2)
+
+        a3 = acceleration(q3, v3)
+        v4 = v0 + dt * a3
+        q4 = pin.integrate(self.model, q0, dt * v3)
+
+        a4 = acceleration(q4, v4)
+
+        weighted_velocity = (v0 + 2.0 * v2 + 2.0 * v3 + v4) / 6.0
+        weighted_acceleration = (a1 + 2.0 * a2 + 2.0 * a3 + a4) / 6.0
+
+        self.q = pin.integrate(self.model, q0, dt * weighted_velocity)
+        self.v = v0 + dt * weighted_acceleration
+        self.a = a4.copy()
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def forward(self) -> None:
@@ -264,91 +272,27 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         return self.q.copy(), self.v.copy()
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        """Set the current state and refresh derived kinematics."""
+        """Set the current state."""
         if q is None:
             raise ValueError("q must be provided")
-        if v is None:
-            raise ValueError("v must be provided")
         if self.model is None:
             return
 
-        q_vector = _require_vector_shape("q", q, self.model.nq)
-        v_vector = _require_vector_shape("v", v, self.model.nv)
-        self.q = q_vector.copy()
-        self.v = v_vector.copy()
-        # Refresh derived kinematics so Jacobians and frame placements are current
-        self.forward()
+        if len(q) == self.model.nq:
+            self.q = q.copy()
+        if len(v) == self.model.nv:
+            self.v = v.copy()
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
-        if u is None:
-            raise ValueError("u must be provided")
         if self.model is None:
             return
-
-        control = _require_vector_shape("u", u, self.model.nv)
-        self.tau = control.copy()
+        u_arr = self._require_vector("u", u, self.model.nv)
+        self.tau = u_arr.copy()
 
     def get_time(self) -> float:
         """Get the current simulation time."""
         return self.time
-
-    def enable_aerodynamics(self, config: AerodynamicsConfig | None = None) -> None:
-        """Enable aerodynamic force simulation (Issue #3167).
-
-        Args:
-            config: Aerodynamics configuration. If None, uses defaults.
-        """
-        self.aero_engine = AerodynamicsEngine(config)
-        logger.debug("Aerodynamics enabled in Pinocchio engine")
-
-    def disable_aerodynamics(self) -> None:
-        """Disable aerodynamic force simulation."""
-        self.aero_engine = None
-        logger.debug("Aerodynamics disabled in Pinocchio engine")
-
-    def _apply_aerodynamics(self, dt: float) -> None:
-        """Apply aerodynamic forces to ball state.
-
-        This method applies aerodynamic damping to generalized velocities.
-        For a full implementation with ball-specific tracking, extend to
-        identify ball body and apply forces directly (tracked in issue #3167).
-
-        Args:
-            dt: Time step [s]
-        """
-        if self.aero_engine is None or self.model is None:
-            return
-
-        try:
-            # First 6: [v_x, v_y, v_z, omega_x, omega_y, omega_z]
-            if self.v.shape[0] >= 6:
-                vel_indices = slice(0, 3)
-                spin_indices = slice(3, 6)
-
-                ball_vel = self.v[vel_indices].copy()
-                ball_spin = self.v[spin_indices].copy()
-
-                # Compute aerodynamic forces
-                forces = self.aero_engine.compute_forces(
-                    ball_vel, ball_spin, self.time, np.zeros(3)
-                )
-                total_force = forces["total"]
-
-                # Apply as damping to velocities
-                if np.linalg.norm(ball_vel) > 1e-6:
-                    ball_mass = 0.04593  # Standard golf ball mass [kg]
-                    aero_accel = total_force / ball_mass
-                    self.v[vel_indices] += aero_accel * dt
-
-                    # Decay spin
-                    new_spin = self.aero_engine.compute_spin_decay(
-                        ball_spin, dt, np.linalg.norm(ball_vel)
-                    )
-                    self.v[spin_indices] = new_spin
-
-        except Exception as e:
-            logger.warning("Aerodynamics application failed: %s", e)
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names."""
@@ -437,9 +381,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     )
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
-        if not (qacc is not None):
+        if qacc is None:
             raise ValueError("qacc must be provided")
         if self.model is None or self.data is None:
             return np.array([])
@@ -449,27 +391,21 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     def compute_contact_forces(self) -> np.ndarray:
-        """Raise NotImplementedError — contact forces are unsupported.
-
-        Pinocchio's standard ABA algorithm does not compute contact / ground
-        reaction forces without a dedicated constraint solver.
-        ``CONTACT_FORCES`` is intentionally absent from
-        :meth:`capabilities`; callers **must** check capabilities before
-        invoking this method::
-
-            if Capability.CONTACT_FORCES in engine.capabilities():
-                forces = engine.compute_contact_forces()
+        """Compute total contact forces (ground reaction force, GRF).
 
         Raises:
-            NotImplementedError: Always.  Use a MuJoCo or OpenSim engine
-                for contact-force queries, or check ``capabilities()``
-                before calling this method.
+            NotImplementedError: Always. Pinocchio's standard ABA does not
+                compute contact forces without a constraint solver (e.g.,
+                RigidContactModel + ProximalContactSolver). Returning zeros
+                would silently misrepresent the physical state and mask
+                integration failures downstream.
+
+                Use a full contact-aware solver or Drake/MuJoCo for GRF.
         """
         raise NotImplementedError(
-            "PinocchioPhysicsEngine does not support compute_contact_forces. "
-            "Standard ABA dynamics do not compute contact forces without a "
-            "constraint solver.  Check engine.capabilities() before calling "
-            "this method; CONTACT_FORCES is not in the Pinocchio capability set."
+            "PinocchioPhysicsEngine.compute_contact_forces is not implemented. "
+            "Standard ABA dynamics in Pinocchio do not compute contact forces "
+            "without a constraint solver. Use Drake or MuJoCo for GRF queries."
         )
 
     @precondition(
@@ -482,7 +418,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     )
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if self.model is None or self.data is None:
             return None
@@ -547,18 +483,16 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_control: Control acceleration vector (nv,)
         """
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        tau_vector = _require_vector_shape("tau", tau, self.model.nv)
+        tau_arr = self._require_vector("tau", tau, self.model.nv)
 
         M = self.compute_mass_matrix()
         if M.size == 0:
             return np.array([])
 
-        a_control = np.linalg.solve(M, tau_vector)
+        a_control = np.linalg.solve(M, tau_arr)
 
         return a_control
 
@@ -576,16 +510,14 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZTCF: Acceleration under zero torque (n_v,)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        q_vector = _require_vector_shape("q", q, self.model.nq)
-        v_vector = _require_vector_shape("v", v, self.model.nv)
+        q_arr = self._require_vector("q", q, self.model.nq)
+        v_arr = self._require_vector("v", v, self.model.nv)
 
         tau_zero = np.zeros(self.model.nv)
-        a_ztcf = pin.aba(self.model, self.data, q_vector, v_vector, tau_zero)
+        a_ztcf = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
 
         return cast(np.ndarray, a_ztcf)
 
@@ -602,19 +534,17 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZVCF: Acceleration with v=0 (n_v,)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
-        q_vector = _require_vector_shape("q", q, self.model.nq)
+        q_arr = self._require_vector("q", q, self.model.nq)
 
         v_zero = np.zeros(self.model.nv)
 
         # Use current control (preserved for ZVCF)
         tau = self.tau.copy()
 
-        a_zvcf = pin.aba(self.model, self.data, q_vector, v_zero, tau)
+        a_zvcf = pin.aba(self.model, self.data, q_arr, v_zero, tau)
 
         return cast(np.ndarray, a_zvcf)
 
@@ -637,29 +567,3 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns empty dict for parity with unconfigured MuJoCo models.
         """
         return {}
-
-    def capabilities(self) -> frozenset:
-        """Return the set of capabilities this engine supports.
-
-        Pinocchio supports forward dynamics, mass matrix, inverse dynamics,
-        Jacobian computation, drift-control decomposition, and counterfactual
-        experiments via ABA.  Contact forces are **not** supported — standard
-        ABA does not compute constraint reactions without a dedicated contact
-        solver.  Callers must check this set before invoking optional methods::
-
-            if Capability.CONTACT_FORCES in engine.capabilities():
-                forces = engine.compute_contact_forces()
-
-        Returns:
-            frozenset of supported :class:`Capability` members.
-        """
-        return frozenset(
-            {
-                Capability.FORWARD_DYNAMICS,
-                Capability.MASS_MATRIX,
-                Capability.INVERSE_DYNAMICS,
-                Capability.JACOBIAN,
-                Capability.DRIFT_CONTROL,
-                Capability.COUNTERFACTUAL,
-            }
-        )

@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Terrain and environment API routes for Golf Modeling Suite.
 
 Provides engine-agnostic terrain queries, preset environment loading,
@@ -110,7 +114,9 @@ def _get_active_terrain() -> Terrain:
             length=200.0,
             terrain_type=TerrainType.FAIRWAY,
         )
-    return _terrain_state["active"]  # type: ignore[return-value]
+    terrain = _terrain_state["active"]
+    assert terrain is not None  # for mypy; guaranteed by preceding assignment
+    return terrain
 
 
 # ──────────────────────────────────────────────────────────────
@@ -175,7 +181,7 @@ def _build_putting_green(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
     """Build a putting green environment."""
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     elevation = ElevationMap.sloped(
         width=width,
@@ -196,7 +202,7 @@ def _build_fairway(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
     """Build a fairway environment."""
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     elevation = ElevationMap.sloped(
         width=width,
@@ -226,7 +232,7 @@ def _build_driving_range(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
     """Build a driving range environment."""
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     elevation = ElevationMap.flat(width=width, length=length, resolution=2.0)
     patches = [
@@ -242,7 +248,7 @@ def _build_bunker(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
     """Build a bunker practice environment."""
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     elevation = ElevationMap.flat(width=width, length=length, resolution=0.5)
     patches = [
@@ -265,7 +271,7 @@ def _build_rough(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
     """Build a rough practice environment."""
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     elevation = ElevationMap.sloped(
         width=width,
@@ -290,7 +296,7 @@ def _build_full_hole(
     width: float, length: float, slope: float, direction: float
 ) -> Terrain:
     """Build a complete golf hole (par 4)."""
-    if not (width is not None):
+    if width is None:
         raise ValueError("width must be provided")
     elevation = ElevationMap.sloped(
         width=width,

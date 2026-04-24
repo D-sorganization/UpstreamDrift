@@ -98,8 +98,8 @@ def expand_gimbal_joint(joint: Joint) -> tuple[list[Link], list[Joint]]:
         joint.child,
     ]
 
-    for i in range(3):
-        revolute_joints.append(
+    revolute_joints.extend(
+        [
             Joint(
                 name=f"{joint.name}_dof{i + 1}",
                 joint_type=JointType.REVOLUTE,
@@ -110,7 +110,9 @@ def expand_gimbal_joint(joint: Joint) -> tuple[list[Link], list[Joint]]:
                 limits=limits[i] if limits and i < len(limits) else JointLimits(),
                 dynamics=joint.dynamics,
             )
-        )
+            for i in range(3)
+        ]
+    )
 
     logger.debug(
         "Expanded gimbal joint '%s' into 3 revolute joints with 2 intermediate links",

@@ -11,8 +11,6 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
-
 # Paths to the isolated unit test files
 ISOLATED_TESTS_DIR = Path(__file__).parent / "isolated"
 TEST_DRAKE_STRICT = ISOLATED_TESTS_DIR / "test_drake_strict.py"
@@ -22,7 +20,9 @@ TEST_PINOCCHIO_STRICT = ISOLATED_TESTS_DIR / "test_pinocchio_strict.py"
 class TestProcessIsolationStrict:
     """Run specific strict unit tests in isolated subprocesses."""
 
-    def run_isolated_test(self, test_file: Path) -> None:
+    pytestmark = pytest.mark.slow
+
+    def run_isolated_test(self, test_file: Path):
         """Helper to run pytest on a single file in a subprocess."""
         cmd = [sys.executable, "-m", "pytest", str(test_file), "-v", "--no-cov"]
 
@@ -47,13 +47,13 @@ class TestProcessIsolationStrict:
                 f"--- STDERR ---\n{result.stderr}"
             )
 
-    def test_drake_strict_isolated(self) -> None:
+    def test_drake_strict_isolated(self):
         """Run Drake strict tests in an isolated process to prevent numpy corruption."""
         if not TEST_DRAKE_STRICT.exists():
             pytest.fail(f"Test file not found: {TEST_DRAKE_STRICT}")
         self.run_isolated_test(TEST_DRAKE_STRICT)
 
-    def test_pinocchio_strict_isolated(self) -> None:
+    def test_pinocchio_strict_isolated(self):
         """Run Pinocchio strict tests in an isolated process to prevent numpy corruption."""
         if not TEST_PINOCCHIO_STRICT.exists():
             pytest.fail(f"Test file not found: {TEST_PINOCCHIO_STRICT}")

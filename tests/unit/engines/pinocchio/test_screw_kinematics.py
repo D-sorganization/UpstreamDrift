@@ -7,7 +7,6 @@ availability guard and ``ImportError`` path are always tested.
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -17,8 +16,6 @@ from src.engines.physics_engines.pinocchio.python.pinocchio_screw_kinematics imp
     PinocchioScrewKinematics,
 )
 from src.shared.python.screw_theory import ScrewAxis, Twist
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -214,7 +211,7 @@ class TestWithRealPinocchio:
     """Integration tests that require the real pinocchio package."""
 
     @pytest.fixture
-    def double_pendulum(self) -> Any:
+    def double_pendulum(self):
         """Simple 2-DOF planar double pendulum model in pinocchio."""
         pin = pytest.importorskip("pinocchio")
 

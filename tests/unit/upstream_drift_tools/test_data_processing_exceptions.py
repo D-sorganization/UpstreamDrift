@@ -15,8 +15,6 @@ from src.shared.python.upstream_drift_tools.data_processing.exceptions import (
     UnsupportedOperationError,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Exception hierarchy
 # ---------------------------------------------------------------------------

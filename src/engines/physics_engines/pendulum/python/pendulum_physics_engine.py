@@ -24,7 +24,6 @@ from src.shared.python.core.numerical_constants import EPSILON_TIME_STEP
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
-from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -179,9 +178,7 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
 
     def _restore_extra_checkpoint_state(self, checkpoint: StateCheckpoint) -> None:
         """Restore pendulum-specific state from checkpoint."""
-        if not (checkpoint is not None):
-            raise ValueError("checkpoint must be provided")
-        if not (checkpoint is not None):
+        if checkpoint is None:
             raise ValueError("checkpoint must be provided")
         self.time = checkpoint.timestamp
         if "phi" in checkpoint.engine_state:
@@ -232,9 +229,7 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
     @postcondition(check_finite, "Inverse dynamics torques must contain finite values")
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
-        if not (qacc is not None):
+        if qacc is None:
             raise ValueError("qacc must be provided")
         if len(qacc) < 2:
             return np.array([])
@@ -274,9 +269,7 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         Returns:
             Control acceleration vector (2,) [rad/s**2]
         """
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
-        if not (tau is not None):
+        if tau is None:
             raise ValueError("tau must be provided")
         if len(tau) < 2:
             return np.array([])
@@ -305,9 +298,7 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         Returns:
             Acceleration with tau=0 [rad/s**2] (2,)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if len(q) < 2 or len(v) < 2:
             return np.array([])
@@ -335,26 +326,6 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
             self._pendulum_state.omega1 = omega1_orig
             self._pendulum_state.omega2 = omega2_orig
 
-    def capabilities(self) -> frozenset:
-        """Return the set of capabilities this engine supports.
-
-        The double-pendulum engine implements forward dynamics, mass matrix,
-        inverse dynamics, drift-control decomposition, and counterfactual
-        experiments.  Jacobian and contact-force queries are not supported.
-
-        Returns:
-            frozenset of supported :class:`Capability` members.
-        """
-        return frozenset(
-            {
-                Capability.FORWARD_DYNAMICS,
-                Capability.MASS_MATRIX,
-                Capability.INVERSE_DYNAMICS,
-                Capability.DRIFT_CONTROL,
-                Capability.COUNTERFACTUAL,
-            }
-        )
-
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual - Guideline G2.
 
@@ -367,9 +338,7 @@ class PendulumPhysicsEngine(BasePhysicsEngine):
         Returns:
             Acceleration with v=0 but tau preserved [rad/s**2] (2,)
         """
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if len(q) < 2:
             return np.array([])

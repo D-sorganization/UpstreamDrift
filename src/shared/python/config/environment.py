@@ -113,7 +113,7 @@ def get_env_bool(
     Example:
         >>> debug = get_env_bool("DEBUG", default=False)
     """
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     value = os.environ.get(name)
 
@@ -270,7 +270,7 @@ def get_env_list(
     Example:
         >>> hosts = get_env_list("ALLOWED_HOSTS", default=["localhost"])
     """
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     value = os.environ.get(name)
 
@@ -333,27 +333,10 @@ def is_development() -> bool:
     return get_environment() == "development"
 
 
-def _get_with_fallback(new_name: str, old_name: str) -> str | None:
-    """Get environment variable, supporting both new and old names for migration.
-
-    Tries the new name first, then falls back to the old name for backward
-    compatibility during the GOLF_* → domain-neutral renaming (issue #3046-#3047).
-
-    Args:
-        new_name: New environment variable name (domain-neutral).
-        old_name: Old environment variable name (GOLF_*).
-
-    Returns:
-        Value from new_name, or fallback to old_name, or None.
-    """
-    return os.environ.get(new_name) or os.environ.get(old_name)
-
-
 def get_secret_key(*, required: bool = False) -> str | None:
     """Get the API secret key.
 
-    Checks HUMANOID_API_SECRET_KEY (new) and falls back to GOLF_API_SECRET_KEY,
-    then SECRET_KEY for backward compatibility.
+    Checks GOLF_API_SECRET_KEY and falls back to SECRET_KEY.
 
     Args:
         required: If True, raise EnvironmentError if not set in production.
@@ -367,16 +350,14 @@ def get_secret_key(*, required: bool = False) -> str | None:
     Example:
         >>> key = get_secret_key(required=True)
     """
-    key = _get_with_fallback(
-        "HUMANOID_API_SECRET_KEY", "GOLF_API_SECRET_KEY"
-    ) or os.environ.get("SECRET_KEY")
+    key = os.environ.get("GOLF_API_SECRET_KEY") or os.environ.get("SECRET_KEY")
 
     if key:
         return key
 
     if required or is_production():
         raise EnvironmentError(
-            "HUMANOID_API_SECRET_KEY",
+            "GOLF_API_SECRET_KEY",
             "Secret key is required for production",
         )
 
@@ -401,21 +382,17 @@ def get_database_url(default: str = "sqlite:///golf.db") -> str:
 def get_admin_password() -> str | None:
     """Get the admin password.
 
-    Checks HUMANOID_ADMIN_PASSWORD (new) and falls back to GOLF_ADMIN_PASSWORD
-    for backward compatibility.
-
     Returns:
         Admin password or None if not set.
     """
-    return _get_with_fallback("HUMANOID_ADMIN_PASSWORD", "GOLF_ADMIN_PASSWORD")
+    return os.environ.get("GOLF_ADMIN_PASSWORD")
 
 
 def get_api_host(default: str = "127.0.0.1") -> str:
     """Get the API host address.
 
     Uses 127.0.0.1 (localhost) by default for security.
-    Set HUMANOID_API_HOST=0.0.0.0 for Docker or when external access is needed.
-    Falls back to GOLF_API_HOST for backward compatibility.
+    Set GOLF_API_HOST=0.0.0.0 for Docker or when external access is needed.
 
     Args:
         default: Default host address (127.0.0.1 for localhost-only access).
@@ -423,14 +400,11 @@ def get_api_host(default: str = "127.0.0.1") -> str:
     Returns:
         Host address string.
     """
-    return _get_with_fallback("HUMANOID_API_HOST", "GOLF_API_HOST") or default
+    return os.environ.get("GOLF_API_HOST", default)
 
 
 def get_api_port(default: int = 8000) -> int:
     """Get the API port number.
-
-    Checks HUMANOID_API_PORT (new) and falls back to GOLF_API_PORT for
-    backward compatibility.
 
     Args:
         default: Default port number.
@@ -438,14 +412,6 @@ def get_api_port(default: int = 8000) -> int:
     Returns:
         Port number.
     """
-    # Check env var presence before falling back to avoid default masking legacy name
-    if os.environ.get("HUMANOID_API_PORT") is not None:
-        return (
-            get_env_int(
-                "HUMANOID_API_PORT", default=default, min_value=1, max_value=65535
-            )
-            or default
-        )
     return (
         get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
         or default
@@ -522,10 +488,9 @@ def is_wsl() -> bool:
 
 
 def get_golf_port(default: int = 8000) -> int:
-    """Get the Humanoid Suite server port.
+    """Get the Golf Suite server port.
 
-    Reads from HUMANOID_PORT env var (new) or GOLF_PORT (old, distinct from
-    HUMANOID_API_PORT/GOLF_API_PORT).
+    Reads from GOLF_PORT env var (distinct from GOLF_API_PORT).
 
     Args:
         default: Default port number.
@@ -533,47 +498,35 @@ def get_golf_port(default: int = 8000) -> int:
     Returns:
         Port number.
     """
-    # Check env var presence before falling back to avoid default masking legacy name
-    if os.environ.get("HUMANOID_PORT") is not None:
-        return (
-            get_env_int("HUMANOID_PORT", default=default, min_value=1, max_value=65535)
-            or default
-        )
     return (
         get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
         or default
     )
 
 
-def get_golf_suite_mode(default: str = "remote") -> str:
-    """Get the Humanoid Suite operating mode.
-
-    Defaults to ``"remote"`` (auth-required) when ``HUMANOID_SUITE_MODE`` is
-    not set. Set ``HUMANOID_SUITE_MODE=local`` explicitly to enable auth
-    bypass for local development — do not rely on the absence of the variable.
-    Falls back to GOLF_SUITE_MODE for backward compatibility.
+def get_golf_suite_mode(default: str = "local") -> str:
+    """Get the Golf Suite operating mode.
 
     Args:
-        default: Default mode (``"remote"``).
+        default: Default mode (``"local"``).
 
     Returns:
         Mode string (e.g., ``"local"``, ``"remote"``).
     """
-    return _get_with_fallback("HUMANOID_SUITE_MODE", "GOLF_SUITE_MODE") or default
+    return get_env("GOLF_SUITE_MODE", default=default) or default
 
 
 def is_auth_disabled() -> bool:
     """Check if authentication is disabled.
 
-    Auth is disabled when ``HUMANOID_SUITE_MODE=local`` or
-    ``HUMANOID_AUTH_DISABLED=true``. Falls back to old GOLF_* names.
+    Auth is disabled when ``GOLF_SUITE_MODE=local`` or
+    ``GOLF_AUTH_DISABLED=true``.
 
     Returns:
         True if authentication checks should be skipped.
     """
-    return get_golf_suite_mode() == "local" or (
-        get_env_bool("HUMANOID_AUTH_DISABLED", default=False)
-        or get_env_bool("GOLF_AUTH_DISABLED", default=False)
+    return get_golf_suite_mode() == "local" or get_env_bool(
+        "GOLF_AUTH_DISABLED", default=False
     )
 
 
@@ -590,12 +543,9 @@ def is_browser_suppressed() -> bool:
     """Check if auto-opening a browser is suppressed.
 
     Returns:
-        True if ``HUMANOID_NO_BROWSER=true`` or ``GOLF_NO_BROWSER=true``
-        (old name, for backward compatibility).
+        True if ``GOLF_NO_BROWSER=true``.
     """
-    return get_env_bool("HUMANOID_NO_BROWSER", default=False) or get_env_bool(
-        "GOLF_NO_BROWSER", default=False
-    )
+    return get_env_bool("GOLF_NO_BROWSER", default=False)
 
 
 def is_headless() -> bool:

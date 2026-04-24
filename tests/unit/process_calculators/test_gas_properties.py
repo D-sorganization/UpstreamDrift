@@ -17,8 +17,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_ca
     calculate_speed_of_sound,
 )
 
-pytestmark = pytest.mark.unit
-
 _SYNGAS = {"H2": 0.3, "CO": 0.4, "CO2": 0.2, "N2": 0.1}
 
 

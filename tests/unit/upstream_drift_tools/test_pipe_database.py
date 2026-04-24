@@ -12,8 +12,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_ca
     list_schedules_for_size,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # get_roughness
 # ---------------------------------------------------------------------------

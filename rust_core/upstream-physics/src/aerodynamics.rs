@@ -42,6 +42,37 @@ impl Default for AirProperties {
     }
 }
 
+impl AirProperties {
+    /// Validate public air properties in all build modes.
+    pub fn validate(&self) -> Result<(), String> {
+        if !self.density.is_finite() || self.density < 0.0 {
+            return Err(format!(
+                "AirProperties.density must be finite and non-negative, got {}",
+                self.density
+            ));
+        }
+        if !self.viscosity.is_finite() || self.viscosity <= 0.0 {
+            return Err(format!(
+                "AirProperties.viscosity must be finite and positive, got {}",
+                self.viscosity
+            ));
+        }
+        if !self.temperature.is_finite() || self.temperature <= 0.0 {
+            return Err(format!(
+                "AirProperties.temperature must be finite and positive, got {}",
+                self.temperature
+            ));
+        }
+        if !self.pressure.is_finite() || self.pressure < 0.0 {
+            return Err(format!(
+                "AirProperties.pressure must be finite and non-negative, got {}",
+                self.pressure
+            ));
+        }
+        Ok(())
+    }
+}
+
 /// Golf ball physical properties.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "python", pyo3::prelude::pyclass)]
@@ -69,6 +100,43 @@ impl Default for AeroBallProperties {
             drag_coefficient: 0.25,
             spin_decay_rate: 0.1,
         }
+    }
+}
+
+impl AeroBallProperties {
+    /// Validate public golf-ball aerodynamic properties in all build modes.
+    pub fn validate(&self) -> Result<(), String> {
+        if !self.mass.is_finite() || self.mass <= 0.0 {
+            return Err(format!(
+                "AeroBallProperties.mass must be finite and positive, got {}",
+                self.mass
+            ));
+        }
+        if !self.radius.is_finite() || self.radius <= 0.0 {
+            return Err(format!(
+                "AeroBallProperties.radius must be finite and positive, got {}",
+                self.radius
+            ));
+        }
+        if !self.area.is_finite() || self.area <= 0.0 {
+            return Err(format!(
+                "AeroBallProperties.area must be finite and positive, got {}",
+                self.area
+            ));
+        }
+        if !self.drag_coefficient.is_finite() || self.drag_coefficient < 0.0 {
+            return Err(format!(
+                "AeroBallProperties.drag_coefficient must be finite and non-negative, got {}",
+                self.drag_coefficient
+            ));
+        }
+        if !self.spin_decay_rate.is_finite() || self.spin_decay_rate < 0.0 {
+            return Err(format!(
+                "AeroBallProperties.spin_decay_rate must be finite and non-negative, got {}",
+                self.spin_decay_rate
+            ));
+        }
+        Ok(())
     }
 }
 
@@ -102,16 +170,17 @@ pub fn compute_aero_forces(
     ball: &AeroBallProperties,
     air: &AirProperties,
 ) -> AeroForces {
-    debug_assert!(
+    assert!(
         velocity.x.is_finite() && velocity.y.is_finite() && velocity.z.is_finite(),
         "DbC: velocity must be finite"
     );
-    debug_assert!(
+    assert!(
         spin.x.is_finite() && spin.y.is_finite() && spin.z.is_finite(),
         "DbC: spin must be finite"
     );
-    debug_assert!(air.density >= 0.0, "DbC: air density must be non-negative");
-    debug_assert!(ball.area > 0.0, "DbC: ball area must be positive");
+    ball.validate()
+        .expect("invalid aerodynamic ball properties");
+    air.validate().expect("invalid air properties");
 
     let drag = compute_drag(velocity, ball, air);
     let lift = compute_lift(velocity, spin, ball, air);
@@ -262,7 +331,14 @@ pub fn compute_magnus_coefficient(spin_param: f64) -> f64 {
 /// - `dt` must be positive
 #[must_use]
 pub fn compute_spin_decay(spin: &Vector3, dt: f64, spin_decay_rate: f64) -> Vector3 {
-    debug_assert!(dt > 0.0, "DbC: dt must be positive");
+    assert!(
+        dt.is_finite() && dt > 0.0,
+        "DbC: dt must be finite and positive"
+    );
+    assert!(
+        spin_decay_rate.is_finite() && spin_decay_rate >= 0.0,
+        "DbC: spin decay rate must be finite and non-negative"
+    );
     let decay = (-spin_decay_rate * dt).exp();
     Vector3::new(spin.x * decay, spin.y * decay, spin.z * decay)
 }
@@ -295,13 +371,21 @@ pub fn air_from_altitude(altitude_m: f64) -> AirProperties {
 impl AirProperties {
     #[new]
     #[pyo3(signature = (density=1.225, viscosity=1.81e-5, temperature=288.15, pressure=101325.0))]
-    fn py_new(density: f64, viscosity: f64, temperature: f64, pressure: f64) -> Self {
-        Self {
+    fn py_new(
+        density: f64,
+        viscosity: f64,
+        temperature: f64,
+        pressure: f64,
+    ) -> pyo3::PyResult<Self> {
+        let air = Self {
             density,
             viscosity,
             temperature,
             pressure,
-        }
+        };
+        air.validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)?;
+        Ok(air)
     }
 
     #[staticmethod]
@@ -315,15 +399,23 @@ impl AirProperties {
 impl AeroBallProperties {
     #[new]
     #[pyo3(signature = (mass=0.04593, radius=0.02135, drag_coefficient=0.25, spin_decay_rate=0.1))]
-    fn py_new(mass: f64, radius: f64, drag_coefficient: f64, spin_decay_rate: f64) -> Self {
+    fn py_new(
+        mass: f64,
+        radius: f64,
+        drag_coefficient: f64,
+        spin_decay_rate: f64,
+    ) -> pyo3::PyResult<Self> {
         let area = std::f64::consts::PI * radius * radius;
-        Self {
+        let ball = Self {
             mass,
             radius,
             area,
             drag_coefficient,
             spin_decay_rate,
-        }
+        };
+        ball.validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)?;
+        Ok(ball)
     }
 }
 
@@ -363,6 +455,63 @@ mod tests {
 
     fn default_air() -> AirProperties {
         AirProperties::default()
+    }
+
+    #[test]
+    fn test_air_properties_reject_invalid_public_values() {
+        assert!(AirProperties {
+            density: f64::NAN,
+            ..AirProperties::default()
+        }
+        .validate()
+        .is_err());
+        assert!(AirProperties {
+            viscosity: 0.0,
+            ..AirProperties::default()
+        }
+        .validate()
+        .is_err());
+        assert!(AirProperties {
+            temperature: -1.0,
+            ..AirProperties::default()
+        }
+        .validate()
+        .is_err());
+    }
+
+    #[test]
+    fn test_aero_ball_properties_reject_invalid_public_values() {
+        assert!(AeroBallProperties {
+            mass: 0.0,
+            ..AeroBallProperties::default()
+        }
+        .validate()
+        .is_err());
+        assert!(AeroBallProperties {
+            radius: -0.1,
+            area: 0.01,
+            ..AeroBallProperties::default()
+        }
+        .validate()
+        .is_err());
+        assert!(AeroBallProperties {
+            spin_decay_rate: f64::INFINITY,
+            ..AeroBallProperties::default()
+        }
+        .validate()
+        .is_err());
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid aerodynamic ball properties")]
+    fn test_compute_aero_forces_rejects_invalid_ball_in_release_mode() {
+        let velocity = Vector3::new(10.0, 0.0, 0.0);
+        let spin = Vector3::new(0.0, 0.0, 100.0);
+        let ball = AeroBallProperties {
+            mass: 0.0,
+            ..AeroBallProperties::default()
+        };
+        let _ = compute_aero_forces(&velocity, &spin, &ball, &AirProperties::default());
     }
 
     // ── Drag Tests ───────────────────────────────────────────────────────

@@ -53,9 +53,7 @@ class PhysicsTab(QtWidgets.QWidget):
         main_window: AdvancedGolfAnalysisWindow,
         parent: QtWidgets.QWidget | None = None,
     ) -> None:
-        if not (sim_widget is not None):
-            raise ValueError("sim_widget must be provided")
-        if not (sim_widget is not None):
+        if sim_widget is None:
             raise ValueError("sim_widget must be provided")
         super().__init__(parent)
         self.sim_widget = sim_widget
@@ -196,7 +194,7 @@ class PhysicsTab(QtWidgets.QWidget):
             self._default_model_index = 5
             logger.info(
                 "dm_control not available; defaulting to advanced_biomech model"
-            )
+            )  # noqa: E501
 
     def _add_musculoskeletal_configs(self) -> None:
         """Add MyoSuite musculoskeletal model configs."""
@@ -258,8 +256,8 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _add_linkage_mechanism_configs(self) -> None:
         """Add linkage mechanism configs from the catalog."""
-        for mech_name, mech_config in LINKAGE_CATALOG.items():
-            self.model_configs.append(
+        self.model_configs.extend(
+            [
                 {
                     "name": mech_name.lower()
                     .replace(" ", "_")
@@ -271,7 +269,9 @@ class PhysicsTab(QtWidgets.QWidget):
                     "category": mech_config.get("category", "Mechanisms"),
                     "description": mech_config.get("description", ""),
                 }
-            )
+                for (mech_name, mech_config) in LINKAGE_CATALOG.items()
+            ]
+        )
 
     def _load_shared_urdfs(self) -> None:
         """Load URDF models from shared/urdf directory."""
@@ -326,7 +326,7 @@ class PhysicsTab(QtWidgets.QWidget):
         self.mode_combo = QtWidgets.QComboBox()
         self.mode_combo.addItems(
             ["Dynamic (Torque Control)", "Kinematic (Pose Adjustment)"]
-        )
+        )  # noqa: E501
         self.mode_combo.setToolTip(
             "Dynamic: Physics-driven simulation using torques.\n"
             "Kinematic: Direct control of joint positions (pose)."
@@ -353,17 +353,17 @@ class PhysicsTab(QtWidgets.QWidget):
             "full_body": ("Full body with leg drive and weight transfer."),
             "advanced_biomech": (
                 "Detailed golf model: scapulae, 3-DOF shoulders, flexible shaft."
-            ),
+            ),  # noqa: E501
             "humanoid_cm": (
                 "CMU Humanoid from DeepMind Control Suite. Original MuJoCo humanoid."
-            ),
+            ),  # noqa: E501
             "myoupperbody": ("Muscle-actuated upper body. Independent muscle control."),
             "myobody": (
                 "Complete musculoskeletal model. Very complex - for advanced users."
-            ),
+            ),  # noqa: E501
             "myoarm_simple": (
                 "Both arms with muscle actuation. Good for arm mechanics study."
-            ),
+            ),  # noqa: E501
         }
 
         # Names that should be categorized as golf/pendulum models
@@ -384,7 +384,7 @@ class PhysicsTab(QtWidgets.QWidget):
             elif config["name"] in desc_map:
                 prefix = "Golf" if config["name"] in golf_names else "Musculoskeletal"
                 display_name = (
-                    f"{prefix}: {display_name} ({len(config['actuators'])} DOF)"
+                    f"{prefix}: {display_name} ({len(config['actuators'])} DOF)"  # noqa: E501
                 )
 
             self.model_combo.addItem(display_name)
@@ -403,9 +403,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def on_model_changed(self, index: int) -> None:
         """Handle model selection change."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         self.load_current_model()
         self._update_model_description(index)
@@ -419,9 +417,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _on_loading_finished(self, success: bool) -> None:
         """Handle completion of model loading."""
-        if not (success is not None):
-            raise ValueError("success must be provided")
-        if not (success is not None):
+        if success is None:
             raise ValueError("success must be provided")
         self.model_combo.setEnabled(True)
         self.mode_combo.setEnabled(True)
@@ -430,7 +426,7 @@ class PhysicsTab(QtWidgets.QWidget):
             if success:
                 self.main_window.statusBar().showMessage(
                     "Model loaded successfully.", 3000
-                )
+                )  # noqa: E501
             else:
                 self.main_window.statusBar().showMessage("Model load failed.", 5000)
 
@@ -478,7 +474,7 @@ class PhysicsTab(QtWidgets.QWidget):
                 if "xml_path" in config:
                     self.sim_widget.load_model_async(
                         str(config["xml_path"]), is_file=True
-                    )
+                    )  # noqa: E501
                 elif "xml" in config:
                     self.sim_widget.load_model_async(str(config["xml"]), is_file=False)
                 else:
@@ -502,9 +498,7 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _on_operating_mode_changed(self, index: int) -> None:
         """Handle operating mode change (Dynamic vs Kinematic)."""
-        if not (index is not None):
-            raise ValueError("index must be provided")
-        if not (index is not None):
+        if index is None:
             raise ValueError("index must be provided")
         mode = "dynamic" if index == 0 else "kinematic"
         self.sim_widget.set_operating_mode(mode)

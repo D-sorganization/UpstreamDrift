@@ -15,8 +15,6 @@ from src.shared.python.plot_theme.themes import (
     register_theme,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestPlotTheme:
     def test_get_theme_names_returns_list(self) -> None:

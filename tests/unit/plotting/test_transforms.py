@@ -7,8 +7,6 @@ import pytest
 
 from src.shared.python.plotting.transforms import DataManager
 
-pytestmark = pytest.mark.unit
-
 
 class _StubRecorder:
     """Minimal stub implementing get_time_series for testing DataManager."""

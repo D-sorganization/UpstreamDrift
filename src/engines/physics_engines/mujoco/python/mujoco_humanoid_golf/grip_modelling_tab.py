@@ -1,9 +1,10 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
 """Grip Modelling Tab for Advanced Hand Models.
 
 Issue #757: Contact-based hand-grip model in MuJoCo with pressure visualization.
-
-Implementation split across:
-- _grip_modelling_widgets.py: PressureVisualizationWidget, ContactMetricsWidget
 """
 
 from __future__ import annotations
@@ -15,21 +16,211 @@ from typing import Any
 
 import mujoco
 import numpy as np
-from PyQt6 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.grip_contact_model import (
     GripContactExporter,
     GripContactModel,
     GripParameters,
+    PressureVisualizationData,
     compute_pressure_visualization,
 )
 
-# Re-export public names for backward compatibility
-from ._grip_modelling_widgets import ContactMetricsWidget, PressureVisualizationWidget
 from .sim_widget import MuJoCoSimWidget
 
 logger = get_logger(__name__)
+
+
+class PressureVisualizationWidget(QtWidgets.QWidget):
+    """Widget for visualizing grip pressure distribution.
+
+    Issue #757: Pressure distribution visualization available in the UI.
+    Displays pressure as a 2D heatmap (unwrapped grip cylinder).
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        """Initialize pressure visualization widget."""
+        super().__init__(parent)
+        self.setMinimumSize(200, 150)
+        self.pressure_data: PressureVisualizationData | None = None
+
+        # Color map (blue -> green -> yellow -> red)
+        self.color_stops = [
+            (0.0, QtGui.QColor(0, 0, 255)),  # Blue (low)
+            (0.33, QtGui.QColor(0, 255, 0)),  # Green
+            (0.66, QtGui.QColor(255, 255, 0)),  # Yellow
+            (1.0, QtGui.QColor(255, 0, 0)),  # Red (high)
+        ]
+
+    def update_pressure(self, data: PressureVisualizationData) -> None:
+        """Update displayed pressure data.
+
+        Args:
+            data: New pressure visualization data
+        """
+        if data is None:
+            raise ValueError("data must be provided")
+        self.pressure_data = data
+        self.update()
+
+    def clear(self) -> None:
+        """Clear pressure display."""
+        self.pressure_data = None
+        self.update()
+
+    def _get_color_for_value(self, normalized_value: float) -> QtGui.QColor:
+        """Get color from gradient for normalized value [0, 1]."""
+        if normalized_value is None:
+            raise ValueError("normalized_value must be provided")
+        normalized_value = max(0.0, min(1.0, normalized_value))
+
+        # Find surrounding color stops
+        for i in range(len(self.color_stops) - 1):
+            t1, c1 = self.color_stops[i]
+            t2, c2 = self.color_stops[i + 1]
+
+            if t1 <= normalized_value <= t2:
+                # Interpolate
+                t = (normalized_value - t1) / (t2 - t1) if t2 > t1 else 0
+                r = int(c1.red() + t * (c2.red() - c1.red()))
+                g = int(c1.green() + t * (c2.green() - c1.green()))
+                b = int(c1.blue() + t * (c2.blue() - c1.blue()))
+                return QtGui.QColor(r, g, b)
+
+        return self.color_stops[-1][1]
+
+    def paintEvent(self, event: QtGui.QPaintEvent | None) -> None:
+        """Paint the pressure visualization."""
+        painter = QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+
+        rect = self.rect()
+        painter.fillRect(rect, QtGui.QColor(40, 40, 40))
+
+        if self.pressure_data is None or len(self.pressure_data.pressures) == 0:
+            painter.setPen(QtGui.QColor(150, 150, 150))
+            painter.drawText(
+                rect, QtCore.Qt.AlignmentFlag.AlignCenter, "No contact data"
+            )  # noqa: E501
+            return
+
+        # Draw title
+        painter.setPen(QtGui.QColor(255, 255, 255))
+        painter.drawText(10, 20, f"Max: {self.pressure_data.max_pressure:.0f} Pa")
+        painter.drawText(10, 35, f"Mean: {self.pressure_data.mean_pressure:.0f} Pa")
+
+        # Draw pressure points
+        margin = 50
+        plot_rect = rect.adjusted(margin, margin, -margin, -20)
+
+        if plot_rect.width() <= 0 or plot_rect.height() <= 0:
+            return
+
+        # Map grip axis position to x, angular position to y
+        axis_pos = self.pressure_data.grip_axis_positions
+        angles = self.pressure_data.angular_positions
+
+        if len(axis_pos) == 0:
+            return
+
+        # Normalize positions for display
+        axis_min, axis_max = np.min(axis_pos), np.max(axis_pos)
+        axis_range = axis_max - axis_min if axis_max > axis_min else 1.0
+
+        for i in range(len(self.pressure_data.pressures)):
+            # Map to widget coordinates
+            x_norm = (axis_pos[i] - axis_min) / axis_range
+            y_norm = (angles[i] + np.pi) / (2 * np.pi)
+
+            x = int(plot_rect.left() + x_norm * plot_rect.width())
+            y = int(plot_rect.top() + y_norm * plot_rect.height())
+
+            # Size based on pressure (larger = more pressure)
+            size = int(5 + 15 * self.pressure_data.normalized_pressures[i])
+
+            # Color based on pressure
+            norm_val = self.pressure_data.normalized_pressures[i]
+            color = self._get_color_for_value(norm_val)
+            painter.setBrush(QtGui.QBrush(color))
+            painter.setPen(QtCore.Qt.PenStyle.NoPen)
+            painter.drawEllipse(x - size // 2, y - size // 2, size, size)
+
+        # Draw axes labels
+        painter.setPen(QtGui.QColor(200, 200, 200))
+        painter.drawText(plot_rect.left(), rect.bottom() - 5, "Butt")
+        painter.drawText(plot_rect.right() - 20, rect.bottom() - 5, "Tip")
+
+        # Draw color legend
+        legend_rect = QtCore.QRect(rect.right() - 30, margin, 15, plot_rect.height())
+        for i in range(legend_rect.height()):
+            t = i / legend_rect.height()
+            color = self._get_color_for_value(1.0 - t)  # Flip so high is at top
+            painter.setPen(color)
+            painter.drawLine(
+                legend_rect.left(),
+                legend_rect.top() + i,
+                legend_rect.right(),
+                legend_rect.top() + i,
+            )
+
+
+class ContactMetricsWidget(QtWidgets.QWidget):
+    """Widget displaying contact metrics summary.
+
+    Issue #757: Shows contact forces, slip detection status.
+    """
+
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
+        """Initialize metrics widget."""
+        super().__init__(parent)
+        layout = QtWidgets.QFormLayout(self)
+
+        self.lbl_normal_force = QtWidgets.QLabel("0.0 N")
+        self.lbl_tangent_force = QtWidgets.QLabel("0.0 N")
+        self.lbl_num_contacts = QtWidgets.QLabel("0")
+        self.lbl_slip_status = QtWidgets.QLabel("No slip")
+        self.lbl_slip_margin = QtWidgets.QLabel("N/A")
+        self.lbl_equilibrium = QtWidgets.QLabel("Unknown")
+
+        layout.addRow("Normal Force:", self.lbl_normal_force)
+        layout.addRow("Tangent Force:", self.lbl_tangent_force)
+        layout.addRow("Active Contacts:", self.lbl_num_contacts)
+        layout.addRow("Slip Status:", self.lbl_slip_status)
+        layout.addRow("Min Slip Margin:", self.lbl_slip_margin)
+        layout.addRow("Equilibrium:", self.lbl_equilibrium)
+
+    def update_metrics(
+        self,
+        normal_force: float,
+        tangent_force: float,
+        num_contacts: int,
+        num_slipping: int,
+        slip_margin: float,
+        equilibrium: bool,
+    ) -> None:
+        """Update displayed metrics."""
+        if normal_force is None:
+            raise ValueError("normal_force must be provided")
+        self.lbl_normal_force.setText(f"{normal_force:.1f} N")
+        self.lbl_tangent_force.setText(f"{tangent_force:.1f} N")
+        self.lbl_num_contacts.setText(str(num_contacts))
+
+        if num_slipping > 0:
+            self.lbl_slip_status.setText(f"SLIPPING ({num_slipping})")
+            self.lbl_slip_status.setStyleSheet("color: red; font-weight: bold;")
+        else:
+            self.lbl_slip_status.setText("No slip")
+            self.lbl_slip_status.setStyleSheet("color: green;")
+
+        self.lbl_slip_margin.setText(f"{slip_margin:.2%}")
+
+        if equilibrium:
+            self.lbl_equilibrium.setText("Stable")
+            self.lbl_equilibrium.setStyleSheet("color: green;")
+        else:
+            self.lbl_equilibrium.setText("Unstable")
+            self.lbl_equilibrium.setStyleSheet("color: orange;")
 
 
 class GripModellingTab(QtWidgets.QWidget):
@@ -44,9 +235,7 @@ class GripModellingTab(QtWidgets.QWidget):
         # For now, we just store the reference, but we maintain our own internal widget
         # for independent visualization of the hand models.
         # Future work: Unify visualization if possible.
-        if not (sim_widget is not None):
-            raise ValueError("sim_widget must be provided")
-        if not (sim_widget is not None):
+        if sim_widget is None:
             raise ValueError("sim_widget must be provided")
         self.external_sim_widget = sim_widget
         logger.info("Connected GripModellingTab to external sim widget")
@@ -217,9 +406,7 @@ class GripModellingTab(QtWidgets.QWidget):
         self, scene_path: Path, folder_path: Path, is_both: bool = False
     ) -> str:  # noqa: E501
         """Read scene file and inject absolute paths and cylinder object."""
-        if not (scene_path is not None):
-            raise ValueError("scene_path must be provided")
-        if not (scene_path is not None):
+        if scene_path is None:
             raise ValueError("scene_path must be provided")
         xml_content = scene_path.read_text("utf-8")
 
@@ -250,9 +437,7 @@ class GripModellingTab(QtWidgets.QWidget):
         is_both: bool,
     ) -> str:
         """Read a hand XML file, inject freejoint, and strip mujoco tags."""
-        if not (folder_path is not None):
-            raise ValueError("folder_path must be provided")
-        if not (folder_path is not None):
+        if folder_path is None:
             raise ValueError("folder_path must be provided")
         full_path = folder_path / filename
         if not full_path.exists():
@@ -305,17 +490,13 @@ class GripModellingTab(QtWidgets.QWidget):
         is_both: bool,
     ) -> str:
         """Inline hand XML includes and inject extracted bodies into worldbody."""
-        if not (xml_content is not None):
-            raise ValueError("xml_content must be provided")
-        if not (xml_content is not None):
+        if xml_content is None:
             raise ValueError("xml_content must be provided")
         extracted_bodies: list[str] = []
 
         def extract_worldbody_content(filename: str, body_pattern: str) -> str:
             """Extract worldbody XML content from a hand model file."""
-            if not (filename is not None):
-                raise ValueError("filename must be provided")
-            if not (filename is not None):
+            if filename is None:
                 raise ValueError("filename must be provided")
             content = self._get_hand_content(
                 folder_path, filename, body_pattern, is_both
@@ -429,9 +610,7 @@ class GripModellingTab(QtWidgets.QWidget):
     @staticmethod
     def _inject_mocap_bodies(xml_content: str, scene_path: Path, is_both: bool) -> str:
         """Inject mocap bodies and weld constraints for hand positioning."""
-        if not (xml_content is not None):
-            raise ValueError("xml_content must be provided")
-        if not (xml_content is not None):
+        if xml_content is None:
             raise ValueError("xml_content must be provided")
         mocap_xml = ""
         equality_xml = "<equality>\n"
@@ -517,9 +696,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
-        if not (i is not None):
-            raise ValueError("i must be provided")
-        if not (i is not None):
+        if i is None:
             raise ValueError("i must be provided")
         if self.sim_widget.data is None:
             return
@@ -595,27 +772,21 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _val_to_slider(self, val: float, min_v: float, max_v: float) -> int:
         """Convert float value to slider integer position."""
-        if not (val is not None):
-            raise ValueError("val must be provided")
-        if not (val is not None):
+        if val is None:
             raise ValueError("val must be provided")
         ratio = (val - min_v) / (max_v - min_v) if max_v > min_v else 0.5
         return int(ratio * 1000)
 
     def _slider_to_val(self, slider_val: int, min_v: float, max_v: float) -> float:
         """Convert slider integer position to float value."""
-        if not (slider_val is not None):
-            raise ValueError("slider_val must be provided")
-        if not (slider_val is not None):
+        if slider_val is None:
             raise ValueError("slider_val must be provided")
         ratio = slider_val / 1000.0
         return min_v + ratio * (max_v - min_v)
 
     def _update_joint(self, q_idx: int, val: float) -> None:
         """Update joint value in simulation."""
-        if not (q_idx is not None):
-            raise ValueError("q_idx must be provided")
-        if not (q_idx is not None):
+        if q_idx is None:
             raise ValueError("q_idx must be provided")
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
@@ -634,9 +805,7 @@ class GripModellingTab(QtWidgets.QWidget):
         q_idx: int,
     ) -> None:
         """Handle slider value change."""
-        if not (val_int is not None):
-            raise ValueError("val_int must be provided")
-        if not (val_int is not None):
+        if val_int is None:
             raise ValueError("val_int must be provided")
         val = self._slider_to_val(val_int, min_v, max_v)
         spin.blockSignals(True)  # noqa: FBT003
@@ -653,9 +822,7 @@ class GripModellingTab(QtWidgets.QWidget):
         q_idx: int,
     ) -> None:
         """Handle spinbox value change."""
-        if not (val is not None):
-            raise ValueError("val must be provided")
-        if not (val is not None):
+        if val is None:
             raise ValueError("val must be provided")
         slider_val = self._val_to_slider(val, min_v, max_v)
         slider.blockSignals(True)  # noqa: FBT003
@@ -665,9 +832,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _get_joint_range(self, i: int, model: mujoco.MjModel) -> tuple[float, float]:
         """Get valid joint range, providing defaults if undefined."""
-        if not (i is not None):
-            raise ValueError("i must be provided")
-        if not (i is not None):
+        if i is None:
             raise ValueError("i must be provided")
         range_min, range_max = (
             model.jnt_range[i] if model.jnt_range is not None else (-np.pi, np.pi)
@@ -706,9 +871,7 @@ class GripModellingTab(QtWidgets.QWidget):
     def _extract_hand_contacts(
         self, model: mujoco.MjModel, data: mujoco.MjData
     ) -> tuple[list, list, list, list, list]:
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         positions = []
         normals = []
@@ -750,10 +913,8 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _update_contact_visualizations(
         self, positions_arr: np.ndarray, state: Any
-    ) -> None:
-        if not (positions_arr is not None):
-            raise ValueError("positions_arr must be provided")
-        if not (positions_arr is not None):
+    ) -> None:  # noqa: E501
+        if positions_arr is None:
             raise ValueError("positions_arr must be provided")
         if len(positions_arr) > 0:
             grip_center = np.mean(positions_arr, axis=0)
@@ -871,10 +1032,3 @@ class GripModellingTab(QtWidgets.QWidget):
             QtWidgets.QMessageBox.critical(
                 self, "Export Failed", f"Failed to export: {e}"
             )  # noqa: E501
-
-
-__all__ = [
-    "ContactMetricsWidget",
-    "GripModellingTab",
-    "PressureVisualizationWidget",
-]

@@ -158,9 +158,7 @@ class OllamaAdapter(BaseAgentAdapter):
             AITimeoutError: If request times out.
             AIProviderError: For other Ollama errors.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
 
@@ -224,9 +222,7 @@ class OllamaAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message, tools)
@@ -363,9 +359,7 @@ class OllamaAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for Ollama.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, str]] = []
 
@@ -382,13 +376,15 @@ class OllamaAdapter(BaseAgentAdapter):
         )
 
         # Add conversation history
-        for msg in context.messages:
-            messages.append(
+        messages.extend(
+            [
                 {
                     "role": msg.role if msg.role != "tool" else "assistant",
                     "content": msg.content,
                 }
-            )
+                for msg in context.messages
+            ]
+        )
 
         # Add current message
         messages.append(
@@ -409,9 +405,7 @@ class OllamaAdapter(BaseAgentAdapter):
         Returns:
             Parsed AgentResponse.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         message = data.get("message", {})
         content = message.get("content", "")
@@ -419,14 +413,16 @@ class OllamaAdapter(BaseAgentAdapter):
         # Parse tool calls if present (model-dependent)
         tool_calls: list[ToolCall] = []
         if "tool_calls" in message:
-            for tc in message["tool_calls"]:
-                tool_calls.append(
+            tool_calls.extend(
+                [
                     ToolCall(
                         id=tc.get("id", f"tc_{len(tool_calls)}"),
                         name=tc.get("function", {}).get("name", ""),
                         arguments=tc.get("function", {}).get("arguments", {}),
                     )
-                )
+                    for tc in message["tool_calls"]
+                ]
+            )
 
         # Extract usage if available
         usage: dict[str, int] = {}

@@ -3,15 +3,12 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.pendulum_simulator.jacobians_golfer import (
     ellipsoids_golfer,
     jacobian_golfer,
 )
 from src.shared.python.pendulum_simulator.physics_golfer import N_DOF, GolferParams
-
-pytestmark = pytest.mark.unit
 
 
 def _make_params() -> GolferParams:

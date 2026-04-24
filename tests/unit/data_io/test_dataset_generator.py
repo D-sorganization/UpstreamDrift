@@ -10,8 +10,6 @@ from src.shared.python.data_io.dataset_generator import (
     ParameterRange,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestParameterRange:
     def test_construction(self) -> None:

@@ -37,7 +37,8 @@ class GRFMetricsMixin:
         if cop_diff.shape[1] == 2:
             cop_dist = np.hypot(cop_diff[:, 0], cop_diff[:, 1])
         else:
-            cop_dist = np.sqrt(np.sum(cop_diff**2, axis=1))
+            cd_f = cop_diff.astype(float, copy=False)
+            cop_dist = np.sqrt(np.einsum("...i,...i->...", cd_f, cd_f))
         path_length = np.sum(cop_dist)
 
         # CoP Velocity

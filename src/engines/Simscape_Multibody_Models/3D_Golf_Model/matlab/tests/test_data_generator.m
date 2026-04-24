@@ -27,12 +27,20 @@ classdef test_data_generator < matlab.unittest.TestCase
         function setupTestEnvironment(testCase)
             % Setup test environment before all tests
 
-            % Add paths
-            addpath(genpath('matlab/Scripts'));
+            % Add paths relative to this test file so the bundled model can
+            % be discovered from a clean checkout.
+            test_file = mfilename('fullpath');
+            tests_root = fileparts(test_file);
+            matlab_root = fileparts(tests_root);
+
+            addpath(fullfile(matlab_root, 'src', 'scripts', 'dataset_generator'));
+            addpath(genpath(fullfile(matlab_root, 'src', 'functions', 'dataset_generator')));
+            addpath(fullfile(matlab_root, 'src', 'model'));
 
             % Verify model exists
-            model_name = 'GolfSwing3D_Model';
-            if ~exist([model_name '.slx'], 'file') && ~exist([model_name '.mdl'], 'file')
+            model_name = 'GolfSwing3D_Kinetic';
+            model_path = fullfile(matlab_root, 'src', 'model', [model_name '.slx']);
+            if ~exist(model_path, 'file') && ~exist(fullfile(matlab_root, 'src', 'model', [model_name '.mdl']), 'file')
                 testCase.assumeFail('Simulink model not found - skipping tests requiring model');
             end
 
@@ -74,11 +82,13 @@ classdef test_data_generator < matlab.unittest.TestCase
             testCase.verifyTrue(isfield(config, 'num_simulations'), 'Config must have num_simulations');
             testCase.verifyTrue(isfield(config, 'simulation_time'), 'Config must have simulation_time');
             testCase.verifyTrue(isfield(config, 'output_folder'), 'Config must have output_folder');
+            testCase.verifyTrue(isfield(config, 'verbose'), 'Config must have verbose');
 
             % Verify defaults are reasonable
             testCase.verifyGreaterThan(config.num_simulations, 0, 'num_simulations must be positive');
             testCase.verifyGreaterThan(config.simulation_time, 0, 'simulation_time must be positive');
             testCase.verifyClass(config.model_name, 'char', 'model_name must be string');
+            testCase.verifyClass(config.verbose, 'logical', 'verbose must be logical');
         end
 
         function testConfigValidation(testCase)
@@ -229,7 +239,7 @@ function config = createSimulationConfig()
     config = struct();
 
     % Model settings
-    config.model_name = 'GolfSwing3D_Model';
+    config.model_name = 'GolfSwing3D_Kinetic';
     config.model_path = which([config.model_name '.slx']);
     if isempty(config.model_path)
         config.model_path = which([config.model_name '.mdl']);
@@ -256,6 +266,7 @@ function config = createSimulationConfig()
 
     % Verbosity
     config.verbosity = 'Normal';  % Silent, Normal, Verbose, Debug
+    config.verbose = true;
 
     % Optional settings
     config.enable_animation = false;

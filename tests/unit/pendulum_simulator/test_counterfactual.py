@@ -12,8 +12,6 @@ from src.shared.python.pendulum_simulator.counterfactual import (
 from src.shared.python.pendulum_simulator.physics import PendulumParams
 from src.shared.python.pendulum_simulator.physics_triple import TriplePendulumParams
 
-pytestmark = pytest.mark.unit
-
 
 def _make_double_params() -> PendulumParams:
     return PendulumParams(m1=1.0, m2=0.3, L1=1.0, L2=0.5)
@@ -44,12 +42,12 @@ class TestZeroTorqueJointForcesDouble:
             assert np.isfinite(fy), f"Non-finite fy at {key}"
 
     def test_wrong_state_shape_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             zero_torque_joint_forces_double(np.zeros(6), _make_double_params())
 
     def test_non_finite_state_raises(self) -> None:
         state = np.array([np.nan, 0.0, 0.0, 0.0])
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             zero_torque_joint_forces_double(state, _make_double_params())
 
     def test_nonzero_state_finite_output(self) -> None:
@@ -80,13 +78,13 @@ class TestZeroTorqueJointForcesTriple:
             assert np.isfinite(fy), f"Non-finite fy at {key}"
 
     def test_wrong_state_shape_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             zero_torque_joint_forces_triple(np.zeros(4), _make_triple_params())
 
     def test_non_finite_state_raises(self) -> None:
         state = np.zeros(6)
         state[0] = np.nan
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             zero_torque_joint_forces_triple(state, _make_triple_params())
 
     def test_nonzero_state_finite_output(self) -> None:

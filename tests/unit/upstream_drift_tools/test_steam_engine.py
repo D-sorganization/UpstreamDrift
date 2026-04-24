@@ -4,15 +4,11 @@ from __future__ import annotations
 
 import math
 
-import pytest
-
 from src.shared.python.upstream_drift_tools.calculators.thermo.steam_engine import (
     STANDARD_ATMOSPHERIC_PRESSURE,
     SteamCalculationEngine,
     SteamProperties,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestSteamCalculationEngineInit:

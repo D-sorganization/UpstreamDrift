@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from src.shared.python.perturbation.config import (
     PerturbationConfig,
     PerturbationSummary,
+    TrialFailure,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestPerturbationConfig:
@@ -19,6 +20,8 @@ class TestPerturbationConfig:
         assert cfg.noise_type == "white"
         assert cfg.noise_amplitude == pytest.approx(0.1)
         assert cfg.perturb_mode == "additive"
+        assert cfg.min_success_rate == pytest.approx(0.95)
+        assert cfg.raise_on_partial_results is False
         assert cfg.seed is None
 
     def test_custom_construction(self) -> None:
@@ -27,20 +30,24 @@ class TestPerturbationConfig:
             noise_type="pink",
             noise_amplitude=0.05,
             perturb_mode="multiplicative",
+            min_success_rate=0.8,
+            raise_on_partial_results=True,
             seed=42,
         )
         assert cfg.n_trials == 50
         assert cfg.noise_type == "pink"
         assert cfg.noise_amplitude == pytest.approx(0.05)
         assert cfg.perturb_mode == "multiplicative"
+        assert cfg.min_success_rate == pytest.approx(0.8)
+        assert cfg.raise_on_partial_results is True
         assert cfg.seed == 42
 
     def test_n_trials_zero_raises(self) -> None:
-        with pytest.raises((ValueError, AssertionError)):
+        with pytest.raises(ValueError):
             PerturbationConfig(n_trials=0)
 
     def test_n_trials_negative_raises(self) -> None:
-        with pytest.raises((ValueError, AssertionError)):
+        with pytest.raises(ValueError):
             PerturbationConfig(n_trials=-10)
 
     def test_noise_amplitude_zero_allowed(self) -> None:
@@ -48,7 +55,7 @@ class TestPerturbationConfig:
         assert cfg.noise_amplitude == pytest.approx(0.0)
 
     def test_noise_amplitude_negative_raises(self) -> None:
-        with pytest.raises((ValueError, AssertionError)):
+        with pytest.raises(ValueError):
             PerturbationConfig(noise_amplitude=-0.1)
 
     def test_noise_type_white(self) -> None:
@@ -64,7 +71,7 @@ class TestPerturbationConfig:
         assert cfg.noise_type == "brown"
 
     def test_noise_type_invalid_raises(self) -> None:
-        with pytest.raises((ValueError, AssertionError)):
+        with pytest.raises(ValueError):
             PerturbationConfig(noise_type="red")
 
     def test_perturb_mode_additive(self) -> None:
@@ -80,8 +87,16 @@ class TestPerturbationConfig:
         assert cfg.perturb_mode == "both"
 
     def test_perturb_mode_invalid_raises(self) -> None:
-        with pytest.raises((ValueError, AssertionError)):
+        with pytest.raises(ValueError):
             PerturbationConfig(perturb_mode="subtractive")
+
+    def test_min_success_rate_below_zero_raises(self) -> None:
+        with pytest.raises(ValueError):
+            PerturbationConfig(min_success_rate=-0.1)
+
+    def test_min_success_rate_above_one_raises(self) -> None:
+        with pytest.raises(ValueError):
+            PerturbationConfig(min_success_rate=1.1)
 
     def test_seed_integer(self) -> None:
         cfg = PerturbationConfig(seed=123)
@@ -94,13 +109,14 @@ class TestPerturbationConfig:
 
 class TestPerturbationSummary:
     def _make_summary(self, **kwargs) -> PerturbationSummary:
-        defaults = {
+        defaults: dict[str, Any] = {
             "engine_name": "test_engine",
             "config": PerturbationConfig(),
             "robustness_score": 0.85,
             "metrics": {"rmse": 0.12},
             "success_rate": 0.95,
             "execution_time_sec": 3.14,
+            "failures": [],
         }
         defaults.update(kwargs)
         return PerturbationSummary(**defaults)
@@ -156,6 +172,26 @@ class TestPerturbationSummary:
         d = s.to_dict()
         assert "metrics" in d
         assert d["metrics"]["rmse"] == pytest.approx(0.05)
+
+    def test_to_dict_has_failures(self) -> None:
+        failure = TrialFailure(
+            trial_index=2,
+            seed=123,
+            stage="run_batch",
+            error_type="RuntimeError",
+            message="boom",
+        )
+        s = self._make_summary(failures=[failure])
+        d = s.to_dict()
+        assert d["failures"] == [
+            {
+                "trial_index": 2,
+                "seed": 123,
+                "stage": "run_batch",
+                "error_type": "RuntimeError",
+                "message": "boom",
+            }
+        ]
 
     def test_to_dict_json_serializable(self) -> None:
         import json

@@ -61,7 +61,8 @@ class StabilityMetricsMixin:
         # theta = arccos( v_z / |v| )
 
         # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
-        vec_norm = np.sqrt(np.sum(vec**2, axis=1))
+        vec_f = vec.astype(float, copy=False)
+        vec_norm = np.sqrt(np.einsum("...i,...i->...", vec_f, vec_f))
         # Avoid division by zero
         vec_norm[vec_norm < 1e-6] = 1.0
 

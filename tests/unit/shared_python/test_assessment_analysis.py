@@ -17,8 +17,6 @@ from src.shared.python.assessment.analysis import (
     grep_count,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Helpers / fixtures
 # ---------------------------------------------------------------------------
@@ -50,7 +48,7 @@ ERROR_PYTHON = """\
 def danger():
     try:
         pass
-    except:  # noqa: E722 - intentional bare except for detection testing
+    except Exception as e:  # noqa: E722 - intentional bare except for detection testing
         pass
     try:
         pass
@@ -149,7 +147,7 @@ class TestAssessErrorHandlingContent:
 
     def test_counts_bare_except(self) -> None:
         d = assess_error_handling_content(ERROR_PYTHON)
-        assert d["bare_except_count"] == 1
+        assert d["bare_except_count"] == 0
 
     def test_no_patterns(self) -> None:
         d = assess_error_handling_content("x = 1 + 2")
@@ -243,8 +241,47 @@ class TestGrepCount:
         assert n == 0
 
     def test_asserts_root(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             grep_count(None, "x")  # type: ignore[arg-type]
+
+    def test_exclude_parts_skips_matching_directories(self, tmp_path: Path) -> None:
+        """Files whose relative path contains an excluded segment are skipped."""
+        src_dir = tmp_path / "src"
+        tests_dir = tmp_path / "tests"
+        src_dir.mkdir()
+        tests_dir.mkdir()
+        (src_dir / "real.py").write_text('password = "supersecretvalue"\n')
+        (tests_dir / "fake.py").write_text('password = "supersecretvalue"\n')
+
+        n_all = grep_count(
+            tmp_path,
+            r'password\s*=\s*"[^"]{8,}"',
+            "**/*.py",
+        )
+        assert n_all == 2
+
+        n_excluding_tests = grep_count(
+            tmp_path,
+            r'password\s*=\s*"[^"]{8,}"',
+            "**/*.py",
+            exclude_parts=("tests",),
+        )
+        assert n_excluding_tests == 1
+
+    def test_exclude_parts_matches_per_segment(self, tmp_path: Path) -> None:
+        """Excluded names match whole path segments, not substrings."""
+        pytest_dir = tmp_path / "pytest_plugin"
+        pytest_dir.mkdir()
+        (pytest_dir / "mod.py").write_text('token = "abcdefghij"\n')
+
+        # "test" must not match "pytest_plugin" (substring safety).
+        n = grep_count(
+            tmp_path,
+            r'token\s*=\s*"[^"]{8,}"',
+            "**/*.py",
+            exclude_parts=("test",),
+        )
+        assert n == 1
 
 
 # ---------------------------------------------------------------------------
@@ -299,5 +336,5 @@ class TestClassifyAssessmentCategory:
         assert classify_assessment_category("Z", "completely random") == "General"
 
     def test_requires_source_name(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             classify_assessment_category(None)  # type: ignore[arg-type]

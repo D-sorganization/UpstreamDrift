@@ -109,3 +109,9 @@ class TestComputeAirDensity:
         # Density should be roughly 1/e of sea level since 8848 ~ 8500
         assert rho < rho_0 * 0.4
         assert rho > 0.0
+
+    @pytest.mark.parametrize("altitude_m", [-1.0, 11000.1])
+    def test_rejects_altitude_outside_troposphere_range(self, altitude_m):
+        """Altitude correction is only valid for the ISA troposphere range."""
+        with pytest.raises(ValueError, match="ISA troposphere range"):
+            compute_air_density_at_altitude(1.225, altitude_m)

@@ -62,10 +62,10 @@ def run_command(
     Example:
         result = run_command(["python", "--version"])
         if result and result.returncode == 0:
-            print(result.stdout)
+            logger.info(result.stdout)
     """
-    assert cmd is not None, "cmd must be provided"
-    assert cmd is not None, "cmd must be provided"
+    if cmd is None:
+        raise ValueError("cmd must be provided")
     effective_timeout = timeout if timeout is not None else DEFAULT_SUBPROCESS_TIMEOUT
     logger.debug(f"Running command: {' '.join(cmd)} (timeout={effective_timeout}s)")
 
@@ -94,7 +94,7 @@ class ProcessManager:
 
         # Check status
         if manager.is_running("server"):
-            print("Server is running")
+            logger.info("Server is running")
 
         # Stop processes
         manager.stop("server")
@@ -201,8 +201,8 @@ class ProcessManager:
         Returns:
             True if running, False otherwise
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if name is None:
+            raise ValueError("name must be provided")
         if name not in self.processes:
             return False
 
@@ -218,8 +218,8 @@ class ProcessManager:
         Returns:
             Tuple of (stdout, stderr) as strings
         """
-        assert name is not None, "name must be provided"
-        assert name is not None, "name must be provided"
+        if name is None:
+            raise ValueError("name must be provided")
         if name not in self.processes:
             return "", ""
 
@@ -240,8 +240,8 @@ class ProcessManager:
         Args:
             timeout: Timeout for each process
         """
-        assert timeout is not None, "timeout must be provided"
-        assert timeout is not None, "timeout must be provided"
+        if timeout is None:
+            raise ValueError("timeout must be provided")
         logger.info("Stopping all processes")
 
         # Get list of names to avoid modifying dict during iteration
@@ -358,8 +358,8 @@ class CommandRunner:
         Returns:
             CompletedProcess object or None if failed after all attempts
         """
-        assert cmd is not None, "cmd must be provided"
-        assert cmd is not None, "cmd must be provided"
+        if cmd is None:
+            raise ValueError("cmd must be provided")
         for attempt in range(max_attempts):
             result = self.run(cmd)
 

@@ -23,6 +23,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.launchers.launcher_provider_compatibility import is_engine_runtime_available
+from src.shared.python.config.model_pack_manifest import LauncherPresentationMetadata
+from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -31,6 +34,70 @@ logger = get_logger(__name__)
 CONFIG_DIR = Path(__file__).parent
 MANIFEST_PATH = CONFIG_DIR / "launcher_manifest.json"
 ASSETS_DIR = Path(__file__).parent.parent.parent / "assets" / "logos"
+REGISTRY_PATH = CONFIG_DIR / "models.yaml"
+_DEFAULT_PROVIDER_LOGO = "golf_logo.svg"
+_ENGINE_LOGOS = {
+    "drake": "drake.svg",
+    "mujoco": "mujoco_humanoid.svg",
+    "myosuite": "myosim.svg",
+    "opensim": "opensim.svg",
+    "pinocchio": "pinocchio.svg",
+    "putting_green": "putting_green.svg",
+}
+
+
+def _has_provider_metadata(model: ModelConfig) -> bool:
+    """Return True when a registry entry comes from provider-aware metadata."""
+    if model.provider not in (None, "", "local"):
+        return True
+    return bool(model.source_root)
+
+
+def _legacy_launcher_metadata(model: ModelConfig) -> LauncherPresentationMetadata:
+    """Provide a migration bridge for models without explicit launcher metadata."""
+    if model.engine_type:
+        category = "physics_engine"
+        logo = _ENGINE_LOGOS.get(model.engine_type, _DEFAULT_PROVIDER_LOGO)
+        status = "provider_ready"
+    else:
+        category = "external"
+        logo = _DEFAULT_PROVIDER_LOGO
+        status = "external"
+    return LauncherPresentationMetadata(
+        category=category,
+        logo=logo,
+        status=status,
+    )
+
+
+def _build_provider_tile(model: ModelConfig) -> LauncherTile:
+    """Adapt a provider-backed model registry entry into a launcher tile."""
+    metadata = model.launcher or _legacy_launcher_metadata(model)
+    status = metadata.status
+    source_root = (
+        Path(model.source_root) if isinstance(model.source_root, str) else None
+    )
+    if source_root is not None and not source_root.exists():
+        status = "provider_unavailable"
+    elif not is_engine_runtime_available(model.engine_type):
+        status = "runtime_unavailable"
+
+    return LauncherTile(
+        id=model.id,
+        name=model.name,
+        description=model.description,
+        category=metadata.category,
+        type=model.type,
+        path=model.path,
+        logo=metadata.logo,
+        status=status,
+        capabilities=model.capabilities,
+        order=model.order,
+        engine_type=model.engine_type,
+        provider=model.provider,
+        source_root=model.source_root,
+        web_route=metadata.web_route,
+    )
 
 
 @dataclass(frozen=True)
@@ -49,7 +116,6 @@ class LauncherTile:
         capabilities: List of capability tags for filtering/display
         order: Display order (1 = first)
         engine_type: Optional engine type identifier for physics engines
-        web_route: Optional URL path for tiles that open web tools
     """
 
     id: str
@@ -63,6 +129,8 @@ class LauncherTile:
     capabilities: tuple[str, ...] = ()
     order: int = 99
     engine_type: str | None = None
+    provider: str | None = None
+    source_root: str | None = None
     web_route: str | None = None
 
     @classmethod
@@ -95,6 +163,8 @@ class LauncherTile:
             capabilities=tuple(data.get("capabilities", [])),
             order=data.get("order", 99),
             engine_type=data.get("engine_type"),
+            provider=data.get("provider"),
+            source_root=data.get("source_root"),
             web_route=data.get("web_route"),
         )
 
@@ -118,6 +188,10 @@ class LauncherTile:
         }
         if self.engine_type:
             result["engine_type"] = self.engine_type
+        if self.provider:
+            result["provider"] = self.provider
+        if self.source_root:
+            result["source_root"] = self.source_root
         if self.web_route:
             result["web_route"] = self.web_route
         return result
@@ -155,11 +229,20 @@ class LauncherManifest:
     description: str = ""
 
     @classmethod
-    def load(cls, path: Path | None = None) -> LauncherManifest:
+    def load(
+        cls,
+        path: Path | None = None,
+        *,
+        include_provider_tiles: bool = True,
+        registry_path: Path | None = None,
+    ) -> LauncherManifest:
         """Load the launcher manifest from disk.
 
         Args:
             path: Optional override path. Defaults to MANIFEST_PATH.
+            include_provider_tiles: Whether to augment the base manifest with
+                provider-backed tiles from the shared model registry.
+            registry_path: Optional override for the shared model registry path.
 
         Returns:
             Loaded LauncherManifest
@@ -186,33 +269,65 @@ class LauncherManifest:
         if not isinstance(tiles_raw, list):
             raise ValueError("Manifest 'tiles' must be a list")
 
-        tiles = tuple(
-            sorted(
-                [LauncherTile.from_dict(t) for t in tiles_raw],
-                key=lambda t: t.order,
+        tiles = [LauncherTile.from_dict(t) for t in tiles_raw]
+        if include_provider_tiles:
+            tiles.extend(
+                cls._load_provider_tiles(
+                    registry_path=registry_path or REGISTRY_PATH,
+                    existing_ids={tile.id for tile in tiles},
+                )
             )
+
+        sorted_tiles: tuple[LauncherTile, ...] = tuple(
+            sorted(tiles, key=lambda t: (t.order, t.id))
         )
 
         manifest = cls(
             version=raw.get("version", "0.0.0"),
-            tiles=tiles,
+            tiles=sorted_tiles,
             description=raw.get("description", ""),
         )
 
         # DBC Postcondition: verify all tiles have unique IDs
-        ids = [t.id for t in tiles]
+        ids = [t.id for t in sorted_tiles]
         duplicates = [tid for tid in ids if ids.count(tid) > 1]
         if duplicates:
             raise ValueError(f"Duplicate tile IDs in manifest: {set(duplicates)}")
 
         logger.info(
             "Loaded %d tiles (v%s): %s",
-            len(tiles),
+            len(sorted_tiles),
             manifest.version,
             ", ".join(t.id for t in tiles),
         )
 
         return manifest
+
+    @staticmethod
+    def _load_provider_tiles(
+        *,
+        registry_path: Path,
+        existing_ids: set[str],
+    ) -> list[LauncherTile]:
+        """Load dynamic provider-backed tiles from the shared model registry."""
+        if not registry_path.exists():
+            return []
+
+        registry = ModelRegistry(config_path=registry_path)
+        provider_tiles: list[LauncherTile] = []
+
+        for model in registry.get_all_models():
+            if model.id in existing_ids or not _has_provider_metadata(model):
+                continue
+            provider_tiles.append(_build_provider_tile(model))
+
+        if provider_tiles:
+            logger.info(
+                "Augmented launcher manifest with %d provider-backed tiles",
+                len(provider_tiles),
+            )
+
+        return provider_tiles
 
     def get_tile(self, tile_id: str) -> LauncherTile | None:
         """Get a tile by its ID.
@@ -223,7 +338,7 @@ class LauncherManifest:
         Returns:
             LauncherTile if found, None otherwise
         """
-        if not (tile_id is not None):
+        if tile_id is None:
             raise ValueError("tile_id must be provided")
         for tile in self.tiles:
             if tile.id == tile_id:

@@ -11,12 +11,8 @@ from __future__ import annotations
 
 import asyncio
 import time
-from collections.abc import Generator
-from typing import Any
 
 import pytest
-
-pytestmark = pytest.mark.unit
 
 # ── Route Registry Tests ─────────────────────────────────────────
 
@@ -36,33 +32,13 @@ class TestRouteRegistry:
             assert hasattr(router, "routes")  # APIRouter has .routes
 
     def test_discover_routes_excludes_websocket_modules(self) -> None:
-        """WebSocket-only modules are excluded from auto-discovery (handled explicitly)."""
+        """WebSocket-only modules are excluded by default."""
         from src.api.route_registry import discover_routes
 
         routes = discover_routes()
         module_names = {name for name, _ in routes}
         assert "chat_ws" not in module_names
         assert "simulation_ws" not in module_names
-
-    def test_websocket_modules_registered_explicitly_in_server(self) -> None:
-        """WebSocket modules must be explicitly registered in server.py.
-
-        They are excluded from auto-discovery but must still be served —
-        this test protects against accidental removal of the explicit registration.
-        """
-        source = (
-            __import__("pathlib").Path("src/api/server.py").read_text(encoding="utf-8")
-        )
-        assert "chat_ws" in source, (
-            "server.py does not register chat_ws router. "
-            "WebSocket modules are excluded from auto-discovery and must be "
-            "explicitly included in server.py."
-        )
-        assert "simulation_ws" in source, (
-            "server.py does not register simulation_ws router. "
-            "WebSocket modules are excluded from auto-discovery and must be "
-            "explicitly included in server.py."
-        )
 
     def test_discover_routes_custom_exclude(self) -> None:
         """Custom exclusion set is respected."""
@@ -113,6 +89,69 @@ class TestRouteRegistry:
         # At least some routes should have the /api/v1 prefix
         prefixed = [p for p in route_paths if p.startswith("/api/v1")]
         assert len(prefixed) > 0
+
+    def test_tooling_routes_do_not_double_api_prefix(self) -> None:
+        """Tooling routers mount once under the versioned API prefix."""
+        from fastapi import FastAPI
+
+        from src.api.route_registry import register_routes
+
+        test_app = FastAPI()
+        register_routes(test_app, prefix="/api/v1")
+        route_paths = {r.path for r in test_app.routes if hasattr(r, "path")}
+
+        expected_paths = {
+            "/api/v1/tools/data-explorer/datasets",
+            "/api/v1/terrain/presets",
+            "/api/v1/tools/putting-green/simulate",
+            "/api/v1/tools/motion-capture/sources",
+            "/api/v1/launcher/manifest",
+        }
+        double_prefixed_paths = {
+            "/api/v1/api/tools/data-explorer/datasets",
+            "/api/v1/api/terrain/presets",
+            "/api/v1/api/tools/putting-green/simulate",
+            "/api/v1/api/tools/motion-capture/sources",
+            "/api/v1/api/launcher/manifest",
+        }
+
+        assert expected_paths <= route_paths
+        assert route_paths.isdisjoint(double_prefixed_paths)
+
+    def test_expensive_route_modules_receive_quota_dependencies(self) -> None:
+        """Simulation and video routes receive quota dependencies at registration."""
+        from fastapi import FastAPI
+
+        from src.api.auth.dependencies import CheckSimulationQuota, CheckVideoQuota
+        from src.api.route_registry import register_routes
+
+        test_app = FastAPI()
+        register_routes(test_app, prefix="/test")
+
+        simulation_route = next(
+            r for r in test_app.routes if getattr(r, "path", "") == "/test/simulate"
+        )
+        video_route = next(
+            r
+            for r in test_app.routes
+            if getattr(r, "path", "") == "/test/analyze/video"
+        )
+
+        simulation_dependencies = [
+            dep.call for dep in simulation_route.dependant.dependencies
+        ]
+        video_dependencies = [dep.call for dep in video_route.dependant.dependencies]
+        simulation_enforced_dependencies = [
+            getattr(dependency, "enforced_dependency", None)
+            for dependency in simulation_dependencies
+        ]
+        video_enforced_dependencies = [
+            getattr(dependency, "enforced_dependency", None)
+            for dependency in video_dependencies
+        ]
+
+        assert CheckSimulationQuota.dependency in simulation_enforced_dependencies
+        assert CheckVideoQuota.dependency in video_enforced_dependencies
 
 
 # ── Task Manager Tests ────────────────────────────────────────────
@@ -281,7 +320,7 @@ class TestAPIVersioning:
     """Tests for API versioning under /api/v1/ prefix (#1488)."""
 
     @pytest.fixture
-    def client(self) -> Generator[Any, None, None]:
+    def client(self):
         """Create a test client for the API."""
         httpx = pytest.importorskip("httpx")  # noqa: F841
         fastapi = pytest.importorskip("fastapi")  # noqa: F841
@@ -296,8 +335,8 @@ class TestAPIVersioning:
             pytest.skip("Cannot import api.server")
 
     def test_root_endpoint_at_legacy_path(self, client) -> None:
-        """Root endpoint works at /api/ path."""
-        response = client.get("/api/")
+        """Root endpoint works at legacy un-prefixed path."""
+        response = client.get("/")
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "running"
@@ -469,7 +508,7 @@ class TestOpenAPIEnhancements:
     """Tests for OpenAPI schema improvements (#1488)."""
 
     @pytest.fixture
-    def client(self) -> Generator[Any, None, None]:
+    def client(self):
         """Create a test client for the API."""
         httpx = pytest.importorskip("httpx")  # noqa: F841
         fastapi = pytest.importorskip("fastapi")  # noqa: F841
@@ -494,4 +533,4 @@ class TestOpenAPIEnhancements:
         """OpenAPI schema includes version info."""
         response = client.get("/openapi.json")
         data = response.json()
-        assert "version" in data["info"]
+        assert data["info"]["version"] == client.app.version

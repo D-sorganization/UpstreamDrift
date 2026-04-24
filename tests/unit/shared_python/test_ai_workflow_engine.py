@@ -20,8 +20,6 @@ from src.shared.python.ai.workflow_engine import (
     WorkflowStep,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -154,7 +152,7 @@ class TestWorkflowExecution:
             workflow_id="wf1",
             context=context,
         )
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             exe.get_step_result(None)  # type: ignore[arg-type]
 
 

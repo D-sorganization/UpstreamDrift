@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Modification operations mixin for the Frankenstein Editor.
 
 Provides link/joint deletion, renaming, modification, attachment/detachment,
@@ -62,9 +66,7 @@ class ModificationMixin:
         Returns the model if it exists and is not read-only, otherwise logs
         an error and returns ``None``.
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:
@@ -106,9 +108,7 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -186,9 +186,7 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -248,9 +246,7 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         if old_name == new_name:
             return True  # No-op
@@ -317,9 +313,7 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         if old_name == new_name:
             return True  # No-op
@@ -369,9 +363,7 @@ class ModificationMixin:
         Returns:
             True if modified
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -459,9 +451,7 @@ class ModificationMixin:
         Returns:
             True if attached
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -526,9 +516,7 @@ class ModificationMixin:
         Returns:
             True if detached
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -578,9 +566,7 @@ class ModificationMixin:
         Returns:
             True if applied
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -643,9 +629,7 @@ class ModificationMixin:
         Returns:
             List of created link names.
         """
-        if not (links is not None):
-            raise ValueError("links must be provided")
-        if not (links is not None):
+        if links is None:
             raise ValueError("links must be provided")
         created_links: list[str] = []
         for link in links:

@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Frankenstein Editor for component composition.
 
@@ -107,9 +111,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             The loaded ParsedModel
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         self._save_state()
 
@@ -136,9 +138,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             The created ParsedModel
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         self._save_state()
 
@@ -172,9 +172,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             True if unloaded
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         if model_id in self._models:
             self._save_state()
@@ -202,9 +200,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             The copied model
         """
-        if not (source_id is not None):
-            raise ValueError("source_id must be provided")
-        if not (source_id is not None):
+        if source_id is None:
             raise ValueError("source_id must be provided")
         source = self._models.get(source_id)
         if not source:
@@ -234,9 +230,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             Dict with link names and children
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:
@@ -265,9 +259,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             List of link names in the subtree
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:
@@ -285,9 +277,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             The connecting Joint or None
         """
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:
@@ -325,9 +315,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             List of created link names
         """
-        if not (target_model_id is not None):
-            raise ValueError("target_model_id must be provided")
-        if not (target_model_id is not None):
+        if target_model_id is None:
             raise ValueError("target_model_id must be provided")
         if not self._clipboard:
             logger.error("Clipboard is empty")
@@ -372,9 +360,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         suffix: str,
     ) -> dict[str, str]:
         """Build a name mapping for pasted elements to avoid conflicts."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         name_map: dict[str, str] = {}
         existing_links = {link.name for link in model.links}
@@ -426,9 +412,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         joint_type: JointType,
     ) -> list[str]:
         """Create renamed copies of links and joints in the target model."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         created_links: list[str] = []
 
@@ -589,9 +573,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
     def _restore_state(self, state: EditorState) -> None:
         """Restore from a state snapshot."""
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         self._models = state.models
         self._clipboard = state.clipboard  # type: ignore[assignment]
@@ -646,9 +628,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         Returns:
             Comparison results
         """
-        if not (model_id_a is not None):
-            raise ValueError("model_id_a must be provided")
-        if not (model_id_a is not None):
+        if model_id_a is None:
             raise ValueError("model_id_a must be provided")
         model_a = self._models.get(model_id_a)
         model_b = self._models.get(model_id_b)
@@ -691,9 +671,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
         existing_names: set[str],
     ) -> str:
         """Generate a unique name by appending a number if needed."""
-        if not (base_name is not None):
-            raise ValueError("base_name must be provided")
-        if not (base_name is not None):
+        if base_name is None:
             raise ValueError("base_name must be provided")
         if base_name not in existing_names:
             return base_name
@@ -718,9 +696,7 @@ class FrankensteinEditor(ClipboardMixin, ModificationMixin):
 
     def get_model_statistics(self, model_id: str) -> dict[str, Any]:
         """Get statistics about a model."""
-        if not (model_id is not None):
-            raise ValueError("model_id must be provided")
-        if not (model_id is not None):
+        if model_id is None:
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:

@@ -6,7 +6,7 @@ import math
 import typing
 from pathlib import Path
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -23,9 +23,9 @@ class MJCFExporter:
         Args:
             yaml_path: Path to canonical YAML specification
         """
-        if not (yaml_path is not None):
+        if yaml_path is None:
             raise ValueError("yaml_path must be provided")
-        if not (yaml_path is not None):
+        if yaml_path is None:
             raise ValueError("yaml_path must be provided")
         self.yaml_path = Path(yaml_path)
         with self.yaml_path.open() as f:
@@ -46,9 +46,7 @@ class MJCFExporter:
         Args:
             output_path: Path to output MJCF file
         """
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
-        if not (output_path is not None):
+        if output_path is None:
             raise ValueError("output_path must be provided")
         output = Path(output_path)
         mjcf_content = self._generate_mjcf()
@@ -67,7 +65,7 @@ class MJCFExporter:
         # Options
         lines.append(
             f'  <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}" '
-            'integrator="RK4"/>'
+            'integrator="RK4"/>'  # noqa: E501
         )
 
         # Visual
@@ -80,7 +78,7 @@ class MJCFExporter:
         lines.append("  <worldbody>")
         lines.append(
             '    <geom name="floor" type="plane" size="10 10 0.1" '
-            'rgba="0.8 0.8 0.8 1"/>'
+            'rgba="0.8 0.8 0.8 1"/>'  # noqa: E501
         )
 
         # Root body
@@ -88,7 +86,7 @@ class MJCFExporter:
         root_pos = root.get("position", [0.0, 0.0, 0.9])
         lines.append(
             f'    <body name="{root["name"]}" '
-            f'pos="{root_pos[0]} {root_pos[1]} {root_pos[2]}">'
+            f'pos="{root_pos[0]} {root_pos[1]} {root_pos[2]}">'  # noqa: E501
         )
         lines.extend(self._generate_body_geom(root))
         lines.extend(self._generate_segments_mjcf(root["name"]))
@@ -108,9 +106,7 @@ class MJCFExporter:
         Returns:
             List of MJCF lines
         """
-        if not (parent_name is not None):
-            raise ValueError("parent_name must be provided")
-        if not (parent_name is not None):
+        if parent_name is None:
             raise ValueError("parent_name must be provided")
         lines = []
         indent = "  " * (depth + 1)
@@ -144,7 +140,7 @@ class MJCFExporter:
             # Geometry
             lines.extend(
                 [indent + "  " + line for line in self._generate_body_geom(segment)]
-            )
+            )  # noqa: E501
 
             # Recursive children
             lines.extend(self._generate_segments_mjcf(seg_name, depth + 1))
@@ -162,9 +158,7 @@ class MJCFExporter:
         Returns:
             List of MJCF lines
         """
-        if not (body is not None):
-            raise ValueError("body must be provided")
-        if not (body is not None):
+        if body is None:
             raise ValueError("body must be provided")
         lines = []
         geom = body.get("geometry", {})

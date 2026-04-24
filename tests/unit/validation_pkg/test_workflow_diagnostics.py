@@ -11,8 +11,6 @@ from src.shared.python.validation_pkg.workflow_diagnostics import (
     WorkflowDiagnosticContext,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestWorkflowDiagnosticContextBasic:
     def test_construction(self, tmp_path: Path) -> None:

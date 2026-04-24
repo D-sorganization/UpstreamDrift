@@ -40,7 +40,7 @@ Integration Pattern (how shared tools are incorporated)
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -57,13 +57,12 @@ logger = get_logger(__name__)
 # ---------------------------------------------------------------------------
 
 _TOOLS_PENDULUM_AVAILABLE: bool | None = None
+# Resolve repo root: src/engines/physics_engines/pendulum/python/<this file>
+# seven levels up from this file reaches the repository root
+_THIS_FILE = Path(__file__).resolve()
+_REPO_ROOT = _THIS_FILE.parents[6]
 _TOOLS_PACKAGE_ROOT = (
-    Path(__file__).parent.parent.parent.parent.parent.parent.parent
-    / "vendor"
-    / "ud-tools"
-    / "src"
-    / "pendulum_simulator"
-    / "src"
+    _REPO_ROOT / "vendor" / "ud-tools" / "src" / "pendulum_simulator" / "src"
 )
 
 
@@ -150,6 +149,9 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         self._state: np.ndarray = np.zeros(4)  # [theta1, phi, dtheta1, dphi]
         self.time: float = 0.0
         self._tau: np.ndarray = np.zeros(2)  # [tau_shoulder, tau_wrist]
+        self._torque_profile: Callable[[float], Sequence[float] | np.ndarray] | None = (
+            None
+        )
 
         # Lazy initialisation — avoid PyQt6 import at load time
         self._dynamics: Any = None
@@ -218,22 +220,12 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         self._state = np.zeros(4)
         self.time = 0.0
         self._tau = np.zeros(2)
+        self._torque_profile = None
 
-    def step(
-        self,
-        dt: float | None = None,
-        torque_callback: Callable[[float], tuple[float, float]] | None = None,
-    ) -> None:
+    def step(self, dt: float | None = None) -> None:
         """Advance state by one RK4 step.
 
-        Args:
-            dt: Time step [s]. Defaults to 0.01.
-            torque_callback: Optional function ``τ(t) → (τ1, τ2)`` that
-                returns joint torques as a function of time.  When provided,
-                each RK4 stage samples torque at the correct Butcher-tableau
-                time point so time-varying swing controllers are integrated
-                accurately.  When ``None``, the stored ``self._tau`` array is
-                used (constant-torque assumption).
+        Precondition: engine must be initialised.
         """
         if not self._is_initialized:
             logger.warning("GolfSwingPendulumEngine: step called before init.")
@@ -243,51 +235,37 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
         from double_pendulum_golf.physics import equations_of_motion  # noqa: PLC0415
 
-        if torque_callback is not None:
-            # Time-varying torque: sample τ at each Butcher stage time
-            def _tau_at(t: float) -> tuple[float, float]:
-                return torque_callback(t)
+        def torque_func(t: float) -> tuple[float, float]:
+            if self._torque_profile is not None:
+                tau = self._torque_profile(t)
+                if len(tau) < 2:
+                    raise ValueError("torque profile must return at least two values")
+                return float(tau[0]), float(tau[1])
+            return float(self._tau[0]), float(self._tau[1])
 
-        else:
-            # Constant-torque: always return the stored array
-            tau0, tau1 = float(self._tau[0]), float(self._tau[1])
-
-            def _tau_at(t: float) -> tuple[float, float]:  # noqa: ARG001
-                return tau0, tau1
-
-        t0 = self.time
-        t_half = t0 + 0.5 * step_size
-        t_full = t0 + step_size
-
-        def _make_torque_func(t: float) -> Callable[[float], tuple[float, float]]:
-            tau_val = _tau_at(t)
-
-            def _f(_t: float) -> tuple[float, float]:  # noqa: ARG001
-                return tau_val
-
-            return _f
-
-        # RK4 integration — torque sampled at canonical Butcher-tableau times
-        k1 = equations_of_motion(
-            self._state, t0, self._pendulum_params, _make_torque_func(t0)
+        deriv = equations_of_motion(
+            self._state, self.time, self._pendulum_params, torque_func
         )
+
+        # RK4 integration
+        k1 = deriv
         k2 = equations_of_motion(
             self._state + 0.5 * step_size * k1,
-            t_half,
+            self.time + 0.5 * step_size,
             self._pendulum_params,
-            _make_torque_func(t_half),
+            torque_func,
         )
         k3 = equations_of_motion(
             self._state + 0.5 * step_size * k2,
-            t_half,
+            self.time + 0.5 * step_size,
             self._pendulum_params,
-            _make_torque_func(t_half),
+            torque_func,
         )
         k4 = equations_of_motion(
             self._state + step_size * k3,
-            t_full,
+            self.time + step_size,
             self._pendulum_params,
-            _make_torque_func(t_full),
+            torque_func,
         )
 
         self._state = self._state + (step_size / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
@@ -313,6 +291,14 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         """Set applied torques [tau_shoulder, tau_wrist] (N·m)."""
         if len(u) >= 2:
             self._tau = np.array([float(u[0]), float(u[1])])
+            self._torque_profile = None
+
+    def set_control_profile(
+        self,
+        torque_profile: Callable[[float], Sequence[float] | np.ndarray] | None,
+    ) -> None:
+        """Set a time-varying torque profile sampled by RK4 stage time."""
+        self._torque_profile = torque_profile
 
     def get_time(self) -> float:
         """Return current simulation time (s)."""
@@ -375,9 +361,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         qacc : np.ndarray, shape (2,)
             Desired angular accelerations [rad/s²].
         """
-        if not (qacc is not None):
-            raise ValueError("qacc must be provided")
-        if not (qacc is not None):
+        if qacc is None:
             raise ValueError("qacc must be provided")
         if not self._is_initialized or len(qacc) < 2:
             return np.zeros(2)
@@ -403,9 +387,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         tau : np.ndarray, shape (2,)
             Applied joint torques [N·m].
         """
-        if not (tau is not None):
-            raise ValueError("tau must be provided")
-        if not (tau is not None):
+        if tau is None:
             raise ValueError("tau must be provided")
         if not self._is_initialized or len(tau) < 2:
             return np.zeros(2)
@@ -420,9 +402,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         Cartesian velocities at the requested point.  Returns ``None`` for
         unknown body names.
         """
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if not self._is_initialized:
             return None
@@ -457,9 +437,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-Torque Counterfactual at a given state (q, v)."""
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if not self._is_initialized or len(q) < 2 or len(v) < 2:
             return np.zeros(2)
@@ -473,9 +451,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual at position q with current control."""
-        if not (q is not None):
-            raise ValueError("q must be provided")
-        if not (q is not None):
+        if q is None:
             raise ValueError("q must be provided")
         if not self._is_initialized or len(q) < 2:
             return np.zeros(2)
@@ -501,9 +477,7 @@ class GolfSwingPendulumEngine(BasePhysicsEngine):
         }
 
     def _restore_extra_checkpoint_state(self, checkpoint: StateCheckpoint) -> None:
-        if not (checkpoint is not None):
-            raise ValueError("checkpoint must be provided")
-        if not (checkpoint is not None):
+        if checkpoint is None:
             raise ValueError("checkpoint must be provided")
         self.time = checkpoint.timestamp
         es = checkpoint.engine_state

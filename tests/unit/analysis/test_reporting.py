@@ -15,8 +15,6 @@ from src.shared.python.analysis.reporting import ReportingMixin
 from src.shared.python.analysis.stability_metrics import StabilityMetricsMixin
 from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
 
-pytestmark = pytest.mark.unit
-
 
 class _Concrete(
     ReportingMixin,

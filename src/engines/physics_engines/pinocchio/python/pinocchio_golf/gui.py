@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 try:
-    import pinocchio as pin
+    import pinocchio as pin  # type: ignore[import-untyped]
 
     PINOCCHIO_AVAILABLE = True
 except ImportError:
@@ -68,9 +68,7 @@ logger = get_logger(__name__)
 
 
 # Constants
-DT_DEFAULT = (
-    0.01  # [s] Physics time step. 10ms is standard for real-time visualization.
-)
+DT_DEFAULT = 0.01  # [s] Physics time step. 10ms is standard for real-time visualization.  # noqa: E501
 SLIDER_RANGE_RAD = 10.0  # [rad] Range for joint sliders provided in UI
 SLIDER_SCALE = 100.0  # Scale factor for QSlider (int) -> rad (float)
 COM_SPHERE_RADIUS = 0.02  # [m] Radius for Center of Mass visualization spheres
@@ -130,7 +128,7 @@ class PinocchioGUI(
             except TypeError:
                 logger.warning(
                     "Meshcat Visualizer: server_args not supported. Using default."
-                )
+                )  # noqa: E501
                 self.viewer = viz.Visualizer()
 
             url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
@@ -158,12 +156,12 @@ class PinocchioGUI(
     def _load_default_model(self) -> None:
         default_urdf = (
             Path(__file__).parent / "../../models/generated/golfer.urdf"
-        ).resolve()
+        ).resolve()  # noqa: E501
 
         if default_urdf.exists():
             self.available_models.insert(
                 0, {"name": "Default: Golfer", "path": str(default_urdf)}
-            )
+            )  # noqa: E501
             self.load_urdf(str(default_urdf))
         else:
             self.available_models.insert(0, {"name": "Select Model...", "path": None})
@@ -206,15 +204,13 @@ class PinocchioGUI(
                     name = urdf_file.stem.replace("_", " ").title()
                     self.available_models.append(
                         {"name": f"URDF: {name}", "path": str(urdf_file)}
-                    )
+                    )  # noqa: E501
         except (RuntimeError, ValueError, OSError) as e:
             logger.error(f"Failed to scan URDF models: {e}")
 
     def log_write(self, text: str) -> None:
         """Append a message to the log panel and logger."""
-        if not (text is not None):
-            raise ValueError("text must be provided")
-        if not (text is not None):
+        if text is None:
             raise ValueError("text must be provided")
         self.log.append(text)
         logger.info(text)

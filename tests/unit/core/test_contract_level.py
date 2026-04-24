@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.core.contracts.level import (
     ContractLevel,
     contracts_enabled,
@@ -12,8 +10,6 @@ from src.shared.python.core.contracts.level import (
     get_contract_level,
     set_contract_level,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestContractLevelEnum:

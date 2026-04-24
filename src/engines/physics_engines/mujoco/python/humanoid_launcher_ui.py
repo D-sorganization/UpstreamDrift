@@ -159,7 +159,7 @@ class UISetupMixin:
 
         self.combo_control.setCurrentText(
             str(getattr(self.config, "control_mode", "pd"))
-        )
+        )  # noqa: E501
 
         settings_layout.addWidget(self.combo_control, 0, 1)
 
@@ -222,7 +222,7 @@ class UISetupMixin:
 
         btn_browse_save.clicked.connect(
             lambda: self.browse_file(self.txt_save_path, save=True)
-        )
+        )  # noqa: E501
 
         state_layout.addWidget(btn_browse_save, 1, 2)
 
@@ -317,9 +317,7 @@ class UISetupMixin:
 
     def enable_results(self, enabled: bool) -> None:
         """Enable or disable the result viewing buttons."""
-        if not (enabled is not None):
-            raise ValueError("enabled must be provided")
-        if not (enabled is not None):
+        if enabled is None:
             raise ValueError("enabled must be provided")
         from src.shared.python.engine_core.engine_availability import (
             MATPLOTLIB_AVAILABLE,
@@ -354,7 +352,7 @@ class UISetupMixin:
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
         self.slider_weight.valueChanged.connect(
             lambda v: self.lbl_weight_val.setText(f"{v}%")
-        )
+        )  # noqa: E501
         dim_layout.addWidget(self.slider_weight, 1, 1)
         dim_layout.addWidget(self.lbl_weight_val, 1, 2)
 
@@ -507,9 +505,7 @@ class UISetupMixin:
 
     def setup_log_area(self, parent_layout: QVBoxLayout) -> None:
         """Build the simulation log output area."""
-        if not (parent_layout is not None):
-            raise ValueError("parent_layout must be provided")
-        if not (parent_layout is not None):
+        if parent_layout is None:
             raise ValueError("parent_layout must be provided")
         log_group = QGroupBox("Simulation Log")
 

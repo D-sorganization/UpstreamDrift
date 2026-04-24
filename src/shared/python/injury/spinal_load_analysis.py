@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Spinal Load Analysis Module
 
@@ -24,7 +28,6 @@ References:
 - Lindsay et al. (2002) review of spine loading mechanisms
 """
 
-import logging
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -37,8 +40,9 @@ from src.shared.python.analysis.dataclasses import (
     MethodCitation,
 )
 from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.logging_pkg.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SpinalRiskLevel(Enum):
@@ -172,9 +176,7 @@ class SpinalLoadAnalyzer:
             trunk_length: Trunk length in m (optional, overrides height estimate)
             lumbar_segments: List of segment names to analyze (default: L3-L4 to L5-S1)
         """
-        if not (body_weight is not None):
-            raise ValueError("body_weight must be provided")
-        if not (body_weight is not None):
+        if body_weight is None:
             raise ValueError("body_weight must be provided")
         self.body_weight = body_weight
         self.body_weight_N = body_weight * GRAVITY_M_S2  # Convert to Newtons
@@ -216,9 +218,7 @@ class SpinalLoadAnalyzer:
         Returns:
             SpinalLoadResult containing all computed metrics and risk assessments
         """
-        if not (joint_angles is not None):
-            raise ValueError("joint_angles must be provided")
-        if not (joint_angles is not None):
+        if joint_angles is None:
             raise ValueError("joint_angles must be provided")
         result = SpinalLoadResult(time=time)
         n_frames = len(time)
@@ -280,9 +280,7 @@ class SpinalLoadAnalyzer:
         time: np.ndarray,
     ) -> SpinalSegment:
         """Compute forces on a single spinal segment."""
-        if not (segment_name is not None):
-            raise ValueError("segment_name must be provided")
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         segment = SpinalSegment(name=segment_name)
         n_frames = len(time)
@@ -366,9 +364,7 @@ class SpinalLoadAnalyzer:
         during the transition from backswing to downswing.
         """
         # Assuming angles are [roll, pitch, yaw] where yaw is rotation
-        if not (pelvis_angles is not None):
-            raise ValueError("pelvis_angles must be provided")
-        if not (pelvis_angles is not None):
+        if pelvis_angles is None:
             raise ValueError("pelvis_angles must be provided")
         pelvis_rotation = (
             pelvis_angles[:, 2] if pelvis_angles.ndim > 1 else pelvis_angles
@@ -418,9 +414,7 @@ class SpinalLoadAnalyzer:
         and rotation, which creates asymmetric loading on the spine. This
         is associated with increased injury risk in the modern golf swing.
         """
-        if not (lateral_bend is not None):
-            raise ValueError("lateral_bend must be provided")
-        if not (lateral_bend is not None):
+        if lateral_bend is None:
             raise ValueError("lateral_bend must be provided")
         lateral_deg = np.degrees(lateral_bend)
         rotation_deg = np.degrees(rotation)
@@ -450,9 +444,7 @@ class SpinalLoadAnalyzer:
 
     def _compute_peak_values(self, result: SpinalLoadResult) -> SpinalLoadResult:
         """Extract peak values normalized to body weight."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         max_compression = 0.0
         max_ap_shear = 0.0
@@ -481,9 +473,7 @@ class SpinalLoadAnalyzer:
     def _assess_risk(self, result: SpinalLoadResult) -> SpinalLoadResult:
         """Assess risk levels based on computed values."""
         # Compression risk
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         if result.peak_compression_bw >= self.COMPRESSION_HIGH:
             result.compression_risk = SpinalRiskLevel.CRITICAL
@@ -543,9 +533,7 @@ class SpinalLoadAnalyzer:
         self, result: SpinalLoadResult, time: np.ndarray
     ) -> SpinalLoadResult:
         """Compute cumulative load impulses for tracking over time."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         dt = np.mean(np.diff(time)) if len(time) > 1 else 0.001
 
@@ -591,9 +579,7 @@ class SpinalLoadAnalyzer:
         Returns:
             List of recommendation strings
         """
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         recommendations = []
 

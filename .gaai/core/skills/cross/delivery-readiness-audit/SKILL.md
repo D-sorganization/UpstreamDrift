@@ -61,7 +61,7 @@ Scan all backlog item `notes` fields for patterns indicating unresolved work:
 
 - "sera révisé", "à réviser", "sera revu"
 - "story à générer", "story E0x à générer", "à créer"
-- "TODO", "à remplacer", "à migrer"
+- "TRACKED_TASK", "à remplacer", "à migrer"
 - "will be revised", "to be created", "to migrate", "to replace", "needs update"
 - `DEC-` references followed by a pending action description
 

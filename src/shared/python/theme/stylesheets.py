@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Qt stylesheet generation for the fleet-wide theme system.
 
 This module generates complete QSS stylesheets for PyQt6 applications

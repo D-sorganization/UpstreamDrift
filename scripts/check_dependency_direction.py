@@ -37,6 +37,8 @@ def _is_exception_active(exc: dict, *, now: datetime) -> bool:
 
 def build_exception_index(config: dict) -> tuple[set[str], list[str]]:
     """Build active-exception index and list any expired/invalid exceptions."""
+    if not isinstance(config, dict):
+        raise TypeError("config must be a dict")
     active: set[str] = set()
     invalid: list[str] = []
     now = datetime.now(tz=timezone.utc)
@@ -89,6 +91,10 @@ def get_top_level_imports(filepath: Path) -> list[tuple[int, str]]:
 
 def check_rules(src_root: Path, rules_path: Path, verbose: bool = False) -> list[str]:
     """Check all rules and return list of violation messages."""
+    if not isinstance(src_root, Path):
+        raise TypeError("src_root must be a pathlib.Path")
+    if not isinstance(rules_path, Path):
+        raise TypeError("rules_path must be a pathlib.Path")
     project_root = src_root.parent
     config = load_rules(project_root, rules_path)
     active_exceptions, invalid_exceptions = build_exception_index(config)

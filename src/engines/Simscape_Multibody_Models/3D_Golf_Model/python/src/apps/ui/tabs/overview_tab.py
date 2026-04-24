@@ -29,7 +29,7 @@ class OverviewTab(QtWidgets.QWidget):
         if header is not None:
             header.setSectionResizeMode(
                 0, QtWidgets.QHeaderView.ResizeMode.ResizeToContents
-            )
+            )  # noqa: E501
             header.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table_metadata)
 

@@ -9,13 +9,11 @@ from src.shared.python.upstream_drift_tools.process_calculators.multi_param_anal
     run_multi_parameter_analysis,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class _StubEngine:
     """Simple engine: output = p1 + p2."""
 
-    def calculate(self, **params) -> dict:
+    def calculate(self, **params):
         return {
             "output": params.get("p1", 0.0) + params.get("p2", 0.0),
         }

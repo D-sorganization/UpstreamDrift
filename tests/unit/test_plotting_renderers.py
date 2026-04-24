@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.plotting.core import GolfSwingPlotter
 from src.shared.python.plotting.renderers.club import ClubRenderer
@@ -18,21 +17,19 @@ from src.shared.python.plotting.renderers.stability import StabilityRenderer
 from src.shared.python.plotting.renderers.vectors import VectorOverlayRenderer
 from src.shared.python.plotting.transforms import DataManager
 
-pytestmark = pytest.mark.unit
-
 
 class _MockRecorder:
     """Minimal recorder mock satisfying RecorderInterface."""
 
     engine = None
 
-    def get_time_series(self, field_name) -> tuple[np.ndarray, np.ndarray]:
+    def get_time_series(self, field_name):
         return np.linspace(0, 1, 10), np.zeros((10, 3))
 
-    def get_induced_acceleration_series(self, source) -> tuple[np.ndarray, np.ndarray]:
+    def get_induced_acceleration_series(self, source):
         return np.linspace(0, 1, 10), np.zeros((10, 3))
 
-    def set_analysis_config(self, config) -> None:
+    def set_analysis_config(self, config):
         pass
 
 

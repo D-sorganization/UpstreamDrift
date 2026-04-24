@@ -1,20 +1,21 @@
 """Tests for golf_launcher.py."""
 
 import contextlib  # noqa: E402
-from collections.abc import Generator  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
-
-pytestmark = pytest.mark.integration
 from PyQt6.QtWidgets import QMessageBox  # noqa: E402
 
-from src.launchers.golf_launcher import GolfLauncher, main  # noqa: E402
+from src.launchers.golf_launcher import (  # noqa: E402
+    GolfLauncher,
+    ProcessCleanupWorker,  # noqa: E402
+    main,
+)
 from src.launchers.ui_components import StartupResults  # noqa: E402
 
 
 @pytest.fixture
-def startup_results() -> StartupResults:
+def startup_results():
     results = StartupResults()
     results.startup_time_ms = 100
     results.docker_available = True
@@ -24,7 +25,7 @@ def startup_results() -> StartupResults:
 
 
 @contextlib.contextmanager
-def patch_launcher_ui() -> Generator[None, None, None]:
+def patch_launcher_ui():
     with (
         patch("src.launchers.golf_launcher.DockerCheckThread"),
         patch("src.launchers.golf_launcher.QTimer"),
@@ -32,7 +33,7 @@ def patch_launcher_ui() -> Generator[None, None, None]:
         yield
 
 
-def test_init_without_results(qapp) -> None:
+def test_init_without_results(qapp):
     with (
         patch_launcher_ui(),
         patch("src.launchers.golf_launcher._lazy_load_model_registry") as mock_reg,
@@ -47,7 +48,7 @@ def test_init_without_results(qapp) -> None:
         mock_eng.assert_called_once()
 
 
-def test_init_with_results(qapp, startup_results) -> None:
+def test_init_with_results(qapp, startup_results):
     with patch_launcher_ui():
         launcher = GolfLauncher(startup_results)
         assert launcher._startup_time_ms == 100
@@ -56,14 +57,29 @@ def test_init_with_results(qapp, startup_results) -> None:
         assert launcher.engine_manager == startup_results.engine_manager
 
 
-def test_load_window_icon(qapp) -> None:
+def test_load_window_icon(qapp):
     with patch_launcher_ui():
         # Do not mock QIcon. Just instantiate and test it doesn't crash.
         launcher = GolfLauncher()
         assert launcher.windowIcon() is not None
 
 
-def test_init_registry_exception(qapp) -> None:
+def test_process_cleanup_worker_emits_finished_keys():
+    done_proc = MagicMock()
+    done_proc.poll.return_value = 0
+    running_proc = MagicMock()
+    running_proc.poll.return_value = None
+    lock = MagicMock()
+
+    worker = ProcessCleanupWorker({"done": done_proc, "running": running_proc}, lock)
+    worker.signals.finished = MagicMock()
+
+    worker.run()
+
+    worker.signals.finished.emit.assert_called_once_with(["done"])
+
+
+def test_init_registry_exception(qapp):
     with patch(
         "src.launchers.golf_launcher._lazy_load_model_registry",
         side_effect=ImportError("test"),
@@ -72,7 +88,7 @@ def test_init_registry_exception(qapp) -> None:
         assert launcher.registry is None
 
 
-def test_init_engine_manager_exception(qapp) -> None:
+def test_init_engine_manager_exception(qapp):
     with patch(
         "src.launchers.golf_launcher._lazy_load_engine_manager",
         side_effect=RuntimeError("test"),
@@ -81,7 +97,7 @@ def test_init_engine_manager_exception(qapp) -> None:
         assert launcher.engine_manager is None
 
 
-def test_build_available_models(qapp, startup_results) -> None:
+def test_build_available_models(qapp, startup_results):
     model1 = MagicMock(id="m1", type="sim")
     model2 = MagicMock(id="m2", type="utility")
     startup_results.registry.get_all_models.return_value = [model1, model2]
@@ -91,7 +107,7 @@ def test_build_available_models(qapp, startup_results) -> None:
     assert "m2" in launcher.special_app_lookup
 
 
-def test_get_model(qapp) -> None:
+def test_get_model(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.available_models["m1"] = "Model1"
@@ -105,7 +121,7 @@ def test_get_model(qapp) -> None:
         assert launcher._get_model("mx") is None
 
 
-def test_layout_management(qapp) -> None:
+def test_layout_management(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.layout_manager = MagicMock()
@@ -131,7 +147,7 @@ def test_layout_management(qapp) -> None:
         launcher.layout_manager.update_search_filter.assert_called_with("test")
 
 
-def test_launch_model_direct(qapp) -> None:
+def test_launch_model_direct(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.select_model = MagicMock()
@@ -141,7 +157,7 @@ def test_launch_model_direct(qapp) -> None:
         launcher.launch_simulation.assert_called_once()
 
 
-def test_center_window(qapp) -> None:
+def test_center_window(qapp):
     from PyQt6.QtCore import QPoint
 
     with patch_launcher_ui():
@@ -157,7 +173,7 @@ def test_center_window(qapp) -> None:
         launcher.move.assert_called_once()
 
 
-def test_load_layout_empty(qapp) -> None:
+def test_load_layout_empty(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.layout_manager = MagicMock()
@@ -167,7 +183,7 @@ def test_load_layout_empty(qapp) -> None:
         launcher._rebuild_grid.assert_called_once()
 
 
-def test_load_layout_with_data(qapp) -> None:
+def test_load_layout_with_data(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.layout_manager = MagicMock()
@@ -192,7 +208,7 @@ def test_load_layout_with_data(qapp) -> None:
         launcher.select_model.assert_called_with("m1")
 
 
-def test_select_model(qapp) -> None:
+def test_select_model(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         card_m1 = MagicMock()
@@ -215,7 +231,7 @@ def test_select_model(qapp) -> None:
         launcher.context_help.update_context.assert_called_with("m1")
 
 
-def test_update_launch_button(qapp) -> None:
+def test_update_launch_button(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
 
@@ -244,7 +260,7 @@ def test_update_launch_button(qapp) -> None:
 
 
 @patch("src.launchers.golf_launcher._lazy_load_engine_manager")
-def test_get_engine_type(mock_lazy_em, qapp) -> None:
+def test_get_engine_type(mock_lazy_em, qapp):
     with patch_launcher_ui():
         EngineType = MagicMock()
         EngineType.MUJOCO = "mujoco_enum"
@@ -265,7 +281,7 @@ def test_get_engine_type(mock_lazy_em, qapp) -> None:
         assert launcher._get_engine_type("unknown") == "mujoco_enum"
 
 
-def test_docker_status(qapp) -> None:
+def test_docker_status(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.update_launch_button = MagicMock()
@@ -277,7 +293,7 @@ def test_docker_status(qapp) -> None:
         assert launcher.lbl_status.text() == "Docker Not Found"
 
 
-def test_check_docker(qapp) -> None:
+def test_check_docker(qapp):
     # patch_launcher_ui already mocks DockerCheckThread, so we don't need a separate patch block.
     # However we can just grab it off the launcher to assert on it.
     with patch_launcher_ui():
@@ -292,7 +308,7 @@ def test_check_docker(qapp) -> None:
         launcher.docker_checker.wait.assert_called()
 
 
-def test_menu_toggles(qapp) -> None:
+def test_menu_toggles(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         launcher.toggle_layout_mode = MagicMock()
@@ -308,10 +324,9 @@ def test_menu_toggles(qapp) -> None:
         launcher.context_help.hide.assert_called_once()
 
 
-def test_cleanup_processes(qapp) -> None:
+def test_cleanup_processes(qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
-
         proc1 = MagicMock()
         proc1.poll.return_value = 0  # Finished
         proc2 = MagicMock()
@@ -328,9 +343,23 @@ def test_cleanup_processes(qapp) -> None:
         assert launcher.lbl_status.text() == "Ready"
 
 
+def test_on_cleanup_finished_updates_running_processes(qapp):
+    with patch_launcher_ui():
+        launcher = GolfLauncher()
+        launcher.running_processes = {
+            "p1": MagicMock(),
+            "p2": MagicMock(),
+        }
+
+        launcher._on_cleanup_finished(["p1"])
+
+        assert "p1" not in launcher.running_processes
+        assert "p2" in launcher.running_processes
+
+
 @patch("src.launchers.golf_launcher.QMessageBox.question")
 @patch("src.launchers.golf_launcher.kill_process_tree")
-def test_close_event(mock_kill, mock_question, qapp) -> None:
+def test_close_event(mock_kill, mock_question, qapp):
     with patch_launcher_ui():
         launcher = GolfLauncher()
         # Disconnect cleanups to prevent PyQt crashes with mocks
@@ -367,7 +396,7 @@ def test_close_event(mock_kill, mock_question, qapp) -> None:
 @patch("src.launchers.golf_launcher.QApplication")
 @patch("src.launchers.golf_launcher.AsyncStartupWorker")
 @patch("src.launchers.golf_launcher.sys.exit")
-def test_main(mock_exit, mock_worker, mock_app) -> None:
+def test_main(mock_exit, mock_worker, mock_app):
     with patch("src.launchers.golf_launcher.GolfSplashScreen"):
         main()
         mock_app.assert_called()

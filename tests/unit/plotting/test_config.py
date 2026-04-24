@@ -13,8 +13,6 @@ from src.shared.python.plotting.config import (
     resolve_figure,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestColors:
     def test_primary_key_present(self) -> None:

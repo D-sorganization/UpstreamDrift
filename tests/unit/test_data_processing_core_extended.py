@@ -15,15 +15,7 @@ All tests are headless-safe with no heavy dependencies beyond pandas/numpy.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-import pandas as pd
 import pytest
-
-if TYPE_CHECKING:
-    from src.shared.python.upstream_drift_tools.data_processing.core import (
-        DataProcessorEngine,
-    )
 
 pytestmark = pytest.mark.unit
 
@@ -33,8 +25,10 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 
 
-def _make_df(n: int = 5) -> pd.DataFrame:
+def _make_df(n: int = 5):
     """Return a simple numeric DataFrame with columns a, b."""
+    import pandas as pd
+
     return pd.DataFrame(
         {
             "a": [float(i) for i in range(1, n + 1)],
@@ -43,8 +37,10 @@ def _make_df(n: int = 5) -> pd.DataFrame:
     )
 
 
-def _make_df_with_group(n: int = 4) -> pd.DataFrame:
+def _make_df_with_group(n: int = 4):
     """Return a DataFrame with numeric columns and a group column."""
+    import pandas as pd
+
     return pd.DataFrame(
         {
             "a": [1.0, 2.0, 3.0, 4.0],
@@ -277,7 +273,7 @@ class TestFitResult:
 
 
 @pytest.fixture
-def engine() -> DataProcessorEngine:
+def engine():
     """Fresh DataProcessorEngine for each test."""
     from src.shared.python.upstream_drift_tools.data_processing.core import (
         DataProcessorEngine,
@@ -287,7 +283,7 @@ def engine() -> DataProcessorEngine:
 
 
 @pytest.fixture
-def loaded_engine() -> DataProcessorEngine:
+def loaded_engine():
     """DataProcessorEngine with a 5-row DataFrame already loaded."""
     from src.shared.python.upstream_drift_tools.data_processing.core import (
         DataProcessorEngine,
@@ -601,8 +597,10 @@ class TestFitCurve:
 class TestSmoothColumn:
     """Tests for DataProcessorEngine.smooth_column."""
 
-    def _long_engine(self) -> DataProcessorEngine:
+    def _long_engine(self):
         """Engine with 20-row data for smoothing."""
+        import pandas as pd
+
         from src.shared.python.upstream_drift_tools.data_processing.core import (
             DataProcessorEngine,
         )

@@ -67,9 +67,7 @@ class TelemetryRecorder:
 
     def __init__(self, model: mujoco.MjModel) -> None:
         """Initialize the telemetry recorder."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.samples: list[SimulationSample] = []
@@ -83,20 +81,18 @@ class TelemetryRecorder:
     @staticmethod
     def _build_body_name_map(model: mujoco.MjModel) -> list[str]:
         """Build a list of body names from the model."""
-        body_names: list[str] = []
-        for idx in range(model.nbody):
-            name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, idx)
-            body_names.append(name or f"body_{idx}")
-        return body_names
+        return [
+            mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, idx) or f"body_{idx}"
+            for idx in range(model.nbody)
+        ]
 
     @staticmethod
     def _build_joint_name_map(model: mujoco.MjModel) -> list[str]:
         """Build a list of joint names from the model."""
-        joint_names: list[str] = []
-        for idx in range(model.njnt):
-            name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, idx)
-            joint_names.append(name or f"joint_{idx}")
-        return joint_names
+        return [
+            mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, idx) or f"joint_{idx}"
+            for idx in range(model.njnt)
+        ]
 
     @staticmethod
     def _build_actuator_dof_map(model: mujoco.MjModel) -> dict[int, int]:
@@ -129,9 +125,7 @@ class TelemetryRecorder:
         joint_transmission_types: set[int],
     ) -> bool:
         """Check if actuator targets a joint."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         transmission_type = model.actuator_trntype[actuator_id]
         if transmission_type not in joint_transmission_types:
@@ -165,9 +159,7 @@ class TelemetryRecorder:
     def record_step(self, data: mujoco.MjData) -> None:
         """Capture telemetry for the current simulation state."""
 
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         actuator_torques = self._extract_actuator_torques(data)
         constraint_torques = self._extract_constraint_torques(data)
@@ -210,9 +202,7 @@ class TelemetryRecorder:
 
     def _extract_actuator_torques(self, data: mujoco.MjData) -> dict[str, float]:
         """Docstring for _extract_actuator_torques."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         actuator_torques: dict[str, float] = {}
         for actuator_id, dof_index in self._actuator_dof_map.items():
@@ -229,9 +219,7 @@ class TelemetryRecorder:
 
     def _extract_constraint_torques(self, data: mujoco.MjData) -> dict[str, float]:
         """Docstring for _extract_constraint_torques."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         constraint_torques: dict[str, float] = {}
         for joint_id, joint_name in enumerate(self._joint_names):
@@ -241,9 +229,7 @@ class TelemetryRecorder:
 
     def _extract_body_forces(self, data: mujoco.MjData) -> dict[str, np.ndarray]:
         """Docstring for _extract_body_forces."""
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         forces: dict[str, np.ndarray] = {}
         reshaped = data.cfrc_ext.reshape(-1, 6)

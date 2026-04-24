@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import pytest
 
+from src.shared.python.upstream_drift_tools.process_calculators.analysis_utils import (
+    evaluate_compression_result,
+)
 from src.shared.python.upstream_drift_tools.process_calculators.syngas_compression_calculator import (
     CompressionStage,
     SyngasCompressionEngine,
 )
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # SyngasCompressionEngine.calculate_water_dropout
@@ -111,3 +112,25 @@ class TestCalculateCompressionWork:
         )
         with pytest.raises(ValueError):
             self._ENGINE.calculate_compression_work(stage, 1000.0, _MIX_PROPS)
+
+
+class TestAnalyzeProcessConditions:
+    _ENGINE = SyngasCompressionEngine()
+
+    def test_delegates_to_shared_analysis_helper(self) -> None:
+        compression_result = {
+            "final_temperature": 530.0,
+            "final_pressure": 120.0,
+            "total_power_hp": 1200.0,
+            "stages": [
+                {
+                    "work_isentropic": 100.0,
+                    "work_actual": 60.0,
+                    "water_dropout": {"water_dropout": 0.2},
+                }
+            ],
+        }
+
+        assert self._ENGINE.analyze_process_conditions(compression_result) == (
+            evaluate_compression_result(compression_result)
+        )

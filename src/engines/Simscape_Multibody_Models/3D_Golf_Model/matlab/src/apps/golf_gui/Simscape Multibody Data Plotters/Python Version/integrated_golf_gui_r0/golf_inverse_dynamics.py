@@ -5,13 +5,9 @@ from scipy import signal
 from scipy.interpolate import UnivariateSpline
 
 
-def butter_lowpass_filter(
-    data: np.ndarray, cutoff: float, fs: float, order: int = 4
-) -> np.ndarray:
+def butter_lowpass_filter(data, cutoff, fs, order=4) -> np.ndarray:
     """Apply a Butterworth low-pass filter."""
-    if not (data is not None):
-        raise ValueError("data must be provided")
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
@@ -20,29 +16,23 @@ def butter_lowpass_filter(
     return y
 
 
-def savitzky_golay_filter(
-    data: np.ndarray, window_length: int = 9, polyorder: int = 3
-) -> np.ndarray:
+def savitzky_golay_filter(data, window_length=9, polyorder=3) -> np.ndarray:
     """Apply a Savitzky-Golay filter."""
-    if not (data is not None):
-        raise ValueError("data must be provided")
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     if window_length % 2 == 0:
         window_length += 1  # Must be odd
     return signal.savgol_filter(data, window_length, polyorder)
 
 
-def moving_average_filter(data: np.ndarray, window_size: int = 5) -> np.ndarray:
+def moving_average_filter(data, window_size=5) -> np.ndarray:
     """Apply a moving average filter."""
     return np.convolve(data, np.ones(window_size) / window_size, mode="valid")
 
 
-def calculate_derivatives(data: np.ndarray, time: np.ndarray) -> tuple:
+def calculate_derivatives(data, time) -> tuple:
     """Calculate velocity and acceleration using splines for accuracy."""
-    if not (data is not None):
-        raise ValueError("data must be provided")
-    if not (data is not None):
+    if data is None:
         raise ValueError("data must be provided")
     spline = UnivariateSpline(time, data, s=0)
     velocity = spline.derivative(n=1)(time)
@@ -51,11 +41,7 @@ def calculate_derivatives(data: np.ndarray, time: np.ndarray) -> tuple:
 
 
 def calculate_inverse_dynamics(
-    position_data: np.ndarray,
-    orientation_data: np.ndarray,
-    time_vector: np.ndarray,
-    club_mass: float = 0.2,
-    eval_offset: float = 0.0,
+    position_data, orientation_data, time_vector, club_mass=0.2, eval_offset=0.0
 ) -> dict:
     """
     Calculate inverse dynamics (forces and torques).
@@ -70,9 +56,7 @@ def calculate_inverse_dynamics(
     Returns:
         dict: A dictionary containing forces and torques.
     """
-    if not (position_data is not None):
-        raise ValueError("position_data must be provided")
-    if not (position_data is not None):
+    if position_data is None:
         raise ValueError("position_data must be provided")
     num_frames = position_data.shape[0]
 

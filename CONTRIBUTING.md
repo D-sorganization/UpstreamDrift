@@ -1,6 +1,9 @@
-# Contributing to Golf Modeling Suite
+# Contributing to UpstreamDrift
 
-Thank you for your interest in contributing! This document provides guidelines for contributing to the Golf Modeling Suite.
+Thank you for your interest in contributing to UpstreamDrift.
+
+`CLAUDE.md` is the authoritative source for repository rules and quality gates.
+This guide focuses on contribution flow and the minimum local steps to prepare a PR.
 
 ## 🚀 Quick Start
 
@@ -33,12 +36,33 @@ pip install -e ".[dev,all-engines]"
 See `docs/engines/support_tiers.md` before enabling heavier or experimental
 engine combinations.
 
+### Rust kernel development
+
+The Rust workspace no longer requires a sibling `../Tools` checkout just to
+build `upstream-physics`. `tools-core` is fetched automatically from a pinned
+git revision of `D-sorganization/Tools`, so the clean-clone workflow is:
+
+```bash
+cargo build
+
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip maturin
+
+cd rust_core/upstream-physics
+python -m maturin develop --features python
+```
+
+If you need editable cross-repository Python integration code from
+`D-sorganization/Tools`, run `scripts/setup_tools_workspace.sh` to attach the
+optional sibling workspace and helper `PYTHONPATH` entries.
+
 ## ✅ Code Standards
 
 ### Python
 
-- **Formatter**: Black (default settings)
-- **Linter**: Ruff
+- **Formatter**: Ruff format
+- **Linter**: Ruff check
 - **Type Checker**: MyPy (see note below)
 - Use type hints for all new functions
 - Use `logging` instead of `print()`
@@ -52,7 +76,7 @@ engine combinations.
 Use the Makefile for convenience:
 
 ```bash
-make format   # Format with black and ruff
+make format   # Format with Ruff
 make lint     # Run ruff and mypy
 make test     # Run pytest
 make check    # Run all checks
@@ -61,13 +85,15 @@ make check    # Run all checks
 Or run commands directly:
 
 ```bash
-python3 -m black .
-python3 -m ruff check . --fix
+python3 -m ruff format .
+python3 -m ruff check .
 python3 -m mypy .
 python3 -m pytest
 ```
 
-> **Note on Tests**: Because our CI pipeline strictly checks test files, please run `ruff check tests/ --fix` and `black tests/` before submitting to prevent failures on test suites.
+> **Note on CI parity**: `CLAUDE.md` is authoritative for required commands, and
+> `.github/workflows/ci-standard.yml` is the canonical enforcement surface.
+> Today that means Ruff formatting plus a 30% coverage floor in CI.
 
 ## 🎯 Physics Engine Guidelines
 
@@ -112,6 +138,6 @@ Example: `feat(mujoco): Add contact force visualization`
 
 ## 🤝 Pull Request Process
 
-1. Ensure CI passes (ruff, black, mypy, pytest)
+1. Ensure CI passes (ruff check, ruff format, mypy, pytest)
 2. Update documentation
 3. Request review from maintainers

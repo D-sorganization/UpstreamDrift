@@ -1,43 +1,54 @@
+# ARCHITECTURE_DEBT — tracked as GitHub issue #1937
+# This file is 1,163 lines of pure calculation functions plus the engine class.
+# Recommended split:
+#   friction_factors.py           — friction_factor_* functions
+#   flow_properties.py            — calculate_flow_properties, classify_flow_regime
+#   fittings.py                   — calculate_fitting_pressure_drop
+#   compressible_flow.py          — compressible correction + expansion factor
+#   pressure_drop_calculation_engine.py — PressureDropCalculationEngine (thin facade)
+# Risk: medium — many internal cross-calls; extract incrementally with contract tests.
+
+#!/usr/bin/env python3
 """Advanced pressure drop calculation engine for combustion and gasification gases.
 
 This module implements comprehensive pressure drop calculations using industry-standard
 correlations with support for compressible flow corrections.
 
-Friction factor correlations are in _friction_factors.py.
-Flow property and pressure drop functions are in _flow_calculations.py.
-
 References:
     - Darcy-Weisbach equation for pipe friction
     - Colebrook-White equation for friction factor
-    - Crane TP-410 for fitting losses
+    - Moody diagram relationships
+    - Panhandle A and B equations for compressible flow
+    - Weymouth equation
     - API RP 14E for erosional velocity
+    - Crane TP-410 for fitting losses
+    - Perry's Chemical Engineers' Handbook, 9th Edition
 """
-
-from __future__ import annotations
 
 import logging
 
-from ...constants import HUNDRED_FEET_IN_METERS, METERS_TO_INCHES
+from ...constants import (
+    HUNDRED_FEET_IN_METERS,
+    METERS_TO_INCHES,
+)
 from ..models.pressure_drop_data_models import (
     FlowProperties,
-    GasComposition,
-    PipeFitting,
     PressureDropInputs,
     PressureDropResults,
 )
-
-# Re-export public API for backward compatibility
-from ._flow_calculations import (
+from .compressible_flow import (
     calculate_compressible_flow_correction,
+    calculate_expansion_factor,
+)
+from .fittings import calculate_fitting_pressure_drop
+from .flow_properties import (
     calculate_elevation_pressure_drop,
     calculate_erosional_velocity,
-    calculate_expansion_factor,
-    calculate_fitting_pressure_drop,
     calculate_flow_properties,
     calculate_frictional_pressure_drop,
     classify_flow_regime,
 )
-from ._friction_factors import (
+from .friction_factors import (
     friction_factor_churchill,
     friction_factor_colebrook,
     friction_factor_haaland,
@@ -47,6 +58,24 @@ from ._friction_factors import (
 )
 
 logger = logging.getLogger(__name__)
+
+__all__ = [
+    "PressureDropCalculationEngine",
+    "calculate_compressible_flow_correction",
+    "calculate_elevation_pressure_drop",
+    "calculate_erosional_velocity",
+    "calculate_expansion_factor",
+    "calculate_fitting_pressure_drop",
+    "calculate_flow_properties",
+    "calculate_frictional_pressure_drop",
+    "classify_flow_regime",
+    "friction_factor_churchill",
+    "friction_factor_colebrook",
+    "friction_factor_haaland",
+    "friction_factor_laminar",
+    "friction_factor_swamee_jain",
+    "select_friction_factor_method",
+]
 
 
 class PressureDropCalculationEngine:
@@ -71,9 +100,7 @@ class PressureDropCalculationEngine:
         Returns:
             (dp_friction, dp_fittings, dp_elevation, total_k_factor)
         """
-        if not (inputs is not None):
-            raise ValueError("inputs must be provided")
-        if not (inputs is not None):
+        if inputs is None:
             raise ValueError("inputs must be provided")
         dp_friction = calculate_frictional_pressure_drop(
             friction_factor,
@@ -115,9 +142,7 @@ class PressureDropCalculationEngine:
         Returns:
             (total_dp, outlet_pressure, dp_acceleration, warnings)
         """
-        if not (inputs is not None):
-            raise ValueError("inputs must be provided")
-        if not (inputs is not None):
+        if inputs is None:
             raise ValueError("inputs must be provided")
         warnings_list: list[str] = []
         pressure_ratio_initial = dp_incompressible / inputs.inlet_pressure
@@ -379,22 +404,3 @@ if __name__ == "__main__":
         logger.warning("WARNINGS:")
         for warning in results.warnings:
             logger.warning(f"  {warning}")
-
-
-__all__ = [
-    "PressureDropCalculationEngine",
-    "calculate_compressible_flow_correction",
-    "calculate_elevation_pressure_drop",
-    "calculate_erosional_velocity",
-    "calculate_expansion_factor",
-    "calculate_fitting_pressure_drop",
-    "calculate_frictional_pressure_drop",
-    "calculate_flow_properties",
-    "classify_flow_regime",
-    "friction_factor_colebrook",
-    "friction_factor_churchill",
-    "friction_factor_haaland",
-    "friction_factor_laminar",
-    "friction_factor_swamee_jain",
-    "select_friction_factor_method",
-]

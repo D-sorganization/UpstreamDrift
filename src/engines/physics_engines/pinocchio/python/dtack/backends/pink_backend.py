@@ -101,7 +101,7 @@ class PINKBackend:
             # Integrate to get new q
             q_next: npt.NDArray[np.float64] = pin.integrate(
                 self.robot.model, q_init, velocity * dt
-            )
+            )  # noqa: E501
 
             # Update internal configuration for next step consistency
             # if this object persists state?

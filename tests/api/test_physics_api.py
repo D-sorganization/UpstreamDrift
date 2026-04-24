@@ -428,6 +428,25 @@ class TestEngineCapabilitiesAPI:
                 assert "supported" in cap
                 assert cap["level"] in ("full", "partial", "none")
 
+    def test_capabilities_exclude_non_level_metadata(self, client) -> None:
+        """Metadata keys like ``spatial_jacobian_order`` must not appear as
+        capability-level entries.
+
+        Regression test for issue #2743 / #2797: ``EngineCapabilities.to_dict``
+        emits a ``spatial_jacobian_order`` key whose value (e.g.
+        ``"angular_linear"``) does not match the capability-level schema. It
+        must be filtered out before being surfaced via the capabilities API.
+        """
+        resp = client.get("/engines/pendulum/capabilities")
+        if resp.status_code != 200:
+            pytest.skip("capabilities endpoint unavailable in this environment")
+        data = resp.json()
+        names = {cap["name"] for cap in data["capabilities"]}
+        assert "spatial_jacobian_order" not in names
+        assert "engine_name" not in names
+        for cap in data["capabilities"]:
+            assert cap["level"] in ("full", "partial", "none")
+
 
 class TestActuatorEndpoints:
     """Test actuator control endpoints (require loaded engine)."""

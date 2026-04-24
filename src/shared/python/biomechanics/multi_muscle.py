@@ -40,15 +40,13 @@ class MuscleAttachment:
 class MuscleGroup:
     """A group of muscles acting on a single joint."""
 
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str):
         """Initialize muscle group.
 
         Args:
             name: Group name (e.g., "Elbow Flexors")
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         self.name = name
         self.muscles: dict[str, HillMuscleModel] = {}
@@ -67,9 +65,7 @@ class MuscleGroup:
             muscle: HillMuscleModel instance
             moment_arm: Moment arm [m] (+ for flexion, - for extension)
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         require(bool(name), "muscle name must be non-empty", name)
         require(moment_arm != 0.0, "moment_arm must be non-zero", moment_arm)
@@ -96,9 +92,7 @@ class MuscleGroup:
         Returns:
             Net joint torque [N·m]
         """
-        if not (activations is not None):
-            raise ValueError("activations must be provided")
-        if not (activations is not None):
+        if activations is None:
             raise ValueError("activations must be provided")
         for mname, act_val in activations.items():
             require(
@@ -142,16 +136,14 @@ class MuscleGroup:
 class AntagonistPair:
     """A pair of agonist/antagonist muscle groups (e.g., Biceps/Triceps)."""
 
-    def __init__(self, agonist: MuscleGroup, antagonist: MuscleGroup) -> None:
+    def __init__(self, agonist: MuscleGroup, antagonist: MuscleGroup):
         """Initialize antagonist pair.
 
         Args:
             agonist: MuscleGroup for positive torque (Flexors)
             antagonist: MuscleGroup for negative torque (Extensors)
         """
-        if not (agonist is not None):
-            raise ValueError("agonist must be provided")
-        if not (agonist is not None):
+        if agonist is None:
             raise ValueError("agonist must be provided")
         self.agonist = agonist
         self.antagonist = antagonist
@@ -175,9 +167,7 @@ class AntagonistPair:
         Returns:
             Net torque [N·m]
         """
-        if not (agonist_activations is not None):
-            raise ValueError("agonist_activations must be provided")
-        if not (agonist_activations is not None):
+        if agonist_activations is None:
             raise ValueError("agonist_activations must be provided")
         tau_agonist = self.agonist.compute_net_torque(
             agonist_activations, muscle_states
@@ -192,11 +182,6 @@ class AntagonistPair:
         result = tau_agonist + tau_antagonist
         ensure(np.isfinite(result), "antagonist pair net torque must be finite", result)
         return result
-
-    @property
-    def muscle_names(self) -> list[str]:
-        """Return all muscle names (agonist + antagonist) without chain traversal."""
-        return list(self.agonist.muscles.keys()) + list(self.antagonist.muscles.keys())
 
 
 def create_elbow_muscle_system() -> AntagonistPair:

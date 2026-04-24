@@ -16,13 +16,12 @@ from src.api.auth.models import (
     APIKeyResponse,
     LoginRequest,
     LoginResponse,
-    RefreshTokenRequest,
     User,
     UserCreate,
     UserResponse,
     UserRole,
 )
-from src.api.auth.security import security_manager, usage_tracker
+from src.api.auth.security import compute_prefix_hash, security_manager, usage_tracker
 from src.api.database import get_db
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
@@ -131,26 +130,16 @@ async def login(
 
 @router.post("/refresh", response_model=dict)
 @precondition(
-    lambda body, db=None: (
-        body is not None
-        and body.refresh_token is not None
-        and len(body.refresh_token.strip()) > 0
+    lambda refresh_token, db=None: (
+        refresh_token is not None and len(refresh_token.strip()) > 0
     ),
     "Refresh token must be a non-empty string",
 )
 async def refresh_token(
-    body: RefreshTokenRequest, db: Session = Depends(get_db)
+    refresh_token: str, db: Session = Depends(get_db)
 ) -> dict[str, Any]:
-    """Refresh access token using refresh token.
+    """Refresh access token using refresh token."""
 
-    Args:
-        body: Request body containing the refresh token.
-        db: Database session.
-
-    Returns:
-        New access token and metadata.
-    """
-    refresh_token = body.refresh_token
     # Verify refresh token
     payload = security_manager.verify_token(refresh_token, "refresh")
     user_id = payload.get("sub")
@@ -203,7 +192,7 @@ async def create_api_key(
     """Create a new API key for the current user."""
 
     # Generate API key
-    if not (api_key_data is not None):
+    if api_key_data is None:
         raise ValueError("api_key_data must be provided")
     api_key = security_manager.generate_api_key()
     api_key_hash = security_manager.hash_api_key(api_key)
@@ -212,6 +201,7 @@ async def create_api_key(
     db_api_key = APIKey(
         user_id=current_user.id,
         key_hash=api_key_hash,
+        key_prefix=compute_prefix_hash(api_key[4:12]),
         name=api_key_data.name,
         is_active=True,
     )
@@ -233,7 +223,7 @@ async def list_api_keys(
 ) -> list[APIKeyResponse]:
     """List all API keys for the current user."""
 
-    if not (current_user is not None):
+    if current_user is None:
         raise ValueError("current_user must be provided")
     api_keys = db.query(APIKey).filter(APIKey.user_id == current_user.id).all()
     return [APIKeyResponse.from_orm(key) for key in api_keys]
@@ -280,7 +270,7 @@ async def list_users(
 ) -> list[UserResponse]:
     """List all users (admin only)."""
 
-    if not (skip is not None):
+    if skip is None:
         raise ValueError("skip must be provided")
     users = db.query(User).offset(skip).limit(limit).all()
     return [UserResponse.from_orm(user) for user in users]

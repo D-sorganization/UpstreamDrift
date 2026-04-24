@@ -6,14 +6,19 @@ Used across MuJoCo, Pendulums, Drake, OpenSim, MyoSuite, and Pinocchio.
 
 from __future__ import annotations
 
-from PyQt6 import QtCore, QtWidgets
-
+from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+if PYQT6_AVAILABLE:
+    from PyQt6 import QtCore, QtWidgets
+else:
+    QtWidgets = None  # type: ignore
+    QtCore = None  # type: ignore
 
 logger = get_logger(__name__)
 
 
-class ScrewVisualizationTab(QtWidgets.QWidget):
+class ScrewVisualizationTab(QtWidgets.QWidget if PYQT6_AVAILABLE else object):  # type: ignore[misc]
     """Reusable layout/tab for rendering Screw Axes and Twists across varying engines.
 
     Signals:
@@ -22,8 +27,12 @@ class ScrewVisualizationTab(QtWidgets.QWidget):
             for tracking its screw axis visually.
     """
 
-    visualization_changed = QtCore.pyqtSignal(bool)
-    target_body_changed = QtCore.pyqtSignal(str)
+    if PYQT6_AVAILABLE:
+        visualization_changed = QtCore.pyqtSignal(bool)
+        target_body_changed = QtCore.pyqtSignal(str)
+    else:
+        visualization_changed = None  # type: ignore
+        target_body_changed = None  # type: ignore
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)

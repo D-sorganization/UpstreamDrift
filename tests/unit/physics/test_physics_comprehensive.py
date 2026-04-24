@@ -188,6 +188,13 @@ class TestComputeAirDensityAtAltitude:
         ratio = rho / 1.225
         assert 0.4 < ratio < 0.7
 
+    @pytest.mark.parametrize("altitude_m", [-1.0, 11000.1])
+    def test_rejects_altitude_outside_troposphere_range(
+        self, altitude_m: float
+    ) -> None:
+        with pytest.raises(ValueError, match="ISA troposphere range"):
+            compute_air_density_at_altitude(1.225, altitude_m=altitude_m)
+
 
 # ============================================================================
 # Tests for EnergySnapshot

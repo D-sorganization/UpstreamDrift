@@ -15,9 +15,15 @@ if ~isfield(config, 'use_simscape')
     config.use_simscape = true;    % Enable simscape extraction
 end
 
-% Ensure verbose logging is enabled for debugging
-if ~isfield(config, 'verbose')
-    config.verbose = true;
+% Ensure verbose logging is available for downstream extractors.
+% Prefer the explicit boolean flag when present, otherwise derive it from
+% the human-readable verbosity level used by the GUI and CLI.
+if ~isfield(config, 'verbose') || isempty(config.verbose)
+    if isfield(config, 'verbosity')
+        config.verbose = ~strcmpi(config.verbosity, 'Silent');
+    else
+        config.verbose = true;
+    end
 end
 
 % Set other important defaults for enhanced extraction

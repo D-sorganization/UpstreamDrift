@@ -14,8 +14,6 @@ from src.shared.python.spatial_algebra.joints import (
     jcalc,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestMotionSubspaces:
     def test_s_rx_shape(self) -> None:

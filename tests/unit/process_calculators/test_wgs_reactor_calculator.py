@@ -10,8 +10,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.wgs_reactor_calc
     WGSReactorEngine,
 )
 
-pytestmark = pytest.mark.unit
-
 _SYNGAS = {"CO": 30.0, "H2": 25.0, "CO2": 10.0, "H2O": 5.0}
 
 

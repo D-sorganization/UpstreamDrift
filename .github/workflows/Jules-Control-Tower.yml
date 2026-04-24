@@ -9,16 +9,17 @@ on:
     workflows: ["CI Standard"]
     types: [completed]
   schedule:
-    # OVERNIGHT SCHEDULE - All work done before morning (midnight-6 AM PST / 8 AM-2 PM UTC)
-    - cron: "0 0 * * 0,4" # Midnight PST (Mondays) - Assessment Generator
-    - cron: "0 0 * * 0,4" # 12:30 AM PST (Mondays) - Code Quality Reviewer
-    - cron: "0 0 * * 0,4" # 1 AM PST (Mondays) - Completist (incomplete impl)
-    - cron: "0 0 * * 0,4" # 1:30 AM PST (Mondays) - Documentation Auditor
-    - cron: "0 0 * * 0,4" # 2:30 AM PST (Mondays) - Sentinel (security)
-    - cron: "0 0 * * 0,4" # 3 AM PST (Mondays) - Auto-Refactor
-    - cron: "0 0 * * 0,4" # 3:30 AM PST (Mondays) - Issue Resolver (daily fix)
-    - cron: "0 0 * * 0,4" # 5 AM PST (Mondays) - Auto-Rebase
-    - cron: "0 0 * * 0,4" # 4 AM PST (Mondays) - PR Compiler (consolidate PRs)
+    # OVERNIGHT SCHEDULE - Staggered so each cron maps to exactly one worker via routing switch
+    # Runs Sun (0) + Thu (4) at unique UTC times — matches routing logic in triage job
+    - cron: "0 8 * * 0,4" # 08:00 UTC → assessment-generator
+    - cron: "30 8 * * 0,4" # 08:30 UTC → code-quality-reviewer
+    - cron: "0 9 * * 0,4" # 09:00 UTC → completist
+    - cron: "30 9 * * 0,4" # 09:30 UTC → documentation-auditor
+    - cron: "30 10 * * 0,4" # 10:30 UTC → sentinel
+    - cron: "0 11 * * 0,4" # 11:00 UTC → auto-refactor
+    - cron: "30 11 * * 0,4" # 11:30 UTC → issue-resolver
+    - cron: "0 12 * * 0,4" # 12:00 UTC → pr-compiler
+    - cron: "0 13 * * 0,4" # 13:00 UTC → auto-rebase
   workflow_dispatch:
     inputs:
       target:
@@ -56,8 +57,31 @@ permissions:
   checks: read
 
 jobs:
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   triage:
-    runs-on: ubuntu-latest
+    needs: pick-runner
+    runs-on: self-hosted
     # Removed global actor check to allow scheduled runs even if file modified by bot
     outputs:
       target: ${{ steps.decide.outputs.target }}
@@ -67,7 +91,7 @@ jobs:
         id: check-limits
         if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           echo "Checking repair iteration limits..."
           BRANCH="${{ github.event.workflow_run.head_branch }}"

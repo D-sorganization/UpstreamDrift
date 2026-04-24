@@ -58,9 +58,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
             render_mode: Render mode.
         """
         # Create task config for walking
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         task_config = TaskConfig(
             task_type=TaskType.LOCOMOTION,
@@ -154,9 +152,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for walking task."""
-        if not (action is not None):
-            raise ValueError("action must be provided")
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         reward = 0.0
 
@@ -168,8 +164,7 @@ class HumanoidWalkEnv(RoboticsGymEnv):
 
         target_vel = self.task_config.target_velocity
         vel_error = np.linalg.norm(base_vel[:2] - target_vel[:2])
-        # Squared-error exponential so reward drops steeply beyond ~1 m/s error
-        vel_reward = np.exp(-(vel_error**2))
+        vel_reward = np.exp(-vel_error)
         reward += vel_reward * self.reward_config.task_reward_weight
 
         # Alive bonus
@@ -216,10 +211,9 @@ class HumanoidWalkEnv(RoboticsGymEnv):
         # Check base tilt
         if hasattr(self.engine, "get_base_orientation"):
             quat = self.engine.get_base_orientation()
-            # Convention assumed: [w, x, y, z] (scalar-first).
-            # R[2,2] = 1 - 2*(x^2 + y^2) gives the cosine of tilt from vertical.
-            q_x, q_y = float(quat[1]), float(quat[2])
-            up_z = 1.0 - 2.0 * (q_x**2 + q_y**2)
+            # Check z-component of up vector after rotation
+            # Simplified: check quaternion indicates large tilt
+            up_z = 1 - 2 * (quat[1] ** 2 + quat[2] ** 2)
             if up_z < self._base_tilt_threshold:
                 return True
 
@@ -287,9 +281,7 @@ class HumanoidStandEnv(RoboticsGymEnv):
             reward_config: Reward configuration.
             render_mode: Render mode.
         """
-        if not (engine is not None):
-            raise ValueError("engine must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         task_config = TaskConfig(
             task_type=TaskType.BALANCE,
@@ -362,9 +354,7 @@ class HumanoidStandEnv(RoboticsGymEnv):
 
     def _compute_reward(self, action: NDArray[np.floating]) -> float:
         """Compute reward for standing task."""
-        if not (action is not None):
-            raise ValueError("action must be provided")
-        if not (action is not None):
+        if action is None:
             raise ValueError("action must be provided")
         reward = 0.0
 

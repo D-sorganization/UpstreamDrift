@@ -11,8 +11,6 @@ from src.shared.python.pendulum_simulator.club_forces import (
     net_force_on_club,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestNetForceOnClub:
     def test_sum_of_forces(self) -> None:

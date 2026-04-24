@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.upstream_drift_tools.process_calculators.electrode_advancement_calculator import (
     ElectrodeAdvancementCalculator,
@@ -11,8 +10,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.electrode_advanc
 from src.shared.python.upstream_drift_tools.process_calculators.thermal_profile_predictor import (
     predict_temperature_profile,
 )
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # ElectrodeAdvancementCalculator

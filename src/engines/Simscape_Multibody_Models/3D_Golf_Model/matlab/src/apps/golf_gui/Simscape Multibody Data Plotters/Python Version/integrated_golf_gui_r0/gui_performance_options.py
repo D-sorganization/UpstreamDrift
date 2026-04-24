@@ -16,10 +16,8 @@ logger = logging.getLogger(__name__)
 class PerformanceOptionsDialog:
     """Dialog for configuring simulation performance options"""
 
-    def __init__(self, parent: tk.Tk) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
-        if not (parent is not None):
+    def __init__(self, parent):
+        if parent is None:
             raise ValueError("parent must be provided")
         self.parent = parent
         self.result = None
@@ -63,7 +61,7 @@ class PerformanceOptionsDialog:
         # Simscape Results Explorer option
         self.simscape_var = tk.BooleanVar(
             value=self.settings["disable_simscape_results"]
-        )
+        )  # noqa: E501
         simscape_check = ttk.Checkbutton(
             main_frame,
             text="Disable Simscape Results Explorer",
@@ -76,12 +74,12 @@ class PerformanceOptionsDialog:
         self.simscape_info = ttk.Label(
             main_frame,
             text="✅ Provides ~5% speed improvement\n"
-            "   Reduces memory usage during simulation",
+            "   Reduces memory usage during simulation",  # noqa: E501
             foreground="green",
         )
         self.simscape_info.grid(
             row=2, column=0, columnspan=2, sticky=tk.W, pady=(0, 15)
-        )
+        )  # noqa: E501
 
         # Memory optimization option
         self.memory_var = tk.BooleanVar(value=self.settings["optimize_memory"])
@@ -120,7 +118,7 @@ class PerformanceOptionsDialog:
 
         cancel_button = ttk.Button(
             button_frame, text="Cancel", command=self.cancel_clicked
-        )
+        )  # noqa: E501
         cancel_button.grid(row=0, column=1)
 
         # Initialize info display
@@ -137,7 +135,7 @@ class PerformanceOptionsDialog:
         else:
             self.simscape_info.config(
                 text="⚠️  Simscape Results Explorer enabled\n"
-                "   May slow down simulation",
+                "   May slow down simulation",  # noqa: E501
                 foreground="orange",
             )
 
@@ -162,13 +160,13 @@ class PerformanceOptionsDialog:
         return self.result
 
 
-def get_performance_options(parent: tk.Tk) -> dict | None:
+def get_performance_options(parent) -> dict | None:
     """Show performance options dialog and return settings"""
     dialog = PerformanceOptionsDialog(parent)
     return dialog.show()
 
 
-def generate_matlab_performance_script(settings: dict) -> str:
+def generate_matlab_performance_script(settings) -> str:
     """Generate MATLAB script with performance settings"""
     script_lines = []
 
@@ -179,7 +177,7 @@ def generate_matlab_performance_script(settings: dict) -> str:
     if settings["disable_simscape_results"]:
         script_lines.append(
             "% Disable Simscape Results Explorer for better performance"
-        )
+        )  # noqa: E501
         script_lines.append("set_param(gcs, 'SimscapeLogType', 'none');")
         script_lines.append("")
 

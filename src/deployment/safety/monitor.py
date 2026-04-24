@@ -83,9 +83,7 @@ class SafetyLimits:
         Returns:
             Safety limits instance.
         """
-        if not (robot_config is not None):
-            raise ValueError("robot_config must be provided")
-        if not (robot_config is not None):
+        if robot_config is None:
             raise ValueError("robot_config must be provided")
         n_joints = robot_config.n_joints
 
@@ -132,9 +130,7 @@ class SafetyMonitor:
             robot_config: Robot configuration.
             limits: Safety limits (derived from config if None).
         """
-        if not (robot_config is not None):
-            raise ValueError("robot_config must be provided")
-        if not (robot_config is not None):
+        if robot_config is None:
             raise ValueError("robot_config must be provided")
         self.config = robot_config
         self.limits = limits or SafetyLimits.from_config(robot_config)
@@ -151,9 +147,7 @@ class SafetyMonitor:
         Returns:
             Safety status.
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         violations = []
         warnings = []
@@ -223,9 +217,7 @@ class SafetyMonitor:
         Returns:
             Safety status.
         """
-        if not (command is not None):
-            raise ValueError("command must be provided")
-        if not (command is not None):
+        if command is None:
             raise ValueError("command must be provided")
         violations: list[str] = []
         warnings: list[str] = []
@@ -290,9 +282,7 @@ class SafetyMonitor:
         Returns:
             Safe control command.
         """
-        if not (desired is not None):
-            raise ValueError("desired must be provided")
-        if not (desired is not None):
+        if desired is None:
             raise ValueError("desired must be provided")
         from src.deployment.realtime import ControlCommand
 
@@ -333,15 +323,6 @@ class SafetyMonitor:
             if safe_command.torque_commands is not None:
                 safe_command.torque_commands *= self._speed_override
 
-        # Enforce E-stop: freeze position to current and zero feedforward torque
-        if self._emergency_stop:
-            if safe_command.position_targets is not None:
-                safe_command.position_targets = state.joint_positions.copy()
-            if safe_command.feedforward_torque is not None:
-                safe_command.feedforward_torque = np.zeros_like(
-                    safe_command.feedforward_torque
-                )
-
         # Clip torque commands
         if safe_command.torque_commands is not None:
             safe_command.torque_commands = np.clip(
@@ -379,9 +360,7 @@ class SafetyMonitor:
         """
         # Simplified: estimate from maximum velocity
         # Full implementation would use dynamics model
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         max_vel = float(np.max(np.abs(state.joint_velocities)))
         max_decel = 2.0  # m/s² typical deceleration
@@ -405,9 +384,7 @@ class SafetyMonitor:
         Args:
             nearby: True if human is within safety distance.
         """
-        if not (nearby is not None):
-            raise ValueError("nearby must be provided")
-        if not (nearby is not None):
+        if nearby is None:
             raise ValueError("nearby must be provided")
         self._human_nearby = nearby
         if nearby:

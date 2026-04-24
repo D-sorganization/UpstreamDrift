@@ -15,8 +15,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.water_vapor_pres
     WaterVaporPressureCalculator,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestSyngasComposition:
     def test_default_construction_zero(self) -> None:

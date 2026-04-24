@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.gas_properties import (
     calculate_ideal_gas_density,
     calculate_mixture_molecular_weight,
 )
-
-pytestmark = pytest.mark.unit
 
 _SYNGAS = {"H2": 0.4, "CO": 0.3, "CO2": 0.2, "N2": 0.1}
 

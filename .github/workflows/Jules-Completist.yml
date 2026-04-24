@@ -3,8 +3,8 @@ name: Jules Completist (Incomplete Implementation Auditor)
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * 0,4" # Daily at 1 AM UTC (matches Control Tower)
+  # Schedule removed: Control Tower (Jules-Control-Tower.yml) handles all scheduling.
+  # This workflow runs via workflow_call from Control Tower at 09:00 UTC Sun+Thu.
 
 permissions:
   contents: write
@@ -12,8 +12,31 @@ permissions:
   issues: write
 
 jobs:
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   audit-completeness:
-    runs-on: ubuntu-latest
+    needs: pick-runner
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
         with:
@@ -40,32 +63,27 @@ jobs:
           # Find TODO/FIXME/XXX comments
           grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
             --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
-            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/todo_markers.txt 2>/dev/null || true
 
           # Find NotImplementedError
           grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
-            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/not_implemented.txt 2>/dev/null || true
 
           # Find stub functions (empty or just pass/...)
           grep -rn "def .*:$" -A 2 --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
-            --exclude-dir="vendor" --exclude-dir="scripts" \
             | grep -B 1 "pass$\|\.\.\.$ " \
             > .jules/completist_data/stub_functions.txt 2>/dev/null || true
 
           # Find incomplete docstrings
           grep -rn '""".*TODO\|""".*WIP\|# TODO:' --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
-            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/incomplete_docs.txt 2>/dev/null || true
 
           # Find abstract methods without implementations
           grep -rn "@abstractmethod" -A 5 --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
-            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/abstract_methods.txt 2>/dev/null || true
 
           # Count findings

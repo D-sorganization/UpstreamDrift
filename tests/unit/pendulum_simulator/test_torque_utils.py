@@ -6,8 +6,6 @@ import pytest
 
 from src.shared.python.pendulum_simulator.torque_utils import make_polynomial_torque
 
-pytestmark = pytest.mark.unit
-
 
 class TestMakePolynomialTorque:
     def test_constant_torque_single_joint(self) -> None:
@@ -66,7 +64,7 @@ class TestMakePolynomialTorque:
         assert tf(3.0)[0] == pytest.approx(3.0)
 
     def test_no_joints_raises(self) -> None:
-        with pytest.raises((AssertionError, TypeError)):
+        with pytest.raises((ValueError, TypeError)):
             make_polynomial_torque()
 
     def test_negative_torque(self) -> None:

@@ -2,8 +2,6 @@
 Tests for the REST API module.
 """
 
-from typing import Any
-
 SIMPLE_URDF = """<?xml version="1.0"?>
 <robot name="test_robot">
     <link name="base_link">
@@ -383,7 +381,7 @@ class TestRoute:
         """Test Route creation."""
         from model_generation.api import HTTPMethod, Route
 
-        def dummy_handler(request: Any) -> None:
+        def dummy_handler(request) -> None:
             return None
 
         route = Route(

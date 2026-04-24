@@ -9,8 +9,6 @@ import pytest
 
 from src.api.routes.engines import _sanitize_for_json
 
-pytestmark = pytest.mark.unit
-
 
 class TestSanitizeForJson:
     """Verify _sanitize_for_json converts numpy types to native Python."""

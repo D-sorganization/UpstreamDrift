@@ -13,8 +13,9 @@ Cost Model:
     - Typical workflow: ~$0.30-0.70
 
 Example:
+    >>> import os
     >>> from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
-    >>> adapter = AnthropicAdapter(api_key="your-api-key-here")
+    >>> adapter = AnthropicAdapter(api_key=os.environ["ANTHROPIC_API_KEY"])
     >>> response = adapter.send_message("Analyze this swing", context, tools)
 """
 
@@ -72,7 +73,8 @@ class AnthropicAdapter(BaseAgentAdapter):
         timeout: Request timeout [s].
 
     Example:
-        >>> adapter = AnthropicAdapter(api_key="your-api-key-here")
+        >>> import os
+        >>> adapter = AnthropicAdapter(api_key=os.environ["ANTHROPIC_API_KEY"])
         >>> success, message = adapter.validate_connection()
         >>> if success:
         ...     response = adapter.send_message(
@@ -99,9 +101,7 @@ class AnthropicAdapter(BaseAgentAdapter):
             model: Model name. Uses ANTHROPIC_MODEL env var or default.
             timeout: Request timeout [s]. Uses ANTHROPIC_TIMEOUT env var or default.
         """
-        if not (api_key is not None):
-            raise ValueError("api_key must be provided")
-        if not (api_key is not None):
+        if api_key is None:
             raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_anthropic_model()
@@ -154,9 +154,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             AgentResponse with model's reply.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
 
@@ -199,9 +197,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message)
@@ -316,9 +312,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for Anthropic.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
@@ -345,15 +339,17 @@ class AnthropicAdapter(BaseAgentAdapter):
                 content = []
                 if msg.content:
                     content.append({"type": "text", "text": msg.content})
-                for tc in msg.tool_calls:
-                    content.append(
+                content.extend(
+                    [
                         {
                             "type": "tool_use",
                             "id": tc.id,
                             "name": tc.name,
                             "input": tc.arguments,
                         }
-                    )
+                        for tc in msg.tool_calls
+                    ]
+                )
 
             messages.append(
                 {
@@ -389,9 +385,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             Messages with alternating roles.
         """
-        if not (messages is not None):
-            raise ValueError("messages must be provided")
-        if not (messages is not None):
+        if messages is None:
             raise ValueError("messages must be provided")
         if not messages:
             return messages
@@ -435,9 +429,7 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             System message string.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
 
@@ -457,10 +449,7 @@ class AnthropicAdapter(BaseAgentAdapter):
             f"3. Validate scientific claims before presenting them\n"
             f"4. Guide users through workflows step by step\n"
             f"5. Acknowledge uncertainty and cite limitations\n"
-            f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)\n"
-            f"7. When the user asks about physics terms or golf biomechanics concepts, "
-            f"use the explain_concept tool to retrieve the authoritative definition "
-            f"from the glossary before answering."
+            f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)"
         )
 
     def _parse_response(self, response: Any) -> AgentResponse:

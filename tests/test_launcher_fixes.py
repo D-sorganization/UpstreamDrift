@@ -368,15 +368,9 @@ class TestDockerConfiguration(unittest.TestCase):
         """Test that Dockerfile uses a pinned base image."""
         dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
         content = dockerfile_path.read_text()
-        # Should use a pinned version, not :latest
-        self.assertIn(
-            "continuumio/miniconda3:", content, "Should use miniconda3 base image"
-        )
-        self.assertNotIn(
-            "continuumio/miniconda3:latest",
-            content,
-            "Should use pinned version, not :latest",
-        )
+        self.assertIn("FROM python:3.12-slim AS builder", content)
+        self.assertIn("FROM python:3.12-slim AS runtime", content)
+        self.assertNotIn(":latest", content, "Should use explicit base image tags")
 
 
 class TestMuJoCoModule(unittest.TestCase):

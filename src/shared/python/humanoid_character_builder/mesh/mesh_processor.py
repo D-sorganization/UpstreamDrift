@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Mesh processing utilities for humanoid character builder.
 
@@ -179,9 +183,7 @@ class MeshProcessor:
         config: MeshExportConfig,
     ) -> MeshSegmentResult:
         """Process and export a single mesh segment."""
-        if not (segment_name is not None):
-            raise ValueError("segment_name must be provided")
-        if not (segment_name is not None):
+        if segment_name is None:
             raise ValueError("segment_name must be provided")
         import trimesh
 
@@ -349,9 +351,7 @@ class MeshProcessor:
 
     def _simplify_mesh(self, mesh: Any, target_faces: int) -> Any:
         """Internal mesh simplification."""
-        if not (target_faces is not None):
-            raise ValueError("target_faces must be provided")
-        if not (target_faces is not None):
+        if target_faces is None:
             raise ValueError("target_faces must be provided")
         import trimesh
 
@@ -417,9 +417,7 @@ class MeshProcessor:
         Returns:
             Path to exported file
         """
-        if not (output_path is not None):
-            raise ValueError("output_path must be provided")
-        if not (output_path is not None):
+        if output_path is None:
             raise ValueError("output_path must be provided")
         config = config or MeshExportConfig()
         output_path = Path(output_path)
@@ -580,9 +578,7 @@ class LODGenerator:
         Returns:
             LODGenerationResult with all generated levels
         """
-        if not (mesh_path is not None):
-            raise ValueError("mesh_path must be provided")
-        if not (mesh_path is not None):
+        if mesh_path is None:
             raise ValueError("mesh_path must be provided")
         if not self._processor._trimesh_available:
             return LODGenerationResult(
@@ -680,9 +676,7 @@ class LODGenerator:
         Returns:
             LODGenerationResult with collision-optimized LODs
         """
-        if not (mesh_path is not None):
-            raise ValueError("mesh_path must be provided")
-        if not (mesh_path is not None):
+        if mesh_path is None:
             raise ValueError("mesh_path must be provided")
         if not self._processor._trimesh_available:
             return LODGenerationResult(
@@ -772,9 +766,7 @@ class LODGenerator:
         Returns:
             Dict with memory estimation details
         """
-        if not (lod_result is not None):
-            raise ValueError("lod_result must be provided")
-        if not (lod_result is not None):
+        if lod_result is None:
             raise ValueError("lod_result must be provided")
         if not lod_result.success or not lod_result.levels:
             return {"error": "No LOD data available"}

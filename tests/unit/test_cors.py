@@ -5,11 +5,7 @@ from __future__ import annotations
 import os
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.shared.python.cors import DEFAULT_ORIGINS, add_cors_middleware
-
-pytestmark = pytest.mark.unit
 
 
 class TestDefaultOrigins:

@@ -27,21 +27,29 @@ from src.robotics.sensing.imu_sensor import (
     IMUSensorConfig,
 )
 from src.robotics.sensing.noise_models import (
+    FORCE_TORQUE_INDUSTRIAL_DEFAULTS,
+    IMU_MEMS_DEFAULTS,
     BrownianNoise,
     CompositeNoise,
     GaussianNoise,
     NoiseModel,
+    NoisySensor,
     QuantizationNoise,
+    SensorNoiseParameters,
 )
 
 __all__ = [
+    "FORCE_TORQUE_INDUSTRIAL_DEFAULTS",
+    "IMU_MEMS_DEFAULTS",
+    "BrownianNoise",
+    "CompositeNoise",
     "ForceTorqueSensor",
     "ForceTorqueSensorConfig",
+    "GaussianNoise",
     "IMUSensor",
     "IMUSensorConfig",
     "NoiseModel",
-    "GaussianNoise",
-    "BrownianNoise",
+    "NoisySensor",
     "QuantizationNoise",
-    "CompositeNoise",
+    "SensorNoiseParameters",
 ]

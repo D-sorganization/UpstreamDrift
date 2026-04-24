@@ -30,7 +30,7 @@ def main() -> None:
         # Generate a random action
         action = np.random.uniform(
             action_spec.minimum, action_spec.maximum, size=action_spec.shape
-        )
+        )  # noqa: E501
 
         # Step the environment
         env.step(action)

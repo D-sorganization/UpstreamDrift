@@ -60,7 +60,7 @@ def jacobian_golfer(q: np.ndarray, p: GolferParams) -> dict[str, np.ndarray]:
     -------
     dict mapping joint names to (2, 8) Jacobian matrices.
     """
-    if not (q is not None):
+    if q is None:
         raise ValueError("q must be provided")
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
@@ -78,7 +78,7 @@ def ellipsoids_golfer(q: np.ndarray, p: GolferParams) -> dict[str, dict]:
         'jacobian', 'directions', 'mob_semi_axes',
         'force_semi_axes', 'singular_values'
     """
-    if not (q is not None):
+    if q is None:
         raise ValueError("q must be provided")
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
@@ -109,7 +109,7 @@ def delta_matrix(q: np.ndarray, p: GolferParams) -> np.ndarray:
     -------
     Delta : np.ndarray, shape (8, 8)
     """
-    if not (q is not None):
+    if q is None:
         raise ValueError("q must be provided")
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]
@@ -140,7 +140,7 @@ def ztcf_matrix(
     -------
     T : np.ndarray, shape (2, 8) or None if singular
     """
-    if not (q is not None):
+    if q is None:
         raise ValueError("q must be provided")
     if q.shape[0] > N_DOF:
         q = q[:N_DOF]

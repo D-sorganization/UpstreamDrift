@@ -39,9 +39,7 @@ class PinocchioManipulabilityAnalyzer:
 
     def __init__(self, model: pin.Model, data: pin.Data) -> None:
         """Initialize the analyzer."""
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -51,9 +49,7 @@ class PinocchioManipulabilityAnalyzer:
     ) -> ManipulabilityResult | None:
         """Compute manipulability metrics for a specific frame/body."""
         # Resolve frame ID (Pinocchio tends to use Frames for end effectors)
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         if not self.model.existFrame(body_name):
             # Try body name if frame not found?
@@ -126,10 +122,9 @@ class PinocchioManipulabilityAnalyzer:
     def find_potential_bodies(self) -> list[str]:
         """Find frame names that look like points of interest."""
         candidates = ["hand", "wrist", "arm", "club", "head", "grip"]
-        found = []
-        for frame in self.model.frames:
-            name = frame.name
-            name_lower = name.lower()
-            if any(c in name_lower for c in candidates):
-                found.append(name)
-        return sorted(list(set(found)))
+        found = [
+            frame.name
+            for frame in self.model.frames
+            if any(c in frame.name.lower() for c in candidates)
+        ]
+        return sorted(set(found))

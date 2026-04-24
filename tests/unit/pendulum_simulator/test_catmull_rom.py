@@ -6,8 +6,6 @@ import pytest
 
 from src.shared.python.pendulum_simulator.gui.catmull_rom import catmull_rom_smooth
 
-pytestmark = pytest.mark.unit
-
 
 class TestCatmullRomSmooth:
     def test_empty_returns_empty(self) -> None:
@@ -47,7 +45,7 @@ class TestCatmullRomSmooth:
         assert len(result_8) > len(result_4)
 
     def test_zero_n_sub_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             catmull_rom_smooth(
                 [(0.0, 0.0), (1.0, 1.0), (2.0, 0.0), (3.0, 1.0)], n_sub=0
             )

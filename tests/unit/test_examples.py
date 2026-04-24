@@ -9,8 +9,6 @@ import pytest
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.physics.rust_kernel import is_rust_available
 
-pytestmark = pytest.mark.unit
-
 # Import paths configured at test runner level via pyproject.toml/conftest.py
 project_root = get_repo_root()
 

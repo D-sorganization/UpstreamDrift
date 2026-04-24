@@ -8,7 +8,6 @@ extracting 33 body landmarks from video frames.
 from __future__ import annotations
 
 import logging
-from types import TracebackType
 
 import cv2
 import numpy as np
@@ -82,7 +81,7 @@ class PoseEstimator:
         min_detection_confidence: float = 0.5,
         min_tracking_confidence: float = 0.5,
         smooth_landmarks: bool = True,
-    ) -> None:
+    ):
         """
         Initialize the pose estimator.
 
@@ -93,9 +92,7 @@ class PoseEstimator:
             min_tracking_confidence: Minimum confidence for landmark tracking (0-1).
             smooth_landmarks: Whether to apply landmark smoothing.
         """
-        if not (model_complexity is not None):
-            raise ValueError("model_complexity must be provided")
-        if not (model_complexity is not None):
+        if model_complexity is None:
             raise ValueError("model_complexity must be provided")
         self.model_complexity = model_complexity
         self.min_detection_confidence = min_detection_confidence
@@ -149,9 +146,7 @@ class PoseEstimator:
         Returns:
             PoseFrame with landmarks, or None if no pose detected.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if not self._initialized and not self.initialize():
             return None
@@ -209,9 +204,7 @@ class PoseEstimator:
         Returns:
             PoseFrame with world-space landmarks, or None if no pose detected.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if not self._initialized and not self.initialize():
             return None
@@ -275,9 +268,7 @@ class PoseEstimator:
         Returns:
             Frame with landmarks drawn.
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if not MEDIAPIPE_AVAILABLE:
             return frame
@@ -325,7 +316,7 @@ class PoseEstimator:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
+        exc_tb: object,
     ) -> None:
         """Context manager exit."""
         self.close()

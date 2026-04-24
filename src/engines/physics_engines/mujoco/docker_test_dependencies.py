@@ -25,7 +25,7 @@ def test_python_environment() -> None:
         logger.info("⚠️  NOT using MuJoCo virtual environment!")
         logger.info(
             "   This might be the issue - dependencies installed in /opt/mujoco-env"
-        )
+        )  # noqa: E501
 
     logger.info("")
 
@@ -130,7 +130,7 @@ def test_environment_activation() -> None:
             )
             logger.info(
                 "✓ defusedxml works with venv python: %s", result.stdout.strip()
-            )
+            )  # noqa: E501
         except subprocess.CalledProcessError as e:
             logger.info("❌ defusedxml fails with venv python: %s", e.stderr)
     else:
@@ -158,7 +158,7 @@ def main() -> int:
         logger.info("   1. Make sure Docker container uses: /opt/mujoco-env/bin/python")
         logger.info(
             "   2. Activate virtual environment: source /opt/mujoco-env/bin/activate"
-        )
+        )  # noqa: E501
         logger.info("   3. Rebuild Docker image if dependencies are missing")
 
     return 0 if success else 1

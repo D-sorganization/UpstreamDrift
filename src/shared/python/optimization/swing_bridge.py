@@ -191,7 +191,7 @@ class SwingOptimizationBridge:
         bridge = SwingOptimizationBridge(config)
         x0 = np.zeros(14)          # 7 positions + 7 velocities
         result = bridge.optimize_swing(x0)
-        # >>> result.clubhead_velocity
+        logger.info(result.clubhead_velocity)
     """
 
     def __init__(
@@ -335,7 +335,7 @@ class SwingOptimizationBridge:
 
                 # Step size with decay
                 alpha = 0.1 / (1.0 + 0.01 * iteration)
-                controls[k] = controls[k] - alpha * gradient
+                controls[k] = controls[k] - alpha * gradient  # type: ignore[assignment]
 
         # Final evaluation
         trajectory, clubhead_vel = self._evaluate_trajectory(controls, initial_state)
@@ -405,8 +405,8 @@ class SwingOptimizationBridge:
             is a list of state vectors and *clubhead_velocity* is the
             speed of the last joint at the terminal time-step.
         """
-        assert controls is not None, "controls must be provided"
-        assert controls is not None, "controls must be provided"
+        if controls is None:
+            raise ValueError("controls must be provided")
         n = self._config.n_joints
         dt = self._config.dt
         trajectory: list[np.ndarray] = [initial_state.copy()]

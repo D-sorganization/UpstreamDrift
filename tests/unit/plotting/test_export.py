@@ -14,8 +14,6 @@ from src.shared.python.plotting.export import (
     export_plot_data,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestExportConfig:
     def test_default_construction(self) -> None:

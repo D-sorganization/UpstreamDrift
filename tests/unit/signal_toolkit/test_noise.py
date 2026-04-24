@@ -12,8 +12,6 @@ from src.shared.python.signal_toolkit.noise import (
     add_noise_to_signal,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_signal(n: int = 100) -> Signal:
     t = np.linspace(0.0, 1.0, n)

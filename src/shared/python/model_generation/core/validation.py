@@ -72,9 +72,7 @@ class ValidationResult:
         details: dict | None = None,
     ) -> None:
         """Add an error to the result."""
-        if not (code is not None):
-            raise ValueError("code must be provided")
-        if not (code is not None):
+        if code is None:
             raise ValueError("code must be provided")
         self.errors.append(ValidationError(code, message, component, details))
         self.is_valid = False
@@ -91,9 +89,7 @@ class ValidationResult:
 
     def merge(self, other: ValidationResult) -> None:
         """Merge another validation result into this one."""
-        if not (other is not None):
-            raise ValueError("other must be provided")
-        if not (other is not None):
+        if other is None:
             raise ValueError("other must be provided")
         self.errors.extend(other.errors)
         self.warnings.extend(other.warnings)
@@ -154,9 +150,7 @@ class Validator:
         Returns:
             ValidationResult
         """
-        if not (mass is not None):
-            raise ValueError("mass must be provided")
-        if not (mass is not None):
+        if mass is None:
             raise ValueError("mass must be provided")
         result = ValidationResult(is_valid=True)
 
@@ -192,9 +186,7 @@ class Validator:
         Returns:
             ValidationResult
         """
-        if not (inertia is not None):
-            raise ValueError("inertia must be provided")
-        if not (inertia is not None):
+        if inertia is None:
             raise ValueError("inertia must be provided")
         result = ValidationResult(is_valid=True)
 
@@ -258,9 +250,7 @@ class Validator:
         Returns:
             ValidationResult
         """
-        if not (link is not None):
-            raise ValueError("link must be provided")
-        if not (link is not None):
+        if link is None:
             raise ValueError("link must be provided")
         result = ValidationResult(is_valid=True)
 
@@ -291,9 +281,7 @@ class Validator:
         Returns:
             ValidationResult
         """
-        if not (joint is not None):
-            raise ValueError("joint must be provided")
-        if not (joint is not None):
+        if joint is None:
             raise ValueError("joint must be provided")
         result = ValidationResult(is_valid=True)
 
@@ -375,9 +363,7 @@ class Validator:
         Returns:
             ValidationResult
         """
-        if not (links is not None):
-            raise ValueError("links must be provided")
-        if not (links is not None):
+        if links is None:
             raise ValueError("links must be provided")
         result = ValidationResult(is_valid=True)
 
@@ -394,9 +380,7 @@ class Validator:
         cls, result: ValidationResult, names: list[str], entity_type: str
     ) -> None:
         """Check for duplicate names in a list."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         seen: set[str] = set()
         for name in names:
@@ -415,9 +399,7 @@ class Validator:
         joints: list[Joint],
     ) -> None:
         """Check for valid root link configuration."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         children = {j.child for j in joints}
         roots = link_name_set - children
@@ -441,9 +423,7 @@ class Validator:
         joints: list[Joint],
     ) -> None:
         """Check for circular dependencies using DFS."""
-        if not (result is not None):
-            raise ValueError("result must be provided")
-        if not (result is not None):
+        if result is None:
             raise ValueError("result must be provided")
         visited: set[str] = set()
 
@@ -464,9 +444,7 @@ class Validator:
         joints: list[Joint],
     ) -> bool:
         """Detect if there's a cycle starting from the given node."""
-        if not (start is not None):
-            raise ValueError("start must be provided")
-        if not (start is not None):
+        if start is None:
             raise ValueError("start must be provided")
         if start in path:
             return True
@@ -506,9 +484,7 @@ class Validator:
         Returns:
             ValidationResult
         """
-        if not (links is not None):
-            raise ValueError("links must be provided")
-        if not (links is not None):
+        if links is None:
             raise ValueError("links must be provided")
         result = ValidationResult(is_valid=True)
 

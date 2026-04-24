@@ -5,6 +5,7 @@
 [workspace]
 resolver = "2"
 members = ["rust_core/upstream-physics"]
+exclude = ["ui/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"
@@ -14,9 +15,10 @@ authors = ["D-sorganization"]
 repository = "https://github.com/D-sorganization/UpstreamDrift"
 
 [workspace.dependencies]
-# Shared kernel from Tools repository
-# Local path for development; CI overrides via .cargo/config.toml
-tools-core = { path = "../Tools/rust_core/tools-core" }
+# Shared kernel from D-sorganization/Tools repository.
+# Pin the git revision so a clean UpstreamDrift clone can build Rust crates
+# without requiring a sibling Tools checkout or ad hoc CI symlinks.
+tools-core = { git = "https://github.com/D-sorganization/Tools.git", rev = "ea2690362481379b94135894f9dfac2b70d1bc65" }
 pyo3 = { version = "0.24", features = ["extension-module"] }
 wasm-bindgen = "0.2"
 serde-wasm-bindgen = "0.6"

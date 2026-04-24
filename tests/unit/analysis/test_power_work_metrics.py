@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.analysis.power_work_metrics import PowerWorkMetricsMixin
-
-pytestmark = pytest.mark.unit
 
 
 def _make_instance(n_samples: int = 50, n_joints: int = 3) -> PowerWorkMetricsMixin:

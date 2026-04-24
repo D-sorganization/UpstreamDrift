@@ -11,8 +11,6 @@ from src.shared.python.calc_backend.contracts.ode_solver import (
     ODEVariableSummary,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestODESolverRequest:
     def _valid_request(self, **kwargs) -> ODESolverRequest:

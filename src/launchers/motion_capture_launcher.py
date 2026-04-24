@@ -6,29 +6,18 @@ Central hub for C3D visualization and Markerless Pose Estimation.
 Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
-import os
-import subprocess
 import sys
-from pathlib import Path
 
 from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+)
 
 
-def _make_subprocess_env(repo_root: Path) -> dict[str, str]:
-    """Build an environment dict that injects *repo_root* into PYTHONPATH.
-
-    Args:
-        repo_root: Repository root directory.
-
-    Returns:
-        A copy of the current environment with repo_root prepended to PYTHONPATH.
-    """
-    env = os.environ.copy()
-    sep = ";" if os.name == "nt" else ":"
-    existing = env.get("PYTHONPATH", "")
-    repo_str = str(repo_root)
-    env["PYTHONPATH"] = f"{repo_str}{sep}{existing}" if existing else repo_str
-    return env
+def _spawn_process(command: list[str], cwd: object) -> None:
+    """Spawn a launcher subprocess through the secure wrapper."""
+    secure_popen(command, cwd=cwd, suite_root=REPO_ROOT)
 
 
 class MoCapLauncher(BaseLauncher):
@@ -77,9 +66,7 @@ class MoCapLauncher(BaseLauncher):
         Args:
             relative_path: Path relative to REPO_ROOT
         """
-        if not (relative_path is not None):
-            raise ValueError("relative_path must be provided")
-        if not (relative_path is not None):
+        if relative_path is None:
             raise ValueError("relative_path must be provided")
         script_path = REPO_ROOT / relative_path
         if not script_path.exists():
@@ -87,13 +74,13 @@ class MoCapLauncher(BaseLauncher):
             return
 
         try:
-            env = _make_subprocess_env(REPO_ROOT)
-            subprocess.Popen(  # noqa: S603
-                [sys.executable, str(script_path)],
-                cwd=REPO_ROOT,
-                env=env,
-            )
-        except (FileNotFoundError, PermissionError, OSError) as e:
+            _spawn_process([sys.executable, str(script_path)], cwd=REPO_ROOT)
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             self.show_error("Launch Error", str(e))
 
 

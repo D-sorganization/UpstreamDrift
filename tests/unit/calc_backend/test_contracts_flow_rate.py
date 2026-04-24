@@ -10,8 +10,6 @@ from src.shared.python.calc_backend.contracts.flow_rate import (
     FlowRateConvertResponse,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestFlowRateConvertRequest:
     def test_basic_construction(self) -> None:

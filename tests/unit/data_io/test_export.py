@@ -10,8 +10,6 @@ from src.shared.python.data_io.export import (
     get_available_export_formats,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestGetAvailableExportFormats:
     def test_returns_dict(self) -> None:

@@ -12,8 +12,9 @@ Cost Model:
     - Typical workflow: ~$0.50-1.00
 
 Example:
+    >>> import os
     >>> from shared.python.ai.adapters.openai_adapter import OpenAIAdapter
-    >>> adapter = OpenAIAdapter(api_key="your-api-key-here")
+    >>> adapter = OpenAIAdapter(api_key=os.environ["OPENAI_API_KEY"])
     >>> response = adapter.send_message("Analyze this swing", context, tools)
 """
 
@@ -75,7 +76,8 @@ class OpenAIAdapter(BaseAgentAdapter):
         organization: Optional organization ID.
 
     Example:
-        >>> adapter = OpenAIAdapter(api_key="your-api-key-here")
+        >>> import os
+        >>> adapter = OpenAIAdapter(api_key=os.environ["OPENAI_API_KEY"])
         >>> success, message = adapter.validate_connection()
         >>> if success:
         ...     response = adapter.send_message(
@@ -105,9 +107,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             timeout: Request timeout [s]. Uses OPENAI_TIMEOUT env var or default.
             organization: Organization ID. Uses OPENAI_ORGANIZATION env var if not set.
         """
-        if not (api_key is not None):
-            raise ValueError("api_key must be provided")
-        if not (api_key is not None):
+        if api_key is None:
             raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_openai_model()
@@ -169,9 +169,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             AIRateLimitError: If rate limit exceeded.
             AITimeoutError: If request times out.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
 
@@ -211,9 +209,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message)
@@ -346,9 +342,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for OpenAI.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
@@ -406,9 +400,7 @@ class OpenAIAdapter(BaseAgentAdapter):
         Returns:
             System message string.
         """
-        if not (context is not None):
-            raise ValueError("context must be provided")
-        if not (context is not None):
+        if context is None:
             raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
 
@@ -427,10 +419,7 @@ class OpenAIAdapter(BaseAgentAdapter):
             f"2. Explain concepts at the {expertise} level\n"
             f"3. Validate scientific claims before presenting them\n"
             f"4. Guide users through workflows step by step\n"
-            f"5. Acknowledge uncertainty and cite limitations\n"
-            f"6. When the user asks about physics terms or golf biomechanics concepts, "
-            f"use the explain_concept tool to retrieve the authoritative definition "
-            f"from the glossary before answering.\n\n"
+            f"5. Acknowledge uncertainty and cite limitations\n\n"
             f"When the user asks about analysis:\n"
             f"1. First, understand what data they have\n"
             f"2. Suggest appropriate analyses for their goals\n"

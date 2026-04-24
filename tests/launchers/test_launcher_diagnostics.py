@@ -3,10 +3,7 @@
 import json  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
-import pytest  # noqa: E402
 import yaml  # noqa: E402
-
-pytestmark = pytest.mark.integration
 
 from src.launchers.launcher_diagnostics import (  # noqa: E402
     DiagnosticResult,
@@ -16,7 +13,7 @@ from src.launchers.launcher_diagnostics import (  # noqa: E402
 )
 
 
-def test_diagnostic_result_to_dict() -> None:
+def test_diagnostic_result_to_dict():
     result = DiagnosticResult(
         name="test", status="pass", message="ok", details={"a": 1}, duration_ms=10.123
     )
@@ -31,13 +28,21 @@ def test_diagnostic_result_to_dict() -> None:
 @patch.object(LauncherDiagnostics, "check_python_environment")
 @patch.object(LauncherDiagnostics, "check_models_yaml")
 @patch.object(LauncherDiagnostics, "check_model_registry")
+@patch.object(LauncherDiagnostics, "check_launcher_provider_compatibility")
 @patch.object(LauncherDiagnostics, "check_layout_config")
 @patch.object(LauncherDiagnostics, "check_asset_files")
 @patch.object(LauncherDiagnostics, "check_pyqt6_availability")
 @patch.object(LauncherDiagnostics, "check_engine_availability")
 def test_run_all_checks(
-    mock_engine, mock_qt, mock_assets, mock_layout, mock_registry, mock_yaml, mock_env
-) -> None:
+    mock_engine,
+    mock_qt,
+    mock_assets,
+    mock_layout,
+    mock_provider,
+    mock_registry,
+    mock_yaml,
+    mock_env,
+):
     diag = LauncherDiagnostics()
 
     # Mock some results
@@ -45,7 +50,7 @@ def test_run_all_checks(
     res2 = DiagnosticResult("test2", "fail", "msg2")
     res3 = DiagnosticResult("test3", "warning", "msg3")
 
-    def add_results(*args, **kwargs) -> None:
+    def add_results(*args, **kwargs):
         diag.results.extend([res1, res2, res3])
 
     mock_env.side_effect = add_results
@@ -61,7 +66,7 @@ def test_run_all_checks(
     assert "recommendations" in report
 
 
-def test_check_python_environment() -> None:
+def test_check_python_environment():
     diag = LauncherDiagnostics()
     res = diag.check_python_environment()
     assert res.name == "python_environment"
@@ -70,7 +75,7 @@ def test_check_python_environment() -> None:
 
 
 @patch("pathlib.Path.exists")
-def test_check_models_yaml_missing(mock_exists) -> None:
+def test_check_models_yaml_missing(mock_exists):
     mock_exists.return_value = False
     diag = LauncherDiagnostics()
     res = diag.check_models_yaml()
@@ -81,7 +86,7 @@ def test_check_models_yaml_missing(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_models_yaml_valid(mock_exists) -> None:
+def test_check_models_yaml_valid(mock_exists):
     diag = LauncherDiagnostics()
 
     valid_data = {
@@ -96,7 +101,7 @@ def test_check_models_yaml_valid(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_models_yaml_empty(mock_exists) -> None:
+def test_check_models_yaml_empty(mock_exists):
     diag = LauncherDiagnostics()
     with patch("builtins.open", mock_open(read_data="")):
         res = diag.check_models_yaml()
@@ -107,7 +112,7 @@ def test_check_models_yaml_empty(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_models_yaml_missing_models_key(mock_exists) -> None:
+def test_check_models_yaml_missing_models_key(mock_exists):
     diag = LauncherDiagnostics()
     with patch("builtins.open", mock_open(read_data="foo: bar")):
         res = diag.check_models_yaml()
@@ -118,7 +123,7 @@ def test_check_models_yaml_missing_models_key(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_models_yaml_incomplete(mock_exists) -> None:
+def test_check_models_yaml_incomplete(mock_exists):
     diag = LauncherDiagnostics()
 
     valid_data = {"models": [{"id": "mujoco_unified"}]}
@@ -132,7 +137,7 @@ def test_check_models_yaml_incomplete(mock_exists) -> None:
 
 
 @patch("src.shared.python.config.model_registry.ModelRegistry")
-def test_check_model_registry_success(mock_registry_class) -> None:
+def test_check_model_registry_success(mock_registry_class):
     diag = LauncherDiagnostics()
     mock_registry = MagicMock()
     mock_registry_class.return_value = mock_registry
@@ -148,7 +153,7 @@ def test_check_model_registry_success(mock_registry_class) -> None:
 
 
 @patch("src.shared.python.config.model_registry.ModelRegistry")
-def test_check_model_registry_missing(mock_registry_class) -> None:
+def test_check_model_registry_missing(mock_registry_class):
     diag = LauncherDiagnostics()
     mock_registry = MagicMock()
     mock_registry_class.return_value = mock_registry
@@ -162,8 +167,67 @@ def test_check_model_registry_missing(mock_registry_class) -> None:
     assert "missing" in res.message
 
 
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch(
+    "src.launchers.launcher_provider_compatibility.evaluate_launcher_model_compatibility"
+)
+def test_check_launcher_provider_compatibility_success(
+    mock_evaluate, mock_registry_class
+):
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+    mock_registry.get_all_models.return_value = [MagicMock(id="mujoco_unified")]
+
+    compatible_result = MagicMock()
+    compatible_result.model_id = "mujoco_unified"
+    compatible_result.provider = "local"
+    compatible_result.is_compatible = True
+    compatible_result.issues = ()
+    mock_evaluate.return_value = [compatible_result]
+
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "pass"
+    assert res.details["compatible_model_ids"] == ["mujoco_unified"]
+
+
+@patch("src.shared.python.config.model_registry.ModelRegistry")
+@patch(
+    "src.launchers.launcher_provider_compatibility.evaluate_launcher_model_compatibility"
+)
+def test_check_launcher_provider_compatibility_warning(
+    mock_evaluate, mock_registry_class
+):
+    diag = LauncherDiagnostics()
+    mock_registry = MagicMock()
+    mock_registry_class.return_value = mock_registry
+    mock_registry.get_all_models.return_value = [MagicMock(id="external_model")]
+
+    incompatible_result = MagicMock()
+    incompatible_result.model_id = "external_model"
+    incompatible_result.provider = "drake_models"
+    incompatible_result.is_compatible = False
+    incompatible_result.issues = ("source root does not exist",)
+    mock_evaluate.return_value = [incompatible_result]
+
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "warning"
+    assert res.details["incompatible_models"][0]["model_id"] == "external_model"
+
+
+@patch(
+    "src.shared.python.config.model_registry.ModelRegistry",
+    side_effect=ImportError("mock"),
+)
+def test_check_launcher_provider_compatibility_import_error(mock_registry_class):
+    diag = LauncherDiagnostics()
+    res = diag.check_launcher_provider_compatibility()
+    assert res.status == "warning"
+    assert "unavailable" in res.message
+
+
 @patch("pathlib.Path.exists")
-def test_check_layout_config_missing(mock_exists) -> None:
+def test_check_layout_config_missing(mock_exists):
     # Mock first exists (CONFIG_DIR) and second/third (LAYOUT_CONFIG_FILE)
     mock_exists.side_effect = [True, False, False]
     diag = LauncherDiagnostics()
@@ -173,7 +237,7 @@ def test_check_layout_config_missing(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_layout_config_json_error(mock_exists) -> None:
+def test_check_layout_config_json_error(mock_exists):
     diag = LauncherDiagnostics()
     with patch("builtins.open", mock_open(read_data="{bad json")):
         res = diag.check_layout_config()
@@ -181,7 +245,7 @@ def test_check_layout_config_json_error(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_layout_config_success(mock_exists) -> None:
+def test_check_layout_config_success(mock_exists):
     diag = LauncherDiagnostics()
     layout_data = {"model_order": LauncherDiagnostics.EXPECTED_TILE_IDS}
     with patch("builtins.open", mock_open(read_data=json.dumps(layout_data))):
@@ -190,7 +254,7 @@ def test_check_layout_config_success(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_layout_config_incomplete(mock_exists) -> None:
+def test_check_layout_config_incomplete(mock_exists):
     diag = LauncherDiagnostics()
     layout_data = {"model_order": ["mujoco_unified"]}
     with patch("builtins.open", mock_open(read_data=json.dumps(layout_data))):
@@ -200,7 +264,7 @@ def test_check_layout_config_incomplete(mock_exists) -> None:
 
 
 @patch("pathlib.Path.exists")
-def test_check_asset_files_dir_missing(mock_exists) -> None:
+def test_check_asset_files_dir_missing(mock_exists):
     mock_exists.return_value = False
     diag = LauncherDiagnostics()
     res = diag.check_asset_files()
@@ -209,8 +273,8 @@ def test_check_asset_files_dir_missing(mock_exists) -> None:
 
 @patch("pathlib.Path.exists", autospec=True)
 @patch("pathlib.Path.iterdir")
-def test_check_asset_files_success(mock_iterdir, mock_exists) -> None:
-    def exists_side_effect(self) -> bool:
+def test_check_asset_files_success(mock_iterdir, mock_exists):
+    def exists_side_effect(self):
         # Only some assets exist
         return "mujoco" not in str(self)
 
@@ -229,7 +293,7 @@ def test_check_asset_files_success(mock_iterdir, mock_exists) -> None:
 
 
 @patch("src.shared.python.engine_core.engine_manager.EngineManager")
-def test_check_engine_availability_success(mock_manager_class) -> None:
+def test_check_engine_availability_success(mock_manager_class):
     diag = LauncherDiagnostics()
     mock_mgr = MagicMock()
     mock_manager_class.return_value = mock_mgr
@@ -264,14 +328,14 @@ def test_check_engine_availability_success(mock_manager_class) -> None:
 
 @patch("pathlib.Path.exists")
 @patch("pathlib.Path.rename")
-def test_reset_layout_config(mock_rename, mock_exists) -> None:
+def test_reset_layout_config(mock_rename, mock_exists):
     mock_exists.return_value = True
     assert reset_layout_config() is True
     mock_rename.assert_called_once()
 
 
 @patch.object(LauncherDiagnostics, "run_all_checks")
-def test_run_cli_diagnostics(mock_run) -> None:
+def test_run_cli_diagnostics(mock_run):
     mock_run.return_value = {
         "summary": {"status": "healthy", "passed": 1, "failed": 0, "warnings": 0},
         "checks": [{"name": "check1", "status": "pass", "message": "msg"}],
@@ -281,7 +345,7 @@ def test_run_cli_diagnostics(mock_run) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_models_yaml_yaml_error(mock_exists) -> None:
+def test_check_models_yaml_yaml_error(mock_exists):
     diag = LauncherDiagnostics()
     with patch("builtins.open", mock_open(read_data="[ : invalid yaml")):
         res = diag.check_models_yaml()
@@ -293,7 +357,7 @@ def test_check_models_yaml_yaml_error(mock_exists) -> None:
     "src.shared.python.config.model_registry.ModelRegistry",
     side_effect=ImportError("mock"),
 )
-def test_check_model_registry_import_error(mock_registry_class) -> None:
+def test_check_model_registry_import_error(mock_registry_class):
     diag = LauncherDiagnostics()
     res = diag.check_model_registry()
     assert res.status == "fail"
@@ -304,7 +368,7 @@ def test_check_model_registry_import_error(mock_registry_class) -> None:
     "src.shared.python.config.model_registry.ModelRegistry",
     side_effect=RuntimeError("mock"),
 )
-def test_check_model_registry_runtime_error(mock_registry_class) -> None:
+def test_check_model_registry_runtime_error(mock_registry_class):
     diag = LauncherDiagnostics()
     res = diag.check_model_registry()
     assert res.status == "fail"
@@ -312,7 +376,7 @@ def test_check_model_registry_runtime_error(mock_registry_class) -> None:
 
 
 @patch("pathlib.Path.exists", return_value=True)
-def test_check_layout_config_os_error(mock_exists) -> None:
+def test_check_layout_config_os_error(mock_exists):
     diag = LauncherDiagnostics()
     with patch("builtins.open", side_effect=OSError("denied")):
         res = diag.check_layout_config()
@@ -320,7 +384,7 @@ def test_check_layout_config_os_error(mock_exists) -> None:
     assert "Error reading layout" in res.message
 
 
-def test_check_pyqt6_availability_success() -> None:
+def test_check_pyqt6_availability_success():
     diag = LauncherDiagnostics()
     with (
         patch("PyQt6.QtCore.PYQT_VERSION_STR", "6.0", create=True),
@@ -332,7 +396,7 @@ def test_check_pyqt6_availability_success() -> None:
     assert "PyQt6 available" in res.message
 
 
-def test_check_pyqt6_availability_import_error() -> None:
+def test_check_pyqt6_availability_import_error():
     diag = LauncherDiagnostics()
     with patch.dict("sys.modules", {"PyQt6.QtCore": None, "PyQt6.QtWidgets": None}):
         res = diag.check_pyqt6_availability()
@@ -340,7 +404,7 @@ def test_check_pyqt6_availability_import_error() -> None:
 
 
 @patch("src.shared.python.engine_core.engine_manager.EngineManager")
-def test_check_engine_availability_probe_error(mock_manager_class) -> None:
+def test_check_engine_availability_probe_error(mock_manager_class):
     diag = LauncherDiagnostics()
     mock_mgr = MagicMock()
     mock_manager_class.return_value = mock_mgr
@@ -366,7 +430,7 @@ def test_check_engine_availability_probe_error(mock_manager_class) -> None:
 
 
 @patch("src.shared.python.engine_core.engine_manager.EngineManager")
-def test_check_engine_availability_no_probe(mock_manager_class) -> None:
+def test_check_engine_availability_no_probe(mock_manager_class):
     diag = LauncherDiagnostics()
     mock_mgr = MagicMock()
     mock_manager_class.return_value = mock_mgr
@@ -392,7 +456,7 @@ def test_check_engine_availability_no_probe(mock_manager_class) -> None:
     "src.shared.python.engine_core.engine_manager.EngineManager",
     side_effect=ImportError("mock"),
 )
-def test_check_engine_availability_import_error(mock_manager_class) -> None:
+def test_check_engine_availability_import_error(mock_manager_class):
     diag = LauncherDiagnostics()
     res = diag.check_engine_availability()
     assert res.status == "warning"
@@ -402,13 +466,13 @@ def test_check_engine_availability_import_error(mock_manager_class) -> None:
     "src.shared.python.engine_core.engine_manager.EngineManager",
     side_effect=RuntimeError("mock"),
 )
-def test_check_engine_availability_runtime_error(mock_manager_class) -> None:
+def test_check_engine_availability_runtime_error(mock_manager_class):
     diag = LauncherDiagnostics()
     res = diag.check_engine_availability()
     assert res.status == "warning"
 
 
-def test_generate_recommendations() -> None:
+def test_generate_recommendations():
     diag = LauncherDiagnostics()
     res1 = DiagnosticResult("models_yaml", "fail", "msg", {})
     res2 = DiagnosticResult("model_registry", "fail", "msg", {})
@@ -418,10 +482,11 @@ def test_generate_recommendations() -> None:
         "layout_config", "warning", "msg", {"missing_from_saved": ["drake"]}
     )
     res6 = DiagnosticResult("asset_files", "warning", "msg", {})
+    res7 = DiagnosticResult("launcher_provider_compatibility", "warning", "msg", {})
 
-    diag.results.extend([res1, res2, res3, res4, res5, res6])
+    diag.results.extend([res1, res2, res3, res4, res5, res6, res7])
     recs = diag._generate_recommendations()
-    assert len(recs) == 6
+    assert len(recs) == 7
 
     # Test healthy branch
     diag.results.clear()
@@ -433,14 +498,14 @@ def test_generate_recommendations() -> None:
 
 @patch("pathlib.Path.exists", return_value=True)
 @patch("pathlib.Path.rename", side_effect=OSError("mock"))
-def test_reset_layout_config_error(mock_rename, mock_exists) -> None:
+def test_reset_layout_config_error(mock_rename, mock_exists):
     from src.launchers.launcher_diagnostics import reset_layout_config
 
     assert reset_layout_config() is False
 
 
 @patch.object(LauncherDiagnostics, "run_all_checks")
-def test_run_cli_diagnostics_failures_and_warnings(mock_run) -> None:
+def test_run_cli_diagnostics_failures_and_warnings(mock_run):
     mock_run.return_value = {
         "summary": {"status": "degraded", "passed": 0, "failed": 1, "warnings": 1},
         "checks": [

@@ -41,7 +41,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
 
     def get_matrix_entries(self, mc: dict) -> list:
         """Return list of matrix cell entries for 8x8 (numpy array)."""
-        if not (mc is not None):
+        if mc is None:
             raise ValueError("mc must be provided")
         entries = []
         for row in range(8):
@@ -58,7 +58,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
 
     def paintEvent(self, event: object) -> None:
         """Override to include constraint violation section."""
-        if not (event is not None):
+        if event is None:
             raise ValueError("event must be provided")
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -95,7 +95,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
 
     def _draw_mass_matrix_compact(self, painter: QPainter, y: int) -> int:
         """Draw the 8x8 mass matrix in compact heat-map style."""
-        if not (self._result is not None):
+        if self._result is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         M = self._result.mass_matrix_at(self._current_idx)
 
@@ -155,7 +155,7 @@ class GolferMatrixWidget(MatrixWidgetBase):
 
     def _draw_constraint_violation(self, painter: QPainter, y: int) -> int:
         """Draw constraint violation as a progress bar."""
-        if not (self._result is not None):
+        if self._result is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         v = self._result.constraint_violation_at(self._current_idx)
 

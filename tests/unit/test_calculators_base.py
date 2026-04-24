@@ -8,19 +8,17 @@ from src.shared.python.upstream_drift_tools.calculators.base import (
     BaseCalculationEngine,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class _ConcreteEngine(BaseCalculationEngine):
     """Minimal concrete implementation for testing the ABC."""
 
-    def calculate(self, *args, **kwargs) -> dict:
+    def calculate(self, *args, **kwargs):
         value = kwargs.get("x", 0.0)
         return {"result": float(value) * 2.0, "status": "ok"}
 
 
 class _AddingEngine(BaseCalculationEngine):
-    def calculate(self, *args, **kwargs) -> dict:
+    def calculate(self, *args, **kwargs):
         a = float(kwargs.get("a", 0.0))
         b = float(kwargs.get("b", 0.0))
         return {"sum": a + b}

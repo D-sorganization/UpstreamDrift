@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.upstream_drift_tools.ui.managers.unit_preferences_manager import (
     UNIT_CATEGORIES,
     UNIT_PRESETS,
     UnitPreferencesManager,
     get_unit_preferences_manager,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestUnitCategories:

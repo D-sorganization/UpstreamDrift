@@ -18,8 +18,6 @@ from src.shared.python.data_io.reproducibility import (
     set_seeds,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # set_seeds
 # ---------------------------------------------------------------------------

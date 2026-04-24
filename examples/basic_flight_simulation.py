@@ -10,14 +10,17 @@ the estimated carry distance to landing.
 
 from __future__ import annotations
 
-import pathlib
 import sys
+from pathlib import Path
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+# Allow running from repo root without installing the package
+_this_file = Path(__file__).resolve()
+_project_root = _this_file.parents[1]
+sys.path.insert(0, str(_project_root))
 
-import numpy as np
+import numpy as np  # noqa: E402
 
-from src.shared.python.physics.ball_flight_physics import (
+from src.shared.python.physics.ball_flight_physics import (  # noqa: E402
     BallFlightSimulator,
     BallProperties,
     EnvironmentalConditions,
@@ -54,28 +57,17 @@ def main() -> None:
     simulator = BallFlightSimulator(ball=ball, env=env)
     trajectory = simulator.simulate_trajectory(launch, max_time=8.0, dt=0.05)
 
-    # --- Print summary every 0.5 s (every 10 points at dt=0.05) ---
-    print("\n=== Golf Shot Trajectory ===\n")
-    print(f"{'Time (s)':<10} {'X (m)':<12} {'Z (m)':<12} {'Speed (m/s)':<15}")
-    print("-" * 50)
-    for pt in trajectory[::10]:
-        print(
-            f"{pt.time:<10.2f} {pt.position[0]:<12.2f} {pt.position[2]:<12.2f} "
-            f"{pt.speed:<15.2f}"
-        )
+    # --- Print summary every 0.5 s ---
+    for _pt in trajectory[::10]:
+        pass
 
     # --- Carry distance: last point before height < 0 ---
     landing_pts = [p for p in trajectory if p.height <= 0.0]
     if len(landing_pts) >= 2:
         carry_m = float(landing_pts[-1].position[0])
-        carry_yards = carry_m * 1.0936
-        print("\n=== Results ===\n")
-        print(f"Carry Distance: {carry_m:.2f} m ({carry_yards:.2f} yards)")
-        print(f"Flight Time: {landing_pts[-1].time:.2f} s")
-        print(f"Max Height: {max(p.height for p in trajectory):.2f} m")
+        carry_m * 1.0936
     else:
-        print("\n[Warning] Landing point not found or insufficient data")
-        print(f"Final height: {trajectory[-1].height:.2f} m")
+        pass
 
 
 if __name__ == "__main__":

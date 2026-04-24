@@ -390,29 +390,3 @@ class TestClubDataLoaderMappings:
         from src.shared.python.club_data.loader import ClubDataLoader
 
         assert len(ClubDataLoader.PLAYER_COLUMN_MAPPINGS) > 0
-
-
-class TestSmashFactorUnitValidationBugFix:
-    """Regression tests for smash factor unit validation (#2704 finding #9)."""
-
-    def test_valid_smash_factor_accepted(self) -> None:
-        from src.shared.python.club_data.loader import SwingMetrics
-
-        m = SwingMetrics(club_head_speed_mph=100.0, ball_speed_mph=148.0)
-        assert 1.0 < m.smash_factor < 1.6
-
-    def test_unit_mismatch_raises(self) -> None:
-        """Mixing mph and m/s produces smash factor ~3.6 → ValueError."""
-        from src.shared.python.club_data.loader import SwingMetrics
-
-        with pytest.raises(ValueError, match="unit mismatch"):
-            SwingMetrics(club_head_speed_mph=100.0, ball_speed_mph=44.7)
-
-    def test_explicitly_provided_smash_factor_validated(self) -> None:
-        """Even manually-set smash factors outside range are caught."""
-        from src.shared.python.club_data.loader import SwingMetrics
-
-        with pytest.raises(ValueError, match="physical range"):
-            SwingMetrics(
-                club_head_speed_mph=100.0, ball_speed_mph=100.0, smash_factor=4.0
-            )

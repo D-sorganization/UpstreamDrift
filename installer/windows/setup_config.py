@@ -126,11 +126,10 @@ def build_executable_specs(
     profile: PackagingProfile,
 ) -> tuple[ExecutableSpec, ...]:
     """Build executable metadata for the selected packaging profile."""
-    src_root = project_root / "src"
-    icon_path = str(src_root / "launchers" / "assets" / "golf_robot_icon.ico")
+    icon_path = str(project_root / "shared" / "icons" / "golf_robot.ico")
     executables = [
         ExecutableSpec(
-            script=str(project_root / "launch_golf_suite.py"),
+            script=str(project_root / "launchers" / "golf_launcher.py"),
             base="Win32GUI",
             target_name="GolfModelingSuite.exe",
             icon=icon_path,
@@ -141,7 +140,7 @@ def build_executable_specs(
     if profile.include_api_executable:
         executables.append(
             ExecutableSpec(
-                script=str(project_root / "start_api_server.py"),
+                script=str(project_root / "api" / "server.py"),
                 base="Console",
                 target_name="GolfAPI.exe",
                 icon=icon_path,
@@ -158,8 +157,6 @@ def build_setup_configuration(
 ) -> SetupProfileConfiguration:
     """Resolve the full cx_Freeze setup configuration for the selected profile."""
     profile = get_packaging_profile(profile_name)
-    src_root = project_root / "src"
-    launchers_assets_dir = src_root / "launchers" / "assets"
     available_engines = detect_available_engines(profile, importer=importer)
     packages = list(BASE_PACKAGES)
     for engine_id in available_engines:
@@ -169,10 +166,9 @@ def build_setup_configuration(
         "packages": packages,
         "excludes": list(EXCLUDES),
         "include_files": [
-            (str(src_root / "shared" / "urdf"), "src/shared/urdf"),
-            (str(src_root / "shared" / "meshes"), "src/shared/meshes"),
-            (str(launchers_assets_dir), "src/launchers/assets"),
-            (str(src_root / "config"), "src/config"),
+            (str(project_root / "shared" / "urdf"), "shared/urdf"),
+            (str(project_root / "shared" / "meshes"), "shared/meshes"),
+            (str(project_root / "config"), "config"),
             (str(project_root / "docs"), "docs"),
             (str(project_root / "README.md"), "README.md"),
             (str(project_root / "LICENSE"), "LICENSE"),
@@ -186,7 +182,7 @@ def build_setup_configuration(
         "upgrade_code": "{12345678-1234-5678-9012-123456789012}",
         "add_to_path": True,
         "initial_target_dir": rf"[ProgramFilesFolder]\UpstreamDrift\{profile.profile_id}",
-        "install_icon": str(launchers_assets_dir / "golf_robot_icon.ico"),
+        "install_icon": str(project_root / "shared" / "icons" / "golf_robot.ico"),
         "summary_data": {
             "author": "UpstreamDrift Team",
             "comments": profile.description,

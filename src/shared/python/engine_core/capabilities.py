@@ -24,42 +24,15 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+SPATIAL_JACOBIAN_ORDER = ("angular", "linear")
+"""Canonical suite row order for ``jacobian["spatial"]``.
 
-class Capability(Enum):
-    """Discrete physics-engine capabilities used by ``BasePhysicsEngine.capabilities()``.
-
-    Each member maps to a concrete method that callers may invoke.
-    If a capability is *not* in the set returned by ``capabilities()``,
-    the corresponding method is unsupported and may raise
-    ``NotImplementedError``.
-
-    Usage::
-
-        engine = PinocchioPhysicsEngine()
-        if Capability.CONTACT_FORCES in engine.capabilities():
-            forces = engine.compute_contact_forces()
-
-    Members:
-        FORWARD_DYNAMICS: ``step()`` / ``forward()`` are implemented.
-        INVERSE_DYNAMICS: ``compute_inverse_dynamics()`` is implemented.
-        CONTACT_FORCES: ``compute_contact_forces()`` returns real data.
-        ENERGY_COMPUTATION: kinetic / potential energy queries are available.
-        MASS_MATRIX: ``compute_mass_matrix()`` is implemented.
-        JACOBIAN: ``compute_jacobian()`` is implemented.
-        DRIFT_CONTROL: ``compute_drift_acceleration()`` /
-            ``compute_control_acceleration()`` are implemented.
-        COUNTERFACTUAL: ``compute_ztcf()`` / ``compute_zvcf()`` are
-            implemented.
-    """
-
-    FORWARD_DYNAMICS = auto()
-    INVERSE_DYNAMICS = auto()
-    CONTACT_FORCES = auto()
-    ENERGY_COMPUTATION = auto()
-    MASS_MATRIX = auto()
-    JACOBIAN = auto()
-    DRIFT_CONTROL = auto()
-    COUNTERFACTUAL = auto()
+Engine wrappers expose separate ``linear`` and ``angular`` matrices and a
+combined ``spatial`` matrix. The combined matrix is stacked as
+``[angular; linear]`` for compatibility with Drake spatial velocity ordering.
+Wrappers whose native API returns ``[linear; angular]`` must restack before
+returning ``spatial``.
+"""
 
 
 class CapabilityLevel(Enum):
@@ -162,6 +135,7 @@ class EngineCapabilities:
             "force_visualization": self.force_visualization.name.lower(),
             "model_positioning": self.model_positioning.name.lower(),
             "measurements": self.measurements.name.lower(),
+            "spatial_jacobian_order": "_".join(SPATIAL_JACOBIAN_ORDER),
         }
 
     @classmethod
@@ -174,9 +148,7 @@ class EngineCapabilities:
         Returns:
             EngineCapabilities instance.
         """
-        if not (data is not None):
-            raise ValueError("data must be provided")
-        if not (data is not None):
+        if data is None:
             raise ValueError("data must be provided")
         level_map = {
             "full": CapabilityLevel.FULL,

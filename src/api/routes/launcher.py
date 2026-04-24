@@ -40,9 +40,10 @@ def _get_manifest() -> LauncherManifest:
                 status_code=500,
                 detail=f"Launcher manifest error: {e}",
             ) from e
-    result = _launcher_state["manifest"]
-    assert result is not None  # guaranteed: loaded above or HTTPException raised
-    return result
+    # Guaranteed non-None after the check above
+    manifest = _launcher_state["manifest"]
+    assert manifest is not None  # for mypy
+    return manifest
 
 
 @router.get("/manifest")
@@ -297,7 +298,7 @@ def _get_engine_capabilities() -> dict[str, dict[str, str]]:
     profiles = _build_engine_profiles()
     _capabilities_state["cache"] = {k: v.to_dict() for k, v in profiles.items()}
 
-    if not (_capabilities_state["cache"] is not None):  # Ensure not None for mypy
+    if _capabilities_state["cache"] is None:  # Ensure not None for mypy
         raise ValueError("DbC Blocked: Precondition failed.")
     return _capabilities_state["cache"]
 

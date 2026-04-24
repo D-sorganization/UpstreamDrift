@@ -65,7 +65,7 @@ def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:
         r_rot = (
             np.eye(3)
             + np.sin(theta) * omega_hat
-            + (1 - np.cos(theta)) * (omega_hat @ omega_hat)
+            + (1 - np.cos(theta)) * (omega_hat @ omega_hat)  # noqa: E501
         )
 
         # Position component (Proposition 3.14 in Lynch & Park)

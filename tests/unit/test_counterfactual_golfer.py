@@ -11,8 +11,6 @@ from src.shared.python.pendulum_simulator.counterfactual_golfer import (
 )
 from src.shared.python.pendulum_simulator.physics_golfer import N_DOF, GolferParams
 
-pytestmark = pytest.mark.unit
-
 
 def _make_params() -> GolferParams:
     return GolferParams(

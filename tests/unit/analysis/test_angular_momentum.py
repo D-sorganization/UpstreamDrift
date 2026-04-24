@@ -7,8 +7,6 @@ import pytest
 
 from src.shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
 
-pytestmark = pytest.mark.unit
-
 
 class _Concrete(AngularMomentumMetricsMixin):
     def __init__(self) -> None:

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   archive-stale-docs:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     steps:
       - uses: actions/checkout@v6
 

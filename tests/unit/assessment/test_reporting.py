@@ -4,14 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from src.shared.python.assessment.reporting import (
     generate_issue_document,
     generate_markdown_report,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestGenerateMarkdownReport:

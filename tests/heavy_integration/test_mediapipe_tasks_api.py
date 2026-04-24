@@ -7,21 +7,19 @@ All tests skip gracefully when mediapipe is not installed.
 
 from __future__ import annotations
 
-from types import ModuleType
-
 import numpy as np
 import pytest
 
 
 @pytest.fixture(scope="module")
-def mp() -> ModuleType:
+def mp():
     """Import mediapipe or skip the module."""
     mp_mod = pytest.importorskip("mediapipe")
     return mp_mod
 
 
 @pytest.fixture(scope="module")
-def synthetic_rgb_frame() -> np.ndarray:
+def synthetic_rgb_frame():
     """A 480×640 synthetic RGB image (blank white)."""
     return np.ones((480, 640, 3), dtype=np.uint8) * 200
 

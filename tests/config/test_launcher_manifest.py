@@ -56,6 +56,14 @@ def sample_tile_dict() -> dict:
     }
 
 
+@pytest.fixture
+def registry_path(tmp_path: Path) -> Path:
+    """A minimal local registry file for provider-manifest tests."""
+    config_path = tmp_path / "models.yaml"
+    config_path.write_text("models: []\n", encoding="utf-8")
+    return config_path
+
+
 # =============================================================================
 # 1. Manifest Loading
 # =============================================================================
@@ -112,6 +120,254 @@ class TestManifestLoading:
         bad.write_text(json.dumps({"tiles": [tile, tile]}))
         with pytest.raises(ValueError, match="Duplicate"):
             LauncherManifest.load(bad)
+
+    def test_manifest_loads_provider_tiles_from_configured_roots(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider manifests augment the launcher tile list through the registry."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "mujoco-models"
+        provider_root.mkdir(parents=True)
+        provider_manifest = provider_root / "model_pack.yaml"
+        provider_manifest.write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "mujoco-pack"
+pack_name: "MuJoCo Models"
+provider: "mujoco_models"
+models:
+  - id: "external_mujoco"
+    name: "External MuJoCo"
+    description: "Provider-backed MuJoCo model"
+    type: "custom_humanoid"
+    path: "apps/mujoco_launcher.py"
+    engine_type: "mujoco"
+    capabilities: ["rigid_body", "contact"]
+    order: 4
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("external_mujoco")
+        assert tile is not None
+        assert tile.category == "physics_engine"
+        assert tile.provider == "mujoco_models"
+        assert tile.source_root == str(provider_root)
+        assert tile.logo == "mujoco_humanoid.svg"
+        assert tile.capabilities == ("rigid_body", "contact")
+
+    def test_manifest_prefers_explicit_provider_launcher_metadata(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider packs can define launcher presentation without loader inference."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "drake-models"
+        provider_root.mkdir(parents=True)
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "drake-pack"
+pack_name: "Drake Models"
+provider: "drake_models"
+models:
+  - id: "external_drake"
+    name: "External Drake"
+    description: "Provider-backed Drake model"
+    type: "drake"
+    path: "apps/drake_launcher.py"
+    engine_type: "drake"
+    capabilities: ["rigid_body"]
+    launcher:
+      category: "physics_engine"
+      logo: "drake.svg"
+      status: "experimental"
+      web_route: "/providers/drake"
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("external_drake")
+        assert tile is not None
+        assert tile.category == "physics_engine"
+        assert tile.logo == "drake.svg"
+        assert tile.status == "experimental"
+        assert tile.web_route == "/providers/drake"
+
+    def test_manifest_marks_provider_tile_runtime_unavailable(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider tiles should surface runtime-unavailable status cleanly."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "pinocchio-models"
+        (provider_root / "models").mkdir(parents=True)
+        (provider_root / "models" / "pinocchio.urdf").write_text(
+            "<robot />",
+            encoding="utf-8",
+        )
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "pinocchio-pack"
+pack_name: "Pinocchio Models"
+provider: "pinocchio_models"
+models:
+  - id: "external_pinocchio"
+    name: "External Pinocchio"
+    description: "Provider-backed Pinocchio model"
+    type: "urdf"
+    path: "models/pinocchio.urdf"
+    engine_type: "pinocchio"
+    capabilities: ["rigid_body"]
+    identity:
+      canonical_id: "demo.external.pinocchio"
+      motion_family: "demo"
+      exercise: "pinocchio"
+      humanoid: "athlete"
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+        monkeypatch.setattr(
+            "src.config.launcher_manifest_loader.is_engine_runtime_available",
+            lambda engine_type: False,
+        )
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("external_pinocchio")
+        assert tile is not None
+        assert tile.status == "runtime_unavailable"
+
+    def test_manifest_loads_utility_provider_tiles_from_known_roots_without_env(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        """Utility repos should be discoverable through the shared launch path."""
+        workspace_root = tmp_path
+        repo_root = workspace_root / "UpstreamDrift"
+        manifest_path = repo_root / "src" / "config" / "launcher_manifest.json"
+        registry_path = repo_root / "src" / "config" / "models.yaml"
+        manifest_path.parent.mkdir(parents=True)
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+        registry_path.write_text("models: []\n", encoding="utf-8")
+
+        tools_root = workspace_root / "Tools"
+        tools_root.mkdir(parents=True)
+        (tools_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "tools-pack"
+pack_name: "Tools"
+provider: "tools"
+models:
+  - id: "pendulum_suite"
+    name: "Pendulum Suite"
+    description: "Pendulum workflows"
+    type: "special_app"
+    path: "src/pendulum_launcher.py"
+    capabilities: ["pendulum", "simulation"]
+    launcher:
+      category: "tool"
+      logo: "golf_logo.svg"
+      status: "utility"
+      web_route: "/tools/pendulum-suite"
+""".strip(),
+            encoding="utf-8",
+        )
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        tile = manifest.get_tile("pendulum_suite")
+        assert tile is not None
+        assert tile.category == "tool"
+        assert tile.status == "utility"
+        assert tile.web_route == "/tools/pendulum-suite"
+
+    def test_manifest_ignores_provider_tiles_when_disabled(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Provider discovery is opt-out for callers that need static-only tiles."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps({"version": "1.0.0", "tiles": []}),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "opensim-models"
+        provider_root.mkdir(parents=True)
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "opensim-pack"
+pack_name: "OpenSim Models"
+provider: "opensim_models"
+models:
+  - id: "external_opensim"
+    name: "External OpenSim"
+    description: "Provider-backed OpenSim model"
+    type: "opensim"
+    path: "apps/opensim_gui.py"
+    engine_type: "opensim"
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            include_provider_tiles=False,
+            registry_path=registry_path,
+        )
+
+        assert manifest.get_tile("external_opensim") is None
 
 
 # =============================================================================
@@ -221,6 +477,65 @@ class TestOrdering:
         ids1 = manifest.ordered_ids
         ids2 = LauncherManifest.load().ordered_ids
         assert ids1 == ids2
+
+    def test_mixed_static_and_provider_tiles_sort_by_order_then_id(
+        self,
+        tmp_path: Path,
+        registry_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Mixed tile sources preserve deterministic ordering across migration."""
+        manifest_path = tmp_path / "launcher_manifest.json"
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "version": "1.0.0",
+                    "tiles": [
+                        {
+                            "id": "z_static",
+                            "name": "Z Static",
+                            "description": "Static tile",
+                            "category": "tool",
+                            "type": "special_app",
+                            "path": "src/z_static.py",
+                            "logo": "golf_logo.svg",
+                            "status": "utility",
+                            "capabilities": ["docs"],
+                            "order": 3,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        provider_root = tmp_path / "providers" / "mujoco-models"
+        provider_root.mkdir(parents=True)
+        (provider_root / "model_pack.yaml").write_text(
+            """
+manifest_version: "1.0.0"
+pack_id: "mujoco-pack"
+pack_name: "MuJoCo Models"
+provider: "mujoco_models"
+models:
+  - id: "a_provider"
+    name: "A Provider"
+    description: "Provider tile"
+    type: "custom_humanoid"
+    path: "apps/mujoco_launcher.py"
+    engine_type: "mujoco"
+    order: 3
+""".strip(),
+            encoding="utf-8",
+        )
+        monkeypatch.setenv("UPSTREAM_DRIFT_PROVIDER_ROOTS", str(provider_root))
+
+        manifest = LauncherManifest.load(
+            manifest_path,
+            registry_path=registry_path,
+        )
+
+        assert manifest.ordered_ids == ["a_provider", "z_static"]
 
 
 # =============================================================================

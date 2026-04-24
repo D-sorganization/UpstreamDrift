@@ -46,7 +46,7 @@ def update_upstream_drift() -> bool:
             logger.info("🚀 Running: %s", " ".join(cmd))
             logger.info(
                 "📦 This should be quick since we're just adding one package..."
-            )
+            )  # noqa: E501
 
             subprocess.run(cmd, cwd=temp_dir, check=True, text=True)
 
@@ -94,7 +94,7 @@ def test_updated_environment() -> bool:
                 "python",
                 "-c",
                 "import defusedxml.ElementTree; "
-                "print('✅ defusedxml.ElementTree available')",
+                "print('✅ defusedxml.ElementTree available')",  # noqa: E501
             ],
             capture_output=True,
             text=True,
@@ -155,16 +155,16 @@ def main() -> int:
         if test_success:
             logger.info(
                 "\n🎉 Success! The upstream-drift now has all required dependencies."
-            )
+            )  # noqa: E501
             logger.info("💡 You can now run MuJoCo, Drake, and Pinocchio simulations!")
         else:
             logger.error(
                 "\n⚠️  Update completed but tests failed. Check the output above."
-            )
+            )  # noqa: E501
     else:
         logger.error(
             "\n💥 Failed to update upstream-drift. Check error messages above."
-        )
+        )  # noqa: E501
 
     return 0 if success else 1
 

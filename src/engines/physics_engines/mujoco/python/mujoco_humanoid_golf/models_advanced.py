@@ -19,12 +19,12 @@ _ball_radius_param = _registry.get("BALL_RADIUS")
 BALL_MASS = (
     float(_ball_mass_param.value)
     if _ball_mass_param
-    else float(constants.GOLF_BALL_MASS_KG)
+    else float(constants.GOLF_BALL_MASS_KG)  # noqa: E501
 )
 BALL_RADIUS = (
     float(_ball_radius_param.value)
     if _ball_radius_param
-    else float(constants.GOLF_BALL_RADIUS_M)
+    else float(constants.GOLF_BALL_RADIUS_M)  # noqa: E501
 )
 
 

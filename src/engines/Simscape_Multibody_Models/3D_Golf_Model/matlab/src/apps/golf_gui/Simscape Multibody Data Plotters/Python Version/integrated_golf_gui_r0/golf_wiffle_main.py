@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
+
 #!/usr/bin/env python3
 """
 Golf Swing Visualizer - Wiffle_ProV1 Main Application
@@ -7,7 +11,6 @@ Enhanced main application with Excel data loading and advanced visualization
 import logging
 import sys
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -48,9 +51,7 @@ class DataLoadingThread(QThread):
     loadingError = pyqtSignal(str)
 
     def __init__(self, excel_file_path: str, config: WiffleDataConfig) -> None:
-        if not (excel_file_path is not None):
-            raise ValueError("excel_file_path must be provided")
-        if not (excel_file_path is not None):
+        if excel_file_path is None:
             raise ValueError("excel_file_path must be provided")
         super().__init__()
         self.excel_file_path = excel_file_path
@@ -398,9 +399,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _load_excel_file(self, file_path: str = None) -> None:
         """Load Excel file with Wiffle_ProV1 data"""
-        if not (file_path is not None):
-            raise ValueError("file_path must be provided")
-        if not (file_path is not None):
+        if file_path is None:
             raise ValueError("file_path must be provided")
         if file_path is None:
             file_path, _ = QFileDialog.getOpenFileName(
@@ -436,18 +435,14 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_loading_progress(self, message: str) -> None:
         """Handle loading progress updates"""
-        if not (message is not None):
-            raise ValueError("message must be provided")
-        if not (message is not None):
+        if message is None:
             raise ValueError("message must be provided")
         self.progress_text.append(message)
         self.statusBar().showMessage(message)
 
-    def _on_data_loaded(self, baseq: Any, ztcfq: Any, deltaq: Any) -> None:
+    def _on_data_loaded(self, baseq, ztcfq, deltaq) -> None:
         """Handle successful data loading"""
-        if not (baseq is not None):
-            raise ValueError("baseq must be provided")
-        if not (baseq is not None):
+        if baseq is None:
             raise ValueError("baseq must be provided")
         self.baseq_data = baseq
         self.ztcfq_data = ztcfq
@@ -479,9 +474,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_loading_error(self, error_message: str) -> None:
         """Handle loading errors"""
-        if not (error_message is not None):
-            raise ValueError("error_message must be provided")
-        if not (error_message is not None):
+        if error_message is None:
             raise ValueError("error_message must be provided")
         self.progress_bar.setVisible(False)
         self.progress_text.setVisible(False)
@@ -490,9 +483,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _on_ball_type_changed(self, ball_type: str) -> None:
         """Handle ball type selection change"""
-        if not (ball_type is not None):
-            raise ValueError("ball_type must be provided")
-        if not (ball_type is not None):
+        if ball_type is None:
             raise ValueError("ball_type must be provided")
         if not self.data_loaded:
             return
@@ -501,17 +492,17 @@ class WiffleGolfMainWindow(QMainWindow):
         if ball_type == "ProV1":
             self.visualizer_widget.load_data(
                 self.baseq_data, self.ztcfq_data, self.deltaq_data
-            )
+            )  # noqa: E501
         elif ball_type == "Wiffle":
             # Swap BASEQ and ZTCFQ to show Wiffle as primary
             self.visualizer_widget.load_data(
                 self.ztcfq_data, self.baseq_data, self.deltaq_data
-            )
+            )  # noqa: E501
         elif ball_type == "Difference":
             # Show difference data
             self.visualizer_widget.load_data(
                 self.deltaq_data, self.baseq_data, self.ztcfq_data
-            )
+            )  # noqa: E501
 
     def _on_visibility_changed(self) -> None:
         """Handle visibility checkbox changes"""
@@ -552,7 +543,7 @@ class WiffleGolfMainWindow(QMainWindow):
             current_file = self.file_path_label.text()
             if current_file.startswith("Loaded:") or current_file.startswith(
                 "Loading:"
-            ):
+            ):  # noqa: E501
                 # Extract file path from previous load
                 # This is a simplified approach - in practice you'd store the path
                 self._load_excel_file()
@@ -583,7 +574,7 @@ class WiffleGolfMainWindow(QMainWindow):
         except (RuntimeError, ValueError, OSError) as e:
             self.metrics_label.setText(f"Error calculating metrics: {str(e)}")
 
-    def _calculate_max_speed(self, data: Any) -> float:
+    def _calculate_max_speed(self, data) -> float:
         """Calculate maximum clubhead speed"""
         try:
             # Calculate velocity from position data
@@ -612,9 +603,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
     def _update_frame_metrics(self, frame_idx: int) -> None:
         """Update metrics for current frame"""
-        if not (frame_idx is not None):
-            raise ValueError("frame_idx must be provided")
-        if not (frame_idx is not None):
+        if frame_idx is None:
             raise ValueError("frame_idx must be provided")
         if not self.data_loaded or frame_idx >= len(self.baseq_data):
             return
@@ -643,7 +632,7 @@ class WiffleGolfMainWindow(QMainWindow):
             time_val = self.baseq_data.iloc[frame_idx]["Time"]
             self.statusBar().showMessage(
                 f"Frame {frame_idx + 1}, Time: {time_val:.3f}s, "
-                f"Distance: {distance:.3f}m"
+                f"Distance: {distance:.3f}m"  # noqa: E501
             )
 
         except (ValueError, TypeError, RuntimeError):
@@ -686,12 +675,12 @@ class WiffleGolfMainWindow(QMainWindow):
                 comparison_data.to_csv(file_path, index=False)
                 QMessageBox.information(
                     self, "Export Complete", f"Data exported to {file_path}"
-                )
+                )  # noqa: E501
 
             except (RuntimeError, ValueError, OSError) as e:
                 QMessageBox.critical(
                     self, "Export Error", f"Error exporting data: {str(e)}"
-                )
+                )  # noqa: E501
 
     def _show_about(self) -> None:
         """Show about dialog"""

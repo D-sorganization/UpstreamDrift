@@ -73,9 +73,7 @@ class GitHubImporter:
         Returns:
             List of import results
         """
-        if not (query is not None):
-            raise ValueError("query must be provided")
-        if not (query is not None):
+        if query is None:
             raise ValueError("query must be provided")
         results = []
 
@@ -110,8 +108,12 @@ class GitHubImporter:
             items = data.get("items", [])
             logger.info(f"Found {len(items)} repositories")
 
-            for item in items[:max_results]:
-                results.append(self._process_search_item(item, dry_run))
+            results.extend(
+                [
+                    self._process_search_item(item, dry_run)
+                    for item in items[:max_results]
+                ]
+            )
 
         except (PermissionError, OSError) as e:
             logger.error(f"Search failed: {e}")
@@ -121,9 +123,7 @@ class GitHubImporter:
 
     def _process_search_item(self, item: dict[str, Any], dry_run: bool) -> ImportResult:
         """Process a single search result item."""
-        if not (item is not None):
-            raise ValueError("item must be provided")
-        if not (item is not None):
+        if item is None:
             raise ValueError("item must be provided")
         owner = item["owner"]["login"]
         repo_name = item["name"]
@@ -194,16 +194,16 @@ class GitHubImporter:
         Returns:
             List of import results
         """
-        if not (urls is not None):
-            raise ValueError("urls must be provided")
-        if not (urls is not None):
+        if urls is None:
             raise ValueError("urls must be provided")
         results = []
 
-        for url in urls:
-            results.append(
+        results.extend(
+            [
                 self._import_single_url(url, flatten_structure, skip_existing)
-            )
+                for url in urls
+            ]
+        )
 
         return results
 
@@ -275,9 +275,7 @@ class GitHubImporter:
         self, url: str, owner: str, repo_name: str
     ) -> tuple[str, str]:
         """Fetch repository metadata (branch and description) from GitHub API."""
-        if not (url is not None):
-            raise ValueError("url must be provided")
-        if not (url is not None):
+        if url is None:
             raise ValueError("url must be provided")
         api_url = f"{self.API_BASE}/repos/{owner}/{repo_name}"
         branch = "main"

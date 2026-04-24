@@ -1,3 +1,10 @@
+# Environment secrets
+.env
+.env.*
+!.env.example
+!.env.docker.example
+!.env.*.example
+
 # Merge conflict artifacts
 *.ours
 *.theirs
@@ -79,12 +86,12 @@ quality_report*.txt
 black_report*.txt
 coverage.xml
 coverage.json
-htmlcov/
-
-# Generated security scan artifacts
+bandit_results.json
 reports/bandit.json
-reports/pip_audit.json
-reports/semgrep.json
+temp_id.txt
+matlab_quality_report.txt
+test.npz
+htmlcov/
 
 # Test output debris (prevent accumulation at root)
 test_*.txt
@@ -101,6 +108,7 @@ run_log.txt
 
 # Generated agent memory
 .jules/bolt.md
+.jules/completist_data/
 
 # Jules generated files
 .jules/bolt*
@@ -161,15 +169,6 @@ failed_pytest.log
 ci_failed_pytest.log
 .tmp_gui_test.log
 
-# Sphinx build artifacts — do not commit generated static files
-docs/sphinx/_static/jquery.js
-docs/sphinx/_static/doctools.js
-docs/sphinx/_static/searchtools.js
-docs/sphinx/_static/sphinx_highlight.js
-docs/sphinx/_static/_sphinx_javascript_frameworks_compat.js
-docs/sphinx/_static/documentation_options.js
-docs/sphinx/_static/language_data.js
-
 # Root-level junk analysis docs (belong in docs/development/ per AGENTS.md)
 BUILD_INFRASTRUCTURE_REVIEW.md
 CONFIG_ISSUES_QUICK_REFERENCE.md
@@ -189,3 +188,7 @@ pkg/
 
 # Rust build artifacts
 target/
+venv/
+testenv/
+venv/
+test_venv/

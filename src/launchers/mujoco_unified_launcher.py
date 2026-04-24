@@ -6,10 +6,20 @@ Hub for accessing MuJoCo Humanoid Simulation and Analysis Dashboard.
 Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
-import subprocess
 import sys
 
 from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher
+from src.shared.python.security.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+)
+
+
+def _spawn_process(
+    command: list[str], cwd: object, env: dict[str, str] | None = None
+) -> None:
+    """Spawn a launcher subprocess through the secure wrapper."""
+    secure_popen(command, cwd=cwd, suite_root=REPO_ROOT, env=env)
 
 
 class MujocoUnifiedLauncher(BaseLauncher):
@@ -76,9 +86,7 @@ class MujocoUnifiedLauncher(BaseLauncher):
         Args:
             relative_path: Path relative to REPO_ROOT
         """
-        if not (relative_path is not None):
-            raise ValueError("relative_path must be provided")
-        if not (relative_path is not None):
+        if relative_path is None:
             raise ValueError("relative_path must be provided")
         script_path = REPO_ROOT / relative_path
         if not script_path.exists():
@@ -87,8 +95,13 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             env = self._get_launch_env()
-            subprocess.Popen([sys.executable, str(script_path)], cwd=REPO_ROOT, env=env)
-        except (FileNotFoundError, PermissionError, OSError) as e:
+            _spawn_process([sys.executable, str(script_path)], cwd=REPO_ROOT, env=env)
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             self.show_error("Launch Error", str(e))
 
     def _launch_python_module(
@@ -100,9 +113,7 @@ class MujocoUnifiedLauncher(BaseLauncher):
             module_name: Name of the module to run (e.g., "mujoco_humanoid_golf")
             cwd_suffix: Optional path suffix for working directory
         """
-        if not (module_name is not None):
-            raise ValueError("module_name must be provided")
-        if not (module_name is not None):
+        if module_name is None:
             raise ValueError("module_name must be provided")
         cwd = REPO_ROOT
         if cwd_suffix:
@@ -110,12 +121,13 @@ class MujocoUnifiedLauncher(BaseLauncher):
 
         try:
             env = self._get_launch_env()
-            subprocess.Popen(
-                [sys.executable, "-m", module_name],
-                cwd=cwd,
-                env=env,
-            )
-        except (FileNotFoundError, PermissionError, OSError) as e:
+            _spawn_process([sys.executable, "-m", module_name], cwd=cwd, env=env)
+        except (
+            FileNotFoundError,
+            PermissionError,
+            OSError,
+            SecureSubprocessError,
+        ) as e:
             self.show_error("Launch Error", str(e))
 
 

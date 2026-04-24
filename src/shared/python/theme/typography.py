@@ -137,9 +137,7 @@ def get_qfont(
     Note:
         This is a lazy import to avoid Qt dependency in non-GUI contexts.
     """
-    if not (size is not None):
-        raise ValueError("size must be provided")
-    if not (size is not None):
+    if size is None:
         raise ValueError("size must be provided")
     from PyQt6.QtGui import QFont
 
@@ -170,9 +168,7 @@ def get_display_font(size: int = Sizes.XL, weight: int = Weights.BOLD) -> "QFont
     Returns:
         Configured QFont for headings
     """
-    if not (size is not None):
-        raise ValueError("size must be provided")
-    if not (size is not None):
+    if size is None:
         raise ValueError("size must be provided")
     from PyQt6.QtGui import QFont
 
@@ -195,9 +191,7 @@ def get_mono_font(size: int = Sizes.BASE, weight: int = Weights.NORMAL) -> "QFon
     Returns:
         Configured monospace QFont
     """
-    if not (size is not None):
-        raise ValueError("size must be provided")
-    if not (size is not None):
+    if size is None:
         raise ValueError("size must be provided")
     from PyQt6.QtGui import QFont
 

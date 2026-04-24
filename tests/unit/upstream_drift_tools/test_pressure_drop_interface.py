@@ -11,8 +11,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_ca
     list_materials,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestListFunctions:
     def test_list_materials_nonempty(self) -> None:

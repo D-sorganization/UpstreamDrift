@@ -5,21 +5,19 @@ from src.reinforcement_learning.trajectory_funnel_benchmark import (
     TrajectoryFunnelBenchmark,
 )
 
-pytestmark = pytest.mark.unit
 
-
-def test_initialization() -> None:
+def test_initialization():
     bench = TrajectoryFunnelBenchmark("transverse")
     assert bench.mode == "transverse"
 
     bench2 = TrajectoryFunnelBenchmark("setpoint")
     assert bench2.mode == "setpoint"
 
-    with pytest.raises((AssertionError, ValueError)):
+    with pytest.raises(AssertionError):
         TrajectoryFunnelBenchmark("invalid")
 
 
-def test_setpoint_reward() -> None:
+def test_setpoint_reward():
     bench = TrajectoryFunnelBenchmark("setpoint")
 
     current = np.array([1.0, 2.0])
@@ -28,11 +26,11 @@ def test_setpoint_reward() -> None:
     res = bench.setpoint_reward(current, target)
     assert res == -1.0
 
-    with pytest.raises((AssertionError, ValueError)):
+    with pytest.raises(AssertionError):
         bench.setpoint_reward(None, target)
 
 
-def test_trajectory_funnel_reward() -> None:
+def test_trajectory_funnel_reward():
     bench = TrajectoryFunnelBenchmark("transverse")
 
     current = np.array([0.0, 0.5])
@@ -48,13 +46,16 @@ def test_trajectory_funnel_reward() -> None:
     assert np.isclose(res, -2.5)
 
 
-def test_simulate_agent_training_mock() -> None:
+def test_simulate_agent_training_mock_raises():
+    """simulate_agent_training_mock raises NotImplementedError (issue #3168).
+
+    The method previously returned hardcoded mock values. It now raises
+    NotImplementedError to make the absence of real RL integration explicit.
+    """
     bench_setpoint = TrajectoryFunnelBenchmark("setpoint")
-    res1 = bench_setpoint.simulate_agent_training_mock()
-    assert res1["convergence_epochs"] == 15000
-    assert res1["terminal_variance"] == 4.5
+    with pytest.raises(NotImplementedError, match="Real RL training integration"):
+        bench_setpoint.simulate_agent_training_mock()
 
     bench_transverse = TrajectoryFunnelBenchmark("transverse")
-    res2 = bench_transverse.simulate_agent_training_mock()
-    assert res2["convergence_epochs"] == 2400
-    assert res2["terminal_variance"] == 0.03
+    with pytest.raises(NotImplementedError, match="Real RL training integration"):
+        bench_transverse.simulate_agent_training_mock()

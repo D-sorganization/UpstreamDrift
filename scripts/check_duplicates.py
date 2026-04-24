@@ -70,6 +70,10 @@ def get_file_hash(path: Path) -> str:
 
 def find_duplicates(root_dir: Path) -> int:
     """Find duplicate files by name and content."""
+    if not isinstance(root_dir, Path):
+        raise TypeError("root_dir must be a pathlib.Path")
+    if not root_dir.exists():
+        raise ValueError(f"root_dir does not exist: {root_dir}")
     files_by_name = defaultdict(list)
     files_by_hash = defaultdict(list)
 

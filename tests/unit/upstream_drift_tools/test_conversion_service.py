@@ -14,8 +14,6 @@ from src.shared.python.upstream_drift_tools.calculators.conversion.service impor
     UnknownUnitError,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # ConversionResult dataclass
 # ---------------------------------------------------------------------------

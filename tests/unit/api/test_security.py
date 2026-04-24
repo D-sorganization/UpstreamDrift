@@ -72,7 +72,7 @@ class TestSecurityManagerHashPassword:
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
-            password = "password123"
+            password = "password123"  # nosec B105 - test fixture, not a real credential
             hashed = manager.hash_password(password)
             assert hashed != password
 
@@ -84,7 +84,7 @@ class TestSecurityManagerHashPassword:
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
-            password = "password123"
+            password = "password123"  # nosec B105 - test fixture, not a real credential
             hash1 = manager.hash_password(password)
             hash2 = manager.hash_password(password)
             assert hash1 != hash2  # Different salts
@@ -101,7 +101,7 @@ class TestSecurityManagerVerifyPassword:
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
-            password = "correct_password"
+            password = "correct_password"  # nosec B105 - test fixture, not a real credential
             hashed = manager.hash_password(password)
             assert manager.verify_password(password, hashed) is True
 
@@ -537,7 +537,7 @@ class TestAuthCache:
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
-            api_key = "gms_test_key_12345"
+            api_key = "gms_test_key_12345"  # nosec B105 - test fixture, not a real credential
             user_id = 42
 
             cache.set(api_key, user_id)

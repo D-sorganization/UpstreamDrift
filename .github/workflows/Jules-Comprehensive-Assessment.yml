@@ -1,9 +1,9 @@
 name: Jules Comprehensive Assessment
 
 on:
-  schedule:
-    - cron: "0 0 * * 0,4" # Every 3 days at 5 AM PST (10 UTC) - cost optimized
+  workflow_call:
   workflow_dispatch:
+  # Schedule removed: Control Tower handles scheduling at 08:00 UTC Sun+Thu via assessment-generator path.
 
 permissions:
   contents: write
@@ -11,9 +11,32 @@ permissions:
   issues: write
 
 jobs:
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   comprehensive-assessment:
+    needs: pick-runner
     name: Comprehensive Assessment & Audit
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -117,7 +140,7 @@ jobs:
       - name: Jules Comprehensive Analysis
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           set -e
           DATE=$(date +%Y-%m-%d)
@@ -243,7 +266,7 @@ jobs:
       - name: Enforce PR Title
         if: always()
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           DATE=$(date +%Y-%m-%d)
           EXPECTED_TITLE="[${{ github.event.repository.name }}] [docs] Assessment Generation - $DATE"

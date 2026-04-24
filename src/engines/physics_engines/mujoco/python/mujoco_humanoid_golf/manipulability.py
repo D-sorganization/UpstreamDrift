@@ -64,9 +64,7 @@ class ManipulabilityAnalyzer:
             model: MuJoCo model
             data: MuJoCo data (Thread-local/private data recommended)
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -75,9 +73,7 @@ class ManipulabilityAnalyzer:
     def _compute_ellipsoid_decomposition(
         self, M_v: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
-        if not (M_v is not None):
-            raise ValueError("M_v must be provided")
-        if not (M_v is not None):
+        if M_v is None:
             raise ValueError("M_v must be provided")
         try:
             eig_val_v, eig_vec_v = np.linalg.eigh(M_v)
@@ -131,9 +127,7 @@ class ManipulabilityAnalyzer:
         Returns:
             ManipulabilityResult or None if body not found.
         """
-        if not (body_name is not None):
-            raise ValueError("body_name must be provided")
-        if not (body_name is not None):
+        if body_name is None:
             raise ValueError("body_name must be provided")
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:
@@ -185,12 +179,10 @@ class ManipulabilityAnalyzer:
             "pelvis",
             "hip",
         ]
-        found = []
-        for i in range(self.model.nbody):
-            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
-            if not name:
-                continue
-            name_lower = name.lower()
-            if any(c in name_lower for c in candidates):
-                found.append(name)
-        return sorted(list(set(found)))
+        found = [
+            name
+            for i in range(self.model.nbody)
+            if (name := mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i))
+            and any(c in name.lower() for c in candidates)
+        ]
+        return sorted(set(found))

@@ -11,8 +11,6 @@ from src.shared.python.upstream_drift_tools.calculators.mechanical.trc_geometry 
     VesselGeometryResult,
 )
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -96,13 +94,13 @@ class TestCalculateGeometry:
         assert len(result.layers) == 1
 
     def test_zero_diameter_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             self._ENGINE.calculate_geometry(
                 _simple_dims(cylinder_diameter=0.0), [_layer()]
             )
 
     def test_zero_height_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             self._ENGINE.calculate_geometry(
                 _simple_dims(cylinder_height=0.0), [_layer()]
             )

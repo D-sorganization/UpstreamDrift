@@ -149,7 +149,8 @@ class TestLauncherIntegration(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Check for key components
-        self.assertIn("continuumio/miniconda3:", content, "Should use miniconda base")
+        self.assertIn("FROM python:3.12-slim AS builder", content)
+        self.assertIn("FROM python:3.12-slim AS runtime", content)
         self.assertIn("PYTHONPATH=", content, "Should set PYTHONPATH")
         self.assertIn("/workspace", content, "Should reference workspace directory")
         self.assertIn("WORKDIR /workspace", content, "Should set workspace directory")

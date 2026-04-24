@@ -113,9 +113,7 @@ class MediaPipeEstimator(PoseEstimator):
             min_tracking_confidence: Minimum confidence for pose tracking
             enable_temporal_smoothing: Whether to apply Kalman filtering
         """
-        if not (min_detection_confidence is not None):
-            raise ValueError("min_detection_confidence must be provided")
-        if not (min_detection_confidence is not None):
+        if min_detection_confidence is None:
             raise ValueError("min_detection_confidence must be provided")
         self.pose_detector: Any | None = None
         self.min_detection_confidence = min_detection_confidence
@@ -283,9 +281,7 @@ class MediaPipeEstimator(PoseEstimator):
         Returns:
             Smoothed keypoints
         """
-        if not (keypoints_3d is not None):
-            raise ValueError("keypoints_3d must be provided")
-        if not (keypoints_3d is not None):
+        if keypoints_3d is None:
             raise ValueError("keypoints_3d must be provided")
         smoothed = {}
 

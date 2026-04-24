@@ -2,11 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.engine_loaders import LOADER_MAP
-
-pytestmark = pytest.mark.unit
 
 
 class TestEngineLoaders:

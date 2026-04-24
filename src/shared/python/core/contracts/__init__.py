@@ -3,6 +3,17 @@
 This package provides formal contract enforcement for the UpstreamDrift platform,
 implementing preconditions, postconditions, and class invariants.
 
+.. note:: **Two contracts implementations exist intentionally.**
+
+   - ``src/shared/python/core/contracts/`` (this package) -- the decorator-based
+     contracts system used by ``src/shared/python/core/`` and the physics modules.
+   - ``src/shared/python/contracts.py`` -- the canonical function-call-style DbC
+     module for the wider platform, with ``require()``/``ensure()`` primitives,
+     enforcement levels, and convenience validators.
+
+   Both are maintained; this package is the authoritative source for the
+   ``core`` sub-system, while the sibling module serves the rest of the codebase.
+
 Enforcement Levels (controlled via ``DBC_LEVEL`` environment variable):
   - ``enforce`` (default): Raise contract violation errors on failure.
   - ``warn``: Log violations at WARNING level but do not raise.

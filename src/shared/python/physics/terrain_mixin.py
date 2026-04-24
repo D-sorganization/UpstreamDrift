@@ -81,9 +81,7 @@ class TerrainMixin:
             terrain: Terrain configuration
             use_compressible_turf: Whether to use compressible turf model
         """
-        if not (terrain is not None):
-            raise ValueError("terrain must be provided")
-        if not (terrain is not None):
+        if terrain is None:
             raise ValueError("terrain must be provided")
         self._terrain = terrain
         self._use_compressible_turf = use_compressible_turf
@@ -115,14 +113,15 @@ class TerrainMixin:
         Returns:
             Ground height (meters), or 0.0 if no terrain
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None:
             return 0.0
 
-        return self._terrain.get_elevation(x, y)
+        try:
+            return self._terrain.get_elevation(x, y)
+        except ValueError:
+            return 0.0
 
     def get_terrain_normal(self, x: float, y: float) -> np.ndarray:
         """Get terrain surface normal at a position.
@@ -134,9 +133,7 @@ class TerrainMixin:
         Returns:
             Unit normal vector (3,)
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None:
             return np.array([0.0, 0.0, 1.0])
@@ -156,9 +153,7 @@ class TerrainMixin:
         Returns:
             Terrain type at the position
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None:
             return TerrainType.FAIRWAY
@@ -175,9 +170,7 @@ class TerrainMixin:
         Returns:
             Friction coefficient
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None:
             return 0.5
@@ -195,9 +188,7 @@ class TerrainMixin:
         Returns:
             Coefficient of restitution
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None:
             return 0.6
@@ -228,9 +219,7 @@ class TerrainMixin:
         Returns:
             Contact force vector (3,) [N]
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if not self._terrain_enabled or self._terrain is None:
             return np.zeros(3)
@@ -264,9 +253,7 @@ class TerrainMixin:
         Returns:
             Friction force vector (3,) [N]
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if not self._terrain_enabled or self._contact_model is None:
             return np.zeros(3)
@@ -291,9 +278,7 @@ class TerrainMixin:
         Returns:
             True if in contact with terrain
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None or self._contact_model is None:
             return False
@@ -316,9 +301,7 @@ class TerrainMixin:
         Returns:
             Dictionary with lie quality metrics
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._turf_model is None:
             return {
@@ -344,9 +327,7 @@ class TerrainMixin:
         Returns:
             Dictionary with friction, restitution, stiffness, damping
         """
-        if not (x is not None):
-            raise ValueError("x must be provided")
-        if not (x is not None):
+        if x is None:
             raise ValueError("x must be provided")
         if self._terrain is None:
             return {
@@ -367,9 +348,7 @@ class TerrainMixin:
         Returns:
             XML string for MuJoCo model
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if self._terrain is None:
             return ""
@@ -408,9 +387,7 @@ class TerrainAwareSimulation:
             terrain: Terrain configuration
             use_compressible_turf: Whether to use compressible turf model
         """
-        if not (terrain is not None):
-            raise ValueError("terrain must be provided")
-        if not (terrain is not None):
+        if terrain is None:
             raise ValueError("terrain must be provided")
         self.terrain = terrain
         self.contact_model = TerrainContactModel(terrain)
@@ -436,9 +413,7 @@ class TerrainAwareSimulation:
         Returns:
             Total force vector (3,) [N]
         """
-        if not (position is not None):
-            raise ValueError("position must be provided")
-        if not (position is not None):
+        if position is None:
             raise ValueError("position must be provided")
         x, y, z = position
 
@@ -479,9 +454,7 @@ class TerrainAwareSimulation:
         Returns:
             Dictionary with landing results
         """
-        if not (impact_position is not None):
-            raise ValueError("impact_position must be provided")
-        if not (impact_position is not None):
+        if impact_position is None:
             raise ValueError("impact_position must be provided")
         x, y, z = impact_position
 

@@ -1,3 +1,9 @@
+# WARNING: LOCAL DEVELOPMENT ONLY
+# This compose file is intended for local developer workflows only.
+# Before using in any shared or internet-facing environment:
+#   - Change port bindings from 127.0.0.1 to an appropriate reverse-proxy.
+#   - Remove or set GOLF_AUTH_DISABLED=false if present in your .env.
+#   - Remove --reload from the uvicorn command.
 version: "3.8"
 
 services:
@@ -10,13 +16,14 @@ services:
     image: upstream-drift:runtime
     container_name: upstream-drift-backend
     ports:
-      - "8001:8001"
+      # Bind to loopback only — not exposed on all host interfaces.
+      - "127.0.0.1:8001:8001"
     volumes:
       - .:/workspace:delegated
       - ./data:/workspace/data
     environment:
       - PYTHONPATH=/workspace
-      - PATH=/home/golfer/.local/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      - PATH=/home/golfer/.local/bin:/opt/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - DATABASE_URL=sqlite:////workspace/golf_modeling_suite.db
       - API_HOST=0.0.0.0
       - API_PORT=8001
@@ -34,17 +41,32 @@ services:
     networks:
       - upstream-drift
 
-  # Frontend UI (optional - can also run locally)
+  # Frontend UI (optional — can also run locally outside Docker).
+  # node_modules are cached in a named volume so `npm install` does not re-run
+  # on every `docker compose up`. `npm ci` runs only when the volume is empty
+  # (first boot / after `docker compose down -v`) or when package-lock.json is
+  # newer than the cached lockfile snapshot (`node_modules/.package-lock.json`),
+  # which npm writes after every successful install. This preserves cache hits
+  # across restarts and keeps startup fast and offline-capable once populated.
   frontend:
     image: node:20-alpine
     container_name: upstream-drift-frontend
     ports:
-      - "5180:5180"
+      - "127.0.0.1:5180:5180"
     volumes:
       - ./ui:/app:delegated
-      - /app/node_modules
+      # Named volume so npm install is not repeated on every start.
+      - frontend_node_modules:/app/node_modules
     working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    command: >-
+      sh -c "if [ ! -f node_modules/.package-lock.json ] ||
+               [ package-lock.json -nt node_modules/.package-lock.json ]; then
+               echo '[frontend] installing dependencies (first boot or lockfile changed)';
+               npm ci;
+             else
+               echo '[frontend] node_modules cache is up-to-date, skipping npm ci';
+             fi &&
+             npm run dev -- --host 0.0.0.0"
     environment:
       - VITE_API_URL=http://backend:8001
     depends_on:
@@ -78,4 +100,5 @@ networks:
     driver: bridge
 
 volumes:
-  node_modules:
+  # Cached node_modules for the frontend service.  Reset: docker compose down -v
+  frontend_node_modules:

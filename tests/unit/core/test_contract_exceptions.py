@@ -12,8 +12,6 @@ from src.shared.python.core.contracts.exceptions import (
     StateError,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestContractViolationError:
     def test_is_value_error(self) -> None:

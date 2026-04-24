@@ -21,8 +21,22 @@ from __future__ import annotations
 
 import importlib
 import pkgutil
+from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from fastapi import Depends, HTTPException, Request, status
+from fastapi.security import HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+
+from src.api.auth.dependencies import (
+    CheckSimulationQuota,
+    CheckVideoQuota,
+    check_usage_quota,
+    get_current_user_flexible,
+)
+from src.api.auth.models import User
+from src.api.database import get_db
+from src.shared.python.config.environment import is_auth_disabled
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 if TYPE_CHECKING:
@@ -66,6 +80,66 @@ _REGISTRATION_ORDER: tuple[str, ...] = (
     "data_explorer",
     "motion_capture",
 )
+
+
+async def _current_user_from_bearer_header(request: Request, db: Session) -> User:
+    authorization = request.headers.get("Authorization")
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    scheme, _, token = authorization.partition(" ")
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    credentials = HTTPAuthorizationCredentials(scheme=scheme, credentials=token)
+    return await get_current_user_flexible(credentials=credentials, db=db)
+
+
+def _request_time_quota_dependency(
+    resource_type: str,
+    enforced_dependency: Callable[..., object],
+) -> Callable[..., object]:
+    quota_dependency = check_usage_quota(resource_type)
+
+    async def dependency(
+        request: Request,
+        db: Session = Depends(get_db),
+    ) -> User | None:
+        if is_auth_disabled():
+            return None
+
+        current_user = await _current_user_from_bearer_header(request, db)
+        return quota_dependency(current_user, db)
+
+    dependency.enforced_dependency = enforced_dependency  # type: ignore[attr-defined]
+    return dependency
+
+
+_SIMULATION_QUOTA_DEPENDENCY = _request_time_quota_dependency(
+    "simulations",
+    CheckSimulationQuota.dependency,
+)
+_VIDEO_QUOTA_DEPENDENCY = _request_time_quota_dependency(
+    "video_analyses",
+    CheckVideoQuota.dependency,
+)
+
+_ROUTE_DEPENDENCIES: dict[str, tuple[Callable[..., object], ...]] = {
+    "simulation": (_SIMULATION_QUOTA_DEPENDENCY,),
+    "video": (_VIDEO_QUOTA_DEPENDENCY,),
+}
+
+
+def _dependencies_for_route(module_name: str) -> tuple[Callable[..., object], ...]:
+    return _ROUTE_DEPENDENCIES.get(module_name, ())
 
 
 def discover_routes(
@@ -135,8 +209,7 @@ def discover_routes(
             ordered.append((name, discovered_map.pop(name)))
 
     # Append any newly added modules not in _REGISTRATION_ORDER (alphabetically)
-    for name in sorted(discovered_map):
-        ordered.append((name, discovered_map[name]))
+    ordered.extend([(name, discovered_map[name]) for name in sorted(discovered_map)])
 
     logger.info("Discovered %d route modules", len(ordered))
     return ordered
@@ -162,6 +235,13 @@ def register_routes(
     """
     routes = discover_routes(exclude=exclude)
     for module_name, router in routes:
-        app.include_router(router, prefix=prefix)
+        app.include_router(
+            router,
+            prefix=prefix,
+            dependencies=[
+                Depends(dependency)
+                for dependency in _dependencies_for_route(module_name)
+            ],
+        )
         logger.debug("Registered router from %s with prefix '%s'", module_name, prefix)
     return len(routes)

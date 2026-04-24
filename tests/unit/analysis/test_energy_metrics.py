@@ -7,8 +7,6 @@ import pytest
 
 from src.shared.python.analysis.energy_metrics import EnergyMetricsMixin
 
-pytestmark = pytest.mark.unit
-
 
 class _Concrete(EnergyMetricsMixin):
     """Minimal concrete subclass for testing EnergyMetricsMixin."""

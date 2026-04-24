@@ -13,9 +13,7 @@ class StabilityRenderer(BaseRenderer):
 
     def plot_stability_metrics(self, fig: Figure) -> None:
         """Plot stability metrics (CoM-CoP distance and Inclination Angle)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             times_cop, cop = self.data.get_series("cop_position")
@@ -42,7 +40,8 @@ class StabilityRenderer(BaseRenderer):
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec = vec_temp
-        vec_norm = np.sqrt(np.sum(vec**2, axis=1))
+        vec_f = vec.astype(float, copy=False)
+        vec_norm = np.sqrt(np.einsum("...i,...i->...", vec_f, vec_f))
         vec_norm[vec_norm < 1e-6] = 1.0
 
         cos_theta = vec[:, 2] / vec_norm
@@ -92,9 +91,7 @@ class StabilityRenderer(BaseRenderer):
 
     def plot_cop_trajectory(self, fig: Figure) -> None:
         """Plot Center of Pressure trajectory (top-down view)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, cop_data = self.data.get_series("cop_position")
         cop_data = np.asarray(cop_data)
@@ -127,9 +124,7 @@ class StabilityRenderer(BaseRenderer):
 
     def plot_cop_vector_field(self, fig: Figure, skip_steps: int = 5) -> None:
         """Plot CoP velocity vector field."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         times, cop_data = self.data.get_series("cop_position")
         cop_data = np.asarray(cop_data)
@@ -170,9 +165,7 @@ class StabilityRenderer(BaseRenderer):
         scale: float = 0.001,
     ) -> None:
         """Plot Ground Reaction Force 'Butterfly Diagram'."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             times, cop_data = self.data.get_series("cop_position")
@@ -245,9 +238,7 @@ class StabilityRenderer(BaseRenderer):
         scale: float = 0.1,
     ) -> None:
         """Plot 3D vector field along a trajectory."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             times, vectors = self.data.get_series(vector_name)
@@ -308,9 +299,7 @@ class StabilityRenderer(BaseRenderer):
         tau: int = 5,
     ) -> None:
         """Plot local divergence rate (Local Stability) over time."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             from src.shared.python.validation_pkg.statistical_analysis import (
@@ -394,9 +383,7 @@ class StabilityRenderer(BaseRenderer):
 
     def plot_stability_diagram(self, fig: Figure) -> None:
         """Plot Stability Diagram (CoM vs CoP on Ground Plane)."""
-        if not (fig is not None):
-            raise ValueError("fig must be provided")
-        if not (fig is not None):
+        if fig is None:
             raise ValueError("fig must be provided")
         try:
             times, cop_data = self.data.get_series("cop_position")

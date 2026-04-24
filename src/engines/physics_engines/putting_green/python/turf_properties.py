@@ -15,6 +15,7 @@ References:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
@@ -133,7 +134,7 @@ class TurfProperties:
             )
 
         # Normalize grain direction
-        grain_mag = np.linalg.norm(self.grain_direction)
+        grain_mag = math.hypot(self.grain_direction[0], self.grain_direction[1])
         if grain_mag > 0:
             object.__setattr__(
                 self, "grain_direction", self.grain_direction / grain_mag
@@ -177,7 +178,7 @@ class TurfProperties:
 
         # Adjust for height of cut (longer grass = more friction)
         # Note: height_of_cut_mm is guaranteed non-None after __post_init__
-        if not (self.height_of_cut_mm is not None):
+        if self.height_of_cut_mm is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         height_factor = 1.0 + 0.05 * (self.height_of_cut_mm - 3.0) / 2.0
 
@@ -200,14 +201,13 @@ class TurfProperties:
         Returns:
             Multiplier for friction adjustment (-1 to +1)
         """
-        if not (velocity_direction is not None):
+        if velocity_direction is None:
             raise ValueError("velocity_direction must be provided")
-        if not (velocity_direction is not None):
-            raise ValueError("velocity_direction must be provided")
-        if np.linalg.norm(velocity_direction) < 1e-10:
+        v_mag = math.hypot(velocity_direction[0], velocity_direction[1])
+        if v_mag < 1e-10:
             return 0.0
 
-        v_dir = velocity_direction / np.linalg.norm(velocity_direction)
+        v_dir = velocity_direction / v_mag
         # Dot product gives alignment: +1 with grain, -1 against grain
         alignment = np.dot(v_dir, self.grain_direction)
 
@@ -223,11 +223,9 @@ class TurfProperties:
         Returns:
             Deceleration vector [m/s²] (opposing motion)
         """
-        if not (velocity is not None):
+        if velocity is None:
             raise ValueError("velocity must be provided")
-        if not (velocity is not None):
-            raise ValueError("velocity must be provided")
-        speed = np.linalg.norm(velocity)
+        speed = math.hypot(velocity[0], velocity[1])
         if speed < 1e-10:
             return np.zeros(2)
 
@@ -255,7 +253,7 @@ class TurfProperties:
         Returns:
             Modified velocity with grain effect
         """
-        speed = np.linalg.norm(velocity)
+        speed = math.hypot(velocity[0], velocity[1])
         if speed < 0.05:  # Grain effect negligible at very low speeds
             return velocity
 
@@ -264,7 +262,7 @@ class TurfProperties:
         # Cross-grain component causes slight curve
         # Perpendicular to velocity in direction of grain
         cross_grain = self.grain_direction - np.dot(self.grain_direction, v_dir) * v_dir
-        cross_mag = np.linalg.norm(cross_grain)
+        cross_mag = math.hypot(cross_grain[0], cross_grain[1])
 
         if cross_mag < 1e-10:
             return velocity
@@ -274,7 +272,7 @@ class TurfProperties:
         # Apply small cross-grain velocity component
         # Effect is proportional to grain strength and inversely to speed
         # Note: grain_strength is guaranteed non-None after __post_init__
-        if not (self.grain_strength is not None):
+        if self.grain_strength is None:
             raise ValueError("DbC Blocked: Precondition failed.")
         curve_amount = self.grain_strength * 0.01 / (1.0 + speed)
         return velocity + curve_amount * cross_grain * speed

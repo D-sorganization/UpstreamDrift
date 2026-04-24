@@ -38,8 +38,31 @@ env:
   MAX_ISSUES_PER_RUN: 5
 
 jobs:
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   process-comments:
-    runs-on: ubuntu-latest
+    needs: pick-runner
+    runs-on: self-hosted
     # HARDENING: Skip bot-triggered events to prevent cascades
     if: |
       github.event_name == 'workflow_dispatch' ||
@@ -62,7 +85,7 @@ jobs:
       - name: Collect Review Comments
         id: collect
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           mkdir -p .github/review_comments
           mkdir -p docs/review_archive
@@ -99,8 +122,9 @@ jobs:
       - name: Process and Create Issues
         id: process
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           ARCHIVE_ONLY: ${{ inputs.archive_only || 'false' }}
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref_name }}
         run: |
           # Write Python script to temp file to avoid YAML heredoc issues
           cat > /tmp/process_comments.py << 'SCRIPT_EOF'
@@ -119,20 +143,31 @@ jobs:
           created_issues = []
           archived_comments = []
 
+          def load_json_file(path: Path, default):
+              if not path.exists():
+                  return default
+              try:
+                  if path.stat().st_size == 0:
+                      return default
+                  with open(path, 'r', encoding='utf-8') as f:
+                      return json.load(f)
+              except (json.JSONDecodeError, OSError):
+                  return default
+
           # Load existing issue tracking to avoid duplicates
           tracking_file = archive_dir / 'comment_tracking.json'
-          if tracking_file.exists():
-              with open(tracking_file, 'r') as f:
-                  tracking = json.load(f)
-          else:
-              tracking = {'processed_comments': [], 'created_issues': {}}
+          tracking = load_json_file(
+              tracking_file,
+              {'processed_comments': [], 'created_issues': {}}
+          )
 
           # Find all PR details files
           for details_file in comments_dir.glob('pr_*_details.json'):
               pr_num = details_file.stem.split('_')[1]
 
-              with open(details_file, 'r') as f:
-                  pr_details = json.load(f)
+              pr_details = load_json_file(details_file, {})
+              if not pr_details:
+                  continue
 
               pr_title = pr_details.get('title', f'PR #{pr_num}')
               pr_author = pr_details.get('author', {}).get('login', 'unknown')
@@ -140,11 +175,7 @@ jobs:
 
               # Load review comments
               review_file = comments_dir / f'pr_{pr_num}_review_comments.json'
-              if review_file.exists():
-                  with open(review_file, 'r') as f:
-                      review_comments = json.load(f)
-              else:
-                  review_comments = []
+              review_comments = load_json_file(review_file, [])
 
               # Process each review comment
               for comment in review_comments:
@@ -305,16 +336,17 @@ jobs:
 
       - name: Commit Archive
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref_name }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add docs/review_archive/ .github/review_comments/comment_tracking.json || true
+          git add docs/review_archive/ docs/review_archive/comment_tracking.json || true
 
           if ! git diff --staged --quiet; then
             git commit -m "docs: archive review comments from PRs"
-            git push
+            git push origin HEAD:"$TARGET_BRANCH"
           else
             echo "No changes to commit"
           fi

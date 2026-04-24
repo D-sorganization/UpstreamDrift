@@ -20,8 +20,6 @@ from src.shared.python.pendulum_simulator.physics import (
     total_energy,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_params() -> PendulumParams:
     return PendulumParams(m1=5.0, m2=0.3, L1=0.65, L2=1.10)
@@ -65,11 +63,11 @@ class TestPendulumParams:
         assert p.mClub == pytest.approx(0.1)
 
     def test_negative_mass_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(AssertionError):
             PendulumParams(m1=-1.0, m2=0.3, L1=0.65, L2=1.10)
 
     def test_zero_length_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(AssertionError):
             PendulumParams(m1=1.0, m2=0.3, L1=0.0, L2=1.10)
 
 
@@ -83,7 +81,7 @@ class TestJointLimits:
         assert jl.phi_min < jl.phi_max
 
     def test_inverted_phi_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(AssertionError):
             JointLimits(phi_min=1.0, phi_max=-1.0)
 
 

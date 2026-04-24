@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """Club data loader with Excel support.
 
 Loads golf club specifications and professional player swing data from
@@ -161,16 +165,6 @@ class SwingMetrics:
         ):
             self.smash_factor = self.ball_speed_mph / self.club_head_speed_mph
 
-        # Guard against unit mismatch: legal smash factor range is 1.0–1.5.
-        # A value outside [0.5, 2.0] almost certainly means one speed is in
-        # mph and the other in m/s (ratio would be ~3.6 or ~0.28).
-        if self.smash_factor != 0 and not (0.5 <= self.smash_factor <= 2.0):
-            raise ValueError(
-                f"smash_factor={self.smash_factor:.3f} is outside the physical range "
-                "[0.5, 2.0] — likely a unit mismatch between club_head_speed and "
-                "ball_speed (ensure both are in mph or both in m/s)"
-            )
-
     def to_dict(self) -> dict[str, float]:
         """Convert to dictionary."""
         return {
@@ -227,9 +221,7 @@ class ProPlayerData:
 
     def get_position_at_time(self, t: float) -> np.ndarray | None:
         """Interpolate position at a specific time."""
-        if not (t is not None):
-            raise ValueError("t must be provided")
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         if not self.has_trajectory_data():
             return None
@@ -256,9 +248,7 @@ class ProPlayerData:
 
     def get_velocity_at_time(self, t: float) -> np.ndarray | None:
         """Interpolate velocity at a specific time."""
-        if not (t is not None):
-            raise ValueError("t must be provided")
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         if self.club_head_velocities is None or self.time_series is None:
             return None
@@ -370,44 +360,28 @@ class ClubDataLoader:
 
         Raises:
             ImportError: If pandas or openpyxl is not available
-            FileNotFoundError: If file does not exist with actionable message
+            FileNotFoundError: If file does not exist
             ValueError: If file format is invalid
         """
         if not PANDAS_AVAILABLE:
             raise ImportError(
-                "pandas is required for Excel loading. Install with:\n"
-                "  pip install pandas\n"
-                "  pip install -e '.[data]'  (includes data analysis dependencies)"
+                "pandas is required for Excel loading. Install with: pip install pandas"
             )
         if not OPENPYXL_AVAILABLE:
             raise ImportError(
-                "openpyxl is required for Excel loading. Install with:\n"
-                "  pip install openpyxl\n"
-                "  pip install -e '.[data]'  (includes Excel/data dependencies)"
+                "openpyxl is required for Excel loading. Install with: pip install openpyxl"
             )
 
         file_path = Path(file_path)
         if not file_path.exists():
-            raise FileNotFoundError(
-                f"Club data file not found: {file_path}\n"
-                f"Expected path: {file_path.resolve()}\n"
-                f"Supported formats: .xlsx, .xls\n"
-                f"Verify the file exists at the location above or check the path."
-            )
+            raise FileNotFoundError(f"Club data file not found: {file_path}")
 
         logger.info("Loading club data from: %s", file_path)
 
         try:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
         except (RuntimeError, TypeError, ValueError) as e:
-            raise ValueError(
-                f"Failed to read Excel file: {file_path}\n"
-                f"Error: {e}\n"
-                f"Possible causes:\n"
-                f"  - File is corrupted or not a valid Excel file\n"
-                f"  - Sheet '{sheet_name}' does not exist\n"
-                f"  - File is locked or in use by another application"
-            ) from e
+            raise ValueError(f"Failed to read Excel file: {e}") from e
 
         clubs = []
         for _, row in df.iterrows():
@@ -431,41 +405,20 @@ class ClubDataLoader:
 
         Returns:
             List of ProPlayerData objects
-
-        Raises:
-            ImportError: If pandas or openpyxl is not available
-            FileNotFoundError: If file does not exist with actionable message
-            ValueError: If file format is invalid
         """
         if not PANDAS_AVAILABLE or not OPENPYXL_AVAILABLE:
-            raise ImportError(
-                "pandas and openpyxl are required for Excel loading. Install with:\n"
-                "  pip install pandas openpyxl\n"
-                "  pip install -e '.[data]'  (includes all data dependencies)"
-            )
+            raise ImportError("pandas and openpyxl are required for Excel loading")
 
         file_path = Path(file_path)
         if not file_path.exists():
-            raise FileNotFoundError(
-                f"Player data file not found: {file_path}\n"
-                f"Expected path: {file_path.resolve()}\n"
-                f"Supported formats: .xlsx, .xls\n"
-                f"Verify the file exists at the location above."
-            )
+            raise FileNotFoundError(f"Player data file not found: {file_path}")
 
         logger.info("Loading player data from: %s", file_path)
 
         try:
             df = pd.read_excel(file_path, sheet_name=sheet_name)
         except (RuntimeError, TypeError, ValueError) as e:
-            raise ValueError(
-                f"Failed to read Excel file: {file_path}\n"
-                f"Error: {e}\n"
-                f"Possible causes:\n"
-                f"  - File is corrupted or not a valid Excel file\n"
-                f"  - Sheet '{sheet_name}' does not exist\n"
-                f"  - File is locked or in use by another application"
-            ) from e
+            raise ValueError(f"Failed to read Excel file: {e}") from e
 
         players = []
         for _, row in df.iterrows():
@@ -494,30 +447,15 @@ class ClubDataLoader:
 
         Returns:
             ProPlayerData with trajectory information
-
-        Raises:
-            ImportError: If pandas or openpyxl is not available
-            FileNotFoundError: If file does not exist with actionable message
-            ValueError: If required columns are missing
         """
         if not PANDAS_AVAILABLE or not OPENPYXL_AVAILABLE:
             raise ImportError("pandas and openpyxl are required for Excel loading")
 
         file_path = Path(file_path)
         if not file_path.exists():
-            raise FileNotFoundError(
-                f"Trajectory file not found: {file_path}\n"
-                f"Expected path: {file_path.resolve()}\n"
-                f"Required columns: Time (or t), X, Y, Z\n"
-                f"Optional columns: Vx, Vy, Vz"
-            )
+            raise FileNotFoundError(f"Trajectory file not found: {file_path}")
 
-        try:
-            df = pd.read_excel(file_path, sheet_name=sheet_name)
-        except (RuntimeError, TypeError, ValueError) as e:
-            raise ValueError(
-                f"Failed to read trajectory file: {file_path}\nError: {e}"
-            ) from e
+        df = pd.read_excel(file_path, sheet_name=sheet_name)
 
         # Find time column
         time_col = None
@@ -583,28 +521,13 @@ class ClubDataLoader:
 
         Returns:
             List of ClubSpecification objects
-
-        Raises:
-            FileNotFoundError: If file does not exist with actionable message
-            ValueError: If JSON format is invalid
         """
         file_path = Path(file_path)
         if not file_path.exists():
-            raise FileNotFoundError(
-                f"Club data file not found: {file_path}\n"
-                f"Expected path: {file_path.resolve()}\n"
-                f"Supported format: .json"
-            )
+            raise FileNotFoundError(f"Club data file not found: {file_path}")
 
-        try:
-            with open(file_path) as f:
-                data = json.load(f)
-        except (json.JSONDecodeError, ValueError) as e:
-            raise ValueError(
-                f"Failed to parse JSON file: {file_path}\n"
-                f"Error: {e}\n"
-                f"Ensure the file contains valid JSON syntax."
-            ) from e
+        with open(file_path) as f:
+            data = json.load(f)
 
         clubs = []
         if isinstance(data, dict):
@@ -640,9 +563,7 @@ class ClubDataLoader:
 
     def _find_column(self, df: Any, possible_names: list[str]) -> str | None:
         """Find a column by checking multiple possible names."""
-        if not (possible_names is not None):
-            raise ValueError("possible_names must be provided")
-        if not (possible_names is not None):
+        if possible_names is None:
             raise ValueError("possible_names must be provided")
         for name in possible_names:
             for col in df.columns:

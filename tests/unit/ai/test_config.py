@@ -27,8 +27,6 @@ from src.shared.python.ai.config import (
     get_openai_timeout,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestOllamaConfig:
     def test_default_host(self) -> None:

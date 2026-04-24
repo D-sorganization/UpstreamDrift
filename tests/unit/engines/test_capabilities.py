@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.engine_core.capabilities import (
     CapabilityLevel,
     EngineCapabilities,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestCapabilityLevel:

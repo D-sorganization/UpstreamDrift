@@ -88,7 +88,7 @@ def test_qt_environment() -> bool:
                 "python",
                 "-c",
                 "from PyQt6 import QtWidgets, QtCore; "
-                "print('✅ PyQt6 imports successfully')",
+                "print('✅ PyQt6 imports successfully')",  # noqa: E501
             ],
             capture_output=True,
             text=True,
@@ -139,7 +139,7 @@ def main() -> int:
         if test_success:
             logger.info(
                 "\n🎉 Success! PyQt6 is now fully functional in upstream-drift."
-            )
+            )  # noqa: E501
             logger.info("💡 MuJoCo GUI simulations should now work properly!")
         else:
             logger.error("\n⚠️  Qt installed but tests failed. May work in GUI mode.")

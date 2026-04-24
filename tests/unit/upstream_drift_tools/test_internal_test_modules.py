@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.upstream_drift_tools.tests.calculators.conversion.test_conversion import (
     TestUnitConversion,
 )
@@ -13,8 +11,6 @@ from src.shared.python.upstream_drift_tools.tests.calculators.electrical.test_el
 from src.shared.python.upstream_drift_tools.tests.calculators.mechanical.test_trc_geometry import (
     TestTRCGeometryEngine,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestInternalTestModulesImportable:

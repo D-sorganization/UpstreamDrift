@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.upstream_drift_tools.calculators.electrical.config import (
     ElectrodeConfig,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestElectrodeConfigDefaults:

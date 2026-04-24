@@ -86,7 +86,15 @@ def compute_module_coverage(
     Returns:
         Dict mapping gate name to (covered_lines, total_lines, percent).
         Only gates that have at least one matching source file are included.
+
+    Raises:
+        TypeError: If report is not a dict.
+        ValueError: If report does not contain a 'files' key.
     """
+    if not isinstance(report, dict):
+        raise TypeError("report must be a dict")
+    if "files" not in report:
+        raise ValueError("report must contain a 'files' key")
     results: dict[str, tuple[int, int]] = {}
 
     for filepath, file_data in report["files"].items():

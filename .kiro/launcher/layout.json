@@ -18,11 +18,11 @@
     "data_explorer",
     "project_map"
   ],
-  "selected_model": "drake_golf",
+  "selected_model": "opensim_golf",
   "window_geometry": {
     "x": 574,
     "y": -30,
-    "width": 1914,
+    "width": 1880,
     "height": 999
   },
   "options": {

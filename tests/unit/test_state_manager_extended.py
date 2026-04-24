@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -125,7 +124,7 @@ class TestSafeWriteJson:
 
 
 @pytest.fixture
-def manager(tmp_path: Path) -> Any:
+def manager(tmp_path: Path):
     """StateManager instance using a temporary directory."""
     from src.shared.python.upstream_drift_tools.utils.state_manager import StateManager
 

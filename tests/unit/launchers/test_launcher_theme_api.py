@@ -6,11 +6,7 @@ ThemeManager, preventing silent failures in the theme menu.
 
 import inspect
 
-import pytest
-
 from src.launchers import launcher_theme
-
-pytestmark = pytest.mark.unit
 
 
 class TestLauncherThemeApiCalls:

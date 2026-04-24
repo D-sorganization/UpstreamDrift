@@ -56,12 +56,40 @@ def precondition(
         def sqrt(x: float) -> float:
             return math.sqrt(x)
     """
-    if not (condition is not None):
+    if condition is None:
         raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
     def decorator(func: F) -> F:
         """Wrap the function with precondition checking logic."""
+        if inspect.iscoroutinefunction(func):
+
+            @functools.wraps(func)
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+                if not enabled or get_contract_level() == ContractLevel.OFF:
+                    return await func(*args, **kwargs)
+                sig = inspect.signature(func)
+                try:
+                    bound = sig.bind(*args, **kwargs)
+                    bound.apply_defaults()
+                except TypeError:
+                    pass
+                try:
+                    result = condition(*args, **kwargs)
+                except (RuntimeError, TypeError, ValueError) as e:
+                    _handle_violation(
+                        "Precondition",
+                        f"Failed to evaluate precondition: {e}",
+                        function_name=func.__qualname__,
+                    )
+                    return await func(*args, **kwargs)
+                if not result:
+                    _handle_violation(
+                        "Precondition", message, function_name=func.__qualname__
+                    )
+                return await func(*args, **kwargs)
+
+            return cast(F, async_wrapper)
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -132,43 +160,37 @@ def postcondition(
         def compute_acceleration(self) -> np.ndarray:
             ...
     """
-    if not (condition is not None):
+    if condition is None:
         raise ValueError(_ERR_CONDITION_REQUIRED)
     from .level import get_contract_level  # read live state via function
 
-    def _check_postcondition(result: Any, func_name: str) -> Any:
-        """Evaluate the postcondition against result and handle violations."""
-        try:
-            check_result = condition(result)
-        except (RuntimeError, TypeError, ValueError) as e:
-            _handle_violation(
-                "Postcondition",
-                f"Failed to evaluate postcondition: {e}",
-                function_name=func_name,
-                value=result,
-            )
-            return result
-        if not check_result:
-            _handle_violation(
-                "Postcondition",
-                message,
-                function_name=func_name,
-                value=result,
-            )
-        return result
-
     def decorator(func: F) -> F:
         """Wrap the function with postcondition checking logic."""
-
         if inspect.iscoroutinefunction(func):
 
             @functools.wraps(func)
             async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-                """Execute async function and verify its postcondition."""
                 if not enabled or get_contract_level() == ContractLevel.OFF:
                     return await func(*args, **kwargs)
                 result = await func(*args, **kwargs)
-                return _check_postcondition(result, func.__qualname__)
+                try:
+                    check_result = condition(result)
+                except (RuntimeError, TypeError, ValueError) as e:
+                    _handle_violation(
+                        "Postcondition",
+                        f"Failed to evaluate postcondition: {e}",
+                        function_name=func.__qualname__,
+                        value=result,
+                    )
+                    return result
+                if not check_result:
+                    _handle_violation(
+                        "Postcondition",
+                        message,
+                        function_name=func.__qualname__,
+                        value=result,
+                    )
+                return result
 
             return cast(F, async_wrapper)
 
@@ -178,8 +200,30 @@ def postcondition(
             # Check level at call time so runtime changes to contract level take effect
             if not enabled or get_contract_level() == ContractLevel.OFF:
                 return func(*args, **kwargs)
+
             result = func(*args, **kwargs)
-            return _check_postcondition(result, func.__qualname__)
+
+            # Evaluate the postcondition
+            try:
+                check_result = condition(result)
+            except (RuntimeError, TypeError, ValueError) as e:
+                _handle_violation(
+                    "Postcondition",
+                    f"Failed to evaluate postcondition: {e}",
+                    function_name=func.__qualname__,
+                    value=result,
+                )
+                return result
+
+            if not check_result:
+                _handle_violation(
+                    "Postcondition",
+                    message,
+                    function_name=func.__qualname__,
+                    value=result,
+                )
+
+            return result
 
         return cast(F, wrapper)
 
@@ -211,7 +255,7 @@ def require_state(
         def step(self, dt: float) -> None:
             ...
     """
-    if not (state_check is not None):
+    if state_check is None:
         raise ValueError(_ERR_STATE_CHECK_REQUIRED)
     from .exceptions import StateError
     from .level import get_contract_level  # read live state via function

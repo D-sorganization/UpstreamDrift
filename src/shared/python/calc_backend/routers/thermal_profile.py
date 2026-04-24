@@ -1,10 +1,10 @@
 """Thermal profile predictor router.  See issue #608."""
 
-from __future__ import annotations
+from __future__ import annotations  # noqa: E402, F404
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException  # noqa: E402
 
-from ..contracts.thermal_profile import (
+from ..contracts.thermal_profile import (  # noqa: E402
     ThermalProfileDataPoint,
     ThermalProfileRequest,
     ThermalProfileResponse,
@@ -48,9 +48,7 @@ def _solve_thermal_profile(
     t_amb = request.ambient_temp_c
 
     def deriv(t: float, temp: float) -> float:
-        if not (t is not None):
-            raise ValueError("t must be provided")
-        if not (t is not None):
+        if t is None:
             raise ValueError("t must be provided")
         q_in = power_func(t)
         q_loss = h * (temp - t_amb)

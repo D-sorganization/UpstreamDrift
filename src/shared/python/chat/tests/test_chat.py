@@ -1,0 +1,198 @@
+"""Tests for the chat module.
+
+Covers:
+- Pydantic contract models (ChatMessageRequest, ChatChunkResponse,
+  ChatSessionInfo, ChatHistoryResponse)
+- Pure utility functions: _session_file_path, _read_shared_session_id,
+  _write_shared_session_id
+- ChatMessageBubble (mocked Qt) and ChatDockWidget construction (mocked Qt)
+
+Note: PyQt6 widget tests use the qtbot fixture from pytest-qt where
+available; pure function tests need no Qt at all.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Pydantic model tests (no Qt required)
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestChatModels:
+    def test_chat_message_request_defaults(self):
+        from chat.models import ChatMessageRequest
+
+        req = ChatMessageRequest(message="hello world")
+        assert req.message == "hello world"
+        assert req.expertise_level == "beginner"
+        assert req.app_context is None
+
+    def test_chat_message_request_with_context(self):
+        from chat.models import ChatMessageRequest
+
+        req = ChatMessageRequest(
+            message="how does this work?",
+            app_context="mujoco",
+            expertise_level="advanced",
+        )
+        assert req.app_context == "mujoco"
+        assert req.expertise_level == "advanced"
+
+    def test_chat_message_request_min_length_validation(self):
+        import pydantic
+        from chat.models import ChatMessageRequest
+
+        with pytest.raises(pydantic.ValidationError):
+            ChatMessageRequest(message="")  # min_length=1
+
+    def test_chat_message_request_max_length_validation(self):
+        import pydantic
+        from chat.models import ChatMessageRequest
+
+        with pytest.raises(pydantic.ValidationError):
+            ChatMessageRequest(message="x" * 10001)  # max_length=10000
+
+    def test_chat_chunk_response_defaults(self):
+        from chat.models import ChatChunkResponse
+
+        chunk = ChatChunkResponse(content="hello")
+        assert chunk.content == "hello"
+        assert chunk.is_final is False
+        assert chunk.index == 0
+
+    def test_chat_chunk_response_final(self):
+        from chat.models import ChatChunkResponse
+
+        chunk = ChatChunkResponse(content="done", is_final=True, index=5)
+        assert chunk.is_final is True
+        assert chunk.index == 5
+
+    def test_chat_session_info(self):
+        from chat.models import ChatSessionInfo
+
+        info = ChatSessionInfo(
+            session_id="abc-123",
+            message_count=10,
+            created_at="2026-01-01T00:00:00",
+            last_active="2026-01-01T01:00:00",
+            app_contexts=["gasification", "mujoco"],
+        )
+        assert info.session_id == "abc-123"
+        assert info.message_count == 10
+        assert len(info.app_contexts) == 2
+
+    def test_chat_session_info_defaults(self):
+        from chat.models import ChatSessionInfo
+
+        info = ChatSessionInfo(
+            session_id="xyz",
+            message_count=0,
+            created_at="now",
+            last_active="now",
+        )
+        assert info.app_contexts == []
+
+    def test_chat_history_response(self):
+        from chat.models import ChatHistoryResponse
+
+        resp = ChatHistoryResponse(
+            session_id="abc",
+            messages=[
+                {"role": "user", "content": "Hello"},
+                {"role": "assistant", "content": "Hi!"},
+            ],
+        )
+        assert resp.session_id == "abc"
+        assert len(resp.messages) == 2
+        assert resp.messages[0]["role"] == "user"
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Pure utility function tests (no Qt required)
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+class TestSessionFileFunctions:
+    def test_session_file_path_format(self):
+        from chat.chat_dock_widget import _session_file_path
+
+        path = _session_file_path("my_app")
+        assert path.name == "active_chat_session.txt"
+        assert ".my_app" in str(path)
+
+    def test_read_shared_session_id_missing_file(self, tmp_path: Path):
+        from chat.chat_dock_widget import _read_shared_session_id
+
+        missing = tmp_path / "no_file.txt"
+        result = _read_shared_session_id(missing)
+        assert result is None
+
+    def test_read_shared_session_id_empty_file(self, tmp_path: Path):
+        from chat.chat_dock_widget import _read_shared_session_id
+
+        f = tmp_path / "session.txt"
+        f.write_text("   ", encoding="utf-8")
+        result = _read_shared_session_id(f)
+        assert result is None
+
+    def test_read_shared_session_id_valid(self, tmp_path: Path):
+        from chat.chat_dock_widget import _read_shared_session_id
+
+        f = tmp_path / "session.txt"
+        f.write_text("my-session-123\n", encoding="utf-8")
+        result = _read_shared_session_id(f)
+        assert result == "my-session-123"
+
+    def test_write_shared_session_id(self, tmp_path: Path):
+        from chat.chat_dock_widget import _write_shared_session_id
+
+        f = tmp_path / "subdir" / "session.txt"
+        _write_shared_session_id("abc-def", f)
+        assert f.exists()
+        assert f.read_text(encoding="utf-8") == "abc-def"
+
+    def test_write_shared_session_id_creates_parents(self, tmp_path: Path):
+        from chat.chat_dock_widget import _write_shared_session_id
+
+        f = tmp_path / "a" / "b" / "c" / "session.txt"
+        _write_shared_session_id("xyz", f)
+        assert f.exists()
+
+    def test_read_shared_session_id_permission_error(self, tmp_path: Path):
+        """PermissionError is swallowed and returns None."""
+        from chat.chat_dock_widget import _read_shared_session_id
+
+        f = tmp_path / "session.txt"
+        f.write_text("abc", encoding="utf-8")
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch.object(Path, "read_text", side_effect=PermissionError("denied")),
+        ):
+            result = _read_shared_session_id(f)
+        assert result is None
+
+    def test_write_shared_session_id_permission_error(self, tmp_path: Path):
+        """PermissionError is swallowed silently."""
+        from chat.chat_dock_widget import _write_shared_session_id
+
+        f = tmp_path / "session.txt"
+        with patch.object(Path, "mkdir", side_effect=PermissionError("denied")):
+            # Should not raise
+            _write_shared_session_id("abc", f)
+
+    def test_roundtrip(self, tmp_path: Path):
+        """Write then read gives back the same session ID."""
+        from chat.chat_dock_widget import (
+            _read_shared_session_id,
+            _write_shared_session_id,
+        )
+
+        f = tmp_path / "session.txt"
+        _write_shared_session_id("roundtrip-id-999", f)
+        result = _read_shared_session_id(f)
+        assert result == "roundtrip-id-999"

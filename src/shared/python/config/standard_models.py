@@ -8,7 +8,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 
 from src.shared.python.core.constants import DEG_TO_RAD
 from src.shared.python.data_io.common_utils import GolfModelingError
@@ -32,8 +32,8 @@ class StandardModelManager:
             suite_root = Path(__file__).parent.parent.parent
 
         self.suite_root = Path(suite_root)
-        self.models_dir = self.suite_root / "urdf"
-        self.meshes_dir = self.suite_root / "meshes"
+        self.models_dir = self.suite_root / "shared" / "urdf"
+        self.meshes_dir = self.suite_root / "shared" / "meshes"
         self.config_file = self.models_dir / "standard_models.yaml"
 
         # Ensure directories exist
@@ -170,9 +170,7 @@ class StandardModelManager:
         In production, this would download actual STL files from human-gazebo.
         """
         # Create basic temporary STL files
-        if not (mesh_dir is not None):
-            raise ValueError("mesh_dir must be provided")
-        if not (mesh_dir is not None):
+        if mesh_dir is None:
             raise ValueError("mesh_dir must be provided")
         temporary_meshes = [
             "head.stl",
@@ -222,9 +220,7 @@ class StandardModelManager:
 
     def _generate_golf_club_urdf(self, club_type: str, output_path: Path) -> None:
         """Generate golf club URDF file."""
-        if not (club_type is not None):
-            raise ValueError("club_type must be provided")
-        if not (club_type is not None):
+        if club_type is None:
             raise ValueError("club_type must be provided")
         club_config: dict[str, Any] = self.config["golf_clubs"][club_type]
 
@@ -328,9 +324,7 @@ class StandardModelManager:
         Returns:
             Dictionary mapping engine names to compatibility status
         """
-        if not (urdf_path is not None):
-            raise ValueError("urdf_path must be provided")
-        if not (urdf_path is not None):
+        if urdf_path is None:
             raise ValueError("urdf_path must be provided")
         results = {}
 

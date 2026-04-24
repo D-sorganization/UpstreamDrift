@@ -33,7 +33,7 @@ from typing import Protocol, runtime_checkable
 
 import numpy as np
 
-from src.shared.python.pendulum_simulator.perturbation_analysis import (
+from .perturbation_analysis import (
     perturb_torque_profile,
 )
 
@@ -272,7 +272,7 @@ class CrossEnginePerturbationRunner:
             # Shape (n_steps,) — same torque for all DOF; reshape to (n_steps, 1)
             profile_2d = profile.reshape(-1, 1)
         elif profile.ndim == 2:
-            profile_2d = profile
+            profile_2d = profile  # type: ignore[assignment]
         else:
             raise ValueError(
                 f"base_torque_profile must be 1-D or 2-D, got {profile.ndim}-D"

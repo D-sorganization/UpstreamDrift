@@ -10,8 +10,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_ca
     PressureDropInputs,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_inputs(**kwargs) -> PressureDropInputs:
     defaults = {

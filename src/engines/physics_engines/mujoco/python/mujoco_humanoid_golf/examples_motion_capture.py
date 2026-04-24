@@ -224,41 +224,38 @@ def example_4_inverse_dynamics() -> None:
         np.max(np.abs(r.inertial_torques))
         for r in id_results
         if r.inertial_torques is not None
-    )
+    )  # noqa: E501
     max(
         np.max(np.abs(r.coriolis_torques))
         for r in id_results
         if r.coriolis_torques is not None
-    )
+    )  # noqa: E501
     max(
         np.max(np.abs(r.gravity_torques))
         for r in id_results
         if r.gravity_torques is not None
-    )
+    )  # noqa: E501
 
     # Decomposition percentages
-    np.mean([np.linalg.norm(r.joint_torques) for r in id_results])
-    np.mean(
-        [
-            np.linalg.norm(r.inertial_torques)
-            for r in id_results
-            if r.inertial_torques is not None
-        ],
-    )
-    np.mean(
-        [
-            np.linalg.norm(r.coriolis_torques)
-            for r in id_results
-            if r.coriolis_torques is not None
-        ],
-    )
-    np.mean(
-        [
-            np.linalg.norm(r.gravity_torques)
-            for r in id_results
-            if r.gravity_torques is not None
-        ],
-    )
+    # ⚡ Bolt: Vectorized sum of squares is faster than repeated np.linalg.norm
+    if id_results:
+        _jt = np.array([r.joint_torques for r in id_results], dtype=float)
+        np.mean(np.sqrt(np.einsum("ij,ij->i", _jt, _jt)))
+
+    _it = [r.inertial_torques for r in id_results if r.inertial_torques is not None]
+    if _it:
+        _ita = np.array(_it, dtype=float)
+        np.mean(np.sqrt(np.einsum("ij,ij->i", _ita, _ita)))
+
+    _ct = [r.coriolis_torques for r in id_results if r.coriolis_torques is not None]
+    if _ct:
+        _cta = np.array(_ct, dtype=float)
+        np.mean(np.sqrt(np.einsum("ij,ij->i", _cta, _cta)))
+
+    _gt = [r.gravity_torques for r in id_results if r.gravity_torques is not None]
+    if _gt:
+        _gta = np.array(_gt, dtype=float)
+        np.mean(np.sqrt(np.einsum("ij,ij->i", _gta, _gta)))
 
     export_inverse_dynamics_to_csv(times, id_results, "inverse_dynamics.csv")
 
@@ -293,9 +290,7 @@ def _retarget_mocap(
     model: mujoco.MjModel,
     data: mujoco.MjData,
 ) -> tuple[np.ndarray, np.ndarray]:
-    if not (mocap_seq is not None):
-        raise ValueError("mocap_seq must be provided")
-    if not (mocap_seq is not None):
+    if mocap_seq is None:
         raise ValueError("mocap_seq must be provided")
     marker_set = MarkerSet.golf_swing_marker_set()
     retargeting = MotionRetargeting(model, data, marker_set)
@@ -314,9 +309,7 @@ def _retarget_mocap(
 def _filter_and_differentiate(
     times_ret: np.ndarray, joint_traj: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    if not (times_ret is not None):
-        raise ValueError("times_ret must be provided")
-    if not (times_ret is not None):
+    if times_ret is None:
         raise ValueError("times_ret must be provided")
     processor = MotionCaptureProcessor()
 

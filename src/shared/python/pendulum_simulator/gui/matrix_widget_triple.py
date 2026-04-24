@@ -50,7 +50,7 @@ class TripleMatrixWidget(MatrixWidgetBase):
 
     def _draw_coupling_ratio(self, painter: QPainter, mc: dict, y: int) -> int:
         """Draw average coupling ratio for 3x3 matrix."""
-        if not (painter is not None):
+        if painter is None:
             raise ValueError("painter must be provided")
         diag = np.array([mc["M11"], mc["M22"], mc["M33"]])
         off = np.array(

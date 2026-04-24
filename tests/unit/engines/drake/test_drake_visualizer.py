@@ -3,19 +3,15 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.unit
 
-_PYDRAKE_MOCKED_KEYS = ["pydrake", "pydrake.all"]
-_VISUALIZER_MOD = "src.engines.physics_engines.drake.python.src.drake_visualizer"
-
-
+# Per CLAUDE.md: never module-level sys.modules mocking.
+# Use patch.dict context managers instead.
 # Fix mocking for class methods and types
 # RotationMatrix needs to be a class with MakeYRotation classmethod
 class MockRotationMatrix:
@@ -50,35 +46,22 @@ class MockRigidTransform:
         """Initialize mock rigid transform."""
 
 
-@pytest.fixture(autouse=True)
-def _mock_pydrake() -> Generator[None, None, None]:
-    """Mock pydrake for every test using patch.dict.
+_MOCK_PYDRAKE = MagicMock()
+_MOCK_PYDRAKE.RotationMatrix = MockRotationMatrix
+_MOCK_PYDRAKE.RigidTransform = MockRigidTransform
+_MOCK_PYDRAKE.Cylinder = MagicMock()
+_MOCK_PYDRAKE.Sphere = MagicMock()
+_MOCK_PYDRAKE.Rgba = MagicMock()
 
-    patch.dict auto-restores sys.modules after each test so no pollution leaks
-    to other modules.
-    """
-    mock_pydrake = MagicMock()
-    mock_pydrake.RotationMatrix = MockRotationMatrix
-    mock_pydrake.RigidTransform = MockRigidTransform
-    mock_pydrake.Cylinder = MagicMock()
-    mock_pydrake.Sphere = MagicMock()
-    mock_pydrake.Rgba = MagicMock()
-    with patch.dict("sys.modules", dict.fromkeys(_PYDRAKE_MOCKED_KEYS, mock_pydrake)):
-        # Evict any cached visualizer module so it re-imports with mocks in place.
-        sys.modules.pop(_VISUALIZER_MOD, None)
-        yield
-    # Evict the cached module after the test so the next test re-imports cleanly.
-    sys.modules.pop(_VISUALIZER_MOD, None)
+_PYDRAKE_MOCK = {
+    "pydrake": _MOCK_PYDRAKE,
+    "pydrake.all": _MOCK_PYDRAKE,
+}
 
-
-@pytest.fixture
-def _visualizer_class():
-    """Return DrakeVisualizer imported under the currently active mocks."""
-    from src.engines.physics_engines.drake.python.src.drake_visualizer import (
+with patch.dict(sys.modules, _PYDRAKE_MOCK):
+    from src.engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
         DrakeVisualizer,
     )
-
-    return DrakeVisualizer
 
 
 class TestDrakeVisualizer:
@@ -95,9 +78,9 @@ class TestDrakeVisualizer:
         return MagicMock()
 
     @pytest.fixture
-    def visualizer(self, _visualizer_class, mock_meshcat, mock_plant):
+    def visualizer(self, mock_meshcat, mock_plant) -> DrakeVisualizer:
         """Create visualizer instance."""
-        return _visualizer_class(mock_meshcat, mock_plant)
+        return DrakeVisualizer(mock_meshcat, mock_plant)
 
     def test_initialization(self, visualizer, mock_meshcat, mock_plant) -> None:
         """Test initialization."""

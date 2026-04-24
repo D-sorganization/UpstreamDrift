@@ -69,7 +69,7 @@ def get_cmu_xml_path() -> str:
     return str(xml_path)
 
 
-def get_actuator_indices(physics: mjcf.Physics) -> dict[str, int]:
+def get_actuator_indices(physics) -> dict[str, int]:
     """Map actuator names to their indices."""
     mapping = {}
     for i in range(physics.model.nu):
@@ -99,10 +99,8 @@ def _load_cmu_mjcf() -> mjcf.RootElement:
     return mjcf.from_xml_string(xml_string, assets=assets)
 
 
-def _scale_model_positions(root: mjcf.RootElement, height_scale: float) -> None:
-    if not (root is not None):
-        raise ValueError("root must be provided")
-    if not (root is not None):
+def _scale_model_positions(root, height_scale) -> None:
+    if root is None:
         raise ValueError("root must be provided")
     for body in root.find_all("body"):
         pos = getattr(body, "pos", None)
@@ -125,9 +123,7 @@ def _scale_model_positions(root: mjcf.RootElement, height_scale: float) -> None:
             site.pos = [x * height_scale for x in pos]
 
 
-def _scale_geom_sizes(
-    root: mjcf.RootElement, height_scale: float, width_scale: float
-) -> None:
+def _scale_geom_sizes(root, height_scale, width_scale) -> None:
     for geom in root.find_all("geom"):
         size = getattr(geom, "size", None)
         if size is not None:
@@ -143,7 +139,7 @@ def _scale_geom_sizes(
                 ]
 
 
-def _add_cameras(root: mjcf.RootElement, height_scale: float) -> None:
+def _add_cameras(root, height_scale) -> None:
     if root.worldbody:
         root.worldbody.add(
             "camera",
@@ -155,19 +151,17 @@ def _add_cameras(root: mjcf.RootElement, height_scale: float) -> None:
 
 
 def load_humanoid_with_props(
-    target_height: float = 1.8,
-    weight_percent: float = 100.0,
-    club_params: dict | None = None,
-    two_handed: bool = False,
-    enhance_face: bool = False,
-    articulated_fingers: bool = False,
+    target_height=1.8,
+    weight_percent=100.0,
+    club_params=None,
+    two_handed=False,
+    enhance_face=False,
+    articulated_fingers=False,
 ) -> mjcf.Physics:
     """
     Load the CMU humanoid with updated props and features.
     """
-    if not (target_height is not None):
-        raise ValueError("target_height must be provided")
-    if not (target_height is not None):
+    if target_height is None:
         raise ValueError("target_height must be provided")
     root = _load_cmu_mjcf()
 
@@ -195,11 +189,9 @@ def load_humanoid_with_props(
     return mjcf.Physics.from_mjcf_model(root)
 
 
-def _add_face_features(root: mjcf.RootElement, h_scale: float, w_scale: float) -> None:
+def _add_face_features(root, h_scale, w_scale) -> None:
     """Add facial features like nose and mouth."""
-    if not (root is not None):
-        raise ValueError("root must be provided")
-    if not (root is not None):
+    if root is None:
         raise ValueError("root must be provided")
     head = root.find("body", "head")
     if not head:
@@ -228,9 +220,7 @@ def _add_face_features(root: mjcf.RootElement, h_scale: float, w_scale: float) -
     )
 
 
-def _add_articulated_fingers(
-    root: mjcf.RootElement, h_scale: float, w_scale: float
-) -> None:
+def _add_articulated_fingers(root, h_scale, w_scale) -> None:
     """Add articulated fingers to the model."""
     for side in ["l", "r"]:
         hand = root.find("body", f"{side}hand")
@@ -282,17 +272,9 @@ def _add_articulated_fingers(
             )
 
 
-def _attach_club(
-    root: mjcf.RootElement,
-    h_scale: float,
-    w_scale: float,
-    params: dict,
-    two_handed: bool,
-) -> None:
+def _attach_club(root, h_scale, w_scale, params, two_handed) -> None:
     """Attach the golf club to the model."""
-    if not (root is not None):
-        raise ValueError("root must be provided")
-    if not (root is not None):
+    if root is None:
         raise ValueError("root must be provided")
     rhand = root.find("body", "rhand")
     if not rhand:
@@ -332,7 +314,7 @@ def _attach_club(
             # Locate it where left hand should be (slightly above right hand?)
             rhand.add(
                 "site", name="club_grip_site", pos=[0, 0.05 * w_scale, -0.15 * h_scale]
-            )
+            )  # noqa: E501
 
             # Site on Left Hand (palm center)
             lhand.add("site", name="lhand_grip_site", pos=[0, 0, -0.05 * h_scale])
@@ -350,12 +332,10 @@ def _attach_club(
             equality.add("connect", site1="lhand_grip_site", site2="club_grip_site")
 
 
-def customize_visuals(physics: mjcf.Physics, config: dict | None = None) -> None:
+def customize_visuals(physics, config=None) -> None:
     """Apply colors and visual tweaks."""
     # Defaults
-    if not (physics is not None):
-        raise ValueError("physics must be provided")
-    if not (physics is not None):
+    if physics is None:
         raise ValueError("physics must be provided")
     colors = {
         "shirt": [0.6, 0.6, 0.6, 1.0],

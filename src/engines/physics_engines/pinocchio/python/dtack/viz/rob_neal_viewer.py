@@ -118,9 +118,7 @@ class RobNealDataViewer:
             show_velocity: Whether to show velocity vectors
             show_acceleration: Whether to show acceleration vectors
         """
-        if not (frame is not None):
-            raise ValueError("frame must be provided")
-        if not (frame is not None):
+        if frame is None:
             raise ValueError("frame must be provided")
         if self.data is None:
             logger.warning("No data loaded")
@@ -143,7 +141,7 @@ class RobNealDataViewer:
         # Draw hands position
         self.viewer["club/hands"].set_object(
             g.Sphere(0.02), g.MeshBasicMaterial(color=0x0000FF)
-        )
+        )  # noqa: E501
         # Construct proper homogeneous transformation matrix for hands position
         hands_transform = np.eye(4)
         hands_transform[:3, 3] = midhands_xyz
@@ -152,7 +150,7 @@ class RobNealDataViewer:
         # Draw clubface position
         self.viewer["club/face"].set_object(
             g.Sphere(0.03), g.MeshBasicMaterial(color=0xFF0000)
-        )
+        )  # noqa: E501
         # Construct proper homogeneous transformation matrix for clubface position
         clubface_transform = np.eye(4)
         clubface_transform[:3, 3] = clubface_xyz

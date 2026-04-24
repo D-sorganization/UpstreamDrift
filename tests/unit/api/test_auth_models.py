@@ -134,7 +134,7 @@ class TestUserCreateContract:
         """Postcondition: Valid password is accepted."""
         from src.api.auth.models import UserCreate
 
-        user = UserCreate(email="test@example.com", password="securepassword123")
+        user = UserCreate(email="test@example.com", password="securepassword123")  # nosec B106
         assert user.password == "securepassword123"
 
 
@@ -234,8 +234,8 @@ class TestLoginResponseContract:
         )
 
         response = LoginResponse(
-            access_token="access_token",
-            refresh_token="refresh_token",
+            access_token="access_token",  # nosec B106 - test fixture value
+            refresh_token="refresh_token",  # nosec B106 - test fixture value
             expires_in=3600,
             user=user_response,
         )

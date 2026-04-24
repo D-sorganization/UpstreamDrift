@@ -1,7 +1,6 @@
 """Service for loading C3D files into application data models."""
 
 import os
-from typing import Any
 
 import numpy as np
 
@@ -10,7 +9,7 @@ from ...logger_utils import log_execution_time
 from ..core.models import AnalogData, C3DDataModel, MarkerData
 
 
-def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerData]:
+def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
     """Build marker data dictionary from points dataframe.
 
     Args:
@@ -20,9 +19,7 @@ def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerD
     Returns:
         Dictionary mapping marker names to MarkerData.
     """
-    if not (df_points is not None):
-        raise ValueError("df_points must be provided")
-    if not (df_points is not None):
+    if df_points is None:
         raise ValueError("df_points must be provided")
     markers: dict[str, MarkerData] = {}
     if not df_points.empty:
@@ -40,7 +37,7 @@ def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerD
     return markers
 
 
-def _build_analog(df_analog: Any, metadata_obj: Any) -> dict[str, AnalogData]:
+def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
     """Build analog channel data dictionary from analog dataframe.
 
     Args:
@@ -50,14 +47,12 @@ def _build_analog(df_analog: Any, metadata_obj: Any) -> dict[str, AnalogData]:
     Returns:
         Dictionary mapping channel names to AnalogData.
     """
-    if not (df_analog is not None):
-        raise ValueError("df_analog must be provided")
-    if not (df_analog is not None):
+    if df_analog is None:
         raise ValueError("df_analog must be provided")
     analog: dict[str, AnalogData] = {}
     units_map = dict(
         zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False)
-    )
+    )  # noqa: E501
     if not df_analog.empty and "channel" in df_analog.columns:
         for name in df_analog["channel"].unique():
             mask = df_analog["channel"] == name
@@ -67,7 +62,7 @@ def _build_analog(df_analog: Any, metadata_obj: Any) -> dict[str, AnalogData]:
     return analog
 
 
-def _build_metadata_ui(filepath: str, metadata_obj: Any) -> dict[str, str]:
+def _build_metadata_ui(filepath: str, metadata_obj) -> dict[str, str]:
     """Build UI-friendly metadata dictionary from C3D metadata.
 
     Args:
@@ -77,9 +72,7 @@ def _build_metadata_ui(filepath: str, metadata_obj: Any) -> dict[str, str]:
     Returns:
         Dictionary of display-friendly metadata key-value pairs.
     """
-    if not (filepath is not None):
-        raise ValueError("filepath must be provided")
-    if not (filepath is not None):
+    if filepath is None:
         raise ValueError("filepath must be provided")
     metadata_ui = {
         "File": os.path.basename(filepath),
@@ -95,7 +88,7 @@ def _build_metadata_ui(filepath: str, metadata_obj: Any) -> dict[str, str]:
     if metadata_obj.events:
         events_str = ", ".join(
             [f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events]
-        )
+        )  # noqa: E501
         metadata_ui["Events"] = events_str
     return metadata_ui
 

@@ -15,8 +15,6 @@ from src.shared.python.signal_toolkit.calculus import (
 )
 from src.shared.python.signal_toolkit.core import Signal
 
-pytestmark = pytest.mark.unit
-
 
 def _make_signal(n: int = 100, amp: float = 1.0) -> Signal:
     """Create a sinusoidal test signal: y = amp * sin(2*pi*t), t in [0, 1]."""

@@ -7,8 +7,6 @@ only numpy and model_generation (available via pytest pythonpath).
 
 from __future__ import annotations
 
-from typing import Any
-
 import pytest
 
 pytestmark = pytest.mark.unit
@@ -19,9 +17,7 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 
 
-def _make_inertia(
-    ixx=0.1, iyy=0.1, izz=0.1, ixy=0.0, ixz=0.0, iyz=0.0, mass=1.0
-) -> Any:
+def _make_inertia(ixx=0.1, iyy=0.1, izz=0.1, ixy=0.0, ixz=0.0, iyz=0.0, mass=1.0):
     """Create an Inertia object with given diagonal + off-diagonal elements."""
     from model_generation.core.types import Inertia
 
@@ -29,7 +25,7 @@ def _make_inertia(
 
 
 @pytest.fixture
-def validator() -> Any:
+def validator():
     """PhysicsValidator instance with default gravity."""
     from src.shared.python.model_generation.core.physics_validation import (
         PhysicsValidator,

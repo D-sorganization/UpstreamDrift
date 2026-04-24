@@ -10,14 +10,12 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def _load_excel_frame_data(filename: str, sheet_name: str) -> list:
+def _load_excel_frame_data(filename, sheet_name) -> list:
     """Load and parse frame data from an Excel sheet.
 
     Returns a list of frame data dicts, or an empty list on failure.
     """
-    if not (filename is not None):
-        raise ValueError("filename must be provided")
-    if not (filename is not None):
+    if filename is None:
         raise ValueError("filename must be provided")
     df = pd.read_excel(filename, sheet_name=sheet_name, header=None)
 
@@ -66,7 +64,7 @@ def _load_excel_frame_data(filename: str, sheet_name: str) -> list:
     return data
 
 
-def _compute_motion_ranges(data: list) -> tuple:
+def _compute_motion_ranges(data) -> tuple:
     """Compute and log per-axis motion ranges for mid-hands and club head.
 
     Returns (mid_motion_ranges, club_motion_ranges) as lists of [X, Y, Z] range sizes.
@@ -125,11 +123,9 @@ def _compute_motion_ranges(data: list) -> tuple:
     return mid_motion_ranges, club_motion_ranges
 
 
-def _interpret_swing_motion(mid_motion_ranges: list, club_motion_ranges: list) -> None:
+def _interpret_swing_motion(mid_motion_ranges, club_motion_ranges) -> None:
     """Log interpretation of the swing motion directions and patterns."""
-    if not (mid_motion_ranges is not None):
-        raise ValueError("mid_motion_ranges must be provided")
-    if not (mid_motion_ranges is not None):
+    if mid_motion_ranges is None:
         raise ValueError("mid_motion_ranges must be provided")
     logger.info("\nMotion analysis:")
     # Determine the axis with largest motion range using explicit if-elif-else
@@ -157,7 +153,7 @@ def _interpret_swing_motion(mid_motion_ranges: list, club_motion_ranges: list) -
     if max(club_motion_ranges) > max(mid_motion_ranges) * 1.5:
         logger.info(
             "  ✓ Club head has larger motion than hands (typical of golf swing)"
-        )
+        )  # noqa: E501
     else:
         logger.info("  ✗ Club head motion similar to hands (unusual for golf swing)")
 
@@ -179,16 +175,14 @@ def _interpret_swing_motion(mid_motion_ranges: list, club_motion_ranges: list) -
         logger.info("  This seems unusual for a golf swing")
 
 
-def _analyze_key_frame(name: str, frame: dict) -> None:
+def _analyze_key_frame(name, frame) -> None:
     """Analyze and log position, club vector, and rotation matrix for a single frame."""
-    if not (name is not None):
-        raise ValueError("name must be provided")
-    if not (name is not None):
+    if name is None:
         raise ValueError("name must be provided")
     logger.info("%s frame (t=%ss):", name, frame["time"])
     logger.info(
         f"  Mid-hands: X={frame['mid_X']:.3f}, Y={frame['mid_Y']:.3f}, "
-        f"Z={frame['mid_Z']:.3f}"
+        f"Z={frame['mid_Z']:.3f}"  # noqa: E501
     )
     logger.info(
         f"  Club head: X={frame['club_X']:.3f}, Y={frame['club_Y']:.3f}, "
@@ -211,15 +205,15 @@ def _analyze_key_frame(name: str, frame: dict) -> None:
     logger.info("  Mid-hands direction cosines:")
     logger.info(
         f"    X-axis: [{frame['mid_Xx']:.3f}, {frame['mid_Xy']:.3f}, "
-        f"{frame['mid_Xz']:.3f}]"
+        f"{frame['mid_Xz']:.3f}]"  # noqa: E501
     )
     logger.info(
         f"    Y-axis: [{frame['mid_Yx']:.3f}, {frame['mid_Yy']:.3f}, "
-        f"{frame['mid_Yz']:.3f}]"
+        f"{frame['mid_Yz']:.3f}]"  # noqa: E501
     )
     logger.info(
         f"    Z-axis: [{frame['mid_Zx']:.3f}, {frame['mid_Zy']:.3f}, "
-        f"{frame['mid_Zz']:.3f}]"
+        f"{frame['mid_Zz']:.3f}]"  # noqa: E501
     )
 
     # Check if direction cosines form a proper rotation matrix

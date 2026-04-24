@@ -12,8 +12,6 @@ from src.shared.python.calc_backend.contracts.wgs_reactor import (
     WGSSizingOut,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _valid_request(**kwargs) -> WGSReactorRequest:
     defaults = {

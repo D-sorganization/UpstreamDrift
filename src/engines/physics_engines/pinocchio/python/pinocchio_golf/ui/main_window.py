@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-import pinocchio as pin
+import pinocchio as pin  # type: ignore[import-untyped]
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import (
@@ -113,12 +113,12 @@ class PinocchioGUI(
         # Use relative path from this file's directory
         default_urdf = (
             Path(__file__).parent / "../../../models/generated/golfer.urdf"
-        ).resolve()
+        ).resolve()  # noqa: E501
 
         if default_urdf.exists():
             self.available_models.insert(
                 0, {"name": "Default: Golfer", "path": str(default_urdf)}
-            )
+            )  # noqa: E501
             self.load_urdf(str(default_urdf))
         else:
             self.available_models.insert(0, {"name": "Select Model...", "path": None})
@@ -129,9 +129,7 @@ class PinocchioGUI(
 
     def log_write(self, text: str) -> None:
         """Append a message to the UI log panel and logger."""
-        if not (text is not None):
-            raise ValueError("text must be provided")
-        if not (text is not None):
+        if text is None:
             raise ValueError("text must be provided")
         if hasattr(self, "log"):
             self.log.append(text)

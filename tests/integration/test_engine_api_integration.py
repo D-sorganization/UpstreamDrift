@@ -13,31 +13,24 @@ Fixes #1119
 
 from __future__ import annotations
 
-import importlib.util
 import time
-from collections.abc import Generator
+import typing
 
 import pytest
 
-from src.shared.python.engine_core.engine_registry import EngineType
-
-_api_deps_available = (
-    importlib.util.find_spec("fastapi") is not None
-    and importlib.util.find_spec("src.api.server") is not None
-)
-pytestmark = pytest.mark.skipif(
-    not _api_deps_available,
-    reason="API server deps not available",
-)
-
-if _api_deps_available:
+try:
     from fastapi.testclient import TestClient
 
     from src.api.server import app
+except ImportError:
+    TestClient = typing.Any  # type: ignore
+    pytest.skip("API server deps not available", allow_module_level=True)
+
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 @pytest.fixture(scope="module")
-def client() -> Generator[TestClient, None, None]:
+def client():
     """Create test client with proper application lifespan."""
     with TestClient(app) as c:
         yield c
@@ -169,7 +162,7 @@ class TestEnginePerformanceBenchmarks:
     def test_engine_list_latency(self, client: TestClient) -> None:
         """Engine list responds within 3 seconds."""
         start = time.time()
-        resp = client.get("/api/engines")
+        resp = client.get("/engines")
         elapsed = time.time() - start
         assert resp.status_code == 200
         assert elapsed < 3.0

@@ -7,8 +7,6 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-pytestmark = pytest.mark.unit
-
 try:
     import pyarrow  # noqa: F401
 
@@ -16,16 +14,13 @@ try:
 except ImportError:
     HAS_PYARROW = False
 
-from src.shared.python.upstream_drift_tools.data_io import (  # noqa: E402
-    read_data,
-    write_data,
-)
+from src.shared.python.upstream_drift_tools.data_io import read_data, write_data
 
 needs_parquet = pytest.mark.skipif(not HAS_PYARROW, reason="pyarrow not installed")
 
 
 @pytest.fixture
-def sample_df() -> pd.DataFrame:
+def sample_df():
     return pd.DataFrame({"a": [1, 2, 3], "b": [4.0, 5.0, 6.0]})
 
 

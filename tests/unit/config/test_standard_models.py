@@ -8,8 +8,6 @@ import pytest
 
 from src.shared.python.config.standard_models import StandardModelManager
 
-pytestmark = pytest.mark.unit
-
 # ---------------------------------------------------------------------------
 # Construction
 # ---------------------------------------------------------------------------

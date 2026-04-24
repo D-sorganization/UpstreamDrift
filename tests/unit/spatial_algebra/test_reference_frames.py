@@ -17,8 +17,6 @@ from src.shared.python.spatial_algebra.reference_frames import (
     transform_wrench_to_frame,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _identity_wrench() -> WrenchInFrame:
     return WrenchInFrame(

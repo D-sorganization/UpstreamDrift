@@ -5,11 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 from src.shared.python.upstream_drift_tools.bootstrap import ensure_paths
-
-pytestmark = pytest.mark.unit
 
 
 class TestEnsurePaths:

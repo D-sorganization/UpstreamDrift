@@ -13,8 +13,6 @@ from src.engines.physics_engines.pendulum.python.pendulum_screw_kinematics impor
 )
 from src.shared.python.screw_theory import ScrewAxis, Twist
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def dynamics() -> DoublePendulumDynamics:

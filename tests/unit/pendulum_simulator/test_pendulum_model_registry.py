@@ -12,8 +12,6 @@ from src.shared.python.pendulum_simulator.model_registry import (
     register_model,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_config(name: str = "TestModel", n_dof: int = 2) -> ModelConfig:
     return ModelConfig(
@@ -83,11 +81,11 @@ class TestRegisterAndGet:
         assert list_models() == []
 
     def test_register_empty_name_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(AssertionError):
             register_model("", _make_config())
 
     def test_register_wrong_type_raises(self) -> None:
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(AssertionError):
             register_model("bad", {"not": "a ModelConfig"})  # type: ignore[arg-type]
 
     def test_list_models_returns_list(self) -> None:

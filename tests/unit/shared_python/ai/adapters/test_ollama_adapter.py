@@ -27,11 +27,11 @@ from src.shared.python.ai.types import (
 pytestmark = pytest.mark.unit
 
 
-class MockConnectError(Exception):
+class MockConnectError(OSError):
     pass
 
 
-class MockTimeoutException(Exception):
+class MockTimeoutException(OSError):
     pass
 
 

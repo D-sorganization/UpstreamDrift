@@ -8,9 +8,8 @@ from __future__ import annotations
 
 import os
 import sys
-from collections.abc import Callable, Generator
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -71,19 +70,10 @@ def pytest_configure(config: pytest.Config) -> None:
         # Always override — even if already present — to ensure a single class identity.
         # xdist workers may have loaded 'contracts' via the short sys.path entry before
         # pytest_configure runs, creating a stale second module instance.
-        _contracts_aliases = ("contracts", "shared.python.contracts")
-        for alias in _contracts_aliases:
+        for alias in ("contracts", "shared.python.contracts"):
             sys.modules[alias] = canonical_mod
-        config._contracts_aliases_installed = _contracts_aliases  # type: ignore[attr-defined]
     except Exception as e:  # noqa: BLE001, F841
         pass  # Don't block test collection if this fails
-
-
-def pytest_unconfigure(config: pytest.Config) -> None:
-    """Remove contracts aliases installed by pytest_configure."""
-    aliases = getattr(config, "_contracts_aliases_installed", ())
-    for alias in aliases:
-        sys.modules.pop(alias, None)
 
 
 # Engine module prefixes whose sys.modules entries must be isolated between
@@ -95,9 +85,6 @@ def pytest_unconfigure(config: pytest.Config) -> None:
 _PROTECTED_PREFIXES = (
     "pinocchio",
     "pydrake",
-    "mujoco",
-    "opensim",
-    "myosuite",
 )
 
 
@@ -164,7 +151,7 @@ def pendulum_urdf(tmp_path: Path) -> str:
 
 
 @pytest.fixture
-def clean_pendulum_dynamics() -> Callable[..., Any]:
+def clean_pendulum_dynamics():
     """Fixture to provide standardized DoublePendulumDynamics setup for unit tests."""
     from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
         DoublePendulumDynamics,
@@ -173,7 +160,7 @@ def clean_pendulum_dynamics() -> Callable[..., Any]:
         SegmentProperties,
     )
 
-    def _create(m1_kg: float = 1.0, l1_m: float = 1.0) -> Any:
+    def _create(m1_kg=1.0, l1_m=1.0):
         assert m1_kg is not None, "m1_kg must be provided"
         assert l1_m is not None, "l1_m must be provided"
         assert m1_kg > 0.0, "m1_kg must be positive"
@@ -211,8 +198,8 @@ class MockPhysicsEngine:
     pass
 
 
-@pytest.fixture
-def mock_drake_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
+@pytest.fixture(scope="module")
+def mock_drake_dependencies():
     """Fixture to mock pydrake and interfaces safely.
 
     This fixture mocks pydrake modules to allow testing Drake integration
@@ -225,10 +212,12 @@ def mock_drake_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, No
         "sys.modules",
         {
             "pydrake": mock_pydrake,
+            "pydrake.geometry": MagicMock(),
             "pydrake.math": MagicMock(),
             "pydrake.multibody": MagicMock(),
             "pydrake.multibody.plant": MagicMock(),
             "pydrake.multibody.parsing": MagicMock(),
+            "pydrake.multibody.tree": MagicMock(),
             "pydrake.systems": MagicMock(),
             "pydrake.systems.framework": MagicMock(),
             "pydrake.systems.analysis": MagicMock(),
@@ -239,8 +228,8 @@ def mock_drake_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, No
         yield mock_pydrake, mock_interfaces
 
 
-@pytest.fixture
-def mock_mujoco_dependencies() -> Generator[tuple[MagicMock, MagicMock], None, None]:
+@pytest.fixture(scope="module")
+def mock_mujoco_dependencies():
     """Fixture to mock mujoco and interfaces safely.
 
     This fixture mocks mujoco modules to allow testing MuJoCo integration

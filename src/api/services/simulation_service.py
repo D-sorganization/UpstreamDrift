@@ -1,7 +1,5 @@
 """Simulation service for Golf Modeling Suite API."""
 
-import time
-from dataclasses import dataclass, field
 from typing import Any
 
 from src.shared.python.core.contracts import precondition
@@ -20,23 +18,6 @@ from ..models.responses import SimulationResponse
 
 logger = get_logger(__name__)
 
-_DEFAULT_SPEED_FACTOR = 1.0
-
-
-@dataclass
-class SimulationStats:
-    """Authoritative runtime state for an active simulation session.
-
-    Owned by SimulationService and updated by the real simulation loop.
-    Routes read from this instead of engine_manager private fields.
-    """
-
-    start_time: float = field(default_factory=time.time)
-    frame_count: int = 0
-    speed_factor: float = _DEFAULT_SPEED_FACTOR
-    is_recording: bool = False
-    recorded_frames: list[Any] = field(default_factory=list)
-
 
 class SimulationService:
     """Service for managing physics simulations."""
@@ -48,29 +29,6 @@ class SimulationService:
             engine_manager: Engine manager instance
         """
         self.engine_manager = engine_manager
-        self._stats = SimulationStats()
-
-    @property
-    def stats(self) -> SimulationStats:
-        """Return the authoritative runtime stats for this session."""
-        return self._stats
-
-    def start_recording(self) -> None:
-        """Begin recording trajectory frames. Clears any previously recorded data."""
-        self._stats.is_recording = True
-        self._stats.recorded_frames = []
-
-    def stop_recording(self) -> None:
-        """Stop recording trajectory frames."""
-        self._stats.is_recording = False
-
-    def set_speed_factor(self, value: float) -> None:
-        """Set simulation speed multiplier.
-
-        Args:
-            value: Speed multiplier (>0).
-        """
-        self._stats.speed_factor = value
 
     @precondition(
         lambda self, request: request is not None,
@@ -140,9 +98,9 @@ class SimulationService:
             timestep: Time step per simulation step.
             steps: Total number of steps to execute.
         """
-        if not (recorder is not None):
+        if recorder is None:
             raise ValueError("recorder must be provided")
-        if not (engine is not None):
+        if engine is None:
             raise ValueError("engine must be provided")
         if not recorder.is_recording:
             recorder.record_step()
@@ -154,7 +112,6 @@ class SimulationService:
                     engine.set_control(control["torques"])
             engine.step(timestep)
             recorder.record_step()
-            self._stats.frame_count += 1
 
     async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
         """Run a physics simulation based on request parameters.
@@ -166,8 +123,6 @@ class SimulationService:
             Simulation results and data
         """
         try:
-            self._stats.start_time = time.time()
-            self._stats.frame_count = 0
             engine = self._prepare_engine(request)
             recorder = GenericPhysicsRecorder(engine)
 
@@ -237,16 +192,10 @@ class SimulationService:
 
             result = await self.run_simulation(request)
 
-            if result.success:
-                active_tasks[task_id] = {
-                    "status": "completed",
-                    "result": result.model_dump(),
-                }
-            else:
-                active_tasks[task_id] = {
-                    "status": "failed",
-                    "result": result.model_dump(),
-                }
+            active_tasks[task_id] = {
+                "status": "completed",
+                "result": result.model_dump(),
+            }
 
         except (GolfSuiteError, ValueError, RuntimeError, OSError) as e:
             active_tasks[task_id] = {"status": "failed", "error": str(e)}
@@ -262,7 +211,7 @@ class SimulationService:
         Returns:
             Dictionary containing simulation data
         """
-        if not (recorder is not None):
+        if recorder is None:
             raise ValueError("recorder must be provided")
         data = {}
 
@@ -312,7 +261,7 @@ class SimulationService:
         Returns:
             Analysis results
         """
-        if not (recorder is not None):
+        if recorder is None:
             raise ValueError("recorder must be provided")
         results = {}
 

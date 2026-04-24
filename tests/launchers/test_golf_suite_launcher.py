@@ -1,17 +1,15 @@
 """Tests for golf_suite_launcher.py."""
 
+import importlib
 import sys  # noqa: E402
-from collections.abc import Generator  # noqa: E402
 from pathlib import Path  # noqa: E402
-from unittest.mock import ANY, MagicMock, patch  # noqa: E402
+from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
-pytestmark = pytest.mark.integration
-
 
 @pytest.fixture
-def mock_pyqt(qapp) -> Generator[tuple[MagicMock, MagicMock], None, None]:
+def mock_pyqt(qapp):
     """Mock PyQt6 components for testing non-UI logic safely."""
     with (
         patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", True),
@@ -25,7 +23,7 @@ def mock_pyqt(qapp) -> Generator[tuple[MagicMock, MagicMock], None, None]:
 
 
 @pytest.fixture
-def launcher(mock_pyqt) -> Generator[MagicMock, None, None]:
+def launcher(mock_pyqt):
     """Provide a minimal instantiated GolfLauncher."""
     with patch("src.launchers.golf_suite_launcher.GolfLauncher._setup_ui"):
         from src.launchers.golf_suite_launcher import GolfLauncher
@@ -39,17 +37,22 @@ def launcher(mock_pyqt) -> Generator[MagicMock, None, None]:
         yield inst
 
 
-def test_init_raises_without_pyqt() -> None:
-    with patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", False):
+def test_init_raises_without_pyqt():
+    with patch(
+        "src.shared.python.engine_core.engine_availability.PYQT6_AVAILABLE", False
+    ):
         import src.launchers.golf_suite_launcher as gsl
 
-        with pytest.raises(ImportError, match="PyQt6 is required"):
-            gsl.GolfLauncher()
+        try:
+            importlib.reload(gsl)
+
+            with pytest.raises(ImportError, match="PyQt6 is required"):
+                gsl.GolfLauncher()
+        finally:
+            importlib.reload(gsl)
 
 
-def test_imports_without_pyqt() -> None:
-    import importlib
-
+def test_imports_without_pyqt():
     import src.launchers.golf_suite_launcher as gsl
 
     with patch(
@@ -68,7 +71,7 @@ def test_imports_without_pyqt() -> None:
     importlib.reload(gsl)
 
 
-def test_init_sets_paths(mock_pyqt) -> None:
+def test_init_sets_paths(mock_pyqt):
     from src.launchers.golf_suite_launcher import GolfLauncher
 
     with patch.object(GolfLauncher, "_setup_ui"):
@@ -79,7 +82,7 @@ def test_init_sets_paths(mock_pyqt) -> None:
         assert "engines" in str(launcher.mujoco_path)
 
 
-def test_setup_ui_execution(qapp) -> None:
+def test_setup_ui_execution(qapp):
     from src.launchers.golf_suite_launcher import GolfLauncher
 
     # Do not patch _setup_ui, let it execute with real PyQT
@@ -100,7 +103,7 @@ def test_setup_ui_execution(qapp) -> None:
     assert hasattr(launcher, "clear_btn")
 
 
-def test_launch_script_success(launcher) -> None:
+def test_launch_script_success(launcher):
     fake_path = Path("fake/path.py")
     fake_cwd = Path("fake/cwd")
 
@@ -115,12 +118,12 @@ def test_launch_script_success(launcher) -> None:
         launcher._launch_script("Test Engine", fake_path, fake_cwd)
 
         mock_popen.assert_called_once_with(
-            [sys.executable, str(fake_path)], cwd=str(fake_cwd), env=ANY
+            [sys.executable, str(fake_path)], cwd=str(fake_cwd)
         )
         launcher.status.setText.assert_called_with("Test Engine Launched")
 
 
-def test_launch_script_not_found(launcher) -> None:
+def test_launch_script_not_found(launcher):
     fake_path = Path("fake/path.py")
     fake_cwd = Path("fake/cwd")
 
@@ -133,7 +136,7 @@ def test_launch_script_not_found(launcher) -> None:
         launcher.status.setText.assert_called_with("Error: Script not found")
 
 
-def test_launch_script_subprocess_error(launcher) -> None:
+def test_launch_script_subprocess_error(launcher):
     fake_path = Path("fake/path.py")
     fake_cwd = Path("fake/cwd")
 
@@ -150,19 +153,19 @@ def test_launch_script_subprocess_error(launcher) -> None:
         launcher.status.setText.assert_called_with("Error")
 
 
-def test_log_message(launcher) -> None:
+def test_log_message(launcher):
     launcher.log_message("Test message")
     launcher.log_text.append.assert_called_once()
     assert "Test message" in launcher.log_text.append.call_args[0][0]
 
 
-def test_clear_log(launcher) -> None:
+def test_clear_log(launcher):
     launcher.clear_log()
     launcher.log_text.clear.assert_called_once()
     launcher.clear_btn.setText.assert_called_with("Cleared!")
 
 
-def test_copy_log(launcher, mock_pyqt) -> None:
+def test_copy_log(launcher, mock_pyqt):
     mock_widgets, mock_core = mock_pyqt
     mock_clipboard = MagicMock()
     mock_widgets.QApplication.clipboard.return_value = mock_clipboard
@@ -173,7 +176,7 @@ def test_copy_log(launcher, mock_pyqt) -> None:
     launcher.copy_btn.setText.assert_called_with("Copied!")
 
 
-def test_copy_log_no_clipboard(launcher, mock_pyqt) -> None:
+def test_copy_log_no_clipboard(launcher, mock_pyqt):
     mock_widgets, mock_core = mock_pyqt
     mock_widgets.QApplication.clipboard.return_value = None
 
@@ -182,7 +185,7 @@ def test_copy_log_no_clipboard(launcher, mock_pyqt) -> None:
     launcher.copy_btn.setText.assert_not_called()
 
 
-def test_restore_btn(launcher) -> None:
+def test_restore_btn(launcher):
     mock_btn = MagicMock()
     mock_icon = MagicMock()
     launcher._restore_btn(mock_btn, "Restored", mock_icon)
@@ -190,7 +193,7 @@ def test_restore_btn(launcher) -> None:
     mock_btn.setIcon.assert_called_once_with(mock_icon)
 
 
-def test_restore_btn_none(launcher) -> None:
+def test_restore_btn_none(launcher):
     # Tests the fallback conditions where btn=None or icon=None
     launcher._restore_btn(None, "Restored", MagicMock())
 
@@ -200,7 +203,7 @@ def test_restore_btn_none(launcher) -> None:
     mock_btn.setIcon.assert_not_called()
 
 
-def test_launcher_methods(launcher) -> None:
+def test_launcher_methods(launcher):
     with patch.object(launcher, "_launch_script") as mock_launch:
         launcher._launch_mujoco()
         assert "MuJoCo" in mock_launch.call_args[0]
@@ -234,7 +237,7 @@ def test_launcher_methods(launcher) -> None:
         assert "Shot Tracer" in mock_launch.call_args[0]
 
 
-def test_main_no_pyqt() -> None:
+def test_main_no_pyqt():
     with patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", False):
         from src.launchers.golf_suite_launcher import main
 
@@ -243,7 +246,7 @@ def test_main_no_pyqt() -> None:
         assert exc.value.code == 1
 
 
-def test_main_with_pyqt(mock_pyqt) -> None:
+def test_main_with_pyqt(mock_pyqt):
     with (
         patch("src.launchers.golf_suite_launcher.PYQT6_AVAILABLE", True),
         patch("src.launchers.golf_suite_launcher.GolfLauncher"),

@@ -10,8 +10,14 @@ Covers:
 - Library manifest integrity
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from model_generation.library.unified_loader import UnifiedModelLoader
 
 
 class TestFormatDetection:
@@ -155,14 +161,14 @@ class TestBundledManifest:
 class TestUnifiedLoader:
     """Tests for loading bundled models via UnifiedModelLoader."""
 
-    def _make_loader(self, tmp_path: Path) -> object:  # type: ignore[return]
+    def _make_loader(self, tmp_path: Path) -> UnifiedModelLoader:
         from model_generation.library.unified_loader import UnifiedModelLoader
 
         return UnifiedModelLoader(prefs_dir=tmp_path)
 
     def test_list_bundled_models(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        models = loader.list_bundled_models()  # type: ignore[attr-defined]
+        models = loader.list_bundled_models()
         assert len(models) >= 4
         ids = {m["id"] for m in models}
         assert "mujoco_humanoid" in ids
@@ -172,7 +178,7 @@ class TestUnifiedLoader:
 
     def test_load_mujoco_humanoid(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_bundled("mujoco_humanoid")  # type: ignore[attr-defined]
+        result = loader.load_bundled("mujoco_humanoid")
         assert result.success, f"Failed to load mujoco_humanoid: {result.error}"
         assert result.model is not None
         assert result.source_format.value == "mjcf"
@@ -181,7 +187,7 @@ class TestUnifiedLoader:
 
     def test_load_simple_humanoid(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_bundled("simple_humanoid")  # type: ignore[attr-defined]
+        result = loader.load_bundled("simple_humanoid")
         assert result.success, f"Failed to load simple_humanoid: {result.error}"
         assert result.model is not None
         assert result.source_format.value == "urdf"
@@ -189,42 +195,42 @@ class TestUnifiedLoader:
 
     def test_load_simple_arm(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_bundled("simple_arm")  # type: ignore[attr-defined]
+        result = loader.load_bundled("simple_arm")
         assert result.success, f"Failed to load simple_arm: {result.error}"
         assert result.model is not None
         assert len(result.model.links) >= 5
 
     def test_load_simple_quadruped(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_bundled("simple_quadruped")  # type: ignore[attr-defined]
+        result = loader.load_bundled("simple_quadruped")
         assert result.success, f"Failed to load simple_quadruped: {result.error}"
         assert result.model is not None
         assert len(result.model.links) >= 9
 
     def test_load_default_is_mujoco_humanoid(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_default()  # type: ignore[attr-defined]
+        result = loader.load_default()
         assert result.success
         assert result.model is not None
         assert result.model.name == "humanoid"
 
     def test_load_nonexistent_bundled_model(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_bundled("nonexistent_model_xyz")  # type: ignore[attr-defined]
+        result = loader.load_bundled("nonexistent_model_xyz")
         assert not result.success
         assert result.error is not None
 
     def test_load_nonexistent_file(self, tmp_path: Path) -> None:
         loader = self._make_loader(tmp_path)
-        result = loader.load_file(tmp_path / "nope.urdf")  # type: ignore[attr-defined]
+        result = loader.load_file(tmp_path / "nope.urdf")
         assert not result.success
         assert "not found" in (result.error or "").lower()
 
     def test_fallback_when_default_missing(self, tmp_path: Path) -> None:
         """If configured default is invalid, fall back to mujoco_humanoid."""
         loader = self._make_loader(tmp_path)
-        loader._preferences.default_model_id = "nonexistent_model"  # type: ignore[attr-defined]
-        result = loader.load_default()  # type: ignore[attr-defined]
+        loader._preferences.default_model_id = "nonexistent_model"
+        result = loader.load_default()
         assert result.success
         assert result.model is not None
 
@@ -242,7 +248,7 @@ class TestUnifiedLoader:
         f.write_text(urdf_content)
 
         loader = self._make_loader(tmp_path)
-        result = loader.load_file(f)  # type: ignore[attr-defined]
+        result = loader.load_file(f)
         assert result.success
         assert result.model is not None
         assert result.model.name == "test_bot"
@@ -260,7 +266,7 @@ class TestUnifiedLoader:
         f.write_text(mjcf_content)
 
         loader = self._make_loader(tmp_path)
-        result = loader.load_file(f)  # type: ignore[attr-defined]
+        result = loader.load_file(f)
         assert result.success
         assert result.model is not None
         assert result.model.name == "test_mj"

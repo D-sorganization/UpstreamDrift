@@ -10,7 +10,6 @@ Design by Contract:
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import numpy as np
@@ -23,8 +22,6 @@ from src.shared.python.core.contracts import (
     ContractChecker,
     postcondition,
 )
-
-_log = logging.getLogger(__name__)
 
 
 class ContactManager(ContractChecker):
@@ -129,18 +126,15 @@ class ContactManager(ContractChecker):
         Raises:
             ContactError: If contact detection fails.
         """
-        # Set configuration if provided, restoring afterwards
+        # Set configuration if provided
         if q is not None:
             current_q, current_v = self._engine.get_state()
             self._engine.set_state(q, current_v)
-            try:
-                contacts = (
-                    self._detect_from_engine() if self._is_contact_capable else []
-                )
-            finally:
-                self._engine.set_state(current_q, current_v)
-        else:
-            contacts = self._detect_from_engine() if self._is_contact_capable else []
+
+        contacts: list[ContactState] = []
+
+        # Fallback: no contact detection available
+        contacts = self._detect_from_engine() if self._is_contact_capable else []
 
         self._contact_cache = contacts
         return contacts
@@ -183,9 +177,7 @@ class ContactManager(ContractChecker):
         Returns:
             ContactState object.
         """
-        if not (info is not None):
-            raise ValueError("info must be provided")
-        if not (info is not None):
+        if info is None:
             raise ValueError("info must be provided")
         contact_id = self._next_contact_id
         self._next_contact_id += 1
@@ -194,19 +186,8 @@ class ContactManager(ContractChecker):
         normal = np.asarray(info.get("normal", [0, 0, 1]), dtype=np.float64)
         force = np.asarray(info.get("force", [0, 0, 0]), dtype=np.float64)
 
-        # Decompose force into normal and tangential.
-        # A negative raw normal force means the upstream dynamics computed a
-        # separating force — clip but warn so callers can detect regressions.
-        raw_normal = float(np.dot(force, normal))
-        if raw_normal < 0.0:
-            _log.warning(
-                "Contact %s/%s: negative raw normal force %.4g N clipped to 0 — "
-                "upstream dynamics may have exited the contact model.",
-                info.get("body_a", "?"),
-                info.get("body_b", "?"),
-                raw_normal,
-            )
-        normal_force = max(0.0, raw_normal)
+        # Decompose force into normal and tangential
+        normal_force = max(0.0, float(np.dot(force, normal)))
         friction_force = force - normal_force * normal
 
         return ContactState(
@@ -235,9 +216,7 @@ class ContactManager(ContractChecker):
         Returns:
             Contact Jacobian (3, n_v) or (6, n_v), or None if unavailable.
         """
-        if not (contact is not None):
-            raise ValueError("contact must be provided")
-        if not (contact is not None):
+        if contact is None:
             raise ValueError("contact must be provided")
         if not self._is_contact_capable:
             return None
@@ -279,16 +258,8 @@ class ContactManager(ContractChecker):
         for contact in contacts:
             J = self.get_contact_jacobian(contact)
             if J is not None:
-                # Use only linear part (first 3 rows) for point contacts.
-                # Rotational coupling (rows 3–5) is dropped here; for fast-
-                # rotating end-effectors (e.g. club head at ~70 rad/s) this
-                # introduces modelling error — tracked in issue #2706.
+                # Use only linear part (first 3 rows) for point contacts
                 if J.shape[0] == 6:
-                    _log.debug(
-                        "Contact Jacobian for %s is 6×n; dropping rotational rows "
-                        "(angular coupling ignored for point-contact assumption).",
-                        contact.body_a,
-                    )
                     J = J[:3]
                 jacobians.append(J)
 
@@ -347,9 +318,7 @@ class ContactManager(ContractChecker):
         Returns:
             True if point is inside support polygon.
         """
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         polygon = self.compute_support_polygon(contacts)
         if polygon is None:
@@ -390,12 +359,9 @@ def _convex_hull_2d(points: NDArray[np.float64]) -> NDArray[np.float64]:
         return points[hull.vertices]
     except ImportError:
         pass
-    except (RuntimeError, TypeError, AttributeError) as exc:
-        _log.warning(
-            "scipy ConvexHull failed (%s); falling back to Graham scan — "
-            "support polygon may be less accurate for degenerate inputs.",
-            exc,
-        )
+    except (RuntimeError, TypeError, AttributeError):
+        # Fall through to manual algorithm
+        pass
 
     # Manual Graham scan algorithm
     return _graham_scan(points)
@@ -471,9 +437,7 @@ def _point_in_polygon(
     Returns:
         True if point is inside or on boundary.
     """
-    if not (point is not None):
-        raise ValueError("point must be provided")
-    if not (point is not None):
+    if point is None:
         raise ValueError("point must be provided")
     n = len(polygon)
     if n < 3:

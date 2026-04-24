@@ -82,7 +82,7 @@ def compute_screw_axis(
     Returns:
         ScrewAxis with complete representation
     """
-    if not (twist is not None):
+    if twist is None:
         raise ValueError("twist must be provided")
     ω = twist.angular
     v = twist.linear
@@ -140,7 +140,7 @@ def compute_screw_endpoints(
     Returns:
         Tuple of (start_point, end_point) for line segment [3], [3]
     """
-    if not (screw is not None):
+    if screw is None:
         raise ValueError("screw must be provided")
     if screw.is_singular:
         # Pure translation: draw along velocity direction

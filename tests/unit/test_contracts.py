@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
-
 import pytest
 
 from src.shared.python.contracts import (
@@ -21,8 +19,6 @@ from src.shared.python.contracts import (
     set_contract_level,
 )
 
-pytestmark = pytest.mark.unit
-
 _needs_contracts = pytest.mark.skipif(
     DBC_LEVEL != ContractLevel.ENFORCE,
     reason="DBC_LEVEL is not 'enforce'; enforcement tests require ENFORCE mode",
@@ -30,23 +26,20 @@ _needs_contracts = pytest.mark.skipif(
 
 
 @pytest.fixture(autouse=True)
-def _enforce_contracts() -> Generator[None, None, None]:
+def _enforce_contracts():
     """Force ENFORCE mode by patching the exact module dict that require/ensure read.
 
     set_contract_level() updates sys.modules[__name__], but in a namespace-package
     environment the module may be loaded under two names, so require.__globals__ can
     be a different dict.  Patching __globals__ directly is always correct.
-
-    Note: after the contracts refactor, require.__globals__ no longer contains a
-    module-level DBC_LEVEL variable — enforcement state lives exclusively in
-    _ContractState.level.  Only patch _ContractState.
     """
     _g = require.__globals__  # the actual dict require/ensure/_handle_violation read
-    _cs = _g["_ContractState"]
-    original_level = _cs.level
-    _cs.level = _g["ContractLevel"].ENFORCE
+    original_dbc = _g["DBC_LEVEL"]
+    _g["DBC_LEVEL"] = _g["ContractLevel"].ENFORCE
+    _g["_ContractState"].level = _g["ContractLevel"].ENFORCE
     yield
-    _cs.level = original_level
+    _g["DBC_LEVEL"] = original_dbc
+    _g["_ContractState"].level = original_dbc
 
 
 class TestRequire:
@@ -128,7 +121,7 @@ class TestCheckHelpers:
 class TestPreconditionDecorator:
     def test_decorator_allows_valid_input(self) -> None:
         @precondition(lambda self, x: x > 0, "x must be positive")
-        def compute(self, x) -> int:
+        def compute(self, x):
             return x * 2
 
         assert compute(None, 5) == 10
@@ -139,7 +132,7 @@ class TestPreconditionDecorator:
         try:
 
             @precondition(lambda self, x: x > 0, "x must be positive")
-            def compute(self, x) -> int:
+            def compute(self, x):
                 return x * 2
 
             with pytest.raises((ContractViolationError, AssertionError, ValueError)):

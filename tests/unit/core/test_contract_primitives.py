@@ -17,8 +17,6 @@ from src.shared.python.core.contracts.level import (
 )
 from src.shared.python.core.contracts.primitives import ensure, require
 
-pytestmark = pytest.mark.unit
-
 
 class TestRequire:
     def setup_method(self) -> None:

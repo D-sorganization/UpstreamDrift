@@ -1,7 +1,6 @@
 """Example: simulate a golf swing motion with MuJoCo."""
 
 import logging
-from typing import Any
 
 import imageio
 from dm_control import suite
@@ -88,25 +87,23 @@ SWING_SEQUENCE = ["Address", "Backswing", "Downswing", "Impact", "FollowThrough"
 DURATION = [50, 60, 20, 10, 60]  # ticks per phase
 
 
-def get_cmu_joint_names(env: Any) -> list[str]:
+def get_cmu_joint_names(env) -> list[str]:
     """Retrieve joint names for the CMU model."""
     # This is a best-effort inspection.
     # If explicit names aren't in named.data, we might need a hardcoded
     # mapping or try to print them.
     try:
-        names = env.physics.named.data.qpos.axes.row.names
+        named_data = env.physics.named.data
+        qpos_axes = named_data.qpos.axes
+        names = qpos_axes.row.names
         return list(names)
     except (RuntimeError, ValueError, OSError):
         return []
 
 
-def interpolate_pose(
-    start_pose: dict[str, float], end_pose: dict[str, float], alpha: float
-) -> dict[str, float]:
+def interpolate_pose(start_pose, end_pose, alpha) -> dict[str, float]:
     """Linearly interpolate between two poses."""
-    if not (start_pose is not None):
-        raise ValueError("start_pose must be provided")
-    if not (start_pose is not None):
+    if start_pose is None:
         raise ValueError("start_pose must be provided")
     result = start_pose.copy()
     for joint, end_val in end_pose.items():
@@ -161,10 +158,11 @@ def main() -> None:
             # However, for kinematic animation, we can just write to known
             # named joints.
             # Apply pose directly to qpos
+            named_qpos = env.physics.named.data.qpos
             for joint_name, angle in interpolated.items():
                 try:
-                    if joint_name in env.physics.named.data.qpos:
-                        env.physics.named.data.qpos[joint_name] = angle
+                    if joint_name in named_qpos:
+                        named_qpos[joint_name] = angle
                 except (RuntimeError, ValueError, AttributeError):
                     pass
 
@@ -189,7 +187,7 @@ def main() -> None:
     logger.info("Saved to %s", filename)
 
 
-def colorize_humanoid(env: Any) -> None:
+def colorize_humanoid(env) -> None:
     """Apply custom colors to the humanoid key body parts."""
     logger.info("Applying custom outfit colors...")
     # Colors (R, G, B, A)

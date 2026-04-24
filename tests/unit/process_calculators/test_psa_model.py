@@ -12,8 +12,6 @@ from src.shared.python.upstream_drift_tools.process_calculators.psa_package.psa_
     StreamFlows,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestPSAModelConstruction:
     def test_default_construction(self) -> None:

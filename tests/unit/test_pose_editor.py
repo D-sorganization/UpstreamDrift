@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.shared.python.pose_editor.core import JointInfo, JointType, PoseEditorState
 from src.shared.python.pose_editor.library import (
@@ -13,8 +12,6 @@ from src.shared.python.pose_editor.library import (
     list_preset_poses,
     list_preset_poses_by_category,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestJointType:

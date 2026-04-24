@@ -171,7 +171,7 @@ class ForcePlotTab(QtWidgets.QWidget):
             axes = [self.time_series_canvas.add_subplot(3, 1, i + 1) for i in range(3)]
             for ax, key, label in zip(
                 axes, ["fx", "fy", "fz"], ["Fx", "Fy", "Fz"], strict=True
-            ):
+            ):  # noqa: E501
                 if key in data:
                     ax.plot(time, data[key], label=label)
                     ax.set_ylabel(f"{label} [N]")
@@ -184,7 +184,7 @@ class ForcePlotTab(QtWidgets.QWidget):
             axes = [self.time_series_canvas.add_subplot(3, 1, i + 1) for i in range(3)]
             for ax, key, label in zip(
                 axes, ["mx", "my", "mz"], ["Mx", "My", "Mz"], strict=True
-            ):
+            ):  # noqa: E501
                 if key in data:
                     ax.plot(time, data[key], label=label)
                     ax.set_ylabel(f"{label} [N·m]")
@@ -266,7 +266,7 @@ class ForcePlotTab(QtWidgets.QWidget):
             end_idx = valid_indices[-1]
             ax.plot(
                 cop_x[start_idx], cop_y[start_idx], "go", markersize=10, label="Start"
-            )
+            )  # noqa: E501
             ax.plot(cop_x[end_idx], cop_y[end_idx], "ro", markersize=10, label="End")
 
         ax.set_xlabel("COP X [m]")

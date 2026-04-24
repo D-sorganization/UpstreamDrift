@@ -80,7 +80,13 @@ def _probe_engine(
 
     try:
         if import_name == "drake":
-            importlib.import_module("pydrake.all")
+            pydrake_module = importlib.import_module("pydrake")
+            drake_all_module = importlib.import_module("pydrake.all")
+            if (
+                type(pydrake_module).__module__ == "unittest.mock"
+                or type(drake_all_module).__module__ == "unittest.mock"
+            ):
+                raise ImportError("mocked pydrake module detected")
         elif import_name == "torch":
             importlib.import_module("torch")
         elif import_name == "tf":
@@ -105,6 +111,17 @@ def _probe_engine(
                 raise ImportError(
                     "Incorrect pinocchio package (likely nose plugin). Please install pinocchio from conda-forge."
                 )
+        elif import_name == "mediapipe":
+            # mediapipe>=0.10 removed the legacy mp.solutions API.
+            # We probe for mp.solutions.pose to accurately report whether
+            # the version installed is compatible with our estimator code.
+            mp = importlib.import_module("mediapipe")
+            if not hasattr(mp, "solutions") or not hasattr(mp.solutions, "pose"):
+                raise ImportError(
+                    "mediapipe is installed but mp.solutions.pose is not available. "
+                    "mediapipe>=0.10 removed the legacy solutions API. "
+                    "Pin mediapipe<0.10 or update MediaPipeEstimator to use the new Tasks API."
+                )
         else:
             importlib.import_module(import_name)
 
@@ -122,13 +139,6 @@ def _probe_engine(
         else:
             _engine_status_cache[name] = EngineStatus.NOT_INSTALLED
             _engine_error_cache[name] = e
-    except Exception as e:
-        # Catch all other exceptions (e.g., Windows fatal exceptions from Qt/PyQtGraph
-        # initialization on incompatible Python versions) to prevent test collection
-        # from crashing.
-        _engine_status_cache[name] = EngineStatus.BROKEN
-        _engine_error_cache[name] = e
-        logger.warning("%s loading failed with exception: %s", import_name, e)
 
     return _engine_status_cache[name]
 
@@ -290,7 +300,7 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 def require_engine(engine_name: str, reason: str | None = None) -> Callable[[F], F]:
     """Decorator to skip test/function if engine is not available."""
-    if not (engine_name is not None):
+    if engine_name is None:
         raise ValueError("engine_name must be provided")
 
     def decorator(func: F) -> F:

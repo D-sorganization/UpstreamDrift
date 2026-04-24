@@ -38,13 +38,33 @@ impl Default for IntegratorConfig {
     }
 }
 
+impl IntegratorConfig {
+    /// Validate public integrator configuration in all build modes.
+    pub fn validate(&self) -> Result<(), String> {
+        if !self.dt.is_finite() || self.dt <= 0.0 {
+            return Err(format!(
+                "IntegratorConfig.dt must be finite and positive, got {}",
+                self.dt
+            ));
+        }
+        if self.max_steps == 0 {
+            return Err("IntegratorConfig.max_steps must be greater than 0".to_string());
+        }
+        Ok(())
+    }
+}
+
 #[cfg(feature = "python")]
 #[pyo3::prelude::pymethods]
 impl IntegratorConfig {
     #[new]
     #[pyo3(signature = (dt=0.001, max_steps=100_000))]
-    fn py_new(dt: f64, max_steps: usize) -> Self {
-        Self { dt, max_steps }
+    fn py_new(dt: f64, max_steps: usize) -> pyo3::PyResult<Self> {
+        let config = Self { dt, max_steps };
+        config
+            .validate()
+            .map_err(pyo3::exceptions::PyValueError::new_err)?;
+        Ok(config)
     }
 }
 
@@ -88,8 +108,12 @@ impl IntegrationResult {
 impl IntegratorConfig {
     /// Create integrator configuration.
     #[wasm_bindgen(constructor)]
-    pub fn wasm_new(dt: f64, max_steps: usize) -> Self {
-        Self { dt, max_steps }
+    pub fn wasm_new(dt: f64, max_steps: usize) -> Result<IntegratorConfig, wasm_bindgen::JsValue> {
+        let config = Self { dt, max_steps };
+        config
+            .validate()
+            .map_err(|e| wasm_bindgen::JsValue::from_str(&e))?;
+        Ok(config)
     }
 }
 
@@ -117,10 +141,13 @@ where
     F: Fn(f64, &[f64]) -> Vec<f64>,
     T: Fn(f64, &[f64]) -> bool,
 {
-    // DbC: Precondition validation
-    debug_assert!(config.dt > 0.0, "Time step must be positive");
-    debug_assert!(t_end > t_start, "t_end must be greater than t_start");
-    debug_assert!(
+    config
+        .validate()
+        .expect("invalid RK4 integrator configuration");
+    assert!(t_start.is_finite(), "t_start must be finite");
+    assert!(t_end.is_finite(), "t_end must be finite");
+    assert!(t_end > t_start, "t_end must be greater than t_start");
+    assert!(
         y0.iter().all(|v| v.is_finite()),
         "Initial state must be finite"
     );
@@ -215,6 +242,46 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_integrator_config_rejects_invalid_public_values() {
+        assert!(IntegratorConfig {
+            dt: 0.0,
+            max_steps: 1,
+        }
+        .validate()
+        .is_err());
+        assert!(IntegratorConfig {
+            dt: f64::NAN,
+            max_steps: 1,
+        }
+        .validate()
+        .is_err());
+        assert!(IntegratorConfig {
+            dt: 0.001,
+            max_steps: 0,
+        }
+        .validate()
+        .is_err());
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid RK4 integrator configuration")]
+    fn test_integrate_rejects_zero_dt_in_release_mode() {
+        let config = IntegratorConfig {
+            dt: 0.0,
+            max_steps: 10,
+        };
+        let f = |_t: f64, y: &[f64]| vec![-y[0]];
+        integrate(
+            f,
+            0.0,
+            1.0,
+            &[1.0],
+            &config,
+            None::<fn(f64, &[f64]) -> bool>,
+        );
+    }
 
     /// Test 1: Simple exponential decay dy/dt = -y, y(0) = 1.
     /// Exact solution: y(t) = exp(-t).

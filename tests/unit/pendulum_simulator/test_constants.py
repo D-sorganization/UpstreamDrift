@@ -13,8 +13,6 @@ from src.shared.python.pendulum_simulator.constants import (
     NM_PER_KGFM,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestGravityConstants:
     def test_gravity_mss_approx_9_81(self) -> None:

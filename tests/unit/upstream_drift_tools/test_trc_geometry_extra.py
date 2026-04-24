@@ -11,8 +11,6 @@ from src.shared.python.upstream_drift_tools.calculators.mechanical.trc_geometry 
     VesselGeometryResult,
 )
 
-pytestmark = pytest.mark.unit
-
 
 def _make_dims() -> VesselDimensions:
     return VesselDimensions(
@@ -112,5 +110,5 @@ class TestTRCGeometryEngineCalculateGeometry:
             cone_interior_hole=10.0,
             top_refractory_thickness=5.0,
         )
-        with pytest.raises((AssertionError, ValueError)):
+        with pytest.raises(ValueError):
             engine.calculate_geometry(bad_dims, [_make_steel_layer()])

@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.ui.loading_button import LoadingButton, LoadingSpinner
 from src.shared.python.ui.overlay import OverlayWidget
 from src.shared.python.ui.recent_models import RecentModelItem, RecentModelsPanel
 from src.shared.python.ui.shortcuts_overlay import DEFAULT_SHORTCUTS
 from src.shared.python.ui.toast import Toast, ToastManager, ToastType
-
-pytestmark = pytest.mark.unit
 
 
 class TestLoadingButtonModuleImportable:

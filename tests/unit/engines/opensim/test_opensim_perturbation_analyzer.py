@@ -11,22 +11,18 @@ Design by Contract
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 import pytest
 
 from src.engines.physics_engines.opensim.python.perturbation.analyzer import (
     MANDATORY_METRICS,
-    ComparisonReport,
     OpenSimSimResult,
 )
 from src.shared.python.pendulum_simulator.perturbation_analysis import (
     perturb_torque_coeffs,
 )
+from src.shared.python.perturbation.analyzer_base import ComparisonReport
 from src.shared.python.perturbation.config import PerturbationConfig
-
-pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Availability check
@@ -35,12 +31,18 @@ pytestmark = pytest.mark.unit
 try:
     import opensim as _opensim  # noqa: F401
 
-    _OPENSIM_AVAILABLE = True
+    _OPENSIM_IMPORT_OK = True
 except ImportError:
-    _OPENSIM_AVAILABLE = False
+    _OPENSIM_IMPORT_OK = False
+
+# Use the shared engine availability check (consistent with production code).
+# opensim may be importable but still broken (e.g., missing shared libs in CI).
+from src.shared.python.engine_core.engine_availability import (
+    OPENSIM_AVAILABLE as _OPENSIM_AVAILABLE,
+)
 
 _skip_no_opensim = pytest.mark.skipif(
-    not _OPENSIM_AVAILABLE, reason="opensim not installed"
+    not _OPENSIM_AVAILABLE, reason="opensim not available (import or init failed)"
 )
 
 # ---------------------------------------------------------------------------
@@ -202,7 +204,9 @@ class TestComparisonReport:
 
 
 @pytest.fixture(scope="module")
-def analyzer() -> Any:  # type: ignore[no-untyped-def]
+def analyzer():  # type: ignore[no-untyped-def]
+    if not _OPENSIM_AVAILABLE:
+        pytest.skip("opensim not installed")
     from src.engines.physics_engines.opensim.python.perturbation.analyzer import (
         OpenSimPerturbationAnalyzer,
     )
@@ -211,7 +215,7 @@ def analyzer() -> Any:  # type: ignore[no-untyped-def]
 
 
 @pytest.fixture(scope="module")
-def analyzer_with_profile(analyzer) -> Any:  # type: ignore[no-untyped-def]
+def analyzer_with_profile(analyzer):  # type: ignore[no-untyped-def]
     analyzer.set_base_torque_profile(_ZERO_PROFILE)
     return analyzer
 
@@ -338,7 +342,10 @@ class TestRunBatch:
             OpenSimPerturbationAnalyzer,
         )
 
-        fresh = OpenSimPerturbationAnalyzer(t_end=0.1, dt=0.01)
+        try:
+            fresh = OpenSimPerturbationAnalyzer(t_end=0.1, dt=0.01)
+        except ImportError:
+            pytest.skip("opensim not available")
         with pytest.raises((AssertionError, AttributeError)):
             fresh.run_batch(_SMALL_CONFIG)
 

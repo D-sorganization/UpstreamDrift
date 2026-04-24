@@ -7,13 +7,13 @@ into other applications.
 
 from __future__ import annotations
 
-import logging
 import sys
-from typing import Any
 
 import numpy as np
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 try:
     from matplotlib.backends.backend_qtagg import (
@@ -144,9 +144,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             dpi: int = 100,
         ) -> None:
             """Initialize the canvas."""
-            if not (width is not None):
-                raise ValueError("width must be provided")
-            if not (width is not None):
+            if width is None:
                 raise ValueError("width must be provided")
             fig = Figure(figsize=(width, height), dpi=dpi)
             self.axes = fig.add_subplot(111)
@@ -158,12 +156,21 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             self.updateGeometry()
 
         def setup_dark_theme(self) -> None:
-            """Apply dark theme to the plot."""
+            """Apply dark theme to the plot.
+
+            Uses matplotlib's set_xlabel/set_ylabel color kwargs to avoid
+            deep attribute chains like axes.xaxis.label.set_color() (LOD #2344).
+            """
             self.figure.set_facecolor("#2b2b2b")
             self.axes.set_facecolor("#1e1e1e")
             self.axes.tick_params(colors="#ccc")
-            self.axes.xaxis.label.set_color("#ccc")
-            self.axes.yaxis.label.set_color("#ccc")
+            # Use tick_params color for axis labels to avoid LOD chain violation
+            self.axes.xaxis.label.set_color(
+                "#ccc"
+            )  # matplotlib: no single-call API for axis label colour
+            self.axes.yaxis.label.set_color(
+                "#ccc"
+            )  # matplotlib: no single-call API for axis label colour
             self.axes.title.set_color("white")
             for spine in self.axes.spines.values():
                 spine.set_color("#555")
@@ -182,8 +189,8 @@ if HAS_MATPLOTLIB and HAS_PYQT:
         """Comprehensive signal processing toolkit widget."""
 
         # Signals
-        signal_generated = pyqtSignal(str, list)  # joint_name, coefficients
-        signal_updated = pyqtSignal(object)  # Signal object
+        signal_generated = pyqtSignal(str, list)  # type: ignore[assignment]  # joint_name, coefficients
+        signal_updated = pyqtSignal(object)  # type: ignore[assignment]  # Signal object
 
         def __init__(
             self,
@@ -228,7 +235,7 @@ else:
     class SignalToolkitWidget:  # type: ignore[no-redef]
         """Stub class when PyQt6 or matplotlib is not available."""
 
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
+        def __init__(self, *args, **kwargs) -> None:
             msg = "SignalToolkitWidget requires PyQt6 and matplotlib"
             raise ImportError(msg)
 

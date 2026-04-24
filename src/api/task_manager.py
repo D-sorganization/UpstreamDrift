@@ -64,6 +64,10 @@ class TaskManager:
             ttl_seconds: Override default TTL for task expiry.
             max_tasks: Override maximum number of stored tasks.
             max_concurrent: Override maximum concurrent engine instances.
+
+        Note: Issue #2715 — mixing threading.Lock with asyncio.Semaphore creates
+              deadlock risk. This class maintains sync access for backward compatibility.
+              For pure async, refactor to use asyncio.Lock exclusively.
         """
         if ttl_seconds is not None:
             self.TTL_SECONDS = ttl_seconds
@@ -76,6 +80,7 @@ class TaskManager:
         self._timestamps: dict[str, float] = {}
         self._lock = threading.Lock()
         self._engine_semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_ENGINES)
+        self._closed = False
 
     @property
     def engine_semaphore(self) -> asyncio.Semaphore:
@@ -206,3 +211,20 @@ class TaskManager:
         if result is None:
             raise KeyError(task_id)
         return result
+
+    def shutdown(self) -> None:
+        """Cleanup resources on TaskManager shutdown (issue #2715).
+
+        Closes the engine semaphore and prevents further operations.
+        Call this when the TaskManager is no longer needed.
+        """
+        with self._lock:
+            self._closed = True
+            # asyncio.Semaphore cleanup happens implicitly on GC,
+            # but we log for diagnostics
+            logger.debug("TaskManager shutdown: semaphore cleanup scheduled")
+
+    def __del__(self) -> None:
+        """Cleanup on garbage collection."""
+        if not self._closed:
+            self.shutdown()

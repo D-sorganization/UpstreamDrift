@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.pendulum_simulator.native_backend import (
     get_native_backend_info,
     golfer_native_available,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestNativeBackend:

@@ -1,18 +1,15 @@
 import sys
 import unittest
-from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 
-pytestmark = pytest.mark.unit
-
-if DRAKE_AVAILABLE:
-    from pydrake.geometry import SceneGraph
-    from pydrake.systems.analysis import Simulator
-    from pydrake.systems.framework import Context, Diagram
+pytest.importorskip("pydrake.geometry", reason="pydrake not available")
+from pydrake.geometry import SceneGraph
+from pydrake.systems.analysis import Simulator
+from pydrake.systems.framework import Context, Diagram
 
 # MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
 _PLANT_SPEC_ATTRS = [
@@ -57,7 +54,7 @@ _DRAKE_PARENT_PACKAGES = [
 
 
 @pytest.fixture(autouse=True)
-def _fix_drake_pollution() -> Generator[None, None, None]:
+def _fix_drake_pollution():
     """Fix Drake parent package pollution before each test.
 
     When test_drake_gui_app or other tests import Drake modules, they may leave
@@ -113,7 +110,7 @@ with patch.dict(sys.modules, _pydrake_mocks):
 
 
 @pytest.fixture(autouse=True)
-def _isolate_drake_module_state() -> Generator[None, None, None]:
+def _isolate_drake_module_state():
     """Prevent module-level Drake mocks from leaking across tests."""
     engine_before = sys.modules.get(_ENGINE_MOD_NAME)
     pydrake_before = {key: sys.modules.get(key) for key in _PYDRAKE_KEYS}
@@ -132,7 +129,7 @@ def _isolate_drake_module_state() -> Generator[None, None, None]:
 
 
 class TestDrakeWrapper(unittest.TestCase):
-    def setUp(self) -> None:
+    def setUp(self):
         if DrakePhysicsEngine is None:
             self.skipTest("DrakePhysicsEngine could not be imported")
 
@@ -174,7 +171,7 @@ class TestDrakeWrapper(unittest.TestCase):
         # Simulator starts None
         self.engine.simulator = None
 
-    def test_step_caching(self) -> None:
+    def test_step_caching(self):
         """Test that Simulator is cached and reused in step()."""
         # Patch analysis directly on the module object to avoid sys.modules
         # lookup issues that occur in full-suite ordering.
@@ -217,7 +214,7 @@ class TestDrakeWrapper(unittest.TestCase):
         mock_simulator_instance.Initialize.assert_not_called()
         mock_simulator_instance.AdvanceTo.assert_called()
 
-    def test_reset_logic(self) -> None:
+    def test_reset_logic(self):
         """Test that reset() properly resets state to defaults."""
         self.engine.context = (
             MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
@@ -246,7 +243,7 @@ class TestDrakeWrapper(unittest.TestCase):
         # Verify simulator re-initialization
         self.engine.simulator.Initialize.assert_called_once()
 
-    def test_forward_computation(self) -> None:
+    def test_forward_computation(self):
         """Test forward() triggers computation of derived quantities."""
         self.engine.plant_context = (
             MagicMock(spec=Context) if DRAKE_AVAILABLE else MagicMock()
@@ -273,7 +270,7 @@ class TestDrakeWrapper(unittest.TestCase):
         # Verify bias forces computation was triggered (ensures kinematics updated)
         self.engine.plant.CalcInverseDynamics.assert_called_once()
 
-    def test_forward_with_no_context(self) -> None:
+    def test_forward_with_no_context(self):
         """Test forward() raises PreconditionError when context is missing."""
         from src.shared.python.core.contracts import PreconditionError
 

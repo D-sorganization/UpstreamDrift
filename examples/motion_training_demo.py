@@ -17,34 +17,27 @@ Or with custom options:
 from __future__ import annotations
 
 import argparse
-import pathlib
 import sys
 from pathlib import Path
-from typing import Any
 
-sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
-sys.path.insert(
-    0,
-    str(
-        pathlib.Path(__file__).parent.parent
-        / "src/engines/physics_engines/pinocchio/python"
-    ),
+# Add the motion_training module to path
+_this_file = Path(__file__).resolve()
+PROJECT_ROOT = _this_file.parents[1]
+_pinocchio_python_dir = (
+    PROJECT_ROOT / "src" / "engines" / "physics_engines" / "pinocchio" / "python"
 )
+sys.path.insert(0, str(_pinocchio_python_dir))
 
-from src.shared.python.data_io.path_utils import get_repo_root
 
-
-def parse_args() -> argparse.Namespace:
+def parse_args():
     """Parse command line arguments."""
-    repo_root = get_repo_root()
-
     parser = argparse.ArgumentParser(
         description="Motion Training Demo - Generate body motion from club trajectory",
     )
     parser.add_argument(
         "--trajectory",
         "-t",
-        default=str(repo_root / "data/Wiffle_ProV1_club_3D_data.xlsx"),
+        default=str(PROJECT_ROOT / "data/Wiffle_ProV1_club_3D_data.xlsx"),
         help="Path to Excel file with club trajectory",
     )
     parser.add_argument(
@@ -58,7 +51,7 @@ def parse_args() -> argparse.Namespace:
         "--urdf",
         "-u",
         default=str(
-            repo_root
+            PROJECT_ROOT
             / "src/engines/physics_engines/pinocchio/models/generated/golfer_ik.urdf",
         ),
         help="Path to golfer URDF",
@@ -66,7 +59,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         "-o",
-        default=str(repo_root / "output/motion_training_demo"),
+        default=str(PROJECT_ROOT / "output/motion_training_demo"),
         help="Output directory",
     )
     parser.add_argument(
@@ -100,28 +93,22 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def run_trajectory_analysis(
-    trajectory_path: Path, sheet_name: str, output_dir: Path
-) -> Any:
+def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: Path):
     """Run trajectory analysis and generate plots."""
-    if not (trajectory_path is not None):
+    if trajectory_path is None:
         raise ValueError("trajectory_path required")
     if not (sheet_name):
         raise ValueError("sheet_name required")
-    if not (output_dir is not None):
+    if output_dir is None:
         raise ValueError("output_dir required")
-    from src.engines.physics_engines.pinocchio.python.motion_training.club_trajectory_parser import (
-        ClubTrajectoryParser,
-    )
+    from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
     parser = ClubTrajectoryParser(trajectory_path)
     trajectory = parser.parse(sheet_name=sheet_name)
 
     # Generate 3D plot
     try:
-        from src.engines.physics_engines.pinocchio.python.motion_training.motion_visualizer import (
-            MatplotlibVisualizer,
-        )
+        from motion_training.motion_visualizer import MatplotlibVisualizer
 
         viz = MatplotlibVisualizer()
         fig = viz.plot_trajectory_3d(trajectory)
@@ -137,16 +124,14 @@ def run_trajectory_analysis(
     return trajectory
 
 
-def _parse_and_subsample(trajectory_path: Any, sheet_name: Any, subsample: Any) -> Any:
-    if not (trajectory_path is not None):
+def _parse_and_subsample(trajectory_path, sheet_name, subsample):
+    if trajectory_path is None:
         raise ValueError("trajectory_path required")
     if not (sheet_name):
         raise ValueError("sheet_name required")
     if not (subsample > 0):
         raise ValueError("subsample must be positive")
-    from src.engines.physics_engines.pinocchio.python.motion_training.club_trajectory_parser import (
-        ClubTrajectoryParser,
-    )
+    from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
     parser = ClubTrajectoryParser(trajectory_path)
     trajectory = parser.parse(sheet_name=sheet_name)
@@ -157,21 +142,15 @@ def _parse_and_subsample(trajectory_path: Any, sheet_name: Any, subsample: Any) 
     return trajectory
 
 
-def _init_and_solve_ik(urdf_path: Any, trajectory: Any) -> Any:
-    if not (urdf_path is not None):
+def _init_and_solve_ik(urdf_path, trajectory):
+    if urdf_path is None:
         raise ValueError("urdf_path required")
-    if not (trajectory is not None):
+    if trajectory is None:
         raise ValueError("trajectory required")
-    try:
-        from motion_training.dual_hand_ik_solver import (  # type: ignore[import]
-            IKSolverSettings,
-            create_ik_solver,
-        )
-    except ImportError:
-        from src.engines.physics_engines.pinocchio.python.motion_training.dual_hand_ik_solver import (
-            IKSolverSettings,
-            create_ik_solver,
-        )
+    from motion_training.dual_hand_ik_solver import (
+        IKSolverSettings,
+        create_ik_solver,
+    )
 
     settings = IKSolverSettings(
         dt=0.01,
@@ -192,16 +171,14 @@ def _init_and_solve_ik(urdf_path: Any, trajectory: Any) -> Any:
     return ik_result
 
 
-def _export_results(ik_result, trajectory, output_dir) -> None:
-    if not (ik_result is not None):
+def _export_results(ik_result, trajectory, output_dir):
+    if ik_result is None:
         raise ValueError("ik_result required")
-    if not (trajectory is not None):
+    if trajectory is None:
         raise ValueError("trajectory required")
-    if not (output_dir is not None):
+    if output_dir is None:
         raise ValueError("output_dir required")
-    from src.engines.physics_engines.pinocchio.python.motion_training.trajectory_exporter import (
-        TrajectoryExporter,
-    )
+    from motion_training.trajectory_exporter import TrajectoryExporter
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -215,9 +192,7 @@ def _export_results(ik_result, trajectory, output_dir) -> None:
     exporter.export(output_dir / "swing_trajectory", format="npz")
 
     try:
-        from src.engines.physics_engines.pinocchio.python.motion_training.motion_visualizer import (
-            MatplotlibVisualizer,
-        )
+        from motion_training.motion_visualizer import MatplotlibVisualizer
 
         viz = MatplotlibVisualizer()
 
@@ -237,12 +212,10 @@ def _export_results(ik_result, trajectory, output_dir) -> None:
         pass
 
 
-def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback) -> None:
+def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback):
     if visualize:
         try:
-            from src.engines.physics_engines.pinocchio.python.motion_training.motion_visualizer import (
-                MotionVisualizer,
-            )
+            from motion_training.motion_visualizer import MotionVisualizer
 
             motion_viz = MotionVisualizer(urdf_path=urdf_path)
 
@@ -266,15 +239,15 @@ def run_ik_demo(
     subsample: int = 10,
     visualize: bool = False,
     playback: bool = False,
-) -> Any:
+):
     """Run the full IK demo."""
-    if not (trajectory_path is not None):
+    if trajectory_path is None:
         raise ValueError("trajectory_path required")
     if not (sheet_name):
         raise ValueError("sheet_name required")
-    if not (urdf_path is not None):
+    if urdf_path is None:
         raise ValueError("urdf_path required")
-    if not (output_dir is not None):
+    if output_dir is None:
         raise ValueError("output_dir required")
 
     trajectory = _parse_and_subsample(trajectory_path, sheet_name, subsample)
@@ -289,7 +262,7 @@ def run_ik_demo(
     return ik_result
 
 
-def main() -> None:
+def main():
     """Main entry point."""
     args = parse_args()
 

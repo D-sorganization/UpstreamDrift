@@ -10,8 +10,6 @@ from src.shared.python.engine_core.engine_manager import EngineManager, EngineTy
 from src.shared.python.logging_pkg.logging_config import get_logger
 from tests.physics_validation.analytical import AnalyticalBallistic
 
-pytestmark = pytest.mark.integration
-
 logger = get_logger(__name__)
 
 
@@ -22,7 +20,7 @@ def is_engine_available(engine_type: EngineType) -> bool:
     return bool(probe_result.is_available())
 
 
-def test_mujoco_ballistic_energy_conservation() -> None:
+def test_mujoco_ballistic_energy_conservation():
     """Verify energy conservation for a falling particle in MuJoCo."""
     if not is_engine_available(EngineType.MUJOCO):
         pytest.skip("MuJoCo not installed")
@@ -85,12 +83,16 @@ def test_mujoco_ballistic_energy_conservation() -> None:
     assert percent_error < 0.1, f"Energy not conserved! Error: {percent_error:.4f}%"
 
 
-def test_pinocchio_energy_check() -> None:
-    """Verify energy conservation with Pinocchio using explicit integration."""
+def test_pinocchio_energy_check():
+    """Verify long-run Pinocchio free-fall energy with the engine RK4 integrator."""
     if not is_engine_available(EngineType.PINOCCHIO):
         pytest.skip("Pinocchio not installed")
 
     import pinocchio
+
+    from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        PinocchioPhysicsEngine,
+    )
 
     if isinstance(pinocchio, MagicMock):
         pytest.skip("pinocchio is mocked")
@@ -135,53 +137,49 @@ def test_pinocchio_energy_check() -> None:
     # 2. Initial Conditions
     # q = [x, y, z, qx, qy, qz, qw] (7D for SE3)
     # v = [vx, vy, vz, wx, wy, wz] (6D se3)
-    q = pinocchio.neutral(model)
-    q[2] = 10.0  # z = 10m
+    engine = PinocchioPhysicsEngine()
+    engine.model = model
+    engine.data = data
+    engine.q = pinocchio.neutral(model)
+    engine.q[2] = 10.0  # z = 10m
+    engine.v = np.zeros(model.nv)
+    engine.a = np.zeros(model.nv)
+    engine.tau = np.zeros(model.nv)
 
-    v = np.zeros(model.nv)
-
-    # 3. Simulation Loop (Symplectic Euler / Semi-implicit)
+    # 3. Simulation Loop (RK4)
     dt = 0.001
-    steps = 1000
+    steps = 10_000
 
     # Pinocchio calculates potential energy automatically if gravity is set?
     # No, model.gravity needs to be set.
     model.gravity = pinocchio.Motion(np.array([0, 0, -GRAVITY_M_S2, 0, 0, 0]))
 
     # Pre-compute initial energy
-    pinocchio.computeKineticEnergy(model, data, q, v)
-    pinocchio.computePotentialEnergy(model, data, q)
+    pinocchio.computeKineticEnergy(model, data, engine.q, engine.v)
+    pinocchio.computePotentialEnergy(model, data, engine.q)
     initial_energy = data.kinetic_energy + data.potential_energy
 
     errors = []
 
     for _ in range(steps):
-        # Forward Dynamics (ABA) -> returns acceleration
-        a = pinocchio.aba(model, data, q, v, np.zeros(model.nv))
-
-        # Semi-implicit Euler
-        v_next = v + a * dt
-        q_next = pinocchio.integrate(model, q, v_next * dt)
-
-        q = q_next
-        v = v_next
+        engine.step(dt)
 
         # Check Energy
-        # Note: Symplectic Euler is stable but not perfectly energy conserving
-        # It oscillates around the true energy.
-        pinocchio.computeMechanicalEnergy(model, data, q, v)
+        pinocchio.computeMechanicalEnergy(model, data, engine.q, engine.v)
         current_energy = data.mechanical_energy
 
         errors.append(abs(current_energy - initial_energy))
 
     max_error = np.max(errors)
-    logger.info(f"Max Energy Error (Pinocchio): {max_error:.6f} J")
+    relative_error = max_error / abs(initial_energy)
+    logger.info(f"Max Energy Error (Pinocchio RK4): {relative_error:.6%}")
 
-    # Allow slightly higher error due to simple integrator
-    assert max_error < 0.05, f"Pinocchio energy check failed. Error: {max_error}"
+    assert relative_error < 1e-3, (
+        f"Pinocchio energy check failed. Relative error: {relative_error:.6%}"
+    )
 
 
-def test_drake_energy_conservation() -> None:
+def test_drake_energy_conservation():
     """Verify energy conservation with Drake (if available)."""
     if not is_engine_available(EngineType.DRAKE):
         pytest.skip("Drake not installed")
@@ -258,70 +256,3 @@ def test_drake_energy_conservation() -> None:
     logger.info(f"Drake Energy Error: {error:.6f} J")
 
     assert error < 0.01, f"Drake energy conservation failed. Error: {error}"
-
-
-def test_pinocchio_10s_rk4_energy_conservation() -> None:
-    """10-second ballistic free-fall with Pinocchio RK4 integrator.
-
-    Validates that the RK4 path in PinocchioPhysicsEngine.step() conserves
-    energy to within 0.5% over a 10-second integration horizon (10 000 steps
-    at dt=0.001).  Semi-implicit Euler is only expected to oscillate, not
-    drift monotonically, so the same model is run with both integrators and
-    both are checked.
-    """
-    if not is_engine_available(EngineType.PINOCCHIO):
-        pytest.skip("Pinocchio not installed")
-
-    import pinocchio
-
-    if isinstance(pinocchio, MagicMock):
-        pytest.skip("pinocchio is mocked")
-
-    from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
-        PinocchioPhysicsEngine,
-    )
-
-    # Build a minimal single-body free-flyer model
-    model = pinocchio.Model()
-    mass = 1.0
-    joint_id = model.addJoint(
-        0, pinocchio.JointModelFreeFlyer(), pinocchio.SE3.Identity(), "body_joint"
-    )
-    inertia = pinocchio.Inertia.FromSphere(mass, 0.1)
-    model.appendBodyToJoint(joint_id, inertia, pinocchio.SE3.Identity())
-    model.gravity = pinocchio.Motion(np.array([0, 0, -GRAVITY_M_S2, 0, 0, 0]))
-
-    dt = 0.001
-    total_time = 10.0
-    steps = int(total_time / dt)
-
-    for scheme in ("semi_implicit", "rk4"):
-        eng = PinocchioPhysicsEngine()
-        eng.model = model
-        eng.data = model.createData()
-        eng.q = pinocchio.neutral(model)
-        eng.q[2] = 10.0  # start 10 m above ground
-        eng.v = np.zeros(model.nv)
-        eng.a = np.zeros(model.nv)
-        eng.tau = np.zeros(model.nv)
-        eng.time = 0.0
-        eng._is_initialized = True  # noqa: SLF001
-
-        pinocchio.computeKineticEnergy(model, eng.data, eng.q, eng.v)
-        pinocchio.computePotentialEnergy(model, eng.data, eng.q)
-        e0 = eng.data.kinetic_energy + eng.data.potential_energy
-
-        errors = []
-        for _ in range(steps):
-            eng.step(dt=dt, integrator=scheme)  # type: ignore[call-arg]
-            pinocchio.computeKineticEnergy(model, eng.data, eng.q, eng.v)
-            pinocchio.computePotentialEnergy(model, eng.data, eng.q)
-            e = eng.data.kinetic_energy + eng.data.potential_energy
-            errors.append(abs(e - e0))
-
-        max_err = float(np.max(errors))
-        pct = max_err / abs(e0) * 100.0
-        logger.info(f"Pinocchio 10-s energy error [{scheme}]: {pct:.4f}%")
-        # Both schemes must stay within 0.5% over 10 s
-        msg = f"Energy drift too large ({pct:.4f}%) with integrator={scheme!r}"
-        assert pct < 0.5, msg

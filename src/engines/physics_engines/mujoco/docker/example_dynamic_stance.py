@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any
 
 import dm_control
 import imageio
@@ -51,17 +50,9 @@ def get_cmu_xml_path() -> str:
     return str(suite_dir / "humanoid_CMU.xml")
 
 
-def pd_control(
-    physics: Any,
-    target_pose: dict[str, float],
-    actuators: dict[str, int],
-    kp: float = 10.0,
-    kd: float = 1.0,
-) -> np.ndarray:
+def pd_control(physics, target_pose, actuators, kp=10.0, kd=1.0) -> np.ndarray:
     """Compute PD control action."""
-    if not (physics is not None):
-        raise ValueError("physics must be provided")
-    if not (physics is not None):
+    if physics is None:
         raise ValueError("physics must be provided")
     action = np.zeros(physics.model.nu)
     for joint_name, target_angle in target_pose.items():
@@ -77,7 +68,7 @@ def pd_control(
     return action
 
 
-def customize_model(physics: Any) -> None:
+def customize_model(physics) -> None:
     """Apply colors and geometric adjustments."""
     # Grey Shirt
     GREY_SHIRT = [0.6, 0.6, 0.6, 1.0]
@@ -168,7 +159,7 @@ def customize_model(physics: Any) -> None:
             physics.model.geom_rgba[i] = BLACK_SHOES
 
 
-def _load_and_patch_xml(xml_path: str | Path) -> mjcf.Physics:
+def _load_and_patch_xml(xml_path) -> mjcf.Physics:
     """Load the CMU Humanoid XML, patch it, and return compiled physics.
 
     Returns the compiled physics object, or None if patching fails.
@@ -213,7 +204,7 @@ def _load_and_patch_xml(xml_path: str | Path) -> mjcf.Physics:
     return physics
 
 
-def _attach_golf_club(root: Any) -> None:
+def _attach_golf_club(root) -> None:
     """Attach a golf club geometry to the right hand body."""
     rhand = root.find("body", "rhand")
     if rhand:
@@ -240,7 +231,7 @@ def _attach_golf_club(root: Any) -> None:
         )
 
 
-def _add_face_on_camera(root: Any) -> None:
+def _add_face_on_camera(root) -> None:
     """Add a face-on camera to the worldbody."""
     worldbody = root.find("worldbody", "world")
     if worldbody:
@@ -254,7 +245,7 @@ def _add_face_on_camera(root: Any) -> None:
         )
 
 
-def _setup_physics(xml_path: str | Path) -> mjcf.Physics:
+def _setup_physics(xml_path) -> mjcf.Physics:
     """Set up physics, falling back to suite.load if patching fails."""
     try:
         physics = _load_and_patch_xml(xml_path)
@@ -266,7 +257,7 @@ def _setup_physics(xml_path: str | Path) -> mjcf.Physics:
     return physics
 
 
-def _find_face_on_camera(physics: Any) -> int:
+def _find_face_on_camera(physics) -> int:
     """Find the face_on camera id, defaulting to 0."""
     logger.info("\nAvailable Cameras:")
     ncam = physics.model.ncam
@@ -279,7 +270,7 @@ def _find_face_on_camera(physics: Any) -> int:
     return camera_id
 
 
-def _set_initial_pose(physics: Any) -> None:
+def _set_initial_pose(physics) -> None:
     """Reset physics and set the initial address pose."""
     with physics.reset_context():
         # Z-height 0.96 adjusted empirically for CMU model to ensure feet
@@ -296,13 +287,9 @@ def _set_initial_pose(physics: Any) -> None:
                 pass
 
 
-def _run_simulation_loop(
-    physics: Any, actuators: dict[str, int], camera_id: int
-) -> None:
+def _run_simulation_loop(physics, actuators, camera_id) -> None:
     """Run the simulation loop, recording frames and saving video."""
-    if not (physics is not None):
-        raise ValueError("physics must be provided")
-    if not (physics is not None):
+    if physics is None:
         raise ValueError("physics must be provided")
     logger.info("Simulating...")
     frames = []

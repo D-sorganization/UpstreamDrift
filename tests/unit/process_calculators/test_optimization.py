@@ -12,13 +12,11 @@ from src.shared.python.upstream_drift_tools.process_calculators.optimization imp
     run_adam_optimization,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class _StubEngine:
     """Engine that computes output = Temperature - 0.5 * (O2/Feed Ratio)."""
 
-    def calculate(self, **params) -> dict:
+    def calculate(self, **params):
         temp = params.get("Temperature", 800.0)
         o2 = params.get("O2/Feed Ratio", 0.3)
         return {
@@ -158,7 +156,7 @@ class TestRunAdamOptimization:
 
 
 class TestFindOptimalOnSurface:
-    def _make_grid(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _make_grid(self):
         x = np.linspace(0.0, 10.0, 20)
         y = np.linspace(0.0, 10.0, 20)
         # Z = -(x-5)^2 - (y-5)^2 → max at (5,5)

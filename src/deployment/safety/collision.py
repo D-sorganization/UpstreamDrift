@@ -54,9 +54,7 @@ class Obstacle:
         Returns:
             Signed distance (negative inside obstacle).
         """
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         if self.obstacle_type == ObstacleType.SPHERE:
             return float(
@@ -97,22 +95,18 @@ class Obstacle:
         Returns:
             Gradient vector (points away from obstacle).
         """
-        if not (point is not None):
-            raise ValueError("point must be provided")
-        if not (point is not None):
+        if point is None:
             raise ValueError("point must be provided")
         eps = 1e-6
-        gradient = np.zeros(3)
-
-        for i in range(3):
-            point_plus = point.copy()
-            point_plus[i] += eps
-            point_minus = point.copy()
-            point_minus[i] -= eps
-
-            gradient[i] = (
-                self.get_distance(point_plus) - self.get_distance(point_minus)
-            ) / (2 * eps)
+        # Vectorized finite-difference gradient: perturb each axis simultaneously
+        perturbations = np.eye(3) * eps
+        dist_plus = np.array(
+            [self.get_distance(point + perturbations[i]) for i in range(3)]
+        )
+        dist_minus = np.array(
+            [self.get_distance(point - perturbations[i]) for i in range(3)]
+        )
+        gradient = (dist_plus - dist_minus) / (2 * eps)
 
         norm = np.linalg.norm(gradient)
         if norm > eps:
@@ -182,9 +176,7 @@ class CollisionAvoidance:
             robot_model: Physics engine for kinematics.
             safety_distance: Minimum clearance in meters.
         """
-        if not (robot_model is not None):
-            raise ValueError("robot_model must be provided")
-        if not (robot_model is not None):
+        if robot_model is None:
             raise ValueError("robot_model must be provided")
         self.model = robot_model
         self.safety_distance = safety_distance
@@ -213,9 +205,7 @@ class CollisionAvoidance:
         Returns:
             True if obstacle was found and removed.
         """
-        if not (name is not None):
-            raise ValueError("name must be provided")
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         for i, obs in enumerate(self._obstacles):
             if obs.name == name:
@@ -247,9 +237,7 @@ class CollisionAvoidance:
         Returns:
             Dictionary mapping link names to positions.
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         positions = {}
 
@@ -283,9 +271,7 @@ class CollisionAvoidance:
         Returns:
             Repulsive force in joint space (n_joints,).
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         n_joints = len(state.joint_positions)
         repulsion = np.zeros(n_joints)
@@ -349,9 +335,7 @@ class CollisionAvoidance:
         Returns:
             Tuple of (is_clear, minimum_distance_found).
         """
-        if not (trajectory is not None):
-            raise ValueError("trajectory must be provided")
-        if not (trajectory is not None):
+        if trajectory is None:
             raise ValueError("trajectory must be provided")
         if min_distance is None:
             min_distance = self.safety_distance
@@ -402,9 +386,7 @@ class CollisionAvoidance:
         Returns:
             Velocity scaling factor (0-1).
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         link_positions = self.get_link_positions(state)
 
@@ -444,9 +426,7 @@ class CollisionAvoidance:
         Returns:
             Minimum distance in meters.
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         link_positions = self.get_link_positions(state)
 

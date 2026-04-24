@@ -8,15 +8,11 @@ does NOT trigger its heavy physics engine import at module level.
 import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
-
-pytestmark = pytest.mark.unit
-
 
 class TestMuJoCoDashboardLazyLoading:
     """Verify mujoco_dashboard does not import engine at module load time."""
 
-    def test_module_importable_without_mujoco_installed(self) -> None:
+    def test_module_importable_without_mujoco_installed(self):
         """mujoco_dashboard can be imported even when the mujoco engine module is absent."""
         engine_module = (
             "src.engines.physics_engines.mujoco.python"
@@ -32,7 +28,7 @@ class TestMuJoCoDashboardLazyLoading:
         # Clean up so other tests are unaffected
         sys.modules.pop("src.launchers.mujoco_dashboard", None)
 
-    def test_engine_not_imported_at_module_level(self) -> None:
+    def test_engine_not_imported_at_module_level(self):
         """Importing mujoco_dashboard must not touch the MuJoCo physics engine module."""
         engine_module = (
             "src.engines.physics_engines.mujoco.python"
@@ -55,7 +51,7 @@ class TestMuJoCoDashboardLazyLoading:
 
         sys.modules.pop("src.launchers.mujoco_dashboard", None)
 
-    def test_dashboard_module_has_main(self) -> None:
+    def test_dashboard_module_has_main(self):
         """mujoco_dashboard exposes a callable main() function."""
         sys.modules.pop("src.launchers.mujoco_dashboard", None)
         import src.launchers.mujoco_dashboard as mod
@@ -67,7 +63,7 @@ class TestMuJoCoDashboardLazyLoading:
 class TestPinocchioDashboardLazyLoading:
     """Verify pinocchio_dashboard does not import engine at module load time."""
 
-    def test_module_importable_without_pinocchio_installed(self) -> None:
+    def test_module_importable_without_pinocchio_installed(self):
         """pinocchio_dashboard can be imported even when the pinocchio engine module is absent."""
         engine_module = (
             "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine"
@@ -79,7 +75,7 @@ class TestPinocchioDashboardLazyLoading:
 
         sys.modules.pop("src.launchers.pinocchio_dashboard", None)
 
-    def test_engine_not_imported_at_module_level(self) -> None:
+    def test_engine_not_imported_at_module_level(self):
         """Importing pinocchio_dashboard must not touch the Pinocchio physics engine module."""
         engine_module = (
             "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine"
@@ -98,7 +94,7 @@ class TestPinocchioDashboardLazyLoading:
 
         sys.modules.pop("src.launchers.pinocchio_dashboard", None)
 
-    def test_dashboard_module_has_main(self) -> None:
+    def test_dashboard_module_has_main(self):
         """pinocchio_dashboard exposes a callable main() function."""
         sys.modules.pop("src.launchers.pinocchio_dashboard", None)
         import src.launchers.pinocchio_dashboard as mod
@@ -110,7 +106,7 @@ class TestPinocchioDashboardLazyLoading:
 class TestDrakeDashboardLazyLoading:
     """Verify drake_dashboard does not import engine at module load time."""
 
-    def test_module_importable_without_drake_installed(self) -> None:
+    def test_module_importable_without_drake_installed(self):
         """drake_dashboard can be imported even when the drake engine module is absent."""
         engine_module = "src.engines.physics_engines.drake.python.drake_physics_engine"
         sys.modules.pop("src.launchers.drake_dashboard", None)
@@ -120,7 +116,7 @@ class TestDrakeDashboardLazyLoading:
 
         sys.modules.pop("src.launchers.drake_dashboard", None)
 
-    def test_engine_not_imported_at_module_level(self) -> None:
+    def test_engine_not_imported_at_module_level(self):
         """Importing drake_dashboard must not touch the Drake physics engine module."""
         engine_module = "src.engines.physics_engines.drake.python.drake_physics_engine"
         sys.modules.pop("src.launchers.drake_dashboard", None)
@@ -137,7 +133,7 @@ class TestDrakeDashboardLazyLoading:
 
         sys.modules.pop("src.launchers.drake_dashboard", None)
 
-    def test_dashboard_module_has_main(self) -> None:
+    def test_dashboard_module_has_main(self):
         """drake_dashboard exposes a callable main() function."""
         sys.modules.pop("src.launchers.drake_dashboard", None)
         import src.launchers.drake_dashboard as mod

@@ -38,7 +38,7 @@ class VisualizationMixin:
             except TypeError:
                 logger.warning(
                     "Meshcat Visualizer: server_args not supported. Using default."
-                )
+                )  # noqa: E501
                 self.viewer = viz.Visualizer()
 
             url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
@@ -71,7 +71,7 @@ class VisualizationMixin:
             or self.data is None
             or self.q is None
             or self.viz is None
-        ):
+        ):  # noqa: E501
             return
 
         # Update Visuals via Pinocchio Visualizer
@@ -112,7 +112,7 @@ class VisualizationMixin:
         pin.computeJointJacobians(self.model, self.data, self.q)
         J = pin.getJointJacobian(
             self.model, self.data, joint_id, pin.ReferenceFrame.LOCAL
-        )
+        )  # noqa: E501
 
         try:
             s = np.linalg.svd(J, compute_uv=False)
@@ -157,7 +157,7 @@ class VisualizationMixin:
                     if (
                         self.chk_mobility.isChecked()
                         and res.mobility_matrix is not None
-                    ):
+                    ):  # noqa: E501
                         path_name = f"{res.body_name}/mobility"
                         radii = res.velocity_ellipsoid.radii
                         self._draw_ellipsoid_meshcat(
@@ -171,7 +171,7 @@ class VisualizationMixin:
                     if (
                         self.chk_force_ellip.isChecked()
                         and res.force_matrix is not None
-                    ):
+                    ):  # noqa: E501
                         path_name = f"{res.body_name}/force"
                         radii = res.force_ellipsoid.radii
                         self._draw_ellipsoid_meshcat(
@@ -191,9 +191,7 @@ class VisualizationMixin:
         color: int,
     ) -> None:
         """Internal helper to render an ellipsoid in Meshcat."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         import meshcat.geometry as g
 
@@ -303,9 +301,7 @@ class VisualizationMixin:
         self: PinocchioGUI, path: str, start: np.ndarray, vector: np.ndarray, color: int
     ) -> None:
         """Helper to draw an arrow in Meshcat."""
-        if not (path is not None):
-            raise ValueError("path must be provided")
-        if not (path is not None):
+        if path is None:
             raise ValueError("path must be provided")
         import meshcat.geometry as g
 
@@ -380,9 +376,7 @@ class VisualizationMixin:
             self._update_viewer()
 
     def _toggle_forces(self: PinocchioGUI, checked: bool) -> None:
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        if not (checked is not None):
+        if checked is None:
             raise ValueError("checked must be provided")
         if self.viewer is None:
             return
@@ -391,9 +385,7 @@ class VisualizationMixin:
         self._update_viewer()
 
     def _toggle_torques(self: PinocchioGUI, checked: bool) -> None:
-        if not (checked is not None):
-            raise ValueError("checked must be provided")
-        if not (checked is not None):
+        if checked is None:
             raise ValueError("checked must be provided")
         if self.viewer is None:
             return

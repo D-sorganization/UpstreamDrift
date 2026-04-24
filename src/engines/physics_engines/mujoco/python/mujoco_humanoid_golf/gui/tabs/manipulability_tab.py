@@ -23,7 +23,7 @@ class ManipulabilityTab(QtWidgets.QWidget):
 
     def __init__(
         self, sim_widget: Any, parent: QtWidgets.QWidget | None = None
-    ) -> None:
+    ) -> None:  # noqa: E501
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.analyzer: ManipulabilityAnalyzer | None = None
@@ -92,7 +92,7 @@ class ManipulabilityTab(QtWidgets.QWidget):
         # Best practice: use the widget's provided data which is synchronized.
         self.analyzer = ManipulabilityAnalyzer(
             self.sim_widget.model, self.sim_widget.data
-        )
+        )  # noqa: E501
 
         # Populate Body Checkboxes
         self._populate_body_checkboxes()
@@ -148,7 +148,7 @@ class ManipulabilityTab(QtWidgets.QWidget):
 
         active_bodies = [
             name for name, chk in self.body_checkboxes.items() if chk.isChecked()
-        ]
+        ]  # noqa: E501
 
         if not active_bodies:
             if meshcat:

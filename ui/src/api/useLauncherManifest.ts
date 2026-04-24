@@ -30,6 +30,8 @@ export interface LauncherManifest {
     version: string;
     description: string;
     tiles: LauncherTile[];
+    launcher_csrf_token?: string;
+    launcher_csrf_header?: string;
 }
 
 export type ManifestLoadState = 'idle' | 'loading' | 'loaded' | 'error';
@@ -39,6 +41,8 @@ interface UseLauncherManifestResult {
     tiles: LauncherTile[];
     engines: LauncherTile[];
     tools: LauncherTile[];
+    launcherCsrfToken: string | null;
+    launcherCsrfHeader: string;
     loadState: ManifestLoadState;
     error: string | null;
     refetch: () => Promise<void>;
@@ -79,12 +83,16 @@ export function useLauncherManifest(): UseLauncherManifestResult {
     const tiles = manifest?.tiles ?? [];
     const engines = tiles.filter((t) => t.category === 'physics_engine');
     const tools = tiles.filter((t) => t.category === 'tool' || t.category === 'external');
+    const launcherCsrfToken = manifest?.launcher_csrf_token ?? null;
+    const launcherCsrfHeader = manifest?.launcher_csrf_header ?? 'X-Launcher-CSRF-Token';
 
     return {
         manifest,
         tiles,
         engines,
         tools,
+        launcherCsrfToken,
+        launcherCsrfHeader,
         loadState,
         error,
         refetch: fetchManifest,

@@ -13,8 +13,6 @@ from src.shared.python.biomechanics.multi_muscle import (
 )
 from src.shared.python.core.contracts import PreconditionError
 
-pytestmark = pytest.mark.unit
-
 
 def _make_muscle(f_max: float = 500.0) -> HillMuscleModel:
     return HillMuscleModel(MuscleParameters(F_max=f_max, l_opt=0.10, l_slack=0.20))

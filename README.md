@@ -7,7 +7,6 @@
 <p align="center">
   <a href="https://github.com/D-sorganization/UpstreamDrift/actions/workflows/ci-standard.yml"><img src="https://github.com/D-sorganization/UpstreamDrift/actions/workflows/ci-standard.yml/badge.svg" alt="CI Standard"></a>
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
-  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
   <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
 </p>
 
@@ -109,6 +108,29 @@ export GOLF_USE_MOCK_ENGINE=1
 
 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
 
+### Rust Kernel Quickstart
+
+Rust development now works from a clean `UpstreamDrift` clone. The shared
+`tools-core` crate is fetched automatically from a pinned `D-sorganization/Tools`
+git revision, so you do not need a sibling `../Tools` checkout just to run the
+Rust build or Python bindings workflow.
+
+```bash
+cargo build
+
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip maturin
+
+cd rust_core/upstream-physics
+python -m maturin develop --features python
+python -c "import upstream_physics; print(upstream_physics.IntegratorConfig())"
+```
+
+If you are also iterating on local cross-repository Python integrations from
+`D-sorganization/Tools`, use `scripts/setup_tools_workspace.sh` to wire the
+optional sibling workspace and `PYTHONPATH` helpers.
+
 ### Supported Engine Tiers
 
 | Tier         | Engines           | Install Profile                        | Validation                                              |
@@ -129,7 +151,7 @@ Use the Makefile for common development tasks:
 make help      # Show available targets
 make install   # Install dependencies
 make check     # Run linters and tests
-make format    # Format code with black and ruff
+make format    # Format code with Ruff
 ```
 
 ### Launching the Suite

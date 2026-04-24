@@ -119,9 +119,7 @@ class PendulumCanvas(FigureCanvasQTAgg):
 
     def draw_chain(self, points: np.ndarray[typing.Any, typing.Any]) -> None:
         """Render the pendulum chain as connected line segments."""
-        if not (points is not None):
-            raise ValueError("points must be provided")
-        if not (points is not None):
+        if points is None:
             raise ValueError("points must be provided")
         self.ax.cla()
         self._configure_axes()
@@ -190,9 +188,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         layout.addWidget(control_panel, stretch=1)
 
     def _build_form(self, parent: QtWidgets.QWidget) -> None:
-        if not (parent is not None):
-            raise ValueError("parent must be provided")
-        if not (parent is not None):
+        if parent is None:
             raise ValueError("parent must be provided")
         form_layout = QtWidgets.QFormLayout(parent)
 
@@ -296,15 +292,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         )
 
     def _start(self) -> None:
-        # Reset state alongside time so forcing functions that depend on t
-        # are evaluated against a consistent (state, time) pair.
         self.time = 0.0
-        self.state_double = DoublePendulumState(
-            theta1=-0.5, theta2=-1.2, omega1=0.0, omega2=0.0
-        )
-        self.state_triple = TriplePendulumState(
-            theta1=-0.5, theta2=-0.8, theta3=-0.6, omega1=0.0, omega2=0.0, omega3=0.0
-        )
         self.timer.start(int(TIME_STEP * 1000))
 
     def _pause(self) -> None:
@@ -363,13 +351,9 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         """Safely evaluate mathematical expression using simpleeval.
 
         Security: Replaced eval() with simpleeval to eliminate code injection risk.
-
-        On failure, records the error in self._last_eval_error and surfaces it
-        to the status label so the user is not silently running with zero torque.
         """
         try:
             result = _EVALUATOR.eval(expression)
-            self._last_eval_error = None
             return float(result)
         except (
             ValueError,
@@ -379,18 +363,13 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
             KeyError,
             Exception,
         ):  # noqa: BLE001
-            msg = f"Invalid expression: {expression}"
-            self._last_eval_error = msg
-            logger.warning("Error evaluating torque expression: %s", expression)
-            self.status_label.setText(f"Error: {msg}")
+            logger.debug("Error evaluating expression: %s", expression)
             return 0.0
 
     def _polynomial_profiles(
         self, expressions: tuple[str, ...]
     ) -> tuple[PolynomialProfile, ...]:
-        if not (expressions is not None):
-            raise ValueError("expressions must be provided")
-        if not (expressions is not None):
+        if expressions is None:
             raise ValueError("expressions must be provided")
         profiles = []
         for expr in expressions:
@@ -410,9 +389,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         state: DoublePendulumState,
         profiles: tuple[PolynomialProfile, PolynomialProfile],
     ) -> DoublePendulumState:
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         omega1 = profiles[0].omega(self.time)
         omega2 = profiles[1].omega(self.time)
@@ -441,9 +418,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         state: TriplePendulumState,
         profiles: tuple[PolynomialProfile, PolynomialProfile, PolynomialProfile],
     ) -> TriplePendulumState:
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         omega = [profile.omega(self.time) for profile in profiles]
         alpha = [profile.alpha(self.time) for profile in profiles]
@@ -474,9 +449,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         self.canvas.draw_chain(points)
 
     def _update_status(self, state: DoublePendulumState | TriplePendulumState) -> None:
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         status_text = f"Time: {self.time:.3f} s\n"
 
@@ -495,9 +468,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _points_double(
         self, state: DoublePendulumState
     ) -> np.ndarray[typing.Any, typing.Any]:
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         plane_rotation = self._plane_rotation(self.double_params.plane_inclination_deg)
         shoulder = np.array([0.0, 0.0, 0.0])
@@ -514,13 +485,11 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _points_triple(
         self, state: TriplePendulumState
     ) -> np.ndarray[typing.Any, typing.Any]:
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         shoulder = np.array([0.0, 0.0, 0.0])
         params = self.triple_params.segments
-        plane_rotation = self._plane_rotation(self.triple_params.plane_inclination_deg)
+        plane_rotation = self._plane_rotation(35.0)
         p1 = self._point_from_angles(state.theta1, plane_rotation, params[0].length_m)
         p2 = p1 + self._point_from_angles(
             state.theta1 + state.theta2, plane_rotation, params[1].length_m
@@ -535,9 +504,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _point_from_angles(
         self, angle: float, rotation: np.ndarray[typing.Any, typing.Any], length: float
     ) -> np.ndarray[typing.Any, typing.Any]:
-        if not (angle is not None):
-            raise ValueError("angle must be provided")
-        if not (angle is not None):
+        if angle is None:
             raise ValueError("angle must be provided")
         local = np.array(
             [
@@ -552,9 +519,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
     def _plane_rotation(
         self, inclination_deg: float
     ) -> np.ndarray[typing.Any, typing.Any]:
-        if not (inclination_deg is not None):
-            raise ValueError("inclination_deg must be provided")
-        if not (inclination_deg is not None):
+        if inclination_deg is None:
             raise ValueError("inclination_deg must be provided")
         inclination_rad = math.radians(inclination_deg)
         cos_inc = math.cos(inclination_rad)

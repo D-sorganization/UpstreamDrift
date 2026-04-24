@@ -13,8 +13,6 @@ from src.shared.python.club_data.loader import (
     load_club_data,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestClubSpecification:
     def test_basic_construction(self) -> None:

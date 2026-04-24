@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.shared.python.core.numerical_constants import (
     CONDITION_NUMBER_CRITICAL_THRESHOLD,
     CONDITION_NUMBER_WARNING_THRESHOLD,
@@ -15,8 +13,6 @@ from src.shared.python.core.numerical_constants import (
     TOLERANCE_ENERGY_CONSERVATION,
     TOLERANCE_WORK_ENERGY_MISMATCH,
 )
-
-pytestmark = pytest.mark.unit
 
 
 class TestEpsilonConstants:

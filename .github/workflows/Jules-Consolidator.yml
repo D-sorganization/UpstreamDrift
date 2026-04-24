@@ -13,8 +13,8 @@ on:
         required: false
         default: ""
         type: string
-  schedule:
-    - cron: "0 0 * * 0,4" # 5 AM PST Mon-Fri (13 UTC)
+  # Schedule removed: Control Tower handles Consolidator invocation via workflow_call.
+  # Was: cron "0 0 * * 0,4" — duplicate of Control Tower's pr-compiler routing.
 
 concurrency:
   group: jules-consolidator
@@ -26,8 +26,31 @@ permissions:
   issues: write
 
 jobs:
+  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  pick-runner:
+    runs-on: d-sorg-fleet
+    timeout-minutes: 2
+    outputs:
+      runner: ${{ steps.check.outputs.runner }}
+    steps:
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online — routing locally"
+          else
+            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using GitHub-hosted"
+          fi
   discover:
-    runs-on: ubuntu-latest
+    needs: pick-runner
+    runs-on: self-hosted
     outputs:
       pr_count: ${{ steps.list.outputs.count }}
       pr_list: ${{ steps.list.outputs.prs }}
@@ -40,7 +63,7 @@ jobs:
       - name: List Consolidatable PRs
         id: list
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           EXCLUDE_PRS: ${{ inputs.exclude_prs }}
         run: |
           prs=$(gh pr list --base main --state open --json number,title,author,labels,mergeable \
@@ -64,14 +87,14 @@ jobs:
           [ "$count" -gt 1 ] && echo "should_consolidate=true" >> $GITHUB_OUTPUT || echo "should_consolidate=false" >> $GITHUB_OUTPUT
 
   consolidate:
-    needs: discover
+    needs: [pick-runner, discover]
     if: needs.discover.outputs.should_consolidate == 'true' && inputs.dry_run != 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RUNNER_CHECK_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -80,7 +103,7 @@ jobs:
 
       - name: Create and Merge PRs
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           PR_LIST: ${{ needs.discover.outputs.pr_list }}
         run: |
           BRANCH_NAME="consolidated-prs-$(date +%Y-%m-%d)"

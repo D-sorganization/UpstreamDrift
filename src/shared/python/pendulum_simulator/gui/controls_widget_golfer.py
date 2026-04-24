@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Control panel widget for the golfer upper-body model.
 
@@ -468,7 +472,7 @@ class ControlsWidgetGolfer(ControlsWidgetBase):
         }
 
     def _apply_preset(self, name: str) -> None:
-        if not (name is not None):
+        if name is None:
             raise ValueError("name must be provided")
         if name not in self.PRESETS:
             return

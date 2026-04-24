@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Diagnostic utilities for Golf Modeling Suite GUI Launcher.
 
@@ -13,20 +17,22 @@ launcher issues including:
 from __future__ import annotations
 
 import json
-import logging
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-logger = logging.getLogger(__name__)
+from src.shared.python.data_io.path_utils import get_repo_root
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     pass
 
-# Constants
-REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
+# Constants — use centralized root discovery (issue #2354)
+REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
 CONFIG_DIR = Path.home() / ".golf_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
@@ -115,6 +121,7 @@ class LauncherDiagnostics:
         self.check_python_environment()
         self.check_models_yaml()
         self.check_model_registry()
+        self.check_launcher_provider_compatibility()
         self.check_layout_config()
         self.check_asset_files()
         self.check_pyqt6_availability()
@@ -164,9 +171,7 @@ class LauncherDiagnostics:
     def _validate_models_yaml_content(
         self, data: Any, details: dict[str, Any]
     ) -> DiagnosticResult | None:
-        if not (details is not None):
-            raise ValueError("details must be provided")
-        if not (details is not None):
+        if details is None:
             raise ValueError("details must be provided")
         details["raw_content_preview"] = str(data)[:500] if data else "empty"
 
@@ -192,9 +197,7 @@ class LauncherDiagnostics:
     def _check_models_yaml_completeness(
         self, models: list, details: dict[str, Any]
     ) -> DiagnosticResult:
-        if not (models is not None):
-            raise ValueError("models must be provided")
-        if not (models is not None):
+        if models is None:
             raise ValueError("models must be provided")
         details["model_count"] = len(models)
         details["model_ids"] = [m.get("id", "unknown") for m in models]
@@ -337,6 +340,82 @@ class LauncherDiagnostics:
                 name="model_registry",
                 status="fail",
                 message=f"ModelRegistry error: {e}",
+                details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+
+        self.results.append(result)
+        return result
+
+    def check_launcher_provider_compatibility(self) -> DiagnosticResult:
+        """Check that launcher model entries resolve cleanly as local/provider sources."""
+        start = time.time()
+        details: dict[str, Any] = {}
+
+        try:
+            from src.launchers.launcher_provider_compatibility import (
+                evaluate_launcher_model_compatibility,
+            )
+            from src.shared.python.config.model_registry import ModelRegistry
+
+            registry_path = REPOS_ROOT / "src" / "config" / "models.yaml"
+            registry = ModelRegistry(registry_path)
+            results = evaluate_launcher_model_compatibility(
+                registry.get_all_models(), REPOS_ROOT
+            )
+
+            details["model_count"] = len(results)
+            details["compatible_model_ids"] = [
+                result.model_id for result in results if result.is_compatible
+            ]
+            details["incompatible_models"] = [
+                {
+                    "model_id": result.model_id,
+                    "provider": result.provider,
+                    "issues": list(result.issues),
+                }
+                for result in results
+                if not result.is_compatible
+            ]
+
+            if details["incompatible_models"]:
+                result = DiagnosticResult(
+                    name="launcher_provider_compatibility",
+                    status="warning",
+                    message=(
+                        "Launcher provider compatibility found "
+                        f"{len(details['incompatible_models'])} incompatible models"
+                    ),
+                    details=details,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+            else:
+                result = DiagnosticResult(
+                    name="launcher_provider_compatibility",
+                    status="pass",
+                    message=(
+                        "Launcher provider compatibility validated "
+                        f"{len(results)} models"
+                    ),
+                    details=details,
+                    duration_ms=(time.time() - start) * 1000,
+                )
+
+        except ImportError as e:
+            details["import_error"] = str(e)
+            result = DiagnosticResult(
+                name="launcher_provider_compatibility",
+                status="warning",
+                message=f"Launcher provider compatibility unavailable: {e}",
+                details=details,
+                duration_ms=(time.time() - start) * 1000,
+            )
+        except (RuntimeError, TypeError, AttributeError, ValueError) as e:
+            details["error"] = str(e)
+            result = DiagnosticResult(
+                name="launcher_provider_compatibility",
+                status="warning",
+                message=f"Launcher provider compatibility error: {e}",
                 details=details,
                 duration_ms=(time.time() - start) * 1000,
             )
@@ -635,6 +714,10 @@ class LauncherDiagnostics:
                     recommendations.append(
                         "Restore missing asset files in src/launchers/assets/"
                     )
+                elif result.name == "launcher_provider_compatibility":
+                    recommendations.append(
+                        "Fix model provider metadata so launcher entries resolve valid source roots, artifacts, and working directories"
+                    )
 
             elif result.status == "warning":
                 if result.name == "layout_config":
@@ -645,6 +728,10 @@ class LauncherDiagnostics:
                         )
                 elif result.name == "asset_files":
                     recommendations.append("Some tile icons may not display correctly")
+                elif result.name == "launcher_provider_compatibility":
+                    recommendations.append(
+                        "Review incompatible provider-backed models before enabling shared external packs in the launcher"
+                    )
 
         if not recommendations:
             recommendations.append("All systems operational - no issues detected")

@@ -132,9 +132,7 @@ def compute_jacobian_diagnostics(
     Returns:
         JacobianDiagnostics with rank, nullspace, conditioning info
     """
-    if not (J is not None):
-        raise ValueError("J must be provided")
-    if not (J is not None):
+    if J is None:
         raise ValueError("J must be provided")
     if J.size == 0:
         return JacobianDiagnostics(
@@ -201,9 +199,7 @@ def compute_constraint_diagnostics(
     Returns:
         ConstraintDiagnostics with rank, nullspace basis, and flags
     """
-    if not (J_constraint is not None):
-        raise ValueError("J_constraint must be provided")
-    if not (J_constraint is not None):
+    if J_constraint is None:
         raise ValueError("J_constraint must be provided")
     if J_constraint.size == 0:
         return ConstraintDiagnostics(
@@ -281,9 +277,7 @@ def validate_jacobians_cross_engine(
     Returns:
         CrossEngineJacobianReport with comparison results
     """
-    if not (jacobians is not None):
-        raise ValueError("jacobians must be provided")
-    if not (jacobians is not None):
+    if jacobians is None:
         raise ValueError("jacobians must be provided")
     engines = list(jacobians.keys())
     matrices = list(jacobians.values())
@@ -351,9 +345,7 @@ def diagnose_task_points(
     Returns:
         Map of body_name -> JacobianDiagnostics
     """
-    if not (engine_compute_jacobian is not None):
-        raise ValueError("engine_compute_jacobian must be provided")
-    if not (engine_compute_jacobian is not None):
+    if engine_compute_jacobian is None:
         raise ValueError("engine_compute_jacobian must be provided")
     if task_points is None:
         task_points = GOLF_TASK_POINTS

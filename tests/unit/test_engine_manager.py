@@ -3,10 +3,9 @@ Unit tests for EngineManager functionality.
 """
 
 import tempfile
+import textwrap
 from pathlib import Path
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from src.shared.python.engine_core.engine_manager import (
     EngineManager,
@@ -14,13 +13,11 @@ from src.shared.python.engine_core.engine_manager import (
     EngineType,
 )
 
-pytestmark = pytest.mark.unit
-
 
 class TestEngineManager:
     """Test cases for EngineManager functionality."""
 
-    def test_engine_manager_initialization(self) -> None:
+    def test_engine_manager_initialization(self):
         """Test that EngineManager initializes correctly."""
         manager = EngineManager()
 
@@ -35,7 +32,7 @@ class TestEngineManager:
         assert isinstance(manager.engine_paths, dict)
         assert len(manager.engine_paths) == len(EngineType)
 
-    def test_engine_manager_with_custom_root(self) -> None:
+    def test_engine_manager_with_custom_root(self):
         """Test EngineManager with custom suite root."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -47,7 +44,7 @@ class TestEngineManager:
             assert manager.suite_root == temp_path
             assert manager.engines_root == engines_dir
 
-    def test_engine_discovery_with_existing_engines(self) -> None:
+    def test_engine_discovery_with_existing_engines(self):
         """Test engine discovery when engines exist."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -70,7 +67,7 @@ class TestEngineManager:
             # Should not detect non-existent engines
             assert EngineType.PINOCCHIO not in available_engines
 
-    def test_engine_discovery_with_no_engines(self) -> None:
+    def test_engine_discovery_with_no_engines(self):
         """Test engine discovery when no engines exist."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -89,7 +86,95 @@ class TestEngineManager:
                     manager.get_engine_status(engine_type) == EngineStatus.UNAVAILABLE
                 )
 
-    def test_switch_engine_unavailable(self) -> None:
+    def test_engine_discovery_uses_provider_backed_paths(self):
+        """Provider-backed model packs can surface engine availability."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            (temp_path / "src" / "config").mkdir(parents=True)
+            provider_root = temp_path / "provider_roots" / "Drake_Models"
+            (provider_root / "python").mkdir(parents=True)
+            (provider_root / "models").mkdir(parents=True)
+            (provider_root / "models" / "humanoid.urdf").write_text(
+                "<robot/>",
+                encoding="utf-8",
+            )
+
+            models_yaml = temp_path / "src" / "config" / "models.yaml"
+            models_yaml.write_text(
+                textwrap.dedent("""
+                    models:
+                      - id: drake_provider_model
+                        name: Drake Provider Model
+                        description: External Drake-backed model
+                        type: urdf
+                        path: models/humanoid.urdf
+                        engine_type: drake
+                        capabilities: [swing]
+                        source_root: provider_roots/Drake_Models
+                        working_dir: python
+                    """).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            manager = EngineManager(suite_root=temp_path)
+
+            assert EngineType.DRAKE in manager.get_available_engines()
+            assert manager.provider_engine_paths[EngineType.DRAKE] == (
+                (provider_root / "python").resolve(),
+            )
+            assert manager.validate_engine_configuration(EngineType.DRAKE) is True
+
+    def test_engine_discovery_handles_missing_provider_roots_gracefully(self):
+        """Missing provider repos should degrade to unavailable without exploding."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            (temp_path / "src" / "config").mkdir(parents=True)
+            models_yaml = temp_path / "src" / "config" / "models.yaml"
+            models_yaml.write_text(
+                textwrap.dedent("""
+                    models:
+                      - id: drake_provider_model
+                        name: Drake Provider Model
+                        description: External Drake-backed model
+                        type: urdf
+                        path: models/humanoid.urdf
+                        engine_type: drake
+                        capabilities: [swing]
+                        source_root: provider_roots/Drake_Models
+                        working_dir: python
+                    """).strip()
+                + "\n",
+                encoding="utf-8",
+            )
+
+            manager = EngineManager(suite_root=temp_path)
+
+            assert manager.provider_engine_paths[EngineType.DRAKE] == (
+                (temp_path / "provider_roots" / "Drake_Models").resolve(),
+            )
+            assert (
+                manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
+            )
+
+    def test_model_registry_path_uses_src_config_when_suite_root_is_src(self):
+        """suite_root already at src/ should not duplicate the src segment."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            src_root = repo_root / "src"
+            (src_root / "config").mkdir(parents=True)
+            (src_root / "config" / "models.yaml").write_text(
+                "models: []\n",
+                encoding="utf-8",
+            )
+
+            manager = EngineManager(suite_root=src_root)
+
+            assert manager._get_model_registry_path() == (
+                src_root / "config" / "models.yaml"
+            )
+
+    def test_switch_engine_unavailable(self):
         """Test switching to unavailable engine."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -103,7 +188,7 @@ class TestEngineManager:
             assert result is False
             assert manager.current_engine is None
 
-    def test_switch_engine_unknown_type(self) -> None:
+    def test_switch_engine_unknown_type(self):
         """Test switching to unknown engine type."""
         manager = EngineManager()
 
@@ -113,7 +198,7 @@ class TestEngineManager:
         result = manager.switch_engine(EngineType.MUJOCO)
         assert result is False
 
-    def test_get_current_engine(self) -> None:
+    def test_get_current_engine(self):
         """Test getting current engine."""
         manager = EngineManager()
 
@@ -124,7 +209,7 @@ class TestEngineManager:
         manager.current_engine = EngineType.MUJOCO
         assert manager.get_current_engine() == EngineType.MUJOCO
 
-    def test_get_engine_status(self) -> None:
+    def test_get_engine_status(self):
         """Test getting engine status."""
         manager = EngineManager()
 
@@ -138,7 +223,7 @@ class TestEngineManager:
         status = manager.get_engine_status(EngineType.MUJOCO)
         assert status == EngineStatus.UNAVAILABLE
 
-    def test_get_engine_info(self) -> None:
+    def test_get_engine_info(self):
         """Test getting engine information."""
         manager = EngineManager()
 
@@ -156,7 +241,7 @@ class TestEngineManager:
         # Current engine should be None initially
         assert info["current_engine"] is None
 
-    def test_validate_engine_configuration_existing(self) -> None:
+    def test_validate_engine_configuration_existing(self):
         """Test engine configuration validation for existing engines."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -173,7 +258,7 @@ class TestEngineManager:
             result = manager.validate_engine_configuration(EngineType.MUJOCO)
             assert result is True
 
-    def test_validate_engine_configuration_missing(self) -> None:
+    def test_validate_engine_configuration_missing(self):
         """Test engine configuration validation for missing engines."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -186,7 +271,7 @@ class TestEngineManager:
             result = manager.validate_engine_configuration(EngineType.MUJOCO)
             assert result is False
 
-    def test_validate_engine_configuration_unknown_engine(self) -> None:
+    def test_validate_engine_configuration_unknown_engine(self):
         """Test engine configuration validation for unknown engine."""
         manager = EngineManager()
 
@@ -198,9 +283,7 @@ class TestEngineManager:
 
     @patch("src.shared.python.engine_core.engine_manager.logger")
     @patch("src.shared.python.engine_core.engine_manager.get_registry")
-    def test_engine_loading_error_handling(
-        self, mock_get_registry, mock_logger
-    ) -> None:
+    def test_engine_loading_error_handling(self, mock_get_registry, mock_logger):
         """Test error handling during engine loading."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -228,7 +311,7 @@ class TestEngineManager:
 class TestEngineTypes:
     """Test cases for EngineType enum."""
 
-    def test_engine_type_values(self) -> None:
+    def test_engine_type_values(self):
         """Test that all engine types have correct values."""
         expected_values = {
             EngineType.MUJOCO: "mujoco",
@@ -244,7 +327,7 @@ class TestEngineTypes:
         for engine_type, expected_value in expected_values.items():
             assert engine_type.value == expected_value
 
-    def test_engine_type_completeness(self) -> None:
+    def test_engine_type_completeness(self):
         """Test that we have all expected engine types."""
         engine_values = {e.value for e in EngineType}
         expected_values = {
@@ -266,7 +349,7 @@ class TestEngineTypes:
 class TestEngineStatus:
     """Test cases for EngineStatus enum."""
 
-    def test_engine_status_values(self) -> None:
+    def test_engine_status_values(self):
         """Test that all engine statuses have correct values."""
         expected_values = {
             EngineStatus.AVAILABLE: "available",
@@ -295,7 +378,7 @@ class TestEngineStatus:
 class TestEngineManagerBehavior:
     """Exemplary tests demonstrating proper testing practices."""
 
-    def test_engine_discovery_respects_filesystem_state(self) -> None:
+    def test_engine_discovery_respects_filesystem_state(self):
         """Test that engine discovery accurately reflects filesystem reality.
 
         GOOD PRACTICE: Tests actual behavior using real filesystem operations.
@@ -325,7 +408,7 @@ class TestEngineManagerBehavior:
                 manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
             )
 
-    def test_engine_manager_handles_partial_installation(self) -> None:
+    def test_engine_manager_handles_partial_installation(self):
         """Test behavior when engine directory exists but is incomplete.
 
         GOOD PRACTICE: Tests edge case - directory exists but missing required subdirs.
@@ -343,7 +426,7 @@ class TestEngineManagerBehavior:
             result = manager.validate_engine_configuration(EngineType.DRAKE)
             assert result is False
 
-    def test_engine_info_provides_complete_state(self) -> None:
+    def test_engine_info_provides_complete_state(self):
         """Test that get_engine_info provides complete, accurate state.
 
         GOOD PRACTICE: Tests the contract of the API - what data it returns
@@ -370,7 +453,7 @@ class TestEngineManagerBehavior:
             # Keys are strings (engine type values)
             assert all(isinstance(k, str) for k in info["engine_status"])
 
-    def test_multiple_switch_operations_maintain_consistency(self) -> None:
+    def test_multiple_switch_operations_maintain_consistency(self):
         """Test that multiple engine switches maintain consistent state.
 
         GOOD PRACTICE: Tests behavioral invariants across multiple operations.

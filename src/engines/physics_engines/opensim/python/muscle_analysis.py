@@ -61,9 +61,7 @@ class OpenSimMuscleAnalyzer:
             model: OpenSim model with muscles
             state: Current state of the simulation
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
         self.state = state
@@ -90,6 +88,27 @@ class OpenSimMuscleAnalyzer:
                 name = muscle.getName()
                 # Get active fiber force (Hill-type model output)
                 force = muscle.getActiveFiberForce(self.state)
+                forces[name] = float(force)
+
+        return forces
+
+    def get_passive_muscle_forces(self) -> dict[str, float]:
+        """Compute current passive muscle forces for all muscles.
+
+        Returns:
+            Dictionary mapping muscle names to passive forces [N]
+        """
+        if opensim is None:
+            return {}
+
+        forces = {}
+        self.model.realizeDynamics(self.state)
+
+        for i in range(self.n_muscles):
+            muscle = opensim.Muscle.safeDownCast(self.muscle_set.get(i))
+            if muscle:
+                name = muscle.getName()
+                force = muscle.getPassiveFiberForce(self.state)
                 forces[name] = float(force)
 
         return forces
@@ -168,9 +187,7 @@ class OpenSimMuscleAnalyzer:
         Args:
             activations: Dictionary mapping muscle names to desired activation [0-1]
         """
-        if not (activations is not None):
-            raise ValueError("activations must be provided")
-        if not (activations is not None):
+        if activations is None:
             raise ValueError("activations must be provided")
         if opensim is None:
             return
@@ -241,6 +258,17 @@ class OpenSimMuscleAnalyzer:
         # Get muscle torques
         muscle_torques = self.compute_muscle_joint_torques()
 
+        # Check conditioning once before loop
+        cond = np.linalg.cond(M)
+        if cond > 1e8:
+            logger.warning(
+                f"Mass matrix ill-conditioned (cond={cond:.2e}), using regularized solve"
+            )
+            lambda_reg = 1e-6 * np.trace(M) / M.shape[0]
+            M_solve = M + lambda_reg * np.eye(M.shape[0])
+        else:
+            M_solve = M
+
         # Compute induced acceleration: a = M^-1 * tau
         induced_accelerations = {}
         for muscle_name, tau in muscle_torques.items():
@@ -248,7 +276,7 @@ class OpenSimMuscleAnalyzer:
             tau_full = np.zeros(n_u)
             tau_full[: min(len(tau), n_u)] = tau[: min(len(tau), n_u)]
 
-            a_induced = np.linalg.solve(M, tau_full)
+            a_induced = np.linalg.solve(M_solve, tau_full)
             induced_accelerations[muscle_name] = a_induced
 
         return induced_accelerations
@@ -305,9 +333,7 @@ class OpenSimGripModel:
         Args:
             model: OpenSim model (should have grip body and hand muscles)
         """
-        if not (model is not None):
-            raise ValueError("model must be provided")
-        if not (model is not None):
+        if model is None:
             raise ValueError("model must be provided")
         self.model = model
 
@@ -330,9 +356,7 @@ class OpenSimGripModel:
             length: Wrap cylinder length [m]
             location: (x, y, z) location in grip body frame [m]
         """
-        if not (muscle_name is not None):
-            raise ValueError("muscle_name must be provided")
-        if not (muscle_name is not None):
+        if muscle_name is None:
             raise ValueError("muscle_name must be provided")
         if opensim is None:
             logger.warning("OpenSim not installed - cannot add wrap")
@@ -380,9 +404,7 @@ class OpenSimGripModel:
         Returns:
             Dictionary mapping constraint names to reaction forces [N]
         """
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         if opensim is None:
             return {}
@@ -407,9 +429,7 @@ class OpenSimGripModel:
             Dictionary with grip analysis metrics
         """
         # Get forces from grip-related muscles
-        if not (state is not None):
-            raise ValueError("state must be provided")
-        if not (state is not None):
+        if state is None:
             raise ValueError("state must be provided")
         muscle_forces = analyzer.get_muscle_forces()
 

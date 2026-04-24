@@ -23,8 +23,6 @@ Color/style configuration is centralized in module-level constants.
 
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 from matplotlib.figure import Figure
 
@@ -380,7 +378,7 @@ class ForceVectorRenderer(BaseRenderer):
 
     def _draw_quiver_on_axes(
         self,
-        ax: Any,
+        ax,
         *,
         positions: np.ndarray,
         vectors: np.ndarray,
@@ -415,7 +413,7 @@ class ForceVectorRenderer(BaseRenderer):
         )
 
     @staticmethod
-    def _format_3d_axes(ax: Any) -> None:
+    def _format_3d_axes(ax) -> None:
         """Apply standard formatting to a 3-D axes."""
         ax.set_xlabel("X (m)", fontsize=10)
         ax.set_ylabel("Y (m)", fontsize=10)
