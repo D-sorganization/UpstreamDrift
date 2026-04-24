@@ -6,6 +6,7 @@ analysis on engine dynamics.
 
 from .config import PerturbationAnalyzer, PerturbationConfig, PerturbationSummary
 from .noise import generate_noise
+from .perturbation_base import PartialResultsWarning, TrialFailure
 from .robustness_score import compute_robustness_score
 from .statistics import MetricStatistics, compute_metric_statistics
 
@@ -13,6 +14,8 @@ __all__ = [
     "PerturbationAnalyzer",
     "PerturbationConfig",
     "PerturbationSummary",
+    "PartialResultsWarning",
+    "TrialFailure",
     "generate_noise",
     "compute_robustness_score",
     "MetricStatistics",

@@ -79,6 +79,41 @@ _ARRAY_METRICS: frozenset[str] = frozenset(
 
 
 # ---------------------------------------------------------------------------
+# Failure reporting types
+# ---------------------------------------------------------------------------
+
+#: Failure rate threshold above which a PartialResultsWarning is issued.
+FAILURE_RATE_ERROR_THRESHOLD: float = 0.05
+
+
+class PartialResultsWarning(UserWarning):
+    """Raised when a significant fraction of perturbation trials fail.
+
+    Callers may catch this warning to inspect the failure list embedded in
+    the message or to apply custom escalation logic.
+    """
+
+
+@dataclass
+class TrialFailure:
+    """Record of a single failed perturbation trial.
+
+    Attributes
+    ----------
+    trial_index : int
+        Zero-based index of the trial that failed.
+    exception_type : str
+        ``type(exc).__name__`` of the caught exception.
+    message : str
+        ``str(exc)`` — the exception message.
+    """
+
+    trial_index: int
+    exception_type: str
+    message: str
+
+
+# ---------------------------------------------------------------------------
 # Shared comparison report (same dataclass for all engines)
 # ---------------------------------------------------------------------------
 
@@ -333,6 +368,7 @@ class PerturbationAnalyzerBase(ABC):
         scalar_metric_names = [m for m in MANDATORY_METRICS if m not in _ARRAY_METRICS]
         metric_lists: dict[str, list[float]] = {m: [] for m in scalar_metric_names}
         n_success = 0
+        failures: list[TrialFailure] = []
 
         for i in range(config.n_trials):
             perturbed = _perturb_coeffs(
@@ -351,10 +387,44 @@ class PerturbationAnalyzerBase(ABC):
                         v = float(np.linalg.norm(v))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except Exception:  # noqa: BLE001
-                logger.debug("Trial %d failed", i, exc_info=True)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Trial %d failed: %s", i, exc, exc_info=True)
+                failures.append(
+                    TrialFailure(
+                        trial_index=i,
+                        exception_type=type(exc).__name__,
+                        message=str(exc),
+                    )
+                )
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
+
+        if failures:
+            n_failed = len(failures)
+            failure_rate = n_failed / config.n_trials
+            pct_success = 100.0 * (1.0 - failure_rate)
+            logger.warning(
+                "%d of %d trials failed (success rate: %.1f%%)",
+                n_failed,
+                config.n_trials,
+                pct_success,
+            )
+            if failure_rate > FAILURE_RATE_ERROR_THRESHOLD:
+                import warnings  # noqa: PLC0415
+
+                failure_summary = "; ".join(
+                    f"trial {f.trial_index}: {f.exception_type}({f.message})"
+                    for f in failures[:10]
+                )
+                if len(failures) > 10:
+                    failure_summary += f" ... and {len(failures) - 10} more"
+                warnings.warn(
+                    f"{n_failed} of {config.n_trials} trials failed "
+                    f"(failure rate {failure_rate:.1%} > threshold "
+                    f"{FAILURE_RATE_ERROR_THRESHOLD:.1%}): {failure_summary}",
+                    PartialResultsWarning,
+                    stacklevel=2,
+                )
 
         if n_success == 0:
             logger.warning("All trials failed — returning zero-robustness summary")
@@ -414,6 +484,7 @@ class PerturbationAnalyzerBase(ABC):
         def _collect_scalar(profile: object, metric: str) -> np.ndarray:
             self.set_base_torque_profile(profile)
             values: list[float] = []
+            cmp_failures: list[TrialFailure] = []
             for i in range(config.n_trials):
                 perturbed = _perturb_coeffs(
                     self._base_coeffs,  # type: ignore[arg-type]
@@ -429,8 +500,24 @@ class PerturbationAnalyzerBase(ABC):
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
-                    pass
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug(
+                        "compare_profiles trial %d failed: %s", i, exc, exc_info=True
+                    )
+                    cmp_failures.append(
+                        TrialFailure(
+                            trial_index=i,
+                            exception_type=type(exc).__name__,
+                            message=str(exc),
+                        )
+                    )
+            if cmp_failures:
+                logger.warning(
+                    "compare_profiles: %d of %d trials failed for metric '%s'",
+                    len(cmp_failures),
+                    config.n_trials,
+                    metric,
+                )
             return np.array(values) if values else np.array([0.0])
 
         metric_comparisons: dict[str, Any] = {}
