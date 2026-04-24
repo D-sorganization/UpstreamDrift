@@ -71,10 +71,19 @@ def pytest_configure(config: pytest.Config) -> None:
         # Always override — even if already present — to ensure a single class identity.
         # xdist workers may have loaded 'contracts' via the short sys.path entry before
         # pytest_configure runs, creating a stale second module instance.
-        for alias in ("contracts", "shared.python.contracts"):
+        _contracts_aliases = ("contracts", "shared.python.contracts")
+        for alias in _contracts_aliases:
             sys.modules[alias] = canonical_mod
+        config._contracts_aliases_installed = _contracts_aliases  # type: ignore[attr-defined]
     except Exception as e:  # noqa: BLE001, F841
         pass  # Don't block test collection if this fails
+
+
+def pytest_unconfigure(config: pytest.Config) -> None:
+    """Remove contracts aliases installed by pytest_configure."""
+    aliases = getattr(config, "_contracts_aliases_installed", ())
+    for alias in aliases:
+        sys.modules.pop(alias, None)
 
 
 # Engine module prefixes whose sys.modules entries must be isolated between
@@ -86,6 +95,9 @@ def pytest_configure(config: pytest.Config) -> None:
 _PROTECTED_PREFIXES = (
     "pinocchio",
     "pydrake",
+    "mujoco",
+    "opensim",
+    "myosuite",
 )
 
 

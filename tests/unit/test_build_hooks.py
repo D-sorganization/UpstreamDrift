@@ -1,6 +1,19 @@
+"""Tests for build_hooks module.
+
+build_hooks.py imports hatchling at module level, so we must have hatchling
+mocked before importing it.  We use contextlib.ExitStack + patch.dict so the
+mock is installed at collection time and automatically removed on pytest exit.
+"""
+
+from __future__ import annotations
+
+import contextlib
 import os
+import subprocess
 import sys
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class DummyHookInterface:
@@ -9,20 +22,36 @@ class DummyHookInterface:
         self.config = config
 
 
-sys.modules["hatchling"] = MagicMock()
-sys.modules["hatchling.builders"] = MagicMock()
-sys.modules["hatchling.builders.hooks"] = MagicMock()
-sys.modules["hatchling.builders.hooks.plugin"] = MagicMock()
-sys.modules["hatchling.builders.hooks.plugin.interface"] = MagicMock()
-sys.modules["hatchling.builders.hooks.plugin.interface"].BuildHookInterface = (
-    DummyHookInterface
+# Install hatchling mock for the duration of this module's collection+execution.
+# patch.dict is used (not direct assignment) so the entries are removed when the
+# context exits in teardown_module, preventing sys.modules pollution.
+_hatchling_mock_stack = contextlib.ExitStack()
+
+_hatchling_mock_hook_interface = MagicMock()
+_hatchling_mock_hook_interface.BuildHookInterface = DummyHookInterface
+
+_hatchling_mock_stack.enter_context(
+    patch.dict(
+        "sys.modules",
+        {
+            "hatchling": MagicMock(),
+            "hatchling.builders": MagicMock(),
+            "hatchling.builders.hooks": MagicMock(),
+            "hatchling.builders.hooks.plugin": MagicMock(),
+            "hatchling.builders.hooks.plugin.interface": _hatchling_mock_hook_interface,
+        },
+    )
 )
 
-import subprocess  # noqa: E402
-
-import pytest  # noqa: E402
-
+# Force reimport of build_hooks under the mocked hatchling
+sys.modules.pop("build_hooks", None)
 import build_hooks  # noqa: E402
+
+
+def teardown_module(module) -> None:
+    """Remove hatchling mocks and build_hooks from sys.modules."""
+    _hatchling_mock_stack.close()
+    sys.modules.pop("build_hooks", None)
 
 
 class DummyConfig:

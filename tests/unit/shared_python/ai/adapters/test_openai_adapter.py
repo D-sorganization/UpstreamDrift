@@ -1,23 +1,28 @@
 """Tests for the OpenAI adapter."""
 
+from __future__ import annotations
+
 import sys
-from unittest.mock import MagicMock
+from collections.abc import Generator
+from typing import Any
+from unittest.mock import MagicMock, patch
 
-# Mock openai globally so lazy imports bypass the missing package
-openai_mock = MagicMock()
-openai_mock.OpenAI = MagicMock()
-openai_mock.Anthropic = MagicMock()
-sys.modules["openai"] = openai_mock
-# for gemini
-if "openai" == "google.generativeai":
-    sys.modules["google"] = MagicMock()
-from typing import Any  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
+import pytest
 
-import pytest  # noqa: E402
+from src.shared.python.ai.adapters.base import ToolDeclaration
+from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
-from src.shared.python.ai.adapters.base import ToolDeclaration  # noqa: E402
-from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter  # noqa: E402
+
+@pytest.fixture(autouse=True)
+def _mock_openai() -> Generator[MagicMock, None, None]:
+    """Mock openai for every test using patch.dict."""
+    openai_mock = MagicMock()
+    openai_mock.OpenAI = MagicMock()
+    openai_mock.Anthropic = MagicMock()
+    with patch.dict("sys.modules", {"openai": openai_mock}):
+        yield openai_mock
+
+
 from src.shared.python.ai.exceptions import (  # noqa: E402
     AIConnectionError,
     AIProviderError,

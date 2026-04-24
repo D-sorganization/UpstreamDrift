@@ -1,3 +1,14 @@
+"""Tests for optimize_arm module.
+
+optimize_arm imports casadi and pinocchio at module level, so we must have them
+mocked before importing the module under test.  We use contextlib.ExitStack +
+patch.dict so the mocks are installed at collection time and cleaned up after
+the test module runs.
+"""
+
+from __future__ import annotations
+
+import contextlib
 import sys
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -5,54 +16,35 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Save original modules so we can restore them after mocking.
-# This prevents pollution of sys.modules for other test modules.
-_saved_modules = {}
-for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-    if _key in sys.modules:
-        _saved_modules[_key] = sys.modules[_key]
+# Install casadi/pinocchio mocks for the duration of this module's collection+execution.
+# patch.dict is used so the entries are removed in teardown_module, preventing
+# sys.modules pollution for other test modules.
+_mock_stack = contextlib.ExitStack()
 
-# Mock dependencies temporarily to allow importing optimize_arm
-sys.modules["casadi"] = MagicMock()
-sys.modules["pinocchio"] = MagicMock()
-sys.modules["pinocchio.casadi"] = MagicMock()
+ca = MagicMock()
+pin = MagicMock()
+cpin = MagicMock()
 
-import casadi as ca  # noqa: E402
-import pinocchio as pin  # noqa: E402
-import pinocchio.casadi as cpin  # noqa: E402
+_mock_stack.enter_context(
+    patch.dict(
+        "sys.modules",
+        {
+            "casadi": ca,
+            "pinocchio": pin,
+            "pinocchio.casadi": cpin,
+        },
+    )
+)
 
-# Use sys.modules.pop instead of reload to avoid C-extension corruption
+# Force reimport of optimize_arm under the mocked dependencies.
 sys.modules.pop("src.shared.python.optimization.examples.optimize_arm", None)
 from src.shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
-# Restore original modules IMMEDIATELY to prevent polluting other test modules.
-# The module-level code above runs at pytest collection time, so without this
-# restore, sys.modules["pinocchio"] would remain a MagicMock during the
-# entire collection phase, breaking any test that imports pinocchio afterward.
-for _key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-    if _key in _saved_modules:
-        sys.modules[_key] = _saved_modules[_key]
-    elif _key in sys.modules:
-        del sys.modules[_key]
-
-
-def setup_module(module) -> None:
-    """Re-install mocks for test execution in this module."""
-    for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-        if key in sys.modules:
-            _saved_modules.setdefault(key, sys.modules[key])
-    sys.modules["casadi"] = ca
-    sys.modules["pinocchio"] = pin
-    sys.modules["pinocchio.casadi"] = cpin
-
 
 def teardown_module(module) -> None:
-    """Clean up sys.modules pollution by restoring original modules."""
-    for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
-        if key in _saved_modules:
-            sys.modules[key] = _saved_modules[key]
-        elif key in sys.modules:
-            del sys.modules[key]
+    """Remove mocks and cached module from sys.modules."""
+    _mock_stack.close()
+    sys.modules.pop("src.shared.python.optimization.examples.optimize_arm", None)
 
 
 @pytest.fixture

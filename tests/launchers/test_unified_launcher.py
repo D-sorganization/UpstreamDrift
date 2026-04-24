@@ -54,9 +54,8 @@ def test_get_golf_main_prefer_legacy(clean_sys_modules) -> None:
         pass
 
     legacy_mock.main = fake_main
-    sys.modules["launchers.golf_launcher"] = legacy_mock
-
-    main_func = _get_golf_main(prefer_legacy=True)
+    with patch.dict(sys.modules, {"launchers.golf_launcher": legacy_mock}):
+        main_func = _get_golf_main(prefer_legacy=True)
     assert main_func is fake_main
 
 

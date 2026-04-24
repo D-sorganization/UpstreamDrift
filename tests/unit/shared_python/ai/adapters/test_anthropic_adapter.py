@@ -1,37 +1,40 @@
 """Tests for the Anthropic adapter."""
 
+from __future__ import annotations
+
 import sys
-from unittest.mock import MagicMock
+from collections.abc import Generator
+from typing import Any
+from unittest.mock import MagicMock, patch
 
-# Mock anthropic globally so lazy imports bypass the missing package
-anthropic_mock = MagicMock()
-anthropic_mock.OpenAI = MagicMock()
-anthropic_mock.Anthropic = MagicMock()
-sys.modules["anthropic"] = anthropic_mock
-# for gemini
-if "anthropic" == "google.generativeai":
-    sys.modules["google"] = MagicMock()
-from typing import Any  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
+import pytest
 
-import pytest  # noqa: E402
-
-from src.shared.python.ai.adapters.anthropic_adapter import (  # noqa: E402
+from src.shared.python.ai.adapters.anthropic_adapter import (
     AnthropicAdapter,
 )
-from src.shared.python.ai.adapters.base import ToolDeclaration  # noqa: E402
-from src.shared.python.ai.exceptions import (  # noqa: E402
+from src.shared.python.ai.adapters.base import ToolDeclaration
+from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
     AIRateLimitError,
     AITimeoutError,
 )
-from src.shared.python.ai.types import (  # noqa: E402
+from src.shared.python.ai.types import (
     ConversationContext,
     ExpertiseLevel,
     Message,
     ProviderCapability,
 )
+
+
+@pytest.fixture(autouse=True)
+def _mock_anthropic() -> Generator[MagicMock, None, None]:
+    """Mock anthropic for every test using patch.dict."""
+    anthropic_mock = MagicMock()
+    anthropic_mock.OpenAI = MagicMock()
+    anthropic_mock.Anthropic = MagicMock()
+    with patch.dict("sys.modules", {"anthropic": anthropic_mock}):
+        yield anthropic_mock
 
 
 @pytest.fixture

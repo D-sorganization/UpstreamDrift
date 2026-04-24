@@ -3,33 +3,38 @@
 from __future__ import annotations
 
 import sys
-from unittest.mock import MagicMock
+from collections.abc import Generator
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
 _PYDRAKE_MOCKED_KEYS = ["pydrake", "pydrake.all"]
-_pydrake_saved: dict[str, object] = {
-    k: sys.modules[k] for k in _PYDRAKE_MOCKED_KEYS if k in sys.modules
-}
-# Mock pydrake before importing the module under test.
-# teardown_module() removes these entries from sys.modules afterward.
-mock_pydrake = MagicMock()
-for _k in _PYDRAKE_MOCKED_KEYS:
-    sys.modules[_k] = mock_pydrake
-
-from src.engines.physics_engines.drake.python.src.induced_acceleration import (  # noqa: E402
-    DrakeInducedAccelerationAnalyzer,
-)
 
 
-def teardown_module(module) -> None:
-    """Remove pydrake mock from sys.modules to avoid polluting other tests."""
-    for k in _PYDRAKE_MOCKED_KEYS:
-        if k in _pydrake_saved:
-            sys.modules[k] = _pydrake_saved[k]
-        else:
-            sys.modules.pop(k, None)
+@pytest.fixture(autouse=True)
+def _mock_pydrake() -> Generator[None, None, None]:
+    """Mock pydrake for every test in this module using patch.dict.
+
+    patch.dict auto-restores sys.modules after each test so no pollution leaks
+    to other modules.
+    """
+    mock_pydrake = MagicMock()
+    with patch.dict("sys.modules", dict.fromkeys(_PYDRAKE_MOCKED_KEYS, mock_pydrake)):
+        yield
+
+
+@pytest.fixture
+def _drake_analyzer_class():
+    """Return DrakeInducedAccelerationAnalyzer under active mocks."""
+    # Evict any cached module so it re-imports with the current sys.modules mocks.
+    mod_key = "src.engines.physics_engines.drake.python.src.induced_acceleration"
+    sys.modules.pop(mod_key, None)
+    from src.engines.physics_engines.drake.python.src.induced_acceleration import (
+        DrakeInducedAccelerationAnalyzer,
+    )
+
+    return DrakeInducedAccelerationAnalyzer
 
 
 class TestDrakeInducedAcceleration:
@@ -45,9 +50,9 @@ class TestDrakeInducedAcceleration:
         return plant
 
     @pytest.fixture
-    def analyzer(self, mock_plant) -> DrakeInducedAccelerationAnalyzer:
+    def analyzer(self, _drake_analyzer_class, mock_plant):
         """Create analyzer instance."""
-        return DrakeInducedAccelerationAnalyzer(mock_plant)
+        return _drake_analyzer_class(mock_plant)
 
     def test_initialization(self, analyzer, mock_plant) -> None:
         """Test initialization."""

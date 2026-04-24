@@ -1,14 +1,28 @@
 """Tests for the local Ollama adapter."""
 
+from __future__ import annotations
+
 import json
 import sys
-from unittest.mock import MagicMock
+from collections.abc import Iterator
+from typing import Any
+from unittest.mock import MagicMock, patch
 
-# Mock httpx globally so lazy imports bypass the missing package
-httpx_mock = MagicMock()
-httpx_mock.OpenAI = MagicMock()
-httpx_mock.Anthropic = MagicMock()
-sys.modules["httpx"] = httpx_mock
+import pytest
+
+from src.shared.python.ai.adapters.base import ToolDeclaration
+from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+from src.shared.python.ai.exceptions import (
+    AIConnectionError,
+    AIProviderError,
+    AITimeoutError,
+)
+from src.shared.python.ai.types import (
+    ConversationContext,
+    ExpertiseLevel,
+    Message,
+    ProviderCapability,
+)
 
 
 class MockConnectError(Exception):
@@ -19,37 +33,24 @@ class MockTimeoutException(Exception):
     pass
 
 
-httpx_mock.ConnectError = MockConnectError
-httpx_mock.TimeoutException = MockTimeoutException
-
-# for gemini
-if "httpx" == "google.generativeai":
-    sys.modules["google"] = MagicMock()
-from collections.abc import Iterator  # noqa: E402
-from typing import Any  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
-
-import pytest  # noqa: E402
+@pytest.fixture(autouse=True)
+def _mock_httpx() -> Iterator[MagicMock]:
+    """Mock httpx for every test using patch.dict."""
+    httpx_mock = MagicMock()
+    httpx_mock.OpenAI = MagicMock()
+    httpx_mock.Anthropic = MagicMock()
+    httpx_mock.ConnectError = MockConnectError
+    httpx_mock.TimeoutException = MockTimeoutException
+    with patch.dict("sys.modules", {"httpx": httpx_mock}):
+        yield httpx_mock
 
 
 @pytest.fixture(autouse=True)
-def reset_mocks() -> None:
-    sys.modules["httpx"].reset_mock()
-
-
-from src.shared.python.ai.adapters.base import ToolDeclaration  # noqa: E402
-from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter  # noqa: E402
-from src.shared.python.ai.exceptions import (  # noqa: E402
-    AIConnectionError,
-    AIProviderError,
-    AITimeoutError,
-)
-from src.shared.python.ai.types import (  # noqa: E402
-    ConversationContext,
-    ExpertiseLevel,
-    Message,
-    ProviderCapability,
-)
+def reset_mocks(_mock_httpx) -> None:
+    _mock_httpx.reset_mock()
+    # Restore error classes after reset_mock clears them
+    _mock_httpx.ConnectError = MockConnectError
+    _mock_httpx.TimeoutException = MockTimeoutException
 
 
 @pytest.fixture

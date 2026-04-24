@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -10,9 +11,25 @@ import mujoco
 import numpy as np
 import pytest
 
-# Mock dependencies before import
-sys.modules["cv2"] = MagicMock()
-sys.modules["imageio"] = MagicMock()
+_VIDEO_EXPORT_MOD = (
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export"
+)
+
+
+@pytest.fixture(autouse=True)
+def _mock_cv2_imageio() -> Generator[None, None, None]:
+    """Mock cv2 and imageio for every test using patch.dict."""
+    sys.modules.pop(_VIDEO_EXPORT_MOD, None)
+    with patch.dict(
+        "sys.modules",
+        {
+            "cv2": MagicMock(),
+            "imageio": MagicMock(),
+        },
+    ):
+        yield
+    sys.modules.pop(_VIDEO_EXPORT_MOD, None)
+
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E402, E501
     VideoExporter,

@@ -1,18 +1,45 @@
 """Tests for the Gemini adapter."""
 
+from __future__ import annotations
+
+import contextlib
 import sys
-from unittest.mock import MagicMock
+from collections.abc import Generator
+from unittest.mock import MagicMock, patch
 
-# Mock google.generativeai globally so lazy imports bypass the missing package
-mock_genai_pkg = MagicMock()
-sys.modules["google"] = MagicMock()
-sys.modules["google.generativeai"] = mock_genai_pkg
-sys.modules["google.generativeai.types"] = MagicMock()
+import pytest
 
-from collections.abc import Generator  # noqa: E402
-from unittest.mock import MagicMock, patch  # noqa: E402
+# Install google.generativeai mock for the duration of this module's
+# collection+execution.  patch.dict is used so entries are removed in
+# teardown_module.  The mock must be active when gemini_adapter is first
+# imported so that HAS_GEMINI=True and GenerativeModel is set in the module.
+_google_mock_stack = contextlib.ExitStack()
+_mock_genai_pkg = MagicMock()
 
-import pytest  # noqa: E402
+_google_mock_stack.enter_context(
+    patch.dict(
+        "sys.modules",
+        {
+            "google": MagicMock(),
+            "google.generativeai": _mock_genai_pkg,
+            "google.generativeai.types": MagicMock(),
+        },
+    )
+)
+
+sys.modules.pop("src.shared.python.ai.adapters.gemini_adapter", None)
+from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter  # noqa: E402
+from src.shared.python.ai.types import (  # noqa: E402
+    ConversationContext,
+    Message,
+    ProviderCapability,
+)
+
+
+def teardown_module(module) -> None:
+    """Remove google mocks and gemini_adapter from sys.modules."""
+    _google_mock_stack.close()
+    sys.modules.pop("src.shared.python.ai.adapters.gemini_adapter", None)
 
 
 @pytest.fixture(autouse=True)
@@ -24,14 +51,6 @@ def reset_mocks() -> None:
 def patch_has_gemini() -> Generator[None, None, None]:
     with patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True):
         yield
-
-
-from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter  # noqa: E402
-from src.shared.python.ai.types import (  # noqa: E402
-    ConversationContext,
-    Message,
-    ProviderCapability,
-)
 
 
 def test_init_missing_package() -> None:

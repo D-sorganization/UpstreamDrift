@@ -49,47 +49,39 @@ def test_load_drake_missing(tmp_path: object) -> None:
 
     path = Path(str(tmp_path))
 
-    # Ensure pydrake is NOT in sys.modules so import is attempted fresh
-    # Back up and then delete any existing pydrake from sys.modules
-    pydrake_backup = sys.modules.pop("pydrake", None)
-    pydrake_all_backup = sys.modules.pop("pydrake.all", None)
+    # Force ImportError when 'pydrake' is imported by removing it from sys.modules
+    # and using patch.dict (which auto-restores on exit).
 
-    try:
-        # Force ImportError when 'pydrake' is imported
-        original_import = (
-            __builtins__.__import__
-            if hasattr(__builtins__, "__import__")
-            else __import__
-        )
+    original_import = (
+        __builtins__.__import__ if hasattr(__builtins__, "__import__") else __import__
+    )
 
-        def side_effect(name, *args, **kwargs) -> Any:
-            if name == "pydrake" or name.startswith("pydrake."):
-                raise ImportError(f"No module named {name}")
-            return original_import(name, *args, **kwargs)
+    def side_effect(name, *args, **kwargs) -> Any:
+        if name == "pydrake" or name.startswith("pydrake."):
+            raise ImportError(f"No module named {name}")
+        return original_import(name, *args, **kwargs)
 
-        # Need to mock other engines to allow import of engine_loaders
-        with (
-            patch("builtins.__import__", side_effect=side_effect),
-            patch.dict(
-                sys.modules,
-                {
-                    "mujoco": MagicMock(),
-                    "pinocchio": MagicMock(),
-                    "matlab": MagicMock(),
-                    "matlab.engine": MagicMock(),
-                },
-            ),
-        ):
-            from shared.python.engine_core.engine_loaders import load_drake_engine
+    # Remove pydrake from sys.modules (patch.dict handles restore on exit)
+    # and mock other engines to allow import of engine_loaders.
+    modules_to_patch = {
+        "mujoco": MagicMock(),
+        "pinocchio": MagicMock(),
+        "matlab": MagicMock(),
+        "matlab.engine": MagicMock(),
+    }
+    # Remove pydrake keys so the mocked __import__ is invoked for them.
+    for key in list(sys.modules):
+        if key == "pydrake" or key.startswith("pydrake."):
+            modules_to_patch[key] = None  # type: ignore[assignment]
 
-            # load_drake_engine catches ImportError and raises GolfModelingError
-            with pytest.raises(Exception) as excinfo:
-                load_drake_engine(path)
+    with (
+        patch("builtins.__import__", side_effect=side_effect),
+        patch.dict(sys.modules, modules_to_patch),
+    ):
+        from shared.python.engine_core.engine_loaders import load_drake_engine
 
-            assert "Drake requirements not met" in str(excinfo.value)
-    finally:
-        # Restore backed up modules
-        if pydrake_backup is not None:
-            sys.modules["pydrake"] = pydrake_backup
-        if pydrake_all_backup is not None:
-            sys.modules["pydrake.all"] = pydrake_all_backup
+        # load_drake_engine catches ImportError and raises GolfModelingError
+        with pytest.raises(Exception) as excinfo:
+            load_drake_engine(path)
+
+        assert "Drake requirements not met" in str(excinfo.value)

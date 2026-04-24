@@ -71,12 +71,6 @@ def test_topography_demo(monkeypatch) -> None:
 def test_motion_training_demo(mock_close, mock_show, monkeypatch, tmp_path) -> None:
     import sys
 
-    sys.modules["motion_training"] = MagicMock()
-    sys.modules["motion_training.club_trajectory_parser"] = MagicMock()
-    sys.modules["motion_training.dual_hand_ik_solver"] = MagicMock()
-    sys.modules["motion_training.trajectory_exporter"] = MagicMock()
-    sys.modules["motion_training.motion_visualizer"] = MagicMock()
-
     # Mock visualizers, UI, IK solvers, parse functions.
     mock_parser_class = MagicMock()
     mock_parser = mock_parser_class.return_value
@@ -91,10 +85,6 @@ def test_motion_training_demo(mock_close, mock_show, monkeypatch, tmp_path) -> N
     mock_trajectory.frames = list(range(10))
     mock_parser.parse.return_value = mock_trajectory
 
-    sys.modules["motion_training.club_trajectory_parser"].ClubTrajectoryParser = (
-        mock_parser_class
-    )
-
     mock_ik_result = MagicMock()
     mock_ik_result.convergence_rate = 1.0
     mock_ik_result.left_hand_errors = [0.0]
@@ -105,31 +95,38 @@ def test_motion_training_demo(mock_close, mock_show, monkeypatch, tmp_path) -> N
     mock_solver.model.nq = 10
     mock_solver.solve_trajectory.return_value = mock_ik_result
 
-    sys.modules["motion_training.dual_hand_ik_solver"].create_ik_solver = (
-        mock_solver_class
-    )
+    motion_training_mock = MagicMock()
+    club_traj_mock = MagicMock()
+    club_traj_mock.ClubTrajectoryParser = mock_parser_class
+    dual_hand_mock = MagicMock()
+    dual_hand_mock.create_ik_solver = mock_solver_class
 
-    # Needs to mock before run_path execution via sys.modules or monkeypatch on import
-    # But for a script run via runpy, monkeypatching the actual module objects works if they are imported!
-    # Instead, let's just use run_example and mock out sys.argv.
+    motion_training_modules = {
+        "motion_training": motion_training_mock,
+        "motion_training.club_trajectory_parser": club_traj_mock,
+        "motion_training.dual_hand_ik_solver": dual_hand_mock,
+        "motion_training.trajectory_exporter": MagicMock(),
+        "motion_training.motion_visualizer": MagicMock(),
+    }
 
-    monkeypatch.setattr(
-        "sys.argv",
-        [
-            "motion_training_demo.py",
-            "--trajectory",
-            "dummy.xlsx",
-            "--sheet",
-            "TW_wiffle",
-            "--urdf",
-            "dummy.urdf",
-            "--output",
-            str(tmp_path),
-            "--plot-only",
-        ],
-    )
+    with patch.dict(sys.modules, motion_training_modules):
+        monkeypatch.setattr(
+            "sys.argv",
+            [
+                "motion_training_demo.py",
+                "--trajectory",
+                "dummy.xlsx",
+                "--sheet",
+                "TW_wiffle",
+                "--urdf",
+                "dummy.urdf",
+                "--output",
+                str(tmp_path),
+                "--plot-only",
+            ],
+        )
 
-    # We will just run plot-only so it doesn't need IK
-    monkeypatch.setattr("pathlib.Path.exists", lambda s: True)
+        # We will just run plot-only so it doesn't need IK
+        monkeypatch.setattr("pathlib.Path.exists", lambda s: True)
 
-    run_example("motion_training_demo.py", monkeypatch)
+        run_example("motion_training_demo.py", monkeypatch)
