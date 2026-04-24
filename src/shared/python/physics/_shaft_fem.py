@@ -321,8 +321,8 @@ class FiniteElementShaftModel(ShaftModel):
         """
         if not (dt is not None):
             raise ValueError("dt must be provided")
-        if not (dt is not None):
-            raise ValueError("dt must be provided")
+        if dt <= 0:
+            raise ValueError(f"dt must be positive, got {dt!r}")
         self.time += dt
 
         # Newmark-beta parameters

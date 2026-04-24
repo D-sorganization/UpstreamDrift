@@ -29,6 +29,10 @@ _BEARMAN_HARVEY_RE_MIN = 2e4
 _BEARMAN_HARVEY_RE_MAX = 5e5
 _DRAG_CD_MIN = 0.10
 _DRAG_CD_MAX = 0.50
+_NUMERICAL_EPSILON = 1e-10  # guard against division by near-zero values
+# Empirical spin-rate time constant for lift saturation curve (dimensionless).
+# Source: Bearman & Harvey (1976) or update with calibration data.
+_SPIN_RATIO_TIME_CONSTANT = 0.1
 
 
 @lru_cache(maxsize=1)
@@ -95,7 +99,7 @@ class DragModel:
         if velocity is None:
             raise ValueError("velocity must be provided")
         speed = float(np.linalg.norm(velocity))
-        if speed < 1e-10:
+        if speed < _NUMERICAL_EPSILON:
             return np.zeros(3)
 
         cd = self.get_effective_coefficient(velocity, air_density)
@@ -114,7 +118,7 @@ class DragModel:
             return self.base_coefficient
 
         speed = float(np.linalg.norm(velocity))
-        if speed < 1e-10:
+        if speed < _NUMERICAL_EPSILON:
             return self.base_coefficient
 
         viscosity = float(AIR_VISCOSITY_KG_M_S)
@@ -179,14 +183,14 @@ class LiftModel:
         speed = float(np.linalg.norm(velocity))
         spin_magnitude = float(np.linalg.norm(spin))
 
-        if speed < 1e-10 or spin_magnitude < 1e-10:
+        if speed < _NUMERICAL_EPSILON or spin_magnitude < _NUMERICAL_EPSILON:
             return np.zeros(3)
 
         spin_axis = spin / spin_magnitude
         lift_dir = np.cross(spin_axis, velocity)
         lift_norm = float(np.linalg.norm(lift_dir))
 
-        if lift_norm < 1e-10:
+        if lift_norm < _NUMERICAL_EPSILON:
             return np.zeros(3)
 
         lift_dir = lift_dir / lift_norm
@@ -199,7 +203,9 @@ class LiftModel:
         """Compute lift coefficient based on spin ratio."""
         if spin_ratio is None:
             raise ValueError("spin_ratio must be provided")
-        cl = self.max_coefficient * (1 - math.exp(-spin_ratio / 0.1))
+        cl = self.max_coefficient * (
+            1 - math.exp(-spin_ratio / _SPIN_RATIO_TIME_CONSTANT)
+        )
         return min(cl, self.max_coefficient)
 
 
@@ -234,13 +240,13 @@ class MagnusModel:
         speed = float(np.linalg.norm(velocity))
         spin_magnitude = float(np.linalg.norm(spin))
 
-        if speed < 1e-10 or spin_magnitude < 1e-10:
+        if speed < _NUMERICAL_EPSILON or spin_magnitude < _NUMERICAL_EPSILON:
             return np.zeros(3)
 
         magnus_dir = np.cross(spin, velocity)
         magnus_norm = float(np.linalg.norm(magnus_dir))
 
-        if magnus_norm < 1e-10:
+        if magnus_norm < _NUMERICAL_EPSILON:
             return np.zeros(3)
 
         magnus_dir = magnus_dir / magnus_norm

@@ -4,6 +4,10 @@ This submodule provides the TrajectoryAnalysisMixin with methods for computing
 carry distance, max height, flight time, landing angle, and apex time from a
 trajectory. Extracted from ball_flight_physics.py as part of P1 sprint
 decomposition (issue #2486).
+
+Coordinate convention: x=horizontal-forward, y=horizontal-lateral, z=vertical-up.
+All distances in meters, velocities in m/s, angles in radians.
+Horizontal range is sqrt(x**2 + y**2); height is the z component.
 """
 
 from __future__ import annotations
