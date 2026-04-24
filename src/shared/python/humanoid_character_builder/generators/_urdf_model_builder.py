@@ -1,3 +1,7 @@
+# DEPRECATED: This internal helper duplicates assembly logic now consolidated in
+# src/shared/python/model_generation/builders/base_builder.py (canonical humanoid builder).
+# New code should use model_generation.builders.base_builder.BaseURDFBuilder instead.
+# This module is retained for backward compatibility and will be removed in a future release.
 """Internal helpers for humanoid URDF model assembly."""
 
 from __future__ import annotations

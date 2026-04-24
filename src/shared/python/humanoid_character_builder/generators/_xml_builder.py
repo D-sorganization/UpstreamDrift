@@ -1,3 +1,6 @@
+# DEPRECATED: XML assembly helpers duplicated in src/shared/python/humanoid_character_builder/generators/urdf_xml_builder.py.
+# The canonical implementation is urdf_xml_builder.py (build_urdf_xml function).
+# This private module is retained for backward compatibility and will be removed in a future release.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET

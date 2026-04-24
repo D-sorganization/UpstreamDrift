@@ -1,6 +1,14 @@
 # ARCHITECTURE_DEBT:
 # This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
 # It requires domain-aware structural extraction to isolate its internal classes appropriately.
+#
+# AUDIT NOTE (#3057): This file is ~24 KB / 708 lines and is the canonical DbC source for the platform.
+# It is NOT auto-generated. It grew organically from consolidating three separate contract shims:
+#   1. src/shared/python/humanoid_character_builder/contracts.py  (re-exports from here)
+#   2. src/shared/python/model_generation/core/contracts.py        (re-exports from here)
+#   3. src/shared/python/core/contracts/                           (separately evolved sub-system)
+# New code should import directly from this module. The two re-exporting shims above are retained
+# for backward compatibility only. Tracked for structural extraction in a future refactor sprint.
 
 """Design by Contract (DbC) enforcement for the Tools platform.
 
