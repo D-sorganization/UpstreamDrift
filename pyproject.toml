@@ -275,6 +275,7 @@ module = "src.api.*"
 disallow_untyped_defs = true
 warn_return_any = true
 
+
 # --- Targeted suppressions: attr-defined on third-party/generated code ---
 # These modules use dynamic attributes from third-party libs (scipy, Drake, Pinocchio)
 # that ship without complete type stubs.  disable_error_code is narrower than

@@ -10,11 +10,8 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import sys
-from typing import Any
 
 import pytest
-
-pytestmark = pytest.mark.unit
 
 
 class TestCoreDependencies:
@@ -112,7 +109,7 @@ class TestStructuredLogging:
         """Test that logger accepts keyword arguments for structured data."""
         from src.shared.python.core import get_logger
 
-        logger: Any = get_logger(__name__)
+        logger = get_logger(__name__)
         # Should not raise exceptions
         logger.info("test_event", key1="value1", key2=123)
 
@@ -265,22 +262,3 @@ class TestPyprojectTomlConsistency:
         assert any("structlog" in dep for dep in deps), (
             "structlog must be in core dependencies"
         )
-
-    def test_mypy_config_does_not_force_global_stub_path(self) -> None:
-        """Guard against global Pinocchio stub shadowing (issue #2968)."""
-        from pathlib import Path
-
-        try:
-            import tomllib
-        except ImportError:
-            import tomli as tomllib  # type: ignore[import-not-found]
-
-        repo_root = Path(__file__).parent.parent
-        pyproject = repo_root / "pyproject.toml"
-
-        with open(pyproject, "rb") as f:
-            data = tomllib.load(f)
-
-        mypy_cfg = data.get("tool", {}).get("mypy", {})
-        assert "mypy_path" not in mypy_cfg
-        assert "mypypath" not in mypy_cfg

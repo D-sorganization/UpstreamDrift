@@ -1,7 +1,3 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
-
 """Recording library and database management for golf swing analysis.
 
 Provides:
@@ -41,7 +37,9 @@ class ConnectionPool:
     """
 
     def __init__(self, db_path: str) -> None:
-        if db_path is None:
+        if not (db_path is not None):
+            raise ValueError("db_path must be provided")
+        if not (db_path is not None):
             raise ValueError("db_path must be provided")
         self.db_path = db_path
         self._local = threading.local()
@@ -51,7 +49,7 @@ class ConnectionPool:
         if not hasattr(self._local, "connection") or self._local.connection is None:
             self._local.connection = sqlite3.connect(
                 self.db_path, check_same_thread=False
-            )  # noqa: E501
+            )
         return self._local.connection  # type: ignore[no-any-return]
 
     def close_all(self) -> None:
@@ -90,7 +88,9 @@ class RecordingLibrary:
         Args:
             library_path: Directory for recordings and database
         """
-        if library_path is None:
+        if not (library_path is not None):
+            raise ValueError("library_path must be provided")
+        if not (library_path is not None):
             raise ValueError("library_path must be provided")
         self.library_path = Path(library_path)
         self.library_path.mkdir(exist_ok=True)
@@ -272,7 +272,7 @@ class RecordingLibrary:
 
         if not is_safe:
             msg = (
-                f"Security violation: Attempt to save file '{filename}' outside library"  # noqa: E501
+                f"Security violation: Attempt to save file '{filename}' outside library"
             )
             logger.warning(msg)
             raise ValueError(msg)
@@ -286,7 +286,7 @@ class RecordingLibrary:
             # SEC-006: Use SHA-256 instead of MD5 for consistency
             timestamp_hash = hashlib.sha256(str(datetime.now()).encode()).hexdigest()[
                 :8
-            ]  # noqa: E501
+            ]
             temp_name = f".tmp_{filename}_{timestamp_hash}"
             temp_dest = self.library_path / temp_name
             try:
@@ -308,7 +308,9 @@ class RecordingLibrary:
         Returns:
             RecordingMetadata or None if not found
         """
-        if recording_id is None:
+        if not (recording_id is not None):
+            raise ValueError("recording_id must be provided")
+        if not (recording_id is not None):
             raise ValueError("recording_id must be provided")
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -329,7 +331,9 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
-        if metadata is None:
+        if not (metadata is not None):
+            raise ValueError("metadata must be provided")
+        if not (metadata is not None):
             raise ValueError("metadata must be provided")
         if metadata.id is None:
             return False
@@ -388,7 +392,9 @@ class RecordingLibrary:
         Returns:
             True if successful
         """
-        if recording_id is None:
+        if not (recording_id is not None):
+            raise ValueError("recording_id must be provided")
+        if not (recording_id is not None):
             raise ValueError("recording_id must be provided")
         if delete_file:
             metadata = self.get_recording(recording_id)
@@ -456,7 +462,9 @@ class RecordingLibrary:
         Returns:
             List of matching RecordingMetadata
         """
-        if min_rating is None:
+        if not (min_rating is not None):
+            raise ValueError("min_rating must be provided")
+        if not (min_rating is not None):
             raise ValueError("min_rating must be provided")
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -499,7 +507,7 @@ class RecordingLibrary:
         if tags:
             results = [
                 r for r in results if all(tag in r.tags.split(",") for tag in tags)
-            ]  # noqa: E501
+            ]
 
         return results
 
@@ -575,7 +583,9 @@ class RecordingLibrary:
         Args:
             output_file: Output JSON file path
         """
-        if output_file is None:
+        if not (output_file is not None):
+            raise ValueError("output_file must be provided")
+        if not (output_file is not None):
             raise ValueError("output_file must be provided")
         recordings = self.get_all_recordings()
         data = {
@@ -594,7 +604,9 @@ class RecordingLibrary:
             input_file: Input JSON file path
             merge: If True, merge with existing library; if False, replace
         """
-        if input_file is None:
+        if not (input_file is not None):
+            raise ValueError("input_file must be provided")
+        if not (input_file is not None):
             raise ValueError("input_file must be provided")
         with open(input_file) as f:
             data = json.load(f)
@@ -629,9 +641,10 @@ class RecordingLibrary:
             List of unique values
         """
         # Whitelist allowed fields to prevent SQL injection
-        if field is None:
+        if not (field is not None):
             raise ValueError("field must be provided")
-
+        if not (field is not None):
+            raise ValueError("field must be provided")
         allowed_fields = {
             "golfer_name",
             "club_type",
@@ -647,12 +660,8 @@ class RecordingLibrary:
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        # Safe: field is validated against whitelist above
-        query = (
-            f"SELECT DISTINCT {field} "  # nosec B608
-            f"FROM recordings WHERE {field} != ''"
-        )
-        cursor.execute(query)
+        # Safe: field is validated against whitelist above (allowed_fields)
+        cursor.execute(f"SELECT DISTINCT {field} FROM recordings WHERE {field} != ''")  # nosec B608
         values = [row[0] for row in cursor.fetchall()]
 
         return sorted(values)
@@ -681,7 +690,9 @@ class RecordingLibrary:
 
         SEC-006: Replaced MD5 with SHA-256 to prevent collision attacks.
         """
-        if file_path is None:
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
             raise ValueError("file_path must be provided")
         sha256 = hashlib.sha256()
         with open(file_path, "rb") as f:
@@ -698,7 +709,9 @@ class RecordingLibrary:
         Returns:
             Path to data file
         """
-        if metadata is None:
+        if not (metadata is not None):
+            raise ValueError("metadata must be provided")
+        if not (metadata is not None):
             raise ValueError("metadata must be provided")
         file_path = Path(metadata.filename)
         if not file_path.is_absolute():
@@ -723,7 +736,9 @@ def create_metadata_from_recording(
     Returns:
         RecordingMetadata with computed statistics
     """
-    if data_dict is None:
+    if not (data_dict is not None):
+        raise ValueError("data_dict must be provided")
+    if not (data_dict is not None):
         raise ValueError("data_dict must be provided")
     times = data_dict.get("times", [])
     duration = times[-1] - times[0] if len(times) > 1 else 0.0
