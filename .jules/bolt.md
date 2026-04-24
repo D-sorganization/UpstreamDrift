@@ -27,3 +27,6 @@
 ## 2024-05-24 - [Avoid np.linalg.norm for small 2D/3D vectors]
 **Learning:** `np.linalg.norm` has significant overhead due to Python-to-C abstraction and array allocations. For small, fixed-size vectors (like 2D velocities and 3D spins), using explicit indexing with `math.hypot(v[0], v[1])` avoids this and is ~5-6x faster (from ~2.5us to ~0.44us).
 **Action:** In hot loops, replace `np.linalg.norm` on 2D/3D vectors with `math.hypot`.
+## 2026-04-24 - [Replace np.sum(x**2) with np.vdot(x, x)]
+**Learning:** When computing the sum of squares on flat or real-numbered arrays (e.g., Reinforcement Learning action or energy penalties), replacing `np.sum(x**2)` with `np.vdot(x, x)` leverages BLAS dot products directly. This avoids the memory allocation overhead of creating a temporary array for the squared values, yielding up to a ~4x performance speedup.
+**Action:** Replace `np.sum(x**2)` with `np.vdot(x, x)` for sum of squares on real arrays.
