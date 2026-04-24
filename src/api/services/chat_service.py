@@ -18,8 +18,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from src.shared.python.ai.adapters.base import ToolDeclaration
+from src.shared.python.ai.exceptions import ToolExecutionError
 from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
-from src.shared.python.ai.sample_tools import register_golf_suite_tools
 from src.shared.python.ai.tool_registry import ToolRegistry
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import InvalidRequestError
@@ -53,7 +53,7 @@ class ChatService:
         self._lock = threading.Lock()
         self._tool_registry = ToolRegistry()
         self._rag_store: SimpleRAGStore | None = rag_store
-        register_golf_suite_tools(self._tool_registry)
+        self._load_tool_registry()
         self._load_adapter()
 
     def _load_adapter(self) -> None:
@@ -113,6 +113,36 @@ class ChatService:
                 "ChatService: failed to load settings (%s), falling back to Ollama", e
             )
             self._fallback_to_ollama()
+
+    def _load_tool_registry(self) -> None:
+        """Register all Golf Suite tools with the registry."""
+        try:
+            from src.shared.python.ai.sample_tools import register_golf_suite_tools
+
+            register_golf_suite_tools(self._tool_registry)
+            logger.info("ChatService: registered %d tools", len(self._tool_registry))
+        except (ImportError, RuntimeError) as e:
+            logger.warning("ChatService: could not load tool registry: %s", e)
+
+    def _get_tool_declarations(self) -> list[ToolDeclaration]:
+        """Convert registry tools to ToolDeclaration objects for adapters."""
+        declarations: list[ToolDeclaration] = []
+        for tool in self._tool_registry.list_tools():
+            props: dict[str, Any] = {}
+            required: list[str] = []
+            for param in tool.parameters:
+                props[param.name] = param.to_json_schema()
+                if param.required:
+                    required.append(param.name)
+            declarations.append(
+                ToolDeclaration(
+                    name=tool.name,
+                    description=tool.description,
+                    parameters=props,
+                    required=required,
+                )
+            )
+        return declarations
 
     def _fallback_to_ollama(self) -> None:
         """Fall back to default Ollama adapter."""
@@ -264,97 +294,74 @@ class ChatService:
         )
 
         full_response: list[str] = []
+        tool_declarations = self._get_tool_declarations()
 
+        # Run in thread pool and yield chunks
+        # We use a queue-based approach for true streaming
+        import json
         import queue
 
         chunk_queue: queue.Queue[str | None] = queue.Queue()
-        tools = [
-            ToolDeclaration(
-                name=t.name,
-                description=t.description,
-                parameters={p.name: p.to_json_schema() for p in t.parameters},
-                required=[p.name for p in t.parameters if p.required],
-            )
-            for t in self._tool_registry.list_tools()
-        ]
 
         def _stream_to_queue() -> None:
             """Stream adapter chunks into queue; execute any tool calls inline."""
-            import json as _json
-
             try:
-                # Accumulate pending tool-call deltas keyed by index
-                pending_tool_calls: dict[int, dict[str, Any]] = {}
-
+                pending_tool_calls: dict[str, Any] = {}
                 for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
                     "",  # message already in context
                     temp_ctx,
-                    tools,
+                    tool_declarations,
                 ):
                     if chunk.content:
                         chunk_queue.put(chunk.content)
                         full_response.append(chunk.content)
-
-                    # Accumulate tool-call delta fragments
                     if chunk.tool_call_delta:
-                        for tc in chunk.tool_call_delta.get("tool_calls", []):
-                            idx = tc.get("index", 0)
-                            if idx not in pending_tool_calls:
-                                pending_tool_calls[idx] = {
-                                    "id": "",
-                                    "name": "",
-                                    "arguments": "",
+                        delta = chunk.tool_call_delta
+                        # Support both OpenAI-style nested format
+                        # {"tool_calls": [{"id": ..., "name": ..., "arguments": ...}]}
+                        # and flat format {"id": ..., "name": ..., "arguments": ...}.
+                        entries: list[dict[str, Any]] = delta.get("tool_calls") or [
+                            delta
+                        ]
+                        for entry in entries:
+                            tc_id = entry.get("id", "")
+                            if tc_id and tc_id not in pending_tool_calls:
+                                pending_tool_calls[tc_id] = {
+                                    "name": entry.get("name", ""),
+                                    "arguments_raw": entry.get("arguments", ""),
                                 }
-                            entry = pending_tool_calls[idx]
-                            if tc.get("id"):
-                                entry["id"] = tc["id"]
-                            fn = tc.get("function") or {}
-                            if fn.get("name"):
-                                entry["name"] = fn["name"]
-                            if fn.get("arguments"):
-                                entry["arguments"] += fn["arguments"]
-
+                            elif tc_id:
+                                pending_tool_calls[tc_id]["arguments_raw"] += entry.get(
+                                    "arguments", ""
+                                )
                     if chunk.is_final and pending_tool_calls:
-                        # Execute accumulated tool calls and append results to context
-                        for entry in pending_tool_calls.values():
-                            tool_name = entry["name"]
-                            tool_call_id = entry["id"] or f"tc_{tool_name}"
+                        for tc_id, tc_data in pending_tool_calls.items():
                             try:
-                                arguments = (
-                                    _json.loads(entry["arguments"])
-                                    if entry["arguments"]
-                                    else {}
+                                args = json.loads(tc_data["arguments_raw"] or "{}")
+                            except (ValueError, KeyError):
+                                args = {}
+                            try:
+                                tool_result = self._tool_registry.execute(
+                                    tc_data["name"], args, tool_call_id=tc_id
                                 )
-                            except _json.JSONDecodeError:
-                                arguments = {}
-
+                                result_text = (
+                                    str(tool_result.result)
+                                    if tool_result.success
+                                    else f"Tool error: {tool_result.error}"
+                                )
+                            except ToolExecutionError as te:
+                                logger.warning("Tool not found: %s", tc_data["name"])
+                                result_text = f"Tool error: {te}"
+                            # Persist result to both temp_ctx and real ctx so
+                            # subsequent turns can see it, and stream it to caller.
+                            temp_ctx.add_tool_result(tc_id, result_text)
+                            ctx.add_tool_result(tc_id, result_text)
+                            chunk_queue.put(result_text)
+                            full_response.append(result_text)
                             logger.info(
-                                "Executing tool call: %s (id=%s)",
-                                tool_name,
-                                tool_call_id,
+                                "Tool call executed: %s",
+                                tc_data["name"],
                             )
-                            try:
-                                result = self._tool_registry.execute(
-                                    tool_name, arguments, tool_call_id
-                                )
-                                result_content = _json.dumps(result.to_dict())
-                            except Exception as exc:  # noqa: BLE001
-                                logger.warning(
-                                    "Tool execution failed: %s: %s", tool_name, exc
-                                )
-                                result_content = _json.dumps(
-                                    {"success": False, "error": str(exc)}
-                                )
-
-                            # Append tool result to the live context so the next
-                            # iteration of streaming (if any) can use it.
-                            temp_ctx.add_tool_result(tool_call_id, result_content)
-                            notice = f"\n[Tool {tool_name}: {result_content}]\n"
-                            chunk_queue.put(notice)
-                            full_response.append(notice)
-
-                        pending_tool_calls.clear()
-
             except (RuntimeError, ValueError, OSError) as e:
                 chunk_queue.put(f"\n[Error: {e}]")
             finally:

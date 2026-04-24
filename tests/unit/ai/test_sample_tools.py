@@ -119,7 +119,7 @@ class TestAnalysisTools:
         assert "invalid" in result.result["error"].lower()
 
     def test_run_inverse_dynamics_valid_engine(self) -> None:
-        """Test inverse dynamics with valid engine."""
+        """Test inverse dynamics returns not-implemented (issue #3163)."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
@@ -127,9 +127,9 @@ class TestAnalysisTools:
             "run_inverse_dynamics",
             {"file_path": "test.c3d", "engine": "mujoco"},
         )
-        assert result.success is True
-        assert result.result["success"] is True
-        assert result.result["engine"] == "mujoco"
+        assert result.success is True  # ToolResult.success = True (tool ran)
+        assert result.result["success"] is False  # business-level not-implemented
+        assert result.result["error"] == "not implemented"
 
     def test_interpret_torques(self) -> None:
         """Test torque interpretation."""
@@ -247,7 +247,7 @@ class TestValidationTools:
     """Tests for validation tools."""
 
     def test_validate_cross_engine(self) -> None:
-        """Test cross-engine validation queuing."""
+        """Test cross-engine validation returns not-implemented (issue #3163)."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
@@ -256,11 +256,11 @@ class TestValidationTools:
             {"file_path": "test.c3d", "tolerance": 0.02},
         )
         assert result.success is True
-        assert "engines" in result.result
-        assert len(result.result["engines"]) == 3
+        assert result.result["success"] is False
+        assert result.result["error"] == "not implemented"
 
     def test_check_energy_conservation(self) -> None:
-        """Test energy conservation check."""
+        """Test energy conservation check returns not-implemented (issue #3163)."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
@@ -269,7 +269,8 @@ class TestValidationTools:
             {"tolerance": 0.01},
         )
         assert result.success is True
-        assert result.result["tolerance"] == 0.01
+        assert result.result["success"] is False
+        assert result.result["error"] == "not implemented"
 
     def test_list_physics_engines(self) -> None:
         """Test listing physics engines."""

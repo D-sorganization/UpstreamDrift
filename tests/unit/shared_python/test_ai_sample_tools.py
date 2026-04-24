@@ -93,12 +93,13 @@ def test_run_inverse_dynamics() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
+    # run_inverse_dynamics is not yet implemented (issue #3163)
     res = reg.execute(
         "run_inverse_dynamics", {"file_path": "test.c3d", "engine": "mujoco"}
     )
-    assert res.success is True
-    assert res.result["success"] is True
-    assert res.result["engine"] == "mujoco"
+    assert res.success is True  # ToolResult.success = True (tool ran without exception)
+    assert res.result["success"] is False  # business-level not-implemented
+    assert res.result["error"] == "not implemented"
 
     res_bad = reg.execute(
         "run_inverse_dynamics", {"file_path": "test.c3d", "engine": "bad_engine"}
@@ -156,7 +157,8 @@ def test_validate_cross_engine() -> None:
 
     res = reg.execute("validate_cross_engine", {"file_path": "test.c3d"})
     assert res.success is True
-    assert res.result["status"] == "validation_pending"
+    assert res.result["success"] is False
+    assert res.result["error"] == "not implemented"
 
 
 def test_check_energy_conservation() -> None:
@@ -165,7 +167,8 @@ def test_check_energy_conservation() -> None:
 
     res = reg.execute("check_energy_conservation", {})
     assert res.success is True
-    assert res.result["status"] == "check_pending"
+    assert res.result["success"] is False
+    assert res.result["error"] == "not implemented"
 
 
 def test_list_physics_engines() -> None:

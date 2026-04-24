@@ -263,22 +263,10 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
                 "error": f"Invalid engine. Choose from: {valid_engines}",
             }
 
-        # This implementation requires integration with the physics engines.
-        # 1. Load the C3D data
-        # 2. Create/load the model
-        # 3. Run inverse dynamics
-        # 4. Return results
-
         return {
-            "success": True,
-            "status": "simulation_pending",
-            "engine": engine,
-            "file": file_path,
-            "message": (
-                f"Inverse dynamics simulation queued using {engine}. "
-                "This would normally take 30-60 seconds for a typical swing."
-            ),
-            "note": ("Implementation requires physics engine integration."),
+            "success": False,
+            "error": "not implemented",
+            "issue": "#3163",
         }
 
 
@@ -515,17 +503,10 @@ def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
         Returns:
             Validation results.
         """
-        # Placeholder for actual cross-engine validation
         return {
-            "status": "validation_pending",
-            "file": file_path,
-            "engines": ["mujoco", "drake", "pinocchio"],
-            "tolerance": tolerance,
-            "message": (
-                "Cross-engine validation queued. This compares results from "
-                "multiple physics engines to ensure accuracy."
-            ),
-            "note": "Placeholder - requires full physics engine integration.",
+            "success": False,
+            "error": "not implemented",
+            "issue": "#3163",
         }
 
 
@@ -549,13 +530,9 @@ def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
             Energy conservation check results.
         """
         return {
-            "status": "check_pending",
-            "tolerance": tolerance,
-            "message": (
-                "Energy conservation check queued. This verifies that total "
-                "mechanical energy is properly accounted for throughout the motion."
-            ),
-            "note": "Placeholder - requires simulation data.",
+            "success": False,
+            "error": "not implemented",
+            "issue": "#3163",
         }
 
 
