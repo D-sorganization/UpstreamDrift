@@ -36,8 +36,8 @@ jobs:
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
             echo "Self-hosted runner online — routing locally"
           else
-            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-            echo "No self-hosted runner — using GitHub-hosted"
+            echo "::error::No local self-hosted runner available; failing closed"
+            exit 1
           fi
   check-mention:
     needs: pick-runner
