@@ -1,7 +1,7 @@
 /**
  * useChat — WebSocket hook for AI assistant chat streaming.
  *
- * Connects to /ws/chat/{sessionId}, handles chunk streaming with
+ * Connects to /api/ws/chat/{sessionId}, handles chunk streaming with
  * exponential-backoff reconnection, and syncs into useChatStore.
  *
  * Protocol (server → client):
