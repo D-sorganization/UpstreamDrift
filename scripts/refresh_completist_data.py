@@ -17,6 +17,8 @@ EXCLUDE_DIRS = [
     "dist",
     "docs",
     "output",
+    "vendor",
+    "scripts",
 ]
 
 

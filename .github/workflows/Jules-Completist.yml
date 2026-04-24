@@ -40,27 +40,32 @@ jobs:
           # Find TODO/FIXME/XXX comments
           grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
             --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
+            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/todo_markers.txt 2>/dev/null || true
 
           # Find NotImplementedError
           grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
+            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/not_implemented.txt 2>/dev/null || true
 
           # Find stub functions (empty or just pass/...)
           grep -rn "def .*:$" -A 2 --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
+            --exclude-dir="vendor" --exclude-dir="scripts" \
             | grep -B 1 "pass$\|\.\.\.$ " \
             > .jules/completist_data/stub_functions.txt 2>/dev/null || true
 
           # Find incomplete docstrings
           grep -rn '""".*TODO\|""".*WIP\|# TODO:' --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
+            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/incomplete_docs.txt 2>/dev/null || true
 
           # Find abstract methods without implementations
           grep -rn "@abstractmethod" -A 5 --include="*.py" . \
             --exclude-dir=".git" --exclude-dir="venv" \
+            --exclude-dir="vendor" --exclude-dir="scripts" \
             > .jules/completist_data/abstract_methods.txt 2>/dev/null || true
 
           # Count findings

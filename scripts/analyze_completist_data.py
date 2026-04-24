@@ -233,7 +233,14 @@ def create_issue_file(item: Mapping[str, Any], issue_id: int) -> str:
     itype = str(item.get("type", "Incomplete Implementation"))
     f_path, l_no = str(item["file"]), str(item["line"])
     context = str(item.get("name", item.get("text", "")))
-    title = f"Incomplete {itype} in {os.path.basename(f_path)}:{l_no}"
+    # Use function name (not line number) as idempotency key so the same
+    # function doesn't produce a new issue file just because its line number
+    # shifted after an unrelated edit.
+    name_key = item.get("name") or re.sub(r"[^\w]", "_", str(item.get("text", "")))[:40]
+    # Use full path (not just basename) so files with identical names in different
+    # directories and repeated text (e.g. multiple `raise NotImplementedError` calls)
+    # each get a distinct idempotency key.
+    title = f"Incomplete {itype} in {f_path} {name_key}"
     fname_title = re.sub(r"[^\w]", "_", title).strip("_")
 
     # Idempotency check

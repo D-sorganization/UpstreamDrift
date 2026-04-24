@@ -440,10 +440,16 @@ def get_api_port(default: int = 8000) -> int:
     """
     # Check env var presence before falling back to avoid default masking legacy name
     if os.environ.get("HUMANOID_API_PORT") is not None:
-        return get_env_int(
-            "HUMANOID_API_PORT", default=default, min_value=1, max_value=65535
+        return (
+            get_env_int(
+                "HUMANOID_API_PORT", default=default, min_value=1, max_value=65535
+            )
+            or default
         )
-    return get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
+    return (
+        get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
+        or default
+    )
 
 
 def get_log_level(default: str = "INFO") -> str:
@@ -529,10 +535,14 @@ def get_golf_port(default: int = 8000) -> int:
     """
     # Check env var presence before falling back to avoid default masking legacy name
     if os.environ.get("HUMANOID_PORT") is not None:
-        return get_env_int(
-            "HUMANOID_PORT", default=default, min_value=1, max_value=65535
+        return (
+            get_env_int("HUMANOID_PORT", default=default, min_value=1, max_value=65535)
+            or default
         )
-    return get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
+    return (
+        get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
+        or default
+    )
 
 
 def get_golf_suite_mode(default: str = "remote") -> str:

@@ -191,7 +191,7 @@ class SwingOptimizationBridge:
         bridge = SwingOptimizationBridge(config)
         x0 = np.zeros(14)          # 7 positions + 7 velocities
         result = bridge.optimize_swing(x0)
-        print(result.clubhead_velocity)
+        # >>> result.clubhead_velocity
     """
 
     def __init__(

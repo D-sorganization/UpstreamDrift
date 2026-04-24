@@ -396,10 +396,10 @@ class DrakePhysicsEngine(PhysicsEngine):
 
             # Sum all point contact forces
             total_force = np.zeros(3)
-            n_contacts = contact_results.num_point_pair_contacts()
+            n_contacts = contact_results.num_point_pair_contacts()  # type: ignore[attr-defined]
 
             for i in range(n_contacts):
-                point_contact = contact_results.point_pair_contact_info(i)
+                point_contact = contact_results.point_pair_contact_info(i)  # type: ignore[attr-defined]
                 # Contact force is along the contact normal, scaled by force magnitude
                 contact_force = point_contact.contact_force()
                 total_force += np.array(
