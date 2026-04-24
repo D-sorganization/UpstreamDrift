@@ -17,9 +17,19 @@ Or with custom options:
 from __future__ import annotations
 
 import argparse
+import pathlib
 import sys
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+sys.path.insert(
+    0,
+    str(
+        pathlib.Path(__file__).parent.parent
+        / "src/engines/physics_engines/pinocchio/python"
+    ),
+)
 
 from src.shared.python.data_io.path_utils import get_repo_root
 
@@ -152,10 +162,16 @@ def _init_and_solve_ik(urdf_path: Any, trajectory: Any) -> Any:
         raise ValueError("urdf_path required")
     if not (trajectory is not None):
         raise ValueError("trajectory required")
-    from src.engines.physics_engines.pinocchio.python.motion_training.dual_hand_ik_solver import (
-        IKSolverSettings,
-        create_ik_solver,
-    )
+    try:
+        from motion_training.dual_hand_ik_solver import (  # type: ignore[import]
+            IKSolverSettings,
+            create_ik_solver,
+        )
+    except ImportError:
+        from src.engines.physics_engines.pinocchio.python.motion_training.dual_hand_ik_solver import (
+            IKSolverSettings,
+            create_ik_solver,
+        )
 
     settings = IKSolverSettings(
         dt=0.01,

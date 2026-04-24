@@ -10,6 +10,11 @@ the estimated carry distance to landing.
 
 from __future__ import annotations
 
+import pathlib
+import sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+
 import numpy as np
 
 from src.shared.python.physics.ball_flight_physics import (
