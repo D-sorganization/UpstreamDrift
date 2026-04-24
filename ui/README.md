@@ -166,19 +166,19 @@ npm run type-check
 
 ## Technology Stack
 
-| Layer | Technology |
-| --- | --- |
-| Framework | React 19, React Router 7 |
-| Language | TypeScript 5.9 |
-| Build | Vite 7.2 |
-| Styling | Tailwind CSS 3.4, PostCSS |
-| 3D Graphics | Three.js, React Three Fiber |
-| Charts | Recharts 3.7 |
-| State | Zustand 5 |
-| HTTP | React Query 5 |
-| Desktop | Tauri 2 |
-| Testing | Vitest 1.3, React Testing Library |
-| Linting | ESLint 9 |
+| Layer       | Technology                        |
+| ----------- | --------------------------------- |
+| Framework   | React 19, React Router 7          |
+| Language    | TypeScript 5.9                    |
+| Build       | Vite 7.2                          |
+| Styling     | Tailwind CSS 3.4, PostCSS         |
+| 3D Graphics | Three.js, React Three Fiber       |
+| Charts      | Recharts 3.7                      |
+| State       | Zustand 5                         |
+| HTTP        | React Query 5                     |
+| Desktop     | Tauri 2                           |
+| Testing     | Vitest 1.3, React Testing Library |
+| Linting     | ESLint 9                          |
 
 ## Common Development Tasks
 
@@ -230,12 +230,12 @@ Diagnostics panel: Press `Ctrl+Shift+?` (or see Help panel).
 
 ## Troubleshooting
 
-| Issue | Solution |
-| --- | --- |
-| API connection refused | Ensure backend runs on 8001; check `vite.config.ts` proxy |
-| WebSocket failures | Backend may not support WS; verify `/api/ws` endpoint |
-| 3D viz not rendering | Check WebGL support; try Chrome/Firefox; ensure URDF loads |
-| Slow dev rebuild | Try `npm run type-check` separately; check disk I/O |
+| Issue                    | Solution                                                    |
+| ------------------------ | ----------------------------------------------------------- |
+| API connection refused   | Ensure backend runs on 8001; check `vite.config.ts` proxy   |
+| WebSocket failures       | Backend may not support WS; verify `/api/ws` endpoint       |
+| 3D viz not rendering     | Check WebGL support; try Chrome/Firefox; ensure URDF loads  |
+| Slow dev rebuild         | Try `npm run type-check` separately; check disk I/O         |
 | Test failures on Windows | Use `npm run test:run` (not watch); check line endings (LF) |
 
 ## Contributing
