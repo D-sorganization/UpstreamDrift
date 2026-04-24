@@ -2,6 +2,15 @@
 # This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
 # It requires domain-aware structural extraction to isolate its internal classes appropriately.
 
+# CANONICAL PENDULUM IMPLEMENTATION (closes #3056)
+# This module is the authoritative double-pendulum physics implementation.
+# Other pendulum implementations in this codebase should delegate here:
+#   - src/engines/pendulum_models/python/double_pendulum_model/physics/double_pendulum.py
+#     (OO wrapper around the same Lagrangian physics; engine adapters use that wrapper)
+#   - src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py
+#     (PhysicsEngine protocol adapter; wraps double_pendulum.py)
+# New code should import PendulumParams and the free functions from this module directly.
+
 """
 Double pendulum golf swing physics using Lagrangian formulation with relative coordinates.
 

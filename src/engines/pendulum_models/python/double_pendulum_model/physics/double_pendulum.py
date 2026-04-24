@@ -5,6 +5,19 @@ This module models a two-link planar manipulator (shoulder + wrist) swinging on 
 user-specified plane (e.g., a golf swing plane). It exposes control-affine
 dynamics, supports arbitrary user forcing functions, and reports joint torques
 for educational demonstrations of chaos and control.
+
+.. deprecated::
+    This OO wrapper is a secondary implementation retained for the
+    ``PendulumPhysicsEngine`` adapter in
+    ``src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py``.
+
+    The **canonical** double-pendulum physics implementation is:
+
+        src/shared/python/pendulum_simulator/physics.py
+
+    New code should import ``PendulumParams`` and the Lagrangian free
+    functions from the canonical module rather than using
+    ``DoublePendulumDynamics`` from this file.  See issue #3056.
 """
 
 from __future__ import annotations

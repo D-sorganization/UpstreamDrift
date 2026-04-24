@@ -3,6 +3,15 @@
 Wraps the standalone DoublePendulumDynamics to implement the PhysicsEngine
 protocol. Inherits from BasePhysicsEngine to eliminate DRY violations for
 checkpoint save/restore, model name tracking, and engine initialization.
+
+Implementation hierarchy (see issue #3056):
+    - Canonical physics: ``src/shared/python/pendulum_simulator/physics.py``
+    - OO wrapper:        ``...double_pendulum_model/physics/double_pendulum.py``
+    - Engine adapter:    this file (wraps the OO wrapper above)
+
+This adapter exists to bridge ``DoublePendulumDynamics`` to the
+``PhysicsEngine`` protocol used by engine-agnostic callers.  For pure
+physics computations, prefer importing from the canonical module directly.
 """
 
 from __future__ import annotations
