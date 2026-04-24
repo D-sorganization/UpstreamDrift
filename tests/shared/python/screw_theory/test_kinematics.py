@@ -1,13 +1,13 @@
 import numpy as np
 import pytest
 
-from src.shared.python.screw_theory.kinematics import (
+pytestmark = pytest.mark.unit
+
+from src.shared.python.screw_theory.kinematics import (  # noqa: E402
     Twist,
     compute_screw_axis,
     compute_screw_endpoints,
 )
-
-pytestmark = pytest.mark.unit
 
 __all__ = [
     "test_pure_translation",

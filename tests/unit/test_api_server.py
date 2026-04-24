@@ -19,6 +19,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Import TestClient first
 httpx = pytest.importorskip("httpx")
 fastapi = pytest.importorskip("fastapi")

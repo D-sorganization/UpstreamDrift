@@ -35,6 +35,8 @@ from src.shared.python.physics.physics_validation import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for equipment module
 # ============================================================================

@@ -31,6 +31,8 @@ from src.shared.python.config.environment import EnvironmentError
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_ollama_config_defaults() -> None:
     with patch.dict(os.environ, {}, clear=True):

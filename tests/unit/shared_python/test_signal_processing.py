@@ -17,6 +17,8 @@ from src.shared.python.signal_toolkit.signal_processing import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestSignalProcessing:
     @pytest.fixture

@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Per CLAUDE.md: never module-level sys.modules mocking.
 # Use patch.dict context managers instead.
 _PYDRAKE_MOCK = {

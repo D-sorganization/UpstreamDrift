@@ -8,6 +8,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 EXAMPLES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "examples"
 
 

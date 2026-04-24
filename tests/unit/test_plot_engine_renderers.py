@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.plot_engine.matplotlib_renderer import MatplotlibRenderer
 from src.shared.python.plot_engine.plotly_converter import PlotlyConverter
 from src.shared.python.plot_engine.specs import PlotSpec, SeriesData
+
+pytestmark = pytest.mark.unit
 
 
 class TestMatplotlibRenderer:

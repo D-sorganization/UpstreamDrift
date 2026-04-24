@@ -10,6 +10,8 @@ from src.shared.python.core import physics_constants as pc
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.parametrize(
     "constant,expected",

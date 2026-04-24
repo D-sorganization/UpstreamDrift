@@ -10,6 +10,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Skip if API dependencies not available
 try:
     from src.api.models.requests import AnalysisRequest, SimulationRequest

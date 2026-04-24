@@ -20,6 +20,8 @@ from src.shared.python.ai.workflow_engine import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestWorkflowStep:
     """Tests for WorkflowStep."""

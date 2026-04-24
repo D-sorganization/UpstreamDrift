@@ -21,6 +21,8 @@ from mujoco_humanoid_golf.spatial_algebra import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestSpatialCrossProducts:
     """Tests for spatial cross product operators."""

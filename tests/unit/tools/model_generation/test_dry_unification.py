@@ -16,6 +16,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 # ---------------------------------------------------------------------------
 # Helper to reload the module cleanly for each test that inspects globals
 # ---------------------------------------------------------------------------

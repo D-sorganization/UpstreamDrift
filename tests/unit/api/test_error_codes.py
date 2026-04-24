@@ -11,6 +11,8 @@ from fastapi import HTTPException
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestErrorCategoryContract:
     """Design by Contract tests for ErrorCategory enum."""

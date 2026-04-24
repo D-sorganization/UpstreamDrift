@@ -8,12 +8,13 @@ import pytest
 from src.shared.python.data_io.common_utils import get_shared_urdf_path
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 
+pytestmark = pytest.mark.integration
+
 _REPO_ROOT = Path(__file__).parent.parent
 _SIMPLE_HUMANOID = _REPO_ROOT / "src/shared/urdf/simple_humanoid.urdf"
 _GOLFER_URDF = (
     _REPO_ROOT / "src/engines/physics_engines/pinocchio/models/generated/golfer.urdf"
 )
-
 # Check if display is available for Qt tests
 HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"
 

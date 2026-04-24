@@ -5,6 +5,8 @@ import pytest
 
 import installer.windows.build_installer as bi
 
+pytestmark = pytest.mark.unit
+
 
 def test_check_prerequisites(monkeypatch):
     original_import = __import__

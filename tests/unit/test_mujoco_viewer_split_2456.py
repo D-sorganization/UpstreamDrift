@@ -11,6 +11,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[2]
 VIEWER_DIR = REPO / "src/tools/model_explorer"
 LOC_BUDGET = 700

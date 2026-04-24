@@ -10,6 +10,8 @@ from src.shared.python.ai.tool_registry import ToolRegistry
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_register_golf_suite_tools() -> None:
     reg = ToolRegistry()

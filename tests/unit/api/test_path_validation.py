@@ -11,6 +11,8 @@ from fastapi import HTTPException
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestValidateModelPathContract:
     """Design by Contract tests for validate_model_path function.

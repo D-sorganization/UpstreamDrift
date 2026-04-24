@@ -11,6 +11,8 @@ from src.shared.python.calc_backend.contracts.thermal_profile import (
     ThermalProfileResponse,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestThermalProfileRequest:
     def _valid_request(self, **kwargs) -> ThermalProfileRequest:

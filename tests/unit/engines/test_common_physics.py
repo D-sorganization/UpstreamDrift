@@ -16,6 +16,8 @@ from src.engines.common.physics import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestAirProperties:
     """Tests for AirProperties dataclass."""

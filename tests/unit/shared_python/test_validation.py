@@ -15,6 +15,8 @@ from src.shared.python.validation_pkg.validation import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestValidation:
     """Tests for physical validation functions."""

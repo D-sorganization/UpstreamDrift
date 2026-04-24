@@ -20,6 +20,8 @@ from src.shared.python.core.error_utils import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestGolfSuiteError:
     """Tests for GolfSuiteError base exception."""

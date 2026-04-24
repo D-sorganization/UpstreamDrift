@@ -12,6 +12,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.syngas_compressi
     SyngasCompressionEngine,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # SyngasCompressionEngine.calculate_water_dropout
 # ---------------------------------------------------------------------------

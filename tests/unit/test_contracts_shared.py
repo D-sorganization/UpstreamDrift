@@ -10,6 +10,8 @@ from collections.abc import Generator
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers — enforce mode for all tests
 # ---------------------------------------------------------------------------

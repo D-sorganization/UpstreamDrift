@@ -12,6 +12,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[2]
 GENERATORS_DIR = REPO / "src/shared/python/humanoid_character_builder/generators"
 LOC_BUDGET_TYPES = 150

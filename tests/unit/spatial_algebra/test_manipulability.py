@@ -15,6 +15,8 @@ from src.shared.python.spatial_algebra.manipulability import (
     compute_manipulability_index,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _identity_jacobian(m: int = 6, n: int = 6) -> np.ndarray:
     """Well-conditioned Jacobian: identity (κ = 1)."""

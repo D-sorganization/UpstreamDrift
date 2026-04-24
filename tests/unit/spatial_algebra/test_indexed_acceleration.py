@@ -10,6 +10,8 @@ from src.shared.python.spatial_algebra.indexed_acceleration import (
     IndexedAcceleration,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_accel(
     gravity: float = 1.0,

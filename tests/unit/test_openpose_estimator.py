@@ -13,6 +13,8 @@ from src.shared.python.core.contracts import StateError
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Mock pyopenpose using patch.dict (auto-cleans) BEFORE importing the estimator,
 # so the try/except import in the module succeeds.
 mock_op = MagicMock()

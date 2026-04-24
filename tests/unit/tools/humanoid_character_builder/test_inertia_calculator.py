@@ -20,6 +20,8 @@ from humanoid_character_builder.mesh.primitive_inertia import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestInertiaResult:
     """Tests for InertiaResult class."""

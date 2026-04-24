@@ -9,6 +9,8 @@ from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def t100() -> np.ndarray:

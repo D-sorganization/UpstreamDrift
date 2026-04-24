@@ -11,6 +11,8 @@ import scipy.io
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 logger = logging.getLogger(__name__)
 
 

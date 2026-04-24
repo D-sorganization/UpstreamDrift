@@ -11,6 +11,8 @@ from src.shared.python.pendulum_simulator.simulation_triple import (
     run_simulation,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_params(**kwargs) -> TriplePendulumParams:
     defaults = {"m1": 5.0, "m2": 0.3, "m3": 0.05, "L1": 0.65, "L2": 1.1, "L3": 0.1}

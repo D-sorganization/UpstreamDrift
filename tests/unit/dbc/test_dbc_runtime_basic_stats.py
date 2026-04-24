@@ -15,6 +15,8 @@ from src.shared.python.core.contracts import PreconditionError
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class _StubAnalyzer(BasicStatsMixin):
     """Minimal stub implementing attributes expected by BasicStatsMixin."""

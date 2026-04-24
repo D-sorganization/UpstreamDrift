@@ -12,6 +12,8 @@ from plot_engine.trendline import TrendlineResult, compute_trendline
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ── Linear trendline ─────────────────────────────────────────────────────────
 
 

@@ -16,6 +16,8 @@ from src.shared.python.validation_pkg.validation_helpers import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestValidationHelpers:
     """Tests for physics validation helpers."""

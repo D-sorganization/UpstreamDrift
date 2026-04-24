@@ -16,6 +16,8 @@ from src.shared.python.validation_pkg.statistical_analysis import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestStatisticalAnalyzer:
     @pytest.fixture

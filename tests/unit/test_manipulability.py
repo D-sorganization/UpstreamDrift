@@ -24,6 +24,8 @@ from src.shared.python.spatial_algebra.manipulability import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngine:
     """Mock physics engine for testing."""

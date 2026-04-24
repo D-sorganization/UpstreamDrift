@@ -9,6 +9,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 INSTALL_SCRIPT = REPO_ROOT / "install.sh"
 

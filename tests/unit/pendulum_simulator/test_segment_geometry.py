@@ -15,6 +15,8 @@ from src.shared.python.pendulum_simulator.segment_geometry import (
     tapered_cylinder_cross_section,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSegmentStyle:
     def test_line_value(self) -> None:

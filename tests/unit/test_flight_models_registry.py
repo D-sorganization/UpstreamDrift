@@ -13,6 +13,8 @@ from src.shared.python.physics.flight_models import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_all_models_generate_trajectory() -> None:
     """All registered models should return a non-empty trajectory."""

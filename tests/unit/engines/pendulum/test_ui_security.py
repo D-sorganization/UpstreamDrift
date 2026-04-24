@@ -7,6 +7,8 @@ from double_pendulum_model.ui.pendulum_pyqt_app import PendulumController
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_safe_eval_valid_math() -> None:
     """Test that safe mathematical expressions are evaluated correctly."""

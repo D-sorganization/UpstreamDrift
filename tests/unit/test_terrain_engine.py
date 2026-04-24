@@ -11,6 +11,8 @@ from src.shared.python.physics.terrain_engine import (
     TerrainContactModel,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _flat_terrain(height: float = 0.0) -> Terrain:
     data = np.full((10, 10), height)

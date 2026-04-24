@@ -5,7 +5,11 @@ from __future__ import annotations
 import textwrap
 from pathlib import Path
 
+import pytest
+
 from src.shared.python.tools.scientific_auditor import ScienceAuditor, run_audit
+
+pytestmark = pytest.mark.unit
 
 
 def _audit_code(source: str) -> list[dict]:

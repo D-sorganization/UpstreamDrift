@@ -12,6 +12,8 @@ from src.shared.python.perturbation.config import (
     TrialFailure,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPerturbationConfig:
     def test_default_construction(self) -> None:

@@ -11,6 +11,8 @@ from src.shared.python.biomechanics.hill_muscle import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def muscle_params() -> MuscleParameters:

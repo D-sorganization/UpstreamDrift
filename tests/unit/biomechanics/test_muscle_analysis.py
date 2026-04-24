@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip(
     "sklearn", reason="scikit-learn is required for muscle synergy analysis"
 )

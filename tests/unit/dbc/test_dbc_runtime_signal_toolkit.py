@@ -31,6 +31,8 @@ from src.shared.python.signal_toolkit.noise import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def _make_signal(
     duration: float = 1.0,

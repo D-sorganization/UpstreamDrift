@@ -8,6 +8,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.electrode_advanc
     ElectrodeAdvancementCalculator,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestElectrodeAdvancementCalculator:
     def test_construction(self) -> None:

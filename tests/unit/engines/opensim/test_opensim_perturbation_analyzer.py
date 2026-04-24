@@ -24,6 +24,8 @@ from src.shared.python.pendulum_simulator.perturbation_analysis import (
 from src.shared.python.perturbation.analyzer_base import ComparisonReport
 from src.shared.python.perturbation.config import PerturbationConfig
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Availability check
 # ---------------------------------------------------------------------------
@@ -37,7 +39,7 @@ except ImportError:
 
 # Use the shared engine availability check (consistent with production code).
 # opensim may be importable but still broken (e.g., missing shared libs in CI).
-from src.shared.python.engine_core.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (  # noqa: E402
     OPENSIM_AVAILABLE as _OPENSIM_AVAILABLE,
 )
 

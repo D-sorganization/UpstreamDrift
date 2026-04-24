@@ -13,6 +13,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_ca
     list_available_fittings,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFittingKFactorsDict:
     def test_is_nonempty(self) -> None:

@@ -10,6 +10,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.flare_calculator
     FlareDesign,
 )
 
+pytestmark = pytest.mark.unit
+
 _SYNGAS = {"H2": 30.0, "CO": 40.0, "CO2": 20.0, "N2": 10.0}
 
 

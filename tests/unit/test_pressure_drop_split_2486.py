@@ -12,6 +12,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 _upstream_tools_available = importlib.util.find_spec("sympy") is not None
 
 REPO = Path(__file__).parents[2]

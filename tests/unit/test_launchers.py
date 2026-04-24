@@ -14,6 +14,8 @@ from src.shared.python.data_io.path_utils import get_repo_root
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestLauncherModule:
     """Test cases for launcher module functionality."""

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestSteamCalculationEngineImport:
     """Tests that the module and class are importable."""

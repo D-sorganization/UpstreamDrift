@@ -13,6 +13,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 # Files that were identified in issue #1772 as containing silent pass handlers
 _FIXED_FILES: list[str] = [
     "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py",

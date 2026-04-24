@@ -15,6 +15,8 @@ from src.shared.python.ai.tool_registry import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_tool_parameter_to_json() -> None:
     tp = ToolParameter("p1", "desc", type="string", required=True, default="a")

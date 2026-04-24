@@ -9,6 +9,8 @@ from src.shared.python.ai.types import ExpertiseLevel
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestGlossaryEntry:
     """Tests for GlossaryEntry."""

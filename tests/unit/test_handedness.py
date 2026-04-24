@@ -9,6 +9,8 @@ from src.tools.model_explorer.urdf_builder import Handedness, URDFBuilder
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestHandednessEnum:
     """Tests for Handedness enumeration."""

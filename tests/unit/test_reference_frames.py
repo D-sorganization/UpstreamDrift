@@ -22,6 +22,8 @@ from src.shared.python.spatial_algebra.reference_frames import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestRotationMatrix:
     """Tests for rotation matrix computation."""

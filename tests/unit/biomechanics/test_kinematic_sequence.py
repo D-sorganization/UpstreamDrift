@@ -12,6 +12,8 @@ from src.shared.python.biomechanics.kinematic_sequence import (
     SegmentTimingResult,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_velocities(n_samples: int = 100) -> tuple[dict[str, np.ndarray], np.ndarray]:
     """Create synthetic segment velocities with identifiable peaks."""

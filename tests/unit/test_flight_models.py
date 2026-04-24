@@ -28,6 +28,8 @@ from src.shared.python.physics.flight_models import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # Fixtures
 # =============================================================================

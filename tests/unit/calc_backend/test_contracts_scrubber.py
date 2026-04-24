@@ -10,6 +10,8 @@ from src.shared.python.calc_backend.contracts.scrubber import (
     ScrubberResponse,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _valid_request(**kwargs) -> ScrubberRequest:
     defaults = {

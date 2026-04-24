@@ -9,6 +9,8 @@ from double_pendulum_model.physics.triple_pendulum import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_mass_matrix_positive_definite() -> None:
     dynamics = TriplePendulumDynamics()

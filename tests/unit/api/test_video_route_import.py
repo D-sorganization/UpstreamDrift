@@ -11,6 +11,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestVideoRouteImportFallback:
     """Module has the optional-dep guard flag (issue #2466)."""

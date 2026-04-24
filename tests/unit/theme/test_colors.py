@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.theme.colors import (
     THEME_COLOR_KEYS,
     get_rgba,
@@ -9,6 +11,8 @@ from src.shared.python.theme.colors import (
     is_valid_hex_color,
     normalise_hex_color,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestIsValidHexColor:

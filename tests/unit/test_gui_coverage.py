@@ -13,6 +13,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 # Ensure offscreen platform BEFORE any Qt imports so that a QApplication can be
 # created even when no X server / Wayland display is available (headless CI).
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")

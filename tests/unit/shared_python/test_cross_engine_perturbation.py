@@ -19,6 +19,8 @@ from src.shared.python.pendulum_simulator.perturbation_analysis import (
     perturb_torque_profile,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Mock engine
 # ---------------------------------------------------------------------------

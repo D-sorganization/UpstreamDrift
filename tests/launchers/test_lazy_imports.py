@@ -17,6 +17,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # Heavy engine packages whose module-level presence indicates an eager import
 _ENGINE_PACKAGES = [
     "mujoco",

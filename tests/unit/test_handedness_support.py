@@ -25,6 +25,8 @@ from src.shared.python.config.handedness_support import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestMirrorPosition:
     """Tests for position mirroring."""

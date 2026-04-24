@@ -20,6 +20,8 @@ from mujoco_humanoid_golf.motion_capture import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestMotionCaptureFrame:
     """Tests for MotionCaptureFrame dataclass."""

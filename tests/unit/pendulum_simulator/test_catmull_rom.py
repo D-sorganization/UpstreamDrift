@@ -6,6 +6,8 @@ import pytest
 
 from src.shared.python.pendulum_simulator.gui.catmull_rom import catmull_rom_smooth
 
+pytestmark = pytest.mark.unit
+
 
 class TestCatmullRomSmooth:
     def test_empty_returns_empty(self) -> None:

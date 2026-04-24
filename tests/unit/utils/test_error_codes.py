@@ -15,6 +15,8 @@ from src.api.utils.error_codes import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestErrorCategory:
     """Tests for ErrorCategory enum."""

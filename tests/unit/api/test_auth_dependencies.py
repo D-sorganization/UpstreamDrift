@@ -8,6 +8,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 try:
     import sqlalchemy  # noqa: F401
 

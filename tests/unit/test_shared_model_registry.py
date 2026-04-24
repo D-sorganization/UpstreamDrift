@@ -5,9 +5,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import mock_open, patch
 
+import pytest
 import yaml
 
-from src.shared.python.config.model_registry import (
+pytestmark = pytest.mark.unit
+
+from src.shared.python.config.model_registry import (  # noqa: E402
     ModelConfig,
     ModelRegistry,
     ModelRegistryLoadError,

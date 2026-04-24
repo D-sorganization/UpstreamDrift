@@ -20,6 +20,8 @@ from src.shared.python.ai.types import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Python 3.10 compatibility: datetime.UTC is only available in 3.11+
 # Use timezone.utc instead for compatibility
 UTC = timezone.utc  # noqa: UP017

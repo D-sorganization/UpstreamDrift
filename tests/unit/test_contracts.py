@@ -19,6 +19,8 @@ from src.shared.python.contracts import (
     set_contract_level,
 )
 
+pytestmark = pytest.mark.unit
+
 _needs_contracts = pytest.mark.skipif(
     DBC_LEVEL != ContractLevel.ENFORCE,
     reason="DBC_LEVEL is not 'enforce'; enforcement tests require ENFORCE mode",

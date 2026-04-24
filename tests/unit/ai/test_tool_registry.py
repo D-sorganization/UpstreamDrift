@@ -14,6 +14,8 @@ from src.shared.python.ai.tool_registry import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestToolParameter:
     """Tests for ToolParameter."""

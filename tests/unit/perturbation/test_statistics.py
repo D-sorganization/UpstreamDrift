@@ -10,6 +10,8 @@ from src.shared.python.perturbation.statistics import (
     compute_metric_statistics,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # MetricStatistics dataclass
 # ---------------------------------------------------------------------------

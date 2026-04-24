@@ -10,6 +10,8 @@ import start_api_server
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_validate_security_no_issues(monkeypatch) -> None:
     mock_validate = MagicMock(return_value={"critical_issues": [], "warnings": []})

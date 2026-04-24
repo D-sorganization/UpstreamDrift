@@ -14,6 +14,8 @@ from src.shared.python.security.env_validator import (
     validate_secret_key_strength,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # validate_secret_key_strength
 # ---------------------------------------------------------------------------

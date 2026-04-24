@@ -25,6 +25,8 @@ from src.shared.python.perturbation.statistics import MetricStatistics
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Minimal stub sim-result
 # ---------------------------------------------------------------------------

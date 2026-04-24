@@ -19,6 +19,8 @@ from src.shared.python.engine_core.checkpoint import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestStateCheckpoint(unittest.TestCase):
     def test_creation(self) -> None:

@@ -15,6 +15,8 @@ from src.shared.python.engine_core.engine_registry import (
     get_registry,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # EngineType enum
 # ---------------------------------------------------------------------------

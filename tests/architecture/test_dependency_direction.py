@@ -24,6 +24,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 logger = logging.getLogger(__name__)
 
 # Repository root

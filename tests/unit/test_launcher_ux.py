@@ -11,6 +11,8 @@ from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import Qt  # noqa: F401
     from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QWidget  # noqa: F401

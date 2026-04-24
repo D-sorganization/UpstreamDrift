@@ -26,6 +26,8 @@ from model_generation.core.types import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ============================================================
 # Issue 1: Deque optimization - _get_descendants()
 # ============================================================

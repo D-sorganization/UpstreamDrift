@@ -18,6 +18,8 @@ from src.shared.python.plotting.renderers.base import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def mock_data_manager() -> MagicMock:

@@ -2,7 +2,11 @@ import argparse
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 import launch_golf_suite
+
+pytestmark = pytest.mark.unit
 
 
 def test_parse_arguments():

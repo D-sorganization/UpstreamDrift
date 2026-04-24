@@ -11,6 +11,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[2]
 DATA_IO_DIR = REPO / "src/shared/python/data_io"
 LOC_BUDGET = 600

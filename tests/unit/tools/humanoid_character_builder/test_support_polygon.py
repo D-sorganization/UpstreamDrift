@@ -14,6 +14,8 @@ from humanoid_character_builder.core.model import SupportPolygon
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture()
 def unit_square() -> SupportPolygon:

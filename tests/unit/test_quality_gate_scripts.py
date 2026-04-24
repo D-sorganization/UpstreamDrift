@@ -10,6 +10,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 
 def _load_script_module(name: str) -> types.ModuleType:
     script_path = Path(__file__).resolve().parents[2] / "scripts" / f"{name}.py"

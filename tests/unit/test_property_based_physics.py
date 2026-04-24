@@ -32,6 +32,8 @@ from src.shared.python.physics.ball_flight_physics import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Reusable strategies
 # ---------------------------------------------------------------------------

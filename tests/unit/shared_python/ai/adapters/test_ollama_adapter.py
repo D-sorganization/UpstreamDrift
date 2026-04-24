@@ -29,6 +29,8 @@ from src.shared.python.ai.types import (
     ProviderCapability,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def reset_mocks():

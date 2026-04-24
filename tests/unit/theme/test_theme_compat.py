@@ -6,7 +6,11 @@ and functional after theme module refactors.
 
 import enum
 
+import pytest
+
 from src.shared.python.theme import ThemePreset, apply_golf_suite_style
+
+pytestmark = pytest.mark.unit
 
 
 class TestThemePresetCompat:

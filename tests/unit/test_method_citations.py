@@ -17,6 +17,8 @@ from src.shared.python.analysis.dataclasses import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestMethodCitation:
     """MethodCitation dataclass tests."""

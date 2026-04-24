@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import QApplication
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_tooltips() -> None:
     qapp = QApplication.instance()

@@ -19,6 +19,8 @@ from src.shared.python.engine_core.engine_availability import skip_if_unavailabl
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestSynergyResult:
     """Test SynergyResult dataclass."""

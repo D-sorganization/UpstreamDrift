@@ -12,6 +12,8 @@ from src.shared.python.engine_core.engine_availability import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Now we can import apps.*
 try:
     from apps.core.models import C3DDataModel

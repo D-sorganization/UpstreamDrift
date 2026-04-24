@@ -17,6 +17,8 @@ from src.shared.python.engine_core.checkpoint import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngine:
     """Mock engine implementing Checkpointable protocol."""

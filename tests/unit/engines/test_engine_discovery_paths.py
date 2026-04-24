@@ -7,8 +7,12 @@ is the repo root (classic launcher) vs src/ (API server).
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.engine_core.engine_registry import EngineType
+
+pytestmark = pytest.mark.unit
 
 
 class TestEnginePathResolution:

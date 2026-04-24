@@ -11,6 +11,8 @@ from src.shared.python.engine_core.workflow_adapter import EngineWorkflowAdapter
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_probe_returns_unknown_for_invalid_engine_name() -> None:
     manager = MagicMock()

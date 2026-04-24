@@ -22,6 +22,8 @@ from src.shared.python.spatial_algebra.reference_frames import SwingPlaneFrame
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestPlaneVertices:
     """Tests for plane vertex generation."""

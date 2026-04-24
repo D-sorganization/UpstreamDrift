@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.gui_launcher.registry import (
     GUIRegistration,
     GUIRegistry,
@@ -9,6 +11,8 @@ from src.shared.python.gui_launcher.registry import (
     LaunchConfig,
     get_registry,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestGUIType:

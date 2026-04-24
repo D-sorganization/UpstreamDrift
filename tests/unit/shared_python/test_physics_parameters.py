@@ -11,6 +11,8 @@ from src.shared.python.physics.physics_parameters import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestPhysicsParameters:
     """Tests for physics parameter registry."""

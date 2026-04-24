@@ -16,6 +16,8 @@ from src.api.utils.datetime_compat import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestUTC:
     """Tests for UTC constant."""

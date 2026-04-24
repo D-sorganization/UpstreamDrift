@@ -11,6 +11,8 @@ from pydantic import ValidationError
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestCalculationEngineProtocol:
     """Tests for the CalculationEngine structural protocol."""

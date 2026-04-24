@@ -11,6 +11,8 @@ from src.shared.python.pendulum_simulator.simulation import (
     run_simulation,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_params(**kwargs) -> PendulumParams:
     defaults = {"m1": 5.0, "m2": 0.3, "L1": 0.65, "L2": 1.1, "mClub": 0.2}

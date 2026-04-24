@@ -14,6 +14,8 @@ import time
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # ── Route Registry Tests ─────────────────────────────────────────
 
 

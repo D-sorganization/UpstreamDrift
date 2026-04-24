@@ -20,6 +20,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     pass
 

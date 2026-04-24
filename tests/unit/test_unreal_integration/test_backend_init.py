@@ -14,6 +14,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestUnrealBridgeBackendInitFailure:
     """initialize() must fail explicitly when the server cannot bind a socket."""

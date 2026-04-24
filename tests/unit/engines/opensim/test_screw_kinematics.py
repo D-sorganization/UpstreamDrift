@@ -16,6 +16,8 @@ from src.engines.physics_engines.opensim.python.opensim_screw_kinematics import 
 )
 from src.shared.python.screw_theory import ScrewAxis, Twist
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

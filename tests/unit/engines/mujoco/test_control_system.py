@@ -17,6 +17,8 @@ from mujoco_humanoid_golf.control_system import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestControlType:
     """Tests for ControlType enum."""

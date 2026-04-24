@@ -16,13 +16,16 @@ import pytest
 
 from src.shared.python.ai.adapters.base import ToolDeclaration
 from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
-from src.shared.python.ai.exceptions import (
+
+pytestmark = pytest.mark.unit
+
+from src.shared.python.ai.exceptions import (  # noqa: E402
     AIConnectionError,
     AIProviderError,
     AIRateLimitError,
     AITimeoutError,
 )
-from src.shared.python.ai.types import (
+from src.shared.python.ai.types import (  # noqa: E402
     ConversationContext,
     ExpertiseLevel,
     Message,

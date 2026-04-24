@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from src.shared.python.validation_pkg.kaggle_validation import (
     ShotRecord,
     get_clean_shots,
     get_dataset_statistics,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # ShotRecord dataclass

@@ -24,6 +24,8 @@ from model_generation.core.validation import ValidationResult, Validator
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ── validate_mass ────────────────────────────────────────────────────────────
 
 

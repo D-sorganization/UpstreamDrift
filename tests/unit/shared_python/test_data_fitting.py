@@ -16,6 +16,8 @@ from src.shared.python.validation_pkg.data_fitting import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_body_segment_params() -> None:
     """Test BodySegmentParams serialization."""

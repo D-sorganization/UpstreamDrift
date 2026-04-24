@@ -12,6 +12,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[2]
 AERO_PKG = REPO / "src/shared/python/physics/aerodynamics"
 LOC_BUDGET = 300

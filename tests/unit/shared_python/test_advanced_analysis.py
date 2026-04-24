@@ -15,6 +15,8 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # sklearn/muscle_analysis is optional - check actual sklearn availability
 try:
     from shared.python.biomechanics.muscle_analysis import (

@@ -26,6 +26,8 @@ from src.unreal_integration.data_models import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestVector3:
     """Tests for Vector3 data model."""

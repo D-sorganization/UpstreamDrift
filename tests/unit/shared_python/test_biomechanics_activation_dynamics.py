@@ -9,6 +9,8 @@ from src.shared.python.biomechanics.activation_dynamics import ActivationDynamic
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestActivationDynamicsInit:
     def test_default_params(self) -> None:

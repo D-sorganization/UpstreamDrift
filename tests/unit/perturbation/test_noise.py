@@ -7,6 +7,8 @@ import pytest
 
 from src.shared.python.perturbation.noise import generate_noise
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Basic shape / type guarantees
 # ---------------------------------------------------------------------------

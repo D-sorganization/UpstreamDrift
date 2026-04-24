@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.engine_core.unified_engine_interface import (
     EngineManager,
     EngineType,
     UnifiedEngineInterface,
     create_unified_interface,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestEngineType:

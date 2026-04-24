@@ -13,6 +13,8 @@ from src.shared.python.pendulum_simulator.hub_options import (
 )
 from src.shared.python.pendulum_simulator.physics_golfer import GolferParams
 
+pytestmark = pytest.mark.unit
+
 
 def _make_params() -> GolferParams:
     return GolferParams(

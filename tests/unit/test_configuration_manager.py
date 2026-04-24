@@ -13,6 +13,8 @@ from src.shared.python.data_io.common_utils import GolfModelingError
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_default_config() -> None:
     """Test that default configuration is valid."""

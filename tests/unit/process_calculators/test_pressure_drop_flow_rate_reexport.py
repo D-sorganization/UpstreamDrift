@@ -18,6 +18,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_ca
     scfm_to_acfm,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFlowRateReexport:
     """Verify re-exported symbols are available and functional."""

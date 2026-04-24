@@ -19,6 +19,8 @@ from src.shared.python.core import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestExceptions:
     """Test custom exception classes."""

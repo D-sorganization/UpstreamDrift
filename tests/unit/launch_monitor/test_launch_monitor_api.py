@@ -16,6 +16,8 @@ from src.shared.python.launch_monitor import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Fixture CSV strings
 # ---------------------------------------------------------------------------

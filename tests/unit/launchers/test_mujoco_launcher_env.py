@@ -7,6 +7,10 @@ preventing ModuleNotFoundError for contracts and other shared modules.
 import os
 from unittest.mock import patch
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 class TestMujocoLauncherEnv:
     """Test that _get_launch_env produces correct PYTHONPATH."""

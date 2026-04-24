@@ -23,6 +23,8 @@ from src.shared.python.engine_core.engine_availability import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def temp_osim_file(tmp_path) -> Path:

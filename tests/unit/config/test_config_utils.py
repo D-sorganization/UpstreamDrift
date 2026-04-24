@@ -17,6 +17,8 @@ from src.shared.python.config.config_utils import (
     validate_config,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # load_json_config
 # ---------------------------------------------------------------------------

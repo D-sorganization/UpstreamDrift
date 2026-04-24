@@ -11,6 +11,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestBodyPositionSupportCheck:
     """set_body_position must surface unsupported-engine errors."""

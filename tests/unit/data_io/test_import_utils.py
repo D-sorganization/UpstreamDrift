@@ -15,6 +15,8 @@ from src.shared.python.data_io.import_utils import (
     lazy_import,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # ensure_imports
 # ---------------------------------------------------------------------------

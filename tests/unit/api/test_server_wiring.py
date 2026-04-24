@@ -15,6 +15,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 _SERVER_PY = Path(__file__).parents[3] / "src" / "api" / "server.py"
 _SERVER_SRC = _SERVER_PY.read_text(encoding="utf-8")
 

@@ -22,9 +22,9 @@ from unittest.mock import patch
 
 import pytest
 
-from tests._mocks.physics_stubs import hatchling_stubs
-
 pytestmark = pytest.mark.unit
+
+from tests._mocks.physics_stubs import hatchling_stubs  # noqa: E402
 
 
 class DummyHookInterface:

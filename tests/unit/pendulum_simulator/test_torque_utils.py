@@ -6,6 +6,8 @@ import pytest
 
 from src.shared.python.pendulum_simulator.torque_utils import make_polynomial_torque
 
+pytestmark = pytest.mark.unit
+
 
 class TestMakePolynomialTorque:
     def test_constant_torque_single_joint(self) -> None:

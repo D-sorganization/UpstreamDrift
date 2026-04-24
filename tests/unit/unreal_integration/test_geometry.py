@@ -9,6 +9,8 @@ from src.unreal_integration.geometry import Quaternion, Vector3
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestVector3:
     """Tests for Vector3 class."""

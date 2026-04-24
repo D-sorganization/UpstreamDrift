@@ -17,6 +17,8 @@ from src.shared.python.data_io.export import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def sample_data() -> dict[str, Any]:

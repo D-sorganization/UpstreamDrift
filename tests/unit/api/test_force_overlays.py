@@ -13,6 +13,8 @@ from src.api.routes.force_overlays import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_magnitude_to_color() -> None:
     assert _magnitude_to_color(0, 10) == [0.0, 1.0, 1.0, 1.0]

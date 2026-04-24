@@ -16,6 +16,8 @@ from src.shared.python.pendulum_simulator.gui.unit_converter import (
     to_si,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestUnitCategory:
     def test_length_value(self) -> None:

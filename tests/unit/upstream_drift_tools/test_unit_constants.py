@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.upstream_drift_tools.utils.unit_constants import (
     ATMOSPHERE_TO_PASCAL,
     CELSIUS_OFFSET,
@@ -22,6 +24,8 @@ from src.shared.python.upstream_drift_tools.utils.unit_constants import (
     UNIT_ALIASES,
     WATT_HOUR_TO_JOULE,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestLengthConversions:

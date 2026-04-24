@@ -10,6 +10,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestIssue2483MyoSuiteTerminationHandling:
     """Issue #2483: step() must handle environment termination state."""

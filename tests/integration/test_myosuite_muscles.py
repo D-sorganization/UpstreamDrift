@@ -18,6 +18,8 @@ import pytest
 from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+pytestmark = pytest.mark.integration
+
 logger = get_logger(__name__)
 
 

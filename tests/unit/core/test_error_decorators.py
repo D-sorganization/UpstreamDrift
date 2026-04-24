@@ -21,6 +21,8 @@ from src.shared.python.core.error_decorators import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for @log_errors decorator
 # ============================================================================

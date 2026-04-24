@@ -25,6 +25,8 @@ from src.shared.python.signal_toolkit.core import Signal
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def _make_signal(
     freq: float = 1.0,

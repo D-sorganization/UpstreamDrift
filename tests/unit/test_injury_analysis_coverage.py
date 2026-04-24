@@ -4,6 +4,8 @@ from src.shared.python.injury.injury_risk import InjuryRiskScorer, InjuryType, R
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class MockSpinalResult:
     def __init__(self, compression=3.0, shear=0.4, twist=40.0):

@@ -4,6 +4,8 @@ import contextlib  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
+
+pytestmark = pytest.mark.integration
 from PyQt6.QtWidgets import QMessageBox  # noqa: E402
 
 from src.launchers.golf_launcher import (  # noqa: E402

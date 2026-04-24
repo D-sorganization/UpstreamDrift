@@ -24,6 +24,8 @@ from model_generation.core.types import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def _make_builder_with_two_links() -> ManualBuilder:
     """Create a builder with base + arm and a revolute joint."""

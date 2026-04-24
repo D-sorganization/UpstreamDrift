@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 mock_pin = MagicMock()
 with patch.dict("sys.modules", {"pinocchio": mock_pin}):
     induced_acceleration_mod = importlib.import_module(

@@ -10,6 +10,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Try to import drake_golf_model, skip all tests if pydrake is not available
 # Note: pythonpath is configured in pytest.ini to include the parent directory
 try:

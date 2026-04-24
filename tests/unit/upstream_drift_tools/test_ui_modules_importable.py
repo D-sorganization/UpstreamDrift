@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.scrubber.tests.test_scrubber_engine import (
     ScrubberEngine,
     ScrubberInputs,
@@ -14,6 +16,8 @@ from src.shared.python.upstream_drift_tools.ui.mixins.base_calculator_mixin impo
 from src.shared.python.upstream_drift_tools.ui.widgets.mixins.data_processor_ops import (
     DataProcessorOpsMixin,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestScubberModulesImportable:

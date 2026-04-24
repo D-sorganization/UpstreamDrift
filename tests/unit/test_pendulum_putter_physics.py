@@ -14,6 +14,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Skip entire module if model_generation.models.pendulum_putter is not available
 pytest.importorskip(
     "model_generation.models.pendulum_putter",

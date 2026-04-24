@@ -11,6 +11,8 @@ from src.shared.python.calc_backend.contracts.rotation_converter import (
     RotationConverterRequest,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestRotationConverterRequest:
     def test_quaternion_construction(self) -> None:

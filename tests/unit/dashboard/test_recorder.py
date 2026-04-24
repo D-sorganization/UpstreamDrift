@@ -11,6 +11,8 @@ from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class MockPhysicsEngine(PhysicsEngine):
     """Minimal PhysicsEngine implementation for recorder tests."""

@@ -8,6 +8,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Mock matplotlib before importing plotting
 mock_matplotlib = MagicMock()
 mock_pyplot = MagicMock()

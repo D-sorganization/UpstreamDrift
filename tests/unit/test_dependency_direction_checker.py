@@ -10,6 +10,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 
 def _load_module() -> types.ModuleType:
     script_path = (

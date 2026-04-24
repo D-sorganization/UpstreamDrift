@@ -33,6 +33,8 @@ from humanoid_character_builder.generators.mesh_generator import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

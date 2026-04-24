@@ -13,6 +13,8 @@ from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
+pytestmark = pytest.mark.integration
+
 from src.launchers.launcher_process_manager import (  # noqa: E402
     ProcessManager,
     is_vcxsrv_running,

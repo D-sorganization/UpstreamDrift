@@ -5,11 +5,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.launchers.drake_dashboard import main as drake_main
-from src.launchers.matlab_launcher_unified import MatlabLauncher
-from src.launchers.matlab_launcher_unified import main as matlab_main
-from src.launchers.mujoco_dashboard import main as mujoco_main
-from src.launchers.pinocchio_dashboard import main as pinocchio_main
+pytestmark = pytest.mark.integration
+
+from src.launchers.drake_dashboard import main as drake_main  # noqa: E402
+from src.launchers.matlab_launcher_unified import MatlabLauncher  # noqa: E402
+from src.launchers.matlab_launcher_unified import main as matlab_main  # noqa: E402
+from src.launchers.mujoco_dashboard import main as mujoco_main  # noqa: E402
+from src.launchers.pinocchio_dashboard import main as pinocchio_main  # noqa: E402
 
 
 def test_mujoco_dashboard_main():

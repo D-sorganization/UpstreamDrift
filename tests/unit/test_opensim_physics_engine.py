@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Explicit attribute lists for OpenSim C++ types (opensim-core bindings).
 _OSIM_MODEL_SPEC = [
     "getName",

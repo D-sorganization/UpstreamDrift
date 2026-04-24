@@ -18,6 +18,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Issue #1779 – SECRET_KEY fallback
 # ---------------------------------------------------------------------------

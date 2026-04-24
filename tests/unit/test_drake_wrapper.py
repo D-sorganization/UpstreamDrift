@@ -6,10 +6,12 @@ import pytest
 
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip("pydrake.geometry", reason="pydrake not available")
-from pydrake.geometry import SceneGraph
-from pydrake.systems.analysis import Simulator
-from pydrake.systems.framework import Context, Diagram
+from pydrake.geometry import SceneGraph  # noqa: E402
+from pydrake.systems.analysis import Simulator  # noqa: E402
+from pydrake.systems.framework import Context, Diagram  # noqa: E402
 
 # MultibodyPlant uses undocumented Drake APIs; enumerate tested attributes.
 _PLANT_SPEC_ATTRS = [

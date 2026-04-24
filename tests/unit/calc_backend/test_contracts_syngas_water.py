@@ -12,6 +12,8 @@ from src.shared.python.calc_backend.contracts.syngas_water import (
     WaterContentOut,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSyngasWaterRequest:
     def test_valid_construction(self) -> None:

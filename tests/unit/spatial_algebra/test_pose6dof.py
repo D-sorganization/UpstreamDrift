@@ -24,6 +24,8 @@ from src.shared.python.spatial_algebra.pose6dof import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestEulerToRotationMatrix:
     """Tests for euler_to_rotation_matrix function."""

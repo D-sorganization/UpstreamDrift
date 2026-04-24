@@ -10,6 +10,8 @@ from src.launchers.unified_launcher import UnifiedLauncher
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class _FakeEngineType:
     def __init__(self, value: str) -> None:

@@ -10,6 +10,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def pkg_mocks() -> dict[str, MagicMock]:

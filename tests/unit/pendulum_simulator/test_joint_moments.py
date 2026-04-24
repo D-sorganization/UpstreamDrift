@@ -13,6 +13,8 @@ from src.shared.python.pendulum_simulator.joint_moments import (
     triple_pendulum_moments,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestCross2d:
     def test_orthogonal_unit_vectors(self) -> None:

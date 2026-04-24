@@ -26,6 +26,8 @@ from src.shared.python.optimization.swing_optimizer import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # Fixtures
 # =============================================================================

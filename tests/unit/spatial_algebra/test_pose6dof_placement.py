@@ -25,6 +25,8 @@ from src.shared.python.spatial_algebra.pose6dof import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestPose6DOF:
     """Tests for Pose6DOF class - intuitive 6DOF positioning."""

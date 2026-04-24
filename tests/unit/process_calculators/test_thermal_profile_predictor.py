@@ -10,6 +10,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.thermal_profile_
     predict_temperature_profile,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _const_power(t: float) -> float:
     return 1000.0  # 1 kW constant power

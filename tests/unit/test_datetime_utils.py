@@ -34,6 +34,8 @@ from src.shared.python.core.datetime_utils import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestNowFunctions:
     """Tests for current time functions."""

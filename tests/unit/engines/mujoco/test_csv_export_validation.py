@@ -9,6 +9,8 @@ from mujoco_humanoid_golf.inverse_dynamics import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestCSVExportValidation:
     """Test comprehensive input validation for CSV export (Finding A-007)."""

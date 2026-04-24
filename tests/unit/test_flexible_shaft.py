@@ -31,6 +31,8 @@ from src.shared.python.physics.flexible_shaft import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestSectionProperties:
     """Tests for section property calculations."""

@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.wgs_reactor_calculator import (
     WGSReactorEngine,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # WGSReactorEngine.calculate_equilibrium_constant

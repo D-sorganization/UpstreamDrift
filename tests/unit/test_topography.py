@@ -32,6 +32,8 @@ from src.shared.python.physics.topography import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # TopographyBounds
 # ---------------------------------------------------------------------------

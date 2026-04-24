@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Mock dependencies at test-level via conftest.pytest_configure() and fixtures.
 # Mocking is now handled by @patch.dict decorators at test function level,
 # preventing module-level sys.modules pollution that can affect other tests.

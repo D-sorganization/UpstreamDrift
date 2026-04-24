@@ -11,6 +11,8 @@ from tests.fixtures.fixtures_lib import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def test_probe_engine_instance_marks_missing_dependency() -> None:
     """Unavailable optional engines should be marked as missing."""

@@ -31,6 +31,8 @@ from src.robotics.planning.collision import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # Mock Engine for Testing
 # =============================================================================

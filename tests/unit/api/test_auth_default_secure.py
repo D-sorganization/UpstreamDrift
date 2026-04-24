@@ -14,6 +14,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+import pytest  # noqa: E402
+
 
 class TestAuthDefaultIsSecure:
     """When no environment is configured, auth must be required (not bypassed)."""

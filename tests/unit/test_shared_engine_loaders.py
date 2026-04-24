@@ -24,6 +24,8 @@ from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 _PROBE_RESULT_SPEC = [
     "is_available",
     "diagnostic_message",

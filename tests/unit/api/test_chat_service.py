@@ -16,6 +16,8 @@ from src.shared.python.core.error_utils import InvalidRequestError
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def chat_service(tmp_path) -> Any:

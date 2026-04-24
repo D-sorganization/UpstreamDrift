@@ -25,6 +25,8 @@ from src.unreal_integration.mesh_loader import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestMeshFormat:
     """Tests for MeshFormat enum."""

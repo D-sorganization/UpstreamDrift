@@ -5,6 +5,8 @@ from src.reinforcement_learning.trajectory_funnel_benchmark import (
     TrajectoryFunnelBenchmark,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_initialization():
     bench = TrajectoryFunnelBenchmark("transverse")

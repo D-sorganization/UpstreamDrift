@@ -44,6 +44,8 @@ from src.shared.python.data_io.reproducibility import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for common_utils: convert_units
 # ============================================================================

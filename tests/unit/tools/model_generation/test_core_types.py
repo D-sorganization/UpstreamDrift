@@ -30,6 +30,8 @@ from model_generation.core.types import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # ── Inertia factory methods ──────────────────────────────────────────────────
 
 

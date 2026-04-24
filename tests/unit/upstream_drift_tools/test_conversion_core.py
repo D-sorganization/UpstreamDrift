@@ -14,6 +14,8 @@ from src.shared.python.upstream_drift_tools.calculators.conversion.tables import
     StandardCondition,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # convert_temperature
 # ---------------------------------------------------------------------------

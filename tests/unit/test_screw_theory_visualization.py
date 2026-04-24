@@ -10,6 +10,8 @@ from src.shared.python.screw_theory.visualization import (
     compute_screw_endpoints as viz_compute,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_screw(
     direction=(0.0, 0.0, 1.0), point=(0.0, 0.0, 0.0), pitch=0.0

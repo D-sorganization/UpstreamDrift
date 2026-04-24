@@ -34,6 +34,8 @@ from src.shared.python.physics.terrain import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestTerrainType:
     """Test terrain type enumeration."""

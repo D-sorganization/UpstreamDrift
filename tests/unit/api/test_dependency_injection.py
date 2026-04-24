@@ -21,6 +21,8 @@ from src.shared.python.engine_core.engine_manager import EngineManager
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 # Skip if FastAPI not available
 fastapi = pytest.importorskip("fastapi")
 httpx = pytest.importorskip("httpx")

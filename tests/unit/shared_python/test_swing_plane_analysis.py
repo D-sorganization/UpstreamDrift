@@ -5,6 +5,8 @@ from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyz
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestSwingPlaneAnalysis:
     def test_fit_plane_perfect(self) -> None:

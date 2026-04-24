@@ -1,10 +1,12 @@
 import pytest
 
+pytestmark = pytest.mark.integration
+
 pytest.importorskip("cv2", reason="OpenCV (cv2) required for api.server")
 
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # noqa: E402
 
-from src.api.server import app
+from src.api.server import app  # noqa: E402
 
 client = TestClient(app)
 

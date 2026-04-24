@@ -18,6 +18,8 @@ from src.shared.python.core import constants
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 def create_2link_model() -> dict:
     """Create a simple 2-link planar robot for testing.

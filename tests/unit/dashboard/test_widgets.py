@@ -15,6 +15,8 @@ from src.shared.python.engine_core.interfaces import RecorderInterface
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class MockRecorder(RecorderInterface):
     """Mock recorder for widget testing."""

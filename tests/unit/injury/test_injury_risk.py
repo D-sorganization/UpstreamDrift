@@ -14,6 +14,8 @@ from src.shared.python.injury.injury_risk import (
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestRiskLevel:
     """Tests for RiskLevel enum."""

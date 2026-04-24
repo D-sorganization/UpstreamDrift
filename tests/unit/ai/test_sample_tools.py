@@ -11,6 +11,8 @@ from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 
 pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
+
 
 class TestRegisterGolfSuiteTools:
     """Tests for tool registration."""
