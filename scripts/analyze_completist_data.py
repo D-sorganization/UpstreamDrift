@@ -254,13 +254,60 @@ def create_issue_file(item: Mapping[str, Any], issue_id: int) -> str:
     itype = str(item.get("type", "Incomplete Implementation"))
     f_path, l_no = str(item["file"]), str(item["line"])
     context = str(item.get("name", item.get("text", "")))
-    title = f"Incomplete {itype} in {os.path.basename(f_path)}:{l_no}"
+    # Use full path (not just basename) so files with identical names in different
+    # directories each get a distinct idempotency key.
+    title = f"Incomplete {itype} in {f_path}:{l_no}"
     fname_title = re.sub(r"[^\w]", "_", title).strip("_")
 
     # Idempotency check
     existing = glob.glob(os.path.join(ISSUES_DIR, f"Issue_*_{fname_title}.md"))
     if existing:
         return existing[0]
+
+    # Line drift check
+    clean_f_path = f_path.removeprefix("./")
+    for existing_file in glob.glob(os.path.join(ISSUES_DIR, "Issue_*.md")):
+        try:
+            with open(existing_file, encoding="utf-8") as f:
+                content = f.read()
+        except OSError:
+            continue
+
+        if (
+            f"`{f_path}" in content
+            or f"`./{clean_f_path}" in content
+            or f"`{clean_f_path}" in content
+        ) and f"```python\n{context}\n```" in content:
+            # Reappears after line drift! Update the line number in the existing issue
+            new_content = re.sub(r"at line \d+", f"at line {l_no}", content)
+            new_content = re.sub(
+                r"(:)`" + re.escape(f_path) + r":\d+`",
+                r"\g<1>`" + f_path + f":{l_no}`",
+                new_content,
+            )
+            new_content = re.sub(
+                r"(:)`\./" + re.escape(clean_f_path) + r":\d+`",
+                r"\g<1>`./" + clean_f_path + f":{l_no}`",
+                new_content,
+            )
+            new_content = re.sub(
+                r"title: \"Incomplete .*?\"", f'title: "{title}"', new_content
+            )
+
+            with open(existing_file, "w", encoding="utf-8") as f:
+                f.write(new_content)
+
+            # Rename the file to match the new line number and title
+            match_id = re.search(r"Issue_(\d+)_", os.path.basename(existing_file))
+            if match_id:
+                issue_id_str = match_id.group(1)
+                new_filepath = os.path.join(
+                    ISSUES_DIR, f"Issue_{issue_id_str}_{fname_title}.md"
+                )
+                if existing_file != new_filepath:
+                    os.rename(existing_file, new_filepath)
+                    return new_filepath
+            return existing_file
 
     filepath = os.path.join(ISSUES_DIR, f"Issue_{issue_id:03d}_{fname_title}.md")
     impact, coverage, complexity = calculate_metrics(item)
@@ -466,9 +513,24 @@ def generate_report() -> None:
     ni_errors = analyze_not_implemented()
     todos, fixmes = analyze_todos()
     missing_docs = analyze_docs()
-    _ = analyze_abstract_methods()
+    abstract_methods = analyze_abstract_methods()
 
-    criticals = [s for s in (stubs + ni_errors) if "test" not in s["file"].lower()]
+    abstracts_by_file: dict[str, set[int]] = {}
+    for a in abstract_methods:
+        abstracts_by_file.setdefault(a["file"], set()).add(int(a["line"]))
+
+    def is_abstract(finding: Finding) -> bool:
+        f = finding["file"]
+        if f not in abstracts_by_file:
+            return False
+        line_no = int(finding["line"])
+        return any(0 <= line_no - al <= 5 for al in abstracts_by_file[f])
+
+    criticals = [
+        s
+        for s in (stubs + ni_errors)
+        if "test" not in s["file"].lower() and not is_abstract(s)
+    ]
     criticals.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
 
     date_s = datetime.now().strftime("%Y-%m-%d")
