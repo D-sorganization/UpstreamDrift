@@ -5,6 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import numpy as np
+import pandas as pd
+
 from src.shared.python.core import (
     DataFormatError,
     EngineNotFoundError,
@@ -27,6 +30,8 @@ from src.shared.python.core.constants import (
     RAD_TO_DEG,
 )
 
+logger = get_logger(__name__)
+
 # Re-export them for backward compatibility
 __all__ = [
     "DataFormatError",
@@ -44,9 +49,6 @@ __all__ = [
     "get_shared_urdf_path",
     "normalize_z_score",
 ]
-
-import numpy as np
-import pandas as pd
 
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
@@ -298,6 +300,10 @@ def get_shared_urdf_path() -> Path | None:
             for parent in current_file.parents:
                 if (parent / "shared" / "urdf").exists():
                     return parent / "shared" / "urdf"
+            logger.warning(
+                "shared/urdf directory not found: could not locate 'shared' "
+                "parent in filesystem traversal"
+            )
             return None
 
         urdf_dir = shared_dir / "urdf"
@@ -307,4 +313,8 @@ def get_shared_urdf_path() -> Path | None:
     except (FileNotFoundError, OSError):
         pass
 
+    logger.warning(
+        "shared/urdf directory not found at expected path relative to %s",
+        __file__,
+    )
     return None

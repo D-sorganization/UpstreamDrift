@@ -17,6 +17,10 @@ from datetime import timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from src.shared.python.ai.adapters.base import ToolDeclaration
+from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
+from src.shared.python.ai.sample_tools import register_golf_suite_tools
+from src.shared.python.ai.tool_registry import ToolRegistry
 from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import InvalidRequestError
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -42,11 +46,14 @@ class ChatService:
     SESSION_TTL_SECONDS = 7200  # 2 hours
     PERSIST_DIR = Path.home() / ".golf_modeling_suite" / "chat_sessions"
 
-    def __init__(self) -> None:
+    def __init__(self, rag_store: SimpleRAGStore | None = None) -> None:
         self._sessions: OrderedDict[str, ConversationContext] = OrderedDict()
         self._timestamps: dict[str, float] = {}
         self._adapter: BaseAgentAdapter | None = None
         self._lock = threading.Lock()
+        self._tool_registry = ToolRegistry()
+        self._rag_store: SimpleRAGStore | None = rag_store
+        register_golf_suite_tools(self._tool_registry)
         self._load_adapter()
 
     def _load_adapter(self) -> None:
@@ -203,16 +210,46 @@ class ChatService:
 
         # Build engine context system message
         engine = ctx.metadata.get("last_engine")
+        system_parts: list[str] = []
         if engine:
-            system_hint = (
+            system_parts.append(
                 f"The user is currently working in the {engine} physics engine. "
                 "Tailor your responses to that context when relevant."
             )
-            # Temporarily inject system context (don't persist it)
+
+        # Prepend RAG-retrieved docs relevant to the last user message
+        if self._rag_store is not None:
+            last_user_msg = next(
+                (m.content for m in reversed(ctx.messages) if m.role == "user"),
+                None,
+            )
+            if last_user_msg:
+                try:
+                    rag_results = self._rag_store.query(last_user_msg, top_k=5)
+                    if rag_results:
+                        snippets = "\n\n".join(
+                            f"[{doc.metadata.get('source', doc.id)}]\n{doc.content[:400]}"
+                            for doc, _score in rag_results
+                        )
+                        system_parts.append(
+                            "Relevant documentation retrieved for this query:\n\n"
+                            + snippets
+                        )
+                        logger.debug(
+                            "RAG: prepended %d docs for session %s",
+                            len(rag_results),
+                            session_id,
+                        )
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("RAG query failed: %s", exc)
+
+        if system_parts:
             from src.shared.python.ai.types import Message
 
             temp_messages = list(ctx.messages)
-            temp_messages.insert(0, Message(role="system", content=system_hint))
+            temp_messages.insert(
+                0, Message(role="system", content="\n\n".join(system_parts))
+            )
         else:
             temp_messages = list(ctx.messages)
 
@@ -228,34 +265,96 @@ class ChatService:
 
         full_response: list[str] = []
 
-        def _run_sync() -> list[str]:
-            """Run synchronous adapter streaming in thread."""
-            chunks: list[str] = []
-            for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
-                temp_ctx.messages[-1].content if temp_ctx.messages else "",
-                temp_ctx,
-                [],  # No tools for now
-            ):
-                if chunk.content:
-                    chunks.append(chunk.content)
-            return chunks
-
-        # Run in thread pool and yield chunks
-        # We use a queue-based approach for true streaming
         import queue
 
         chunk_queue: queue.Queue[str | None] = queue.Queue()
+        tools = [
+            ToolDeclaration(
+                name=t.name,
+                description=t.description,
+                parameters={p.name: p.to_json_schema() for p in t.parameters},
+                required=[p.name for p in t.parameters if p.required],
+            )
+            for t in self._tool_registry.list_tools()
+        ]
 
         def _stream_to_queue() -> None:
+            """Stream adapter chunks into queue; execute any tool calls inline."""
+            import json as _json
+
             try:
+                # Accumulate pending tool-call deltas keyed by index
+                pending_tool_calls: dict[int, dict[str, Any]] = {}
+
                 for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
                     "",  # message already in context
                     temp_ctx,
-                    [],
+                    tools,
                 ):
                     if chunk.content:
                         chunk_queue.put(chunk.content)
                         full_response.append(chunk.content)
+
+                    # Accumulate tool-call delta fragments
+                    if chunk.tool_call_delta:
+                        for tc in chunk.tool_call_delta.get("tool_calls", []):
+                            idx = tc.get("index", 0)
+                            if idx not in pending_tool_calls:
+                                pending_tool_calls[idx] = {
+                                    "id": "",
+                                    "name": "",
+                                    "arguments": "",
+                                }
+                            entry = pending_tool_calls[idx]
+                            if tc.get("id"):
+                                entry["id"] = tc["id"]
+                            fn = tc.get("function") or {}
+                            if fn.get("name"):
+                                entry["name"] = fn["name"]
+                            if fn.get("arguments"):
+                                entry["arguments"] += fn["arguments"]
+
+                    if chunk.is_final and pending_tool_calls:
+                        # Execute accumulated tool calls and append results to context
+                        for entry in pending_tool_calls.values():
+                            tool_name = entry["name"]
+                            tool_call_id = entry["id"] or f"tc_{tool_name}"
+                            try:
+                                arguments = (
+                                    _json.loads(entry["arguments"])
+                                    if entry["arguments"]
+                                    else {}
+                                )
+                            except _json.JSONDecodeError:
+                                arguments = {}
+
+                            logger.info(
+                                "Executing tool call: %s (id=%s)",
+                                tool_name,
+                                tool_call_id,
+                            )
+                            try:
+                                result = self._tool_registry.execute(
+                                    tool_name, arguments, tool_call_id
+                                )
+                                result_content = _json.dumps(result.to_dict())
+                            except Exception as exc:  # noqa: BLE001
+                                logger.warning(
+                                    "Tool execution failed: %s: %s", tool_name, exc
+                                )
+                                result_content = _json.dumps(
+                                    {"success": False, "error": str(exc)}
+                                )
+
+                            # Append tool result to the live context so the next
+                            # iteration of streaming (if any) can use it.
+                            temp_ctx.add_tool_result(tool_call_id, result_content)
+                            notice = f"\n[Tool {tool_name}: {result_content}]\n"
+                            chunk_queue.put(notice)
+                            full_response.append(notice)
+
+                        pending_tool_calls.clear()
+
             except (RuntimeError, ValueError, OSError) as e:
                 chunk_queue.put(f"\n[Error: {e}]")
             finally:

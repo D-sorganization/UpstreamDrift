@@ -457,7 +457,10 @@ class AnthropicAdapter(BaseAgentAdapter):
             f"3. Validate scientific claims before presenting them\n"
             f"4. Guide users through workflows step by step\n"
             f"5. Acknowledge uncertainty and cite limitations\n"
-            f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)"
+            f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)\n"
+            f"7. When the user asks about physics terms or golf biomechanics concepts, "
+            f"use the explain_concept tool to retrieve the authoritative definition "
+            f"from the glossary before answering."
         )
 
     def _parse_response(self, response: Any) -> AgentResponse:

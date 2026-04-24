@@ -9,6 +9,7 @@ import { MotionCapturePage } from './pages/MotionCapture';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
+import { ChatPanel } from './components/ai/ChatPanel';
 import { useUIStore } from './stores';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
         </Routes>
         <DiagnosticsPanel />
         <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+        <ChatPanel />
       </ToastProvider>
     </BrowserRouter>
   );
