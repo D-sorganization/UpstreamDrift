@@ -169,6 +169,12 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
     """Load MuJoCo engine with full initialization.
 
     Postcondition: returned engine is non-None (DbC).
+
+    Raises
+    ------
+    GolfModelingError
+        If MuJoCo is not installed or engine initialization fails.
+        Error message includes actionable installation instructions.
     """
     try:
         import mujoco  # noqa: F401
@@ -198,15 +204,32 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         )
 
     except ImportError as e:
-        raise GolfModelingError(
-            "MuJoCo requirements not met. Install mujoco>=3.2.3"
-        ) from e
+        error_msg = (
+            "ERROR: MuJoCo is not installed.\n\n"
+            "To use the MuJoCo physics engine, install it with one of:\n"
+            "  pip install mujoco>=3.2.3\n"
+            "  pip install -e '.[physics]'  (includes all optional physics engines)\n\n"
+            "Alternative engines available:\n"
+            "  - Drake (pydrake)\n"
+            "  - Pinocchio (pin)\n"
+            "  - OpenSim\n"
+            "  - Pendulum (pure Python)\n\n"
+            "To see available engines, use: python -m src.cli engines list"
+        )
+        logger.error(error_msg)
+        raise GolfModelingError(error_msg) from e
 
 
 def load_drake_engine(suite_root: Path) -> PhysicsEngine:
     """Load Drake engine with full initialization.
 
     Postcondition: returned engine is non-None (DbC).
+
+    Raises
+    ------
+    GolfModelingError
+        If Drake is not installed or engine initialization fails.
+        Error message includes actionable installation instructions.
     """
     try:
         import pydrake  # noqa: F401
@@ -237,7 +260,20 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         )
 
     except ImportError as e:
-        raise GolfModelingError("Drake requirements not met.") from e
+        error_msg = (
+            "ERROR: Drake is not installed.\n\n"
+            "To use the Drake physics engine, install it with:\n"
+            "  pip install drake>=1.22.0\n"
+            "  pip install -e '.[physics]'  (includes all optional physics engines)\n\n"
+            "Note: Drake has binary requirements and may require additional setup.\n"
+            "See: https://drake.mit.edu/installation.html\n\n"
+            "Alternative engines available:\n"
+            "  - MuJoCo (mujoco)\n"
+            "  - Pinocchio (pin)\n"
+            "  - Pendulum (pure Python, no dependencies)"
+        )
+        logger.error(error_msg)
+        raise GolfModelingError(error_msg) from e
 
 
 def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:

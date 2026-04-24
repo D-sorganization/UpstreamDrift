@@ -2,7 +2,7 @@
 
 The suite provides multiple entry points depending on your needs.
 
-## 1. Unified Launcher (`launchers/golf_launcher.py`)
+## 1. Unified Launcher (`src/launchers/golf_launcher.py`)
 
 This is the main entry point. It provides a GUI to select and configure simulations across all supported Python engines.
 
@@ -12,7 +12,7 @@ This is the main entry point. It provides a GUI to select and configure simulati
 - Model Selection.
 - Environment Configuration.
 
-## 2. Suite Launcher (`launchers/golf_suite_launcher.py`)
+## 2. Suite Launcher (`src/launchers/golf_suite_launcher.py`)
 
 A legacy or alternative launcher that may offer different configuration options or debugging paths.
 

@@ -56,24 +56,43 @@ export async function getBackendStatus(): Promise<BackendStatus> {
   return invoke<BackendStatus>('backend_status');
 }
 
+/** Helper to determine error message from fetch failure. */
+function getDiagnosticsErrorMessage(error: unknown): string {
+  if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+    return 'Backend API server is not running. Start with: python -m uvicorn src.api.main:app';
+  }
+  if (error instanceof Error && error.name === 'AbortError') {
+    return 'Backend server request timed out. Server may be overloaded.';
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return 'Unknown error connecting to backend';
+}
+
 /** Get comprehensive diagnostic info (Tauri only). */
 export async function getDiagnostics(): Promise<DiagnosticInfo> {
   if (!isTauri()) {
     // In browser mode, call the backend API endpoint
     try {
-      const response = await fetch('/api/diagnostics');
+      const response = await fetch('/api/diagnostics', {
+        signal: AbortSignal.timeout(3000),
+      });
       if (!response.ok) {
+        if (response.status === 503) {
+          throw new Error('Backend server is starting up or overloaded (503)');
+        }
         throw new Error(`HTTP ${response.status}`);
       }
       return await response.json();
     } catch (error) {
-      // Fallback if backend is not available
+      // Fallback if backend is not available with actionable message
       return {
         backend: {
           running: false,
           pid: null,
           port: 8001,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: getDiagnosticsErrorMessage(error),
         },
         python_found: false,
         python_version: null,

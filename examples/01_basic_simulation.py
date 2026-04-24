@@ -6,9 +6,18 @@ This example demonstrates how to:
 2. Load the MuJoCo engine
 3. Run a basic simulation loop
 4. Save results
+
+Usage::
+
+    python3 examples/01_basic_simulation.py
 """
 
+import sys
 import time
+from pathlib import Path
+
+# Allow running from repo root without installing the package
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.data_io.output_manager import OutputManager

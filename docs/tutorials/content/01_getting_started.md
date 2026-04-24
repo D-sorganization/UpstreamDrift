@@ -24,7 +24,7 @@ By the end of this tutorial, you will:
 
 \`\`\`bash
 git clone https://github.com/dieterolson/UpstreamDrift.git
-cd Golf_Modeling_Suite
+cd UpstreamDrift
 git lfs install && git lfs pull
 \`\`\`
 
@@ -54,7 +54,7 @@ Installation verified successfully!
 ### Launch the Unified GUI
 
 \`\`\`bash
-python launchers/golf_launcher.py
+python src/launchers/golf_launcher.py
 \`\`\`
 
 ### Select Engine and Model

@@ -5,9 +5,19 @@ This example demonstrates how to:
 1. Access and modify physics parameters
 2. Run a parameter sweep simulation
 3. Export detailed analysis results
+
+Usage::
+
+    python3 examples/02_parameter_sweeps.py
 """
 
+import sys
+from pathlib import Path
+
 import numpy as np
+
+# Allow running from repo root without installing the package
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.data_io.path_utils import get_repo_root

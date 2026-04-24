@@ -103,19 +103,54 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             raise
 
     def load_from_path(self, path: str) -> None:
-        """Load model from file path."""
+        """Load model from file path.
+
+        Parameters
+        ----------
+        path : str
+            Path to the MuJoCo XML model file.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        ValueError
+            If the path is outside allowed directories or file format is invalid.
+        """
         try:
             # Security: Validate path is within allowed directories
             # Hardening against path traversal (F-004)
             resolved = validate_path(path, ALLOWED_MODEL_DIRS, strict=True)
             path_str = str(resolved)
 
+            # Check if file exists before attempting to parse
+            if not Path(path_str).exists():
+                raise FileNotFoundError(
+                    f"Model file not found: {path}\n"
+                    f"Expected path: {Path(path_str).resolve()}\n"
+                    f"Supported format: .xml (MuJoCo model files)\n"
+                    f"Allowed directories:\n"
+                    + "\n".join(f"  - {d}" for d in ALLOWED_MODEL_DIRS)
+                )
+
             self.model = mujoco.MjModel.from_xml_path(path_str)
             self.data = mujoco.MjData(self.model)
             self.xml_path = path_str
-        except (RuntimeError, TypeError, ValueError) as e:
-            logger.error("Failed to load model from path %s: %s", path, e)
+            logger.info("Successfully loaded MuJoCo model from: %s", path_str)
+        except FileNotFoundError:
             raise
+        except (RuntimeError, TypeError, ValueError) as e:
+            error_msg = (
+                f"Failed to load MuJoCo model from: {path}\n"
+                f"Error: {e}\n"
+                f"Possible causes:\n"
+                f"  - Invalid XML syntax or format\n"
+                f"  - Missing mesh files referenced in the model\n"
+                f"  - Incompatible MuJoCo model version\n"
+                f"Check the file at: {Path(path).resolve()}"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg) from e
 
     def set_model_data(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         """Set model and data manually (e.g. from async loader)."""

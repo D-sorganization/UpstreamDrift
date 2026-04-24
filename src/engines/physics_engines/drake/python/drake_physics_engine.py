@@ -120,12 +120,33 @@ class DrakePhysicsEngine(PhysicsEngine):
             self._is_finalized = True
 
     def load_from_path(self, path: str) -> None:
-        """Load model from file path (URDF, SDF, MJCF if supported)."""
-        # Drake Parser supports SDF, URDF, MJCF (experimental)
+        """Load model from file path (URDF, SDF, MJCF if supported).
+
+        Parameters
+        ----------
+        path : str
+            Path to the model file (URDF, SDF, or MJCF format).
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        ValueError
+            If the file format is not supported or the file is invalid.
+        """
         if not (path is not None):
             raise ValueError("path must be provided")
-        if not (path is not None):
-            raise ValueError("path must be provided")
+
+        # Check if file exists before trying to parse
+        file_path = Path(path)
+        if not file_path.exists():
+            raise FileNotFoundError(
+                f"Model file not found: {path}\n"
+                f"Expected path: {file_path.resolve()}\n"
+                f"Supported formats: .urdf, .sdf, .mjcf\n"
+                f"Check that the file exists at the expected location."
+            )
+
         parser = Parser(self.plant)
         # We can try to infer model name from path
         model_name = path.split("/")[-1].split(".")[0]
@@ -133,10 +154,19 @@ class DrakePhysicsEngine(PhysicsEngine):
 
         try:
             # Add model to plant
-            parser.AddModels(Path(path))  # Path() for pydrake PathLike requirement
+            parser.AddModels(file_path)  # Path() for pydrake PathLike requirement
         except (RuntimeError, TypeError, ValueError) as e:
-            logger.error("Failed to load Drake model from path %s: %s", path, e)
-            raise
+            error_msg = (
+                f"Failed to load Drake model from path: {path}\n"
+                f"Error: {e}\n"
+                f"Possible causes:\n"
+                f"  - Invalid XML/file format\n"
+                f"  - Missing mesh files referenced in the model\n"
+                f"  - Invalid model specification\n"
+                f"Check the file at: {file_path.resolve()}"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg) from e
 
         # We don't finalize here immediately to allow adding more models if needed?
         # But protocol implies "load then run".

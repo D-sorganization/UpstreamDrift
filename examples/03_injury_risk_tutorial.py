@@ -10,7 +10,17 @@ We will:
 2. Create synthetic swing data (mocking a biomechanical analysis)
 3. Calculate spinal and joint risks
 4. Generate a comprehensive report
+
+Usage::
+
+    python3 examples/03_injury_risk_tutorial.py
 """
+
+import sys
+from pathlib import Path
+
+# Allow running from repo root without installing the package
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # Setup logger for tutorial
 from src.shared.python.injury.injury_risk import (
