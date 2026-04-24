@@ -577,7 +577,7 @@ Throughout this manual, the following conventions are used:
 
   ```python
   # Python example
-  from src.shared.python.engine_manager import EngineManager
+  from src.shared.python.engine_core.engine_manager import EngineManager
   manager = EngineManager()
   ```
 
@@ -763,7 +763,7 @@ implements this protocol, translating generic calls into engine-specific API
 invocations. This allows analysis code to remain engine-agnostic:
 
 ```python
-from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_manager import EngineManager
 
 manager = EngineManager()
 engine = manager.get_engine("mujoco")  # or "drake", "pinocchio", etc.
@@ -1792,7 +1792,7 @@ For custom simulations, use the Python API directly:
 """Minimal simulation example."""
 
 import numpy as np
-from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_manager import EngineManager
 
 # 1. Initialize the engine
 manager = EngineManager()
@@ -2015,7 +2015,7 @@ which watches for file changes and automatically restarts.
 This workflow runs the same simulation on multiple engines and compares results:
 
 ```python
-from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_manager import EngineManager
 from src.shared.python.comparative_analysis import ComparativeAnalysis
 
 manager = EngineManager()

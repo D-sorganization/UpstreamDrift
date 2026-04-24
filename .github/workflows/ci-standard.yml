@@ -188,6 +188,9 @@ jobs:
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 
+      - name: Tutorial Import Check
+        run: python3 scripts/check_tutorial_imports.py
+
       - name: Module Size Budget Check
         run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
 
