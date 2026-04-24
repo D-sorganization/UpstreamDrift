@@ -41,7 +41,7 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 
 ### Advanced Analysis
 
-- **Motion Capture**: Load and retarget mocap data (CSV, JSON, C3D) using OpenPose or MediaPipe.
+- **Data Explorer**: Import, filter, and visualize CSV/JSON simulation datasets in the browser.
 - **Model Explorer**: Interactive browser for Humanoid, Pendulum, and Robotic models.
 - **Inverse Kinematics**: Professional IK solver with nullspace optimization
 - **Inverse Dynamics**: Complete torque computation with force decomposition
@@ -233,6 +233,18 @@ UpstreamDrift/
 ├── shared/                      # Shared assets and vendored dependencies
 └── tools/                       # Root-level helper scripts and workflows
 ```
+
+## Roadmap
+
+The following features have UI scaffolding but require backend implementation before
+they are exposed to users. Tracked in [#3166](https://github.com/D-sorganization/UpstreamDrift/issues/3166).
+
+- **Motion Capture** (`/tools/motion-capture`): Real-time skeleton visualization using
+  C3D, OpenPose, and MediaPipe sources. Backend REST API not yet implemented.
+- **Video Analyzer** (`/tools/video-analyzer`): Frame-by-frame swing video analysis with
+  pose-estimation overlays. Backend REST API not yet implemented.
+- **Putting Green Simulator** (`/tools/putting-green`): Physics-based putt trajectory
+  simulation with scatter analysis. Backend REST API not yet implemented.
 
 ## Contributing
 

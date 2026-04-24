@@ -6,7 +6,7 @@ Provides REST endpoints for the Motion Capture tool page:
 - Recording/playback control
 - Frame-by-frame joint data
 
-See issue #1206
+Backend tracked in #3166.
 """
 
 from __future__ import annotations
@@ -151,7 +151,7 @@ _session_state: dict[str, int] = {"counter": 0}
 async def list_capture_sources() -> list[CaptureSource]:
     """List available motion capture sources.
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     sources = [
         CaptureSource(
@@ -187,7 +187,7 @@ async def list_capture_sources() -> list[CaptureSource]:
 async def get_skeleton_template(source_type: str) -> list[JointData]:
     """Get the skeleton joint template for a given source type.
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     if source_type == "mediapipe":
         skeleton = _MEDIAPIPE_SKELETON
@@ -218,7 +218,7 @@ async def start_capture_session(
 ) -> CaptureSessionResponse:
     """Start a new motion capture session.
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     valid_sources = {"mediapipe", "openpose", "c3d"}
     if request.source_type not in valid_sources:
@@ -253,7 +253,7 @@ async def start_capture_session(
 async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
     """Stop an active capture session and save the recording.
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     if session_id not in _sessions:
         raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found")
@@ -281,7 +281,7 @@ async def stop_capture_session(session_id: str) -> CaptureSessionResponse:
 async def list_recordings() -> list[RecordingInfo]:
     """List available recordings.
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     result = []
     for name, rec in _recordings.items():
@@ -315,7 +315,7 @@ async def list_recordings() -> list[RecordingInfo]:
 async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
     """Control recording playback (play, pause, stop, seek).
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     if request.recording_name not in _recordings:
         raise HTTPException(
@@ -364,7 +364,7 @@ async def control_playback(request: PlaybackRequest) -> PlaybackResponse:
 async def get_frame(recording_name: str, frame_index: int) -> SkeletonFrame:
     """Get skeleton data for a specific frame.
 
-    See issue #1206
+    Backend tracked in #3166.
     """
     if recording_name not in _recordings:
         raise HTTPException(

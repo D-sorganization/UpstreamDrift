@@ -1,7 +1,7 @@
 /**
  * Tests for MotionCapture page.
  *
- * See issue #1206
+ * WIP: backend not yet implemented. Tracked in #3166.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -12,7 +12,7 @@ import type {
   RecordingInfo,
   CaptureSession,
   PlaybackState,
-} from './MotionCapture';
+} from './_wip/MotionCapture';
 
 describe('MotionCapture data structures', () => {
   it('should parse capture sources', () => {

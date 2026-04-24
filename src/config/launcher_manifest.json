@@ -129,8 +129,8 @@
             "path": "src/engines/physics_engines/putting_green/python/simulator.py",
             "engine_type": "putting_green",
             "logo": "putting_green.svg",
-            "status": "simulator",
-            "web_route": "/tools/putting-green",
+            "status": "wip",
+            "wip_note": "Web UI hidden until backend is implemented. Tracked in #3166.",
             "capabilities": [
                 "surface_modeling",
                 "ball_physics",
@@ -162,8 +162,8 @@
             "type": "special_app",
             "path": "src/launchers/motion_capture_launcher.py",
             "logo": "c3d_icon.svg",
-            "status": "utility",
-            "web_route": "/tools/motion-capture",
+            "status": "wip",
+            "wip_note": "Web UI hidden until backend is implemented. Tracked in #3166.",
             "capabilities": [
                 "c3d_viewer",
                 "openpose",
@@ -180,8 +180,8 @@
             "type": "special_app",
             "path": "src/tools/video_analyzer/launch_video_analyzer.py",
             "logo": "video_analyzer.svg",
-            "status": "utility",
-            "web_route": "/tools/video-analyzer",
+            "status": "wip",
+            "wip_note": "Web UI hidden until backend is implemented. Tracked in #3166.",
             "capabilities": [
                 "video_processing",
                 "pose_estimation",

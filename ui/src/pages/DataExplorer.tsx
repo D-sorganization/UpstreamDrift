@@ -2,14 +2,13 @@
  * DataExplorer - Dataset browser with filtering, sorting, and chart views.
  *
  * Supports CSV/JSON import, tabular data grid view, summary statistics,
- * and column filtering. Connects to the data-explorer REST API.
- *
- * See issue #1206
+ * and column filtering. Connects to the data-explorer REST API at
+ * /api/tools/data-explorer/*.
  */
 
 import { useState, useCallback, useEffect } from 'react';
 
-/** Dataset info from the API. See issue #1206 */
+/** Dataset info from the API. */
 export interface DatasetInfo {
   name: string;
   path: string;
@@ -18,7 +17,7 @@ export interface DatasetInfo {
   columns: string[];
 }
 
-/** Dataset preview response. See issue #1206 */
+/** Dataset preview response. */
 export interface DatasetPreview {
   name: string;
   columns: string[];
@@ -27,7 +26,7 @@ export interface DatasetPreview {
   format: string;
 }
 
-/** Column statistics. See issue #1206 */
+/** Column statistics. */
 export interface ColumnStats {
   min: number | null;
   max: number | null;
@@ -35,7 +34,7 @@ export interface ColumnStats {
   count: number;
 }
 
-/** Dataset statistics response. See issue #1206 */
+/** Dataset statistics response. */
 export interface DatasetStats {
   name: string;
   columns: string[];
@@ -167,8 +166,6 @@ function StatsPanel({ stats }: { stats: DatasetStats | null }) {
 
 /**
  * DataExplorerPage - Full data explorer tool page.
- *
- * See issue #1206
  */
 export function DataExplorerPage() {
   const [datasets, setDatasets] = useState<DatasetInfo[]>([]);

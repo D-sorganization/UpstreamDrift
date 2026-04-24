@@ -1,16 +1,15 @@
+// WIP: Backend not yet implemented. Tracked in #3166.
 /**
  * MotionCapture - Motion capture tool page with skeleton visualization.
  *
  * Provides capture source selection (C3D, OpenPose, MediaPipe),
  * 2D/3D skeleton visualization, and recording/playback controls.
  * Connects to the motion-capture REST API.
- *
- * See issue #1206
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 
-/** Capture source from the API. See issue #1206 */
+/** Capture source from the API. Backend tracked in #3166. */
 export interface CaptureSource {
   id: string;
   name: string;
@@ -19,7 +18,7 @@ export interface CaptureSource {
   description: string;
 }
 
-/** Joint data for skeleton rendering. See issue #1206 */
+/** Joint data for skeleton rendering. Backend tracked in #3166. */
 export interface JointData {
   name: string;
   position: number[];
@@ -27,7 +26,7 @@ export interface JointData {
   parent: string | null;
 }
 
-/** Recording metadata. See issue #1206 */
+/** Recording metadata. Backend tracked in #3166. */
 export interface RecordingInfo {
   name: string;
   source_type: string;
@@ -37,7 +36,7 @@ export interface RecordingInfo {
   joint_names: string[];
 }
 
-/** Capture session state. See issue #1206 */
+/** Capture session state. Backend tracked in #3166. */
 export interface CaptureSession {
   session_id: string;
   status: string;
@@ -45,7 +44,7 @@ export interface CaptureSession {
   message: string;
 }
 
-/** Playback state. See issue #1206 */
+/** Playback state. Backend tracked in #3166. */
 export interface PlaybackState {
   recording_name: string;
   status: string;
@@ -173,8 +172,6 @@ function SkeletonRenderer({
 
 /**
  * MotionCapturePage - Full motion capture tool page.
- *
- * See issue #1206
  */
 export function MotionCapturePage() {
   const [sources, setSources] = useState<CaptureSource[]>([]);

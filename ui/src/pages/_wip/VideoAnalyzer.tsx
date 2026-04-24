@@ -1,15 +1,14 @@
+// WIP: Backend not yet implemented. Tracked in #3166.
 /**
  * VideoAnalyzer - Video-based swing analysis tool page.
  *
  * Provides video upload/playback, frame-by-frame analysis with overlay
  * controls, and integration with existing REST video endpoints.
- *
- * See issue #1206
  */
 
 import { useState, useCallback, useRef } from 'react';
 
-/** Video analysis result from the API. See issue #1206 */
+/** Video analysis result from the API. Backend tracked in #3166. */
 export interface VideoAnalysisResult {
   filename: string;
   total_frames: number;
@@ -19,7 +18,7 @@ export interface VideoAnalysisResult {
   pose_data: PoseFrame[];
 }
 
-/** A single pose frame. See issue #1206 */
+/** A single pose frame. Backend tracked in #3166. */
 export interface PoseFrame {
   timestamp: number;
   confidence: number;
@@ -27,7 +26,7 @@ export interface PoseFrame {
   keypoints: Record<string, number[]>;
 }
 
-/** Async task status. See issue #1206 */
+/** Async task status. Backend tracked in #3166. */
 export interface TaskStatus {
   task_id: string;
   status: 'started' | 'processing' | 'completed' | 'failed';
@@ -118,8 +117,6 @@ function JointAngleChart({
 
 /**
  * VideoAnalyzerPage - Full video analysis tool page.
- *
- * See issue #1206
  */
 export function VideoAnalyzerPage() {
   const [file, setFile] = useState<File | null>(null);

@@ -1,16 +1,15 @@
+// WIP: Backend not yet implemented. Tracked in #3166.
 /**
  * PuttingGreen - Interactive putting green simulator page.
  *
  * Provides 2D green visualization with putt trajectory rendering,
  * slope contours, and speed/slope/distance controls. Connects to
  * the FastAPI putting green simulation engine.
- *
- * See issue #1206
  */
 
 import { useState, useCallback } from 'react';
 
-/** Putt simulation result from the API. See issue #1206 */
+/** Putt simulation result from the API. Backend tracked in #3166. */
 export interface PuttResult {
   positions: number[][];
   velocities: number[][];
@@ -21,7 +20,7 @@ export interface PuttResult {
   duration: number;
 }
 
-/** Green reading from the API. See issue #1206 */
+/** Green reading from the API. Backend tracked in #3166. */
 export interface GreenReading {
   distance: number;
   total_break: number;
@@ -31,7 +30,7 @@ export interface GreenReading {
   slopes: number[][];
 }
 
-/** Scatter analysis result. See issue #1206 */
+/** Scatter analysis result. Backend tracked in #3166. */
 export interface ScatterResult {
   final_positions: number[][];
   holed_count: number;
@@ -40,7 +39,7 @@ export interface ScatterResult {
   make_percentage: number;
 }
 
-/** Green contour data. See issue #1206 */
+/** Green contour data. Backend tracked in #3166. */
 export interface GreenContour {
   width: number;
   height: number;
@@ -223,8 +222,6 @@ function GreenCanvas({
 
 /**
  * PuttingGreenPage - Full putting green simulator tool page.
- *
- * See issue #1206
  */
 export function PuttingGreenPage() {
   // Putt parameters
