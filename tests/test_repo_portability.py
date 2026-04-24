@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 
-import patch_analyzers
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_PATCH_ANALYZERS_PATH = _REPO_ROOT / "scripts" / "patch_analyzers.py"
+
+# ``patch_analyzers`` moved from the repo root to ``scripts/`` (issue #3070);
+# load it by file path so the test does not depend on ``scripts/`` being on
+# ``sys.path``. The module is *not* registered in ``sys.modules`` so it
+# doesn't pollute other tests.
+_spec = importlib.util.spec_from_file_location("patch_analyzers", _PATCH_ANALYZERS_PATH)
+assert _spec is not None and _spec.loader is not None
+patch_analyzers = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(patch_analyzers)
 
 WORKSTATION_ROOT_LITERAL = "C:/Users/diete/Repositories/UpstreamDrift"
 

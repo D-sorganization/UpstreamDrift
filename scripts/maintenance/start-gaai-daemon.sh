@@ -10,7 +10,7 @@
 #   claude --version   # verify claude is in PATH
 #
 # Usage:
-#   From Windows Git Bash or WSL:
+#   From Windows Git Bash or WSL, from the repository root:
 #     bash scripts/maintenance/start-gaai-daemon.sh            # interactive (status output)
 #     bash scripts/maintenance/start-gaai-daemon.sh --dry-run  # show what would launch, no action
 #     bash scripts/maintenance/start-gaai-daemon.sh --status   # check active sessions
@@ -24,7 +24,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DAEMON_SCRIPT="$REPO_ROOT/.gaai/core/scripts/delivery-daemon.sh"
 
 # ── Preflight checks ──────────────────────────────────────────────────────────

@@ -1,17 +1,25 @@
-"""Tests for the Gemini adapter."""
+"""Tests for the Gemini adapter.
+
+The ``google.generativeai`` stub that this module depends on is installed by
+``conftest.pytest_configure`` (see ``conftest.py`` in this directory), which
+keeps the banned module-level ``sys.modules[...] = MagicMock()`` assignments
+out of test files while still ensuring the stub is present before
+``gemini_adapter`` is imported for the first time.
+"""
+
+from __future__ import annotations
 
 import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-# Mock google.generativeai globally so lazy imports bypass the missing package
-mock_genai_pkg = MagicMock()
-sys.modules["google"] = MagicMock()
-sys.modules["google.generativeai"] = mock_genai_pkg
-sys.modules["google.generativeai.types"] = MagicMock()
+import pytest
 
-from unittest.mock import MagicMock, patch  # noqa: E402
-
-import pytest  # noqa: E402
+from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter
+from src.shared.python.ai.types import (
+    ConversationContext,
+    Message,
+    ProviderCapability,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -23,14 +31,6 @@ def reset_mocks():
 def patch_has_gemini():
     with patch("src.shared.python.ai.adapters.gemini_adapter.HAS_GEMINI", True):
         yield
-
-
-from src.shared.python.ai.adapters.gemini_adapter import GeminiAdapter  # noqa: E402
-from src.shared.python.ai.types import (  # noqa: E402
-    ConversationContext,
-    Message,
-    ProviderCapability,
-)
 
 
 def test_init_missing_package():

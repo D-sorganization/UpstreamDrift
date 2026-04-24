@@ -364,9 +364,10 @@ class OllamaAdapter(BaseAgentAdapter):
         messages: list[dict[str, str]] = []
 
         # Add system prompt
+        expertise = context.expertise_level or context.user_expertise.name.lower()
         system_prompt = self.build_system_prompt(
             tools,
-            context.user_expertise.name.lower(),
+            expertise,
         )
         messages.append(
             {

@@ -5,6 +5,9 @@
 !.env.docker.example
 !.env.*.example
 
+# Claude Code worktrees
+.claude/worktrees/
+
 # Merge conflict artifacts
 *.ours
 *.theirs
@@ -87,6 +90,17 @@ black_report*.txt
 coverage.xml
 coverage.json
 htmlcov/
+
+# Security & quality scan artifacts (CI-generated; should never be committed)
+bandit_results.json
+bandit.json
+pip_audit.json
+semgrep.json
+matlab_quality_report.txt
+
+# One-off scratch files (keep the repo root tidy)
+temp_id.txt
+test.npz
 
 # Test output debris (prevent accumulation at root)
 test_*.txt

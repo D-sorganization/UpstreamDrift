@@ -402,12 +402,12 @@ class OpenAIAdapter(BaseAgentAdapter):
         """
         if context is None:
             raise ValueError("context must be provided")
-        expertise = context.user_expertise.name.lower()
+        expertise = context.expertise_level or context.user_expertise.name.lower()
 
         return (
             f"You are an AI assistant for the Golf Modeling Suite, a research-grade "
             f"biomechanics simulation platform for analyzing golf swings.\n\n"
-            f"Current user expertise level: {expertise}\n\n"
+            f"User expertise level: {expertise}.\n\n"
             f"Your capabilities include:\n"
             f"- Analyzing C3D motion capture data\n"
             f"- Running physics simulations (MuJoCo, Drake, Pinocchio)\n"
@@ -424,7 +424,11 @@ class OpenAIAdapter(BaseAgentAdapter):
             f"1. First, understand what data they have\n"
             f"2. Suggest appropriate analyses for their goals\n"
             f"3. Execute using available tools\n"
-            f"4. Interpret results with scientific rigor"
+            f"4. Interpret results with scientific rigor\n\n"
+            f"When explaining physics/biomechanics terms, use the explain_concept "
+            f"tool to pull canonical UpstreamDrift glossary definitions. Prefer "
+            f"multi-level explanations (beginner -> advanced) based on the "
+            f"user's expertise_level if set."
         )
 
     def _parse_response(self, response: Any) -> AgentResponse:

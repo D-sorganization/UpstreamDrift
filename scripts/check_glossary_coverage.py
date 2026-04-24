@@ -1,13 +1,13 @@
 """Check glossary coverage for physics parameter names.
 
-Scans Python source files under src/ for physics parameter names
-(snake_case identifiers that look like physics quantities) and checks
-whether each one has a corresponding entry in the glossary.
+Scans Python source files under ``src/shared/python/physics/`` for
+``@dataclass``/``pydantic.BaseModel`` field names and reports which ones
+are missing from the glossary.
 
-Exit code 0 if coverage >= threshold, 1 otherwise.
+Per issue #3165, this is an informational report and always exits 0.
 
 Usage:
-    python3 scripts/check_glossary_coverage.py [--threshold 0.3]
+    python3 scripts/check_glossary_coverage.py
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ GLOSSARY_PATH = (
     REPO_ROOT / "src" / "shared" / "python" / "ai" / "data" / "glossary_core.json"
 )
 SRC_ROOT = REPO_ROOT / "src"
+PHYSICS_ROOT = REPO_ROOT / "src" / "shared" / "python" / "physics"
 
 # Patterns that suggest physics parameter names
 _PHYSICS_PATTERN = re.compile(
@@ -41,6 +42,47 @@ _PHYSICS_PATTERN = re.compile(
     r"dynamic_loft|spin_axis|apex|flight_time|trajectory"
     r").*$"
 )
+
+
+def _extract_dataclass_fields(src_root: Path) -> set[str]:
+    """Collect field names from dataclasses / pydantic BaseModels.
+
+    Walks ``src_root`` looking for class bodies marked with the
+    ``@dataclass`` decorator or inheriting from ``BaseModel``, and
+    returns their annotated field names.
+    """
+    fields: set[str] = set()
+    if not src_root.exists():
+        return fields
+    for py_file in src_root.rglob("*.py"):
+        try:
+            source = py_file.read_text(encoding="utf-8", errors="ignore")
+            tree = ast.parse(source, filename=str(py_file))
+        except SyntaxError:
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.ClassDef):
+                continue
+            is_dataclass = any(
+                (isinstance(d, ast.Name) and d.id == "dataclass")
+                or (
+                    isinstance(d, ast.Call)
+                    and isinstance(d.func, ast.Name)
+                    and d.func.id == "dataclass"
+                )
+                for d in node.decorator_list
+            )
+            inherits_basemodel = any(
+                isinstance(b, ast.Name) and b.id == "BaseModel" for b in node.bases
+            )
+            if not (is_dataclass or inherits_basemodel):
+                continue
+            for stmt in node.body:
+                if isinstance(stmt, ast.AnnAssign) and isinstance(
+                    stmt.target, ast.Name
+                ):
+                    fields.add(stmt.target.id)
+    return fields
 
 
 def _load_glossary_keys() -> set[str]:
@@ -93,51 +135,53 @@ def _extract_parameter_names(src_root: Path) -> set[str]:
 
 
 def main() -> None:
-    """Run glossary coverage check."""
+    """Run glossary coverage check (informational, never fails).
+
+    Per issue #3165 this walks ``src/shared/python/physics`` for dataclass
+    and pydantic BaseModel field names, cross-references them against the
+    glossary keys, and prints uncovered field names to stdout. Always
+    exits 0.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--threshold",
-        type=float,
-        default=0.3,
-        help="Minimum fraction of params that must be in glossary (default: 0.3)",
+        "--physics-only",
+        action="store_true",
+        default=True,
+        help=(
+            "Scan only src/shared/python/physics (default True). "
+            "Legacy flag kept for compatibility."
+        ),
     )
-    args = parser.parse_args()
+    _ = parser.parse_args()
 
     glossary_keys = _load_glossary_keys()
     if not glossary_keys:
-        logger.error("No glossary keys loaded — aborting.")
-        sys.exit(1)
+        logger.warning("No glossary keys loaded.")
 
-    param_names = _extract_parameter_names(SRC_ROOT)
-    if not param_names:
-        logger.warning("No physics parameter names found in %s", SRC_ROOT)
+    field_names = _extract_dataclass_fields(PHYSICS_ROOT)
+    if not field_names:
+        logger.info("No dataclass/BaseModel fields found under %s", PHYSICS_ROOT)
         sys.exit(0)
 
-    covered = {p for p in param_names if p in glossary_keys}
-    missing = param_names - covered
+    covered = {p for p in field_names if p in glossary_keys}
+    missing = sorted(field_names - covered)
 
-    coverage = len(covered) / len(param_names)
+    total = len(field_names)
+    coverage_pct = (len(covered) / total * 100) if total else 0.0
     logger.info(
-        "Glossary coverage: %d/%d param names (%.1f%%)",
+        "Glossary coverage (physics/): %d/%d fields (%.1f%%)",
         len(covered),
-        len(param_names),
-        coverage * 100,
+        total,
+        coverage_pct,
     )
 
     if missing:
-        logger.info("Parameters NOT in glossary (%d):", len(missing))
-        for name in sorted(missing):
-            logger.info("  - %s", name)
+        logger.info("Uncovered fields (%d):", len(missing))
+        for name in missing:
+            # Print to stdout so CI logs capture them.
+            sys.stdout.write(f"  - {name}\n")
 
-    if coverage < args.threshold:
-        logger.error(
-            "Coverage %.1f%% is below threshold %.1f%%",
-            coverage * 100,
-            args.threshold * 100,
-        )
-        sys.exit(1)
-
-    logger.info("Glossary coverage check passed.")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

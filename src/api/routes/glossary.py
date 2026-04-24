@@ -52,16 +52,29 @@ def _build_glossary_index() -> dict[str, dict[str, Any]]:
     return {entry["key"]: entry for entry in _load_glossary()}
 
 
+_LEVEL_FIELD = {
+    "beginner": "b",
+    "intermediate": "i",
+    "advanced": "a",
+    "expert": "a",
+}
+
+
 @router.get("/glossary/{term_id}")
-async def get_glossary_term(term_id: str) -> dict[str, Any]:
+async def get_glossary_term(term_id: str, level: str = "beginner") -> dict[str, Any]:
     """Return the glossary entry for a physics or biomechanics term.
 
     Args:
         term_id: The snake_case identifier for the term (e.g. ``equations_of_motion``).
+        level: Optional expertise level (``beginner``, ``intermediate``,
+            ``advanced``). Selects which definition text populates the
+            ``definition`` field. Raw entry fields ``b``/``i``/``a`` are
+            always included for backwards compatibility.
 
     Returns:
         Glossary entry with fields: key, term, cat, b (beginner),
-        i (intermediate), a (advanced), f (formula), r (related terms).
+        i (intermediate), a (advanced), f (formula), r (related terms),
+        definition (level-selected), level, term_id, related_terms.
 
     Raises:
         HTTPException 404: If the term is not found in the glossary.
@@ -76,4 +89,14 @@ async def get_glossary_term(term_id: str) -> dict[str, Any]:
             status_code=404,
             detail=f"Glossary term not found: {term_id}",
         )
-    return entry
+
+    level_normalized = (level or "beginner").strip().lower()
+    field = _LEVEL_FIELD.get(level_normalized, "b")
+    definition = entry.get(field) or entry.get("b") or entry.get("i") or ""
+
+    response: dict[str, Any] = dict(entry)
+    response["term_id"] = entry["key"]
+    response["level"] = level_normalized
+    response["definition"] = definition
+    response["related_terms"] = entry.get("r", [])
+    return response

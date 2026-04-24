@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import contextlib
+import json
 from typing import Any
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 
+from src.api.services.chat_service import EVENT_CHUNK_PREFIX
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -71,8 +73,17 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
                     await websocket.send_json({"type": "error", "detail": str(e)})
                     continue
 
-                # Stream response chunks
+                # Stream response chunks. Structured events (tool_call_*,
+                # context, tool_error) arrive with a sentinel prefix and are
+                # forwarded to the client as their declared event type.
                 async for chunk in chat_service.stream_response(session_id):
+                    if chunk.startswith(EVENT_CHUNK_PREFIX):
+                        try:
+                            event = json.loads(chunk[len(EVENT_CHUNK_PREFIX) :])
+                            await websocket.send_json(event)
+                            continue
+                        except json.JSONDecodeError:
+                            pass
                     await websocket.send_json({"type": "chunk", "content": chunk})
 
                 await websocket.send_json(

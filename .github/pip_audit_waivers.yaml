@@ -1,0 +1,63 @@
+# pip-audit CVE waivers (issue #3076).
+#
+# Every entry MUST have:
+#   - cve:     CVE identifier (or GHSA-... ID accepted by pip-audit)
+#   - package: affected package name (informational)
+#   - reason:  one-line justification for the waiver
+#   - expires: YYYY-MM-DD date (UTC). After this date the waiver is INACTIVE
+#              and the pip-audit CI step will fail on the CVE until the
+#              waiver is renewed (with fresh justification) or the dep is
+#              bumped.
+#
+# Review cadence: these waivers are re-evaluated on every release AND at
+# least quarterly. Keep expiry dates within 30-90 days of entry.
+#
+# The CI step in ci-standard.yml consumes this file via
+# scripts/pip_audit_check.py, which emits --ignore-vuln flags for active
+# waivers only. tests/security/test_pip_audit_waivers.py enforces the
+# schema (including a present expiry).
+
+waivers:
+  - cve: CVE-2024-23342
+    package: ecdsa
+    reason: >-
+      No fix version available upstream; timing side-channel only exploitable
+      via network-adjacent attackers on signing keys this project does not use.
+    expires: "2026-07-24"
+
+  - cve: CVE-2026-0994
+    package: protobuf
+    reason: >-
+      No fix available. Transitive dep pulled in by dm_control/mujoco; patched
+      upstream requires a coordinated mujoco release.
+    expires: "2026-07-24"
+
+  - cve: CVE-2026-1703
+    package: pip
+    reason: >-
+      pip itself is not part of the runtime supply chain; GHA runners pin
+      a newer pip at job start. Kept as waiver until the base image is
+      updated.
+    expires: "2026-06-24"
+
+  - cve: CVE-2026-4539
+    package: pygments
+    reason: >-
+      No fix version available at time of writing. Pygments is used only
+      at build-time for docs; no network input.
+    expires: "2026-07-24"
+
+  - cve: CVE-2026-40192
+    package: pillow
+    reason: >-
+      Transitive dep via opencv/imageio; fix is in pillow>=12.2.0 which is
+      incompatible with our pinned imageio. Bump scheduled with issue #3076
+      follow-up.
+    expires: "2026-07-24"
+
+  - cve: CVE-2026-28684
+    package: dm-tree
+    reason: >-
+      No fix version available upstream; affects only process-local
+      computation, not network-facing inputs.
+    expires: "2026-07-24"

@@ -25,6 +25,15 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.core.error_utils import InvalidRequestError
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+# Tool-call runtime guards (issue #3162).
+TOOL_CALL_TIMEOUT_S = 30.0
+MAX_TOOL_CALLS_PER_TURN = 5
+
+# Chunks beginning with this marker carry a JSON-encoded structured event
+# ({"type": ..., ...}). Downstream (chat_ws) unpacks and forwards them as
+# typed WebSocket frames; plain text chunks are emitted as "chunk" frames.
+EVENT_CHUNK_PREFIX = "\x00EVENT\x00"
+
 if TYPE_CHECKING:
     from src.shared.python.ai.adapters.base import BaseAgentAdapter
     from src.shared.python.ai.types import ConversationContext
@@ -248,6 +257,7 @@ class ChatService:
             )
 
         # Prepend RAG-retrieved docs relevant to the last user message
+        rag_sources: list[dict[str, str]] = []
         if self._rag_store is not None:
             last_user_msg = next(
                 (m.content for m in reversed(ctx.messages) if m.role == "user"),
@@ -265,6 +275,13 @@ class ChatService:
                             "Relevant documentation retrieved for this query:\n\n"
                             + snippets
                         )
+                        for doc, _score in rag_results:
+                            rag_sources.append(
+                                {
+                                    "path": doc.metadata.get("source", doc.id),
+                                    "excerpt": doc.content[:400],
+                                }
+                            )
                         logger.debug(
                             "RAG: prepended %d docs for session %s",
                             len(rag_results),
@@ -290,6 +307,7 @@ class ChatService:
             session_id=ctx.session_id,
             messages=temp_messages,
             user_expertise=ctx.user_expertise,
+            expertise_level=ctx.expertise_level,
             metadata=ctx.metadata,
         )
 
@@ -303,65 +321,141 @@ class ChatService:
 
         chunk_queue: queue.Queue[str | None] = queue.Queue()
 
-        def _stream_to_queue() -> None:
-            """Stream adapter chunks into queue; execute any tool calls inline."""
-            try:
-                pending_tool_calls: dict[str, Any] = {}
-                for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
-                    "",  # message already in context
-                    temp_ctx,
-                    tool_declarations,
-                ):
-                    if chunk.content:
-                        chunk_queue.put(chunk.content)
-                        full_response.append(chunk.content)
-                    if chunk.tool_call_delta:
-                        delta = chunk.tool_call_delta
-                        # Support both OpenAI-style nested format
-                        # {"tool_calls": [{"id": ..., "name": ..., "arguments": ...}]}
-                        # and flat format {"id": ..., "name": ..., "arguments": ...}.
-                        entries: list[dict[str, Any]] = delta.get("tool_calls") or [
-                            delta
-                        ]
-                        for entry in entries:
-                            tc_id = entry.get("id", "")
-                            if tc_id and tc_id not in pending_tool_calls:
-                                pending_tool_calls[tc_id] = {
-                                    "name": entry.get("name", ""),
-                                    "arguments_raw": entry.get("arguments", ""),
-                                }
-                            elif tc_id:
-                                pending_tool_calls[tc_id]["arguments_raw"] += entry.get(
-                                    "arguments", ""
-                                )
-                    if chunk.is_final and pending_tool_calls:
-                        for tc_id, tc_data in pending_tool_calls.items():
-                            try:
-                                args = json.loads(tc_data["arguments_raw"] or "{}")
-                            except (ValueError, KeyError):
-                                args = {}
-                            try:
-                                tool_result = self._tool_registry.execute(
-                                    tc_data["name"], args, tool_call_id=tc_id
-                                )
-                                result_text = (
-                                    str(tool_result.result)
-                                    if tool_result.success
-                                    else f"Tool error: {tool_result.error}"
-                                )
-                            except ToolExecutionError as te:
-                                logger.warning("Tool not found: %s", tc_data["name"])
-                                result_text = f"Tool error: {te}"
-                            # Persist result to both temp_ctx and real ctx so
-                            # subsequent turns can see it, and stream it to caller.
-                            temp_ctx.add_tool_result(tc_id, result_text)
-                            ctx.add_tool_result(tc_id, result_text)
-                            chunk_queue.put(result_text)
-                            full_response.append(result_text)
-                            logger.info(
-                                "Tool call executed: %s",
-                                tc_data["name"],
+        # Emit the RAG context event up front (before the model response).
+        if rag_sources:
+            chunk_queue.put(
+                EVENT_CHUNK_PREFIX
+                + json.dumps({"type": "context", "sources": rag_sources})
+            )
+
+        def _emit_event(event: dict[str, Any]) -> None:
+            chunk_queue.put(EVENT_CHUNK_PREFIX + json.dumps(event))
+
+        def _run_tool(tc_id: str, name: str, args: dict[str, Any]) -> tuple[bool, str]:
+            """Run a tool under a timeout; return (ok, text)."""
+            import concurrent.futures
+
+            def _call() -> Any:
+                return self._tool_registry.execute(name, args, tool_call_id=tc_id)
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(_call)
+                try:
+                    tool_result = future.result(timeout=TOOL_CALL_TIMEOUT_S)
+                except concurrent.futures.TimeoutError as te:
+                    _emit_event(
+                        {
+                            "type": "tool_error",
+                            "tool": name,
+                            "detail": (f"tool timed out after {TOOL_CALL_TIMEOUT_S}s"),
+                        }
+                    )
+                    future.cancel()
+                    return False, f"Tool timeout: {te}"
+                except ToolExecutionError as te:
+                    logger.warning("Tool not found: %s", name)
+                    _emit_event({"type": "tool_error", "tool": name, "detail": str(te)})
+                    return False, f"Tool error: {te}"
+                except (RuntimeError, ValueError) as exc:
+                    _emit_event(
+                        {"type": "tool_error", "tool": name, "detail": str(exc)}
+                    )
+                    return False, f"Tool error: {exc}"
+
+            if tool_result.success:
+                _emit_event(
+                    {
+                        "type": "tool_call_result",
+                        "tool": name,
+                        "result": tool_result.result,
+                    }
+                )
+                return True, str(tool_result.result)
+            _emit_event(
+                {
+                    "type": "tool_error",
+                    "tool": name,
+                    "detail": str(tool_result.error),
+                }
+            )
+            return False, f"Tool error: {tool_result.error}"
+
+        def _stream_once(current_ctx: Any) -> list[dict[str, Any]]:
+            """Stream one adapter pass; return any tool calls that need running."""
+            pending_tool_calls: dict[str, Any] = {}
+            tool_call_order: list[str] = []
+            for chunk in self._adapter.stream_response(  # type: ignore[union-attr]
+                "",
+                current_ctx,
+                tool_declarations,
+            ):
+                if chunk.content:
+                    chunk_queue.put(chunk.content)
+                    full_response.append(chunk.content)
+                if chunk.tool_call_delta:
+                    delta = chunk.tool_call_delta
+                    entries: list[dict[str, Any]] = delta.get("tool_calls") or [delta]
+                    for entry in entries:
+                        tc_id = entry.get("id", "")
+                        if tc_id and tc_id not in pending_tool_calls:
+                            pending_tool_calls[tc_id] = {
+                                "name": entry.get("name", ""),
+                                "arguments_raw": entry.get("arguments", ""),
+                            }
+                            tool_call_order.append(tc_id)
+                        elif tc_id:
+                            pending_tool_calls[tc_id]["arguments_raw"] += entry.get(
+                                "arguments", ""
                             )
+            return [
+                {"id": tc_id, **pending_tool_calls[tc_id]} for tc_id in tool_call_order
+            ]
+
+        def _stream_to_queue() -> None:
+            """Stream adapter chunks; execute tool calls with timeout + loop-guard."""
+            try:
+                total_calls = 0
+                passes = 0
+                max_passes = MAX_TOOL_CALLS_PER_TURN + 1
+                while passes < max_passes:
+                    passes += 1
+                    pending = _stream_once(temp_ctx)
+                    if not pending:
+                        break
+                    did_run = False
+                    for tc in pending:
+                        if total_calls >= MAX_TOOL_CALLS_PER_TURN:
+                            _emit_event(
+                                {
+                                    "type": "tool_error",
+                                    "tool": tc["name"],
+                                    "detail": "max tool calls exceeded",
+                                }
+                            )
+                            return
+                        tc_id = tc["id"]
+                        name = tc["name"]
+                        try:
+                            args = json.loads(tc["arguments_raw"] or "{}")
+                        except (ValueError, KeyError):
+                            args = {}
+                        _emit_event(
+                            {
+                                "type": "tool_call_started",
+                                "tool": name,
+                                "args": args,
+                            }
+                        )
+                        ok, text = _run_tool(tc_id, name, args)
+                        temp_ctx.add_tool_result(tc_id, text)
+                        ctx.add_tool_result(tc_id, text)
+                        full_response.append(text)
+                        chunk_queue.put(text)
+                        total_calls += 1
+                        did_run = True
+                        logger.info("Tool call executed: %s (ok=%s)", name, ok)
+                    if not did_run:
+                        break
             except (RuntimeError, ValueError, OSError) as e:
                 chunk_queue.put(f"\n[Error: {e}]")
             finally:

@@ -1,0 +1,25 @@
+{
+  "_comment": "Map from 'action@tag' to 40-char commit SHA. Used by scripts/pin_actions_to_sha.py to rewrite .github/workflows/*.yml so every 'uses:' is SHA-pinned (supply-chain hardening per issue #3066). Regenerate by running 'git ls-remote https://github.com/<owner>/<repo> refs/tags/<tag>^{}' and updating the SHA here. The trailing tag is preserved as a trailing comment in the workflow for human legibility.",
+  "pins": {
+    "actions/cache@v5": "27d5ce7f107fe9357f9df03efb73ab90386fccae",
+    "actions/checkout@v6": "de0fac2e4500dabe0009e67214ff5f5447ce83dd",
+    "actions/download-artifact@v8": "3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c",
+    "actions/github-script@v8": "ed597411d8f924073f98dfc5c65a23a2325f34cd",
+    "actions/setup-node@v4": "49933ea5288caeca8642d1e84afbd3f7d6820020",
+    "actions/setup-python@v6": "a309ff8b426b58ec0e2a45f0f869d46889d02405",
+    "actions/stale@v10": "b5d41d4e1d5dceea10e7104786b73624c18a190f",
+    "actions/upload-artifact@v7": "043fb46d1a93c77aae656e7c1c64a875d1fc6a0a",
+    "aquasecurity/trivy-action@master": "ed142fd0673e97e23eac54620cfb913e5ce36c25",
+    "codecov/codecov-action@v6": "57e3a136b779b570ffcdbf80b3bdc90e7fab3de2",
+    "docker/build-push-action@v7": "bcafcacb16a39f128d818304e6c9c0c18556b85f",
+    "docker/setup-buildx-action@v4": "4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd",
+    "dtolnay/rust-toolchain@stable": "29eef336d9b2848a0b548edc03f92a220660cdb8",
+    "github/codeql-action/upload-sarif@v4": "95e58e9a2cdfd71adc6e0353d5c52f41a045d225",
+    "matlab-actions/run-command@v3": "2970c890bd6dfbc8ba4d640879c4c496dec4e426",
+    "matlab-actions/setup-matlab@v3": "a0180c939fb1a28de13f44f7b778b912384ced1f",
+    "pypa/gh-action-pypi-publish@release/v1": "cef221092ed1bacb1cc03d23a2d87d1d172e277b",
+    "softprops/action-gh-release@v3": "b4309332981a82ec1c5618f44dd2e27cc8bfbfda",
+    "stefanzweifel/git-auto-commit-action@v7": "04702edda442b2e678b25b537cec683a1493fcb9",
+    "tauri-apps/tauri-action@v0": "84b9d35b5fc46c1e45415bdb6144030364f7ebc5"
+  }
+}

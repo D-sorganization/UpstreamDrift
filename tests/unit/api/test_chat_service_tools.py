@@ -197,6 +197,6 @@ class TestStreamResponseToolCallHandling:
 
         # Should complete without raising
         result = asyncio.get_event_loop().run_until_complete(_run())
-        # The error is surfaced as a text chunk
-        combined = "".join(result)
-        assert "Error" in combined or combined == ""
+        # The error is surfaced as an event or text chunk
+        combined = "".join(result).lower()
+        assert "error" in combined or combined == ""

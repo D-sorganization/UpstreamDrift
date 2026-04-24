@@ -7,15 +7,21 @@ import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
 import { ChatPanel } from './components/ai/ChatPanel';
+import { ExpertiseLevelDropdown } from './components/ui/ExpertiseLevelDropdown';
 import { useUIStore } from './stores';
 
 function App() {
   const helpOpen = useUIStore((s) => s.helpOpen);
+  const helpTopicId = useUIStore((s) => s.helpTopicId);
   const setHelpOpen = useUIStore((s) => s.setHelpOpen);
 
   return (
     <BrowserRouter>
       <ToastProvider>
+        {/* Thin global header (#3165) */}
+        <header className="fixed top-0 right-0 z-40 flex items-center gap-2 p-2">
+          <ExpertiseLevelDropdown />
+        </header>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/simulation" element={<SimulationPage />} />
@@ -25,7 +31,11 @@ function App() {
               backends are implemented. Tracked in #3166. */}
         </Routes>
         <DiagnosticsPanel />
-        <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+        <HelpPanel
+          isOpen={helpOpen}
+          initialTopicId={helpTopicId ?? undefined}
+          onClose={() => setHelpOpen(false)}
+        />
         <ChatPanel />
       </ToastProvider>
     </BrowserRouter>

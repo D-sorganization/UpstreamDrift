@@ -64,7 +64,7 @@ jobs:
     if: needs.check-mention.outputs.should_run == 'true' && !github.event.issue.pull_request
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           fetch-depth: 0
 

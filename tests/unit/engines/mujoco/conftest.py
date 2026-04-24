@@ -2,42 +2,42 @@
 
 Path configuration is centralized in pyproject.toml [tool.pytest.ini_options].
 This follows DRY principles from The Pragmatic Programmer.
+
+Optional-dependency stubs (``cv2``, ``imageio``, ``mujoco``) are installed in
+``pytest_configure`` so they are available before any test module imports
+``src.engines.physics_engines.mujoco.*`` — which in turn does ``import cv2``
+and ``import imageio`` lazily. Stubs are removed in ``pytest_unconfigure``
+to avoid leaking across sessions. This replaces the module-level
+``sys.modules[...] = MagicMock()`` pattern banned by CLAUDE.md.
 """
 
 from __future__ import annotations
 
-import contextlib
-from importlib.machinery import ModuleSpec
+import sys
 from importlib.util import find_spec
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-# If mujoco is not installed, install a mock at collection time so that test
-# modules that do ``import mujoco`` at the top level can be collected.
-# patch.dict via contextlib.ExitStack ensures the mock is removed cleanly when
-# pytest exits via pytest_unconfigure, preventing leakage to other processes.
-_mujoco_mock_stack = contextlib.ExitStack()
+from tests._mocks.physics_stubs import mujoco_cv_stubs
 
-if find_spec("mujoco") is None:
-    _mujoco_mock = MagicMock()
-    # importlib.util.find_spec() raises ValueError when __spec__ is a MagicMock.
-    # Set a proper ModuleSpec so that other test modules that call find_spec("mujoco")
-    # at collection time (e.g. to skip tests) do not raise ValueError.
-    _mujoco_mock.__spec__ = ModuleSpec("mujoco", None)
-    _mujoco_viewer_mock = MagicMock()
-    _mujoco_viewer_mock.__spec__ = ModuleSpec("mujoco.viewer", None)
-    _mujoco_mock_stack.enter_context(
-        patch.dict(
-            "sys.modules",
-            {
-                "mujoco": _mujoco_mock,
-                "mujoco.viewer": _mujoco_viewer_mock,
-            },
-        )
-    )
+_installed_keys: list[str] = []
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    """Install MuJoCo video-export optional-dependency stubs."""
+    stubs: dict = dict(mujoco_cv_stubs())
+    if find_spec("mujoco") is None:
+        stubs.setdefault("mujoco", MagicMock())
+        stubs.setdefault("mujoco.viewer", MagicMock())
+    for key, value in stubs.items():
+        if key not in sys.modules:
+            sys.modules[key] = value
+            _installed_keys.append(key)
 
 
 def pytest_unconfigure(config: pytest.Config) -> None:
-    """Remove mujoco mock installed at collection time."""
-    _mujoco_mock_stack.close()
+    """Remove stubs installed by :func:`pytest_configure`."""
+    while _installed_keys:
+        key = _installed_keys.pop()
+        sys.modules.pop(key, None)

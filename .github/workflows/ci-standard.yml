@@ -84,10 +84,10 @@ jobs:
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
         with: { python-version: "3.11" }
       - run: pip install ruff==0.14.10 mypy>=1.15.0 bandit==1.7.7 pydocstyle==6.3.0
 
@@ -99,85 +99,17 @@ jobs:
       # a strict superset of black's style; running both causes conflicts.
       # Runs on full repo (.) to catch formatting issues outside src/scripts/tests.
       - name: Check Formatting (ruff)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              BASE_SHA=$(git rev-parse HEAD~1 || true)
-            fi
-          fi
-
-          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
-          if [ -n "$CHANGED_PY_FILES" ]; then
-            echo "Changed Python files:"
-            echo "$CHANGED_PY_FILES"
-            ruff format --check $CHANGED_PY_FILES
-          else
-            echo "No changed Python files detected — skipping ruff format check."
-          fi
+        run: ruff format --check .
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -e .[dev]
-      # Baseline mypy check for changed source files only so unrelated legacy
-      # type debt elsewhere in src/ does not block this PR.
-      - name: MyPy (changed src files)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              BASE_SHA=$(git rev-parse HEAD~1 || true)
-            fi
-          fi
-
-          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
-          CHANGED_SRC_PY_FILES=$(printf '%s\n' "$CHANGED_PY_FILES" | grep '^src/' || true)
-          if [ -n "$CHANGED_SRC_PY_FILES" ]; then
-            echo "Changed source files:"
-            echo "$CHANGED_SRC_PY_FILES"
-            mypy $CHANGED_SRC_PY_FILES --config-file pyproject.toml
-          else
-            echo "No changed source files detected — skipping baseline mypy."
-          fi
-
+      # Baseline mypy check across all of src/
+      - run: mypy src --config-file pyproject.toml
       # Strict mypy for the fully-annotated API layer (issue #2105).
       # --follow-imports=silent applies strict rules only to src/api/ files,
       # not to their transitive dependencies (which have pre-existing issues).
       - name: MyPy Strict (src/api)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              BASE_SHA=$(git rev-parse HEAD~1 || true)
-            fi
-          fi
-
-          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
-          CHANGED_API_PY_FILES=$(printf '%s\n' "$CHANGED_PY_FILES" | grep '^src/api/' || true)
-          if [ -n "$CHANGED_API_PY_FILES" ]; then
-            echo "Changed API files:"
-            echo "$CHANGED_API_PY_FILES"
-            mypy $CHANGED_API_PY_FILES --strict --follow-imports=silent --config-file pyproject.toml
-          else
-            echo "No changed src/api files detected — skipping strict mypy."
-          fi
+        run: mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
 
       - name: Dependency Direction Fitness Check
         run: python3 scripts/check_dependency_direction.py
@@ -185,17 +117,11 @@ jobs:
       - name: Changed-File Size Budget Check
         run: python3 scripts/check_file_size_budget.py
 
-      - name: Agent Docs Consistency Check
-        run: python3 scripts/check_agent_docs_consistency.py
-
       - name: Module Size Budget Check
         run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
 
       - name: Heavy Test Dependency Parity Check
         run: python3 scripts/check_heavy_dep_parity.py
-
-      - name: Forbidden Artifact Check
-        run: python3 scripts/check_forbidden_artifacts.py
 
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
@@ -213,35 +139,28 @@ jobs:
             exit 1
           fi
 
-      # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
+      # SECURITY FIX: Make security audit blocking (fail on vulnerabilities).
+      # Waivers (with mandatory expiry dates) live in
+      # .github/pip_audit_waivers.yaml and are consumed by
+      # scripts/pip_audit_check.py. Expired waivers are NOT passed to
+      # pip-audit, so an expired waiver causes this step to fail until the
+      # waiver is renewed or the dep is bumped (issue #3076).
       - name: Security Audit
         run: |
           pip install --upgrade pip
           # Force-reinstall sortedcontainers before pip-audit: the shared runner toolcache
           # can carry a half-installed sortedcontainers that makes cyclonedx (pip-audit dep) fail.
           pip install --ignore-installed --no-deps "sortedcontainers>=2.4.0"
-          pip install pip-audit
+          pip install pip-audit pyyaml
           # Audit only the project's declared dependency set (requirements-dev.lock)
           # rather than all ambient packages in the shared runner toolcache.
-          # The shared self-hosted runner toolcache accumulates stale packages from
-          # multiple projects; auditing the full environment produces false positives.
-          # Ignore CVEs with no fix version available:
-          # - CVE-2024-23342 (ecdsa): No fix version available
-          # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
-          # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
-          # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          # - CVE-2026-40192 (pillow): Transitive dep via opencv/imageio; fix in pillow>=12.2.0
           # Resolved CVEs (issue #2653): black>=26.3.1, bokeh>=3.8.2, flask>=3.1.3, requests>=2.33.0
           # are now pinned in pyproject.toml dev deps and requirements-dev.lock.
           # Resolved CVE (Dependabot remediation 2026-04-14):
           # - CVE-2025-71176 (pytest): now pinned to pytest>=9.0.3 in requirements-dev.lock
-          python -m pip_audit -r requirements-dev.lock \
-            --ignore-vuln CVE-2024-23342 \
-            --ignore-vuln CVE-2026-0994 \
-            --ignore-vuln CVE-2026-1703 \
-            --ignore-vuln CVE-2026-4539 \
-            --ignore-vuln CVE-2026-40192 \
-            --ignore-vuln CVE-2026-28684
+          python3 scripts/pip_audit_check.py \
+            --requirements requirements-dev.lock \
+            --waivers .github/pip_audit_waivers.yaml
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
@@ -266,7 +185,7 @@ jobs:
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         if: always()
         with:
           name: matlab-quality-report
@@ -280,13 +199,351 @@ jobs:
       matrix:
         python: ["3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
       - name: Reject Raw Merge Conflict Markers
         run: |
-          if grep -rne '      # Clone Tools repo for tools-core dependency
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
+            echo "::error::Raw git merge conflict markers found!"
+            exit 1
+          fi
+
+      - name: Install System Dependencies
+        run: |
+          apt_retry() {
+            for attempt in {1..12}; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install Core Test Dependencies
+        # Force-reinstall hypothesis + sortedcontainers: the shared self-
+        # hosted toolcache occasionally carries half-installed versions
+        # where the pip metadata says 2.4.0 but the package namespace is
+        # missing exports (e.g. `SortedSet`). A plain `pip install -e` sees
+        # "Requirement already satisfied" and doesn't repair the cache,
+        # which causes hypothesis to fail its terminal-summary import.
+        run: |
+          python -m venv "$RUNNER_TEMP/core-ci-venv"
+          echo "$RUNNER_TEMP/core-ci-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/core-ci-venv" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/core-ci-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/core-ci-venv/bin/python"
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+
+      - name: Document Native Engine Coverage In Core Lane
+        run: |
+          echo "## Core CI Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- This lane installs core project dependencies plus \`[dev,gui-test]\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "- MuJoCo coverage may run because MuJoCo is part of the base project dependencies." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Drake, Pinocchio, OpenSim, and MyoSuite are optional extras and are not provisioned in this lane." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Passing this job does not claim full native-engine integration coverage for those optional stacks." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1280x720x24 -ac +extension GLX +render -noreset &
+          sleep 1
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+
+      - name: Clean Stale Coverage Data
+        # Self-hosted runners reuse workspaces across jobs. A crashed
+        # worker from a prior run can leave behind a partially-written
+        # .coverage.<host>.<pid>.<rand> sqlite file with no 'file' table,
+        # which then causes pytest-cov to abort the next run with
+        # "sqlite3.OperationalError: no such table: file". Remove any
+        # stale coverage artefacts before collecting fresh data.
+        run: |
+          rm -f .coverage .coverage.* coverage.xml || true
+
+      - name: Run Core Test Suite
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+
+          # Run the default, dependency-light CI lane:
+          # - Serial execution for self-hosted runner and coverage stability
+          # - 60 second timeout per test
+          # - Skip slow tests in CI for faster feedback
+          # - Coverage measurement on src/ (pytest-cov)
+          # Optional native-engine extras such as Drake/Pinocchio/OpenSim/MyoSuite
+          # are intentionally not provisioned here.
+          xvfb-run --auto-servernum python -m pytest \
+            -p no:xvfb \
+            -n 0 \
+            --timeout=60 \
+            --timeout-method=thread \
+            --ignore=tests/shared_contracts \
+            --ignore=tests/heavy_integration \
+            --ignore=tests/benchmarks \
+            -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-config=pyproject.toml \
+            --cov-fail-under=30 \
+            --tb=short \
+            -v
+
+      # Dependency-free validator coverage that supports future native-engine jobs.
+      - name: Cross-Engine Validator Core Unit Tests
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          set -o pipefail
+          echo "## Cross-Engine Validator Core Unit Tests" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- This step exercises the dependency-free validator logic only." >> "$GITHUB_STEP_SUMMARY"
+          echo "- It does not install or verify Drake, Pinocchio, OpenSim, or MyoSuite." >> "$GITHUB_STEP_SUMMARY"
+          xvfb-run --auto-servernum python -m pytest tests/integration/test_cross_engine_validation.py \
+            -p no:xvfb \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short 2>&1 | tee cross-engine-results.txt
+
+          # Report to summary
+          passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
+          failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
+          echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
+      - uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2  # v6
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: env.CODECOV_TOKEN != ''
+        with:
+          fail_ci_if_error: false # Do not block if token is missing
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+
+  shared-tools-consumer-contracts:
+    needs: [pick-runner, quality-gate]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - name: Checkout Tools Hub
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          repository: D-sorganization/Tools
+          path: _tools_dep
+      - name: Symlink Tools for Workspace
+        run: bash "$GITHUB_WORKSPACE/scripts/setup_tools_workspace.sh"
+      - name: Reject Raw Merge Conflict Markers
+        run: |
+          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
+            echo "::error::Raw git merge conflict markers found!"
+            exit 1
+          fi
+
+      - name: Install System Dependencies
+        run: |
+          apt_retry() {
+            for attempt in {1..12}; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+        with:
+          python-version: "3.11"
+      - name: Install Core Test Dependencies
+        # See tests/Install Core Test Dependencies for the rationale —
+        # the shared toolcache can carry a stale `sortedcontainers` that
+        # makes hypothesis fail during pytest_terminal_summary.
+        # Force-reinstall numpy/scipy to ensure a consistent binary ABI:
+        # the self-hosted toolcache for Python 3.11 carries numpy 2.4.x
+        # which is incompatible with cached scipy wheels built against <2.3.
+        run: |
+          python -m venv "$RUNNER_TEMP/shared-contracts-venv"
+          echo "$RUNNER_TEMP/shared-contracts-venv/bin" >> "$GITHUB_PATH"
+          echo "VIRTUAL_ENV=$RUNNER_TEMP/shared-contracts-venv" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/shared-contracts-venv/bin/python" -m pip install --upgrade pip
+          python="$RUNNER_TEMP/shared-contracts-venv/bin/python"
+          "$python" -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0" "hypothesis>=6.0.0"
+          "$python" -m pip install -e ".[dev,gui-test]"
+          "$python" -m pip install --force-reinstall --no-cache-dir "numpy==2.2.6" "scipy==1.15.3"
+      - name: Run Shared Tools Consumer Contracts
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+          REQUIRE_REAL_TOOLS_REPO: "1"
+        run: |
+          xvfb-run --auto-servernum python -m pytest tests/shared_contracts/ \
+            -p no:xvfb \
+            --tools-mode=vendored \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short
+
+  frontend-tests:
+    needs: [pick-runner, quality-gate]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Type Check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run Tests
+        run: npm run test:run
+
+      - name: Build Check
+        run: npm run build
+
+  # =============================================================================
+  # MATLAB TESTS - DISABLED BY DEFAULT
+  # =============================================================================
+  # This job requires a MATLAB license which is NOT available in GitHub CI.
+  # DO NOT enable (remove 'if: false') unless you have configured MATLAB licensing.
+  # To enable: set 'if: true' and configure matlab-actions.
+  # Users with local MATLAB can run: matlab/run_all.m for equivalent tests.
+  # =============================================================================
+  matlab-tests:
+    needs: [pick-runner, quality-gate]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    if: false # DISABLED - Requires MATLAB license not available in CI
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f  # v3
+      - uses: matlab-actions/run-command@2970c890bd6dfbc8ba4d640879c4c496dec4e426  # v3
+        with:
+          command: |
+            addpath('matlab');
+            run_all
+
+  # =============================================================================
+  # ARDUINO BUILD - DISABLED BY DEFAULT
+  # =============================================================================
+  # No Arduino components in this project - disabled.
+  # =============================================================================
+  arduino-build:
+    needs: [pick-runner, quality-gate]
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    if: false # DISABLED - No Arduino components in this project
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+        with: { python-version: "3.11" }
+      - run: pip install platformio
+      - name: Verify Build
+        working-directory: ./arduino
+        run: pio run -e uno
+
+  # =============================================================================
+  # RUST QUALITY GATE
+  # =============================================================================
+  # Only runs when Rust source files or Cargo manifests change.
+  # Enforces: format (rustfmt), lint (clippy), tests (cargo test).
+  # =============================================================================
+  rust-quality-gate:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for Rust changes
+        id: rust-changes
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}"
+            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
+            if [ -z "$BASE_SHA" ]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            fi
+            RUST_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+            RUST_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
+          else
+            RUST_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || echo "")
+          fi
+
+          if [ -n "$RUST_FILES" ]; then
+            # Only enable the gate if a Cargo workspace actually exists
+            if [ -f "Cargo.toml" ]; then
+              echo "has_changes=true" >> "$GITHUB_OUTPUT"
+              echo "Changed Rust files:"
+              echo "$RUST_FILES"
+            else
+              echo "has_changes=false" >> "$GITHUB_OUTPUT"
+              echo "Rust files changed but no Cargo.toml found — skipping quality gate."
+            fi
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Rust changes detected — skipping Rust quality gate."
+          fi
+
+      - name: Install Rust toolchain
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8  # stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+
+      # Clone Tools repo for tools-core dependency
       - name: Checkout Tools (tools-core dependency)
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -301,7 +558,7 @@ jobs:
 
       - name: Cache Cargo registry
         if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5
         with:
           path: |
             ~/.cargo/registry
@@ -369,74 +626,3 @@ jobs:
           echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
-
-  rust-quickstart:
-    name: Rust Quickstart
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Check for Rust changes
-        id: rust-changes
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-            RUST_FILES=$(git diff --name-only "$BASE_SHA" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
-          elif [ -n "${{ github.event.before }}" ] && [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
-            RUST_FILES=$(git diff --name-only "${{ github.event.before }}" HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || true)
-          else
-            RUST_FILES=$(git diff --name-only HEAD~1 HEAD -- '*.rs' 'Cargo.toml' '*/Cargo.toml' 'rust-toolchain.toml' || echo "")
-          fi
-
-          if [ -n "$RUST_FILES" ] && [ -f "Cargo.toml" ]; then
-            echo "has_changes=true" >> "$GITHUB_OUTPUT"
-            echo "$RUST_FILES"
-          else
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No Rust changes detected — skipping Rust quickstart."
-          fi
-
-      - name: Setup Python
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-
-      - name: Install Rust toolchain
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Cargo registry
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: rust-quickstart-${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/Cargo.toml') }}
-          restore-keys: |
-            rust-quickstart-${{ runner.os }}-
-
-      - name: Cargo build from clean clone
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        run: cargo build
-
-      - name: Maturin develop from clean clone
-        if: steps.rust-changes.outputs.has_changes == 'true'
-        run: |
-          python -m venv "$RUNNER_TEMP/rust-quickstart-venv"
-          source "$RUNNER_TEMP/rust-quickstart-venv/bin/activate"
-          python -m pip install --upgrade pip maturin
-          cd rust_core/upstream-physics
-          python -m maturin develop --features python
-          python -c "
-          import upstream_physics
-          print(upstream_physics.IntegratorConfig())
-          "

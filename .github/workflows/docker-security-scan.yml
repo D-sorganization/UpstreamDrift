@@ -28,13 +28,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Build Docker image
         run: docker build -t upstreamdrift:ci .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # master
         with:
           image-ref: "upstreamdrift:ci"
           format: "sarif"
@@ -44,13 +44,13 @@ jobs:
           exit-code: "0"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@95e58e9a2cdfd71adc6e0353d5c52f41a045d225  # v4
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
 
       - name: Run Trivy (table output for PR comments)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25  # master
         with:
           image-ref: "upstreamdrift:ci"
           format: "table"

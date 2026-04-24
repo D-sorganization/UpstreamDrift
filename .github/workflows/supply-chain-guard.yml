@@ -1,0 +1,51 @@
+name: Supply-Chain Guard
+
+# Enforces that every external `uses:` in .github/workflows/*.yml is pinned
+# to a 40-character commit SHA rather than a mutable tag/branch (issue #3066).
+# Local path references (./.github/...) and Docker image references
+# (docker://...) are exempt from the check.
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - ".github/workflows/**"
+      - ".github/action_pins.json"
+      - "scripts/pin_actions_to_sha.py"
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+      - ".github/action_pins.json"
+      - "scripts/pin_actions_to_sha.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-action-pins:
+    name: Verify all actions are SHA-pinned
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+
+      - name: Verify all actions are SHA-pinned (grep)
+        run: |
+          # Fail if any active workflow file has an external `uses:` using
+          # a tag/branch (v1, v2, main, master, release/*, stable, etc.).
+          # Local `./` paths are excluded. Archived/.disabled files are
+          # also excluded because GitHub Actions does not execute them.
+          if grep -rnE 'uses:[[:space:]]+[^./#]+@(v[0-9]|main|master|release/|stable|latest)' \
+               .github/workflows/ \
+               --include='*.yml' \
+               --include='*.yaml' \
+               --exclude-dir=archived; then
+            echo "::error::Found unpinned external 'uses:' references. Pin to a 40-char commit SHA."
+            echo "Run: python3 scripts/pin_actions_to_sha.py"
+            exit 1
+          fi
+          echo "All external 'uses:' references are SHA-pinned."
+
+      - name: Verify via pin_actions_to_sha.py --check
+        run: python3 scripts/pin_actions_to_sha.py --check

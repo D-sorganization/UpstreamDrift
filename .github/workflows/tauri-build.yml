@@ -62,9 +62,9 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
       - name: Checkout Tools (tools-core dependency)
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -76,14 +76,14 @@ jobs:
         run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: ui/package-lock.json
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8  # stable
         with:
           components: rustfmt, clippy
 
@@ -133,9 +133,9 @@ jobs:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
       - name: Checkout Tools (tools-core dependency)
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           repository: D-sorganization/Tools
           path: _tools_dep
@@ -147,14 +147,14 @@ jobs:
         run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: ui/package-lock.json
 
       - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8  # stable
         with:
           targets: ${{ matrix.target }}
 
@@ -173,14 +173,14 @@ jobs:
         run: npm run build
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5  # v0
         env:
           GITHUB_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         with:
           projectPath: ui
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
         with:
           name: golf-modeling-suite-${{ matrix.platform }}
           path: |

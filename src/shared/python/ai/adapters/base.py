@@ -258,5 +258,9 @@ class BaseAgentAdapter(ABC):
             f"2. Explain concepts at the user's expertise level\n"
             f"3. Use tools to perform analyses rather than making up results\n"
             f"4. Cite sources and acknowledge uncertainty\n"
-            f"5. Guide users through workflows step by step"
+            f"5. Guide users through workflows step by step\n\n"
+            f"When explaining physics/biomechanics terms, use the explain_concept "
+            f"tool to pull canonical UpstreamDrift glossary definitions. Prefer "
+            f"multi-level explanations (beginner -> advanced) based on the "
+            f"user's expertise_level if set."
         )

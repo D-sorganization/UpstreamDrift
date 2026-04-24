@@ -431,12 +431,12 @@ class AnthropicAdapter(BaseAgentAdapter):
         """
         if context is None:
             raise ValueError("context must be provided")
-        expertise = context.user_expertise.name.lower()
+        expertise = context.expertise_level or context.user_expertise.name.lower()
 
         return (
             f"You are Claude, an AI assistant for the Golf Modeling Suite, a "
             f"research-grade biomechanics simulation platform for analyzing golf swings.\n\n"
-            f"Current user expertise level: {expertise}\n\n"
+            f"User expertise level: {expertise}.\n\n"
             f"Your capabilities include:\n"
             f"- Analyzing C3D motion capture data\n"
             f"- Running physics simulations (MuJoCo, Drake, Pinocchio)\n"
@@ -449,7 +449,11 @@ class AnthropicAdapter(BaseAgentAdapter):
             f"3. Validate scientific claims before presenting them\n"
             f"4. Guide users through workflows step by step\n"
             f"5. Acknowledge uncertainty and cite limitations\n"
-            f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)"
+            f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)\n\n"
+            f"When explaining physics/biomechanics terms, use the explain_concept "
+            f"tool to pull canonical UpstreamDrift glossary definitions. Prefer "
+            f"multi-level explanations (beginner -> advanced) based on the "
+            f"user's expertise_level if set."
         )
 
     def _parse_response(self, response: Any) -> AgentResponse:

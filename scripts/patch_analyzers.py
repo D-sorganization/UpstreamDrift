@@ -14,8 +14,12 @@ BASE_IMPORT = """from src.shared.python.perturbation.analyzer_base import (
 
 
 def resolve_repo_root() -> Path:
-    """Return the repository root for this maintenance script."""
-    return Path(__file__).resolve().parent
+    """Return the repository root for this maintenance script.
+
+    The script lives at ``scripts/patch_analyzers.py``; the repository root
+    is one directory up (``scripts/`` -> repo root).
+    """
+    return Path(__file__).resolve().parents[1]
 
 
 def iter_analyzer_files(repo_root: Path) -> list[Path]:

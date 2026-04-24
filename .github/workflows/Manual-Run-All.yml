@@ -52,7 +52,7 @@ jobs:
     steps:
       - name: Dispatch Assessment Generator
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -69,7 +69,7 @@ jobs:
 
       - name: Dispatch Code Quality Reviewer
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -86,7 +86,7 @@ jobs:
 
       - name: Dispatch Completist
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -103,7 +103,7 @@ jobs:
 
       - name: Dispatch Sentinel
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -120,7 +120,7 @@ jobs:
 
       - name: Dispatch Issue Resolver
         if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -137,7 +137,7 @@ jobs:
 
       - name: Dispatch PR Compiler
         if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only' || inputs.workflows == 'pr-compiler-only'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             const dry_run = '${{ inputs.dry_run }}' === 'true';

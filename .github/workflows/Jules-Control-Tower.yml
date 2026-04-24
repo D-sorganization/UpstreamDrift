@@ -115,7 +115,7 @@ jobs:
       - name: Analyze Event Context
         id: decide
         if: steps.check-limits.outcome == 'skipped' || steps.check-limits.outputs.exceeded != 'true'
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8
         with:
           script: |
             const event = context.eventName;

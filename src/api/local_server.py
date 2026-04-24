@@ -70,6 +70,7 @@ from src.api.routes import (  # noqa: E402
     chat_ws,
     engines,
     export,
+    glossary,
     simulation,
     simulation_ws,
 )
@@ -169,6 +170,7 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(chat_ws.router, prefix=API_PREFIX, tags=["Chat"])
     app.include_router(analysis.router, prefix=API_PREFIX, tags=["Analysis"])
     app.include_router(export.router, prefix=API_PREFIX, tags=["Export"])
+    app.include_router(glossary.router, prefix=API_PREFIX, tags=["Glossary"])
 
     # Legacy routes: /api/... (deprecated aliases for backward compatibility)
     app.include_router(engines.router, prefix="/api", tags=["Engines"])
@@ -179,6 +181,7 @@ def _register_api_routers(app: FastAPI) -> None:
     app.include_router(chat_ws.router, prefix="/api", tags=["Chat"])
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
+    app.include_router(glossary.router, prefix="/api", tags=["Glossary"])
 
 
 def _load_launcher_manifest() -> dict[str, Any]:
@@ -729,6 +732,125 @@ def _mount_static_files_and_spa(app: FastAPI) -> None:
         _register_error_page_catch_all(app)
 
 
+def _index_docs_into_rag(rag_store: Any, repo_root: Path) -> tuple[int, int]:
+    """Populate a ``SimpleRAGStore`` from repo documentation.
+
+    Indexes Markdown under ``docs/`` (skipping ``docs/archive`` and
+    ``*_review*`` directories), root-level ``SPEC.md``/``README.md``/
+    ``CONTRIBUTING.md``, and entries from the glossary JSON files.
+
+    Args:
+        rag_store: A ``SimpleRAGStore`` instance to populate.
+        repo_root: Root of the repository checkout.
+
+    Returns:
+        Tuple ``(documents_indexed, distinct_sources)``.
+    """
+    import json as _json
+
+    indexed = 0
+    sources: set[str] = set()
+
+    docs_dir = repo_root / "docs"
+    if docs_dir.is_dir():
+        for md_path in docs_dir.rglob("*.md"):
+            rel = str(md_path.relative_to(repo_root))
+            parts_lower = [p.lower() for p in md_path.relative_to(repo_root).parts]
+            if any("archive" in p or "_review" in p for p in parts_lower):
+                continue
+            try:
+                content = md_path.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            if content.strip():
+                rag_store.add_document(rel, content, {"source": rel, "type": "docs"})
+                indexed += 1
+                sources.add("docs")
+
+    for top_level in ("SPEC.md", "README.md", "CONTRIBUTING.md"):
+        path = repo_root / top_level
+        if path.exists():
+            try:
+                content = path.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            if content.strip():
+                if top_level == "SPEC.md":
+                    chunks = _split_markdown_by_h2(content)
+                    for idx, chunk_text in enumerate(chunks):
+                        rag_store.add_document(
+                            f"{top_level}#chunk{idx}",
+                            chunk_text,
+                            {"source": top_level, "type": "root_doc"},
+                        )
+                        indexed += 1
+                else:
+                    rag_store.add_document(
+                        top_level,
+                        content,
+                        {"source": top_level, "type": "root_doc"},
+                    )
+                    indexed += 1
+                sources.add(top_level)
+
+    glossary_candidates = [
+        repo_root / "data" / "glossary_core.json",
+        repo_root / "src" / "shared" / "python" / "ai" / "data" / "glossary_core.json",
+    ]
+    for glossary_path in glossary_candidates:
+        if not glossary_path.exists():
+            continue
+        try:
+            raw = glossary_path.read_text(encoding="utf-8", errors="ignore")
+            entries = _json.loads(raw)
+        except (OSError, ValueError):
+            continue
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            key = entry.get("key", "")
+            if not key:
+                continue
+            term = entry.get("term", key)
+            parts = [f"Term: {term}"]
+            for field in ("b", "i", "a", "f"):
+                val = entry.get(field)
+                if val:
+                    parts.append(str(val))
+            content = "\n".join(parts)
+            rag_store.add_document(
+                f"glossary:{key}",
+                content,
+                {
+                    "source": str(glossary_path.relative_to(repo_root)),
+                    "type": "glossary",
+                    "key": key,
+                },
+            )
+            indexed += 1
+        sources.add("glossary")
+        break
+
+    if indexed > 0:
+        rag_store.build_index()
+    return indexed, len(sources)
+
+
+def _split_markdown_by_h2(content: str) -> list[str]:
+    """Split markdown content into chunks by top-level ``## `` headings."""
+    chunks: list[str] = []
+    current: list[str] = []
+    for line in content.splitlines():
+        if line.startswith("## ") and current:
+            chunks.append("\n".join(current))
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        chunks.append("\n".join(current))
+    return [c for c in chunks if c.strip()]
+
+
 def create_local_app() -> FastAPI:
     """Create FastAPI app configured for local use.
 
@@ -763,7 +885,18 @@ def create_local_app() -> FastAPI:
     app.state.analysis_service = _LazyServiceProxy(
         lambda: _create_analysis_service(engine_manager)
     )
-    app.state.chat_service = ChatService()
+    # Build a RAG store from repo docs so the chat assistant can cite them.
+    from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
+
+    rag_store = SimpleRAGStore()
+    repo_root = Path(__file__).parent.parent.parent
+    try:
+        indexed, source_count = _index_docs_into_rag(rag_store, repo_root)
+        logger.info("RAG indexed %d documents from %d sources", indexed, source_count)
+    except (OSError, ValueError) as exc:  # defensive; must not block startup
+        logger.warning("RAG indexing failed: %s", exc)
+    app.state.rag = rag_store
+    app.state.chat_service = ChatService(rag_store=rag_store)
 
     # Register routes (no auth required in local mode)
     _register_api_routers(app)

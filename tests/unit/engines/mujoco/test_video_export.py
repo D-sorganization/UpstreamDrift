@@ -1,9 +1,14 @@
-"""Tests for video export functionality."""
+"""Tests for video export functionality.
+
+The ``cv2`` and ``imageio`` stubs required by ``video_export`` are installed
+in ``conftest.pytest_configure`` (same directory), which keeps the banned
+module-level ``sys.modules[...] = MagicMock()`` assignments out of test
+files.
+"""
 
 from __future__ import annotations
 
 import sys
-from collections.abc import Generator
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -11,29 +16,7 @@ import mujoco
 import numpy as np
 import pytest
 
-pytestmark = pytest.mark.unit
-
-_VIDEO_EXPORT_MOD = (
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export"
-)
-
-
-@pytest.fixture(autouse=True)
-def _mock_cv2_imageio() -> Generator[None, None, None]:
-    """Mock cv2 and imageio for every test using patch.dict."""
-    sys.modules.pop(_VIDEO_EXPORT_MOD, None)
-    with patch.dict(
-        "sys.modules",
-        {
-            "cv2": MagicMock(),
-            "imageio": MagicMock(),
-        },
-    ):
-        yield
-    sys.modules.pop(_VIDEO_EXPORT_MOD, None)
-
-
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E402, E501
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E501
     VideoExporter,
     VideoFormat,
     create_metrics_overlay,
