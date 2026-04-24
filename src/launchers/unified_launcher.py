@@ -1,5 +1,10 @@
 """Unified launcher interface wrapping PyQt GolfLauncher.
 
+**Canonical role**: This is the primary PyQt6 launcher used by the recommended
+``launch_golf_suite.py --classic`` entry point.  For web-UI or API-only modes,
+use ``launch_golf_suite.py`` directly.  See ``scripts/README_launchers.md`` for
+a full catalogue of all launcher systems and the recommended primary entry point.
+
 This module provides a consistent interface for launch_golf_suite.py
 that wraps the PyQt-based GolfLauncher implementation.
 
