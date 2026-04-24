@@ -44,6 +44,8 @@ from src.shared.python.spatial_algebra.transforms import (
     xtrans,
 )
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Helpers
 # ============================================================================

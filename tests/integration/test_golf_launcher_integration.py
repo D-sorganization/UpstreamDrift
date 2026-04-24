@@ -12,6 +12,8 @@ import pytest
 
 from src.shared.python.config.model_registry import ModelRegistry
 
+pytestmark = pytest.mark.integration
+
 # Mock PyQt6 for headless/CI environment where DLLs are broken/missing
 # This must happen BEFORE importing modules that use PyQt6
 mock_qt = MagicMock()

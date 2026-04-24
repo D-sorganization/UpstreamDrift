@@ -5,6 +5,9 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.integration
 
 # We used to mock at module level, but that restores sys.modules before tests run.
 # Now we will rely on setUp to patch and import the engine.

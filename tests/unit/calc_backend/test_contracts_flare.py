@@ -12,6 +12,8 @@ from src.shared.python.calc_backend.contracts.flare import (
     RadiationZonesOut,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _valid_request(**kwargs) -> FlareRequest:
     defaults = {

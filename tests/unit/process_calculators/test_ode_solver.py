@@ -9,6 +9,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.ode_solver impor
     ODESolver,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestODESolverConstruction:
     def test_construction(self) -> None:

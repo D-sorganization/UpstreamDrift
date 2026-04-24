@@ -9,6 +9,8 @@ import pytest
 
 from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def sample_data() -> dict[str, Any]:

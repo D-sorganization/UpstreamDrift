@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from src.shared.python.pendulum_simulator.constraint_solver import (
     constrained_accelerations,
@@ -10,6 +11,8 @@ from src.shared.python.pendulum_simulator.constraint_solver import (
     equations_of_motion,
 )
 from src.shared.python.pendulum_simulator.physics_golfer import N_DOF, GolferParams
+
+pytestmark = pytest.mark.unit
 
 
 def _make_params() -> GolferParams:

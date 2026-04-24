@@ -10,6 +10,10 @@ import sys
 import unittest
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 
 class TestLauncherIntegration(unittest.TestCase):
     """Integration tests for launcher functionality."""

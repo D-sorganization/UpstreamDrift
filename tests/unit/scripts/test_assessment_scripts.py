@@ -13,6 +13,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 class TestCreateIssuesSchema:
     """create_issues_from_assessment.py must read the 'issues' key, not 'critical_issues'."""

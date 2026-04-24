@@ -8,6 +8,8 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
+pytestmark = pytest.mark.unit
+
 
 class TestUserRoleContract:
     """Design by Contract tests for UserRole enum."""

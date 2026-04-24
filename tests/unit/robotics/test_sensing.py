@@ -33,6 +33,8 @@ from src.robotics.sensing.noise_models import (
     create_realistic_sensor_noise,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestNoiseModels:
     """Tests for noise model classes."""

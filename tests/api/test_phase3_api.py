@@ -35,6 +35,8 @@ from src.api.models.responses import (
     URDFModelResponse,
 )
 
+pytestmark = pytest.mark.integration
+
 # ──────────────────────────────────────────────────────────────
 #  Contract Tests: URDF Model Responses (#1201)
 # ──────────────────────────────────────────────────────────────

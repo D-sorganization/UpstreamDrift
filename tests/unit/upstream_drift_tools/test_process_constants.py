@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.constants import (
     ATM_PA,
     MOLECULAR_WEIGHTS,
@@ -12,6 +14,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.constants import
     kelvin_to_celsius,
     kelvin_to_fahrenheit,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Physical constants sanity checks

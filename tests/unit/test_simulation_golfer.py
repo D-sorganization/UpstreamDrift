@@ -11,6 +11,8 @@ from src.shared.python.pendulum_simulator.simulation_golfer import (
     run_simulation,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_params() -> GolferParams:
     return GolferParams(

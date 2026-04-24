@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # List of modules to mock
 MOCK_MODULES = [
     "mujoco",

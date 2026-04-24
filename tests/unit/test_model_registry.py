@@ -11,6 +11,8 @@ import yaml
 
 from src.shared.python.config.model_registry import ModelRegistry
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.mark.unit
 class TestModelRegistry:

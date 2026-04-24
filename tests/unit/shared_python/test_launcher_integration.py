@@ -13,6 +13,8 @@ from src.shared.python.config.environment import is_docker, is_production, is_ws
 from src.shared.python.dashboard import launcher
 from src.shared.python.engine_core import engine_availability
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="session")
 def qapp() -> Any:

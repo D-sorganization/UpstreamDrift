@@ -11,6 +11,8 @@ from src.shared.python.calc_backend.contracts.acid_gas_dewpoint import (
     DewpointComponentOut,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestAcidGasDewpointRequest:
     def test_valid_construction(self) -> None:

@@ -7,6 +7,8 @@ import pytest
 
 from src.shared.python.analysis.pca_analysis import PCAAnalysisMixin
 
+pytestmark = pytest.mark.unit
+
 
 class _Concrete(PCAAnalysisMixin):
     def __init__(self, n: int = 100, n_joints: int = 6) -> None:

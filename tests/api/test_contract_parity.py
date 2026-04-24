@@ -26,6 +26,8 @@ from src.api.models.responses import (
 )
 from src.shared.python.engine_core.engine_registry import EngineType
 
+pytestmark = pytest.mark.integration
+
 
 # ──────────────────────────────────────────────────────────────
 #  SimulationRequest Precondition Tests

@@ -8,9 +8,12 @@ from __future__ import annotations
 import unittest
 
 import numpy as np
+import pytest
 
 from src.shared.python.analysis.basic_stats import BasicStatsMixin
 from src.shared.python.core.contracts import PreconditionError
+
+pytestmark = pytest.mark.unit
 
 
 class _StubAnalyzer(BasicStatsMixin):

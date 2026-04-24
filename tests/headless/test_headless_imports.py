@@ -1,5 +1,7 @@
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_headless_plotting_import() -> None:
     """Test that plotting_core can be imported without PyQt6.

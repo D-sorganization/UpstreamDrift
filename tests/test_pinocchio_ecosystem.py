@@ -12,6 +12,10 @@ Tests cover:
 import unittest
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 
 class TestPinocchioEcosystem(unittest.TestCase):
     """Test Pinocchio ecosystem package availability and basic functionality."""

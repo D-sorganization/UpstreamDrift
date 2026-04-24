@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.theme.typography import (
     CSS_FONT_DISPLAY,
     CSS_FONT_MONO,
@@ -14,6 +16,8 @@ from src.shared.python.theme.typography import (
     Sizes,
     Weights,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestFontSizes:

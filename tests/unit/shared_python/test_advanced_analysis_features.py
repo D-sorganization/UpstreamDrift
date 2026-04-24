@@ -13,6 +13,8 @@ from src.shared.python.dashboard.advanced_analysis import (
     WaveletTab,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class MockRecorder:
     """Mock recorder providing synthetic time series data."""

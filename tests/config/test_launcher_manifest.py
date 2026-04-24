@@ -26,6 +26,8 @@ from src.config.launcher_manifest_loader import (
     LauncherTile,
 )
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # Fixtures
 # =============================================================================

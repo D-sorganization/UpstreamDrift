@@ -1,7 +1,10 @@
+import pytest
 from double_pendulum_model.ui.validation import (
     validate_polynomial_text,
     validate_torque_text,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_validate_polynomial() -> None:

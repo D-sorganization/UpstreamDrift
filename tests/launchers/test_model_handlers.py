@@ -13,6 +13,8 @@ from unittest.mock import MagicMock  # noqa: E402
 
 import pytest  # noqa: E402
 
+pytestmark = pytest.mark.integration
+
 from src.launchers.launcher_model_handlers import (  # noqa: E402
     ModelHandlerRegistry,
     PuttingGreenHandler,

@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestIsEngineAvailable:
     """Tests for the is_engine_available() function."""

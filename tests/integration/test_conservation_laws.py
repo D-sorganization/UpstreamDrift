@@ -23,6 +23,8 @@ from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
 from tests.fixtures.fixtures_lib import _check_mujoco_available
 
+pytestmark = pytest.mark.integration
+
 logger = get_logger(__name__)
 
 # Inline pendulum model for energy tests (XML-in-Python pattern)

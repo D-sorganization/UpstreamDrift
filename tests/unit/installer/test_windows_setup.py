@@ -8,8 +8,12 @@ from types import ModuleType
 from typing import Any
 from unittest.mock import MagicMock
 
+import pytest
+
 from installer.windows import setup_config
 from installer.windows.packaging_profiles import get_packaging_profile
+
+pytestmark = pytest.mark.unit
 
 
 def _fake_setup_configuration(

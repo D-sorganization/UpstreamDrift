@@ -13,6 +13,8 @@ from src.shared.python.security.subprocess_utils import (
     run_command,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # run_command
 # ---------------------------------------------------------------------------

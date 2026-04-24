@@ -11,6 +11,8 @@ from src.shared.python.biomechanics.kinematic_sequence import (
 )
 from src.shared.python.core.contracts import PreconditionError
 
+pytestmark = pytest.mark.unit
+
 
 class MockRecorder:
     def __init__(self, times, velocities):

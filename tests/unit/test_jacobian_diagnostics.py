@@ -18,6 +18,8 @@ from src.engines.common.jacobian_diagnostics import (
     validate_jacobians_cross_engine,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestJacobianDiagnostics:
     """Tests for single-Jacobian diagnostics."""

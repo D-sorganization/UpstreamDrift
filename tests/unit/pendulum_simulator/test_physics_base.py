@@ -13,6 +13,8 @@ from src.shared.python.pendulum_simulator.physics_base import (
     total_energy_from_parts,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestKineticEnergyFromM:
     def test_identity_mass_matrix(self) -> None:

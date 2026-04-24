@@ -15,6 +15,8 @@ from tests.helpers.numerical import (
     is_finite,
 )
 
+pytestmark = pytest.mark.unit
+
 # ── is_finite ────────────────────────────────────────────────────────────────
 
 

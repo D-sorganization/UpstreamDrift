@@ -36,6 +36,8 @@ from src.api.models.responses import (
     URDFTreeNode,
 )
 
+pytestmark = pytest.mark.integration
+
 # ──────────────────────────────────────────────────────────────
 #  Contract Tests: Force Overlay (#1199)
 # ──────────────────────────────────────────────────────────────

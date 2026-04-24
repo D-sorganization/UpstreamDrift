@@ -10,6 +10,8 @@ from src.shared.python.ai.types import (
     ExpertiseLevel,
 )
 
+pytestmark = pytest.mark.unit
+
 # Mock modules
 mock_openai_module = MagicMock()
 mock_anthropic_module = MagicMock()

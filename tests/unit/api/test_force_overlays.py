@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import pytest
+
 from src.api.models.requests import ForceOverlayRequest
 from src.api.routes.force_overlays import (
     _is_filtered_out,
@@ -8,6 +10,8 @@ from src.api.routes.force_overlays import (
     _resolve_joint_names,
     _should_include_force_type,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_magnitude_to_color() -> None:

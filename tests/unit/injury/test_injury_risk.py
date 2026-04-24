@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.injury.injury_risk import (
     InjuryRiskReport,
     InjuryRiskScorer,
@@ -9,6 +11,8 @@ from src.shared.python.injury.injury_risk import (
     RiskFactor,
     RiskLevel,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestRiskLevel:

@@ -12,6 +12,8 @@ from src.shared.python.engine_core.engine_availability import (
 )
 from src.shared.python.gui_pkg.gui_utils import get_qapp
 
+pytestmark = pytest.mark.unit
+
 if PYQT6_AVAILABLE:
     pass
 

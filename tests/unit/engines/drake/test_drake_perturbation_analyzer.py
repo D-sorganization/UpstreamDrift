@@ -28,6 +28,8 @@ from src.shared.python.pendulum_simulator.perturbation_analysis import (
 )
 from src.shared.python.perturbation.config import PerturbationConfig
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

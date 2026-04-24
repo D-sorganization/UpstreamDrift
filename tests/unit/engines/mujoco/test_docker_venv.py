@@ -8,6 +8,10 @@ import os
 import subprocess
 import sys
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 logger = logging.getLogger(__name__)
 
 

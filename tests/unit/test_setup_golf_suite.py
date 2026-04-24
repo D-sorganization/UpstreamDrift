@@ -3,9 +3,12 @@ from __future__ import annotations
 import pathlib
 from unittest.mock import patch
 
+import pytest
 from PIL import Image
 
 import setup_golf_suite
+
+pytestmark = pytest.mark.unit
 
 
 def test_apply_icon_optimizations() -> None:

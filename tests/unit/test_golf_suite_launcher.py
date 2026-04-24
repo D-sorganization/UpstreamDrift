@@ -11,6 +11,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Ensure offscreen platform
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 

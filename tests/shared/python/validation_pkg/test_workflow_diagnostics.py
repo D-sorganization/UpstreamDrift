@@ -1,9 +1,13 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from src.shared.python.validation_pkg.workflow_diagnostics import (
     WorkflowDiagnosticContext,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_workflow_diagnostic_context_success(tmp_path: Path) -> None:

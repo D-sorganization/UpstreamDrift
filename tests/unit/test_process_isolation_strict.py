@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Paths to the isolated unit test files
 ISOLATED_TESTS_DIR = Path(__file__).parent / "isolated"
 TEST_DRAKE_STRICT = ISOLATED_TESTS_DIR / "test_drake_strict.py"

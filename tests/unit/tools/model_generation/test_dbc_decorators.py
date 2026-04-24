@@ -14,6 +14,8 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Ensure contracts are enforced during testing
 os.environ["DBC_LEVEL"] = "enforce"
 

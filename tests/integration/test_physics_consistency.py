@@ -20,6 +20,8 @@ from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import 
 )
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
+pytestmark = pytest.mark.integration
+
 # Tolerances from Guideline P3
 TOLERANCE_POSITION_RAD = 1e-4
 TOLERANCE_VELOCITY_RAD_S = 1e-3

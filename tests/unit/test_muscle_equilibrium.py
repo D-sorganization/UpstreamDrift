@@ -16,6 +16,8 @@ from src.shared.python.biomechanics.muscle_equilibrium import (
 )
 from src.shared.python.core.contracts import PostconditionError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def standard_muscle() -> HillMuscleModel:

@@ -11,6 +11,10 @@ tests that exercise the actual HTTP layer.
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 _SERVER_PY = Path(__file__).parents[3] / "src" / "api" / "server.py"
 _SERVER_SRC = _SERVER_PY.read_text(encoding="utf-8")
 

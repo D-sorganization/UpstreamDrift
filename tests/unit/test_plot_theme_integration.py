@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.plot_theme.integration import (
     PlotTheme,
     PlotThemeManager,
@@ -10,6 +12,8 @@ from src.shared.python.plot_theme.integration import (
     get_theme,
     get_theme_colors,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestGetPlotThemeManager:

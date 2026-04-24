@@ -10,6 +10,8 @@ from src.api.models.chat import (
     ChatSessionInfo,
 )
 
+pytestmark = pytest.mark.integration
+
 
 def test_chat_message_request_valid() -> None:
     """Test valid chat message requests."""

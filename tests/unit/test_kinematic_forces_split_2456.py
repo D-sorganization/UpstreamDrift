@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[2]
 KF_DIR = REPO / "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf"
 LOC_BUDGET_DATA = 400

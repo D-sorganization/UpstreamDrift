@@ -15,6 +15,8 @@ from src.shared.python.upstream_drift_tools.protocols import (
     ValidationResult,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # CalculationResult dataclass
 # ---------------------------------------------------------------------------

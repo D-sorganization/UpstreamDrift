@@ -13,6 +13,8 @@ from src.tools.code_quality_check import (
     is_legitimate_pass_context,
 )
 
+pytestmark = pytest.mark.integration
+
 # ─── is_legitimate_pass_context ────────────────────────────────
 
 

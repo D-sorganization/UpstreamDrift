@@ -8,6 +8,8 @@ from src.shared.python.injury.spinal_load_analysis import (
     create_example_analysis,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestSpinalLoadAnalysis:
     """Test suite for SpinalLoadAnalyzer."""

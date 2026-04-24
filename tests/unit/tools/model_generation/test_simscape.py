@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Sample SimScape-like MDL content for testing
 SIMPLE_MDL = """
 Model {

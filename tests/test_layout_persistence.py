@@ -15,7 +15,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
+import pytest
+
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+
+pytestmark = pytest.mark.integration
 
 
 class TestLayoutPersistence(unittest.TestCase):

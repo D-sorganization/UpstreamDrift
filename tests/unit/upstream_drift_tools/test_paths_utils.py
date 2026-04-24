@@ -8,6 +8,8 @@ import pytest
 
 from src.shared.python.upstream_drift_tools.utils.paths import get_repo_root
 
+pytestmark = pytest.mark.unit
+
 
 class TestGetRepoRoot:
     def test_returns_path_object(self) -> None:

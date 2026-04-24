@@ -24,6 +24,8 @@ from src.shared.python.optimization.swing_bridge import (
     SwingOptimizationResult,
 )
 
+pytestmark = pytest.mark.unit
+
 # =========================================================================
 # Fixtures
 # =========================================================================

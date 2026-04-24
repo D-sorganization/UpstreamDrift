@@ -1,6 +1,10 @@
 import sys
 from unittest.mock import patch
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 def test_lazy_imports_engine_manager() -> None:
     """Test that importing EngineManager does NOT import heavy engine libraries."""

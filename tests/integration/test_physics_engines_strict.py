@@ -13,6 +13,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # --- Global Mocking Setup ---
 # We must mock these libs BEFORE importing the engines, because some engines
 # (like MuJoCo) import them at the top level without try/except guards.

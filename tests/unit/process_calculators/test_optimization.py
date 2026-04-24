@@ -12,6 +12,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.optimization imp
     run_adam_optimization,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class _StubEngine:
     """Engine that computes output = Temperature - 0.5 * (O2/Feed Ratio)."""

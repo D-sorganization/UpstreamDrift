@@ -10,6 +10,8 @@ from mujoco_humanoid_golf.drift_control import (
     DriftControlResult,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def simple_pendulum_model() -> mujoco.MjModel:

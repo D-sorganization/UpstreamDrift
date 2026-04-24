@@ -24,6 +24,8 @@ from double_pendulum_model.ui.pendulum_pyqt_app import PendulumController
 
 from src.shared.python.ui.qt.utils import get_qapp
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(scope="module")
 def qapp() -> Any:

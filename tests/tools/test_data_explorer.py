@@ -24,6 +24,8 @@ from src.tools.data_explorer.data_explorer_app import (
     main,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestSupportedFormats:
     """Test supported format definitions."""

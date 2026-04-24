@@ -34,6 +34,8 @@ from src.shared.python.perturbation.cross_engine_runner import (
 )
 from src.shared.python.perturbation.statistics import MetricStatistics
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

@@ -11,6 +11,8 @@ from src.shared.python.spatial_algebra.inertia import (
     transform_spatial_inertia,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _spherical_inertia(mass: float, r: float) -> np.ndarray:
     """Inertia tensor for a uniform sphere: I = 2/5 * m * r^2 * I_3."""

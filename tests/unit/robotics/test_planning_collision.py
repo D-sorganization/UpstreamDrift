@@ -29,6 +29,8 @@ from src.robotics.planning.collision import (
     compute_primitive_distance,
 )
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # Mock Engine for Testing
 # =============================================================================

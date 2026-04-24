@@ -11,6 +11,8 @@ import mujoco
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 _VIDEO_EXPORT_MOD = (
     "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export"
 )

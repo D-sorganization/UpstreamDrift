@@ -12,6 +12,10 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
+pytestmark = pytest.mark.integration
+
 
 class TestMotionCaptureLauncherPythonpath:
     """motion_capture_launcher._launch_script must inject PYTHONPATH."""

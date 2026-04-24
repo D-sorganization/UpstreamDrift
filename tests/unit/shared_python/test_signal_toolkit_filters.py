@@ -25,6 +25,8 @@ from src.shared.python.signal_toolkit.filters import (
     create_savgol_filter,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def fs() -> float:

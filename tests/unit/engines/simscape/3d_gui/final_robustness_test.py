@@ -8,8 +8,11 @@ import time
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 logger = logging.getLogger(__name__)
+
+pytestmark = pytest.mark.unit
 
 
 def test_data_loading_accuracy() -> bool:

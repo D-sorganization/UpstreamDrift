@@ -41,6 +41,8 @@ from src.api.models.responses import (
     TrajectoryRecordResponse,
 )
 
+pytestmark = pytest.mark.integration
+
 try:
     from fastapi.testclient import TestClient
 

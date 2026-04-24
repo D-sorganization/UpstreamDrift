@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[3]
 PHYSICS_DIR = REPO / "src/shared/python/physics"
 LOC_BUDGET = 800

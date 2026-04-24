@@ -10,6 +10,8 @@ import pytest
 
 from src.shared.python.engine_core.engine_manager import EngineManager
 
+pytestmark = pytest.mark.integration
+
 
 class TestEnginesEndpoint:
     """Tests for the /api/engines endpoint used by the frontend EngineSelector."""

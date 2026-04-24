@@ -36,6 +36,8 @@ from src.robotics.locomotion.zmp_computer import (
     ZMPComputer,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestGaitTypes:
     """Tests for gait type enumerations."""

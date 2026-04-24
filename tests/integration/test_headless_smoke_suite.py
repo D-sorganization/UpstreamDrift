@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # Conditional import to handle potential import errors gracefully during collection
 try:
     from apps.c3d_viewer import C3DViewerMainWindow

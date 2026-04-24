@@ -18,6 +18,8 @@ from src.shared.python.data_io.io_utils import (
     write_text,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # ensure_directory
 # ---------------------------------------------------------------------------

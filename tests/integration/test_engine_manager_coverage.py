@@ -15,6 +15,8 @@ from src.shared.python.engine_core.engine_manager import (
     GolfModelingError,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestEngineManagerCoverage:
     """Tests to improve coverage of EngineManager."""

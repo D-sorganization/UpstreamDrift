@@ -17,6 +17,8 @@ import pytest
 from src.shared.python.data_io.path_utils import get_src_root
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineStatus
 
+pytestmark = pytest.mark.integration
+
 
 # Helper to check if a module is mocked (from unit tests polluting sys.modules)
 def is_mock(module_name: str) -> bool:

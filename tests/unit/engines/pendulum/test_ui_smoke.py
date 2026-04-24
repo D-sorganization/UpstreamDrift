@@ -2,6 +2,8 @@ import pytest
 from double_pendulum_model.ui.pendulum_pyqt_app import PendulumController
 from PyQt6.QtWidgets import QApplication
 
+pytestmark = pytest.mark.unit
+
 
 def test_smoke() -> None:
     qapp = QApplication.instance()

@@ -14,6 +14,8 @@ from src.shared.python.upstream_drift_tools.data_processing.io import (
     FileFormatDetector,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # FileFormatDetector
 # ---------------------------------------------------------------------------

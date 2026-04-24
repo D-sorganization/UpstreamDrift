@@ -2,8 +2,12 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from scripts.assess_repository import assess_J
 from scripts.generate_assessment_summary import extract_score_from_report
+
+pytestmark = pytest.mark.unit
 
 
 class TestAssessmentScripts(unittest.TestCase):

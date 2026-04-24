@@ -23,6 +23,8 @@ from src.shared.python.core.contracts.level import (
     set_contract_level,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPreconditionDecorator:
     def setup_method(self) -> None:

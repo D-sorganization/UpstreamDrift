@@ -12,6 +12,8 @@ import pytest
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
+pytestmark = pytest.mark.integration
+
 
 class TestLauncherIntegration:
     """Integration tests for launcher functionality."""

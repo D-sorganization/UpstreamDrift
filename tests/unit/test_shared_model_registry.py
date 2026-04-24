@@ -3,9 +3,12 @@
 import unittest
 from unittest.mock import mock_open, patch
 
+import pytest
 import yaml
 
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
+
+pytestmark = pytest.mark.unit
 
 
 class TestModelRegistry(unittest.TestCase):

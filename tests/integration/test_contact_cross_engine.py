@@ -19,6 +19,8 @@ import pytest
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 
+pytestmark = pytest.mark.integration
+
 # Contact test constants
 BOUNCE_HEIGHT_THRESHOLD_M = 0.001  # Minimum height (1mm) to consider a bounce occurred
 

@@ -3,6 +3,8 @@
 The canonical version lives in src/api/_version.py and all other surfaces
 (server.py FastAPI metadata, local_server.py, and the root endpoint in core.py)
 import from there.
+import pytest
+pytestmark = pytest.mark.unit
 """
 
 from pathlib import Path

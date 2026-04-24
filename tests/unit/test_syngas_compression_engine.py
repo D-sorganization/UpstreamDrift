@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip("sympy")  # upstream_drift_tools package chain requires sympy
 
 

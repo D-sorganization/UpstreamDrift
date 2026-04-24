@@ -6,6 +6,10 @@ import importlib.util
 import types
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 def _load_script_module(name: str) -> types.ModuleType:
     script_path = Path(__file__).resolve().parents[2] / "scripts" / f"{name}.py"

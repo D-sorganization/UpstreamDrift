@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.ai.education import EducationSystem, GlossaryEntry
 from src.shared.python.ai.types import ExpertiseLevel
+
+pytestmark = pytest.mark.unit
 
 
 def test_glossary_entry_get_definition() -> None:

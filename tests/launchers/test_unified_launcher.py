@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
+pytestmark = pytest.mark.integration
+
 from src.launchers.unified_launcher import (  # noqa: E402
     UnifiedLauncher,
     _get_golf_main,

@@ -10,6 +10,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestPhysicsCacheInvalidation:
     """Tests for physics control-metadata cache (issue #2468)."""

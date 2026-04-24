@@ -12,6 +12,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.scrubber.models.
     ScrubberResults,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_inputs(**kwargs) -> ScrubberInputs:
     defaults = {

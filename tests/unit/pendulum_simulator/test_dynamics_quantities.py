@@ -14,6 +14,8 @@ from src.shared.python.pendulum_simulator.dynamics_quantities import (
     linear_power_series,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestAngularPowerAt:
     def test_positive_torque_positive_velocity(self) -> None:

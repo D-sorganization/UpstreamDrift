@@ -9,6 +9,8 @@ import pytest
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+pytestmark = pytest.mark.integration
+
 # Mock modules using patch.dict (auto-cleans) before importing engines.
 # The mocks must also be present at test execution time because the engine
 # modules reference gym/myosuite/opensim at runtime, not just import time.

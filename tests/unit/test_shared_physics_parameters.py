@@ -13,6 +13,8 @@ from src.shared.python.physics.physics_parameters import (
     get_registry,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPhysicsParameter(unittest.TestCase):
     """Test cases for PhysicsParameter."""

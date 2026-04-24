@@ -9,6 +9,8 @@ from unittest.mock import patch
 import pytest
 from fastapi import HTTPException
 
+pytestmark = pytest.mark.unit
+
 
 class TestErrorCategoryContract:
     """Design by Contract tests for ErrorCategory enum."""

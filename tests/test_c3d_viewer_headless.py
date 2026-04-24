@@ -9,6 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 
 # Handle import of module with invalid identifier (3D_Golf_Model)
 def import_c3d_viewer() -> types.ModuleType | None:

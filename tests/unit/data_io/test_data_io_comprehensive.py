@@ -42,6 +42,8 @@ from src.shared.python.data_io.reproducibility import (
     set_seeds,
 )
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for common_utils: convert_units
 # ============================================================================

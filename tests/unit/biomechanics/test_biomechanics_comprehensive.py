@@ -22,6 +22,8 @@ from src.shared.python.biomechanics.swing_plane_analysis import (
 )
 from src.shared.python.core.contracts import PreconditionError
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for MuscleParameters
 # ============================================================================

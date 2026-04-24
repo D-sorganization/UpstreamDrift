@@ -1,7 +1,11 @@
 import argparse
 from unittest.mock import patch
 
+import pytest
+
 import launch_golf_suite
+
+pytestmark = pytest.mark.unit
 
 
 def test_parse_arguments() -> None:

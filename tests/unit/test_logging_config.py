@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import logging
 
+import pytest
+
 from src.shared.python.logging_pkg.logging_config import (
     DEFAULT_BACKUP_COUNT,
     DEFAULT_LOG_FORMAT,
@@ -16,6 +18,8 @@ from src.shared.python.logging_pkg.logging_config import (
     get_logger,
     setup_logging,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # LogLevel enum

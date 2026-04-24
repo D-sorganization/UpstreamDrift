@@ -24,6 +24,8 @@ from src.shared.python.core.datetime_utils import (
     timestamp,
 )
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for time_ago
 # ============================================================================

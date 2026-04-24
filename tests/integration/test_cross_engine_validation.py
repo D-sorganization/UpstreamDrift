@@ -10,9 +10,12 @@ of the Project Design Guidelines.
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from src.shared.python.engine_core.cross_engine_validator import CrossEngineValidator
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+pytestmark = pytest.mark.integration
 
 logger = get_logger(__name__)
 

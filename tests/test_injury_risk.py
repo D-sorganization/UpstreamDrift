@@ -10,6 +10,8 @@ from src.shared.python.injury.injury_risk import (
     RiskLevel,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestInjuryRiskScorer:
     @pytest.fixture

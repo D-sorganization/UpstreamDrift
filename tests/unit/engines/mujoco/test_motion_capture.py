@@ -18,6 +18,8 @@ from mujoco_humanoid_golf.motion_capture import (
     MotionRetargeting,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestMotionCaptureFrame:
     """Tests for MotionCaptureFrame dataclass."""

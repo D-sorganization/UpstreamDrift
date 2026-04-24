@@ -15,10 +15,13 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.engine_core.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
+
+pytestmark = pytest.mark.integration
 
 if DRAKE_AVAILABLE:
     from pydrake.all import DiagramBuilder, Parser

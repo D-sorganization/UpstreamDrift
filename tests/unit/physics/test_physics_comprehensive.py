@@ -33,6 +33,8 @@ from src.shared.python.physics.physics_validation import (
     JacobianValidationResult,
 )
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Tests for equipment module
 # ============================================================================

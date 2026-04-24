@@ -24,6 +24,8 @@ from src.shared.python.ai.types import (
     ProviderCapability,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class MockConnectError(Exception):
     pass

@@ -14,6 +14,8 @@ from src.shared.python.signal_toolkit.noise import (
     generate_disturbance_profile,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def t() -> np.ndarray:

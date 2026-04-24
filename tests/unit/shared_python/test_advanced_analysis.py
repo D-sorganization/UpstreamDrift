@@ -13,6 +13,8 @@ from src.shared.python.validation_pkg.comparative_analysis import (
 from src.shared.python.validation_pkg.comparative_plotting import ComparativePlotter
 from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
+pytestmark = pytest.mark.unit
+
 # sklearn/muscle_analysis is optional - check actual sklearn availability
 try:
     from shared.python.biomechanics.muscle_analysis import (

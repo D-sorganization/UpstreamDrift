@@ -4,6 +4,8 @@ import time  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
+
+pytestmark = pytest.mark.integration
 from PyQt6.QtWidgets import QWidget  # noqa: E402
 
 from src.launchers.settings_dialog import (  # noqa: E402

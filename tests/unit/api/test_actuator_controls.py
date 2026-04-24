@@ -1,9 +1,13 @@
 from unittest.mock import Mock
 
+import pytest
+
 from src.api.routes.actuator_controls import (
     _demo_actuators,
     _get_actuator_info,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_demo_actuators() -> None:

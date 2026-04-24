@@ -19,6 +19,8 @@ from src.shared.python.validation_pkg.comparative_analysis import (
 from src.shared.python.validation_pkg.comparative_plotting import ComparativePlotter
 from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
+pytestmark = pytest.mark.unit
+
 
 class MockRecorder(RecorderInterface):
     """Mock recorder backed by a data dictionary."""

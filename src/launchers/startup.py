@@ -6,7 +6,7 @@ Provides the splash screen, async startup worker, and startup result container.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap
@@ -14,11 +14,6 @@ from PyQt6.QtWidgets import QApplication, QSplashScreen
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.security.secure_subprocess import secure_run
-
-if TYPE_CHECKING:
-    from src.shared.python.theme.theme_manager import (  # type: ignore[attr-defined]
-        ThemeColors,
-    )
 
 logger = get_logger(__name__)
 
@@ -41,7 +36,7 @@ except ImportError:
     THEME_AVAILABLE = False
 
 
-def _get_theme_colors() -> ThemeColors:
+def _get_theme_colors() -> Any:
     """Get current theme colors, with fallback to dark theme defaults."""
     try:
         from src.shared.python.theme import (  # type: ignore[attr-defined]

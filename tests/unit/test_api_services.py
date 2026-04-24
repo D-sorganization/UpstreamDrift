@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Skip if API dependencies not available
 try:
     from src.api.models.requests import AnalysisRequest, SimulationRequest
@@ -16,8 +18,8 @@ try:
 except ImportError as e:
     pytest.skip(f"Cannot import API services: {e}", allow_module_level=True)
 
-from src.shared.python.engine_core.engine_manager import EngineManager
-from src.shared.python.engine_core.interfaces import PhysicsEngine
+from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
+from src.shared.python.engine_core.interfaces import PhysicsEngine  # noqa: E402
 
 _RECORDER_SPEC_ATTRS = [
     "is_recording",

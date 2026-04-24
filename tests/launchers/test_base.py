@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
+pytestmark = pytest.mark.integration
+
 from src.launchers.base import BaseLauncher, LaunchItem, run_launcher  # noqa: E402
 
 

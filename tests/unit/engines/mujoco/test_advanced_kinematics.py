@@ -10,6 +10,8 @@ from mujoco_humanoid_golf.advanced_kinematics import (
 )
 from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 
+pytestmark = pytest.mark.unit
+
 
 class TestManipulabilityMetrics:
     """Tests for ManipulabilityMetrics dataclass."""

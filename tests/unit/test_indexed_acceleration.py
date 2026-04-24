@@ -11,6 +11,8 @@ import pytest
 
 from src.shared.python.spatial_algebra.indexed_acceleration import IndexedAcceleration
 
+pytestmark = pytest.mark.unit
+
 
 class TestIndexedAccelerationDataclass:
     """Test IndexedAcceleration dataclass."""

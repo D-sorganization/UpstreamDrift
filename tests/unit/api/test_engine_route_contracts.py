@@ -14,6 +14,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 _ENGINES_PY = Path("src/api/routes/engines.py")
 _ENGINE_STORE = Path("ui/src/stores/useEngineStore.ts")
 _SIMULATION_TSX = Path("ui/src/pages/Simulation.tsx")

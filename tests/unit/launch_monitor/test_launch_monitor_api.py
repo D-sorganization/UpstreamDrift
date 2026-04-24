@@ -14,6 +14,8 @@ from src.shared.python.launch_monitor import (
     TrackManAdapter,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Fixture CSV strings
 # ---------------------------------------------------------------------------

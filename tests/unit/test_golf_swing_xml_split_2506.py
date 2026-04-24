@@ -9,6 +9,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 REPO = Path(__file__).parents[2]
 XML_DIR = REPO / "src/engines/physics_engines/mujoco"
 LOC_BUDGET = 500  # Each split file should be under 500 LOC

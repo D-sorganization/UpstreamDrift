@@ -3,10 +3,13 @@
 import unittest
 
 import numpy as np
+import pytest
 
 from src.shared.python.engine_core.cross_engine_validator import (
     CrossEngineValidator,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestCrossEngineValidator(unittest.TestCase):

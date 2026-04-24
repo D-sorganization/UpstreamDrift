@@ -6,6 +6,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Mock matplotlib before importing plotting
 mock_matplotlib = MagicMock()
 mock_pyplot = MagicMock()

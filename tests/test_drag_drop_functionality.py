@@ -14,8 +14,12 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
+import pytest
+
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.gui_pkg.gui_utils import get_qapp
+
+pytestmark = pytest.mark.integration
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QMimeData, QPoint, QPointF, Qt

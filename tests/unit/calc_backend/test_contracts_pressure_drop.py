@@ -10,6 +10,8 @@ from src.shared.python.calc_backend.contracts.pressure_drop import (
     PressureDropResponse,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _valid_request(**kwargs) -> PressureDropRequest:
     defaults = {

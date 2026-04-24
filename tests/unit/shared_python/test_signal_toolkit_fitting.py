@@ -17,6 +17,8 @@ from src.shared.python.signal_toolkit.fitting import (
     SinusoidFitter,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def t200() -> np.ndarray:

@@ -11,6 +11,8 @@ from installer.windows.setup_config import (
     detect_available_engines,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_detect_available_engines_core_skips_optional_imports() -> None:
     imported: list[str] = []

@@ -11,6 +11,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 _BASE = Path("src/engines/Simscape_Multibody_Models")
 _2D_APP = _BASE / "2D_Golf_Model/matlab/Integrated_Analysis_App"
 _2D_RUN_ALL = _BASE / "2D_Golf_Model/matlab/run_all.m"

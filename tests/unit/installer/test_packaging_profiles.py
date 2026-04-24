@@ -11,6 +11,8 @@ from installer.windows.packaging_profiles import (
     iter_packaging_profile_ids,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_get_packaging_profile_defaults_to_hybrid() -> None:
     profile = get_packaging_profile(None)

@@ -20,6 +20,8 @@ from src.shared.python.biomechanics.swing_plane_visualization import (
 )
 from src.shared.python.spatial_algebra.reference_frames import SwingPlaneFrame
 
+pytestmark = pytest.mark.unit
+
 
 class TestPlaneVertices:
     """Tests for plane vertex generation."""

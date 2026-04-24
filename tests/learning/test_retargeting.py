@@ -7,6 +7,8 @@ import pytest
 
 from src.learning.retargeting import SkeletonConfig
 
+pytestmark = pytest.mark.integration
+
 
 class TestSkeletonConfig:
     """Tests for SkeletonConfig."""

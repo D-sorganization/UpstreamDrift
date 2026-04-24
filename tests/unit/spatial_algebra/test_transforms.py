@@ -12,6 +12,8 @@ from src.shared.python.spatial_algebra.transforms import (
     xtrans,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _rotation_x(angle: float) -> np.ndarray:
     """Create a rotation matrix around X axis."""

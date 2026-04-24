@@ -15,6 +15,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 from src.shared.python.engine_core.engine_registry import (
     EngineRegistration,
@@ -26,6 +27,8 @@ from src.shared.python.engine_core.plugin_registry import (
     PluginRegistry,
     discover_entry_point_plugins,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Stub engine for testing

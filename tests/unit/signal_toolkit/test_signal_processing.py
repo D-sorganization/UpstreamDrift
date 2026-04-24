@@ -22,6 +22,8 @@ from src.shared.python.signal_toolkit.signal_processing import (
     compute_time_shift,
 )
 
+pytestmark = pytest.mark.unit
+
 # ============================================================================
 # Helpers
 # ============================================================================

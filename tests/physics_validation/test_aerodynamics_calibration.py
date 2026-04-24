@@ -11,6 +11,8 @@ import pytest
 
 from src.shared.python.physics.ball_launch_conditions import EnvironmentalConditions
 
+pytestmark = pytest.mark.integration
+
 
 class TestISAAltitudeModel:
     def test_sea_level_density(self):

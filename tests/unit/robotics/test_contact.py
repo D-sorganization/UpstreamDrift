@@ -26,6 +26,8 @@ from src.robotics.contact.grasp_analysis import (
 )
 from src.robotics.core.types import ContactState
 
+pytestmark = pytest.mark.unit
+
 
 class TestContactState:
     """Tests for ContactState dataclass."""

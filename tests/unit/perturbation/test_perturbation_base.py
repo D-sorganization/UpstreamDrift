@@ -23,6 +23,8 @@ from src.shared.python.perturbation.perturbation_base import (
 )
 from src.shared.python.perturbation.statistics import MetricStatistics
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Minimal stub sim-result
 # ---------------------------------------------------------------------------

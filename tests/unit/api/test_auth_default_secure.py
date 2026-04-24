@@ -10,6 +10,10 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 class TestAuthDefaultIsSecure:
     """When no environment is configured, auth must be required (not bypassed)."""

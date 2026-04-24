@@ -9,9 +9,12 @@ import os
 from pathlib import Path
 
 import numpy as np
+import pytest
 from scipy.io import loadmat
 
 logger = logging.getLogger(__name__)
+
+pytestmark = pytest.mark.unit
 
 
 def analyze_matlab_files() -> bool:

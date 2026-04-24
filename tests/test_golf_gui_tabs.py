@@ -7,7 +7,11 @@ from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch as _patch
 
+import pytest
+
 from src.shared.python.data_io.path_utils import get_repo_root
+
+pytestmark = pytest.mark.integration
 
 # Simscape GUI directory contains spaces and cannot be a proper Python package.
 # This is the one intentional sys.path.insert remaining in the codebase.

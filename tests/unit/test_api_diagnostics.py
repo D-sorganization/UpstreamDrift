@@ -18,6 +18,8 @@ from unittest.mock import patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Skip module if dependencies aren't available
 fastapi = pytest.importorskip("fastapi")
 from fastapi import FastAPI  # noqa: E402

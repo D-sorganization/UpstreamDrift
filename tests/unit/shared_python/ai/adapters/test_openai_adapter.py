@@ -12,6 +12,8 @@ import pytest
 from src.shared.python.ai.adapters.base import ToolDeclaration
 from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def _mock_openai() -> Generator[MagicMock, None, None]:

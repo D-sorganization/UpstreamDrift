@@ -34,6 +34,8 @@ from src.robotics.control.whole_body.wbc_controller import (
     WholeBodyController,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestTask:
     """Tests for Task class."""

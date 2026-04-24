@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.core.version import (
     FEATURES,
     PROFESSIONAL_FEATURES,
@@ -13,6 +15,8 @@ from src.shared.python.core.version import (
     __version__,
     __version_info__,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Version string

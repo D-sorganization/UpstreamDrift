@@ -11,6 +11,8 @@ from src.tools.check_markdown_links import (
     resolve_and_verify_link,
 )
 
+pytestmark = pytest.mark.integration
+
 # ─── extract_links_from_markdown ───────────────────────────────
 
 

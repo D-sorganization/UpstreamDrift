@@ -9,6 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # All tests require GOLF_API_SECRET_KEY to be set
 ENV_PATCH = {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
 

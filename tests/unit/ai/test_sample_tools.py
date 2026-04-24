@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.ai.sample_tools import (
     register_golf_suite_tools,
 )
 from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
+
+pytestmark = pytest.mark.unit
 
 
 class TestRegisterGolfSuiteTools:

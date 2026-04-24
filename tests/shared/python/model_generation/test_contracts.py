@@ -16,6 +16,8 @@ from model_generation.core.contracts import (
     set_contracts_enabled,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPrecondition:
     """Tests for @precondition decorator."""

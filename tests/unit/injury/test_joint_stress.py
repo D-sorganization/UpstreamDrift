@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from src.shared.python.injury.joint_stress import (
     JointSide,
@@ -10,6 +11,8 @@ from src.shared.python.injury.joint_stress import (
     JointStressResult,
     StressType,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def _make_analyzer(body_weight: float = 80.0) -> JointStressAnalyzer:

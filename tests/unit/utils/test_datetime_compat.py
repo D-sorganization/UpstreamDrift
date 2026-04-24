@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+import pytest
+
 from src.api.utils.datetime_compat import (
     UTC,
     add_days,
@@ -11,6 +13,8 @@ from src.api.utils.datetime_compat import (
     iso_format,
     utc_now,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestUTC:

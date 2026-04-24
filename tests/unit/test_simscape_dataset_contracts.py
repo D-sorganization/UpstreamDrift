@@ -12,6 +12,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 _EXTRACT_FILE = Path(
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/"
     "functions/dataset_generator/extractLogsoutDataFixed.m"

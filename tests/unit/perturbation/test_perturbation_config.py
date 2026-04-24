@@ -9,6 +9,8 @@ from src.shared.python.perturbation.config import (
     PerturbationSummary,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPerturbationConfig:
     def test_default_construction(self) -> None:

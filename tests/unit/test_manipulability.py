@@ -22,6 +22,8 @@ from src.shared.python.spatial_algebra.manipulability import (
     get_jacobian_conditioning,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class MockEngine:
     """Mock physics engine for testing."""

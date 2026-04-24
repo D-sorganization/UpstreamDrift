@@ -11,6 +11,8 @@ from mujoco_humanoid_golf.club_configurations import (
     get_recommended_flex,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestClubSpecification:
     """Tests for ClubSpecification dataclass."""

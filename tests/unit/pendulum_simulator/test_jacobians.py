@@ -13,6 +13,8 @@ from src.shared.python.pendulum_simulator.jacobians import (
     jacobian_triple,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestEllipsoidFromJacobian:
     def test_returns_four_elements(self) -> None:

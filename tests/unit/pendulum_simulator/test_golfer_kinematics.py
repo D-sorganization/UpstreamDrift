@@ -8,6 +8,8 @@ import pytest
 from src.shared.python.pendulum_simulator.golfer_kinematics import forward_kinematics
 from src.shared.python.pendulum_simulator.physics_golfer import GolferParams
 
+pytestmark = pytest.mark.unit
+
 
 def _make_params(**kwargs) -> GolferParams:
     defaults = {

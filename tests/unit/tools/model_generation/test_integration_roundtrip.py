@@ -30,6 +30,8 @@ from model_generation.core.types import (
     Origin,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestManualBuilderRoundtrip:
     """Generate URDF via ManualBuilder -> Parse back -> Verify structural equivalence."""

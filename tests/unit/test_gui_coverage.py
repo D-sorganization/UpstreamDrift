@@ -9,26 +9,30 @@ if dependencies are missing rather than using extensive mocking.
 
 import os
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 # Ensure offscreen platform BEFORE any Qt imports so that a QApplication can be
 # created even when no X server / Wayland display is available (headless CI).
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("MUJOCO_GL", "osmesa")
 
-from collections.abc import Generator
-from typing import Any
-from unittest.mock import MagicMock
+from collections.abc import Generator  # noqa: E402
+from typing import Any  # noqa: E402
+from unittest.mock import MagicMock  # noqa: E402
 
-import numpy as np
-import pytest
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
 
 # sympy is needed by some transitive imports; skip module if unavailable
 pytest.importorskip("sympy", reason="sympy not installed")
 
-from src.shared.python.engine_core.engine_availability import (
+from src.shared.python.engine_core.engine_availability import (  # noqa: E402
     PYQT6_AVAILABLE,
     skip_if_unavailable,
 )
-from src.shared.python.gui_pkg.gui_utils import get_qapp
+from src.shared.python.gui_pkg.gui_utils import get_qapp  # noqa: E402
 
 if PYQT6_AVAILABLE:
     pass

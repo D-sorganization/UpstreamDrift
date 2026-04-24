@@ -9,6 +9,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def _einsum_max_distance(positions: np.ndarray, center: np.ndarray) -> float:
     """Optimised version: uses np.einsum to avoid intermediate norm array."""

@@ -9,6 +9,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 # --- Mock PyQt6 Modules ---
 class MockQtBase:

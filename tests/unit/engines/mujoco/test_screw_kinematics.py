@@ -9,6 +9,8 @@ from mujoco_humanoid_golf.screw_kinematics import (
     Twist,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def simple_pendulum() -> mujoco.MjModel:

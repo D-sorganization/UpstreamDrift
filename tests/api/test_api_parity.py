@@ -21,6 +21,8 @@ from collections.abc import Generator
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 try:
     from fastapi.testclient import TestClient
 

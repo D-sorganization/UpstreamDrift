@@ -11,6 +11,8 @@ from src.shared.python.physics.flight_model_options import (
     compute_spin_decay,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFlightModelOptions:
     """Tests for FlightModelOptions dataclass."""

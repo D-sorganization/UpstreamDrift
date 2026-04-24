@@ -28,6 +28,8 @@ from src.unreal_integration.streaming import (  # noqa: E402
     UnrealStreamingServer,
 )
 
+pytestmark = pytest.mark.unit
+
 # Ensure pytest-asyncio is available for async test classes;
 # skip the entire module if it is not installed.
 pytest.importorskip("pytest_asyncio", reason="pytest-asyncio not installed")

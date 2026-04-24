@@ -6,6 +6,8 @@ import pytest
 from src.deployment.digital_twin.estimator import EstimatorConfig, StateEstimator
 from src.deployment.realtime.state import RobotState
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def empty_robot_state() -> RobotState:

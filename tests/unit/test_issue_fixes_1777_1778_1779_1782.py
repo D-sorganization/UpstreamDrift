@@ -18,6 +18,8 @@ from typing import Any
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Issue #1779 – SECRET_KEY fallback must be random, not a known static string
 # ---------------------------------------------------------------------------

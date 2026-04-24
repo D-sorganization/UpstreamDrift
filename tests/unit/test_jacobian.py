@@ -15,6 +15,8 @@ from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
 
+pytestmark = pytest.mark.unit
+
 # Simple inline URDF for Jacobian tests (2-DOF planar arm)
 SIMPLE_ARM_URDF = """<?xml version="1.0"?>
 <robot name="simple_arm">

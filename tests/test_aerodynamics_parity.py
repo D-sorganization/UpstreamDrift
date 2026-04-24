@@ -15,6 +15,7 @@ from __future__ import annotations
 import math
 
 import numpy as np
+import pytest
 
 # Python reference implementation
 from src.engines.common.physics import (
@@ -22,6 +23,8 @@ from src.engines.common.physics import (
     AirProperties,
     BallProperties,
 )
+
+pytestmark = pytest.mark.integration
 
 
 def _make_python_aero(

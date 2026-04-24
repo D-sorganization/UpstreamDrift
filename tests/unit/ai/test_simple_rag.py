@@ -4,7 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from src.shared.python.ai.rag.simple_rag import Document, SimpleRAGStore
+
+pytestmark = pytest.mark.unit
 
 
 class TestDocument:

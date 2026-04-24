@@ -6,6 +6,8 @@ from double_pendulum_model.physics.double_pendulum import (
     ExpressionFunction,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def test_valid_expressions() -> None:
     # Setup a dummy state

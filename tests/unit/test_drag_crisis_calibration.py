@@ -35,6 +35,8 @@ from src.shared.python.core.constants import (
 )
 from src.shared.python.physics.aerodynamics import DragModel
 
+pytestmark = pytest.mark.unit
+
 
 def _speed_for_reynolds(target_re: float) -> float:
     """Return the ball speed [m/s] that yields ``target_re`` at sea level."""

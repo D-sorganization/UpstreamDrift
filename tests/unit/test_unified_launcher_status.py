@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import logging
 
+import pytest
+
 from src.launchers.unified_launcher import UnifiedLauncher
+
+pytestmark = pytest.mark.unit
 
 
 class _FakeEngineType:

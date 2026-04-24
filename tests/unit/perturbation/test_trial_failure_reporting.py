@@ -25,6 +25,8 @@ from src.shared.python.perturbation.perturbation_base import (
     TrialFailure,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Shared stub infrastructure (mirrors test_perturbation_base.py)
 # ---------------------------------------------------------------------------

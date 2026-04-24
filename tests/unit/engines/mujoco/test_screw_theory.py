@@ -16,6 +16,8 @@ from mujoco_humanoid_golf.screw_theory import (
     wrench_to_spatial,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestTwistsAndWrenches:
     """Tests for twist and wrench conversions."""

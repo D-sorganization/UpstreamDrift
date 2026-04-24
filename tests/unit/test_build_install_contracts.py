@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestUIBuildHookMissingDist:
     """UIBuildHook.initialize() must fail loudly when CI is set and ui/dist is absent.

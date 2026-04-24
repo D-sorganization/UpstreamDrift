@@ -23,6 +23,8 @@ import math
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # ── reference parameters matching app.js defaults ────────────────────────────
 L1 = 0.75
 L2 = 1.0

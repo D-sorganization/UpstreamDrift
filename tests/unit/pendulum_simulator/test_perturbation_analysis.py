@@ -10,6 +10,8 @@ from src.shared.python.pendulum_simulator.perturbation_analysis import (
     variability_summary,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPerturbTorqueCoeffs:
     def test_zero_amplitude_no_change(self) -> None:

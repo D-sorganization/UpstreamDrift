@@ -11,10 +11,12 @@ import pytest
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 
+pytestmark = pytest.mark.integration
+
 # Skip if pendulum engine not available
 pytest.importorskip("engines.physics_engines.pendulum")
 
-from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
     PendulumPhysicsEngine,
 )
 

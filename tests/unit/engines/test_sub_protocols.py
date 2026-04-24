@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+import pytest
 
 from src.shared.python.engine_core.sub_protocols import (
     CounterfactualComputable,
@@ -14,6 +15,8 @@ from src.shared.python.engine_core.sub_protocols import (
     Recordable,
     Steppable,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Protocol structural checks

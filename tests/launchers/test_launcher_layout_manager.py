@@ -7,6 +7,8 @@ from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
+pytestmark = pytest.mark.integration
+
 from src.launchers.launcher_layout_manager import (  # noqa: E402
     LayoutConfig,
     LayoutManager,

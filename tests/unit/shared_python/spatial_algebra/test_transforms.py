@@ -3,6 +3,8 @@ import pytest
 
 from src.shared.python.spatial_algebra.transforms import inv_xtrans, xlt, xrot, xtrans
 
+pytestmark = pytest.mark.unit
+
 
 class TestTransforms:
     def test_xrot(self) -> None:

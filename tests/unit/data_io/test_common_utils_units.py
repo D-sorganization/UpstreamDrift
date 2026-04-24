@@ -19,6 +19,8 @@ from src.shared.python.data_io.common_utils import (
     standardize_joint_angles,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # CONVERSION_FACTORS dict
 # ---------------------------------------------------------------------------

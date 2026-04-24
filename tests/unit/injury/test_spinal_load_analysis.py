@@ -11,6 +11,8 @@ from src.shared.python.injury.spinal_load_analysis import (
     SpinalRiskLevel,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_analyzer(body_weight: float = 80.0) -> SpinalLoadAnalyzer:
     return SpinalLoadAnalyzer(body_weight=body_weight, height=1.75)

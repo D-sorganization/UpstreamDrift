@@ -4,6 +4,10 @@ import subprocess  # noqa: E402
 from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
+import pytest  # noqa: E402
+
+pytestmark = pytest.mark.integration
+
 from src.launchers.docker_manager import (  # noqa: E402
     DockerBuildThread,
     DockerCheckThread,

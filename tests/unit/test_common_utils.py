@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from src.shared.python.data_io.common_utils import (
     convert_units,
@@ -16,6 +17,8 @@ from src.shared.python.data_io.common_utils import (
     save_golf_data,
     standardize_joint_angles,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestCommonUtilsHardening(unittest.TestCase):

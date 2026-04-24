@@ -13,6 +13,8 @@ from src.deployment.safety.collision import (
     ObstacleType,
 )
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def mock_sim() -> MagicMock:

@@ -17,6 +17,8 @@ from mujoco_humanoid_golf.power_flow import (
     PowerFlowResult,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def simple_pendulum_model() -> mujoco.MjModel:

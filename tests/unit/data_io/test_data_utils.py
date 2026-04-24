@@ -18,6 +18,8 @@ from src.shared.python.data_io.data_utils import (
     save_numpy_data,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # load_csv_data / save_csv_data
 # ---------------------------------------------------------------------------

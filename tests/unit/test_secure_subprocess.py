@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 # Note: Import paths for the `src` package are configured at the test runner /
 # package level (e.g., via pyproject.toml or conftest.py), so no manual
 from src.shared.python.security.secure_subprocess import (
@@ -15,6 +17,8 @@ from src.shared.python.security.secure_subprocess import (
     validate_executable,
     validate_script_path,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestSecureSubprocess(unittest.TestCase):

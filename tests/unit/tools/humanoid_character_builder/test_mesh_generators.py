@@ -31,6 +31,8 @@ from humanoid_character_builder.generators.mesh_generator import (
     SMPLXMeshGenerator,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

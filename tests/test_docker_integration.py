@@ -14,6 +14,8 @@ import pytest
 
 from src.shared.python.data_io.path_utils import get_repo_root, get_src_root
 
+pytestmark = pytest.mark.integration
+
 # Docker launch command tests are broken after the launcher refactoring to
 # mixin-based architecture (launcher_simulation.py, launcher_dialogs.py).
 # The tests assume a single Popen call but the refactored code makes multiple

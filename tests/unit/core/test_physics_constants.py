@@ -24,6 +24,8 @@ from src.shared.python.core.physics_constants import (
     PhysicalConstant,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # PhysicalConstant class
 # ---------------------------------------------------------------------------

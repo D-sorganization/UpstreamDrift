@@ -24,6 +24,8 @@ from src.shared.python.gui_pkg.ellipsoid_visualization import (
     generate_ellipsoid_mesh,
 )
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     from src.shared.python.engine_core.interfaces import PhysicsEngine
 

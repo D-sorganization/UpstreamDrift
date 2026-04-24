@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from src.shared.python.docker_config import (
     DOCKER_IMAGE_DEV,
     DOCKER_IMAGE_ENGINE,
@@ -14,6 +16,8 @@ from src.shared.python.docker_config import (
     LEGACY_DOCKER_ALIASES,
     detect_gpu_support,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # Image name constants

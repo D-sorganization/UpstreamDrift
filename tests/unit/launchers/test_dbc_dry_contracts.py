@@ -19,6 +19,8 @@ from src.launchers.settings_dialog import (
 )
 from src.launchers.startup import StartupResults
 
+pytestmark = pytest.mark.unit
+
 
 def test_validate_docker_stage_accepts_known_values() -> None:
     """Known launcher Docker stages should pass validation unchanged."""

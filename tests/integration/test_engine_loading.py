@@ -11,6 +11,8 @@ from src.shared.python.engine_core.engine_manager import (
 from src.shared.python.engine_core.engine_registry import EngineRegistry
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 
+pytestmark = pytest.mark.integration
+
 _REGISTRATION_SPEC_ATTRS = [
     "engine_type",
     "factory",

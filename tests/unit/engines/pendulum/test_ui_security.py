@@ -2,7 +2,10 @@ import ast
 import math
 from unittest.mock import patch
 
+import pytest
 from double_pendulum_model.ui.pendulum_pyqt_app import PendulumController
+
+pytestmark = pytest.mark.unit
 
 
 def test_safe_eval_valid_math() -> None:

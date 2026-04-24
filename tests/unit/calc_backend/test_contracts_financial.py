@@ -11,6 +11,8 @@ from src.shared.python.calc_backend.contracts.financial import (
     FinancialResultsOut,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestFinancialRequest:
     def test_default_construction(self) -> None:

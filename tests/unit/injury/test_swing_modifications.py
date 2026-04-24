@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.injury.swing_modifications import (
     ModificationPlan,
     SwingModification,
     SwingModificationRecommender,
     SwingStyle,
 )
+
+pytestmark = pytest.mark.unit
 
 # ---------------------------------------------------------------------------
 # SwingStyle enum

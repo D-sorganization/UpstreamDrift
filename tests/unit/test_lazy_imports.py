@@ -9,6 +9,8 @@ import pytest
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 from src.shared.python.gui_pkg.gui_utils import get_qapp
 
+pytestmark = pytest.mark.unit
+
 
 class TestSharedModuleLazyImports:
     """Test that shared module doesn't eagerly import heavy dependencies."""

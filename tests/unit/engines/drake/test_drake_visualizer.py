@@ -10,6 +10,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 _PYDRAKE_MOCKED_KEYS = ["pydrake", "pydrake.all"]
 _VISUALIZER_MOD = "src.engines.physics_engines.drake.python.src.drake_visualizer"
 

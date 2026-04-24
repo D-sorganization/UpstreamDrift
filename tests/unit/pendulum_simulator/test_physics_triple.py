@@ -14,6 +14,8 @@ from src.shared.python.pendulum_simulator.physics_triple import (
     mass_matrix,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_params() -> TriplePendulumParams:
     return TriplePendulumParams(m1=1.0, m2=0.5, m3=0.3, L1=1.0, L2=0.5, L3=0.4)

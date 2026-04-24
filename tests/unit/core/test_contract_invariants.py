@@ -18,6 +18,8 @@ from src.shared.python.core.contracts.level import (
     set_contract_level,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestContractChecker:
     def setup_method(self) -> None:

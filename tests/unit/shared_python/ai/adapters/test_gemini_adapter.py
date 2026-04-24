@@ -9,6 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Install google.generativeai mock for the duration of this module's
 # collection+execution.  patch.dict is used so entries are removed in
 # teardown_module.  The mock must be active when gemini_adapter is first

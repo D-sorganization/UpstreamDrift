@@ -19,6 +19,8 @@ import pytest
 
 from src.shared.python.engine_core.engine_registry import EngineType
 
+pytestmark = pytest.mark.integration
+
 if TYPE_CHECKING:
     pass
 

@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.upstream_drift_tools.ui.catppuccin_theme import (
     COLORS,
     get_stylesheet,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestCatppuccinColors:

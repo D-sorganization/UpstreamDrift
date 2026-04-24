@@ -2,12 +2,14 @@
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 pytest.importorskip("mujoco_humanoid_golf", reason="mujoco_humanoid_golf is required")
 
-import mujoco
-import numpy as np
-from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
-from mujoco_humanoid_golf.motion_optimization import (
+import mujoco  # noqa: E402
+import numpy as np  # noqa: E402
+from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML  # noqa: E402
+from mujoco_humanoid_golf.motion_optimization import (  # noqa: E402
     OptimizationConstraints,
     OptimizationObjectives,
     OptimizationResult,

@@ -6,6 +6,8 @@ import pytest
 from src.shared.python.plotting import GolfSwingPlotter
 from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
+pytestmark = pytest.mark.unit
+
 
 class TestAdvancedAnalysis:
     @pytest.mark.xfail(

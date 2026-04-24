@@ -11,6 +11,10 @@ Three bugs:
 
 from __future__ import annotations
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 class TestStandardModelManagerPaths:
     """StandardModelManager must not produce double-shared path segments."""

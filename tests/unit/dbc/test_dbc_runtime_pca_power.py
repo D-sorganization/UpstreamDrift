@@ -13,6 +13,9 @@ import unittest
 from unittest.mock import MagicMock
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.unit
 
 
 def _make_pca_mixin(n: int = 100, n_joints: int = 3) -> object:

@@ -6,11 +6,14 @@ from unittest.mock import MagicMock
 import matplotlib
 import matplotlib.backend_bases
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.unit
 
 matplotlib.use("Agg")
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt  # noqa: E402
 
-from src.shared.python.plotting import GolfSwingPlotter
+from src.shared.python.plotting import GolfSwingPlotter  # noqa: E402
 
 # Check if 3D projection is available (broken on some numpy/matplotlib combos)
 try:

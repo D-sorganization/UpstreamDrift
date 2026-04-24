@@ -8,6 +8,8 @@ import pytest
 from src.shared.python.plot_engine.contour import correlation_matrix, scatter_to_grid
 from src.shared.python.plot_engine.protocols import PlotConverter, PlotRenderer
 
+pytestmark = pytest.mark.unit
+
 
 class TestScatterToGrid:
     def _scatter_paraboloid(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:

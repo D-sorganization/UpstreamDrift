@@ -11,6 +11,8 @@ from src.shared.python.data_processing.processor import (
     _validate_dataframe_expression,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # DatasetInfo dataclass
 # ---------------------------------------------------------------------------

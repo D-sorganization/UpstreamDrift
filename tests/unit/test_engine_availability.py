@@ -14,6 +14,8 @@ from src.shared.python.engine_core.engine_availability import (
     require_engine,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # EngineStatus enum
 # ---------------------------------------------------------------------------

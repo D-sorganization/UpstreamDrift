@@ -19,6 +19,8 @@ from src.unreal_integration.skeleton_mapper import (
     SkeletonType,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestSkeletonType:
     """Tests for SkeletonType enum."""

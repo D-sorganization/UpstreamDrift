@@ -16,6 +16,8 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # =============================================================================
 # Issue #1774 – AerodynamicsEngine.compute_forces() shape validation
 # =============================================================================

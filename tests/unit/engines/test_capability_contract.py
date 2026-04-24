@@ -16,6 +16,8 @@ import pytest
 
 from src.shared.python.engine_core.capabilities import Capability
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Tests for the Capability enum itself
 # ---------------------------------------------------------------------------

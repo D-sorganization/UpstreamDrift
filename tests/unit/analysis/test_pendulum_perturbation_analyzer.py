@@ -28,6 +28,8 @@ from src.shared.python.perturbation.config import (
 )
 from src.shared.python.perturbation.statistics import MetricStatistics
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

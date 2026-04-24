@@ -20,6 +20,8 @@ import pytest
 from src.engines.loaders import _ensure_engine_loaded, _load_engine_with_probe
 from src.shared.python.data_io.common_utils import GolfModelingError
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def tmp_root(tmp_path: Path) -> Path:

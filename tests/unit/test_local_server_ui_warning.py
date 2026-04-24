@@ -6,6 +6,8 @@ import logging
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 local_server = pytest.importorskip("src.api.local_server")
 
 

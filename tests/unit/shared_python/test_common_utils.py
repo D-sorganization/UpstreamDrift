@@ -20,6 +20,8 @@ from src.shared.python.data_io.common_utils import (
     standardize_joint_angles,
 )
 
+pytestmark = pytest.mark.unit
+
 # Use non-interactive backend for plots
 matplotlib.use("Agg")
 

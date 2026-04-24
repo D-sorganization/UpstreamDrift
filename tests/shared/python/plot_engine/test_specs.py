@@ -24,6 +24,8 @@ from plot_engine.specs import (
 )
 from pydantic import ValidationError
 
+pytestmark = pytest.mark.unit
+
 # ── SeriesStyle ──────────────────────────────────────────────────────────────
 
 

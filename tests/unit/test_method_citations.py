@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from src.shared.python.analysis.dataclasses import (
     CITATION_CRUNCH_FACTOR,
@@ -13,6 +14,8 @@ from src.shared.python.analysis.dataclasses import (
     validate_angle_cross_engine,
     validate_timing_cross_engine,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class TestMethodCitation:

@@ -12,6 +12,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.acid_gas_dewpoin
     quick_dewpoint_calculation,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestAcidGasComposition:
     def test_default_construction(self) -> None:

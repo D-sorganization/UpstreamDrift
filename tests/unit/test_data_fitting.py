@@ -22,6 +22,8 @@ from src.shared.python.validation_pkg.data_fitting import (
     convert_poses_to_markers,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestBodySegmentParams:
     """Tests for BodySegmentParams dataclass."""

@@ -34,6 +34,8 @@ from src.shared.python.physics.aerodynamics import (
     WindModel,
 )
 
+pytestmark = pytest.mark.unit
+
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 

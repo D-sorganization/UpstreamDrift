@@ -14,6 +14,8 @@ from src.shared.python.theme.api import (
     ThemeOperationResponse,
 )
 
+pytestmark = pytest.mark.unit
+
 _COLORS = {
     "bg": "#1e1e2e",
     "group_bg": "#2a2a3e",

@@ -17,6 +17,8 @@ from src.shared.python.engine_core.engine_manager import (
     EngineType,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestEngineIntegration:
     """Test integration between different physics engines."""

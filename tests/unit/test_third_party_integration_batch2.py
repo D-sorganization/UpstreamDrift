@@ -28,6 +28,8 @@ from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
 
+pytestmark = pytest.mark.unit
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1. Drake Specific Tests (#1810)
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -41,6 +41,8 @@ from src.api.routes.putting_green import (
     ScatterAnalysisResponse,
 )
 
+pytestmark = pytest.mark.integration
+
 # ──────────────────────────────────────────────────────────────
 #  Contract Tests: Putting Green (#1206)
 # ──────────────────────────────────────────────────────────────

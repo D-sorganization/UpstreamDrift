@@ -6,6 +6,8 @@ from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
+
+pytestmark = pytest.mark.integration
 from PyQt6.QtGui import QFont, QPainter  # noqa: E402
 
 from src.launchers.startup import (  # noqa: E402

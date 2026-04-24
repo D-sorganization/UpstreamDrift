@@ -8,6 +8,8 @@ import pytest
 from src.deployment.digital_twin.twin import AnomalyReport, AnomalyType, DigitalTwin
 from src.deployment.realtime.state import RobotState
 
+pytestmark = pytest.mark.integration
+
 
 @pytest.fixture
 def mock_sim() -> MagicMock:

@@ -14,6 +14,10 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 class TestAntagonistPairMuscleNames:
     """AntagonistPair must expose muscle_names to avoid 3-level chain traversal."""

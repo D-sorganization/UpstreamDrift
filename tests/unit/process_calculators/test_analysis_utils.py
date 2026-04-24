@@ -10,6 +10,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.analysis_utils i
     evaluate_output,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class _StubEngine:
     """Minimal engine stub: calculate(**params) returns a dict."""

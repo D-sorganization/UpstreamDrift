@@ -11,6 +11,8 @@ from mujoco_humanoid_golf.kinematic_forces import (
 )
 from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 
+pytestmark = pytest.mark.unit
+
 
 class TestKinematicForceData:
     """Tests for KinematicForceData dataclass."""

@@ -8,6 +8,8 @@ from collections.abc import Generator
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 _API = "/api"
 
 try:

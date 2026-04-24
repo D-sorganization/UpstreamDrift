@@ -20,6 +20,8 @@ from src.shared.python.ai.workflow_engine import (
     WorkflowStep,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

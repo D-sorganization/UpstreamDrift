@@ -2,7 +2,11 @@
 
 from pathlib import Path
 
+import pytest
+
 from src.launchers.launcher_process_manager import ProcessManager
+
+pytestmark = pytest.mark.unit
 
 
 class TestGetSubprocessEnv:

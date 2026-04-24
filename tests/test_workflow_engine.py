@@ -13,6 +13,8 @@ from src.shared.python.ai.workflow_engine import (
     WorkflowStep,
 )
 
+pytestmark = pytest.mark.integration
+
 # Minimal Context Mock
 Context = namedtuple("Context", ["user_id"])
 

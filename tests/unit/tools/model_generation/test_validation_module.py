@@ -12,6 +12,7 @@ Tests cover the Validator class methods:
 
 from __future__ import annotations
 
+import pytest
 from model_generation.core.types import (
     Inertia,
     Joint,
@@ -20,6 +21,8 @@ from model_generation.core.types import (
     Link,
 )
 from model_generation.core.validation import ValidationResult, Validator
+
+pytestmark = pytest.mark.unit
 
 # ── validate_mass ────────────────────────────────────────────────────────────
 

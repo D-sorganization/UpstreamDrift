@@ -12,6 +12,8 @@ from src.shared.python.launcher_factory import (
     launch_engine_directly,
 )
 
+pytestmark = pytest.mark.unit
+
 # ---------------------------------------------------------------------------
 # ENGINE_MODULES dict
 # ---------------------------------------------------------------------------

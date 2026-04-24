@@ -8,6 +8,8 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestIssue2483MyoSuiteTerminationHandling:
     """Issue #2483: step() must handle environment termination state."""

@@ -9,6 +9,8 @@ from src.shared.python.validation_pkg.comparative_analysis import (
     RecorderInterface,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class MockRecorder(RecorderInterface):
     """Mock recorder for testing."""

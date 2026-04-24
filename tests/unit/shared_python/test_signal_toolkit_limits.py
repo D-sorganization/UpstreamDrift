@@ -17,6 +17,8 @@ from src.shared.python.signal_toolkit.limits import (
     visualize_saturation_curves,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture
 def t() -> np.ndarray:

@@ -3,6 +3,8 @@
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.unit
+
 try:
     from apps.services.analysis import compute_marker_statistics  # noqa: E402
 except (ImportError, ModuleNotFoundError):

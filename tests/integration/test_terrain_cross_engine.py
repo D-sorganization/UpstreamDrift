@@ -24,6 +24,8 @@ from src.shared.python.physics.terrain_engine import (
     TerrainGeometryGenerator,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestTerrainConsistency:
     """Test terrain calculations are consistent."""

@@ -10,6 +10,8 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestSteamCalculationEngineImport:
     """Tests that the module and class are importable."""

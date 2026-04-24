@@ -14,6 +14,8 @@ from src.engines.physics_engines.mujoco.head_models import (
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 
+pytestmark = pytest.mark.unit
+
 logger = get_logger(__name__)
 
 

@@ -3,6 +3,8 @@
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
+
+pytestmark = pytest.mark.integration
 from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QVBoxLayout  # noqa: E402
 
 from src.launchers.launcher_ui_setup import LauncherUISetupMixin  # noqa: E402

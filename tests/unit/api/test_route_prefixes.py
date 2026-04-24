@@ -16,6 +16,8 @@ from __future__ import annotations
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 class TestRouterPrefixesNoHardcodedApiSegment:
     """Route module APIRouter instances must NOT include '/api' in their prefix.

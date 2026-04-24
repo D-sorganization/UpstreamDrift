@@ -33,6 +33,8 @@ from src.shared.python.engine_core.engine_availability import (
     skip_if_unavailable,
 )
 
+pytestmark = pytest.mark.unit
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1. Engine Availability Infrastructure Tests (#1818)
 # ═══════════════════════════════════════════════════════════════════════════════

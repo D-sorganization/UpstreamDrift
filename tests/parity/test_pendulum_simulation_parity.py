@@ -14,6 +14,8 @@ import math
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 _API = "/api"
 
 # ---------------------------------------------------------------------------

@@ -7,6 +7,8 @@ import pytest
 
 from src.shared.python.physics.equipment import CLUB_CONFIGS, get_club_config
 
+pytestmark = pytest.mark.unit
+
 
 class TestEquipmentModule:
     """Test cases for equipment module."""

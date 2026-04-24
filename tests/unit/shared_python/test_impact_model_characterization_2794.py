@@ -50,6 +50,8 @@ from src.shared.python.physics.impact_model import (
     validate_energy_balance,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _make_pre_state(
     *,

@@ -17,6 +17,8 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io impo
     import_urdf_to_mujoco,
 )
 
+pytestmark = pytest.mark.unit
+
 # Path to the mujoco module reference inside urdf_io
 _URDF_IO_MUJOCO = (
     "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco"

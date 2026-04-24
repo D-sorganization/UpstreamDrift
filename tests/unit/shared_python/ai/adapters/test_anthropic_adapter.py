@@ -26,6 +26,8 @@ from src.shared.python.ai.types import (
     ProviderCapability,
 )
 
+pytestmark = pytest.mark.unit
+
 
 @pytest.fixture(autouse=True)
 def _mock_anthropic() -> Generator[MagicMock, None, None]:

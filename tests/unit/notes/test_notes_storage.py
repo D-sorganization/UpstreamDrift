@@ -9,6 +9,8 @@ import pytest
 from src.shared.python.notes.models import RecycledNoteItem
 from src.shared.python.notes.storage import NotesStorage
 
+pytestmark = pytest.mark.unit
+
 # ── RecycledNoteItem ─────────────────────────────────────────────────────────
 
 

@@ -11,6 +11,8 @@ from src.shared.python.upstream_drift_tools.process_calculators.scrubber_calcula
     calculate_ntu_removal,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestPackingDatabase:
     def test_nonempty(self) -> None:

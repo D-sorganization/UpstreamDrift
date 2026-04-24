@@ -17,6 +17,9 @@ import unittest
 from collections.abc import Callable
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.unit
 
 os.environ["DBC_LEVEL"] = "enforce"
 

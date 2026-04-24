@@ -18,6 +18,8 @@ from typing import Any
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 # Import TestClient with skip if unavailable
 httpx = pytest.importorskip("httpx")
 fastapi = pytest.importorskip("fastapi")

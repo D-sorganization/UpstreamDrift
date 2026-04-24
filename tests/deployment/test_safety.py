@@ -5,6 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+pytestmark = pytest.mark.integration
+
 
 class TestSafetyLimits:
     """Tests for SafetyLimits."""

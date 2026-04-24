@@ -12,6 +12,8 @@ from src.engines.common.state import (
     StateManager,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestEngineLifecycleState:
     """Tests for EngineLifecycleState enum."""

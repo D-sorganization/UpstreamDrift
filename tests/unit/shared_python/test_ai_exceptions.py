@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIError,
@@ -10,6 +12,8 @@ from src.shared.python.ai.exceptions import (
     ToolExecutionError,
     WorkflowError,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_aierror_init() -> None:

@@ -2,6 +2,8 @@
 
 from collections.abc import Iterator
 
+import pytest
+
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
     AgentChunk,
@@ -10,6 +12,8 @@ from src.shared.python.ai.types import (
     Message,
     ProviderCapabilities,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class DummyAdapter(BaseAgentAdapter):

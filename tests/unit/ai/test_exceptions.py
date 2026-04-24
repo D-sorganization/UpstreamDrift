@@ -15,6 +15,8 @@ from src.shared.python.ai.exceptions import (
     WorkflowError,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestAIError:
     """Tests for base AIError exception."""

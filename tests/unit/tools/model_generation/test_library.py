@@ -5,6 +5,10 @@ Tests for the model library module.
 import tempfile
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.unit
+
 
 class TestModelLibrary:
     """Tests for ModelLibrary class."""

@@ -6,6 +6,8 @@ import pytest
 
 from src.shared.python.exceptions import EngineNotFoundError, GolfModelingError
 
+pytestmark = pytest.mark.unit
+
 
 class TestExceptionShim:
     def test_golf_modeling_error_raises(self) -> None:

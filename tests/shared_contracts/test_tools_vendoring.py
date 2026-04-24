@@ -11,6 +11,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 
 def test_tools_vendoring_provider_path(pytestconfig: pytest.Config) -> None:
     """Proves that shared modules resolve to the configured tooling mode path."""

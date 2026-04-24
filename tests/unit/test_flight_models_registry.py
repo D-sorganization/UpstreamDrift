@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import math
 
+import pytest
+
 from src.shared.python.physics.flight_models import (
     FlightModelRegistry,
     UnifiedLaunchConditions,
 )
+
+pytestmark = pytest.mark.unit
 
 
 def test_all_models_generate_trajectory() -> None:

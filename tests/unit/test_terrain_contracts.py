@@ -19,6 +19,8 @@ from src.shared.python.physics.terrain import (
     TerrainType,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestElevationMapBounds:
     """ElevationMap must reject coordinates beyond the actual grid extent."""

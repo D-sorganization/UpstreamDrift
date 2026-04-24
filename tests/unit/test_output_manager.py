@@ -21,6 +21,8 @@ from src.shared.python.data_io.output_manager import (
     save_results,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _has_parquet_support() -> bool | None:
     """Check if parquet support is available."""

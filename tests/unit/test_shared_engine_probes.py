@@ -15,6 +15,8 @@ from src.shared.python.engine_core.engine_probes import (
     ProbeStatus,
 )
 
+pytestmark = pytest.mark.unit
+
 
 # Test base classes and data structures
 def test_engine_probe_result() -> None:

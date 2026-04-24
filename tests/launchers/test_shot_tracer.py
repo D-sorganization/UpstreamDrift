@@ -5,6 +5,8 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
+pytestmark = pytest.mark.integration
+
 from src.launchers.shot_tracer import (  # noqa: E402
     MultiModelShotTracerWidget,
     MultiModelShotTracerWindow,

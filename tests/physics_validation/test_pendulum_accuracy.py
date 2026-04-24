@@ -10,6 +10,8 @@ from src.shared.python.engine_core.engine_manager import EngineManager, EngineTy
 from src.shared.python.logging_pkg.logging_config import get_logger
 from tests.physics_validation.analytical import AnalyticalPendulum
 
+pytestmark = pytest.mark.integration
+
 logger = get_logger(__name__)
 
 

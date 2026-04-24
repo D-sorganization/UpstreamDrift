@@ -1,6 +1,9 @@
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
+
+pytestmark = pytest.mark.unit
 
 
 # Use a patch for the import since mujoco might not be installed

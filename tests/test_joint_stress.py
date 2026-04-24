@@ -7,6 +7,8 @@ from src.shared.python.injury.joint_stress import (
     JointStressResult,
 )
 
+pytestmark = pytest.mark.integration
+
 
 class TestJointStressAnalyzer:
     """Test suite for JointStressAnalyzer."""
