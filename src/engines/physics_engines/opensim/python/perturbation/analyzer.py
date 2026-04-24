@@ -428,8 +428,8 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                     force_obj.setControls(
                         osim.Vector(1, ctrl), model.updDefaultControls()
                     )
-                except Exception:  # noqa: BLE001  # noqa: BLE001
-                    pass
+                except Exception as exc:  # noqa: BLE001
+                    logger.debug("Actuator control update skipped: %s", exc)
 
             # Realize to acceleration
             with contextlib.suppress(Exception):
@@ -484,8 +484,8 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                 model.realizeVelocity(state)
                 ke = float(model.calcKineticEnergy(state))
                 pe = float(model.calcPotentialEnergy(state))
-            except Exception:  # noqa: BLE001  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                logger.debug("Energy computation skipped (optional metric): %s", exc)
 
             t_list.append(t)
             qpos_list.append(q)
@@ -510,8 +510,10 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                         new_val = q[k] + qdot[k] * dt
                         coord.setValue(state, new_val)
                         coord.setSpeedValue(state, qdot[k])
-                    except Exception:  # noqa: BLE001  # noqa: BLE001
-                        pass
+                    except Exception as exc:  # noqa: BLE001
+                        logger.debug(
+                            "Coordinate update skipped in Euler fallback: %s", exc
+                        )
 
         t_arr = np.array(t_list)
         qpos_arr = np.array(qpos_list)

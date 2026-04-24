@@ -423,8 +423,10 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
                         mujoco.mj_energyVel(mj_model, mj_data)
                         pe = float(mj_data.energy[0])
                         ke = float(mj_data.energy[1])
-                    except Exception:  # noqa: BLE001  # noqa: BLE001
-                        pass
+                    except Exception as exc:  # noqa: BLE001
+                        logger.debug(
+                            "Energy computation skipped (optional metric): %s", exc
+                        )
 
             t_list.append(t)
             qpos_list.append(qpos)
