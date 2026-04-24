@@ -1,17 +1,31 @@
 ---
+<<<<<<<< HEAD:docs/assessments/issues/Issue_2150_Incomplete_Stub_in_flexible_shaft_py_322.md
+title: "Incomplete Stub in flexible_shaft.py:322"
+labels: ['incomplete-implementation', 'critical', 'high-impact']
+========
 title: "Incomplete Stub in flexible_shaft.py:324"
 labels: ["incomplete-implementation", "critical", "high-impact"]
+>>>>>>>> origin/staging:docs/assessments/issues/Issue_2200_Incomplete_Stub_in_flexible_shaft_py_324.md
 assignee: "unassigned"
 status: "open"
 ---
 
 # Issue Description
 
+<<<<<<<< HEAD:docs/assessments/issues/Issue_2150_Incomplete_Stub_in_flexible_shaft_py_322.md
+Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 322.
+
+## Context
+
+# **Type**: Stub | **Location**: `./src/shared/python/physics/flexible_shaft.py:322`
+
 Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 324.
 
 ## Context
 
 **Type**: Stub | **Location**: `./src/shared/python/physics/flexible_shaft.py:324`
+
+> > > > > > > > origin/staging:docs/assessments/issues/Issue_2200_Incomplete_Stub_in_flexible_shaft_py_324.md
 
 ```python
 get_state

@@ -832,8 +832,8 @@ class FiniteElementShaftModel(ShaftModel):
         Returns:
             Updated shaft state
         """
-        if dt is None:
-            raise ValueError("dt must be provided")
+        if dt is None or dt <= 0:
+            raise ValueError("dt must be positive")
         self.time += dt
 
         # Newmark-beta parameters
