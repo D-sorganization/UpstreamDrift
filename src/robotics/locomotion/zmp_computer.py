@@ -284,7 +284,18 @@ class ZMPComputer(ContractChecker):
         )
 
     def _get_com_velocity(self) -> NDArray[np.float64]:
-        """Get CoM velocity from engine."""
+        """Get CoM velocity from engine.
+
+        Returns zero velocity when engine does not implement
+        ``HumanoidCapable``.  Callers that require accurate ZMP
+        computation should either:
+
+        - Use an engine that implements :class:`HumanoidCapable`, or
+        - Pass ``com_velocity`` explicitly to :meth:`compute_zmp`.
+
+        Returning zeros here is a conservative fallback that produces
+        valid (but less accurate) ZMP results for quasi-static motions.
+        """
         if self._is_humanoid:
             engine = self._engine
             if isinstance(engine, HumanoidCapable):
@@ -298,9 +309,24 @@ class ZMPComputer(ContractChecker):
     ) -> NDArray[np.float64]:
         """Estimate CoM acceleration.
 
-        Simple estimation assuming quasi-static (zero acceleration).
+        .. note::
+            **Stub implementation** (closes #3061): This method
+            always returns zero acceleration (quasi-static assumption).
+            For dynamic motions this underestimates inertial effects
+            and produces inaccurate ZMP estimates.
+
+            To get accurate results, pass ``com_acceleration`` directly
+            to :meth:`compute_zmp`.  A proper implementation should use
+            finite-difference differentiation of CoM velocity samples or
+            query the engine for centroidal acceleration directly.
+
+            Required work:
+            - Store a rolling buffer of ``(t, com_velocity)`` samples.
+            - Differentiate with a second-order finite-difference scheme.
+            - Or query ``engine.compute_centroidal_momentum()`` and
+              differentiate the linear momentum component.
         """
-        # For now, assume quasi-static
+        # Quasi-static assumption -- see docstring above.
         return np.zeros(3)
 
     def _estimate_mass(self) -> float:

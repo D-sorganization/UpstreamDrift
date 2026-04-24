@@ -20,8 +20,12 @@ class GAIL(ImitationLearner):
     GAIL uses a discriminator to distinguish between expert and
     policy trajectories, training the policy to fool the discriminator.
 
-    This is a simplified implementation - full GAIL requires
-    integration with RL algorithms like PPO.
+    .. note::
+        **Partial stub** (closes #3061): The discriminator architecture
+        and reward computation (``get_reward``) are fully implemented.
+        The ``train`` method performs discriminator pre-training only;
+        it does not run a real adversarial RL loop.  See the ``train``
+        docstring for the complete list of missing pieces.
     """
 
     def __init__(
@@ -121,15 +125,38 @@ class GAIL(ImitationLearner):
     ) -> dict[str, list[float]]:
         """Train GAIL.
 
-        Note: This is a simplified version. Full GAIL training
-        requires environment interaction and RL algorithm integration.
+        .. note::
+            **Partial stub implementation** (closes #3061): This method
+            performs discriminator pre-training on expert demonstrations
+            but does **not** perform true adversarial RL policy training.
+
+            Full GAIL requires:
+
+            1. An RL environment (e.g. ``gym.Env``) for policy rollouts.
+            2. An RL algorithm (PPO, TRPO, SAC …) to optimise the policy
+               against the GAIL reward ``-log(1 - D(s, a))``.
+            3. Alternating discriminator updates (on expert + rollout
+               data) with RL policy updates.
+
+            The current implementation approximates policy rollouts with
+            noise-perturbed expert trajectories and updates discriminator
+            weights with a simplified weight-decay gradient rather than
+            a proper binary-cross-entropy back-propagation step.  This
+            is sufficient for testing the discriminator architecture and
+            the ``get_reward()`` API, but will **not** produce a trained
+            policy.
+
+            To wire up a real implementation, replace the ``_forward_pass``
+            section below with calls to a proper deep-learning library
+            (PyTorch / JAX) and integrate with an RL training loop.
 
         Args:
             dataset: Expert demonstration dataset.
             validation_split: Fraction for validation.
 
         Returns:
-            Training history.
+            Training history with ``discriminator_loss`` and
+            ``policy_loss`` keys.
         """
         # Get expert data
         if not (dataset is not None):
