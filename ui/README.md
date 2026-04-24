@@ -1,73 +1,74 @@
-# React + TypeScript + Vite
+# UpstreamDrift UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The UpstreamDrift UI is a React 19 + TypeScript + Vite application with an optional Tauri desktop shell. It talks to the local-first Python API over REST and WebSockets, renders 3D scenes with `@react-three/fiber`, and keeps shared client state in Zustand stores.
 
-Currently, two official plugins are available:
+## Local development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Start the Python API from the repository root:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+python start_api_server.py --port 8000
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+In a second terminal, start the UI from `ui/`:
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
-
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+cd ui
+npm install
+npm run dev
 ```
+
+The Vite dev server listens on port `5180` by default. The browser UI expects the API server to be reachable on the same machine, and the WebSocket clients in `ui/src/api/client.ts` connect through `/api/ws/simulate/{engineType}`.
+
+## Architecture at a glance
+
+- `ui/src/pages/` - route-level screens such as the dashboard and simulation views.
+- `ui/src/components/` - reusable UI building blocks and domain components, including `visualization/Scene3D.tsx`.
+- `ui/src/api/` - client utilities and hooks that wrap REST and WebSocket flows.
+- `ui/src/stores/` - Zustand state for engines, simulation state, and UI session data.
+- `ui/src/integration/` - integration-focused UI tests.
+- `ui/src-tauri/` - Rust packaging and native shell support for the desktop build.
+
+## API contracts the UI depends on
+
+The UI consumes HTTP routes defined under `src/api/routes/` and relies on WebSocket flows implemented in:
+
+- `src/api/routes/simulation_ws.py`
+- `src/api/routes/chat_ws.py`
+
+Frontend call sites and hooks live under `ui/src/api/`. For transport details, start with `ui/src/api/client.ts`, which currently connects to `/api/ws/simulate/{engineType}`. The chat service protocol lives in `src/api/routes/chat_ws.py` under `/ws/chat/{session_id}`.
+
+## Desktop build
+
+Install the Rust toolchain and the Tauri build prerequisites for your platform, then run:
+
+```bash
+cd ui
+npm install
+npm run tauri:build
+```
+
+For local desktop iteration, use `npm run tauri:dev`.
+
+## Testing and linting
+
+From `ui/`:
+
+```bash
+npm run test
+npm run lint
+```
+
+`npm run test` uses Vitest. Integration-oriented coverage lives under `ui/src/integration/`.
+
+## Contributing
+
+- Repository contribution workflow: [`../CONTRIBUTING.md`](../CONTRIBUTING.md)
+- Agent and repository policy: [`../CLAUDE.md`](../CLAUDE.md)
+- UI parity assessment notes: [`../docs/assessments/issues/REACT_UI_PARITY_ISSUES.md`](../docs/assessments/issues/REACT_UI_PARITY_ISSUES.md)
+
+The real ESLint configuration for this package lives in `ui/eslint.config.js`; do not copy guidance from the stock Vite scaffold.
+
+## Known gaps
+
+This README is a narrow developer entry point, not the full UI handbook. Active UI follow-up work is being tracked under `#3160`, including the chat UI, scaffolding pages, HelpPanel content, and model-authoring gaps called out in that track.

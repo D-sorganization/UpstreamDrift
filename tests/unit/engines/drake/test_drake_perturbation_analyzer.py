@@ -386,9 +386,9 @@ class TestRK4EnergyStability:
 
         assert np.all(np.isfinite(sim.q_traj)), "q_traj contains non-finite values"
         assert np.all(np.isfinite(sim.v_traj)), "v_traj contains non-finite values"
-        assert np.all(np.isfinite(sim.kinetic_energy_traj)), (
-            "kinetic_energy_traj contains non-finite values"
-        )
-        assert np.all(np.isfinite(sim.potential_energy_traj)), (
-            "potential_energy_traj contains non-finite values"
-        )
+        assert np.all(
+            np.isfinite(sim.kinetic_energy_traj)
+        ), "kinetic_energy_traj contains non-finite values"
+        assert np.all(
+            np.isfinite(sim.potential_energy_traj)
+        ), "potential_energy_traj contains non-finite values"

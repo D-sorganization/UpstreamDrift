@@ -35,9 +35,9 @@ from pathlib import Path
 import numpy as np
 
 from src.shared.python.engine_core.engine_availability import is_engine_available
+from src.shared.python.perturbation.analyzer_base import ComparisonReport  # noqa: F401
 from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exported for test imports
     MANDATORY_METRICS,
-    ComparisonReport,  # noqa: F401
     PerturbationAnalyzerBase,
     build_joint_polys,
     compute_ee_velocity_fd,

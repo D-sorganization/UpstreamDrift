@@ -96,9 +96,9 @@ def test_mujoco_momentum_conservation():
 
     # Tolerance: 1e-12 should be achievable for floating point arithmetic if truly conservative
     # But contact solver might introduce slight drift. Let's start with 1e-6.
-    assert max_deviation < 1e-6, (
-        f"Momentum not conserved. Max deviation: {max_deviation}"
-    )
+    assert (
+        max_deviation < 1e-6
+    ), f"Momentum not conserved. Max deviation: {max_deviation}"
 
 
 def test_pinocchio_momentum_conservation():
