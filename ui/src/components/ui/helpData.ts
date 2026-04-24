@@ -141,6 +141,62 @@ export const HELP_TOPICS: Record<string, HelpTopic> = {
     category: 'tools',
     relatedTopics: ['engine_selection', 'analysis_tools'],
   },
+  docker_setup: {
+    id: 'docker_setup',
+    title: 'Docker Setup',
+    shortDescription: 'Run engines in containerized environments',
+    category: 'tools',
+    relatedTopics: ['engine_selection', 'getting_started'],
+  },
+  wsl_setup: {
+    id: 'wsl_setup',
+    title: 'WSL Configuration',
+    shortDescription: 'Windows Subsystem for Linux setup',
+    category: 'tools',
+    relatedTopics: ['engine_selection', 'getting_started'],
+  },
+  matlab_integration: {
+    id: 'matlab_integration',
+    title: 'MATLAB Integration',
+    shortDescription: 'Export and analyze data in MATLAB',
+    category: 'tools',
+    relatedTopics: ['data_export', 'analysis_tools'],
+  },
+  data_export: {
+    id: 'data_export',
+    title: 'Data Export',
+    shortDescription: 'Export simulation results in multiple formats',
+    category: 'tools',
+    relatedTopics: ['analysis_tools', 'matlab_integration'],
+  },
+  urdf_generator: {
+    id: 'urdf_generator',
+    title: 'URDF Generator',
+    shortDescription: 'Create and edit robot model files',
+    category: 'tools',
+    relatedTopics: ['model_explorer', 'engine_selection'],
+  },
+  model_explorer: {
+    id: 'model_explorer',
+    title: 'Model Explorer',
+    shortDescription: 'Browse and manage physics models',
+    category: 'tools',
+    relatedTopics: ['urdf_generator', 'visualization'],
+  },
+  ball_flight: {
+    id: 'ball_flight',
+    title: 'Ball Flight Analysis',
+    shortDescription: 'Trace and analyze golf ball trajectories',
+    category: 'analysis',
+    relatedTopics: ['analysis_tools', 'visualization'],
+  },
+  configuration: {
+    id: 'configuration',
+    title: 'Configuration Settings',
+    shortDescription: 'Configure application preferences and defaults',
+    category: 'settings',
+    relatedTopics: ['engine_selection', 'visualization'],
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -336,6 +392,380 @@ Select an engine based on your primary analysis goals.`,
       'Check the Deprecated section before working on old code',
     ],
     seeAlso: ['engine_selection', 'analysis_tools'],
+  },
+
+  getting_started: {
+    title: 'Getting Started with UpstreamDrift',
+    short: 'Your first steps with the golf flight simulator',
+    description: `Welcome to UpstreamDrift, a comprehensive golf ball flight and physics modeling suite.
+
+**What You Can Do**
+- Simulate golf swings with multiple physics engines
+- Import and analyze motion capture data
+- Visualize 3D trajectories and forces in real-time
+- Export results for analysis in MATLAB, Excel, or custom tools
+- Compare different physics engines side-by-side
+
+**Your First Simulation**
+1. Click a physics engine tile (MuJoCo recommended for beginners)
+2. Load a pre-configured model or create a custom one
+3. Adjust initial conditions (club speed, impact angle, spin)
+4. Click "Start Simulation" to watch the ball fly
+5. Use the analysis tools to examine the results
+
+**Key Resources**
+- Engine Selection Guide: Choose the right physics model
+- Simulation Controls: Learn playback and recording
+- Analysis Tools: Extract insights from your simulations
+- Project Map: Discover all available features`,
+    tips: [
+      'Start with MuJoCo—it\'s the easiest to install and runs fast',
+      'Use preset camera views (press 1-5) for consistent analysis angles',
+      'Enable recording before running to capture full simulation data',
+      'Check the Project Map to discover hidden features beyond the launcher',
+    ],
+    seeAlso: ['engine_selection', 'docker_setup', 'simulation_controls'],
+  },
+
+  docker_setup: {
+    title: 'Docker Setup',
+    short: 'Run engines in isolated containerized environments',
+    description: `Docker allows you to run UpstreamDrift engines in containerized environments without modifying your system.
+
+**Benefits**
+- Isolated dependencies: Each engine runs in its own container
+- Version pinning: Use exact engine versions without conflicts
+- Cross-platform: Same container runs on Windows, Mac, Linux
+- Clean uninstall: Simply remove container, no system files left
+
+**Quick Start**
+1. Enable Docker Mode from Settings > Docker Setup
+2. Select which engines to containerize (MuJoCo, Drake, etc.)
+3. Click "Build Containers" to download and prepare images
+4. Launch simulations normally—containers handle the rest
+
+**Container Management**
+- View running containers from the Docker panel
+- Stop/restart individual containers
+- Update container images from the Engines menu
+- Check container logs for debugging
+
+**System Requirements**
+- Docker Desktop installed (3.1+)
+- 4GB free disk space per container
+- WSL 2 backend recommended on Windows`,
+    tips: [
+      'Start with a single containerized engine to test your setup',
+      'Container images are reused across simulations—first build takes longer',
+      'Stop containers from the Docker panel to free system resources',
+    ],
+    seeAlso: ['engine_selection', 'getting_started', 'wsl_setup'],
+  },
+
+  wsl_setup: {
+    title: 'WSL Configuration',
+    short: 'Windows Subsystem for Linux setup for Linux engines',
+    description: `WSL (Windows Subsystem for Linux) enables native Linux engine support on Windows without dual-boot.
+
+**Setting Up WSL**
+1. Open PowerShell as Administrator
+2. Run: wsl --install
+3. Restart your computer
+4. Open Ubuntu from Start menu
+5. Set up your Linux environment
+
+**Configuring Engines in WSL**
+- Use Settings > WSL Setup to link your WSL instance
+- Select Ubuntu version (20.04 LTS, 22.04 LTS recommended)
+- Let the system detect available engines
+- Engines run faster in WSL than in Docker
+
+**Accessing Files from Windows**
+- WSL files live in: \\\\wsl$\\Ubuntu\\home\\username
+- Map Z: drive in Windows for easy access
+- Simulations save to your Windows Documents folder automatically
+
+**Troubleshooting**
+- WSL not detected: Ensure version 2 is installed (wsl --list -v)
+- Performance issues: Disable Hyper-V if not needed
+- File sync delays: Wait 1-2 seconds after editing files`,
+    tips: [
+      'WSL 2 is significantly faster than WSL 1—use version 2',
+      'Create a dedicated VS Code terminal linked to your WSL instance',
+      'Pin the WSL Ubuntu app to your taskbar for quick access',
+    ],
+    seeAlso: ['docker_setup', 'engine_selection', 'getting_started'],
+  },
+
+  matlab_integration: {
+    title: 'MATLAB Integration',
+    short: 'Export simulation data for analysis in MATLAB',
+    description: `Export your UpstreamDrift simulation results to MATLAB for advanced analysis and custom visualization.
+
+**Export Formats**
+- .mat files: Binary format preserving structure and types
+- .csv files: Simple tabular data (single result sets)
+- .json files: Structured hierarchical data with metadata
+
+**Exporting from UpstreamDrift**
+1. Run a simulation and pause at the desired frame
+2. Click Export > MATLAB Format
+3. Choose data to include: trajectories, forces, energies, joint angles
+4. Select resolution (every nth frame for large datasets)
+5. Save to your preferred location
+
+**Working with .mat Files in MATLAB**
+\`\`\`matlab
+% Load exported data
+data = load('simulation_export.mat');
+
+% Access trajectories (position over time)
+trajectory = data.ballPosition; % Nx3 array [x, y, z]
+
+% Access forces
+forces = data.contactForces; % Nx3 array [Fx, Fy, Fz]
+
+% Plot trajectory
+plot3(trajectory(:,1), trajectory(:,2), trajectory(:,3));
+\`\`\`
+
+**Batch Export**
+- Use the CLI: python -m upstream_drift export --engine mujoco --format mat
+- Creates separate .mat files for each simulation`,
+    tips: [
+      'Always verify data ranges in MATLAB match your simulation expectations',
+      'Use .csv for sharing data with non-MATLAB collaborators',
+      'Reduce resolution for large simulations to keep file size manageable',
+    ],
+    seeAlso: ['data_export', 'analysis_tools'],
+  },
+
+  data_export: {
+    title: 'Data Export',
+    short: 'Save simulation results in CSV, JSON, or MATLAB formats',
+    description: `Export your simulation results for external analysis, sharing, and long-term archival.
+
+**Export Formats**
+- CSV: Spreadsheet-compatible tabular format
+  - Best for: Simple analysis, Excel/Pandas
+  - Contains: Time series for position, velocity, forces
+
+- JSON: Structured hierarchical format
+  - Best for: Web applications, API integration
+  - Contains: Full metadata, nested joint data, contact points
+
+- MATLAB: Binary .mat files
+  - Best for: Advanced analysis, custom visualizations
+  - Contains: All arrays preserved with exact precision
+
+**What Gets Exported**
+- Trajectory data: X, Y, Z position at each timestep
+- Velocities: Linear and angular velocities
+- Forces: Contact forces, applied forces
+- Energy: Kinetic, potential, total energy
+- Joint angles: Rotation and angular velocity per joint
+- Metadata: Simulation parameters, engine version, timestamps
+
+**Exporting**
+1. Click Export in the simulation controls
+2. Select format (CSV/JSON/MATLAB)
+3. Choose data scope: Full simulation or custom time range
+4. Adjust resolution: Every frame or sample at N Hz
+5. Click Export and choose save location
+
+**Batch Export**
+- Export multiple simulations at once
+- Use template to match column/field names across runs
+- Schedule exports from the API`,
+    tips: [
+      'CSV exports are fastest for quick data inspection',
+      'Use JSON for preserving nested structure (joint hierarchies)',
+      'High-frequency data (sampling at 500+ Hz) creates large files—resample if needed',
+    ],
+    seeAlso: ['matlab_integration', 'analysis_tools'],
+  },
+
+  urdf_generator: {
+    title: 'URDF Generator',
+    short: 'Create and edit robot model description files',
+    description: `URDF (Unified Robot Description Format) files define robot/model geometry, physics, and visual properties.
+
+**Creating a New URDF**
+1. Click URDF Generator from launcher
+2. Choose a template: Empty, Human Body, Golf Club, etc.
+3. Add links (rigid bodies) and joints
+4. Attach visual meshes and collision shapes
+5. Set physics properties: mass, inertia
+6. Save and validate
+
+**URDF Components**
+- Links: Rigid bodies with mass, inertia, geometry
+- Joints: Connections between links (revolute, prismatic, fixed)
+- Visual: How the model appears in rendering
+- Collision: How physics engines compute contact
+
+**Editing an Existing URDF**
+1. Click Model Explorer > Open URDF
+2. Select a .urdf file
+3. Modify properties in the editor
+4. See changes in real-time 3D preview
+5. Validate for physics engines before saving
+
+**Common Tasks**
+- Add a new joint: Right-click link, "Add Joint"
+- Import mesh: Drag .stl/.obj file onto link
+- Adjust mass: Select link, modify mass slider
+- Test in engine: Click "Test in MuJoCo" to validate
+
+**Tips for Good URDFs**
+- Keep inertias realistic (sphere rule: I = 0.4*m*r²)
+- Close kinematic chains carefully (can cause numerical issues)
+- Validate in at least two engines before deployment`,
+    tips: [
+      'Start with templates—they have correct structure and valid defaults',
+      'Use low-poly meshes (<10k triangles) for fast simulation',
+      'Test URDFs in MuJoCo first—most forgiving with marginal definitions',
+    ],
+    seeAlso: ['model_explorer', 'engine_selection'],
+  },
+
+  model_explorer: {
+    title: 'Model Explorer',
+    short: 'Browse, manage, and test physics models',
+    description: `The Model Explorer is your hub for managing URDF models, inspecting properties, and testing compatibility.
+
+**Browsing Models**
+1. Click Model Explorer from launcher
+2. Browse built-in models (human, golf clubs, balls, etc.)
+3. Filter by category: Anatomical, Sports, Robots
+4. Search by property: "mass > 2kg", "has_hands", etc.
+
+**Model Properties**
+- Overview: Links, joints, total mass, degrees of freedom
+- Geometry: Mesh files, collision shapes
+- Physics: Mass distribution, inertia matrix
+- Materials: Friction, restitution, damping
+- Kinematics: Joint ranges, default positions
+
+**Testing Compatibility**
+- Select model > "Test in Engine"
+- Choose physics engine (MuJoCo, Drake, Pinocchio, etc.)
+- See validation result: Green (compatible), Yellow (warnings), Red (errors)
+- Check detailed error log
+
+**Common Issues**
+- "Floating base not supported": Drake requires explicit base frame
+- "Inertia matrix not positive definite": Fix with Physics > Validate
+- "Mesh file not found": Re-link mesh from URDF Generator
+
+**Organizing Models**
+- Create custom folders in Documents/UpstreamDrift/models/
+- Tag models with custom keywords
+- Star frequently-used models for quick access
+- Export model info as JSON for backup`,
+    tips: [
+      'Use the validation tool before running long simulations',
+      'Create a backup copy before editing important models',
+      'Filter by engine compatibility to find usable models quickly',
+    ],
+    seeAlso: ['urdf_generator', 'visualization', 'engine_selection'],
+  },
+
+  ball_flight: {
+    title: 'Ball Flight Analysis',
+    short: 'Trace and analyze golf ball trajectories',
+    description: `The Ball Flight tool provides detailed trajectory analysis, aerodynamics, and comparison features.
+
+**Launching Ball Flight Analysis**
+1. Run a golf shot simulation (any engine)
+2. Click the shot tracer icon during playback
+3. Or load a saved shot from Results
+4. The ball trajectory is automatically extracted
+
+**Trajectory Display**
+- 3D flight path: Shows full ball trajectory in 3D space
+- Launch angle indicator: Initial angle in vertical and horizontal planes
+- Spin rate: Ball rotation rate during flight (RPM)
+- Carry distance: Distance traveled in air
+- Roll distance: Additional distance after landing
+
+**Aerodynamic Metrics**
+- Drag coefficient: How air resistance affects flight
+- Lift coefficient: Magnus effect on the ball
+- Spin axis: Direction of primary spin rotation
+- Peak height: Maximum altitude of the ball
+
+**Analysis Features**
+- Compare multiple shots side-by-side
+- Create overlay view to visualize differences
+- Mark waypoints to measure intermediate distances
+- Export as trajectory file for external analysis
+
+**Preset Views**
+- Face-on (XY plane): Curvature left/right
+- Down-the-line (ZY plane): Height and distance
+- Top-down (XZ plane): Full flight path
+- 3D: Interactive rotation
+
+**Export Options**
+- CSV: Frame-by-frame trajectory data
+- JSON: Full aerodynamic analysis
+- Video: Animated trajectory with metrics
+- Image: Snapshot with measurements`,
+    tips: [
+      'Enable 1-frame display for clearest flight path visualization',
+      'Use overlay comparison to tune swing parameters',
+      'Check spin axis—should match your swing type (draw/fade spin)',
+    ],
+    seeAlso: ['analysis_tools', 'visualization'],
+  },
+
+  configuration: {
+    title: 'Configuration Settings',
+    short: 'Adjust application preferences and default behaviors',
+    description: `Customize UpstreamDrift to match your workflow and system capabilities.
+
+**General Settings**
+- Default physics engine: What loads when you click a tile
+- Default camera view: Which preset view opens first (side, face-on, etc.)
+- Auto-save interval: Save state every N minutes (0 to disable)
+- Theme: Light, dark, or system default
+
+**Engine Preferences**
+- Engine install paths: Custom locations for Drake, OpenSim, etc.
+- Parallel processing: Enable multi-core simulation
+- GPU acceleration: CUDA/Metal support (if available)
+- Memory limit: Cap RAM usage per simulation
+
+**Visualization**
+- Rendering quality: Low (fast), Medium, High, Ultra
+- Anti-aliasing: Off, FXAA, or MSAA
+- Shadows: Off, blob, or ray-traced
+- Frame rate limit: 30, 60, 120, or unlimited fps
+
+**Performance**
+- Data recording rate: 60, 120, 240 Hz (higher = larger files)
+- Playback frame rate: Match recording or custom
+- Mesh decimation: Simplify complex models for speed
+- Background processes: Keep engines running or auto-close
+
+**File Locations**
+- Models directory: Where custom URDF files are stored
+- Exports directory: Default save location for data files
+- Cache directory: Temporary files, mesh cache
+- Projects directory: Save and load simulation sets
+
+**Advanced**
+- Log level: Debug, Info, Warning, Error
+- Network: Enable API server, set port
+- Profiling: Collect performance metrics
+- Reset to defaults: Restore factory settings`,
+    tips: [
+      'Lower rendering quality to 30 fps for smoother long simulations',
+      'Set data recording to match your analysis needs (120 Hz is typical)',
+      'Create a symbolic link to sync models across machines',
+    ],
+    seeAlso: ['engine_selection', 'visualization'],
   },
 };
 

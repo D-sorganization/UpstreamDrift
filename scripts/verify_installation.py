@@ -251,7 +251,7 @@ def check_api_server() -> tuple[bool, str]:
                     sys.executable,
                     "-m",
                     "uvicorn",
-                    "src.api.server:app",
+                    "src.api.server:create_app",
                     "--port",
                     "8001",
                     "--host",
@@ -497,7 +497,7 @@ def main() -> int:
         logger.info("")
         logger.info("You can now run:")
         logger.info("  python examples/01_basic_simulation.py")
-        logger.info("  python -m uvicorn src.api.server:app --reload")
+        logger.info("  python -m uvicorn src.api.server:create_app --reload")
         logger.info("")
         return 0
 
