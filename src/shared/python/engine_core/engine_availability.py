@@ -122,6 +122,13 @@ def _probe_engine(
         else:
             _engine_status_cache[name] = EngineStatus.NOT_INSTALLED
             _engine_error_cache[name] = e
+    except Exception as e:
+        # Catch all other exceptions (e.g., Windows fatal exceptions from Qt/PyQtGraph
+        # initialization on incompatible Python versions) to prevent test collection
+        # from crashing.
+        _engine_status_cache[name] = EngineStatus.BROKEN
+        _engine_error_cache[name] = e
+        logger.warning("%s loading failed with exception: %s", import_name, e)
 
     return _engine_status_cache[name]
 
