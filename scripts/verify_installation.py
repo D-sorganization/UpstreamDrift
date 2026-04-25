@@ -5,8 +5,24 @@ This script validates that all required dependencies are installed,
 can be imported, and work correctly. It also checks physics engines,
 required files, environment variables, and the API server.
 
+Modes
+-----
+Default (no flags):
+    Fast import-only checks — confirms packages are importable and reports
+    versions. Does NOT call into any engine runtime. Suitable for CI pre-flight
+    and quick sanity checks (typically < 2 s).
+
+--smoke-test:
+    All default checks PLUS functional engine verification:
+      - MuJoCo: loads a minimal XML model and runs one simulation step,
+        reporting wall-clock time. Catches the "import passes but mj_step
+        crashes" failure class described in issue #3172.
+      - API server: starts the server in a subprocess and polls /health for
+        up to 10 seconds, reporting pass/fail and latency.
+
 Usage:
-    python scripts/verify_installation.py
+    python scripts/verify_installation.py               # import-only (default)
+    python scripts/verify_installation.py --smoke-test  # full functional check
 
 Exit codes:
     0 - All critical checks passed
@@ -15,6 +31,7 @@ Exit codes:
 
 from __future__ import annotations
 
+import argparse
 import logging
 import pathlib
 import subprocess
@@ -182,6 +199,55 @@ def check_physics_engine(engine_name: str, import_path: str) -> tuple[str, str]:
         return "BROKEN", f"✗ {engine_name}: Unexpected error - {e}"
 
 
+# Minimal MuJoCo XML used by smoke_test_mujoco().  A free-floating box gives us
+# a model with a degree of freedom so mj_step actually integrates dynamics.
+_MINIMAL_MUJOCO_XML = (
+    "<mujoco>"
+    "<worldbody>"
+    '<body name="box" pos="0 0 1">'
+    "<freejoint/>"
+    '<geom type="box" size="0.1 0.1 0.1"/>'
+    "</body>"
+    "</worldbody>"
+    "</mujoco>"
+)
+
+
+def smoke_test_mujoco() -> tuple[bool, str]:
+    """Load a minimal MuJoCo model and run one simulation step.
+
+    This catches the "import passes but mj_step crashes" failure class
+    described in issue #3172, where ``import mujoco`` succeeds but the engine
+    runtime is broken or incompatible.
+
+    Returns:
+        Tuple of (success, message).  On success the message includes the
+        wall-clock time for one step.  When MuJoCo is not installed the result
+        is a non-fatal SKIP (success=True so it does not block the overall
+        verdict for users who have not installed MuJoCo).
+    """
+    try:
+        import mujoco  # noqa: PLC0415
+    except ImportError as exc:
+        return True, f"MuJoCo smoke test SKIP: not installed ({exc})"
+
+    try:
+        t0 = time.perf_counter()
+        model = mujoco.MjModel.from_xml_string(_MINIMAL_MUJOCO_XML)
+        data = mujoco.MjData(model)
+        mujoco.mj_step(model, data)
+        elapsed_ms = (time.perf_counter() - t0) * 1000
+        return (
+            True,
+            f"✓ MuJoCo smoke test: mj_step completed in {elapsed_ms:.1f} ms",
+        )
+    except Exception as exc:
+        return (
+            False,
+            f"✗ MuJoCo installed but mj_step failed: {exc}",
+        )
+
+
 def check_required_files() -> tuple[bool, list[str]]:
     """Check if required data files and model files exist.
 
@@ -226,8 +292,13 @@ def check_required_files() -> tuple[bool, list[str]]:
     return all_exist, messages
 
 
-def check_api_server() -> tuple[bool, str]:
+def check_api_server(timeout_seconds: int = 5) -> tuple[bool, str]:
     """Try to start the API server and ping the /health endpoint.
+
+    Args:
+        timeout_seconds: How long to wait for /health to respond.  The default
+            (5 s) is used by the standard import-only run; ``--smoke-test``
+            passes 10 to give the server more time to initialise.
 
     Returns:
         Tuple of (success, message)
@@ -263,17 +334,22 @@ def check_api_server() -> tuple[bool, str]:
                 text=True,
             )
 
-            # Wait up to 5 seconds for server to start
+            # Wait up to timeout_seconds for server to start
             start_time = time.time()
-            while time.time() - start_time < 5:
+            while time.time() - start_time < timeout_seconds:
                 try:
-                    import requests
+                    import requests  # noqa: PLC0415
 
                     response = requests.get("http://127.0.0.1:8001/health", timeout=1)
                     if response.ok:
+                        elapsed_ms = (time.time() - start_time) * 1000
                         process.terminate()
                         process.wait(timeout=2)
-                        return True, "✓ API Server: Started and healthy (port 8001)"
+                        return (
+                            True,
+                            f"✓ API Server: Started and healthy"
+                            f" (port 8001, {elapsed_ms:.0f} ms)",
+                        )
                 except Exception:
                     time.sleep(0.5)
 
@@ -286,7 +362,8 @@ def check_api_server() -> tuple[bool, str]:
 
             return (
                 False,
-                "✗ API Server: Failed to start or /health unreachable within 5s",
+                f"✗ API Server: Failed to start or /health unreachable"
+                f" within {timeout_seconds}s",
             )
 
         except FileNotFoundError:
@@ -298,12 +375,47 @@ def check_api_server() -> tuple[bool, str]:
         return False, f"✗ API Server: Check failed - {e}"
 
 
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(
+        description=(
+            "Verify Golf Modeling Suite installation. "
+            "Default mode performs fast import-only checks (typically < 2 s). "
+            "Pass --smoke-test to also exercise physics engine runtimes "
+            "and the API server — catching failures that import checks miss."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Exit codes:\n"
+            "  0  All critical checks passed\n"
+            "  1  One or more critical checks failed\n"
+        ),
+    )
+    parser.add_argument(
+        "--smoke-test",
+        action="store_true",
+        default=False,
+        help=(
+            "Run functional smoke tests in addition to import checks: "
+            "(1) load a minimal MuJoCo model and execute one mj_step, reporting "
+            "timing; (2) start the API server and poll /health for up to 10 s. "
+            "Adds ~10 s to total runtime."
+        ),
+    )
+    return parser.parse_args(argv)
+
+
 def main() -> int:
     """Run all verification checks."""
+    args = _parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     logger.info("=" * 70)
     logger.info("Golf Modeling Suite - Installation Verification")
+    if args.smoke_test:
+        logger.info("Mode: smoke-test (import checks + engine runtime + API server)")
+    else:
+        logger.info("Mode: import-only  (pass --smoke-test for full functional checks)")
     logger.info("=" * 70)
     logger.info("")
 
@@ -314,6 +426,7 @@ def main() -> int:
         "deep": [],
         "suite": [],
         "physics_engines": [],
+        "smoke": [],
         "files": [],
         "api": [],
     }
@@ -430,6 +543,20 @@ def main() -> int:
 
     logger.info("")
 
+    # SMOKE TESTS — opt-in via --smoke-test.
+    # Exercises engine runtimes beyond bare imports to catch the failure class
+    # described in issue #3172 (import succeeds but first real call crashes).
+    if args.smoke_test:
+        logger.info("Engine Smoke Tests:")
+        logger.info("-" * 70)
+        logger.info("(Functional checks — exercises engine runtimes, not just imports)")
+
+        smoke_ok, smoke_msg = smoke_test_mujoco()
+        logger.info(smoke_msg)
+        results["smoke"].append(smoke_ok)
+
+        logger.info("")
+
     # REQUIRED FILES
     logger.info("Required Files and Assets:")
     logger.info("-" * 70)
@@ -442,10 +569,14 @@ def main() -> int:
     logger.info("")
 
     # API SERVER TEST
+    # In smoke-test mode we give the server 10 s to initialise so slow cold
+    # starts are not penalised; the default 5 s window keeps import-only runs
+    # snappy.
     logger.info("API Server Test:")
     logger.info("-" * 70)
 
-    success, message = check_api_server()
+    api_timeout = 10 if args.smoke_test else 5
+    success, message = check_api_server(timeout_seconds=api_timeout)
     logger.info(message)
     results["api"].append(success)
 
@@ -465,6 +596,7 @@ def main() -> int:
     deep_passed, deep_total = count_results(results["deep"])
     suite_passed, suite_total = count_results(results["suite"])
     physics_passed, physics_total = count_results(results["physics_engines"])
+    smoke_passed, smoke_total = count_results(results["smoke"])
     files_passed, files_total = count_results(results["files"])
     api_passed, api_total = count_results(results["api"])
 
@@ -473,17 +605,24 @@ def main() -> int:
     logger.info("Deep checks:       %d/%d", deep_passed, deep_total)
     logger.info("Suite modules:     %d/%d", suite_passed, suite_total)
     logger.info("Physics engines:   %d/%d available", physics_passed, physics_total)
+    if smoke_total:
+        logger.info("Engine smoke tests: %d/%d", smoke_passed, smoke_total)
     logger.info("Required files:    %d/%d", files_passed, files_total)
     logger.info("API server:        %d/%d", api_passed, api_total)
     logger.info("")
 
-    # Determine overall pass/fail
+    # Determine overall pass/fail.
+    # Smoke-test failures are critical when --smoke-test was requested but do
+    # not affect the default import-only run (smoke_total == 0, so
+    # smoke_critical is trivially True).
+    smoke_critical = smoke_passed == smoke_total
     critical_results = (
         env_passed == env_total
         and core_passed == core_total
         and deep_passed == deep_total
         and suite_passed == suite_total
         and files_passed == files_total
+        and smoke_critical
     )
 
     if critical_results:

@@ -125,21 +125,19 @@ class TestAnalysisTools:
         assert "invalid" in result.result["error"].lower()
 
     def test_run_inverse_dynamics_valid_engine(self) -> None:
-        """Test inverse dynamics falls back to demo fixture (issue #3163)."""
+        """Test inverse dynamics returns honest not-implemented (issue #3163)."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
-        # No real file on disk -> demo fixture path.
         result = registry.execute(
             "run_inverse_dynamics",
             {"file_path": "test.c3d", "engine": "mujoco"},
         )
-        assert result.success is True
+        assert result.success is True  # tool ran without exception
         payload = result.result
-        assert payload["success"] is True
-        assert payload["source"] == "demo_fixture"
-        assert payload["engine"] == "mujoco"
-        assert len(payload["torques"]) > 1
+        assert payload["success"] is False
+        assert "not implemented" in payload["error"]
+        assert payload["issue"] == "#3163"
 
     def test_interpret_torques(self) -> None:
         """Test torque interpretation."""
@@ -257,7 +255,7 @@ class TestValidationTools:
     """Tests for validation tools."""
 
     def test_validate_cross_engine(self) -> None:
-        """Cross-engine validation reports demo-fixture diff (issue #3163)."""
+        """Cross-engine validation returns honest not-implemented (issue #3163)."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
@@ -265,14 +263,14 @@ class TestValidationTools:
             "validate_cross_engine",
             {"file_path": "test.c3d", "tolerance": 0.02},
         )
-        assert result.success is True
+        assert result.success is True  # tool ran without exception
         payload = result.result
-        assert payload["success"] is True
-        assert "max_delta" in payload
-        assert payload["source"] == "demo_fixture"
+        assert payload["success"] is False
+        assert "not implemented" in payload["error"]
+        assert payload["issue"] == "#3163"
 
     def test_check_energy_conservation(self) -> None:
-        """Energy conservation runs on demo pendulum (issue #3163)."""
+        """Energy conservation returns honest not-implemented (issue #3163)."""
         registry = ToolRegistry()
         register_golf_suite_tools(registry)
 
@@ -280,11 +278,11 @@ class TestValidationTools:
             "check_energy_conservation",
             {"tolerance": 0.01},
         )
-        assert result.success is True
+        assert result.success is True  # tool ran without exception
         payload = result.result
-        assert payload["success"] is True
-        assert "drift_fraction" in payload
-        assert payload["source"] == "demo_fixture"
+        assert payload["success"] is False
+        assert "not implemented" in payload["error"]
+        assert payload["issue"] == "#3163"
 
     def test_list_physics_engines(self) -> None:
         """Test listing physics engines."""

@@ -25,14 +25,17 @@ _COLLECTION_STUBS: dict[str, str] = {
 def pytest_configure(config: "pytest.Config") -> None:  # noqa: F821
     """Install minimal collection-time stubs for unavailable heavy dependencies.
 
-    These stubs are intentionally *not* cleaned up here — the autouse fixture
-    ``_mock_heavy_deps`` replaces them with fresh MagicMock instances before
-    every test function and restores the original state afterward via
-    ``patch.dict``, satisfying the CLAUDE.md rule against persistent module-
-    level ``sys.modules`` mutations.
+    These stubs allow test-file imports that reference heavy packages (pydrake,
+    casadi, pinocchio) to succeed during collection without a real installation.
+    They are only installed for modules that are genuinely absent so that a real
+    installation is never shadowed.
+
+    The autouse fixture ``_mock_heavy_deps`` below reinstalls fresh mocks via
+    ``patch.dict`` before every test and tears them down afterward, satisfying
+    the CLAUDE.md rule against persistent module-level ``sys.modules`` mutations.
+    ``pytest_unconfigure`` removes the stubs that were added here once the
+    session is complete, ensuring the process exits with a clean sys.modules.
     """
-    # Only install stubs for modules that are genuinely absent so we do not
-    # shadow a real installation.
     pydrake_stub = MagicMock()
     stubs = {
         "pydrake": pydrake_stub,
@@ -41,9 +44,24 @@ def pytest_configure(config: "pytest.Config") -> None:  # noqa: F821
         "pinocchio": MagicMock(),
         "pinocchio.casadi": MagicMock(),
     }
+    installed: list[str] = []
     for name, stub in stubs.items():
         if name not in sys.modules:
             sys.modules[name] = stub
+            installed.append(name)
+    # Record which names we injected so pytest_unconfigure can clean them up.
+    config._unit_collection_stubs = installed  # type: ignore[attr-defined]
+
+
+def pytest_unconfigure(config: "pytest.Config") -> None:  # noqa: F821
+    """Remove collection-time stubs installed by pytest_configure.
+
+    Ensures the process-level sys.modules is clean after the test session ends,
+    satisfying the CLAUDE.md requirement that sys.modules mutations are
+    temporary and always cleaned up.
+    """
+    for name in getattr(config, "_unit_collection_stubs", ()):
+        sys.modules.pop(name, None)
 
 
 @pytest.fixture(autouse=True)

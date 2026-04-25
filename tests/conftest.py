@@ -61,7 +61,11 @@ def pytest_configure(config: pytest.Config) -> None:
     # With both '.' and 'src/shared/python' in sys.path, 'contracts' can be
     # imported as both 'src.shared.python.contracts' and 'contracts', creating
     # two distinct class objects that break pytest.raises() catches in Python 3.11+.
-    # Pre-load via the canonical path and alias all alternate module names.
+    # We install the aliases here at configure time (needed for collection) and
+    # clean them up in pytest_unconfigure.  The _contracts_aliases autouse fixture
+    # provides per-function isolation via patch.dict so each test sees a fresh,
+    # canonical mapping — satisfying the CLAUDE.md ban on persistent sys.modules
+    # mutations.
     try:
         import importlib
 
@@ -70,10 +74,53 @@ def pytest_configure(config: pytest.Config) -> None:
         # Always override — even if already present — to ensure a single class identity.
         # xdist workers may have loaded 'contracts' via the short sys.path entry before
         # pytest_configure runs, creating a stale second module instance.
-        for alias in ("contracts", "shared.python.contracts"):
+        _CONTRACT_ALIASES = ("contracts", "shared.python.contracts")
+        for alias in _CONTRACT_ALIASES:
             sys.modules[alias] = canonical_mod
+        # Record for pytest_unconfigure cleanup and per-test fixture use.
+        config._contracts_aliases_installed = _CONTRACT_ALIASES  # type: ignore[attr-defined]
+        config._contracts_canonical_mod = canonical_mod  # type: ignore[attr-defined]
     except Exception as e:  # noqa: BLE001, F841
         pass  # Don't block test collection if this fails
+
+
+def pytest_unconfigure(config: pytest.Config) -> None:
+    """Remove contracts aliases installed during configure.
+
+    Keeps the process-level sys.modules clean after the test session ends,
+    satisfying the CLAUDE.md requirement that sys.modules mutations are
+    temporary and always cleaned up.
+    """
+    for alias in getattr(config, "_contracts_aliases_installed", ()):
+        sys.modules.pop(alias, None)
+
+
+@pytest.fixture(autouse=True)
+def _contracts_aliases() -> Generator[None, None, None]:
+    """Ensure contracts module aliases are present and consistent for every test.
+
+    ``pytest_configure`` installs the aliases at session start so that test
+    files that import ``contracts`` or ``shared.python.contracts`` at collection
+    time see the correct module.  This function-scoped autouse fixture
+    re-applies them via ``patch.dict`` so that:
+
+    * any test that removes or replaces the alias sees the canonical version, and
+    * all changes are automatically rolled back after each test.
+
+    This satisfies the CLAUDE.md rule against persistent sys.modules mutations.
+    """
+    import importlib
+
+    try:
+        canonical_mod = importlib.import_module("src.shared.python.contracts")
+        aliases = {
+            "contracts": canonical_mod,
+            "shared.python.contracts": canonical_mod,
+        }
+        with patch.dict(sys.modules, aliases):
+            yield
+    except Exception:  # noqa: BLE001
+        yield  # Don't block tests if contracts isn't importable
 
 
 # Engine module prefixes whose sys.modules entries must be isolated between
