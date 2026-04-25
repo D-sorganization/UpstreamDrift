@@ -1,226 +1,43 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.  # noqa: E501
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.  # noqa: E501
-
 """Grip Modelling Tab for Advanced Hand Models.
 
 Issue #757: Contact-based hand-grip model in MuJoCo with pressure visualization.
+
+Sub-components (extracted in issue #3060):
+  - grip_plot_panel.py  — PressureVisualizationWidget, ContactMetricsWidget
+  - grip_xml_builder.py — GripSceneXmlBuilder (scene XML preparation)
 """
 
 from __future__ import annotations
 
 import os
-import re
 from pathlib import Path
 from typing import Any
 
 import mujoco
 import numpy as np
-from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.physics.grip_contact_model import (
     GripContactExporter,
     GripContactModel,
     GripParameters,
-    PressureVisualizationData,
     compute_pressure_visualization,
 )
 
+from .grip_plot_panel import ContactMetricsWidget, PressureVisualizationWidget
+from .grip_xml_builder import GripSceneXmlBuilder
 from .sim_widget import MuJoCoSimWidget
 
 logger = get_logger(__name__)
 
-
-class PressureVisualizationWidget(QtWidgets.QWidget):
-    """Widget for visualizing grip pressure distribution.
-
-    Issue #757: Pressure distribution visualization available in the UI.
-    Displays pressure as a 2D heatmap (unwrapped grip cylinder).
-    """
-
-    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
-        """Initialize pressure visualization widget."""
-        super().__init__(parent)
-        self.setMinimumSize(200, 150)
-        self.pressure_data: PressureVisualizationData | None = None
-
-        # Color map (blue -> green -> yellow -> red)
-        self.color_stops = [
-            (0.0, QtGui.QColor(0, 0, 255)),  # Blue (low)
-            (0.33, QtGui.QColor(0, 255, 0)),  # Green
-            (0.66, QtGui.QColor(255, 255, 0)),  # Yellow
-            (1.0, QtGui.QColor(255, 0, 0)),  # Red (high)
-        ]
-
-    def update_pressure(self, data: PressureVisualizationData) -> None:
-        """Update displayed pressure data.
-
-        Args:
-            data: New pressure visualization data
-        """
-        if data is None:
-            raise ValueError("data must be provided")
-        self.pressure_data = data
-        self.update()
-
-    def clear(self) -> None:
-        """Clear pressure display."""
-        self.pressure_data = None
-        self.update()
-
-    def _get_color_for_value(self, normalized_value: float) -> QtGui.QColor:
-        """Get color from gradient for normalized value [0, 1]."""
-        if normalized_value is None:
-            raise ValueError("normalized_value must be provided")
-        normalized_value = max(0.0, min(1.0, normalized_value))
-
-        # Find surrounding color stops
-        for i in range(len(self.color_stops) - 1):
-            t1, c1 = self.color_stops[i]
-            t2, c2 = self.color_stops[i + 1]
-
-            if t1 <= normalized_value <= t2:
-                # Interpolate
-                t = (normalized_value - t1) / (t2 - t1) if t2 > t1 else 0
-                r = int(c1.red() + t * (c2.red() - c1.red()))
-                g = int(c1.green() + t * (c2.green() - c1.green()))
-                b = int(c1.blue() + t * (c2.blue() - c1.blue()))
-                return QtGui.QColor(r, g, b)
-
-        return self.color_stops[-1][1]
-
-    def paintEvent(self, event: QtGui.QPaintEvent | None) -> None:
-        """Paint the pressure visualization."""
-        painter = QtGui.QPainter(self)
-        painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
-
-        rect = self.rect()
-        painter.fillRect(rect, QtGui.QColor(40, 40, 40))
-
-        if self.pressure_data is None or len(self.pressure_data.pressures) == 0:
-            painter.setPen(QtGui.QColor(150, 150, 150))
-            painter.drawText(
-                rect, QtCore.Qt.AlignmentFlag.AlignCenter, "No contact data"
-            )  # noqa: E501
-            return
-
-        # Draw title
-        painter.setPen(QtGui.QColor(255, 255, 255))
-        painter.drawText(10, 20, f"Max: {self.pressure_data.max_pressure:.0f} Pa")
-        painter.drawText(10, 35, f"Mean: {self.pressure_data.mean_pressure:.0f} Pa")
-
-        # Draw pressure points
-        margin = 50
-        plot_rect = rect.adjusted(margin, margin, -margin, -20)
-
-        if plot_rect.width() <= 0 or plot_rect.height() <= 0:
-            return
-
-        # Map grip axis position to x, angular position to y
-        axis_pos = self.pressure_data.grip_axis_positions
-        angles = self.pressure_data.angular_positions
-
-        if len(axis_pos) == 0:
-            return
-
-        # Normalize positions for display
-        axis_min, axis_max = np.min(axis_pos), np.max(axis_pos)
-        axis_range = axis_max - axis_min if axis_max > axis_min else 1.0
-
-        for i in range(len(self.pressure_data.pressures)):
-            # Map to widget coordinates
-            x_norm = (axis_pos[i] - axis_min) / axis_range
-            y_norm = (angles[i] + np.pi) / (2 * np.pi)
-
-            x = int(plot_rect.left() + x_norm * plot_rect.width())
-            y = int(plot_rect.top() + y_norm * plot_rect.height())
-
-            # Size based on pressure (larger = more pressure)
-            size = int(5 + 15 * self.pressure_data.normalized_pressures[i])
-
-            # Color based on pressure
-            norm_val = self.pressure_data.normalized_pressures[i]
-            color = self._get_color_for_value(norm_val)
-            painter.setBrush(QtGui.QBrush(color))
-            painter.setPen(QtCore.Qt.PenStyle.NoPen)
-            painter.drawEllipse(x - size // 2, y - size // 2, size, size)
-
-        # Draw axes labels
-        painter.setPen(QtGui.QColor(200, 200, 200))
-        painter.drawText(plot_rect.left(), rect.bottom() - 5, "Butt")
-        painter.drawText(plot_rect.right() - 20, rect.bottom() - 5, "Tip")
-
-        # Draw color legend
-        legend_rect = QtCore.QRect(rect.right() - 30, margin, 15, plot_rect.height())
-        for i in range(legend_rect.height()):
-            t = i / legend_rect.height()
-            color = self._get_color_for_value(1.0 - t)  # Flip so high is at top
-            painter.setPen(color)
-            painter.drawLine(
-                legend_rect.left(),
-                legend_rect.top() + i,
-                legend_rect.right(),
-                legend_rect.top() + i,
-            )
-
-
-class ContactMetricsWidget(QtWidgets.QWidget):
-    """Widget displaying contact metrics summary.
-
-    Issue #757: Shows contact forces, slip detection status.
-    """
-
-    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
-        """Initialize metrics widget."""
-        super().__init__(parent)
-        layout = QtWidgets.QFormLayout(self)
-
-        self.lbl_normal_force = QtWidgets.QLabel("0.0 N")
-        self.lbl_tangent_force = QtWidgets.QLabel("0.0 N")
-        self.lbl_num_contacts = QtWidgets.QLabel("0")
-        self.lbl_slip_status = QtWidgets.QLabel("No slip")
-        self.lbl_slip_margin = QtWidgets.QLabel("N/A")
-        self.lbl_equilibrium = QtWidgets.QLabel("Unknown")
-
-        layout.addRow("Normal Force:", self.lbl_normal_force)
-        layout.addRow("Tangent Force:", self.lbl_tangent_force)
-        layout.addRow("Active Contacts:", self.lbl_num_contacts)
-        layout.addRow("Slip Status:", self.lbl_slip_status)
-        layout.addRow("Min Slip Margin:", self.lbl_slip_margin)
-        layout.addRow("Equilibrium:", self.lbl_equilibrium)
-
-    def update_metrics(
-        self,
-        normal_force: float,
-        tangent_force: float,
-        num_contacts: int,
-        num_slipping: int,
-        slip_margin: float,
-        equilibrium: bool,
-    ) -> None:
-        """Update displayed metrics."""
-        if normal_force is None:
-            raise ValueError("normal_force must be provided")
-        self.lbl_normal_force.setText(f"{normal_force:.1f} N")
-        self.lbl_tangent_force.setText(f"{tangent_force:.1f} N")
-        self.lbl_num_contacts.setText(str(num_contacts))
-
-        if num_slipping > 0:
-            self.lbl_slip_status.setText(f"SLIPPING ({num_slipping})")
-            self.lbl_slip_status.setStyleSheet("color: red; font-weight: bold;")
-        else:
-            self.lbl_slip_status.setText("No slip")
-            self.lbl_slip_status.setStyleSheet("color: green;")
-
-        self.lbl_slip_margin.setText(f"{slip_margin:.2%}")
-
-        if equilibrium:
-            self.lbl_equilibrium.setText("Stable")
-            self.lbl_equilibrium.setStyleSheet("color: green;")
-        else:
-            self.lbl_equilibrium.setText("Unstable")
-            self.lbl_equilibrium.setStyleSheet("color: orange;")
+# Backward-compat re-exports so existing importers keep working without changes.
+__all__ = [
+    "GripModellingTab",
+    "PressureVisualizationWidget",
+    "ContactMetricsWidget",
+    "GripSceneXmlBuilder",
+]
 
 
 class GripModellingTab(QtWidgets.QWidget):
@@ -232,9 +49,6 @@ class GripModellingTab(QtWidgets.QWidget):
         Args:
            sim_widget: The main simulation widget to connect to.
         """
-        # For now, we just store the reference, but we maintain our own internal widget
-        # for independent visualization of the hand models.
-        # Future work: Unify visualization if possible.
         if sim_widget is None:
             raise ValueError("sim_widget must be provided")
         self.external_sim_widget = sim_widget
@@ -290,7 +104,7 @@ class GripModellingTab(QtWidgets.QWidget):
         self.chk_contact_monitor = QtWidgets.QCheckBox("Monitor Contacts")
         self.chk_contact_monitor.setToolTip(
             "Enable contact force and slip monitoring (Issue #757)"
-        )  # noqa: E501
+        )
         self.chk_contact_monitor.setChecked(False)
         self.chk_contact_monitor.toggled.connect(self._on_contact_monitor_toggled)
         self.control_layout.addWidget(self.chk_contact_monitor)
@@ -342,6 +156,11 @@ class GripModellingTab(QtWidgets.QWidget):
         self.grip_contact_model = GripContactModel(GripParameters())
         self.contact_exporter = GripContactExporter(self.grip_contact_model)
         self.contact_timer: QtCore.QTimer | None = None
+        self._xml_builder = GripSceneXmlBuilder()
+
+    # -------------------------------------------------------------------------
+    # Model loading
+    # -------------------------------------------------------------------------
 
     def _on_kinematic_toggled(self, checked: bool) -> None:
         """Handle kinematic mode toggle."""
@@ -378,14 +197,14 @@ class GripModellingTab(QtWidgets.QWidget):
             return
 
         try:
-            xml_content = self._prepare_scene_xml(scene_path, folder_path, is_both)
+            xml_content = self._xml_builder.prepare_scene_xml(
+                scene_path, folder_path, is_both
+            )
         except (RuntimeError, ValueError, OSError):
             logger.exception("Failed to prepare XML model from %s", scene_path)
             return
 
-        # Load into widget
         try:
-            # Change directory to scene file location so relative assets (meshdir) work
             current_dir = os.getcwd()
             os.chdir(scene_path.parent)
             try:
@@ -396,285 +215,15 @@ class GripModellingTab(QtWidgets.QWidget):
             logger.exception("Failed to load XML model")
             return
 
-        # Rebuild controls
         self.rebuild_joint_controls()
-
-        # Apply initial kinematic state
         self._on_kinematic_toggled(self.chk_kinematic.isChecked())
 
-    def _prepare_scene_xml(
-        self, scene_path: Path, folder_path: Path, is_both: bool = False
-    ) -> str:  # noqa: E501
-        """Read scene file and inject absolute paths and cylinder object."""
-        if scene_path is None:
-            raise ValueError("scene_path must be provided")
-        xml_content = scene_path.read_text("utf-8")
-
-        # 1. Inline hand XML includes and extract worldbodies
-        xml_content = self._inline_hand_includes(
-            xml_content, scene_path, folder_path, is_both
-        )  # noqa: E501
-
-        # 2. Ensure offscreen framebuffer is large enough for renderer
-        xml_content = self._ensure_offscreen_visual(xml_content)
-
-        # 3. Inject Cylinder Object (only if not present)
-        xml_content = self._inject_cylinder_object(xml_content)
-
-        # 4. Inject Mocap Bodies and Welds for Hands
-        xml_content = self._inject_mocap_bodies(xml_content, scene_path, is_both)
-
-        logger.info(
-            "Successfully prepared scene XML with movable hands and mocap bodies."
-        )  # noqa: E501
-        return xml_content
-
-    def _get_hand_content(
-        self,
-        folder_path: Path,
-        filename: str,
-        body_name_pattern: str,
-        is_both: bool,
-    ) -> str:
-        """Read a hand XML file, inject freejoint, and strip mujoco tags."""
-        if folder_path is None:
-            raise ValueError("folder_path must be provided")
-        full_path = folder_path / filename
-        if not full_path.exists():
-            return ""
-
-        try:
-            content = full_path.read_text("utf-8")
-
-            # Check if freejoint already exists
-            if "freejoint" not in content:
-                pattern = f'(<body[^>]*name="{body_name_pattern}"[^>]*>)'
-                match = re.search(pattern, content)
-                if match:
-                    logger.info("Injecting freejoint into %s", filename)
-                    insertion = match.group(1) + "\n      <freejoint/>"
-                    content = content.replace(match.group(1), insertion)
-                else:
-                    logger.warning(
-                        "Could not find body '%s' in %s to inject freejoint",
-                        body_name_pattern,
-                        filename,
-                    )
-
-            # Strip <mujoco> tags to allow embedding
-            content = re.sub(r"<mujoco[^>]*>", "", content)
-            content = content.replace("</mujoco>", "")
-
-            # When merging both hands, prefix default class names to avoid
-            # collisions
-            if is_both:
-                hand_prefix = "right" if "right" in filename.lower() else "left"
-                # Find all default class names
-                class_names = re.findall(r'<default class="([^"]+)">', content)
-                for class_name in set(class_names):
-                    new_name = f"{hand_prefix}_{class_name}"
-                    content = content.replace(
-                        f'class="{class_name}"', f'class="{new_name}"'
-                    )  # noqa: E501
-
-            return content
-        except (RuntimeError, ValueError, OSError):
-            logger.exception("Failed to process hand file %s", filename)
-            return ""  # Return empty only on catastrophic failure
-
-    def _inline_hand_includes(
-        self,
-        xml_content: str,
-        scene_path: Path,
-        folder_path: Path,
-        is_both: bool,
-    ) -> str:
-        """Inline hand XML includes and inject extracted bodies into worldbody."""
-        if xml_content is None:
-            raise ValueError("xml_content must be provided")
-        extracted_bodies: list[str] = []
-
-        def extract_worldbody_content(filename: str, body_pattern: str) -> str:
-            """Extract worldbody XML content from a hand model file."""
-            if filename is None:
-                raise ValueError("filename must be provided")
-            content = self._get_hand_content(
-                folder_path, filename, body_pattern, is_both
-            )  # noqa: E501
-            bodies_match = re.search(
-                r"<worldbody[^>]*>(.*?)</worldbody>", content, re.DOTALL
-            )  # noqa: E501
-            if bodies_match:
-                extracted_bodies.append(bodies_match.group(1))
-                content = re.sub(
-                    r"<worldbody[^>]*>.*?</worldbody>", "", content, flags=re.DOTALL
-                )  # noqa: E501
-            return content
-
-        if is_both:
-            right_defs = extract_worldbody_content("right_hand.xml", "rh_forearm")
-            left_defs = extract_worldbody_content("left_hand.xml", "lh_forearm")
-
-            xml_content = re.sub(
-                r'<include[^>]*file="right_hand.xml"[^>]*/>', right_defs, xml_content
-            )
-            xml_content = re.sub(
-                r'<include[^>]*file="left_hand.xml"[^>]*/>', left_defs, xml_content
-            )
-        else:
-            if 'file="right_hand.xml"' in xml_content:
-                target_body = "rh_forearm"
-                if "allegro" in str(folder_path).lower():
-                    target_body = "right_hand"
-
-                defs = extract_worldbody_content("right_hand.xml", target_body)
-                xml_content = re.sub(
-                    r'<include[^>]*file="right_hand.xml"[^>]*/>',
-                    defs,
-                    xml_content,
-                )
-            elif 'file="left_hand.xml"' in xml_content:
-                target_body = "lh_forearm"
-                if "allegro" in str(folder_path):
-                    target_body = "left_hand"
-
-                defs = extract_worldbody_content("left_hand.xml", target_body)
-                xml_content = re.sub(
-                    r'<include[^>]*file="left_hand.xml"[^>]*/>',
-                    defs,
-                    xml_content,
-                )
-
-        # Inject extracted bodies into the scene's worldbody
-        if extracted_bodies:
-            bodies_str = "\n".join(extracted_bodies)
-            xml_content = re.sub(
-                r"(<worldbody[^>]*>)", r"\1\n" + bodies_str, xml_content, count=1
-            )  # noqa: E501
-
-        return xml_content
-
-    @staticmethod
-    def _ensure_offscreen_visual(xml_content: str) -> str:
-        """Ensure the XML has offscreen framebuffer settings for rendering."""
-        offscreen_global = '<global offwidth="1920" offheight="1080"/>'
-        if "<visual>" in xml_content:
-            if "<global" in xml_content:
-
-                def update_global_tag(m: re.Match) -> str:
-                    """Replace offscreen render dimensions in a global tag."""
-                    attrs = m.group(1).replace("/", "").strip()
-                    attrs = re.sub(r'offwidth="[^"]*"', "", attrs)
-                    attrs = re.sub(r'offheight="[^"]*"', "", attrs)
-                    return f'<global {attrs} offwidth="1920" offheight="1080"/>'
-
-                xml_content = re.sub(
-                    r"<global([^>]*)>", update_global_tag, xml_content, count=1
-                )  # noqa: E501
-            else:
-                xml_content = xml_content.replace(
-                    "<visual>",
-                    f"<visual>\n    {offscreen_global}",
-                )
-        else:
-            xml_content = xml_content.replace(
-                "</mujoco>",
-                f"<visual>\n  {offscreen_global}\n</visual>\n</mujoco>",
-            )
-        return xml_content
-
-    @staticmethod
-    def _inject_cylinder_object(xml_content: str) -> str:
-        """Inject a cylinder grip object into the scene if not present."""
-        if (
-            "club_handle" not in xml_content
-            and 'name="club_handle"' not in xml_content
-            and 'name="object"' not in xml_content
-        ):
-            cylinder_body = """
-    <body name="club_handle" pos="0.3 0 0.1">
-      <freejoint/>
-      <geom type="cylinder" size="0.015 0.15" rgba="0.8 0.2 0.2 1"
-            mass="0.3" condim="4" friction="1 0.5 0.5"/>
-    </body>
-        """
-            last_worldbody_end = xml_content.rfind("</worldbody>")
-            if last_worldbody_end != -1:
-                xml_content = (
-                    xml_content[:last_worldbody_end]
-                    + f"{cylinder_body}\n  "
-                    + xml_content[last_worldbody_end:]
-                )
-        return xml_content
-
-    @staticmethod
-    def _inject_mocap_bodies(xml_content: str, scene_path: Path, is_both: bool) -> str:
-        """Inject mocap bodies and weld constraints for hand positioning."""
-        if xml_content is None:
-            raise ValueError("xml_content must be provided")
-        mocap_xml = ""
-        equality_xml = "<equality>\n"
-
-        # Right Hand Mocap (only add if not already present)
-        if (
-            is_both or "right" in str(scene_path).lower()
-        ) and 'name="rh_mocap"' not in xml_content:  # noqa: E501
-            mocap_xml += """
-    <body name="rh_mocap" mocap="true" pos="0 0 0">
-        <geom type="box" size="0.02 0.02 0.02" rgba="0 1 0 0.5" contype="0"
-              conaffinity="0"/>
-    </body>
-            """
-            equality_xml += (
-                '    <weld body1="rh_mocap" body2="rh_forearm" solref="0.02 1" '
-                'solimp="0.9 0.95 0.001"/>\n'
-            )
-
-        # Left Hand Mocap (only add if not already present)
-        if (
-            is_both or "left" in str(scene_path).lower()
-        ) and 'name="lh_mocap"' not in xml_content:  # noqa: E501
-            mocap_xml += """
-    <body name="lh_mocap" mocap="true" pos="0 0 0">
-        <geom type="box" size="0.02 0.02 0.02" rgba="1 0 0 0.5" contype="0"
-              conaffinity="0"/>
-    </body>
-            """
-            equality_xml += (
-                '    <weld body1="lh_mocap" body2="lh_forearm" solref="0.02 1" '
-                'solimp="0.9 0.95 0.001"/>\n'
-            )
-
-        equality_xml += "  </equality>"
-
-        # Insert Mocap bodies before the last </worldbody>
-        if mocap_xml:
-            last_worldbody_end = xml_content.rfind("</worldbody>")
-            if last_worldbody_end != -1:
-                xml_content = (
-                    xml_content[:last_worldbody_end]
-                    + f"{mocap_xml}\n  "
-                    + xml_content[last_worldbody_end:]
-                )
-
-        # Insert Equality section before </mujoco> (or merge if exists)
-        if "</equality>" in xml_content:
-            equality_content = (
-                equality_xml.strip()
-                .replace("<equality>", "")
-                .replace("</equality>", "")  # noqa: E501
-            )
-            xml_content = xml_content.replace(
-                "</equality>", f"{equality_content}\n  </equality>"
-            )  # noqa: E501
-        else:
-            xml_content = xml_content.replace("</mujoco>", f"{equality_xml}\n</mujoco>")
-
-        return xml_content
+    # -------------------------------------------------------------------------
+    # Joint controls
+    # -------------------------------------------------------------------------
 
     def rebuild_joint_controls(self) -> None:
         """Rebuild the joint control widgets for the current model."""
-        # Clear existing
         while self.sliders_layout.count():
             item = self.sliders_layout.takeAt(0)
             if item is not None:
@@ -688,9 +237,7 @@ class GripModellingTab(QtWidgets.QWidget):
         if self.sim_widget.model is None or self.sim_widget.data is None:
             return
 
-        # Iterate joints
         model = self.sim_widget.model
-
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
@@ -701,7 +248,6 @@ class GripModellingTab(QtWidgets.QWidget):
         if self.sim_widget.data is None:
             return
 
-        # Skip free joints and ball joints (multi-dof)
         jnt_type = model.jnt_type[i]
         if jnt_type in (mujoco.mjtJoint.mjJNT_FREE, mujoco.mjtJoint.mjJNT_BALL):
             return
@@ -713,7 +259,6 @@ class GripModellingTab(QtWidgets.QWidget):
         if not name:
             name = f"Joint {i}"
 
-        # Create UI row
         row = QtWidgets.QWidget()
         row_layout = QtWidgets.QHBoxLayout(row)
         row_layout.setContentsMargins(0, 0, 0, 0)
@@ -722,7 +267,6 @@ class GripModellingTab(QtWidgets.QWidget):
         label.setFixedWidth(120)
         row_layout.addWidget(label)
 
-        # Range
         range_min, range_max = self._get_joint_range(i, model)
 
         slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
@@ -732,15 +276,12 @@ class GripModellingTab(QtWidgets.QWidget):
         spin.setRange(range_min, range_max)
         spin.setSingleStep(0.01)
 
-        # Initial value (qpos) - Assuming qpos address matches joint id for 1-dof joints
-        # Need strict qpos address.
         qpos_adr = model.jnt_qposadr[i]
         init_val = self.sim_widget.get_state()[0][qpos_adr]
 
         slider.setValue(self._val_to_slider(init_val, range_min, range_max))
         spin.setValue(init_val)
 
-        # Connect
         def _on_slider_change(
             v: int,
             s: Any = spin,
@@ -913,7 +454,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
     def _update_contact_visualizations(
         self, positions_arr: np.ndarray, state: Any
-    ) -> None:  # noqa: E501
+    ) -> None:
         if positions_arr is None:
             raise ValueError("positions_arr must be provided")
         if len(positions_arr) > 0:
@@ -957,7 +498,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
         positions, normals, forces, velocities, body_names = (
             self._extract_hand_contacts(model, data)
-        )  # noqa: E501
+        )
 
         if not positions:
             self.pressure_widget.clear()
@@ -1015,7 +556,6 @@ class GripModellingTab(QtWidgets.QWidget):
                 with open(filename, "w") as f:
                     json.dump(data, f, indent=2)
 
-            # Show summary
             summary = self.contact_exporter.get_summary_statistics()
             QtWidgets.QMessageBox.information(
                 self,
@@ -1031,4 +571,4 @@ class GripModellingTab(QtWidgets.QWidget):
             logger.exception("Failed to export contact data")
             QtWidgets.QMessageBox.critical(
                 self, "Export Failed", f"Failed to export: {e}"
-            )  # noqa: E501
+            )
