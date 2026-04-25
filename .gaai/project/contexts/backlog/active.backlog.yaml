@@ -148,7 +148,11 @@ items:
   - id: GH2034
     title: "Reduce 1227 type:ignore comments systematically"
     priority: medium
-    status: refined
+    status: done
+    completed_at: "2026-04-20T09:08:18Z"
+    pr_url: "https://github.com/D-sorganization/UpstreamDrift/pull/2840"
+    pr_number: 2840
+    pr_status: "merged"
     github_issue: 2034
     artefact: .gaai/project/contexts/artefacts/stories/GH2034.story.md
     dependencies: []
