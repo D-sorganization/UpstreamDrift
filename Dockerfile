@@ -98,7 +98,7 @@ WORKDIR /workspace
 COPY --chown=${USER_NAME}:${USER_NAME} src/ ./src/
 COPY --chown=${USER_NAME}:${USER_NAME} pyproject.toml ./
 COPY --chown=${USER_NAME}:${USER_NAME} launch_golf_suite.py ./
-COPY --chown=${USER_NAME}:${USER_NAME} start_api_server.py ./
+COPY --chown=${USER_NAME}:${USER_NAME} scripts/ci/start_api_server.py ./
 COPY --chown=${USER_NAME}:${USER_NAME} .env.example ./.env.example
 
 USER ${USER_NAME}

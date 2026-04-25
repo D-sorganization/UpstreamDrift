@@ -185,13 +185,13 @@ jobs:
         run: python3 scripts/check_dependency_direction.py
 
       - name: Changed-File Size Budget Check
-        run: python3 scripts/check_file_size_budget.py
+        run: python3 scripts/ci/check_file_size_budget.py
 
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 
       - name: Tutorial Import Check
-        run: python3 scripts/check_tutorial_imports.py
+        run: python3 scripts/ci/check_tutorial_imports.py
 
       - name: Module Size Budget Check
         run: python3 scripts/check_module_size_budget.py --max-lines 1500 --include src
@@ -236,7 +236,7 @@ jobs:
           # are now pinned in pyproject.toml dev deps and requirements-dev.lock.
           # Resolved CVE (Dependabot remediation 2026-04-14):
           # - CVE-2025-71176 (pytest): now pinned to pytest>=9.0.3 in requirements-dev.lock
-          mapfile -t PIP_AUDIT_FLAGS < <(python scripts/check_pip_audit_waivers.py)
+          mapfile -t PIP_AUDIT_FLAGS < <(python scripts/ci/check_pip_audit_waivers.py)
           python -m pip_audit -r requirements-dev.lock "${PIP_AUDIT_FLAGS[@]}"
 
       # SECURITY: Bandit static security analysis (Issue #782)
