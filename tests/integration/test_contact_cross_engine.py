@@ -133,8 +133,53 @@ class TestBasicContactPhysics:
     @pytest.mark.slow
     def test_drake_ball_drop_energy_dissipation(self, ball_urdf):
         """Verify Drake contact dissipates energy."""
-        pytest.skip("Drake contact model testing - implementation pending")
-        # Expected behavior: Similar to MuJoCo but may use different contact model
+        try:
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
+                DrakePhysicsEngine,
+            )
+        except ImportError:
+            pytest.skip("Drake not installed")
+
+        engine = DrakePhysicsEngine()
+        try:
+            engine.load_from_path(ball_urdf)
+        except Exception as e:  # noqa: BLE001
+            pytest.skip(f"Drake URDF loading failed: {e}")
+
+        # Drop ball from 1m height
+        initial_height = 1.0
+        # State: [x, y, z, qw, qx, qy, qz]
+        q_init = np.array([0, 0, initial_height, 1, 0, 0, 0])
+        v_init = np.zeros(6)  # Zero velocity
+        engine.set_state(q_init, v_init)
+
+        # Compute initial potential energy
+        E_initial = 0.045 * float(GRAVITY_M_S2) * initial_height  # mgh
+
+        # Simulate until ball settles (2 seconds should be enough)
+        dt = 0.001
+        num_steps = int(2.0 / dt)
+        for _ in range(num_steps):
+            engine.step(dt=dt)
+
+        # Get final state
+        q_final, v_final = engine.get_state()
+        final_height = q_final[2]
+        E_final = (
+            0.045 * float(GRAVITY_M_S2) * final_height  # Potential
+            + 0.5 * 0.045 * np.linalg.norm(v_final[:3]) ** 2  # Kinetic
+        )
+
+        # Energy should have dissipated (ball shouldn't bounce back to 1m)
+        assert E_final < E_initial * 0.5, (
+            f"Drake contact should dissipate energy: "
+            f"E_initial={E_initial:.6f} J, E_final={E_final:.6f} J"
+        )
+
+        # Ball should be near ground (not still at 1m)
+        assert final_height < 0.1, (
+            f"Ball should settle near ground: height={final_height:.3f}m"
+        )
 
     @pytest.mark.slow
     def test_pinocchio_contact_behavior(self, ball_urdf):

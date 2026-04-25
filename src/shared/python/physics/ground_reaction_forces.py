@@ -508,8 +508,16 @@ def extract_grf_from_contacts(
     total_weighted_pos = np.zeros(3)
 
     # --- Primary path: query the engine's native contact solver -----------
-    contact_force = engine.compute_contact_forces()
-    has_contact_data = float(np.linalg.norm(contact_force)) > 1e-10
+    try:
+        contact_force = engine.compute_contact_forces()
+        has_contact_data = float(np.linalg.norm(contact_force)) > 1e-10
+    except NotImplementedError:
+        # Engine does not support contact force queries (e.g., Pinocchio without contact solver)
+        contact_force = np.zeros(3)
+        has_contact_data = False
+        logger.debug(
+            "Engine does not support contact force queries; falling back to gravity approximation"
+        )
 
     if has_contact_data:
         total_force[: len(contact_force)] = contact_force[:3]
