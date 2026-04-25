@@ -21,6 +21,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -73,7 +74,7 @@ class SlopeRegion:
 
     def __post_init__(self) -> None:
         """Normalize slope direction."""
-        mag = np.linalg.norm(self.slope_direction)
+        mag = math.hypot(*self.slope_direction)
         if mag > 0:
             self.slope_direction = self.slope_direction / mag
 
@@ -81,14 +82,18 @@ class SlopeRegion:
         """Check if position is within region."""
         if position is None:
             raise ValueError("position must be provided")
-        distance = np.linalg.norm(position[:2] - self.center[:2])
+        distance = math.hypot(
+            position[0] - self.center[0], position[1] - self.center[1]
+        )
         return bool(distance <= self.radius)
 
     def get_weight(self, position: np.ndarray) -> float:
         """Get influence weight at position (0-1)."""
         if position is None:
             raise ValueError("position must be provided")
-        distance = np.linalg.norm(position[:2] - self.center[:2])
+        distance = math.hypot(
+            position[0] - self.center[0], position[1] - self.center[1]
+        )
         if distance >= self.radius:
             return 0.0
 
@@ -360,14 +365,16 @@ class GreenSurface:
         """
         if position is None:
             raise ValueError("position must be provided")
-        distance = np.linalg.norm(position[:2] - self._hole_position)
+        distance = math.hypot(
+            position[0] - self._hole_position[0], position[1] - self._hole_position[1]
+        )
 
         if distance > self.hole_radius:
             return False
 
         # Check for lip-out at high speeds
         if velocity is not None:
-            speed = np.linalg.norm(velocity)
+            speed = math.hypot(*velocity)
             # Empirical: ball lips out if going too fast near edge
             max_speed_at_edge = 1.5  # m/s
             if distance > self.hole_radius * 0.5 and speed > max_speed_at_edge:
@@ -438,7 +445,7 @@ class GreenSurface:
 
         # Project point onto ridge line
         line_vec = end - start
-        line_len = np.linalg.norm(line_vec)
+        line_len = math.hypot(*line_vec)
         if line_len < 1e-10:
             return 0.0
 
@@ -452,7 +459,7 @@ class GreenSurface:
 
         # Distance from line
         closest_on_line = start + projection * line_dir
-        distance = np.linalg.norm(position - closest_on_line)
+        distance = math.hypot(*(position - closest_on_line))
 
         if distance > width:
             return 0.0
@@ -471,7 +478,7 @@ class GreenSurface:
         radius = depression["radius"]
         depth = depression["depth"]
 
-        distance = np.linalg.norm(position - center)
+        distance = math.hypot(*(position - center))
 
         if distance > radius:
             return 0.0
@@ -507,7 +514,7 @@ class GreenSurface:
 
         # Perpendicular to putt direction
         putt_dir = end - start
-        putt_len = np.linalg.norm(putt_dir)
+        putt_len = math.hypot(*putt_dir)
         if putt_len < 1e-10:
             return {
                 "total_break": 0.0,
@@ -563,7 +570,7 @@ class GreenSurface:
             "positions": np.array(positions),
             "elevations": np.array([self.get_elevation_at(p) for p in positions]),
             "slopes": np.array([self.get_slope_at(p) for p in positions]),
-            "distance": np.linalg.norm(end - start),
+            "distance": math.hypot(*(end - start)),
         }
 
     def to_heightmap(self, resolution: int = 100) -> np.ndarray:
