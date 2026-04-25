@@ -1,9 +1,10 @@
-"""Unit tests for model duplicate endpoint (issue #3174).
+"""Unit tests for model duplicate endpoint (issues #3174, #3202).
 
 Tests cover:
 - ModelDuplicateRequest validation (safe name, path fields)
 - ModelDuplicateResponse structure
 - Source-level verification that /models/duplicate endpoint is declared
+- validate_model_source_path allowlist validation (issue #3202)
 
 defusedxml is not installed in the unit-test environment, so we avoid
 importing the full model_explorer module and test the data models
@@ -13,8 +14,15 @@ directly via AST inspection and direct Pydantic model construction.
 from __future__ import annotations
 
 import ast
+import importlib.util
 import re
+import tempfile
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+
+pytestmark = pytest.mark.unit
 
 _MODEL_EXPLORER_SRC = (
     Path(__file__).parents[3] / "src" / "api" / "routes" / "model_explorer.py"
@@ -225,3 +233,97 @@ class TestModelExtensionAllowlist:
     def test_422_on_bad_extension(self) -> None:
         """Source raises HTTP 422 when extension is not in the allowlist."""
         assert "422" in self._MODEL_EXPLORER_SRC
+
+    def test_validate_model_source_path_function_present(self) -> None:
+        """Source defines a validate_model_source_path helper (issue #3202)."""
+        assert "validate_model_source_path" in self._MODEL_EXPLORER_SRC, (
+            "model_explorer.py must define validate_model_source_path "
+            "for explicit pre-copy allowlist validation"
+        )
+
+    def test_allowed_model_dirs_constant_present(self) -> None:
+        """Source defines _ALLOWED_MODEL_DIRS for directory allowlist."""
+        assert "_ALLOWED_MODEL_DIRS" in self._MODEL_EXPLORER_SRC, (
+            "model_explorer.py must define _ALLOWED_MODEL_DIRS"
+        )
+
+    def test_sdf_extension_in_allowlist(self) -> None:
+        """.sdf extension is in the allowlist (issue #3202)."""
+        assert ".sdf" in self._MODEL_EXPLORER_SRC
+
+    def test_obj_extension_in_allowlist(self) -> None:
+        """.obj extension is in the allowlist (issue #3202)."""
+        assert ".obj" in self._MODEL_EXPLORER_SRC
+
+    def test_stl_extension_in_allowlist(self) -> None:
+        """.stl extension is in the allowlist (issue #3202)."""
+        assert ".stl" in self._MODEL_EXPLORER_SRC
+
+
+def _load_validate_fn():
+    """Load validate_model_source_path from model_explorer with deps mocked."""
+    mocks = {
+        "defusedxml": MagicMock(),
+        "defusedxml.ElementTree": MagicMock(),
+        "src.api.middleware.error_handler": MagicMock(handle_api_errors=lambda f: f),
+        "src.shared.python.core.contracts": MagicMock(
+            precondition=lambda *a, **kw: lambda f: f,
+            postcondition=lambda *a, **kw: lambda f: f,
+        ),
+        "src.api.dependencies": MagicMock(),
+        "src.api.models.requests": MagicMock(),
+        "src.api.models.responses": MagicMock(),
+        "src.api.routes._route_utils": MagicMock(),
+        "fastapi": MagicMock(),
+        "pydantic": MagicMock(),
+    }
+    import sys
+
+    with patch.dict(sys.modules, mocks):
+        spec = importlib.util.spec_from_file_location(
+            "model_explorer_isolated",
+            Path(__file__).parents[3] / "src" / "api" / "routes" / "model_explorer.py",
+        )
+        mod = importlib.util.module_from_spec(spec)  # type: ignore[arg-type]
+        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        return mod.validate_model_source_path
+
+
+class TestValidateModelSourcePath:
+    """Unit tests for validate_model_source_path (issue #3202).
+
+    Tests import only the pure validation function to avoid defusedxml
+    dependency -- the function does path arithmetic, not XML parsing.
+    """
+
+    def test_urdf_in_approved_dir_is_allowed(self) -> None:
+        """A .urdf file inside an approved model dir passes validation."""
+        validate = _load_validate_fn()
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            model_dir = repo_root / "tests" / "fixtures" / "models"
+            model_dir.mkdir(parents=True)
+            urdf_file = model_dir / "robot.urdf"
+            urdf_file.write_text("<robot/>")
+            # Should not raise
+            validate("tests/fixtures/models/robot.urdf", repo_root)
+
+    def test_python_file_is_rejected(self) -> None:
+        """A .py source file is rejected even if it exists in a model dir."""
+        validate = _load_validate_fn()
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            model_dir = repo_root / "tests" / "fixtures" / "models"
+            model_dir.mkdir(parents=True)
+            py_file = model_dir / "secret.py"
+            py_file.write_text("# code")
+            with pytest.raises(ValueError, match=r"(?i)model asset"):
+                validate("tests/fixtures/models/secret.py", repo_root)
+
+    def test_path_traversal_is_rejected(self) -> None:
+        """A path traversal attempt escaping the repo root is rejected."""
+        validate = _load_validate_fn()
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            with pytest.raises(ValueError, match=r"(?i)escapes"):
+                validate("../../etc/passwd", repo_root)

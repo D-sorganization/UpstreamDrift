@@ -41,8 +41,81 @@ from ._route_utils import find_project_root
 # new model stem (no slashes, dots, or path-traversal sequences).
 _SAFE_STEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_\-]{0,63}$")
 
-# Restrict duplication to known model-asset extensions only.
-_ALLOWED_MODEL_EXTENSIONS = {".urdf", ".mjcf", ".xml"}
+# Restrict duplication to known model-asset extensions only (issue #3202).
+_ALLOWED_MODEL_EXTENSIONS = {
+    ".urdf",
+    ".mjcf",
+    ".xml",
+    ".sdf",
+    ".obj",
+    ".stl",
+    ".dae",
+    ".yaml",
+    ".yml",
+}
+
+# Approved model directories relative to repo root (issue #3202).
+_ALLOWED_MODEL_DIRS = {
+    "src/models",
+    "src/robots",
+    "assets",
+    "models",
+    "tests/fixtures/models",
+    "src/shared/urdf",
+    "src/engines/physics_engines/pinocchio/models/generated",
+}
+
+
+def validate_model_source_path(source_path: str, repo_root: Path) -> None:
+    """Validate that source_path points to a legitimate model asset file.
+
+    Preconditions:
+        - source_path is a non-empty string
+        - repo_root is an existing directory
+
+    Postconditions:
+        - abs_path is inside repo_root
+        - abs_path has an allowed model extension
+        - abs_path is inside an approved model directory
+
+    Args:
+        source_path: Relative path from repo root to the source file.
+        repo_root: Absolute path to the repository root.
+
+    Raises:
+        ValueError: If the path escapes the repo root, has a disallowed
+            extension, or is not in an approved model directory.
+    """
+    if not source_path:
+        raise ValueError("source_path must not be empty")
+
+    abs_path = (repo_root / source_path).resolve()
+
+    # Confirm still within repo root.
+    try:
+        abs_path.relative_to(repo_root.resolve())
+    except ValueError as exc:
+        raise ValueError(
+            f"source_path '{source_path}' escapes the repository root"
+        ) from exc
+
+    # Confirm extension is a model asset file format.
+    if abs_path.suffix.lower() not in _ALLOWED_MODEL_EXTENSIONS:
+        raise ValueError(
+            f"source_path must be a model asset file (got '{abs_path.suffix}'). "
+            f"Allowed extensions: {sorted(_ALLOWED_MODEL_EXTENSIONS)}"
+        )
+
+    # Confirm it is in an approved model directory.
+    is_approved_dir = any(
+        str(abs_path).startswith(str((repo_root / d).resolve()))
+        for d in _ALLOWED_MODEL_DIRS
+    )
+    if not is_approved_dir:
+        raise ValueError(
+            f"source_path '{source_path}' must be in an approved model directory. "
+            f"Approved dirs: {sorted(_ALLOWED_MODEL_DIRS)}"
+        )
 
 
 class ModelDuplicateRequest(BaseModel):
@@ -457,11 +530,12 @@ async def duplicate_model(
     request: ModelDuplicateRequest,
     logger: Any = Depends(get_logger),
 ) -> ModelDuplicateResponse:
-    """Duplicate a URDF/MJCF model asset under a new name.
+    """Duplicate a URDF/MJCF/SDF/mesh model asset under a new name.
 
-    Only files inside an approved model directory and with an allowed
-    extension (.urdf, .mjcf, .xml) may be duplicated.  Arbitrary repo
-    files are rejected even when they reside inside the checkout.
+    Only files inside an approved model directory and with an extension
+    from _ALLOWED_MODEL_EXTENSIONS may be duplicated (issue #3202).
+    Arbitrary repo files -- config, code, secrets -- are rejected even
+    when they reside inside the checkout.
 
     Args:
         request: Duplicate request with source_path and new_name.
@@ -474,7 +548,7 @@ async def duplicate_model(
         HTTPException 400: new_name contains unsafe characters.
         HTTPException 404: source_path not found or not a model asset.
         HTTPException 409: destination file already exists.
-        HTTPException 422: source file has a disallowed extension.
+        HTTPException 422: source_path fails allowlist validation.
     """
     if request is None:
         raise ValueError("request must be provided")
@@ -491,35 +565,20 @@ async def duplicate_model(
         )
 
     root = _find_project_root()
-    approved_roots = [
-        root / model_dir for model_dir in _MODEL_DIRS if (root / model_dir).exists()
-    ]
 
-    # Resolve and validate source_path — must be inside an approved model dir.
+    # Validate source_path against extension and directory allowlists
+    # BEFORE any file-system operation (issue #3202).
+    try:
+        validate_model_source_path(request.source_path, root)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
     source = (root / request.source_path).resolve()
-    if not any(
-        source.is_relative_to(approved_root.resolve())
-        for approved_root in approved_roots
-    ):
-        raise HTTPException(
-            status_code=404,
-            detail=f"source_path '{request.source_path}' is not inside an approved model directory.",
-        )
 
     if not source.exists() or not source.is_file():
         raise HTTPException(
             status_code=404,
             detail=f"Model file not found: {request.source_path}",
-        )
-
-    # Restrict to model asset extensions.
-    if source.suffix.lower() not in _ALLOWED_MODEL_EXTENSIONS:
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                f"Extension '{source.suffix}' is not an allowed model type. "
-                f"Allowed: {sorted(_ALLOWED_MODEL_EXTENSIONS)}"
-            ),
         )
 
     dest = source.parent / (request.new_name + source.suffix)
