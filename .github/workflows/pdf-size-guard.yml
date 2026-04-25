@@ -1,0 +1,51 @@
+name: PDF Size Guard
+
+on:
+  pull_request:
+    paths:
+      - '**/*.pdf'
+
+jobs:
+  check-pdf-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check PDF sizes
+        run: |
+          echo "Checking for new or modified PDFs larger than 1MB..."
+          
+          # Get list of added or modified PDF files in this PR
+          FILES=$(git diff --name-only --diff-filter=AM origin/${{ github.base_ref }}...HEAD | grep '\.pdf$' || true)
+          
+          if [ -z "$FILES" ]; then
+            echo "No PDF files modified."
+            exit 0
+          fi
+          
+          BLOCKED=false
+          
+          for file in $FILES; do
+            if [ -f "$file" ]; then
+              SIZE=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file")
+              SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
+              
+              if [ "$SIZE" -gt 1048576 ]; then
+                echo "🚨 BLOCKED: File $file is too large ($SIZE_MB MB). Maximum allowed is 1MB."
+                BLOCKED=true
+              else
+                echo "✅ File $file is within limits ($SIZE_MB MB)."
+              fi
+            fi
+          done
+          
+          if [ "$BLOCKED" = true ]; then
+            echo ""
+            echo "❌ This PR introduces PDF files larger than 1MB. Please store large assets in Git LFS or external storage."
+            exit 1
+          fi
+          
+          echo "✅ All PDFs within size limits."
