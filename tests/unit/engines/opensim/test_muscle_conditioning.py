@@ -40,6 +40,9 @@ if not OPENSIM_AVAILABLE:
 from src.engines.physics_engines.opensim.python.muscle_analysis import (
     OpenSimMuscleAnalyzer,
 )
+import pytest
+pytestmark = pytest.mark.unit
+
 
 
 def test_mass_matrix_conditioning_fallback(caplog):

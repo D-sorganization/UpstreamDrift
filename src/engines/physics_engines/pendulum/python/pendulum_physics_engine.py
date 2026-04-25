@@ -16,6 +16,7 @@ physics computations, prefer importing from the canonical module directly.
 
 from __future__ import annotations
 
+import warnings  # noqa: E402
 from typing import Any
 
 import numpy as np
@@ -35,6 +36,13 @@ from src.shared.python.engine_core.base_physics_engine import (
 )
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.logging_pkg.logging_config import get_logger
+
+warnings.warn(
+    "pendulum_physics_engine is deprecated (issue #3056). "
+    "Use src.shared.python.pendulum_simulator instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 logger = get_logger(__name__)
 

@@ -18,7 +18,7 @@ ENGINE_MODULES: dict[str, str] = {
     "pinocchio": "src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui",
     "opensim": "src.engines.physics_engines.opensim.python.opensim_gui",
     "myosuite": "src.engines.physics_engines.myosuite.python.myosuite_physics_engine",
-    "pendulum": "src.engines.pendulum_models.python.pendulum_launcher",
+    "pendulum": "src.shared.python.pendulum_simulator",  # canonical (issue #3056)
 }
 
 

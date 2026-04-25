@@ -450,10 +450,9 @@ class AnthropicAdapter(BaseAgentAdapter):
             f"4. Guide users through workflows step by step\n"
             f"5. Acknowledge uncertainty and cite limitations\n"
             f"6. Be precise about physical units (SI: m, kg, s, rad, N, N·m)\n\n"
-            f"When explaining physics/biomechanics terms, use the explain_concept "
-            f"tool to pull canonical UpstreamDrift glossary definitions. Prefer "
-            f"multi-level explanations (beginner -> advanced) based on the "
-            f"user's expertise_level if set."
+            f"When explaining physics or biomechanics terms, use the explain_concept "
+            f"tool to provide accurate, multi-level UpstreamDrift definitions "
+            f"tailored to the user's expertise level."
         )
 
     def _parse_response(self, response: Any) -> AgentResponse:

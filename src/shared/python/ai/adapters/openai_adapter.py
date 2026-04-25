@@ -425,10 +425,9 @@ class OpenAIAdapter(BaseAgentAdapter):
             f"2. Suggest appropriate analyses for their goals\n"
             f"3. Execute using available tools\n"
             f"4. Interpret results with scientific rigor\n\n"
-            f"When explaining physics/biomechanics terms, use the explain_concept "
-            f"tool to pull canonical UpstreamDrift glossary definitions. Prefer "
-            f"multi-level explanations (beginner -> advanced) based on the "
-            f"user's expertise_level if set."
+            f"When explaining physics or biomechanics terms, use the explain_concept "
+            f"tool to provide accurate, multi-level UpstreamDrift definitions "
+            f"tailored to the user's expertise level."
         )
 
     def _parse_response(self, response: Any) -> AgentResponse:

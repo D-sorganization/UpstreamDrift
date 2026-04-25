@@ -28,12 +28,20 @@ import typing
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
+import warnings  # noqa: E402 (intentional: after all imports)
 from dataclasses import dataclass
 
 # Security: Use simpleeval for safe expression evaluation instead of eval()
 from simpleeval import SimpleEval
 
 from src.shared.python.core.constants import GRAVITY_M_S2
+
+warnings.warn(
+    "double_pendulum.py is deprecated (issue #3056). "
+    "Use src.shared.python.pendulum_simulator.physics instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # Physical constants with documented units and references
 # International gravity standard at 45 degrees latitude (m/s^2)
