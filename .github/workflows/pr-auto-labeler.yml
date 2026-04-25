@@ -22,7 +22,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
-          ONLINE=$(gh api /orgs/${{ github.repository_owner }}/actions/runners \
+          ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
             --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" -gt 0 ]]; then

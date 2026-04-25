@@ -288,7 +288,7 @@ class MotionPlanner(ABC):
             raise ValueError("q_from must be provided")
         max_distance = max_distance or self._config.step_size
         direction = q_to - q_from
-        distance = np.linalg.norm(direction)
+        distance = float(np.sqrt(np.vdot(direction, direction)))
 
         if distance <= max_distance:
             return q_to.copy()
@@ -305,7 +305,8 @@ class MotionPlanner(ABC):
         Returns:
             Euclidean distance.
         """
-        return float(np.linalg.norm(q2 - q1))
+        diff = q2 - q1
+        return float(np.sqrt(np.vdot(diff, diff)))
 
     def _is_path_valid(
         self,

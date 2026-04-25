@@ -70,12 +70,3 @@
 **Vulnerability:** String-based query construction with `f-strings` in `get_unique_values` (Bandit B608).
 **Learning:** Even when input is validated against a whitelist, security scanners will flag string-based SQL query construction. Using a hardcoded mapping of query strings eliminates both the actual risk and the static analysis warnings.
 **Prevention:** Use hardcoded SQL query maps for column names (which cannot be parameterized in standard SQL bindings) instead of dynamic string construction.
-## 2026-04-25 - Prevent Insecure Subprocess Execution (B603)
-**Vulnerability:** Directly calling `subprocess.run` or `subprocess.Popen` without restrictions can lead to command injection and unauthorized program execution, which triggers Bandit B603 warnings.
-**Learning:** Security scanners will flag direct use of the `subprocess` module when executing commands. Using a centralized, secure wrapper ensures that all executed commands and paths are strictly validated against allowlists.
-**Prevention:** Instead of using the standard `subprocess` module directly, import and use the custom secure wrappers `secure_run` and `secure_popen` from `src.shared.python.security.secure_subprocess`.
-
-## 2026-04-25 - [LOW] Use of raw `subprocess.Popen` without command validation
-**Vulnerability:** Found `subprocess.Popen` being used to launch external MuJoCo viewers in `src/tools/model_explorer/mujoco_viewer.py`. Even though the commands were constructed as lists (reducing standard injection risks via `shell=True`), directly importing and calling `subprocess` bypasses the centralized security policies and validations, and is flagged by static analysis scanners (Bandit B404/B603).
-**Learning:** Using list-based arguments for `subprocess` isn't enough to satisfy project security requirements. All subprocess creations must pass through the `secure_subprocess` wrapper which guarantees commands are running within approved whitelists, paths, and timeouts.
-**Prevention:** Avoid `import subprocess`. Always import `secure_popen` and `secure_run` from `src.shared.python.security.secure_subprocess` when an external command needs to be executed.

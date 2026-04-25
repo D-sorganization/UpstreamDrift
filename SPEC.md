@@ -29,7 +29,7 @@ Last-Updated: 2026-04-25T01:56:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.177                                            |
+| **Spec Version**        | 1.0.178                                            |
 | **Last Spec Update**    | 2026-04-24                                         |
 
 ## 2. Purpose & Mission
@@ -728,6 +728,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 - 2026-04-22: Hardened aerodynamics vector magnitude helpers so drag, lift, Magnus, and Reynolds correction accept column-vector or other non-1D inputs, and clamped randomized air density to a positive minimum.
 - 2026-04-22: Added release-mode validation for Rust upstream-physics public RK4, aerodynamic, and ball-flight inputs so Python/WASM constructors return typed boundary errors and invalid simulation parameters fail before producing NaNs or repeated states.
 - 2026-04-22: Guarded MuJoCo contact-force body lookups against negative non-geom contact IDs so flex or other non-geom contacts are skipped instead of indexing the wrong `geom_bodyid` entry.
+- 2026-04-25: Replaced np.linalg.norm with vdot and math.hypot for robotics path distance calculations to improve performance.
 - 2026-04-22: Updated humanoid URDF contract parseroot behavior to preserve real filesystem/permission I/O errors for existing path inputs while retaining raw-XML fallback for non-path-like or non-existent path inputs.
 - 2026-04-22: Added a launcher/archivist workflow token fallback for runner discovery and branch cleanup, and bounded property-based rotation/skew/numerical tests to reduce CI timeout risk.
 - 2026-04-22: Hardened launcher process cwd validation so Windows path test doubles and temp-directory launch targets are handled without relying on `Path.resolve()`, preserving immediate-death launch diagnostics while rejecting out-of-policy paths.
@@ -749,4 +750,3 @@ pytest tests/ --cov=src --cov-fail-under=70
 - Mounted production quota route dependencies consistently and deferred auth-mode bypass decisions to request time so local/test API requests preserve endpoint validation semantics while cloud-mode simulation and video routes reject unauthenticated access.
 - Restored legacy `/api/...` API route registration for launcher, terrain, and other existing clients while preserving root and `/api/v1/...` route coverage.
 - Enforced streamed upload byte-limit validation in upload-related API handlers and tests for robust production quota enforcement.
-| 2026-04-25 | 1.1.20       | Secured subprocess execution wrappers across tools          |

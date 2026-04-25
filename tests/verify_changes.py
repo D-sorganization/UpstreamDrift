@@ -1,9 +1,8 @@
 # Import paths configured at test runner level via pyproject.toml/conftest.py
 
+import subprocess
 import sys
 import unittest
-
-from src.shared.python.security.secure_subprocess import secure_run
 
 
 class TestVerification(unittest.TestCase):
@@ -79,7 +78,7 @@ class TestVerification(unittest.TestCase):
 
         for file_path in files_to_check:
             if exists(file_path):
-                result = secure_run(
+                result = subprocess.run(
                     [sys.executable, tool_path, file_path],
                     capture_output=True,
                     text=True,

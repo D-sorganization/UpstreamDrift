@@ -80,7 +80,7 @@ class BallState:
     def speed(self) -> float:
         """Ball speed magnitude."""
         # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for small 2D vectors
-        return math.hypot(self.velocity[0], self.velocity[1])
+        return float(math.hypot(self.velocity[0], self.velocity[1]))
 
     @property
     def is_moving(self) -> bool:

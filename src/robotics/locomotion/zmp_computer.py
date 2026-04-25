@@ -412,4 +412,5 @@ class ZMPComputer(ContractChecker):
         t = max(0, min(1, t))
 
         closest = seg_a + t * v
-        return float(np.linalg.norm(point - closest))
+        diff = point - closest
+        return float(np.sqrt(np.vdot(diff, diff)))
