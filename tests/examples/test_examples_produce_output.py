@@ -15,9 +15,10 @@ from pathlib import Path
 
 import pytest
 
-
 SKIP_EXAMPLES = {"__init__.py"}  # not an example
-CLI_OUTPUT_EXAMPLES = {"basic_flight_simulation.py"}  # examples that must produce output
+CLI_OUTPUT_EXAMPLES = {
+    "basic_flight_simulation.py"
+}  # examples that must produce output
 REQUIRED_UNIT_SUFFIXES = {"m", "yd", "N", "kg", "s", "rad", "rpm"}
 
 
@@ -61,7 +62,9 @@ def test_example_produces_output(example_file: Path) -> None:
     # Only CLI output examples must produce output
     if example_file.name in CLI_OUTPUT_EXAMPLES:
         output = result.stdout + result.stderr
-        assert output.strip(), f"{example_file.name} produced no output (silent failure)"
+        assert output.strip(), (
+            f"{example_file.name} produced no output (silent failure)"
+        )
 
         has_unit = any(suffix in output for suffix in REQUIRED_UNIT_SUFFIXES)
         assert has_unit, (
