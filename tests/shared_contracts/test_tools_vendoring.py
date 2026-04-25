@@ -51,18 +51,18 @@ def test_tools_vendoring_provider_path(pytestconfig: pytest.Config) -> None:
     provider_file = Path(upstream_drift_tools.__file__).resolve()
 
     if mode == "vendored":
-        assert "ud-tools" in provider_file.parts or "ud-tools" in str(
-            provider_file
-        ), f"Expected a vendored tools path containing 'ud-tools', got {provider_file}"
+        assert "ud-tools" in provider_file.parts or "ud-tools" in str(provider_file), (
+            f"Expected a vendored tools path containing 'ud-tools', got {provider_file}"
+        )
         # Ensure it is definitely not resolving from our local UpstreamDrift/src/shared/python
         assert "upstreamdrift/src/shared/python" not in str(
             provider_file
-        ).lower().replace(
-            "\\", "/"
-        ), f"Resolved to local path instead of vendored: {provider_file}"
+        ).lower().replace("\\", "/"), (
+            f"Resolved to local path instead of vendored: {provider_file}"
+        )
     elif mode == "local":
-        assert str(local_path) in str(
-            provider_file
-        ), f"Expected local tools path {local_path}, got {provider_file}"
+        assert str(local_path) in str(provider_file), (
+            f"Expected local tools path {local_path}, got {provider_file}"
+        )
     else:
         pytest.fail(f"Unknown tools mode configured: {mode}")
