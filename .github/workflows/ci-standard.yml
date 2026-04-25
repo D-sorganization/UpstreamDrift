@@ -22,10 +22,12 @@ name: CI Standard
 #     Both respond to CI failures. Auto-Repair pushes to the failing branch;
 #     Hotfix-Creator opens a new hotfix branch. Not truly redundant.
 #
-# Action items:
-#   1. Disable/delete auto-remediate-issues.yml (superseded).
-#   2. Disable/delete assessment-auto-fix.yml (superseded).
-#   3. Review Jules-Code-Quality-Fixer vs Jules-Assessment-AutoFix for merge.
+# Status (as of 2026-04-25 — issue #2352 infrastructure consolidation):
+#   1. ✓ auto-remediate-issues.yml archived → .github/workflows/archived/auto-remediate-issues.yml.disabled
+#   2. ✓ assessment-auto-fix.yml archived → .github/workflows/archived/assessment-auto-fix.yml.disabled
+#   3. TODO: Review Jules-Code-Quality-Fixer ↔ Jules-Assessment-AutoFix consolidation (follow-up PR)
+#
+# See .github/INFRASTRUCTURE_CONSOLIDATION.md and .github/BUILD_INFRASTRUCTURE.md for detailed analysis.
 # ---------------------------------------------------------------------------
 on:
   push:
