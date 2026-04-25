@@ -374,6 +374,7 @@ def _register_interpret_torques_tool(registry: ToolRegistry) -> None:
             Interpretation of torque values.
         """
         # Typical ranges for golf swing (approximate).
+        # NOTE: these ranges are heuristic estimates; see issue #3163 for citation tracking
         # Sources: shoulder ranges follow Nesbit & Serrano (2005) J.Sports Sci. Med.;
         # hip ranges adapted from MacKenzie & Sprigings (2009); wrist ranges from
         # Kwon et al. (2012) kinetic analysis of driver swings. Values are
@@ -607,15 +608,23 @@ def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
         if tolerance <= 0:
             raise ValueError("tolerance must be positive")
 
-        # Real cross-engine comparison requires each physics engine to
-        # independently compute torques from the same model input.  That
-        # pipeline is not yet wired - returning honest not-implemented rather
-        # than faking delta=0 for every engine.  Tracked in issue #3163.
+        # Real cross-engine validation requires invoking each available engine
+        # and comparing its output against a reference. Returning success:True
+        # with a hardcoded delta of 0.0 would falsely report PASS for engines
+        # that were never actually run. Until per-engine result extraction is
+        # wired, return an honest not-implemented response. See issue #3163.
+        available = _available_engines()
         return {
             "success": False,
             "error": "not implemented",
             "issue": "#3163",
             "tool": "validate_cross_engine",
+            "available_engines": available,
+            "message": (
+                "Cross-engine validation is not yet implemented. "
+                "Each physics engine must be invoked and results compared; "
+                "returning fake deltas of 0.0 would misreport as PASS."
+            ),
         }
 
 
