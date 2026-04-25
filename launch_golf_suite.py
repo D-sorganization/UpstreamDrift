@@ -11,7 +11,8 @@ Usage:
 
 import argparse
 import logging
-from os import environ, getcwd
+from os import environ
+from pathlib import Path
 from sys import exit, path
 
 # Configure logging
@@ -90,8 +91,8 @@ def route_launch(args: argparse.Namespace) -> None:
         try:
             from src.shared.python.launcher_factory import launch_engine_directly
         except ImportError:
-            # Fallback if PYTHONPATH is not set correctly
-            path.append(getcwd())
+            # Fallback: add the repo root (directory containing this file) to sys.path
+            path.insert(0, str(Path(__file__).resolve().parent))
             from src.shared.python.launcher_factory import launch_engine_directly
 
         # Check if engine is web-only
@@ -101,7 +102,7 @@ def route_launch(args: argparse.Namespace) -> None:
                 "Engine '%s' requires the web UI. Launching web UI instead...",
                 engine_arg,
             )
-            environ["GOLF_DEFAULT_ENGINE"] = str(engine_arg)
+            environ["UPSTREAM_DEFAULT_ENGINE"] = str(engine_arg)
             from src.api.local_server import main as server_main
 
             server_main()
@@ -122,17 +123,17 @@ def route_launch(args: argparse.Namespace) -> None:
 
     elif api_only_arg:
         # API server only
-        environ["GOLF_NO_BROWSER"] = "true"
-        environ["GOLF_PORT"] = str(port_arg)
+        environ["UPSTREAM_NO_BROWSER"] = "true"
+        environ["UPSTREAM_PORT"] = str(port_arg)
         from src.api.local_server import main as api_main
 
         api_main()
 
     else:
         # Default: Web UI (recommended)
-        environ["GOLF_PORT"] = str(port_arg)
+        environ["UPSTREAM_PORT"] = str(port_arg)
         if no_browser_arg:
-            environ["GOLF_NO_BROWSER"] = "true"
+            environ["UPSTREAM_NO_BROWSER"] = "true"
         from src.api.local_server import main as server_main
 
         server_main()

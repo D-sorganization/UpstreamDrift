@@ -54,7 +54,7 @@ Installation verified successfully!
 ### Launch the Unified GUI
 
 \`\`\`bash
-python src/launchers/golf_launcher.py
+python3 launch_golf_suite.py
 \`\`\`
 
 ### Select Engine and Model
