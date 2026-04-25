@@ -3,7 +3,7 @@
 This module provides reusable data loading patterns to eliminate duplication.
 
 Usage:
-    from src.shared.python.data_utils import (
+    from src.shared.python.data_io.data_utils import (
         load_csv_data,
         load_json_data,
         save_csv_data,
