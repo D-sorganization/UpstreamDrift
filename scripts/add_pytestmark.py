@@ -40,6 +40,7 @@ def find_safe_insert_point(lines: list[str]) -> int:
     return last_safe_end
 
 
+
 def process_file(path: str, marker: str) -> bool:
     """Return True if the file was modified."""
     with open(path, encoding="utf-8") as fh:
