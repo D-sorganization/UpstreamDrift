@@ -18,6 +18,28 @@ SUITES = {
 }
 
 
+def find_safe_insert_point(lines: list[str]) -> int:
+    """Track paren depth to never insert inside a multi-line import."""
+    paren_depth = 0
+    last_safe_end = 0
+
+    for i, line in enumerate(lines):
+        stripped = line.rstrip()
+        if paren_depth == 0:
+            if re.match(r"^(import |from )\S", line):
+                paren_depth = stripped.count("(") - stripped.count(")")
+                if paren_depth <= 0:
+                    paren_depth = 0
+                    last_safe_end = i + 1
+        else:
+            paren_depth += stripped.count("(") - stripped.count(")")
+            if paren_depth <= 0:
+                paren_depth = 0
+                last_safe_end = i + 1
+
+    return last_safe_end
+
+
 def process_file(path: str, marker: str) -> bool:
     """Return True if the file was modified."""
     with open(path, encoding="utf-8") as fh:
@@ -33,15 +55,8 @@ def process_file(path: str, marker: str) -> bool:
         for line in lines
     )
 
-    # Find insertion point: after the last top-level import line
-    # We scan for lines starting with `import ` or `from ` that are not
-    # inside a try/except block (heuristic: indentation == 0).
-    insert_at = 0
-    for i, line in enumerate(lines):
-        if re.match(r"^(import |from )\S", line):
-            insert_at = i + 1
+    insert_at = find_safe_insert_point(lines)
 
-    # Build the lines to insert
     to_insert: list[str] = []
     if not has_pytest_import:
         to_insert.append("import pytest")
