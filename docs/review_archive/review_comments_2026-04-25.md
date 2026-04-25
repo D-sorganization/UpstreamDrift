@@ -13,6 +13,12 @@ Actionable: Yes
 Has Suggestion: No
 
 ```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Remove incorrect changelog claim about deleted RL files**
+
+This new changelog entry states that `src/reinforcement_learning/trajectory_funnel_benchmark.py` and its tests were deleted, but those files are still present in the repository (`src/reinforcement_learning/trajectory_funnel_benchmark.py`, `tests/unit/reinforcement_learning/test_trajectory_funnel_benchmark.py`, and `tests/reinforcement_learning/test_tr...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3260#discussion_r3142247464)
 **<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Remove incorrect deletion claim from changelog**
 
 This new changelog row says `src/reinforcement_learning/trajectory_funnel_benchmark.py` and its tests were deleted, but those files still exist in the repository (`src/reinforcement_learning/trajectory_funnel_benchmark.py`, `tests/reinforcement_learning/test_trajectory_funnel_benchmark.py`, and `tests/unit/reinforcement_learning/test_trajectory_funnel_benchmar...
