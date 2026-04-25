@@ -1,0 +1,126 @@
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from enum import Enum
+from pathlib import Path
+from typing import Any
+
+
+class ModelFormat(Enum):
+    URDF = "urdf"
+    MJCF = "mjcf"
+
+
+class ModelCategory(Enum):
+    HUMANOID = "humanoid"
+    ROBOT_ARM = "robot_arm"
+    MOBILE_ROBOT = "mobile_robot"
+    QUADRUPED = "quadruped"
+    GRIPPER = "gripper"
+    VEHICLE = "vehicle"
+    EQUIPMENT = "equipment"
+    ENVIRONMENT = "environment"
+    OTHER = "other"
+
+
+class RepositorySource(Enum):
+    LOCAL = "local"
+    GITHUB = "github"
+    GITLAB = "gitlab"
+    URL = "url"
+    BUNDLED = "bundled"
+
+
+@dataclass
+class ModelEntry:
+    id: str
+    name: str
+    description: str = ""
+    category: ModelCategory = ModelCategory.OTHER
+    source: RepositorySource = RepositorySource.LOCAL
+    source_url: str | None = None
+    source_path: str | None = None
+    model_format: ModelFormat = ModelFormat.URDF
+    urdf_path: Path | None = None
+    mesh_dir: Path | None = None
+    author: str | None = None
+    license: str | None = None
+    version: str | None = None
+    tags: list[str] = field(default_factory=list)
+    link_count: int = 0
+    joint_count: int = 0
+    dof_count: int = 0
+    is_cached: bool = False
+    is_read_only: bool = True
+    thumbnail_path: Path | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "category": self.category.value,
+            "model_format": self.model_format.value,
+            "source": self.source.value,
+            "source_url": self.source_url,
+            "source_path": self.source_path,
+            "urdf_path": str(self.urdf_path) if self.urdf_path else None,
+            "mesh_dir": str(self.mesh_dir) if self.mesh_dir else None,
+            "author": self.author,
+            "license": self.license,
+            "version": self.version,
+            "tags": self.tags,
+            "link_count": self.link_count,
+            "joint_count": self.joint_count,
+            "dof_count": self.dof_count,
+            "is_cached": self.is_cached,
+            "is_read_only": self.is_read_only,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ModelEntry:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        fmt_str = data.get("model_format", "urdf")
+        try:
+            model_format = ModelFormat(fmt_str)
+        except ValueError:
+            model_format = ModelFormat.URDF
+
+        return cls(
+            id=data["id"],
+            name=data["name"],
+            description=data.get("description", ""),
+            category=ModelCategory(data.get("category", "other")),
+            model_format=model_format,
+            source=RepositorySource(data.get("source", "local")),
+            source_url=data.get("source_url"),
+            source_path=data.get("source_path"),
+            urdf_path=Path(data["urdf_path"]) if data.get("urdf_path") else None,
+            mesh_dir=Path(data["mesh_dir"]) if data.get("mesh_dir") else None,
+            author=data.get("author"),
+            license=data.get("license"),
+            version=data.get("version"),
+            tags=data.get("tags", []),
+            link_count=data.get("link_count", 0),
+            joint_count=data.get("joint_count", 0),
+            dof_count=data.get("dof_count", 0),
+            is_cached=data.get("is_cached", False),
+            is_read_only=data.get("is_read_only", True),
+        )
+
+
+@dataclass
+class LibraryConfig:
+    cache_dir: Path = field(
+        default_factory=lambda: Path.home() / ".model_generation" / "cache"
+    )
+    index_file: Path = field(
+        default_factory=lambda: Path.home() / ".model_generation" / "index.json"
+    )
+    default_repositories: list[dict[str, Any]] = field(default_factory=list)
+    auto_cache: bool = True
+    cache_meshes: bool = True
+    verify_checksums: bool = True

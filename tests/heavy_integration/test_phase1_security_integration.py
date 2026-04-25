@@ -293,7 +293,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         results = []
         errors = []
 
-        def run_subprocess():
+        def run_subprocess() -> None:
             try:
                 result = secure_run(
                     [PYTHON_EXE, "--version"],

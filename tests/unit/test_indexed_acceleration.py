@@ -15,7 +15,7 @@ from src.shared.python.spatial_algebra.indexed_acceleration import IndexedAccele
 class TestIndexedAccelerationDataclass:
     """Test IndexedAcceleration dataclass."""
 
-    def test_initialization(self):
+    def test_initialization(self) -> None:
         """Test basic initialization with required components."""
         gravity = np.array([1.0, 2.0, 3.0])
         coriolis = np.array([0.1, 0.2, 0.3])
@@ -38,7 +38,7 @@ class TestIndexedAccelerationDataclass:
         np.testing.assert_array_equal(acc.external, external)
         assert acc.centrifugal is None
 
-    def test_initialization_with_centrifugal(self):
+    def test_initialization_with_centrifugal(self) -> None:
         """Test initialization including optional centrifugal component."""
         gravity = np.array([1.0])
         coriolis = np.array([0.1])
@@ -59,7 +59,7 @@ class TestIndexedAccelerationDataclass:
         assert acc.centrifugal is not None
         np.testing.assert_array_equal(acc.centrifugal, centrifugal)
 
-    def test_total_property_without_centrifugal(self):
+    def test_total_property_without_centrifugal(self) -> None:
         """Test that total property sums all components (without centrifugal)."""
         gravity = np.array([1.0, 0.0])
         coriolis = np.array([0.0, 2.0])
@@ -81,7 +81,7 @@ class TestIndexedAccelerationDataclass:
         expected = gravity + coriolis + applied_torque + constraint + external
         np.testing.assert_array_almost_equal(total, expected)
 
-    def test_total_property_with_centrifugal(self):
+    def test_total_property_with_centrifugal(self) -> None:
         """Test that total property includes centrifugal when present."""
         gravity = np.array([1.0])
         coriolis = np.array([0.1])
@@ -107,7 +107,7 @@ class TestIndexedAccelerationDataclass:
         )
         np.testing.assert_array_almost_equal(total, expected)
 
-    def test_total_with_zero_components(self):
+    def test_total_with_zero_components(self) -> None:
         """Test total with all zero components."""
         zeros = np.zeros(3)
 
@@ -123,7 +123,7 @@ class TestIndexedAccelerationDataclass:
 
         np.testing.assert_array_almost_equal(total, zeros)
 
-    def test_total_with_negative_components(self):
+    def test_total_with_negative_components(self) -> None:
         """Test that total correctly handles negative accelerations."""
         acc = IndexedAcceleration(
             gravity=np.array([5.0]),
@@ -139,7 +139,7 @@ class TestIndexedAccelerationDataclass:
         expected = np.array([5.0])
         np.testing.assert_array_almost_equal(total, expected)
 
-    def test_multidimensional_components(self):
+    def test_multidimensional_components(self) -> None:
         """Test with multi-DOF system (multiple joints/dimensions)."""
         from src.shared.python.core.constants import GRAVITY_M_S2
 
@@ -168,7 +168,7 @@ class TestIndexedAccelerationDataclass:
 class TestPhysicalRealism:
     """Test physical realism of indexed accelerations."""
 
-    def test_gravity_dominant_in_free_fall(self):
+    def test_gravity_dominant_in_free_fall(self) -> None:
         """Test that gravity dominates in free fall scenario."""
         from src.shared.python.core.constants import GRAVITY_M_S2
 
@@ -185,7 +185,7 @@ class TestPhysicalRealism:
         # Total should be mostly gravity
         np.testing.assert_array_almost_equal(total, acc.gravity)
 
-    def test_applied_torque_accelerates_system(self):
+    def test_applied_torque_accelerates_system(self) -> None:
         """Test that applied torque contributes to acceleration."""
         acc = IndexedAcceleration(
             gravity=np.zeros(3),
@@ -202,7 +202,7 @@ class TestPhysicalRealism:
         assert total[1] == 0.0
         assert total[2] == 0.0
 
-    def test_constraint_opposes_motion(self):
+    def test_constraint_opposes_motion(self) -> None:
         """Test that constraints can oppose other accelerations."""
         from src.shared.python.core.constants import GRAVITY_M_S2
 
@@ -224,7 +224,7 @@ class TestPhysicalRealism:
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
 
-    def test_single_dof_system(self):
+    def test_single_dof_system(self) -> None:
         """Test with single degree of freedom."""
         acc = IndexedAcceleration(
             gravity=np.array([1.0]),
@@ -239,7 +239,7 @@ class TestEdgeCases:
         assert total.shape == (1,)
         assert total[0] == pytest.approx(1.8, rel=1e-10)
 
-    def test_very_large_accelerations(self):
+    def test_very_large_accelerations(self) -> None:
         """Test with very large acceleration values."""
         acc = IndexedAcceleration(
             gravity=np.array([1e6]),
@@ -254,7 +254,7 @@ class TestEdgeCases:
         # Should handle large values correctly
         assert np.isfinite(total[0])
 
-    def test_very_small_accelerations(self):
+    def test_very_small_accelerations(self) -> None:
         """Test with very small acceleration values."""
         acc = IndexedAcceleration(
             gravity=np.array([1e-10]),
@@ -269,7 +269,7 @@ class TestEdgeCases:
         # Should handle small values correctly
         assert np.isfinite(total[0])
 
-    def test_mixed_positive_negative_cancellation(self):
+    def test_mixed_positive_negative_cancellation(self) -> None:
         """Test cancellation of positive and negative components."""
         acc = IndexedAcceleration(
             gravity=np.array([10.0, -5.0, 3.0]),
@@ -288,7 +288,7 @@ class TestEdgeCases:
 class TestNumericalAccuracy:
     """Test numerical accuracy of summation."""
 
-    def test_summation_order_independence(self):
+    def test_summation_order_independence(self) -> None:
         """Test that total is computed consistently."""
         gravity = np.array([1.0, 2.0])
         coriolis = np.array([0.1, 0.2])
@@ -316,7 +316,7 @@ class TestNumericalAccuracy:
         # Totals should be identical
         np.testing.assert_array_equal(acc1.total, acc2.total)
 
-    def test_total_recomputed_each_time(self):
+    def test_total_recomputed_each_time(self) -> None:
         """Test that total is a computed property, not cached."""
         acc = IndexedAcceleration(
             gravity=np.array([1.0]),

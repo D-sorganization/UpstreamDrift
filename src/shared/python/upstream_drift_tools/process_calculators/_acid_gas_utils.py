@@ -1,0 +1,124 @@
+from __future__ import annotations
+
+import numpy as np
+
+from ._acid_gas_calculator import AcidGasDewpointCalculator
+from ._acid_gas_models import AcidGasComposition
+
+# Predefined acid gas compositions for common scenarios
+ACID_GAS_PRESETS = {
+    "typical_syngas": AcidGasComposition(
+        h2o=0.15,
+        hf=0.0001,
+        hcl=0.0002,
+        h2s=0.001,
+        name="Typical Syngas with Acid Gases",
+    ),
+    "high_acid_content": AcidGasComposition(
+        h2o=0.20, hf=0.001, hcl=0.002, h2s=0.005, name="High Acid Gas Content"
+    ),
+    "coal_gasification": AcidGasComposition(
+        h2o=0.12, hf=0.0005, hcl=0.001, h2s=0.003, name="Coal Gasification"
+    ),
+    "biomass_gasification": AcidGasComposition(
+        h2o=0.18, hf=0.0002, hcl=0.0005, h2s=0.002, name="Biomass Gasification"
+    ),
+    "custom": AcidGasComposition(name="Custom Composition"),
+}
+
+
+def quick_dewpoint_calculation(
+    temperature_c: float,
+    pressure_bar: float,
+    h2o_fraction: float,
+    hf_fraction: float = 0.0,
+    hcl_fraction: float = 0.0,
+    h2s_fraction: float = 0.0,
+    method: str = "antoine",
+) -> dict[str, float | str]:
+    """
+    Quick dewpoint calculation for common use cases
+
+    Args:
+        temperature_c: System temperature in Celsius
+        pressure_bar: System pressure in bar
+        h2o_fraction: Water vapor mole fraction
+        hf_fraction: HF mole fraction
+        hcl_fraction: HCl mole fraction
+        h2s_fraction: H2S mole fraction
+        method: Vapor pressure method
+
+    Returns:
+        Dictionary with key results
+    """
+    assert temperature_c is not None, "temperature_c must be provided"
+    assert temperature_c is not None, "temperature_c must be provided"
+    calc = AcidGasDewpointCalculator()
+    composition = AcidGasComposition(
+        h2o=h2o_fraction, hf=hf_fraction, hcl=hcl_fraction, h2s=h2s_fraction
+    )
+
+    result = calc.calculate_dewpoint_mixture(
+        temperature_c, pressure_bar, composition, method
+    )
+
+    return {
+        "overall_dewpoint_c": result.overall_dewpoint_c,
+        "limiting_component": result.limiting_component,
+        "condensation_risk": result.condensation_risk,
+        "dewpoint_margin_c": result.dewpoint_margin_c,
+    }
+
+
+def estimate_condensation_risk(
+    temperature_c: float,
+    pressure_bar: float,
+    composition: AcidGasComposition,
+    safety_margin_c: float = 10.0,
+    method: str = "antoine",
+) -> dict[str, float | str]:
+    """
+    Estimate condensation risk for acid gas mixture
+
+    Args:
+        temperature_c: System temperature
+        pressure_bar: System pressure
+        composition: Acid gas composition
+        safety_margin_c: Required safety margin in Celsius
+        method: Vapor pressure method
+
+    Returns:
+        Risk assessment dictionary
+    """
+    assert temperature_c is not None, "temperature_c must be provided"
+    assert temperature_c is not None, "temperature_c must be provided"
+    calc = AcidGasDewpointCalculator()
+    result = calc.calculate_dewpoint_mixture(
+        temperature_c, pressure_bar, composition, method
+    )
+
+    margin = result.dewpoint_margin_c
+
+    if np.isnan(margin):
+        risk_level = "Unknown"
+        recommendation = "Check input parameters and component validity"
+    elif margin < 0:
+        risk_level = "Critical"
+        recommendation = "Immediate action required - condensation occurring"
+    elif margin < safety_margin_c:
+        risk_level = "High"
+        recommendation = "Increase temperature or reduce acid gas content"
+    elif margin < 2 * safety_margin_c:
+        risk_level = "Medium"
+        recommendation = "Monitor closely and consider preventive measures"
+    else:
+        risk_level = "Low"
+        recommendation = "Safe operating conditions"
+
+    return {
+        "risk_level": risk_level,
+        "current_margin_c": margin,
+        "required_margin_c": safety_margin_c,
+        "recommendation": recommendation,
+        "limiting_component": result.limiting_component,
+    }

@@ -1,6 +1,7 @@
 """Service for loading C3D files into application data models."""
 
 import os
+from typing import Any
 
 import numpy as np
 
@@ -9,7 +10,7 @@ from ...logger_utils import log_execution_time
 from ..core.models import AnalogData, C3DDataModel, MarkerData
 
 
-def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
+def _build_markers(df_points: Any, marker_names: list[str]) -> dict[str, MarkerData]:
     """Build marker data dictionary from points dataframe.
 
     Args:
@@ -19,7 +20,9 @@ def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
     Returns:
         Dictionary mapping marker names to MarkerData.
     """
-    if df_points is None:
+    if not (df_points is not None):
+        raise ValueError("df_points must be provided")
+    if not (df_points is not None):
         raise ValueError("df_points must be provided")
     markers: dict[str, MarkerData] = {}
     if not df_points.empty:
@@ -37,7 +40,7 @@ def _build_markers(df_points, marker_names: list[str]) -> dict[str, MarkerData]:
     return markers
 
 
-def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
+def _build_analog(df_analog: Any, metadata_obj: Any) -> dict[str, AnalogData]:
     """Build analog channel data dictionary from analog dataframe.
 
     Args:
@@ -47,7 +50,9 @@ def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
     Returns:
         Dictionary mapping channel names to AnalogData.
     """
-    if df_analog is None:
+    if not (df_analog is not None):
+        raise ValueError("df_analog must be provided")
+    if not (df_analog is not None):
         raise ValueError("df_analog must be provided")
     analog: dict[str, AnalogData] = {}
     units_map = dict(
@@ -62,7 +67,7 @@ def _build_analog(df_analog, metadata_obj) -> dict[str, AnalogData]:
     return analog
 
 
-def _build_metadata_ui(filepath: str, metadata_obj) -> dict[str, str]:
+def _build_metadata_ui(filepath: str, metadata_obj: Any) -> dict[str, str]:
     """Build UI-friendly metadata dictionary from C3D metadata.
 
     Args:
@@ -72,7 +77,9 @@ def _build_metadata_ui(filepath: str, metadata_obj) -> dict[str, str]:
     Returns:
         Dictionary of display-friendly metadata key-value pairs.
     """
-    if filepath is None:
+    if not (filepath is not None):
+        raise ValueError("filepath must be provided")
+    if not (filepath is not None):
         raise ValueError("filepath must be provided")
     metadata_ui = {
         "File": os.path.basename(filepath),

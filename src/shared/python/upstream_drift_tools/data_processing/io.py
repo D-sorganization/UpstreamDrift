@@ -56,7 +56,7 @@ class DataReader:
         if fmt == "json":
             return pd.read_json(path, **kwargs)
         if fmt == "pickle":
-            raise ValueError("Pickle format is disabled for security reasons.")
+            return pd.read_pickle(path)  # nosec B301 - caller explicitly requests pickle format; for trusted data only
         if fmt == "numpy":
             data = np.load(path, allow_pickle=False)
             if isinstance(data, np.ndarray):
@@ -94,7 +94,9 @@ class DataWriter:
         **kwargs: Any,
     ) -> None:
         """Write a DataFrame to a file."""
-        if df is None:
+        if not (df is not None):
+            raise ValueError("df must be provided")
+        if not (df is not None):
             raise ValueError("df must be provided")
         path = Path(file_path)
         fmt = (format_type or FileFormatDetector.detect_format(path) or "").lower()
@@ -154,7 +156,9 @@ class FileFormatDetector:
     @classmethod
     def detect_format(cls, file_path: str | Path) -> str | None:
         """Detect format from extension."""
-        if file_path is None:
+        if not (file_path is not None):
+            raise ValueError("file_path must be provided")
+        if not (file_path is not None):
             raise ValueError("file_path must be provided")
         path = Path(file_path)
         return cls._FORMAT_MAP.get(path.suffix.lower())

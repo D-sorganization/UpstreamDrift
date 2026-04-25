@@ -45,7 +45,7 @@ def run_command(cmd: list[str]) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     logger.info("Starting fresh assessment workflow...")
 
     docs_dir = Path("docs/assessments")

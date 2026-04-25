@@ -191,7 +191,9 @@ class FlareCalculator:
         Returns:
             Dictionary with zone distances (m)
         """
-        if flare_design is None:
+        if not (flare_design is not None):
+            raise ValueError("flare_design must be provided")
+        if not (flare_design is not None):
             raise ValueError("flare_design must be provided")
         zones = {
             "lethal": 0.0,  # 37.5 kW/m²
@@ -236,7 +238,9 @@ class FlareCalculator:
             Combustion efficiency (0-1)
         """
         # Simplified efficiency calculation
-        if gas_composition is None:
+        if not (gas_composition is not None):
+            raise ValueError("gas_composition must be provided")
+        if not (gas_composition is not None):
             raise ValueError("gas_composition must be provided")
         efficiency = FLARE_BASE_EFFICIENCY  # Base efficiency
 

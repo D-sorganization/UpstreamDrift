@@ -113,7 +113,7 @@ def test_set_base_torque_profile_accepts_valid_dict(
 def test_set_base_torque_profile_requires_coeffs_key(
     analyzer: PendulumPerturbationAnalyzer,
 ) -> None:
-    with pytest.raises((ValueError, KeyError, TypeError)):
+    with pytest.raises((AssertionError, KeyError, TypeError)):
         analyzer.set_base_torque_profile({"wrong_key": []})
 
 
@@ -245,7 +245,7 @@ def test_extract_metrics_values_are_finite(
 def test_extract_metrics_rejects_invalid_input(
     analyzer_with_profile: PendulumPerturbationAnalyzer,
 ) -> None:
-    with pytest.raises((ValueError, AttributeError, TypeError)):
+    with pytest.raises((AssertionError, AttributeError, TypeError)):
         analyzer_with_profile.extract_metrics("not a sim result")  # type: ignore[arg-type]
 
 
@@ -360,7 +360,7 @@ def test_run_batch_metric_statistics_type(
 def test_run_batch_requires_profile_set(
     analyzer: PendulumPerturbationAnalyzer,
 ) -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises((AssertionError, AttributeError, TypeError)):
         analyzer.run_batch(_SMALL_CONFIG)
 
 

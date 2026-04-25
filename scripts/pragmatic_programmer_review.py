@@ -24,6 +24,7 @@ import re
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from scripts.script_utils import find_python_files as _find_python_files
 from scripts.script_utils import (
@@ -61,7 +62,7 @@ def compute_file_hash(content: str) -> str:
     return hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()
 
 
-def get_detailed_function_metrics(content: str):
+def get_detailed_function_metrics(content: str) -> list[dict[str, Any]]:
     """Simple AST parser to get function metrics."""
     try:
         tree = ast.parse(content)
@@ -217,7 +218,7 @@ def check_testing(root_path: Path) -> list[dict]:
     return issues
 
 
-def run_review(root_path: Path):
+def run_review(root_path: Path) -> dict[str, Any]:
     """Run all pragmatic programmer checks and return aggregated results."""
     logger.info(f"Running Pragmatic Review on {root_path}")
     files = find_python_files(root_path)
@@ -237,7 +238,7 @@ def run_review(root_path: Path):
     }
 
 
-def generate_markdown_report(results, output_path):
+def generate_markdown_report(results, output_path) -> None:
     """Write the pragmatic review results as a Markdown report."""
     if not isinstance(results, dict):
         raise ValueError("results must be a dictionary")

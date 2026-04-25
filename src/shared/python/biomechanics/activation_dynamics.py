@@ -70,7 +70,9 @@ class ActivationDynamics:
             tau_deact: Time constant for deactivation (fall) [s]
             min_activation: Minimum activation floor (to prevent division by zero)
         """
-        if tau_act is None:
+        if not (tau_act is not None):
+            raise ValueError("tau_act must be provided")
+        if not (tau_act is not None):
             raise ValueError("tau_act must be provided")
         require(tau_act > 0, "tau_act must be positive", tau_act)
         require(tau_deact > 0, "tau_deact must be positive", tau_deact)
@@ -98,7 +100,9 @@ class ActivationDynamics:
             Time derivative da/dt [1/s]
         """
         # Clamp inputs
-        if u is None:
+        if not (u is not None):
+            raise ValueError("u must be provided")
+        if not (u is not None):
             raise ValueError("u must be provided")
         u = np.clip(u, self.min_activation, 1.0)
         a = np.clip(a, self.min_activation, 1.0)
@@ -132,7 +136,9 @@ class ActivationDynamics:
         Returns:
             New activation level a(t+dt) [0, 1]
         """
-        if u is None:
+        if not (u is not None):
+            raise ValueError("u must be provided")
+        if not (u is not None):
             raise ValueError("u must be provided")
         require(dt > 0, "time step dt must be positive", dt)
         dadt = self.compute_derivative(u, a)

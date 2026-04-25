@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 # Environment secrets
 .env
 .env.*
@@ -5,6 +7,7 @@
 !.env.docker.example
 !.env.*.example
 
+>>>>>>> origin/main
 # Merge conflict artifacts
 *.ours
 *.theirs
@@ -86,11 +89,14 @@ quality_report*.txt
 black_report*.txt
 coverage.xml
 coverage.json
+<<<<<<< HEAD
+=======
 bandit_results.json
 reports/bandit.json
 temp_id.txt
 matlab_quality_report.txt
 test.npz
+>>>>>>> origin/main
 htmlcov/
 
 # Test output debris (prevent accumulation at root)
@@ -168,6 +174,15 @@ pr_checks.json
 failed_pytest.log
 ci_failed_pytest.log
 .tmp_gui_test.log
+
+# Sphinx build artifacts — do not commit generated static files
+docs/sphinx/_static/jquery.js
+docs/sphinx/_static/doctools.js
+docs/sphinx/_static/searchtools.js
+docs/sphinx/_static/sphinx_highlight.js
+docs/sphinx/_static/_sphinx_javascript_frameworks_compat.js
+docs/sphinx/_static/documentation_options.js
+docs/sphinx/_static/language_data.js
 
 # Root-level junk analysis docs (belong in docs/development/ per AGENTS.md)
 BUILD_INFRASTRUCTURE_REVIEW.md

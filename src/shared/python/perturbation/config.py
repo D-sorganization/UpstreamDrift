@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 import numpy as np
@@ -53,8 +53,6 @@ class PerturbationConfig:
     noise_amplitude: float = 0.1
     perturb_mode: str = "additive"
     seed: int | None = None
-    min_success_rate: float = 0.95
-    raise_on_partial_results: bool = False
 
     def __post_init__(self) -> None:
         if not (self.n_trials > 0):
@@ -62,11 +60,6 @@ class PerturbationConfig:
         if not (self.noise_amplitude >= 0):
             raise ValueError(
                 f"noise_amplitude must be non-negative, got {self.noise_amplitude}"
-            )
-        if not (0.0 <= self.min_success_rate <= 1.0):
-            raise ValueError(
-                "min_success_rate must be between 0.0 and 1.0, "
-                f"got {self.min_success_rate}"
             )
         if self.noise_type not in {"white", "pink", "brown"}:
             raise ValueError(f"Unknown noise_type: {self.noise_type}")
@@ -84,7 +77,6 @@ class PerturbationSummary:
     metrics: dict[str, Any]  # Dictionary mapping metric name to MetricStatistics
     success_rate: float
     execution_time_sec: float
-    failures: list[TrialFailure] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert summary to JSON-serializable dictionary."""
@@ -96,8 +88,6 @@ class PerturbationSummary:
                 "noise_amplitude": self.config.noise_amplitude,
                 "perturb_mode": self.config.perturb_mode,
                 "seed": self.config.seed,
-                "min_success_rate": self.config.min_success_rate,
-                "raise_on_partial_results": self.config.raise_on_partial_results,
             },
             "robustness_score": self.robustness_score,
             "metrics": {
@@ -106,7 +96,6 @@ class PerturbationSummary:
             },
             "success_rate": self.success_rate,
             "execution_time_sec": self.execution_time_sec,
-            "failures": [failure.to_dict() for failure in self.failures],
         }
 
 

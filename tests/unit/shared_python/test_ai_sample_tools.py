@@ -7,7 +7,7 @@ from src.shared.python.ai.sample_tools import register_golf_suite_tools
 from src.shared.python.ai.tool_registry import ToolRegistry
 
 
-def test_register_golf_suite_tools():
+def test_register_golf_suite_tools() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
     assert len(reg) > 0
@@ -24,7 +24,7 @@ def test_register_golf_suite_tools():
     assert "list_physics_engines" in reg
 
 
-def test_list_sample_files(tmp_path: Path):
+def test_list_sample_files(tmp_path: Path) -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -54,7 +54,7 @@ def test_list_sample_files(tmp_path: Path):
         assert res2.result["files"][0]["size_kb"] == 2
 
 
-def test_load_c3d():
+def test_load_c3d() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -75,7 +75,7 @@ def test_load_c3d():
         assert "must be a .c3d file" in res_suffix.result["error"]
 
 
-def test_get_marker_info():
+def test_get_marker_info() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -89,7 +89,7 @@ def test_get_marker_info():
         assert res.result["success"] is False
 
 
-def test_run_inverse_dynamics():
+def test_run_inverse_dynamics() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -106,7 +106,7 @@ def test_run_inverse_dynamics():
     assert res_bad.result["success"] is False
 
 
-def test_interpret_torques():
+def test_interpret_torques() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -120,7 +120,7 @@ def test_interpret_torques():
     assert "Above typical" in res.result["wrist"]["classification"]
 
 
-def test_explain_concept():
+def test_explain_concept() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -132,7 +132,7 @@ def test_explain_concept():
     assert "M(q)q" in res.result["explanation"]
 
 
-def test_list_glossary_terms():
+def test_list_glossary_terms() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -141,7 +141,7 @@ def test_list_glossary_terms():
     assert "kinetic_chain" in res.result["terms"]
 
 
-def test_search_glossary():
+def test_search_glossary() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -150,7 +150,7 @@ def test_search_glossary():
     assert any(r["term"] == "Pinocchio" for r in res.result["results"])
 
 
-def test_validate_cross_engine():
+def test_validate_cross_engine() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -159,7 +159,7 @@ def test_validate_cross_engine():
     assert res.result["status"] == "validation_pending"
 
 
-def test_check_energy_conservation():
+def test_check_energy_conservation() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 
@@ -168,7 +168,7 @@ def test_check_energy_conservation():
     assert res.result["status"] == "check_pending"
 
 
-def test_list_physics_engines():
+def test_list_physics_engines() -> None:
     reg = ToolRegistry()
     register_golf_suite_tools(reg)
 

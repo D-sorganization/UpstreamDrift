@@ -8,11 +8,15 @@ import pytest
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 
-# Check if pytest-benchmark is installed, otherwise skip
-if importlib.util.find_spec("pytest_benchmark") is None:
-    pytest.skip("pytest-benchmark not installed", allow_module_level=True)
+_pytest_benchmark_available = importlib.util.find_spec("pytest_benchmark") is not None
 
-if MUJOCO_AVAILABLE:
+# Skip entire module if pytest-benchmark or MuJoCo not available
+pytestmark = pytest.mark.skipif(
+    not _pytest_benchmark_available or not MUJOCO_AVAILABLE,
+    reason="pytest-benchmark or MuJoCo not installed",
+)
+
+if _pytest_benchmark_available and MUJOCO_AVAILABLE:
     try:
         from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (
             aba,
@@ -28,11 +32,9 @@ if MUJOCO_AVAILABLE:
             "MuJoCo dynamics internal imports not available",
             allow_module_level=True,
         )
-else:
-    pytest.skip("MuJoCo dynamics modules not available", allow_module_level=True)
 
 
-def create_random_model(num_bodies=10):
+def create_random_model(num_bodies: int = 10) -> dict:
     """
     Create a random kinematic chain model for benchmarking.
     """
@@ -63,7 +65,7 @@ def create_random_model(num_bodies=10):
 
 
 @pytest.fixture
-def dynamics_setup():
+def dynamics_setup() -> tuple:
     """Setup arrays for dynamics benchmarks."""
     nb = 20  # Reasonable size for a humanoid(-ish) robot
     model = create_random_model(nb)
@@ -74,19 +76,19 @@ def dynamics_setup():
     return model, q, qd, qdd, tau
 
 
-def test_aba_benchmark(benchmark, dynamics_setup):
+def test_aba_benchmark(benchmark, dynamics_setup) -> None:
     """Benchmark the Articulated Body Algorithm."""
     model, q, qd, _, tau = dynamics_setup
     benchmark(aba, model, q, qd, tau)
 
 
-def test_crba_benchmark(benchmark, dynamics_setup):
+def test_crba_benchmark(benchmark, dynamics_setup) -> None:
     """Benchmark the Composite Rigid Body Algorithm."""
     model, q, _, _, _ = dynamics_setup
     benchmark(crba, model, q)
 
 
-def test_rnea_benchmark(benchmark, dynamics_setup):
+def test_rnea_benchmark(benchmark, dynamics_setup) -> None:
     """Benchmark the Recursive Newton-Euler Algorithm."""
     model, q, qd, qdd, _ = dynamics_setup
     benchmark(rnea, model, q, qd, qdd)

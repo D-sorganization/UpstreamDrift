@@ -118,7 +118,9 @@ class PreferencesDialog(QDialog):
         Args:
             parent: Parent window
         """
-        if parent is None:
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
             raise ValueError("parent must be provided")
         super().__init__(parent)
         self.setWindowTitle("Preferences")

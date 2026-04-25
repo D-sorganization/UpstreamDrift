@@ -97,7 +97,7 @@ __version__ = "0.1.0"
 def main() -> None:
     # Handle --version flag before any GUI initialization
     if "--version" in sys.argv:
-        logger.info(f"pendulum-simulator {__version__}")  # noqa: F821, T201
+        sys.stdout.write(f"pendulum-simulator {__version__}\n")
         sys.exit(0)
 
     _configure_logging()

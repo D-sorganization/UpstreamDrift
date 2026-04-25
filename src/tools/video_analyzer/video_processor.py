@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable, Generator
 from pathlib import Path
+from types import TracebackType
 
 import cv2
 import numpy as np
@@ -39,7 +40,7 @@ class VideoProcessor:
 
     SUPPORTED_FORMATS = {".mp4", ".avi", ".mov", ".mkv", ".webm", ".m4v"}
 
-    def __init__(self, video_path: str | None = None):
+    def __init__(self, video_path: str | None = None) -> None:
         """
         Initialize the video processor.
 
@@ -67,7 +68,9 @@ class VideoProcessor:
         Returns:
             True if video loaded successfully, False otherwise.
         """
-        if video_path is None:
+        if not (video_path is not None):
+            raise ValueError("video_path must be provided")
+        if not (video_path is not None):
             raise ValueError("video_path must be provided")
         path = Path(video_path)
 
@@ -145,7 +148,9 @@ class VideoProcessor:
         Returns:
             BGR image frame, or None if frame not available.
         """
-        if frame_number is None:
+        if not (frame_number is not None):
+            raise ValueError("frame_number must be provided")
+        if not (frame_number is not None):
             raise ValueError("frame_number must be provided")
         if not self.is_loaded:
             return None
@@ -168,7 +173,9 @@ class VideoProcessor:
         Returns:
             BGR image frame, or None if not available.
         """
-        if time_ms is None:
+        if not (time_ms is not None):
+            raise ValueError("time_ms must be provided")
+        if not (time_ms is not None):
             raise ValueError("time_ms must be provided")
         frame_number = int((time_ms / 1000) * self._fps)
         return self.get_frame(frame_number)
@@ -190,7 +197,9 @@ class VideoProcessor:
         Yields:
             Tuple of (frame, frame_number, timestamp_ms)
         """
-        if start_frame is None:
+        if not (start_frame is not None):
+            raise ValueError("start_frame must be provided")
+        if not (start_frame is not None):
             raise ValueError("start_frame must be provided")
         if not self.is_loaded:
             return
@@ -233,7 +242,9 @@ class VideoProcessor:
         Returns:
             List of PoseFrame objects with valid poses.
         """
-        if start_frame is None:
+        if not (start_frame is not None):
+            raise ValueError("start_frame must be provided")
+        if not (start_frame is not None):
             raise ValueError("start_frame must be provided")
         if not self.is_loaded:
             return []
@@ -282,7 +293,9 @@ class VideoProcessor:
         Returns:
             True if export successful.
         """
-        if frame_number is None:
+        if not (frame_number is not None):
+            raise ValueError("frame_number must be provided")
+        if not (frame_number is not None):
             raise ValueError("frame_number must be provided")
         frame = self.get_frame(frame_number)
         if frame is None:
@@ -317,7 +330,9 @@ class VideoProcessor:
         Returns:
             True if export successful.
         """
-        if output_path is None:
+        if not (output_path is not None):
+            raise ValueError("output_path must be provided")
+        if not (output_path is not None):
             raise ValueError("output_path must be provided")
         if not self.is_loaded:
             return False
@@ -357,7 +372,7 @@ class VideoProcessor:
         self,
         exc_type: type[BaseException] | None,
         exc_val: BaseException | None,
-        exc_tb: object,
+        exc_tb: TracebackType | None,
     ) -> None:
         """Context manager exit."""
         self.close()

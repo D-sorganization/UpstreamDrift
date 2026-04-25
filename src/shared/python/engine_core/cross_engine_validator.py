@@ -194,7 +194,9 @@ class CrossEngineValidator(ContractChecker):
         Returns:
             Tuple of (passed, severity_level).
         """
-        if max_dev is None:
+        if not (max_dev is not None):
+            raise ValueError("max_dev must be provided")
+        if not (max_dev is not None):
             raise ValueError("max_dev must be provided")
         ratio = max_dev / tolerance if tolerance > 0 else float("inf")
 
@@ -208,7 +210,9 @@ class CrossEngineValidator(ContractChecker):
 
     def _build_message(self, severity: str, max_dev: float, tol: float) -> str:
         """Build appropriate message based on severity."""
-        if severity is None:
+        if not (severity is not None):
+            raise ValueError("severity must be provided")
+        if not (severity is not None):
             raise ValueError("severity must be provided")
         if severity == "PASSED":  # noqa: SIM116
             return ""
@@ -232,7 +236,9 @@ class CrossEngineValidator(ContractChecker):
         engine2_state: np.ndarray,
     ) -> None:
         """Log validation result with appropriate severity level."""
-        if severity is None:
+        if not (severity is not None):
+            raise ValueError("severity must be provided")
+        if not (severity is not None):
             raise ValueError("severity must be provided")
         ratio = max_dev / tol if tol > 0 else float("inf")
         worst_idx = int(np.argmax(deviation))
@@ -296,7 +302,9 @@ class CrossEngineValidator(ContractChecker):
         Returns:
             ValidationResult with RMS comparison details
         """
-        if engine1_name is None:
+        if not (engine1_name is not None):
+            raise ValueError("engine1_name must be provided")
+        if not (engine1_name is not None):
             raise ValueError("engine1_name must be provided")
         if engine1_torques.shape != engine2_torques.shape:
             return ValidationResult(

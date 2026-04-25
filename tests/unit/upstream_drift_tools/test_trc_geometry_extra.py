@@ -110,5 +110,5 @@ class TestTRCGeometryEngineCalculateGeometry:
             cone_interior_hole=10.0,
             top_refractory_thickness=5.0,
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(AssertionError):
             engine.calculate_geometry(bad_dims, [_make_steel_layer()])

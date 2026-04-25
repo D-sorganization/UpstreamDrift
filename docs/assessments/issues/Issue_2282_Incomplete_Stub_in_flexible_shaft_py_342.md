@@ -1,5 +1,5 @@
 ---
-title: "Incomplete Stub in flexible_shaft.py:342"
+title: "Incomplete Stub in flexible_shaft.py:365"
 labels: ["incomplete-implementation", "critical", "high-impact"]
 assignee: "unassigned"
 status: "open"
@@ -7,11 +7,11 @@ status: "open"
 
 # Issue Description
 
-Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 342.
+Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 365.
 
 ## Context
 
-**Type**: Stub | **Location**: `./src/shared/python/physics/flexible_shaft.py:342`
+**Type**: Stub | **Location**: `./src/shared/python/physics/flexible_shaft.py:365`
 
 ```python
 step

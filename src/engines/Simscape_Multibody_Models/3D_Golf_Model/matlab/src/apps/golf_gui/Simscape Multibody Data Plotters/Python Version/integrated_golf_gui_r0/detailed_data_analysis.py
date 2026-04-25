@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import scipy.io
@@ -17,7 +18,7 @@ import scipy.io
 logger = logging.getLogger(__name__)
 
 
-def deep_analyze_matlab_file(filename) -> bool:
+def deep_analyze_matlab_file(filename: Any) -> bool:
     """Deep analysis of a MATLAB file structure"""
     logger.debug(f"\n=== Deep Analysis of {filename} ===")
 
@@ -100,7 +101,7 @@ def deep_analyze_matlab_file(filename) -> bool:
         return False
 
 
-def extract_actual_data(filename) -> np.ndarray | None:
+def extract_actual_data(filename: Any) -> np.ndarray | None:
     """Try to extract the actual data from the MATLAB file"""
     logger.debug(f"\n=== Extracting Data from {filename} ===")
 

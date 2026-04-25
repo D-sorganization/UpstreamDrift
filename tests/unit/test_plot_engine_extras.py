@@ -10,7 +10,7 @@ from src.shared.python.plot_engine.protocols import PlotConverter, PlotRenderer
 
 
 class TestScatterToGrid:
-    def _scatter_paraboloid(self):
+    def _scatter_paraboloid(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         rng = np.random.default_rng(42)
         n = 50
         x = rng.uniform(0, 10, n)

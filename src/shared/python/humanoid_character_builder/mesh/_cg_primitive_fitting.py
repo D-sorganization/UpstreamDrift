@@ -1,0 +1,216 @@
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import numpy as np
+
+from ._cg_types import CollisionGeometryResult, PrimitiveFit, SimplificationMethod
+
+logger = logging.getLogger(__name__)
+
+
+def primitives_would_fit(mesh: Any, max_primitives: int) -> bool:
+    if not (max_primitives is not None):
+        raise ValueError("max_primitives must be provided")
+    if not (max_primitives is not None):
+        raise ValueError("max_primitives must be provided")
+    try:
+        extents = mesh.extents
+        aspect_ratios = extents / extents.min()
+
+        if all(r < 10 for r in aspect_ratios):
+            volume = mesh.volume
+            bounding_volume = np.prod(extents)
+            fill_ratio = volume / bounding_volume
+
+            estimated_primitives = int(1 / fill_ratio)
+            return estimated_primitives <= max_primitives
+
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+        pass
+
+    return False
+
+
+def fit_box(mesh: Any) -> PrimitiveFit:
+    try:
+        obb = mesh.bounding_box_oriented
+        center = tuple(obb.centroid.tolist())
+        extents = tuple(obb.primitive.extents.tolist())
+        transform = obb.primitive.transform
+
+        from scipy.spatial.transform import Rotation
+
+        rot = Rotation.from_matrix(transform[:3, :3])
+        quat = tuple(rot.as_quat().tolist())
+
+        volume_ratio = mesh.volume / obb.volume
+        error = 1.0 - volume_ratio
+
+        return PrimitiveFit(
+            primitive_type="box",
+            center=center,
+            dimensions=extents,
+            rotation=quat,
+            volume_ratio=volume_ratio,
+            error_metric=error,
+        )
+    except ImportError as e:
+        logger.warning(f"Box fitting failed: {e}")
+        return PrimitiveFit(
+            primitive_type="box",
+            center=(0, 0, 0),
+            dimensions=(1, 1, 1),
+            rotation=(0, 0, 0, 1),
+            volume_ratio=0.0,
+            error_metric=float("inf"),
+        )
+
+
+def fit_sphere(mesh: Any) -> PrimitiveFit:
+    try:
+        center = tuple(mesh.centroid.tolist())
+        vertices = mesh.vertices - mesh.centroid
+        radius = float(np.max(np.linalg.norm(vertices, axis=1)))
+
+        sphere_volume = (4 / 3) * np.pi * radius**3
+        volume_ratio = mesh.volume / sphere_volume
+
+        return PrimitiveFit(
+            primitive_type="sphere",
+            center=center,
+            dimensions=(radius,),
+            rotation=(0, 0, 0, 1),
+            volume_ratio=volume_ratio,
+            error_metric=1.0 - volume_ratio,
+        )
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+        logger.warning(f"Sphere fitting failed: {e}")
+        return PrimitiveFit(
+            primitive_type="sphere",
+            center=(0, 0, 0),
+            dimensions=(1,),
+            rotation=(0, 0, 0, 1),
+            volume_ratio=0.0,
+            error_metric=float("inf"),
+        )
+
+
+def fit_cylinder(mesh: Any) -> PrimitiveFit:
+    try:
+        obb = mesh.bounding_box_oriented
+        extents = obb.primitive.extents
+
+        axis_idx = np.argmax(extents)
+        height = extents[axis_idx]
+
+        other_dims = [extents[i] for i in range(3) if i != axis_idx]
+        radius = max(other_dims) / 2
+
+        cylinder_volume = np.pi * radius**2 * height
+        volume_ratio = mesh.volume / cylinder_volume
+
+        center = tuple(obb.centroid.tolist())
+        transform = obb.primitive.transform
+        from scipy.spatial.transform import Rotation
+
+        rot = Rotation.from_matrix(transform[:3, :3])
+        quat = tuple(rot.as_quat().tolist())
+
+        return PrimitiveFit(
+            primitive_type="cylinder",
+            center=center,
+            dimensions=(radius, height),
+            rotation=quat,
+            volume_ratio=volume_ratio,
+            error_metric=1.0 - volume_ratio,
+        )
+    except ImportError as e:
+        logger.warning(f"Cylinder fitting failed: {e}")
+        return PrimitiveFit(
+            primitive_type="cylinder",
+            center=(0, 0, 0),
+            dimensions=(1, 1),
+            rotation=(0, 0, 0, 1),
+            volume_ratio=0.0,
+            error_metric=float("inf"),
+        )
+
+
+def primitive_to_mesh(fit: PrimitiveFit) -> Any:
+    if not (fit is not None):
+        raise ValueError("fit must be provided")
+    if not (fit is not None):
+        raise ValueError("fit must be provided")
+    import trimesh
+
+    if fit.primitive_type == "box":
+        mesh = trimesh.creation.box(extents=fit.dimensions)
+    elif fit.primitive_type == "sphere":
+        mesh = trimesh.creation.icosphere(radius=fit.dimensions[0])
+    elif fit.primitive_type == "cylinder":
+        mesh = trimesh.creation.cylinder(
+            radius=fit.dimensions[0],
+            height=fit.dimensions[1],
+        )
+    else:
+        mesh = trimesh.creation.box(extents=(1, 1, 1))
+
+    from scipy.spatial.transform import Rotation
+
+    rot = Rotation.from_quat(fit.rotation)
+    transform = np.eye(4)
+    transform[:3, :3] = rot.as_matrix()
+    transform[:3, 3] = fit.center
+    mesh.apply_transform(transform)
+
+    return mesh
+
+
+def generate_primitives(mesh: Any, max_primitives: int) -> CollisionGeometryResult:
+    if not (max_primitives is not None):
+        raise ValueError("max_primitives must be provided")
+    if not (max_primitives is not None):
+        raise ValueError("max_primitives must be provided")
+    primitives = []
+    primitive_fits = []
+
+    fits = [
+        fit_box(mesh),
+        fit_sphere(mesh),
+        fit_cylinder(mesh),
+    ]
+
+    fits.sort(key=lambda f: f.error_metric)
+
+    best_fit = fits[0]
+    if best_fit.volume_ratio > 0.7:
+        primitives.append(primitive_to_mesh(best_fit))
+        primitive_fits.append(best_fit)
+    else:
+        primitives.append(mesh.convex_hull)
+
+    return CollisionGeometryResult(
+        success=True,
+        method_used=SimplificationMethod.PRIMITIVES,
+        components=primitives,
+        original_triangles=len(mesh.faces),
+        final_triangles=sum(
+            len(p.faces) if hasattr(p, "faces") else 0 for p in primitives
+        ),
+        reduction_ratio=0.0,
+        volume_preservation=1.0,
+        hausdorff_distance=0.0,
+        primitive_fits=primitive_fits,
+    )
+
+
+__all__ = [
+    "fit_box",
+    "fit_cylinder",
+    "fit_sphere",
+    "generate_primitives",
+    "primitive_to_mesh",
+    "primitives_would_fit",
+]

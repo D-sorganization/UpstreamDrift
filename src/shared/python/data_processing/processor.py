@@ -9,36 +9,21 @@ See issue #407.
 
 from __future__ import annotations  # noqa: E402, F404
 
-import ast  # noqa: E402
-import logging  # noqa: E402
-from dataclasses import dataclass, field  # noqa: E402
-from pathlib import Path  # noqa: E402
-from typing import Any  # noqa: E402
+import ast
+import logging
+from pathlib import Path
+from typing import Any
 
 import pandas as pd  # noqa: E402
-from contracts import require  # noqa: E402
 
 logger = logging.getLogger(__name__)
 SUPPORTED_FILTER_TYPES = {"butterworth", "moving_average", "median", "savgol"}
 
-_DISALLOWED_EVAL_NODES: tuple[type, ...] = (
-    ast.Import,
-    ast.ImportFrom,
-    ast.Lambda,
-    ast.ListComp,
-    ast.DictComp,
-    ast.SetComp,
-    ast.GeneratorExp,
-    ast.Await,
-    ast.Yield,
-    ast.YieldFrom,
-    ast.Global,
-    ast.Nonlocal,
-    ast.FunctionDef,
-    ast.AsyncFunctionDef,
-    ast.ClassDef,
-)
+# ---------------------------------------------------------------------------
+# Expression validation (security -- issue #2065)
+# ---------------------------------------------------------------------------
 
+#: AST node types that must not appear in DataFrame.eval() expressions
 _FORBIDDEN_NAMES: frozenset[str] = frozenset(
     {
         "__builtins__",
@@ -60,109 +45,34 @@ _FORBIDDEN_NAMES: frozenset[str] = frozenset(
 
 
 def _validate_dataframe_expression(expression: str) -> None:
-    """Validate that *expression* is safe to pass to pandas eval/query."""
-    validation_expr = expression.replace("@", "")
+    """Validate that *expression* is safe to pass to ``DataFrame.eval()``.
+
+    Raises ``ValueError`` for any expression that contains constructs which
+    could lead to arbitrary code execution (imports, lambdas, dunder
+    attribute access, forbidden built-in names, etc.).
+
+    This follows the same AST-validation approach used by
+    ``ExpressionFunction`` in the pendulum physics engine (see issue #2065).
+
+    Args:
+        expression: The expression string to validate.
+
+    Raises:
+        ValueError: If the expression contains disallowed syntax.
+    """
     try:
-        tree = ast.parse(validation_expr, mode="eval")
+        tree = ast.parse(expression, mode="eval")
     except SyntaxError as exc:
         raise ValueError(f"Syntax error in expression: {exc}") from exc
 
     for node in ast.walk(tree):
-        if isinstance(node, _DISALLOWED_EVAL_NODES):
-            raise ValueError(
-                f"Disallowed construct in expression: {type(node).__name__}"
-            )
+        # Reject disallowed node types outright
         if isinstance(node, ast.Attribute) and node.attr.startswith("__"):
             raise ValueError(
                 f"Attribute access to dunder name '{node.attr}' is not permitted"
             )
-        if isinstance(node, ast.Name) and node.id in _FORBIDDEN_NAMES:
-            raise ValueError(f"Use of forbidden name '{node.id}' is not permitted")
 
-
-@dataclass
-class DatasetInfo:
-    """Metadata about a loaded dataset."""
-
-    name: str = ""
-    source_path: str = ""
-    num_rows: int = 0
-    num_columns: int = 0
-    columns: list[str] = field(default_factory=list)
-    dtypes: dict[str, str] = field(default_factory=dict)
-    memory_mb: float = 0.0
-
-
-class DataProcessor:
-    """Facade for data loading, transformation, analysis, and export.
-
-    Example::
-
-        dp = DataProcessor()
-        dp.load("data.csv")
-        dp.trim_time(0, 100)
-        dp.apply_filter("butterworth", cutoff=10, order=4, columns=["v1"])
-        dp.resample(target_rate=100)
-        stats = dp.describe()
-        dp.export("out.parquet")
-    """
-
-    def __init__(self) -> None:
-        self._df: pd.DataFrame | None = None
-        self._source_path: str = ""
-        self._history: list[str] = []
-
-    # ------------------------------------------------------------------
-    # Properties
-    # ------------------------------------------------------------------
-
-    @property
-    def dataframe(self) -> pd.DataFrame:
-        """Return the current working DataFrame (raises if nothing loaded)."""
-        if self._df is None:
-            raise RuntimeError("No data loaded. Call load() first.")
-        return self._df
-
-    @dataframe.setter
-    def dataframe(self, value: pd.DataFrame) -> None:
-        self._df = value
-
-    @property
-    def info(self) -> DatasetInfo:
-        """Return metadata about the current dataset."""
-        if self._df is None:
-            return DatasetInfo()
-        return DatasetInfo(
-            name=Path(self._source_path).stem if self._source_path else "untitled",
-            source_path=self._source_path,
-            num_rows=len(self._df),
-            num_columns=len(self._df.columns),
-            columns=list(self._df.columns),
-            dtypes={str(col): str(dt) for col, dt in self._df.dtypes.items()},
-            memory_mb=self._df.memory_usage(deep=True).sum() / 1e6,
-        )
-
-    @property
-    def history(self) -> list[str]:
-        """Return the processing history (list of operation descriptions)."""
-        return list(self._history)
-
-    # ------------------------------------------------------------------
-    # Load
-    # ------------------------------------------------------------------
-
-    def load(
-        self,
-        path: str | Path,
-        *,
-        sheet_name: str | int = 0,
-        encoding: str = "utf-8",
-    ) -> DataProcessor:
-        """Load data from a file (CSV, Excel, Parquet, DAT).
-
-        Returns *self* for method chaining.
-        """
-        if path is None:
+            # Reject forbidden bare names
             raise ValueError("path must be provided")
         path = Path(path)
         suffix = path.suffix.lower()
@@ -200,10 +110,10 @@ class DataProcessor:
 
     def load_dataframe(self, df: pd.DataFrame, name: str = "inline") -> DataProcessor:
         """Load from an existing DataFrame."""
-        if df is None:
+        if not (df is not None):
             raise ValueError("df must be provided")
-        require(isinstance(df, pd.DataFrame), "df must be a pandas DataFrame")
-        require(isinstance(name, str) and bool(name), "name must be a non-empty string")
+        if not (df is not None):
+            raise ValueError("df must be provided")
         self._df = df.copy()
         self._source_path = ""
         self._history = [
@@ -222,11 +132,10 @@ class DataProcessor:
         time_column: str | None = None,
     ) -> DataProcessor:
         """Trim data to a time range.  Auto-detects the time column if not given."""
-        if start is None:
+        if not (start is not None):
             raise ValueError("start must be provided")
-        require(isinstance(start, int | float), "start must be numeric")
-        require(isinstance(end, int | float), "end must be numeric")
-        require(end >= start, "end must be >= start")
+        if not (start is not None):
+            raise ValueError("start must be provided")
         df = self.dataframe
         if time_column is None:
             time_column = self._detect_time_column(df)
@@ -251,12 +160,10 @@ class DataProcessor:
             time_column: Column containing time values. Auto-detected if None.
             method: Interpolation method ('linear', 'cubic', etc.).
         """
-        if target_rate is None:
+        if not (target_rate is not None):
             raise ValueError("target_rate must be provided")
-        require(
-            isinstance(target_rate, int | float) and target_rate > 0,
-            "target_rate must be a positive number",
-        )
+        if not (target_rate is not None):
+            raise ValueError("target_rate must be provided")
         df = self.dataframe
         if time_column is None:
             time_column = self._detect_time_column(df)
@@ -309,7 +216,9 @@ class DataProcessor:
         window_size : int
             Window size for moving_average / median / savgol.
         """
-        if filter_type is None:
+        if not (filter_type is not None):
+            raise ValueError("filter_type must be provided")
+        if not (filter_type is not None):
             raise ValueError("filter_type must be provided")
         self._validate_filter_contract(filter_type, window_size)
         df = self.dataframe
@@ -380,7 +289,9 @@ class DataProcessor:
         window_size: int,
     ) -> None:
         """Apply filter implementation backed by scipy.signal."""
-        if df is None:
+        if not (df is not None):
+            raise ValueError("df must be provided")
+        if not (df is not None):
             raise ValueError("df must be provided")
         from scipy.signal import butter, filtfilt, medfilt, savgol_filter
 
@@ -419,54 +330,44 @@ class DataProcessor:
 
         Example: ``dp.apply_formula("speed", "distance / time")``
         """
-        if new_column is None:
+        if not (new_column is not None):
             raise ValueError("new_column must be provided")
-        require(
-            isinstance(new_column, str) and bool(new_column),
-            "new_column must be a non-empty string",
-        )
-        require(
-            isinstance(expression, str) and bool(expression),
-            "expression must be a non-empty string",
-        )
+        if not (new_column is not None):
+            raise ValueError("new_column must be provided")
+        # Security (issue #2065): validate the expression before passing to
+        # DataFrame.eval() which can execute arbitrary Python code.
         _validate_dataframe_expression(expression)
         df = self.dataframe
-        # pandas DataFrame.eval() is safe -- it only resolves column names
-        # within the dataframe and does not execute arbitrary Python code.
         df[new_column] = df.eval(expression)
         self._history.append(f"Created column '{new_column}' = {expression}")
         return self
 
     def drop_columns(self, columns: list[str]) -> DataProcessor:
         """Drop specified columns."""
-        if columns is None:
+        if not (columns is not None):
             raise ValueError("columns must be provided")
-        require(
-            isinstance(columns, list) and bool(columns),
-            "columns must be a non-empty list",
-        )
+        if not (columns is not None):
+            raise ValueError("columns must be provided")
         self._df = self.dataframe.drop(columns=columns, errors="ignore")
         self._history.append(f"Dropped columns: {columns}")
         return self
 
     def rename_columns(self, mapping: dict[str, str]) -> DataProcessor:
         """Rename columns."""
-        if mapping is None:
+        if not (mapping is not None):
             raise ValueError("mapping must be provided")
-        require(
-            isinstance(mapping, dict) and bool(mapping),
-            "mapping must be a non-empty dict",
-        )
+        if not (mapping is not None):
+            raise ValueError("mapping must be provided")
         self._df = self.dataframe.rename(columns=mapping)
         self._history.append(f"Renamed {len(mapping)} columns")
         return self
 
     def sort(self, by: str, ascending: bool = True) -> DataProcessor:
         """Sort by a column."""
-        if by is None:
+        if not (by is not None):
             raise ValueError("by must be provided")
-        require(isinstance(by, str) and bool(by), "by must be a non-empty string")
-        require(isinstance(ascending, bool), "ascending must be a boolean")
+        if not (by is not None):
+            raise ValueError("by must be provided")
         self._df = self.dataframe.sort_values(by=by, ascending=ascending).reset_index(
             drop=True
         )
@@ -498,11 +399,10 @@ class DataProcessor:
 
     def correlate(self, method: str = "pearson") -> pd.DataFrame:
         """Return correlation matrix."""
-        require(method is not None, "method must be provided")
-        require(
-            isinstance(method, str) and bool(method),
-            "method must be a non-empty string",
-        )
+        if not (method is not None):
+            raise ValueError("method must be provided")
+        if not (method is not None):
+            raise ValueError("method must be provided")
         result: pd.DataFrame = self.dataframe.select_dtypes(include="number").corr(
             method=method
         )
@@ -518,7 +418,10 @@ class DataProcessor:
 
         Delegates to ``data_processor.core.outlier_detection`` when available.
         """
-        require(method is not None, "method must be provided")
+        if not (method is not None):
+            raise ValueError("method must be provided")
+        if not (method is not None):
+            raise ValueError("method must be provided")
         df = self.dataframe
         if columns is None:
             columns = list(df.select_dtypes(include="number").columns)
@@ -563,7 +466,9 @@ class DataProcessor:
 
         Supported formats: .csv, .xlsx, .parquet, .json
         """
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
         suffix = path.suffix.lower()

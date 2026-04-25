@@ -37,7 +37,6 @@ from typing import Any
 
 import numpy as np
 
-from src.shared.python.contracts import require
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -437,21 +436,33 @@ class ElevationMap:
 
     def _to_grid_coords(self, x: float, y: float) -> tuple[float, float]:
         """Convert world coordinates to grid coordinates."""
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         gx = (x - self.origin_x) / self.resolution
         gy = (y - self.origin_y) / self.resolution
         return gx, gy
 
     def _check_bounds(self, x: float, y: float) -> None:
-        """Check if coordinates are within bounds."""
-        if x < self.origin_x or x > self.origin_x + self.width:
+        """Check if coordinates are within the actual grid extent.
+
+        The valid range is [origin, origin + (n-1)*resolution] where n is the
+        number of grid nodes in that axis.  Coordinates equal to
+        ``origin + width`` (or length) are *beyond* the last grid node and must
+        be rejected so callers never receive silently-clamped values.
+        """
+        n_rows, n_cols = self.data.shape
+        max_x = self.origin_x + (n_cols - 1) * self.resolution
+        max_y = self.origin_y + (n_rows - 1) * self.resolution
+        if x < self.origin_x or x > max_x:
             raise ValueError(
-                f"X coordinate {x} out of bounds [{self.origin_x}, {self.origin_x + self.width}]"
+                f"X coordinate {x} out of bounds [{self.origin_x}, {max_x}]"
             )
-        if y < self.origin_y or y > self.origin_y + self.length:
+        if y < self.origin_y or y > max_y:
             raise ValueError(
-                f"Y coordinate {y} out of bounds [{self.origin_y}, {self.origin_y + self.length}]"
+                f"Y coordinate {y} out of bounds [{self.origin_y}, {max_y}]"
             )
 
     def get_elevation(self, x: float, y: float) -> float:
@@ -464,8 +475,11 @@ class ElevationMap:
         Returns:
             Elevation at the point (meters)
         """
-        require(math.isfinite(x), "x must be finite", x)
-        require(math.isfinite(y), "y must be finite", y)
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
+            raise ValueError("x must be provided")
         self._check_bounds(x, y)
 
         gx, gy = self._to_grid_coords(x, y)
@@ -509,7 +523,10 @@ class ElevationMap:
         Returns:
             Tuple of (dz/dx, dz/dy) gradient components
         """
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         self._check_bounds(x, y)
 
@@ -550,8 +567,11 @@ class ElevationMap:
         Returns:
             Unit normal vector (3,)
         """
-        require(math.isfinite(x), "x must be finite", x)
-        require(math.isfinite(y), "y must be finite", y)
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
+            raise ValueError("x must be provided")
         dzdx, dzdy = self.get_gradient(x, y)
 
         # Normal from gradient: n = (-dz/dx, -dz/dy, 1) normalized
@@ -570,7 +590,10 @@ class ElevationMap:
         Returns:
             Slope angle in degrees
         """
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         dzdx, dzdy = self.get_gradient(x, y)
         slope_magnitude = math.sqrt(dzdx**2 + dzdy**2)
@@ -590,7 +613,10 @@ class ElevationMap:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ElevationMap:
         """Create elevation map from dictionary."""
-        if data is None:
+
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         return cls(
             data=np.array(data["data"], dtype=np.float64),
@@ -624,7 +650,10 @@ class TerrainPatch:
 
     def contains(self, x: float, y: float) -> bool:
         """Check if a point is within this patch."""
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         return self.x_min <= x <= self.x_max and self.y_min <= y <= self.y_max
 
@@ -658,7 +687,10 @@ class TerrainPatch:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TerrainPatch:
         """Create patch from dictionary."""
-        if data is None:
+
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         terrain_type = TerrainType[data["terrain_type"].upper()]
         material = None
@@ -724,7 +756,10 @@ class TerrainRegion:
 
     def contains(self, x: float, y: float) -> bool:
         """Check if a point is within this region."""
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         if self.shape_type == "circle":
             cx = self.shape_data["center_x"]
@@ -743,7 +778,10 @@ class TerrainRegion:
         x: float, y: float, vertices: list[tuple[float, float]]
     ) -> bool:
         """Ray casting algorithm for point-in-polygon test."""
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         n = len(vertices)
         inside = False
@@ -769,7 +807,7 @@ class TerrainRegion:
         return MATERIALS[material_name]
 
     def to_dict(self) -> dict[str, Any]:
-        """Serialize region to dictionary."""
+        """Serialize region to dictionary, preserving all SurfaceMaterial fields."""
         result: dict[str, Any] = {
             "terrain_type": self.terrain_type.name.lower(),
             "shape_type": self.shape_type,
@@ -778,24 +816,29 @@ class TerrainRegion:
         if self.material is not None:
             result["material"] = {
                 "name": self.material.name,
-                "friction": self.material.friction_coefficient,
+                "friction_coefficient": self.material.friction_coefficient,
+                "rolling_resistance": self.material.rolling_resistance,
                 "restitution": self.material.restitution,
+                "hardness": self.material.hardness,
+                "grass_height_m": self.material.grass_height_m,
+                "compressibility": self.material.compressibility,
+                "compression_damping": self.material.compression_damping,
+                "turf_density": self.material.turf_density,
+                "moisture_content": self.material.moisture_content,
             }
         return result
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TerrainRegion:
         """Deserialize region from dictionary."""
-        if data is None:
+
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         material = None
         if "material" in data:
-            mat = data["material"]
-            material = SurfaceMaterial(
-                name=mat["name"],
-                friction_coefficient=mat["friction"],
-                restitution=mat["restitution"],
-            )
+            material = SurfaceMaterial(**data["material"])
         return cls(
             terrain_type=TerrainType[data["terrain_type"].upper()],
             shape_type=data["shape_type"],
@@ -835,7 +878,10 @@ class Terrain:
         Returns:
             Elevation at the point (meters)
         """
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         return self.elevation.get_elevation(x, y)
 
@@ -849,7 +895,10 @@ class Terrain:
         Returns:
             Unit normal vector (3,)
         """
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         return self.elevation.get_normal(x, y)
 
@@ -865,7 +914,10 @@ class Terrain:
         Returns:
             Terrain type at the position
         """
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         result = self.default_type
 
@@ -884,7 +936,10 @@ class Terrain:
     def get_material(self, x: float, y: float) -> SurfaceMaterial:
         """Get surface material at a position."""
         # Check regions first (they override patches)
-        if x is None:
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         for region in reversed(self.regions):
             if region.contains(x, y):
@@ -928,8 +983,11 @@ class Terrain:
         Returns:
             Dictionary with friction, restitution, stiffness, damping
         """
-        require(math.isfinite(x), "x must be finite", x)
-        require(math.isfinite(y), "y must be finite", y)
+
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
+            raise ValueError("x must be provided")
         material = self.get_material(x, y)
 
         # Calculate stiffness and damping from material properties
@@ -996,7 +1054,10 @@ class TerrainConfig:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> TerrainConfig:
         """Create config from dictionary."""
-        if data is None:
+
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         return cls(
             name=data["name"],
@@ -1014,7 +1075,10 @@ class TerrainConfig:
     @classmethod
     def load(cls, path: Path | str) -> TerrainConfig:
         """Load config from JSON file."""
-        if path is None:
+
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         with open(path) as f:
             data = json.load(f)
@@ -1043,3 +1107,164 @@ class TerrainConfig:
             data["elevation"] = elev_map.to_dict()
 
         return cls.from_dict(data)
+
+
+# Factory functions
+
+
+def create_flat_terrain(
+    name: str,
+    width: float,
+    length: float,
+    terrain_type: TerrainType = TerrainType.FAIRWAY,
+    resolution: float = 1.0,
+) -> Terrain:
+    """Create a simple flat terrain.
+
+    Args:
+        name: Terrain identifier
+        width: Width in X direction (meters)
+        length: Length in Y direction (meters)
+        terrain_type: Terrain type for the entire surface
+        resolution: Grid resolution (meters)
+
+    Returns:
+        Flat terrain
+    """
+    if not (name is not None):
+        raise ValueError("name must be provided")
+    if not (name is not None):
+        raise ValueError("name must be provided")
+    elevation = ElevationMap.flat(width=width, length=length, resolution=resolution)
+    patches = [TerrainPatch(terrain_type, 0.0, width, 0.0, length)]
+
+    return Terrain(name=name, elevation=elevation, patches=patches)
+
+
+def create_sloped_terrain(
+    name: str,
+    width: float,
+    length: float,
+    slope_angle_deg: float,
+    slope_direction_deg: float,
+    terrain_type: TerrainType = TerrainType.FAIRWAY,
+    resolution: float = 1.0,
+) -> Terrain:
+    """Create a uniformly sloped terrain.
+
+    Args:
+        name: Terrain identifier
+        width: Width in X direction (meters)
+        length: Length in Y direction (meters)
+        slope_angle_deg: Slope angle in degrees
+        slope_direction_deg: Direction of uphill slope (0=+X, 90=+Y)
+        terrain_type: Terrain type for the entire surface
+        resolution: Grid resolution (meters)
+
+    Returns:
+        Sloped terrain
+    """
+    if not (name is not None):
+        raise ValueError("name must be provided")
+    if not (name is not None):
+        raise ValueError("name must be provided")
+    elevation = ElevationMap.sloped(
+        width=width,
+        length=length,
+        resolution=resolution,
+        slope_angle_deg=slope_angle_deg,
+        slope_direction_deg=slope_direction_deg,
+    )
+    patches = [TerrainPatch(terrain_type, 0.0, width, 0.0, length)]
+
+    return Terrain(name=name, elevation=elevation, patches=patches)
+
+
+def create_terrain_from_config(config_path: Path | str) -> Terrain:
+    """Create terrain from configuration file.
+
+    Args:
+        config_path: Path to JSON configuration file
+
+    Returns:
+        Configured terrain
+    """
+    config = TerrainConfig.load(config_path)
+    return config.to_terrain()
+
+
+# Physics integration functions
+
+
+@functools.lru_cache(maxsize=256)
+def compute_gravity_on_slope(
+    slope_angle_deg: float,
+    gravity: float = float(GRAVITY_M_S2),
+) -> tuple[float, float]:
+    """Compute gravity components on a slope. Cached for performance.
+
+    Args:
+        slope_angle_deg: Slope angle in degrees
+        gravity: Gravitational acceleration (m/s^2)
+
+    Returns:
+        Tuple of (g_parallel, g_perpendicular) components
+    """
+    if not (slope_angle_deg is not None):
+        raise ValueError("slope_angle_deg must be provided")
+    if not (slope_angle_deg is not None):
+        raise ValueError("slope_angle_deg must be provided")
+    slope_rad = math.radians(slope_angle_deg)
+    g_parallel = gravity * math.sin(slope_rad)
+    g_perpendicular = gravity * math.cos(slope_rad)
+
+    return g_parallel, g_perpendicular
+
+
+def compute_roll_direction(
+    elevation: ElevationMap,
+    x: float,
+    y: float,
+) -> np.ndarray:
+    """Compute ball roll direction on terrain (downhill).
+
+    Args:
+        elevation: Elevation map
+        x: X coordinate (meters)
+        y: Y coordinate (meters)
+
+    Returns:
+        Unit vector in roll direction (2D: x, y)
+    """
+    if not (elevation is not None):
+        raise ValueError("elevation must be provided")
+    if not (elevation is not None):
+        raise ValueError("elevation must be provided")
+    dzdx, dzdy = elevation.get_gradient(x, y)
+
+    # Roll direction is opposite to gradient (downhill)
+    roll_dir = np.array([-dzdx, -dzdy])
+    magnitude = np.linalg.norm(roll_dir)
+
+    if magnitude < 1e-10:
+        return np.zeros(2)
+
+    return roll_dir / magnitude
+
+
+def get_contact_normal(
+    elevation: ElevationMap,
+    x: float,
+    y: float,
+) -> np.ndarray:
+    """Get contact normal for physics engine.
+
+    Args:
+        elevation: Elevation map
+        x: X coordinate (meters)
+        y: Y coordinate (meters)
+
+    Returns:
+        Unit normal vector (3,)
+    """
+    return elevation.get_normal(x, y)

@@ -1,0 +1,463 @@
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import numpy as np
+
+from ._constants import (
+    ANTOINE_A,
+    ANTOINE_B,
+    ANTOINE_C_KELVIN,
+    FALLBACK_ATMOSPHERIC_PRESSURE,
+    FALLBACK_BOILING_TEMPERATURE,
+    KELVIN_TO_CELSIUS_OFFSET,
+    MMHG_TO_PASCAL_FACTOR,
+    PASCAL_TO_MMHG_FACTOR,
+    SPECIFIC_GAS_CONSTANT_WATER,
+    TRIPLE_POINT_PRESSURE,
+    TRIPLE_POINT_TEMPERATURE,
+    VAPOR_ENTHALPY_REFERENCE,
+    VAPOR_ENTHALPY_SLOPE,
+    VAPOR_ENTROPY_REFERENCE,
+    VAPOR_ENTROPY_SLOPE,
+    VAPOR_SPECIFIC_HEAT_CP,
+    VAPOR_SPECIFIC_HEAT_CV,
+)
+from ._models import SteamProperties
+
+logger = logging.getLogger(__name__)
+
+try:
+    import cantera as ct  # noqa: F401
+
+    CANTERA_AVAILABLE = True
+except ImportError:
+    ct = None  # type: ignore[assignment]
+    CANTERA_AVAILABLE = False
+    logging.getLogger(__name__).warning(
+        "Warning: Cantera not available. Steam calculator will use simplified calculations."
+    )
+
+try:
+    from CoolProp.CoolProp import PhaseSI, PropsSI
+
+    COOLPROP_AVAILABLE = True
+except ImportError:
+    COOLPROP_AVAILABLE = False
+    logging.getLogger(__name__).warning(
+        "Warning: CoolProp not available. Falling back to Cantera or simplified correlations."
+    )
+
+
+def validate_coolprop_inputs(temperature: float, pressure: float) -> None:
+    """Validate temperature and pressure for CoolProp calculations."""
+    if temperature < TRIPLE_POINT_TEMPERATURE or temperature > 1000:
+        msg = (
+            f"Temperature {temperature} K is outside valid range "
+            f"[{TRIPLE_POINT_TEMPERATURE}, 1000] K for CoolProp"
+        )
+        logger.error(msg)
+        raise ValueError(msg)
+
+    max_reasonable_pressure: float = 100e6
+    if pressure < TRIPLE_POINT_PRESSURE or pressure > max_reasonable_pressure:
+        msg = (
+            f"Pressure {pressure} Pa is outside valid range "
+            f"[{TRIPLE_POINT_PRESSURE}, {max_reasonable_pressure}] Pa for CoolProp. "
+            f"Check unit conversion - this value seems too high."
+        )
+        logger.error(msg)
+        raise ValueError(msg)
+
+
+def compute_derived_properties(
+    cp: float,
+    cv: float,
+    dynamic_viscosity: float,
+    thermal_conductivity: float,
+    pressure: float,
+    specific_volume: float,
+    temperature: float,
+) -> dict[str, float | None]:
+    """Compute derived thermo properties (Z, Pr, k)."""
+    if not (cp is not None):
+        raise ValueError("cp must be provided")
+    if not (cp is not None):
+        raise ValueError("cp must be provided")
+    r_specific = 461.5
+    return {
+        "compressibility_factor": (
+            pressure * specific_volume / (r_specific * temperature)
+        ),
+        "prandtl_number": (
+            (cp * dynamic_viscosity / thermal_conductivity)
+            if thermal_conductivity
+            else None
+        ),
+        "specific_heat_ratio": cp / cv if cv else None,
+    }
+
+
+def calculate_coolprop_properties(
+    temperature: float, pressure: float
+) -> SteamProperties:
+    """High-accuracy calculation using CoolProp"""
+    try:
+        validate_coolprop_inputs(temperature, pressure)
+
+        density = PropsSI("D", "T", temperature, "P", pressure, "Water")
+        specific_volume = 1.0 / density
+        enthalpy = PropsSI("H", "T", temperature, "P", pressure, "Water")
+        entropy = PropsSI("S", "T", temperature, "P", pressure, "Water")
+        internal_energy = PropsSI("U", "T", temperature, "P", pressure, "Water")
+        cp = PropsSI("Cpmass", "T", temperature, "P", pressure, "Water")
+        cv = PropsSI("Cvmass", "T", temperature, "P", pressure, "Water")
+        speed_of_sound = PropsSI("A", "T", temperature, "P", pressure, "Water")
+        thermal_conductivity = PropsSI("L", "T", temperature, "P", pressure, "Water")
+        dynamic_viscosity = PropsSI(
+            "VISCOSITY", "T", temperature, "P", pressure, "Water"
+        )
+        kinematic_viscosity = dynamic_viscosity / density
+
+        derived = compute_derived_properties(
+            cp,
+            cv,
+            dynamic_viscosity,
+            thermal_conductivity,
+            pressure,
+            specific_volume,
+            temperature,
+        )
+
+        try:
+            phase_str = PhaseSI("T", temperature, "P", pressure, "Water")
+        except (RuntimeError, ValueError):
+            phase_str = "unknown"
+        try:
+            quality = PropsSI("Q", "T", temperature, "P", pressure, "Water")
+            if np.isnan(quality):
+                quality = 0.0 if phase_str.lower() == "liquid" else 1.0
+        except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+            quality = 0.0
+
+        return SteamProperties(
+            temperature=temperature,
+            pressure=pressure,
+            density=density,
+            specific_volume=specific_volume,
+            enthalpy=enthalpy,
+            entropy=entropy,
+            internal_energy=internal_energy,
+            cp=cp,
+            cv=cv,
+            speed_of_sound=speed_of_sound,
+            thermal_conductivity=thermal_conductivity,
+            dynamic_viscosity=dynamic_viscosity,
+            kinematic_viscosity=kinematic_viscosity,
+            quality=quality,
+            phase=phase_str,
+            **derived,
+        )
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+        logger.exception("CoolProp steam calculation failed: %s", e)
+        return calculate_simplified_properties(temperature, pressure)
+
+
+def determine_phase_and_quality(
+    water: Any, temperature: float, pressure: float
+) -> tuple[str, float]:
+    """Determine phase and steam quality"""
+    try:
+        T_critical = 647.1
+        P_critical = 22064000
+
+        if temperature > T_critical or pressure > P_critical:
+            return "supercritical", 1.0
+
+        try:
+            water.TQ = temperature, 0.0
+            P_sat = water.P
+
+            if pressure > P_sat:
+                return "liquid", 0.0
+            if abs(pressure - P_sat) / P_sat < 0.001:
+                return "two-phase", 0.5
+            return "vapor", 1.0
+
+        except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+            return "unknown", 0.0
+
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+        return "unknown", 0.0
+
+
+def calculate_cantera_properties(
+    water: Any, temperature: float, pressure: float
+) -> SteamProperties:
+    """Calculate steam properties using Cantera"""
+    if water is None:
+        raise RuntimeError("Cantera water object is not initialized")
+
+    try:
+        water.TP = temperature, pressure
+
+        density = water.density
+        specific_volume = 1.0 / density
+        enthalpy = water.enthalpy_mass
+        entropy = water.entropy_mass
+        internal_energy = water.int_energy_mass
+        cp = water.cp_mass
+        cv = water.cv_mass
+
+        try:
+            thermal_conductivity = water.thermal_conductivity
+            dynamic_viscosity = water.viscosity
+            kinematic_viscosity = dynamic_viscosity / density
+        except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+            thermal_conductivity = 0.6
+            dynamic_viscosity = 1e-6
+            kinematic_viscosity = dynamic_viscosity / density
+
+        try:
+            speed_of_sound = np.sqrt(cp / cv * pressure / density)
+        except (ValueError, ZeroDivisionError, OverflowError, TypeError):
+            speed_of_sound = 1500.0
+
+        phase, quality = determine_phase_and_quality(water, temperature, pressure)
+
+        R_specific = 461.5
+        compressibility_factor = pressure * (1 / density) / (R_specific * temperature)
+        specific_heat_ratio = cp / cv if cv else None
+        prandtl_number = (
+            (cp * dynamic_viscosity / thermal_conductivity)
+            if thermal_conductivity
+            else None
+        )
+
+        return SteamProperties(
+            temperature=temperature,
+            pressure=pressure,
+            density=density,
+            specific_volume=specific_volume,
+            enthalpy=enthalpy,
+            entropy=entropy,
+            internal_energy=internal_energy,
+            cp=cp,
+            cv=cv,
+            speed_of_sound=speed_of_sound,
+            thermal_conductivity=thermal_conductivity,
+            dynamic_viscosity=dynamic_viscosity,
+            kinematic_viscosity=kinematic_viscosity,
+            quality=quality,
+            phase=phase,
+            compressibility_factor=compressibility_factor,
+            prandtl_number=prandtl_number,
+            specific_heat_ratio=specific_heat_ratio,
+        )
+
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+        logger.exception("Cantera steam calculation failed: %s", e)
+        return calculate_simplified_properties(temperature, pressure)
+
+
+def calculate_simplified_properties(
+    temperature: float, pressure: float
+) -> SteamProperties:
+    """Simplified calculations based on ideal gas law and constant properties"""
+    try:
+        T_sat_1atm = 373.15
+        if temperature < T_sat_1atm and pressure > 50000:
+            density = 1000.0
+            enthalpy = 4186.0 * (temperature - 273.15)
+            entropy = 4186.0 * np.log(temperature / 273.15)
+            cp = 4186.0
+            cv = 4186.0
+            phase = "liquid"
+            quality = 0.0
+        else:
+            density = pressure / (SPECIFIC_GAS_CONSTANT_WATER * temperature)
+            enthalpy = VAPOR_ENTHALPY_REFERENCE + VAPOR_ENTHALPY_SLOPE * (
+                temperature - KELVIN_TO_CELSIUS_OFFSET
+            )
+            enthalpy *= 1000
+
+            entropy = VAPOR_ENTROPY_REFERENCE + VAPOR_ENTROPY_SLOPE * np.log(
+                temperature / 373.15
+            )
+
+            cp = VAPOR_SPECIFIC_HEAT_CP * 1000
+            cv = VAPOR_SPECIFIC_HEAT_CV * 1000
+            phase = "vapor"
+            quality = 1.0
+
+        specific_volume = 1.0 / density
+        internal_energy = enthalpy - pressure * specific_volume
+
+        thermal_conductivity = 0.6 if phase == "liquid" else 0.025
+        dynamic_viscosity = 2.8e-4 if phase == "liquid" else 1.2e-5
+        kinematic_viscosity = dynamic_viscosity / density
+
+        if phase == "liquid":
+            speed_of_sound = 1500.0
+        else:
+            speed_of_sound = np.sqrt(1.3 * 461.5 * temperature)
+
+        return SteamProperties(
+            temperature=temperature,
+            pressure=pressure,
+            density=density,
+            specific_volume=specific_volume,
+            enthalpy=enthalpy,
+            entropy=entropy,
+            internal_energy=internal_energy,
+            cp=cp,
+            cv=cv,
+            speed_of_sound=speed_of_sound,
+            thermal_conductivity=thermal_conductivity,
+            dynamic_viscosity=dynamic_viscosity,
+            kinematic_viscosity=kinematic_viscosity,
+            quality=quality,
+            phase=phase,
+            compressibility_factor=pressure * specific_volume / (461.5 * temperature),
+            prandtl_number=cp * dynamic_viscosity / thermal_conductivity,
+            specific_heat_ratio=cp / cv if cv else None,
+        )
+
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+        logger.exception("Simplified calculation failed: %s", e)
+        return SteamProperties(
+            temperature=temperature,
+            pressure=pressure,
+            density=0.0,
+            specific_volume=0.0,
+            enthalpy=0.0,
+            entropy=0.0,
+            internal_energy=0.0,
+            cp=0.0,
+            cv=0.0,
+            speed_of_sound=0.0,
+            thermal_conductivity=0.0,
+            dynamic_viscosity=0.0,
+            kinematic_viscosity=0.0,
+            quality=0.0,
+            phase="error",
+        )
+
+
+def calculate_saturated_coolprop_from_temp(temperature: float) -> SteamProperties:
+    """Calculate saturated steam properties from temperature using CoolProp"""
+    try:
+        pressure = PropsSI("P", "T", temperature, "Q", 1.0, "Water")
+        return calculate_coolprop_properties(temperature, pressure)
+    except (RuntimeError, ValueError, TypeError) as e:
+        logger.exception(
+            "CoolProp saturated calculation from temperature failed: %s", e
+        )
+        return calculate_saturated_simplified_from_temp(temperature)
+
+
+def calculate_saturated_coolprop_from_pressure(pressure: float) -> SteamProperties:
+    """Calculate saturated steam properties from pressure using CoolProp"""
+    try:
+        temperature = PropsSI("T", "P", pressure, "Q", 1.0, "Water")
+        return calculate_coolprop_properties(temperature, pressure)
+    except (RuntimeError, ValueError, TypeError) as e:
+        logger.exception("CoolProp saturated calculation from pressure failed: %s", e)
+        return calculate_saturated_simplified_from_pressure(pressure)
+
+
+def calculate_saturated_cantera_from_temp(
+    water: Any, temperature: float
+) -> SteamProperties:
+    """Calculate saturated steam properties from temperature using Cantera"""
+    try:
+        water.TQ = temperature, 1.0
+        pressure = water.P
+        return calculate_cantera_properties(water, temperature, pressure)
+    except (RuntimeError, ValueError, TypeError) as e:
+        logger.exception("Cantera saturated calculation from temperature failed: %s", e)
+        return calculate_saturated_simplified_from_temp(temperature)
+
+
+def calculate_saturated_cantera_from_pressure(
+    water: Any, pressure: float
+) -> SteamProperties:
+    """Calculate saturated steam properties from pressure using Cantera"""
+    try:
+        water.PQ = pressure, 1.0
+        temperature = water.T
+        return calculate_cantera_properties(water, temperature, pressure)
+    except (RuntimeError, ValueError, TypeError) as e:
+        logger.exception("Cantera saturated calculation from pressure failed: %s", e)
+        return calculate_saturated_simplified_from_pressure(pressure)
+
+
+def calculate_saturated_simplified_from_temp(temperature: float) -> SteamProperties:
+    """Calculate saturated steam properties from temperature using simplified correlations"""
+    if not (temperature is not None):
+        raise ValueError("temperature must be provided")
+    if not (temperature is not None):
+        raise ValueError("temperature must be provided")
+    temp_c = temperature - KELVIN_TO_CELSIUS_OFFSET
+
+    if temp_c < 1.0:
+        temp_c = 1.0
+    elif temp_c > 374.0:
+        temp_c = 374.0
+
+    log_p_mmhg = ANTOINE_A - ANTOINE_B / (temperature - ANTOINE_C_KELVIN)
+    pressure_mmhg = 10**log_p_mmhg
+    pressure = pressure_mmhg * MMHG_TO_PASCAL_FACTOR
+
+    return calculate_simplified_properties(temperature, pressure)
+
+
+def calculate_saturated_simplified_from_pressure(pressure: float) -> SteamProperties:
+    """Calculate saturated steam properties from pressure using simplified correlations"""
+    if not (pressure is not None):
+        raise ValueError("pressure must be provided")
+    if not (pressure is not None):
+        raise ValueError("pressure must be provided")
+    pressure_mmhg = pressure * PASCAL_TO_MMHG_FACTOR
+
+    if pressure_mmhg <= 0:
+        pressure_mmhg = 1.0
+
+    log_p = np.log10(pressure_mmhg)
+    temperature = ANTOINE_B / (ANTOINE_A - log_p) + ANTOINE_C_KELVIN
+
+    if temperature < 274.15:
+        temperature = 274.15
+    elif temperature > 647.15:
+        temperature = 647.15
+
+    return calculate_simplified_properties(temperature, pressure)
+
+
+def get_saturation_pressure(water: Any, temperature: float) -> float:
+    """Get saturation pressure for given temperature"""
+    try:
+        if CANTERA_AVAILABLE and water is not None and water:
+            water.TQ = temperature, 1.0
+            return float(water.P)
+        log_p_mmhg = ANTOINE_A - ANTOINE_B / (temperature - ANTOINE_C_KELVIN)
+        pressure_mmhg = 10**log_p_mmhg
+        return pressure_mmhg * MMHG_TO_PASCAL_FACTOR
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+        logger.exception("Saturation pressure calculation failed: %s", e)
+        return FALLBACK_ATMOSPHERIC_PRESSURE
+
+
+def get_saturation_temperature(water: Any, pressure: float) -> float:
+    """Get saturation temperature for given pressure"""
+    try:
+        if CANTERA_AVAILABLE and water is not None and water:
+            water.PQ = pressure, 1.0
+            return float(water.T)
+        pressure_mmhg = pressure * PASCAL_TO_MMHG_FACTOR
+        log_p = np.log10(pressure_mmhg)
+        return float(ANTOINE_B / (ANTOINE_A - log_p) + ANTOINE_C_KELVIN)
+    except (ValueError, ZeroDivisionError, OverflowError, TypeError) as e:
+        logger.exception("Saturation temperature calculation failed: %s", e)
+        return FALLBACK_BOILING_TEMPERATURE

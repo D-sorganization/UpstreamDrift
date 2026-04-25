@@ -215,7 +215,7 @@ class TestSwingOptimizer:
         assert result.optimal_velocities.shape[0] > 0, (
             "Should have at least one timestep"
         )
-        assert result.optimal_velocities.shape[1] == _num_velocities(model)
+        assert result.optimal_velocities.shape[1] == model.nv
         assert np.all(np.isfinite(result.optimal_trajectory))
 
     @pytest.mark.slow()

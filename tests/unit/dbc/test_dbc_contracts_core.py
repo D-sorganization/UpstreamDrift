@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from collections.abc import Callable
 
 import numpy as np
 
@@ -207,7 +208,7 @@ class TestContractChecker(unittest.TestCase):
             def __init__(self) -> None:
                 self.mass = 1.0
 
-            def _get_invariants(self):  # type: ignore[no-untyped-def]
+            def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
                 return [(lambda: self.mass > 0, "mass must be positive")]
 
         checker = TestChecker()
@@ -220,7 +221,7 @@ class TestContractChecker(unittest.TestCase):
             def __init__(self) -> None:
                 self.mass = -1.0
 
-            def _get_invariants(self):  # type: ignore[no-untyped-def]
+            def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
                 return [(lambda: self.mass > 0, "mass must be positive")]
 
         checker = TestChecker()

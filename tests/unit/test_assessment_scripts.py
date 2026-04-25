@@ -7,7 +7,7 @@ from scripts.generate_assessment_summary import extract_score_from_report
 
 
 class TestAssessmentScripts(unittest.TestCase):
-    def test_extract_score_from_report(self):
+    def test_extract_score_from_report(self) -> None:
         # Create a dummy report file
         dummy_report = Path("dummy_report.md")
         dummy_report.write_text(
@@ -20,7 +20,7 @@ class TestAssessmentScripts(unittest.TestCase):
             if dummy_report.exists():
                 dummy_report.unlink()
 
-    def test_assess_J_logic(self):
+    def test_assess_J_logic(self) -> None:
         # We can't easily mock the file system for the whole function without heavy mocking,
         # but we can verify that the function runs without error and returns a report path.
         # This assumes REPO_ROOT is set correctly in the imported module.

@@ -53,7 +53,7 @@ if PYQT6_AVAILABLE:
         def forward(self) -> None:
             pass
 
-        def get_state(self):
+        def get_state(self) -> tuple[np.ndarray, np.ndarray]:
             return self._q, self._v
 
         def set_state(self, q, v) -> None:
@@ -66,31 +66,31 @@ if PYQT6_AVAILABLE:
         def get_time(self) -> float:
             return self._time
 
-        def compute_mass_matrix(self):
+        def compute_mass_matrix(self) -> np.ndarray:
             return np.eye(10)
 
-        def compute_bias_forces(self):
+        def compute_bias_forces(self) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_gravity_forces(self):
+        def compute_gravity_forces(self) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_inverse_dynamics(self, qacc):
+        def compute_inverse_dynamics(self, qacc) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_jacobian(self, body_name):
+        def compute_jacobian(self, body_name) -> None:
             return None
 
-        def compute_drift_acceleration(self):
+        def compute_drift_acceleration(self) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_control_acceleration(self, tau):
+        def compute_control_acceleration(self, tau) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_ztcf(self, q, v):
+        def compute_ztcf(self, q, v) -> np.ndarray:
             return np.zeros(10)
 
-        def compute_zvcf(self, q):
+        def compute_zvcf(self, q) -> np.ndarray:
             return np.zeros(10)
 
     class TestDashboardEnhancements(unittest.TestCase):
@@ -108,7 +108,7 @@ if PYQT6_AVAILABLE:
                     existing if isinstance(existing, QtWidgets.QApplication) else None
                 )
 
-        def setUp(self):
+        def setUp(self) -> None:
             self.engine = MockPhysicsEngine()
             self.recorder = GenericPhysicsRecorder(self.engine)
             self.recorder.start()
@@ -121,7 +121,7 @@ if PYQT6_AVAILABLE:
             # Manually populate induced acceleration for testing
             self.recorder.data["induced_accelerations"][0] = np.random.rand(100, 10)
 
-        def test_live_plot_widget_modes(self):
+        def test_live_plot_widget_modes(self) -> None:
             """Test LivePlotWidget new modes."""
             widget = LivePlotWidget(self.recorder)
 
@@ -145,7 +145,7 @@ if PYQT6_AVAILABLE:
             self.assertEqual(len(widget.line_objects), 1)
             self.assertEqual(widget.line_objects[0].get_label(), "Norm")
 
-        def test_live_plot_ground_forces(self):
+        def test_live_plot_ground_forces(self) -> None:
             """Test plotting Ground Forces."""
             widget = LivePlotWidget(self.recorder)
 
@@ -157,7 +157,7 @@ if PYQT6_AVAILABLE:
             # So we expect 3 lines
             self.assertEqual(len(widget.line_objects), 3)
 
-        def test_unified_window_static_plots(self):
+        def test_unified_window_static_plots(self) -> None:
             """Test new static plot options in UnifiedDashboardWindow."""
             window = UnifiedDashboardWindow(self.engine)
 

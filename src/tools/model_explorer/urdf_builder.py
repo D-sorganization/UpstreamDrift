@@ -265,7 +265,9 @@ class URDFBuilder:
             robot: Root robot element.
         """
         # Sort segments to ensure parents are processed before children
-        if robot is None:
+        if not (robot is not None):
+            raise ValueError("robot must be provided")
+        if not (robot is not None):
             raise ValueError("robot must be provided")
         sorted_segments = self._sort_segments_by_hierarchy()
 
@@ -311,7 +313,9 @@ class URDFBuilder:
             robot: Root robot element.
             segment: Segment data.
         """
-        if robot is None:
+        if not (robot is not None):
+            raise ValueError("robot must be provided")
+        if not (robot is not None):
             raise ValueError("robot must be provided")
         link = ET.SubElement(robot, "link", name=segment["name"])
 
@@ -331,7 +335,9 @@ class URDFBuilder:
             link: Link element.
             segment: Segment data.
         """
-        if link is None:
+        if not (link is not None):
+            raise ValueError("link must be provided")
+        if not (link is not None):
             raise ValueError("link must be provided")
         visual = ET.SubElement(link, "visual")
 
@@ -354,7 +360,9 @@ class URDFBuilder:
             link: Link element.
             segment: Segment data.
         """
-        if link is None:
+        if not (link is not None):
+            raise ValueError("link must be provided")
+        if not (link is not None):
             raise ValueError("link must be provided")
         collision = ET.SubElement(link, "collision")
 
@@ -372,7 +380,9 @@ class URDFBuilder:
             link: Link element.
             segment: Segment data.
         """
-        if link is None:
+        if not (link is not None):
+            raise ValueError("link must be provided")
+        if not (link is not None):
             raise ValueError("link must be provided")
         inertial = ET.SubElement(link, "inertial")
 
@@ -403,7 +413,9 @@ class URDFBuilder:
             parent: Parent element.
             geometry: Geometry data containing position and orientation.
         """
-        if parent is None:
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
             raise ValueError("parent must be provided")
         position = geometry.get("position", {})
         orientation = geometry.get("orientation", {})
@@ -427,7 +439,9 @@ class URDFBuilder:
             geometry: Geometry element.
             geom_data: Geometry data.
         """
-        if geometry is None:
+        if not (geometry is not None):
+            raise ValueError("geometry must be provided")
+        if not (geometry is not None):
             raise ValueError("geometry must be provided")
         shape = geom_data.get("shape", "Box").lower()
         dimensions = geom_data.get("dimensions", {})
@@ -462,7 +476,9 @@ class URDFBuilder:
             robot: Root robot element.
             segment: Segment data.
         """
-        if robot is None:
+        if not (robot is not None):
+            raise ValueError("robot must be provided")
+        if not (robot is not None):
             raise ValueError("robot must be provided")
         joint_name = f"{segment['parent']}_to_{segment['name']}"
         joint_data = segment.get("joint", {})
@@ -513,7 +529,9 @@ class URDFBuilder:
         Args:
             name: New robot name.
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         self.robot_name = name
         logger.info(f"Robot name set to: {name}")
@@ -553,7 +571,9 @@ class URDFBuilder:
             Returns:
                 True if a circular dependency is detected.
             """
-            if segment_name is None:
+            if not (segment_name is not None):
+                raise ValueError("segment_name must be provided")
+            if not (segment_name is not None):
                 raise ValueError("segment_name must be provided")
             if segment_name in visited:
                 return True
@@ -593,7 +613,9 @@ class URDFBuilder:
         Args:
             handedness: Handedness.LEFT or Handedness.RIGHT
         """
-        if handedness is None:
+        if not (handedness is not None):
+            raise ValueError("handedness must be provided")
+        if not (handedness is not None):
             raise ValueError("handedness must be provided")
         self.handedness = handedness
         logger.info(f"Handedness set to: {handedness.value}")
@@ -669,7 +691,9 @@ class URDFBuilder:
         Returns:
             URDF XML string configured for the target handedness.
         """
-        if target_handedness is None:
+        if not (target_handedness is not None):
+            raise ValueError("target_handedness must be provided")
+        if not (target_handedness is not None):
             raise ValueError("target_handedness must be provided")
         if target_handedness == self.handedness:
             return self.get_urdf()

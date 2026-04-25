@@ -221,7 +221,9 @@ class ProPlayerData:
 
     def get_position_at_time(self, t: float) -> np.ndarray | None:
         """Interpolate position at a specific time."""
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         if not self.has_trajectory_data():
             return None
@@ -248,7 +250,9 @@ class ProPlayerData:
 
     def get_velocity_at_time(self, t: float) -> np.ndarray | None:
         """Interpolate velocity at a specific time."""
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         if self.club_head_velocities is None or self.time_series is None:
             return None
@@ -563,7 +567,9 @@ class ClubDataLoader:
 
     def _find_column(self, df: Any, possible_names: list[str]) -> str | None:
         """Find a column by checking multiple possible names."""
-        if possible_names is None:
+        if not (possible_names is not None):
+            raise ValueError("possible_names must be provided")
+        if not (possible_names is not None):
             raise ValueError("possible_names must be provided")
         for name in possible_names:
             for col in df.columns:

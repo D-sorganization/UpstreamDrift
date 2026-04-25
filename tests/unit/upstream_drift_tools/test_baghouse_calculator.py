@@ -61,17 +61,17 @@ class TestBaghouseCalculator:
 
     def test_zero_gas_flow_raises(self) -> None:
         kwargs = {**_BASE_KWARGS, "gas_flow_kg_s": 0.0}
-        with pytest.raises(ValueError):
+        with pytest.raises(AssertionError):
             self._CALC.calculate(**kwargs)
 
     def test_negative_temperature_raises(self) -> None:
         kwargs = {**_BASE_KWARGS, "inlet_temp_k": -100.0}
-        with pytest.raises(ValueError):
+        with pytest.raises(AssertionError):
             self._CALC.calculate(**kwargs)
 
     def test_efficiency_above_one_raises(self) -> None:
         kwargs = {**_BASE_KWARGS, "carbon_removal_efficiency": 1.5}
-        with pytest.raises(ValueError):
+        with pytest.raises(AssertionError):
             self._CALC.calculate(**kwargs)
 
     def test_zero_efficiency_no_removal(self) -> None:

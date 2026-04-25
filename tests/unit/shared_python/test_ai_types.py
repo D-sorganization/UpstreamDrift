@@ -17,7 +17,7 @@ from src.shared.python.ai.types import (
 )
 
 
-def test_expertise_level_comparison():
+def test_expertise_level_comparison() -> None:
     assert ExpertiseLevel.BEGINNER < ExpertiseLevel.INTERMEDIATE
     assert ExpertiseLevel.INTERMEDIATE <= ExpertiseLevel.ADVANCED
     assert ExpertiseLevel.ADVANCED < ExpertiseLevel.EXPERT
@@ -31,7 +31,7 @@ def test_expertise_level_comparison():
         _ = ExpertiseLevel.BEGINNER <= 5  # type: ignore
 
 
-def test_provider_capabilities():
+def test_provider_capabilities() -> None:
     caps = frozenset(
         [ProviderCapability.FUNCTION_CALLING, ProviderCapability.STREAMING]
     )
@@ -41,7 +41,7 @@ def test_provider_capabilities():
     assert provider.has_capability(ProviderCapability.VISION) is False
 
 
-def test_message_dict():
+def test_message_dict() -> None:
     msg = Message(role="user", content="hello", metadata={"a": 1})
     d = msg.to_dict()
     assert d["role"] == "user"
@@ -61,7 +61,7 @@ def test_message_dict():
     assert d2["tool_call_id"] == "tc_123"
 
 
-def test_tool_call():
+def test_tool_call() -> None:
     tc = ToolCall.create("test_tool", {"param": 1})
     assert tc.name == "test_tool"
     assert isinstance(tc.id, str)
@@ -73,7 +73,7 @@ def test_tool_call():
     assert d["arguments"] == {"param": 1}
 
 
-def test_tool_result():
+def test_tool_result() -> None:
     res = ToolResult("tc_1", True, result={"ok": 1}, execution_time=0.5)
     d = res.to_dict()
     assert d["tool_call_id"] == "tc_1"
@@ -83,7 +83,7 @@ def test_tool_result():
     assert d["execution_time"] == 0.5
 
 
-def test_conversation_context():
+def test_conversation_context() -> None:
     ctx = ConversationContext()
     ctx.add_user_message("hello")
     ctx.add_assistant_message("how are you")
@@ -107,7 +107,7 @@ def test_conversation_context():
     assert ctx2.user_expertise == ExpertiseLevel.BEGINNER
 
 
-def test_conversation_context_save_load(tmp_path: Path):
+def test_conversation_context_save_load(tmp_path: Path) -> None:
     file_path = tmp_path / "ctx.json"
 
     ctx = ConversationContext()
@@ -123,12 +123,12 @@ def test_conversation_context_save_load(tmp_path: Path):
     assert ctx2.messages[0].content == "test save"
 
 
-def test_conversation_context_load_missing():
+def test_conversation_context_load_missing() -> None:
     ctx = ConversationContext.load_from_file(Path("does_not_exist.json"))
     assert len(ctx.messages) == 0
 
 
-def test_conversation_context_truncation():
+def test_conversation_context_truncation() -> None:
     ctx = ConversationContext(_max_tokens=10)
     for _i in range(10):
         ctx.add_user_message("A very long message string here " * 10)
@@ -138,14 +138,14 @@ def test_conversation_context_truncation():
     assert len(ctx.messages) < 10
 
 
-def test_conversation_context_clear():
+def test_conversation_context_clear() -> None:
     ctx = ConversationContext()
     ctx.add_user_message("hi")
     ctx.clear_history()
     assert len(ctx.messages) == 0
 
 
-def test_agent_response():
+def test_agent_response() -> None:
     resp = AgentResponse("hi")
     assert not resp.has_tool_calls
 
@@ -158,13 +158,13 @@ def test_agent_response():
     assert len(d["tool_calls"]) == 1
 
 
-def test_agent_chunk():
+def test_agent_chunk() -> None:
     chunk = AgentChunk(content="chunk data", is_final=True)
     assert chunk.content == "chunk data"
     assert chunk.is_final is True
 
 
-def test_conversation_context_from_dict_defaults():
+def test_conversation_context_from_dict_defaults() -> None:
     # Test from_dict with missing data
     ctx = ConversationContext.from_dict({})
     assert len(ctx.messages) == 0

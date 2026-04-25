@@ -102,9 +102,9 @@ def _parse_urdf_geometry(
     Returns:
         Dictionary with geometry_type, dimensions, origin, rotation, and color.
     """
-    if materials is None:
+    if not (materials is not None):
         raise ValueError("materials must be provided")
-    if visual_elem is None:
+    if not (visual_elem is not None):
         raise ValueError("visual_elem must be provided")
     result: dict[str, Any] = {
         "geometry_type": "box",
@@ -207,9 +207,9 @@ def _parse_urdf_links(
     Returns:
         List of URDFLinkGeometry descriptors for each link with visual data.
     """
-    if materials is None:
+    if not (materials is not None):
         raise ValueError("materials must be provided")
-    if root is None:
+    if not (root is not None):
         raise ValueError("root must be provided")
     links: list[URDFLinkGeometry] = []
     for link_elem in root.findall("link"):
@@ -307,7 +307,7 @@ def _find_root_link(links: list[URDFLinkGeometry], child_links: set[str]) -> str
     Returns:
         Name of the root link, or "base" if none can be determined.
     """
-    if links is None:
+    if not (links is not None):
         raise ValueError("links must be provided")
     all_link_names = {link.link_name for link in links}
     root_candidates = all_link_names - child_links

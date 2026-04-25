@@ -65,7 +65,9 @@ class FrictionCone:
         Returns:
             True if force satisfies friction constraint.
         """
-        if force is None:
+        if not (force is not None):
+            raise ValueError("force must be provided")
+        if not (force is not None):
             raise ValueError("force must be provided")
         force = np.asarray(force, dtype=np.float64)
         f_n = float(np.dot(force, self.normal))
@@ -119,7 +121,9 @@ def _compute_cone_generators(
     Returns:
         Generator matrix (3, num_sides).
     """
-    if normal is None:
+    if not (normal is not None):
+        raise ValueError("normal must be provided")
+    if not (normal is not None):
         raise ValueError("normal must be provided")
     normal = np.asarray(normal, dtype=np.float64)
     normal = normal / np.linalg.norm(normal)
@@ -188,7 +192,9 @@ def linearize_friction_cone(
         Tuple of (A, b) such that A @ f <= b enforces friction cone.
         A has shape (num_faces, 3), b has shape (num_faces,).
     """
-    if mu is None:
+    if not (mu is not None):
+        raise ValueError("mu must be provided")
+    if not (mu is not None):
         raise ValueError("mu must be provided")
     normal = np.asarray(normal, dtype=np.float64)
     normal = normal / np.linalg.norm(normal)
@@ -241,7 +247,9 @@ def compute_friction_cone_constraint(
             - 'normal': Contact normal (3,)
             - 'generators': Cone generators (3, num_faces)
     """
-    if contact_normal is None:
+    if not (contact_normal is not None):
+        raise ValueError("contact_normal must be provided")
+    if not (contact_normal is not None):
         raise ValueError("contact_normal must be provided")
     contact_normal = np.asarray(contact_normal, dtype=np.float64)
     contact_normal = contact_normal / np.linalg.norm(contact_normal)
@@ -285,7 +293,9 @@ def project_to_friction_cone(
     Returns:
         Projected force (3,) inside the cone.
     """
-    if force is None:
+    if not (force is not None):
+        raise ValueError("force must be provided")
+    if not (force is not None):
         raise ValueError("force must be provided")
     force = np.asarray(force, dtype=np.float64)
 
@@ -336,7 +346,9 @@ def _project_to_cone_surface(
     """
     # Find point on cone edge that minimizes distance
     # The cone edge is at angle arctan(mu) from normal
-    if f_n is None:
+    if not (f_n is not None):
+        raise ValueError("f_n must be provided")
+    if not (f_n is not None):
         raise ValueError("f_n must be provided")
     if f_t_mag < 1e-10:
         return np.zeros(3)

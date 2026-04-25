@@ -59,7 +59,9 @@ class JointState:
         validate: bool = False,
     ) -> JointState:
         """Create new JointState with optional validation."""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         instance = object.__new__(cls)
         return instance
@@ -134,7 +136,9 @@ class JointState:
         Returns:
             New JointState instance.
         """
-        if d is None:
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
             raise ValueError("d must be provided")
         return cls(
             name=d["name"],
@@ -196,7 +200,9 @@ class ForceVector:
         validate: bool = False,
     ) -> ForceVector:
         """Create new ForceVector with optional validation."""
-        if origin is None:
+        if not (origin is not None):
+            raise ValueError("origin must be provided")
+        if not (origin is not None):
             raise ValueError("origin must be provided")
         instance = object.__new__(cls)
         return instance
@@ -275,7 +281,9 @@ class ForceVector:
         Returns:
             New ForceVector instance.
         """
-        if d is None:
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
             raise ValueError("d must be provided")
         color = tuple(d["color"]) if "color" in d else None
         return cls(

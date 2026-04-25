@@ -86,9 +86,10 @@ end
 %% Set Close Request Function
 set(main_fig, 'CloseRequestFcn', @(src, event) on_close_request(src, event, app_handles));
 
-fprintf('Golf Swing Analysis Application initialized successfully!\n');
+fprintf('Golf Swing Analysis Application launched.\n');
 fprintf('--------------------------------------------------------------\n');
-fprintf('Ready to use. Start with Tab 1 (Model Setup) or Tab 3 (Visualization)\n');
+fprintf('WARNING: Tab 1 (Model Setup) and Tab 2 (ZTCF Calculation) are not yet implemented.\n');
+fprintf('Only Tab 3 (Visualization) is functional. Load pre-generated data files to use it.\n');
 
 end
 

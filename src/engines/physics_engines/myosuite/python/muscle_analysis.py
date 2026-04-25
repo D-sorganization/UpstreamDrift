@@ -470,7 +470,9 @@ class MyoSuiteGripModel:
             sim: MyoSuite/MuJoCo simulation
             analyzer: Muscle analyzer for force computation
         """
-        if analyzer is None:
+        if not (analyzer is not None):
+            raise ValueError("analyzer must be provided")
+        if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         self.sim = sim
         self.model = sim.model if hasattr(sim, "model") else sim

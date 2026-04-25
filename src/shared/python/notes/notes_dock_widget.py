@@ -27,7 +27,9 @@ class NotesDockWidget(QDockWidget):
         title: str = "Notes",
         parent: QWidget | None = None,
     ) -> None:
-        if project_dir is None:
+        if not (project_dir is not None):
+            raise ValueError("project_dir must be provided")
+        if not (project_dir is not None):
             raise ValueError("project_dir must be provided")
         super().__init__(title, parent)
         self.storage = NotesStorage(project_dir=project_dir)

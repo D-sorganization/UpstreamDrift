@@ -79,7 +79,7 @@ STYLE_BTN_IMPORT = (
     f"QPushButton:pressed {{ background: #153820; }}"
 )
 
-# â”€â”€ Full-window dark stylesheet (fallback when fleet ThemeManager unavailable)
+# ── Full-window dark stylesheet (fallback when fleet ThemeManager unavailable)
 # Tracked in #1042: Derive from fleet ThemeManager palette when it's a hard dep.
 PENDULUM_DARK_STYLE = f"""
     QMainWindow {{ background: #12121c; }}

@@ -112,7 +112,7 @@ def _lookup_api_key_by_prefix(api_key: str, db: Session) -> APIKey:
             .all()
         )
     except (RuntimeError, ValueError, OSError):
-        # Fallback: prefix index lookup is unavailable in the current environment.
+        # Fallback: key_prefix column not yet migrated (schema pending)
         active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
     if not active_keys:
@@ -149,7 +149,7 @@ def _get_active_user_for_api_key(api_key_record: APIKey, db: Session) -> User:
 
 
 def _update_api_key_usage(api_key_record: APIKey, db: Session) -> None:
-    if api_key_record is None:
+    if not (api_key_record is not None):
         raise ValueError("api_key_record must be provided")
     from datetime import datetime
 
@@ -168,7 +168,7 @@ async def get_current_user_from_api_key(
     reducing O(n) bcrypt calls to O(1) average case.
     """
 
-    if credentials is None:
+    if not (credentials is not None):
         raise ValueError("credentials must be provided")
     api_key = credentials.credentials
     _validate_api_key_format(api_key)
@@ -193,7 +193,7 @@ async def get_current_user_flexible(
 ) -> User:
     """Get current user from either JWT token or API key."""
 
-    if credentials is None:
+    if not (credentials is not None):
         raise ValueError("credentials must be provided")
     token = credentials.credentials
 

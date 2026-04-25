@@ -27,7 +27,9 @@ class UniversalJointAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
-        if model is None:
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -111,7 +113,9 @@ class UniversalJointAnalyzer:
         # Classic universal joint velocity relationship
         # ω_out/ω_in = cos(β) / (1 - sin²(β)sin²(θ))
         # where β is the joint angle and θ is the input rotation
-        if input_angle is None:
+        if not (input_angle is not None):
+            raise ValueError("input_angle must be provided")
+        if not (input_angle is not None):
             raise ValueError("input_angle must be provided")
         if abs(joint_angle) < 1e-6:
             return 1.0
@@ -191,7 +195,9 @@ class GimbalJointAnalyzer:
             model: MuJoCo model
             data: MuJoCo data
         """
-        if model is None:
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -246,7 +252,9 @@ class GimbalJointAnalyzer:
         Returns:
             Tuple of (is_near_lock, distance_to_lock)
         """
-        if joint_x is None:
+        if not (joint_x is not None):
+            raise ValueError("joint_x must be provided")
+        if not (joint_x is not None):
             raise ValueError("joint_x must be provided")
         _, angle_y, _ = self.get_gimbal_angles(joint_x, joint_y, joint_z)
 
@@ -268,7 +276,9 @@ def plot_torque_wobble(
         analysis_results: Results from UniversalJointAnalyzer.analyze_torque_trans
         save_path: Optional path to save the plot
     """
-    if analysis_results is None:
+    if not (analysis_results is not None):
+        raise ValueError("analysis_results must be provided")
+    if not (analysis_results is not None):
         raise ValueError("analysis_results must be provided")
     _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))  # type: ignore[misc]
 
@@ -319,7 +329,9 @@ def analyze_constraint_forces_over_time(
     Returns:
         Dictionary mapping joint names to force time series
     """
-    if model is None:
+    if not (model is not None):
+        raise ValueError("model must be provided")
+    if not (model is not None):
         raise ValueError("model must be provided")
     if timestep is None:
         timestep = model.opt.timestep
@@ -373,7 +385,9 @@ def plot_constraint_forces(
         joint_names: List of joint names to plot
         save_path: Optional path to save the plot
     """
-    if force_data is None:
+    if not (force_data is not None):
+        raise ValueError("force_data must be provided")
+    if not (force_data is not None):
         raise ValueError("force_data must be provided")
     num_joints = len(joint_names)
     _fig, axes = plt.subplots(num_joints, 1, figsize=(12, 4 * num_joints))

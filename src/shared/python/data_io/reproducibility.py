@@ -106,7 +106,9 @@ def log_execution_time(
         with log_execution_time("forward_kinematics"):
             result = compute_fk(robot, q)
     """
-    if operation_name is None:
+    if not (operation_name is not None):
+        raise ValueError("operation_name must be provided")
+    if not (operation_name is not None):
         raise ValueError("operation_name must be provided")
     logr = logger_obj or logger
     start_time = time.perf_counter()

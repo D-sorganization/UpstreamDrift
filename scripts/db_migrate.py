@@ -153,10 +153,10 @@ def cmd_check(args: argparse.Namespace) -> int:  # noqa: ARG001
     try:
         cfg = _get_alembic_config()
         command.check(cfg)
-        _emit_stdout("Migration check passed: models and migrations are in sync.")
+        print("Migration check passed: models and migrations are in sync.")  # noqa: T201
         return 0
     except Exception as exc:  # noqa: BLE001
-        _emit_stderr(
+        print(  # noqa: T201
             f"Migration check FAILED: {exc}\n"
             "Run: python3 scripts/db_migrate.py revision --autogenerate "
             "-m 'describe your change' to generate a new migration."

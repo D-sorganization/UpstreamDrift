@@ -99,8 +99,8 @@ class ControlsWidgetBase(QWidget):
     - Implement ``_build_model_sections(layout)`` to add model-specific UI.
     - Implement ``_apply_preset(name)`` to populate inputs from preset data.
     - Implement ``get_params()`` to parse and return simulation parameters.
-    - Implement ``_get_joint_names()`` -> list[str] for signal toolkit dialog.
-    - Implement ``_get_torque_inputs()`` -> dict[str, LabeledInput].
+    - Implement ``_get_joint_names()`` â†’ list[str] for signal toolkit dialog.
+    - Implement ``_get_torque_inputs()`` â†’ dict[str, LabeledInput].
     """
 
     # â”€â”€ Common signals (identical across all three widgets) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

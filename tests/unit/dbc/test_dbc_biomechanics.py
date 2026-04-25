@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from typing import Any
 
 import numpy as np
 
@@ -68,7 +69,7 @@ class TestMuscleParametersPreconditions(unittest.TestCase):
 class TestForceLengthActivePostconditions(unittest.TestCase):
     """force_length_active must be ~1.0 at optimal length and < 1 elsewhere."""
 
-    def _make_model(self):  # type: ignore[no-untyped-def]
+    def _make_model(self) -> Any:
         from src.shared.python.biomechanics.hill_muscle import (
             HillMuscleModel,
             MuscleParameters,
@@ -101,7 +102,7 @@ class TestForceLengthActivePostconditions(unittest.TestCase):
 class TestForceLengthPassivePostconditions(unittest.TestCase):
     """Passive force must be zero below optimal length, positive above."""
 
-    def _make_model(self):  # type: ignore[no-untyped-def]
+    def _make_model(self) -> Any:
         from src.shared.python.biomechanics.hill_muscle import (
             HillMuscleModel,
             MuscleParameters,
@@ -136,7 +137,7 @@ class TestForceLengthPassivePostconditions(unittest.TestCase):
 class TestForceVelocityPostconditions(unittest.TestCase):
     """force_velocity must satisfy Hill's hyperbola constraints."""
 
-    def _make_model(self):  # type: ignore[no-untyped-def]
+    def _make_model(self) -> Any:
         from src.shared.python.biomechanics.hill_muscle import (
             HillMuscleModel,
             MuscleParameters,
@@ -171,7 +172,7 @@ class TestForceVelocityPostconditions(unittest.TestCase):
 class TestTendonForcePostconditions(unittest.TestCase):
     """Tendon force must be zero when slack, positive when stretched."""
 
-    def _make_model(self):  # type: ignore[no-untyped-def]
+    def _make_model(self) -> Any:
         from src.shared.python.biomechanics.hill_muscle import (
             HillMuscleModel,
             MuscleParameters,
@@ -204,7 +205,7 @@ class TestTendonForcePostconditions(unittest.TestCase):
 class TestComputeForcePostconditions(unittest.TestCase):
     """compute_force must return non-negative total force."""
 
-    def _make_model(self):  # type: ignore[no-untyped-def]
+    def _make_model(self) -> Any:
         from src.shared.python.biomechanics.hill_muscle import (
             HillMuscleModel,
             MuscleParameters,

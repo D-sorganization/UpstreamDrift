@@ -1,7 +1,41 @@
+"""Dataset Generator for Neural Network Training.
+
+Generates large-scale simulation datasets by varying inputs across physics engines.
+Records all kinematics (q, v, a), kinetics (tau, forces, energies), and model
+data (inertia, bias forces, Jacobians) into structured databases for ML training.
+
+Data models are in _dataset_models.py.
+Export methods are in _dataset_export_mixin.py.
+
+Design by Contract:
+    Preconditions:
+        - Engine must implement PhysicsEngine protocol
+        - Parameter ranges must be valid (min <= max)
+        - Output directory must be writable
+    Postconditions:
+        - Generated dataset contains all requested fields
+        - Data is validated (no NaN/Inf in physics quantities)
+        - Provenance metadata is attached to every dataset
+    Invariants:
+        - Original engine state is restored after generation
+        - All data is reproducible given the same seed
+
+Usage:
+    >>> from src.shared.python.data_io.dataset_generator import DatasetGenerator
+    >>> gen = DatasetGenerator(engine)
+    >>> config = GeneratorConfig(
+    ...     num_samples=1000,
+    ...     duration=2.0,
+    ...     timestep=0.002,
+    ...     vary_initial_positions=True,
+    ... )
+    >>> dataset = gen.generate(config)
+    >>> gen.export(dataset, "output/training_data", format="hdf5")
+"""
+
+from __future__ import annotations
+
 import contextlib
-import json
-import sqlite3
-from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -11,8 +45,15 @@ from src.shared.python.core.error_utils import SimulationError
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from .config import GeneratorConfig
-from .models import SimulationSample, TrainingDataset
+# Re-export public data models for backward compatibility
+from ._dataset_export_mixin import _DatasetExportMixin
+from ._dataset_models import (
+    ControlProfile,
+    GeneratorConfig,
+    ParameterRange,
+    SimulationSample,
+    TrainingDataset,
+)
 
 logger = get_logger(__name__)
 
@@ -21,7 +62,7 @@ logger = get_logger(__name__)
     lambda self: self.engine is not None,
     "DatasetGenerator must have a valid engine reference",
 )
-class DatasetGenerator:
+class DatasetGenerator(_DatasetExportMixin):
     """Generates simulation datasets for neural network training.
 
     Uses a PhysicsEngine to run simulations with varied inputs and records
@@ -47,7 +88,10 @@ class DatasetGenerator:
         Raises:
             ValueError: If engine has no model loaded.
         """
-        if engine is None:
+
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
             raise ValueError("engine must be provided")
         self.engine = engine
         self._original_state: tuple[np.ndarray, np.ndarray] | None = None
@@ -85,7 +129,10 @@ class DatasetGenerator:
         Raises:
             RuntimeError: If simulation fails for all samples.
         """
-        if config is None:
+
+        if not (config is not None):
+            raise ValueError("config must be provided")
+        if not (config is not None):
             raise ValueError("config must be provided")
         rng = np.random.default_rng(config.seed)
 
@@ -112,42 +159,44 @@ class DatasetGenerator:
             n_steps,
         )
 
-        for i in range(config.num_samples):
-            try:
-                sample = self._run_single_simulation(
-                    sample_id=i,
-                    config=config,
-                    rng=rng,
-                    n_steps=n_steps,
-                    n_q=n_q,
-                    n_v=n_v,
+        try:
+            for i in range(config.num_samples):
+                try:
+                    sample = self._run_single_simulation(
+                        sample_id=i,
+                        config=config,
+                        rng=rng,
+                        n_steps=n_steps,
+                        n_q=n_q,
+                        n_v=n_v,
+                    )
+                    samples.append(sample)
+
+                    if progress_callback is not None:
+                        progress_callback(i + 1, config.num_samples)
+
+                except (RuntimeError, TypeError, ValueError) as e:
+                    logger.warning("Sample %d failed: %s", i, e)
+                    failed_count += 1
+                    continue
+
+            if not samples:
+                raise SimulationError(
+                    f"All {config.num_samples} samples failed during generation"
                 )
-                samples.append(sample)
 
-                if progress_callback is not None:
-                    progress_callback(i + 1, config.num_samples)
+            if failed_count > 0:
+                logger.warning(
+                    "%d/%d samples failed during generation",
+                    failed_count,
+                    config.num_samples,
+                )
 
-            except (RuntimeError, TypeError, ValueError) as e:
-                logger.warning("Sample %d failed: %s", i, e)
-                failed_count += 1
-                continue
-
-        if not samples:
-            raise SimulationError(
-                f"All {config.num_samples} samples failed during generation"
-            )
-
-        if failed_count > 0:
-            logger.warning(
-                "%d/%d samples failed during generation",
-                failed_count,
-                config.num_samples,
-            )
-
-        # Restore original state
-        if self._original_state is not None:
-            with contextlib.suppress(ValueError, RuntimeError, AttributeError):
-                self.engine.set_state(*self._original_state)
+        finally:
+            # Restore original state regardless of success or failure
+            if self._original_state is not None:
+                with contextlib.suppress(ValueError, RuntimeError, AttributeError):
+                    self.engine.set_state(*self._original_state)
 
         dataset = TrainingDataset(
             samples=samples,
@@ -215,19 +264,19 @@ class DatasetGenerator:
             "control_type": profile.profile_type,
         }
 
-        if buffers["times"] is None:
+        if not (buffers["times"] is not None):
             raise ValueError("times buffer must not be None")
-        if buffers["positions"] is None:
+        if not (buffers["positions"] is not None):
             raise ValueError("positions buffer must not be None")
-        if buffers["velocities"] is None:
+        if not (buffers["velocities"] is not None):
             raise ValueError("velocities buffer must not be None")
-        if buffers["accelerations"] is None:
+        if not (buffers["accelerations"] is not None):
             raise ValueError("accelerations buffer must not be None")
-        if buffers["torques"] is None:
+        if not (buffers["torques"] is not None):
             raise ValueError("torques buffer must not be None")
-        if buffers["kinetic_energy"] is None:
+        if not (buffers["kinetic_energy"] is not None):
             raise ValueError("kinetic_energy buffer must not be None")
-        if buffers["potential_energy"] is None:
+        if not (buffers["potential_energy"] is not None):
             raise ValueError("potential_energy buffer must not be None")
 
         return SimulationSample(
@@ -352,7 +401,10 @@ class DatasetGenerator:
             v: Current velocity vector.
             buffers: Pre-allocated recording buffers (modified in-place).
         """
-        if config is None:
+
+        if not (config is not None):
+            raise ValueError("config must be provided")
+        if not (config is not None):
             raise ValueError("config must be provided")
         if config.record_mass_matrix and buffers["mass_matrices"] is not None:
             with contextlib.suppress(ValueError, RuntimeError, AttributeError):
@@ -390,6 +442,10 @@ class DatasetGenerator:
             buffers["kinetic_energy"][step] = 0.5 * float(v.T @ M @ v)  # type: ignore[index]
         except (ValueError, RuntimeError, AttributeError):
             pass
+        with contextlib.suppress(ValueError, RuntimeError, AttributeError):
+            buffers["potential_energy"][step] = float(  # type: ignore[index]
+                self.engine.compute_potential_energy()  # type: ignore[attr-defined]
+            )
 
     def _generate_initial_conditions(
         self,
@@ -409,7 +465,10 @@ class DatasetGenerator:
         Returns:
             Tuple of (initial_positions, initial_velocities).
         """
-        if config is None:
+
+        if not (config is not None):
+            raise ValueError("config must be provided")
+        if not (config is not None):
             raise ValueError("config must be provided")
         if config.vary_initial_positions and config.position_ranges:
             q0 = np.zeros(n_q)
@@ -483,342 +542,12 @@ class DatasetGenerator:
         n_q, _ = self._get_dimensions()
         return [f"joint_{i}" for i in range(n_q)]
 
-    def export_to_hdf5(self, dataset: TrainingDataset, output_path: str | Path) -> Path:
-        """Export dataset to HDF5 format.
 
-        Args:
-            dataset: Training dataset to export.
-            output_path: Output file path (without extension).
-
-        Returns:
-            Path to the created HDF5 file.
-
-        Raises:
-            ImportError: If h5py is not available.
-        """
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        try:
-            import h5py
-        except ImportError:
-            raise ImportError(
-                "h5py required for HDF5 export: pip install h5py"
-            ) from None
-
-        output_path = Path(output_path)
-        if not output_path.suffix:
-            output_path = output_path.with_suffix(".hdf5")
-
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        with h5py.File(str(output_path), "w") as f:
-            self._write_hdf5_metadata(f, dataset)
-            samples_grp = f.create_group("samples")
-            for sample in dataset.samples:
-                self._write_hdf5_sample(samples_grp, sample)
-
-        logger.info("Exported dataset to HDF5: %s", output_path)
-        return output_path
-
-    @staticmethod
-    def _write_hdf5_metadata(f: Any, dataset: TrainingDataset) -> None:
-        """Write dataset-level metadata to an HDF5 file."""
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        meta = f.create_group("metadata")
-        meta.attrs["model_name"] = dataset.model_name
-        meta.attrs["engine_name"] = dataset.engine_name
-        meta.attrs["num_samples"] = dataset.num_samples
-        meta.attrs["total_frames"] = dataset.total_frames
-        meta.attrs["creation_time"] = dataset.creation_time
-        meta.attrs["duration"] = dataset.config.duration
-        meta.attrs["timestep"] = dataset.config.timestep
-        meta.attrs["seed"] = dataset.config.seed
-
-        if dataset.joint_names:
-            meta.create_dataset(
-                "joint_names",
-                data=[n.encode("utf-8") for n in dataset.joint_names],
-            )
-
-    @staticmethod
-    def _write_hdf5_sample(samples_grp: Any, sample: SimulationSample) -> None:
-        """Write a single sample's data to an HDF5 samples group."""
-        if sample is None:
-            raise ValueError("sample must be provided")
-        s_grp = samples_grp.create_group(f"sample_{sample.sample_id:06d}")
-        s_grp.create_dataset("times", data=sample.times, compression="gzip")
-        s_grp.create_dataset("positions", data=sample.positions, compression="gzip")
-        s_grp.create_dataset("velocities", data=sample.velocities, compression="gzip")
-        s_grp.create_dataset(
-            "accelerations", data=sample.accelerations, compression="gzip"
-        )
-        s_grp.create_dataset("torques", data=sample.torques, compression="gzip")
-
-        optional_fields = [
-            ("mass_matrices", sample.mass_matrices),
-            ("bias_forces", sample.bias_forces),
-            ("gravity_forces", sample.gravity_forces),
-            ("contact_forces", sample.contact_forces),
-            ("drift_accelerations", sample.drift_accelerations),
-            ("control_accelerations", sample.control_accelerations),
-        ]
-        for field_name, field_data in optional_fields:
-            if field_data is not None:
-                s_grp.create_dataset(field_name, data=field_data, compression="gzip")
-
-        if sample.energies:
-            e_grp = s_grp.create_group("energies")
-            for key, arr in sample.energies.items():
-                e_grp.create_dataset(key, data=arr, compression="gzip")
-
-        s_grp.attrs["metadata"] = json.dumps(sample.metadata)
-
-    def export_to_sqlite(
-        self, dataset: TrainingDataset, output_path: str | Path
-    ) -> Path:
-        """Export dataset to SQLite database.
-
-        Args:
-            dataset: Training dataset to export.
-            output_path: Output database path.
-
-        Returns:
-            Path to the created SQLite database.
-        """
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        output_path = Path(output_path)
-        if not output_path.suffix:
-            output_path = output_path.with_suffix(".db")
-
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        conn = sqlite3.connect(str(output_path))
-        try:
-            cursor = conn.cursor()
-            self._create_sqlite_tables(cursor)
-            self._insert_sqlite_metadata(cursor, dataset)
-            for sample in dataset.samples:
-                self._insert_sqlite_sample(cursor, sample)
-            conn.commit()
-        finally:
-            conn.close()
-
-        logger.info("Exported dataset to SQLite: %s", output_path)
-        return output_path
-
-    @staticmethod
-    def _create_sqlite_tables(cursor: sqlite3.Cursor) -> None:
-        """Create the SQLite schema tables."""
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS dataset_metadata (
-                key TEXT PRIMARY KEY,
-                value TEXT
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS samples (
-                sample_id INTEGER PRIMARY KEY,
-                metadata_json TEXT,
-                n_steps INTEGER,
-                n_q INTEGER,
-                n_v INTEGER
-            )
-        """)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS frames (
-                sample_id INTEGER,
-                step INTEGER,
-                time REAL,
-                positions_json TEXT,
-                velocities_json TEXT,
-                accelerations_json TEXT,
-                torques_json TEXT,
-                kinetic_energy REAL,
-                PRIMARY KEY (sample_id, step),
-                FOREIGN KEY (sample_id) REFERENCES samples(sample_id)
-            )
-        """)
-
-    @staticmethod
-    def _insert_sqlite_metadata(
-        cursor: sqlite3.Cursor, dataset: TrainingDataset
-    ) -> None:
-        """Insert dataset-level metadata into the SQLite database."""
-        if cursor is None:
-            raise ValueError("cursor must be provided")
-        meta_items = [
-            ("model_name", dataset.model_name),
-            ("engine_name", dataset.engine_name),
-            ("num_samples", str(dataset.num_samples)),
-            ("total_frames", str(dataset.total_frames)),
-            ("creation_time", str(dataset.creation_time)),
-            ("seed", str(dataset.config.seed)),
-            ("duration", str(dataset.config.duration)),
-            ("timestep", str(dataset.config.timestep)),
-            ("joint_names", json.dumps(dataset.joint_names)),
-        ]
-        cursor.executemany(
-            "INSERT OR REPLACE INTO dataset_metadata (key, value) VALUES (?, ?)",
-            meta_items,
-        )
-
-    @staticmethod
-    def _insert_sqlite_sample(cursor: sqlite3.Cursor, sample: SimulationSample) -> None:
-        """Insert a single sample and its frames into the SQLite database."""
-        if cursor is None:
-            raise ValueError("cursor must be provided")
-        n_steps = len(sample.times)
-        n_q = sample.positions.shape[1] if sample.positions.ndim > 1 else 0
-        n_v = sample.velocities.shape[1] if sample.velocities.ndim > 1 else 0
-
-        cursor.execute(
-            "INSERT INTO samples (sample_id, metadata_json, n_steps, n_q, n_v) "
-            "VALUES (?, ?, ?, ?, ?)",
-            (sample.sample_id, json.dumps(sample.metadata), n_steps, n_q, n_v),
-        )
-
-        frame_rows = []
-        for step in range(n_steps):
-            ke = (
-                float(sample.energies["kinetic"][step])
-                if "kinetic" in sample.energies
-                else 0.0
-            )
-            frame_rows.append(
-                (
-                    sample.sample_id,
-                    step,
-                    float(sample.times[step]),
-                    json.dumps(sample.positions[step].tolist()),
-                    json.dumps(sample.velocities[step].tolist()),
-                    json.dumps(sample.accelerations[step].tolist()),
-                    json.dumps(sample.torques[step].tolist()),
-                    ke,
-                )
-            )
-
-        cursor.executemany(
-            "INSERT INTO frames "
-            "(sample_id, step, time, positions_json, velocities_json, "
-            "accelerations_json, torques_json, kinetic_energy) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            frame_rows,
-        )
-
-    def export_to_csv(self, dataset: TrainingDataset, output_dir: str | Path) -> Path:
-        """Export dataset to CSV files (one per sample).
-
-        Args:
-            dataset: Training dataset to export.
-            output_dir: Output directory for CSV files.
-
-        Returns:
-            Path to the output directory.
-        """
-        if dataset is None:
-            raise ValueError("dataset must be provided")
-        output_dir = Path(output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        for sample in dataset.samples:
-            n_steps = len(sample.times)
-            n_q = sample.positions.shape[1]
-            n_v = sample.velocities.shape[1]
-
-            # Build header
-            headers = ["time"]
-            headers.extend([f"q_{i}" for i in range(n_q)])
-            headers.extend([f"v_{i}" for i in range(n_v)])
-            headers.extend([f"a_{i}" for i in range(n_v)])
-            headers.extend([f"tau_{i}" for i in range(n_v)])
-            headers.append("kinetic_energy")
-
-            # Build data matrix
-            data_cols = [sample.times.reshape(-1, 1)]
-            data_cols.append(sample.positions)
-            data_cols.append(sample.velocities)
-            data_cols.append(sample.accelerations)
-            data_cols.append(sample.torques)
-
-            ke = sample.energies.get("kinetic", np.zeros(n_steps))
-            data_cols.append(ke.reshape(-1, 1))
-
-            data = np.hstack(data_cols)
-
-            filepath = output_dir / f"sample_{sample.sample_id:06d}.csv"
-            np.savetxt(
-                str(filepath),
-                data,
-                delimiter=",",
-                header=",".join(headers),
-                comments="",
-            )
-
-        # Write metadata file
-        meta_path = output_dir / "metadata.json"
-        meta = {
-            "model_name": dataset.model_name,
-            "engine_name": dataset.engine_name,
-            "num_samples": dataset.num_samples,
-            "total_frames": dataset.total_frames,
-            "joint_names": dataset.joint_names,
-            "config": {
-                "duration": dataset.config.duration,
-                "timestep": dataset.config.timestep,
-                "seed": dataset.config.seed,
-                "num_samples": dataset.config.num_samples,
-            },
-        }
-        with open(meta_path, "w") as f:
-            json.dump(meta, f, indent=2)
-
-        logger.info("Exported dataset to CSV: %s", output_dir)
-        return output_dir
-
-    @precondition(
-        lambda self, dataset, output_path, format="hdf5": dataset is not None,
-        "Dataset must not be None",
-    )
-    @precondition(
-        lambda self, dataset, output_path, format="hdf5": (
-            output_path is not None and len(str(output_path)) > 0
-        ),
-        "Output path must be a non-empty string or Path",
-    )
-    @precondition(
-        lambda self, dataset, output_path, format="hdf5": (
-            format in ("hdf5", "sqlite", "db", "csv")
-        ),
-        "Export format must be one of: hdf5, sqlite, db, csv",
-    )
-    def export(
-        self,
-        dataset: TrainingDataset,
-        output_path: str | Path,
-        format: str = "hdf5",
-    ) -> Path:
-        """Export dataset in the specified format.
-
-        Args:
-            dataset: Training dataset to export.
-            output_path: Output path (file or directory depending on format).
-            format: Export format ('hdf5', 'sqlite', 'csv').
-
-        Returns:
-            Path to the exported data.
-
-        Raises:
-            ValueError: If format is not supported.
-        """
-        format = format.lower()
-        if format == "hdf5":
-            return self.export_to_hdf5(dataset, output_path)
-        if format in ("sqlite", "db"):
-            return self.export_to_sqlite(dataset, output_path)
-        if format == "csv":
-            return self.export_to_csv(dataset, output_path)
-        raise ValueError(
-            f"Unsupported export format: {format}. Supported: hdf5, sqlite, csv"
-        )
+__all__ = [
+    "ControlProfile",
+    "DatasetGenerator",
+    "GeneratorConfig",
+    "ParameterRange",
+    "SimulationSample",
+    "TrainingDataset",
+]

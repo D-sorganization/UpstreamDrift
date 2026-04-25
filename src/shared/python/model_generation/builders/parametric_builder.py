@@ -84,7 +84,7 @@ class ParametricBuilder(BaseURDFBuilder):
         self,
         robot_name: str = "humanoid",
         config: ParametricConfig | None = None,
-    ):
+    ) -> None:
         """
         Initialize parametric builder.
 
@@ -92,7 +92,9 @@ class ParametricBuilder(BaseURDFBuilder):
             robot_name: Name for the robot element
             config: Builder configuration
         """
-        if robot_name is None:
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
+        if not (robot_name is not None):
             raise ValueError("robot_name must be provided")
         super().__init__(robot_name)
         self._config = config or ParametricConfig()
@@ -244,7 +246,9 @@ class ParametricBuilder(BaseURDFBuilder):
         width: float,
     ) -> tuple[Geometry, Inertia]:
         """Create geometry and inertia for a segment based on shape type."""
-        if geometry_type is None:
+        if not (geometry_type is not None):
+            raise ValueError("geometry_type must be provided")
+        if not (geometry_type is not None):
             raise ValueError("geometry_type must be provided")
         if geometry_type == GeometryType.CAPSULE:
             radius = width / 2
@@ -282,7 +286,9 @@ class ParametricBuilder(BaseURDFBuilder):
         origin_offset: tuple[float, float, float],
     ) -> None:
         """Create a joint connecting a segment to its parent."""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         joint_name = f"{parent}_to_{name}"
         limits = None
@@ -372,7 +378,9 @@ class ParametricBuilder(BaseURDFBuilder):
     ) -> dict[str, float]:
         """Add torso segments (pelvis, lumbar, thorax)."""
         # Pelvis (root)
-        if get_mass is None:
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
             raise ValueError("get_mass must be provided")
         self.add_segment(
             name="pelvis",
@@ -429,7 +437,9 @@ class ParametricBuilder(BaseURDFBuilder):
         segment_heights: dict[str, float],
     ) -> None:
         """Add head and neck segments."""
-        if get_mass is None:
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
             raise ValueError("get_mass must be provided")
         thorax_height = segment_heights["thorax"]
 
@@ -467,7 +477,9 @@ class ParametricBuilder(BaseURDFBuilder):
         segment_heights: dict[str, float],
     ) -> None:
         """Add arm segments (shoulder, upper arm, forearm, hand) for both sides."""
-        if get_mass is None:
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
             raise ValueError("get_mass must be provided")
         thorax_height = segment_heights["thorax"]
         shoulder_width = (
@@ -490,7 +502,9 @@ class ParametricBuilder(BaseURDFBuilder):
     ) -> None:
         """Add segments for a single arm."""
         # Shoulder
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         self.add_segment(
             name=f"{side}_shoulder",
@@ -553,7 +567,9 @@ class ParametricBuilder(BaseURDFBuilder):
         segment_heights: dict[str, float],
     ) -> None:
         """Add leg segments (thigh, shin, foot) for both sides."""
-        if get_mass is None:
+        if not (get_mass is not None):
+            raise ValueError("get_mass must be provided")
+        if not (get_mass is not None):
             raise ValueError("get_mass must be provided")
         pelvis_height = segment_heights["pelvis"]
         hip_width = (
@@ -576,7 +592,9 @@ class ParametricBuilder(BaseURDFBuilder):
     ) -> None:
         """Add segments for a single leg."""
         # Thigh
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         self.add_segment(
             name=f"{side}_thigh",

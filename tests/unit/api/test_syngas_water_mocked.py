@@ -8,6 +8,7 @@ internal mathematical logic.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -22,7 +23,7 @@ client = TestClient(_app)
 
 
 @pytest.fixture
-def mock_calculator():
+def mock_calculator() -> Generator[MagicMock, None, None]:
     """Mock the SyngasWaterCalculator securely from Tools."""
     with patch(
         "upstream_drift_tools.process_calculators.syngas_water_calculator.SyngasWaterCalculator"
@@ -33,7 +34,7 @@ def mock_calculator():
 
 
 @pytest.fixture
-def mock_estimate_risk():
+def mock_estimate_risk() -> Generator[MagicMock, None, None]:
     """Mock the estimate_condensation_risk function."""
     with patch(
         "upstream_drift_tools.process_calculators.syngas_water_calculator.estimate_condensation_risk"

@@ -1,0 +1,66 @@
+from __future__ import annotations
+
+from collections.abc import Iterator
+
+from model_generation.library._model_types import (
+    ModelCategory,
+    ModelEntry,
+    RepositorySource,
+)
+
+
+def list_models(
+    entries: dict[str, ModelEntry],
+    category: ModelCategory | None = None,
+    source: RepositorySource | None = None,
+    tags: list[str] | None = None,
+    search: str | None = None,
+) -> list[ModelEntry]:
+    results = []
+
+    for entry in entries.values():
+        if category and entry.category != category:
+            continue
+
+        if source and entry.source != source:
+            continue
+
+        if tags and not any(t in entry.tags for t in tags):
+            continue
+
+        if search:
+            search_lower = search.lower()
+            if (
+                search_lower not in entry.name.lower()
+                and search_lower not in entry.description.lower()
+            ):
+                continue
+
+        results.append(entry)
+
+    return sorted(results, key=lambda e: e.name)
+
+
+def get_model(
+    entries: dict[str, ModelEntry],
+    model_id: str,
+) -> ModelEntry | None:
+    return entries.get(model_id)
+
+
+def get_categories(entries: dict[str, ModelEntry]) -> list[ModelCategory]:
+    categories = set()
+    for entry in entries.values():
+        categories.add(entry.category)
+    return sorted(categories, key=lambda c: c.value)
+
+
+def get_tags(entries: dict[str, ModelEntry]) -> list[str]:
+    tags: set[str] = set()
+    for entry in entries.values():
+        tags.update(entry.tags)
+    return sorted(tags)
+
+
+def iter_entries(entries: dict[str, ModelEntry]) -> Iterator[ModelEntry]:
+    return iter(entries.values())

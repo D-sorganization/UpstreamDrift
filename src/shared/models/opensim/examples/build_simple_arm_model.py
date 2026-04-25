@@ -25,9 +25,12 @@ Requirements:
     - OpenSim Python package: conda install -c opensim-org opensim
 """
 
+from __future__ import annotations
+
 import logging
 import math
 import sys
+from typing import Any
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 
@@ -42,7 +45,7 @@ except ImportError:
     sys.exit(1)
 
 
-def _create_arm_bodies():
+def _create_arm_bodies() -> tuple[Any, Any]:
     humerus = osim.Body(
         "humerus",
         1.0,  # mass [kg]
@@ -58,8 +61,10 @@ def _create_arm_bodies():
     return humerus, radius
 
 
-def _create_arm_joints(arm, humerus, radius):
-    if arm is None:
+def _create_arm_joints(arm: Any, humerus: Any, radius: Any) -> tuple[Any, Any]:
+    if not (arm is not None):
+        raise ValueError("arm must be provided")
+    if not (arm is not None):
         raise ValueError("arm must be provided")
     shoulder = osim.PinJoint(
         "shoulder",
@@ -83,8 +88,10 @@ def _create_arm_joints(arm, humerus, radius):
     return shoulder, elbow
 
 
-def _create_biceps_muscle(humerus, radius):
-    if humerus is None:
+def _create_biceps_muscle(humerus: Any, radius: Any) -> Any:
+    if not (humerus is not None):
+        raise ValueError("humerus must be provided")
+    if not (humerus is not None):
         raise ValueError("humerus must be provided")
     biceps = osim.Millard2012EquilibriumMuscle(
         "biceps",  # name
@@ -98,15 +105,17 @@ def _create_biceps_muscle(humerus, radius):
     return biceps
 
 
-def _create_controller(biceps):
+def _create_controller(biceps: Any) -> Any:
     brain = osim.PrescribedController()
     brain.addActuator(biceps)
     brain.prescribeControlForActuator("biceps", osim.StepFunction(0.5, 3.0, 0.3, 1.0))
     return brain
 
 
-def _add_reporter(arm, biceps, elbow):
-    if arm is None:
+def _add_reporter(arm: Any, biceps: Any, elbow: Any) -> None:
+    if not (arm is not None):
+        raise ValueError("arm must be provided")
+    if not (arm is not None):
         raise ValueError("arm must be provided")
     reporter = osim.ConsoleReporter()
     reporter.set_report_time_interval(1.0)
@@ -116,8 +125,10 @@ def _add_reporter(arm, biceps, elbow):
     arm.addComponent(reporter)
 
 
-def _attach_body_visualization(body, name):
-    if body is None:
+def _attach_body_visualization(body: Any, name: str) -> None:
+    if not (body is not None):
+        raise ValueError("body must be provided")
+    if not (body is not None):
         raise ValueError("body must be provided")
     body_geometry = osim.Ellipsoid(0.1, 0.5, 0.1)
     body_geometry.setColor(osim.Gray)
@@ -171,7 +182,9 @@ def run_simulation(model: osim.Model, duration: float = 10.0) -> osim.State:
         Final state after simulation.
     """
     # Initialize the system
-    if model is None:
+    if not (model is not None):
+        raise ValueError("model must be provided")
+    if not (model is not None):
         raise ValueError("model must be provided")
     state = model.initSystem()
 

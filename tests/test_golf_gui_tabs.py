@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import sys
 import unittest
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import MagicMock
 from unittest.mock import patch as _patch
 
@@ -36,13 +40,13 @@ class MockQWidget(MockQObject):
         super().__init__(parent)
         self.layout = None
 
-    def setLayout(self, layout):
+    def setLayout(self, layout) -> None:
         self.layout = layout
 
-    def show(self):
+    def show(self) -> None:
         pass
 
-    def setFocusPolicy(self, policy):
+    def setFocusPolicy(self, policy) -> None:
         pass
 
 
@@ -57,10 +61,10 @@ class MockLayout(MockQObject):
         self.widgets = []
         self.layouts = []
 
-    def addWidget(self, widget, *args):
+    def addWidget(self, widget, *args) -> None:
         self.widgets.append(widget)
 
-    def addLayout(self, layout, *args):
+    def addLayout(self, layout, *args) -> None:
         self.layouts.append(layout)
 
 
@@ -96,7 +100,7 @@ class MockQLabel(MockQWidget):
         self.setStyleSheet = MagicMock()
         self.setAlignment = MagicMock()
 
-    def setText(self, text):
+    def setText(self, text) -> None:
         self.text = text
 
 
@@ -106,7 +110,7 @@ class MockQComboBox(MockQWidget):
         self.items = []
         self.currentText = MagicMock(return_value="")
 
-    def addItems(self, items):
+    def addItems(self, items) -> None:
         self.items.extend(items)
 
 
@@ -147,13 +151,13 @@ class MockProperty:
         self.fget = fget
         self.fset = fset
 
-    def setter(self, fset):
+    def setter(self, fset) -> MockProperty:
         self.fset = fset
         return self
 
 
-def mock_pyqt_property(type_):
-    def decorator(func):
+def mock_pyqt_property(type_) -> Callable[[Any], MockProperty]:
+    def decorator(func) -> MockProperty:
         return MockProperty(fget=func)
 
     return decorator
@@ -226,7 +230,7 @@ with _patch.dict("sys.modules", _MOCK_MODULES):
 
 
 class TestGolfGuiTabs(unittest.TestCase):
-    def test_simulink_model_tab_structure(self):
+    def test_simulink_model_tab_structure(self) -> None:
         # Instantiate the tab
         tab = golf_gui_application.SimulinkModelTab(parent=MockQWidget())
 
@@ -243,7 +247,7 @@ class TestGolfGuiTabs(unittest.TestCase):
         )
         self.assertIsInstance(tab.layout.widgets[2], golf_gui_application.QLabel)
 
-    def test_comparison_tab_structure(self):
+    def test_comparison_tab_structure(self) -> None:
         # Instantiate the tab
         tab = golf_gui_application.ComparisonTab(parent=MockQWidget())
 

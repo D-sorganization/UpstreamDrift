@@ -10,7 +10,7 @@ import contextlib
 from typing import Any
 
 import numpy as np
-import pinocchio as pin  # type: ignore[import-untyped]
+import pinocchio as pin
 from PyQt6 import QtWidgets
 
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -173,7 +173,9 @@ class PinocchioVisualizationMixin:
         color: int,
     ) -> None:
         """Draw ellipsoid using Meshcat."""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if self.viewer is None:
             return
@@ -336,7 +338,9 @@ class PinocchioVisualizationMixin:
         self: Any, path: str, start: np.ndarray, vector: np.ndarray, color: int
     ) -> None:
         """Helper to draw an arrow in Meshcat."""
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         if self.viewer is None:
             return
@@ -406,7 +410,9 @@ class PinocchioVisualizationMixin:
             self._update_viewer()
 
     def _toggle_forces(self: Any, checked: bool) -> None:  # noqa: FBT001
-        if checked is None:
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
+        if not (checked is not None):
             raise ValueError("checked must be provided")
         if self.viewer is None:
             return
@@ -415,7 +421,9 @@ class PinocchioVisualizationMixin:
         self._update_viewer()
 
     def _toggle_torques(self: Any, checked: bool) -> None:  # noqa: FBT001
-        if checked is None:
+        if not (checked is not None):
+            raise ValueError("checked must be provided")
+        if not (checked is not None):
             raise ValueError("checked must be provided")
         if self.viewer is None:
             return

@@ -6,6 +6,7 @@ Extracted from golf_gui_application.py for Single Responsibility Principle.
 from __future__ import annotations
 
 from copy import copy
+from typing import Any
 
 import numpy as np
 from golf_data_core import FrameData, FrameProcessor
@@ -32,8 +33,10 @@ class SmoothPlaybackController(QObject):
     frameUpdated = pyqtSignal(FrameData)  # Emits interpolated frame data
     positionChanged = pyqtSignal(float)  # Emits current position (0.0 to total_frames)
 
-    def __init__(self, parent=None) -> None:
-        if parent is None:
+    def __init__(self, parent: Any = None) -> None:
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
             raise ValueError("parent must be provided")
         super().__init__(parent)
 
@@ -54,7 +57,9 @@ class SmoothPlaybackController(QObject):
 
     def load_frame_processor(self, frame_processor: FrameProcessor) -> None:
         """Load frame processor with motion data."""
-        if frame_processor is None:
+        if not (frame_processor is not None):
+            raise ValueError("frame_processor must be provided")
+        if not (frame_processor is not None):
             raise ValueError("frame_processor must be provided")
         self.frame_processor = frame_processor
         self.stop()
@@ -72,7 +77,9 @@ class SmoothPlaybackController(QObject):
     @position.setter
     def position(self, value: float) -> None:
         """Set playback position with interpolation."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         if self.frame_processor is None:
             return
@@ -142,7 +149,9 @@ class SmoothPlaybackController(QObject):
 
     def seek(self, position: float) -> None:
         """Seek to specific frame position."""
-        if position is None:
+        if not (position is not None):
+            raise ValueError("position must be provided")
+        if not (position is not None):
             raise ValueError("position must be provided")
         if self.frame_processor is None:
             return
@@ -159,7 +168,9 @@ class SmoothPlaybackController(QObject):
 
     def set_playback_speed(self, speed: float) -> None:
         """Set playback speed multiplier (0.5 = half speed, 2.0 = double speed)."""
-        if speed is None:
+        if not (speed is not None):
+            raise ValueError("speed must be provided")
+        if not (speed is not None):
             raise ValueError("speed must be provided")
         self._playback_speed = np.clip(speed, 0.1, 10.0)
 
@@ -217,7 +228,9 @@ class SmoothPlaybackController(QObject):
         Returns:
             Interpolated frame data
         """
-        if frame_a is None:
+        if not (frame_a is not None):
+            raise ValueError("frame_a must be provided")
+        if not (frame_a is not None):
             raise ValueError("frame_a must be provided")
         result = copy(frame_a)
 

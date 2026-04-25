@@ -10,6 +10,7 @@ while valid inputs still work correctly.
 from __future__ import annotations
 
 import os
+from typing import Any
 
 import pytest
 
@@ -59,7 +60,7 @@ SIMPLE_URDF = """<?xml version="1.0"?>
 
 
 @pytest.fixture
-def editor():
+def editor() -> Any:
     """Create a FrankensteinEditor with a loaded model."""
     from model_generation.editor import FrankensteinEditor
 
@@ -78,23 +79,23 @@ def editor():
 class TestDeleteLinkPreconditions:
     """Tests for delete_link precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.delete_link("", "arm_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.delete_link(None, "arm_link")
 
-    def test_empty_link_name_raises(self, editor):
+    def test_empty_link_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="link_name"):
             editor.delete_link("editable", "")
 
-    def test_none_link_name_raises(self, editor):
+    def test_none_link_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="link_name"):
             editor.delete_link("editable", None)
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.delete_link("editable", "hand_link", reparent_children=False)
         assert result is True
 
@@ -102,23 +103,23 @@ class TestDeleteLinkPreconditions:
 class TestDeleteSubtreePreconditions:
     """Tests for delete_subtree precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.delete_subtree("", "arm_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.delete_subtree(None, "arm_link")
 
-    def test_empty_root_link_raises(self, editor):
+    def test_empty_root_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="root_link"):
             editor.delete_subtree("editable", "")
 
-    def test_none_root_link_raises(self, editor):
+    def test_none_root_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="root_link"):
             editor.delete_subtree("editable", None)
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.delete_subtree("editable", "hand_link")
         assert result is True
 
@@ -126,23 +127,23 @@ class TestDeleteSubtreePreconditions:
 class TestRenameLinkPreconditions:
     """Tests for rename_link precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.rename_link("", "arm_link", "new_name")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.rename_link(None, "arm_link", "new_name")
 
-    def test_empty_old_name_raises(self, editor):
+    def test_empty_old_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="old_name"):
             editor.rename_link("editable", "", "new_name")
 
-    def test_empty_new_name_raises(self, editor):
+    def test_empty_new_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="new_name"):
             editor.rename_link("editable", "arm_link", "")
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.rename_link("editable", "arm_link", "renamed_arm")
         assert result is True
 
@@ -150,23 +151,23 @@ class TestRenameLinkPreconditions:
 class TestRenameJointPreconditions:
     """Tests for rename_joint precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.rename_joint("", "base_to_arm", "new_joint")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.rename_joint(None, "base_to_arm", "new_joint")
 
-    def test_empty_old_name_raises(self, editor):
+    def test_empty_old_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="old_name"):
             editor.rename_joint("editable", "", "new_joint")
 
-    def test_empty_new_name_raises(self, editor):
+    def test_empty_new_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="new_name"):
             editor.rename_joint("editable", "base_to_arm", "")
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.rename_joint("editable", "base_to_arm", "renamed_joint")
         assert result is True
 
@@ -174,23 +175,23 @@ class TestRenameJointPreconditions:
 class TestModifyJointPreconditions:
     """Tests for modify_joint precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.modify_joint("", "base_to_arm")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.modify_joint(None, "base_to_arm")
 
-    def test_empty_joint_name_raises(self, editor):
+    def test_empty_joint_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="joint_name"):
             editor.modify_joint("editable", "")
 
-    def test_none_joint_name_raises(self, editor):
+    def test_none_joint_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="joint_name"):
             editor.modify_joint("editable", None)
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         from model_generation.core.types import Origin
 
         result = editor.modify_joint(
@@ -202,19 +203,19 @@ class TestModifyJointPreconditions:
 class TestAttachLinkPreconditions:
     """Tests for attach_link precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.attach_link("", "base_link", "arm_link")
 
-    def test_empty_parent_link_raises(self, editor):
+    def test_empty_parent_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="parent_link"):
             editor.attach_link("editable", "", "arm_link")
 
-    def test_empty_child_link_raises(self, editor):
+    def test_empty_child_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="child_link"):
             editor.attach_link("editable", "base_link", "")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.attach_link(None, "base_link", "arm_link")
 
@@ -222,19 +223,19 @@ class TestAttachLinkPreconditions:
 class TestDetachLinkPreconditions:
     """Tests for detach_link precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.detach_link("", "arm_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.detach_link(None, "arm_link")
 
-    def test_empty_link_name_raises(self, editor):
+    def test_empty_link_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="link_name"):
             editor.detach_link("editable", "")
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.detach_link("editable", "arm_link")
         assert result is True
 
@@ -242,23 +243,23 @@ class TestDetachLinkPreconditions:
 class TestApplyPrefixPreconditions:
     """Tests for apply_prefix precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.apply_prefix("", "robot_")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.apply_prefix(None, "robot_")
 
-    def test_empty_prefix_raises(self, editor):
+    def test_empty_prefix_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="prefix"):
             editor.apply_prefix("editable", "")
 
-    def test_none_prefix_raises(self, editor):
+    def test_none_prefix_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="prefix"):
             editor.apply_prefix("editable", None)
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.apply_prefix("editable", "robot_")
         assert result is True
 
@@ -266,19 +267,19 @@ class TestApplyPrefixPreconditions:
 class TestMirrorSubtreePreconditions:
     """Tests for mirror_subtree precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.mirror_subtree("", "arm_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.mirror_subtree(None, "arm_link")
 
-    def test_empty_root_link_raises(self, editor):
+    def test_empty_root_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="root_link"):
             editor.mirror_subtree("editable", "")
 
-    def test_none_root_link_raises(self, editor):
+    def test_none_root_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="root_link"):
             editor.mirror_subtree("editable", None)
 
@@ -291,23 +292,23 @@ class TestMirrorSubtreePreconditions:
 class TestCopySubtreePreconditions:
     """Tests for copy_subtree precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.copy_subtree("", "arm_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.copy_subtree(None, "arm_link")
 
-    def test_empty_root_link_raises(self, editor):
+    def test_empty_root_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="root_link"):
             editor.copy_subtree("test_model", "")
 
-    def test_none_root_link_raises(self, editor):
+    def test_none_root_link_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="root_link"):
             editor.copy_subtree("test_model", None)
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.copy_subtree("test_model", "arm_link")
         assert result is True
 
@@ -315,23 +316,23 @@ class TestCopySubtreePreconditions:
 class TestPasteSubtreePreconditions:
     """Tests for paste_subtree precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         # First copy something to clipboard
         editor.copy_subtree("test_model", "arm_link")
         with pytest.raises(ContractViolationError, match="target_model_id"):
             editor.paste_subtree("", "base_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         editor.copy_subtree("test_model", "arm_link")
         with pytest.raises(ContractViolationError, match="target_model_id"):
             editor.paste_subtree(None, "base_link")
 
-    def test_empty_attach_to_raises(self, editor):
+    def test_empty_attach_to_raises(self, editor) -> None:
         editor.copy_subtree("test_model", "arm_link")
         with pytest.raises(ContractViolationError, match="attach_to"):
             editor.paste_subtree("editable", "")
 
-    def test_none_attach_to_raises(self, editor):
+    def test_none_attach_to_raises(self, editor) -> None:
         editor.copy_subtree("test_model", "arm_link")
         with pytest.raises(ContractViolationError, match="attach_to"):
             editor.paste_subtree("editable", None)
@@ -340,23 +341,23 @@ class TestPasteSubtreePreconditions:
 class TestCopyLinkPreconditions:
     """Tests for copy_link precondition decorators."""
 
-    def test_empty_model_id_raises(self, editor):
+    def test_empty_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.copy_link("", "arm_link")
 
-    def test_none_model_id_raises(self, editor):
+    def test_none_model_id_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="model_id"):
             editor.copy_link(None, "arm_link")
 
-    def test_empty_link_name_raises(self, editor):
+    def test_empty_link_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="link_name"):
             editor.copy_link("test_model", "")
 
-    def test_none_link_name_raises(self, editor):
+    def test_none_link_name_raises(self, editor) -> None:
         with pytest.raises(ContractViolationError, match="link_name"):
             editor.copy_link("test_model", None)
 
-    def test_valid_inputs_work(self, editor):
+    def test_valid_inputs_work(self, editor) -> None:
         result = editor.copy_link("test_model", "arm_link")
         assert result is True
 
@@ -369,7 +370,7 @@ class TestCopyLinkPreconditions:
 class TestHumanoidGeneratorPreconditions:
     """Tests for HumanoidURDFGenerator DbC decorators."""
 
-    def test_generate_none_params_raises(self):
+    def test_generate_none_params_raises(self) -> None:
         from humanoid_character_builder.generators.urdf_generator import (
             HumanoidURDFGenerator,
         )
@@ -378,7 +379,7 @@ class TestHumanoidGeneratorPreconditions:
         with pytest.raises((ContractViolationError, AttributeError, TypeError)):
             gen.generate(None)
 
-    def test_build_model_none_params_raises(self):
+    def test_build_model_none_params_raises(self) -> None:
         from humanoid_character_builder.generators.urdf_generator import (
             HumanoidURDFGenerator,
         )
@@ -387,7 +388,7 @@ class TestHumanoidGeneratorPreconditions:
         with pytest.raises((ContractViolationError, AttributeError, TypeError)):
             gen.build_model(None)
 
-    def test_generate_valid_params_works(self):
+    def test_generate_valid_params_works(self) -> None:
         from humanoid_character_builder.core.body_parameters import BodyParameters
         from humanoid_character_builder.generators.urdf_generator import (
             HumanoidURDFGenerator,
@@ -409,29 +410,29 @@ class TestHumanoidGeneratorPreconditions:
 class TestBaseURDFBuilderInvariants:
     """Tests for BaseURDFBuilder._check_invariants method."""
 
-    def _create_concrete_builder(self):
+    def _create_concrete_builder(self) -> Any:
         """Create a concrete subclass of BaseURDFBuilder for testing."""
         from model_generation.builders.base_builder import BaseURDFBuilder, BuildResult
         from model_generation.core.types import Inertia, Joint, JointType, Link, Origin
 
         class ConcreteBuilder(BaseURDFBuilder):
-            def build(self, **kwargs):
+            def build(self, **kwargs) -> Any:
                 return BuildResult(success=True)
 
-            def clear(self):
+            def clear(self) -> None:
                 self._links.clear()
                 self._joints.clear()
 
         return ConcreteBuilder, Link, Joint, JointType, Origin, Inertia
 
-    def test_check_invariants_empty_model(self):
+    def test_check_invariants_empty_model(self) -> None:
         """Empty model passes invariants."""
         ConcreteBuilder, *_ = self._create_concrete_builder()
         builder = ConcreteBuilder("test")
         # Should not raise
         builder._check_invariants()
 
-    def test_check_invariants_consistent_model(self):
+    def test_check_invariants_consistent_model(self) -> None:
         """Model with matching link/joint references passes."""
         ConcreteBuilder, Link, Joint, JointType, Origin, Inertia = (
             self._create_concrete_builder()
@@ -455,7 +456,7 @@ class TestBaseURDFBuilderInvariants:
         # Should not raise
         builder._check_invariants()
 
-    def test_check_invariants_dangling_joint_parent(self):
+    def test_check_invariants_dangling_joint_parent(self) -> None:
         """Joint referencing nonexistent parent raises InvariantError."""
         from src.shared.python.contracts import InvariantError
 
@@ -479,7 +480,7 @@ class TestBaseURDFBuilderInvariants:
         with pytest.raises(InvariantError, match="parent.*nonexistent"):
             builder._check_invariants()
 
-    def test_check_invariants_dangling_joint_child(self):
+    def test_check_invariants_dangling_joint_child(self) -> None:
         """Joint referencing nonexistent child raises InvariantError."""
         from src.shared.python.contracts import InvariantError
 
@@ -503,7 +504,7 @@ class TestBaseURDFBuilderInvariants:
         with pytest.raises(InvariantError, match="child.*nonexistent"):
             builder._check_invariants()
 
-    def test_check_invariants_duplicate_link_names(self):
+    def test_check_invariants_duplicate_link_names(self) -> None:
         """Duplicate link names raise InvariantError."""
         from src.shared.python.contracts import InvariantError
 
@@ -521,7 +522,7 @@ class TestBaseURDFBuilderInvariants:
         with pytest.raises(InvariantError, match="[Dd]uplicate.*link"):
             builder._check_invariants()
 
-    def test_check_invariants_duplicate_joint_names(self):
+    def test_check_invariants_duplicate_joint_names(self) -> None:
         """Duplicate joint names raise InvariantError."""
         from src.shared.python.contracts import InvariantError
 

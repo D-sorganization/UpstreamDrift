@@ -137,7 +137,9 @@ class MuJoCoBackend:
         Returns:
             Joint torques [nv]
         """
-        if q is None:
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
             raise ValueError("q must be provided")
         q_arr = np.asarray(q, dtype=np.float64)
         v_arr = np.asarray(v, dtype=np.float64)

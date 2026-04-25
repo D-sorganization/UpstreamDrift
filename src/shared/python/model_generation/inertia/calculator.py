@@ -251,7 +251,9 @@ class InertiaCalculator:
         Returns:
             InertiaResult
         """
-        if mesh_path is None:
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
+        if not (mesh_path is not None):
             raise ValueError("mesh_path must be provided")
         mode = (
             InertiaMode.MESH_SPECIFIED_MASS
@@ -399,7 +401,9 @@ class InertiaCalculator:
         mode: InertiaMode,
     ) -> InertiaResult:
         """Compute from mesh file using trimesh."""
-        if density is None:
+        if not (density is not None):
+            raise ValueError("density must be provided")
+        if not (density is not None):
             raise ValueError("density must be provided")
         mesh_path = self._resolve_mesh_path(source)
         cache_key = f"{mesh_path}:{density}:{mass}"
@@ -434,7 +438,9 @@ class InertiaCalculator:
         self, mesh_path: Path, mode: InertiaMode, mass: float | None
     ) -> Any | None:
         """Load mesh from file, returning None on failure."""
-        if mesh_path is None:
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
+        if not (mesh_path is not None):
             raise ValueError("mesh_path must be provided")
         try:
             import trimesh
@@ -459,7 +465,9 @@ class InertiaCalculator:
         self, mesh: Any, mesh_path: Path, mode: InertiaMode, mass: float | None
     ) -> dict[str, Any] | None:
         """Extract inertia properties from mesh, returning None on failure."""
-        if mesh_path is None:
+        if not (mesh_path is not None):
+            raise ValueError("mesh_path must be provided")
+        if not (mesh_path is not None):
             raise ValueError("mesh_path must be provided")
         is_watertight = mesh.is_watertight
         if not is_watertight:
@@ -487,7 +495,9 @@ class InertiaCalculator:
         source_path: str,
     ) -> InertiaResult:
         """Scale inertia based on mode and create result."""
-        if mesh_props is None:
+        if not (mesh_props is not None):
+            raise ValueError("mesh_props must be provided")
+        if not (mesh_props is not None):
             raise ValueError("mesh_props must be provided")
         raw_inertia = mesh_props["raw_inertia"]
         volume = mesh_props["volume"]
@@ -522,7 +532,9 @@ class InertiaCalculator:
         mode: InertiaMode,
     ) -> tuple[np.ndarray, float]:
         """Compute scaled inertia and final mass based on mode."""
-        if raw_inertia is None:
+        if not (raw_inertia is not None):
+            raise ValueError("raw_inertia must be provided")
+        if not (raw_inertia is not None):
             raise ValueError("raw_inertia must be provided")
         if mode == InertiaMode.MESH_SPECIFIED_MASS and mass is not None:
             if volume and volume > 0:
@@ -599,7 +611,9 @@ class InertiaCalculator:
 
     def _geometry_from_dimensions(self, dimensions: dict[str, float]) -> Geometry:
         """Create geometry from dimensions dict."""
-        if dimensions is None:
+        if not (dimensions is not None):
+            raise ValueError("dimensions must be provided")
+        if not (dimensions is not None):
             raise ValueError("dimensions must be provided")
         if "radius" in dimensions and "length" in dimensions:
             return Geometry.cylinder(dimensions["radius"], dimensions["length"])

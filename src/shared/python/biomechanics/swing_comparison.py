@@ -57,7 +57,9 @@ class SwingComparator:
             reference_data: Reference swing data (Pro/Model)
             student_data: Student swing data (User)
         """
-        if reference_data is None:
+        if not (reference_data is not None):
+            raise ValueError("reference_data must be provided")
+        if not (reference_data is not None):
             raise ValueError("reference_data must be provided")
         self.ref = self._ensure_analyzer(reference_data)
         self.student = self._ensure_analyzer(student_data)
@@ -110,7 +112,9 @@ class SwingComparator:
         Returns:
             DTWResult object
         """
-        if joint_idx is None:
+        if not (joint_idx is not None):
+            raise ValueError("joint_idx must be provided")
+        if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
         if feature == "position":
             ref_data = self.ref.joint_positions
@@ -182,7 +186,9 @@ class SwingComparator:
         Returns:
             Dictionary of comparison metrics
         """
-        if segment_indices is None:
+        if not (segment_indices is not None):
+            raise ValueError("segment_indices must be provided")
+        if not (segment_indices is not None):
             raise ValueError("segment_indices must be provided")
         require(
             len(segment_indices) > 0,

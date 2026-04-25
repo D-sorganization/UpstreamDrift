@@ -772,3 +772,78 @@ class TestIntegration:
 
         solution = wbc.solve()
         assert solution.success
+
+
+class TestIssue2501NullspaceAndTorqueLimits:
+    """Issue #2501: NullspaceQPSolver must respect variable bounds; torque limits enforced."""
+
+    def test_nullspace_solver_respects_variable_bounds(self) -> None:
+        """NullspaceQPSolver must clamp x to [x_lb, x_ub] after solving."""
+        # Unconstrained solution would be [-100, 100]; bounds are [-1, 1]
+        n = 2
+        H = np.eye(n)
+        g = np.array([100.0, -100.0])  # unconstrained min at [-100, 100]
+        x_lb = np.array([-1.0, -1.0])
+        x_ub = np.array([1.0, 1.0])
+
+        problem = QPProblem(H=H, g=g, x_lb=x_lb, x_ub=x_ub)
+        solver = NullspaceQPSolver()
+        solution = solver.solve(problem)
+
+        assert solution.success
+        assert solution.x is not None
+        assert np.all(solution.x >= x_lb - 1e-9), (
+            f"x={solution.x} violates lb={x_lb}: NullspaceQPSolver must clamp to bounds"
+        )
+        assert np.all(solution.x <= x_ub + 1e-9), (
+            f"x={solution.x} violates ub={x_ub}: NullspaceQPSolver must clamp to bounds"
+        )
+
+    def test_torque_limits_enforced_in_wbc_solution(self) -> None:
+        """WBC with torque_limits set must clip joint_torques to those limits."""
+        n_v = 3
+        engine = MockEngine(n_v=n_v)
+        max_tau = 5.0
+        config = WBCConfig(
+            torque_limits=np.full(n_v, max_tau),
+            regularization=1e-3,
+        )
+        wbc = WholeBodyController(engine, config=config)
+
+        # Large tracking error -> large unconstrained torques
+        task = create_posture_task(
+            n_v=n_v,
+            q_target=np.full(n_v, 100.0),
+            q_current=np.zeros(n_v),
+            v_current=np.zeros(n_v),
+            gains=TaskGains(weight=1.0, priority=1, gain_p=1000.0, gain_d=0.0),
+        )
+        wbc.add_task(task)
+        solution = wbc.solve()
+
+        assert solution.success
+        assert solution.joint_torques is not None
+        assert np.all(np.abs(solution.joint_torques) <= max_tau + 1e-9), (
+            f"Torques {solution.joint_torques} exceed limit {max_tau}. "
+            "torque_limits must be enforced."
+        )
+
+    def test_wbc_without_torque_limits_unconstrained(self) -> None:
+        """WBC without torque_limits must not clip torques."""
+        n_v = 3
+        engine = MockEngine(n_v=n_v)
+        config = WBCConfig(regularization=1e-3)
+        wbc = WholeBodyController(engine, config=config)
+
+        task = create_posture_task(
+            n_v=n_v,
+            q_target=np.full(n_v, 100.0),
+            q_current=np.zeros(n_v),
+            v_current=np.zeros(n_v),
+            gains=TaskGains(weight=1.0, priority=1, gain_p=1000.0, gain_d=0.0),
+        )
+        wbc.add_task(task)
+        solution = wbc.solve()
+
+        assert solution.success
+        assert solution.joint_torques is not None

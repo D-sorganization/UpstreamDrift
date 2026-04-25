@@ -63,7 +63,9 @@ class SegmentPanel(QWidget):
         Args:
             parent_layout: Parent layout to add to.
         """
-        if parent_layout is None:
+        if not (parent_layout is not None):
+            raise ValueError("parent_layout must be provided")
+        if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
         group = QGroupBox("Segments")
         layout = QVBoxLayout(group)
@@ -80,7 +82,9 @@ class SegmentPanel(QWidget):
         Args:
             parent_layout: Parent layout to add to.
         """
-        if parent_layout is None:
+        if not (parent_layout is not None):
+            raise ValueError("parent_layout must be provided")
+        if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
         self.editor_tabs = QTabWidget()
 
@@ -358,7 +362,9 @@ class SegmentPanel(QWidget):
         Args:
             parent_layout: Parent layout to add to.
         """
-        if parent_layout is None:
+        if not (parent_layout is not None):
+            raise ValueError("parent_layout must be provided")
+        if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
         button_layout = QHBoxLayout()
 
@@ -570,7 +576,9 @@ class SegmentPanel(QWidget):
         Args:
             segment_name: Name of the segment to load.
         """
-        if segment_name is None:
+        if not (segment_name is not None):
+            raise ValueError("segment_name must be provided")
+        if not (segment_name is not None):
             raise ValueError("segment_name must be provided")
         segment = next(
             (seg for seg in self.segments if seg["name"] == segment_name), None

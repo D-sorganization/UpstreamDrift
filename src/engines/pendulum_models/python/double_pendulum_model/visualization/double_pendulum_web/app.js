@@ -138,30 +138,68 @@ function restoreDefaults() {
   announce("Parameters restored to defaults");
 }
 
+/**
+ * Evaluate a torque expression string in the given context.
+ *
+ * Returns the numeric result on success, or NaN on runtime failure.
+ * Runtime errors are surfaced via setTorqueError() so the UI can
+ * report them rather than silently producing zero torque.
+ */
 function safeEval(expr, context) {
   try {
     const fn = new Function(...Object.keys(context), `return ${expr};`);
-    return Number(fn(...Object.values(context)));
+    const result = Number(fn(...Object.values(context)));
+    if (!isFinite(result)) {
+      setTorqueError(`Expression "${expr}" evaluated to ${result}`);
+      return 0;
+    }
+    return result;
   } catch (err) {
+    setTorqueError(`Runtime error in "${expr}": ${err.message}`);
     return 0;
   }
 }
 
+/** Last torque-expression runtime error, or null when clean. */
+let _torqueError = null;
+
+function setTorqueError(msg) {
+  _torqueError = msg;
+}
+
+function clearTorqueError() {
+  _torqueError = null;
+}
+
+function getTorqueError() {
+  return _torqueError;
+}
+
+/**
+ * Compute the 2×2 mass matrix for the given relative angle theta2.
+ *
+ * I1 and I2 are the proximal-joint inertias computed via the parallel-axis
+ * theorem: I_prox = (1/12)*m*l^2 + m*lc^2.  These already include the
+ * centre-of-mass shift, so the coupling terms in m11/m12/m22 must NOT add
+ * m*lc^2 again — that was the bug fixed in issue #2498.
+ *
+ * Correct formula (Spong et al., "Robot Modeling and Control"):
+ *   m11 = I1 + I2 + m2*(l1^2 + 2*l1*lc2*cos(theta2))
+ *   m12 = I2 + m2*l1*lc2*cos(theta2)
+ *   m22 = I2
+ */
 function massMatrix(theta2) {
   const m2 = params.mShaft + params.mHead;
   const lc1 = params.l1 * params.com1;
   const lc2 = params.l2 * params.com2;
+  // Proximal-joint inertias (parallel-axis already applied — do not re-add m*lc^2)
   const I1 =
     (1 / 12) * params.m1 * params.l1 * params.l1 + params.m1 * lc1 * lc1;
   const I2 = (1 / 12) * m2 * params.l2 * params.l2 + m2 * lc2 * lc2;
   const cos2 = Math.cos(theta2);
-  const m11 =
-    I1 +
-    I2 +
-    params.m1 * lc1 * lc1 +
-    m2 * (params.l1 ** 2 + lc2 ** 2 + 2 * params.l1 * lc2 * cos2);
-  const m12 = I2 + m2 * (lc2 ** 2 + params.l1 * lc2 * cos2);
-  const m22 = I2 + m2 * lc2 ** 2;
+  const m11 = I1 + I2 + m2 * (params.l1 ** 2 + 2 * params.l1 * lc2 * cos2);
+  const m12 = I2 + m2 * params.l1 * lc2 * cos2;
+  const m22 = I2;
   return [
     [m11, m12],
     [m12, m22],
@@ -325,9 +363,16 @@ function draw() {
 }
 
 function step() {
+  clearTorqueError();
   rk4(0.01);
   draw();
   const tau = torques(state.time, state);
+  const err = getTorqueError();
+  if (err) {
+    pause();
+    announce(`Simulation stopped: ${err}`);
+    return;
+  }
   document.getElementById("torques").textContent =
     `Applied Nm: shoulder=${tau[0].toFixed(2)}, wrist=${tau[1].toFixed(2)}`;
   animationId = requestAnimationFrame(step);
@@ -475,6 +520,18 @@ function start() {
     resetStateFromInputs();
   }
   updateParamsFromInputs();
+
+  // Check for syntax errors in torque expressions before committing to run.
+  const tau1Err = validateExpr(params.tau1Expr);
+  const tau2Err = validateExpr(params.tau2Expr);
+  if (tau1Err || tau2Err) {
+    announce(
+      `Cannot start: torque expression error — ${tau1Err || tau2Err}`,
+    );
+    return;
+  }
+
+  clearTorqueError();
   step();
   updateButtonStates(true);
   announce("Simulation started");

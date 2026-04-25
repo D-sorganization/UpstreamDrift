@@ -35,7 +35,9 @@ def export_recording_all_formats(
     Delegates to the shared implementation, falling back to the
     engine-local telemetry helpers for JSON/CSV when available.
     """
-    if base_path is None:
+    if not (base_path is not None):
+        raise ValueError("base_path must be provided")
+    if not (base_path is not None):
         raise ValueError("base_path must be provided")
     try:
         from .telemetry import export_telemetry_csv, export_telemetry_json
@@ -209,7 +211,9 @@ def create_matlab_script(
         mat_file: Path to .mat file (relative or absolute)
         script_type: Type of script ('plot', 'analyze', 'animate')
     """
-    if output_path is None:
+    if not (output_path is not None):
+        raise ValueError("output_path must be provided")
+    if not (output_path is not None):
         raise ValueError("output_path must be provided")
     mat_file = Path(mat_file).name
 

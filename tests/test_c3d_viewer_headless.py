@@ -1,14 +1,17 @@
 """Headless smoke test for C3D Viewer."""
 
+from __future__ import annotations
+
 import importlib
 import sys
+import types
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 
 # Handle import of module with invalid identifier (3D_Golf_Model)
-def import_c3d_viewer():
+def import_c3d_viewer() -> types.ModuleType | None:
     """Import the C3D viewer module dynamically."""
     module_name = (
         "engines.Simscape_Multibody_Models.3D_Golf_Model.python.src.apps.c3d_viewer"
@@ -20,7 +23,7 @@ def import_c3d_viewer():
 
 
 @pytest.mark.skipif(sys.platform == "linux", reason="Requires X11 or Xvfb on Linux")
-def test_c3d_viewer_instantiation(qtbot):
+def test_c3d_viewer_instantiation(qtbot) -> None:
     """Test that the main window can be instantiated without crashing."""
     with patch.dict(sys.modules, {"c3d_reader": MagicMock()}):
         c3d_viewer = import_c3d_viewer()

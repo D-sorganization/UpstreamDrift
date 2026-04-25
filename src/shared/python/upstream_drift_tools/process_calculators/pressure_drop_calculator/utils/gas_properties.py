@@ -18,14 +18,55 @@ References:
 """
 
 import logging
-import math
-from dataclasses import dataclass
 
-from ....utils.unit_constants import R_UNIVERSAL as R_UNIVERSAL_J_MOL_K
-from ....utils.unit_constants import (
-    R_UNIVERSAL_KMOL,
+from ._component_database import (
+    GAS_DATABASE,
+    R_UNIVERSAL,
+    SUTHERLAND_CONSTANTS,
+    ComponentProperties,
 )
-from ...constants import DEFAULT_GAMMA_DIATOMIC, GAMMA_UPPER_BOUND
+from ._heat_capacity import (
+    calculate_heat_capacity_ratio,
+    calculate_ideal_gas_cp,
+    calculate_mixture_cp,
+    calculate_speed_of_sound,
+)
+from ._mixture_properties import (
+    calculate_compressibility_factor,
+    calculate_ideal_gas_density,
+    calculate_mixture_molecular_weight,
+    calculate_real_gas_density,
+)
+from ._viscosity import (
+    _compute_pure_viscosities,
+    _wilke_mixing_rule,
+    calculate_mixture_viscosity_simple,
+    calculate_mixture_viscosity_wilke,
+    calculate_pure_gas_viscosity_lucas,
+    calculate_pure_gas_viscosity_sutherland,
+)
+
+__all__ = [
+    "ComponentProperties",
+    "GAS_DATABASE",
+    "R_UNIVERSAL",
+    "SUTHERLAND_CONSTANTS",
+    "calculate_ideal_gas_cp",
+    "calculate_mixture_cp",
+    "calculate_heat_capacity_ratio",
+    "calculate_speed_of_sound",
+    "calculate_mixture_molecular_weight",
+    "calculate_ideal_gas_density",
+    "calculate_compressibility_factor",
+    "calculate_real_gas_density",
+    "calculate_pure_gas_viscosity_lucas",
+    "calculate_pure_gas_viscosity_sutherland",
+    "_compute_pure_viscosities",
+    "_wilke_mixing_rule",
+    "calculate_mixture_viscosity_wilke",
+    "calculate_mixture_viscosity_simple",
+    "calculate_gas_properties",
+]
 
 logger = logging.getLogger(__name__)
 
@@ -857,7 +898,9 @@ def calculate_gas_properties(
         >>> print(f"Gamma: {props['heat_capacity_ratio']:.3f}")
     """
     # Molecular weight
-    if composition is None:
+    if not (composition is not None):
+        raise ValueError("composition must be provided")
+    if not (composition is not None):
         raise ValueError("composition must be provided")
     mw = calculate_mixture_molecular_weight(composition)
 

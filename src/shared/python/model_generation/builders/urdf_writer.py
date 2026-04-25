@@ -116,7 +116,9 @@ class URDFWriter:
 
     def _write_link(self, link: Link, level: int) -> list[str]:
         """Generate XML for a link."""
-        if link is None:
+        if not (link is not None):
+            raise ValueError("link must be provided")
+        if not (link is not None):
             raise ValueError("link must be provided")
         lines: list[str] = []
         indent = self.indent * level
@@ -175,7 +177,9 @@ class URDFWriter:
 
     def _write_joint(self, joint: Joint, level: int) -> list[str]:
         """Generate XML for a joint."""
-        if joint is None:
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
             raise ValueError("joint must be provided")
         lines: list[str] = []
         indent = self.indent * level
@@ -234,7 +238,9 @@ class URDFWriter:
 
     def _write_geometry(self, geometry: Geometry, level: int) -> list[str]:
         """Generate XML for geometry."""
-        if geometry is None:
+        if not (geometry is not None):
+            raise ValueError("geometry must be provided")
+        if not (geometry is not None):
             raise ValueError("geometry must be provided")
         lines: list[str] = []
         indent = self.indent * level
@@ -279,7 +285,9 @@ class URDFWriter:
 
     def _write_material_definition(self, material: Material, level: int) -> list[str]:
         """Generate XML for material definition."""
-        if material is None:
+        if not (material is not None):
+            raise ValueError("material must be provided")
+        if not (material is not None):
             raise ValueError("material must be provided")
         lines: list[str] = []
         indent = self.indent * level
@@ -303,7 +311,9 @@ class URDFWriter:
         self, links: list[Link], extra_materials: dict[str, Any]
     ) -> dict[str, Material]:
         """Collect all unique materials from links."""
-        if links is None:
+        if not (links is not None):
+            raise ValueError("links must be provided")
+        if not (links is not None):
             raise ValueError("links must be provided")
         materials: dict[str, Material] = {}
 
@@ -327,7 +337,9 @@ class URDFWriter:
     ) -> list[Link]:
         """Sort links so parents come before children."""
         # Build parent map
-        if links is None:
+        if not (links is not None):
+            raise ValueError("links must be provided")
+        if not (links is not None):
             raise ValueError("links must be provided")
         parent_map: dict[str, str | None] = {}
         for joint in joints:
@@ -370,7 +382,9 @@ class URDFWriter:
         Delegates to the shared utilities in
         ``model_generation.core.composite_joints``.
         """
-        if links is None:
+        if not (links is not None):
+            raise ValueError("links must be provided")
+        if not (links is not None):
             raise ValueError("links must be provided")
         if not self.expand_composite_joints:
             return links, joints

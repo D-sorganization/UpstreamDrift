@@ -33,7 +33,7 @@ def _make_params() -> GolferParams:
     )
 
 
-def _zero_torque(t):  # noqa: ARG001
+def _zero_torque(t) -> tuple[float, ...]:  # noqa: ARG001
     return (0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 
 

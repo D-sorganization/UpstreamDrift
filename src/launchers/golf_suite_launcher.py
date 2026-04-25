@@ -12,6 +12,7 @@ or accessible via `sys.executable`.
 It does NOT use Docker. For Docker support, use `golf_launcher.py`.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -97,7 +98,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         icon_pixmap: object = None,
     ) -> "QtWidgets.QPushButton":
         """Create a standard engine launch button."""
-        if label is None:
+        if not (label is not None):
             raise ValueError("label must be provided")
         btn = QtWidgets.QPushButton(label)
         btn.setMinimumHeight(40)
@@ -114,7 +115,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_engine_buttons(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create and add all engine launch buttons to the layout."""
-        if layout is None:
+        if not (layout is not None):
             raise ValueError("layout must be provided")
         self.btn_mujoco = self._create_engine_button(
             "Launch &MuJoCo Engine",
@@ -187,7 +188,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_shot_tracer_section(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Add separator and shot tracer button to the layout."""
-        if layout is None:
+        if not (layout is not None):
             raise ValueError("layout must be provided")
         layout.addSpacing(10)
 
@@ -213,7 +214,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _setup_log_area(self, layout: "QtWidgets.QVBoxLayout") -> None:
         """Create the simulation log group box with copy/clear controls."""
-        if layout is None:
+        if not (layout is not None):
             raise ValueError("layout must be provided")
         layout.addSpacing(20)
 
@@ -296,7 +297,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def log_message(self, message: str) -> None:
         """Add a timestamped message to the log area."""
-        if message is None:
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
             raise ValueError("message must be provided")
         import datetime
 
@@ -368,7 +371,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         )
 
     def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         self.status.setText(f"Launching {name}...")
         self.log_message(f"Starting {name} engine...")
@@ -384,9 +389,19 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             return
 
         try:
-            # Launch detached process
-            # Use same python interpreter
-            process = subprocess.Popen([sys.executable, str(path)], cwd=str(cwd))  # noqa: S603
+            # Launch detached process using the same interpreter.
+            # Inject repo root into PYTHONPATH so child scripts can import src.*
+            # regardless of ambient shell state.
+            sep = ";" if os.name == "nt" else ":"
+            existing = os.environ.get("PYTHONPATH", "")
+            repo_str = str(self.suite_root)
+            env = os.environ.copy()
+            env["PYTHONPATH"] = f"{repo_str}{sep}{existing}" if existing else repo_str
+            process = subprocess.Popen(  # noqa: S603
+                [sys.executable, str(path)],
+                cwd=str(cwd),
+                env=env,
+            )
             self.log_message(f"{name} launched successfully (PID: {process.pid})")
             self.status.setText(f"{name} Launched")
         except (OSError, subprocess.SubprocessError) as e:

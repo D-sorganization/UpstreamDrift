@@ -19,15 +19,13 @@ generate_humanoid_urdf) is fully preserved.
 from __future__ import annotations
 
 import logging
-import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 from humanoid_character_builder.contracts import postcondition, precondition
 from humanoid_character_builder.core.anthropometry import (
     estimate_segment_dimensions,
     estimate_segment_masses,
-    get_com_location,
 )
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.core.model import (
@@ -38,34 +36,19 @@ from humanoid_character_builder.core.model import (
 from humanoid_character_builder.core.segment_definitions import (
     HUMANOID_JOINTS,
     HUMANOID_SEGMENTS,
-    JointDefinition,
-    SegmentDefinition,
 )
-from humanoid_character_builder.generators.urdf_config import URDFGeneratorConfig
-from humanoid_character_builder.generators.urdf_geometry import (
-    add_geometry_element,
-    create_geometry_dict,
+from humanoid_character_builder.generators._joint_generation import generate_joint
+from humanoid_character_builder.generators._link_generation import (
+    apply_proportion_factors,
+    generate_link,
+    generate_materials,
 )
-from humanoid_character_builder.generators.urdf_joints import (
-    expand_composite_joint,
-    generate_joint,
-    generate_single_joint,
-    map_joint_type,
-)
-from humanoid_character_builder.generators.urdf_xml_builder import (
-    _add_joint_element,
-    _add_link_element,
-    build_urdf_xml,
-)
+from humanoid_character_builder.generators._xml_builder import build_urdf_xml
 from humanoid_character_builder.mesh.inertia_calculator import (
     InertiaMode,
-    InertiaResult,
     MeshInertiaCalculator,
 )
-from humanoid_character_builder.mesh.primitive_inertia import (
-    PrimitiveInertiaCalculator,
-    estimate_segment_primitive,
-)
+from humanoid_character_builder.mesh.primitive_inertia import PrimitiveInertiaCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +74,13 @@ class HumanoidURDFGenerator:
     - Outputting valid URDF XML
     """
 
-    def __init__(self, config: URDFGeneratorConfig | None = None):
+    def __init__(self, config: URDFGeneratorConfig | None = None) -> None:
+        """
+        Initialize the generator.
+
+        Args:
+            config: Generator configuration
+        """
         self.config = config or URDFGeneratorConfig()
         self.mesh_inertia_calc = MeshInertiaCalculator(self.config.default_density)
         self.primitive_inertia_calc = PrimitiveInertiaCalculator()
@@ -108,22 +97,38 @@ class HumanoidURDFGenerator:
     def build_model(
         self, params: BodyParameters, mesh_dir: Path | str | None = None
     ) -> HumanoidModel:
-        """Build HumanoidModel from body parameters."""
-        if params is None:
+        """
+        Build HumanoidModel from body parameters.
+
+        Args:
+            params: Body parameters
+            mesh_dir: Optional directory containing mesh files
+
+        Returns:
+            HumanoidModel instance
+        """
+        if not (params is not None):
+            raise ValueError("params must be provided")
+        if not (params is not None):
             raise ValueError("params must be provided")
         errors = params.validate()
         if errors:
             logger.warning(f"Parameter validation warnings: {errors}")
+
         self._links.clear()
         self._joints.clear()
         self._materials.clear()
+
         gender_factor = params.get_effective_gender_factor()
         segment_masses = estimate_segment_masses(params.mass_kg, gender_factor)
         segment_dimensions = estimate_segment_dimensions(params.height_m, gender_factor)
-        segment_dimensions = self._apply_proportion_factors(segment_dimensions, params)
-        self._generate_materials(params)
+
+        segment_dimensions = apply_proportion_factors(segment_dimensions, params)
+
+        self._materials = generate_materials(params)
+
         for segment_name, segment_def in HUMANOID_SEGMENTS.items():
-            self._generate_link(
+            self._links[segment_name] = generate_link(
                 segment_name,
                 segment_def,
                 params,
@@ -133,9 +138,21 @@ class HumanoidURDFGenerator:
                 ),
                 gender_factor,
                 mesh_dir,
+                self.config.inertia_mode,
+                self.mesh_inertia_calc,
+                self.primitive_inertia_calc,
+                self.config.generate_collision,
             )
+
         for joint_name, joint_def in HUMANOID_JOINTS.items():
-            self._generate_joint(joint_name, joint_def, segment_dimensions)
+            generate_joint(
+                joint_name,
+                joint_def,
+                self._links,
+                self._joints,
+                self.config.expand_composite_joints,
+            )
+
         return HumanoidModel(self._links, self._joints)
 
     @precondition(lambda params: params is not None, "params must not be None")
@@ -151,18 +168,32 @@ class HumanoidURDFGenerator:
         output_path: Path | str | None = None,
         mesh_dir: Path | str | None = None,
     ) -> str:
-        """Generate URDF from body parameters."""
-        if params is None:
+        """
+        Generate URDF from body parameters.
+
+        Args:
+            params: Body parameters
+            output_path: Optional path to write URDF file
+            mesh_dir: Optional directory containing mesh files
+
+        Returns:
+            URDF XML string
+        """
+        if not (params is not None):
+            raise ValueError("params must be provided")
+        if not (params is not None):
             raise ValueError("params must be provided")
         self.build_model(params, mesh_dir)
+
         urdf_xml = build_urdf_xml(
-            robot_name=params.name,
-            links=self._links,
-            joints=self._joints,
-            materials=self._materials,
-            pretty_print=self.config.pretty_print,
-            indent=self.config.indent,
+            params.name,
+            self._links,
+            self._joints,
+            self._materials,
+            self.config.pretty_print,
+            self.config.indent,
         )
+
         if output_path:
             output_path = Path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -388,8 +419,20 @@ def generate_humanoid_urdf(
     output_path: Path | str | None = None,
     config: URDFGeneratorConfig | None = None,
 ) -> str:
-    """Convenience function to generate humanoid URDF."""
-    if params is None:
+    """
+    Convenience function to generate humanoid URDF.
+
+    Args:
+        params: Body parameters
+        output_path: Optional path to write URDF
+        config: Generator configuration
+
+    Returns:
+        URDF XML string
+    """
+    if not (params is not None):
+        raise ValueError("params must be provided")
+    if not (params is not None):
         raise ValueError("params must be provided")
     generator = HumanoidURDFGenerator(config)
     return cast(str, generator.generate(params, output_path))

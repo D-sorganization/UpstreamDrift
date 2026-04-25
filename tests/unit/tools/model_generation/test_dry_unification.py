@@ -9,6 +9,7 @@ Verifies that:
 
 from __future__ import annotations
 
+import types
 from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
@@ -16,7 +17,7 @@ from unittest.mock import MagicMock, patch
 # ---------------------------------------------------------------------------
 
 
-def _import_model_generation():
+def _import_model_generation() -> types.ModuleType:
     """Import model_generation, returning the live module."""
     import model_generation
 
@@ -31,7 +32,7 @@ def _import_model_generation():
 class TestHumanoidPresetsConstant:
     """_HUMANOID_PRESETS must be a module-level dict in model_generation."""
 
-    def test_constant_exists(self):
+    def test_constant_exists(self) -> None:
         """_HUMANOID_PRESETS must exist as a module-level name."""
         import model_generation
 
@@ -40,7 +41,7 @@ class TestHumanoidPresetsConstant:
             "extract the preset dict from quick_urdf/quick_build into a module constant"
         )
 
-    def test_constant_is_dict(self):
+    def test_constant_is_dict(self) -> None:
         """_HUMANOID_PRESETS must be a dict."""
         import model_generation
 
@@ -48,7 +49,7 @@ class TestHumanoidPresetsConstant:
             f"_HUMANOID_PRESETS must be a dict, got {type(model_generation._HUMANOID_PRESETS)}"
         )
 
-    def test_constant_has_exactly_four_keys(self):
+    def test_constant_has_exactly_four_keys(self) -> None:
         """_HUMANOID_PRESETS must contain exactly four preset keys."""
         import model_generation
 
@@ -62,7 +63,7 @@ class TestHumanoidPresetsConstant:
             f"Expected keys {{athletic, average, heavy, lean}}, got {set(presets.keys())}"
         )
 
-    def test_athletic_preset_values(self):
+    def test_athletic_preset_values(self) -> None:
         """athletic preset must set gender_factor=0.7 and shoulder_width_factor=1.1."""
         import model_generation
 
@@ -74,7 +75,7 @@ class TestHumanoidPresetsConstant:
             f"athletic shoulder_width_factor expected 1.1, got {athletic.get('shoulder_width_factor')}"
         )
 
-    def test_average_preset_values(self):
+    def test_average_preset_values(self) -> None:
         """average preset must set gender_factor=0.5 and nothing else."""
         import model_generation
 
@@ -87,7 +88,7 @@ class TestHumanoidPresetsConstant:
             f"average preset should only have 'gender_factor', got {set(average.keys())}"
         )
 
-    def test_heavy_preset_values(self):
+    def test_heavy_preset_values(self) -> None:
         """heavy preset must set gender_factor=0.5 and hip_width_factor=1.15."""
         import model_generation
 
@@ -99,7 +100,7 @@ class TestHumanoidPresetsConstant:
             f"heavy hip_width_factor expected 1.15, got {heavy.get('hip_width_factor')}"
         )
 
-    def test_lean_preset_values(self):
+    def test_lean_preset_values(self) -> None:
         """lean preset must set gender_factor=0.5 and shoulder_width_factor=0.95."""
         import model_generation
 
@@ -120,7 +121,7 @@ class TestHumanoidPresetsConstant:
 class TestQuickFunctionsUseSharedPresets:
     """quick_urdf() and quick_build() must read from _HUMANOID_PRESETS, not a local copy."""
 
-    def _make_builder_mock(self):
+    def _make_builder_mock(self) -> MagicMock:
         """Create a mock ParametricBuilder that records set_parameters calls."""
         mock_builder = MagicMock()
         mock_result = MagicMock()
@@ -129,7 +130,7 @@ class TestQuickFunctionsUseSharedPresets:
         mock_builder.build.return_value = mock_result
         return mock_builder
 
-    def test_quick_urdf_athletic_uses_correct_params(self):
+    def test_quick_urdf_athletic_uses_correct_params(self) -> None:
         """quick_urdf with 'athletic' preset must pass gender_factor=0.7, shoulder_width_factor=1.1."""
         import model_generation
 
@@ -146,7 +147,7 @@ class TestQuickFunctionsUseSharedPresets:
         assert call_kwargs.get("gender_factor") == 0.7
         assert call_kwargs.get("shoulder_width_factor") == 1.1
 
-    def test_quick_urdf_heavy_uses_correct_params(self):
+    def test_quick_urdf_heavy_uses_correct_params(self) -> None:
         """quick_urdf with 'heavy' preset must pass hip_width_factor=1.15."""
         import model_generation
 
@@ -161,7 +162,7 @@ class TestQuickFunctionsUseSharedPresets:
         call_kwargs = mock_builder.set_parameters.call_args[1]
         assert call_kwargs.get("hip_width_factor") == 1.15
 
-    def test_quick_build_lean_uses_correct_params(self):
+    def test_quick_build_lean_uses_correct_params(self) -> None:
         """quick_build with 'lean' preset must pass shoulder_width_factor=0.95."""
         import model_generation
 
@@ -177,7 +178,9 @@ class TestQuickFunctionsUseSharedPresets:
         assert call_kwargs.get("shoulder_width_factor") == 0.95
         assert call_kwargs.get("gender_factor") == 0.5
 
-    def test_quick_urdf_and_quick_build_yield_identical_config_for_same_preset(self):
+    def test_quick_urdf_and_quick_build_yield_identical_config_for_same_preset(
+        self,
+    ) -> None:
         """
         For the same preset name, quick_urdf and quick_build must apply the
         identical parameter set (i.e. both read from the same shared dict).
@@ -190,10 +193,10 @@ class TestQuickFunctionsUseSharedPresets:
         mock_builder_urdf = self._make_builder_mock()
         mock_builder_build = self._make_builder_mock()
 
-        def capture_urdf(*a, **kw):
+        def capture_urdf(*a, **kw) -> None:
             urdf_kwargs.update(kw)
 
-        def capture_build(*a, **kw):
+        def capture_build(*a, **kw) -> None:
             build_kwargs.update(kw)
 
         mock_builder_urdf.set_parameters.side_effect = capture_urdf
@@ -202,7 +205,7 @@ class TestQuickFunctionsUseSharedPresets:
         builders = [mock_builder_urdf, mock_builder_build]
         call_count = [0]
 
-        def builder_factory(*a, **kw):
+        def builder_factory(*a, **kw) -> MagicMock:
             idx = call_count[0]
             call_count[0] += 1
             return builders[idx]
@@ -224,7 +227,7 @@ class TestQuickFunctionsUseSharedPresets:
             f"urdf={urdf_preset_kw}, build={build_preset_kw}"
         )
 
-    def test_unknown_preset_falls_back_to_no_extra_params(self):
+    def test_unknown_preset_falls_back_to_no_extra_params(self) -> None:
         """An unrecognised preset name must fall through to empty config (no crash)."""
         import model_generation
 
@@ -253,7 +256,7 @@ class TestQuickFunctionsUseSharedPresets:
 class TestPresetsNotMutated:
     """Ensure the shared constant is not mutated by quick_urdf / quick_build calls."""
 
-    def test_presets_unchanged_after_quick_urdf(self):
+    def test_presets_unchanged_after_quick_urdf(self) -> None:
         """The module-level constant must be identical before and after calling quick_urdf."""
         import copy
 

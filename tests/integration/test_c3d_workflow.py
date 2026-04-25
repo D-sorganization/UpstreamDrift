@@ -3,7 +3,10 @@
 TEST-004: Added @pytest.mark.integration markers for test categorization.
 """
 
-from unittest.mock import patch
+from collections.abc import Generator
+from pathlib import Path
+from typing import Any
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
@@ -37,7 +40,7 @@ if not C3D_IMPORTS_AVAILABLE:
 
 
 @pytest.fixture
-def mock_c3d_file(tmp_path):
+def mock_c3d_file(tmp_path: Path) -> Path:
     """Create a dummy file path."""
     f = tmp_path / "test.c3d"
     f.touch()
@@ -45,7 +48,7 @@ def mock_c3d_file(tmp_path):
 
 
 @pytest.fixture
-def mock_ezc3d():
+def mock_ezc3d() -> Generator[MagicMock, None, None]:
     """Mock ezc3d module behavior."""
     with patch("c3d_reader.ezc3d") as mock:
         # Construct a fake C3D structure
@@ -84,7 +87,7 @@ def mock_ezc3d():
         yield mock
 
 
-def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path):
+def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path) -> None:
     """Test C3D reading and dataframe conversion."""
     from src.shared.python.validation_pkg.workflow_diagnostics import (
         WorkflowDiagnosticContext,
@@ -122,7 +125,7 @@ def test_reader_ingestion(mock_c3d_file, mock_ezc3d, tmp_path):
         ctx.record_state("test_complete", True)
 
 
-def test_unit_conversion(mock_c3d_file, mock_ezc3d):
+def test_unit_conversion(mock_c3d_file, mock_ezc3d) -> None:
     """Test unit scaling logic (mm -> m)."""
     reader = C3DDataReader(mock_c3d_file)
 
@@ -133,7 +136,7 @@ def test_unit_conversion(mock_c3d_file, mock_ezc3d):
     np.testing.assert_almost_equal(m1_data[1], 0.001)
 
 
-def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path):
+def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path) -> None:
     """Test export functionality."""
     reader = C3DDataReader(mock_c3d_file)
     out_csv = tmp_path / "output.csv"
@@ -148,14 +151,14 @@ def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path):
 
 
 @pytest.fixture(scope="session")
-def qapp():
+def qapp() -> Generator[Any, None, None]:
     """Manage a single QApplication instance for the test session."""
 
     app = get_qapp()
     yield app
 
 
-def test_gui_load_logic(qapp, mock_c3d_file, mock_ezc3d):
+def test_gui_load_logic(qapp, mock_c3d_file, mock_ezc3d) -> None:
     """Test GUI loading logic using the refactored path."""
     try:
         window = C3DViewerMainWindow()

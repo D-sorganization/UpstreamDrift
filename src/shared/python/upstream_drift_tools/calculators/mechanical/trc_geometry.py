@@ -108,7 +108,9 @@ def _calculate_layer_cone_volume(
 ) -> float:
     """Differential annular truncated-cone volume for one layer."""
     # Outer frustum at bottom for this layer
-    if current_radius is None:
+    if not (current_radius is not None):
+        raise ValueError("current_radius must be provided")
+    if not (current_radius is not None):
         raise ValueError("current_radius must be provided")
     outer_bottom_r = max(cone_bottom_radius - radius_offset, interior_hole_radius)
     outer_bottom_sq = outer_bottom_r * outer_bottom_r
@@ -139,7 +141,9 @@ def _calculate_layer_surface_area(
     display_cone: bool,
 ) -> float:
     """Outer surface area for the Metal Shell layer."""
-    if current_radius is None:
+    if not (current_radius is not None):
+        raise ValueError("current_radius must be provided")
+    if not (current_radius is not None):
         raise ValueError("current_radius must be provided")
     area = 0.0
     if display_cylinder:
@@ -168,7 +172,9 @@ def _calculate_interior_void(
     display_cone: bool,
 ) -> float:
     """Interior void volume in cubic inches (cylinder + cone)."""
-    if last_inner_radius is None:
+    if not (last_inner_radius is not None):
+        raise ValueError("last_inner_radius must be provided")
+    if not (last_inner_radius is not None):
         raise ValueError("last_inner_radius must be provided")
     r_sq = last_inner_radius * last_inner_radius
 
@@ -212,7 +218,9 @@ class TRCGeometryEngine:
         Returns:
             Tuple of (LayerResult, new_radius_offset_delta, inner_radius).
         """
-        if layer is None:
+        if not (layer is not None):
+            raise ValueError("layer must be provided")
+        if not (layer is not None):
             raise ValueError("layer must be provided")
         t = layer.thickness
         inner_r = max(current_radius - t, hole_r)
@@ -278,7 +286,9 @@ class TRCGeometryEngine:
         dimensions: VesselDimensions,
     ) -> None:
         """Compute interior void and final geometry dimensions."""
-        if results is None:
+        if not (results is not None):
+            raise ValueError("results must be provided")
+        if not (results is not None):
             raise ValueError("results must be provided")
         void_in3 = _calculate_interior_void(
             current_radius,
@@ -387,7 +397,9 @@ class TRCGeometryEngine:
         Returns:
             Residence time in seconds
         """
-        if volume_ft3 is None:
+        if not (volume_ft3 is not None):
+            raise ValueError("volume_ft3 must be provided")
+        if not (volume_ft3 is not None):
             raise ValueError("volume_ft3 must be provided")
         if gas_flow_acfm <= 0:
             return 0.0

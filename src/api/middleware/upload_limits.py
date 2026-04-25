@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import contextlib
-from collections.abc import AsyncIterator, Awaitable, Callable
-from pathlib import Path
+from collections.abc import Awaitable, Callable
 
 from fastapi import HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, Response
@@ -96,7 +94,7 @@ async def validate_upload_size(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     """Reject requests exceeding upload size limits."""
-    if request is None:
+    if not (request is not None):
         raise ValueError("request must be provided")
     content_length = request.headers.get("content-length")
 

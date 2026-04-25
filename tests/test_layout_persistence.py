@@ -21,7 +21,7 @@ from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 class TestLayoutPersistence(unittest.TestCase):
     """Test layout persistence functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.temp_dir = tempfile.mkdtemp()
         self.config_file = Path(self.temp_dir) / "layout.json"
@@ -34,7 +34,7 @@ class TestLayoutPersistence(unittest.TestCase):
             "options": {"live_visualization": True, "gpu_acceleration": False},
         }
 
-    def test_layout_data_structure(self):
+    def test_layout_data_structure(self) -> None:
         """Test that layout data has correct structure."""
         required_keys = ["model_order", "selected_model", "window_geometry", "options"]
 
@@ -53,7 +53,7 @@ class TestLayoutPersistence(unittest.TestCase):
         for key in options_keys:
             self.assertIn(key, options, f"Options should contain {key}")
 
-    def test_layout_file_creation(self):
+    def test_layout_file_creation(self) -> None:
         """Test that layout file can be created and read."""
         # Write layout data
         with open(self.config_file, "w", encoding="utf-8") as f:
@@ -69,7 +69,7 @@ class TestLayoutPersistence(unittest.TestCase):
             loaded_data, self.sample_layout, "Loaded data should match saved data"
         )
 
-    def test_model_order_validation(self):
+    def test_model_order_validation(self) -> None:
         """Test model order validation logic."""
         # Valid model order
         model_cards = {"model_1": Mock(), "model_2": Mock(), "urdf_generator": Mock()}
@@ -84,7 +84,7 @@ class TestLayoutPersistence(unittest.TestCase):
         all_exist_invalid = all(model_id in model_cards for model_id in invalid_order)
         self.assertFalse(all_exist_invalid, "Should detect missing model")
 
-    def test_config_directory_creation(self):
+    def test_config_directory_creation(self) -> None:
         """Test that config directory is created if it doesn't exist."""
         from src.launchers.golf_launcher import CONFIG_DIR
 
@@ -95,7 +95,7 @@ class TestLayoutPersistence(unittest.TestCase):
         )
 
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
-    def test_layout_save_load_integration(self):
+    def test_layout_save_load_integration(self) -> None:
         """Test integration of save and load functionality."""
         # This test would require mocking the entire GolfLauncher
         # For now, we test the data structures and file operations
@@ -151,7 +151,7 @@ class TestLayoutPersistence(unittest.TestCase):
 class TestLayoutConstants(unittest.TestCase):
     """Test layout-related constants and paths."""
 
-    def test_config_paths_defined(self):
+    def test_config_paths_defined(self) -> None:
         """Test that config paths are properly defined."""
         try:
             from src.launchers.golf_launcher import CONFIG_DIR, LAYOUT_CONFIG_FILE
@@ -166,7 +166,7 @@ class TestLayoutConstants(unittest.TestCase):
         except ImportError as e:
             self.skipTest(f"Golf launcher not available: {e}")
 
-    def test_grid_columns_constant(self):
+    def test_grid_columns_constant(self) -> None:
         """Test that grid columns constant is correct."""
         try:
             from src.launchers.golf_launcher import GRID_COLUMNS
@@ -180,7 +180,7 @@ class TestLayoutConstants(unittest.TestCase):
 class TestLayoutErrorHandling(unittest.TestCase):
     """Test error handling in layout persistence."""
 
-    def test_invalid_json_handling(self):
+    def test_invalid_json_handling(self) -> None:
         """Test handling of invalid JSON in layout file.
 
         SEC-007: Replaced tempfile.mktemp with NamedTemporaryFile to prevent TOCTOU attacks.
@@ -204,7 +204,7 @@ class TestLayoutErrorHandling(unittest.TestCase):
         finally:
             temp_path.unlink(missing_ok=True)
 
-    def test_missing_layout_file_handling(self):
+    def test_missing_layout_file_handling(self) -> None:
         """Test handling when layout file doesn't exist."""
         non_existent_file = Path("/non/existent/path/layout.json")
 
@@ -214,7 +214,7 @@ class TestLayoutErrorHandling(unittest.TestCase):
         # Loading non-existent file should be handled gracefully
         # (This would be tested in the actual launcher code)
 
-    def test_partial_layout_data(self):
+    def test_partial_layout_data(self) -> None:
         """Test handling of partial/incomplete layout data."""
         partial_layout = {
             "model_order": ["model_1", "model_2"],

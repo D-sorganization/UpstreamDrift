@@ -43,7 +43,9 @@ def auto_crop_to_content(img: Image.Image, padding: int = 50) -> Image.Image:
     Returns:
         Cropped and squared PIL Image.
     """
-    if img is None:
+    if not (img is not None):
+        raise ValueError("img must be provided")
+    if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()
 
@@ -96,7 +98,9 @@ def enhance_icon_source(
     Returns:
         Enhanced PIL Image.
     """
-    if img is None:
+    if not (img is not None):
+        raise ValueError("img must be provided")
+    if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()
 
@@ -123,7 +127,9 @@ def create_optimized_icon(
     Returns:
         Resized and sharpened PIL Image.
     """
-    if img is None:
+    if not (img is not None):
+        raise ValueError("img must be provided")
+    if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()
 
@@ -197,7 +203,9 @@ def save_ico(
         sizes: List of square sizes to include.
         mode: Sharpening mode ('standard' or 'extreme').
     """
-    if img is None:
+    if not (img is not None):
+        raise ValueError("img must be provided")
+    if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()
     if sizes is None:
@@ -222,7 +230,9 @@ def save_png_icons(
     mode: str = "standard",
 ) -> None:
     """Save multiple PNG icons at specified sizes."""
-    if img is None:
+    if not (img is not None):
+        raise ValueError("img must be provided")
+    if not (img is not None):
         raise ValueError("img must be provided")
     ensure_pillow()
     for size in sizes:

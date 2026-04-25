@@ -64,7 +64,8 @@ class UISetupMixin:
 
         self.tabs = QTabWidget()
 
-        self.tabs.setStyleSheet("""
+        self.tabs.setStyleSheet(
+            """
 
             QTabWidget::pane { border: 1px solid #444; background: #2b2b2b; }
 
@@ -74,7 +75,8 @@ class UISetupMixin:
 
             QTabBar::tab:hover { background: #444; }
 
-        """)
+        """
+        )
 
         self.setup_sim_tab()
 
@@ -317,7 +319,9 @@ class UISetupMixin:
 
     def enable_results(self, enabled: bool) -> None:
         """Enable or disable the result viewing buttons."""
-        if enabled is None:
+        if not (enabled is not None):
+            raise ValueError("enabled must be provided")
+        if not (enabled is not None):
             raise ValueError("enabled must be provided")
         from src.shared.python.engine_core.engine_availability import (
             MATPLOTLIB_AVAILABLE,
@@ -505,7 +509,9 @@ class UISetupMixin:
 
     def setup_log_area(self, parent_layout: QVBoxLayout) -> None:
         """Build the simulation log output area."""
-        if parent_layout is None:
+        if not (parent_layout is not None):
+            raise ValueError("parent_layout must be provided")
+        if not (parent_layout is not None):
             raise ValueError("parent_layout must be provided")
         log_group = QGroupBox("Simulation Log")
 

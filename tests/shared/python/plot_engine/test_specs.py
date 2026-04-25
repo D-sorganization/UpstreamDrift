@@ -28,7 +28,7 @@ from pydantic import ValidationError
 
 
 class TestSeriesStyle:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         s = SeriesStyle()
         assert s.color is None
         assert s.line_style == "solid"
@@ -38,7 +38,7 @@ class TestSeriesStyle:
         assert s.opacity == 1.0
         assert s.display_mode == "line"
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         s = SeriesStyle(
             color="#ff0000",
             line_style="dashed",
@@ -49,27 +49,27 @@ class TestSeriesStyle:
         s2 = SeriesStyle(**d)
         assert s == s2
 
-    def test_json_roundtrip(self):
+    def test_json_roundtrip(self) -> None:
         s = SeriesStyle(color="#00ff00", opacity=0.5)
         j = s.model_dump_json()
         s2 = SeriesStyle.model_validate_json(j)
         assert s == s2
 
-    def test_opacity_bounds(self):
+    def test_opacity_bounds(self) -> None:
         with pytest.raises(ValidationError):
             SeriesStyle(opacity=1.5)
         with pytest.raises(ValidationError):
             SeriesStyle(opacity=-0.1)
 
-    def test_invalid_line_style(self):
+    def test_invalid_line_style(self) -> None:
         with pytest.raises(ValidationError):
             SeriesStyle(line_style="wavy")
 
-    def test_invalid_marker(self):
+    def test_invalid_marker(self) -> None:
         with pytest.raises(ValidationError):
             SeriesStyle(marker="hexagon")
 
-    def test_invalid_display_mode(self):
+    def test_invalid_display_mode(self) -> None:
         with pytest.raises(ValidationError):
             SeriesStyle(display_mode="area")
 
@@ -78,25 +78,25 @@ class TestSeriesStyle:
 
 
 class TestTrendlineSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         t = TrendlineSpec(type="linear")
         assert t.degree == 2
         assert t.show_equation is True
         assert t.show_r_squared is True
         assert t.line_style == "dashed"
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         t = TrendlineSpec(type="polynomial", degree=4, show_equation=False)
         t2 = TrendlineSpec(**t.model_dump())
         assert t == t2
 
-    def test_degree_bounds(self):
+    def test_degree_bounds(self) -> None:
         with pytest.raises(ValidationError):
             TrendlineSpec(type="polynomial", degree=0)
         with pytest.raises(ValidationError):
             TrendlineSpec(type="polynomial", degree=11)
 
-    def test_valid_types(self):
+    def test_valid_types(self) -> None:
         for tt in ["linear", "polynomial", "exponential", "power"]:
             t = TrendlineSpec(type=tt)
             assert t.type == tt
@@ -106,7 +106,7 @@ class TestTrendlineSpec:
 
 
 class TestAxisSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         a = AxisSpec()
         assert a.label == ""
         assert a.min is None
@@ -114,7 +114,7 @@ class TestAxisSpec:
         assert a.log_scale is False
         assert a.grid is True
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         a = AxisSpec(label="Time (s)", min=0.0, max=10.0, log_scale=True)
         a2 = AxisSpec(**a.model_dump())
         assert a == a2
@@ -124,17 +124,17 @@ class TestAxisSpec:
 
 
 class TestLegendSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         lg = LegendSpec()
         assert lg.visible is True
         assert lg.position == "right"
         assert lg.labels == {}
 
-    def test_custom_labels(self):
+    def test_custom_labels(self) -> None:
         lg = LegendSpec(labels={"signal_a": "Temperature", "signal_b": "Pressure"})
         assert lg.labels["signal_a"] == "Temperature"
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         lg = LegendSpec(visible=False, position="bottom", labels={"a": "A"})
         lg2 = LegendSpec(**lg.model_dump())
         assert lg == lg2
@@ -144,13 +144,13 @@ class TestLegendSpec:
 
 
 class TestSeriesData:
-    def test_basic(self):
+    def test_basic(self) -> None:
         sd = SeriesData(name="test", x=[1.0, 2.0, 3.0], y=[4.0, 5.0, 6.0])
         assert sd.name == "test"
         assert len(sd.x) == 3
         assert sd.trendline is None
 
-    def test_with_style_and_trendline(self):
+    def test_with_style_and_trendline(self) -> None:
         sd = SeriesData(
             name="signal",
             x=[1.0, 2.0],
@@ -161,7 +161,7 @@ class TestSeriesData:
         assert sd.style.color == "#abcdef"
         assert sd.trendline.type == "linear"
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         sd = SeriesData(
             name="data",
             x=[0.0, 1.0, 2.0],
@@ -176,14 +176,14 @@ class TestSeriesData:
 
 
 class TestPlotSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         p = PlotSpec()
         assert p.title == ""
         assert p.series == []
         assert p.width == 800
         assert p.height == 600
 
-    def test_with_series(self):
+    def test_with_series(self) -> None:
         p = PlotSpec(
             title="My Plot",
             series=[
@@ -193,7 +193,7 @@ class TestPlotSpec:
         )
         assert len(p.series) == 2
 
-    def test_json_roundtrip(self):
+    def test_json_roundtrip(self) -> None:
         p = PlotSpec(
             title="Test",
             series=[SeriesData(name="s", x=[1.0, 2.0], y=[3.0, 4.0])],
@@ -204,13 +204,13 @@ class TestPlotSpec:
         p2 = PlotSpec.model_validate_json(j)
         assert p == p2
 
-    def test_dimension_bounds(self):
+    def test_dimension_bounds(self) -> None:
         with pytest.raises(ValidationError):
             PlotSpec(width=50)
         with pytest.raises(ValidationError):
             PlotSpec(height=5000)
 
-    def test_json_schema_generation(self):
+    def test_json_schema_generation(self) -> None:
         schema = PlotSpec.model_json_schema()
         assert "title" in schema["properties"]
         assert "series" in schema["properties"]
@@ -221,7 +221,7 @@ class TestPlotSpec:
 
 
 class TestSurfacePlotSpec:
-    def test_required_fields(self):
+    def test_required_fields(self) -> None:
         sp = SurfacePlotSpec(
             z_data=[[1.0, 2.0], [3.0, 4.0]],
             x_grid=[0.0, 1.0],
@@ -231,7 +231,7 @@ class TestSurfacePlotSpec:
         assert sp.opacity == 0.8
         assert sp.show_wireframe is False
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         sp = SurfacePlotSpec(
             title="Surface",
             z_data=[[1.0, 2.0], [3.0, 4.0]],
@@ -243,7 +243,7 @@ class TestSurfacePlotSpec:
         sp2 = SurfacePlotSpec(**sp.model_dump())
         assert sp == sp2
 
-    def test_json_roundtrip(self):
+    def test_json_roundtrip(self) -> None:
         sp = SurfacePlotSpec(z_data=[[0.0]], x_grid=[0.0], y_grid=[0.0])
         j = sp.model_dump_json()
         sp2 = SurfacePlotSpec.model_validate_json(j)
@@ -254,7 +254,7 @@ class TestSurfacePlotSpec:
 
 
 class TestContourPlotSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         cp = ContourPlotSpec(
             z_data=[[1.0, 2.0], [3.0, 4.0]],
             x_grid=[0.0, 1.0],
@@ -265,11 +265,11 @@ class TestContourPlotSpec:
         assert cp.show_colorbar is True
         assert cp.show_labels is False
 
-    def test_levels_bounds(self):
+    def test_levels_bounds(self) -> None:
         with pytest.raises(ValidationError):
             ContourPlotSpec(z_data=[[1.0]], x_grid=[0.0], y_grid=[0.0], levels=1)
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         cp = ContourPlotSpec(
             z_data=[[1.0, 2.0], [3.0, 4.0]],
             x_grid=[0.0, 1.0],
@@ -286,14 +286,14 @@ class TestContourPlotSpec:
 
 
 class TestHeatmapSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         hm = HeatmapSpec(z_data=[[1.0, 2.0], [3.0, 4.0]])
         assert hm.colormap == "YlGnBu"
         assert hm.annotate is False
         assert hm.x_labels == []
         assert hm.y_labels == []
 
-    def test_with_labels(self):
+    def test_with_labels(self) -> None:
         hm = HeatmapSpec(
             z_data=[[1.0, 2.0], [3.0, 4.0]],
             x_labels=["A", "B"],
@@ -302,7 +302,7 @@ class TestHeatmapSpec:
         )
         assert hm.x_labels == ["A", "B"]
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         hm = HeatmapSpec(z_data=[[0.5]])
         hm2 = HeatmapSpec(**hm.model_dump())
         assert hm == hm2
@@ -312,18 +312,18 @@ class TestHeatmapSpec:
 
 
 class TestHistogramSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         h = HistogramSpec()
         assert h.bins == 30
         assert h.density is False
         assert h.cumulative is False
         assert h.stacked is False
 
-    def test_bins_bounds(self):
+    def test_bins_bounds(self) -> None:
         with pytest.raises(ValidationError):
             HistogramSpec(bins=0)
 
-    def test_roundtrip(self):
+    def test_roundtrip(self) -> None:
         h = HistogramSpec(bins=50, density=True, cumulative=True)
         h2 = HistogramSpec(**h.model_dump())
         assert h == h2
@@ -333,14 +333,14 @@ class TestHistogramSpec:
 
 
 class TestFilterComparisonSpec:
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         fc = FilterComparisonSpec()
         assert fc.original_series == []
         assert fc.filtered_series == []
         assert fc.show_difference is False
         assert fc.difference_color == "#ff6b6b"
 
-    def test_with_series(self):
+    def test_with_series(self) -> None:
         orig = SeriesData(name="raw", x=[1.0, 2.0], y=[3.0, 4.0])
         filt = SeriesData(
             name="filtered",
@@ -356,7 +356,7 @@ class TestFilterComparisonSpec:
         assert len(fc.original_series) == 1
         assert fc.show_difference is True
 
-    def test_json_roundtrip(self):
+    def test_json_roundtrip(self) -> None:
         fc = FilterComparisonSpec(
             original_series=[SeriesData(name="o", x=[0.0], y=[1.0])],
             filtered_series=[SeriesData(name="f", x=[0.0], y=[0.9])],
@@ -382,7 +382,7 @@ class TestSchemaGeneration:
             FilterComparisonSpec,
         ],
     )
-    def test_json_schema_is_valid_json(self, spec_cls):
+    def test_json_schema_is_valid_json(self, spec_cls) -> None:
         schema = spec_cls.model_json_schema()
         # Should serialize to valid JSON
         j = json.dumps(schema)
@@ -401,7 +401,7 @@ class TestSchemaGeneration:
             FilterComparisonSpec,
         ],
     )
-    def test_inherits_base_fields(self, spec_cls):
+    def test_inherits_base_fields(self, spec_cls) -> None:
         schema = spec_cls.model_json_schema()
         # All specs should have title, width, height
         props = schema.get("properties", {})

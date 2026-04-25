@@ -163,7 +163,9 @@ class RoboticsGymEnv:
             Tuple of (observation, reward, terminated, truncated, info).
         """
         # Process action
-        if action is None:
+        if not (action is not None):
+            raise ValueError("action must be provided")
+        if not (action is not None):
             raise ValueError("action must be provided")
         processed_action = self.action_config.process_action(action, self._prev_action)
 

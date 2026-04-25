@@ -5,7 +5,7 @@ import numpy as np
 
 # Use a patch for the import since mujoco might not be installed
 @patch.dict("sys.modules", {"mujoco": MagicMock()})
-def test_mujoco_iaa_logic():
+def test_mujoco_iaa_logic() -> None:
     # Now we can import the module
     import mujoco
     from mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (
@@ -25,7 +25,7 @@ def test_mujoco_iaa_logic():
     mock_data.qfrc_actuator = np.array([0.0, 0.0])  # Actuator forces (nv=2)
 
     # Analyzer relies on calling mj_fullM
-    def side_effect_fullM(model, M, qM):
+    def side_effect_fullM(model, M, qM) -> None:
         M[:] = np.eye(2)  # Identity mass matrix
 
     mujoco.mj_fullM.side_effect = side_effect_fullM
@@ -34,7 +34,7 @@ def test_mujoco_iaa_logic():
     # When qvel is 0, qfrc_bias = G. Let's say G = [0, GRAVITY_M_S2]
     # When qvel is valid, qfrc_bias = C+G = [10, 20]
 
-    def side_effect_forward(model, data):
+    def side_effect_forward(model, data) -> None:
         if np.all(data.qvel == 0):
             data.qfrc_bias = np.array([0.0, 5.0])  # G term
         else:
@@ -43,7 +43,7 @@ def test_mujoco_iaa_logic():
     mujoco.mj_forward.side_effect = side_effect_forward
 
     # Mock mj_rne for optimized G calculation
-    def side_effect_rne(model, data, flg_acc, result):
+    def side_effect_rne(model, data, flg_acc, result) -> None:
         # mj_rne with flg_acc=0 computes G if qvel=0.
         # In test, we expect G = [0, 5]
         # Verify qvel is 0

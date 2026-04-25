@@ -32,7 +32,7 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
             {"type": "history", "messages": [...]}
             {"type": "error", "detail": "..."}
     """
-    if websocket is None:
+    if not (websocket is not None):
         raise ValueError("websocket must be provided")
     await websocket.accept()
 
@@ -73,7 +73,12 @@ async def chat_stream(websocket: WebSocket, session_id: str = "new") -> None:
 
                 # Stream response chunks
                 async for chunk in chat_service.stream_response(session_id):
-                    await websocket.send_json({"type": "chunk", "content": chunk})
+                    if isinstance(chunk, dict):
+                        await websocket.send_json(chunk)
+                    else:
+                        await websocket.send_json(
+                            {"type": "chunk", "content": str(chunk)}
+                        )
 
                 await websocket.send_json(
                     {"type": "complete", "session_id": session_id}
@@ -119,7 +124,7 @@ async def list_sessions(request: Request) -> list[dict[str, Any]]:
 )
 async def get_history(request: Request, session_id: str) -> dict[str, Any]:
     """Get message history for a session."""
-    if request is None:
+    if not (request is not None):
         raise ValueError("request must be provided")
     messages = request.app.state.chat_service.get_session_history(session_id)
     return {"session_id": session_id, "messages": messages}

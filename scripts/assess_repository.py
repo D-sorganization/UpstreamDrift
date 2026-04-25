@@ -7,6 +7,7 @@ import json
 import logging
 import subprocess
 import sys
+from pathlib import Path
 
 from scripts.script_utils import get_repo_root
 
@@ -40,7 +41,7 @@ DOCS_DIR.mkdir(parents=True, exist_ok=True)
 ISSUES_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def assess_A():
+def assess_A() -> Path:
     """Assess code structure and directory organization."""
     # Code Structure
     findings = []
@@ -63,7 +64,7 @@ def assess_A():
     )
 
 
-def assess_B():
+def assess_B() -> Path:
     """Assess documentation quality and coverage."""
     # Documentation
     findings = []
@@ -94,7 +95,7 @@ def assess_B():
     )
 
 
-def assess_C():
+def assess_C() -> Path:
     """Assess test coverage and test file count."""
     # Test Coverage
     findings = []
@@ -116,7 +117,7 @@ def assess_C():
     )
 
 
-def assess_D():
+def assess_D() -> Path:
     """Error Handling assessment."""
     findings = []
     py_files = REPO_ROOT.rglob("*.py")
@@ -151,7 +152,7 @@ def assess_D():
     )
 
 
-def assess_E():
+def assess_E() -> Path:
     """Assess performance profiling practices."""
     # Performance
     findings = []
@@ -170,7 +171,7 @@ def assess_E():
     )
 
 
-def assess_F():
+def assess_F() -> Path:
     """Assess security practices and hardcoded secrets."""
     # Security
     findings = []
@@ -218,7 +219,7 @@ def assess_F():
     )
 
 
-def assess_G():
+def assess_G() -> Path:
     """Assess dependency management and definition files."""
     # Dependencies
     findings = []
@@ -239,7 +240,7 @@ def assess_G():
     )
 
 
-def assess_H():
+def assess_H() -> Path:
     """Assess CI/CD pipeline configuration."""
     # CI/CD
     findings = []
@@ -261,7 +262,7 @@ def assess_H():
     )
 
 
-def assess_I():
+def assess_I() -> Path:
     """Assess code style and linter configuration."""
     # Code Style
     findings = []
@@ -280,7 +281,7 @@ def assess_I():
     )
 
 
-def assess_J():
+def assess_J() -> Path:
     """Assess API design and endpoint documentation."""
     # API Design
     findings = []
@@ -318,7 +319,7 @@ def assess_J():
     )
 
 
-def assess_K():
+def assess_K() -> Path:
     """Assess data handling and validation patterns."""
     # Data Handling
     findings = []
@@ -332,7 +333,7 @@ def assess_K():
     )
 
 
-def assess_L():
+def assess_L() -> Path:
     """Logging assessment."""
     findings = []
     py_files = REPO_ROOT.rglob("*.py")
@@ -369,7 +370,7 @@ def assess_L():
     )
 
 
-def assess_M():
+def assess_M() -> Path:
     """Assess configuration management practices."""
     # Configuration
     findings = []
@@ -384,7 +385,7 @@ def assess_M():
     )
 
 
-def assess_N():
+def assess_N() -> Path:
     """Assess scalability readiness of the architecture."""
     # Scalability
     findings = []
@@ -401,7 +402,7 @@ def assess_N():
     )
 
 
-def assess_O():
+def assess_O() -> Path:
     """Assess code maintainability and complexity metrics."""
     # Maintainability
     findings = []
@@ -428,7 +429,7 @@ def assess_O():
     )
 
 
-def run_all_assessments():
+def run_all_assessments() -> list[Path]:
     """Execute all category assessments and return their reports."""
     assessors = [
         assess_A,
@@ -459,7 +460,7 @@ def run_all_assessments():
     return reports
 
 
-def generate_issues_locally(json_path):
+def generate_issues_locally(json_path) -> None:
     """Read summary JSON and create issue markdown files for low scores."""
     try:
         with open(json_path) as f:
@@ -483,7 +484,7 @@ def generate_issues_locally(json_path):
         logger.error("Error generating local issues: %s", e)
 
 
-def main():
+def main() -> None:
     """Run all assessments and generate the summary report."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     logger.info("Starting repository assessment...")

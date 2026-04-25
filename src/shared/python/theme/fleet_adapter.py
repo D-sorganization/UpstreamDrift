@@ -124,7 +124,9 @@ def _is_dark_theme(theme_dict: dict[str, str]) -> bool:
 
 def _adjust_color_brightness(hex_color: str, factor: float) -> str:
     """Adjust color brightness by a factor (>1 = lighter, <1 = darker)."""
-    if hex_color is None:
+    if not (hex_color is not None):
+        raise ValueError("hex_color must be provided")
+    if not (hex_color is not None):
         raise ValueError("hex_color must be provided")
     hex_val = hex_color.lstrip("#")
     if len(hex_val) == 3:
@@ -146,7 +148,9 @@ def _adjust_color_brightness(hex_color: str, factor: float) -> str:
 
 def _hex_with_alpha(hex_color: str, alpha: int) -> str:
     """Add alpha channel to hex color (for muted variants)."""
-    if hex_color is None:
+    if not (hex_color is not None):
+        raise ValueError("hex_color must be provided")
+    if not (hex_color is not None):
         raise ValueError("hex_color must be provided")
     hex_val = hex_color.lstrip("#")
     if len(hex_val) == 3:
@@ -185,7 +189,9 @@ def _build_theme_colors_kwargs(
     base: dict[str, str],
     semantic: dict[str, str],
 ) -> dict:
-    if theme_name is None:
+    if not (theme_name is not None):
+        raise ValueError("theme_name must be provided")
+    if not (theme_name is not None):
         raise ValueError("theme_name must be provided")
     accent = base["accent"]
     group_bg = base["group_bg"]

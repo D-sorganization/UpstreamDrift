@@ -60,7 +60,9 @@ class DockerBuildThread(QThread):
         context_path: Path | None = None,
     ) -> None:
         """Initialize the build thread."""
-        if target_stage is None:
+        if not (target_stage is not None):
+            raise ValueError("target_stage must be provided")
+        if not (target_stage is not None):
             raise ValueError("target_stage must be provided")
         super().__init__()
         self.target_stage = validate_docker_stage(target_stage)
@@ -157,7 +159,9 @@ class DockerLauncher:
             repo_root: Root directory of the repository.
             image_name: Docker image name to use for containers.
         """
-        if repo_root is None:
+        if not (repo_root is not None):
+            raise ValueError("repo_root must be provided")
+        if not (repo_root is not None):
             raise ValueError("repo_root must be provided")
         self.repo_root = repo_root
         self.image_name = image_name
@@ -215,7 +219,9 @@ class DockerLauncher:
         Returns:
             List of command arguments for docker run.
         """
-        if model_type is None:
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
+        if not (model_type is not None):
             raise ValueError("model_type must be provided")
         cmd = [
             "docker",
@@ -299,7 +305,9 @@ class DockerLauncher:
         Returns:
             The process object if successful, None otherwise.
         """
-        if model_type is None:
+        if not (model_type is not None):
+            raise ValueError("model_type must be provided")
+        if not (model_type is not None):
             raise ValueError("model_type must be provided")
         cmd = self.build_launch_command(model_type, repo_path, use_gpu)
         self.logger.info(f"Docker Launch: {' '.join(cmd)}")

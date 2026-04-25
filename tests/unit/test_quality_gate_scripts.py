@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import importlib.util
+import types
 from pathlib import Path
 
 
-def _load_script_module(name: str):
+def _load_script_module(name: str) -> types.ModuleType:
     script_path = Path(__file__).resolve().parents[2] / "scripts" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, script_path)
     assert spec is not None and spec.loader is not None
@@ -15,7 +16,7 @@ def _load_script_module(name: str):
     return module
 
 
-def test_find_print_calls_detects_runtime_print(tmp_path):
+def test_find_print_calls_detects_runtime_print(tmp_path) -> None:
     module = _load_script_module("check_no_print_calls")
     file_path = tmp_path / "sample.py"
     file_path.write_text("def run():\n    print('hello')\n", encoding="utf-8")
@@ -25,7 +26,7 @@ def test_find_print_calls_detects_runtime_print(tmp_path):
     assert lines == [2]
 
 
-def test_file_size_exception_active_handles_valid_and_expired_dates():
+def test_file_size_exception_active_handles_valid_and_expired_dates() -> None:
     module = _load_script_module("check_file_size_budget")
 
     assert module._exception_is_active({"expires_on": "2999-01-01"}) is True

@@ -126,7 +126,7 @@ class AnalysisService:
 
         Extracts joint kinematics from the physics engine or provided data.
         """
-        if request is None:
+        if not (request is not None):
             raise ValueError("request must be provided")
         result: dict[str, Any] = {
             "analysis_type": "kinematics",
@@ -197,7 +197,7 @@ class AnalysisService:
 
         Extracts joint kinetics from the physics engine or provided data.
         """
-        if request is None:
+        if not (request is not None):
             raise ValueError("request must be provided")
         result: dict[str, Any] = {
             "analysis_type": "kinetics",
@@ -257,7 +257,7 @@ class AnalysisService:
 
         Computes energy metrics from the physics engine state.
         """
-        if request is None:
+        if not (request is not None):
             raise ValueError("request must be provided")
         result: dict[str, Any] = {
             "analysis_type": "energetics",
@@ -322,7 +322,7 @@ class AnalysisService:
         Analyzes the golf swing phases and transitions.
         """
         # Standard golf swing phases
-        if request is None:
+        if not (request is not None):
             raise ValueError("request must be provided")
         SWING_PHASES = [
             "address",
@@ -396,7 +396,7 @@ class AnalysisService:
         Simple heuristic-based phase detection. For production use,
         this should be replaced with ML-based detection.
         """
-        if state is None:
+        if not (state is not None):
             raise ValueError("state must be provided")
         if not state:
             return None
@@ -414,7 +414,7 @@ class AnalysisService:
             return []
         if isinstance(data, np.ndarray):
             return list(data.tolist())
-        if isinstance(data, list | tuple):
+        if isinstance(data, (list, tuple)):
             return list(data)
         if isinstance(data, int | float):
             return [data]

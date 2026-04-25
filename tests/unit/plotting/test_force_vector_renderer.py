@@ -41,7 +41,7 @@ def mock_data_manager() -> MagicMock:
     # Force vectors: (50, 3, 3) — 50 frames, 3 joints, 3D
     forces = np.random.default_rng(42).uniform(-100, 100, (50, 3, 3))
 
-    def mock_get_series(field_name: str):
+    def mock_get_series(field_name: str) -> tuple[np.ndarray, np.ndarray]:
         if field_name == "joint_world_positions":
             return times, positions
         if field_name == "joint_forces":

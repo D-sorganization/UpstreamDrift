@@ -7,6 +7,8 @@ We mark them as serial to avoid this.
 """
 
 import sys
+import types
+from collections.abc import Generator
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -20,17 +22,17 @@ class MockQThread:
     def __init__(self, parent=None):
         """Mock constructor."""
 
-    def start(self):
+    def start(self) -> None:
         self.run()
 
-    def run(self):
+    def run(self) -> None:
         """Mock run."""
 
-    def wait(self):
+    def wait(self) -> None:
         """Mock wait."""
 
 
-def mock_pyqt_signal(*args):
+def mock_pyqt_signal(*args) -> MagicMock:
     return MagicMock()
 
 
@@ -40,18 +42,18 @@ class MockQWidget:
         """Mock constructor."""
         self._window_title = ""
 
-    def setWindowTitle(self, title):
+    def setWindowTitle(self, title) -> None:
         """Mock setWindowTitle."""
         self._window_title = title
 
-    def windowTitle(self):
+    def windowTitle(self) -> str:
         """Mock windowTitle."""
         return self._window_title
 
-    def resize(self, w, h):
+    def resize(self, w, h) -> None:
         """Mock resize."""
 
-    def setLayout(self, layout):
+    def setLayout(self, layout) -> None:
         """Mock setLayout."""
 
 
@@ -62,18 +64,18 @@ class MockQDialog(MockQWidget):
         """Return a no-op callable for any missing attribute."""
         return lambda *args, **kwargs: None
 
-    def accept(self):
+    def accept(self) -> None:
         """Mock accept."""
 
-    def setMinimumSize(self, w, h):
+    def setMinimumSize(self, w, h) -> None:
         """Mock setMinimumSize."""
 
 
 class MockQTextEdit(MockQWidget):
-    def setReadOnly(self, b):
+    def setReadOnly(self, b) -> None:
         """Mock setReadOnly."""
 
-    def setMarkdown(self, t):
+    def setMarkdown(self, t) -> None:
         """Mock setMarkdown."""
 
 
@@ -81,21 +83,21 @@ class MockQVBoxLayout:
     def __init__(self, parent=None):
         """Mock constructor."""
 
-    def addWidget(self, w, *args, **kwargs):
+    def addWidget(self, w, *args, **kwargs) -> None:
         """Mock addWidget."""
 
-    def addLayout(self, layout, *args, **kwargs):
+    def addLayout(self, layout, *args, **kwargs) -> None:
         """Mock addLayout."""
 
-    def setContentsMargins(self, *args):
+    def setContentsMargins(self, *args) -> None:
         """Mock setContentsMargins."""
 
-    def setSpacing(self, s):
+    def setSpacing(self, s) -> None:
         """Mock setSpacing."""
 
 
 @pytest.fixture
-def mocked_launcher_module():
+def mocked_launcher_module() -> Generator[types.ModuleType, None, None]:
     """
     Import golf_launcher with mocked Qt modules.
     This fixture ensures that the mocks don't pollute the global sys.modules,
@@ -151,7 +153,9 @@ class TestDockerThreads:
     """Test Docker-related threads in golf_launcher."""
 
     @patch("subprocess.run")
-    def test_docker_check_thread_success(self, mock_run, mocked_launcher_module):
+    def test_docker_check_thread_success(
+        self, mock_run, mocked_launcher_module
+    ) -> None:
         """Test DockerCheckThread success."""
         # subprocess.run return value
         mock_run.return_value.returncode = 0
@@ -167,7 +171,9 @@ class TestDockerThreads:
         thread.result.emit.assert_called_with(True)
 
     @patch("subprocess.run")
-    def test_docker_check_thread_failure(self, mock_run, mocked_launcher_module):
+    def test_docker_check_thread_failure(
+        self, mock_run, mocked_launcher_module
+    ) -> None:
         """Test DockerCheckThread failure."""
         mock_run.side_effect = FileNotFoundError
 
@@ -183,7 +189,7 @@ class TestDockerThreads:
     )
     @patch("pathlib.Path.read_text", return_value="# Help")
     @patch("pathlib.Path.exists", return_value=True)
-    def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module):
+    def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module) -> None:
         """Test HelpDialog initialization and content loading."""
         dialog = mocked_launcher_module.HelpDialog()
         assert dialog is not None

@@ -13,7 +13,7 @@ client = TestClient(app)
     reason="Auth login endpoint not yet implemented at /api/auth/login",
     strict=False,
 )
-def test_rate_limiting():
+def test_rate_limiting() -> None:
     # Attempt to hit the login endpoint multiple times
     # Assuming limit is something like 5/minute
 

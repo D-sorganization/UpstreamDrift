@@ -94,7 +94,7 @@ async def run_simulation_async(
     Returns:
         Task ID and initial status.
     """
-    if request is None:
+    if not (request is not None):
         raise ValueError("request must be provided")
     task_id = str(uuid.uuid4())
 

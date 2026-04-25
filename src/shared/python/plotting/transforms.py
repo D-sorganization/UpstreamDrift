@@ -26,7 +26,9 @@ class DataManager:
             joint_names: Optional list of joint names.
             enable_cache: If True, cache data fetches to improve performance
         """
-        if recorder is None:
+        if not (recorder is not None):
+            raise ValueError("recorder must be provided")
+        if not (recorder is not None):
             raise ValueError("recorder must be provided")
         self.recorder = recorder
         self.joint_names = joint_names or []
@@ -76,7 +78,9 @@ class DataManager:
         Returns:
             Tuple of (times, values) arrays
         """
-        if field_name is None:
+        if not (field_name is not None):
+            raise ValueError("field_name must be provided")
+        if not (field_name is not None):
             raise ValueError("field_name must be provided")
         if not self.enable_cache:
             times, values = self.recorder.get_time_series(field_name)
@@ -102,7 +106,9 @@ class DataManager:
 
     def get_joint_name(self, joint_idx: int) -> str:
         """Get human-readable joint name."""
-        if joint_idx is None:
+        if not (joint_idx is not None):
+            raise ValueError("joint_idx must be provided")
+        if not (joint_idx is not None):
             raise ValueError("joint_idx must be provided")
         if 0 <= joint_idx < len(self.joint_names):
             return self.joint_names[joint_idx]
@@ -110,7 +116,9 @@ class DataManager:
 
     def get_aligned_label(self, idx: int, data_dim: int) -> str:
         """Get label aligned with data dimension (handling nq != nv)."""
-        if idx is None:
+        if not (idx is not None):
+            raise ValueError("idx must be provided")
+        if not (idx is not None):
             raise ValueError("idx must be provided")
         if len(self.joint_names) == 0:
             return f"DoF {idx}"
@@ -140,7 +148,9 @@ class DataManager:
         self, source_name: str
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get club induced acceleration series (uncached)."""
-        if source_name is None:
+        if not (source_name is not None):
+            raise ValueError("source_name must be provided")
+        if not (source_name is not None):
             raise ValueError("source_name must be provided")
         if hasattr(self.recorder, "get_club_induced_acceleration_series"):
             return self.recorder.get_club_induced_acceleration_series(source_name)  # type: ignore

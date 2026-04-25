@@ -97,7 +97,7 @@ class ModelCache:
 
     INDEX_FILE = "cache_index.json"
 
-    def __init__(self, config: CacheConfig | None = None):
+    def __init__(self, config: CacheConfig | None = None) -> None:
         """
         Initialize cache.
 
@@ -152,7 +152,9 @@ class ModelCache:
         Returns:
             CacheEntry if cached and valid, None otherwise
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if entry and entry.local_path.exists():
@@ -199,7 +201,9 @@ class ModelCache:
             Created CacheEntry
         """
         # Check if cleanup needed
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         self._maybe_cleanup()
 
@@ -239,7 +243,9 @@ class ModelCache:
         Returns:
             True if removed
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if not entry:
@@ -264,7 +270,9 @@ class ModelCache:
 
     def contains(self, model_id: str) -> bool:
         """Check if model is cached."""
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         return entry is not None and entry.local_path.exists()
@@ -279,7 +287,9 @@ class ModelCache:
         Returns:
             True if valid, False if corrupted or missing
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         entry = self._entries.get(model_id)
         if not entry or not entry.local_path.exists():
@@ -366,7 +376,9 @@ class ModelCache:
 
     def _compute_checksum(self, path: Path) -> str:
         """Compute SHA-256 checksum of a file."""
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         sha256 = hashlib.sha256()
         with open(path, "rb") as f:
@@ -376,7 +388,9 @@ class ModelCache:
 
     def _get_size(self, path: Path) -> int:
         """Get total size of path (file or directory)."""
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         if path.is_file():
             return path.stat().st_size

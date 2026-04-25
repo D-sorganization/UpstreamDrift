@@ -34,7 +34,9 @@ class DrakeInducedAccelerationAnalyzer:
 
     def _calc_bias_term(self, context: Context) -> np.ndarray:
         """Compute the bias term using inverse dynamics with zero acceleration."""
-        if context is None:
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
             raise ValueError("context must be provided")
         vdot_zero = np.zeros(self.plant.num_velocities())
         return self.plant.CalcInverseDynamics(
@@ -55,7 +57,9 @@ class DrakeInducedAccelerationAnalyzer:
         Returns:
             Dict with 'gravity', 'velocity', 'control', 'total'
         """
-        if context is None:
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
             raise ValueError("context must be provided")
         if self.plant is None:
             return {
@@ -95,7 +99,9 @@ class DrakeInducedAccelerationAnalyzer:
 
     def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
         """Compute ZTCF and ZVCF."""
-        if context is None:
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
             raise ValueError("context must be provided")
         if self.plant is None:
             return {}
@@ -142,7 +148,9 @@ class DrakeInducedAccelerationAnalyzer:
             (e.g., [0, 1, 0]), the result is the sensitivity of acceleration
             to that specific actuator.
         """
-        if context is None:
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
             raise ValueError("context must be provided")
         if self.plant is None:
             return np.array([])
@@ -212,7 +220,9 @@ class DrakeRecorder:
         angular_momentum: np.ndarray | None = None,
     ) -> None:
         """Record a single simulation frame with state and optional data."""
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         if not self.is_recording:
             return
@@ -244,7 +254,9 @@ class DrakeRecorder:
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Implement RecorderInterface."""
-        if field_name is None:
+        if not (field_name is not None):
+            raise ValueError("field_name must be provided")
+        if not (field_name is not None):
             raise ValueError("field_name must be provided")
         times = np.array(self.times)
         if field_name == "club_head_position":
@@ -269,7 +281,9 @@ class DrakeRecorder:
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced accelerations."""
-        if source_name is None:
+        if not (source_name is not None):
+            raise ValueError("source_name must be provided")
+        if not (source_name is not None):
             raise ValueError("source_name must be provided")
         if (
             isinstance(source_name, int)
@@ -308,7 +322,9 @@ class DrakeRecorder:
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual data."""
-        if cf_name is None:
+        if not (cf_name is not None):
+            raise ValueError("cf_name must be provided")
+        if not (cf_name is not None):
             raise ValueError("cf_name must be provided")
         if cf_name not in self.counterfactuals:
             return np.array([]), np.array([])
@@ -328,7 +344,9 @@ class DrakeRecorder:
 
         def add_series(target: dict, name: str, arr_list: list) -> None:
             """Append a time-aligned array to the target dictionary."""
-            if target is None:
+            if not (target is not None):
+                raise ValueError("target must be provided")
+            if not (target is not None):
                 raise ValueError("target must be provided")
             if not arr_list:
                 return

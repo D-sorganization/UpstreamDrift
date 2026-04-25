@@ -31,8 +31,9 @@ try:
 except ImportError:
     HAS_PYQT = False
 
-from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.signal_toolkit.core import Signal
+
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # DRY note (issue #2340): This widget and signal_toolkit/widget.py are parallel
 # implementations with shared MplCanvas / dark-theme logic. The canonical split
@@ -150,7 +151,9 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             dpi: int = 100,
         ) -> None:
             """Initialize the canvas."""
-            if width is None:
+            if not (width is not None):
+                raise ValueError("width must be provided")
+            if not (width is not None):
                 raise ValueError("width must be provided")
             self.fig = Figure(figsize=(width, height), dpi=dpi)
             self.axes = self.fig.add_subplot(111)

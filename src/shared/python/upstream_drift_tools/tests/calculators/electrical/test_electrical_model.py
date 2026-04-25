@@ -13,7 +13,7 @@ from upstream_drift_tools.calculators.electrical.glass_interface import (
 
 class TestElectricalModel:
     @pytest.fixture
-    def model(self) -> ThreePhaseElectricalModelEnhanced:
+    def model(self) -> None:
         config = ElectrodeConfig()
         glass = GlassPropertiesInterface()
         return ThreePhaseElectricalModelEnhanced(config, glass)

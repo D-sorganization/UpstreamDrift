@@ -101,7 +101,9 @@ class StateCheckpoint:
         Returns:
             New StateCheckpoint instance
         """
-        if engine_type is None:
+        if not (engine_type is not None):
+            raise ValueError("engine_type must be provided")
+        if not (engine_type is not None):
             raise ValueError("engine_type must be provided")
         checkpoint_id = f"cp_{int(time.time() * 1000)}_{id(engine_state) % 10000:04d}"
 
@@ -159,7 +161,9 @@ class StateCheckpoint:
 
     def __contains__(self, key: object) -> bool:
         """Support `in` checks for common checkpoint fields."""
-        if key is None:
+        if not (key is not None):
+            raise ValueError("key must be provided")
+        if not (key is not None):
             raise ValueError("key must be provided")
         if not isinstance(key, str):
             return False
@@ -257,7 +261,9 @@ class CheckpointManager(ContractChecker):
             max_checkpoints: Maximum checkpoints to keep in memory
             storage_path: Optional path for disk persistence
         """
-        if max_checkpoints is None:
+        if not (max_checkpoints is not None):
+            raise ValueError("max_checkpoints must be provided")
+        if not (max_checkpoints is not None):
             raise ValueError("max_checkpoints must be provided")
         self.max_checkpoints = max_checkpoints
         self.storage_path = storage_path
@@ -325,7 +331,9 @@ class CheckpointManager(ContractChecker):
             interval_steps: Create checkpoint every N steps (0 = disabled)
             interval_time: Create checkpoint every T seconds (0 = disabled)
         """
-        if interval_steps is None:
+        if not (interval_steps is not None):
+            raise ValueError("interval_steps must be provided")
+        if not (interval_steps is not None):
             raise ValueError("interval_steps must be provided")
         self._auto_enabled = True
         self._auto_interval_steps = interval_steps
@@ -372,7 +380,9 @@ class CheckpointManager(ContractChecker):
     def _add_checkpoint(self, checkpoint: StateCheckpoint) -> None:
         """Add checkpoint to buffer."""
         # Remove oldest if at capacity
-        if checkpoint is None:
+        if not (checkpoint is not None):
+            raise ValueError("checkpoint must be provided")
+        if not (checkpoint is not None):
             raise ValueError("checkpoint must be provided")
         if len(self._checkpoints) >= self.max_checkpoints:
             oldest = self._checkpoints[0]
@@ -464,7 +474,9 @@ class CheckpointManager(ContractChecker):
         Returns:
             ID of restored checkpoint, or None if not enough history
         """
-        if engine is None:
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
             raise ValueError("engine must be provided")
         if len(self._checkpoints) < 2:
             return None
@@ -483,7 +495,9 @@ class CheckpointManager(ContractChecker):
             Checkpoint or None if not found
         """
         # Search deque directly (small enough for linear search)
-        if checkpoint_id is None:
+        if not (checkpoint_id is not None):
+            raise ValueError("checkpoint_id must be provided")
+        if not (checkpoint_id is not None):
             raise ValueError("checkpoint_id must be provided")
         for checkpoint in self._checkpoints:
             if checkpoint.id == checkpoint_id:
@@ -499,7 +513,9 @@ class CheckpointManager(ContractChecker):
         Returns:
             Checkpoint or None if not found
         """
-        if tag is None:
+        if not (tag is not None):
+            raise ValueError("tag must be provided")
+        if not (tag is not None):
             raise ValueError("tag must be provided")
         if tag not in self._tags:
             return None
@@ -540,7 +556,9 @@ class CheckpointManager(ContractChecker):
         Returns:
             True if a checkpoint was created
         """
-        if engine is None:
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
             raise ValueError("engine must be provided")
         if not self._auto_enabled:
             return False

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import os
 import unittest
+from typing import Any
 
 import numpy as np
 
@@ -56,7 +57,7 @@ class TestFrictionConePreconditions(unittest.TestCase):
 class TestFrictionConeContains(unittest.TestCase):
     """FrictionCone.contains() postconditions."""
 
-    def _cone(self, mu: float = 0.5):  # type: ignore[no-untyped-def]
+    def _cone(self, mu: float = 0.5) -> Any:
         from src.robotics.contact.friction_cone import FrictionCone
 
         return FrictionCone(mu=mu, normal=np.array([0.0, 0.0, 1.0]))
@@ -185,7 +186,7 @@ class TestLinearizeFrictionConePostconditions(unittest.TestCase):
 class TestProjectToFrictionCone(unittest.TestCase):
     """project_to_friction_cone postconditions."""
 
-    def _cone(self, mu: float = 0.5):  # type: ignore[no-untyped-def]
+    def _cone(self, mu: float = 0.5) -> Any:
         from src.robotics.contact.friction_cone import FrictionCone
 
         return FrictionCone(mu=mu, normal=np.array([0.0, 0.0, 1.0]))

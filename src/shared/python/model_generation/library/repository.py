@@ -76,7 +76,9 @@ class Repository(ABC):
 
     def search(self, query: str) -> list[RepositoryModel]:
         """Search models by name or description."""
-        if query is None:
+        if not (query is not None):
+            raise ValueError("query must be provided")
+        if not (query is not None):
             raise ValueError("query must be provided")
         query_lower = query.lower()
         return [
@@ -94,7 +96,7 @@ class LocalRepository(Repository):
         path: Path | str,
         name: str | None = None,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize local repository.
 
@@ -103,7 +105,9 @@ class LocalRepository(Repository):
             name: Repository name
             description: Repository description
         """
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         self._path = Path(path)
         self._name = name or self._path.name
@@ -144,7 +148,9 @@ class LocalRepository(Repository):
         destination: Path,
     ) -> Path | None:
         """Copy model to destination (local copy)."""
-        if model_path is None:
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
+        if not (model_path is not None):
             raise ValueError("model_path must be provided")
         import shutil
 
@@ -178,7 +184,7 @@ class GitHubRepository(Repository):
         path: str = "",
         name: str | None = None,
         description: str = "",
-    ):
+    ) -> None:
         """
         Initialize GitHub repository.
 
@@ -190,7 +196,9 @@ class GitHubRepository(Repository):
             name: Display name
             description: Repository description
         """
-        if owner is None:
+        if not (owner is not None):
+            raise ValueError("owner must be provided")
+        if not (owner is not None):
             raise ValueError("owner must be provided")
         self._owner = owner
         self._repo = repo
@@ -218,7 +226,9 @@ class GitHubRepository(Repository):
         Returns:
             Configured Request object
         """
-        if url is None:
+        if not (url is not None):
+            raise ValueError("url must be provided")
+        if not (url is not None):
             raise ValueError("url must be provided")
         req = urllib.request.Request(url)
         req.add_header("Accept", "application/vnd.github.v3+json")
@@ -252,7 +262,9 @@ class GitHubRepository(Repository):
             urllib.error.HTTPError: On non-retryable HTTP errors
             OSError: On network errors after retries exhausted
         """
-        if url is None:
+        if not (url is not None):
+            raise ValueError("url must be provided")
+        if not (url is not None):
             raise ValueError("url must be provided")
         all_results: list = []
         current_url: str | None = url
@@ -345,7 +357,9 @@ class GitHubRepository(Repository):
 
     def _scan_directory(self, path: str, depth: int = 0) -> list[RepositoryModel]:
         """Recursively scan directory for URDF files."""
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         if depth > 3:  # Limit recursion
             return []
@@ -383,7 +397,9 @@ class GitHubRepository(Repository):
         destination: Path,
     ) -> Path | None:
         """Download model from GitHub."""
-        if model_path is None:
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
+        if not (model_path is not None):
             raise ValueError("model_path must be provided")
         destination.mkdir(parents=True, exist_ok=True)
 
@@ -410,7 +426,9 @@ class GitHubRepository(Repository):
 
     def _download_meshes(self, model_dir: str, destination: Path) -> None:
         """Download mesh files from model directory."""
-        if model_dir is None:
+        if not (model_dir is not None):
+            raise ValueError("model_dir must be provided")
+        if not (model_dir is not None):
             raise ValueError("model_dir must be provided")
         mesh_dir = f"{model_dir}/meshes"
         api_url = (
@@ -437,7 +455,9 @@ class GitHubRepository(Repository):
 
     def download_archive(self, destination: Path) -> bool:
         """Download entire repository as archive."""
-        if destination is None:
+        if not (destination is not None):
+            raise ValueError("destination must be provided")
+        if not (destination is not None):
             raise ValueError("destination must be provided")
         archive_url = (
             f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
@@ -465,7 +485,7 @@ class CompositeRepository(Repository):
         repositories: list[Repository],
         name: str = "Combined",
         description: str = "Combined repository",
-    ):
+    ) -> None:
         """
         Initialize composite repository.
 
@@ -474,7 +494,9 @@ class CompositeRepository(Repository):
             name: Display name
             description: Description
         """
-        if repositories is None:
+        if not (repositories is not None):
+            raise ValueError("repositories must be provided")
+        if not (repositories is not None):
             raise ValueError("repositories must be provided")
         self._repositories = repositories
         self._name = name
@@ -513,7 +535,9 @@ class CompositeRepository(Repository):
     ) -> Path | None:
         """Download from appropriate repository."""
         # Extract repo name from path
-        if model_path is None:
+        if not (model_path is not None):
+            raise ValueError("model_path must be provided")
+        if not (model_path is not None):
             raise ValueError("model_path must be provided")
         parts = model_path.split("/", 1)
         if len(parts) != 2:

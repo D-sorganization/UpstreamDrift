@@ -56,7 +56,9 @@ class ActuatorControl:
             step_time: Time at which step occurs (for STEP type)
             step_value: Value after step (for STEP type)
         """
-        if control_type is None:
+        if not (control_type is not None):
+            raise ValueError("control_type must be provided")
+        if not (control_type is not None):
             raise ValueError("control_type must be provided")
         self.control_type = control_type
         self.constant_value = constant_value
@@ -100,7 +102,9 @@ class ActuatorControl:
             Control torque value
         """
         # Base torque from control type
-        if time is None:
+        if not (time is not None):
+            raise ValueError("time must be provided")
+        if not (time is not None):
             raise ValueError("time must be provided")
         if self.control_type == ControlType.CONSTANT:
             base_torque = self.constant_value
@@ -149,7 +153,9 @@ class ControlSystem:
         Args:
             num_actuators: Number of actuators in the system
         """
-        if num_actuators is None:
+        if not (num_actuators is not None):
+            raise ValueError("num_actuators must be provided")
+        if not (num_actuators is not None):
             raise ValueError("num_actuators must be provided")
         self.num_actuators = num_actuators
         self.actuator_controls: list[ActuatorControl] = [
@@ -323,4 +329,4 @@ class ControlSystem:
                 # Ensure control type is set to polynomial
                 self.actuator_controls[
                     actuator_index
-                ].control_type = ControlType.POLYNOMIAL  # noqa: E501
+                ].control_type = ControlType.POLYNOMIAL

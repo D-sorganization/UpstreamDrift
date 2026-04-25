@@ -25,7 +25,7 @@ from pathlib import Path
 class TestSharedDoesNotImportEngines:
     """Verify shared/python modules don't import from engines at module level."""
 
-    def test_interfaces_importable_without_engines(self):
+    def test_interfaces_importable_without_engines(self) -> None:
         """interfaces.py should not require engines at import time."""
         # Temporarily remove engines from sys.modules to detect eager imports
         saved = {}
@@ -45,25 +45,25 @@ class TestSharedDoesNotImportEngines:
             # Restore saved modules
             sys.modules.update(saved)
 
-    def test_capabilities_in_shared(self):
+    def test_capabilities_in_shared(self) -> None:
         """EngineCapabilities should be importable from shared.python.engine_core.capabilities."""
         mod = importlib.import_module("src.shared.python.capabilities")
         assert hasattr(mod, "EngineCapabilities")
         assert hasattr(mod, "CapabilityLevel")
 
-    def test_capabilities_backward_compat(self):
+    def test_capabilities_backward_compat(self) -> None:
         """Old import path engines.common.capabilities should still work."""
         mod = importlib.import_module("src.engines.common.capabilities")
         assert hasattr(mod, "EngineCapabilities")
         assert hasattr(mod, "CapabilityLevel")
 
-    def test_engine_loaders_in_engines(self):
+    def test_engine_loaders_in_engines(self) -> None:
         """Engine loaders should be importable from src.engines.loaders."""
         mod = importlib.import_module("src.engines.loaders")
         assert hasattr(mod, "LOADER_MAP")
         assert hasattr(mod, "load_pendulum_engine")
 
-    def test_engine_loaders_backward_compat(self):
+    def test_engine_loaders_backward_compat(self) -> None:
         """Old import path shared.python.engine_loaders should still work."""
         mod = importlib.import_module("src.shared.python.engine_loaders")
         assert hasattr(mod, "LOADER_MAP")
@@ -72,12 +72,12 @@ class TestSharedDoesNotImportEngines:
 class TestApiDoesNotImportLaunchers:
     """Verify API layer doesn't import launchers at module level."""
 
-    def test_launcher_service_exists(self):
+    def test_launcher_service_exists(self) -> None:
         """LauncherService should be importable from api.services."""
         mod = importlib.import_module("src.api.services.launcher_service")
         assert hasattr(mod, "LauncherService")
 
-    def test_launcher_service_lazy_imports(self):
+    def test_launcher_service_lazy_imports(self) -> None:
         """LauncherService should not import launchers at module load time."""
         saved = {}
         launcher_modules = [k for k in sys.modules if k.startswith("src.launchers")]
@@ -149,7 +149,7 @@ def _get_src_root() -> Path:
 class TestNoCircularImportsStaticAnalysis:
     """AST-based static analysis for forbidden import directions."""
 
-    def test_shared_does_not_import_engines_at_module_level(self):
+    def test_shared_does_not_import_engines_at_module_level(self) -> None:
         """No file in shared/python/ should import from engines at module level.
 
         Exception: backward-compatible shim files (engine_loaders.py) that
@@ -174,7 +174,7 @@ class TestNoCircularImportsStaticAnalysis:
             + "\n".join(f"  - {v}" for v in violations)
         )
 
-    def test_shared_does_not_import_robotics_at_module_level(self):
+    def test_shared_does_not_import_robotics_at_module_level(self) -> None:
         """No file in shared/python/ should import from robotics at module level."""
         src_root = _get_src_root()
         shared_dir = src_root / "shared" / "python"
@@ -191,7 +191,7 @@ class TestNoCircularImportsStaticAnalysis:
             + "\n".join(f"  - {v}" for v in violations)
         )
 
-    def test_api_does_not_import_launchers_at_module_level(self):
+    def test_api_does_not_import_launchers_at_module_level(self) -> None:
         """No file in api/ should import from launchers at module level.
 
         Exception: imports inside function bodies are OK (caught by AST

@@ -156,7 +156,9 @@ class CharacterBuildResult:
         Returns:
             Path to the generated URDF file
         """
-        if output_dir is None:
+        if not (output_dir is not None):
+            raise ValueError("output_dir must be provided")
+        if not (output_dir is not None):
             raise ValueError("output_dir must be provided")
         options = options or ExportOptions()
         output_dir = Path(output_dir)
@@ -238,7 +240,9 @@ class CharacterBuildResult:
         Returns:
             True if stable, False otherwise.
         """
-        if duration is None:
+        if not (duration is not None):
+            raise ValueError("duration must be provided")
+        if not (duration is not None):
             raise ValueError("duration must be provided")
         if not self.urdf_xml:
             logger.error("No URDF generated to simulate.")
@@ -273,7 +277,9 @@ class CharacterBuildResult:
         Args:
             animate: If True, applies control signals to joints.
         """
-        if animate is None:
+        if not (animate is not None):
+            raise ValueError("animate must be provided")
+        if not (animate is not None):
             raise ValueError("animate must be provided")
         if not self.urdf_xml:
             logger.error("No URDF generated to preview.")
@@ -341,7 +347,7 @@ class CharacterBuilder:
         self,
         urdf_config: URDFGeneratorConfig | None = None,
         mesh_backend: MeshGeneratorBackend = MeshGeneratorBackend.PRIMITIVE,
-    ):
+    ) -> None:
         """
         Initialize the character builder.
 
@@ -349,7 +355,9 @@ class CharacterBuilder:
             urdf_config: Configuration for URDF generation
             mesh_backend: Backend to use for mesh generation
         """
-        if mesh_backend is None:
+        if not (mesh_backend is not None):
+            raise ValueError("mesh_backend must be provided")
+        if not (mesh_backend is not None):
             raise ValueError("mesh_backend must be provided")
         self.urdf_config = urdf_config or URDFGeneratorConfig()
         self.mesh_backend = mesh_backend
@@ -462,7 +470,9 @@ class CharacterBuilder:
             InertiaResult with computed inertia
         """
         # Get default dimensions if not provided
-        if segment_name is None:
+        if not (segment_name is not None):
+            raise ValueError("segment_name must be provided")
+        if not (segment_name is not None):
             raise ValueError("segment_name must be provided")
         if dimensions is None:
             all_dims = estimate_segment_dimensions(1.75, 0.5)  # Default height, neutral
@@ -516,7 +526,9 @@ class CharacterBuilder:
         Returns:
             Dict mapping segment name to InertiaResult
         """
-        if params is None:
+        if not (params is not None):
+            raise ValueError("params must be provided")
+        if not (params is not None):
             raise ValueError("params must be provided")
         gender_factor = params.get_effective_gender_factor()
         masses = estimate_segment_masses(params.mass_kg, gender_factor)
@@ -546,7 +558,9 @@ class CharacterBuilder:
         mesh_result: GeneratedMeshResult | None,
     ) -> dict[str, SegmentMeshInfo]:
         """Build segment information dictionary."""
-        if params is None:
+        if not (params is not None):
+            raise ValueError("params must be provided")
+        if not (params is not None):
             raise ValueError("params must be provided")
         gender_factor = params.get_effective_gender_factor()
         masses = estimate_segment_masses(params.mass_kg, gender_factor)
@@ -603,7 +617,9 @@ class CharacterBuilder:
         Returns:
             BodyParameters configured for the preset
         """
-        if preset_name is None:
+        if not (preset_name is not None):
+            raise ValueError("preset_name must be provided")
+        if not (preset_name is not None):
             raise ValueError("preset_name must be provided")
         from humanoid_character_builder.presets.loader import load_body_preset
 
@@ -657,7 +673,9 @@ def quick_build(
     Returns:
         CharacterBuildResult
     """
-    if height_m is None:
+    if not (height_m is not None):
+        raise ValueError("height_m must be provided")
+    if not (height_m is not None):
         raise ValueError("height_m must be provided")
     builder = CharacterBuilder()
 
@@ -690,7 +708,9 @@ def quick_urdf(
     Returns:
         URDF XML string
     """
-    if height_m is None:
+    if not (height_m is not None):
+        raise ValueError("height_m must be provided")
+    if not (height_m is not None):
         raise ValueError("height_m must be provided")
     builder = CharacterBuilder()
 

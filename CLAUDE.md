@@ -10,9 +10,6 @@ Golf ball flight and physics modeling suite. Simulates aerodynamics, ball-club i
 and trajectory using multiple physics engines (MuJoCo, Drake, Pinocchio, OpenSim).
 Optional Rust extensions built via Maturin for performance-critical paths.
 
-`CLAUDE.md` is the authoritative contributor and agent policy file. `CONTRIBUTING.md`
-summarizes contribution flow and links back here for repository rules.
-
 ## Key Directories
 
 - `src/` — core library: physics wrappers, URDF loaders, simulation runners
@@ -25,7 +22,8 @@ summarizes contribution flow and links back here for repository rules.
 ## Python and Tooling
 
 - **Python 3.10+**. Always `python3`, never `python`.
-- **Formatter:** Ruff format. 88-char line limit.
+
+- **Formatter:** Ruff format (NOT Black). 88-char line limit.
 - **Linter:** Ruff check. These are **separate CI steps** — both must pass independently.
 
 ## Development Commands
@@ -47,8 +45,9 @@ maturin develop                                   # build Rust extensions locall
 2. `ruff format --check` — zero diffs (separate step from lint)
 3. File size budget: **1200 lines max** per file. Exceptions in `scripts/config/file_size_budget.json`
 4. Module size budget: checked against `module_size_budget_baseline.json`
-5. No TRACKED_TASK/TRACKED_DEFECT unless tied to a tracked GitHub issue
-6. pytest with `-n auto`, 60s timeout, **30% coverage minimum**
+
+5. No TODO/FIXME unless tied to a tracked GitHub issue
+6. pytest with `-n auto`, 60s timeout, **10% coverage minimum**
 7. No `print()` in `src/` — use logging
 
 ## Test Markers
@@ -86,9 +85,3 @@ maturin develop                                   # build Rust extensions locall
 
 - `/gaai-deliver` — Run Delivery Loop for next ready backlog item
 - `/gaai-status` — Show current backlog and memory state
-
-## Specification
-
-This repository's specification is defined in `SPEC.md` at the repo root.
-Read SPEC.md before making any changes. Update it when your changes
-affect documented functionality, features, or architecture.

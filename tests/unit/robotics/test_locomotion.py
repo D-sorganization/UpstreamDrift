@@ -357,6 +357,44 @@ class TestGaitStateMachine:
         assert not gait.is_walking
         assert gait.state.phase == GaitPhase.DOUBLE_SUPPORT
 
+    def test_emergency_stop_resets_stance_foot(self) -> None:
+        """E-stop must reset stance_foot to 'both' (#2503)."""
+        params = GaitParameters(step_duration=0.5)
+        gait = GaitStateMachine(params)
+        gait.start_walking()
+        gait.update(0.2)  # Advance to single-support (stance_foot != 'both')
+
+        gait.emergency_stop()
+
+        assert gait.state.stance_foot == "both"
+
+    def test_emergency_stop_resets_next_stance_foot(self) -> None:
+        """E-stop must reset next_stance_foot to 'both' (#2503)."""
+        params = GaitParameters(step_duration=0.5)
+        gait = GaitStateMachine(params)
+        gait.start_walking()
+        gait.update(0.2)
+
+        gait.emergency_stop()
+
+        assert gait.state.next_stance_foot == "both"
+
+    def test_emergency_stop_full_state_consistency(self) -> None:
+        """After E-stop all stance fields must reflect double-support standing (#2503)."""
+        params = GaitParameters(step_duration=0.5)
+        gait = GaitStateMachine(params)
+        gait.start_walking()
+        gait.update(0.3)
+
+        gait.emergency_stop()
+
+        state = gait.state
+        assert not state.is_walking
+        assert state.gait_type == GaitType.STAND
+        assert state.phase == GaitPhase.DOUBLE_SUPPORT
+        assert state.stance_foot == "both"
+        assert state.next_stance_foot == "both"
+
     def test_update_advances_time(self) -> None:
         """Test update advances phase time."""
         gait = GaitStateMachine()

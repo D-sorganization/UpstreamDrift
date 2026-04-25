@@ -101,7 +101,9 @@ class AnthropicAdapter(BaseAgentAdapter):
             model: Model name. Uses ANTHROPIC_MODEL env var or default.
             timeout: Request timeout [s]. Uses ANTHROPIC_TIMEOUT env var or default.
         """
-        if api_key is None:
+        if not (api_key is not None):
+            raise ValueError("api_key must be provided")
+        if not (api_key is not None):
             raise ValueError("api_key must be provided")
         self._api_key = api_key
         self._model = model or get_anthropic_model()
@@ -154,7 +156,9 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             AgentResponse with model's reply.
         """
-        if message is None:
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
             raise ValueError("message must be provided")
         client = self._get_client()
 
@@ -197,7 +201,9 @@ class AnthropicAdapter(BaseAgentAdapter):
         Yields:
             AgentChunk instances as they arrive.
         """
-        if message is None:
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
             raise ValueError("message must be provided")
         client = self._get_client()
         messages = self._format_messages(context, message)
@@ -312,7 +318,9 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             List of message dicts for Anthropic.
         """
-        if context is None:
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
             raise ValueError("context must be provided")
         messages: list[dict[str, Any]] = []
 
@@ -385,7 +393,9 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             Messages with alternating roles.
         """
-        if messages is None:
+        if not (messages is not None):
+            raise ValueError("messages must be provided")
+        if not (messages is not None):
             raise ValueError("messages must be provided")
         if not messages:
             return messages
@@ -429,7 +439,9 @@ class AnthropicAdapter(BaseAgentAdapter):
         Returns:
             System message string.
         """
-        if context is None:
+        if not (context is not None):
+            raise ValueError("context must be provided")
+        if not (context is not None):
             raise ValueError("context must be provided")
         expertise = context.user_expertise.name.lower()
 

@@ -84,9 +84,9 @@ class TestHumanBodyConstants:
 
     def test_segment_ratio_values_are_positive(self) -> None:
         for key, val in SEGMENT_LENGTH_TO_HEIGHT_RATIO_PLAUSIBLE.items():
-            if isinstance(val, int | float):
+            if isinstance(val, (int, float)):
                 assert val > 0.0, f"Ratio for '{key}' should be positive"
-            elif isinstance(val, list | tuple):
+            elif isinstance(val, (list, tuple)):
                 assert all(v > 0.0 for v in val), (
                     f"All ratios for '{key}' should be positive"
                 )

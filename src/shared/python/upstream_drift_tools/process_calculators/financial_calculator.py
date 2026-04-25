@@ -120,7 +120,9 @@ class FinancialModelCalculator:
         results: FinancialResults,
     ) -> None:
         """Compute annual volumes and revenue line items."""
-        if parameters is None:
+        if not (parameters is not None):
+            raise ValueError("parameters must be provided")
+        if not (parameters is not None):
             raise ValueError("parameters must be provided")
         results.annual_feedstock_tons = (
             parameters.plant_capacity_tpd
@@ -146,7 +148,9 @@ class FinancialModelCalculator:
         results: FinancialResults,
     ) -> None:
         """Compute variable and fixed operating costs."""
-        if parameters is None:
+        if not (parameters is not None):
+            raise ValueError("parameters must be provided")
+        if not (parameters is not None):
             raise ValueError("parameters must be provided")
         tons = results.annual_feedstock_tons
 
@@ -188,7 +192,9 @@ class FinancialModelCalculator:
         results: FinancialResults,
     ) -> None:
         """Compute financial metrics from gross margin through net income."""
-        if parameters is None:
+        if not (parameters is not None):
+            raise ValueError("parameters must be provided")
+        if not (parameters is not None):
             raise ValueError("parameters must be provided")
         results.gross_margin = results.total_revenue - results.total_variable_costs
         results.ebitda = results.gross_margin - results.total_fixed_costs
@@ -278,7 +284,9 @@ class FinancialModelCalculator:
 
     def generate_yearly_projections(self, years: int = 10) -> list[dict[str, Any]]:
         """Generate multi-year financial projections"""
-        if years is None:
+        if not (years is not None):
+            raise ValueError("years must be provided")
+        if not (years is not None):
             raise ValueError("years must be provided")
         projections = []
         base_params = self.parameters

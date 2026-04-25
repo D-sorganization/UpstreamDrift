@@ -9,10 +9,15 @@ simulation environment (built on MuJoCo).  Uses a built-in minimal tendon-driven
 arm model when no environment ID or model path is provided.  When ``myosuite``
 is not installed the module imports cleanly but construction raises ``ImportError``.
 
+
+Inherits from ``PerturbationAnalyzerBase`` (see #2273) which provides the
+shared ``set_base_torque_profile``, ``perturb_torque``, ``extract_metrics``,
+``run_batch``, and ``compare_profiles`` implementations.
+
 Design by Contract
 ------------------
 - ``set_base_torque_profile()`` must be called before ``run_batch()`` or
-  ``perturb_torque()``.  Raises ``AssertionError`` otherwise.
+  ``perturb_torque()``.  Raises ``ValueError`` otherwise.
 - ``run_batch()`` returns a ``PerturbationSummary`` containing all
   ``MANDATORY_METRICS`` as keys.
 - ``extract_metrics()`` requires a ``MyoSuiteSimResult`` and always returns
@@ -21,7 +26,8 @@ Design by Contract
 DRY
 ---
 Delegates noise generation and coefficient perturbation to the shared
-``src.shared.python.perturbation`` package.
+``src.shared.python.perturbation`` package — the same functions used by
+``PendulumPerturbationAnalyzer``.
 
 Note on MyoSuite
 ----------------
@@ -36,27 +42,26 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
 from src.shared.python.engine_core.engine_availability import is_engine_available
-from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exported for test imports
+from src.shared.python.perturbation.perturbation_base import (
     MANDATORY_METRICS,
-    ComparisonReport,  # noqa: F401
+    ComparisonReport,
     PerturbationAnalyzerBase,
-    build_joint_polys,
-    compute_ee_velocity_fd,
 )
 
 logger = logging.getLogger(__name__)
 
 MYOSUITE_AVAILABLE: bool = is_engine_available("myosuite")
 
-# ---------------------------------------------------------------------------
-# Mandatory metric names (shared across all PerturbationAnalyzer engines)
-# ---------------------------------------------------------------------------
-
+__all__ = [
+    "MyoSuitePerturbationAnalyzer",
+    "MyoSuiteSimResult",
+    "ComparisonReport",
+    "MANDATORY_METRICS",
+]
 
 # ---------------------------------------------------------------------------
 # Minimal MJCF model for testing (2-DOF tendon-driven arm, MyoSuite-style)
@@ -128,16 +133,6 @@ class MyoSuiteSimResult:
 
 
 # ---------------------------------------------------------------------------
-# Comparison report
-# ---------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------
-# Coefficient perturbation helper
-# ---------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------
 # Main analyzer
 # ---------------------------------------------------------------------------
 
@@ -195,19 +190,7 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         ee_body_name : str, optional
             Name of the end-effector body.  Defaults to the last body.
         """
-        self._t_end = t_end
-        self._ee_body_name = ee_body_name
-        self._env: Any = None
-        self._model: Any = None
-        self._use_gym = False
-
-        if MYOSUITE_AVAILABLE:
-            self._init_myosuite(env_id or _DEFAULT_ENV_ID)
-        else:
-            self._init_mujoco_fallback(model_xml, model_path)
-
-        self._base_coeffs: list[list[float]] | None = None
-        self._nominal_result: MyoSuiteSimResult | None = None
+        super().__init__()
 
         logger.info(
             "MyoSuitePerturbationAnalyzer: nq=%d, nu=%d, t_end=%.2f, use_gym=%s",
@@ -279,86 +262,24 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         self._use_gym = False
 
     # ------------------------------------------------------------------
-    # Protocol API
+    # Base-class abstract method implementations
     # ------------------------------------------------------------------
 
-    def set_base_torque_profile(self, profile: object) -> None:
-        """Set the nominal torque polynomial coefficients.
+    def _get_q_traj(self, sim_result: MyoSuiteSimResult) -> np.ndarray:
+        return sim_result.qpos_traj
 
-        Design by Contract
-        ------------------
-        Pre: profile is a dict with 'coeffs' key.
-        Post: self._base_coeffs is set and self._nominal_result is cached.
-        """
-        if not isinstance(profile, dict):
-            raise ValueError(f"profile must be a dict, got {type(profile)}")
-        if "coeffs" not in profile:
-            raise ValueError("'coeffs' key missing from profile")
-        coeffs = profile["coeffs"]
-        if not (isinstance(coeffs, list) and len(coeffs) > 0):
-            raise ValueError("profile['coeffs'] must be a non-empty list")
-        self._base_coeffs = coeffs
-        self._nominal_result = self._simulate(coeffs)
+    def _get_v_traj(self, sim_result: MyoSuiteSimResult) -> np.ndarray:
+        return sim_result.qvel_traj
 
-    def extract_metrics(self, sim_result: object) -> dict[str, float | np.ndarray]:
-        """Extract all MANDATORY_METRICS from a simulation result.
-
-        Design by Contract
-        ------------------
-        Pre: sim_result is a MyoSuiteSimResult with n_steps >= 2.
-        Post: all MANDATORY_METRICS present; all values finite.
-        """
+    def _validate_sim_result_type(self, sim_result: object) -> None:
         if not isinstance(sim_result, MyoSuiteSimResult):
             raise ValueError(
                 f"sim_result must be MyoSuiteSimResult, got {type(sim_result)}"
             )
-        if not (sim_result.n_steps >= 2):
-            raise ValueError("Simulation must have >= 2 steps")
 
-        r = sim_result
-        last = r.n_steps - 1
-
-        joint_angles_final = r.qpos_traj[last].copy()
-        joint_velocities_final = r.qvel_traj[last].copy()
-        ee_pos_final = r.ee_pos_traj[last].copy()
-        ee_vel_final = r.ee_vel_traj[last].copy()
-        ee_speed_final = float(np.linalg.norm(ee_vel_final))
-
-        # ⚡ Bolt: np.einsum is ~2-3x faster than np.sum(..., axis=1) for computing
-        # sum of squares when finding max
-        sq_speeds = np.einsum("ij,ij->i", r.ee_vel_traj, r.ee_vel_traj)
-        peak_speed = float(np.sqrt(np.max(sq_speeds)))
-
-        total_energy_final = float(
-            r.kinetic_energy_traj[last] + r.potential_energy_traj[last]
-        )
-
-        trajectory_rmse = 0.0
-        trajectory_max_deviation = 0.0
-        if self._nominal_result is not None:
-            nom = self._nominal_result
-            n_cmp = min(r.n_steps, nom.n_steps)
-            # ⚡ Bolt: np.einsum is ~2-3x faster than np.sum(..., axis=1) for computing
-            # sum of squares
-            diffs = r.qpos_traj[:n_cmp] - nom.qpos_traj[:n_cmp]
-            sq_deviations = np.einsum("ij,ij->i", diffs, diffs)
-            trajectory_rmse = float(np.sqrt(np.mean(sq_deviations)))
-            trajectory_max_deviation = float(np.sqrt(np.max(sq_deviations)))
-
-        motion_duration = float(r.t[last] - r.t[0])
-
-        return {
-            "end_effector_position_final": ee_pos_final,
-            "end_effector_velocity_final": ee_vel_final,
-            "end_effector_speed_final": ee_speed_final,
-            "peak_end_effector_speed": peak_speed,
-            "total_energy_final": total_energy_final,
-            "joint_angles_final": joint_angles_final,
-            "joint_velocities_final": joint_velocities_final,
-            "trajectory_rmse": trajectory_rmse,
-            "trajectory_max_deviation": trajectory_max_deviation,
-            "motion_duration": motion_duration,
-        }
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
 
     def _simulate(self, coeffs: list[list[float]]) -> MyoSuiteSimResult:
         """Run a MyoSuite/MuJoCo forward simulation with polynomial torques."""
@@ -372,7 +293,13 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         env.reset()
 
         nu = self._nu
-        joint_polys = build_joint_polys(coeffs, nu)
+        n_coeff_sets = len(coeffs)
+        joint_polys: list[np.ndarray] = []
+        for j in range(nu):
+            if j < n_coeff_sets:
+                joint_polys.append(np.array(coeffs[j][::-1]))
+            else:
+                joint_polys.append(np.array([0.0]))
 
         dt_env = getattr(env, "dt", 0.005)
         n_steps = max(2, int(self._t_end / dt_env))
@@ -423,7 +350,7 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
                         mujoco.mj_energyVel(mj_model, mj_data)
                         pe = float(mj_data.energy[0])
                         ke = float(mj_data.energy[1])
-                    except Exception:  # noqa: BLE001  # noqa: BLE001
+                    except Exception:  # noqa: BLE001
                         pass
 
             t_list.append(t)
@@ -445,7 +372,13 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         data = mujoco.MjData(model)
 
         nu = model.nu
-        joint_polys = build_joint_polys(coeffs, nu)
+        n_coeff_sets = len(coeffs)
+        joint_polys: list[np.ndarray] = []
+        for j in range(nu):
+            if j < n_coeff_sets:
+                joint_polys.append(np.array(coeffs[j][::-1]))
+            else:
+                joint_polys.append(np.array([0.0]))
 
         dt = float(model.opt.timestep)
         n_steps = max(2, int(self._t_end / dt))
@@ -468,10 +401,7 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
             t_list.append(float(data.time))
             qpos_list.append(data.qpos.copy())
             qvel_list.append(data.qvel.copy())
-            try:
-                ee_idx = max(0, model.nbody - 1)
-            except TypeError:
-                ee_idx = 0
+            ee_idx = max(0, model.nbody - 1)
             ee_pos_list.append(data.xpos[ee_idx].copy())
 
             ke = 0.0
@@ -506,7 +436,10 @@ class MyoSuitePerturbationAnalyzer(PerturbationAnalyzerBase):
         ke_arr = np.array(ke_list)
         pe_arr = np.array(pe_list)
 
-        ee_vel_arr = compute_ee_velocity_fd(ee_pos_arr, t_arr)
+        ee_vel_arr = np.zeros_like(ee_pos_arr)
+        for i in range(1, len(t_arr)):
+            dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
+            ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
 
         return MyoSuiteSimResult(
             t=t_arr,

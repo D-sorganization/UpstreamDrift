@@ -472,7 +472,7 @@ class ControlsWidgetGolfer(ControlsWidgetBase):
         }
 
     def _apply_preset(self, name: str) -> None:
-        if name is None:
+        if not (name is not None):
             raise ValueError("name must be provided")
         if name not in self.PRESETS:
             return

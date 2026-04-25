@@ -41,7 +41,9 @@ class LoadingSpinner(QWidget):
             size: Diameter of the spinner in pixels
             parent: Parent widget
         """
-        if size is None:
+        if not (size is not None):
+            raise ValueError("size must be provided")
+        if not (size is not None):
             raise ValueError("size must be provided")
         super().__init__(parent)
         self._size = size
@@ -113,7 +115,9 @@ class LoadingButton(QPushButton):
             text: Button text
             parent: Parent widget
         """
-        if text is None:
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
             raise ValueError("text must be provided")
         super().__init__(text, parent)
         self._original_text = text
@@ -145,7 +149,9 @@ class LoadingButton(QPushButton):
             loading: Whether to show loading state
             text: Optional loading text (uses "Loading..." if None)
         """
-        if loading is None:
+        if not (loading is not None):
+            raise ValueError("loading must be provided")
+        if not (loading is not None):
             raise ValueError("loading must be provided")
         self._loading = loading
 
@@ -182,7 +188,9 @@ class LoadingButton(QPushButton):
         Args:
             text: New button text
         """
-        if text is None:
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
             raise ValueError("text must be provided")
         self._original_text = text
         if not self._loading:
@@ -208,7 +216,9 @@ class IconLoadingButton(QWidget):
             icon: Icon character/emoji
             parent: Parent widget
         """
-        if text is None:
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
             raise ValueError("text must be provided")
         super().__init__(parent)
         self._original_text = text
@@ -249,7 +259,9 @@ class IconLoadingButton(QWidget):
 
     def set_loading(self, loading: bool, text: str | None = None) -> None:
         """Set loading state."""
-        if loading is None:
+        if not (loading is not None):
+            raise ValueError("loading must be provided")
+        if not (loading is not None):
             raise ValueError("loading must be provided")
         self._loading = loading
 

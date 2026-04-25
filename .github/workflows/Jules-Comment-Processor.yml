@@ -36,25 +36,6 @@ jobs:
     outputs:
       runner: ${{ steps.check.outputs.runner }}
     steps:
-      - name: Check for self-hosted runner
-        id: check
-        env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
-        run: |
-          ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
-            2>/dev/null || echo "0")
-          if [[ "$ONLINE" -gt 0 ]]; then
-            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
-          else
-            echo "::error::No local self-hosted runner available; failing closed"
-            exit 1
-          fi
-  process-comments:
-    needs: pick-runner
-    runs-on: self-hosted
-    steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0

@@ -13,7 +13,7 @@ import os
 import subprocess
 import tempfile
 import threading
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
 if TYPE_CHECKING:
     import queue
@@ -83,7 +83,9 @@ class DockerMixin:
 
     def _run_docker_build(self, temp_dir: str, cmd: list[str]) -> int:
         """Execute the docker build command and return the exit code."""
-        if temp_dir is None:
+        if not (temp_dir is not None):
+            raise ValueError("temp_dir must be provided")
+        if not (temp_dir is not None):
             raise ValueError("temp_dir must be provided")
         host = cast("DockerProtocol", self)
         if host.is_windows:
@@ -243,9 +245,11 @@ class DockerMixin:
         host = cast("DockerProtocol", self)
         q: queue.Queue[str | None] = queue.Queue()
 
-        def enqueue_output(out, output_queue) -> None:
+        def enqueue_output(out: Any, output_queue: Any) -> None:
             """Enqueue output from subprocess."""
-            if out is None:
+            if not (out is not None):
+                raise ValueError("out must be provided")
+            if not (out is not None):
                 raise ValueError("out must be provided")
             try:
                 for line in iter(out.readline, ""):
@@ -278,9 +282,11 @@ class DockerMixin:
 
             host.root.after(0, host.log, output.strip())
 
-    def _handle_process_failure(self, rc) -> None:
+    def _handle_process_failure(self, rc: int | None) -> None:
         """Log error details and suggest solutions for common failures."""
-        if rc is None:
+        if not (rc is not None):
+            raise ValueError("rc must be provided")
+        if not (rc is not None):
             raise ValueError("rc must be provided")
         host = cast("DockerProtocol", self)
         host.root.after(0, host.log, f"Process exited with code {rc}")

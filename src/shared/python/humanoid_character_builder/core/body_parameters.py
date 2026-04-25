@@ -275,7 +275,9 @@ class BodyParameters:
     def from_dict(cls, data: dict[str, Any]) -> BodyParameters:
         """Create from dictionary."""
         # Handle enum conversions
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if "build_type" in data and isinstance(data["build_type"], str):
             data["build_type"] = BuildType(data["build_type"])

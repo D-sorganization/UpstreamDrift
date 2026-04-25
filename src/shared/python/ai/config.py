@@ -296,3 +296,19 @@ __all__ = [
     "get_gemini_api_key",
     "get_gemini_model",
 ]
+
+
+ENV_TOOL_TIMEOUT = "TOOL_TIMEOUT"
+DEFAULT_TOOL_TIMEOUT = 30.0
+
+
+def get_tool_timeout() -> float:
+    """Get maximum tool execution timeout.
+
+    Returns:
+        Timeout in seconds from TOOL_TIMEOUT or default.
+    """
+    return (
+        get_env_float(ENV_TOOL_TIMEOUT, default=DEFAULT_TOOL_TIMEOUT)
+        or DEFAULT_TOOL_TIMEOUT
+    )

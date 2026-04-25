@@ -19,12 +19,12 @@ from src.shared.python.core import physics_constants as pc
     ],
     ids=["PI", "E", "PI_HALF", "PI_QUARTER"],
 )
-def test_mathematical_constants(constant, expected):
+def test_mathematical_constants(constant, expected) -> None:
     """Verify basic mathematical constants."""
     assert constant == expected
 
 
-def test_physical_constant_metadata():
+def test_physical_constant_metadata() -> None:
     """Verify PhysicalConstant class carries metadata."""
     gravity = pc.GRAVITY_M_S2
 
@@ -44,7 +44,7 @@ def test_physical_constant_metadata():
     assert repr(gravity).startswith("PhysicalConstant")
 
 
-def test_golf_specific_constants():
+def test_golf_specific_constants() -> None:
     """Verify golf rules constants."""
     # USGA Rule 5-1: Mass <= 1.620 oz (0.04593 kg)
     assert pc.GOLF_BALL_MASS_KG <= 0.046
@@ -61,7 +61,9 @@ def test_golf_specific_constants():
     ],
     ids=["feet_meters_roundtrip", "yards_meters_roundtrip"],
 )
-def test_unit_conversion_roundtrips(forward_factor, inverse_factor, description):
+def test_unit_conversion_roundtrips(
+    forward_factor, inverse_factor, description
+) -> None:
     """Verify conversion factor round-trips are consistent."""
     assert math.isclose(1.0 * forward_factor * inverse_factor, 1.0, rel_tol=1e-5)
 
@@ -75,7 +77,7 @@ def test_unit_conversion_roundtrips(forward_factor, inverse_factor, description)
     ],
     ids=["deg_to_rad", "rad_to_deg", "mps_to_kph"],
 )
-def test_unit_conversions(input_val, factor, expected):
+def test_unit_conversions(input_val, factor, expected) -> None:
     """Verify individual conversion factors."""
     assert math.isclose(input_val * factor, expected)
 
@@ -89,6 +91,6 @@ def test_unit_conversions(input_val, factor, expected):
     ],
     ids=["steel_gt_aluminum", "titanium_gt_aluminum", "steel_gt_titanium"],
 )
-def test_material_densities(heavier, lighter):
+def test_material_densities(heavier, lighter) -> None:
     """Sanity check material density ordering."""
     assert heavier > lighter

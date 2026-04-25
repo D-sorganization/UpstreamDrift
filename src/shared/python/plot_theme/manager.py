@@ -47,7 +47,9 @@ class PlotThemeManager:
             settings_org: Organization name for QSettings
             settings_app: Application name for QSettings
         """
-        if settings_org is None:
+        if not (settings_org is not None):
+            raise ValueError("settings_org must be provided")
+        if not (settings_org is not None):
             raise ValueError("settings_org must be provided")
         self._settings_org = settings_org
         self._settings_app = settings_app
@@ -108,7 +110,9 @@ class PlotThemeManager:
             name: Theme name
             save: Whether to persist the choice
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         theme = get_theme(name)
         normalized = name.lower().replace("-", "_").replace(" ", "_")
@@ -184,7 +188,9 @@ class PlotThemeManager:
         Args:
             fig: matplotlib Figure to style
         """
-        if fig is None:
+        if not (fig is not None):
+            raise ValueError("fig must be provided")
+        if not (fig is not None):
             raise ValueError("fig must be provided")
         theme = self._current_theme
 
@@ -199,7 +205,9 @@ class PlotThemeManager:
         Args:
             ax: matplotlib Axes to style
         """
-        if ax is None:
+        if not (ax is not None):
+            raise ValueError("ax must be provided")
+        if not (ax is not None):
             raise ValueError("ax must be provided")
         theme = self._current_theme
 
@@ -272,7 +280,9 @@ class PlotThemeManager:
         Args:
             index: Index into color cycle for multiple lines
         """
-        if index is None:
+        if not (index is not None):
+            raise ValueError("index must be provided")
+        if not (index is not None):
             raise ValueError("index must be provided")
         theme = self._current_theme
         colors = theme.get_color_cycle()
@@ -318,7 +328,9 @@ def get_plot_theme_manager(
     Returns:
         PlotThemeManager instance
     """
-    if settings_org is None:
+    if not (settings_org is not None):
+        raise ValueError("settings_org must be provided")
+    if not (settings_org is not None):
         raise ValueError("settings_org must be provided")
     if _ManagerHolder.instance is None:
         _ManagerHolder.instance = PlotThemeManager(settings_org, settings_app)

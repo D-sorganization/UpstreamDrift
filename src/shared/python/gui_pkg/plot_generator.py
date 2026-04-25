@@ -184,7 +184,9 @@ class PlotGenerator:
         Returns:
             List of paths to generated plot files.
         """
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if not MATPLOTLIB_AVAILABLE:
             logger.warning("matplotlib not available, skipping plot generation")
@@ -228,7 +230,9 @@ class PlotGenerator:
         Returns:
             Matplotlib Figure, or None if matplotlib unavailable.
         """
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if not MATPLOTLIB_AVAILABLE:
             return None
@@ -309,7 +313,9 @@ class PlotGenerator:
         Returns:
             Path to the saved plot, or None.
         """
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         fig = self._create_plot(data, plot_type)
         if fig is None:
@@ -331,7 +337,9 @@ class PlotGenerator:
         Returns:
             Matplotlib Figure, or None if data insufficient.
         """
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if plot_type == PlotType.JOINT_POSITIONS:
             return self._plot_joint_data(
@@ -404,7 +412,9 @@ class PlotGenerator:
         Returns:
             Matplotlib Figure.
         """
-        if times is None:
+        if not (times is not None):
+            raise ValueError("times must be provided")
+        if not (times is not None):
             raise ValueError("times must be provided")
         n_joints = data.shape[1]
         indices = self.config.joint_indices or list(range(n_joints))
@@ -428,7 +438,9 @@ class PlotGenerator:
 
     def _plot_energy(self, data: SimulationData) -> Figure | None:
         """Plot energy analysis."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if not data.energies:
             return None
@@ -453,7 +465,9 @@ class PlotGenerator:
 
     def _plot_phase_portrait(self, data: SimulationData) -> Figure:
         """Plot phase portrait (position vs velocity) for each joint."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         n_joints = min(data.positions.shape[1], data.velocities.shape[1])
         indices = self.config.joint_indices or list(range(n_joints))
@@ -509,7 +523,9 @@ class PlotGenerator:
 
     def _plot_contact_forces(self, data: SimulationData) -> Figure | None:
         """Plot contact / ground reaction forces."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if data.contact_forces is None:
             return None
@@ -552,7 +568,9 @@ class PlotGenerator:
 
     def _plot_drift_vs_control(self, data: SimulationData) -> Figure | None:
         """Plot drift vs control acceleration decomposition."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if data.drift_accelerations is None or data.control_accelerations is None:
             return None
@@ -597,7 +615,9 @@ class PlotGenerator:
 
     def _plot_power(self, data: SimulationData) -> Figure | None:
         """Plot joint power (torque × velocity)."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if data.torques is None:
             return None
@@ -628,7 +648,9 @@ class PlotGenerator:
 
     def _plot_mass_matrix_condition(self, data: SimulationData) -> Figure | None:
         """Plot mass matrix condition number over time."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if data.mass_matrices is None:
             return None

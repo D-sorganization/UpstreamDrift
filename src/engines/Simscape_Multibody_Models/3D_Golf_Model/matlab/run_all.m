@@ -1,6 +1,10 @@
 % File: matlab/run_all.m
 function run_all()
-    % RUN_ALL Orchestrates the full Golf Model simulation pipeline.
+    % RUN_ALL Baseline ballistic trajectory demo using PhysicsConstants.
+    %
+    % NOTE: This script is a stand-alone baseline demo using a simple 2D
+    % Euler projectile with drag. It does NOT run the full 3D Simscape
+    % Golf Model pipeline. Use the Simscape model directly for full physics.
     %
     % This script:
     % 1. Configures the environment and reproducibility.

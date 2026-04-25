@@ -1,0 +1,53 @@
+"""Compression calculation worker thread."""
+
+from __future__ import annotations
+
+from typing import Any
+
+try:
+    from PyQt6.QtCore import QThread, pyqtSignal
+
+    HAS_PYQT = True
+except ImportError:
+    HAS_PYQT = False
+    QThread = object  # type: ignore[assignment,misc]
+
+if HAS_PYQT:
+
+    class CompressionCalculationWorker(QThread):  # type: ignore[misc]
+        """Worker thread for compression calculations."""
+
+        finished = pyqtSignal(dict)
+        error = pyqtSignal(str)
+
+        def __init__(
+            self,
+            engine: Any,
+            stages: Any,
+            flow_rate: float,
+            composition: Any,
+            intercooling: bool,
+        ) -> None:
+            """Initialize the worker."""
+            if not (flow_rate is not None):
+                raise ValueError("flow_rate must be provided")
+            super().__init__()
+            self.engine = engine
+            self.stages = stages
+            self.flow_rate = flow_rate
+            self.composition = composition
+            self.intercooling = intercooling
+
+        def run(self) -> None:
+            """Run the compression calculation."""
+            try:
+                result = self.engine.calculate_multistage_compression(
+                    self.stages,
+                    self.flow_rate,
+                    self.composition,
+                    self.intercooling,
+                )
+                analysis = self.engine.analyze_process_conditions(result)
+                self.finished.emit({"result": result, "analysis": analysis})
+            except (ValueError, TypeError, ArithmeticError) as e:
+                self.error.emit(str(e))

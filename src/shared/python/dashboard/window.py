@@ -41,7 +41,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             engine: The physics engine instance to control and analyze.
             title: Window title.
         """
-        if engine is None:
+        if not (engine is not None):
+            raise ValueError("engine must be provided")
+        if not (engine is not None):
             raise ValueError("engine must be provided")
         super().__init__()
         self.setWindowTitle(title)
@@ -115,7 +117,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_plotting_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup standard plotting tab."""
-        if parent is None:
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
             raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
@@ -163,7 +167,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_analysis_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup advanced analysis tab."""
-        if parent is None:
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
             raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
@@ -200,7 +206,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _setup_export_tab(self, parent: QtWidgets.QWidget) -> None:
         """Setup export tab."""
-        if parent is None:
+        if not (parent is not None):
+            raise ValueError("parent must be provided")
+        if not (parent is not None):
             raise ValueError("parent must be provided")
         layout = QtWidgets.QVBoxLayout(parent)
 
@@ -289,7 +297,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
     def _dispatch_plot(self, plot_type: str) -> None:
         """Dispatch to the appropriate plotter method."""
-        if plot_type is None:
+        if not (plot_type is not None):
+            raise ValueError("plot_type must be provided")
+        if not (plot_type is not None):
             raise ValueError("plot_type must be provided")
         fig = self.static_canvas.fig
 

@@ -75,13 +75,28 @@ class HillMuscleModel:
     F_total = (F_CE + F_PEE) * cos(alpha)
     """
 
-    def __init__(self, params: MuscleParameters) -> None:
+    #: Default width of the active force-length Gaussian curve.
+    #: From Thelen (2003), J. Biomech. Eng., 125(1), pp. 70-77.
+    DEFAULT_FORCE_LENGTH_WIDTH: float = 0.56
+
+    def __init__(
+        self,
+        params: MuscleParameters,
+        force_length_width: float | None = None,
+    ) -> None:
         """Initialize muscle model.
 
         Args:
             params: MuscleParameters dataclass
+            force_length_width: Width of the active force-length Gaussian
+                curve (dimensionless). Default 0.56 from Thelen (2003).
         """
         self.params = params
+        self._force_length_width = (
+            force_length_width
+            if force_length_width is not None
+            else self.DEFAULT_FORCE_LENGTH_WIDTH
+        )
 
     def force_length_active(self, l_norm: float) -> float:
         """Active force-length relationship (Gaussian-like curve).
@@ -92,10 +107,15 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, 1]
         """
-        # Width of the force-length curve
-        if l_norm is None:
+        # Width parameter for the Gaussian force-length curve.
+        # Value of 0.56 from Thelen (2003), "Adjustment of Muscle Mechanics
+        # Model Parameters to Simulate Dynamic Contractions in Older Adults",
+        # J. Biomech. Eng., 125(1), pp. 70-77.
+        if not (l_norm is not None):
             raise ValueError("l_norm must be provided")
-        width = 0.56
+        if not (l_norm is not None):
+            raise ValueError("l_norm must be provided")
+        width = self._force_length_width
         return float(np.exp(-((l_norm - 1.0) ** 2) / width**2))
 
     def force_length_passive(self, l_norm: float) -> float:
@@ -107,7 +127,9 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, inf)
         """
-        if l_norm is None:
+        if not (l_norm is not None):
+            raise ValueError("l_norm must be provided")
+        if not (l_norm is not None):
             raise ValueError("l_norm must be provided")
         if l_norm <= 1.0:
             return 0.0
@@ -129,7 +151,9 @@ class HillMuscleModel:
             Force multiplier [0, 1.8]
         """
         # Concentric (shortening)
-        if v_norm is None:
+        if not (v_norm is not None):
+            raise ValueError("v_norm must be provided")
+        if not (v_norm is not None):
             raise ValueError("v_norm must be provided")
         if v_norm < 0:
             # Hill's hyperbola: clamp v_norm to prevent division by zero
@@ -151,7 +175,9 @@ class HillMuscleModel:
         Returns:
             Force multiplier [0, inf)
         """
-        if l_tendon_norm is None:
+        if not (l_tendon_norm is not None):
+            raise ValueError("l_tendon_norm must be provided")
+        if not (l_tendon_norm is not None):
             raise ValueError("l_tendon_norm must be provided")
         if l_tendon_norm <= 1.0:
             return 0.0
@@ -176,7 +202,9 @@ class HillMuscleModel:
         Returns:
             Force at the tendon [N]
         """
-        if state is None:
+        if not (state is not None):
+            raise ValueError("state must be provided")
+        if not (state is not None):
             raise ValueError("state must be provided")
         require(
             0.0 <= state.activation <= 1.0,

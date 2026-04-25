@@ -40,7 +40,7 @@ class TestMetricStatistics:
 
     def test_to_dict_scalar_float(self) -> None:
         d = self._make().to_dict()
-        assert isinstance(d["mean"], int | float)
+        assert isinstance(d["mean"], (int, float))
 
     def test_to_dict_array_becomes_list(self) -> None:
         ms = MetricStatistics(
@@ -107,7 +107,7 @@ class TestComputeMetricStatistics:
         assert stats.mean == 7.0
 
     def test_empty_raises(self) -> None:
-        with pytest.raises(ValueError):
+        with pytest.raises((ValueError, AssertionError)):
             compute_metric_statistics(np.array([]))
 
     def test_p5_less_than_p95(self) -> None:

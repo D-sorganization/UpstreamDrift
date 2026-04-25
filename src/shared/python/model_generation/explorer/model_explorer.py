@@ -262,8 +262,12 @@ class DisplayPreviewPanel(QGroupBox):
 
     display_changed = pyqtSignal(str, bool)
 
-    def __init__(self, preferences: UserPreferences, parent: QWidget | None = None):
-        if preferences is None:
+    def __init__(
+        self, preferences: UserPreferences, parent: QWidget | None = None
+    ) -> None:
+        if not (preferences is not None):
+            raise ValueError("preferences must be provided")
+        if not (preferences is not None):
             raise ValueError("preferences must be provided")
         super().__init__("Display Preview", parent)
         self._preferences = preferences
@@ -291,7 +295,9 @@ class DisplayPreviewPanel(QGroupBox):
 
     def _on_toggle(self, key: str, checked: bool) -> None:
         """Handle checkbox toggle and update preferences."""
-        if key is None:
+        if not (key is not None):
+            raise ValueError("key must be provided")
+        if not (key is not None):
             raise ValueError("key must be provided")
         attr_name = f"show_{key}"
         if hasattr(self._preferences, attr_name):
@@ -469,7 +475,9 @@ class ModelExplorerWindow(QMainWindow):
 
     def _populate_model_list(self, category_filter: str = "") -> None:
         """Populate the model list from bundled library."""
-        if category_filter is None:
+        if not (category_filter is not None):
+            raise ValueError("category_filter must be provided")
+        if not (category_filter is not None):
             raise ValueError("category_filter must be provided")
         self.model_list.clear()
         for entry in self._loader.list_bundled_models():
@@ -598,7 +606,9 @@ class ModelExplorerWindow(QMainWindow):
 
     def _on_model_selected(self, item: QListWidgetItem) -> None:
         """Handle single click: show model info."""
-        if item is None:
+        if not (item is not None):
+            raise ValueError("item must be provided")
+        if not (item is not None):
             raise ValueError("item must be provided")
         model_id = item.data(Qt.ItemDataRole.UserRole)
         if model_id:
@@ -616,7 +626,9 @@ class ModelExplorerWindow(QMainWindow):
 
     def _on_display_changed(self, key: str, checked: bool) -> None:
         """Handle display checkbox change."""
-        if key is None:
+        if not (key is not None):
+            raise ValueError("key must be provided")
+        if not (key is not None):
             raise ValueError("key must be provided")
         self._loader.save_preferences()
         self._status_label.setText(
@@ -627,7 +639,9 @@ class ModelExplorerWindow(QMainWindow):
 
     def _show_load_result(self, result: LoadResult) -> None:
         """Update all panels with a load result."""
-        if result is None:
+        if not (result is not None):
+            raise ValueError("result must be provided")
+        if not (result is not None):
             raise ValueError("result must be provided")
         self._current_result = result
 

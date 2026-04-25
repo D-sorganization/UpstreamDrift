@@ -326,7 +326,9 @@ class UnitPreferencesManager(QObject):
         self, value: float, category: str, from_unit: str | None = None
     ) -> float:
         """Convert a value to SI units."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         from_unit = from_unit or self.get_preferred_unit(category)
         si_unit = self.get_si_unit(category)
@@ -341,7 +343,9 @@ class UnitPreferencesManager(QObject):
         self, value: float, category: str, to_unit: str | None = None
     ) -> float:
         """Convert a value from SI units to display units."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         to_unit = to_unit or self.get_preferred_unit(category)
         si_unit = self.get_si_unit(category)

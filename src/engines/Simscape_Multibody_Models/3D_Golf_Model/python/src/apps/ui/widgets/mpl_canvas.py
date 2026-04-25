@@ -19,7 +19,9 @@ class MplCanvas(FigureCanvas):
         dpi: int = 100,
     ) -> None:
         """Initialize the matplotlib canvas with specified dimensions."""
-        if width is None:
+        if not (width is not None):
+            raise ValueError("width must be provided")
+        if not (width is not None):
             raise ValueError("width must be provided")
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.fig)  # type: ignore

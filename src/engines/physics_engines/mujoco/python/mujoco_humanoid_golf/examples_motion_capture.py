@@ -290,7 +290,9 @@ def _retarget_mocap(
     model: mujoco.MjModel,
     data: mujoco.MjData,
 ) -> tuple[np.ndarray, np.ndarray]:
-    if mocap_seq is None:
+    if not (mocap_seq is not None):
+        raise ValueError("mocap_seq must be provided")
+    if not (mocap_seq is not None):
         raise ValueError("mocap_seq must be provided")
     marker_set = MarkerSet.golf_swing_marker_set()
     retargeting = MotionRetargeting(model, data, marker_set)
@@ -309,7 +311,9 @@ def _retarget_mocap(
 def _filter_and_differentiate(
     times_ret: np.ndarray, joint_traj: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    if times_ret is None:
+    if not (times_ret is not None):
+        raise ValueError("times_ret must be provided")
+    if not (times_ret is not None):
         raise ValueError("times_ret must be provided")
     processor = MotionCaptureProcessor()
 

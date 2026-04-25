@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import importlib.util
+import types
 from pathlib import Path
 
 
-def _load_module():
+def _load_module() -> types.ModuleType:
     script_path = (
         Path(__file__).resolve().parents[2]
         / "scripts"
@@ -21,7 +22,7 @@ def _load_module():
     return module
 
 
-def test_build_exception_index_flags_invalid_and_expired_entries():
+def test_build_exception_index_flags_invalid_and_expired_entries() -> None:
     module = _load_module()
 
     config = {
@@ -53,7 +54,7 @@ def test_build_exception_index_flags_invalid_and_expired_entries():
     assert any("Expired exception" in msg for msg in invalid)
 
 
-def test_check_rules_respects_rules_path_and_exceptions(tmp_path):
+def test_check_rules_respects_rules_path_and_exceptions(tmp_path) -> None:
     module = _load_module()
 
     project_root = tmp_path

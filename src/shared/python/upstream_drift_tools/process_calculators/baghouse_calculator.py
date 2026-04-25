@@ -57,7 +57,9 @@ except ImportError:
 
     def convert(value: float, from_unit: str, to_unit: str) -> float:
         """Simple temperature conversion fallback."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         if from_unit == "K" and to_unit == "C":
             return float(value - CELSIUS_TO_KELVIN_OFFSET)
@@ -126,7 +128,9 @@ class BaghouseCalculator:
             Estimated Cp in J/(kg·K)
         """
         # Approximate Cp values at ~500K in J/(mol·K)
-        if composition is None:
+        if not (composition is not None):
+            raise ValueError("composition must be provided")
+        if not (composition is not None):
             raise ValueError("composition must be provided")
         cp_data = {
             "H2": CP_H2_500K,
@@ -173,7 +177,9 @@ class BaghouseCalculator:
             (acfm, scfm) - Actual and standard cubic feet per minute
         """
         # Molecular weights in kg/mol
-        if mass_flow_kg_s is None:
+        if not (mass_flow_kg_s is not None):
+            raise ValueError("mass_flow_kg_s must be provided")
+        if not (mass_flow_kg_s is not None):
             raise ValueError("mass_flow_kg_s must be provided")
         mw_data = {
             "H2": MW_H2_KG,
@@ -224,7 +230,9 @@ class BaghouseCalculator:
         Returns:
             (outlet_temp_c, flow_acfm, flow_scfm)
         """
-        if gas_flow_kg_s is None:
+        if not (gas_flow_kg_s is not None):
+            raise ValueError("gas_flow_kg_s must be provided")
+        if not (gas_flow_kg_s is not None):
             raise ValueError("gas_flow_kg_s must be provided")
         if self.thermo_calc is not None and HAS_THERMO:
             try:
@@ -292,7 +300,9 @@ class BaghouseCalculator:
              fill_time_hours, fill_time_days,
              carbon_only_fill_hours, ash_only_fill_hours)
         """
-        if solid_carbon_in_kg_hr is None:
+        if not (solid_carbon_in_kg_hr is not None):
+            raise ValueError("solid_carbon_in_kg_hr must be provided")
+        if not (solid_carbon_in_kg_hr is not None):
             raise ValueError("solid_carbon_in_kg_hr must be provided")
         carbon_removed = solid_carbon_in_kg_hr * carbon_removal_efficiency
         ash_removed = ash_in_kg_hr * ash_removal_efficiency

@@ -211,7 +211,9 @@ class SwingCaptureImporter:
             marker_mapping: Custom marker-to-joint mapping. Uses default if None.
             target_frame_rate: Target frame rate for resampled output.
         """
-        if target_frame_rate is None:
+        if not (target_frame_rate is not None):
+            raise ValueError("target_frame_rate must be provided")
+        if not (target_frame_rate is not None):
             raise ValueError("target_frame_rate must be provided")
         self.marker_mapping = marker_mapping or DEFAULT_GOLF_MAPPING
         self.target_frame_rate = target_frame_rate
@@ -426,7 +428,9 @@ class SwingCaptureImporter:
         Returns:
             Angle in radians, or 0.0 if vectors are degenerate.
         """
-        if positions is None:
+        if not (positions is not None):
+            raise ValueError("positions must be provided")
+        if not (positions is not None):
             raise ValueError("positions must be provided")
         p1 = positions[frame, marker_indices[0]]
         p2 = positions[frame, marker_indices[1]]  # vertex
@@ -454,7 +458,9 @@ class SwingCaptureImporter:
         Returns:
             JointTrajectory with computed joint angles.
         """
-        if marker_data is None:
+        if not (marker_data is not None):
+            raise ValueError("marker_data must be provided")
+        if not (marker_data is not None):
             raise ValueError("marker_data must be provided")
         n_frames = marker_data.n_frames
         marker_name_to_idx = {
@@ -554,7 +560,9 @@ class SwingCaptureImporter:
         Returns:
             Tuple of (resampled_positions, resampled_velocities, new_times).
         """
-        if positions is None:
+        if not (positions is not None):
+            raise ValueError("positions must be provided")
+        if not (positions is not None):
             raise ValueError("positions must be provided")
         from scipy.interpolate import interp1d
 
@@ -591,7 +599,9 @@ class SwingCaptureImporter:
             SwingPhaseLabels with frame indices for each phase.
         """
         # Use total angular velocity as a proxy for swing phase detection
-        if trajectory is None:
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
+        if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         total_velocity = np.sum(np.abs(trajectory.velocities), axis=1)
 
@@ -647,7 +657,9 @@ class SwingCaptureImporter:
         Returns:
             Dictionary with demonstration data ready for DemonstrationDataset.
         """
-        if trajectories is None:
+        if not (trajectories is not None):
+            raise ValueError("trajectories must be provided")
+        if not (trajectories is not None):
             raise ValueError("trajectories must be provided")
         demonstrations = []
 
@@ -702,7 +714,9 @@ class SwingCaptureImporter:
         Returns:
             Path to the exported file.
         """
-        if trajectory is None:
+        if not (trajectory is not None):
+            raise ValueError("trajectory must be provided")
+        if not (trajectory is not None):
             raise ValueError("trajectory must be provided")
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)

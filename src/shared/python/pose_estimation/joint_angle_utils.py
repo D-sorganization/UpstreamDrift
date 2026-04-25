@@ -31,7 +31,9 @@ def _angle_between(
     Returns:
         Angle in radians, or NaN if either vector is zero-length.
     """
-    if v1 is None:
+    if not (v1 is not None):
+        raise ValueError("v1 must be provided")
+    if not (v1 is not None):
         raise ValueError("v1 must be provided")
     n1 = np.linalg.norm(v1)
     n2 = np.linalg.norm(v2)
@@ -90,7 +92,9 @@ def compute_joint_angles(
     Returns:
         Dictionary of joint angle name -> angle in radians.
     """
-    if keypoints is None:
+    if not (keypoints is not None):
+        raise ValueError("keypoints must be provided")
+    if not (keypoints is not None):
         raise ValueError("keypoints must be provided")
     angles: dict[str, float] = {}
 
@@ -138,7 +142,9 @@ def _compute_trunk_rotation(
     getter: Callable[[str], np.ndarray | None],
 ) -> None:
     """Compute trunk rotation (X-factor) from shoulder and hip lines."""
-    if angles is None:
+    if not (angles is not None):
+        raise ValueError("angles must be provided")
+    if not (angles is not None):
         raise ValueError("angles must be provided")
     l_shoulder = getter("left_shoulder")
     r_shoulder = getter("right_shoulder")

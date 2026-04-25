@@ -58,11 +58,11 @@ class PinocchioScrewKinematics:
         if not PINOCCHIO_AVAILABLE:
             raise ImportError(
                 "pinocchio is not installed. "
-                "Install it to use PinocchioScrewKinematics."  # noqa: E501
+                "Install it to use PinocchioScrewKinematics."
             )
-        if model is None:
+        if not (model is not None):
             raise ValueError("model must be provided")
-        if data is None:
+        if not (data is not None):
             raise ValueError("data must be provided")
         self.model = model
         self.data = data
@@ -76,7 +76,7 @@ class PinocchioScrewKinematics:
         q: np.ndarray,
         v: np.ndarray,
         frame_name: str,
-        reference_frame: pin.ReferenceFrame | None = None,
+        reference_frame: pin.ReferenceFrame = None,
     ) -> Twist:
         """Compute spatial twist for a named frame.
 
@@ -97,9 +97,9 @@ class PinocchioScrewKinematics:
             ValueError: If ``frame_name`` is not found in the model.
             ImportError: If pinocchio is not installed.
         """
-        if q is None:
+        if not (q is not None):
             raise ValueError("q must be provided")
-        if v is None:
+        if not (v is not None):
             raise ValueError("v must be provided")
 
         if reference_frame is None:
@@ -155,7 +155,7 @@ class PinocchioScrewKinematics:
         Returns:
             Dict mapping frame name → (Twist, ScrewAxis).
         """
-        if q is None:
+        if not (q is not None):
             raise ValueError("q must be provided")
         results: dict[str, tuple[Twist, ScrewAxis]] = {}
         for name in frame_names:

@@ -12,7 +12,7 @@ _installer_dir = _this_file.parent
 project_root = _installer_dir.parent.parent
 # Import version and metadata
 try:
-    from shared.python.version import (  # type: ignore[import-not-found]
+    from src.shared.python.core.version import (  # type: ignore[import-not-found]
         __description__,
         __version__,
     )

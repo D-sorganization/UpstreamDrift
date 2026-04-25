@@ -83,7 +83,7 @@ class MJCFConverter:
     URDF uses a flat structure with explicit parent-child relationships.
     """
 
-    def __init__(self, config: MJCFConfig | None = None):
+    def __init__(self, config: MJCFConfig | None = None) -> None:
         """
         Initialize converter.
 
@@ -109,7 +109,9 @@ class MJCFConverter:
             MJCF XML string
         """
         # Parse URDF if needed
-        if source is None:
+        if not (source is not None):
+            raise ValueError("source must be provided")
+        if not (source is not None):
             raise ValueError("source must be provided")
         if isinstance(source, ParsedModel):
             model = source
@@ -140,7 +142,9 @@ class MJCFConverter:
             URDF XML string
         """
         # Load MJCF
-        if source is None:
+        if not (source is not None):
+            raise ValueError("source must be provided")
+        if not (source is not None):
             raise ValueError("source must be provided")
         if isinstance(source, Path) or (
             isinstance(source, str) and not source.strip().startswith("<")
@@ -163,7 +167,9 @@ class MJCFConverter:
 
     def _build_mjcf(self, model: ParsedModel) -> str:
         """Build MJCF XML from parsed model."""
-        if model is None:
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
             raise ValueError("model must be provided")
         lines = []
         lines.append(f'<mujoco model="{model.name}">')
@@ -247,7 +253,9 @@ class MJCFConverter:
         indent_level: int,
     ) -> list[str]:
         """Recursively build body element."""
-        if model is None:
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
             raise ValueError("model must be provided")
         lines: list[str] = []
         indent = "  " * indent_level
@@ -346,7 +354,9 @@ class MJCFConverter:
         indent: str,
     ) -> str:
         """Build geometry element."""
-        if geometry is None:
+        if not (geometry is not None):
+            raise ValueError("geometry must be provided")
+        if not (geometry is not None):
             raise ValueError("geometry must be provided")
         pos = origin.xyz
         pos_str = f"{pos[0]:.6g} {pos[1]:.6g} {pos[2]:.6g}"
@@ -386,7 +396,9 @@ class MJCFConverter:
 
     def _parse_mjcf(self, root: ET.Element) -> ParsedModel:
         """Parse MJCF into ParsedModel."""
-        if root is None:
+        if not (root is not None):
+            raise ValueError("root must be provided")
+        if not (root is not None):
             raise ValueError("root must be provided")
         model_name = root.get("model", "mjcf_model")
 
@@ -470,7 +482,9 @@ class MJCFConverter:
         body_name: str,
     ) -> tuple[Geometry | None, Origin, Any]:
         """Parse visual geometry and material from an MJCF body element."""
-        if body_elem is None:
+        if not (body_elem is not None):
+            raise ValueError("body_elem must be provided")
+        if not (body_elem is not None):
             raise ValueError("body_elem must be provided")
         from model_generation.core.types import Material
 
@@ -500,7 +514,9 @@ class MJCFConverter:
         pos: tuple[float, ...],
     ) -> Joint:
         """Parse joint elements and create a URDF joint connecting to parent."""
-        if body_elem is None:
+        if not (body_elem is not None):
+            raise ValueError("body_elem must be provided")
+        if not (body_elem is not None):
             raise ValueError("body_elem must be provided")
         from model_generation.core.types import JointDynamics, JointLimits
 
@@ -586,7 +602,9 @@ class MJCFConverter:
 
     def _parse_mjcf_geom(self, geom_elem: ET.Element) -> tuple[Geometry | None, Origin]:
         """Parse a MuJoCo geom element into a Geometry and Origin."""
-        if geom_elem is None:
+        if not (geom_elem is not None):
+            raise ValueError("geom_elem must be provided")
+        if not (geom_elem is not None):
             raise ValueError("geom_elem must be provided")
         geom_type = geom_elem.get("type", "sphere")
         pos_str = geom_elem.get("pos", "0 0 0")

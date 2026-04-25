@@ -15,6 +15,7 @@ import logging
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 from src.shared.python.logging_pkg.logging_config import (
     configure_gui_logging,
@@ -59,8 +60,10 @@ except ImportError as e:
 class EnhancedGolfVisualizerApp(QApplication):
     """Enhanced main application with advanced features"""
 
-    def __init__(self, argv) -> None:
-        if argv is None:
+    def __init__(self, argv: list) -> None:
+        if not (argv is not None):
+            raise ValueError("argv must be provided")
+        if not (argv is not None):
             raise ValueError("argv must be provided")
         super().__init__(argv)
 
@@ -371,7 +374,9 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
 
     def load_data_files(self, file_paths: list[str]) -> bool:
         """Enhanced data loading with validation and preprocessing"""
-        if file_paths is None:
+        if not (file_paths is not None):
+            raise ValueError("file_paths must be provided")
+        if not (file_paths is not None):
             raise ValueError("file_paths must be provided")
         try:
             if len(file_paths) != 3:
@@ -444,7 +449,9 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
 
     def _on_camera_mode_changed(self, mode: str) -> None:
         """Handle camera mode changes"""
-        if mode is None:
+        if not (mode is not None):
+            raise ValueError("mode must be provided")
+        if not (mode is not None):
             raise ValueError("mode must be provided")
         self.statusBar().showMessage(f"Camera mode: {mode}")
         logger.info(f"Camera mode changed to: {mode}")
@@ -627,7 +634,9 @@ class SessionManager:
 
     def create_session(self, data_files: list[str]) -> str:
         """Create a new analysis session"""
-        if data_files is None:
+        if not (data_files is not None):
+            raise ValueError("data_files must be provided")
+        if not (data_files is not None):
             raise ValueError("data_files must be provided")
         import uuid
 
@@ -686,7 +695,9 @@ class ExportManager:
 
     def export_data(self, data: dict, output_path: str, format: str = "csv") -> None:
         """Export analysis data"""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         if format.lower() == "csv":
             import pandas as pd
@@ -697,7 +708,9 @@ class ExportManager:
 
     def export_images(self, frames: list, output_dir: str, format: str = "png") -> None:
         """Export frame sequence as images"""
-        if frames is None:
+        if not (frames is not None):
+            raise ValueError("frames must be provided")
+        if not (frames is not None):
             raise ValueError("frames must be provided")
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         # Export logic here
@@ -719,7 +732,9 @@ class PluginManager:
 
     def register_plugin(self, name: str, plugin: object) -> None:
         """Register a plugin"""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         self.plugins[name] = plugin
         logger.info(f"Plugin registered: {name}")
@@ -734,9 +749,11 @@ def main() -> int:
     """Enhanced main entry point with comprehensive error handling"""
 
     # Setup exception handling
-    def handle_exception(exc_type, exc_value, exc_traceback) -> None:
+    def handle_exception(exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
         """Log uncaught exceptions and show an error dialog."""
-        if exc_type is None:
+        if not (exc_type is not None):
+            raise ValueError("exc_type must be provided")
+        if not (exc_type is not None):
             raise ValueError("exc_type must be provided")
         if issubclass(exc_type, KeyboardInterrupt):
             sys.__excepthook__(exc_type, exc_value, exc_traceback)

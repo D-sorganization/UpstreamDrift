@@ -115,9 +115,11 @@ class ConfigurationManager(ContractChecker):
             config = SimulationConfig(**filtered_data)
             config.validate()
             return config
+        except json.JSONDecodeError as e:
+            raise GolfModelingError(
+                f"Failed to parse config (malformed JSON): {e}"
+            ) from e
         except (FileNotFoundError, PermissionError, OSError) as e:
-            # Fallback to default if load fails, or raise?
-            # Raising is safer to alert user of corruption
             raise GolfModelingError(f"Failed to load config: {e}") from e
 
     def save(self, config: SimulationConfig) -> None:

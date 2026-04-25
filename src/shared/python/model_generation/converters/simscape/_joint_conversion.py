@@ -1,0 +1,243 @@
+from __future__ import annotations
+
+import logging
+import math
+
+from model_generation.converters.simscape.mdl_parser import (
+    SimscapeBlock,
+    SimscapeModel,
+)
+from model_generation.core.types import (
+    Joint,
+    JointDynamics,
+    JointLimits,
+    JointType,
+    Origin,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def get_joint_origin(
+    block: SimscapeBlock,
+    length_factors: dict[str, float],
+    length_unit: str,
+    angle_factors: dict[str, float],
+    angle_unit: str,
+) -> Origin:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    length_scale = length_factors.get(length_unit, 1.0)
+    angle_scale = angle_factors.get(angle_unit, 1.0)
+
+    xyz = (0.0, 0.0, 0.0)
+    for param_name in ["Position", "Offset", "Translation", "xyz"]:
+        if param_name in block.parameters:
+            pos = block.get_param_vector(param_name, (0.0, 0.0, 0.0))
+            if len(pos) >= 3:
+                xyz = (
+                    pos[0] * length_scale,
+                    pos[1] * length_scale,
+                    pos[2] * length_scale,
+                )
+                break
+
+    rpy = (0.0, 0.0, 0.0)
+    for param_name in ["Rotation", "Orientation", "rpy", "Angles"]:
+        if param_name in block.parameters:
+            rot = block.get_param_vector(param_name, (0.0, 0.0, 0.0))
+            if len(rot) >= 3:
+                rpy = (
+                    rot[0] * angle_scale,
+                    rot[1] * angle_scale,
+                    rot[2] * angle_scale,
+                )
+                break
+
+    return Origin(xyz=xyz, rpy=rpy)
+
+
+def get_joint_axis(block: SimscapeBlock) -> tuple[float, float, float]:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    for param_name in ["Axis", "JointAxis", "RotationAxis"]:
+        if param_name in block.parameters:
+            axis = block.get_param_vector(param_name, (0.0, 0.0, 1.0))
+            if len(axis) >= 3:
+                mag = (axis[0] ** 2 + axis[1] ** 2 + axis[2] ** 2) ** 0.5
+                if mag > 0:
+                    return (axis[0] / mag, axis[1] / mag, axis[2] / mag)
+
+    axis_dir = block.get_param("AxisDirection", "").lower()
+    if "x" in axis_dir:
+        return (1.0, 0.0, 0.0)
+    if "y" in axis_dir:
+        return (0.0, 1.0, 0.0)
+
+    return (0.0, 0.0, 1.0)
+
+
+def get_joint_limits(
+    block: SimscapeBlock,
+    joint_type: JointType,
+    angle_factors: dict[str, float],
+    angle_unit: str,
+    length_factors: dict[str, float],
+    length_unit: str,
+    default_effort_limit: float,
+    default_velocity_limit: float,
+) -> JointLimits | None:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    if joint_type in (JointType.FIXED, JointType.FLOATING, JointType.CONTINUOUS):
+        return None
+
+    angle_scale = angle_factors.get(angle_unit, 1.0)
+    length_scale = length_factors.get(length_unit, 1.0)
+
+    lower = -math.pi
+    upper = math.pi
+
+    if "LowerLimit" in block.parameters:
+        lower = block.get_param_float("LowerLimit", lower)
+    if "UpperLimit" in block.parameters:
+        upper = block.get_param_float("UpperLimit", upper)
+
+    if joint_type == JointType.PRISMATIC:
+        lower *= length_scale
+        upper *= length_scale
+    else:
+        lower *= angle_scale
+        upper *= angle_scale
+
+    return JointLimits(
+        lower=lower,
+        upper=upper,
+        effort=default_effort_limit,
+        velocity=default_velocity_limit,
+    )
+
+
+def convert_joint_block(
+    block: SimscapeBlock,
+    model: SimscapeModel,
+    body_to_link: dict[str, str],
+    connection_map: dict[str, list[tuple[str, str]]],
+    joint_type_map: dict,
+    sanitize_name_fn,
+    length_factors: dict[str, float],
+    length_unit: str,
+    angle_factors: dict[str, float],
+    angle_unit: str,
+    default_effort_limit: float,
+    default_velocity_limit: float,
+    default_joint_damping: float,
+    default_joint_friction: float,
+) -> Joint | None:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    urdf_joint_type = joint_type_map.get(block.block_type, JointType.FIXED)
+
+    connections = connection_map.get(block.full_path, [])
+
+    parent_link = None
+    child_link = None
+
+    for connected_block, port in connections:
+        link_name = body_to_link.get(connected_block)
+        if link_name:
+            port_lower = port.lower() if port else ""
+            if "b" in port_lower or "base" in port_lower or parent_link is None:
+                if parent_link is None:
+                    parent_link = link_name
+                else:
+                    child_link = link_name
+            else:
+                child_link = link_name
+
+    if not parent_link or not child_link:
+        for connected_block, _ in connections:
+            link_name = body_to_link.get(connected_block)
+            if link_name:
+                if parent_link is None:
+                    parent_link = link_name
+                elif child_link is None and link_name != parent_link:
+                    child_link = link_name
+
+    if not parent_link or not child_link:
+        logger.warning("Could not find parent/child for joint %s", block.name)
+        return None
+
+    origin = get_joint_origin(
+        block, length_factors, length_unit, angle_factors, angle_unit
+    )
+    axis = get_joint_axis(block)
+    limits = get_joint_limits(
+        block,
+        urdf_joint_type,
+        angle_factors,
+        angle_unit,
+        length_factors,
+        length_unit,
+        default_effort_limit,
+        default_velocity_limit,
+    )
+
+    joint_name = sanitize_name_fn(block.name)
+
+    return Joint(
+        name=joint_name,
+        joint_type=urdf_joint_type,
+        parent=parent_link,
+        child=child_link,
+        origin=origin,
+        axis=axis,
+        limits=limits,
+        dynamics=JointDynamics(
+            damping=default_joint_damping,
+            friction=default_joint_friction,
+        ),
+    )
+
+
+def convert_transform_to_joint(
+    block: SimscapeBlock,
+    model: SimscapeModel,
+    body_to_link: dict[str, str],
+    connection_map: dict[str, list[tuple[str, str]]],
+    sanitize_name_fn,
+    length_factors: dict[str, float],
+    length_unit: str,
+    angle_factors: dict[str, float],
+    angle_unit: str,
+) -> Joint | None:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    connections = connection_map.get(block.full_path, [])
+
+    parent_link = None
+    child_link = None
+
+    for connected_block, _port in connections:
+        link_name = body_to_link.get(connected_block)
+        if link_name:
+            if parent_link is None:
+                parent_link = link_name
+            elif child_link is None and link_name != parent_link:
+                child_link = link_name
+
+    if not parent_link or not child_link:
+        return None
+
+    origin = get_joint_origin(
+        block, length_factors, length_unit, angle_factors, angle_unit
+    )
+    joint_name = sanitize_name_fn(f"{block.name}_fixed")
+
+    return Joint(
+        name=joint_name,
+        joint_type=JointType.FIXED,
+        parent=parent_link,
+        child=child_link,
+        origin=origin,
+    )

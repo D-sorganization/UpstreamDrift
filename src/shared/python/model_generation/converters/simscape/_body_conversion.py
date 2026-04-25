@@ -1,0 +1,179 @@
+from __future__ import annotations
+
+import math
+
+from model_generation.converters.simscape.mdl_parser import (
+    SimscapeBlock,
+    SimscapeBlockType,
+)
+from model_generation.core.types import (
+    Geometry,
+    GeometryType,
+    Inertia,
+    Link,
+    Material,
+)
+
+
+def get_mass(
+    block: SimscapeBlock,
+    mass_factors: dict[str, float],
+    mass_unit: str,
+) -> float:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    mass = 1.0
+    for param_name in ["Mass", "m", "mass", "MassValue"]:
+        if param_name in block.parameters:
+            mass = block.get_param_float(param_name, 1.0)
+            break
+    mass *= mass_factors.get(mass_unit, 1.0)
+    return max(0.001, mass)
+
+
+def get_geometry(
+    block: SimscapeBlock,
+    length_factors: dict[str, float],
+    length_unit: str,
+    create_dummy_links: bool,
+) -> Geometry | None:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    block_type = block.block_type
+    length_scale = length_factors.get(length_unit, 1.0)
+
+    if block_type == SimscapeBlockType.BRICK_SOLID:
+        dims = block.get_param_vector("Dimensions", (0.1, 0.1, 0.1))
+        if len(dims) >= 3:
+            return Geometry.box(
+                dims[0] * length_scale,
+                dims[1] * length_scale,
+                dims[2] * length_scale,
+            )
+
+    elif block_type == SimscapeBlockType.CYLINDER_SOLID:
+        radius = block.get_param_float("Radius", 0.05) * length_scale
+        length = block.get_param_float("Length", 0.1) * length_scale
+        return Geometry.cylinder(radius, length)
+
+    elif block_type == SimscapeBlockType.SPHERE_SOLID:
+        radius = block.get_param_float("Radius", 0.05) * length_scale
+        return Geometry.sphere(radius)
+
+    elif block_type == SimscapeBlockType.SOLID:
+        shape = block.get_param("Shape", "box").lower()
+        if "cylinder" in shape:
+            radius = block.get_param_float("Radius", 0.05) * length_scale
+            length = block.get_param_float("Length", 0.1) * length_scale
+            return Geometry.cylinder(radius, length)
+        if "sphere" in shape:
+            radius = block.get_param_float("Radius", 0.05) * length_scale
+            return Geometry.sphere(radius)
+        dims = block.get_param_vector("Dimensions", (0.1, 0.1, 0.1))
+        if len(dims) >= 3:
+            return Geometry.box(
+                dims[0] * length_scale,
+                dims[1] * length_scale,
+                dims[2] * length_scale,
+            )
+
+    if create_dummy_links:
+        return Geometry.box(0.05, 0.05, 0.05)
+
+    return None
+
+
+def inertia_from_geometry(geometry: Geometry, mass: float) -> Inertia:
+    if not (geometry is not None):
+        raise ValueError("geometry must be provided")
+    if geometry.geometry_type == GeometryType.BOX:
+        return Inertia.from_box(mass, *geometry.dimensions[:3])
+    if geometry.geometry_type == GeometryType.CYLINDER:
+        return Inertia.from_cylinder(
+            mass, geometry.dimensions[0], geometry.dimensions[1]
+        )
+    if geometry.geometry_type == GeometryType.SPHERE:
+        return Inertia.from_sphere(mass, geometry.dimensions[0])
+    return Inertia(ixx=0.01, iyy=0.01, izz=0.01, mass=mass)
+
+
+def get_inertia(
+    block: SimscapeBlock,
+    mass: float,
+    length_factors: dict[str, float],
+    length_unit: str,
+    create_dummy_links: bool,
+) -> Inertia:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    inertia_param = block.parameters.get("Inertia") or block.parameters.get(
+        "MomentOfInertia"
+    )
+
+    if inertia_param:
+        values = inertia_param.as_vector()
+        if len(values) >= 3:
+            ixx, iyy, izz = values[0], values[1], values[2]
+            ixy = values[3] if len(values) > 3 else 0.0
+            ixz = values[4] if len(values) > 4 else 0.0
+            iyz = values[5] if len(values) > 5 else 0.0
+            return Inertia(
+                ixx=ixx, iyy=iyy, izz=izz, ixy=ixy, ixz=ixz, iyz=iyz, mass=mass
+            )
+
+    geometry = get_geometry(block, length_factors, length_unit, create_dummy_links)
+    if geometry:
+        return inertia_from_geometry(geometry, mass)
+
+    return Inertia(ixx=0.01, iyy=0.01, izz=0.01, mass=mass)
+
+
+def convert_body_to_link(
+    block: SimscapeBlock,
+    sanitize_name_fn,
+    mass_factors: dict[str, float],
+    mass_unit: str,
+    length_factors: dict[str, float],
+    length_unit: str,
+    include_visual: bool,
+    include_collision: bool,
+    collision_from_visual: bool,
+    create_dummy_links: bool,
+    default_material_color: tuple[float, float, float, float],
+) -> Link | None:
+    if not (block is not None):
+        raise ValueError("block must be provided")
+    link_name = sanitize_name_fn(block.name)
+    mass = get_mass(block, mass_factors, mass_unit)
+    inertia = get_inertia(block, mass, length_factors, length_unit, create_dummy_links)
+
+    visual_geometry = None
+    collision_geometry = None
+
+    if include_visual:
+        visual_geometry = get_geometry(
+            block, length_factors, length_unit, create_dummy_links
+        )
+
+    if include_collision:
+        if collision_from_visual and visual_geometry:
+            collision_geometry = visual_geometry
+        else:
+            collision_geometry = get_geometry(
+                block, length_factors, length_unit, create_dummy_links
+            )
+
+    return Link(
+        name=link_name,
+        inertia=inertia,
+        visual_geometry=visual_geometry,
+        collision_geometry=collision_geometry,
+        visual_material=Material(
+            name="default_material",
+            color=default_material_color,
+        ),
+    )
+
+
+# Suppress unused import warning — math is used transitively via Inertia.from_box etc.
+_ = math

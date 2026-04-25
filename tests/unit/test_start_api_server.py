@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import start_api_server
 
 
-def test_validate_security_no_issues(monkeypatch):
+def test_validate_security_no_issues(monkeypatch) -> None:
     mock_validate = MagicMock(return_value={"critical_issues": [], "warnings": []})
     monkeypatch.setattr(
         "src.shared.python.security.env_validator.validate_environment",
@@ -19,7 +19,7 @@ def test_validate_security_no_issues(monkeypatch):
     assert start_api_server._validate_security() is True
 
 
-def test_validate_security_with_critical(monkeypatch):
+def test_validate_security_with_critical(monkeypatch) -> None:
     mock_validate = MagicMock(
         return_value={"critical_issues": ["bad secret"], "warnings": []}
     )
@@ -36,7 +36,7 @@ def test_validate_security_with_critical(monkeypatch):
         assert start_api_server._validate_security() is True
 
 
-def test_setup_api_environment(monkeypatch):
+def test_setup_api_environment(monkeypatch) -> None:
     mock_root = Path("/mock/root")
     monkeypatch.setattr("start_api_server.get_repo_root", lambda: mock_root)
     monkeypatch.setattr("start_api_server._validate_security", lambda: True)
@@ -51,7 +51,7 @@ def test_setup_api_environment(monkeypatch):
 
 @patch("start_api_server.uvicorn.run")
 @patch("start_api_server.check_python_dependencies")
-def test_main_success(mock_check_deps, mock_run, monkeypatch):
+def test_main_success(mock_check_deps, mock_run, monkeypatch) -> None:
     mock_check_deps.return_value = True
     monkeypatch.setattr(
         "start_api_server.setup_api_environment", lambda: ("127.0.0.1", 8000)
@@ -63,6 +63,6 @@ def test_main_success(mock_check_deps, mock_run, monkeypatch):
 
 
 @patch("start_api_server.check_python_dependencies")
-def test_main_deps_fail(mock_check_deps):
+def test_main_deps_fail(mock_check_deps) -> None:
     mock_check_deps.return_value = False
     assert start_api_server.main() == 1

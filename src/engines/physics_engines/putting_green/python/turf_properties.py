@@ -178,7 +178,7 @@ class TurfProperties:
 
         # Adjust for height of cut (longer grass = more friction)
         # Note: height_of_cut_mm is guaranteed non-None after __post_init__
-        if self.height_of_cut_mm is None:
+        if not (self.height_of_cut_mm is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         height_factor = 1.0 + 0.05 * (self.height_of_cut_mm - 3.0) / 2.0
 
@@ -201,10 +201,11 @@ class TurfProperties:
         Returns:
             Multiplier for friction adjustment (-1 to +1)
         """
-        if velocity_direction is None:
+        if not (velocity_direction is not None):
             raise ValueError("velocity_direction must be provided")
-        v_mag = math.hypot(velocity_direction[0], velocity_direction[1])
-        if v_mag < 1e-10:
+        if not (velocity_direction is not None):
+            raise ValueError("velocity_direction must be provided")
+        if np.linalg.norm(velocity_direction) < 1e-10:
             return 0.0
 
         v_dir = velocity_direction / v_mag
@@ -223,9 +224,11 @@ class TurfProperties:
         Returns:
             Deceleration vector [m/s²] (opposing motion)
         """
-        if velocity is None:
+        if not (velocity is not None):
             raise ValueError("velocity must be provided")
-        speed = math.hypot(velocity[0], velocity[1])
+        if not (velocity is not None):
+            raise ValueError("velocity must be provided")
+        speed = np.linalg.norm(velocity)
         if speed < 1e-10:
             return np.zeros(2)
 
@@ -272,7 +275,7 @@ class TurfProperties:
         # Apply small cross-grain velocity component
         # Effect is proportional to grain strength and inversely to speed
         # Note: grain_strength is guaranteed non-None after __post_init__
-        if self.grain_strength is None:
+        if not (self.grain_strength is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         curve_amount = self.grain_strength * 0.01 / (1.0 + speed)
         return velocity + curve_amount * cross_grain * speed

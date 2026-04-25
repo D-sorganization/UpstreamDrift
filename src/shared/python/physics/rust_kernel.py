@@ -58,7 +58,9 @@ def create_integrator_config(dt: float = 0.001, max_steps: int = 10000) -> Any:
     Returns:
         IntegratorConfig (Rust) or dict fallback.
     """
-    if dt is None:
+    if not (dt is not None):
+        raise ValueError("dt must be provided")
+    if not (dt is not None):
         raise ValueError("dt must be provided")
     if _RUST_AVAILABLE:
         return _rust.IntegratorConfig(dt=dt, max_steps=max_steps)
@@ -78,7 +80,9 @@ def create_contact_parameters(cor: float = 0.82, friction: float = 0.4) -> Any:
     Returns:
         ContactParameters (Rust) or dict fallback.
     """
-    if cor is None:
+    if not (cor is not None):
+        raise ValueError("cor must be provided")
+    if not (cor is not None):
         raise ValueError("cor must be provided")
     if _RUST_AVAILABLE:
         return _rust.ContactParameters(cor=cor, friction=friction)
@@ -93,7 +97,9 @@ def clamp(value: float, min_val: float, max_val: float) -> float:
 
     Uses Rust tools_core::clamp when available, pure Python otherwise.
     """
-    if value is None:
+    if not (value is not None):
+        raise ValueError("value must be provided")
+    if not (value is not None):
         raise ValueError("value must be provided")
     if _RUST_AVAILABLE and hasattr(_rust, "clamp"):
         return float(_rust.clamp(value, min_val, max_val))
@@ -105,7 +111,9 @@ def lerp(a: float, b: float, t: float) -> float:
 
     Uses Rust tools_core::lerp when available, pure Python otherwise.
     """
-    if a is None:
+    if not (a is not None):
+        raise ValueError("a must be provided")
+    if not (a is not None):
         raise ValueError("a must be provided")
     if _RUST_AVAILABLE and hasattr(_rust, "lerp"):
         return float(_rust.lerp(a, b, t))
@@ -138,7 +146,9 @@ def create_air_properties(
     Returns:
         AirProperties (Rust) or dict fallback.
     """
-    if density is None:
+    if not (density is not None):
+        raise ValueError("density must be provided")
+    if not (density is not None):
         raise ValueError("density must be provided")
     if _RUST_AVAILABLE:
         return _rust.AirProperties(
@@ -177,7 +187,9 @@ def create_ball_properties(
     Returns:
         BallProperties (Rust) or dict fallback.
     """
-    if mass is None:
+    if not (mass is not None):
+        raise ValueError("mass must be provided")
+    if not (mass is not None):
         raise ValueError("mass must be provided")
     import math
 
@@ -207,7 +219,9 @@ def mark_legacy(func_name: str, module: str) -> None:
 
     Call this at the top of legacy functions that have Rust replacements.
     """
-    if func_name is None:
+    if not (func_name is not None):
+        raise ValueError("func_name must be provided")
+    if not (func_name is not None):
         raise ValueError("func_name must be provided")
     import warnings
 

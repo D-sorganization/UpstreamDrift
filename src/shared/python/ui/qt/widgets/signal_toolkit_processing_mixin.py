@@ -16,7 +16,6 @@ from typing import Any
 
 import numpy as np
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
-
 from src.shared.python.signal_toolkit.calculus import (
     Differentiator,
     Integrator,
@@ -110,7 +109,9 @@ class SignalToolkitProcessingMixin:
 
     def _generate_polynomial(self: Any, t: np.ndarray) -> Signal:
         """Generate a polynomial signal from current UI parameters."""
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         coeffs_str = self.poly_coeffs_input.text()
         coeffs = [float(c.strip()) for c in coeffs_str.split(",")]
@@ -170,7 +171,9 @@ class SignalToolkitProcessingMixin:
 
     def _generate_custom(self: Any, t: np.ndarray) -> Signal | None:
         """Generate a custom expression signal from current UI parameters."""
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         expr = self.custom_expr.text()
         if not expr:
@@ -402,7 +405,9 @@ class SignalToolkitProcessingMixin:
 
     def _update_tangent_position(self: Any, value: int) -> None:
         """Update tangent line position from slider."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         if self.current_signal is None:
             return
@@ -769,7 +774,9 @@ class SignalToolkitProcessingMixin:
         title: str,
     ) -> None:
         """Update the secondary plot."""
-        if signal is None:
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
             raise ValueError("signal must be provided")
         self.canvas2.axes.clear()
         self.canvas2.setup_dark_theme()
@@ -792,7 +799,9 @@ class SignalToolkitProcessingMixin:
 
     def set_joints(self: Any, joints: list[str]) -> None:
         """Set the list of available joints."""
-        if joints is None:
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
+        if not (joints is not None):
             raise ValueError("joints must be provided")
         self.joint_names = joints
         self.joint_combo.clear()

@@ -82,7 +82,7 @@ def compute_metric_statistics(values: np.ndarray) -> MetricStatistics:
     def _to_scalar_or_array(arr: Any) -> float | np.ndarray:
         if isinstance(arr, np.ndarray) and arr.ndim == 0:
             return float(arr)
-        if isinstance(arr, float | int | np.number):
+        if isinstance(arr, (float, int, np.number)):
             return float(arr)
         return arr
 

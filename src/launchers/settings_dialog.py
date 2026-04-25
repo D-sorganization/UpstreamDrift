@@ -73,7 +73,9 @@ class SettingsDialog(QDialog):
         diagnostics_data: dict[str, Any] | None = None,
         initial_tab: int = 0,
     ) -> None:
-        if initial_tab is None:
+        if not (initial_tab is not None):
+            raise ValueError("initial_tab must be provided")
+        if not (initial_tab is not None):
             raise ValueError("initial_tab must be provided")
         super().__init__(parent)
         self.setWindowTitle("Settings")
@@ -336,7 +338,9 @@ class SettingsDialog(QDialog):
 
     def _render_diagnostics(self, data: dict[str, Any]) -> None:
         """Render diagnostics results as styled HTML."""
-        if data is None:
+        if not (data is not None):
+            raise ValueError("data must be provided")
+        if not (data is not None):
             raise ValueError("data must be provided")
         summary = data.get("summary", {})
         checks = data.get("checks", [])
@@ -352,7 +356,9 @@ class SettingsDialog(QDialog):
         self._diag_browser.setHtml(html)
 
     def _render_diag_summary(self, summary: dict) -> str:
-        if summary is None:
+        if not (summary is not None):
+            raise ValueError("summary must be provided")
+        if not (summary is not None):
             raise ValueError("summary must be provided")
         status = summary.get("status", "unknown").upper()
         passed = summary.get("passed", 0)
@@ -373,7 +379,9 @@ class SettingsDialog(QDialog):
         """
 
     def _render_diag_checks(self, checks: list) -> str:
-        if checks is None:
+        if not (checks is not None):
+            raise ValueError("checks must be provided")
+        if not (checks is not None):
             raise ValueError("checks must be provided")
         html = "<h3>Check Results</h3><table style='width:100%;'>"
         for check in checks:
@@ -394,7 +402,9 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_engines(self, checks: list) -> str:
-        if checks is None:
+        if not (checks is not None):
+            raise ValueError("checks must be provided")
+        if not (checks is not None):
             raise ValueError("checks must be provided")
         engine_check = next(
             (c for c in checks if c["name"] == "engine_availability"), None
@@ -439,7 +449,9 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_runtime(self, runtime: dict) -> str:
-        if runtime is None:
+        if not (runtime is not None):
+            raise ValueError("runtime must be provided")
+        if not (runtime is not None):
             raise ValueError("runtime must be provided")
         if not runtime:
             return ""
@@ -455,7 +467,9 @@ class SettingsDialog(QDialog):
         return html
 
     def _render_diag_recommendations(self, recommendations: list) -> str:
-        if recommendations is None:
+        if not (recommendations is not None):
+            raise ValueError("recommendations must be provided")
+        if not (recommendations is not None):
             raise ValueError("recommendations must be provided")
         if not recommendations:
             return ""
@@ -515,7 +529,9 @@ class SettingsDialog(QDialog):
         self.build_thread.start()
 
     def _on_build_log(self, line: str) -> None:
-        if line is None:
+        if not (line is not None):
+            raise ValueError("line must be provided")
+        if not (line is not None):
             raise ValueError("line must be provided")
         self.build_console.append(line)
         sb = self.build_console.verticalScrollBar()
@@ -523,7 +539,9 @@ class SettingsDialog(QDialog):
             sb.setValue(sb.maximum())
 
     def _on_build_finished(self, success: bool, message: str) -> None:
-        if success is None:
+        if not (success is not None):
+            raise ValueError("success must be provided")
+        if not (success is not None):
             raise ValueError("success must be provided")
         self._btn_build.setEnabled(True)
         self._btn_cancel_build.setEnabled(False)

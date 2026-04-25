@@ -171,9 +171,10 @@ class TestElevationMap:
         # Height should increase in X direction
         assert elev.get_elevation(50, 50) > elev.get_elevation(0, 50)
 
-        # Approximate height change: 100m * tan(5°) ≈ 8.75m
-        expected_rise = 100.0 * math.tan(math.radians(5.0))
-        actual_rise = elev.get_elevation(100, 50) - elev.get_elevation(0, 50)
+        # Grid has 100 nodes at resolution 1m: valid range is [0, 99].
+        # Height change over 99 nodes: 99m * tan(5°) ≈ 8.66m
+        expected_rise = 99.0 * math.tan(math.radians(5.0))
+        actual_rise = elev.get_elevation(99, 50) - elev.get_elevation(0, 50)
         assert abs(actual_rise - expected_rise) < 0.1
 
     def test_elevation_interpolation(self) -> None:
@@ -520,9 +521,9 @@ class TestTerrainFactories:
             terrain_type=TerrainType.FAIRWAY,
         )
 
-        # Check slope exists in Y direction
+        # Grid: 200 nodes at 1m resolution → valid Y range [0, 199].
         h1 = terrain.elevation.get_elevation(50.0, 0.0)
-        h2 = terrain.elevation.get_elevation(50.0, 200.0)
+        h2 = terrain.elevation.get_elevation(50.0, 199.0)
         assert h2 > h1
 
     def test_create_terrain_from_config(self, tmp_path: Path) -> None:

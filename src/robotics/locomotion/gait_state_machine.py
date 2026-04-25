@@ -179,7 +179,9 @@ class GaitStateMachine(ContractChecker):
         Args:
             parameters: New gait parameters.
         """
-        if parameters is None:
+        if not (parameters is not None):
+            raise ValueError("parameters must be provided")
+        if not (parameters is not None):
             raise ValueError("parameters must be provided")
         self._parameters = parameters
         self._state.gait_type = parameters.gait_type
@@ -221,6 +223,8 @@ class GaitStateMachine(ContractChecker):
         self._state.phase = GaitPhase.DOUBLE_SUPPORT
         self._state.support_state = SupportState.DOUBLE_SUPPORT_CENTERED
         self._state.phase_time = 0.0
+        self._state.stance_foot = "both"
+        self._state.next_stance_foot = "both"
         self._invoke_callbacks("gait_change", GaitEvent.EMERGENCY_STOP)
 
     def update(self, dt: float) -> GaitState:
@@ -232,7 +236,9 @@ class GaitStateMachine(ContractChecker):
         Returns:
             Updated gait state.
         """
-        if dt is None:
+        if not (dt is not None):
+            raise ValueError("dt must be provided")
+        if not (dt is not None):
             raise ValueError("dt must be provided")
         if dt <= 0:
             return self.state
@@ -287,7 +293,9 @@ class GaitStateMachine(ContractChecker):
         Returns:
             Phase value for trajectory interpolation.
         """
-        if foot is None:
+        if not (foot is not None):
+            raise ValueError("foot must be provided")
+        if not (foot is not None):
             raise ValueError("foot must be provided")
         if not self._state.is_walking:
             return 1.0  # Standing
@@ -376,7 +384,9 @@ class GaitStateMachine(ContractChecker):
 
     def _get_phase_duration(self, phase: GaitPhase) -> float:
         """Get duration for a given phase."""
-        if phase is None:
+        if not (phase is not None):
+            raise ValueError("phase must be provided")
+        if not (phase is not None):
             raise ValueError("phase must be provided")
         if phase == GaitPhase.DOUBLE_SUPPORT:
             return self._parameters.double_support_duration

@@ -65,7 +65,9 @@ class JointInfo:
     @classmethod
     def from_element(cls, element: ET.Element) -> JointInfo:
         """Create JointInfo from XML element."""
-        if element is None:
+        if not (element is not None):
+            raise ValueError("element must be provided")
+        if not (element is not None):
             raise ValueError("element must be provided")
         name = element.get("name", "unnamed")
         joint_type = element.get("type", "fixed")
@@ -159,7 +161,9 @@ class JointSliderWidget(QWidget):
 
     def __init__(self, joint: JointInfo, parent: QWidget | None = None) -> None:
         """Initialize the joint slider widget."""
-        if joint is None:
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
             raise ValueError("joint must be provided")
         super().__init__(parent)
         self.joint = joint
@@ -229,7 +233,9 @@ class JointSliderWidget(QWidget):
 
     def _on_slider_changed(self, value: int) -> None:
         """Handle slider value change."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         float_value = value / self.scale
         self.spinbox.blockSignals(True)
@@ -240,7 +246,9 @@ class JointSliderWidget(QWidget):
 
     def _on_spinbox_changed(self, value: float) -> None:
         """Handle spinbox value change."""
-        if value is None:
+        if not (value is not None):
+            raise ValueError("value must be provided")
+        if not (value is not None):
             raise ValueError("value must be provided")
         self.slider.blockSignals(True)
         self.slider.setValue(int(value * self.scale))
@@ -297,7 +305,9 @@ class JointTableWidget(QWidget):
 
     def load_joints(self, joints: dict[str, JointInfo]) -> None:
         """Load joints into the table."""
-        if joints is None:
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
+        if not (joints is not None):
             raise ValueError("joints must be provided")
         self.joints = joints
         self.table.setRowCount(len(joints))
@@ -360,7 +370,9 @@ class JointEditorPanel(QWidget):
         Returns:
             Configured QDoubleSpinBox.
         """
-        if min_val is None:
+        if not (min_val is not None):
+            raise ValueError("min_val must be provided")
+        if not (min_val is not None):
             raise ValueError("min_val must be provided")
         spin = QDoubleSpinBox()
         spin.setRange(min_val, max_val)
@@ -472,7 +484,9 @@ class JointEditorPanel(QWidget):
 
     def load_joints(self, joints: dict[str, JointInfo]) -> None:
         """Load joints into the combo box."""
-        if joints is None:
+        if not (joints is not None):
+            raise ValueError("joints must be provided")
+        if not (joints is not None):
             raise ValueError("joints must be provided")
         self.joint_combo.clear()
         self.joint_combo.addItems(joints.keys())
@@ -488,7 +502,9 @@ class JointEditorPanel(QWidget):
     )
     def set_joint(self, joint: JointInfo) -> None:
         """Set the joint to edit."""
-        if joint is None:
+        if not (joint is not None):
+            raise ValueError("joint must be provided")
+        if not (joint is not None):
             raise ValueError("joint must be provided")
         self.current_joint = joint
 
@@ -658,7 +674,9 @@ class JointManipulatorWidget(QWidget):
     )
     def load_urdf(self, content: str) -> None:
         """Load URDF content and auto-detect joints."""
-        if content is None:
+        if not (content is not None):
+            raise ValueError("content must be provided")
+        if not (content is not None):
             raise ValueError("content must be provided")
         self.urdf_content = content
         self._on_auto_load()
@@ -723,7 +741,9 @@ class JointManipulatorWidget(QWidget):
 
     def _on_joint_value_changed(self, name: str, value: float) -> None:
         """Handle joint value change from slider."""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if name in self.joints:
             self.joints[name].current_position = value
@@ -756,7 +776,9 @@ class JointManipulatorWidget(QWidget):
 
     def _on_joint_updated(self, name: str, new_element: ET.Element) -> None:
         """Handle joint update from editor."""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if not self.urdf_content:
             return

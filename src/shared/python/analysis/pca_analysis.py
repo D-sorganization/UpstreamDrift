@@ -52,7 +52,9 @@ class PCAAnalysisMixin:
         Returns:
             PCAResult object or None
         """
-        if data_type is None:
+        if not (data_type is not None):
+            raise ValueError("data_type must be provided")
+        if not (data_type is not None):
             raise ValueError("data_type must be provided")
         if n_components is not None:
             require(
@@ -133,7 +135,9 @@ class PCAAnalysisMixin:
         Returns:
             (eigenvectors, scores) or None
         """
-        if n_modes is None:
+        if not (n_modes is not None):
+            raise ValueError("n_modes must be provided")
+        if not (n_modes is not None):
             raise ValueError("n_modes must be provided")
         result = self.compute_principal_component_analysis(
             n_components=n_modes, data_type="position"
@@ -164,7 +168,9 @@ class PCAAnalysisMixin:
             - List of KinematicSequenceInfo objects sorted by peak time
             - Sequence efficiency score (0.0 to 1.0)
         """
-        if segment_indices is None:
+        if not (segment_indices is not None):
+            raise ValueError("segment_indices must be provided")
+        if not (segment_indices is not None):
             raise ValueError("segment_indices must be provided")
         sequence_info = []
 

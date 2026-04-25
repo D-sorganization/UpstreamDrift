@@ -48,3 +48,55 @@ class TestCreateUnifiedInterface:
     def test_has_engine_manager(self) -> None:
         ui = create_unified_interface()
         assert ui.engine_manager is not None
+
+
+class TestIssue2500EngineStringLoading:
+    """Issue #2500: load_engine(str) must resolve lowercase enum values."""
+
+    def test_engine_type_enum_values_are_lowercase(self) -> None:
+        """EngineType enum values should be lowercase strings."""
+        for member in EngineType:
+            assert member.value == member.value.lower(), (
+                f"EngineType.{member.name}.value must be lowercase, got {member.value!r}"
+            )
+
+    def test_load_engine_lowercase_string_invokes_internal_load(self) -> None:
+        """load_engine('mujoco') must reach _load_engine with EngineType.MUJOCO."""
+        from unittest.mock import MagicMock
+
+        ui = create_unified_interface()
+        mock_load = MagicMock()
+        ui.engine_manager._load_engine = mock_load
+        mock_engine = MagicMock()
+        ui.engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        ui.load_engine("mujoco")
+
+        mock_load.assert_called_once()
+        called_with = mock_load.call_args[0][0]
+        assert called_with == EngineType.MUJOCO, (
+            f"_load_engine must be called with EngineType.MUJOCO, got {called_with!r}. "
+            "String conversion must use .lower(), not .upper()."
+        )
+
+    def test_load_engine_uppercase_string_also_resolves(self) -> None:
+        """load_engine('MUJOCO') must also reach _load_engine (case-insensitive)."""
+        from unittest.mock import MagicMock
+
+        ui = create_unified_interface()
+        mock_load = MagicMock()
+        ui.engine_manager._load_engine = mock_load
+        mock_engine = MagicMock()
+        ui.engine_manager.get_active_physics_engine = MagicMock(
+            return_value=mock_engine
+        )
+
+        ui.load_engine("MUJOCO")
+
+        mock_load.assert_called_once()
+        called_with = mock_load.call_args[0][0]
+        assert called_with == EngineType.MUJOCO, (
+            f"_load_engine must be called with EngineType.MUJOCO, got {called_with!r}."
+        )

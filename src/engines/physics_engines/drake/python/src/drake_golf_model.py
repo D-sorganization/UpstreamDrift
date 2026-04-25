@@ -193,9 +193,9 @@ class GolfURDFGenerator:
 
     def __init__(self, params: GolfModelParams) -> None:
         """Initialize the generator with parameters."""
-        if params is None:
+        if not (params is not None):
             raise ValueError("params must be provided")
-        if params is None:
+        if not (params is not None):
             raise ValueError("params must be provided")
         self.params = params
         self.root = ET.Element("robot", name="golf_swing_model")
@@ -218,7 +218,9 @@ class GolfURDFGenerator:
 
     def _transform_to_origin_xml(self, X: RigidTransform) -> ET.Element:  # noqa: N803
         """Convert RigidTransform to XML origin element."""
-        if X is None:
+        if not (X is not None):
+            raise ValueError("X must be provided")
+        if not (X is not None):
             raise ValueError("X must be provided")
         origin = ET.Element("origin")
         p = X.translation()
@@ -231,7 +233,9 @@ class GolfURDFGenerator:
         self, mass: float, unit_inertia: UnitInertia, com: npt.ArrayLike
     ) -> ET.Element:
         """Create inertial XML element."""
-        if mass is None:
+        if not (mass is not None):
+            raise ValueError("mass must be provided")
+        if not (mass is not None):
             raise ValueError("mass must be provided")
         inertial = ET.Element("inertial")
         ET.SubElement(inertial, "mass", value=f"{mass:.6g}")
@@ -265,7 +269,9 @@ class GolfURDFGenerator:
         com_offset: npt.ArrayLike | None = None,
     ) -> ET.Element:
         """Add a link to the model."""
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if com_offset is None:
             com_offset = np.zeros(3)
@@ -277,7 +283,7 @@ class GolfURDFGenerator:
 
         # Visual/Collision
         if visual_shape_tag:
-            if visual_params is None:  # noqa: S101
+            if not (visual_params is not None):  # noqa: S101
                 raise ValueError("DbC Blocked: Precondition failed.")
             for tag in ["visual", "collision"]:
                 vis = ET.SubElement(link, tag)
@@ -315,9 +321,9 @@ class GolfURDFGenerator:
         axis: npt.ArrayLike | None = None,
     ) -> None:
         """Add a joint to the model."""
-        if name is None:
+        if not (name is not None):
             raise ValueError("name must be provided")
-        if name is None:
+        if not (name is not None):
             raise ValueError("name must be provided")
         joint = ET.SubElement(self.root, "joint", name=name, type=joint_type)
         ET.SubElement(joint, "parent", link=parent)
@@ -417,7 +423,9 @@ class GolfURDFGenerator:
         Args:
             side: 'left' or 'right'.
         """
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         sign = 1.0 if side == "right" else -1.0
 
@@ -428,7 +436,9 @@ class GolfURDFGenerator:
 
     def _add_scapula(self, side: str, sign: float) -> None:
         """Add scapula links and joints for one arm side."""
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         p = self.params
         scap_offset = np.array([0.0, sign * 0.18, 0.10], dtype=np.float64)  # type: ignore[arg-type]
@@ -472,7 +482,9 @@ class GolfURDFGenerator:
 
     def _add_shoulder(self, side: str) -> None:
         """Add shoulder gimbal (yaw, pitch, roll) links and joints for one arm side."""
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         p = self.params
         scap_len = p.scapula_rod.length
@@ -529,7 +541,9 @@ class GolfURDFGenerator:
 
     def _add_upper_arm_and_elbow(self, side: str) -> None:
         """Add upper arm link, weld, and elbow joint for one arm side."""
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         p = self.params
         ua_len = p.upper_arm.length
@@ -571,7 +585,9 @@ class GolfURDFGenerator:
 
     def _add_forearm_and_wrist(self, side: str) -> None:
         """Add forearm, wrist dummy, and hand links/joints for one arm side."""
-        if side is None:
+        if not (side is not None):
+            raise ValueError("side must be provided")
+        if not (side is not None):
             raise ValueError("side must be provided")
         p = self.params
 
@@ -695,7 +711,9 @@ def add_ground_and_club_contact(
     params: GolfModelParams,
 ) -> None:
     """Add ground and club contact geometry to the plant."""
-    if plant is None:
+    if not (plant is not None):
+        raise ValueError("plant must be provided")
+    if not (plant is not None):
         raise ValueError("plant must be provided")
     world_body = plant.world_body()
     X_WG = RigidTransform()

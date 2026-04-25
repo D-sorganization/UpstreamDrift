@@ -107,7 +107,9 @@ class TaskCoordinator:
         Returns:
             True if task was found and removed.
         """
-        if task_id is None:
+        if not (task_id is not None):
+            raise ValueError("task_id must be provided")
+        if not (task_id is not None):
             raise ValueError("task_id must be provided")
         if task_id in self._tasks:
             del self._tasks[task_id]
@@ -138,7 +140,9 @@ class TaskCoordinator:
         Returns:
             True if assignment was successful.
         """
-        if task_id is None:
+        if not (task_id is not None):
+            raise ValueError("task_id must be provided")
+        if not (task_id is not None):
             raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
@@ -161,7 +165,9 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
-        if task_id is None:
+        if not (task_id is not None):
+            raise ValueError("task_id must be provided")
+        if not (task_id is not None):
             raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
@@ -182,7 +188,9 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
-        if task_id is None:
+        if not (task_id is not None):
+            raise ValueError("task_id must be provided")
+        if not (task_id is not None):
             raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
@@ -205,7 +213,9 @@ class TaskCoordinator:
         Returns:
             True if status was updated.
         """
-        if task_id is None:
+        if not (task_id is not None):
+            raise ValueError("task_id must be provided")
+        if not (task_id is not None):
             raise ValueError("task_id must be provided")
         if task_id not in self._tasks:
             return False
@@ -227,7 +237,9 @@ class TaskCoordinator:
         Returns:
             Assigned task or None.
         """
-        if robot_id is None:
+        if not (robot_id is not None):
+            raise ValueError("robot_id must be provided")
+        if not (robot_id is not None):
             raise ValueError("robot_id must be provided")
         task_id = self._robot_tasks.get(robot_id)
         if task_id:
@@ -285,7 +297,9 @@ class MultiRobotSystem:
             engine: Physics engine for this robot.
             base_pose: Initial base pose (7D: xyz + quaternion).
         """
-        if robot_id is None:
+        if not (robot_id is not None):
+            raise ValueError("robot_id must be provided")
+        if not (robot_id is not None):
             raise ValueError("robot_id must be provided")
         self._robots[robot_id] = engine
         self._robot_poses[robot_id] = base_pose.copy()
@@ -299,7 +313,9 @@ class MultiRobotSystem:
         Returns:
             True if robot was found and removed.
         """
-        if robot_id is None:
+        if not (robot_id is not None):
+            raise ValueError("robot_id must be provided")
+        if not (robot_id is not None):
             raise ValueError("robot_id must be provided")
         if robot_id in self._robots:
             del self._robots[robot_id]
@@ -367,7 +383,9 @@ class MultiRobotSystem:
         Returns:
             List of colliding robot pairs.
         """
-        if safety_distance is None:
+        if not (safety_distance is not None):
+            raise ValueError("safety_distance must be provided")
+        if not (safety_distance is not None):
             raise ValueError("safety_distance must be provided")
         collisions = []
         robot_ids = list(self._robots.keys())
@@ -397,7 +415,9 @@ class MultiRobotSystem:
         Returns:
             Dictionary mapping robot IDs to assigned tasks.
         """
-        if tasks is None:
+        if not (tasks is not None):
+            raise ValueError("tasks must be provided")
+        if not (tasks is not None):
             raise ValueError("tasks must be provided")
         allocation: dict[str, list[Task]] = {robot_id: [] for robot_id in self._robots}
 

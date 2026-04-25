@@ -74,7 +74,9 @@ class PhaseDetectionMixin:
         duration: float,
     ) -> list[SwingPhase]:
         """Return a single 'Complete Swing' phase when data is insufficient."""
-        if duration is None:
+        if not (duration is not None):
+            raise ValueError("duration must be provided")
+        if not (duration is not None):
             raise ValueError("duration must be provided")
         t_start = float(times[0]) if times is not None and len(times) > 0 else 0.0
         t_end = float(times[-1]) if times is not None and len(times) > 0 else 0.0
@@ -180,7 +182,9 @@ class PhaseDetectionMixin:
         times: np.ndarray,
     ) -> list[SwingPhase]:
         """Convert raw phase definitions into bounded SwingPhase objects."""
-        if phase_definitions is None:
+        if not (phase_definitions is not None):
+            raise ValueError("phase_definitions must be provided")
+        if not (phase_definitions is not None):
             raise ValueError("phase_definitions must be provided")
         phases: list[SwingPhase] = []
         for name, start_idx_raw, end_idx_raw in phase_definitions:
@@ -221,7 +225,9 @@ class PhaseDetectionMixin:
         Returns:
             Dictionary mapping phase name to statistics
         """
-        if phases is None:
+        if not (phases is not None):
+            raise ValueError("phases must be provided")
+        if not (phases is not None):
             raise ValueError("phases must be provided")
         phase_stats = {}
         # Assuming compute_summary_stats is available (from BasicStatsMixin via MRO)

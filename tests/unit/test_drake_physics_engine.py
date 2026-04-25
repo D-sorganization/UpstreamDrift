@@ -1,4 +1,6 @@
 import sys
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -49,14 +51,14 @@ _PLANT_SPEC_ATTRS = [
 ]
 
 
-def _cleanup_drake_modules():
+def _cleanup_drake_modules() -> None:
     """Clean up drake engine modules to prevent pollution of other tests."""
     for module_name in _DRAKE_ENGINE_MODULES:
         sys.modules.pop(module_name, None)
 
 
 @pytest.fixture(scope="module")
-def DrakePhysicsEngineClass(mock_drake_dependencies):
+def DrakePhysicsEngineClass(mock_drake_dependencies) -> Generator[Any, None, None]:
     """Fixture to provide the DrakePhysicsEngine class with mocked dependencies."""
     # Ensure module is imported
     import engines.physics_engines.drake.python.drake_physics_engine as mod
@@ -86,7 +88,7 @@ def DrakePhysicsEngineClass(mock_drake_dependencies):
 
 
 @pytest.fixture
-def engine(DrakePhysicsEngineClass):
+def engine(DrakePhysicsEngineClass) -> Any:
     """Fixture to provide an uninitialized DrakePhysicsEngine instance."""
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
@@ -103,7 +105,7 @@ def engine(DrakePhysicsEngineClass):
 
 
 @pytest.fixture
-def initialized_engine(engine):
+def initialized_engine(engine) -> Any:
     """Fixture providing a DrakePhysicsEngine that satisfies DBC preconditions.
 
     Sets _is_finalized=True and plant_context so @precondition(is_initialized)
@@ -116,13 +118,13 @@ def initialized_engine(engine):
     return engine
 
 
-def test_initialization(engine):
+def test_initialization(engine) -> None:
     assert engine.plant is not None
     assert engine.builder is not None
     assert not engine._is_finalized
 
 
-def test_load_from_path(engine):
+def test_load_from_path(engine) -> None:
     from pathlib import Path as StdPath
 
     with patch(
@@ -142,7 +144,7 @@ def test_load_from_path(engine):
         engine.builder.Build.assert_called_once()
 
 
-def test_load_from_string(engine):
+def test_load_from_string(engine) -> None:
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.Parser"
     ) as mock_parser_cls:
@@ -156,7 +158,7 @@ def test_load_from_string(engine):
         assert engine.model_name == "StringLoadedModel"
 
 
-def test_step(initialized_engine):
+def test_step(initialized_engine) -> None:
     """Test step method on an initialized engine (DBC: requires is_initialized)."""
     engine = initialized_engine
 
@@ -168,7 +170,7 @@ def test_step(initialized_engine):
     engine.simulator.AdvanceTo.assert_called_once_with(0.01)
 
 
-def test_get_state(initialized_engine):
+def test_get_state(initialized_engine) -> None:
     """Test get_state on an initialized engine."""
     engine = initialized_engine
 
@@ -182,7 +184,7 @@ def test_get_state(initialized_engine):
     engine.plant.GetPositions.assert_called_once()
 
 
-def test_compute_mass_matrix(initialized_engine):
+def test_compute_mass_matrix(initialized_engine) -> None:
     """Test compute_mass_matrix on an initialized engine (DBC: requires is_initialized)."""
     engine = initialized_engine
 
@@ -195,7 +197,7 @@ def test_compute_mass_matrix(initialized_engine):
     engine.plant.CalcMassMatrixViaInverseDynamics.assert_called_once()
 
 
-def test_compute_inverse_dynamics(initialized_engine):
+def test_compute_inverse_dynamics(initialized_engine) -> None:
     """Test compute_inverse_dynamics on an initialized engine (DBC: requires is_initialized)."""
     engine = initialized_engine
 

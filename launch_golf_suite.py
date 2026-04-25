@@ -74,7 +74,7 @@ Examples:
 
 def route_launch(args: argparse.Namespace) -> None:
     """Route the launch based on parsed arguments."""
-    if args is None:
+    if not (args is not None):
         raise ValueError("Parsed arguments must be provided")
     if not isinstance(args, argparse.Namespace):
         raise ValueError("args must be a Namespace object")

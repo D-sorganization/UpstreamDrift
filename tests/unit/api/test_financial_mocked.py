@@ -8,6 +8,7 @@ internal mathematical logic directly.
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -22,7 +23,7 @@ client = TestClient(_app)
 
 
 @pytest.fixture
-def mock_calculator():
+def mock_calculator() -> Generator[MagicMock, None, None]:
     """Mock the scrubber calculators securely from Tools."""
     with patch(
         "upstream_drift_tools.process_calculators.financial_calculator.FinancialModelCalculator"

@@ -79,15 +79,11 @@ class ZTCFResult:
 
     def magnitudes(self) -> np.ndarray:
         """Return force magnitudes for all joints.  Shape ``(n_joints,)``."""
-        # ⚡ Bolt: Explicit element-wise sqrt(sum(sq)) is faster than np.linalg.norm(..., axis=1) for small inner dims
-        jf_f = self.joint_forces.astype(float, copy=False)
-        return np.sqrt(np.einsum("...i,...i->...", jf_f, jf_f))
+        return np.linalg.norm(self.joint_forces, axis=1)
 
     def max_magnitude(self) -> float:
         """Return the largest force magnitude across all joints."""
-        # ⚡ Bolt: Leverage monotonic property of square roots by finding the max of squared sums first
-        jf_f = self.joint_forces.astype(float, copy=False)
-        return float(np.sqrt(np.max(np.einsum("...i,...i->...", jf_f, jf_f))))
+        return float(np.max(self.magnitudes()))
 
 
 # ============================================================================

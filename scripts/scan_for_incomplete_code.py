@@ -3,7 +3,7 @@ import re
 from os.path import join
 
 
-def scan_for_incomplete_code(root_dir):
+def scan_for_incomplete_code(root_dir: str) -> dict[str, list[tuple[int, str, str]]]:
     patterns = {
         "TRACKED_TASK": re.compile(r"TRACKED_TASK"),
         "TRACKED_DEFECT": re.compile(r"TRACKED_DEFECT"),

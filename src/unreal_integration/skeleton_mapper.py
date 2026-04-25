@@ -231,7 +231,9 @@ class BoneMapping:
         Returns:
             New BoneMapping instance.
         """
-        if d is None:
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
             raise ValueError("d must be provided")
         return cls(
             source_bone=d["source_bone"],
@@ -329,7 +331,9 @@ class MappingProfile:
         Returns:
             New MappingProfile instance.
         """
-        if d is None:
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
             raise ValueError("d must be provided")
         source_type = SkeletonType[d["source_type"].upper()]
         target_type = SkeletonType[d["target_type"].upper()]
@@ -424,7 +428,9 @@ class PoseTransform:
         Returns:
             New PoseTransform instance.
         """
-        if matrix is None:
+        if not (matrix is not None):
+            raise ValueError("matrix must be provided")
+        if not (matrix is not None):
             raise ValueError("matrix must be provided")
         position = matrix[:3, 3].copy()
 
@@ -539,7 +545,9 @@ class SkeletonMapper:
         Returns:
             Target skeleton bone name, or None if not mapped.
         """
-        if source_bone is None:
+        if not (source_bone is not None):
+            raise ValueError("source_bone must be provided")
+        if not (source_bone is not None):
             raise ValueError("source_bone must be provided")
         if self.profile is None:
             return None
@@ -555,7 +563,9 @@ class SkeletonMapper:
         Returns:
             Source skeleton bone name, or None if not mapped.
         """
-        if target_bone is None:
+        if not (target_bone is not None):
+            raise ValueError("target_bone must be provided")
+        if not (target_bone is not None):
             raise ValueError("target_bone must be provided")
         if self.profile is None:
             return None
@@ -627,7 +637,9 @@ class SkeletonMapper:
         Returns:
             Dictionary of mesh bone name to rotation quaternion.
         """
-        if joint_angles is None:
+        if not (joint_angles is not None):
+            raise ValueError("joint_angles must be provided")
+        if not (joint_angles is not None):
             raise ValueError("joint_angles must be provided")
         if self.profile is None:
             return {}
@@ -663,7 +675,9 @@ class SkeletonMapper:
         Returns:
             List of unmapped bone names.
         """
-        if source_bones is None:
+        if not (source_bones is not None):
+            raise ValueError("source_bones must be provided")
+        if not (source_bones is not None):
             raise ValueError("source_bones must be provided")
         if self.profile is None:
             return source_bones
@@ -686,7 +700,9 @@ class SkeletonMapper:
         Returns:
             Interpolated pose.
         """
-        if pose_a is None:
+        if not (pose_a is not None):
+            raise ValueError("pose_a must be provided")
+        if not (pose_a is not None):
             raise ValueError("pose_a must be provided")
         result: dict[str, PoseTransform] = {}
 
@@ -725,7 +741,9 @@ class SkeletonMapper:
             Interpolated quaternion.
         """
         # Normalize inputs
-        if q_a is None:
+        if not (q_a is not None):
+            raise ValueError("q_a must be provided")
+        if not (q_a is not None):
             raise ValueError("q_a must be provided")
         q_a = q_a / np.linalg.norm(q_a)
         q_b = q_b / np.linalg.norm(q_b)
@@ -766,7 +784,9 @@ class SkeletonMapper:
         Returns:
             Quaternion as (w, x, y, z).
         """
-        if roll is None:
+        if not (roll is not None):
+            raise ValueError("roll must be provided")
+        if not (roll is not None):
             raise ValueError("roll must be provided")
         cy = np.cos(yaw * 0.5)
         sy = np.sin(yaw * 0.5)
@@ -795,7 +815,9 @@ class SkeletonMapper:
         Returns:
             Product quaternion.
         """
-        if q1 is None:
+        if not (q1 is not None):
+            raise ValueError("q1 must be provided")
+        if not (q1 is not None):
             raise ValueError("q1 must be provided")
         w1, x1, y1, z1 = q1
         w2, x2, y2, z2 = q2

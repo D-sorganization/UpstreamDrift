@@ -64,7 +64,7 @@ class TestMakePolynomialTorque:
         assert tf(3.0)[0] == pytest.approx(3.0)
 
     def test_no_joints_raises(self) -> None:
-        with pytest.raises((ValueError, TypeError)):
+        with pytest.raises((AssertionError, TypeError)):
             make_polynomial_torque()
 
     def test_negative_torque(self) -> None:

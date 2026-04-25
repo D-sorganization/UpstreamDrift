@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add the motion_training module to path
 _this_file = Path(__file__).resolve()
@@ -29,7 +30,7 @@ _pinocchio_python_dir = (
 sys.path.insert(0, str(_pinocchio_python_dir))
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Motion Training Demo - Generate body motion from club trajectory",
@@ -93,13 +94,15 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: Path):
+def run_trajectory_analysis(
+    trajectory_path: Path, sheet_name: str, output_dir: Path
+) -> Any:
     """Run trajectory analysis and generate plots."""
-    if trajectory_path is None:
+    if not (trajectory_path is not None):
         raise ValueError("trajectory_path required")
     if not (sheet_name):
         raise ValueError("sheet_name required")
-    if output_dir is None:
+    if not (output_dir is not None):
         raise ValueError("output_dir required")
     from motion_training.club_trajectory_parser import ClubTrajectoryParser
 
@@ -124,8 +127,8 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
     return trajectory
 
 
-def _parse_and_subsample(trajectory_path, sheet_name, subsample):
-    if trajectory_path is None:
+def _parse_and_subsample(trajectory_path: Any, sheet_name: Any, subsample: Any) -> Any:
+    if not (trajectory_path is not None):
         raise ValueError("trajectory_path required")
     if not (sheet_name):
         raise ValueError("sheet_name required")
@@ -142,10 +145,10 @@ def _parse_and_subsample(trajectory_path, sheet_name, subsample):
     return trajectory
 
 
-def _init_and_solve_ik(urdf_path, trajectory):
-    if urdf_path is None:
+def _init_and_solve_ik(urdf_path: Any, trajectory: Any) -> Any:
+    if not (urdf_path is not None):
         raise ValueError("urdf_path required")
-    if trajectory is None:
+    if not (trajectory is not None):
         raise ValueError("trajectory required")
     from motion_training.dual_hand_ik_solver import (
         IKSolverSettings,
@@ -171,12 +174,12 @@ def _init_and_solve_ik(urdf_path, trajectory):
     return ik_result
 
 
-def _export_results(ik_result, trajectory, output_dir):
-    if ik_result is None:
+def _export_results(ik_result, trajectory, output_dir) -> None:
+    if not (ik_result is not None):
         raise ValueError("ik_result required")
-    if trajectory is None:
+    if not (trajectory is not None):
         raise ValueError("trajectory required")
-    if output_dir is None:
+    if not (output_dir is not None):
         raise ValueError("output_dir required")
     from motion_training.trajectory_exporter import TrajectoryExporter
 
@@ -212,7 +215,7 @@ def _export_results(ik_result, trajectory, output_dir):
         pass
 
 
-def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback):
+def _run_visualization(urdf_path, trajectory, ik_result, visualize, playback) -> None:
     if visualize:
         try:
             from motion_training.motion_visualizer import MotionVisualizer
@@ -239,15 +242,15 @@ def run_ik_demo(
     subsample: int = 10,
     visualize: bool = False,
     playback: bool = False,
-):
+) -> Any:
     """Run the full IK demo."""
-    if trajectory_path is None:
+    if not (trajectory_path is not None):
         raise ValueError("trajectory_path required")
     if not (sheet_name):
         raise ValueError("sheet_name required")
-    if urdf_path is None:
+    if not (urdf_path is not None):
         raise ValueError("urdf_path required")
-    if output_dir is None:
+    if not (output_dir is not None):
         raise ValueError("output_dir required")
 
     trajectory = _parse_and_subsample(trajectory_path, sheet_name, subsample)
@@ -262,7 +265,7 @@ def run_ik_demo(
     return ik_result
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     args = parse_args()
 
@@ -271,11 +274,7 @@ def main():
     output_dir = Path(args.output)
 
     if not trajectory_path.exists():
-        raise FileNotFoundError(
-            f"Trajectory file not found: {trajectory_path}\n"
-            f"  Fix: Provide a valid trajectory file via --trajectory "
-            f"or use the bundled fixture at data/golf_trajectory.csv"
-        )
+        sys.exit(1)
 
     if args.plot_only:
         run_trajectory_analysis(trajectory_path, args.sheet, output_dir)

@@ -11,6 +11,7 @@ sys.modules["openai"] = openai_mock
 # for gemini
 if "openai" == "google.generativeai":
     sys.modules["google"] = MagicMock()
+from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
@@ -32,12 +33,12 @@ from src.shared.python.ai.types import (  # noqa: E402
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> OpenAIAdapter:
     """Provide a configured OpenAIAdapter."""
     return OpenAIAdapter(api_key="sk-test", model="gpt-4-test", timeout=30.0)
 
 
-def test_init(adapter):
+def test_init(adapter) -> None:
     """Test initialization."""
     assert adapter._api_key == "sk-test"
     assert adapter._model == "gpt-4-test"
@@ -45,7 +46,7 @@ def test_init(adapter):
     assert adapter._client is None
 
 
-def test_get_client(adapter):
+def test_get_client(adapter) -> None:
     sys.modules["openai"].OpenAI.reset_mock()
     """Test client lazy loading."""
     client = adapter._get_client()
@@ -61,13 +62,13 @@ def test_get_client(adapter):
     assert client2 == client
 
 
-def test_get_client_import_error():
+def test_get_client_import_error() -> None:
     """Test missing openai package."""
     adapter = OpenAIAdapter("sk-test")
     # Force ImportError when importing OpenAI
     real_import = __import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name == "openai":
             raise ImportError("No module named 'openai'")
         return real_import(name, *args, **kwargs)
@@ -79,7 +80,7 @@ def test_get_client_import_error():
         adapter._get_client()
 
 
-def test_capabilities(adapter):
+def test_capabilities(adapter) -> None:
     """Test capabilities declaration."""
     caps = adapter.capabilities
     assert caps.provider_name == "openai"
@@ -89,7 +90,7 @@ def test_capabilities(adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_validate_connection_success(mock_get_client, adapter):
+def test_validate_connection_success(mock_get_client, adapter) -> None:
     """Test validate_connection success."""
     mock_client = MagicMock()
     mock_model = MagicMock()
@@ -103,7 +104,7 @@ def test_validate_connection_success(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_validate_connection_model_not_found(mock_get_client, adapter):
+def test_validate_connection_model_not_found(mock_get_client, adapter) -> None:
     """Test validate_connection when model is not in visible list."""
     mock_client = MagicMock()
     mock_model = MagicMock()
@@ -117,7 +118,7 @@ def test_validate_connection_model_not_found(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_validate_connection_errors(mock_get_client, adapter):
+def test_validate_connection_errors(mock_get_client, adapter) -> None:
     """Test validate_connection error handling."""
     mock_client = MagicMock()
     mock_get_client.return_value = mock_client
@@ -147,7 +148,7 @@ def test_validate_connection_errors(mock_get_client, adapter):
     assert "openai package not installed" in msg
 
 
-def test_format_messages(adapter):
+def test_format_messages(adapter) -> None:
     """Test formatting messages for OpenAI."""
     ctx = ConversationContext()
     ctx.user_expertise = ExpertiseLevel.EXPERT
@@ -189,7 +190,7 @@ def test_format_messages(adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_send_message_success(mock_get_client, adapter):
+def test_send_message_success(mock_get_client, adapter) -> None:
     """Test send_message success path."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -232,7 +233,7 @@ def test_send_message_success(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_send_message_with_tool_call(mock_get_client, adapter):
+def test_send_message_with_tool_call(mock_get_client, adapter) -> None:
     """Test send_message receiving a tool call."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -269,7 +270,7 @@ def test_send_message_with_tool_call(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_send_message_error_handling(mock_get_client, adapter):
+def test_send_message_error_handling(mock_get_client, adapter) -> None:
     """Test error handling in send_message."""
     mock_client = MagicMock()
     mock_get_client.return_value = mock_client
@@ -298,7 +299,7 @@ def test_send_message_error_handling(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_stream_response(mock_get_client, adapter):
+def test_stream_response(mock_get_client, adapter) -> None:
     """Test streaming response."""
     mock_client = MagicMock()
 
@@ -334,7 +335,7 @@ def test_stream_response(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.openai_adapter.OpenAIAdapter._get_client")
-def test_stream_error_handling(mock_get_client, adapter):
+def test_stream_error_handling(mock_get_client, adapter) -> None:
     """Test streaming error propagation."""
     mock_client = MagicMock()
     mock_client.chat.completions.create.side_effect = ValueError("Stream closed")

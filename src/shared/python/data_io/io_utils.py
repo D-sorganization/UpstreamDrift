@@ -38,7 +38,7 @@ from ..core.error_utils import IOError as IOUtilsError
 from ..engine_core.engine_availability import YAML_AVAILABLE
 
 if YAML_AVAILABLE:
-    import yaml  # type: ignore[import-untyped]
+    import yaml
 
 
 # Re-export for backwards compatibility
@@ -71,7 +71,9 @@ def ensure_directory(path: Path | str, parents: bool = True) -> Path:
     Example:
         output_dir = ensure_directory("output/results")
     """
-    if path is None:
+    if not (path is not None):
+        raise ValueError("path must be provided")
+    if not (path is not None):
         raise ValueError("path must be provided")
     dir_path = Path(path)
     dir_path.mkdir(parents=parents, exist_ok=True)
@@ -146,7 +148,9 @@ def save_json(
         save_json("output.json", {"key": "value"})
         save_json("data.json", results, indent=4, sort_keys=True)
     """
-    if path is None:
+    if not (path is not None):
+        raise ValueError("path must be provided")
+    if not (path is not None):
         raise ValueError("path must be provided")
     file_path = Path(path)
 
@@ -322,7 +326,9 @@ def write_text(
     Example:
         write_text("output.txt", "Hello, World!")
     """
-    if path is None:
+    if not (path is not None):
+        raise ValueError("path must be provided")
+    if not (path is not None):
         raise ValueError("path must be provided")
     file_path = Path(path)
 

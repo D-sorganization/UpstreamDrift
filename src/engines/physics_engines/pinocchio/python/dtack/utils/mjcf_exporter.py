@@ -6,7 +6,7 @@ import math
 import typing
 from pathlib import Path
 
-import yaml  # type: ignore[import-untyped]
+import yaml
 
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -23,9 +23,9 @@ class MJCFExporter:
         Args:
             yaml_path: Path to canonical YAML specification
         """
-        if yaml_path is None:
+        if not (yaml_path is not None):
             raise ValueError("yaml_path must be provided")
-        if yaml_path is None:
+        if not (yaml_path is not None):
             raise ValueError("yaml_path must be provided")
         self.yaml_path = Path(yaml_path)
         with self.yaml_path.open() as f:
@@ -46,7 +46,9 @@ class MJCFExporter:
         Args:
             output_path: Path to output MJCF file
         """
-        if output_path is None:
+        if not (output_path is not None):
+            raise ValueError("output_path must be provided")
+        if not (output_path is not None):
             raise ValueError("output_path must be provided")
         output = Path(output_path)
         mjcf_content = self._generate_mjcf()
@@ -106,7 +108,9 @@ class MJCFExporter:
         Returns:
             List of MJCF lines
         """
-        if parent_name is None:
+        if not (parent_name is not None):
+            raise ValueError("parent_name must be provided")
+        if not (parent_name is not None):
             raise ValueError("parent_name must be provided")
         lines = []
         indent = "  " * (depth + 1)
@@ -158,7 +162,9 @@ class MJCFExporter:
         Returns:
             List of MJCF lines
         """
-        if body is None:
+        if not (body is not None):
+            raise ValueError("body must be provided")
+        if not (body is not None):
             raise ValueError("body must be provided")
         lines = []
         geom = body.get("geometry", {})

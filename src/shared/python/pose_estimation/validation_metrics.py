@@ -46,7 +46,9 @@ S3_TOLERANCES: dict[str, float] = {
 
 def _grade(value: float, excellent: float, acceptable: float) -> str:
     """Return quality grade for a metric (lower is better)."""
-    if value is None:
+    if not (value is not None):
+        raise ValueError("value must be provided")
+    if not (value is not None):
         raise ValueError("value must be provided")
     if value <= excellent:
         return "excellent"
@@ -57,7 +59,9 @@ def _grade(value: float, excellent: float, acceptable: float) -> str:
 
 def _grade_higher_better(value: float, excellent: float, acceptable: float) -> str:
     """Return quality grade for a metric where higher is better."""
-    if value is None:
+    if not (value is not None):
+        raise ValueError("value must be provided")
+    if not (value is not None):
         raise ValueError("value must be provided")
     if value >= excellent:
         return "excellent"
@@ -100,7 +104,9 @@ def compute_joint_angle_rmse(
     Returns:
         Dictionary with per-joint RMSE, grade, and aggregate RMSE.
     """
-    if predicted is None:
+    if not (predicted is not None):
+        raise ValueError("predicted must be provided")
+    if not (predicted is not None):
         raise ValueError("predicted must be provided")
     per_joint: dict[str, dict[str, Any]] = {}
     all_errors: list[float] = []
@@ -154,7 +160,9 @@ def compute_marker_rmse(
     Returns:
         Dictionary with per-marker and aggregate RMSE in meters.
     """
-    if predicted is None:
+    if not (predicted is not None):
+        raise ValueError("predicted must be provided")
+    if not (predicted is not None):
         raise ValueError("predicted must be provided")
     n = min(predicted.shape[0], reference.shape[0])
     if n == 0:
@@ -196,7 +204,9 @@ def compute_temporal_jitter(
     Returns:
         Dictionary with per-joint jitter and aggregate jitter.
     """
-    if joint_angles_series is None:
+    if not (joint_angles_series is not None):
+        raise ValueError("joint_angles_series must be provided")
+    if not (joint_angles_series is not None):
         raise ValueError("joint_angles_series must be provided")
     per_joint: dict[str, dict[str, Any]] = {}
     all_jitter: list[float] = []
@@ -284,7 +294,9 @@ def validate_pipeline_output(
     Returns:
         Comprehensive ValidationReport.
     """
-    if dt is None:
+    if not (dt is not None):
+        raise ValueError("dt must be provided")
+    if not (dt is not None):
         raise ValueError("dt must be provided")
     report = ValidationReport()
 

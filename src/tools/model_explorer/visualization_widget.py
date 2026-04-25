@@ -85,7 +85,7 @@ class VisualizationWidget(QWidget):
 
         self.urdf_path: str | None = None
 
-        self.use_mujoco = MUJOCO_AVAILABLE
+        self.use_mujoco = MUJOCO_AVAILABLE and MuJoCoViewerWidget is not None
 
         self.mujoco_widget: MuJoCoViewerWidget | None = None  # type: ignore[assignment]
 
@@ -128,7 +128,8 @@ class VisualizationWidget(QWidget):
 
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.info_label.setStyleSheet("""
+        self.info_label.setStyleSheet(
+            """
 
             QLabel {
 
@@ -142,7 +143,8 @@ class VisualizationWidget(QWidget):
 
             }
 
-        """)
+        """
+        )
 
         layout.addWidget(self.info_label)
 
@@ -161,7 +163,9 @@ class VisualizationWidget(QWidget):
 
         """
 
-        if urdf_content is None:
+        if not (urdf_content is not None):
+            raise ValueError("urdf_content must be provided")
+        if not (urdf_content is not None):
             raise ValueError("urdf_content must be provided")
         self.urdf_content = urdf_content
 
@@ -249,7 +253,9 @@ class VisualizationWidget(QWidget):
 
         """
 
-        if urdf_content is None:
+        if not (urdf_content is not None):
+            raise ValueError("urdf_content must be provided")
+        if not (urdf_content is not None):
             raise ValueError("urdf_content must be provided")
         self._link_names = []
 
@@ -455,7 +461,9 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
         # 1. Rotate around Y (yaw)
 
-        if x is None:
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         rad_y = math.radians(self.camera_rotation_y)
 
@@ -491,7 +499,9 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         Args:
             painter: Active QPainter with translation already applied.
         """
-        if painter is None:
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
+        if not (painter is not None):
             raise ValueError("painter must be provided")
         painter.setPen(QPen(QColor(80, 80, 80), 1))
         grid_size = 5
@@ -513,7 +523,9 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         Args:
             painter: Active QPainter with translation already applied.
         """
-        if painter is None:
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
+        if not (painter is not None):
             raise ValueError("painter must be provided")
         origin_x, origin_y = self.project_point(0, 0, 0)
 
@@ -534,7 +546,9 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         Args:
             painter: Active QPainter (transform reset expected before calling).
         """
-        if painter is None:
+        if not (painter is not None):
+            raise ValueError("painter must be provided")
+        if not (painter is not None):
             raise ValueError("painter must be provided")
         painter.resetTransform()
         painter.setPen(QColor(255, 255, 255))

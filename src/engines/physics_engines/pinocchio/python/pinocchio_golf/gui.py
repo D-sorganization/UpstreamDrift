@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 
 try:
-    import pinocchio as pin  # type: ignore[import-untyped]
+    import pinocchio as pin
 
     PINOCCHIO_AVAILABLE = True
 except ImportError:
@@ -210,7 +210,9 @@ class PinocchioGUI(
 
     def log_write(self, text: str) -> None:
         """Append a message to the log panel and logger."""
-        if text is None:
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
             raise ValueError("text must be provided")
         self.log.append(text)
         logger.info(text)

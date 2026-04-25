@@ -66,7 +66,9 @@ class ModificationMixin:
         Returns the model if it exists and is not read-only, otherwise logs
         an error and returns ``None``.
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._models.get(model_id)
         if not model:
@@ -108,7 +110,9 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -186,7 +190,9 @@ class ModificationMixin:
         Returns:
             True if deleted
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -246,7 +252,9 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         if old_name == new_name:
             return True  # No-op
@@ -313,7 +321,9 @@ class ModificationMixin:
         Returns:
             True if renamed
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         if old_name == new_name:
             return True  # No-op
@@ -363,7 +373,9 @@ class ModificationMixin:
         Returns:
             True if modified
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -451,7 +463,9 @@ class ModificationMixin:
         Returns:
             True if attached
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -516,7 +530,9 @@ class ModificationMixin:
         Returns:
             True if detached
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -566,7 +582,9 @@ class ModificationMixin:
         Returns:
             True if applied
         """
-        if model_id is None:
+        if not (model_id is not None):
+            raise ValueError("model_id must be provided")
+        if not (model_id is not None):
             raise ValueError("model_id must be provided")
         model = self._get_writable_model(model_id)
         if not model:
@@ -629,7 +647,9 @@ class ModificationMixin:
         Returns:
             List of created link names.
         """
-        if links is None:
+        if not (links is not None):
+            raise ValueError("links must be provided")
+        if not (links is not None):
             raise ValueError("links must be provided")
         created_links: list[str] = []
         for link in links:

@@ -20,7 +20,7 @@ if PINOCCHIO_AVAILABLE:
         pytest.skip("Pinocchio GUI dependencies missing", allow_module_level=True)
 
 
-def test_pinocchio_recorder_basic():
+def test_pinocchio_recorder_basic() -> None:
     recorder = PinocchioRecorder()
     assert recorder.get_num_frames() == 0
 
@@ -52,7 +52,7 @@ def test_pinocchio_recorder_basic():
     assert speeds[0] == 0.0
 
 
-def test_pinocchio_recorder_with_club_data():
+def test_pinocchio_recorder_with_club_data() -> None:
     recorder = PinocchioRecorder()
     recorder.start_recording()
 
@@ -72,7 +72,7 @@ def test_pinocchio_recorder_with_club_data():
     assert speed[0] == 0.1
 
 
-def test_recorder_empty():
+def test_recorder_empty() -> None:
     recorder = PinocchioRecorder()
     t, v = recorder.get_time_series("joint_positions")
     assert len(t) == 0

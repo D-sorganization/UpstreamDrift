@@ -133,7 +133,7 @@ class MotionTrainingPipeline:
         logger.info("\n[2/4] Initializing IK solver...")
         self._init_ik_solver()
         logger.info(f"      Model: {self.config.golfer_urdf}")
-        if self.ik_solver is None:
+        if not (self.ik_solver is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         logger.info(f"      DOF: {self.ik_solver.model.nq}")
 
@@ -203,7 +203,7 @@ class MotionTrainingPipeline:
 
     def _solve_ik(self) -> TrajectoryIKResult:
         """Solve IK for the trajectory."""
-        if self.ik_solver is None:
+        if not (self.ik_solver is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         return self.ik_solver.solve_trajectory(
             self.trajectory,
@@ -212,7 +212,7 @@ class MotionTrainingPipeline:
 
     def _save_results(self) -> None:
         """Save results to files."""
-        if self.ik_result is None:
+        if not (self.ik_result is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         output_dir = Path(self.config.output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -307,7 +307,9 @@ def run_motion_training(
     Returns:
         PipelineResult with trajectory and IK results
     """
-    if trajectory_file is None:
+    if not (trajectory_file is not None):
+        raise ValueError("trajectory_file must be provided")
+    if not (trajectory_file is not None):
         raise ValueError("trajectory_file must be provided")
     config = PipelineConfig(
         trajectory_file=trajectory_file,

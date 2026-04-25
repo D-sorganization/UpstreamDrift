@@ -111,24 +111,11 @@ def count_files(root: Path, pattern: str) -> int:
     return len(list(root.glob(pattern)))
 
 
-def grep_count(
-    root: Path,
-    pattern: str,
-    file_pattern: str = "**/*.py",
-    exclude_parts: tuple[str, ...] = (),
-) -> int:
-    """Count files where a regex pattern is found.
-
-    Args:
-        root: Directory to search from.
-        pattern: Regex pattern to match in file contents.
-        file_pattern: Glob pattern for files to consider.
-        exclude_parts: Path components that disqualify a file when any match a
-            segment of its path relative to ``root`` (e.g. ``("tests",)`` skips
-            anything under a ``tests`` directory). Comparison is done per path
-            segment so ``"test"`` will not match ``"pytest"``.
-    """
-    if root is None:
+def grep_count(root: Path, pattern: str, file_pattern: str = "**/*.py") -> int:
+    """Count files where a regex pattern is found."""
+    if not (root is not None):
+        raise ValueError("root must be provided")
+    if not (root is not None):
         raise ValueError("root must be provided")
     count = 0
     regex = re.compile(pattern)
@@ -162,7 +149,9 @@ def classify_assessment_category(source_name: str, description: str = "") -> str
     Returns:
         A standardized category name.
     """
-    if source_name is None:
+    if not (source_name is not None):
+        raise ValueError("source_name must be provided")
+    if not (source_name is not None):
         raise ValueError("source_name must be provided")
     text = (source_name + " " + description).lower()
 

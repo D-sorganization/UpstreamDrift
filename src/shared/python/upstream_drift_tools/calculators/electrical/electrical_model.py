@@ -30,7 +30,9 @@ class ThreePhaseElectricalModelEnhanced:
         config: ElectrodeConfig,
         glass_interface: GlassPropertiesInterface,
     ) -> None:
-        if config is None:
+        if not (config is not None):
+            raise ValueError("config must be provided")
+        if not (config is not None):
             raise ValueError("config must be provided")
         self.config = config
         self.glass_interface = glass_interface
@@ -54,7 +56,9 @@ class ThreePhaseElectricalModelEnhanced:
     ) -> dict:
         """Calculate complete electrical system state with new path model"""
         # Electrode tip positions
-        if depths is None:
+        if not (depths is not None):
+            raise ValueError("depths must be provided")
+        if not (depths is not None):
             raise ValueError("depths must be provided")
         r_bath = bath_diameter / 2.0
         tip_radius = tip_diameter / 2.0
@@ -123,7 +127,9 @@ class ThreePhaseElectricalModelEnhanced:
         metal_conductive: bool,
     ) -> tuple[float, dict]:
         """Calculate total resistance and path info for a single electrode pair."""
-        if electrode1_pos is None:
+        if not (electrode1_pos is not None):
+            raise ValueError("electrode1_pos must be provided")
+        if not (electrode1_pos is not None):
             raise ValueError("electrode1_pos must be provided")
         direct_resistance = self._calculate_trapezoidal_path_resistance(
             electrode1_pos,
@@ -185,7 +191,9 @@ class ThreePhaseElectricalModelEnhanced:
         Performance: Results are cached and reused when parameters unchanged.
         """
         # Build cache key from parameters
-        if depths is None:
+        if not (depths is not None):
+            raise ValueError("depths must be provided")
+        if not (depths is not None):
             raise ValueError("depths must be provided")
         cache_key = (tuple(depths), r_bath, metal_depth, self.config.glass_depth)
 
@@ -250,7 +258,9 @@ class ThreePhaseElectricalModelEnhanced:
         Performance: Vectorized numpy operations replace 30-iteration loop.
         """
         # Get glass wall intersection points
-        if electrode1_pos is None:
+        if not (electrode1_pos is not None):
+            raise ValueError("electrode1_pos must be provided")
+        if not (electrode1_pos is not None):
             raise ValueError("electrode1_pos must be provided")
         e1_angle = electrode1_pos["angle"]
         e1_wall_glass = np.array(
@@ -297,9 +307,9 @@ class ThreePhaseElectricalModelEnhanced:
 
         # Section widths: distance from wall to tip at each segment
         # Shape: (num_segments,)
+        # ⚡ Bolt: Explicit element-wise sum of squares is faster than np.linalg.norm(..., axis=1) for small inner dimensions
         diffs = tip_positions - wall_positions
-        # ⚡ Bolt: einsum is ~35% faster than np.linalg.norm(..., axis=1) for small inner dimensions
-        section_widths = np.sqrt(np.einsum("ij,ij->i", diffs, diffs))
+        section_widths = np.sqrt(np.sum(np.square(diffs, dtype=float), axis=1))
 
         # Cross-sectional areas in m²
         cross_section_areas_m2 = section_widths * effective_height * 0.00064516
@@ -336,7 +346,9 @@ class ThreePhaseElectricalModelEnhanced:
         Vertical segments use horizontal_spreading_factor for width
         """
         # Get glass wall positions
-        if electrode1_pos is None:
+        if not (electrode1_pos is not None):
+            raise ValueError("electrode1_pos must be provided")
+        if not (electrode1_pos is not None):
             raise ValueError("electrode1_pos must be provided")
         e1_angle = electrode1_pos["angle"]
         e1_wall = np.array(
@@ -407,7 +419,9 @@ class ThreePhaseElectricalModelEnhanced:
         default_resistance: float = 0.001,
     ) -> float:
         """Calculate resistance of a vertical glass segment (electrode to metal)."""
-        if electrode_length is None:
+        if not (electrode_length is not None):
+            raise ValueError("electrode_length must be provided")
+        if not (electrode_length is not None):
             raise ValueError("electrode_length must be provided")
         area_m2 = electrode_length * effective_width * 0.00064516  # in² → m²
         distance_m = abs(electrode_z - metal_depth) * 0.0254  # in → m
@@ -428,7 +442,9 @@ class ThreePhaseElectricalModelEnhanced:
         temperature: float,
     ) -> float:
         """Calculate resistance through the metal layer between two electrodes."""
-        if electrode1_pos is None:
+        if not (electrode1_pos is not None):
+            raise ValueError("electrode1_pos must be provided")
+        if not (electrode1_pos is not None):
             raise ValueError("electrode1_pos must be provided")
         center1 = (electrode1_pos["tip"] + e1_wall) / 2
         center2 = (electrode2_pos["tip"] + e2_wall) / 2
@@ -451,7 +467,9 @@ class ThreePhaseElectricalModelEnhanced:
 
     def _analyze_current_distribution_new(self, current_paths: dict) -> dict:
         """Analyze current distribution with new path model"""
-        if current_paths is None:
+        if not (current_paths is not None):
+            raise ValueError("current_paths must be provided")
+        if not (current_paths is not None):
             raise ValueError("current_paths must be provided")
         analysis = {}
 
@@ -486,7 +504,9 @@ class ThreePhaseElectricalModelEnhanced:
 
     def _parallel_resistance(self, r1: float, r2: float) -> float:
         """Calculate parallel resistance safely"""
-        if r1 is None:
+        if not (r1 is not None):
+            raise ValueError("r1 must be provided")
+        if not (r1 is not None):
             raise ValueError("r1 must be provided")
         if np.isnan(r1) or np.isnan(r2) or r1 <= 0 or r2 <= 0:
             return max(r1, r2) if not (np.isnan(r1) or np.isnan(r2)) else np.nan

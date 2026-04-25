@@ -1,111 +1,50 @@
-# ARCHITECTURE_DEBT:
-# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
-# It requires domain-aware structural extraction to isolate its internal classes appropriately.
-
-"""
-URDF Text Editor with diff view support.
+"""URDF Text Editor with diff view support (coordinator).
 
 Provides text-based editing of URDF files with:
-- Syntax validation
+- Syntax validation (see _text_editor_validation.py)
 - Diff generation between versions (see text_editor_diff_mixin.py)
-- Undo/redo support
+- Undo/redo support (see text_editor_history_mixin.py)
 - Real-time validation feedback
+
+Implementation split across:
+- _text_editor_models.py: data classes
+- _text_editor_validation.py: _URDFValidationMixin
+- text_editor_history_mixin.py: EditorHistoryMixin
 """
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import re
 import xml.etree.ElementTree as ET
 from collections.abc import Callable
-from dataclasses import dataclass, field
-from datetime import datetime
-from enum import Enum
 from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as DefusedET
 
+# Re-export public names for backward compatibility
+from ._text_editor_models import (
+    DiffHunk,
+    DiffResult,
+    EditorVersion,
+    ValidationMessage,
+    ValidationSeverity,
+)
+from ._text_editor_validation import _URDFValidationMixin
 from .text_editor_diff_mixin import TextEditorDiffMixin
+from .text_editor_history_mixin import EditorHistoryMixin
 
 logger = logging.getLogger(__name__)
 
 
-class ValidationSeverity(Enum):
-    """Severity levels for validation messages."""
-
-    ERROR = "error"
-    WARNING = "warning"
-    INFO = "info"
-
-
-@dataclass
-class ValidationMessage:
-    """A validation message for URDF content."""
-
-    severity: ValidationSeverity
-    line: int
-    column: int
-    message: str
-    element: str | None = None
-
-    def __str__(self) -> str:
-        prefix = self.severity.value.upper()
-        loc = f"Line {self.line}"
-        if self.column > 0:
-            loc += f", Col {self.column}"
-        if self.element:
-            return f"[{prefix}] {loc} ({self.element}): {self.message}"
-        return f"[{prefix}] {loc}: {self.message}"
-
-
-@dataclass
-class DiffHunk:
-    """A single hunk in a diff."""
-
-    old_start: int
-    old_count: int
-    new_start: int
-    new_count: int
-    lines: list[str]
-    context_before: list[str] = field(default_factory=list)
-    context_after: list[str] = field(default_factory=list)
-
-
-@dataclass
-class DiffResult:
-    """Result of comparing two URDF versions."""
-
-    original_content: str
-    modified_content: str
-    hunks: list[DiffHunk]
-    unified_diff: str
-    additions: int
-    deletions: int
-    has_changes: bool
-
-    def get_summary(self) -> str:
-        """Get a summary of changes."""
-        if not self.has_changes:
-            return "No changes"
-        return f"{self.additions} additions, {self.deletions} deletions in {len(self.hunks)} hunks"
-
-
-@dataclass
-class EditorVersion:
-    """A version of the document."""
-
-    content: str
-    timestamp: datetime
-    description: str
-    checksum: str
-
-
-class URDFTextEditor(TextEditorDiffMixin):
+class URDFTextEditor(TextEditorDiffMixin, _URDFValidationMixin, EditorHistoryMixin):
     """Text editor for URDF files with validation and diff support.
 
-    Diff operations are provided by :class:`TextEditorDiffMixin`.
+    Responsibilities are split across mixins:
+    - :class:`TextEditorDiffMixin` — diff computation and side-by-side views
+    - :class:`_URDFValidationMixin` — XML/URDF structural validation
+    - :class:`EditorHistoryMixin` — undo/redo and version history
 
     Example:
         editor = URDFTextEditor()
@@ -127,7 +66,7 @@ class URDFTextEditor(TextEditorDiffMixin):
         editor.save_file()
     """
 
-    def __init__(self, max_history: int = 100):
+    def __init__(self, max_history: int = 100) -> None:
         """
         Initialize the editor.
 
@@ -359,481 +298,8 @@ class URDFTextEditor(TextEditorDiffMixin):
         content = self._content.replace(old_content, new_content, 1)
         return self.set_content(content, f"Replace {element_name}")
 
-    # ============================================================
-    # Validation
-    # ============================================================
-
-    def validate(self) -> list[ValidationMessage]:
-        """
-        Validate current URDF content.
-
-        Returns:
-            List of validation messages
-        """
-        messages = []
-
-        # XML validation
-        messages.extend(self._validate_xml())
-
-        if not any(m.severity == ValidationSeverity.ERROR for m in messages):
-            # URDF-specific validation
-            messages.extend(self._validate_urdf())
-
-        return messages
-
-    def _validate_xml(self) -> list[ValidationMessage]:
-        """Validate XML syntax."""
-        messages = []
-
-        try:
-            DefusedET.fromstring(self._content)
-        except ET.ParseError as e:
-            # Parse error message for line/column
-            error_str = str(e)
-            line, col = 1, 0
-
-            # Try to extract line number
-            match = re.search(r"line (\d+)", error_str)
-            if match:
-                line = int(match.group(1))
-
-            match = re.search(r"column (\d+)", error_str)
-            if match:
-                col = int(match.group(1))
-
-            messages.append(
-                ValidationMessage(
-                    severity=ValidationSeverity.ERROR,
-                    line=line,
-                    column=col,
-                    message=f"XML syntax error: {error_str}",
-                )
-            )
-
-        return messages
-
-    def _validate_urdf(self) -> list[ValidationMessage]:
-        """Validate URDF-specific rules."""
-        messages: list[ValidationMessage] = []
-
-        try:
-            root = DefusedET.fromstring(self._content)
-        except ET.ParseError:
-            return messages  # Already reported in XML validation
-
-        if not self._validate_root_element(root, messages):
-            return messages
-
-        links = self._validate_links(root, messages)
-        self._validate_joints(root, links, messages)
-        self._validate_orphan_links(root, links, messages)
-        return messages
-
-    def _validate_root_element(
-        self,
-        root: ET.Element,
-        messages: list[ValidationMessage],
-    ) -> bool:
-        """Check root is <robot> with a name. Return False to abort."""
-        if root is None:
-            raise ValueError("root must be provided")
-        if root.tag != "robot":
-            messages.append(
-                ValidationMessage(
-                    severity=ValidationSeverity.ERROR,
-                    line=1,
-                    column=0,
-                    message=(f"Root element should be 'robot', got '{root.tag}'"),
-                )
-            )
-            return False
-
-        if not root.get("name"):
-            messages.append(
-                ValidationMessage(
-                    severity=ValidationSeverity.WARNING,
-                    line=1,
-                    column=0,
-                    message="Robot element missing 'name' attribute",
-                    element="robot",
-                )
-            )
-        return True
-
-    def _validate_links(
-        self,
-        root: ET.Element,
-        messages: list[ValidationMessage],
-    ) -> dict[str, ET.Element]:
-        """Validate link elements and return name→element map."""
-        if root is None:
-            raise ValueError("root must be provided")
-        links: dict[str, ET.Element] = {}
-
-        for link_elem in root.findall("link"):
-            name = link_elem.get("name")
-            if not name:
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.ERROR,
-                        line=self._find_element_line(link_elem),
-                        column=0,
-                        message="Link element missing 'name' attribute",
-                        element="link",
-                    )
-                )
-            elif name in links:
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.ERROR,
-                        line=self._find_element_line(link_elem),
-                        column=0,
-                        message=f"Duplicate link name: '{name}'",
-                        element=name,
-                    )
-                )
-            else:
-                links[name] = link_elem
-
-            self._validate_link_inertial(
-                link_elem,
-                name,
-                messages,
-            )
-
-        return links
-
-    def _validate_link_inertial(
-        self,
-        link_elem: ET.Element,
-        name: str | None,
-        messages: list[ValidationMessage],
-    ) -> None:
-        """Validate inertial/mass properties of a link."""
-        if link_elem is None:
-            raise ValueError("link_elem must be provided")
-        inertial = link_elem.find("inertial")
-        if inertial is None:
-            return
-        mass_elem = inertial.find("mass")
-        if mass_elem is None:
-            return
-        mass = mass_elem.get("value")
-        if mass is None:
-            return
-
-        try:
-            mass_val = float(mass)
-        except ValueError:
-            messages.append(
-                ValidationMessage(
-                    severity=ValidationSeverity.ERROR,
-                    line=self._find_element_line(mass_elem),
-                    column=0,
-                    message=f"Invalid mass value: '{mass}'",
-                    element=name,
-                )
-            )
-            return
-
-        if mass_val < 0:
-            messages.append(
-                ValidationMessage(
-                    severity=ValidationSeverity.ERROR,
-                    line=self._find_element_line(mass_elem),
-                    column=0,
-                    message=f"Negative mass value: {mass_val}",
-                    element=name,
-                )
-            )
-        elif mass_val == 0:
-            messages.append(
-                ValidationMessage(
-                    severity=ValidationSeverity.WARNING,
-                    line=self._find_element_line(mass_elem),
-                    column=0,
-                    message="Zero mass value",
-                    element=name,
-                )
-            )
-
-    _VALID_JOINT_TYPES = frozenset(
-        {
-            "revolute",
-            "continuous",
-            "prismatic",
-            "fixed",
-            "floating",
-            "planar",
-        }
-    )
-
-    def _validate_joints(
-        self,
-        root: ET.Element,
-        links: dict[str, ET.Element],
-        messages: list[ValidationMessage],
-    ) -> None:
-        """Validate joint elements (type, parent/child, limits)."""
-        if root is None:
-            raise ValueError("root must be provided")
-        seen: dict[str, ET.Element] = {}
-
-        for joint_elem in root.findall("joint"):
-            name = joint_elem.get("name")
-            if not name:
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.ERROR,
-                        line=self._find_element_line(joint_elem),
-                        column=0,
-                        message="Joint element missing 'name' attribute",
-                        element="joint",
-                    )
-                )
-            elif name in seen:
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.ERROR,
-                        line=self._find_element_line(joint_elem),
-                        column=0,
-                        message=f"Duplicate joint name: '{name}'",
-                        element=name,
-                    )
-                )
-            else:
-                seen[name] = joint_elem
-
-            joint_type = joint_elem.get("type")
-            if joint_type not in self._VALID_JOINT_TYPES:
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.ERROR,
-                        line=self._find_element_line(joint_elem),
-                        column=0,
-                        message=f"Invalid joint type: '{joint_type}'",
-                        element=name,
-                    )
-                )
-
-            self._validate_joint_refs(
-                joint_elem,
-                name,
-                links,
-                messages,
-            )
-
-            if (
-                joint_type in {"revolute", "prismatic"}
-                and joint_elem.find("limit") is None
-            ):
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.WARNING,
-                        line=self._find_element_line(joint_elem),
-                        column=0,
-                        message=(f"{joint_type} joint missing limit element"),
-                        element=name,
-                    )
-                )
-
-    def _validate_joint_refs(
-        self,
-        joint_elem: ET.Element,
-        name: str | None,
-        links: dict[str, ET.Element],
-        messages: list[ValidationMessage],
-    ) -> None:
-        """Validate parent/child link references for a joint."""
-        for role in ("parent", "child"):
-            ref_elem = joint_elem.find(role)
-            if ref_elem is None:
-                messages.append(
-                    ValidationMessage(
-                        severity=ValidationSeverity.ERROR,
-                        line=self._find_element_line(joint_elem),
-                        column=0,
-                        message=f"Joint missing {role} element",
-                        element=name,
-                    )
-                )
-            else:
-                link_name = ref_elem.get("link")
-                if link_name and link_name not in links:
-                    messages.append(
-                        ValidationMessage(
-                            severity=ValidationSeverity.ERROR,
-                            line=self._find_element_line(ref_elem),
-                            column=0,
-                            message=(f"{role.title()} link not found: '{link_name}'"),
-                            element=name,
-                        )
-                    )
-
-    def _validate_orphan_links(
-        self,
-        root: ET.Element,
-        links: dict[str, ET.Element],
-        messages: list[ValidationMessage],
-    ) -> None:
-        """Detect links that are not connected to any joint."""
-        if root is None:
-            raise ValueError("root must be provided")
-        child_links = set()
-        for joint_elem in root.findall("joint"):
-            child_elem = joint_elem.find("child")
-            if child_elem is not None:
-                child_links.add(child_elem.get("link"))
-
-        for link_name in links:
-            if link_name not in child_links:
-                is_parent = any(
-                    (pe := j.find("parent")) is not None and pe.get("link") == link_name
-                    for j in root.findall("joint")
-                )
-                if not is_parent and len(links) > 1:
-                    messages.append(
-                        ValidationMessage(
-                            severity=ValidationSeverity.WARNING,
-                            line=1,
-                            column=0,
-                            message=(
-                                f"Link '{link_name}' is not connected to any joint"
-                            ),
-                            element=link_name,
-                        )
-                    )
-
-    def _find_element_line(self, elem: ET.Element) -> int:
-        """Find the line number of an element (approximate)."""
-        # This is a simple heuristic - search for element in content
-        if elem is None:
-            raise ValueError("elem must be provided")
-        ET.tostring(elem, encoding="unicode")
-        tag_start = f"<{elem.tag}"
-
-        # Find in content
-        lines = self._content.split("\n")
-        for idx, line in enumerate(lines, 1):
-            if tag_start in line:
-                # Check if attributes match
-                name = elem.get("name")
-                if name is None or f'name="{name}"' in line or f"name='{name}'" in line:
-                    return idx
-
-        return 1
-
-    # ============================================================
-    # History / Undo / Redo
-    # ============================================================
-
-    def undo(self) -> bool:
-        """
-        Undo last change.
-
-        Returns:
-            True if undone
-        """
-        if self._history_index <= 0:
-            logger.warning("Nothing to undo")
-            return False
-
-        self._history_index -= 1
-        self._content = self._history[self._history_index].content
-
-        logger.info(f"Undone to: {self._history[self._history_index].description}")
-        return True
-
-    def redo(self) -> bool:
-        """
-        Redo last undone change.
-
-        Returns:
-            True if redone
-        """
-        if self._history_index >= len(self._history) - 1:
-            logger.warning("Nothing to redo")
-            return False
-
-        self._history_index += 1
-        self._content = self._history[self._history_index].content
-
-        logger.info(f"Redone to: {self._history[self._history_index].description}")
-        return True
-
-    def can_undo(self) -> bool:
-        """Check if undo is available."""
-        return self._history_index > 0
-
-    def can_redo(self) -> bool:
-        """Check if redo is available."""
-        return self._history_index < len(self._history) - 1
-
-    def get_history(self) -> list[dict[str, Any]]:
-        """
-        Get version history.
-
-        Returns:
-            List of version info dicts
-        """
-        return [
-            {
-                "index": idx,
-                "description": v.description,
-                "timestamp": v.timestamp.isoformat(),
-                "checksum": v.checksum[:8],
-                "is_current": idx == self._history_index,
-            }
-            for idx, v in enumerate(self._history)
-        ]
-
-    def go_to_version(self, index: int) -> bool:
-        """
-        Go to a specific version in history.
-
-        Args:
-            index: Version index
-
-        Returns:
-            True if successful
-        """
-        if index is None:
-            raise ValueError("index must be provided")
-        if index < 0 or index >= len(self._history):
-            logger.error(f"Invalid version index: {index}")
-            return False
-
-        self._history_index = index
-        self._content = self._history[index].content
-        logger.info(f"Went to version {index}: {self._history[index].description}")
-        return True
-
-    def _add_to_history(self, description: str) -> None:
-        """Add current content to history."""
-        if description is None:
-            raise ValueError("description must be provided")
-        checksum = hashlib.md5(
-            self._content.encode(), usedforsecurity=False
-        ).hexdigest()
-
-        version = EditorVersion(
-            content=self._content,
-            timestamp=datetime.now(),
-            description=description,
-            checksum=checksum,
-        )
-
-        # Remove any redo history
-        if self._history_index < len(self._history) - 1:
-            self._history = self._history[: self._history_index + 1]
-
-        self._history.append(version)
-        self._history_index = len(self._history) - 1
-
-        # Limit history size
-        while len(self._history) > self._max_history:
-            self._history.pop(0)
-            self._history_index -= 1
+    # History / Undo / Redo operations are provided by EditorHistoryMixin
+    # (see text_editor_history_mixin.py).
 
     # ============================================================
     # Callbacks
@@ -1038,3 +504,13 @@ class URDFTextEditor(TextEditorDiffMixin):
                 }
 
         return None
+
+
+__all__ = [
+    "DiffHunk",
+    "DiffResult",
+    "EditorVersion",
+    "URDFTextEditor",
+    "ValidationMessage",
+    "ValidationSeverity",
+]

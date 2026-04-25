@@ -23,7 +23,7 @@ module_patches = {
 
 
 class TestPinocchioStrict:
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Inject mock pinocchio into the module namespace."""
         self.patcher = patch.dict("sys.modules", module_patches)
         self.patcher.start()
@@ -37,20 +37,10 @@ class TestPinocchioStrict:
         self.TEST_LINEAR_VAL = 1.0
         self.TEST_ANGULAR_VAL = 2.0
 
-    def make_engine(self, nq: int = 2, nv: int = 2):
-        """Create a minimally initialized engine with mocked model/data."""
-        engine = self.PinocchioPhysicsEngine()
-        engine.model = MagicMock()
-        engine.data = MagicMock()
-        engine.model.nq = nq
-        engine.model.nv = nv
-        engine.tau = np.zeros(nv)
-        return engine
-
-    def teardown_method(self):
+    def teardown_method(self) -> None:
         self.patcher.stop()
 
-    def test_jacobian_standardization_mocked(self):
+    def test_jacobian_standardization_mocked(self) -> None:
         engine = self.PinocchioPhysicsEngine()
         engine.model = MagicMock()
         engine.data = MagicMock()
@@ -84,7 +74,7 @@ class TestPinocchioStrict:
             err_msg="Pinocchio spatial bottom should be re-stacked to Linear",
         )
 
-    def test_compute_jacobian_missing_frame_and_body(self):
+    def test_compute_jacobian_missing_frame_and_body(self) -> None:
         """Test behavior when neither frame nor body exists."""
         engine = self.make_engine()
         engine.model.existFrame.return_value = False

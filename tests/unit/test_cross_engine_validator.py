@@ -12,11 +12,11 @@ from src.shared.python.engine_core.cross_engine_validator import (
 class TestCrossEngineValidator(unittest.TestCase):
     """Test suite for cross-engine validator."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up validator."""
         self.validator = CrossEngineValidator()
 
-    def test_compare_states_exact_match(self):
+    def test_compare_states_exact_match(self) -> None:
         """Test validation with exact match."""
         res = self.validator.compare_states(
             "engine1",
@@ -29,7 +29,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertEqual(res.severity, "PASSED")
         self.assertEqual(res.max_deviation, 0.0)
 
-    def test_compare_states_within_tolerance(self):
+    def test_compare_states_within_tolerance(self) -> None:
         """Test validation within tolerance."""
         tol = self.validator.TOLERANCES["position"]
         dev = tol * 0.5
@@ -43,7 +43,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertTrue(res.passed)
         self.assertEqual(res.severity, "PASSED")
 
-    def test_compare_states_warning(self):
+    def test_compare_states_warning(self) -> None:
         """Test validation in warning range."""
         tol = self.validator.TOLERANCES["position"]
         dev = tol * 1.5  # < 2.0 (WARNING_THRESHOLD)
@@ -57,7 +57,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertTrue(res.passed)
         self.assertEqual(res.severity, "WARNING")
 
-    def test_compare_states_error(self):
+    def test_compare_states_error(self) -> None:
         """Test validation in error range."""
         tol = self.validator.TOLERANCES["position"]
         dev = tol * 5.0  # > 2.0, < 10.0 (ERROR_THRESHOLD)
@@ -71,7 +71,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertFalse(res.passed)
         self.assertEqual(res.severity, "ERROR")
 
-    def test_compare_states_blocker(self):
+    def test_compare_states_blocker(self) -> None:
         """Test validation in blocker range."""
         tol = self.validator.TOLERANCES["position"]
         dev = tol * 200.0  # > 100.0 (BLOCKER_THRESHOLD)
@@ -85,7 +85,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertFalse(res.passed)
         self.assertEqual(res.severity, "BLOCKER")
 
-    def test_invalid_metric(self):
+    def test_invalid_metric(self) -> None:
         """Test unknown metric raises ValueError."""
         with self.assertRaises(ValueError):
             self.validator.compare_states(
@@ -96,7 +96,7 @@ class TestCrossEngineValidator(unittest.TestCase):
                 metric="unknown",  # type: ignore[arg-type]
             )
 
-    def test_shape_mismatch(self):
+    def test_shape_mismatch(self) -> None:
         """Test handling of shape mismatch."""
         res = self.validator.compare_states(
             "e1", np.zeros(1), "e2", np.zeros(2), metric="position"
@@ -104,7 +104,7 @@ class TestCrossEngineValidator(unittest.TestCase):
         self.assertFalse(res.passed)
         self.assertIn("Shape mismatch", res.message)
 
-    def test_compare_torques_with_rms(self):
+    def test_compare_torques_with_rms(self) -> None:
         """Test torque RMS comparison."""
         # 0% difference
         res = self.validator.compare_torques_with_rms(

@@ -2,6 +2,8 @@
 Unit tests for shared.python.statistical_analysis module.
 """
 
+from typing import Any
+
 import numpy as np
 import pytest
 
@@ -9,7 +11,7 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 
 @pytest.fixture
-def sample_data():
+def sample_data() -> dict[str, Any]:
     """Create sample data for testing."""
     times = np.linspace(0, 1.0, 101)  # 101 points, dt=0.01
 
@@ -47,7 +49,7 @@ def sample_data():
 
 
 @pytest.fixture
-def analyzer(sample_data):
+def analyzer(sample_data) -> StatisticalAnalyzer:
     return StatisticalAnalyzer(
         times=sample_data["times"],
         joint_positions=sample_data["positions"],
@@ -60,11 +62,11 @@ def analyzer(sample_data):
 
 
 class TestStatisticalAnalyzer:
-    def test_initialization(self, analyzer):
+    def test_initialization(self, analyzer) -> None:
         assert analyzer.dt == pytest.approx(0.01)
         assert analyzer.duration == pytest.approx(1.0)
 
-    def test_compute_summary_stats(self, analyzer):
+    def test_compute_summary_stats(self, analyzer) -> None:
         data = np.array([1, 2, 3, 4, 5])
         # Manually create analyzer for simple data or just use method
         stats = analyzer.compute_summary_stats(data)
@@ -72,40 +74,40 @@ class TestStatisticalAnalyzer:
         assert stats.max == 5
         assert stats.mean == 3
 
-    def test_find_club_head_speed_peak(self, analyzer):
+    def test_find_club_head_speed_peak(self, analyzer) -> None:
         peak = analyzer.find_club_head_speed_peak()
         assert peak is not None
         assert peak.time == pytest.approx(0.5, abs=0.01)
         assert peak.value > 49.0
 
-    def test_compute_x_factor(self, analyzer):
+    def test_compute_x_factor(self, analyzer) -> None:
         # Joint 0 (hips), Joint 1 (shoulders)
         # Difference
         xf = analyzer.compute_x_factor(1, 0)
         assert xf is not None
         assert len(xf) == 101
 
-    def test_compute_x_factor_stretch(self, analyzer):
+    def test_compute_x_factor_stretch(self, analyzer) -> None:
         vel, peak = analyzer.compute_x_factor_stretch(1, 0)
         assert vel is not None
         assert len(vel) == 101
         assert peak >= 0
 
-    def test_compute_grf_metrics(self, analyzer):
+    def test_compute_grf_metrics(self, analyzer) -> None:
         metrics = analyzer.compute_grf_metrics()
         assert metrics is not None
         # CoP is circle radius 1. Path length ~ 2*pi
         assert metrics.cop_path_length == pytest.approx(2 * np.pi, abs=0.1)
         assert metrics.peak_vertical_force == 1000.0
 
-    def test_detect_swing_phases(self, analyzer):
+    def test_detect_swing_phases(self, analyzer) -> None:
         phases = analyzer.detect_swing_phases()
         assert len(phases) > 0
         names = [p.name for p in phases]
         assert "Impact" in names
         assert "Downswing" in names
 
-    def test_generate_report(self, analyzer):
+    def test_generate_report(self, analyzer) -> None:
         report = analyzer.generate_comprehensive_report()
         assert "club_head_speed" in report
         assert "grf_metrics" in report

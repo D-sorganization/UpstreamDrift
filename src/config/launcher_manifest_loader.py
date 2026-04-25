@@ -116,6 +116,7 @@ class LauncherTile:
         capabilities: List of capability tags for filtering/display
         order: Display order (1 = first)
         engine_type: Optional engine type identifier for physics engines
+        web_route: Optional URL path for tiles that open web tools
     """
 
     id: str
@@ -163,8 +164,6 @@ class LauncherTile:
             capabilities=tuple(data.get("capabilities", [])),
             order=data.get("order", 99),
             engine_type=data.get("engine_type"),
-            provider=data.get("provider"),
-            source_root=data.get("source_root"),
             web_route=data.get("web_route"),
         )
 
@@ -188,10 +187,6 @@ class LauncherTile:
         }
         if self.engine_type:
             result["engine_type"] = self.engine_type
-        if self.provider:
-            result["provider"] = self.provider
-        if self.source_root:
-            result["source_root"] = self.source_root
         if self.web_route:
             result["web_route"] = self.web_route
         return result
@@ -338,7 +333,7 @@ class LauncherManifest:
         Returns:
             LauncherTile if found, None otherwise
         """
-        if tile_id is None:
+        if not (tile_id is not None):
             raise ValueError("tile_id must be provided")
         for tile in self.tiles:
             if tile.id == tile_id:

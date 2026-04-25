@@ -23,7 +23,9 @@ class MuJoCoInducedAccelerationAnalyzer:
 
     def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         """Initialize analyzer."""
-        if model is None:
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
             raise ValueError("model must be provided")
         self.model = model
         self.data = data
@@ -139,7 +141,9 @@ class MuJoCoInducedAccelerationAnalyzer:
         Returns:
             Dictionary of 3D acceleration vectors (World Frame) or None if not found.
         """
-        if body_name is None:
+        if not (body_name is not None):
+            raise ValueError("body_name must be provided")
+        if not (body_name is not None):
             raise ValueError("body_name must be provided")
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:

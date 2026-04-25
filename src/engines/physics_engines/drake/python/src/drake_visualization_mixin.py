@@ -145,8 +145,10 @@ class DrakeVisualizationMixin:
             if self.meshcat is not None:
                 self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))
 
-    def _resolve_induced_accels(self: Any, analyzer, source):
-        if analyzer is None:
+    def _resolve_induced_accels(self: Any, analyzer: Any, source: str) -> Any:
+        if not (analyzer is not None):
+            raise ValueError("analyzer must be provided")
+        if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         accels = np.zeros(self.plant.num_velocities())
 
@@ -177,15 +179,19 @@ class DrakeVisualizationMixin:
 
         return accels
 
-    def _draw_induced_vectors_viz(self: Any, analyzer) -> None:
-        if analyzer is None:
+    def _draw_induced_vectors_viz(self: Any, analyzer: Any) -> None:
+        if not (analyzer is not None):
+            raise ValueError("analyzer must be provided")
+        if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         source = self.combo_induced_source.currentText()
         accels = self._resolve_induced_accels(analyzer, source)
         self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
-    def _draw_counterfactual_vectors(self: Any, analyzer) -> None:
-        if analyzer is None:
+    def _draw_counterfactual_vectors(self: Any, analyzer: Any) -> None:
+        if not (analyzer is not None):
+            raise ValueError("analyzer must be provided")
+        if not (analyzer is not None):
             raise ValueError("analyzer must be provided")
         cf_type = self.combo_cf_type.currentText()
         res = analyzer.compute_counterfactuals(self.eval_context)
@@ -232,7 +238,9 @@ class DrakeVisualizationMixin:
         scale: float = 0.1,
     ) -> None:
         """Draw vectors at joints (accel, torque, etc)."""
-        if values is None:
+        if not (values is not None):
+            raise ValueError("values must be provided")
+        if not (values is not None):
             raise ValueError("values must be provided")
         if not self.meshcat or self.plant is None:
             return

@@ -74,7 +74,9 @@ class UnrealDataFrame:
         validate: bool = False,
     ) -> UnrealDataFrame:
         """Create new UnrealDataFrame with optional validation."""
-        if timestamp is None:
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
+        if not (timestamp is not None):
             raise ValueError("timestamp must be provided")
         instance = object.__new__(cls)
         return instance
@@ -106,7 +108,9 @@ class UnrealDataFrame:
             environment: Environmental conditions.
             validate: If True, validate inputs.
         """
-        if timestamp is None:
+        if not (timestamp is not None):
+            raise ValueError("timestamp must be provided")
+        if not (timestamp is not None):
             raise ValueError("timestamp must be provided")
         if validate:
             if timestamp < 0:
@@ -178,7 +182,9 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        if d is None:
+        if not (d is not None):
+            raise ValueError("d must be provided")
+        if not (d is not None):
             raise ValueError("d must be provided")
         joints = {
             name: JointState.from_dict(js_dict)
@@ -225,7 +231,9 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        if json_str is None:
+        if not (json_str is not None):
+            raise ValueError("json_str must be provided")
+        if not (json_str is not None):
             raise ValueError("json_str must be provided")
         d = json.loads(json_str)
         return cls.from_dict(d, validate=validate)
@@ -256,7 +264,9 @@ class UnrealDataFrame:
         Returns:
             New UnrealDataFrame instance.
         """
-        if q is None:
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
             raise ValueError("q must be provided")
         joints: dict[str, JointState] = {}
 

@@ -72,7 +72,9 @@ class GaussianNoise(NoiseModel):
         Returns:
             Signal with additive Gaussian noise.
         """
-        if signal is None:
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
             raise ValueError("signal must be provided")
         noise = self._rng.normal(self.mean, self.std, signal.shape)
         return signal + noise
@@ -118,7 +120,9 @@ class BrownianNoise(NoiseModel):
             Signal with additive drifting bias.
         """
         # Update bias with random walk
-        if signal is None:
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
             raise ValueError("signal must be provided")
         drift = self._rng.normal(0, self.drift_rate)
         self._current_bias += drift
@@ -162,7 +166,9 @@ class QuantizationNoise(NoiseModel):
         Returns:
             Quantized signal.
         """
-        if signal is None:
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
             raise ValueError("signal must be provided")
         shifted = signal - self.offset
         quantized = np.round(shifted / self.resolution) * self.resolution
@@ -214,8 +220,13 @@ class BandwidthLimitedNoise(NoiseModel):
         Returns:
             Filtered signal.
         """
-        if signal is None:
+        if not (signal is not None):
             raise ValueError("signal must be provided")
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if self._filter_state is None:
+            self._filter_state = signal.copy()
+            return signal.copy()
 
         result = signal.copy()
         for stage in range(self.order):
@@ -257,7 +268,9 @@ class CompositeNoise(NoiseModel):
         Returns:
             Signal with all noise sources applied.
         """
-        if signal is None:
+        if not (signal is not None):
+            raise ValueError("signal must be provided")
+        if not (signal is not None):
             raise ValueError("signal must be provided")
         result = signal.copy()
         for model in self.models:
@@ -482,7 +495,9 @@ def create_realistic_sensor_noise(
     Returns:
         Composite noise model with realistic characteristics.
     """
-    if noise_std is None:
+    if not (noise_std is not None):
+        raise ValueError("noise_std must be provided")
+    if not (noise_std is not None):
         raise ValueError("noise_std must be provided")
     resolution = signal_range / (2**quantization_bits)
 

@@ -42,7 +42,9 @@ class ColorPickerButton(QPushButton):
     def __init__(
         self, initial_color: str = "#ffffff", parent: QWidget | None = None
     ) -> None:
-        if initial_color is None:
+        if not (initial_color is not None):
+            raise ValueError("initial_color must be provided")
+        if not (initial_color is not None):
             raise ValueError("initial_color must be provided")
         super().__init__(parent)
         self._color = initial_color
@@ -66,7 +68,8 @@ class ColorPickerButton(QPushButton):
         qcolor = QColor(self._color)
         text_color = "#ffffff" if qcolor.lightness() < 128 else "#000000"
 
-        self.setStyleSheet(f"""
+        self.setStyleSheet(
+            f"""
             QPushButton {{
                 background-color: {self._color};
                 color: {text_color};
@@ -78,7 +81,8 @@ class ColorPickerButton(QPushButton):
             QPushButton:hover {{
                 border: 2px solid #333333;
             }}
-        """)
+        """
+        )
         self.setText(self._color.upper())
 
     def _open_color_picker(self) -> None:
@@ -122,7 +126,9 @@ class ThemePreviewWidget(QWidget):
 
     def apply_theme_colors(self, colors: dict[str, str]) -> None:
         """Apply theme colors to preview elements."""
-        if colors is None:
+        if not (colors is not None):
+            raise ValueError("colors must be provided")
+        if not (colors is not None):
             raise ValueError("colors must be provided")
         stylesheet = f"""
             QWidget {{
@@ -180,7 +186,9 @@ class CustomThemeEditor(QDialog):
         parent: QWidget | None = None,
         edit_theme: str | None = None,
     ) -> None:
-        if theme_manager is None:
+        if not (theme_manager is not None):
+            raise ValueError("theme_manager must be provided")
+        if not (theme_manager is not None):
             raise ValueError("theme_manager must be provided")
         super().__init__(parent)
         self.theme_manager = theme_manager
@@ -352,7 +360,9 @@ class CustomThemeEditor(QDialog):
 
     def _load_preset_theme(self, theme_name: str) -> None:
         """Load colors from a preset theme."""
-        if theme_name is None:
+        if not (theme_name is not None):
+            raise ValueError("theme_name must be provided")
+        if not (theme_name is not None):
             raise ValueError("theme_name must be provided")
         theme_def = self.theme_manager.get_theme_definition(theme_name)
         if theme_def:
@@ -372,7 +382,9 @@ class CustomThemeEditor(QDialog):
 
     def _on_color_changed(self, key: str, color: str) -> None:
         """Handle color change from color picker."""
-        if key is None:
+        if not (key is not None):
+            raise ValueError("key must be provided")
+        if not (key is not None):
             raise ValueError("key must be provided")
         self.theme_colors[key] = color
         self._update_preview()
@@ -413,7 +425,9 @@ class CustomThemeEditor(QDialog):
 
     def _perform_save(self, apply_immediately: bool = False) -> bool:
         """Perform the actual save operation."""
-        if apply_immediately is None:
+        if not (apply_immediately is not None):
+            raise ValueError("apply_immediately must be provided")
+        if not (apply_immediately is not None):
             raise ValueError("apply_immediately must be provided")
         name = self.name_edit.text().strip()
 

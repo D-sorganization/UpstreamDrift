@@ -183,7 +183,7 @@ async def generate_dataset(
 
     Requires a loaded engine (POST /engines/{type}/load first).
     """
-    if request is None:
+    if not (request is not None):
         raise ValueError("request must be provided")
     engine = _require_active_engine(engine_manager)
 
@@ -243,7 +243,7 @@ async def import_swing_capture(
     This endpoint does not require a loaded engine — it only parses
     capture data and converts it to joint-space trajectories.
     """
-    if request is None:
+    if not (request is not None):
         raise ValueError("request must be provided")
     from src.shared.python.data_io.swing_capture_import import SwingCaptureImporter
 
@@ -293,7 +293,7 @@ async def get_control_state(
     Returns all joint torques, control strategy, gains, and joint info
     for the currently loaded engine.
     """
-    if engine_manager is None:
+    if not (engine_manager is not None):
         raise ValueError("engine_manager must be provided")
     engine = _require_active_engine(engine_manager)
 
@@ -315,7 +315,7 @@ async def configure_control(
     logger: Any = Depends(get_logger),
 ) -> dict[str, Any]:
     """Configure control strategy and parameters on the active engine."""
-    if request is None:
+    if not (request is not None):
         raise ValueError("request must be provided")
     engine = _require_active_engine(engine_manager)
 
@@ -372,44 +372,10 @@ async def list_features(
     Exposes all hidden engine capabilities for discoverability.
     Feature availability is checked against the currently loaded engine.
     """
-    engine = _require_active_engine(engine_manager)
-
-    try:
-        from src.shared.python.control_features_registry import ControlFeaturesRegistry
-
-        registry = ControlFeaturesRegistry(engine)
-        return registry.list_features(category=category, available_only=available_only)
-
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
-
-
-@router.get("/features/summary")
-async def features_summary(
-    engine_manager: EngineManager = Depends(get_engine_manager),
-) -> dict[str, Any]:
-    """Get summary of all available features on the active engine."""
-    engine = _require_active_engine(engine_manager)
-
-    try:
-        from src.shared.python.control_features_registry import ControlFeaturesRegistry
-
-        registry = ControlFeaturesRegistry(engine)
-        return registry.get_summary()
-
-    except ImportError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
-
-
-@router.post("/features/execute")
-@handle_api_errors
-async def execute_feature(
-    request: FeatureExecuteRequest,
-    engine_manager: EngineManager = Depends(get_engine_manager),
-    logger: Any = Depends(get_logger),
-) -> dict[str, Any]:
-    """Execute a specific engine feature by name on the active engine."""
-    if request is None:
+    if not (available_only is not None):
+        raise ValueError("available_only must be provided")
+    if not (category is not None):
+        raise ValueError("category must be provided")
         raise ValueError("request must be provided")
     engine = _require_active_engine(engine_manager)
 

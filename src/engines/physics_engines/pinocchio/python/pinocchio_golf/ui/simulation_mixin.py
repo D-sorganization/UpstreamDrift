@@ -166,7 +166,9 @@ class SimulationMixin:
 
     def _add_joint_control_widget(self: PinocchioGUI, i: int) -> None:
         """Add a single joint control row."""
-        if i is None:
+        if not (i is not None):
+            raise ValueError("i must be provided")
+        if not (i is not None):
             raise ValueError("i must be provided")
         if self.model is None:
             return
@@ -237,8 +239,10 @@ class SimulationMixin:
 
     def _on_slider(
         self: PinocchioGUI, val: int, spin: QtWidgets.QDoubleSpinBox, idx: int
-    ) -> None:  # noqa: E501
-        if val is None:
+    ) -> None:
+        if not (val is not None):
+            raise ValueError("val must be provided")
+        if not (val is not None):
             raise ValueError("val must be provided")
         angle = val / SLIDER_SCALE
         with SignalBlocker(spin):
@@ -288,13 +292,13 @@ class SimulationMixin:
 
     def _record_frame(self: PinocchioGUI) -> None:
         """Capture and record a single frame of simulation state."""
-        if self.model is None:
+        if not (self.model is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        if self.data is None:
+        if not (self.data is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        if self.q is None:
+        if not (self.q is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        if self.v is None:
+        if not (self.v is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         tau = np.zeros(self.model.nv)
 
@@ -322,9 +326,9 @@ class SimulationMixin:
         self: PinocchioGUI,
     ) -> tuple[np.ndarray | None, np.ndarray | None]:
         """Resolve club head frame and return its pose/velocity."""
-        if self.model is None:
+        if not (self.model is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
-        if self.data is None:
+        if not (self.data is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
 
         club_id = -1
@@ -349,7 +353,9 @@ class SimulationMixin:
         self: PinocchioGUI, tau: np.ndarray
     ) -> tuple[dict[str, np.ndarray] | None, dict[str, np.ndarray] | None]:
         """Run real-time induced/counterfactual analysis if enabled."""
-        if tau is None:
+        if not (tau is not None):
+            raise ValueError("tau must be provided")
+        if not (tau is not None):
             raise ValueError("tau must be provided")
         if not self.chk_live_analysis.isChecked():
             return None, None

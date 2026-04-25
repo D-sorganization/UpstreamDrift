@@ -45,7 +45,7 @@ class ChartDataDialog(QDialog):
         parent: QWidget | None = None,
         model_type: str = "double",
     ) -> None:
-        if model_type is None:
+        if not (model_type is not None):
             raise ValueError("model_type must be provided")
         super().__init__(parent)
         self.setWindowTitle("Select Chart Data")
@@ -116,6 +116,6 @@ class ChartDataDialog(QDialog):
         x_key = self._x_combo.currentData()
         y_key = self._y_combo.currentData()
         degree = self._reg_degree.value()
-        if x_key is not None and y_key is None:
+        if not (x_key is not None and y_key is not None):
             raise ValueError("DbC Blocked: Precondition failed.")
         return x_key, y_key, degree

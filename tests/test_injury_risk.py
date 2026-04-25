@@ -13,11 +13,11 @@ from src.shared.python.injury.injury_risk import (
 
 class TestInjuryRiskScorer:
     @pytest.fixture
-    def scorer(self):
+    def scorer(self) -> InjuryRiskScorer:
         return InjuryRiskScorer()
 
     @pytest.fixture
-    def mock_spinal_result(self):
+    def mock_spinal_result(self) -> Mock:
         result = Mock()
         result.peak_compression_bw = 5.0  # Caution range (4-6)
         result.peak_lateral_shear_bw = 0.8  # Caution range (0.5-1.0)
@@ -29,8 +29,8 @@ class TestInjuryRiskScorer:
         return result
 
     @pytest.fixture
-    def mock_joint_results(self):
-        def create_result(score, impingement=False):
+    def mock_joint_results(self) -> dict[str, Mock]:
+        def create_result(score, impingement=False) -> Mock:
             result = Mock()
             result.risk_score = score
             result.impingement_risk = impingement
@@ -48,7 +48,7 @@ class TestInjuryRiskScorer:
         }
 
     @pytest.fixture
-    def mock_swing_metrics(self):
+    def mock_swing_metrics(self) -> dict[str, float]:
         return {
             "sequence_timing_error": 0.10,  # Middle of range
             "tempo_ratio": 3.5,  # Error of 0.5
@@ -56,13 +56,13 @@ class TestInjuryRiskScorer:
         }
 
     @pytest.fixture
-    def mock_training_load(self):
+    def mock_training_load(self) -> dict[str, float]:
         return {
             "acwr": 1.4,  # High (>1.3)
             "weekly_swings": 800,  # High (500-1000)
         }
 
-    def test_score_spinal_risks(self, scorer, mock_spinal_result):
+    def test_score_spinal_risks(self, scorer, mock_spinal_result) -> None:
         report = InjuryRiskReport()
         scorer._score_spinal_risks(mock_spinal_result, report)
 
@@ -78,7 +78,7 @@ class TestInjuryRiskScorer:
         assert score > 0
         assert score < 100
 
-    def test_score_joint_risks(self, scorer, mock_joint_results):
+    def test_score_joint_risks(self, scorer, mock_joint_results) -> None:
         report = InjuryRiskReport()
         scorer._score_joint_risks(mock_joint_results, report)
 
@@ -92,7 +92,7 @@ class TestInjuryRiskScorer:
         # Hip: (45 + 30) / 2 = 37.5
         assert report.region_scores[InjuryType.HIP] == 37.5
 
-    def test_score_technique_risks(self, scorer, mock_swing_metrics):
+    def test_score_technique_risks(self, scorer, mock_swing_metrics) -> None:
         report = InjuryRiskReport()
         scorer._score_technique_risks(mock_swing_metrics, report)
 
@@ -103,7 +103,7 @@ class TestInjuryRiskScorer:
         assert "swing_tempo" in factor_names
         assert "early_extension" in factor_names
 
-    def test_score_training_load_risks(self, scorer, mock_training_load):
+    def test_score_training_load_risks(self, scorer, mock_training_load) -> None:
         report = InjuryRiskReport()
         scorer._score_training_load_risks(mock_training_load, report)
 
@@ -113,7 +113,7 @@ class TestInjuryRiskScorer:
         assert "acwr" in factor_names
         assert "weekly_swings" in factor_names
 
-    def test_compute_overall_scores(self, scorer):
+    def test_compute_overall_scores(self, scorer) -> None:
         report = InjuryRiskReport()
         report.acute_risk_score = 60.0
         report.chronic_risk_score = 40.0
@@ -132,7 +132,7 @@ class TestInjuryRiskScorer:
         assert report.overall_risk_level == RiskLevel.HIGH  # 50-75 range
         assert "high_risk" in report.top_risks
 
-    def test_generate_recommendations(self, scorer):
+    def test_generate_recommendations(self, scorer) -> None:
         report = InjuryRiskReport()
 
         # Add high risk factors
@@ -162,7 +162,7 @@ class TestInjuryRiskScorer:
         mock_joint_results,
         mock_swing_metrics,
         mock_training_load,
-    ):
+    ) -> None:
         report = scorer.score(
             spinal_result=mock_spinal_result,
             joint_results=mock_joint_results,

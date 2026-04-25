@@ -322,7 +322,9 @@ class PhysicsParameterRegistry:
         Returns:
             Tuple of (success, error_message)
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         param = self.parameters.get(name)
         if param is None:
@@ -382,7 +384,9 @@ class PhysicsParameterRegistry:
         Returns:
             Number of parameters imported
         """
-        if filepath is None:
+        if not (filepath is not None):
+            raise ValueError("filepath must be provided")
+        if not (filepath is not None):
             raise ValueError("filepath must be provided")
         with open(filepath) as f:
             data = json.load(f)
@@ -460,7 +464,7 @@ def get_parameter_registry() -> PhysicsParameterRegistry:
         _registry_holder["instance"] = PhysicsParameterRegistry()
 
     registry = _registry_holder["instance"]
-    if registry is None:  # Ensure it is not None for mypy
+    if not (registry is not None):  # Ensure it is not None for mypy
         raise ValueError("DbC Blocked: Precondition failed.")
     return registry
 

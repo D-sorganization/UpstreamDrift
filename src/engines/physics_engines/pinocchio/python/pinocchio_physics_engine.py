@@ -9,7 +9,7 @@ initialization patterns.
 
 from __future__ import annotations
 
-from typing import Any, Literal, cast
+from typing import Literal, cast
 
 import numpy as np
 
@@ -136,7 +136,9 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Args:
             path: Validated path to URDF model file.
         """
-        if path is None:
+        if not (path is not None):
+            raise ValueError("path must be provided")
+        if not (path is not None):
             raise ValueError("path must be provided")
         if not path.endswith(".urdf"):
             logger.warning("Pinocchio loader expects URDF, got: %s", path)
@@ -159,7 +161,9 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             content: Model definition string (URDF/XML).
             extension: File extension hint.
         """
-        if content is None:
+        if not (content is not None):
+            raise ValueError("content must be provided")
+        if not (content is not None):
             raise ValueError("content must be provided")
         if extension != "urdf":
             logger.warning("Pinocchio load_from_string mostly supports URDF.")
@@ -272,116 +276,29 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         return self.q.copy(), self.v.copy()
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        """Set the current state."""
-        if q is None:
+        """Set the current state and refresh derived kinematics."""
+        if not (q is not None):
+            raise ValueError("q must be provided")
+        if not (q is not None):
             raise ValueError("q must be provided")
         if self.model is None:
             return
 
-        if len(q) == self.model.nq:
-            self.q = q.copy()
-        if len(v) == self.model.nv:
-            self.v = v.copy()
+        if len(q) != self.model.nq:
+            raise ValueError(f"q size {len(q)} does not match model nq={self.model.nq}")
+        if len(v) != self.model.nv:
+            raise ValueError(f"v size {len(v)} does not match model nv={self.model.nv}")
+        self.q = q.copy()
+        self.v = v.copy()
+        # Refresh derived kinematics so Jacobians and frame placements are current
+        self.forward()
 
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
-        if self.model is None:
-            return
-        u_arr = self._require_vector("u", u, self.model.nv)
-        self.tau = u_arr.copy()
-
-    def get_time(self) -> float:
-        """Get the current simulation time."""
-        return self.time
-
-    def get_joint_names(self) -> list[str]:
-        """Get list of joint names."""
-        if self.model is None:
-            return []
-
-        names = list(self.model.names)
-        if "universe" in names:
-            names.remove("universe")
-        return names
-
-    def get_full_state(self) -> dict[str, Any]:
-        """Get complete state in a single batched call.
-
-        Returns:
-            Dictionary with 'q', 'v', 't', and 'M' (mass matrix).
-        """
-        if self.model is None or self.data is None:
-            return {
-                "q": np.array([]),
-                "v": np.array([]),
-                "t": 0.0,
-                "M": None,
-            }
-
-        q = self.q.copy()
-        v = self.v.copy()
-        t = self.time
-
-        pin.crba(self.model, self.data, self.q)
-
-        # Symmetrize
-        M = self.data.M.copy()
-        M = np.triu(M) + np.triu(M, 1).T
-
-        return {"q": q, "v": v, "t": t, "M": M}
-
-    # -------- Dynamics Interface --------
-
-    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "Mass matrix must contain finite values")
-    def compute_mass_matrix(self) -> np.ndarray:
-        """Compute the dense inertia matrix M(q)."""
-        if self.model is None or self.data is None:
-            return np.array([])
-
-        pin.crba(self.model, self.data, self.q)
-
-        # Symmetrize
-        M = self.data.M.copy()
-        M = np.triu(M) + np.triu(M, 1).T
-        return cast(np.ndarray, M)
-
-    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "Bias forces must contain finite values")
-    def compute_bias_forces(self) -> np.ndarray:
-        """Compute bias forces C(q,v) + g(q)."""
-        if self.model is None or self.data is None:
-            return np.array([])
-
-        a_zero = np.zeros(self.model.nv)
-        return cast(
-            np.ndarray,
-            pin.rnea(self.model, self.data, self.q, self.v, a_zero),
-        )
-
-    @precondition(lambda self: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "Gravity forces must contain finite values")
-    def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces g(q)."""
-        if self.model is None or self.data is None:
-            return np.array([])
-
-        return cast(
-            np.ndarray,
-            pin.computeGeneralizedGravity(self.model, self.data, self.q),
-        )
-
-    @precondition(
-        lambda self, qacc: self.is_initialized,
-        "Engine must be initialized",
-    )
-    @postcondition(
-        check_finite,
-        "Inverse dynamics torques must contain finite values",
-    )
-    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
-        """Compute inverse dynamics tau = ID(q, v, a)."""
-        if qacc is None:
+        if not (u is not None):
+            raise ValueError("u must be provided")
+        if not (u is not None):
+            raise ValueError("u must be provided")
             raise ValueError("qacc must be provided")
         if self.model is None or self.data is None:
             return np.array([])
@@ -424,7 +341,7 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
     )
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
-        if body_name is None:
+        if not (body_name is not None):
             raise ValueError("body_name must be provided")
         if self.model is None or self.data is None:
             return None
@@ -489,33 +406,8 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_control: Control acceleration vector (nv,)
         """
-        if self.model is None or self.data is None:
-            return np.array([])
-
-        tau_arr = self._require_vector("tau", tau, self.model.nv)
-
-        M = self.compute_mass_matrix()
-        if M.size == 0:
-            return np.array([])
-
-        a_control = np.linalg.solve(M, tau_arr)
-
-        return a_control
-
-    @precondition(lambda self, q, v: self.is_initialized, "Engine must be initialized")
-    @postcondition(check_finite, "ZTCF acceleration must contain finite values")
-    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
-
-        Compute acceleration with applied torques set to zero.
-
-        Args:
-            q: Joint positions (n_q,) [rad or m]
-            v: Joint velocities (n_v,) [rad/s or m/s]
-
-        Returns:
-            q_ddot_ZTCF: Acceleration under zero torque (n_v,)
-        """
+        if not (tau is not None):
+            raise ValueError("tau must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 
@@ -540,6 +432,9 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         Returns:
             q_ddot_ZVCF: Acceleration with v=0 (n_v,)
         """
+
+        if not (q is not None):
+            raise ValueError("q must be provided")
         if self.model is None or self.data is None:
             return np.array([])
 

@@ -25,13 +25,15 @@ httpx_mock.TimeoutException = MockTimeoutException
 # for gemini
 if "httpx" == "google.generativeai":
     sys.modules["google"] = MagicMock()
+from collections.abc import Iterator  # noqa: E402
+from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
-def reset_mocks():
+def reset_mocks() -> None:
     sys.modules["httpx"].reset_mock()
 
 
@@ -51,27 +53,27 @@ from src.shared.python.ai.types import (  # noqa: E402
 
 
 @pytest.fixture
-def adapter():
+def adapter() -> OllamaAdapter:
     """Provide a configured OllamaAdapter."""
     return OllamaAdapter(
         host="http://localhost:11434", model="llama3.1:8b", timeout=10.0
     )
 
 
-def test_init_defaults():
+def test_init_defaults() -> None:
     """Test defaults when omitted."""
     adapter = OllamaAdapter()
     assert adapter._host == "http://localhost:11434"
     assert adapter._timeout == 120.0
 
 
-def test_get_client_import_error():
+def test_get_client_import_error() -> None:
     """Test missing httpx package."""
     adapter = OllamaAdapter()
 
     real_import = __import__
 
-    def mock_import(name, *args, **kwargs):
+    def mock_import(name, *args, **kwargs) -> Any:
         if name == "httpx":
             raise ImportError("No httpx provided")
         return real_import(name, *args, **kwargs)
@@ -83,7 +85,7 @@ def test_get_client_import_error():
         adapter._get_client()
 
 
-def test_get_client(adapter):
+def test_get_client(adapter) -> None:
     sys.modules["httpx"].Client.reset_mock()
     """Test client lazy loading."""
     client = adapter._get_client()
@@ -91,7 +93,7 @@ def test_get_client(adapter):
     assert adapter._client == client
 
 
-def test_capabilities(adapter):
+def test_capabilities(adapter) -> None:
     """Test capabilities declaration handling dynamic models."""
     caps = adapter.capabilities
     assert caps.provider_name == "ollama"
@@ -107,7 +109,7 @@ def test_capabilities(adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_validate_connection_success(mock_get_client, adapter):
+def test_validate_connection_success(mock_get_client, adapter) -> None:
     """Test successful connection validation."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -124,7 +126,7 @@ def test_validate_connection_success(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_validate_connection_missing_model(mock_get_client, adapter):
+def test_validate_connection_missing_model(mock_get_client, adapter) -> None:
     """Test connection validation where model is missing."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -139,7 +141,7 @@ def test_validate_connection_missing_model(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_validate_connection_errors(mock_get_client, adapter):
+def test_validate_connection_errors(mock_get_client, adapter) -> None:
     import sys
 
     sys.modules["httpx"]
@@ -163,7 +165,7 @@ def test_validate_connection_errors(mock_get_client, adapter):
     assert "status 500" in msg
 
 
-def test_format_messages(adapter):
+def test_format_messages(adapter) -> None:
     """Test conversion of context history."""
     ctx = ConversationContext()
     ctx.user_expertise = ExpertiseLevel.BEGINNER
@@ -185,7 +187,7 @@ def test_format_messages(adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_send_message_success(mock_get_client, adapter):
+def test_send_message_success(mock_get_client, adapter) -> None:
     """Test successful send_message call."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -208,7 +210,7 @@ def test_send_message_success(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_send_message_with_tools(mock_get_client, adapter):
+def test_send_message_with_tools(mock_get_client, adapter) -> None:
     """Test tool parsing in send_message."""
     mock_client = MagicMock()
     mock_response = MagicMock()
@@ -231,7 +233,7 @@ def test_send_message_with_tools(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_send_message_errors(mock_get_client, adapter):
+def test_send_message_errors(mock_get_client, adapter) -> None:
     import sys
 
     sys.modules["httpx"]
@@ -253,17 +255,17 @@ def test_send_message_errors(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_stream_response(mock_get_client, adapter):
+def test_stream_response(mock_get_client, adapter) -> None:
     """Test streaming chunk iterator handles NDJSON."""
     mock_client = MagicMock()
 
     class MockStreamContext:
         def __enter__(self):
             class MockResponse:
-                def raise_for_status(self):
+                def raise_for_status(self) -> None:
                     pass
 
-                def iter_lines(self):
+                def iter_lines(self) -> Iterator[str]:
                     yield json.dumps({"message": {"content": "Hel"}})
                     yield json.dumps({"message": {"content": "lo"}, "done": True})
 
@@ -285,7 +287,7 @@ def test_stream_response(mock_get_client, adapter):
 
 
 @patch("src.shared.python.ai.adapters.ollama_adapter.OllamaAdapter._get_client")
-def test_list_and_pull(mock_get_client, adapter):
+def test_list_and_pull(mock_get_client, adapter) -> None:
     """Test utility methods for querying and pulling models."""
     mock_client = MagicMock()
 

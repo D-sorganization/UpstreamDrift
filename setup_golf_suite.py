@@ -40,9 +40,9 @@ def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
     Returns:
         Optimized PIL Image.
     """
-    if img is None:
+    if not (img is not None):
         raise ValueError("Image cannot be None")
-    if size is None:
+    if not (size is not None):
         raise ValueError("size must be provided")
     if not isinstance(size, int):
         raise ValueError("size must be an integer")
@@ -68,9 +68,9 @@ def create_optimized_icon(source_path: pathlib.Path, output_path: pathlib.Path) 
 
     Orthogonality: Decouples image processing from file system management.
     """
-    if source_path is None:
+    if not (source_path is not None):
         raise ValueError("Source path must not be None")
-    if output_path is None:
+    if not (output_path is not None):
         raise ValueError("Output path must not be None")
     if not isinstance(source_path, pathlib.Path):
         raise ValueError("source_path must be a Path object")
@@ -129,9 +129,9 @@ def create_shortcut_windows(
     """Create a desktop shortcut using PowerShell interaction."""
     if not (target_script):
         raise ValueError("Target script must not be empty")
-    if working_dir is None:
+    if not (working_dir is not None):
         raise ValueError("Working directory must be provided")
-    if icon_path is None:
+    if not (icon_path is not None):
         raise ValueError("Icon path must be provided")
     if not isinstance(target_script, str):
         raise ValueError("target_script must be a string")
@@ -175,11 +175,14 @@ def create_shortcut_windows(
 
 def _find_source_image(repo_root: pathlib.Path) -> pathlib.Path | None:
     """Find the best available source image for icon generation."""
+    asset_dir = repo_root / "src" / "launchers" / "assets"
     potential_sources = [
+        asset_dir / "golf_robot_cropped.png",
+        asset_dir / "golf_robot_icon.png",
+        asset_dir / "golf_icon.png",
+        asset_dir / "golf_robot_windows_optimized.png",
+        asset_dir / "golf_robot_ultra_sharp.png",
         repo_root / "GolfingRobot.png",
-        repo_root / "launchers" / "assets" / "golf_robot_cropped.png",
-        repo_root / "launchers" / "assets" / "golf_icon.png",
-        repo_root / "launchers" / "assets" / "golf_robot_icon.png",
     ]
     for src in potential_sources:
         if src.exists():
@@ -205,18 +208,22 @@ def main() -> int:
     # 3. Resolve Paths
     repo_root = get_repo_root()
     source_icon = _find_source_image(repo_root)
-    output_icon = repo_root / "launchers" / "assets" / "golf_suite_unified.ico"
+    output_icon = repo_root / "src" / "launchers" / "assets" / "golf_suite_unified.ico"
     target_launch_script = repo_root / "launch_golf_suite.py"
+    fallback_icon = repo_root / "src" / "launchers" / "assets" / "golf_robot_icon.ico"
 
     # 4. Generate Icon
     if source_icon:
-        create_optimized_icon(source_icon, output_icon)
-    elif not output_icon.exists():
-        # Fallback to existing icon if generation impossible
-        fallback = repo_root / "launchers" / "assets" / "golf_robot_icon.ico"
-        if fallback.exists():
-            output_icon = fallback
+        if (
+            not create_optimized_icon(source_icon, output_icon)
+            and fallback_icon.exists()
+        ):
+            output_icon = fallback_icon
             logger.info("Using fallback existing icon.")
+    elif not output_icon.exists() and fallback_icon.exists():
+        # Fallback to existing icon if generation impossible
+        output_icon = fallback_icon
+        logger.info("Using fallback existing icon.")
 
     # 5. Create Desktop Shortcut (Windows only)
     if platform.system() == "Windows":

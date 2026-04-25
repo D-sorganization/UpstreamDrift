@@ -347,16 +347,21 @@ class TestInterSegmentTransfer:
 class TestPowerFlowPhysics:
     """Integration tests for power flow physics validation."""
 
+    @pytest.mark.xfail(
+        strict=False, reason="Requires time history for dE/dt - not yet implemented"
+    )
     def test_conservation_over_conservative_swing(
         self, simple_pendulum_model: mujoco.MjModel
     ) -> None:
         """Test energy conservation for passive swing."""
-        pytest.skip("Requires time history for dE/dt - implement in follow-up")
-
         # total mechanical energy remains constant
+        raise NotImplementedError("Requires time history for dE/dt")
 
+    @pytest.mark.xfail(
+        strict=False, reason="Requires time integration - not yet implemented"
+    )
     def test_work_matches_energy_change(
         self, simple_pendulum_model: mujoco.MjModel
     ) -> None:
         """Test W = ΔE for simple case."""
-        pytest.skip("Requires time integration - implement in follow-up")
+        raise NotImplementedError("Requires time integration")

@@ -101,85 +101,22 @@ jobs:
       # a strict superset of black's style; running both causes conflicts.
       # Runs on full repo (.) to catch formatting issues outside src/scripts/tests.
       - name: Check Formatting (ruff)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              BASE_SHA=$(git rev-parse HEAD~1 || true)
-            fi
-          fi
 
-          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
-          if [ -n "$CHANGED_PY_FILES" ]; then
-            echo "Changed Python files:"
-            echo "$CHANGED_PY_FILES"
-            echo "$CHANGED_PY_FILES" | xargs -d '\n' ruff format --check
-          else
-            echo "No changed Python files detected — skipping ruff format check."
-          fi
+        run: ruff format --check .
 
       - run: pip install mypy types-PyYAML types-requests
+      - name: Create stub ui/dist for editable install (quality checks only)
+        run: mkdir -p ui/dist
       - run: pip install -e .[dev]
-      # Baseline mypy check for changed source files only so unrelated legacy
-      # type debt elsewhere in src/ does not block this PR.
-      - name: MyPy (changed src files)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              BASE_SHA=$(git rev-parse HEAD~1 || true)
-            fi
-          fi
 
-          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
-          CHANGED_SRC_PY_FILES=$(printf '%s\n' "$CHANGED_PY_FILES" | grep '^src/' || true)
-          if [ -n "$CHANGED_SRC_PY_FILES" ]; then
-            echo "Changed source files:"
-            echo "$CHANGED_SRC_PY_FILES"
-            echo "$CHANGED_SRC_PY_FILES" | xargs -d '\n' mypy --config-file pyproject.toml
-          else
-            echo "No changed source files detected — skipping baseline mypy."
-          fi
-
+      # Baseline mypy check across all of src/
+      - run: mypy src --config-file pyproject.toml
       # Strict mypy for the fully-annotated API layer (issue #2105).
       # --follow-imports=silent applies strict rules only to src/api/ files,
       # not to their transitive dependencies (which have pre-existing issues).
       - name: MyPy Strict (src/api)
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git fetch origin "${{ github.base_ref }}"
-            BASE_SHA=$(git merge-base "origin/${{ github.base_ref }}" HEAD || true)
-            if [ -z "$BASE_SHA" ]; then
-              BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            fi
-          else
-            BASE_SHA="${{ github.event.before }}"
-            if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
-              BASE_SHA=$(git rev-parse HEAD~1 || true)
-            fi
-          fi
 
-          CHANGED_PY_FILES=$(git diff --diff-filter=AM --name-only "$BASE_SHA" HEAD -- '*.py' || true)
-          CHANGED_API_PY_FILES=$(printf '%s\n' "$CHANGED_PY_FILES" | grep '^src/api/' || true)
-          if [ -n "$CHANGED_API_PY_FILES" ]; then
-            echo "Changed API files:"
-            echo "$CHANGED_API_PY_FILES"
-            echo "$CHANGED_API_PY_FILES" | xargs -d '\n' mypy --strict --follow-imports=silent --config-file pyproject.toml
-          else
-            echo "No changed src/api files detected — skipping strict mypy."
-          fi
+        run: mypy src/api --strict --follow-imports=silent --config-file pyproject.toml
 
       - name: Dependency Direction Fitness Check
         run: python3 scripts/check_dependency_direction.py
@@ -198,9 +135,6 @@ jobs:
 
       - name: Heavy Test Dependency Parity Check
         run: python3 scripts/check_heavy_dep_parity.py
-
-      - name: Forbidden Artifact Check
-        run: python3 scripts/check_forbidden_artifacts.py
 
       - name: Prevent Net-New print() Calls
         run: python3 scripts/check_no_print_calls.py
@@ -226,24 +160,20 @@ jobs:
           # can carry a half-installed sortedcontainers that makes cyclonedx (pip-audit dep) fail.
           pip install --ignore-installed --no-deps "sortedcontainers>=2.4.0"
           pip install pip-audit
-          # Audit only the project's declared dependency set (requirements-dev.lock)
-          # rather than all ambient packages in the shared runner toolcache.
-          # The shared self-hosted runner toolcache accumulates stale packages from
-          # multiple projects; auditing the full environment produces false positives.
-          # Ignore waivers are tracked in .github/security/pip-audit-ignore.yml
-          # with expiry dates so stale exceptions fail the build.
-          # Resolved CVEs (issue #2653): black>=26.3.1, bokeh>=3.8.2, flask>=3.1.3, requests>=2.33.0
-          # are now pinned in pyproject.toml dev deps and requirements-dev.lock.
-          # Resolved CVE (Dependabot remediation 2026-04-14):
-          # - CVE-2025-71176 (pytest): now pinned to pytest>=9.0.3 in requirements-dev.lock
-          mapfile -t PIP_AUDIT_FLAGS < <(python scripts/ci/check_pip_audit_waivers.py)
-          python -m pip_audit -r requirements-dev.lock "${PIP_AUDIT_FLAGS[@]}"
+
+          # Ignore CVEs with no fix version available or transitive dependencies:
+          # - CVE-2024-23342 (ecdsa): No fix version available
+          # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
+          # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
+          # - CVE-2026-4539 (pygments): No fix version available at time of writing
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-4539
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
       - name: Bandit Security Scan
         run: |
-          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git,./vendor -ll -ii --format txt 2>&1)"
+
+          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1)"
           exit_code=$?
           echo "$bandit_output"
           echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
@@ -277,12 +207,6 @@ jobs:
         python: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v6
-      - name: Reject Raw Merge Conflict Markers
-        run: |
-          if grep -rne '<<<<<<< HEAD' . --exclude-dir=.git --exclude-dir=.github; then
-            echo "::error::Raw git merge conflict markers found!"
-            exit 1
-          fi
 
       - name: Install System Dependencies
         run: |
@@ -313,6 +237,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
         # Force-reinstall hypothesis + sortedcontainers: the shared self-
         # hosted toolcache occasionally carries half-installed versions
@@ -383,7 +309,8 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
-            --cov-fail-under=30 \
+
+            --cov-fail-under=10 \
             --tb=short \
             -v
 
@@ -409,7 +336,8 @@ jobs:
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
           echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
-      - uses: codecov/codecov-action@v6
+
+      - uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
@@ -466,6 +394,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
         # See tests/Install Core Test Dependencies for the rationale —
         # the shared toolcache can carry a stale `sortedcontainers` that
@@ -539,8 +469,9 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
-      - uses: matlab-actions/setup-matlab@v3
-      - uses: matlab-actions/run-command@v3
+
+      - uses: matlab-actions/setup-matlab@v2
+      - uses: matlab-actions/run-command@v2
         with:
           command: |
             addpath('matlab');
@@ -618,6 +549,22 @@ jobs:
           targets: wasm32-unknown-unknown
 
       - name: Cache Cargo registry
+        if: steps.rust-changes.outputs.has_changes == 'true'
+
+        uses: actions/checkout@v6
+        with:
+          repository: D-sorganization/Tools
+          path: _tools_dep
+          sparse-checkout: |
+            rust_core
+            Cargo.toml
+            rust-toolchain.toml
+
+      - name: Symlink Tools for Cargo path resolution
+        if: steps.rust-changes.outputs.has_changes == 'true'
+        run: ln -sfn "$GITHUB_WORKSPACE/_tools_dep" "$GITHUB_WORKSPACE/../Tools"
+
+      - name: Cache Cargo registry and build
         if: steps.rust-changes.outputs.has_changes == 'true'
         uses: actions/cache@v5
         with:

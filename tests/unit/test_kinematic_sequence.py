@@ -1,5 +1,7 @@
 """Unit tests for kinematic sequence analysis."""
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
@@ -15,13 +17,13 @@ class MockRecorder:
         self.times = times
         self.velocities = velocities
 
-    def get_time_series(self, name):
+    def get_time_series(self, name) -> tuple[np.ndarray | list, np.ndarray | list]:
         if name == "joint_velocities":
             return self.times, self.velocities
         return [], []
 
 
-def test_kinematic_sequence_ideal():
+def test_kinematic_sequence_ideal() -> None:
     """Test analysis of an ideal segment timing sequence."""
     times = np.linspace(0, 1.0, 100)
 
@@ -53,7 +55,7 @@ def test_kinematic_sequence_ideal():
     assert np.isclose(result.peaks[3].time, 0.5, atol=0.02)
 
 
-def test_kinematic_sequence_out_of_order():
+def test_kinematic_sequence_out_of_order() -> None:
     """Test analysis of an incorrect sequence."""
     times = np.linspace(0, 1.0, 100)
 
@@ -85,7 +87,7 @@ def test_kinematic_sequence_out_of_order():
     ]
 
 
-def test_extract_velocities():
+def test_extract_velocities() -> None:
     """Test extraction helper."""
     times = np.array([0, 1, 2])
     vels = np.array([[1, 10], [2, 20], [3, 30]])
@@ -103,19 +105,19 @@ def test_extract_velocities():
     assert np.array_equal(data["JointB"], np.array([10, 20, 30]))
 
 
-def test_empty_data():
+def test_empty_data() -> None:
     """Test handling empty data raises PreconditionError."""
     analyzer = SegmentTimingAnalyzer()
     with pytest.raises(PreconditionError):
         analyzer.analyze({}, np.array([]))
 
 
-def test_backward_compat_alias():
+def test_backward_compat_alias() -> None:
     """KinematicSequenceAnalyzer should be an alias for SegmentTimingAnalyzer."""
     assert KinematicSequenceAnalyzer is SegmentTimingAnalyzer
 
 
-def test_no_expected_order_peaks_only():
+def test_no_expected_order_peaks_only() -> None:
     """Without expected_order, only peak detection should be performed."""
     times = np.linspace(0, 1.0, 200)
     seg_a = np.exp(-((times - 0.2) ** 2) / 0.005) * 10

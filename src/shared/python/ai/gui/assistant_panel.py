@@ -70,7 +70,9 @@ class MessageWidget(QFrame):
             timestamp: When the message was created.
             parent: Parent widget.
         """
-        if role is None:
+        if not (role is not None):
+            raise ValueError("role must be provided")
+        if not (role is not None):
             raise ValueError("role must be provided")
         super().__init__(parent)
         self._role = role
@@ -164,7 +166,9 @@ class MessageWidget(QFrame):
         Args:
             text: Text to append.
         """
-        if text is None:
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
             raise ValueError("text must be provided")
         self._content += text
         self._content_label.setMarkdown(self._content)
@@ -175,7 +179,9 @@ class MessageWidget(QFrame):
         Args:
             text: New content.
         """
-        if text is None:
+        if not (text is not None):
+            raise ValueError("text must be provided")
+        if not (text is not None):
             raise ValueError("text must be provided")
         self._content = text
         self._content_label.setMarkdown(self._content)
@@ -207,7 +213,9 @@ class StreamWorker(QThread):
             context: Conversation context.
             tools: Available tools.
         """
-        if adapter is None:
+        if not (adapter is not None):
+            raise ValueError("adapter must be provided")
+        if not (adapter is not None):
             raise ValueError("adapter must be provided")
         super().__init__()
         self._adapter = adapter
@@ -359,11 +367,13 @@ class AIAssistantPanel(QWidget):
         # Splitter for messages and input
         splitter = QSplitter(Qt.Orientation.Vertical)
         splitter.setHandleWidth(1)
-        splitter.setStyleSheet("""
+        splitter.setStyleSheet(
+            """
             QSplitter::handle {
                 background-color: #3c3c3c;
             }
-        """)
+        """
+        )
 
         # Message area
         self._message_area = self._create_message_area()
@@ -396,7 +406,8 @@ class AIAssistantPanel(QWidget):
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
-        header.setStyleSheet("""
+        header.setStyleSheet(
+            """
             QFrame {
                 background-color: #FF8800;
                 padding: 8px;
@@ -415,7 +426,8 @@ class AIAssistantPanel(QWidget):
             QPushButton:hover {
                 background-color: rgba(0, 0, 0, 0.2);
             }
-            """)
+            """
+        )
 
         layout = QHBoxLayout(header)
 
@@ -426,8 +438,10 @@ class AIAssistantPanel(QWidget):
 
         return header
 
-    def _add_header_title_widgets(self, layout) -> None:
-        if layout is None:
+    def _add_header_title_widgets(self, layout: Any) -> None:
+        if not (layout is not None):
+            raise ValueError("layout must be provided")
+        if not (layout is not None):
             raise ValueError("layout must be provided")
         self._provider_icon = QLabel("\U0001f916")
         self._provider_icon.setStyleSheet(
@@ -443,15 +457,18 @@ class AIAssistantPanel(QWidget):
 
         layout.addSpacing(10)
 
-    def _add_header_mode_and_status(self, layout) -> None:
-        if layout is None:
+    def _add_header_mode_and_status(self, layout: Any) -> None:
+        if not (layout is not None):
+            raise ValueError("layout must be provided")
+        if not (layout is not None):
             raise ValueError("layout must be provided")
         self._mode_combo = QComboBox()
         self._mode_combo.addItems(["Ask", "Plan", "Agent"])
         self._mode_combo.setToolTip(
             "Select AI Mode: Ask (Chat), Plan (Reasoning), Agent (Tools)"
         )
-        self._mode_combo.setStyleSheet("""
+        self._mode_combo.setStyleSheet(
+            """
             QComboBox {
                 background-color: rgba(255, 255, 255, 0.3);
                 color: black;
@@ -460,7 +477,8 @@ class AIAssistantPanel(QWidget):
                 padding: 2px 8px;
             }
             QComboBox::drop-down { border: none; }
-        """)
+        """
+        )
         layout.addWidget(self._mode_combo)
 
         self._status_label = QLabel("Ready")
@@ -469,8 +487,10 @@ class AIAssistantPanel(QWidget):
         )
         layout.addWidget(self._status_label)
 
-    def _add_header_action_buttons(self, layout) -> None:
-        if layout is None:
+    def _add_header_action_buttons(self, layout: Any) -> None:
+        if not (layout is not None):
+            raise ValueError("layout must be provided")
+        if not (layout is not None):
             raise ValueError("layout must be provided")
         new_chat_btn = QPushButton("New Chat")
         new_chat_btn.clicked.connect(self._on_new_chat)
@@ -483,7 +503,8 @@ class AIAssistantPanel(QWidget):
 
         close_btn = QPushButton("\u2715")
         close_btn.setToolTip("Close AI Chat")
-        close_btn.setStyleSheet("""
+        close_btn.setStyleSheet(
+            """
             QPushButton {
                 background-color: rgba(0, 0, 0, 0.15);
                 color: #000000;
@@ -497,7 +518,8 @@ class AIAssistantPanel(QWidget):
                 background-color: rgba(200, 0, 0, 0.5);
                 color: white;
             }
-        """)
+        """
+        )
         close_btn.clicked.connect(self.close_requested.emit)
         layout.addWidget(close_btn)
 
@@ -508,7 +530,8 @@ class AIAssistantPanel(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         # Dark background for scroll area
-        scroll.setStyleSheet("""
+        scroll.setStyleSheet(
+            """
             QScrollArea {
                 background-color: #1e1e1e;
                 border: none;
@@ -526,7 +549,8 @@ class AIAssistantPanel(QWidget):
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 background: none;
             }
-        """)
+        """
+        )
 
         # Container for messages
         self._message_container = QWidget()
@@ -554,12 +578,14 @@ class AIAssistantPanel(QWidget):
     def _create_input_area(self) -> QWidget:
         """Create the message input area."""
         widget = QFrame()
-        widget.setStyleSheet("""
+        widget.setStyleSheet(
+            """
             QFrame {
                 background-color: #1e1e1e;
                 border-top: 1px solid #3c3c3c;
             }
-            """)
+            """
+        )
 
         layout = QVBoxLayout(widget)
 
@@ -569,7 +595,8 @@ class AIAssistantPanel(QWidget):
             "Type your message here... (Enter to send, Shift+Enter for new line)"
         )
         self._input_edit.setMaximumHeight(100)
-        self._input_edit.setStyleSheet("""
+        self._input_edit.setStyleSheet(
+            """
             QPlainTextEdit {
                 background-color: #252526;
                 color: #e0e0e0;
@@ -580,7 +607,8 @@ class AIAssistantPanel(QWidget):
             QPlainTextEdit:focus {
                 border: 1px solid #FF8800;
             }
-        """)
+        """
+        )
         self._input_edit.submit_requested.connect(self._on_send)
         layout.addWidget(self._input_edit)
 
@@ -598,7 +626,8 @@ class AIAssistantPanel(QWidget):
         self._send_btn = QPushButton("Send")
         # No default, handled by Enter
         self._send_btn.clicked.connect(self._on_send)
-        self._send_btn.setStyleSheet("""
+        self._send_btn.setStyleSheet(
+            """
             QPushButton {
                 background-color: #FF8800;
                 color: black;
@@ -614,7 +643,8 @@ class AIAssistantPanel(QWidget):
                 background-color: #444444;
                 color: #888888;
             }
-            """)
+            """
+        )
         button_layout.addWidget(self._send_btn)
 
         layout.addLayout(button_layout)
@@ -656,7 +686,9 @@ class AIAssistantPanel(QWidget):
         Args:
             message: User's message.
         """
-        if message is None:
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
             raise ValueError("message must be provided")
         if not self._adapter:
             self._add_system_message(
@@ -733,7 +765,9 @@ class AIAssistantPanel(QWidget):
         Args:
             error: Error message.
         """
-        if error is None:
+        if not (error is not None):
+            raise ValueError("error must be provided")
+        if not (error is not None):
             raise ValueError("error must be provided")
         self._set_status("Error")
         self._send_btn.setEnabled(True)
@@ -779,7 +813,9 @@ class AIAssistantPanel(QWidget):
             The created MessageWidget.
         """
         # Insert before the stretch
-        if role is None:
+        if not (role is not None):
+            raise ValueError("role must be provided")
+        if not (role is not None):
             raise ValueError("role must be provided")
         idx = self._message_layout.count() - 1
 
@@ -852,7 +888,9 @@ class AIAssistantPanel(QWidget):
         Args:
             adapter: AI adapter instance.
         """
-        if adapter is None:
+        if not (adapter is not None):
+            raise ValueError("adapter must be provided")
+        if not (adapter is not None):
             raise ValueError("adapter must be provided")
         self._adapter = adapter
         self._set_status("Ready")
@@ -863,7 +901,9 @@ class AIAssistantPanel(QWidget):
         Args:
             level: Expertise level.
         """
-        if level is None:
+        if not (level is not None):
+            raise ValueError("level must be provided")
+        if not (level is not None):
             raise ValueError("level must be provided")
         self._context.user_expertise = level
         level_names = {
@@ -880,7 +920,9 @@ class AIAssistantPanel(QWidget):
         Args:
             settings: Settings to apply.
         """
-        if settings is None:
+        if not (settings is not None):
+            raise ValueError("settings must be provided")
+        if not (settings is not None):
             raise ValueError("settings must be provided")
         from src.shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
         from src.shared.python.ai.types import ExpertiseLevel

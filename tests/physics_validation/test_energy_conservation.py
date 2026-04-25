@@ -20,7 +20,7 @@ def is_engine_available(engine_type: EngineType) -> bool:
     return bool(probe_result.is_available())
 
 
-def test_mujoco_ballistic_energy_conservation():
+def test_mujoco_ballistic_energy_conservation() -> None:
     """Verify energy conservation for a falling particle in MuJoCo."""
     if not is_engine_available(EngineType.MUJOCO):
         pytest.skip("MuJoCo not installed")
@@ -83,8 +83,8 @@ def test_mujoco_ballistic_energy_conservation():
     assert percent_error < 0.1, f"Energy not conserved! Error: {percent_error:.4f}%"
 
 
-def test_pinocchio_energy_check():
-    """Verify long-run Pinocchio free-fall energy with the engine RK4 integrator."""
+def test_pinocchio_energy_check() -> None:
+    """Verify energy conservation with Pinocchio using explicit integration."""
     if not is_engine_available(EngineType.PINOCCHIO):
         pytest.skip("Pinocchio not installed")
 
@@ -179,7 +179,7 @@ def test_pinocchio_energy_check():
     )
 
 
-def test_drake_energy_conservation():
+def test_drake_energy_conservation() -> None:
     """Verify energy conservation with Drake (if available)."""
     if not is_engine_available(EngineType.DRAKE):
         pytest.skip("Drake not installed")

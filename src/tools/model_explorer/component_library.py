@@ -98,7 +98,9 @@ class URDFComponent:
         is_library: bool = False,
     ) -> URDFComponent:
         """Create component from XML element."""
-        if element is None:
+        if not (element is not None):
+            raise ValueError("element must be provided")
+        if not (element is not None):
             raise ValueError("element must be provided")
         tag_to_type = {
             "link": ComponentType.LINK,
@@ -166,7 +168,9 @@ class ComponentLibrary:
         Returns:
             List of loaded components
         """
-        if urdf_path is None:
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
             raise ValueError("urdf_path must be provided")
         if not urdf_path.exists():
             logger.error(f"URDF file not found: {urdf_path}")
@@ -204,7 +208,9 @@ class ComponentLibrary:
         Returns:
             List of loaded components
         """
-        if urdf_path is None:
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
             raise ValueError("urdf_path must be provided")
         if not urdf_path.exists():
             logger.error(f"URDF file not found: {urdf_path}")
@@ -245,7 +251,9 @@ class ComponentLibrary:
         Returns:
             The new editable component, or None if not found
         """
-        if library_key is None:
+        if not (library_key is not None):
+            raise ValueError("library_key must be provided")
+        if not (library_key is not None):
             raise ValueError("library_key must be provided")
         if library_key not in self._library_components:
             logger.error(f"Library component not found: {library_key}")
@@ -317,7 +325,9 @@ class ComponentLibrary:
         Returns:
             Component if found, None otherwise
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if from_library:
             # Search by name in library (could be multiple files)
@@ -337,7 +347,9 @@ class ComponentLibrary:
         Returns:
             True if updated successfully
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if name not in self._working_components:
             logger.error(f"Working component not found: {name}")
@@ -361,7 +373,9 @@ class ComponentLibrary:
         Returns:
             True if removed successfully
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         if name in self._working_components:
             del self._working_components[name]
@@ -378,7 +392,9 @@ class ComponentLibrary:
         Returns:
             URDF XML string
         """
-        if robot_name is None:
+        if not (robot_name is not None):
+            raise ValueError("robot_name must be provided")
+        if not (robot_name is not None):
             raise ValueError("robot_name must be provided")
         root = ET.Element("robot", name=robot_name)
 
@@ -723,14 +739,18 @@ class ComponentLibraryWidget(QWidget):
 
     def load_urdf_to_library(self, urdf_path: Path) -> None:
         """Load a URDF file into the library."""
-        if urdf_path is None:
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
             raise ValueError("urdf_path must be provided")
         self.library.load_urdf_as_library(urdf_path)
         self._refresh_library_tree()
 
     def load_urdf_to_working(self, urdf_path: Path) -> None:
         """Load a URDF file into the working set."""
-        if urdf_path is None:
+        if not (urdf_path is not None):
+            raise ValueError("urdf_path must be provided")
+        if not (urdf_path is not None):
             raise ValueError("urdf_path must be provided")
         self.library.load_urdf_as_working(urdf_path)
         self._refresh_working_tree()
@@ -745,7 +765,9 @@ class CopyComponentDialog(QDialog):
 
     def __init__(self, original_name: str, parent: QWidget | None = None) -> None:
         """Initialize the dialog."""
-        if original_name is None:
+        if not (original_name is not None):
+            raise ValueError("original_name must be provided")
+        if not (original_name is not None):
             raise ValueError("original_name must be provided")
         super().__init__(parent)
         self.setWindowTitle("Copy Component")

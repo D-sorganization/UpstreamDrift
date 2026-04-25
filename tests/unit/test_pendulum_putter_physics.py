@@ -7,6 +7,7 @@ and has correct physical properties.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -50,7 +51,7 @@ class TestMuJoCoIntegration:
         return urdf_path
 
     @pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo not installed")
-    def test_mujoco_can_load_model(self, pendulum_urdf_path: Path):
+    def test_mujoco_can_load_model(self, pendulum_urdf_path: Path) -> None:
         """MuJoCo should be able to load the pendulum putter URDF."""
         import mujoco
 
@@ -65,7 +66,7 @@ class TestMuJoCoIntegration:
             pytest.skip(f"MuJoCo URDF loading not supported: {e}")
 
     @pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo not installed")
-    def test_mujoco_pendulum_swings(self, pendulum_urdf_path: Path):
+    def test_mujoco_pendulum_swings(self, pendulum_urdf_path: Path) -> None:
         """Model should exhibit pendulum-like swing behavior."""
         import mujoco
 
@@ -94,14 +95,14 @@ class TestModelValidationForEngines:
     """Test that model meets requirements for physics engine loading."""
 
     @pytest.fixture
-    def model_result(self):
+    def model_result(self) -> Any:
         """Build model result for testing."""
         from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
 
         builder = PendulumPutterModelBuilder()
         return builder.build()
 
-    def test_all_links_have_inertial(self, model_result):
+    def test_all_links_have_inertial(self, model_result) -> None:
         """All links (except world) should have valid inertial properties."""
         for link in model_result.links:
             if link.name == "world":
@@ -113,7 +114,7 @@ class TestModelValidationForEngines:
                 f"Link {link.name} has invalid inertia tensor"
             )
 
-    def test_all_joints_have_valid_axes(self, model_result):
+    def test_all_joints_have_valid_axes(self, model_result) -> None:
         """All joints should have valid, normalized axes."""
         for joint in model_result.joints:
             if joint.joint_type.value == "fixed":
@@ -125,7 +126,7 @@ class TestModelValidationForEngines:
                 f"Joint {joint.name} axis not normalized: {joint.axis}"
             )
 
-    def test_joint_limits_are_consistent(self, model_result):
+    def test_joint_limits_are_consistent(self, model_result) -> None:
         """Joint limits should be valid (lower < upper)."""
         for joint in model_result.joints:
             if joint.limits is None:
@@ -136,7 +137,7 @@ class TestModelValidationForEngines:
                 f"lower={joint.limits.lower}, upper={joint.limits.upper}"
             )
 
-    def test_model_has_valid_tree_structure(self, model_result):
+    def test_model_has_valid_tree_structure(self, model_result) -> None:
         """Model should have valid parent-child relationships."""
         link_names = {link.name for link in model_result.links}
 
@@ -152,7 +153,7 @@ class TestModelValidationForEngines:
 class TestPendulumPhysicsProperties:
     """Test physics properties of the pendulum model."""
 
-    def test_natural_frequency_estimation(self):
+    def test_natural_frequency_estimation(self) -> None:
         """Natural frequency should be calculable and reasonable."""
         from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
 
@@ -164,7 +165,7 @@ class TestPendulumPhysicsProperties:
         # For arm_length=0.4m: f ≈ (1/2π) * sqrt(9.81/0.4) ≈ 0.79 Hz
         assert 0.3 < freq_hz < 2.0, f"Natural frequency {freq_hz} Hz seems unreasonable"
 
-    def test_pendulum_period_depends_on_arm_length(self):
+    def test_pendulum_period_depends_on_arm_length(self) -> None:
         """Longer arm should have longer period (lower frequency)."""
         from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
 
@@ -186,7 +187,7 @@ class TestPendulumPhysicsProperties:
 class TestModelExplorerCompatibility:
     """Test compatibility with model_explorer tools."""
 
-    def test_urdf_can_be_parsed(self, tmp_path: Path):
+    def test_urdf_can_be_parsed(self, tmp_path: Path) -> None:
         """Generated URDF should be parseable by urdf_parser."""
         from model_generation.models.pendulum_putter import PendulumPutterModelBuilder
 

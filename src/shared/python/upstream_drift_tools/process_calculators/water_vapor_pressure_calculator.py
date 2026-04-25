@@ -27,7 +27,9 @@ class WaterVaporPressureCalculator:
         Returns:
             Vapor pressure in Pa
         """
-        if temperature_c is None:
+        if not (temperature_c is not None):
+            raise ValueError("temperature_c must be provided")
+        if not (temperature_c is not None):
             raise ValueError("temperature_c must be provided")
         pressure, _ = self.calculator.calculate_vapor_pressure(temperature_c, method)
         return pressure

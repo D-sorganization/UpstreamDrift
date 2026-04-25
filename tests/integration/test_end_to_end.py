@@ -17,7 +17,7 @@ class TestLauncherIntegration:
     """Integration tests for launcher functionality."""
 
     @skip_if_unavailable("pyqt6")
-    def test_launch_golf_suite_imports(self):
+    def test_launch_golf_suite_imports(self) -> None:
         """Verify launch_golf_suite can import UnifiedLauncher."""
 
         from src.launchers.unified_launcher import UnifiedLauncher
@@ -26,7 +26,7 @@ class TestLauncherIntegration:
         assert launcher is not None
         assert hasattr(launcher, "mainloop")
 
-    def test_launch_golf_suite_help(self):
+    def test_launch_golf_suite_help(self) -> None:
         """Test launch_golf_suite.py --help command."""
         suite_root = get_repo_root()
         script = suite_root / "launch_golf_suite.py"
@@ -51,7 +51,7 @@ class TestLauncherIntegration:
         and not __import__("os").environ.get("DISPLAY"),
         reason="Requires display for PyQt6 (not available in CI)",
     )
-    def test_unified_launcher_show_status(self):
+    def test_unified_launcher_show_status(self) -> None:
         """Test UnifiedLauncher.show_status() method."""
         get_repo_root()
 
@@ -72,7 +72,7 @@ class TestLauncherIntegration:
 class TestEngineProbes:
     """Integration tests for engine probe system."""
 
-    def test_engine_manager_probes_available(self):
+    def test_engine_manager_probes_available(self) -> None:
         """Verify EngineManager has probe functionality."""
         get_repo_root()
 
@@ -84,7 +84,7 @@ class TestEngineProbes:
         assert hasattr(manager, "probe_all_engines")
         assert hasattr(manager, "get_diagnostic_report")
 
-    def test_probe_all_engines(self):
+    def test_probe_all_engines(self) -> None:
         """Test probing all engines."""
         get_repo_root()
 
@@ -107,7 +107,7 @@ class TestEngineProbes:
             assert isinstance(result.status, ProbeStatus)
             assert result.diagnostic_message is not None
 
-    def test_diagnostic_report_generation(self):
+    def test_diagnostic_report_generation(self) -> None:
         """Test generating diagnostic report."""
         get_repo_root()
 
@@ -127,7 +127,7 @@ class TestEngineProbes:
         # Should contain engine information
         assert "Engine Readiness Report" in report or "MUJOCO" in report.upper()
 
-    def test_at_least_one_engine_available(self):
+    def test_at_least_one_engine_available(self) -> None:
         """Verify at least one engine is available or properly diagnosed."""
         get_repo_root()
 
@@ -158,7 +158,7 @@ class TestEngineProbes:
 class TestPhysicsParameters:
     """Integration tests for physics parameter registry."""
 
-    def test_physics_parameters_accessible(self):
+    def test_physics_parameters_accessible(self) -> None:
         """Verify physics parameters are accessible."""
         from src.shared.python.physics.physics_parameters import get_registry
 
@@ -167,7 +167,7 @@ class TestPhysicsParameters:
         # Should have parameters
         assert len(registry.parameters) > 0
 
-    def test_ball_parameters_present(self):
+    def test_ball_parameters_present(self) -> None:
         """Test that ball parameters are defined."""
         from src.shared.python.physics.physics_parameters import get_registry
 
@@ -184,7 +184,7 @@ class TestPhysicsParameters:
         assert ball_diameter.value == 0.04267
         assert ball_diameter.unit == "m"
 
-    def test_gravity_parameter(self):
+    def test_gravity_parameter(self) -> None:
         """Test gravity parameter."""
         from src.shared.python.physics.physics_parameters import get_registry
 
@@ -196,7 +196,7 @@ class TestPhysicsParameters:
         assert gravity.unit == "m/s²"
         assert gravity.is_constant is True  # Should be constant
 
-    def test_parameter_validation(self):
+    def test_parameter_validation(self) -> None:
         """Test parameter validation."""
         from src.shared.python.physics.physics_parameters import get_registry
 
@@ -216,7 +216,7 @@ class TestPhysicsParameters:
         assert success is False
         assert "constant" in error.lower()
 
-    def test_parameter_categories(self):
+    def test_parameter_categories(self) -> None:
         """Test parameter categorization."""
         from src.shared.python.physics.physics_parameters import (
             ParameterCategory,
@@ -233,7 +233,7 @@ class TestPhysicsParameters:
         for param in ball_params:
             assert param.category == ParameterCategory.BALL
 
-    def test_show_physics_parameters_script(self):
+    def test_show_physics_parameters_script(self) -> None:
         """Test show_physics_parameters.py script."""
         suite_root = get_repo_root()
         script = suite_root / "scripts" / "show_physics_parameters.py"
@@ -263,7 +263,7 @@ class TestPhysicsParameters:
 class TestValidateSuite:
     """Integration tests for validate_suite.py."""
 
-    def test_validate_suite_runs(self):
+    def test_validate_suite_runs(self) -> None:
         """Test that validate_suite.py runs without errors."""
         suite_root = get_repo_root()
         script = suite_root / "scripts" / "validate_suite.py"
@@ -288,7 +288,7 @@ class TestValidateSuite:
 class TestOutputManager:
     """Integration tests for output management."""
 
-    def test_output_manager_real_save_load(self):
+    def test_output_manager_real_save_load(self) -> None:
         """Test OutputManager with real file I/O."""
         import tempfile
 

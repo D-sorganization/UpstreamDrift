@@ -66,7 +66,9 @@ class GUIRegistry:
             icon: Optional path to icon file
             repository: Optional repository identifier
         """
-        if tool_name is None:
+        if not (tool_name is not None):
+            raise ValueError("tool_name must be provided")
+        if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
         registration = GUIRegistration(
             tool_name=tool_name,
@@ -89,7 +91,9 @@ class GUIRegistry:
         Returns:
             True if the tool was found and removed
         """
-        if tool_name is None:
+        if not (tool_name is not None):
+            raise ValueError("tool_name must be provided")
+        if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
         if tool_name in self._registrations:
             del self._registrations[tool_name]
@@ -121,7 +125,9 @@ class GUIRegistry:
         Returns:
             LaunchConfig or None if not found
         """
-        if tool_name is None:
+        if not (tool_name is not None):
+            raise ValueError("tool_name must be provided")
+        if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
         registration = self._registrations.get(tool_name)
         if registration:
@@ -160,7 +166,9 @@ class GUIRegistry:
         Returns:
             List of available GUIType values
         """
-        if tool_name is None:
+        if not (tool_name is not None):
+            raise ValueError("tool_name must be provided")
+        if not (tool_name is not None):
             raise ValueError("tool_name must be provided")
         registration = self._registrations.get(tool_name)
         if registration:
@@ -197,7 +205,9 @@ def register_gui(
         gui_configs: Dictionary mapping GUIType to LaunchConfig
         **kwargs: Additional registration options
     """
-    if tool_name is None:
+    if not (tool_name is not None):
+        raise ValueError("tool_name must be provided")
+    if not (tool_name is not None):
         raise ValueError("tool_name must be provided")
     registry = get_registry()
     registry.register(

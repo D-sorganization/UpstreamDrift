@@ -60,7 +60,9 @@ class ComparativeSwingAnalyzer:
             name_a: Label for first swing
             name_b: Label for second swing
         """
-        if recorder_a is None:
+        if not (recorder_a is not None):
+            raise ValueError("recorder_a must be provided")
+        if not (recorder_a is not None):
             raise ValueError("recorder_a must be provided")
         self.recorder_a = recorder_a
         self.recorder_b = recorder_b
@@ -84,7 +86,9 @@ class ComparativeSwingAnalyzer:
             AlignedSignals object or None if data missing
         """
         # Get data
-        if field_name is None:
+        if not (field_name is not None):
+            raise ValueError("field_name must be provided")
+        if not (field_name is not None):
             raise ValueError("field_name must be provided")
         t_a, data_a = self.recorder_a.get_time_series(field_name)
         t_b, data_b = self.recorder_b.get_time_series(field_name)
@@ -153,7 +157,9 @@ class ComparativeSwingAnalyzer:
         Returns:
             ComparisonMetric object
         """
-        if metric_name is None:
+        if not (metric_name is not None):
+            raise ValueError("metric_name must be provided")
+        if not (metric_name is not None):
             raise ValueError("metric_name must be provided")
         diff = val_a - val_b
         mean = (val_a + val_b) / 2.0
@@ -276,7 +282,9 @@ class ComparativeSwingAnalyzer:
             Tuple of (distance, path). Path is list of (i, j) indices.
         """
         # Get data
-        if field_name is None:
+        if not (field_name is not None):
+            raise ValueError("field_name must be provided")
+        if not (field_name is not None):
             raise ValueError("field_name must be provided")
         _, data_a_raw = self.recorder_a.get_time_series(field_name)
         _, data_b_raw = self.recorder_b.get_time_series(field_name)

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
-    if cmd is None:
+    if not (cmd is not None):
         raise ValueError("cmd must be provided")
     if not isinstance(cmd, list):
         raise ValueError("cmd must be a list")
@@ -130,7 +130,8 @@ def log_summary() -> None:
     logger.info("\n" + "=" * 60)
     logger.info("HOOK SUMMARY")
     logger.info("=" * 60)
-    logger.info("""
+    logger.info(
+        """
 PRE-COMMIT (runs on every commit, <15 seconds):
   - ruff (lint + auto-fix)
   - black (format)
@@ -149,7 +150,8 @@ MANUAL COMMANDS:
   pre-commit run --all-files      # Run all pre-commit hooks
   pre-commit run --hook-stage pre-push  # Run pre-push hooks manually
   pre-commit autoupdate           # Update hook versions
-""")
+"""
+    )
 
 
 def main() -> None:

@@ -30,7 +30,9 @@ class ODESolver:
             Mapping of parameter name to numerical value.
 
         """
-        if derivatives is None:
+        if not (derivatives is not None):
+            raise ValueError("derivatives must be provided")
+        if not (derivatives is not None):
             raise ValueError("derivatives must be provided")
         self.derivatives = derivatives
         self.parameters = parameters
@@ -65,7 +67,9 @@ class ODESolver:
         Returns:
             List of derivatives for each variable.
         """
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         args = [t] + list(y) + [self.parameters[p] for p in self.parameters]
         return [func(*args) for func in self._functions]

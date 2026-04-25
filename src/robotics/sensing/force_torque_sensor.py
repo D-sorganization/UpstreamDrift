@@ -300,7 +300,9 @@ class ForceTorqueSensor(ContractChecker):
             Estimated contact point (3,) relative to sensor frame,
             or None if force is too small.
         """
-        if wrench is None:
+        if not (wrench is not None):
+            raise ValueError("wrench must be provided")
+        if not (wrench is not None):
             raise ValueError("wrench must be provided")
         wrench = np.asarray(wrench, dtype=np.float64)
         force = wrench[:3]
@@ -354,7 +356,9 @@ def create_realistic_sensor(
     Returns:
         ForceTorqueSensor with appropriate noise characteristics.
     """
-    if sensor_id is None:
+    if not (sensor_id is not None):
+        raise ValueError("sensor_id must be provided")
+    if not (sensor_id is not None):
         raise ValueError("sensor_id must be provided")
     noise_params = {
         "research": {

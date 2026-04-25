@@ -98,7 +98,9 @@ def setup_window_geometry(
         size: (width, height) tuple
         center: Whether to center window on screen
     """
-    if window is None:
+    if not (window is not None):
+        raise ValueError("window must be provided")
+    if not (window is not None):
         raise ValueError("window must be provided")
     window.resize(*size)
 
@@ -146,7 +148,9 @@ class BaseApplicationWindow(QMainWindow):
             size: (width, height) tuple
             icon_path: Optional custom icon path
         """
-        if title is None:
+        if not (title is not None):
+            raise ValueError("title must be provided")
+        if not (title is not None):
             raise ValueError("title must be provided")
         super().__init__()
 
@@ -178,7 +182,9 @@ class BaseApplicationWindow(QMainWindow):
             message: Message to display
             timeout: Timeout in milliseconds (0 = no timeout)
         """
-        if message is None:
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        if not (message is not None):
             raise ValueError("message must be provided")
         status_bar = self.statusBar()
         if status_bar:
@@ -191,7 +197,9 @@ class BaseApplicationWindow(QMainWindow):
             title: Dialog title
             message: Error message
         """
-        if title is None:
+        if not (title is not None):
+            raise ValueError("title must be provided")
+        if not (title is not None):
             raise ValueError("title must be provided")
         QMessageBox.critical(self, title, message)
         logger.error(f"{title}: {message}")
@@ -203,7 +211,9 @@ class BaseApplicationWindow(QMainWindow):
             title: Dialog title
             message: Warning message
         """
-        if title is None:
+        if not (title is not None):
+            raise ValueError("title must be provided")
+        if not (title is not None):
             raise ValueError("title must be provided")
         QMessageBox.warning(self, title, message)
         logger.warning(f"{title}: {message}")
@@ -215,7 +225,9 @@ class BaseApplicationWindow(QMainWindow):
             title: Dialog title
             message: Information message
         """
-        if title is None:
+        if not (title is not None):
+            raise ValueError("title must be provided")
+        if not (title is not None):
             raise ValueError("title must be provided")
         QMessageBox.information(self, title, message)
         logger.info(f"{title}: {message}")
@@ -230,7 +242,9 @@ class BaseApplicationWindow(QMainWindow):
         Returns:
             True if user confirmed, False otherwise
         """
-        if title is None:
+        if not (title is not None):
+            raise ValueError("title must be provided")
+        if not (title is not None):
             raise ValueError("title must be provided")
         reply = QMessageBox.question(
             self,
@@ -270,7 +284,9 @@ def create_dialog(
             # User clicked Yes
             pass
     """
-    if title is None:
+    if not (title is not None):
+        raise ValueError("title must be provided")
+    if not (title is not None):
         raise ValueError("title must be provided")
     dialog = QDialog(parent)
     dialog.setWindowTitle(title)
@@ -317,7 +333,9 @@ def create_button(
             tooltip="Load a physics model"
         )
     """
-    if text is None:
+    if not (text is not None):
+        raise ValueError("text must be provided")
+    if not (text is not None):
         raise ValueError("text must be provided")
     button = QPushButton(text)
 
@@ -354,7 +372,9 @@ def create_label(
     Example:
         label = create_label("Model Name:", bold=True)
     """
-    if text is None:
+    if not (text is not None):
+        raise ValueError("text must be provided")
+    if not (text is not None):
         raise ValueError("text must be provided")
     label = QLabel(text)
     label.setAlignment(alignment)
@@ -396,7 +416,9 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
-        if widget is None:
+        if not (widget is not None):
+            raise ValueError("widget must be provided")
+        if not (widget is not None):
             raise ValueError("widget must be provided")
         self.layout.addWidget(widget, stretch)
         return self
@@ -411,7 +433,9 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
-        if stretch is None:
+        if not (stretch is not None):
+            raise ValueError("stretch must be provided")
+        if not (stretch is not None):
             raise ValueError("stretch must be provided")
         self.layout.addLayout(layout, stretch)
         return self
@@ -425,7 +449,9 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
-        if stretch is None:
+        if not (stretch is not None):
+            raise ValueError("stretch must be provided")
+        if not (stretch is not None):
             raise ValueError("stretch must be provided")
         self.layout.addStretch(stretch)
         return self
@@ -439,7 +465,9 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
-        if spacing is None:
+        if not (spacing is not None):
+            raise ValueError("spacing must be provided")
+        if not (spacing is not None):
             raise ValueError("spacing must be provided")
         self.layout.addSpacing(spacing)
         return self
@@ -458,7 +486,9 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
-        if left is None:
+        if not (left is not None):
+            raise ValueError("left must be provided")
+        if not (left is not None):
             raise ValueError("left must be provided")
         self.layout.setContentsMargins(left, top, right, bottom)
         return self
@@ -472,7 +502,9 @@ class LayoutBuilder:
         Returns:
             Self for chaining
         """
-        if spacing is None:
+        if not (spacing is not None):
+            raise ValueError("spacing must be provided")
+        if not (spacing is not None):
             raise ValueError("spacing must be provided")
         self.layout.setSpacing(spacing)
         return self

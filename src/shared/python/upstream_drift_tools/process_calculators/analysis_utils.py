@@ -51,7 +51,9 @@ def evaluate_output(
         *state_dict* and *composition_dict* are sub-dicts from the engine
         result (empty dicts if not present).
     """
-    if base_params is None:
+    if not (base_params is not None):
+        raise ValueError("base_params must be provided")
+    if not (base_params is not None):
         raise ValueError("base_params must be provided")
     params = {**base_params}
     if overrides:

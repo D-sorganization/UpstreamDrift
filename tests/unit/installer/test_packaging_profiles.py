@@ -12,7 +12,7 @@ from installer.windows.packaging_profiles import (
 )
 
 
-def test_get_packaging_profile_defaults_to_hybrid():
+def test_get_packaging_profile_defaults_to_hybrid() -> None:
     profile = get_packaging_profile(None)
 
     assert profile.profile_id == "hybrid"
@@ -20,16 +20,16 @@ def test_get_packaging_profile_defaults_to_hybrid():
     assert profile.include_api_executable is True
 
 
-def test_get_packaging_profile_rejects_unknown_value():
+def test_get_packaging_profile_rejects_unknown_value() -> None:
     with pytest.raises(ValueError, match="unknown packaging profile"):
         get_packaging_profile("invalid")
 
 
-def test_iter_packaging_profile_ids_is_stable():
+def test_iter_packaging_profile_ids_is_stable() -> None:
     assert iter_packaging_profile_ids() == ("core", "hybrid", "full")
 
 
-def test_build_profile_environment_sets_profile_and_provider_roots():
+def test_build_profile_environment_sets_profile_and_provider_roots() -> None:
     profile = get_packaging_profile("full")
     env = build_profile_environment(
         profile,
@@ -44,7 +44,7 @@ def test_build_profile_environment_sets_profile_and_provider_roots():
     )
 
 
-def test_build_profile_environment_clears_provider_roots_for_core():
+def test_build_profile_environment_clears_provider_roots_for_core() -> None:
     profile = get_packaging_profile("core")
     env = build_profile_environment(
         profile,

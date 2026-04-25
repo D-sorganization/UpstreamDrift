@@ -52,7 +52,7 @@ def _magnitude_to_color(magnitude: float, max_magnitude: float) -> list[float]:
     Returns:
         RGBA color list.
     """
-    if magnitude is None:
+    if not (magnitude is not None):
         raise ValueError("magnitude must be provided")
     if max_magnitude <= 0:
         return [0.5, 0.5, 0.5, 1.0]
@@ -99,9 +99,9 @@ def _resolve_joint_names(engine: Any, n_joints: int) -> list[str]:
     Returns:
         List of joint name strings.
     """
-    if n_joints is None:
+    if not (n_joints is not None):
         raise ValueError("n_joints must be provided")
-    if engine is None:
+    if not (engine is not None):
         raise ValueError("engine must be provided")
     joint_names: list[str] = []
     if hasattr(engine, "joint_names"):
@@ -136,7 +136,7 @@ def _resolve_body_name(joint_names: list[str], index: int) -> str:
     Returns:
         The joint name at the given index, or a generic "joint_N" name.
     """
-    if joint_names is None:
+    if not (joint_names is not None):
         raise ValueError("joint_names must be provided")
     if index < len(joint_names):
         return joint_names[index]
@@ -173,7 +173,7 @@ def _build_applied_torque_vectors(
     Returns:
         List of ForceVector3D for non-zero applied torques.
     """
-    if config is None:
+    if not (config is not None):
         raise ValueError("config must be provided")
     if not _should_include_force_type(config, "applied"):
         return []
@@ -221,7 +221,7 @@ def _build_gravity_vectors(
     Returns:
         List of ForceVector3D for downward gravity forces.
     """
-    if config is None:
+    if not (config is not None):
         raise ValueError("config must be provided")
     if not _should_include_force_type(config, "gravity"):
         return []
@@ -277,7 +277,7 @@ def _build_force_vectors(
     Returns:
         List of force vectors for rendering.
     """
-    if engine_manager is None:
+    if not (engine_manager is not None):
         raise ValueError("engine_manager must be provided")
     engine, state = _extract_engine_state(engine_manager)
     if engine is None:
@@ -380,14 +380,10 @@ def _get_sim_time(engine_manager: EngineManager) -> float:
     "/simulation/forces",
     response_model=ForceOverlayResponse,
 )
-@precondition(  # fmt: skip
-    lambda force_types="applied",
-    color_by_magnitude=True,
-    body_filter=None,
-    show_labels=False,
-    scale_factor=0.01,
-    engine_manager=None,
-    logger=None: (scale_factor > 0 and len(force_types.strip()) > 0),
+@precondition(
+    lambda force_types="applied", color_by_magnitude=True, body_filter=None, show_labels=False, scale_factor=0.01, engine_manager=None, logger=None: (
+        scale_factor > 0 and len(force_types.strip()) > 0
+    ),
     "Scale factor must be positive and force_types must be non-empty",
 )
 @handle_api_errors
@@ -417,7 +413,7 @@ async def get_force_overlays(
     Returns:
         Force overlay data with vectors and metadata.
     """
-    if force_types is None:
+    if not (force_types is not None):
         raise ValueError("force_types must be provided")
     config = ForceOverlayRequest(
         enabled=True,
@@ -476,7 +472,7 @@ async def update_force_overlay_config(
     Returns:
         Updated force overlay data.
     """
-    if config is None:
+    if not (config is not None):
         raise ValueError("config must be provided")
     vectors = _build_force_vectors(engine_manager, config)
 

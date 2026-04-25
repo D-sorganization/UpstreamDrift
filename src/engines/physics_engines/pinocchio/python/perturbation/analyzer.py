@@ -9,10 +9,15 @@ dynamics engine.  Uses ``PinocchioPhysicsEngine`` for forward simulation with
 polynomial torque profiles, and exposes Jacobian-based sensitivity as an
 optional complement to Monte Carlo results.
 
+
+Inherits from ``PerturbationAnalyzerBase`` (see #2273) which provides the
+shared ``set_base_torque_profile``, ``perturb_torque``, ``extract_metrics``,
+``run_batch``, and ``compare_profiles`` implementations.
+
 Design by Contract
 ------------------
 - ``set_base_torque_profile()`` must be called before ``run_batch()`` or
-  ``perturb_torque()``.  Raises ``AssertionError`` otherwise.
+  ``perturb_torque()``.  Raises ``ValueError`` otherwise.
 - ``run_batch()`` returns a ``PerturbationSummary`` containing all
   ``MANDATORY_METRICS`` as keys (scalar metrics only; array metrics are
   summarised by norm).
@@ -36,22 +41,20 @@ from pathlib import Path
 
 import numpy as np
 
-from src.shared.python.engine_core.engine_availability import PINOCCHIO_AVAILABLE
-
-# Shared noise / perturbation helpers
-from src.shared.python.perturbation.analyzer_base import (  # noqa: F401  re-exported for test imports
+from src.shared.python.perturbation.perturbation_base import (
     MANDATORY_METRICS,
-    ComparisonReport,  # noqa: F401
+    ComparisonReport,
     PerturbationAnalyzerBase,
-    build_joint_polys,
-    compute_ee_velocity_fd,
 )
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Mandatory metric names (must match PendulumPerturbationAnalyzer.MANDATORY_METRICS)
-# ---------------------------------------------------------------------------
+__all__ = [
+    "PinocchioPerturbationAnalyzer",
+    "PinocchioSimResult",
+    "ComparisonReport",
+    "MANDATORY_METRICS",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -92,16 +95,6 @@ class PinocchioSimResult:
     @property
     def n_steps(self) -> int:
         return len(self.t)
-
-
-# ---------------------------------------------------------------------------
-# Comparison report
-# ---------------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------------
-# Coefficient perturbation helper
-# ---------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------------------
@@ -154,38 +147,7 @@ class PinocchioPerturbationAnalyzer(PerturbationAnalyzerBase):
         ee_frame_name : str, optional
             Name of the end-effector frame in the URDF.  Defaults to last frame.
         """
-        if not PINOCCHIO_AVAILABLE:
-            msg = "pinocchio is not installed.  Install it with: pip install pinocchio"
-            raise ImportError(msg)
-
-        import pinocchio as pin  # noqa: PLC0415 — guard already checked
-
-        if urdf_path is None:
-            urdf_path = (
-                Path(__file__).parents[4] / "models" / "generated" / "golfer.urdf"
-            )
-
-        self._urdf_path = Path(urdf_path)
-        if not (self._urdf_path.exists()):
-            raise ValueError(f"URDF not found: {self._urdf_path}")
-
-        self._model = pin.buildModelFromUrdf(str(self._urdf_path))
-        self._data = self._model.createData()
-        self._t_end = t_end
-        self._dt = dt
-
-        # End-effector frame
-        if ee_frame_name is not None:
-            self._ee_frame_id = self._model.getFrameId(ee_frame_name)
-        else:
-            # Use the last operational frame (tip of kinematic chain)
-            self._ee_frame_id = self._model.nframes - 1
-
-        self._nq = self._model.nq
-        self._nv = self._model.nv
-
-        self._base_coeffs: list[list[float]] | None = None
-        self._nominal_result: PinocchioSimResult | None = None
+        super().__init__()
 
         logger.info(
             "PinocchioPerturbationAnalyzer: model=%s, nq=%d, nv=%d, t_end=%.2f",
@@ -196,108 +158,24 @@ class PinocchioPerturbationAnalyzer(PerturbationAnalyzerBase):
         )
 
     # ------------------------------------------------------------------
-    # Protocol API
+    # Base-class abstract method implementations
     # ------------------------------------------------------------------
 
-    def set_base_torque_profile(self, profile: object) -> None:
-        """Set the nominal torque polynomial coefficients.
+    def _get_q_traj(self, sim_result: PinocchioSimResult) -> np.ndarray:
+        return sim_result.q_traj
 
-        Parameters
-        ----------
-        profile : dict with 'coeffs' key
-            ``profile["coeffs"]`` is a list of per-joint coefficient lists:
-            ``[[c0, c1, ...], [c0, c1, ...], ...]``.
-            The number of joint lists must equal ``nv`` or be broadcastable.
+    def _get_v_traj(self, sim_result: PinocchioSimResult) -> np.ndarray:
+        return sim_result.v_traj
 
-        Design by Contract
-        ------------------
-        Pre: profile is a dict with 'coeffs' key.
-        Post: self._base_coeffs is set and self._nominal_result is cached.
-        """
-        if not isinstance(profile, dict):
-            raise ValueError(f"profile must be a dict, got {type(profile)}")
-        if "coeffs" not in profile:
-            raise ValueError("'coeffs' key missing from profile")
-        coeffs = profile["coeffs"]
-        if not (isinstance(coeffs, list) and len(coeffs) > 0):
-            raise ValueError("profile['coeffs'] must be a non-empty list")
-        self._base_coeffs = coeffs
-        self._nominal_result = self._simulate(coeffs)
-
-    def extract_metrics(self, sim_result: object) -> dict[str, float | np.ndarray]:
-        """Extract all MANDATORY_METRICS from a simulation result.
-
-        Parameters
-        ----------
-        sim_result : PinocchioSimResult
-
-        Returns
-        -------
-        dict mapping metric name → scalar float or ndarray.
-
-        Design by Contract
-        ------------------
-        Pre: sim_result is a PinocchioSimResult with n_steps >= 2.
-        Post: all MANDATORY_METRICS present; all values finite.
-        """
+    def _validate_sim_result_type(self, sim_result: object) -> None:
         if not isinstance(sim_result, PinocchioSimResult):
             raise ValueError(
                 f"sim_result must be PinocchioSimResult, got {type(sim_result)}"
-            )  # noqa: E501
-        if not (sim_result.n_steps >= 2):
-            raise ValueError("Simulation must have >= 2 steps")
+            )
 
-        r = sim_result
-        last = r.n_steps - 1
-
-        joint_angles_final = r.q_traj[last].copy()
-        joint_velocities_final = r.v_traj[last].copy()
-
-        # End-effector position at final step
-        ee_pos_final = r.ee_pos_traj[last].copy()
-
-        # End-effector velocity at final step
-        ee_vel_final = r.ee_vel_traj[last].copy()
-        ee_speed_final = float(np.linalg.norm(ee_vel_final))
-
-        # Peak end-effector speed
-        # ⚡ Bolt: np.einsum is ~2-3x faster than np.sum(..., axis=1) for computing
-        # sum of squares when finding max
-        sq_speeds = np.einsum("ij,ij->i", r.ee_vel_traj, r.ee_vel_traj)
-        peak_speed = float(np.sqrt(np.max(sq_speeds)))
-
-        # Total energy (kinetic + potential) at final step
-        total_energy_final = float(
-            r.kinetic_energy_traj[last] + r.potential_energy_traj[last]
-        )
-
-        # Trajectory RMSE vs nominal
-        trajectory_rmse = 0.0
-        trajectory_max_deviation = 0.0
-        if self._nominal_result is not None:
-            nom = self._nominal_result
-            n_cmp = min(r.n_steps, nom.n_steps)
-            # ⚡ Bolt: np.einsum is ~2-3x faster than np.sum(..., axis=1) for computing
-            # sum of squares
-            diffs = r.q_traj[:n_cmp] - nom.q_traj[:n_cmp]
-            sq_deviations = np.einsum("ij,ij->i", diffs, diffs)
-            trajectory_rmse = float(np.sqrt(np.mean(sq_deviations)))
-            trajectory_max_deviation = float(np.sqrt(np.max(sq_deviations)))
-
-        motion_duration = float(r.t[last] - r.t[0])
-
-        return {
-            "end_effector_position_final": ee_pos_final,
-            "end_effector_velocity_final": ee_vel_final,
-            "end_effector_speed_final": ee_speed_final,
-            "peak_end_effector_speed": peak_speed,
-            "total_energy_final": total_energy_final,
-            "joint_angles_final": joint_angles_final,
-            "joint_velocities_final": joint_velocities_final,
-            "trajectory_rmse": trajectory_rmse,
-            "trajectory_max_deviation": trajectory_max_deviation,
-            "motion_duration": motion_duration,
-        }
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
 
     def _simulate(self, coeffs: list[list[float]]) -> PinocchioSimResult:
         """Run a Pinocchio ABA forward simulation with polynomial torques.
@@ -310,8 +188,16 @@ class PinocchioPerturbationAnalyzer(PerturbationAnalyzerBase):
         data = model.createData()  # fresh data per trial for thread safety
         nv = model.nv
 
-        # Build per-joint polynomial arrays (ascending → reversed for polyval)
-        joint_polys = build_joint_polys(coeffs, nv)
+        # Build per-joint polynomial arrays (ascending order)
+        n_joints_coeff = len(coeffs)
+        # Pad or truncate to match nv
+        joint_polys: list[np.ndarray] = []
+        for j in range(nv):
+            if j < n_joints_coeff:
+                # ascending coefficients [c0, c1, c2, ...] → reversed for polyval
+                joint_polys.append(np.array(coeffs[j][::-1]))
+            else:
+                joint_polys.append(np.array([0.0]))
 
         # Integrate
         q = pin.neutral(model)
@@ -348,7 +234,10 @@ class PinocchioPerturbationAnalyzer(PerturbationAnalyzerBase):
         ee_pos_arr = np.array(ee_pos_list)
 
         # EE velocities via finite difference
-        ee_vel_arr = compute_ee_velocity_fd(ee_pos_arr, t_arr)
+        ee_vel_arr = np.zeros_like(ee_pos_arr)
+        for i in range(1, len(t_arr)):
+            dt_i = max(t_arr[i] - t_arr[i - 1], 1e-12)
+            ee_vel_arr[i] = (ee_pos_arr[i] - ee_pos_arr[i - 1]) / dt_i
 
         # Kinetic and potential energy
         ke_list = []

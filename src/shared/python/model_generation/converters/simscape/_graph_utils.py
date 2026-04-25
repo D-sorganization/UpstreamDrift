@@ -1,0 +1,114 @@
+from __future__ import annotations
+
+import logging
+
+from model_generation.converters.simscape.mdl_parser import SimscapeModel
+from model_generation.core.types import (
+    Geometry,
+    Inertia,
+    Joint,
+    JointType,
+    Link,
+    Origin,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def build_connection_map(
+    model: SimscapeModel,
+) -> dict[str, list[tuple[str, str]]]:
+    if not (model is not None):
+        raise ValueError("model must be provided")
+    connection_map: dict[str, list[tuple[str, str]]] = {}
+
+    for conn in model.connections:
+        if conn.source_block not in connection_map:
+            connection_map[conn.source_block] = []
+        connection_map[conn.source_block].append((conn.dest_block, conn.source_port))
+
+        if conn.dest_block not in connection_map:
+            connection_map[conn.dest_block] = []
+        connection_map[conn.dest_block].append((conn.source_block, conn.dest_port))
+
+    return connection_map
+
+
+def infer_links_from_joints(
+    model: SimscapeModel,
+    result,
+    body_to_link: dict[str, str],
+    sanitize_name_fn,
+) -> None:
+    if not (model is not None):
+        raise ValueError("model must be provided")
+    link_names: set[str] = set()
+
+    for joint_block in model.get_joint_blocks():
+        connections = model.get_connections_from(
+            joint_block.full_path
+        ) + model.get_connections_to(joint_block.full_path)
+
+        for conn in connections:
+            for block_name in [conn.source_block, conn.dest_block]:
+                if block_name == joint_block.full_path:
+                    continue
+
+                link_name = sanitize_name_fn(block_name)
+                if link_name not in link_names:
+                    link_names.add(link_name)
+                    body_to_link[block_name] = link_name
+
+                    link = Link(
+                        name=link_name,
+                        inertia=Inertia(ixx=0.01, iyy=0.01, izz=0.01, mass=1.0),
+                        visual_geometry=Geometry.box(0.05, 0.05, 0.05),
+                    )
+                    result.links.append(link)
+                    result.warnings.append(f"Inferred link: {link_name}")
+
+
+def connect_orphan_links(
+    result,
+    body_to_link: dict[str, str],
+) -> None:
+    if not (result is not None):
+        raise ValueError("result must be provided")
+    child_links = {j.child for j in result.joints}
+    root_candidates = [
+        link.name for link in result.links if link.name not in child_links
+    ]
+
+    if len(root_candidates) <= 1:
+        return
+
+    root_link = "base_link"
+    if root_link not in root_candidates:
+        root_link = root_candidates[0]
+
+    for link_name in root_candidates:
+        if link_name != root_link:
+            joint = Joint(
+                name=f"{root_link}_to_{link_name}_fixed",
+                joint_type=JointType.FIXED,
+                parent=root_link,
+                child=link_name,
+                origin=Origin(),
+            )
+            result.joints.append(joint)
+            result.warnings.append(
+                f"Connected orphan link '{link_name}' to '{root_link}'"
+            )
+
+
+def sanitize_name(name: str, link_counter: int) -> str:
+    if not (name is not None):
+        raise ValueError("name must be provided")
+    sanitized = name.replace("/", "_").replace("\\", "_")
+    sanitized = sanitized.replace(" ", "_").replace("-", "_")
+    sanitized = "".join(c for c in sanitized if c.isalnum() or c == "_")
+
+    if sanitized and sanitized[0].isdigit():
+        sanitized = "link_" + sanitized
+
+    return sanitized or f"unnamed_{link_counter}"

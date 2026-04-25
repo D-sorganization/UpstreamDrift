@@ -193,7 +193,9 @@ class WholeBodyController:
         Returns:
             True if task was removed, False if not found.
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         for i, task in enumerate(self._tasks):
             if task.name == name:
@@ -214,7 +216,9 @@ class WholeBodyController:
         Returns:
             Task if found, None otherwise.
         """
-        if name is None:
+        if not (name is not None):
+            raise ValueError("name must be provided")
+        if not (name is not None):
             raise ValueError("name must be provided")
         for task in self._tasks:
             if task.name == name:
@@ -300,7 +304,9 @@ class WholeBodyController:
         Returns:
             WBCSolution from weighted QP.
         """
-        if n_v is None:
+        if not (n_v is not None):
+            raise ValueError("n_v must be provided")
+        if not (n_v is not None):
             raise ValueError("n_v must be provided")
         n_vars = n_v + n_contact_vars
 
@@ -388,7 +394,9 @@ class WholeBodyController:
         Returns:
             WBCSolution from hierarchical solve.
         """
-        if n_v is None:
+        if not (n_v is not None):
+            raise ValueError("n_v must be provided")
+        if not (n_v is not None):
             raise ValueError("n_v must be provided")
         priority_groups = self._group_tasks_by_priority()
 
@@ -415,12 +423,14 @@ class WholeBodyController:
 
     def _build_priority_level_cost(
         self,
-        tasks: list,
+        tasks: list[Task],
         n_v: int,
         n_vars: int,
-        accumulated_A: list[np.ndarray],
-    ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
-        if tasks is None:
+        accumulated_A: list[NDArray],
+    ) -> tuple[NDArray, NDArray, list]:
+        if not (tasks is not None):
+            raise ValueError("tasks must be provided")
+        if not (tasks is not None):
             raise ValueError("tasks must be provided")
         H = np.zeros((n_vars, n_vars))
         g = np.zeros(n_vars)
@@ -451,9 +461,7 @@ class WholeBodyController:
 
         return H, g, accumulated_A
 
-    def _apply_regularization(
-        self, H: np.ndarray, n_v: int, n_contact_vars: int
-    ) -> None:
+    def _apply_regularization(self, H: NDArray, n_v: int, n_contact_vars: int) -> None:
         H[:n_v, :n_v] += self._config.regularization * np.eye(n_v)
         if n_contact_vars > 0:
             H[n_v:, n_v:] += self._config.contact_force_regularization * np.eye(
@@ -462,15 +470,17 @@ class WholeBodyController:
 
     def _build_level_qp(
         self,
-        H: np.ndarray,
-        g: np.ndarray,
+        H: NDArray,
+        g: NDArray,
         n_v: int,
         n_contact_vars: int,
-        M: np.ndarray,
-        nle: np.ndarray,
-        qd: np.ndarray,
+        M: NDArray,
+        nle: NDArray,
+        qd: NDArray,
     ) -> QPProblem:
-        if H is None:
+        if not (H is not None):
+            raise ValueError("H must be provided")
+        if not (H is not None):
             raise ValueError("H must be provided")
         A_eq, b_eq = self._build_dynamics_constraint(n_v, n_contact_vars, M, nle)
         A_ineq, lb_ineq, ub_ineq = self._build_inequality_constraints(
@@ -512,7 +522,9 @@ class WholeBodyController:
         Returns:
             Tuple of (A_eq, b_eq) or (None, None) if no constraint.
         """
-        if n_v is None:
+        if not (n_v is not None):
+            raise ValueError("n_v must be provided")
+        if not (n_v is not None):
             raise ValueError("n_v must be provided")
         if not self._contact_jacobians:
             # No contacts - no dynamics constraint in QP
@@ -559,7 +571,9 @@ class WholeBodyController:
         Returns:
             Tuple of (A_ineq, lb_ineq, ub_ineq) or (None, None, None).
         """
-        if n_v is None:
+        if not (n_v is not None):
+            raise ValueError("n_v must be provided")
+        if not (n_v is not None):
             raise ValueError("n_v must be provided")
         constraints_A: list[NDArray[np.float64]] = []
         constraints_lb: list[NDArray[np.float64]] = []
@@ -615,7 +629,9 @@ class WholeBodyController:
         Returns:
             Tuple of (x_lb, x_ub) or (None, None).
         """
-        if n_v is None:
+        if not (n_v is not None):
+            raise ValueError("n_v must be provided")
+        if not (n_v is not None):
             raise ValueError("n_v must be provided")
         n_vars = n_v + n_contact_vars
 
@@ -665,7 +681,9 @@ class WholeBodyController:
         Returns:
             WBCSolution.
         """
-        if qp_solution is None:
+        if not (qp_solution is not None):
+            raise ValueError("qp_solution must be provided")
+        if not (qp_solution is not None):
             raise ValueError("qp_solution must be provided")
         if not qp_solution.success or qp_solution.x is None:
             return WBCSolution(
@@ -695,7 +713,9 @@ class WholeBodyController:
         Returns:
             WBCSolution.
         """
-        if x is None:
+        if not (x is not None):
+            raise ValueError("x must be provided")
+        if not (x is not None):
             raise ValueError("x must be provided")
         qdd = x[:n_v]
 
@@ -705,6 +725,8 @@ class WholeBodyController:
 
         # Compute torques: tau = M @ qdd + nle - J_c^T @ f_c
         tau = M @ qdd + nle
+        if self._config.torque_limits is not None:
+            tau = np.clip(tau, -self._config.torque_limits, self._config.torque_limits)
         if contact_forces is not None and self._contact_jacobians:
             for i, J_c in enumerate(self._contact_jacobians):
                 if J_c.shape[0] == 6:
@@ -740,7 +762,9 @@ class WholeBodyController:
         Returns:
             Dictionary mapping task name to weighted error.
         """
-        if qdd is None:
+        if not (qdd is not None):
+            raise ValueError("qdd must be provided")
+        if not (qdd is not None):
             raise ValueError("qdd must be provided")
         errors: dict[str, float] = {}
 
@@ -797,7 +821,9 @@ class WholeBodyController:
         Returns:
             Nullspace projector matrix (n, n).
         """
-        if A is None:
+        if not (A is not None):
+            raise ValueError("A must be provided")
+        if not (A is not None):
             raise ValueError("A must be provided")
         A_pinv = np.linalg.pinv(A)
         return np.eye(n) - A_pinv @ A

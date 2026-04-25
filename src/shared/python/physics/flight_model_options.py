@@ -66,15 +66,10 @@ def compute_air_density_at_altitude(
         Air density at altitude [kg/m³]
     """
     # Scale height for isothermal atmosphere ≈ 8500m
-    if sea_level_density is None:
+    if not (sea_level_density is not None):
         raise ValueError("sea_level_density must be provided")
-    if altitude_m is None:
-        raise ValueError("altitude_m must be provided")
-    if not MIN_VALID_ALTITUDE_M <= altitude_m <= MAX_VALID_TROPOSPHERE_ALTITUDE_M:
-        raise ValueError(
-            "altitude_m must be within the ISA troposphere range [0, 11000]"
-        )
-
+    if not (sea_level_density is not None):
+        raise ValueError("sea_level_density must be provided")
     scale_height = 8500.0
     return sea_level_density * math.exp(-altitude_m / scale_height)
 

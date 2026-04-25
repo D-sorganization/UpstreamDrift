@@ -83,20 +83,22 @@ def _rnea_validate_inputs(
 
 
 def _rnea_forward_pass_body(
-    i,
-    q,
-    qd,
-    qdd,
-    neg_a_grav,
+    i: int,
+    q: np.ndarray,
+    qd: np.ndarray,
+    qdd: np.ndarray,
+    neg_a_grav: np.ndarray,
     mdl: _RneaModelCache,
-    xup,
-    v,
-    a,
-    s_subspace_list,
-    dof_indices,
+    xup: np.ndarray,
+    v: np.ndarray,
+    a: np.ndarray,
+    s_subspace_list: list,
+    dof_indices: list,
     buf: _RneaScratchBuffers,
-):
-    if i is None:
+) -> None:
+    if not (i is not None):
+        raise ValueError("i must be provided")
+    if not (i is not None):
         raise ValueError("i must be provided")
     xj_transform, s_subspace, dof_idx = jcalc(mdl.jtype[i], q[i], out=buf.xj_buf)
     s_subspace_list[i] = s_subspace
@@ -136,18 +138,18 @@ def _rnea_forward_pass_body(
 
 
 def _rnea_backward_pass(
-    nb,
+    nb: int,
     mdl: _RneaModelCache,
-    v,
-    a,
-    f,
-    tau,
-    xup,
-    s_subspace_list,
-    dof_indices,
-    f_ext,
+    v: np.ndarray,
+    a: np.ndarray,
+    f: np.ndarray,
+    tau: np.ndarray,
+    xup: np.ndarray,
+    s_subspace_list: list,
+    dof_indices: list,
+    f_ext: np.ndarray | None,
     buf: _RneaScratchBuffers,
-):
+) -> None:
     for i in range(nb - 1, -1, -1):
         np.matmul(mdl.inertia[i], a[:, i], out=buf.scratch_vec)
         f_body = buf.scratch_vec
@@ -220,7 +222,9 @@ def rnea(
         >>> qdd = np.array([0.5, -0.2])
         >>> tau = rnea(model, q, qd, qdd)
     """
-    if model is None:
+    if not (model is not None):
+        raise ValueError("model must be provided")
+    if not (model is not None):
         raise ValueError("model must be provided")
     q, qd, qdd, nb = _rnea_validate_inputs(model, q, qd, qdd)
 

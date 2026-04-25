@@ -98,7 +98,6 @@ In addition to the standard framework, specialized audits monitor specific quali
 | `docs/assessments/completist/Completist_Report_2026-03-26.md`       | 2026-03-26 | Completist Audit Report                                                        |
 | `docs/assessments/completist/Completist_Report_2026-03-27.md`       | 2026-03-27 | Completist Audit Report                                                        |
 | `docs/assessments/completist/Completist_Report_2026-04-05.md`       | 2026-04-05 | Completist Audit Report                                                        |
-| `docs/assessments/completist/Completist_Report_2026-04-23.md`       | 2026-04-23 | Completist Audit Report                                                        |
 
 ---
 
@@ -176,12 +175,6 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 2026-03-26 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-26.md`                 |
 | 2026-03-27 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-03-27.md`                 |
 | 2026-04-05 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-05.md`                 |
-| 2026-04-23 | Completist Audit Report                  | `docs/assessments/completist/Completist_Report_2026-04-23.md`                 |
-| 2026-04-23 | Stub Issue 2406                          | `docs/assessments/issues/Issue_2406_Incomplete_Stub_in_analyzer_base_py_100.md` |
-| 2026-04-23 | Stub Issue 2407                          | `docs/assessments/issues/Issue_2407_Incomplete_Stub_in_analyzer_base_py_104.md` |
-| 2026-04-23 | Stub Issue 2408                          | `docs/assessments/issues/Issue_2408_Incomplete_Stub_in_analyzer_base_py_108.md` |
-| 2026-04-22 | Secret Pattern Audit                     | `docs/assessments/issues/resolved/ISSUE_2957_Secret_Pattern_False_Positives.md` |
-| 2026-04-22 | Adversarial Review                       | `docs/assessments/adversarial_review_2026-04-22.md`                           |
 
 ---
 
@@ -266,10 +259,8 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 3.5     | 2026-03 | Updated Completist Report 2026-03-27 with gap analysis and 32 stub issue files     |
 | 3.5     | 2026-03 | Added Completist Report 2026-03-27 + 32 incomplete-stub issues (#2194-#2243)       |
 | 3.6     | 2026-04 | Added Completist Report 2026-04-05                                                 |
-| 3.7     | 2026-04 | Added A-N comprehensive review 2026-04-09 (`A-N_Assessment_2026-04-09.md`)         |
-| 3.8     | 2026-04 | Added secret audit false-positive resolution note (#2957)                           |
-| 3.9     | 2026-04 | Added adversarial review 2026-04-22                                                 |
-| 3.10    | 2026-04 | Added completist artifacts for 2026-04-23 report and linked stub issues             |
+
+| 3.7 | 2026-04 | Added A-N Assessment 2026-04-10 refresh (see `A-N_Assessment_2026-04-10.md`) |
 
 ---
 

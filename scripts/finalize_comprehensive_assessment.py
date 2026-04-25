@@ -7,6 +7,7 @@ import json
 import re
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from scripts.script_utils import run_main, setup_script_logging
 
@@ -16,12 +17,12 @@ logger = setup_script_logging(__name__)
 
 DOCS_DIR = _REPO_ROOT / "docs" / "assessments"
 COMPLETIST_REPORT = DOCS_DIR / "completist" / "COMPLETIST_LATEST.md"
-PRAGMATIC_REPORT = DOCS_DIR / "pragmatic_programmer" / "review_2026-01-31.json"
+PRAGMATIC_REPORT = DOCS_DIR / "pragmatic_programmer" / "review.json"
 SUMMARY_JSON = DOCS_DIR / "assessment_summary.json"
 OUTPUT_MD = DOCS_DIR / "Comprehensive_Assessment.md"
 
 
-def load_general_data():
+def load_general_data() -> dict[str, Any] | None:
     """Load the general assessment summary JSON data."""
     if not SUMMARY_JSON.exists():
         logger.error(f"Summary JSON not found: {SUMMARY_JSON}")
@@ -30,7 +31,7 @@ def load_general_data():
         return json.load(f)
 
 
-def load_pragmatic_data():
+def load_pragmatic_data() -> dict[str, Any]:
     """Load the pragmatic programmer review report."""
     if not PRAGMATIC_REPORT.exists():
         logger.warning(f"Pragmatic report not found: {PRAGMATIC_REPORT}")
@@ -39,7 +40,7 @@ def load_pragmatic_data():
         return json.load(f)
 
 
-def load_completist_data():
+def load_completist_data() -> int:
     """Load the completist audit report and extract critical gap count."""
     if not COMPLETIST_REPORT.exists():
         logger.warning(f"Completist report not found: {COMPLETIST_REPORT}")
@@ -52,7 +53,9 @@ def load_completist_data():
     return 0
 
 
-def calculate_scores(general_data, critical_gaps, pragmatic_issues):
+def calculate_scores(
+    general_data: dict[str, Any], critical_gaps: int, pragmatic_issues: list[Any]
+) -> dict[str, float]:
     """Compute general, completist, pragmatic, and unified scores."""
     general_score = general_data.get("overall_score", 0.0)
 
@@ -72,7 +75,9 @@ def calculate_scores(general_data, critical_gaps, pragmatic_issues):
     }
 
 
-def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
+def generate_recommendations(
+    general_data: dict[str, Any], critical_gaps: int, pragmatic_issues: list[Any]
+) -> list[dict[str, Any]]:
     """Generate prioritized improvement recommendations from all assessments."""
     recommendations = []
 
@@ -119,7 +124,7 @@ def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
     return recommendations[:10]
 
 
-def main():
+def main() -> int:
     """Finalize and write the comprehensive assessment report."""
     logger.info("Finalizing Comprehensive Assessment Report...")
 

@@ -512,7 +512,9 @@ def path_type(
         >>> parser.add_argument("input", type=path_type(must_exist=True, must_be_file=True))
     """
 
-    if must_exist is None:
+    if not (must_exist is not None):
+        raise ValueError("must_exist must be provided")
+    if not (must_exist is not None):
         raise ValueError("must_exist must be provided")
 
     def _path_type(value: str) -> Path:
@@ -602,7 +604,9 @@ def run_main(
         >>> import sys
         >>> sys.exit(run_main(main, parser))
     """
-    if main_func is None:
+    if not (main_func is not None):
+        raise ValueError("main_func must be provided")
+    if not (main_func is not None):
         raise ValueError("main_func must be provided")
     logger = get_logger(__name__)
 

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -94,7 +94,9 @@ class ClubTrajectory:
 
     def get_frame_at_time(self, t: float) -> ClubFrame:
         """Interpolate to get frame at specific time."""
-        if t is None:
+        if not (t is not None):
+            raise ValueError("t must be provided")
+        if not (t is not None):
             raise ValueError("t must be provided")
         times = self.times
         if t <= times[0]:
@@ -129,7 +131,9 @@ class ClubTrajectory:
 
     def get_event_frame(self, event: str) -> ClubFrame | None:
         """Get frame at a specific swing event (address, top, impact, finish)."""
-        if event is None:
+        if not (event is not None):
+            raise ValueError("event must be provided")
+        if not (event is not None):
             raise ValueError("event must be provided")
         event_map = {
             "address": self.events.address,
@@ -219,7 +223,9 @@ class ClubTrajectoryParser:
 
     def _parse_with_pandas(self, sheet_name: str) -> ClubTrajectory:
         """Parse using pandas."""
-        if sheet_name is None:
+        if not (sheet_name is not None):
+            raise ValueError("sheet_name must be provided")
+        if not (sheet_name is not None):
             raise ValueError("sheet_name must be provided")
         df = pd.read_excel(self.file_path, sheet_name=sheet_name, header=None)
 
@@ -239,7 +245,9 @@ class ClubTrajectoryParser:
 
     def _parse_with_openpyxl(self, sheet_name: str) -> ClubTrajectory:
         """Parse using openpyxl."""
-        if sheet_name is None:
+        if not (sheet_name is not None):
+            raise ValueError("sheet_name must be provided")
+        if not (sheet_name is not None):
             raise ValueError("sheet_name must be provided")
         wb = load_workbook(self.file_path, data_only=True)
         sheet = wb[sheet_name]
@@ -266,7 +274,9 @@ class ClubTrajectoryParser:
 
     def _parse_events_list(self, row: list) -> SwingEventMarkers:
         """Parse event markers from list."""
-        if row is None:
+        if not (row is not None):
+            raise ValueError("row must be provided")
+        if not (row is not None):
             raise ValueError("row must be provided")
         events = SwingEventMarkers()
 
@@ -285,24 +295,26 @@ class ClubTrajectoryParser:
         return events
 
     @staticmethod
-    def _make_row_accessor(row):
+    def _make_row_accessor(row: Any) -> object:
         if hasattr(row, "iloc"):
 
-            def get(i) -> object | None:
+            def get(i: int) -> object | None:
                 """Return the value at index i from a pandas row."""
                 return row.iloc[i] if i < len(row) else None
 
         else:
 
-            def get(i) -> object | None:
+            def get(i: int) -> object | None:
                 """Return the value at index i from a list row."""
                 return row[i] if i < len(row) else None
 
         return get
 
     @staticmethod
-    def _orthogonalize_axes(x_axis, y_axis):
-        if x_axis is None:
+    def _orthogonalize_axes(x_axis: NDArray, y_axis: NDArray) -> NDArray:
+        if not (x_axis is not None):
+            raise ValueError("x_axis must be provided")
+        if not (x_axis is not None):
             raise ValueError("x_axis must be provided")
         x_axis = x_axis / (np.linalg.norm(x_axis) + 1e-8)
         y_axis = y_axis - np.dot(y_axis, x_axis) * x_axis
@@ -310,8 +322,10 @@ class ClubTrajectoryParser:
         z_axis = np.cross(x_axis, y_axis)
         return np.column_stack([x_axis, y_axis, z_axis])
 
-    def _parse_grip_data(self, get):
-        if get is None:
+    def _parse_grip_data(self, get: Any) -> tuple[NDArray, NDArray]:
+        if not (get is not None):
+            raise ValueError("get must be provided")
+        if not (get is not None):
             raise ValueError("get must be provided")
         grip_pos = np.array(
             [
@@ -339,8 +353,12 @@ class ClubTrajectoryParser:
 
         return grip_pos, grip_rot
 
-    def _parse_club_face_data(self, get, grip_pos, grip_rot):
-        if get is None:
+    def _parse_club_face_data(
+        self, get: Any, grip_pos: NDArray, grip_rot: NDArray
+    ) -> tuple[NDArray, NDArray]:
+        if not (get is not None):
+            raise ValueError("get must be provided")
+        if not (get is not None):
             raise ValueError("get must be provided")
         face_x = get(self.FACE_X_COL)
         face_y = get(self.FACE_Y_COL)
@@ -376,19 +394,21 @@ class ClubTrajectoryParser:
 
         return face_pos, face_rot
 
-    def _parse_row(self, row) -> ClubFrame | None:
+    def _parse_row(self, row: Any) -> ClubFrame | None:
         """Parse a single data row into ClubFrame."""
-        if row is None:
+        if not (row is not None):
+            raise ValueError("row must be provided")
+        if not (row is not None):
             raise ValueError("row must be provided")
         get = self._make_row_accessor(row)
 
-        sample = get(self.SAMPLE_COL)
-        if sample is None or not isinstance(sample, int | float):
+        sample = get(self.SAMPLE_COL)  # type: ignore[operator]
+        if sample is None or not isinstance(sample, (int, float)):
             return None
 
         try:
             sample_idx = int(sample)
-            time = float(get(self.TIME_COL))
+            time = float(get(self.TIME_COL))  # type: ignore[operator]
 
             grip_pos, grip_rot = self._parse_grip_data(get)
             face_pos, face_rot = self._parse_club_face_data(get, grip_pos, grip_rot)
@@ -435,7 +455,9 @@ def compute_hand_positions(
         Tuple of (left_hand_position, right_hand_position)
     """
     # Get the grip Z-axis (along the shaft)
-    if frame is None:
+    if not (frame is not None):
+        raise ValueError("frame must be provided")
+    if not (frame is not None):
         raise ValueError("frame must be provided")
     grip_z = frame.grip_rotation[:, 2]
 

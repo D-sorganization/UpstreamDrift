@@ -1,7 +1,7 @@
 import pytest
 
 
-def test_headless_plotting_import():
+def test_headless_plotting_import() -> None:
     """Test that plotting_core can be imported without PyQt6.
 
     Note: The plotting_core module was removed from the codebase.

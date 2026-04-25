@@ -102,7 +102,9 @@ class PhysicsValidator:
             tolerance_energy: Relative error tolerance for energy conservation
             tolerance_jacobian: Absolute error tolerance for Jacobian validation
         """
-        if model is None:
+        if not (model is not None):
+            raise ValueError("model must be provided")
+        if not (model is not None):
             raise ValueError("model must be provided")
         try:
             import mujoco
@@ -131,7 +133,9 @@ class PhysicsValidator:
         Returns:
             Kinetic energy [J]
         """
-        if qpos is None:
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
             raise ValueError("qpos must be provided")
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = qvel
@@ -169,7 +173,9 @@ class PhysicsValidator:
         Returns:
             Potential energy [J]
         """
-        if qpos is None:
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
             raise ValueError("qpos must be provided")
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = 0
@@ -208,7 +214,9 @@ class PhysicsValidator:
         Returns:
             Tuple of (new_qpos, new_qvel)
         """
-        if qpos is None:
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
             raise ValueError("qpos must be provided")
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = qvel
@@ -252,7 +260,9 @@ class PhysicsValidator:
             EnergyValidationResult with pass/fail status
         """
         # Energy at t
-        if qpos is None:
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
             raise ValueError("qpos must be provided")
         KE_t = self.compute_kinetic_energy(qpos, qvel)
         PE_t = self.compute_potential_energy(qpos)
@@ -330,7 +340,9 @@ class PhysicsValidator:
             JacobianValidationResult with pass/fail status
         """
         # Set state
-        if qpos is None:
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
             raise ValueError("qpos must be provided")
         self._scratch_data.qpos[:] = qpos
         self._scratch_data.qvel[:] = 0
@@ -402,7 +414,9 @@ class PhysicsValidator:
         Returns:
             Dictionary mapping check names to pass/fail status
         """
-        if qpos is None:
+        if not (qpos is not None):
+            raise ValueError("qpos must be provided")
+        if not (qpos is not None):
             raise ValueError("qpos must be provided")
         if torques is None:
             torques = np.zeros(self.model.nv)
