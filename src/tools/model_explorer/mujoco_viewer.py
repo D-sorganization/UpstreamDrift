@@ -14,7 +14,6 @@ Issue #755: Enhanced visualization toggles for collision, frames, joints, and co
 
 from __future__ import annotations
 
-import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass
@@ -39,6 +38,7 @@ from src.shared.python.core.constants import (
 )
 from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.security.secure_subprocess import secure_popen
 
 if TYPE_CHECKING:
     from typing import Any
@@ -955,7 +955,7 @@ class MuJoCoViewerWidget(QWidget):
                 f"m=mujoco.MjModel.from_xml_path(r'{temp_path}'); "
                 f"mujoco.viewer.launch(m)",
             ]
-            subprocess.Popen(cmd)
+            secure_popen(cmd)
             logger.info("Launched external MuJoCo viewer")
 
         except ImportError as e:
