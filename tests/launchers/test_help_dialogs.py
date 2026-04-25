@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 
 # Ensure pytest-qt is available
-pytest.importorskip("pytest_qt")
+pytest.importorskip("pytestqt")
 # Ensure PyQt classes are available
 pytest.importorskip("PyQt6")
 from PyQt6.QtCore import Qt  # noqa: E402
