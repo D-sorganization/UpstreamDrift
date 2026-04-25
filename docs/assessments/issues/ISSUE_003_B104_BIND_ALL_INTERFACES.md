@@ -15,3 +15,7 @@ Bandit identified potential security risks where services bind to all network in
 ## Remediation
 
 Bind to localhost (127.0.0.1) unless external access is explicitly required and secured.
+
+## Status
+
+Addressed (2026-04-25): API host binding now requires `API_ALLOW_PUBLIC_BIND=true` before using `0.0.0.0`/`::`, defaulting to loopback otherwise.

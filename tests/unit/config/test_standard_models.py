@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -79,6 +80,30 @@ class TestGetGolfClubPath:
         mgr = StandardModelManager(suite_root=tmp_path)
         path = mgr.get_golf_club_path("iron_7")
         assert isinstance(path, Path)
+
+
+# ---------------------------------------------------------------------------
+# download_standard_humanoid
+# ---------------------------------------------------------------------------
+
+
+class TestDownloadStandardHumanoid:
+    def test_download_validates_https_only(self, tmp_path: Path) -> None:
+        mgr = StandardModelManager(suite_root=tmp_path)
+        with (
+            patch(
+                "src.shared.python.config.standard_models.validate_url_https_only"
+            ) as validator,
+            patch(
+                "src.shared.python.config.standard_models.urllib.request.urlretrieve"
+            ) as urlretrieve,
+            patch.object(mgr, "_create_temporary_meshes"),
+        ):
+            urlretrieve.return_value = None
+            assert mgr.download_standard_humanoid() is True
+            assert validator.call_count == 2
+            for call_args in validator.call_args_list:
+                assert call_args.args[0].startswith("https://")
 
 
 # ---------------------------------------------------------------------------

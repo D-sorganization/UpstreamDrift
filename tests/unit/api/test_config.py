@@ -56,6 +56,12 @@ def test_get_server_host_default() -> None:
 def test_get_server_host_env() -> None:
     with patch.dict(os.environ, {"API_HOST": "0.0.0.0"}):
         host = get_server_host()
+        assert host == DEFAULT_SERVER_HOST
+
+    with patch.dict(
+        os.environ, {"API_HOST": "0.0.0.0", "API_ALLOW_PUBLIC_BIND": "true"}
+    ):
+        host = get_server_host()
         assert host == "0.0.0.0"
 
 

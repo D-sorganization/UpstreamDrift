@@ -48,6 +48,7 @@ The following medium severity security issues were identified during the automat
 
 **Issue:** Possible binding to all interfaces (`0.0.0.0`). This may expose the service to the network unexpectedly.
 **Remediation:** Bind to localhost (`127.0.0.1`) unless external access is explicitly required and secured.
+**Status:** Addressed (2026-04-25) — API_HOST now falls back to loopback unless API_ALLOW_PUBLIC_BIND=true.
 
 **Affected Files:**
 
@@ -59,6 +60,7 @@ The following medium severity security issues were identified during the automat
 
 **Issue:** Audit url open for permitted schemes. `urllib.request.urlopen` might support `file://` or other schemes that could lead to local file inclusion if user input is allowed.
 **Remediation:** Validate the URL scheme (e.g., ensure it starts with `http://` or `https://`) before calling `urlopen`.
+**Status:** Addressed (2026-04-25) — standard model downloads enforce HTTPS-only validation.
 
 **Affected Files:**
 

@@ -16,3 +16,7 @@ The application binds to all network interfaces (`0.0.0.0`), which may expose th
 ## Remediation
 
 Bind to `127.0.0.1` (localhost) unless external access is explicitly required and secured. If running in a container, ensure the container port mapping is secure.
+
+## Status
+
+Addressed (2026-04-25): API host binding now requires `API_ALLOW_PUBLIC_BIND=true` before using `0.0.0.0`/`::`, defaulting to loopback otherwise.

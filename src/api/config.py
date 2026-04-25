@@ -72,18 +72,35 @@ def get_cors_origins() -> list[str]:
 # API_PORT -- see issue #2068.
 DEFAULT_SERVER_HOST = "127.0.0.1"
 DEFAULT_SERVER_PORT = 8000
+PUBLIC_BIND_ENV = "API_ALLOW_PUBLIC_BIND"
+PUBLIC_BIND_VALUES = {"1", "true", "yes", "on"}
+PUBLIC_BIND_HOSTS = {"0.0.0.0", "::"}
+
+
+def _is_public_bind_allowed() -> bool:
+    """Return True if binding to all interfaces is explicitly allowed."""
+    return os.getenv(PUBLIC_BIND_ENV, "").strip().lower() in PUBLIC_BIND_VALUES
+
+
+def _is_public_bind(host: str) -> bool:
+    """Return True if host represents a public bind address."""
+    return host in PUBLIC_BIND_HOSTS
 
 
 def get_server_host() -> str:
     """Get server host from environment or default.
 
-    Environment Variable:
+    Environment Variables:
         API_HOST: Server bind address (default: 127.0.0.1)
+        API_ALLOW_PUBLIC_BIND: Set to true to allow 0.0.0.0/:: binds
 
     Returns:
         Server host address.
     """
-    return os.getenv("API_HOST", DEFAULT_SERVER_HOST)
+    host = os.getenv("API_HOST", DEFAULT_SERVER_HOST).strip()
+    if _is_public_bind(host) and not _is_public_bind_allowed():
+        return DEFAULT_SERVER_HOST
+    return host
 
 
 def get_server_port() -> int:

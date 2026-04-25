@@ -46,7 +46,13 @@ def test_setup_api_environment(monkeypatch) -> None:
     monkeypatch.setattr("start_api_server._validate_security", lambda: True)
 
     with patch.dict(
-        os.environ, {"API_HOST": "0.0.0.0", "API_PORT": "9000"}, clear=True
+        os.environ,
+        {
+            "API_HOST": "0.0.0.0",
+            "API_PORT": "9000",
+            "API_ALLOW_PUBLIC_BIND": "true",
+        },
+        clear=True,
     ):
         host, port = start_api_server.setup_api_environment()
         assert host == "0.0.0.0"
