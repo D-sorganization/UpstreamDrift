@@ -159,7 +159,7 @@ def _init_arrow_geom(
     start = np.asarray(start, dtype=np.float64)
     end = np.asarray(end, dtype=np.float64)
     diff = end - start
-    length = float(np.linalg.norm(diff))
+    length = float(np.sqrt(np.vdot(diff, diff)))
     if length < 1e-8:
         return
 
