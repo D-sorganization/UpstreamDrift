@@ -19,12 +19,10 @@ from src.shared.python.core.contracts import precondition
 from src.shared.python.engine_core.engine_availability import (
     C3D_AVAILABLE,
     EZC3D_AVAILABLE,
+    SCIPY_AVAILABLE,
 )
 from src.shared.python.engine_core.engine_availability import (
     HDF5_AVAILABLE as H5PY_AVAILABLE,
-)
-from src.shared.python.engine_core.engine_availability import (
-    SCIPY_AVAILABLE,
 )
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -94,9 +92,7 @@ def export_to_matlab(
 
         return True
 
-    except (
-        Exception
-    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to MATLAB: {e}")
         return False
 
@@ -170,9 +166,7 @@ def export_to_hdf5(
 
         return True
 
-    except (
-        Exception
-    ) as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
+    except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to HDF5: {e}")
         return False
 

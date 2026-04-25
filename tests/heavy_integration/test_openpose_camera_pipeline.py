@@ -123,9 +123,9 @@ class TestPoseEstimationInterface:
         import dataclasses
 
         field_names = {f.name for f in dataclasses.fields(PoseEstimationResult)}
-        assert (
-            "keypoints" in field_names
-        ), f"PoseEstimationResult missing 'keypoints' field; got {field_names}"
+        assert "keypoints" in field_names, (
+            f"PoseEstimationResult missing 'keypoints' field; got {field_names}"
+        )
 
 
 pytestmark = pytest.mark.live_simulation

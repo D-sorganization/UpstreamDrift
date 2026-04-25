@@ -199,9 +199,7 @@ class TestSMPLXGenerate:
         mock_output.vertices = MagicMock()
         mock_output.vertices.detach.return_value.cpu.return_value.numpy.return_value.squeeze.return_value = rng.standard_normal(
             (n_verts, 3)
-        ).astype(
-            np.float32
-        )
+        ).astype(np.float32)
 
         mock_model = MagicMock()
         mock_model.return_value = mock_output

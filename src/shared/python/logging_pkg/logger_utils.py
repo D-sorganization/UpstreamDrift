@@ -30,10 +30,8 @@ _USING_FULL_IMPLEMENTATION = False
 
 try:
     from src.shared.python.data_io.reproducibility import (
-        log_execution_time,  # Context manager - re-export directly
-    )
-    from src.shared.python.data_io.reproducibility import (
         DEFAULT_SEED,
+        log_execution_time,  # Context manager - re-export directly
     )
     from src.shared.python.data_io.reproducibility import set_seeds as _set_seeds
     from src.shared.python.logging_pkg.logging_config import (
