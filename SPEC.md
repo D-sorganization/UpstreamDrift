@@ -748,3 +748,4 @@ pytest tests/ --cov=src --cov-fail-under=70
 - Mounted production quota route dependencies consistently and deferred auth-mode bypass decisions to request time so local/test API requests preserve endpoint validation semantics while cloud-mode simulation and video routes reject unauthenticated access.
 - Restored legacy `/api/...` API route registration for launcher, terrain, and other existing clients while preserving root and `/api/v1/...` route coverage.
 - Enforced streamed upload byte-limit validation in upload-related API handlers and tests for robust production quota enforcement.
+| 2026-04-25 | 1.1.20       | Secured subprocess execution wrappers across tools          |
