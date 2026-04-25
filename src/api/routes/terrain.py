@@ -34,7 +34,7 @@ from src.shared.python.physics.terrain import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/terrain", tags=["terrain"])
+router = APIRouter(prefix="/terrain", tags=["terrain"])
 
 
 # ──────────────────────────────────────────────────────────────

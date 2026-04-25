@@ -28,6 +28,16 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+SPATIAL_JACOBIAN_ORDER = ("angular", "linear")
+"""Canonical suite row order for ``jacobian["spatial"]``.
+
+Engine wrappers expose separate ``linear`` and ``angular`` matrices and a
+combined ``spatial`` matrix. The combined matrix is stacked as
+``[angular; linear]`` for compatibility with Drake spatial velocity ordering.
+Wrappers whose native API returns ``[linear; angular]`` must restack before
+returning ``spatial``.
+"""
+
 
 class Capability(Enum):
     """Named optional capabilities an engine may support.

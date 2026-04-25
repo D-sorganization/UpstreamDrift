@@ -1,3 +1,7 @@
+# ARCHITECTURE_DEBT:
+# This module historically exceeds standard length metrics and accumulates excessive domain responsibility.
+# It requires domain-aware structural extraction to isolate its internal classes appropriately.
+
 """
 Double pendulum golf swing physics using Lagrangian formulation with relative coordinates.
 
@@ -28,6 +32,7 @@ import numpy.typing as npt
 
 from . import native_backend as _native_backend
 from .constants import GRAVITY_MSS
+from .physics_base import clamp_torque_ndof  # noqa: F401  (re-export, DRY)
 
 _log = logging.getLogger(__name__)
 
@@ -404,28 +409,6 @@ def joint_limit_torque_ndof(
             result[i] = -_hermite_penalty(
                 angle - hi, vel, transition, limits.stiffness, limits.damping
             )
-    return result
-
-
-def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
-    """Clamp N-DOF torque vector to symmetric per-DOF limits (#1150).
-
-    Parameters
-    ----------
-    tau : ndarray, shape (n,)
-        Joint torque vector.
-    limits : ndarray, shape (n,)
-        Per-joint maximum torque magnitudes (positive).
-        Use ``inf`` for unclamped joints.
-
-    Pre: tau.shape == limits.shape, all limits > 0.
-    Post: |result[i]| <= limits[i] for all i.
-    """
-    assert tau.shape == limits.shape, (
-        f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
-    )
-    assert np.all(limits > 0), "All limits must be positive"
-    result: np.ndarray = np.clip(tau, -limits, limits)
     return result
 
 

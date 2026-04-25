@@ -344,7 +344,7 @@ class DifferentiableEngine:
             """Compute squared error between the final state and the goal."""
             final_state = trajectory[-1]
             state_error = final_state - goal_state
-            return float(np.sum(state_error**2))
+            return float(np.vdot(state_error, state_error))
 
         # Adam optimizer state
         if method == "adam":
@@ -558,7 +558,8 @@ class ContactDifferentiableEngine(DifferentiableEngine):
     ) -> Callable[[NDArray[np.floating]], float]:
         def loss_fn(trajectory: NDArray[np.floating]) -> float:
             """Compute goal error plus contact-transition velocity penalty."""
-            final_error = float(np.sum((trajectory[-1] - goal_state) ** 2))
+            diff_goal = trajectory[-1] - goal_state
+            final_error = float(np.vdot(diff_goal, diff_goal))
 
             contact_penalty = 0.0
             n_q = self._n_q
@@ -566,7 +567,8 @@ class ContactDifferentiableEngine(DifferentiableEngine):
                 if schedule[t] != schedule[t + 1]:
                     v_curr = trajectory[t + 1, n_q:]
                     v_next = trajectory[t + 2, n_q:]
-                    contact_penalty += float(np.sum((v_next - v_curr) ** 2))
+                    diff_v = v_next - v_curr
+                    contact_penalty += float(np.vdot(diff_v, diff_v))
 
             return final_error + contact_penalty_weight * contact_penalty
 

@@ -30,6 +30,21 @@ def create_limited_club_model() -> SimpleNamespace:
     )
 
 
+def create_limited_club_model() -> SimpleNamespace:
+    """Create a minimal mock model with a limited hinge and club-head body."""
+    return SimpleNamespace(
+        nv=3,
+        nq=3,
+        nu=1,
+        njnt=1,
+        nbody=2,
+        jnt_limited=np.array([True]),
+        jnt_qposadr=np.array([0]),
+        jnt_range=np.array([[-0.1, 0.1]]),
+        body_mass=np.array([1.0, 1.0]),
+    )
+
+
 class TestKinematicForceData:
     """Tests for KinematicForceData dataclass."""
 

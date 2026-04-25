@@ -9,6 +9,12 @@
 - Golf Modeling Suite installed and verified
 - Basic Python knowledge
 
+> Install the package before running tutorial snippets:
+>
+> \`\`\`bash
+> pip install -e .
+> \`\`\`
+
 ## Learning Objectives
 
 By the end of this tutorial, you will:
@@ -43,7 +49,8 @@ Create a new file `my_first_simulation.py`:
 """My first simulation with the Golf Modeling Suite."""
 
 from pathlib import Path
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 
 # Define project paths
 project_root = Path(__file__).parent.parent
@@ -303,7 +310,8 @@ import numpy as np
 import json
 from datetime import datetime
 
-from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.engine_core.engine_manager import EngineManager
+from src.shared.python.engine_core.engine_registry import EngineType
 
 
 def main():

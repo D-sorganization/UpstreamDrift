@@ -25,6 +25,7 @@ Design by Contract:
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -683,12 +684,13 @@ class PuttingGreenSimulator:
             raise ValueError("stroke_params must be provided")
         result = self.simulate_putt(stroke_params)
 
-        distance_from_hole = np.linalg.norm(
-            result.final_position - self.green.hole_position
+        distance_from_hole = math.hypot(
+            result.final_position[0] - self.green.hole_position[0],
+            result.final_position[1] - self.green.hole_position[1],
         )
 
         # Generate feedback
-        feedback = {
+        feedback: dict[str, float | bool | str] = {
             "distance_from_hole": distance_from_hole,
             "holed": result.holed,
             "total_distance": result.total_distance,
@@ -785,7 +787,9 @@ class PuttingGreenSimulator:
         aim_point = target - break_info["break_direction"] * break_info["total_break"]
 
         # Recommended speed
-        distance = float(np.linalg.norm(target - ball_position))
+        distance = math.hypot(
+            target[0] - ball_position[0], target[1] - ball_position[1]
+        )
         avg_slope = np.dot(
             break_info["average_slope"], (target - ball_position) / (distance + 1e-10)
         )
