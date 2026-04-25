@@ -11,6 +11,12 @@ Actionable: Yes
 Has Suggestion: No
 
 ```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Stop advertising CONTACT_FORCES in MyoSuite capabilities**
+
+This declares `Capability.CONTACT_FORCES`, but `MyoSuitePhysicsEngine` does not implement `compute_contact_forces()`, so calls fall back to `DynamicsInterface.compute_contact_forces()` which returns `np.zeros(3)` by default. With this capability flag set, downstream code that correctly gates on `engine.capabilities()` will treat zero vectors as real ...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3279#discussion_r3142352327)
 **<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Avoid making BasePhysicsEngine abstract without migrations**
 
 Adding `@abstractmethod capabilities()` here makes every existing `BasePhysicsEngine` subclass that lacks this method non-instantiable. In this tree, `PendulumPhysicsEngine` and `GolfSwingPendulumEngine` do not implement `capabilities()`, so constructing them now raises `TypeError` (e.g., `Can't instantiate abstract class ... without an implementat...
