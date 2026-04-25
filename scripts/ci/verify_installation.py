@@ -5,19 +5,46 @@ This script checks that all required dependencies are installed and
 the core modules can be imported successfully.
 
 Usage:
-    python scripts/verify_installation.py
+    python scripts/verify_installation.py [--json]
 
 Exit codes:
-    0 - All checks passed
-    1 - Some checks failed
+    0 - All critical checks passed
+    1 - Some critical checks failed
+
+Options:
+    --json    Output structured JSON result
 """
 
 from __future__ import annotations
 
+import json
 import logging
 import sys
 
 logger = logging.getLogger(__name__)
+
+
+def check_python_version() -> tuple[bool, str]:
+    """Check Python version is 3.10 or higher."""
+    required_major, required_minor = 3, 10
+    if sys.version_info >= (required_major, required_minor):
+        version_str = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        return True, f"✓ Python version {version_str}"
+    version_str = f"{sys.version_info.major}.{sys.version_info.minor}"
+    return (
+        False,
+        f"✗ Python {version_str} (requires {required_major}.{required_minor}+)",
+    )
+
+
+def check_virtualenv() -> tuple[bool, str]:
+    """Check if running in a virtual environment (advisory, not blocking)."""
+    in_venv = hasattr(sys, "real_prefix") or (
+        hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
+    )
+    if in_venv:
+        return True, f"✓ Virtual environment detected: {sys.prefix}"
+    return True, "⚠ System Python (virtualenv recommended but not required)"
 
 
 def check_import(
@@ -55,9 +82,24 @@ def main() -> int:
     """Run all verification checks."""
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
+    json_output = "--json" in sys.argv
+
     logger.info("=" * 60)
     logger.info("Golf Modeling Suite - Installation Verification")
     logger.info("=" * 60)
+    logger.info("")
+
+    logger.info("Environment Checks:")
+    logger.info("-" * 40)
+
+    # Check Python version
+    py_success, py_msg = check_python_version()
+    logger.info(py_msg)
+
+    # Check virtualenv (advisory)
+    venv_success, venv_msg = check_virtualenv()
+    logger.info(venv_msg)
+
     logger.info("")
 
     # Define checks: (display_name, import_path, version_attr)
@@ -122,6 +164,7 @@ def main() -> int:
     logger.info("=" * 60)
 
     # Summary
+    py_critical = py_success
     core_passed = sum(core_results)
     core_total = len(core_results)
     suite_passed = sum(suite_results)
@@ -129,24 +172,42 @@ def main() -> int:
     total_passed = core_passed + suite_passed
     total_checks = core_total + suite_total
 
+    logger.info("Python version:    %s", "OK" if py_critical else "FAILED")
     logger.info("Core dependencies: %d/%d passed", core_passed, core_total)
     logger.info("Suite modules:     %d/%d passed", suite_passed, suite_total)
     logger.info("Overall:           %d/%d passed", total_passed, total_checks)
     logger.info("")
 
-    if total_passed == total_checks:
+    if json_output:
+        result = {
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "python_ok": py_critical,
+            "in_virtualenv": venv_success and "Virtual" in venv_msg,
+            "core_checks": {"passed": core_passed, "total": core_total},
+            "suite_checks": {"passed": suite_passed, "total": suite_total},
+            "overall": {"passed": total_passed, "total": total_checks},
+            "status": "passed"
+            if (py_critical and total_passed == total_checks)
+            else "failed",
+        }
+        print(json.dumps(result, indent=2))
+
+    if py_critical and total_passed == total_checks:
         logger.info("✓ Installation verified successfully!")
         logger.info("")
         logger.info("You can now run:")
-        logger.info("  python launchers/golf_suite_launcher.py")
-        logger.info("  python -m api.server")
+        logger.info("  upstream-drift")
+        logger.info("  python launch_golf_suite.py")
+        logger.info("  python -m src.api.local_server")
         return 0
-    logger.warning("✗ Some checks failed.")
+    logger.warning("✗ Some critical checks failed.")
     logger.info("")
     logger.info("Troubleshooting:")
     logger.info("  1. See docs/troubleshooting/installation.md")
     logger.info("  2. Try: conda env create -f environment.yml")
     logger.info("  3. Or:  pip install -e '.[dev,engines]'")
+    if not py_critical:
+        logger.info("  4. Your Python version is too old; upgrade to 3.10+")
     return 1
 
 

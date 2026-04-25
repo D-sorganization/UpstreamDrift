@@ -58,16 +58,30 @@ def main() -> None:
     trajectory = simulator.simulate_trajectory(launch, max_time=8.0, dt=0.05)
 
     # --- Print summary every 0.5 s ---
-    for _pt in trajectory[::10]:
-        pass
+    header = f"{'t (s)':>8} {'x (m)':>10} {'z (m)':>8} {'|v| (m/s)':>12}"
+    print(header)
+    print("-" * len(header))
+    for pt in trajectory[::10]:
+        speed = float(np.linalg.norm(pt.velocity))
+        print(f"{pt.time:8.2f} {pt.position[0]:10.2f} {pt.height:8.2f} {speed:12.2f}")
 
     # --- Carry distance: last point before height < 0 ---
     landing_pts = [p for p in trajectory if p.height <= 0.0]
     if len(landing_pts) >= 2:
         carry_m = float(landing_pts[-1].position[0])
-        carry_m * 1.0936
+        carry_yd = carry_m * 1.0936
+        print(f"\nCarry distance: {carry_m:.1f} m ({carry_yd:.1f} yd)")
     else:
-        pass
+        print(
+            "\nBall did not return to ground within the simulated window "
+            "(increase max_time or check launch conditions)."
+        )
+
+    print(
+        "\nPhysics: drag Cd=0.25 and lift Cl=0.15 were applied via the "
+        "BallFlightSimulator; gravity is 9.81 m/s² and air density 1.225 kg/m³ "
+        "(sea level). Higher spin → more lift and longer carry."
+    )
 
 
 if __name__ == "__main__":
