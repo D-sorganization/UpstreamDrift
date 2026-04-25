@@ -9,17 +9,28 @@ Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
 from __future__ import annotations
 
 import os
+import sys
+from pathlib import Path
 
-import uvicorn
+# Add repo root to sys.path so script can be run directly from scripts/ci/
+_script_dir = Path(__file__).resolve().parent
+_repo_root = _script_dir.parent.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
-from api.server import app
-from src.shared.python.gui_pkg.launcher_utils import (
+import uvicorn  # noqa: E402
+
+from api.server import app  # noqa: E402
+from src.shared.python.gui_pkg.launcher_utils import (  # noqa: E402
     check_python_dependencies,
     ensure_environment_var,
     get_repo_root,
     invoke_main,
 )
-from src.shared.python.logging_pkg.logging_config import get_logger, setup_logging
+from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
+    get_logger,
+    setup_logging,
+)
 
 setup_logging(use_simple_format=True)
 logger = get_logger(__name__)
