@@ -112,7 +112,8 @@ class TestEngineManager:
                         capabilities: [swing]
                         source_root: provider_roots/Drake_Models
                         working_dir: python
-                    """).strip() + "\n",
+                    """).strip()
+                + "\n",
                 encoding="utf-8",
             )
 
@@ -142,7 +143,8 @@ class TestEngineManager:
                         capabilities: [swing]
                         source_root: provider_roots/Drake_Models
                         working_dir: python
-                    """).strip() + "\n",
+                    """).strip()
+                + "\n",
                 encoding="utf-8",
             )
 
