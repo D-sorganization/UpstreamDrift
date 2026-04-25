@@ -43,7 +43,7 @@ except ImportError:
 logger = get_logger(__name__)
 
 # Recent models storage
-RECENT_FILE = Path.home() / ".golf_modeling_suite" / "recent_models.json"
+RECENT_FILE = Path.home() / ".upstream_modeling_suite" / "recent_models.json"
 MAX_RECENT = 10
 
 

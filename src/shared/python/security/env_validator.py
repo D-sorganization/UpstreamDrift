@@ -82,7 +82,7 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
     if key == "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL":
         raise EnvironmentValidationError(
             "Secret key is using unsafe placeholder. "
-            "Set GOLF_API_SECRET_KEY or SECRET_KEY environment variable."
+            "Set UPSTREAM_API_SECRET_KEY or SECRET_KEY environment variable."
         )
 
     # Check for common weak patterns
@@ -138,14 +138,14 @@ def validate_api_security() -> APIKeyValidationResults:
     if not secret_key:
         if is_production():
             results["issues"].append(
-                "CRITICAL: No GOLF_API_SECRET_KEY or SECRET_KEY set in production!"
+                "CRITICAL: No UPSTREAM_API_SECRET_KEY or SECRET_KEY set in production!"
             )
             raise EnvironmentValidationError(
-                "GOLF_API_SECRET_KEY",
-                "GOLF_API_SECRET_KEY is required for production",
+                "UPSTREAM_API_SECRET_KEY",
+                "UPSTREAM_API_SECRET_KEY is required for production",
             )
         results["warnings"].append(
-            "No GOLF_API_SECRET_KEY set. Using unsafe placeholder for development."
+            "No UPSTREAM_API_SECRET_KEY set. Using unsafe placeholder for development."
         )
     else:
         try:
@@ -163,7 +163,7 @@ def validate_api_security() -> APIKeyValidationResults:
     if not admin_password:
         if is_production():
             results["warnings"].append(
-                "No GOLF_ADMIN_PASSWORD set. A random password will be generated. "
+                "No UPSTREAM_ADMIN_PASSWORD set. A random password will be generated. "
                 "Set this variable to use a custom admin password."
             )
         results["admin_password"] = False
@@ -277,10 +277,10 @@ python3 -c "import secrets; print(secrets.token_urlsafe(64))"
 # {sample_key}
 
 # Set the environment variable:
-export GOLF_API_SECRET_KEY="[your-generated-key]"
+export UPSTREAM_API_SECRET_KEY="[your-generated-key]"
 
 # Or add to .env file:
-echo 'GOLF_API_SECRET_KEY=[your-generated-key]' >> .env
+echo 'UPSTREAM_API_SECRET_KEY=[your-generated-key]' >> .env
 """
 
 

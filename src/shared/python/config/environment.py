@@ -352,7 +352,7 @@ def _get_with_fallback(new_name: str, old_name: str) -> str | None:
 def get_secret_key(*, required: bool = False) -> str | None:
     """Get the API secret key.
 
-    Checks HUMANOID_API_SECRET_KEY (new) and falls back to GOLF_API_SECRET_KEY,
+    Checks HUMANOID_API_SECRET_KEY (new) and falls back to UPSTREAM_API_SECRET_KEY,
     then SECRET_KEY for backward compatibility.
 
     Args:
@@ -368,7 +368,7 @@ def get_secret_key(*, required: bool = False) -> str | None:
         >>> key = get_secret_key(required=True)
     """
     key = _get_with_fallback(
-        "HUMANOID_API_SECRET_KEY", "GOLF_API_SECRET_KEY"
+        "HUMANOID_API_SECRET_KEY", "UPSTREAM_API_SECRET_KEY"
     ) or os.environ.get("SECRET_KEY")
 
     if key:
@@ -401,13 +401,13 @@ def get_database_url(default: str = "sqlite:///golf.db") -> str:
 def get_admin_password() -> str | None:
     """Get the admin password.
 
-    Checks HUMANOID_ADMIN_PASSWORD (new) and falls back to GOLF_ADMIN_PASSWORD
+    Checks HUMANOID_ADMIN_PASSWORD (new) and falls back to UPSTREAM_ADMIN_PASSWORD
     for backward compatibility.
 
     Returns:
         Admin password or None if not set.
     """
-    return _get_with_fallback("HUMANOID_ADMIN_PASSWORD", "GOLF_ADMIN_PASSWORD")
+    return _get_with_fallback("HUMANOID_ADMIN_PASSWORD", "UPSTREAM_ADMIN_PASSWORD")
 
 
 def get_api_host(default: str = "127.0.0.1") -> str:
@@ -415,7 +415,7 @@ def get_api_host(default: str = "127.0.0.1") -> str:
 
     Uses 127.0.0.1 (localhost) by default for security.
     Set HUMANOID_API_HOST=0.0.0.0 for Docker or when external access is needed.
-    Falls back to GOLF_API_HOST for backward compatibility.
+    Falls back to UPSTREAM_API_HOST for backward compatibility.
 
     Args:
         default: Default host address (127.0.0.1 for localhost-only access).
@@ -423,13 +423,13 @@ def get_api_host(default: str = "127.0.0.1") -> str:
     Returns:
         Host address string.
     """
-    return _get_with_fallback("HUMANOID_API_HOST", "GOLF_API_HOST") or default
+    return _get_with_fallback("HUMANOID_API_HOST", "UPSTREAM_API_HOST") or default
 
 
 def get_api_port(default: int = 8000) -> int:
     """Get the API port number.
 
-    Checks HUMANOID_API_PORT (new) and falls back to GOLF_API_PORT for
+    Checks HUMANOID_API_PORT (new) and falls back to UPSTREAM_API_PORT for
     backward compatibility.
 
     Args:
@@ -443,7 +443,7 @@ def get_api_port(default: int = 8000) -> int:
         return get_env_int(
             "HUMANOID_API_PORT", default=default, min_value=1, max_value=65535
         )
-    return get_env_int("GOLF_API_PORT", default=default, min_value=1, max_value=65535)
+    return get_env_int("UPSTREAM_API_PORT", default=default, min_value=1, max_value=65535)
 
 
 def get_log_level(default: str = "INFO") -> str:
@@ -518,8 +518,8 @@ def is_wsl() -> bool:
 def get_golf_port(default: int = 8000) -> int:
     """Get the Humanoid Suite server port.
 
-    Reads from HUMANOID_PORT env var (new) or GOLF_PORT (old, distinct from
-    HUMANOID_API_PORT/GOLF_API_PORT).
+    Reads from HUMANOID_PORT env var (new) or UPSTREAM_PORT (old, distinct from
+    HUMANOID_API_PORT/UPSTREAM_API_PORT).
 
     Args:
         default: Default port number.
@@ -532,7 +532,7 @@ def get_golf_port(default: int = 8000) -> int:
         return get_env_int(
             "HUMANOID_PORT", default=default, min_value=1, max_value=65535
         )
-    return get_env_int("GOLF_PORT", default=default, min_value=1, max_value=65535)
+    return get_env_int("UPSTREAM_PORT", default=default, min_value=1, max_value=65535)
 
 
 def get_golf_suite_mode(default: str = "remote") -> str:
@@ -541,7 +541,7 @@ def get_golf_suite_mode(default: str = "remote") -> str:
     Defaults to ``"remote"`` (auth-required) when ``HUMANOID_SUITE_MODE`` is
     not set. Set ``HUMANOID_SUITE_MODE=local`` explicitly to enable auth
     bypass for local development — do not rely on the absence of the variable.
-    Falls back to GOLF_SUITE_MODE for backward compatibility.
+    Falls back to UPSTREAM_SUITE_MODE for backward compatibility.
 
 
     Args:
@@ -550,7 +550,7 @@ def get_golf_suite_mode(default: str = "remote") -> str:
     Returns:
         Mode string (e.g., ``"local"``, ``"remote"``).
     """
-    return _get_with_fallback("HUMANOID_SUITE_MODE", "GOLF_SUITE_MODE") or default
+    return _get_with_fallback("HUMANOID_SUITE_MODE", "UPSTREAM_SUITE_MODE") or default
 
 
 def is_auth_disabled() -> bool:
@@ -564,7 +564,7 @@ def is_auth_disabled() -> bool:
     """
     return get_golf_suite_mode() == "local" or (
         get_env_bool("HUMANOID_AUTH_DISABLED", default=False)
-        or get_env_bool("GOLF_AUTH_DISABLED", default=False)
+        or get_env_bool("UPSTREAM_AUTH_DISABLED", default=False)
     )
 
 
@@ -581,11 +581,11 @@ def is_browser_suppressed() -> bool:
     """Check if auto-opening a browser is suppressed.
 
     Returns:
-        True if ``HUMANOID_NO_BROWSER=true`` or ``GOLF_NO_BROWSER=true``
+        True if ``HUMANOID_NO_BROWSER=true`` or ``UPSTREAM_NO_BROWSER=true``
         (old name, for backward compatibility).
     """
     return get_env_bool("HUMANOID_NO_BROWSER", default=False) or get_env_bool(
-        "GOLF_NO_BROWSER", default=False
+        "UPSTREAM_NO_BROWSER", default=False
     )
 
 

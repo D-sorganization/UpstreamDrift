@@ -258,7 +258,7 @@ class LauncherDialogsMixin:
 
     def _reset_layout_to_defaults(self) -> None:
         """Reset layout configuration to show all default tiles."""
-        config_file = Path.home() / ".golf_modeling_suite" / "launcher_layout.json"
+        config_file = Path.home() / ".upstream_modeling_suite" / "launcher_layout.json"
 
         try:
             if config_file.exists():

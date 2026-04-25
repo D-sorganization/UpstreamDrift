@@ -1,7 +1,7 @@
 """Parameter preset routes.
 
 Provides endpoints for saving and loading simulation parameter presets.
-Presets are stored as JSON files in ~/.golf_modeling_suite/presets/.
+Presets are stored as JSON files in ~/.upstream_modeling_suite/presets/.
 
 All dependencies are injected via FastAPI's Depends() mechanism.
 No module-level mutable state.
@@ -36,7 +36,7 @@ def _presets_dir() -> Path:
     Returns:
         Path to the presets directory.
     """
-    directory = Path.home() / ".golf_modeling_suite" / "presets"
+    directory = Path.home() / ".upstream_modeling_suite" / "presets"
     directory.mkdir(parents=True, exist_ok=True)
     return directory
 

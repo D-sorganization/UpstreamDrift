@@ -51,7 +51,7 @@ except ImportError:
 logger = get_logger(__name__)
 
 # Default preferences file location
-PREFS_DIR = Path.home() / ".golf_modeling_suite"
+PREFS_DIR = Path.home() / ".upstream_modeling_suite"
 PREFS_FILE = PREFS_DIR / "preferences.json"
 
 

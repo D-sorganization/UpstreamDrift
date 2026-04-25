@@ -288,7 +288,7 @@ class AIAssistantPanel(QWidget):
         self._rag_store = SimpleRAGStore()
 
         # Persistence
-        self._history_file = Path.home() / ".golf_modeling_suite" / "chat_history.json"
+        self._history_file = Path.home() / ".upstream_modeling_suite" / "chat_history.json"
         self._load_history()
 
         # Initialize Core Tools

@@ -109,7 +109,7 @@ class ProcessManager:
         self._process_lock = threading.RLock()
 
         # Persistent log file for all process output
-        self._log_dir = Path.home() / ".golf_modeling_suite"
+        self._log_dir = Path.home() / ".upstream_modeling_suite"
         self._log_file_path = self._log_dir / "process_output.log"
         self._init_log_file()
 
@@ -253,7 +253,7 @@ class ProcessManager:
     @classmethod
     def get_log_path(cls) -> Path:
         """Return the path to the persistent process output log."""
-        return Path.home() / ".golf_modeling_suite" / "process_output.log"
+        return Path.home() / ".upstream_modeling_suite" / "process_output.log"
 
     def _write_log_line(self, name: str, line: str) -> None:
         """Append a timestamped line to the persistent log file."""

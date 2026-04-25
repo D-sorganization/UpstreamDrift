@@ -2,7 +2,7 @@
 
 Generated: 2026-04-25T11:50:47.535127
 
-## Reviewer (chatgpt-codex-connector[bot]) (7 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (9 comments)
 
 ### PR #3281: src/shared/python/engine_core/base_physics_engine.py:487
 ### PR #3282: src/shared/python/calc_backend/tests/test_inline_calcs.py:1
@@ -11,6 +11,16 @@ Actionable: Yes
 Has Suggestion: No
 
 ```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Keep GOLF_SUITE_MODE fallback in mode resolution**
+
+This change drops support for the legacy `GOLF_SUITE_MODE` variable, so environments that have not migrated yet will silently fall back to the default mode (`remote`) and start enforcing auth where local-mode bypass previously worked. Because local auth behavior is security-critical and the repo still contains existing usage of the legacy names, this is a br...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3276#discussion_r3142346090)
+
+---
+
+### PR #3276: src/api/auth/security.py:28
 **<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Stop advertising CONTACT_FORCES in MyoSuite capabilities**
 
 This declares `Capability.CONTACT_FORCES`, but `MyoSuitePhysicsEngine` does not implement `compute_contact_forces()`, so calls fall back to `DynamicsInterface.compute_contact_forces()` which returns `np.zeros(3)` by default. With this capability flag set, downstream code that correctly gates on `engine.capabilities()` will treat zero vectors as real ...
@@ -38,6 +48,16 @@ Actionable: Yes
 Has Suggestion: No
 
 ```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Accept legacy GOLF_API_SECRET_KEY during migration**
+
+Reading only `UPSTREAM_API_SECRET_KEY` here breaks deployments that still provide `GOLF_API_SECRET_KEY`: in production, startup now raises a missing-secret runtime error; in non-production, the app falls back to a random per-process key and invalidates JWTs on restart. This should keep the legacy env var as a temporary fallback to avoid an outage during re...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3276#discussion_r3142346092)
+
+---
+
+### PR #3276: src/api/database.py:15
 **<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Preserve validate_cross_engine result contract**
 
 This return payload removes previously exposed fields like `source`, `max_delta`, and `engines` and flips `payload['success']` to `False`, which breaks existing callers that treat this tool as a structured diff report; the current test suite already dereferences those keys in `tests/unit/ai/test_sample_tools.py:259-272` and `tests/test_sample_tools_real.py:72-...
@@ -53,6 +73,12 @@ Actionable: Yes
 Has Suggestion: No
 
 ```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Fallback to existing default SQLite file on rename**
+
+Changing the implicit default database file name without a fallback/migration path causes users who rely on default `DATABASE_URL` behavior to boot against a brand-new empty SQLite database after upgrade, effectively hiding existing accounts and state stored in `golf_modeling_suite.db`. Add a compatibility check (or one-time migration) when the old file ex...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3276#discussion_r3142346095)
 **<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Fail tool execution when validation is unimplemented**
 
 Returning `{"success": False}` inside the payload does not trigger workflow failure handling, because `WorkflowEngine._execute_step_tool` only fails on `ToolResult.success == False` (i.e., execution error), not on fields inside `result`; this means the `run_validation` step in the cross-engine workflow can be marked completed even though validation never...

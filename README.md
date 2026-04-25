@@ -103,7 +103,7 @@ pip install -e ".[dev,biomechanics]"
 
 ```bash
 pip install -e .
-export GOLF_USE_MOCK_ENGINE=1
+export UPSTREAM_USE_MOCK_ENGINE=1
 ```
 
 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.

@@ -501,7 +501,7 @@ class LauncherUISetupMixin:
             session_id = sessions[0]["session_id"] if sessions else None
 
             session_file = (
-                Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
+                Path.home() / ".upstream_modeling_suite" / "active_chat_session.txt"
             )
             session_file.parent.mkdir(parents=True, exist_ok=True)
             if session_id:

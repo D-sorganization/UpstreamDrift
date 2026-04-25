@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 # Constants — use centralized root discovery (issue #2354)
 REPOS_ROOT = get_repo_root()
 ASSETS_DIR = Path(__file__).parent / "assets"
-CONFIG_DIR = Path.home() / ".golf_modeling_suite"
+CONFIG_DIR = Path.home() / ".upstream_modeling_suite"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "launcher_layout.json"
 
 

@@ -25,17 +25,17 @@ logger = get_logger(__name__)
 
 # Security configuration
 # SECURITY: Secret key MUST be set via environment variable
-_secret_key_env = os.getenv("GOLF_API_SECRET_KEY") or os.getenv("SECRET_KEY")
+_secret_key_env = os.getenv("UPSTREAM_API_SECRET_KEY") or os.getenv("SECRET_KEY")
 _environment = os.getenv("ENVIRONMENT", "development").lower()
 
 if not _secret_key_env:
     if _environment == "production":
         logger.error(
-            "SECURITY ERROR: No SECRET_KEY or GOLF_API_SECRET_KEY environment "
+            "SECURITY ERROR: No SECRET_KEY or UPSTREAM_API_SECRET_KEY environment "
             "variable set. The server cannot start without a secure secret key."
         )
         raise RuntimeError(
-            "SECRET_KEY is not configured. Set GOLF_API_SECRET_KEY or SECRET_KEY "
+            "SECRET_KEY is not configured. Set UPSTREAM_API_SECRET_KEY or SECRET_KEY "
             "environment variable to a secure, random value."
         )
     else:
@@ -46,9 +46,9 @@ if not _secret_key_env:
         # crafted. Tokens will be invalidated on process restart.
         SECRET_KEY = secrets.token_urlsafe(32)
         logger.warning(
-            "SECURITY WARNING: No GOLF_API_SECRET_KEY or SECRET_KEY env var set. "
+            "SECURITY WARNING: No UPSTREAM_API_SECRET_KEY or SECRET_KEY env var set. "
             "A random per-process key has been generated; all JWT tokens will be "
-            "invalidated on restart. Set GOLF_API_SECRET_KEY for production."
+            "invalidated on restart. Set UPSTREAM_API_SECRET_KEY for production."
         )
 elif len(_secret_key_env) < 32:
     logger.warning(

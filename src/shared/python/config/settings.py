@@ -11,13 +11,13 @@ The project uses several config formats; this table shows what belongs where:
 +----------------------------+-------------------------------------+----------+
 | Setting category           | Canonical location                  | Format   |
 +============================+=====================================+==========+
-| API secret key             | env: GOLF_API_SECRET_KEY            | env var  |
+| API secret key             | env: UPSTREAM_API_SECRET_KEY            | env var  |
 | Fallback secret key        | env: SECRET_KEY                     | env var  |
 | Deployment environment     | env: ENVIRONMENT                    | env var  |
-| Admin password             | env: GOLF_ADMIN_PASSWORD            | env var  |
+| Admin password             | env: UPSTREAM_ADMIN_PASSWORD            | env var  |
 | Database URL               | env: DATABASE_URL                   | env var  |
-| API host / port            | env: GOLF_API_HOST / GOLF_API_PORT  | env var  |
-| Auth disabled flag         | env: GOLF_AUTH_DISABLED             | env var  |
+| API host / port            | env: UPSTREAM_API_HOST / UPSTREAM_API_PORT  | env var  |
+| Auth disabled flag         | env: UPSTREAM_AUTH_DISABLED             | env var  |
 | Headless mode              | env: HEADLESS                       | env var  |
 | Log level                  | env: LOG_LEVEL                      | env var  |
 +----------------------------+-------------------------------------+----------+
@@ -48,7 +48,7 @@ Resolution precedence for runtime settings
 3. Hard-coded default in the accessor function
 
 Note: ``src/config/interim_config.yaml`` contains ``auth.secret_key:
-"${GOLF_API_SECRET_KEY}"`` as documentation only.  The variable
+"${UPSTREAM_API_SECRET_KEY}"`` as documentation only.  The variable
 interpolation is **not** performed automatically.  The actual secret key is
 always read from the environment by
 ``src.shared.python.config.environment.get_secret_key``.

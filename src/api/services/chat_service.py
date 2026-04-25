@@ -47,13 +47,13 @@ class ChatService:
     """Server-side chat session manager.
 
     Manages conversation contexts in-memory with TTL eviction,
-    persists to ~/.golf_modeling_suite/chat_sessions/ on each message,
+    persists to ~/.upstream_modeling_suite/chat_sessions/ on each message,
     and delegates AI inference to the configured adapter.
     """
 
     MAX_SESSIONS = 50
     SESSION_TTL_SECONDS = 7200  # 2 hours
-    PERSIST_DIR = Path.home() / ".golf_modeling_suite" / "chat_sessions"
+    PERSIST_DIR = Path.home() / ".upstream_modeling_suite" / "chat_sessions"
 
     def __init__(self, rag_store: SimpleRAGStore | None = None) -> None:
         self._sessions: OrderedDict[str, ConversationContext] = OrderedDict()

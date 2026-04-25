@@ -113,7 +113,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     """
     try:
         # Validate environment variables before any service initialisation.
-        # env_validator checks GOLF_API_SECRET_KEY, DATABASE_URL, and the
+        # env_validator checks UPSTREAM_API_SECRET_KEY, DATABASE_URL, and the
         # production checklist; it raises on critical failures so misconfigured
         # deployments fail fast instead of silently using insecure defaults.
         from src.shared.python.security.env_validator import validate_environment

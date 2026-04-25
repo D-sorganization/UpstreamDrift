@@ -32,7 +32,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.theme.style_constants import Styles
 
-_SESSION_FILE = Path.home() / ".golf_modeling_suite" / "active_chat_session.txt"
+_SESSION_FILE = Path.home() / ".upstream_modeling_suite" / "active_chat_session.txt"
 _DEFAULT_SERVER = "ws://127.0.0.1:8000"
 
 

@@ -293,7 +293,7 @@ class SettingsDialog(QDialog):
         """Load recent lines from the application log file."""
         log_candidates = [
             Path.cwd() / "app_launch.log",
-            Path.home() / ".golf_modeling_suite" / "launcher.log",
+            Path.home() / ".upstream_modeling_suite" / "launcher.log",
         ]
         for log_path in log_candidates:
             if log_path.exists():
@@ -312,7 +312,7 @@ class SettingsDialog(QDialog):
 
     def _load_process_log(self) -> None:
         """Load recent lines from the process output log file."""
-        log_path = Path.home() / ".golf_modeling_suite" / "process_output.log"
+        log_path = Path.home() / ".upstream_modeling_suite" / "process_output.log"
         if log_path.exists():
             try:
                 text = log_path.read_text(encoding="utf-8", errors="replace")

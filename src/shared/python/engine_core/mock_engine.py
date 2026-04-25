@@ -10,7 +10,7 @@ Usage:
     engine = MockPhysicsEngine()
 
     # For light development (set environment variable)
-    export GOLF_USE_MOCK_ENGINE=1
+    export UPSTREAM_USE_MOCK_ENGINE=1
 """
 
 from __future__ import annotations

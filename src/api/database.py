@@ -12,7 +12,7 @@ from src.api.auth.models import Base
 # Database configuration
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "sqlite:///./golf_modeling_suite.db",  # Default to SQLite for development
+    "sqlite:///./upstream_modeling_suite.db",  # Default to SQLite for development
 )
 
 # Create engine with appropriate settings
@@ -66,21 +66,21 @@ def init_db() -> None:
         admin_user = db.query(User).filter(User.role == UserRole.ADMIN.value).first()
         if not admin_user:
             # SECURITY: Get password from environment variable
-            admin_password = os.getenv("GOLF_ADMIN_PASSWORD")
+            admin_password = os.getenv("UPSTREAM_ADMIN_PASSWORD")
 
             if not admin_password:
                 # Generate a secure random password if not set
                 admin_password = secrets.token_urlsafe(16)
                 logger.warning(
-                    "SECURITY: No GOLF_ADMIN_PASSWORD environment variable set. "
-                    "Generated temporary admin password. Set GOLF_ADMIN_PASSWORD "
+                    "SECURITY: No UPSTREAM_ADMIN_PASSWORD environment variable set. "
+                    "Generated temporary admin password. Set UPSTREAM_ADMIN_PASSWORD "
                     "environment variable for production."
                 )
                 # SECURITY FIX: Never log passwords in plaintext
                 # Instead, provide instructions for recovery
                 logger.info(
                     "Admin user created with randomly generated password. "
-                    "To set a custom password, set the GOLF_ADMIN_PASSWORD "
+                    "To set a custom password, set the UPSTREAM_ADMIN_PASSWORD "
                     "environment variable before starting the server, or use "
                     "the password reset API endpoint."
                 )
