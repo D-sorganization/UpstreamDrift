@@ -60,11 +60,12 @@ def check_python_dependencies(
     for module in required_modules:
         if importlib.util.find_spec(module) is None:
             missing.append(module)
+            logger.warning(
+                f"Missing dependency: '{module}' — install with: pip install {module}"
+            )
 
     if not missing:
         return True
-
-    logger.warning(f"Missing dependencies: {', '.join(missing)}")
 
     if install_missing:
         logger.info("Attempting to install missing dependencies...")

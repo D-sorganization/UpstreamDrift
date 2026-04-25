@@ -37,6 +37,7 @@ export function DiagnosticsPanel() {
       setBackendHealth(response.ok ? 'healthy' : 'unreachable');
     } catch {
       setBackendHealth('unreachable');
+      setActionError('API server unreachable — check that the backend is running');
     }
   }, []);
 

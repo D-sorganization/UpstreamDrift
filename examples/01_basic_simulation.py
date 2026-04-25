@@ -47,8 +47,8 @@ def main() -> None:
     # If not installed, we'll handle gracefully for this example.
     logger.info("Initializing MuJoCo engine...")
     if not engine_manager.switch_engine(EngineType.MUJOCO):
-        logger.warning("MuJoCo not found. Please install it to run simulation.")
-        return
+        print("Error: MuJoCo engine not available. Install MuJoCo: pip install mujoco")
+        sys.exit(1)
 
     # 3. Simulation Loop (Conceptual)
     logger.info("Running simulation...")

@@ -271,6 +271,10 @@ def main():
     output_dir = Path(args.output)
 
     if not trajectory_path.exists():
+        print(
+            f"Error: motion capture file not found at {trajectory_path}. "
+            "Provide a valid .c3d file path."
+        )
         sys.exit(1)
 
     if args.plot_only:
