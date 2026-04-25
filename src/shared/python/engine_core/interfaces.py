@@ -44,6 +44,7 @@ from typing import Protocol, runtime_checkable
 from src.shared.python.engine_core._dynamics_interface import DynamicsInterface
 from src.shared.python.engine_core._recorder_interface import RecorderInterface
 from src.shared.python.engine_core._simulation_interface import SimulationInterface
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.sub_protocols import (
     CounterfactualComputable,
     DynamicsComputable,
@@ -53,8 +54,9 @@ from src.shared.python.engine_core.sub_protocols import (
     Steppable,
 )
 
-# Re-export sub-protocols for convenient access
+# Re-export sub-protocols and Capability for convenient access
 __all__ = [
+    "Capability",
     "CounterfactualComputable",
     "DynamicsComputable",
     "Loadable",
@@ -89,4 +91,24 @@ class PhysicsEngine(SimulationInterface, DynamicsInterface, Protocol):
         - Preconditions: What must be true before calling
         - Postconditions: What will be true after successful return
         - Invariants: What is preserved by the operation
+
+    Capability Discovery:
+        Call ``engine.capabilities()`` to learn which optional methods are
+        supported before dispatching to them::
+
+            if Capability.CONTACT_FORCES in engine.capabilities():
+                grf = engine.compute_contact_forces()
     """
+
+    def capabilities(self) -> frozenset[Capability]:
+        """Return the set of optional capabilities this engine supports.
+
+        Callers should check membership before dispatching to optional methods::
+
+            if Capability.CONTACT_FORCES in engine.capabilities():
+                grf = engine.compute_contact_forces()
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by this engine.
+        """
+        ...

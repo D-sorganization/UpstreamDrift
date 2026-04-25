@@ -28,6 +28,7 @@ from src.shared.python.core.contracts import (  # noqa: E402
     postcondition,
     precondition,
 )
+from src.shared.python.engine_core.capabilities import Capability  # noqa: E402
 from src.shared.python.engine_core.engine_availability import (  # noqa: E402
     MYOSUITE_AVAILABLE,
 )
@@ -874,6 +875,28 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to compute ZVCF: {e}")
 
             return np.array([])
+
+    def capabilities(self) -> frozenset[Capability]:
+        """Return the set of optional capabilities this MyoSuite engine supports.
+
+        MyoSuite wraps MuJoCo under a Gym interface, so it supports most
+        standard dynamics methods. Contact forces are available via the
+        underlying MuJoCo sim data.
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by MyoSuite.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.INVERSE_DYNAMICS,
+                Capability.CONTACT_FORCES,
+                Capability.MASS_MATRIX,
+                Capability.JACOBIAN,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
+        )
 
     def get_acceleration(self) -> np.ndarray:
         """Get current acceleration vector.

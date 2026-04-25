@@ -23,7 +23,9 @@ from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
 )
 from src.shared.python.engine_core.capabilities import (
+    Capability,
     CapabilityLevel,
+    CapabilityNotSupported,
     EngineCapabilities,
 )
 from src.shared.python.engine_core.engine_availability import (
@@ -129,6 +131,28 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
             inverse_dynamics=CapabilityLevel.FULL,
             drift_acceleration=CapabilityLevel.FULL,
             extra={"spatial_jacobian_order": "angular_linear"},
+        )
+
+    def capabilities(self) -> frozenset[Capability]:
+        """Return the set of optional capabilities this Pinocchio engine supports.
+
+        Contact forces are NOT included because standard ABA dynamics in
+        Pinocchio do not compute contact forces without a constraint solver.
+        Callers should check ``Capability.CONTACT_FORCES in engine.capabilities()``
+        before dispatching to ``compute_contact_forces()``.
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by Pinocchio.
+        """
+        return frozenset(
+            {
+                Capability.FORWARD_DYNAMICS,
+                Capability.INVERSE_DYNAMICS,
+                Capability.MASS_MATRIX,
+                Capability.JACOBIAN,
+                Capability.DRIFT_CONTROL,
+                Capability.COUNTERFACTUAL,
+            }
         )
 
     def _load_from_path_impl(self, path: str) -> None:
@@ -414,18 +438,17 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Compute total contact forces (ground reaction force, GRF).
 
         Raises:
-            NotImplementedError: Always. Pinocchio's standard ABA does not
+            CapabilityNotSupported: Always. Pinocchio's standard ABA does not
                 compute contact forces without a constraint solver (e.g.,
                 RigidContactModel + ProximalContactSolver). Returning zeros
                 would silently misrepresent the physical state and mask
                 integration failures downstream.
 
-                Use a full contact-aware solver or Drake/MuJoCo for GRF.
+                Check ``Capability.CONTACT_FORCES in engine.capabilities()``
+                before calling this method. Use Drake or MuJoCo for GRF.
         """
-        raise NotImplementedError(
-            "PinocchioPhysicsEngine.compute_contact_forces is not implemented. "
-            "Standard ABA dynamics in Pinocchio do not compute contact forces "
-            "without a constraint solver. Use Drake or MuJoCo for GRF queries."
+        raise CapabilityNotSupported(
+            "PinocchioPhysicsEngine", Capability.CONTACT_FORCES
         )
 
     @precondition(

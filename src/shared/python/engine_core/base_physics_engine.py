@@ -38,6 +38,7 @@ from src.shared.python.core.contracts import (
     require_state,
 )
 from src.shared.python.core.error_decorators import ErrorContext, log_errors
+from src.shared.python.engine_core.capabilities import Capability
 from src.shared.python.engine_core.checkpoint import StateCheckpoint
 from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
@@ -480,6 +481,19 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
 
         Args:
             checkpoint: Checkpoint with engine-specific state data.
+        """
+
+    @abstractmethod
+    def capabilities(self) -> frozenset[Capability]:
+        """Return the set of optional capabilities this engine supports.
+
+        Callers should check membership before dispatching to optional methods::
+
+            if Capability.CONTACT_FORCES in engine.capabilities():
+                grf = engine.compute_contact_forces()
+
+        Returns:
+            frozenset[Capability] of capabilities implemented by this engine.
         """
 
     def __repr__(self) -> str:

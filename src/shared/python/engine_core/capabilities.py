@@ -13,6 +13,10 @@ Usage:
     caps = engine.get_capabilities()
     if caps.has_video_export:
         exporter = engine.create_video_exporter(...)
+
+    # Lightweight set-based check (capabilities() method):
+    if Capability.CONTACT_FORCES in engine.capabilities():
+        grf = engine.compute_contact_forces()
 """
 
 from __future__ import annotations
@@ -23,6 +27,55 @@ from enum import Enum, auto
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+class Capability(Enum):
+    """Named optional capabilities an engine may support.
+
+    Callers should check ``Capability.X in engine.capabilities()`` before
+    dispatching to optional methods.  This avoids catching
+    ``NotImplementedError`` at runtime and provides an explicit contract.
+
+    Attributes:
+        FORWARD_DYNAMICS: Engine can advance simulation in time (step/forward).
+        INVERSE_DYNAMICS: compute_inverse_dynamics() is implemented.
+        CONTACT_FORCES: compute_contact_forces() is implemented.
+        MASS_MATRIX: compute_mass_matrix() is implemented.
+        JACOBIAN: compute_jacobian() is implemented.
+        DRIFT_CONTROL: compute_drift_acceleration() / compute_control_acceleration()
+            are implemented.
+        COUNTERFACTUAL: compute_ztcf() / compute_zvcf() are implemented.
+    """
+
+    FORWARD_DYNAMICS = auto()
+    INVERSE_DYNAMICS = auto()
+    CONTACT_FORCES = auto()
+    MASS_MATRIX = auto()
+    JACOBIAN = auto()
+    DRIFT_CONTROL = auto()
+    COUNTERFACTUAL = auto()
+
+
+class CapabilityNotSupported(NotImplementedError):
+    """Raised when a caller invokes a method not supported by this engine.
+
+    Prefer checking ``Capability.X in engine.capabilities()`` before calling
+    optional methods rather than catching this exception.
+
+    Args:
+        engine_name: Human-readable engine name.
+        capability: The ``Capability`` member that is not supported.
+    """
+
+    def __init__(self, engine_name: str, capability: Capability) -> None:
+        self.engine_name = engine_name
+        self.capability = capability
+        super().__init__(
+            f"{engine_name} does not support {capability.name}. "
+            f"Check `Capability.{capability.name} in engine.capabilities()` "
+            "before calling this method."
+        )
+
 
 SPATIAL_JACOBIAN_ORDER = ("angular", "linear")
 """Canonical suite row order for ``jacobian["spatial"]``.
