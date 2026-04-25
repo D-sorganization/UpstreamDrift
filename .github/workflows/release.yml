@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
@@ -84,6 +85,42 @@ jobs:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
+  docker-publish:
+    needs: [build]
+    runs-on: ubuntu-latest
+    # Gate: only push to GHCR when the build succeeded (issue #3067).
+    if: >-
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      needs.build.result == 'success'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Log in to GHCR
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5730f46d7a5d7fac25b73a77d963ab85e30e5e7 # v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   create-release:
     needs: [pick-runner, build]
     runs-on: self-hosted
@@ -113,19 +150,6 @@ jobs:
       #      actions/upload-artifact in tauri-build.yml.
       #   3. Download them here with actions/download-artifact and include in
       #      the `files:` list below.
-
-      # TODO(#3067): Build and push Docker image on release.
-      # Dockerfile and Dockerfile.heavy_test exist in the repo but are not
-      # published to GHCR on release.  Placeholder job outline:
-      #   docker-publish:
-      #     needs: [build]
-      #     if: needs.build.result == 'success' && startsWith(github.ref, 'refs/tags/v')
-      #     steps:
-      #       - uses: docker/setup-buildx-action@...
-      #       - uses: docker/build-push-action@...
-      #         with:
-      #           push: true
-      #           tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3

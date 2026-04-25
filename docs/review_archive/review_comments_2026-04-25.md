@@ -2,8 +2,9 @@
 
 Generated: 2026-04-25T11:50:47.535127
 
-## Reviewer (chatgpt-codex-connector[bot]) (9 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (10 comments)
 
+### PR #3265: .github/workflows/Jules-Assessment-Remediator.yml:66
 ### PR #3281: src/shared/python/engine_core/base_physics_engine.py:487
 ### PR #3282: src/shared/python/calc_backend/tests/test_inline_calcs.py:1
 
@@ -11,6 +12,12 @@ Actionable: Yes
 Has Suggestion: No
 
 ```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Include local kill-switch action in sparse checkout**
+
+The new `kill-switch` job checks out only `.github/WORKFLOWS_PAUSED` via `sparse-checkout`, but the next step uses the local action `./.github/actions/check-kill-switch`. Because that directory is not fetched, the runner cannot resolve `action.yml` and the job fails before evaluating the kill switch, which blocks normal workflow execution. Please either i...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3265#discussion_r3142264993)
 **<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Keep GOLF_SUITE_MODE fallback in mode resolution**
 
 This change drops support for the legacy `GOLF_SUITE_MODE` variable, so environments that have not migrated yet will silently fall back to the default mode (`remote`) and start enforcing auth where local-mode bypass previously worked. Because local auth behavior is security-critical and the repo still contains existing usage of the legacy names, this is a br...
