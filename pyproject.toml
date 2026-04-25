@@ -385,9 +385,9 @@ omit = [
 
 [tool.coverage.report]
 # Coverage threshold — single source of truth (issue #3064).
-# Set to actual measured coverage (~11%) so local and CI runs agree.
+# Set to a modest ratchet above actual measured coverage (~11%).
 # Raise toward 60% target (#1630) via ratchet (see scripts/check_coverage_consistency.py).
-fail_under = 11
+fail_under = 15
 show_missing = true
 skip_empty = true
 precision = 1
