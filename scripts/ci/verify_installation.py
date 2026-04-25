@@ -44,7 +44,7 @@ def check_virtualenv() -> tuple[bool, str]:
     )
     if in_venv:
         return True, f"✓ Virtual environment detected: {sys.prefix}"
-    return True, "⚠ System Python (virtualenv recommended but not required)"
+    return False, "⚠ System Python (virtualenv recommended but not required)"
 
 
 def check_import(
@@ -182,7 +182,7 @@ def main() -> int:
         result = {
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             "python_ok": py_critical,
-            "in_virtualenv": venv_success and "Virtual" in venv_msg,
+            "in_virtualenv": venv_success,
             "core_checks": {"passed": core_passed, "total": core_total},
             "suite_checks": {"passed": suite_passed, "total": suite_total},
             "overall": {"passed": total_passed, "total": total_checks},
