@@ -4,8 +4,6 @@ from shared.python.physics.equipment import CLUB_CONFIGS, get_club_config
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_get_club_config_success() -> None:
     for club_type in CLUB_CONFIGS:

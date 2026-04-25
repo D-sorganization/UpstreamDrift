@@ -22,8 +22,6 @@ from src.shared.python.signal_toolkit.series import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def se() -> SeriesExpansion:

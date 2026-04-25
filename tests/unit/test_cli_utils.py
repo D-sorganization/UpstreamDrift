@@ -28,8 +28,6 @@ from src.shared.python.cli_utils import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestCreateBaseParser:
     """Tests for create_base_parser function."""

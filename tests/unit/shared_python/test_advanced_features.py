@@ -21,8 +21,6 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class MockRecorder(RecorderInterface):
     """Mock recorder backed by a data dictionary."""

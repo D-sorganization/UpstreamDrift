@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from hashlib import sha256
 from pathlib import Path
+import pytest
+pytestmark = pytest.mark.unit
+
 
 
 def _repo_root() -> Path:

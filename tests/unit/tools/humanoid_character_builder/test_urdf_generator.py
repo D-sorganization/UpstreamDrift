@@ -17,8 +17,6 @@ from humanoid_character_builder.mesh.inertia_calculator import InertiaMode
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestURDFGeneratorConfig:
     """Tests for URDFGeneratorConfig."""

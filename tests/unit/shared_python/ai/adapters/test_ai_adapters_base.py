@@ -15,8 +15,6 @@ from src.shared.python.ai.types import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class DummyAdapter(BaseAgentAdapter):
     """A dummy adapter for testing the concrete methods of BaseAgentAdapter."""

@@ -19,8 +19,6 @@ from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def mock_recorder() -> MagicMock:

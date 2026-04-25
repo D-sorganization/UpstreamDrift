@@ -11,8 +11,6 @@ from src.robotics.control.whole_body.qp_solver import ScipyQPSolver
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_scipy_qp_solver_unavailable(monkeypatch) -> None:
     """ScipyQPSolver should report unavailable when scipy import fails."""

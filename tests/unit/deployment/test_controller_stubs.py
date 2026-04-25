@@ -20,8 +20,6 @@ from src.deployment.realtime.controller import CommunicationType, RealTimeContro
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def _make_controller(comm: CommunicationType) -> RealTimeController:
     return RealTimeController(

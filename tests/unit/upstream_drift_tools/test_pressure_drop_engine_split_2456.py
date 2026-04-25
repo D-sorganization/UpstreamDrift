@@ -11,8 +11,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 REPO = Path(__file__).parents[3]
 ENGINE_DIR = (
     REPO

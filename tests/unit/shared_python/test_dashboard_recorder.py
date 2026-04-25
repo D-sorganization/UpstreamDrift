@@ -9,8 +9,6 @@ from src.shared.python.engine_core.interfaces import PhysicsEngine
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class MockPhysicsEngine(PhysicsEngine):
     """Mock physics engine for recorder tests."""

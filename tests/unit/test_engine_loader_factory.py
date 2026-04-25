@@ -22,8 +22,6 @@ from src.shared.python.data_io.common_utils import GolfModelingError
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def tmp_root(tmp_path: Path) -> Path:

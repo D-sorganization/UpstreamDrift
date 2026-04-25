@@ -9,6 +9,8 @@ import pytest
 from fastapi import HTTPException
 
 from src.api.routes import models as models_module
+pytestmark = pytest.mark.unit
+
 
 
 def _write_urdf(path: Path, robot_name: str) -> None:

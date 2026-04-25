@@ -11,6 +11,8 @@ from src.shared.python.perturbation.analyzer_base import (
     PerturbationAnalyzerBase,
 )
 from src.shared.python.perturbation.config import PerturbationConfig
+pytestmark = pytest.mark.unit
+
 
 
 class _RecordingAnalyzer(PerturbationAnalyzerBase):

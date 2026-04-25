@@ -9,6 +9,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pandas as pd
 import pytest
+pytestmark = pytest.mark.unit
+
 
 try:
     from c3d_reader import SCHEMA_VERSION, C3DDataReader  # noqa: E402

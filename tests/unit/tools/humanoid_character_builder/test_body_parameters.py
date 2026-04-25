@@ -17,8 +17,6 @@ from humanoid_character_builder.core.body_parameters import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestVector3:
     """Tests for Vector3 class."""

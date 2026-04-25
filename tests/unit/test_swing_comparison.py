@@ -15,8 +15,6 @@ from src.shared.python.validation_pkg.statistical_analysis import StatisticalAna
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestSwingComparison(unittest.TestCase):
     """Test suite for swing comparison logic."""

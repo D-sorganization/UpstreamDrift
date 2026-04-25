@@ -14,8 +14,6 @@ from src.engines.physics_engines.pinocchio.python.pinocchio_golf.torque_fitting 
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestTorqueFitting:
     """Test suite for torque fitting utilities."""

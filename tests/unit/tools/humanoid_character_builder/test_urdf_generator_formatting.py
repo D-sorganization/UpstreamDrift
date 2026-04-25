@@ -19,8 +19,6 @@ from humanoid_character_builder.generators.urdf_generator import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture()
 def default_params() -> BodyParameters:

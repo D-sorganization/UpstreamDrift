@@ -56,7 +56,7 @@ jobs:
       pr_list: ${{ steps.list.outputs.prs }}
       should_consolidate: ${{ steps.list.outputs.should_consolidate }}
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
 
@@ -91,7 +91,7 @@ jobs:
     if: needs.discover.outputs.should_consolidate == 'true' && inputs.dry_run != 'true'
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
         with:
           fetch-depth: 0
           token: ${{ secrets.RUNNER_CHECK_TOKEN }}

@@ -13,8 +13,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # Root of the repo
 REPO_ROOT = Path(__file__).parent.parent.parent
 

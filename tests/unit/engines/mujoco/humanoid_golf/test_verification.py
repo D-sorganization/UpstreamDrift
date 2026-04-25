@@ -9,8 +9,6 @@ from mujoco_humanoid_golf.verification import EnergyMonitor, JacobianTester
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 # Helper to create a simple pendulum model if none exists
 def create_pendulum_model() -> mujoco.MjModel:

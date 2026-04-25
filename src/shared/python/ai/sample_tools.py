@@ -338,11 +338,11 @@ def _register_inverse_dynamics_tool(registry: ToolRegistry) -> None:
                 "error": f"Invalid engine. Choose from: {valid_engines}",
             }
 
-        # Real IK/ID pipeline is not yet wired - return honest not-implemented
+        # Real IK/ID pipeline is not yet wired — return honest not-implemented
         # response rather than fake data.  Tracked in issue #3163.
         return {
             "success": False,
-            "error": "not implemented",
+            "error": "not implemented — real physics engine integration required",
             "issue": "#3163",
             "tool": "run_inverse_dynamics",
         }
@@ -616,7 +616,7 @@ def _register_cross_engine_validation_tool(registry: ToolRegistry) -> None:
         available = _available_engines()
         return {
             "success": False,
-            "error": "not implemented",
+            "error": "not implemented — real physics engine integration required",
             "issue": "#3163",
             "tool": "validate_cross_engine",
             "available_engines": available,
@@ -660,12 +660,12 @@ def _register_energy_conservation_tool(registry: ToolRegistry) -> None:
             raise ValueError("tolerance must be positive")
 
         # Energy conservation check requires a real simulation trajectory from
-        # a physics engine - not a synthetic analytic fixture.  Returning
+        # a physics engine — not a synthetic analytic fixture.  Returning
         # honest not-implemented rather than misleading drift=0 on a
         # hand-crafted pendulum.  Tracked in issue #3163.
         return {
             "success": False,
-            "error": "not implemented",
+            "error": "not implemented — real physics engine integration required",
             "issue": "#3163",
             "tool": "check_energy_conservation",
         }

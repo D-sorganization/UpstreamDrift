@@ -18,8 +18,6 @@ from src.shared.python.ai.types import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_expertise_level_comparison() -> None:
     assert ExpertiseLevel.BEGINNER < ExpertiseLevel.INTERMEDIATE

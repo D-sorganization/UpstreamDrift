@@ -20,8 +20,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 # ---------------------------------------------------------------------------
 # 1. Xacro preprocessing

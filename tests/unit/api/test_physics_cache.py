@@ -12,8 +12,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestPhysicsCacheInvalidation:
     """Tests for physics control-metadata cache (issue #2468)."""

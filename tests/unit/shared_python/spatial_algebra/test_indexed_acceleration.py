@@ -11,8 +11,6 @@ from src.shared.python.spatial_algebra.indexed_acceleration import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestIndexedAcceleration:
     def test_total(self) -> None:

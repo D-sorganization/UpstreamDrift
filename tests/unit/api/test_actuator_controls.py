@@ -9,8 +9,6 @@ from src.api.routes.actuator_controls import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_demo_actuators() -> None:
     acts = _demo_actuators()

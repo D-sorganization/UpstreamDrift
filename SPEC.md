@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-23T08:40:00-07:00
+Last-Updated: 2026-04-25T00:00:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -26,10 +26,10 @@ Last-Updated: 2026-04-23T08:40:00-07:00
 | **Repository Name**     | `UpstreamDrift`                                    |
 | **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift` |
 | **Owner**               | D-sorganization                                    |
-| **Primary Language(s)** | Python 3.11+ (3.13 recommended), Rust, TypeScript  |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.176                                            |
+| **Spec Version**        | 1.0.177                                            |
 | **Last Spec Update**    | 2026-04-25                                         |
 
 ## 2. Purpose & Mission
@@ -148,11 +148,11 @@ UpstreamDrift/
 
 | Component                      | Location                                                   | Purpose                                                                                                                                                                    |
 | ------------------------------ | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MuJoCo Engine Adapter          | `src/engines/physics_engines/mujoco_engine.py`             | Primary physics engine integration with full support for contact dynamics, world-contact force sign normalization, and muscle models                                       |
-| Drake Engine Adapter           | `src/engines/physics_engines/drake_engine.py`              | Extended Drake support for trajectory optimization and manipulation tasks                                                                                                  |
-| Pinocchio Engine Adapter       | `src/engines/physics_engines/pinocchio_engine.py`          | Extended Pinocchio support for efficient rigid-body dynamics computation; step integration accepts only `rk4` and `semi_implicit` modes                                    |
-| OpenSim Engine Adapter         | `src/engines/physics_engines/opensim_engine.py`            | Experimental OpenSim integration for clinical biomechanics workflows                                                                                                       |
-| MyoSuite Engine Adapter        | `src/engines/physics_engines/myosuite_engine.py`           | Experimental MyoSuite integration for detailed muscle physiology simulation                                                                                                |
+| MuJoCo Engine Adapter          | `src/engines/physics_engines/mujoco/python/`             | Primary physics engine integration with full support for contact dynamics, world-contact force sign normalization, and muscle models                                       |
+| Drake Engine Adapter           | `src/engines/physics_engines/drake/python/`              | Extended Drake support for trajectory optimization and manipulation tasks                                                                                                  |
+| Pinocchio Engine Adapter       | `src/engines/physics_engines/pinocchio/python/`          | Extended Pinocchio support for efficient rigid-body dynamics computation; step integration accepts only `rk4` and `semi_implicit` modes                                    |
+| OpenSim Engine Adapter         | `src/engines/physics_engines/opensim/python/`            | Experimental OpenSim integration for clinical biomechanics workflows                                                                                                       |
+| MyoSuite Engine Adapter        | `src/engines/physics_engines/myosuite/python/`           | Experimental MyoSuite integration for detailed muscle physiology simulation                                                                                                |
 | Pendulum Models                | `src/engines/pendulum_models/`                             | Educational simplified models for learning and quick prototyping                                                                                                           |
 | FastAPI Backend                | `src/api/`                                                 | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints                                                                                        |
 | PyQt6 GUI                      | `src/launchers/gui_launcher.py`                            | Professional interactive GUI with real-time 3D visualization                                                                                                               |
@@ -442,7 +442,7 @@ Beyond standard tools, CI enforces custom checks:
 
 ```bash
 # Prerequisites
-- Python 3.11 or later (3.13 recommended)
+- Python 3.10 or later
 - MuJoCo 3.3.0+ with license (community or pro)
 - Optional: Drake, Pinocchio, OpenSim binaries on PATH
 - For Tauri desktop app: Node.js 16+, Rust toolchain
@@ -512,7 +512,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 ## 12. Change Log
 
-| 2026-04-25 | 1.0.176 | Issue #3168 (Option B): Deleted `src/reinforcement_learning/trajectory_funnel_benchmark.py` and associated tests. The `simulate_agent_training_mock()` method returned hardcoded placeholder values masquerading as real RL results; the file is removed entirely rather than kept as a stub. |
+| 2026-04-25 | 1.0.177 | Issue #3168 (Option B): Deleted `src/reinforcement_learning/trajectory_funnel_benchmark.py` and its associated test files. The `simulate_agent_training_mock()` method returned hardcoded placeholder values masquerading as real RL results; the entire file is removed rather than kept with a stub. |
 | 2026-04-23 | 1.0.175 | fix(ci): Shrunk `pyproject.toml` mypy exclusion list by promoting previously suppressed modules to per-file overrides, reducing the global `ignore_errors` footprint toward zero. |
 | 2026-04-22 | 1.0.153 | Performance optimization: Replaced `np.linalg.norm(x)` with `np.sqrt(np.vdot(x, x))` and updated `np.sqrt(sum of squares)` to `math.hypot(*x)` for faster array reduction computations. |
 | 2026-04-23 | 1.0.173 | Performance optimization: Replaced `np.linalg.norm` with `math.hypot` for small 2D vectors in putting green engine. |

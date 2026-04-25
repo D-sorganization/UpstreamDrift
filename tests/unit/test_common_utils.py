@@ -20,8 +20,6 @@ from src.shared.python.data_io.common_utils import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestCommonUtilsHardening(unittest.TestCase):
     """Test suite for hardened utility functions."""

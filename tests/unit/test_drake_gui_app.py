@@ -13,8 +13,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # Check PyQt6 availability without importing engine_availability
 # (which triggers a torch import that may fail on some platforms)
 try:

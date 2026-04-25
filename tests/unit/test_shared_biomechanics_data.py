@@ -8,8 +8,6 @@ from src.shared.python.core.constants import GRAVITY_M_S2
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_biomechanical_data_initialization() -> None:
     """Test default initialization of BiomechanicalData."""

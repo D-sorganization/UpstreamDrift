@@ -18,8 +18,6 @@ from src.api.config import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_get_allowed_hosts_default() -> None:
     """Test get_allowed_hosts returns defaults when no env var is set."""

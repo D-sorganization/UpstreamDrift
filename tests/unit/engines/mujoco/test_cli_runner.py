@@ -11,8 +11,6 @@ from src.shared.python.core import constants
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 if TYPE_CHECKING:
     from pathlib import Path
 

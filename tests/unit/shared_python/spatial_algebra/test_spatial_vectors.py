@@ -15,8 +15,6 @@ from src.shared.python.spatial_algebra.spatial_vectors import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestSpatialVectors:
     def test_skew(self) -> None:

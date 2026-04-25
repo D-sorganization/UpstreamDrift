@@ -16,13 +16,16 @@ import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-import pytest
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_generator import (
+
     HumanoidURDFGenerator,
     URDFGeneratorConfig,
     generate_humanoid_urdf,
 )
+import pytest
+pytestmark = pytest.mark.integration
+
 
 
 @pytest.fixture(scope="module")

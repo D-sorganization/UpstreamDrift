@@ -16,8 +16,6 @@ from src.shared.python.signal_toolkit.noise import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def t() -> np.ndarray:

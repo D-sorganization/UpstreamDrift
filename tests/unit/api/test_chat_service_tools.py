@@ -13,6 +13,8 @@ import pytest
 
 from src.shared.python.ai.adapters.base import ToolDeclaration
 from src.shared.python.ai.types import AgentChunk
+pytestmark = pytest.mark.unit
+
 
 
 @pytest.fixture()

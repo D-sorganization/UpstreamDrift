@@ -11,8 +11,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 REPO = Path(__file__).parents[2]
 EDITOR_DIR = REPO / "src/shared/python/model_generation/editor"
 LOC_BUDGET = 700

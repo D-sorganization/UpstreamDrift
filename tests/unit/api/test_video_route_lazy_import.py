@@ -22,6 +22,8 @@ from unittest import mock
 
 import pytest
 from fastapi import APIRouter, HTTPException
+pytestmark = pytest.mark.unit
+
 
 
 def test_video_route_module_imports_without_cv2() -> None:

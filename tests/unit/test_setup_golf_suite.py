@@ -10,8 +10,6 @@ import setup_golf_suite
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_apply_icon_optimizations() -> None:
     # Create dummy image

@@ -19,8 +19,6 @@ from src.shared.python.signal_toolkit.limits import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def t() -> np.ndarray:

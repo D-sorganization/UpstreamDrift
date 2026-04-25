@@ -11,8 +11,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 REPO = Path(__file__).parents[2]
 GUI_DIR = REPO / "src/shared/python/pendulum_simulator/gui"
 LOC_BUDGET = 550

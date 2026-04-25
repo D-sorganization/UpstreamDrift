@@ -7,8 +7,6 @@ from src.shared.python.ai.types import ExpertiseLevel
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_glossary_entry_get_definition() -> None:
     entry = GlossaryEntry(

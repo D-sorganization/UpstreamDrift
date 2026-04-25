@@ -13,8 +13,6 @@ from src.shared.python.physics.flight_model_options import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestFlightModelOptions:
     """Tests for FlightModelOptions dataclass."""

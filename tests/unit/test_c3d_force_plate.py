@@ -13,8 +13,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 try:
     from c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
 except (ImportError, ModuleNotFoundError):

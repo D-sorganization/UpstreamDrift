@@ -18,8 +18,6 @@ from src.engines.physics_engines.putting_green.python.putter_stroke import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestPutterType:
     """Tests for PutterType enumeration."""

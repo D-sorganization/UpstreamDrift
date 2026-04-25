@@ -61,8 +61,6 @@ from signal_toolkit.noise import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # =============================================================================
 # Core Signal Tests
 # =============================================================================

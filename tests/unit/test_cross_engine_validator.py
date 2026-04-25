@@ -11,8 +11,6 @@ from src.shared.python.engine_core.cross_engine_validator import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestCrossEngineValidator(unittest.TestCase):
     """Test suite for cross-engine validator."""

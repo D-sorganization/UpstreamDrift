@@ -15,8 +15,6 @@ from installer.windows.packaging_profiles import get_packaging_profile
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def _fake_setup_configuration(
     project_root: Path,

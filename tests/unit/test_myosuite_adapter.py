@@ -20,8 +20,6 @@ from src.shared.python.biomechanics.myosuite_adapter import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def mock_muscle_system() -> MagicMock:

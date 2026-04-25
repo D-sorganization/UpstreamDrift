@@ -25,8 +25,6 @@ from src.shared.python.physics.grip_contact_model import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestFrictionCone:
     """Tests for friction cone calculations."""

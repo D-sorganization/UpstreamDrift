@@ -11,8 +11,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def mock_pinocchio_env() -> Generator[None, None, None]:

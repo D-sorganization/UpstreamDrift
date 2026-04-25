@@ -10,8 +10,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 hypothesis = pytest.importorskip("hypothesis")
 from hypothesis import assume, given, settings  # noqa: E402
 from hypothesis import strategies as st  # noqa: E402

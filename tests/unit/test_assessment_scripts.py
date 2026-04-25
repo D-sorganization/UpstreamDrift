@@ -9,8 +9,6 @@ from scripts.generate_assessment_summary import extract_score_from_report
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestAssessmentScripts(unittest.TestCase):
     def test_extract_score_from_report(self) -> None:

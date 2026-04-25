@@ -6,8 +6,6 @@ from src.tools.model_explorer.urdf_builder import URDFBuilder
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestPhysicalValidation:
     """Test physical parameter validation in URDF builder."""

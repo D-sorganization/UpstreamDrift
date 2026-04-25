@@ -29,8 +29,6 @@ from humanoid_character_builder.core.anthropometry import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # ── de Leva Data Loading ────────────────────────────────────────────────────
 
 

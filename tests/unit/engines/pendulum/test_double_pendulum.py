@@ -12,8 +12,6 @@ from double_pendulum_model.physics.double_pendulum import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_expression_function_allows_state_variables() -> None:
     expr = ExpressionFunction("0.5*sin(t) + 0.1*theta1 - 0.2*omega2")

@@ -22,8 +22,6 @@ from src.shared.python.data_io.common_utils import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # Use non-interactive backend for plots
 matplotlib.use("Agg")
 

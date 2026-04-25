@@ -6,6 +6,9 @@ from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 
 from src.api import versioning
+import pytest
+pytestmark = pytest.mark.unit
+
 
 
 def test_get_app_version_matches_pyproject() -> None:

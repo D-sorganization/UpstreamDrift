@@ -6,6 +6,9 @@ import ast
 import json
 from pathlib import Path
 from typing import cast
+import pytest
+pytestmark = pytest.mark.unit
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 POLICY_PATH = REPO_ROOT / "config" / "architecture_debt_policy.json"

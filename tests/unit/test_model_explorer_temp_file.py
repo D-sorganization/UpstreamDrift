@@ -19,8 +19,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def _make_qt_stubs() -> dict[str, ModuleType]:
     """Build minimal PyQt6 stubs so mujoco_viewer can be imported without Qt."""

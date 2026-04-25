@@ -13,8 +13,6 @@ from src.shared.python.core.constants import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestPhysicalConstantXMLSafety:
     """Test that PhysicalConstants work safely in XML templates."""

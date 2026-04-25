@@ -8,6 +8,8 @@ from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import pytest
+pytestmark = pytest.mark.unit
+
 
 MODULE_NAME = "src.shared.python.pendulum_simulator.gui.equations_popup"
 MODULE_PREFIX = f"{MODULE_NAME}_"

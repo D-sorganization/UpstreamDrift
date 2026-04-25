@@ -23,8 +23,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # Try to import the launcher diagnostics module
 try:
     from src.launchers.launcher_diagnostics import (

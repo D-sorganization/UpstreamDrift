@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 from src.shared.python.config.provider_catalog import (
+
     infer_repo_root_from_config,
     iter_configured_provider_roots,
     iter_known_engine_provider_ids,
@@ -14,6 +15,9 @@ from src.shared.python.config.provider_catalog import (
     iter_known_utility_provider_ids,
     iter_provider_manifest_specs,
 )
+import pytest
+pytestmark = pytest.mark.unit
+
 
 
 def test_iter_known_provider_metadata_covers_engine_and_utility_repos() -> None:

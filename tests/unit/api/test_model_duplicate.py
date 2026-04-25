@@ -24,6 +24,7 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+
 _MODEL_EXPLORER_SRC = (
     Path(__file__).parents[3] / "src" / "api" / "routes" / "model_explorer.py"
 ).read_text(encoding="utf-8")

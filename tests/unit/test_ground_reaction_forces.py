@@ -24,8 +24,6 @@ from src.shared.python.physics.ground_reaction_forces import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestLinearImpulse:
     """Tests for linear impulse computation."""

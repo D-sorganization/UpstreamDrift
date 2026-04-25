@@ -27,8 +27,6 @@ from src.shared.python.signal_toolkit.filters import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def fs() -> float:

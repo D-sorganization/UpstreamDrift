@@ -8,8 +8,6 @@ from src.shared.python.security.security_utils import validate_path
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_validate_path_with_tmp_path(tmp_path: Path) -> None:
     """Test path validation using temporary directories."""

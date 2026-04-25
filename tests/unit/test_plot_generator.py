@@ -23,8 +23,6 @@ from src.shared.python.gui_pkg.plot_generator import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # ---- Fixtures ----
 
 

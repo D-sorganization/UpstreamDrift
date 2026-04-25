@@ -8,6 +8,8 @@ import pytest
 from fastapi import HTTPException
 
 from src.api.auth.models import User
+pytestmark = pytest.mark.unit
+
 
 
 class TestQuotaDependencyDefaults:

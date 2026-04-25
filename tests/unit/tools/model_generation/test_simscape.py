@@ -9,8 +9,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # Sample SimScape-like MDL content for testing
 SIMPLE_MDL = """
 Model {

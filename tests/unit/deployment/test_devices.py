@@ -11,8 +11,6 @@ from src.deployment.teleoperation.devices import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class DummyDevice(BaseInputDevice):
     def update(self) -> None:

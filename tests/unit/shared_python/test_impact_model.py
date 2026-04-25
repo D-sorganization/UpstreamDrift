@@ -20,8 +20,6 @@ from src.shared.python.physics.impact_model import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def default_impact_params() -> ImpactParameters:

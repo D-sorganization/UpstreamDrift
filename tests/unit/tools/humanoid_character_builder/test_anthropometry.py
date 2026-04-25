@@ -5,8 +5,6 @@ from humanoid_character_builder.core.anthropometry import estimate_segment_masse
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_estimate_segment_masses_normalized_total() -> None:
     total_mass = 75.0

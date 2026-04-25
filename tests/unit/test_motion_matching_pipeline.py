@@ -30,8 +30,6 @@ from src.shared.python.pose_estimation.validation_metrics import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # ===================================================================
 # Fixtures: synthetic keypoint sets
 # ===================================================================

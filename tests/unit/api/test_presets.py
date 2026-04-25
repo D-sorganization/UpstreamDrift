@@ -10,10 +10,10 @@ No network, no filesystem writes — all I/O paths are mocked.
 
 from __future__ import annotations
 
-import pytest
 from pydantic import ValidationError
 
 from src.api.routes.presets import (
+
     PARAM_BOUNDS,
     PresetEntry,
     PresetSaveRequest,
@@ -21,6 +21,9 @@ from src.api.routes.presets import (
     _safe_preset_path,
     _validate_param_bounds,
 )
+import pytest
+pytestmark = pytest.mark.unit
+
 
 
 class TestParamBounds:

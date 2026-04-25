@@ -7,8 +7,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 # --- PINOCCHIO ---
 def test_pinocchio_iaa() -> None:

@@ -7,8 +7,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 pin = pytest.importorskip("pinocchio")
 
 try:

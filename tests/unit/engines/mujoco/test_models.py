@@ -15,8 +15,6 @@ from mujoco_humanoid_golf.models import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestModelXML:
     """Tests for model XML strings."""

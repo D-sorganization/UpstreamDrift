@@ -13,8 +13,6 @@ from src.shared.python.validation_pkg.comparative_plotting import ComparativePlo
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestComparativePlotter:
     """Tests for ComparativePlotter class."""

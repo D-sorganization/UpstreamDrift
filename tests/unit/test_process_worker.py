@@ -14,8 +14,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture(autouse=True)
 def _force_fallback_signals() -> Generator[None, None, None]:

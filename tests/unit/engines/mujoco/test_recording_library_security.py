@@ -9,8 +9,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # List of modules to mock
 MOCK_MODULES = [
     "mujoco",

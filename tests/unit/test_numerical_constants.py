@@ -17,8 +17,6 @@ from src.shared.python.core.numerical_constants import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestNumericalConstants:
     """Regression tests for numerical constants."""

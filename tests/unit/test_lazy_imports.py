@@ -11,8 +11,6 @@ from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestSharedModuleLazyImports:
     """Test that shared module doesn't eagerly import heavy dependencies."""

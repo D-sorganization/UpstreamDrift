@@ -15,8 +15,6 @@ from src.shared.python.ai.exceptions import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_aierror_init() -> None:
     err = AIError("test msg", details={"k": "v"})

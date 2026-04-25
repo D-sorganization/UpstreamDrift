@@ -19,8 +19,6 @@ from src.shared.python.calc_backend.routers.wgs_reactor import router
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 _app = FastAPI()
 _app.include_router(router)
 client = TestClient(_app)

@@ -14,8 +14,6 @@ from src.shared.python.gui_pkg.gui_utils import get_qapp
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 if PYQT6_AVAILABLE:
     pass
 

@@ -23,8 +23,6 @@ from src.shared.python.data_io.swing_capture_import import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # ---- Fixtures ----
 
 

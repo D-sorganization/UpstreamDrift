@@ -13,8 +13,6 @@ from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry im
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def mock_mujoco_model_data() -> tuple:

@@ -17,8 +17,6 @@ from src.shared.python.ai.exceptions import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestAIError:
     """Tests for base AIError exception."""

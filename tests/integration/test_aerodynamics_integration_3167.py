@@ -14,6 +14,8 @@ import pytest
 
 from src.shared.python.physics.aerodynamics._config import AerodynamicsConfig
 from src.shared.python.physics.aerodynamics._engine import AerodynamicsEngine
+pytestmark = pytest.mark.integration
+
 
 
 class TestAerodynamicsIntegration:

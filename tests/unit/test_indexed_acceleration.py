@@ -13,8 +13,6 @@ from src.shared.python.spatial_algebra.indexed_acceleration import IndexedAccele
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestIndexedAccelerationDataclass:
     """Test IndexedAcceleration dataclass."""

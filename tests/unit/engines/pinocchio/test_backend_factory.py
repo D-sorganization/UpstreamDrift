@@ -13,8 +13,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestBackendType:
     """Tests for BackendType enum."""

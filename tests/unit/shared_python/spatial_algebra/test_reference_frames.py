@@ -15,8 +15,6 @@ from src.shared.python.spatial_algebra.reference_frames import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestReferenceFrames:
     def test_compute_rotation_matrix_from_axes(self) -> None:

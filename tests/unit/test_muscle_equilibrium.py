@@ -18,8 +18,6 @@ from src.shared.python.core.contracts import PostconditionError
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def standard_muscle() -> HillMuscleModel:

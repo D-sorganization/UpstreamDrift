@@ -9,8 +9,6 @@ from src.shared.python.biomechanics.kinematic_sequence import KinematicSequenceA
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestKinematicSequence:
     def test_perfect_sequence(self) -> None:

@@ -5,12 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 
 import biomechanics.humanoid_urdf_contracts as urdf_contracts
-import pytest
 from biomechanics.humanoid_urdf_contracts import (
+
     ContractViolation,
     ValidationReport,
     validate_humanoid_urdf,
 )
+import pytest
+pytestmark = pytest.mark.unit
+
 
 
 def _build_urdf(

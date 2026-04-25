@@ -14,8 +14,6 @@ from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestControlMode:
     """Tests for ControlMode enum."""

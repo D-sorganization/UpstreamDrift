@@ -13,8 +13,6 @@ from mujoco_humanoid_golf.club_configurations import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestClubSpecification:
     """Tests for ClubSpecification dataclass."""

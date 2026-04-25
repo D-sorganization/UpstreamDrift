@@ -35,8 +35,6 @@ from src.shared.python.engine_core.engine_availability import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1. Engine Availability Infrastructure Tests (#1818)
 # ═══════════════════════════════════════════════════════════════════════════════

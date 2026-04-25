@@ -6,8 +6,6 @@ from double_pendulum_model.ui.validation import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_validate_polynomial() -> None:
     assert validate_polynomial_text("1") is None

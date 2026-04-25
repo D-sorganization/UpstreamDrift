@@ -86,7 +86,7 @@ jobs:
         python: ["3.11"]
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Reject Raw Merge Conflict Markers
         run: |
@@ -111,7 +111,7 @@ jobs:
             libxcb-xinerama0 \
             libxcb-xkb1
 
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b  # v5.3.0
         with:
           python-version: ${{ matrix.python }}
 
@@ -306,7 +306,7 @@ jobs:
           done
 
       - name: Upload Test Logs
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7
+        uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b  # v4.5.0
         if: always()
         with:
           name: optional-stack-test-logs-${{ matrix.python }}

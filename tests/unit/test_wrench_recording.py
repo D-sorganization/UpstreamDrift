@@ -18,8 +18,6 @@ from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def _make_engine(nq: int = 7, nv: int = 6) -> MagicMock:
     """Create a mock PhysicsEngine with configurable DOF.

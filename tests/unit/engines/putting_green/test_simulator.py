@@ -30,8 +30,6 @@ from src.engines.physics_engines.putting_green.python.turf_properties import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestSimulationConfig:
     """Tests for SimulationConfig dataclass."""

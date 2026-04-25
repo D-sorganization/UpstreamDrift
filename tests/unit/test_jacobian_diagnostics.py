@@ -20,8 +20,6 @@ from src.engines.common.jacobian_diagnostics import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestJacobianDiagnostics:
     """Tests for single-Jacobian diagnostics."""

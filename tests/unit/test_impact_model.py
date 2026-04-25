@@ -29,8 +29,6 @@ from src.shared.python.physics.impact_model import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestPreImpactState:
     """Tests for pre-impact state creation."""

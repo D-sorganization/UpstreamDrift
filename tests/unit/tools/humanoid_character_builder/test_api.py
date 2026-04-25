@@ -22,8 +22,6 @@ from humanoid_character_builder.presets.loader import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestCharacterBuilder:
     """Tests for CharacterBuilder class."""

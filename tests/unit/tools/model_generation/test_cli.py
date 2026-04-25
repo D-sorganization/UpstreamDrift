@@ -9,8 +9,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 SIMPLE_URDF = """<?xml version="1.0"?>
 <robot name="test_robot">
     <link name="base_link">

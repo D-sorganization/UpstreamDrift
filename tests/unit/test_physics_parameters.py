@@ -9,8 +9,6 @@ from src.shared.python.physics.physics_parameters import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def registry() -> PhysicsParameterRegistry:

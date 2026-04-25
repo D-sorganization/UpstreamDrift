@@ -24,8 +24,6 @@ from src.robotics.planning.motion import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # =============================================================================
 # Mock Collision Checker for Testing
 # =============================================================================

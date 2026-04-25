@@ -11,8 +11,6 @@ from src.shared.python.engine_core.mock_engine import MockPhysicsEngine, get_moc
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestMockPhysicsEngineInit:
     """Tests for MockPhysicsEngine initialization."""

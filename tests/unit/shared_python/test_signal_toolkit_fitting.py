@@ -19,8 +19,6 @@ from src.shared.python.signal_toolkit.fitting import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture
 def t200() -> np.ndarray:

@@ -14,8 +14,6 @@ from src.engines.physics_engines.pinocchio.python.dtack.utils.optical_parser imp
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestGearsParser:
     """Tests for the Optical .rawcap parser stub."""

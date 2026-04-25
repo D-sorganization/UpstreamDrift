@@ -10,8 +10,6 @@ from src.shared.python.biomechanics.multi_muscle import AntagonistPair, MuscleGr
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestMultiMuscle(unittest.TestCase):
     """Test suite for multi-muscle coordination."""

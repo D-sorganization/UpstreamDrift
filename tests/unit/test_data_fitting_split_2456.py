@@ -11,8 +11,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 REPO = Path(__file__).parents[2]
 VAL_DIR = REPO / "src/shared/python/validation_pkg"
 LOC_BUDGET = 600

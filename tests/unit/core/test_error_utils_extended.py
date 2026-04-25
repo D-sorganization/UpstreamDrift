@@ -32,8 +32,6 @@ from src.shared.python.core.error_utils import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # ============================================================================
 # Tests for format_validation_error factory
 # ============================================================================

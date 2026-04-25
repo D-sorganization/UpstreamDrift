@@ -15,8 +15,6 @@ from src.shared.python.data_io.provenance import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestProvenance(unittest.TestCase):
     """Test suite for provenance tracking."""

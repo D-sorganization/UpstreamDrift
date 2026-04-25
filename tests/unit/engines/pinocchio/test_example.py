@@ -16,8 +16,6 @@ from src.shared.python.core import constants
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestConstants:
     """Test physical and mathematical constants."""

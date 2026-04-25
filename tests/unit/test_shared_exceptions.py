@@ -14,8 +14,6 @@ from src.shared.python.core.exceptions import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 def test_exception_inheritance() -> None:
     """Verify that all custom exceptions inherit from GolfSuiteError."""

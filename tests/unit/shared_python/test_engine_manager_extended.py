@@ -17,8 +17,6 @@ from src.shared.python.engine_core.engine_manager import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # --- Fixtures ---
 
 

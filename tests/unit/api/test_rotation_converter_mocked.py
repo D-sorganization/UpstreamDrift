@@ -16,8 +16,6 @@ from fastapi.testclient import TestClient
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 # Skip this module if the rotation_converter package is not installed
 pytest.importorskip(
     "rotation_converter",

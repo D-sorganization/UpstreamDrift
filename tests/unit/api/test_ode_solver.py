@@ -17,8 +17,6 @@ from src.shared.python.calc_backend.routers.ode_solver import router
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 _app = FastAPI()
 _app.include_router(router)
 client = TestClient(_app)

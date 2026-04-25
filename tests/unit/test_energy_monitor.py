@@ -26,8 +26,6 @@ from src.shared.python.tests.mock_physics_engine import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class TestEnergySnapshot:
     """Test EnergySnapshot dataclass."""

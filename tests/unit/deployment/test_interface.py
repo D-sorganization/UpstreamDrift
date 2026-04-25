@@ -12,8 +12,6 @@ from src.deployment.teleoperation.interface import (
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 class MockRobot:
     def __init__(self):

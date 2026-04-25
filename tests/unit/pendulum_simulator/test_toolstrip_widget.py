@@ -7,6 +7,8 @@ import pytest
 pytest.importorskip("PyQt6")
 
 from src.shared.python.pendulum_simulator.gui.toolstrip_widget import ToolStrip
+pytestmark = pytest.mark.unit
+
 
 
 def test_toolstrip_updates_playback_state_and_status(qtbot) -> None:

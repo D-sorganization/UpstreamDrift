@@ -15,8 +15,6 @@ from src.shared.python.engine_core import engine_availability
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 
 @pytest.fixture(scope="session")
 def qapp() -> Any:

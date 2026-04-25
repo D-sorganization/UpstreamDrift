@@ -6,8 +6,6 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
-pytestmark = pytest.mark.unit
-
 pytest.importorskip("sympy")  # upstream_drift_tools package chain requires sympy
 
 
