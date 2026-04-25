@@ -271,7 +271,11 @@ def main():
     output_dir = Path(args.output)
 
     if not trajectory_path.exists():
-        sys.exit(1)
+        raise FileNotFoundError(
+            f"Trajectory file not found: {trajectory_path}\n"
+            f"  Fix: Provide a valid trajectory file via --trajectory "
+            f"or use the bundled fixture at data/golf_trajectory.csv"
+        )
 
     if args.plot_only:
         run_trajectory_analysis(trajectory_path, args.sheet, output_dir)

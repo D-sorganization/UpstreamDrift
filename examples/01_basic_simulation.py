@@ -11,6 +11,7 @@ This example demonstrates how to:
 import time
 
 from src.shared.python.core.constants import GRAVITY_M_S2
+from src.shared.python.core.error_utils import EngineNotAvailableError
 from src.shared.python.data_io.output_manager import OutputManager
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.engine_core.engine_manager import EngineManager
@@ -35,11 +36,14 @@ def main() -> None:
 
     # 2. Load Engine
     # Note: This checks for actual installation.
-    # If not installed, we'll handle gracefully for this example.
+    # If not installed, raise an actionable error with install hint.
     logger.info("Initializing MuJoCo engine...")
     if not engine_manager.switch_engine(EngineType.MUJOCO):
-        logger.warning("MuJoCo not found. Please install it to run simulation.")
-        return
+        raise EngineNotAvailableError(
+            engine_name="mujoco",
+            operation="basic simulation",
+            install_hint="pip install mujoco",
+        )
 
     # 3. Simulation Loop (Conceptual)
     logger.info("Running simulation...")

@@ -1,6 +1,6 @@
 # SPEC.md — Repository Specification Document
 
-Last-Updated: 2026-04-23T12:49:00-07:00
+Last-Updated: 2026-04-24T21:04:00-07:00
 
 <!--
   TEMPLATE VERSION: 1.0.0
@@ -29,7 +29,7 @@ Last-Updated: 2026-04-23T12:49:00-07:00
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.176                                            |
+| **Spec Version**        | 1.0.177                                            |
 | **Last Spec Update**    | 2026-04-24                                         |
 
 ## 2. Purpose & Mission
@@ -714,6 +714,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 | 1.0.140 | 2026-04-20 | Bolt: Replaced `np.linalg.norm` with `math.hypot` for 2D/3D physics vectors in aerodynamics and ball flight simulation for a ~5x performance speedup. |
 | 1.0.139 | 2026-04-20 | Bolt: Optimized Numba-compiled `rotation_matrix_from_vectors` in `golf_data_core.py` by replacing `np.linalg.norm` and `np.allclose` with explicit element-wise math.sqrt and dot products for a 2x+ speedup. |
 | 1.0.140 | 2026-04-21 | Bolt: Optimized `np.sum(forces * velocities, axis=1)` to `np.einsum` in `dynamics_quantities.py` for performance. |
+| 1.0.177 | 2026-04-24 | Corrected `simulate_agent_training` return type annotation from `dict[str, float]` to `dict[str, float | str]` in `trajectory_funnel_benchmark.py` to resolve mypy dict-item error. |
 
 ## Changelog
 
