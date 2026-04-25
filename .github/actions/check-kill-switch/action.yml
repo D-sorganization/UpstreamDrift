@@ -1,0 +1,37 @@
+name: Check Jules Kill Switch
+description: >
+  Checks whether Jules automation is globally paused.
+  Paused if the file .github/WORKFLOWS_PAUSED exists in the repo
+  OR if the repository variable WORKFLOWS_PAUSED is set to "true".
+  Exits with an error if paused so the calling job is marked failed/skipped.
+
+inputs:
+  token:
+    description: GitHub token used to read repository variables
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check kill switch (file + repo variable)
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        # 1. File-based kill switch: presence of .github/WORKFLOWS_PAUSED pauses all Jules runs.
+        if [[ -f ".github/WORKFLOWS_PAUSED" ]]; then
+          echo "::error::Workflows paused via kill switch (.github/WORKFLOWS_PAUSED file present)"
+          exit 1
+        fi
+
+        # 2. Repository-variable kill switch: WORKFLOWS_PAUSED == "true" pauses all Jules runs.
+        PAUSED=$(gh api \
+          "/repos/${{ github.repository }}/actions/variables/WORKFLOWS_PAUSED" \
+          --jq '.value' 2>/dev/null || echo "false")
+        if [[ "$PAUSED" == "true" ]]; then
+          echo "::error::Workflows paused via kill switch (repo variable WORKFLOWS_PAUSED=true)"
+          exit 1
+        fi
+
+        echo "Kill switch not active — proceeding."

@@ -52,8 +52,22 @@ env:
   COOLDOWN_DAYS: 7
 
 jobs:
+  # ── Kill-switch: honour WORKFLOWS_PAUSED file/variable (issue #3065) ────────
+  kill-switch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Checkout (for file-based kill switch)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+        with:
+          sparse-checkout: .github/WORKFLOWS_PAUSED
+          sparse-checkout-cone-mode: false
+      - name: Check kill switch
+        uses: ./.github/actions/check-kill-switch
+
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
   pick-runner:
+    needs: kill-switch
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -81,7 +95,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
 
       - name: Find and Assign Issues
         id: assign
