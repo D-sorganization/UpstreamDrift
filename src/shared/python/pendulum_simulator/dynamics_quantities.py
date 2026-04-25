@@ -43,9 +43,9 @@ def angular_power_at(
         Returns a finite float.
     """
     assert np.isfinite(joint_torque), f"torque must be finite, got {joint_torque}"
-    assert np.isfinite(
-        angular_velocity
-    ), f"omega must be finite, got {angular_velocity}"
+    assert np.isfinite(angular_velocity), (
+        f"omega must be finite, got {angular_velocity}"
+    )
     result = float(joint_torque * angular_velocity)
     assert np.isfinite(result), f"angular power is non-finite: {result}"
     return result
@@ -99,9 +99,9 @@ def angular_power_series(
     torques = np.asarray(torques, dtype=float)
     angular_velocities = np.asarray(angular_velocities, dtype=float)
     assert torques.ndim == 1, f"torques must be 1-D, got {torques.ndim}-D"
-    assert (
-        torques.shape == angular_velocities.shape
-    ), f"Shape mismatch: {torques.shape} vs {angular_velocities.shape}"
+    assert torques.shape == angular_velocities.shape, (
+        f"Shape mismatch: {torques.shape} vs {angular_velocities.shape}"
+    )
     assert np.all(np.isfinite(torques)), "torques must be all finite"
     assert np.all(np.isfinite(angular_velocities)), "velocities must be all finite"
 
@@ -130,12 +130,12 @@ def linear_power_series(
     """
     forces = np.asarray(forces, dtype=float)
     velocities = np.asarray(velocities, dtype=float)
-    assert (
-        forces.ndim == 2 and forces.shape[1] == 2
-    ), f"forces must be (N,2), got {forces.shape}"
-    assert (
-        forces.shape == velocities.shape
-    ), f"Shape mismatch: {forces.shape} vs {velocities.shape}"
+    assert forces.ndim == 2 and forces.shape[1] == 2, (
+        f"forces must be (N,2), got {forces.shape}"
+    )
+    assert forces.shape == velocities.shape, (
+        f"Shape mismatch: {forces.shape} vs {velocities.shape}"
+    )
     assert np.all(np.isfinite(forces)), "forces must be finite"
     assert np.all(np.isfinite(velocities)), "velocities must be finite"
 
@@ -216,9 +216,9 @@ def angular_impulse_series(
     torques = np.asarray(torques, dtype=float)
     time = np.asarray(time, dtype=float)
     assert torques.ndim == 1, f"torques must be 1-D, got {torques.ndim}-D"
-    assert (
-        torques.shape == time.shape
-    ), f"Shape mismatch: {torques.shape} vs {time.shape}"
+    assert torques.shape == time.shape, (
+        f"Shape mismatch: {torques.shape} vs {time.shape}"
+    )
     assert np.all(np.isfinite(torques)), "torques must be finite"
     assert np.all(np.isfinite(time)), "time must be finite"
 
@@ -245,12 +245,12 @@ def linear_impulse_series(
     """
     forces = np.asarray(forces, dtype=float)
     time = np.asarray(time, dtype=float)
-    assert (
-        forces.ndim == 2 and forces.shape[1] == 2
-    ), f"forces must be (N,2), got {forces.shape}"
-    assert (
-        forces.shape[0] == time.shape[0]
-    ), f"Row mismatch: {forces.shape[0]} vs {time.shape[0]}"
+    assert forces.ndim == 2 and forces.shape[1] == 2, (
+        f"forces must be (N,2), got {forces.shape}"
+    )
+    assert forces.shape[0] == time.shape[0], (
+        f"Row mismatch: {forces.shape[0]} vs {time.shape[0]}"
+    )
 
     dt = np.diff(time)
     impulse = np.zeros_like(forces)

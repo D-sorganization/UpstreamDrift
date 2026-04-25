@@ -12,7 +12,7 @@ on:
       - "conftest.py"
       - "launch_golf_suite.py"
       - "setup_golf_suite.py"
-      - "start_api_server.py"
+      - "scripts/ci/start_api_server.py"
 
 jobs:
   # ── Dispatcher: route to self-hosted if available ──────────────────────────
@@ -58,7 +58,6 @@ jobs:
             "conftest.py"
             "launch_golf_suite.py"
             "setup_golf_suite.py"
-            "start_api_server.py"
           )
 
           MISSING_FILES=()
@@ -71,6 +70,14 @@ jobs:
               echo "✅ Found: $file"
             fi
           done
+
+          # Check for start_api_server.py in scripts/ci/ (reorganized in #3070)
+          if [ ! -f "scripts/ci/start_api_server.py" ]; then
+            echo "❌ MISSING: scripts/ci/start_api_server.py"
+            MISSING_FILES+=("scripts/ci/start_api_server.py")
+          else
+            echo "✅ Found: scripts/ci/start_api_server.py"
+          fi
 
           if [ ${#MISSING_FILES[@]} -ne 0 ]; then
             echo ""
