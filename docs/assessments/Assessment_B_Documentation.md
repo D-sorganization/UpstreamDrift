@@ -1,12 +1,10 @@
 # Assessment: Documentation
 
-**Date**: 2026-02-27
-**Grade**: 7.0/10
+**Date**: 2026-04-26
+**Grade**: 8.0/10
 
 ## Details
-Root README.md exists.
-README.md is reasonably detailed.
-docs/ directory exists.
+README.md exists: True
 
 ## Recommendations
-1. Expand documentation for individual engines.
+1. Keep README updated.

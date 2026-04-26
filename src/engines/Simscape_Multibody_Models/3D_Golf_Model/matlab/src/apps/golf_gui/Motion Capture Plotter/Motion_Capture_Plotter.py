@@ -4,6 +4,11 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+
+# Placeholder for matplotlib imports which were missing but used
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
@@ -38,11 +43,6 @@ from .motion_capture_plotter_ui import MotionCapturePlotterUIMixin
 from .motion_capture_plotter_visualization import (
     MotionCapturePlotterVisualizationMixin,
 )
-
-# Placeholder for matplotlib imports which were missing but used
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
 logger = get_logger(__name__)
 
