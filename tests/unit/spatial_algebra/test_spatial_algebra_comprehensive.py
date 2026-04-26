@@ -7,10 +7,11 @@ and physical correctness of the spatial algebra implementation.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
 import numpy.typing as npt
 import pytest
-from typing import Callable
 
 from src.shared.python.spatial_algebra.inertia import (
     mcI,

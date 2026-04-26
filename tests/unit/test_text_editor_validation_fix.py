@@ -12,12 +12,12 @@ import xml.etree.ElementTree as ET
 import defusedxml.ElementTree as DefusedET
 import pytest
 
-from src.shared.python.model_generation.editor._text_editor_validation import (
-    _URDFValidationMixin,
-)
 from src.shared.python.model_generation.editor._text_editor_models import (
     ValidationMessage,
     ValidationSeverity,
+)
+from src.shared.python.model_generation.editor._text_editor_validation import (
+    _URDFValidationMixin,
 )
 
 
@@ -118,7 +118,7 @@ class TestURDFValidationMessages:
             message="Test error",
             element="link",
         )
-        assert "[ERROR] Line 10, Col 5 (link): Test error" == str(msg)
+        assert str(msg) == "[ERROR] Line 10, Col 5 (link): Test error"
 
     def test_validation_message_str_without_element(self) -> None:
         msg = ValidationMessage(
@@ -127,4 +127,4 @@ class TestURDFValidationMessages:
             column=0,
             message="Missing name",
         )
-        assert "[WARNING] Line 1: Missing name" == str(msg)
+        assert str(msg) == "[WARNING] Line 1: Missing name"

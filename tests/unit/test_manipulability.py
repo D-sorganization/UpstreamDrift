@@ -6,8 +6,6 @@ that implements Guideline C2 for singularity detection.
 
 from __future__ import annotations
 
-from typing import NoReturn
-
 import numpy as np
 import pytest
 
