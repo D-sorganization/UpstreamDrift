@@ -14,7 +14,7 @@ permissions:
   issues: write
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -27,11 +27,11 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
@@ -119,34 +119,34 @@ jobs:
           if [ -f "README.md" ]; then
             README_SIZE=$(wc -c < README.md)
             if [ "$README_SIZE" -lt 500 ]; then
-              echo "- ⚠️ README.md exists but is sparse ($README_SIZE bytes)" >> /tmp/doc_report.md
+              echo "- -- README.md exists but is sparse ($README_SIZE bytes)" >> /tmp/doc_report.md
             else
-              echo "- ✅ README.md exists and is substantial" >> /tmp/doc_report.md
+              echo "- - README.md exists and is substantial" >> /tmp/doc_report.md
             fi
           else
-            echo "- ❌ No README.md found" >> /tmp/doc_report.md
+            echo "- - No README.md found" >> /tmp/doc_report.md
           fi
 
           # Check for docs directory
           if [ -d "docs" ]; then
             DOC_COUNT=$(find docs -name "*.md" | wc -l)
-            echo "- ✅ docs/ directory exists with $DOC_COUNT markdown files" >> /tmp/doc_report.md
+            echo "- - docs/ directory exists with $DOC_COUNT markdown files" >> /tmp/doc_report.md
           else
-            echo "- ⚠️ No docs/ directory found" >> /tmp/doc_report.md
+            echo "- -- No docs/ directory found" >> /tmp/doc_report.md
           fi
 
           # Check for CONTRIBUTING
           if [ -f "CONTRIBUTING.md" ]; then
-            echo "- ✅ CONTRIBUTING.md exists" >> /tmp/doc_report.md
+            echo "- - CONTRIBUTING.md exists" >> /tmp/doc_report.md
           else
-            echo "- ⚠️ No CONTRIBUTING.md found" >> /tmp/doc_report.md
+            echo "- -- No CONTRIBUTING.md found" >> /tmp/doc_report.md
           fi
 
           # Check for CHANGELOG
           if [ -f "CHANGELOG.md" ] || [ -f "HISTORY.md" ]; then
-            echo "- ✅ Changelog exists" >> /tmp/doc_report.md
+            echo "- - Changelog exists" >> /tmp/doc_report.md
           else
-            echo "- ⚠️ No CHANGELOG.md or HISTORY.md found" >> /tmp/doc_report.md
+            echo "- -- No CHANGELOG.md or HISTORY.md found" >> /tmp/doc_report.md
           fi
 
       - name: Save Report

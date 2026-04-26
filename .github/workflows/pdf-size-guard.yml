@@ -34,18 +34,33 @@ jobs:
               SIZE_MB=$(echo "scale=2; $SIZE / 1048576" | bc)
               
               if [ "$SIZE" -gt 1048576 ]; then
+<<<<<<< HEAD
+                echo "- BLOCKED: File $file is too large ($SIZE_MB MB). Maximum allowed is 1MB."
+                BLOCKED=true
+              else
+                echo "- File $file is within limits ($SIZE_MB MB)."
+=======
                 echo "🚨 BLOCKED: File $file is too large ($SIZE_MB MB). Maximum allowed is 1MB."
                 BLOCKED=true
               else
                 echo "✅ File $file is within limits ($SIZE_MB MB)."
+>>>>>>> origin/main
               fi
             fi
           done
           
           if [ "$BLOCKED" = true ]; then
             echo ""
+<<<<<<< HEAD
+            echo "- This PR introduces PDF files larger than 1MB. Please store large assets in Git LFS or external storage."
+            exit 1
+          fi
+          
+          echo "- All PDFs within size limits."
+=======
             echo "❌ This PR introduces PDF files larger than 1MB. Please store large assets in Git LFS or external storage."
             exit 1
           fi
           
           echo "✅ All PDFs within size limits."
+>>>>>>> origin/main

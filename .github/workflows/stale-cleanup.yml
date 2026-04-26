@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -24,11 +24,11 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
@@ -45,7 +45,7 @@ jobs:
 
           # Stale PR configuration
           stale-pr-message: |
-            👋 This pull request has been automatically marked as stale because it has not had
+            - This pull request has been automatically marked as stale because it has not had
             recent activity for 30 days.
 
             **It will be closed in 7 days if no further activity occurs.**
@@ -58,10 +58,10 @@ jobs:
             - Explain what's blocking it
             - Request review from maintainers
 
-            Thank you for your contribution! 🙏
+            Thank you for your contribution! -
 
           close-pr-message: |
-            🤖 This pull request has been automatically closed due to inactivity.
+            - This pull request has been automatically closed due to inactivity.
 
             If you'd like to continue this work:
             - Reopen this PR with a comment explaining the status
@@ -71,7 +71,7 @@ jobs:
 
           # Stale Issue configuration
           stale-issue-message: |
-            👋 This issue has been automatically marked as stale because it has not had
+            - This issue has been automatically marked as stale because it has not had
             recent activity for 30 days.
 
             **It will be closed in 7 days if no further activity occurs.**
@@ -83,10 +83,10 @@ jobs:
             If this was resolved:
             - Close the issue with a comment explaining the resolution
 
-            Thank you! 🙏
+            Thank you! -
 
           close-issue-message: |
-            🤖 This issue has been automatically closed due to inactivity.
+            - This issue has been automatically closed due to inactivity.
 
             If this issue is still relevant, please reopen it with:
             - Current status or context

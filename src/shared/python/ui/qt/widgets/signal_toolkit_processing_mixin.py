@@ -22,6 +22,11 @@ from src.shared.python.signal_toolkit.calculus import (
     compute_tangent_line,
 )
 from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
+from src.shared.python.signal_toolkit.fitting import FunctionFitter
+from src.shared.python.signal_toolkit.io import SignalExporter, SignalImporter
+from src.shared.python.signal_toolkit.limits import SaturationMode, apply_saturation
+from src.shared.python.signal_toolkit.noise import NoiseType, add_noise_to_signal
+
 from src.shared.python.signal_toolkit.filters import (
     FilterDesigner,
     FilterType,
@@ -29,10 +34,6 @@ from src.shared.python.signal_toolkit.filters import (
     apply_moving_average,
     apply_savgol,
 )
-from src.shared.python.signal_toolkit.fitting import FunctionFitter
-from src.shared.python.signal_toolkit.io import SignalExporter, SignalImporter
-from src.shared.python.signal_toolkit.limits import SaturationMode, apply_saturation
-from src.shared.python.signal_toolkit.noise import NoiseType, add_noise_to_signal
 
 
 class SignalToolkitProcessingMixin:

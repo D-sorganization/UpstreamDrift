@@ -1,31 +1,31 @@
 name: CI Standard
 # ---------------------------------------------------------------------------
-# WORKFLOW INVENTORY (issue #2352 — 58 workflows with overlapping concerns)
+# WORKFLOW INVENTORY (issue #2352  -  58 workflows with overlapping concerns)
 # ---------------------------------------------------------------------------
 # Core CI (this file and below) are authoritative. Jules-* workflows are
 # AI-automation helpers that SHOULD NOT duplicate core-CI checks.
 #
 # Known overlaps (to consolidate in a future cleanup PR):
-#   - auto-remediate-issues.yml   ←→  Jules-Assessment-Remediator.yml
+#   - auto-remediate-issues.yml   --  Jules-Assessment-Remediator.yml
 #     Both remediate assessment issues. Remediator is the canonical version;
 #     auto-remediate-issues.yml is scheduled for removal.
 #
-#   - assessment-auto-fix.yml     ←→  Jules-Assessment-AutoFix.yml
+#   - assessment-auto-fix.yml     --  Jules-Assessment-AutoFix.yml
 #     Both dispatch auto-fixes. Jules-Assessment-AutoFix is the newer version
 #     with dry-run support; assessment-auto-fix.yml is legacy.
 #
-#   - Jules-Code-Quality-Fixer    ←→  Jules-Assessment-AutoFix
+#   - Jules-Code-Quality-Fixer    --  Jules-Assessment-AutoFix
 #     Both fix code quality issues found in assessments. Fixer runs on a
 #     static assessment file; AutoFix generates and fixes in one pass.
 #
-#   - Jules-Auto-Repair           ←→  Jules-Hotfix-Creator
+#   - Jules-Auto-Repair           --  Jules-Hotfix-Creator
 #     Both respond to CI failures. Auto-Repair pushes to the failing branch;
 #     Hotfix-Creator opens a new hotfix branch. Not truly redundant.
 #
-# Status (as of 2026-04-25 — issue #2352 infrastructure consolidation):
-#   1. ✓ auto-remediate-issues.yml archived → .github/workflows/archived/auto-remediate-issues.yml.disabled
-#   2. ✓ assessment-auto-fix.yml archived → .github/workflows/archived/assessment-auto-fix.yml.disabled
-#   3. TODO: Review Jules-Code-Quality-Fixer ↔ Jules-Assessment-AutoFix consolidation (follow-up PR)
+# Status (as of 2026-04-25  -  issue #2352 infrastructure consolidation):
+#   1. - auto-remediate-issues.yml archived - .github/workflows/archived/auto-remediate-issues.yml.disabled
+#   2. - assessment-auto-fix.yml archived - .github/workflows/archived/assessment-auto-fix.yml.disabled
+#   3. TODO: Review Jules-Code-Quality-Fixer - Jules-Assessment-AutoFix consolidation (follow-up PR)
 #
 # See .github/INFRASTRUCTURE_CONSOLIDATION.md and .github/BUILD_INFRASTRUCTURE.md for detailed analysis.
 # ---------------------------------------------------------------------------
@@ -47,7 +47,7 @@ on:
       - ".gitignore"
   workflow_dispatch:
   schedule:
-    # Weekly run every Monday at 06:00 UTC — catches test drift and
+    # Weekly run every Monday at 06:00 UTC  -  catches test drift and
     # coverage regression independent of code changes (issue #1789)
     - cron: "0 6 * * 1"
 
@@ -59,7 +59,7 @@ permissions:
   contents: read
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -72,11 +72,11 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
@@ -335,7 +335,11 @@ jobs:
           # Report to summary
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
+<<<<<<< HEAD
+          echo "- Passed: $passed | - Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
+=======
           echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
+>>>>>>> origin/main
 
       - uses: codecov/codecov-action@v5
         env:
@@ -397,7 +401,7 @@ jobs:
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
-        # See tests/Install Core Test Dependencies for the rationale —
+        # See tests/Install Core Test Dependencies for the rationale  - 
         # the shared toolcache can carry a stale `sortedcontainers` that
         # makes hypothesis fail during pytest_terminal_summary.
         # Force-reinstall numpy/scipy to ensure a consistent binary ABI:
@@ -534,11 +538,11 @@ jobs:
               echo "$RUST_FILES"
             else
               echo "has_changes=false" >> "$GITHUB_OUTPUT"
-              echo "Rust files changed but no Cargo.toml found — skipping quality gate."
+              echo "Rust files changed but no Cargo.toml found  -  skipping quality gate."
             fi
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No Rust changes detected — skipping Rust quality gate."
+            echo "No Rust changes detected  -  skipping Rust quality gate."
           fi
 
       - name: Install Rust toolchain
@@ -628,12 +632,12 @@ jobs:
         if: steps.rust-changes.outputs.has_changes == 'true'
         run: |
           echo "## Rust Quality Gate" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ clippy: no warnings" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ maturin: wheel built" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Python bindings: verified" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
+          echo "- - rustfmt: formatted" >> $GITHUB_STEP_SUMMARY
+          echo "- - clippy: no warnings" >> $GITHUB_STEP_SUMMARY
+          echo "- - cargo test: all tests pass" >> $GITHUB_STEP_SUMMARY
+          echo "- - maturin: wheel built" >> $GITHUB_STEP_SUMMARY
+          echo "- - Python bindings: verified" >> $GITHUB_STEP_SUMMARY
+          echo "- - WASM: target compiled and verified" >> $GITHUB_STEP_SUMMARY
 
   rust-quickstart:
     name: Rust Quickstart
@@ -665,7 +669,7 @@ jobs:
             echo "$RUST_FILES"
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
-            echo "No Rust changes detected — skipping Rust quickstart."
+            echo "No Rust changes detected  -  skipping Rust quickstart."
           fi
 
       - name: Setup Python

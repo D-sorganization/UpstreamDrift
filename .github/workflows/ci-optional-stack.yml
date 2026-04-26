@@ -36,7 +36,7 @@ on:
       - ".gitignore"
   workflow_dispatch:
   schedule:
-    # Weekly run every Wednesday at 07:00 UTC — staggered from ci-standard
+    # Weekly run every Wednesday at 07:00 UTC  -  staggered from ci-standard
     - cron: "0 7 * * 3"
 
 concurrency:
@@ -47,7 +47,7 @@ permissions:
   contents: read
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -60,21 +60,15 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-
-  # ── Optional-Stack Verification Lane ──────────────────────────────────────
-  # This is the optional-stack verification job described in issue #2368.
-  # It provisions Pinocchio, Pink, Crocoddyl, API extras, and PyQt6.
-  # Tests are run without skip guards so optional-stack regressions surface
-  # immediately as failures rather than silently-skipped test entries.
   optional-stack-check:
     needs: pick-runner
     runs-on: self-hosted
@@ -193,7 +187,7 @@ jobs:
       - name: Run API Tests (Optional Stack)
         continue-on-error: true
         # Run the API test suite against the full API extras installation.
-        # These tests require fastapi, httpx, and related packages — they are
+        # These tests require fastapi, httpx, and related packages  -  they are
         # skipped in the core CI lane which does not install these extras.
         env:
           PYTHONPATH: .:src
@@ -249,7 +243,7 @@ jobs:
           fi
 
           # If Pinocchio IS installed but all tests were skipped, that is a
-          # regression — the guard conditions may no longer match the installed
+          # regression  -  the guard conditions may no longer match the installed
           # package API.
           if [[ "${{ steps.pinocchio_install.outputs.available }}" == "true" ]] && \
              [[ "$passed" -eq 0 ]] && [[ "$skipped" -gt 0 ]]; then
