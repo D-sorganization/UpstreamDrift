@@ -261,6 +261,7 @@ In addition to the standard framework, specialized audits monitor specific quali
 | 3.6     | 2026-04 | Added Completist Report 2026-04-05                                                 |
 
 | 3.7 | 2026-04 | Added A-N Assessment 2026-04-10 refresh (see `A-N_Assessment_2026-04-10.md`) |
+| 3.8 | 2026-04 | Added Completist Report 2026-04-26 |
 
 ---
 
