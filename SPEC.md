@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.80                                             |
+| **Spec Version**        | 1.0.81                                             |
 | **Last Spec Update**    | 2026-04-26                                         |
 
 ## 2. Purpose & Mission
@@ -464,8 +464,10 @@ pytest tests/ --cov=src --cov-fail-under=70
 - Performance scaling beyond 100-muscle models not yet tested
 
 ## 12. Change Log
-| Date       | Version | Changes                                                                                                       |
+| Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| 2026-04-26 | 1.0.81  | fix: Restore missing jobs in `Code-Metrics.yml` and `release.yml`; correct non-UTF-8 characters in 55 workflows causing 0s CI failures. |
+| 2026-04-26 | 1.0.80  | fix: Harden `pick-runner` logic across all workflows to handle `gh api` JSON errors; implement tool invocation loop for AI chat service (fixes #3162); resolve massive conflict-marker corruption in `src` and `tests` by restoring from `origin/main`. |
 | 2026-04-26 | 1.0.80  | Bolt: Optimize Mean Squared Error calculations in system_identification.py |
 | 2026-04-26 | 1.0.80  | Bolt: Replaced `np.linalg.norm` with `np.sqrt(np.vdot)` in `src/robotics/planning/collision/_distance_queries.py` and `src/robotics/planning/collision/_primitive_shapes.py` to avoid NumPy reduction overhead for small 3D geometric vectors. |
 | 2026-04-26 | 1.0.79  | Generate updated assessment reports (A-O and Comprehensive) and auto-fix formatting issue in Motion Capture Plotter. |

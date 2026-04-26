@@ -52,7 +52,7 @@ env:
   CI_POLL_INTERVAL: 30
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -65,11 +65,11 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
@@ -299,7 +299,7 @@ jobs:
 
               # Push changes
               git push origin "$BRANCH"
-              echo "✅ Pushed iteration $iteration fixes to $BRANCH"
+              echo "- Pushed iteration $iteration fixes to $BRANCH"
 
               # Wait for CI to start
               echo ">>> Waiting for CI to start..."
@@ -319,11 +319,11 @@ jobs:
                     --jq '.[] | select(.name == "quality-gate") | .conclusion' 2>/dev/null | head -1)
 
                   if [ "$CONCLUSION" == "SUCCESS" ]; then
-                    echo "✅ CI PASSED after iteration $iteration!"
+                    echo "- CI PASSED after iteration $iteration!"
                     ci_passed=true
                     break 2  # Exit both loops
                   else
-                    echo "❌ CI still failing after iteration $iteration (conclusion: $CONCLUSION)"
+                    echo "- CI still failing after iteration $iteration (conclusion: $CONCLUSION)"
                     break  # Exit wait loop, continue fix loop
                   fi
                 fi
@@ -334,7 +334,7 @@ jobs:
               done
 
               if [ $wait_time -ge ${{ env.CI_WAIT_TIMEOUT }} ]; then
-                echo "⚠️ CI wait timeout reached, continuing with next iteration"
+                echo "-- CI wait timeout reached, continuing with next iteration"
               fi
 
               # Pull any changes before next iteration
@@ -370,10 +370,10 @@ jobs:
           ITERATIONS: ${{ steps.fix-loop.outputs.iterations_used }}
         run: |
           if [ "$STATUS" == "success" ]; then
-            EMOJI="✅"
+            EMOJI="-"
             MESSAGE="CI is now **passing** after $ITERATIONS iteration(s)!"
           else
-            EMOJI="🔧"
+            EMOJI="-"
             MESSAGE="Applied $ITERATIONS iteration(s) of fixes. CI may still need manual attention."
           fi
 
@@ -413,7 +413,7 @@ jobs:
           echo "- **Iterations Used:** ${{ steps.fix-loop.outputs.iterations_used || '0' }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.fix-loop.outputs.status }}" == "success" ]; then
-            echo "### ✅ CI Verification: PASSED" >> $GITHUB_STEP_SUMMARY
+            echo "### - CI Verification: PASSED" >> $GITHUB_STEP_SUMMARY
           elif [ "${{ steps.fix-loop.outputs.status }}" == "partial" ]; then
-            echo "### ⚠️ CI Verification: Partial (manual review needed)" >> $GITHUB_STEP_SUMMARY
+            echo "### -- CI Verification: Partial (manual review needed)" >> $GITHUB_STEP_SUMMARY
           fi

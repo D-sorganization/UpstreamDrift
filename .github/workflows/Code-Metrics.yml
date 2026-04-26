@@ -4,8 +4,7 @@ name: Code Metrics
 # Reports complexity (radon) and duplication (jscpd) metrics
 
 on:
-  # COST OPTIMIZATION: Schedule removed. This is an informational report — run manually via workflow_dispatch.
-  # Was: cron "0 0 * * 0,4" (twice-weekly cloud runs wasting ~10 min/run across 3 repos)
+  # COST OPTIMIZATION: Schedule removed. This is an informational report - run manually via workflow_dispatch.
   workflow_dispatch:
 
 permissions:
@@ -13,13 +12,37 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
       runner: ${{ steps.check.outputs.runner }}
     steps:
+<<<<<<< HEAD
+      - name: Check for self-hosted runner
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
+        run: |
+          ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
+            2>/dev/null || echo "0")
+          if [[ "$ONLINE" -gt 0 ]]; then
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Self-hosted runner online - routing locally"
+          else
+            echo "::error::No local self-hosted runner available; failing closed"
+            exit 1
+          fi
+
+  complexity-metrics:
+    needs: pick-runner
+    name: Complexity Analysis (radon)
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    steps:
+=======
+>>>>>>> origin/main
       - uses: actions/checkout@v6
 
       - name: Setup Python
@@ -27,77 +50,27 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install radon
+      - name: Install Radon
         run: pip install radon
 
-      - name: Run Cyclomatic Complexity Analysis
-        id: cc
+      - name: Run Complexity Analysis
         run: |
-          echo "## Cyclomatic Complexity Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "## Code Complexity Analysis (Radon)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Get complexity grades
-          echo "### Complexity Distribution" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          radon cc src -a -s 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || echo "No Python files found" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Count by grade
-          echo "### Grade Summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Grade | Count | Description |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|-------------|" >> $GITHUB_STEP_SUMMARY
-
-          a_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - A" || echo "0")
-          b_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - B" || echo "0")
-          c_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - C" || echo "0")
-          d_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - D" || echo "0")
-          e_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - E" || echo "0")
-          f_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - F" || echo "0")
-
-          echo "| A | $a_count | Simple (1-5) |" >> $GITHUB_STEP_SUMMARY
-          echo "| B | $b_count | Low (6-10) |" >> $GITHUB_STEP_SUMMARY
-          echo "| C | $c_count | Moderate (11-20) |" >> $GITHUB_STEP_SUMMARY
-          echo "| D | $d_count | High (21-30) |" >> $GITHUB_STEP_SUMMARY
-          echo "| E | $e_count | Very High (31-40) |" >> $GITHUB_STEP_SUMMARY
-          echo "| F | $f_count | Extreme (41+) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Show worst offenders (D, E, F grades)
-          echo "### High Complexity Functions (Grade C or worse)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          radon cc src -a -nc --min C 2>&1 | head -50 >> $GITHUB_STEP_SUMMARY || echo "None found" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: Run Maintainability Index
-        run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Maintainability Index" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Rating | Range | Description |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|-------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| A | 20-100 | Highly maintainable |" >> $GITHUB_STEP_SUMMARY
-          echo "| B | 10-19 | Moderate |" >> $GITHUB_STEP_SUMMARY
-          echo "| C | 0-9 | Difficult to maintain |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "### Low Maintainability Files (B or C)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          radon mi src -s --min B 2>&1 | head -30 >> $GITHUB_STEP_SUMMARY || echo "All files highly maintainable" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-
-      - name: Run Raw Metrics
-        run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Raw Metrics Summary" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          radon raw src -s 2>&1 | tail -15 >> $GITHUB_STEP_SUMMARY || echo "No metrics available" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Cyclomatic Complexity (Top 10)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          radon cc src -s -a -nb C | head -20 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Maintainability Index" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          radon mi src -s -nb B | head -20 >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   duplication-metrics:
     needs: pick-runner
     name: Duplication Analysis (jscpd)
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - uses: actions/checkout@v6
 
@@ -140,42 +113,19 @@ jobs:
           jscpd src --output ./jscpd-report 2>&1 || true
 
           echo "### Duplication Summary" >> $GITHUB_STEP_SUMMARY
-
           if [ -f "./jscpd-report/jscpd-report.json" ]; then
-            # Parse JSON report
-              python3 <<'PYCODE' 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Could not parse duplicates" >> $GITHUB_STEP_SUMMARY
-              import json
-              from pathlib import Path
-                            report = Path('./jscpd-report/jscpd-report.json')
-              data = json.loads(report.read_text())
-              for i, dup in enumerate(data.get('duplicates', [])[:10], start=1):
-              first = dup.get('firstFile', {})
-              second = dup.get('secondFile', {})
-              lines = dup.get('lines', 0)
-              print(f"{i}. {lines} lines duplicated:")
-              print(f"   {first.get('name', '')}:{first.get('startLoc', {}).get('line', '')}")
-              print(f"   {second.get('name', '')}:{second.get('startLoc', {}).get('line', '')}")
-              print()
-              PYCODE
-              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            fi
+             echo '```' >> $GITHUB_STEP_SUMMARY
+             jscpd src --reporters console | tail -10 >> $GITHUB_STEP_SUMMARY || true
+             echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "No duplication report generated" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Check scripts directory
-        run: |
-          if [ -d "scripts" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Scripts Directory Duplication" >> $GITHUB_STEP_SUMMARY
-            jscpd scripts --reporters console 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || true
           fi
 
   summary:
     name: Metrics Summary
     needs: [pick-runner, complexity-metrics, duplication-metrics]
     if: always()
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Final Summary
         run: |
