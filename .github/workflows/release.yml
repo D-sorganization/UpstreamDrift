@@ -24,6 +24,7 @@ jobs:
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
             --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
+          if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
           if [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
             echo "Self-hosted runner online - routing locally"

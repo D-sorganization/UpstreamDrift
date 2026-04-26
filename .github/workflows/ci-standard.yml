@@ -335,11 +335,7 @@ jobs:
           # Report to summary
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
-<<<<<<< HEAD
           echo "- Passed: $passed | - Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
-=======
-          echo "✅ Passed: $passed | ❌ Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
->>>>>>> origin/main
 
       - uses: codecov/codecov-action@v5
         env:
@@ -401,7 +397,7 @@ jobs:
       - name: Create stub ui/dist for editable install
         run: mkdir -p ui/dist
       - name: Install Core Test Dependencies
-        # See tests/Install Core Test Dependencies for the rationale  - 
+        # See tests/Install Core Test Dependencies for the rationale  -
         # the shared toolcache can carry a stale `sortedcontainers` that
         # makes hypothesis fail during pytest_terminal_summary.
         # Force-reinstall numpy/scipy to ensure a consistent binary ABI:
