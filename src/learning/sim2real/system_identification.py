@@ -235,7 +235,7 @@ class SystemIdentifier:
         if weights is not None:
             diff = diff * weights
 
-        return float(np.mean(diff**2))
+        return float(np.vdot(diff, diff) / diff.size)
 
     def identify_from_trajectories(
         self,
@@ -405,9 +405,13 @@ class SystemIdentifier:
         n_dof = sim.shape[1] // 2
 
         metrics = {
-            "total_mse": float(np.mean(diff**2)),
-            "position_mse": float(np.mean(diff[:, :n_dof] ** 2)),
-            "velocity_mse": float(np.mean(diff[:, n_dof:] ** 2)),
+            "total_mse": float(np.vdot(diff, diff) / diff.size),
+            "position_mse": float(
+                np.vdot(diff[:, :n_dof], diff[:, :n_dof]) / diff[:, :n_dof].size
+            ),
+            "velocity_mse": float(
+                np.vdot(diff[:, n_dof:], diff[:, n_dof:]) / diff[:, n_dof:].size
+            ),
             "max_position_error": float(np.max(np.abs(diff[:, :n_dof]))),
             "max_velocity_error": float(np.max(np.abs(diff[:, n_dof:]))),
             "mean_position_error": float(np.mean(np.abs(diff[:, :n_dof]))),
@@ -417,8 +421,13 @@ class SystemIdentifier:
 
         # Per-joint errors
         for j in range(n_dof):
-            metrics[f"joint_{j}_position_mse"] = float(np.mean(diff[:, j] ** 2))
-            metrics[f"joint_{j}_velocity_mse"] = float(np.mean(diff[:, n_dof + j] ** 2))
+            metrics[f"joint_{j}_position_mse"] = float(
+                np.vdot(diff[:, j], diff[:, j]) / diff[:, j].size
+            )
+            metrics[f"joint_{j}_velocity_mse"] = float(
+                np.vdot(diff[:, n_dof + j], diff[:, n_dof + j])
+                / diff[:, n_dof + j].size
+            )
 
         return metrics
 
