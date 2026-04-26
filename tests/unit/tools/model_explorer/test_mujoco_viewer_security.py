@@ -5,7 +5,6 @@ subprocess.Popen to prevent command injection vulnerabilities.
 """
 
 import sys
-import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 

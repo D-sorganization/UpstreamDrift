@@ -454,54 +454,6 @@ class C3DDataReader:
             ground_height,
             self.file_path.name,
         )
-        return result
-
-    def _pivot_analog_data(self) -> pd.DataFrame:
-        analog_df = self.analog_dataframe(include_time=False)
-        return analog_df.pivot(
-            index="sample", columns="channel", values="value"
-        ).reset_index()  # noqa: E501
-
-    @staticmethod
-    def _build_plate_dataframes(
-        plate_channels: dict[int, dict[str, str]],
-        analog_wide: pd.DataFrame,
-        compute_cop: bool,
-        ground_height: float,
-    ) -> list[pd.DataFrame]:
-        if plate_channels is None:
-            raise ValueError("plate_channels must be provided")
-        required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
-        result_dfs: list[pd.DataFrame] = []
-
-        for plate_num, channels in sorted(plate_channels.items()):
-            missing_keys = required_keys - set(channels.keys())
-            if missing_keys:
-                logger.warning(
-                    f"Force plate {plate_num} missing channels: {missing_keys}. "
-                    "Skipping."  # noqa: E501
-                )
-                continue
-
-            plate_df = pd.DataFrame(
-                {
-                    "sample": analog_wide["sample"],
-                    "plate": plate_num,
-                    "fx": analog_wide[channels["fx"]].to_numpy(),
-                    "fy": analog_wide[channels["fy"]].to_numpy(),
-                    "fz": analog_wide[channels["fz"]].to_numpy(),
-                    "mx": analog_wide[channels["mx"]].to_numpy(),
-                    "my": analog_wide[channels["my"]].to_numpy(),
-                    "mz": analog_wide[channels["mz"]].to_numpy(),
-                }
-            )
-
-            if compute_cop:
-                _add_cop_columns(plate_df, ground_height)
-
-            result_dfs.append(plate_df)
-
-        return result_dfs
 
     def get_force_plate_count(self) -> int:
         """Return the number of detected force plates."""

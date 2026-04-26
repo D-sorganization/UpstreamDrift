@@ -1,8 +1,6 @@
-"""Upload size validation middleware."""
-
-from __future__ import annotations
-
-from collections.abc import Awaitable, Callable
+import contextlib
+from collections.abc import AsyncIterator, Awaitable, Callable
+from pathlib import Path
 
 from fastapi import HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse, Response

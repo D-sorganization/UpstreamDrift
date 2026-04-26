@@ -10,7 +10,11 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import patch
+
+if TYPE_CHECKING:
+    from src.launchers.launcher_process_manager import ProcessManager
 
 
 class TestMotionCaptureLauncherPythonpath:
@@ -62,7 +66,7 @@ class TestGolfSuiteLauncherPythonpath:
 class TestProcessManagerWslConfig:
     """launch_in_wsl / launch_module_in_wsl must read settings from env vars."""
 
-    def _make_manager(self) -> object:
+    def _make_manager(self) -> ProcessManager:
         from src.launchers.launcher_process_manager import ProcessManager
 
         return ProcessManager(repo_root=Path("/tmp/fake_repo"))

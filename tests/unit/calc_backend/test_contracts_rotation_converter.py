@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
-
 from src.shared.python.calc_backend.contracts.rotation_converter import (
     ReferenceFrameConversionRequest,
     ReferenceFrameConversionResponse,

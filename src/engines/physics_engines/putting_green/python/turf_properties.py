@@ -205,7 +205,8 @@ class TurfProperties:
             raise ValueError("velocity_direction must be provided")
         if not (velocity_direction is not None):
             raise ValueError("velocity_direction must be provided")
-        if np.linalg.norm(velocity_direction) < 1e-10:
+        v_mag = np.linalg.norm(velocity_direction)
+        if v_mag < 1e-10:
             return 0.0
 
         v_dir = velocity_direction / v_mag

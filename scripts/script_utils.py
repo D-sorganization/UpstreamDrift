@@ -182,7 +182,7 @@ def check_docs_status(root: Path | str = ".") -> dict[str, bool]:
 
 
 def run_pytest(
-    path: Path | str = "tests",
+    path: Path | str | Sequence[Path | str] = "tests",
     verbose: bool = True,
     markers: str | None = None,
     extra_args: Sequence[str] | None = None,
@@ -199,7 +199,11 @@ def run_pytest(
     if logger:
         logger.info(f"Running tests in {path}...")
 
-    cmd = [sys.executable, "-m", "pytest", str(path)]
+    cmd = [sys.executable, "-m", "pytest"]
+    if isinstance(path, (Path, str)):
+        cmd.append(str(path))
+    else:
+        cmd.extend(str(p) for p in path)
 
     if verbose:
         cmd.append("-v")

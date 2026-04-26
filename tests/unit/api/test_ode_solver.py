@@ -12,7 +12,6 @@ import math
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from src.shared.python.calc_backend.routers.ode_solver import router
 
 _app = FastAPI()

@@ -1,9 +1,12 @@
-# mypy: disable-error-code="no-redef"
-"""Thin facade for the legacy golf swing visualizer."""
-
-from __future__ import annotations
-
 import sys
+
+from PyQt6.QtWidgets import QApplication
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+from .golf_visualizer_app import ModernGolfVisualizerApp
+
+logger = get_logger(__name__)
 
 
 def main() -> None:

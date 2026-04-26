@@ -57,17 +57,24 @@ def main() -> None:
     simulator = BallFlightSimulator(ball=ball, env=env)
     trajectory = simulator.simulate_trajectory(launch, max_time=8.0, dt=0.05)
 
-    # --- Print summary every 0.5 s ---
-    for _pt in trajectory[::10]:
-        pass
+    # --- Print summary every 0.5 s (index step of 10) ---
+    print("Trajectory Summary (every 0.5 seconds):")
+    print(f"{'Time (s)':<12} {'X (m)':<12} {'Height (m)':<15} {'Speed (m/s)':<12}")
+    print("-" * 51)
+    for pt in trajectory[::10]:
+        print(
+            f"{pt.time:<12.3f} {pt.position[0]:<12.2f} "
+            f"{pt.height:<15.2f} {pt.speed:<12.2f}"
+        )
 
     # --- Carry distance: last point before height < 0 ---
     landing_pts = [p for p in trajectory if p.height <= 0.0]
     if len(landing_pts) >= 2:
         carry_m = float(landing_pts[-1].position[0])
-        carry_m * 1.0936
+        carry_yards = carry_m * 1.0936
+        print(f"\nCarry Distance: {carry_m:.2f} m ({carry_yards:.2f} yards)")
     else:
-        pass
+        print("\nBall did not land (insufficient trajectory data)")
 
 
 if __name__ == "__main__":

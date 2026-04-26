@@ -19,6 +19,7 @@ import time
 
 import mujoco
 import numpy as np
+from scipy.interpolate import CubicSpline
 from scipy.optimize import differential_evolution, minimize
 
 from ._motion_opt_simulation import (

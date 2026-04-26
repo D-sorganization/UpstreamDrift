@@ -120,7 +120,12 @@ class ModelRegistry(ContractChecker):
         Path(__file__).parent.parent.parent.parent / "config" / "models.yaml"
     )
 
-    def __init__(self, config_path: str | Path | None = None) -> None:
+    def __init__(
+        self,
+        config_path: str | Path | None = None,
+        strict: bool | None = None,
+        required_model_ids: Iterable[str] = (),
+    ) -> None:
         """Initialize registry.
 
         Args:

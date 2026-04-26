@@ -183,7 +183,7 @@ def assess_F() -> Path:
     # Test/fixture/vendored directories are excluded because they legitimately
     # use fake placeholder values; everything else (src, scripts, tooling) is
     # scanned so hardcoded credentials outside src/ are not silently ignored.
-    secret_scan_excludes = (
+    secret_scan_excludes = [
         "tests",
         "test",
         "fixtures",
@@ -193,7 +193,7 @@ def assess_F() -> Path:
         "node_modules",
         ".venv",
         "venv",
-    )
+    ]
     hardcoded_secrets = grep_count(
         REPO_ROOT,
         r'(?:password|secret|api_key|token)\s*=\s*["\'][^"\']{8,}["\']',

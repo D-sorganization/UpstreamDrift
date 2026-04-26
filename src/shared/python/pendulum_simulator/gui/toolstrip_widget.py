@@ -1008,6 +1008,9 @@ class ToolStrip(QWidget):
         seg_layout = self._segment_row_layout()
         if seg_layout is None:
             return
+        overlay_frame: QFrame | None = self.findChild(QFrame, "overlay_section")
+        if overlay_frame is None:
+            return
         overlay_layout = overlay_frame.layout()
         if overlay_layout is None:
             return

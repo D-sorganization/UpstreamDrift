@@ -211,7 +211,7 @@ class TestSpatialCrossPreconditions(unittest.TestCase):
         from src.shared.python.spatial_algebra.spatial_vectors import spatial_cross
 
         with self.assertRaises(_CONTRACT_EXC):
-            spatial_cross(np.ones(6), np.ones(6), cross_type="invalid")
+            spatial_cross(np.ones(6), np.ones(6), cross_type="invalid")  # type: ignore[arg-type]
 
 
 # ─── Transforms Tests ──────────────────────────────────────────

@@ -105,7 +105,7 @@ def generate_recommendations(
     # Pragmatic recommendations
     if pragmatic_issues:
         # Group by principle
-        principles = {}
+        principles: dict[str, int] = {}
         for issue in pragmatic_issues:
             p = issue.get("principle", "General")
             principles[p] = principles.get(p, 0) + 1

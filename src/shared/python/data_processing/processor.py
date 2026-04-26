@@ -71,8 +71,36 @@ def _validate_dataframe_expression(expression: str) -> None:
             raise ValueError(
                 f"Attribute access to dunder name '{node.attr}' is not permitted"
             )
+        if isinstance(node, ast.Name) and node.id in _FORBIDDEN_NAMES:
+            raise ValueError(f"Use of forbidden name '{node.id}' is not permitted")
 
-            # Reject forbidden bare names
+
+class DataProcessor:
+    """Facade for data processing operations."""
+
+    def __init__(self, df: pd.DataFrame | None = None) -> None:
+        self._df: pd.DataFrame = df if df is not None else pd.DataFrame()
+        self._source_path: str = ""
+        self._history: list[str] = []
+
+    @property
+    def dataframe(self) -> pd.DataFrame:
+        """Return the current internal DataFrame."""
+        if self._df.empty and not self._source_path:
+            raise ValueError(
+                "No data loaded. Call load_file() or load_dataframe() first."
+            )
+        return self._df
+
+    def load_file(
+        self,
+        path: str | Path,
+        *,
+        sheet_name: str | int = 0,
+        encoding: str = "utf-8",
+    ) -> DataProcessor:
+        """Load data from a file."""
+        if not (path is not None):
             raise ValueError("path must be provided")
         path = Path(path)
         suffix = path.suffix.lower()

@@ -28,6 +28,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import functools
 import json
 import math
 from dataclasses import dataclass, field
@@ -38,6 +39,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.model_generation.core.constants import GRAVITY_M_S2
 
 logger = get_logger(__name__)
 

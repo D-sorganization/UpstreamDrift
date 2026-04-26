@@ -203,6 +203,7 @@ class TestDataProcessorEngineAddCalculatedColumn:
         engine = self._loaded_engine()
         result = engine.add_calculated_column("z", "x + y")
         assert result.success is True
+        assert engine.data is not None
         assert "z" in engine.data.columns
         assert list(engine.data["z"]) == [11.0, 22.0, 33.0]
 

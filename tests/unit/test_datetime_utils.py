@@ -8,6 +8,7 @@ parsing, duration formatting, and time calculations.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -27,6 +28,7 @@ from src.shared.python.core.datetime_utils import (
     start_of_day,
     time_ago,
     timestamp,
+    TimestampFormat,
     timestamp_display,
     timestamp_filename,
     timestamp_iso,
@@ -69,7 +71,9 @@ class TestTimestampFormatting:
         ],
         ids=["iso", "filename", "display", "date", "time"],
     )
-    def test_timestamp_format(self, fmt: str, check_fn: object) -> None:
+    def test_timestamp_format(
+        self, fmt: TimestampFormat, check_fn: Callable[[str], bool]
+    ) -> None:
         """Test timestamp returns correct format for each format type."""
         ts = timestamp(fmt)
         assert check_fn(ts), f"Format {fmt!r} failed validation: {ts!r}"
@@ -111,7 +115,7 @@ class TestFormatDatetime:
         ],
         ids=["filename", "display", "date", "time", "compact"],
     )
-    def test_format_datetime_formats(self, fmt: str, expected: str) -> None:
+    def test_format_datetime_formats(self, fmt: TimestampFormat, expected: str) -> None:
         """Test format_datetime returns correct string for each format."""
         dt = datetime(2024, 1, 15, 10, 30, 0)
         assert format_datetime(dt, fmt) == expected

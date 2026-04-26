@@ -297,14 +297,33 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         """Apply control inputs (torques/forces)."""
         if not (u is not None):
             raise ValueError("u must be provided")
-        if not (u is not None):
-            raise ValueError("u must be provided")
+
+        if self.model is None:
+            return
+
+        u_arr = self._require_vector("u", u, self.model.nv)
+        self.tau = u_arr.copy()
+
+    @precondition(lambda self, qacc: self.is_initialized, "Engine must be initialized")
+    @postcondition(check_finite, "Inverse dynamics must contain finite values")
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute torques required to achieve a given joint acceleration.
+
+        Args:
+            qacc: Desired joint acceleration vector (nv,)
+
+        Returns:
+            tau: Required joint torque vector (nv,)
+        """
+        if not (qacc is not None):
             raise ValueError("qacc must be provided")
+
         if self.model is None or self.data is None:
             return np.array([])
 
-        tau = pin.rnea(self.model, self.data, self.q, self.v, qacc)
-        return cast(np.ndarray, tau)
+        qacc_arr = self._require_vector("qacc", qacc, self.model.nv)
+        tau = pin.rnea(self.model, self.data, self.q, self.v, qacc_arr)
+        return cast(np.ndarray, tau).copy()
 
     @precondition(lambda self: self.is_initialized, "Engine must be initialized")
     @postcondition(
@@ -411,13 +430,14 @@ class PinocchioPhysicsEngine(BasePhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        q_arr = self._require_vector("q", q, self.model.nq)
-        v_arr = self._require_vector("v", v, self.model.nv)
+        q_arr = self._require_vector("q", self.q, self.model.nq)
+        v_arr = self._require_vector("v", self.v, self.model.nv)
 
         tau_zero = np.zeros(self.model.nv)
-        a_ztcf = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
+        a_drift = pin.aba(self.model, self.data, q_arr, v_arr, tau_zero)
+        a_full = pin.aba(self.model, self.data, q_arr, v_arr, tau)
 
-        return cast(np.ndarray, a_ztcf)
+        return cast(np.ndarray, a_full - a_drift)
 
     @precondition(lambda self, q: self.is_initialized, "Engine must be initialized")
     @postcondition(check_finite, "ZVCF acceleration must contain finite values")

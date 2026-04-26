@@ -101,6 +101,7 @@ class UIBuildHook(BuildHookInterface):
             logger.info("Building UI...")
 
             # Check if npm is available
+            ui_dir = self._ui_dir
             npm_cmd = "npm.cmd" if sys.platform == "win32" else "npm"
 
             try:

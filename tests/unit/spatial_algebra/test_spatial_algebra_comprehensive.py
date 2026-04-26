@@ -10,6 +10,7 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 import pytest
+from typing import Callable
 
 from src.shared.python.spatial_algebra.inertia import (
     mcI,
@@ -110,13 +111,13 @@ class TestCrmCrf:
     """Tests for spatial cross product motion/force operators."""
 
     @pytest.mark.parametrize("func", [crm, crf], ids=["crm", "crf"])
-    def test_shape(self, func: object) -> None:
+    def test_shape(self, func: Callable[[np.ndarray], np.ndarray]) -> None:
         v = np.zeros(6)
         result = func(v)
         assert result.shape == (6, 6)
 
     @pytest.mark.parametrize("func", [crm, crf], ids=["crm", "crf"])
-    def test_invalid_shape(self, func: object) -> None:
+    def test_invalid_shape(self, func: Callable[[np.ndarray], np.ndarray]) -> None:
         with pytest.raises(ValueError, match="6x1"):
             func(np.array([1.0, 2.0, 3.0]))
 

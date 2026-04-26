@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import numpy as np
@@ -53,6 +53,8 @@ class PerturbationConfig:
     noise_amplitude: float = 0.1
     perturb_mode: str = "additive"
     seed: int | None = None
+    min_success_rate: float = 0.95
+    raise_on_partial_results: bool = False
 
     def __post_init__(self) -> None:
         if not (self.n_trials > 0):
@@ -77,6 +79,7 @@ class PerturbationSummary:
     metrics: dict[str, Any]  # Dictionary mapping metric name to MetricStatistics
     success_rate: float
     execution_time_sec: float
+    failures: list[TrialFailure] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert summary to JSON-serializable dictionary."""

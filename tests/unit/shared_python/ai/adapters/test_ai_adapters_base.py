@@ -27,7 +27,12 @@ class DummyAdapter(BaseAgentAdapter):
 
     @property
     def capabilities(self) -> ProviderCapabilities:
-        return ProviderCapabilities()
+        return ProviderCapabilities(
+            supported=frozenset(),
+            max_tokens=4096,
+            model_name="dummy-model",
+            provider_name="dummy",
+        )
 
     def validate_connection(self) -> tuple[bool, str]:
         return True, "OK"

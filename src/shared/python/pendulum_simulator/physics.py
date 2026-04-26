@@ -412,34 +412,112 @@ def joint_limit_torque_ndof(
     return result
 
 
-def clamp_torque_ndof(tau: np.ndarray, limits: np.ndarray) -> np.ndarray:
-    """Clamp N-DOF torque vector to symmetric per-DOF limits (#1150).
+# ---------------------------------------------------------------------------
+# Forward kinematics (for visualization)
+# ---------------------------------------------------------------------------
+
+
+def forward_kinematics(theta1: float, phi: float, params: PendulumParams) -> dict:
+    """Compute joint and tip positions in the world frame.
+
+    Origin is at the shoulder pivot (fixed in world).
+    x-axis points right, y-axis points up.
 
     Parameters
     ----------
-    tau : ndarray, shape (n,)
-        Joint torque vector.
-    limits : ndarray, shape (n,)
-        Per-joint maximum torque magnitudes (positive).
-        Use ``inf`` for unclamped joints.
+    theta1 : float
+        Absolute angle of segment 1 from downward vertical (rad).
+    phi : float
+        Relative angle of segment 2 (rad).
+    params : PendulumParams
 
-    Pre: tau.shape == limits.shape, all limits > 0.
-    Post: |result[i]| <= limits[i] for all i.
+    Returns
+    -------
+    dict with 'hub', 'wrist', 'tip' as (x, y) tuples.
     """
-    assert tau.shape == limits.shape, (
-        f"Shape mismatch: tau={tau.shape}, limits={limits.shape}"
+    assert theta1 is not None, "theta1 must be provided"
+    native_positions = _native_backend.double_forward_kinematics(theta1, phi, params)
+    if native_positions is not None:
+        return native_positions
+
+    L1, L2 = params.L1, params.L2
+    abs_angle2 = theta1 + phi
+
+    # Segment 1 endpoint (wrist)
+    wx = L1 * np.sin(theta1)
+    wy = -L1 * np.cos(theta1)
+
+    # Segment 2 endpoint (tip)
+    tx = wx + L2 * np.sin(abs_angle2)
+    ty = wy - L2 * np.cos(abs_angle2)
+
+    return {
+        "hub": (0.0, 0.0),
+        "wrist": (wx, wy),
+        "tip": (tx, ty),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Equations of motion
+# ---------------------------------------------------------------------------
+
+
+def equations_of_motion(
+    state: State,
+    t: float,
+    params: PendulumParams,
+    torque_func: TorqueFunc,
+    limits: JointLimits | None = None,
+    clamp: TorqueClamp | None = None,
+) -> np.ndarray:
+    """Compute the state derivative: dx/dt = f(x, t).
+
+    State vector x = [theta1, phi, dtheta1, dphi].
+
+    M(q) * qddot = tau - C(q,qdot) - G(q)
+
+    Parameters
+    ----------
+    state : np.ndarray, shape (4,)
+    t : float
+    params : PendulumParams
+    torque_func : callable (t) -> (tau1, tau2)
+    limits : JointLimits, optional
+        Joint angle limits (stiffness/damping penalty).
+    clamp : TorqueClamp, optional
+        Torque saturation limits.
+
+    Returns
+    -------
+    state_dot : np.ndarray, shape (4,)
+    """
+    assert state.shape == (4,)
+    theta1, phi, dtheta1, dphi = state
+
+    M = mass_matrix(phi, params)
+    C = coriolis_vector(phi, dtheta1, dphi, params)
+    G = gravity_vector(theta1, phi, params)
+
+    tau_drive = np.array(torque_func(t))
+
+    # Apply torque clamping if configured
+    if clamp is not None:
+        tau_drive = clamp_torque(tau_drive, clamp)
+
+    # Dissipative and limit torques
+    tau_friction = friction_torque_vector(dtheta1, dphi, params)
+    tau_limit = (
+        np.zeros(2)
+        if limits is None
+        else joint_limit_torque(phi, dphi, limits, theta1=theta1, dtheta1=dtheta1)
     )
-    assert np.all(limits > 0), "All limits must be positive"
-    result: np.ndarray = np.clip(tau, -limits, limits)
-    return result
 
-    assert abs(_tip_dist - L2) < 1e-9, f"Tip distance {_tip_dist:.6f} â‰  L2={L2:.6f}"
-    return result
+    # Solve for accelerations: M * qddot = tau_total - C - G
+    rhs = tau_drive + tau_friction + tau_limit - C - G
+    qddot = np.linalg.solve(M, rhs)
 
-
-# ---------------------------------------------------------------------------
-# Joint velocities (linear speed at each joint)
-# ---------------------------------------------------------------------------
+    return np.array([dtheta1, dphi, qddot[0], qddot[1]])
 
 
 def joint_velocities(state: State, params: PendulumParams) -> dict:

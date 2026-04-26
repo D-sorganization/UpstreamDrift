@@ -24,7 +24,7 @@ def _func_loc(filepath: Path, func_name: str) -> int | None:
             isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
             and node.name == func_name
         ):
-            return node.end_lineno - node.lineno
+            return node.end_lineno - node.lineno  # type: ignore[operator]
     return None
 
 

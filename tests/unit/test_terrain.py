@@ -308,6 +308,7 @@ class TestTerrainPatch:
             material=custom_material,
         )
 
+        assert patch.material is not None
         assert patch.material.name == "wet_fairway"
         assert patch.material.friction_coefficient == 0.4
 

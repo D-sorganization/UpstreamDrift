@@ -6,6 +6,7 @@ Hub for accessing MuJoCo Humanoid Simulation and Analysis Dashboard.
 Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
+import subprocess
 import sys
 
 from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher

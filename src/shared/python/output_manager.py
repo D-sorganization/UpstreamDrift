@@ -15,9 +15,6 @@ from src.shared.python.data_io.output_manager import (
     OutputManager,
 )
 
-if TYPE_CHECKING:
-    import pandas as pd
-
 
 def save_results(
     results: Any, filename: str, format_type: str = "csv", engine: str = "mujoco"

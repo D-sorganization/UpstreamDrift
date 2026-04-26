@@ -252,7 +252,7 @@ class DrakeRecorder:
         """Update analysis configuration."""
         self.analysis_config = config
 
-    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
+    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Implement RecorderInterface."""
         if not (field_name is not None):
             raise ValueError("field_name must be provided")
@@ -275,7 +275,7 @@ class DrakeRecorder:
             return self.get_counterfactual_series("zvcf_torque")
 
         # Fallback
-        return times, []
+        return times, np.array([])
 
     def get_induced_acceleration_series(
         self, source_name: str | int

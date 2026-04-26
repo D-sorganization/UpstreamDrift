@@ -117,9 +117,9 @@ class TestPhysicsValidator(unittest.TestCase):
         validator.model = SimpleNamespace(nv=1)
         validator.tolerance_energy = 1e-3
 
-        validator.compute_kinetic_energy = MagicMock(side_effect=[1.0, 1.0])
-        validator.compute_potential_energy = MagicMock(side_effect=[0.0, 0.0])
-        validator.step_forward = MagicMock(
+        validator.compute_kinetic_energy = MagicMock(side_effect=[1.0, 1.0])  # type: ignore[method-assign]
+        validator.compute_potential_energy = MagicMock(side_effect=[0.0, 0.0])  # type: ignore[method-assign]
+        validator.step_forward = MagicMock(  # type: ignore[method-assign]
             return_value=(np.array([0.0]), np.array([], dtype=np.float64))
         )
 

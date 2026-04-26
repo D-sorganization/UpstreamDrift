@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -240,8 +241,8 @@ class TestProcessingResult:
 
         r = ProcessingResult(success=False, message="fail")
         assert r.data is None
-        # stats defaults to empty dict (not None)
-        assert r.stats == {} or r.stats is None
+        # stats defaults to empty dict
+        assert r.stats == {}
 
 
 # ---------------------------------------------------------------------------
@@ -260,14 +261,14 @@ class TestFitResult:
         )
 
         fr = FitResult(
-            fit_type=FitType.LINEAR,
+            fit_type=FitType.LINEAR.value,
             coefficients=[2.0, 0.0],
             r_squared=1.0,
             equation="y = 2x",
-            fitted_values=None,
-            residuals=None,
+            fitted_values=np.array([2.0, 4.0]),
+            residuals=np.array([0.0, 0.0]),
         )
-        assert fr.fit_type == FitType.LINEAR
+        assert fr.fit_type == FitType.LINEAR.value
         assert fr.r_squared == 1.0
 
 

@@ -194,6 +194,9 @@ class ProcessManager:
             "site-packages",
         )
 
+        repo_root_str = str(self.repo_root)
+        src_dir = str(self.repo_root / "src")
+
         # repo_root and src are always added (required for imports).
         # Optional extras are only added when the directory exists.
         paths_to_add = []

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.upstream_drift_tools.process_calculators.optimization import (
     OptimizationHistoryEntry,
     _build_override_mapping,

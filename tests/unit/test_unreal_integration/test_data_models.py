@@ -307,6 +307,7 @@ class TestClubState:
             loft_angle=10.0,
         )
         assert cs.head_position.x == 0.5
+        assert cs.shaft_flex is not None
         assert len(cs.shaft_flex) == 5
         assert cs.face_angle == 2.5
 

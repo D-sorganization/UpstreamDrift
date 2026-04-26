@@ -10,7 +10,9 @@ Integrates GRF analysis and swing-plane wrench decomposition (Issue #761).
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
+
+import numpy as np
 
 from src.shared.python.core.contracts import invariant
 from src.shared.python.engine_core.interfaces import PhysicsEngine

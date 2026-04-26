@@ -167,6 +167,34 @@ class MuJoCoPerturbationAnalyzer(PerturbationAnalyzerBase):
             the last non-world body.
         """
         super().__init__()
+        try:
+            import mujoco  # noqa: PLC0415
+        except ImportError as e:
+            raise ImportError(
+                "mujoco not found. Please install it with 'pip install mujoco'."
+            ) from e
+
+        if model_path:
+            self._model = mujoco.MjModel.from_xml_path(str(model_path))
+        elif model_xml:
+            self._model = mujoco.MjModel.from_xml_string(model_xml)
+        else:
+            self._model = mujoco.MjModel.from_xml_string(_MINIMAL_MJCF)
+
+        self._nq = self._model.nq
+        self._nv = self._model.nv
+        self._nu = self._model.nu
+        self._t_end = t_end
+
+        if ee_body_name:
+            self._ee_body_id = mujoco.mj_name2id(
+                self._model, mujoco.mjtObj.mjOBJ_BODY, ee_body_name
+            )
+            if self._ee_body_id == -1:
+                raise ValueError(f"Body '{ee_body_name}' not found in MJCF")
+        else:
+            # Default to the last body in the model
+            self._ee_body_id = self._model.nbody - 1
 
         logger.info(
             "MuJoCoPerturbationAnalyzer: nq=%d, nv=%d, nu=%d, t_end=%.2f",

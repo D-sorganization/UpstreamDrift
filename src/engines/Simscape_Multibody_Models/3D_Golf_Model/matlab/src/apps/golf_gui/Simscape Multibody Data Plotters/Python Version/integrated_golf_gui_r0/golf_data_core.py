@@ -754,6 +754,7 @@ class GeometryUtils:
             raise ValueError("vec1 must be provided")
         v1 = vec1 / np.linalg.norm(vec1)
         v2 = vec2 / np.linalg.norm(vec2)
+        dot_val = np.dot(v1, v2)
 
         # If vectors are already aligned
         if dot_val > 0.999999:

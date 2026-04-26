@@ -1,15 +1,50 @@
-"""Thin facade for the legacy motion-capture golf plotter."""
-
-from __future__ import annotations
-
+import os
 import sys
 from typing import Any
 
-from motion_capture_plotter_data import MotionCapturePlotterDataMixin
-from motion_capture_plotter_ui import MotionCapturePlotterUIMixin
-from motion_capture_plotter_visualization import MotionCapturePlotterVisualizationMixin
-from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QApplication, QMainWindow
+import numpy as np
+import pandas as pd
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSlider,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src.shared.python.logging_pkg.logging_config import get_logger
+
+from .mocap_data_loader import (
+    find_available_joints,
+    get_simscape_joint_positions,
+    parse_excel_row,
+    process_excel_sheet,
+    safe_float,
+)
+from .motion_capture_plotter_data import MotionCapturePlotterDataMixin
+from .motion_capture_plotter_ui import MotionCapturePlotterUIMixin
+from .motion_capture_plotter_visualization import (
+    MotionCapturePlotterVisualizationMixin,
+)
+
+# Placeholder for matplotlib imports which were missing but used
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+
+logger = get_logger(__name__)
 
 
 class MotionCapturePlotter(

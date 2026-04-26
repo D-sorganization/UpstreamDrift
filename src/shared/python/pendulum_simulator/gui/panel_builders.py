@@ -351,8 +351,7 @@ class _TripleCallbacks:
 
     def build_params(self, p: dict) -> TriplePendulumParams:
         tilt_rad = np.radians(p.get("tilt_deg", 0.0))
-        g = GRAVITY_MSS if p.get("gravity_on", True) else 0.0
-        g_eff = g * float(np.cos(tilt_rad))  # (#1113)
+
         self._pendulum.set_tilt_angle(tilt_rad)
         self._pendulum.set_view_azimuth(
             np.radians(p.get("azimuth_deg", 0.0))
@@ -552,8 +551,7 @@ class _GolferCallbacks:
 
     def build_params(self, p: dict) -> GolferParams:
         tilt_rad = np.radians(p.get("tilt_deg", 0.0))
-        g = GRAVITY_MSS if p.get("gravity_on", True) else 0.0
-        g_eff = g * float(np.cos(tilt_rad))  # (#1113)
+
         self._pendulum.set_tilt_angle(tilt_rad)
         self._pendulum.set_view_azimuth(
             np.radians(p.get("azimuth_deg", 0.0))

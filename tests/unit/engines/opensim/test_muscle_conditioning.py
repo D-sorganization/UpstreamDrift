@@ -34,8 +34,8 @@ if not OPENSIM_AVAILABLE:
 
     import sys
 
-    sys.modules["opensim"] = MockOpenSim
-    opensim = MockOpenSim
+    sys.modules["opensim"] = MockOpenSim  # type: ignore[assignment]
+    opensim = MockOpenSim  # type: ignore[assignment]
 
 from src.engines.physics_engines.opensim.python.muscle_analysis import (
     OpenSimMuscleAnalyzer,
@@ -78,7 +78,7 @@ def test_mass_matrix_conditioning_fallback(caplog):
     mock_matter.calcM.side_effect = mock_calcM
 
     # Provide fake torques
-    analyzer.compute_muscle_joint_torques = MagicMock(
+    analyzer.compute_muscle_joint_torques = MagicMock(  # type: ignore[method-assign]
         return_value={"muscle1": np.array([1.0, 0.0])}
     )
 

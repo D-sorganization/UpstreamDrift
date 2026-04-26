@@ -5,9 +5,11 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 
 # Ensure pytest-qt is available
-pytest.importorskip("pytestqt")
+pytest.importorskip("pytest_qt")
 # Ensure PyQt classes are available
 pytest.importorskip("PyQt6")
+
+pytestmark = pytest.mark.integration
 from PyQt6.QtCore import Qt  # noqa: E402
 
 from src.launchers.help_dialogs import (  # noqa: E402

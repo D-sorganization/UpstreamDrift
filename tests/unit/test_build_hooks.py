@@ -16,7 +16,7 @@ sys.modules["hatchling.builders.hooks.plugin"] = MagicMock()
 sys.modules["hatchling.builders.hooks.plugin.interface"] = MagicMock()
 sys.modules[
     "hatchling.builders.hooks.plugin.interface"
-].BuildHookInterface = DummyHookInterface
+].BuildHookInterface = DummyHookInterface  # type: ignore
 
 import subprocess  # noqa: E402
 

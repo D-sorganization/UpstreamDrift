@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import cast
 
 import numpy as np
 import pytest
@@ -73,7 +74,9 @@ class TestMeshVertex:
             uv=np.array([0.5, 0.5]),
         )
         assert v.position[0] == 1.0
+        assert v.normal is not None
         assert v.normal[1] == 1.0
+        assert v.uv is not None
         assert v.uv[0] == 0.5
 
     def test_vertex_without_optional_fields(self) -> None:
@@ -99,6 +102,7 @@ class TestMeshVertex:
             bone_indices=np.array([0, 1, 2, 3]),
             bone_weights=np.array([0.5, 0.3, 0.15, 0.05]),
         )
+        assert v.bone_weights is not None
         assert sum(v.bone_weights) == pytest.approx(1.0)
 
 
@@ -205,6 +209,7 @@ class TestMeshSkeleton:
         ]
         skeleton = MeshSkeleton(bones=bones)
         assert len(skeleton.bones) == 3
+        assert skeleton.root_bone is not None
         assert skeleton.root_bone.name == "root"
 
     def test_skeleton_bone_lookup(self) -> None:
@@ -298,6 +303,7 @@ class TestLoadedMesh:
             skeleton=skeleton,
         )
         assert mesh.has_skeleton
+        assert mesh.skeleton is not None
         assert mesh.skeleton.bone_count == 1
 
     def test_mesh_bounds(self) -> None:
@@ -534,7 +540,7 @@ class TestMeshLoaderGLTF:
         bin_file.write_bytes(buffer_data)
 
         # Update GLTF to reference the bin file
-        gltf_content["buffers"][0]["uri"] = "minimal.bin"
+        cast(dict, gltf_content)["buffers"][0]["uri"] = "minimal.bin"
         gltf_file.write_text(json.dumps(gltf_content))
 
         _loader = MeshLoader()  # noqa: F841 - validates loader can be created

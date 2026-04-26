@@ -199,7 +199,9 @@ disallow_untyped_defs = false
 exclude = [
     "src/engines/Simscape_Multibody_Models/2D_Golf_Model",
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model",
-    "src/shared/models/opensim/opensim-models",
+    "vendor/",
+    "shared/models/",
+    "src/shared/models/",
     # Pending type annotation cleanup (consolidated PR 2026-01-31)
     "src/shared/python/plotting/",
     "src/shared/python/ui/qt/widgets/",

@@ -28,7 +28,7 @@ def test_mocap_launcher_python_launch_success(
     mock_exists, mock_popen, mock_base_init
 ) -> None:
     launcher = MoCapLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_script("fake/path.py")
     mock_popen.assert_called_once()
@@ -39,7 +39,7 @@ def test_mocap_launcher_python_launch_success(
 @patch.object(Path, "exists", return_value=False)
 def test_mocap_launcher_python_launch_not_found(mock_exists, mock_base_init) -> None:
     launcher = MoCapLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_script("fake/path.py")
     launcher.show_error.assert_called_once()
@@ -55,7 +55,7 @@ def test_mocap_launcher_python_launch_os_error(
     mock_exists, mock_popen, mock_base_init
 ) -> None:
     launcher = MoCapLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_script("fake/path.py")
     launcher.show_error.assert_called_once()
@@ -85,7 +85,7 @@ def test_mujoco_unified_launcher_script_success(
     mock_exists, mock_popen, mock_base_init
 ) -> None:
     launcher = MujocoUnifiedLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_script("fake/path.py")
     mock_popen.assert_called_once()
@@ -96,7 +96,7 @@ def test_mujoco_unified_launcher_script_success(
 @patch.object(Path, "exists", return_value=False)
 def test_mujoco_unified_launcher_script_not_found(mock_exists, mock_base_init) -> None:
     launcher = MujocoUnifiedLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_script("fake/path.py")
     launcher.show_error.assert_called_once()
@@ -112,7 +112,7 @@ def test_mujoco_unified_launcher_script_os_error(
     mock_exists, mock_popen, mock_base_init
 ) -> None:
     launcher = MujocoUnifiedLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_script("fake/path.py")
     launcher.show_error.assert_called_once()
@@ -122,7 +122,7 @@ def test_mujoco_unified_launcher_script_os_error(
 @patch("subprocess.Popen")
 def test_mujoco_unified_launcher_module_success(mock_popen, mock_base_init) -> None:
     launcher = MujocoUnifiedLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_module("my_module", "my/cwd")
     mock_popen.assert_called_once()
@@ -135,7 +135,7 @@ def test_mujoco_unified_launcher_module_success_no_cwd(
     mock_popen, mock_base_init
 ) -> None:
     launcher = MujocoUnifiedLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_module("my_module")
     mock_popen.assert_called_once()
@@ -146,7 +146,7 @@ def test_mujoco_unified_launcher_module_success_no_cwd(
 @patch("subprocess.Popen", side_effect=OSError("Failed"))
 def test_mujoco_unified_launcher_module_os_error(mock_popen, mock_base_init) -> None:
     launcher = MujocoUnifiedLauncher()
-    launcher.show_error = MagicMock()
+    launcher.show_error = MagicMock()  # type: ignore[method-assign]
 
     launcher._launch_python_module("my_module", "my/cwd")
     launcher.show_error.assert_called_once()

@@ -175,4 +175,4 @@ class TestSpatialCross:
 
     def test_invalid_type_raises(self) -> None:
         with pytest.raises(ValueError, match="cross_type"):
-            spatial_cross(np.zeros(6), np.zeros(6), cross_type="invalid")
+            spatial_cross(np.zeros(6), np.zeros(6), cross_type="invalid")  # type: ignore[arg-type]

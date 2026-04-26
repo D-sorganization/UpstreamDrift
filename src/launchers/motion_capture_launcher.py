@@ -6,6 +6,7 @@ Central hub for C3D visualization and Markerless Pose Estimation.
 Refactored to use BaseLauncher to eliminate DRY violations.
 """
 
+import os
 import sys
 
 from src.launchers.base import REPO_ROOT, BaseLauncher, LaunchItem, run_launcher
@@ -15,9 +16,22 @@ from src.shared.python.security.secure_subprocess import (
 )
 
 
+def _make_subprocess_env(suite_root: Path) -> dict[str, str]:
+    """Create environment dict with suite_root in PYTHONPATH."""
+    env = os.environ.copy()
+    pythonpath = env.get("PYTHONPATH", "")
+    root_str = str(suite_root)
+    if root_str not in pythonpath:
+        env["PYTHONPATH"] = (
+            f"{root_str}{os.pathsep}{pythonpath}" if pythonpath else root_str
+        )
+    return env
+
+
 def _spawn_process(command: list[str], cwd: object) -> None:
     """Spawn a launcher subprocess through the secure wrapper."""
-    secure_popen(command, cwd=cwd, suite_root=REPO_ROOT)
+    env = _make_subprocess_env(REPO_ROOT)
+    secure_popen(command, cwd=cwd, suite_root=REPO_ROOT, env=env)
 
 
 class MoCapLauncher(BaseLauncher):

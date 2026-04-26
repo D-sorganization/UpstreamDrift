@@ -14,7 +14,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from src.shared.python.calc_backend.routers.scrubber import router
 
 _app = FastAPI()
