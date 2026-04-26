@@ -369,11 +369,10 @@ class _URDFValidationMixin:
         # This is a simple heuristic - search for element in content
         if elem is None:
             raise ValueError("elem must be provided")
-        ET.tostring(elem, encoding="unicode")
         tag_start = f"<{elem.tag}"
 
         # Find in content
-        lines = self._content.split("\n")  # type: ignore[attr-defined]
+        lines = self._content.splitlines()  # type: ignore[attr-defined]
         for idx, line in enumerate(lines, 1):
             if tag_start in line:
                 # Check if attributes match
