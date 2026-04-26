@@ -147,9 +147,15 @@ def test_get_unique_values(
     data_file.write_text("{}")
 
     # Add recordings with different golfer names and club types
-    recording_lib.add_recording(str(data_file), RecordingMetadata(golfer_name="Alice", club_type="Driver"))
-    recording_lib.add_recording(str(data_file), RecordingMetadata(golfer_name="Bob", club_type="Putter"))
-    recording_lib.add_recording(str(data_file), RecordingMetadata(golfer_name="Alice", club_type="Iron"))
+    recording_lib.add_recording(
+        str(data_file), RecordingMetadata(golfer_name="Alice", club_type="Driver")
+    )
+    recording_lib.add_recording(
+        str(data_file), RecordingMetadata(golfer_name="Bob", club_type="Putter")
+    )
+    recording_lib.add_recording(
+        str(data_file), RecordingMetadata(golfer_name="Alice", club_type="Iron")
+    )
 
     # Test unique golfer names
     golfers = recording_lib.get_unique_values("golfer_name")
