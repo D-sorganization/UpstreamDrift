@@ -22,8 +22,8 @@ for fname in result.stdout.splitlines():
         continue
     try:
         content = path.read_text(encoding="utf-8", errors="replace")
-        if "<<<<<<< HEAD" in content or "<<<<<<< " in content:
-            count = content.count("<<<<<<< ")
+        if chr(60) * 7 + " HEAD" in content or chr(60) * 7 + " " in content:
+            count = content.count(chr(60) * 7 + " ")
             conflicted.append((count, fname))
     except Exception:
         pass

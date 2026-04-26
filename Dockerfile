@@ -18,36 +18,8 @@ COPY requirements.lock /tmp/requirements.lock
 RUN pip install --upgrade pip==25.3 && \
     pip install -r /tmp/requirements.lock
 
-<<<<<<< HEAD
-# Copy requirements file
-COPY requirements.lock /tmp/requirements.txt
-
-# Install Python dependencies from requirements.txt
-# Filter out comments, WSL/Linux notes, and blank lines
-RUN grep -v '^#' /tmp/requirements.txt | grep -v '^$' > /tmp/filtered_requirements.txt && \
-    pip install --no-cache-dir -r /tmp/filtered_requirements.txt
-
-# Install additional physics engines and API server dependencies
-# Note: opensim is excluded because it is not reliably pip-installable;
-#       install it via conda or from source if needed.
-RUN pip install --no-cache-dir \
-    mujoco>=3.2.3 \
-    drake \
-    meshcat \
-    pin-pink \
-    qpsolvers \
-    osqp \
-    myosuite \
-    mediapipe>=0.10.0 \
-    "imageio[ffmpeg]>=2.31.0" \
-    trimesh>=4.0.0 \
-    robot_descriptions>=1.12.0 \
-    fastapi>=0.126.0 \
-    "uvicorn[standard]>=0.24.0" \
-=======
 # Auth and server extensions not yet in lockfile
 RUN pip install \
->>>>>>> origin/main
     slowapi>=0.1.9 \
     "pydantic[email]>=2.5.0" \
     python-multipart \

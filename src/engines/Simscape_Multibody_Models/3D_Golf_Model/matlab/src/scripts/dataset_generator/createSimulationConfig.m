@@ -34,10 +34,6 @@ end
 config = struct();
 
 % === Model Configuration ===
-<<<<<<< HEAD
-% GolfSwing3D_Kinetic.slx is the actual Simscape model in src/model/
-=======
->>>>>>> origin/main
 config.model_name = 'GolfSwing3D_Kinetic';
 
 % Try to find model path automatically
@@ -89,13 +85,7 @@ config.enable_master_dataset = true;       % Compile master dataset CSV
 % === Verbosity Configuration ===
 % Options: 'Silent', 'Normal', 'Verbose', 'Debug'
 config.verbosity = 'Normal';
-<<<<<<< HEAD
-% config.verbose is the boolean form consumed by processSimulationOutput
-% (true when verbosity is 'Verbose' or 'Debug', false otherwise)
-config.verbose = false;
-=======
 config.verbose = deriveVerboseFlag(config.verbosity);
->>>>>>> origin/main
 
 % === Advanced Configuration ===
 config.stop_on_error = false;              % Continue on simulation errors

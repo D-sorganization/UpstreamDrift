@@ -8,12 +8,6 @@ MAX_TURNS="200"
 HEARTBEAT="1800"
 TIMEOUT="14400"
 DRY_RUN="false"
-<<<<<<< HEAD
-HOST="OGLaptop"
-CAFFEINATE_PID=""
-STARTED="01:42:48"
-=======
 HOST="DeskComputer"
 CAFFEINATE_PID=""
 STARTED="07:23:15"
->>>>>>> origin/main

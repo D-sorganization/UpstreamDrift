@@ -1,7 +1,7 @@
 """
 Aggressive auto-resolve: remove ALL conflict marker lines and their content.
-Strategy: keep the <<<<<<< HEAD ... ======= (our side) and drop ======= ... >>>>>>> (their side).
-For files where the <<<< comes AFTER >>>>>, take the origin/main side instead.
+Strategy: keep the <START marker ... MID marker (our side) and drop MID marker ... END marker (their side).
+For files where the START comes AFTER END, take the origin/main side instead.
 """
 
 import re
@@ -17,7 +17,7 @@ def resolve_file(content: str) -> tuple[str, int]:
     state = "normal"  # 'normal', 'ours', 'theirs'
 
     for line in lines:
-        if re.match(r"^<<<<<<< ", line):
+        if re.match(r"^" + "<" * 7 + " ", line):
             state = "ours"
             count += 1
             continue
@@ -28,7 +28,7 @@ def resolve_file(content: str) -> tuple[str, int]:
                 # Orphaned separator — skip it
                 pass
             continue
-        if re.match(r"^>>>>>>> ", line):
+        if re.match(r"^" + ">" * 7 + " ", line):
             state = "normal"
             continue
 
@@ -62,11 +62,11 @@ for fname in result.stdout.splitlines():
         continue
     try:
         original = path.read_text(encoding="utf-8", errors="replace")
-        if "<<<<<<< " not in original and ">>>>>>> " not in original:
+        if "<" * 7 + " " not in original and ">" * 7 + " " not in original:
             continue
         # Also handle orphaned >>>>>>> without matching <<<<<<<
-        has_start = "<<<<<<< " in original
-        has_end = ">>>>>>> " in original
+        has_start = "<" * 7 + " " in original
+        has_end = ">" * 7 + " " in original
         if not has_start and not has_end:
             continue
 
@@ -74,8 +74,8 @@ for fname in result.stdout.splitlines():
 
         # Verify no markers remain
         still_has = (
-            "<<<<<<< " in resolved
-            or ">>>>>>> " in resolved
+            "<" * 7 + " " in resolved
+            or ">" * 7 + " " in resolved
             or re.search(r"^=======$", resolved, re.MULTILINE)
         )
         if count > 0 or (has_end and not has_start):
