@@ -13,7 +13,8 @@ References:
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 
 import pytest
 from model_generation.builders.manual_builder import ManualBuilder
@@ -393,7 +394,7 @@ class TestParametricBuilderRoundtrip:
         assert result.success
         assert result.urdf_xml is not None
 
-        root = ET.fromstring(result.urdf_xml)
+        root = DefusedET.fromstring(result.urdf_xml)
         assert root.tag == "robot"
         assert root.get("name") == "xml_check"
 
@@ -529,7 +530,7 @@ class TestParsedModelOperations:
     def test_to_urdf_produces_valid_xml(self, parsed_chain: ParsedModel) -> None:
         """ParsedModel.to_urdf() produces parseable XML."""
         urdf = parsed_chain.to_urdf()
-        root = ET.fromstring(urdf)
+        root = DefusedET.fromstring(urdf)
         assert root.tag == "robot"
         assert len(root.findall(".//link")) == 4
         assert len(root.findall(".//joint")) == 3
@@ -646,7 +647,7 @@ class TestQuickURDFIntegration:
         assert isinstance(urdf, str)
         assert len(urdf) > 100  # non-trivial
 
-        root = ET.fromstring(urdf)
+        root = DefusedET.fromstring(urdf)
         assert root.tag == "robot"
 
     def test_quick_urdf_preset_produces_valid_model(self) -> None:

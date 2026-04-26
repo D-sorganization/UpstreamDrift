@@ -5,7 +5,8 @@
 """URDF builder for creating and managing URDF content."""
 
 import math
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from enum import Enum
 from xml.dom import minidom
 

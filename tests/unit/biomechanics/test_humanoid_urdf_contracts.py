@@ -172,7 +172,7 @@ def test_existing_path_permission_error_is_not_masked(
     """Filesystem errors from ET.parse(path) must surface for real paths."""
     monkeypatch.setattr(urdf_contracts.Path, "exists", lambda _self: True)
     monkeypatch.setattr(
-        urdf_contracts.ET,
+        urdf_contracts.DefusedET,
         "parse",
         lambda _path: (_ for _ in ()).throw(PermissionError("denied")),
     )

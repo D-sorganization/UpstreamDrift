@@ -5,7 +5,8 @@
 # drake_golf_model.py
 """Drake Golf Model URDF Generator and Diagram Builder."""
 
-import xml.etree.ElementTree as ET  # noqa: N817, RUF100
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement  # noqa: N817, RUF100
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any  # noqa: ICN003

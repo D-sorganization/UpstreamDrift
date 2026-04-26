@@ -16,7 +16,8 @@ from __future__ import annotations
 
 import logging
 import re
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any

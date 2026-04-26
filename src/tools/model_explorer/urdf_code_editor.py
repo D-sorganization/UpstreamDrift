@@ -11,7 +11,7 @@ with syntax highlighting, line numbers, validation, and auto-completion.
 from __future__ import annotations
 
 import re
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from typing import Any
 
 import defusedxml.ElementTree as DefusedET

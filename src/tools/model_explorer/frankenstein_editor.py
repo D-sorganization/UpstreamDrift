@@ -12,7 +12,8 @@ Implementation split across:
 from __future__ import annotations
 
 import copy
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, pyqtSignal

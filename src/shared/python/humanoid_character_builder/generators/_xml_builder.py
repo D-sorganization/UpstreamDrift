@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 
 from humanoid_character_builder.core.model import GeneratedJoint, GeneratedLink
 from humanoid_character_builder.generators._geometry_helpers import add_geometry_element

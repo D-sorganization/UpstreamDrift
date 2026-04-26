@@ -12,7 +12,8 @@ References:
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
@@ -163,7 +164,7 @@ class TestURDFXMLWellFormedness:
         assert result.urdf_xml is not None
 
         # Must be parseable XML
-        root = ET.fromstring(result.urdf_xml)
+        root = DefusedET.fromstring(result.urdf_xml)
         assert root.tag == "robot"
         assert root.get("name") == "test_robot"
 
@@ -199,7 +200,7 @@ class TestURDFXMLWellFormedness:
 
         assert result.success
         assert result.urdf_xml is not None
-        root = ET.fromstring(result.urdf_xml)
+        root = DefusedET.fromstring(result.urdf_xml)
         assert root.tag == "robot"
 
     @given(mass=mass_strategy, radius=dimension_strategy)
@@ -224,7 +225,7 @@ class TestURDFXMLWellFormedness:
 
         assert result.success
         assert result.urdf_xml is not None
-        root = ET.fromstring(result.urdf_xml)
+        root = DefusedET.fromstring(result.urdf_xml)
         assert root.tag == "robot"
 
 
@@ -270,7 +271,7 @@ class TestLinkJointHierarchyConsistency:
         assert result.success, f"Build failed: {result.error_message}"
         assert result.urdf_xml is not None
 
-        root = ET.fromstring(result.urdf_xml)
+        root = DefusedET.fromstring(result.urdf_xml)
 
         # Verify link names present
         link_names_in_xml = {le.get("name") for le in root.findall(".//link")}

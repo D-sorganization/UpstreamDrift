@@ -11,7 +11,8 @@ in URDFs and copying mesh references between models.
 from __future__ import annotations
 
 import shutil
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any

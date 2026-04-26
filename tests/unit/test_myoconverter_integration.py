@@ -7,7 +7,8 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 

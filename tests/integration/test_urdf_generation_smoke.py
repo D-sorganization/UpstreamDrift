@@ -13,7 +13,8 @@ Generates a humanoid URDF from default body parameters and verifies that:
 from __future__ import annotations
 
 import tempfile
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 from pathlib import Path
 
 import pytest
@@ -35,7 +36,7 @@ def default_urdf() -> str:
 @pytest.fixture(scope="module")
 def default_urdf_root(default_urdf: str) -> ET.Element:
     """Parse the default URDF once for read-only structural assertions."""
-    return ET.fromstring(default_urdf)
+    return DefusedET.fromstring(default_urdf)
 
 
 @pytest.fixture(scope="module")
@@ -125,7 +126,7 @@ class TestURDFFilePersistence:
 
     def test_file_content_is_valid_xml(self, default_urdf_path: Path) -> None:
         content = default_urdf_path.read_text(encoding="utf-8")
-        root = ET.fromstring(content)
+        root = DefusedET.fromstring(content)
         assert root.tag == "robot"
 
     def test_file_content_matches_string_output(self) -> None:
@@ -138,7 +139,7 @@ class TestURDFFilePersistence:
 
     def test_round_trip_preserves_link_count(self, default_urdf_path: Path) -> None:
         content = default_urdf_path.read_text(encoding="utf-8")
-        root = ET.fromstring(content)
+        root = DefusedET.fromstring(content)
         assert len(root.findall("link")) >= 10
 
 
@@ -149,7 +150,7 @@ class TestURDFConfigVariants:
         config = URDFGeneratorConfig(generate_collision=False)
         generator = HumanoidURDFGenerator(config)
         urdf = generator.generate(BodyParameters())
-        root = ET.fromstring(urdf)
+        root = DefusedET.fromstring(urdf)
         for link in root.findall("link"):
             assert link.find("collision") is None
 
@@ -157,7 +158,7 @@ class TestURDFConfigVariants:
         config = URDFGeneratorConfig(expand_composite_joints=False)
         generator = HumanoidURDFGenerator(config)
         urdf = generator.generate(BodyParameters())
-        root = ET.fromstring(urdf)
+        root = DefusedET.fromstring(urdf)
         assert len(root.findall("joint")) >= 1
 
     def test_composite_joints_expanded(self) -> None:
@@ -170,7 +171,7 @@ class TestURDFConfigVariants:
         config = URDFGeneratorConfig(pretty_print=False)
         generator = HumanoidURDFGenerator(config)
         urdf = generator.generate(BodyParameters())
-        root = ET.fromstring(urdf)
+        root = DefusedET.fromstring(urdf)
         assert root.tag == "robot"
         assert "\n  " not in urdf
 

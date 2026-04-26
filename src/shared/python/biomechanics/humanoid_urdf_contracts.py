@@ -13,7 +13,8 @@ structured list plus an overall ok/not-ok result.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -70,12 +71,12 @@ def _parse_root(source: str | Path | ET.Element) -> ET.Element:
         path = Path(source)
     except (TypeError, ValueError):
         # Not path-like; treat as raw XML text.
-        return ET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
+        return DefusedET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
     if path.exists():
         # For existing files, surface real parse/I/O failures directly.
-        return ET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
+        return DefusedET.parse(path).getroot()  # nosec B314 — URDF XML from trusted file paths
     # Fall back to treating the argument as raw XML text.
-    return ET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
+    return DefusedET.fromstring(str(source))  # nosec B314 — URDF XML from trusted file paths
 
 
 def _collect_joint_names(root: ET.Element) -> set[str]:

@@ -19,7 +19,8 @@ generate_humanoid_urdf) is fully preserved.
 from __future__ import annotations
 
 import logging
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from pathlib import Path
 from typing import Any, cast
 
@@ -433,7 +434,7 @@ class HumanoidURDFGenerator:
 def _is_valid_xml(xml_str: str) -> bool:
     """Return True if *xml_str* is parseable XML."""
     try:
-        ET.fromstring(xml_str)  # nosec B314 — parsing self-generated URDF, not untrusted input
+        DefusedET.fromstring(xml_str)  # nosec B314 — parsing self-generated URDF, not untrusted input
         return True
     except ET.ParseError:
         return False

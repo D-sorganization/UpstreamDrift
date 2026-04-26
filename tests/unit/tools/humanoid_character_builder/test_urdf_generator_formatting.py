@@ -8,7 +8,8 @@ generates valid XML that can be round-tripped through ElementTree.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
+import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 
 import pytest
 from humanoid_character_builder.core.body_parameters import BodyParameters
@@ -129,7 +130,7 @@ class TestValidXmlOutput:
     ) -> None:
         urdf_xml = pretty_generator.generate(default_params)
         # Should not raise
-        root = ET.fromstring(urdf_xml)
+        root = DefusedET.fromstring(urdf_xml)
         assert root.tag == "robot"
 
     def test_compact_output_is_valid_xml(
@@ -138,14 +139,14 @@ class TestValidXmlOutput:
         default_params: BodyParameters,
     ) -> None:
         urdf_xml = compact_generator.generate(default_params)
-        root = ET.fromstring(urdf_xml)
+        root = DefusedET.fromstring(urdf_xml)
         assert root.tag == "robot"
 
     def test_pretty_output_has_links_and_joints(
         self, pretty_generator: HumanoidURDFGenerator, default_params: BodyParameters
     ) -> None:
         urdf_xml = pretty_generator.generate(default_params)
-        root = ET.fromstring(urdf_xml)
+        root = DefusedET.fromstring(urdf_xml)
         links = root.findall("link")
         joints = root.findall("joint")
         assert len(links) > 0, "Must have at least one link"
