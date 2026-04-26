@@ -22,6 +22,7 @@ class TestCalculationEngineProtocol:
     def test_protocol_structural_check(self) -> None:
         """A class with calculate() should satisfy the protocol at runtime."""
         from pydantic import BaseModel
+
         from src.shared.python.calc_backend import CalculationEngine
 
         class FakeRequest(BaseModel):
