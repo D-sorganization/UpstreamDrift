@@ -31,7 +31,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -44,18 +44,15 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  # ===========================================================================
-  # Check - Fast validation on PRs
-  # ===========================================================================
   check:
     needs: pick-runner
     name: Check (Rust + TypeScript)

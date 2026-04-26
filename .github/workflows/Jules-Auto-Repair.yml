@@ -48,7 +48,7 @@ env:
   CI_POLL_INTERVAL: 30
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -58,14 +58,14 @@ jobs:
       - name: Check for self-hosted runner
         id: check
         env:
-          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
@@ -353,7 +353,7 @@ jobs:
           Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
                 git push origin "$BRANCH"
-                echo "✅ Pushed repair iteration $iteration"
+                echo "- Pushed repair iteration $iteration"
               fi
 
               # Wait for CI
@@ -371,11 +371,11 @@ jobs:
                       --jq '.[] | select(.name == "quality-gate") | .conclusion' 2>/dev/null | head -1)
 
                     if [ "$CONCLUSION" == "SUCCESS" ]; then
-                      echo "✅ CI PASSED!"
+                      echo "- CI PASSED!"
                       ci_passed=true
                       break 2
                     else
-                      echo "❌ CI still failing"
+                      echo "- CI still failing"
                       # Refresh logs for next iteration
                       LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
                       if [ -n "$LATEST_RUN" ]; then
@@ -393,11 +393,11 @@ jobs:
                   if [ "$STATUS" == "completed" ]; then
                     CONCLUSION=$(echo "$LATEST_STATUS" | jq -r '.conclusion')
                     if [ "$CONCLUSION" == "success" ]; then
-                      echo "✅ CI PASSED!"
+                      echo "- CI PASSED!"
                       ci_passed=true
                       break 2
                     else
-                      echo "❌ CI still failing"
+                      echo "- CI still failing"
                       break
                     fi
                   fi
@@ -435,10 +435,10 @@ jobs:
           ITERATIONS: ${{ steps.repair.outputs.iterations }}
         run: |
           if [ "$STATUS" == "success" ]; then
-            EMOJI="✅"
+            EMOJI="-"
             MSG="CI is now **passing** after $ITERATIONS repair iteration(s)!"
           else
-            EMOJI="🔧"
+            EMOJI="-"
             MSG="Applied $ITERATIONS repair iteration(s). Manual review may still be needed."
           fi
 

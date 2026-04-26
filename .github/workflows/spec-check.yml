@@ -1,4 +1,4 @@
-# spec-check.yml — Specification Freshness Enforcement
+# spec-check.yml  -  Specification Freshness Enforcement
 #
 # PURPOSE: Ensures SPEC.md is updated when source files change.
 # DEPLOYMENT: Copy this file to .github/workflows/spec-check.yml in each repo.
@@ -22,7 +22,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ── Dispatcher: route to self-hosted if available ──────────────────────────
+  # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
     timeout-minutes: 2
@@ -35,11 +35,11 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
-            --jq '[.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length' \
+            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
           if [[ "$ONLINE" =~ ^[0-9]+$ ]] && [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online — routing locally"
+            echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
@@ -83,7 +83,7 @@ jobs:
 
             # Check if source files were modified
             # Add or remove patterns as appropriate for your repo
-            # Note: .github/workflows/ is excluded — CI-only changes rarely
+            # Note: .github/workflows/ is excluded  -  CI-only changes rarely
             # affect documented behavior. Use spec-exempt if needed.
             if [[ "$file" == src/* ]] || \
                [[ "$file" == tests/* ]] || \
@@ -111,7 +111,7 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const body = `## ⚠️ SPEC.md Update Required
+            const body = `## -- SPEC.md Update Required
 
             Source files were modified in this PR but \`SPEC.md\` was not updated.
 
@@ -157,9 +157,9 @@ jobs:
       - name: Spec check passed
         if: steps.check.outputs.needs_update == 'false'
         run: |
-          echo "✅ Spec check passed."
+          echo "- Spec check passed."
           if [[ "${{ steps.check.outputs.spec_changed }}" == "true" ]]; then
             echo "   SPEC.md was updated alongside source changes. Good."
           elif [[ "${{ steps.check.outputs.source_changed }}" == "false" ]]; then
-            echo "   No source files changed — spec update not required."
+            echo "   No source files changed  -  spec update not required."
           fi
