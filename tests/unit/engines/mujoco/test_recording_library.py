@@ -132,3 +132,32 @@ def test_normal_operations(
 
     assert recording_lib.delete_recording(rec_id, delete_file=True)
     assert recording_lib.get_recording(rec_id) is None
+
+
+def test_get_unique_values(
+    library_module: types.ModuleType,
+    recording_lib: Any,
+    tmp_path: Path,
+) -> None:
+    """Test get_unique_values for various fields."""
+    RecordingMetadata = library_module.RecordingMetadata
+
+    # Create dummy data files
+    data_file = tmp_path / "data.json"
+    data_file.write_text("{}")
+
+    # Add recordings with different golfer names and club types
+    recording_lib.add_recording(str(data_file), RecordingMetadata(golfer_name="Alice", club_type="Driver"))
+    recording_lib.add_recording(str(data_file), RecordingMetadata(golfer_name="Bob", club_type="Putter"))
+    recording_lib.add_recording(str(data_file), RecordingMetadata(golfer_name="Alice", club_type="Iron"))
+
+    # Test unique golfer names
+    golfers = recording_lib.get_unique_values("golfer_name")
+    assert golfers == ["Alice", "Bob"]
+
+    # Test unique club types
+    clubs = recording_lib.get_unique_values("club_type")
+    assert clubs == ["Driver", "Iron", "Putter"]
+
+    # Test invalid field
+    assert recording_lib.get_unique_values("invalid_field") == []

@@ -70,3 +70,7 @@
 **Vulnerability:** String-based query construction with `f-strings` in `get_unique_values` (Bandit B608).
 **Learning:** Even when input is validated against a whitelist, security scanners will flag string-based SQL query construction. Using a hardcoded mapping of query strings eliminates both the actual risk and the static analysis warnings.
 **Prevention:** Use hardcoded SQL query maps for column names (which cannot be parameterized in standard SQL bindings) instead of dynamic string construction.
+## 2026-01-20 - Fix SQL Injection in recording_library.py
+**Vulnerability:** String-based query construction allows potential SQL injection (Bandit B608).
+**Learning:** For dynamic column selection where parameterization is not possible, hardcoded query mapping prevents SQL injection and satisfies static analysis without needing nosec annotations.
+**Prevention:** Use dictionary mapping with static SQL strings for queries that depend on variable column names.
