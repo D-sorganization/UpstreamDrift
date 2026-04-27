@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.multi_param_analysis import (
     run_multi_parameter_analysis,
 )

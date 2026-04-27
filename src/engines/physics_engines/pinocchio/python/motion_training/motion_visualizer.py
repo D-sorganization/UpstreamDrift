@@ -465,7 +465,9 @@ class MotionVisualizer:
         else:
             indices = np.linspace(
                 0, trajectory.num_frames - 1, num_frames_to_show
-            ).astype(int)  # noqa: E501
+            ).astype(
+                int
+            )  # noqa: E501
 
         for i, idx in enumerate(indices):
             frame = trajectory.frames[idx]

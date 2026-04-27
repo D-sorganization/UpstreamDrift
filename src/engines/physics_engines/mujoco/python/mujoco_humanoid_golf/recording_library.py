@@ -275,9 +275,7 @@ class RecordingLibrary:
         is_safe = self._is_relative_to(resolved_dest, resolved_lib)
 
         if not is_safe:
-            msg = (
-                f"Security violation: Attempt to save file '{filename}' outside library"  # noqa: E501
-            )
+            msg = f"Security violation: Attempt to save file '{filename}' outside library"  # noqa: E501
             logger.warning(msg)
             raise ValueError(msg)
 
@@ -535,8 +533,7 @@ class RecordingLibrary:
         cursor = conn.cursor()
 
         # PERFORMANCE FIX: Combine basic stats into single query
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT
                 COUNT(*) as total_count,
                 AVG(CASE WHEN rating > 0 THEN rating ELSE NULL END) as avg_rating,
@@ -547,8 +544,7 @@ class RecordingLibrary:
                 AVG(CASE WHEN peak_club_speed > 0
                     THEN peak_club_speed ELSE NULL END) as avg_speed
             FROM recordings
-        """
-        )
+        """)
         stats_row = cursor.fetchone()
         total_count = stats_row[0]
         avg_rating = stats_row[1] or 0.0

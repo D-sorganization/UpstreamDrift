@@ -367,13 +367,11 @@ class AIAssistantPanel(QWidget):
         # Splitter for messages and input
         splitter = QSplitter(Qt.Orientation.Vertical)
         splitter.setHandleWidth(1)
-        splitter.setStyleSheet(
-            """
+        splitter.setStyleSheet("""
             QSplitter::handle {
                 background-color: #3c3c3c;
             }
-        """
-        )
+        """)
 
         # Message area
         self._message_area = self._create_message_area()
@@ -406,8 +404,7 @@ class AIAssistantPanel(QWidget):
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
-        header.setStyleSheet(
-            """
+        header.setStyleSheet("""
             QFrame {
                 background-color: #FF8800;
                 padding: 8px;
@@ -426,8 +423,7 @@ class AIAssistantPanel(QWidget):
             QPushButton:hover {
                 background-color: rgba(0, 0, 0, 0.2);
             }
-            """
-        )
+            """)
 
         layout = QHBoxLayout(header)
 
@@ -467,8 +463,7 @@ class AIAssistantPanel(QWidget):
         self._mode_combo.setToolTip(
             "Select AI Mode: Ask (Chat), Plan (Reasoning), Agent (Tools)"
         )
-        self._mode_combo.setStyleSheet(
-            """
+        self._mode_combo.setStyleSheet("""
             QComboBox {
                 background-color: rgba(255, 255, 255, 0.3);
                 color: black;
@@ -477,8 +472,7 @@ class AIAssistantPanel(QWidget):
                 padding: 2px 8px;
             }
             QComboBox::drop-down { border: none; }
-        """
-        )
+        """)
         layout.addWidget(self._mode_combo)
 
         self._status_label = QLabel("Ready")
@@ -503,8 +497,7 @@ class AIAssistantPanel(QWidget):
 
         close_btn = QPushButton("\u2715")
         close_btn.setToolTip("Close AI Chat")
-        close_btn.setStyleSheet(
-            """
+        close_btn.setStyleSheet("""
             QPushButton {
                 background-color: rgba(0, 0, 0, 0.15);
                 color: #000000;
@@ -518,8 +511,7 @@ class AIAssistantPanel(QWidget):
                 background-color: rgba(200, 0, 0, 0.5);
                 color: white;
             }
-        """
-        )
+        """)
         close_btn.clicked.connect(self.close_requested.emit)
         layout.addWidget(close_btn)
 
@@ -530,8 +522,7 @@ class AIAssistantPanel(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         # Dark background for scroll area
-        scroll.setStyleSheet(
-            """
+        scroll.setStyleSheet("""
             QScrollArea {
                 background-color: #1e1e1e;
                 border: none;
@@ -549,8 +540,7 @@ class AIAssistantPanel(QWidget):
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 background: none;
             }
-        """
-        )
+        """)
 
         # Container for messages
         self._message_container = QWidget()
@@ -578,14 +568,12 @@ class AIAssistantPanel(QWidget):
     def _create_input_area(self) -> QWidget:
         """Create the message input area."""
         widget = QFrame()
-        widget.setStyleSheet(
-            """
+        widget.setStyleSheet("""
             QFrame {
                 background-color: #1e1e1e;
                 border-top: 1px solid #3c3c3c;
             }
-            """
-        )
+            """)
 
         layout = QVBoxLayout(widget)
 
@@ -595,8 +583,7 @@ class AIAssistantPanel(QWidget):
             "Type your message here... (Enter to send, Shift+Enter for new line)"
         )
         self._input_edit.setMaximumHeight(100)
-        self._input_edit.setStyleSheet(
-            """
+        self._input_edit.setStyleSheet("""
             QPlainTextEdit {
                 background-color: #252526;
                 color: #e0e0e0;
@@ -607,8 +594,7 @@ class AIAssistantPanel(QWidget):
             QPlainTextEdit:focus {
                 border: 1px solid #FF8800;
             }
-        """
-        )
+        """)
         self._input_edit.submit_requested.connect(self._on_send)
         layout.addWidget(self._input_edit)
 
@@ -626,8 +612,7 @@ class AIAssistantPanel(QWidget):
         self._send_btn = QPushButton("Send")
         # No default, handled by Enter
         self._send_btn.clicked.connect(self._on_send)
-        self._send_btn.setStyleSheet(
-            """
+        self._send_btn.setStyleSheet("""
             QPushButton {
                 background-color: #FF8800;
                 color: black;
@@ -643,8 +628,7 @@ class AIAssistantPanel(QWidget):
                 background-color: #444444;
                 color: #888888;
             }
-            """
-        )
+            """)
         button_layout.addWidget(self._send_btn)
 
         layout.addLayout(button_layout)

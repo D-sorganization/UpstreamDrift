@@ -132,7 +132,9 @@ class TestUserCreateContract:
         """Postcondition: Valid password is accepted."""
         from src.api.auth.models import UserCreate
 
-        user = UserCreate(email="test@example.com", password="securepassword123")  # nosec B106
+        user = UserCreate(
+            email="test@example.com", password="securepassword123"
+        )  # nosec B106
         assert user.password == "securepassword123"
 
 

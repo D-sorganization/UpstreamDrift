@@ -199,7 +199,9 @@ class TestSMPLXGenerate:
         mock_output.vertices = MagicMock()
         mock_output.vertices.detach.return_value.cpu.return_value.numpy.return_value.squeeze.return_value = rng.standard_normal(
             (n_verts, 3)
-        ).astype(np.float32)
+        ).astype(
+            np.float32
+        )
 
         mock_model = MagicMock()
         mock_model.return_value = mock_output
@@ -390,16 +392,14 @@ class TestMakeHumanOBJParsing:
     """Test the OBJ file parser."""
 
     def test_parse_simple_obj(self, tmp_path: Path) -> None:
-        obj_content = textwrap.dedent(
-            """\
+        obj_content = textwrap.dedent("""\
             v 0.0 0.0 0.0
             v 1.0 0.0 0.0
             v 0.0 1.0 0.0
             v 1.0 1.0 0.0
             f 1 2 3
             f 2 3 4
-        """
-        )
+        """)
         obj_file = tmp_path / "test.obj"
         obj_file.write_text(obj_content, encoding="utf-8")
 
@@ -410,16 +410,14 @@ class TestMakeHumanOBJParsing:
         assert faces[0].tolist() == [0, 1, 2]
 
     def test_parse_obj_with_normals_and_texcoords(self, tmp_path: Path) -> None:
-        obj_content = textwrap.dedent(
-            """\
+        obj_content = textwrap.dedent("""\
             v 0.0 0.0 0.0
             v 1.0 0.0 0.0
             v 0.0 1.0 0.0
             vn 0.0 0.0 1.0
             vt 0.0 0.0
             f 1/1/1 2/1/1 3/1/1
-        """
-        )
+        """)
         obj_file = tmp_path / "test.obj"
         obj_file.write_text(obj_content, encoding="utf-8")
 
@@ -428,15 +426,13 @@ class TestMakeHumanOBJParsing:
         assert faces.shape == (1, 3)
 
     def test_parse_obj_quad_triangulation(self, tmp_path: Path) -> None:
-        obj_content = textwrap.dedent(
-            """\
+        obj_content = textwrap.dedent("""\
             v 0.0 0.0 0.0
             v 1.0 0.0 0.0
             v 1.0 1.0 0.0
             v 0.0 1.0 0.0
             f 1 2 3 4
-        """
-        )
+        """)
         obj_file = tmp_path / "test.obj"
         obj_file.write_text(obj_content, encoding="utf-8")
 
@@ -709,8 +705,8 @@ class TestIssue2474MeshGeneratorScriptAndSegments:
             result = SMPLXMeshGenerator.validate_vertex_ranges(
                 SMPLXMeshGenerator.SMPLX_EXPECTED_VERTEX_COUNT
             )
-            assert result is False, (
-                "validate_vertex_ranges must return False when segments overlap"
-            )
+            assert (
+                result is False
+            ), "validate_vertex_ranges must return False when segments overlap"
         finally:
             SMPLXMeshGenerator.SMPLX_SEGMENT_VERTEX_RANGES = original

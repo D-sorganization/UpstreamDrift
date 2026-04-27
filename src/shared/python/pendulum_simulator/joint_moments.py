@@ -231,9 +231,9 @@ def golfer_pendulum_moments(
     Pre:  len(applied_torques) >= 7 and all required keys present in positions/forces.
     Post: Returns dict with 21 keys (3 per joint Ã— 7 joints), all finite.
     """
-    assert len(applied_torques) >= 7, (
-        f"Need >= 7 applied torques, got {len(applied_torques)}"
-    )
+    assert (
+        len(applied_torques) >= 7
+    ), f"Need >= 7 applied torques, got {len(applied_torques)}"
     # Joint â†’ distal endpoint pairs (joint connects to next link's endpoint)
     joints = ["hub", "rs", "re", "rh", "ls", "le", "lh"]
     endpoints = ["rs", "re", "rh", "club_tip", "le", "lh", "club_tip"]

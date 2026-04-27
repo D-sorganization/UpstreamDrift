@@ -297,7 +297,9 @@ class GitHubRepository(Repository):
         for attempt in range(max_retries + 1):
             try:
                 req = self._build_api_request(url)
-                with urllib.request.urlopen(req, timeout=timeout) as response:  # nosec B310 - GitHub API request via _build_api_request
+                with urllib.request.urlopen(
+                    req, timeout=timeout
+                ) as response:  # nosec B310 - GitHub API request via _build_api_request
                     data = json.loads(response.read().decode())
                     # Extract next page URL from Link header
                     next_url = self._parse_link_header(response)
@@ -411,7 +413,9 @@ class GitHubRepository(Repository):
         local_path = destination / filename
 
         try:
-            urllib.request.urlretrieve(urdf_url, local_path)  # nosec B310 - URL from GitHub raw content base
+            urllib.request.urlretrieve(
+                urdf_url, local_path
+            )  # nosec B310 - URL from GitHub raw content base
             logger.info(f"Downloaded: {filename}")
 
             # Try to download meshes from same directory
@@ -448,7 +452,9 @@ class GitHubRepository(Repository):
                         or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
                     )
                     local_file = local_mesh_dir / item["name"]
-                    urllib.request.urlretrieve(raw_url, local_file)  # nosec B310 - URL from GitHub API download_url field
+                    urllib.request.urlretrieve(
+                        raw_url, local_file
+                    )  # nosec B310 - URL from GitHub API download_url field
 
         except (PermissionError, OSError):
             pass  # Meshes not found or not accessible
@@ -465,7 +471,9 @@ class GitHubRepository(Repository):
 
         try:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:
-                urllib.request.urlretrieve(archive_url, tmp.name)  # nosec B310 - URL from trusted github.com base
+                urllib.request.urlretrieve(
+                    archive_url, tmp.name
+                )  # nosec B310 - URL from trusted github.com base
 
                 with zipfile.ZipFile(tmp.name, "r") as zf:
                     zf.extractall(destination)

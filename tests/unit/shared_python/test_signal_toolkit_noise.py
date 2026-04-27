@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
 from src.shared.python.signal_toolkit.noise import (
     DisturbanceSimulator,

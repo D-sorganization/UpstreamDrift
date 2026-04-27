@@ -186,9 +186,9 @@ def main() -> int:
             "core_checks": {"passed": core_passed, "total": core_total},
             "suite_checks": {"passed": suite_passed, "total": suite_total},
             "overall": {"passed": total_passed, "total": total_checks},
-            "status": "passed"
-            if (py_critical and total_passed == total_checks)
-            else "failed",
+            "status": (
+                "passed" if (py_critical and total_passed == total_checks) else "failed"
+            ),
         }
         print(json.dumps(result, indent=2))
 

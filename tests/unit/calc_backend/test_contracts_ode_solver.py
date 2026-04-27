@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
+
 from src.shared.python.calc_backend.contracts.ode_solver import (
     ODESolverRequest,
     ODESolverResponse,

@@ -276,9 +276,9 @@ class TestLinearizeFrictionCone:
         for f in inside_forces:
             # Should satisfy A @ f <= b (approximately, due to linearization)
             violations = A @ f - b
-            assert np.all(violations <= 1e-6), (
-                f"Force {f} should be inside linearized cone"
-            )
+            assert np.all(
+                violations <= 1e-6
+            ), f"Force {f} should be inside linearized cone"
 
     def test_compute_friction_cone_constraint(self) -> None:
         """Test compute_friction_cone_constraint returns complete info."""

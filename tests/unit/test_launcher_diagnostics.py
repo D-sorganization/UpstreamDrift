@@ -420,9 +420,9 @@ class TestTileLoadingVerification:
 
             missing = expected_ids - loaded_ids
             assert len(missing) == 0, f"Registry missing: {missing}"
-            assert len(all_models) >= 8, (
-                f"Expected at least 8 models, got {len(all_models)}"
-            )
+            assert (
+                len(all_models) >= 8
+            ), f"Expected at least 8 models, got {len(all_models)}"
 
         except ImportError as e:
             pytest.skip(f"Dependencies not available: {e}")

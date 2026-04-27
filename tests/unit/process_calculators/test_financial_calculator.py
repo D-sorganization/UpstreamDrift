@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.financial_calculator import (
     FinancialModelCalculator,
     FinancialParameters,

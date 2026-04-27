@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.fitting_loss_coefficients import (
     FITTING_K_FACTORS,
     equivalent_length_to_k,

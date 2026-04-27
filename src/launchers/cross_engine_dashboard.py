@@ -338,7 +338,9 @@ def _create_dashboard_window_class() -> type:
         to prevent UI blocking.
         """
 
-        def __init__(self, engine_names: list[str], config: CrossEngineSimConfig) -> None:
+        def __init__(
+            self, engine_names: list[str], config: CrossEngineSimConfig
+        ) -> None:
             super().__init__()
             self.signals = ComparisonWorkerSignals()
             self.engine_names = engine_names

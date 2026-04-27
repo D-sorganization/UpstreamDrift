@@ -64,8 +64,7 @@ class UISetupMixin:
 
         self.tabs = QTabWidget()
 
-        self.tabs.setStyleSheet(
-            """
+        self.tabs.setStyleSheet("""
 
             QTabWidget::pane { border: 1px solid #444; background: #2b2b2b; }
 
@@ -75,8 +74,7 @@ class UISetupMixin:
 
             QTabBar::tab:hover { background: #444; }
 
-        """
-        )
+        """)
 
         self.setup_sim_tab()
 

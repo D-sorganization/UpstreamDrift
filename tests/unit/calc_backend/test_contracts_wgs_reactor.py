@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 from pydantic import ValidationError
+
 from src.shared.python.calc_backend.contracts.wgs_reactor import (
     WGSEquilibriumOut,
     WGSReactorRequest,

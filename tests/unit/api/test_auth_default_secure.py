@@ -40,9 +40,9 @@ class TestAuthDefaultIsSecure:
         from src.api.auth.middleware import is_local_mode
 
         with patch.dict(os.environ, {}, clear=True):
-            assert is_local_mode() is False, (
-                "Local (auth-bypass) mode must not be active by default."
-            )
+            assert (
+                is_local_mode() is False
+            ), "Local (auth-bypass) mode must not be active by default."
 
     def test_auth_disabled_only_when_explicitly_set_local(self) -> None:
         """Auth bypass only activates when GOLF_SUITE_MODE=local is explicit."""
