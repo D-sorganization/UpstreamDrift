@@ -65,9 +65,8 @@ class TaskManager:
             max_tasks: Override maximum number of stored tasks.
             max_concurrent: Override maximum concurrent engine instances.
 
-        Note: Issue #2715 — mixing threading.Lock with asyncio.Semaphore creates
-              deadlock risk. This class maintains sync access for backward compatibility.
-              For pure async, refactor to use asyncio.Lock exclusively.
+        Note: Issue #2715 — Refactored to use asyncio.Lock exclusively to prevent
+              deadlock risks when mixed with asyncio.Semaphore.
         """
         if ttl_seconds is not None:
             self.TTL_SECONDS = ttl_seconds
@@ -78,7 +77,7 @@ class TaskManager:
 
         self._tasks: dict[str, dict[str, Any]] = {}
         self._timestamps: dict[str, float] = {}
-        self._lock = threading.Lock()
+        self._lock = asyncio.Lock()
         self._engine_semaphore = asyncio.Semaphore(self.MAX_CONCURRENT_ENGINES)
         self._closed = False
 
@@ -93,7 +92,7 @@ class TaskManager:
         """
         return self._engine_semaphore
 
-    def _cleanup_expired(self) -> None:
+    async def _cleanup_expired(self) -> None:
         """Remove expired tasks. Called internally under lock."""
         current_time = time.time()
         expired_keys = [
@@ -107,7 +106,7 @@ class TaskManager:
         if expired_keys:
             logger.debug("Cleaned up %d expired tasks", len(expired_keys))
 
-    def _enforce_size_limit(self) -> None:
+    async def _enforce_size_limit(self) -> None:
         """Remove oldest tasks if over limit. Called internally under lock."""
         if len(self._tasks) <= self.MAX_TASKS:
             return
@@ -119,7 +118,7 @@ class TaskManager:
             self._timestamps.pop(task_id, None)
         logger.debug("Evicted %d tasks due to size limit", to_remove)
 
-    def set(self, task_id: str, data: dict[str, Any]) -> None:
+    async def set(self, task_id: str, data: dict[str, Any]) -> None:
         """Store or update a task.
 
         Args:
@@ -131,13 +130,13 @@ class TaskManager:
         """
         if not task_id or not task_id.strip():
             raise ValueError("task_id must be a non-empty string")
-        with self._lock:
-            self._cleanup_expired()
+        async with self._lock:
+            await self._cleanup_expired()
             self._tasks[task_id] = data
             self._timestamps[task_id] = time.time()
-            self._enforce_size_limit()
+            await self._enforce_size_limit()
 
-    def get(self, task_id: str) -> dict[str, Any] | None:
+    async def get(self, task_id: str) -> dict[str, Any] | None:
         """Retrieve a task by ID.
 
         Args:
@@ -146,85 +145,69 @@ class TaskManager:
         Returns:
             Task data or None if not found / expired.
         """
-        with self._lock:
-            self._cleanup_expired()
+        async with self._lock:
+            await self._cleanup_expired()
             return self._tasks.get(task_id)
 
-    def update_progress(self, task_id: str, progress: float) -> None:
+    async def exists(self, task_id: str) -> bool:
+        """Check if task exists and is not expired."""
+        async with self._lock:
+            await self._cleanup_expired()
+            return task_id in self._tasks
+
+    async def update_progress(self, task_id: str, progress: float) -> None:
         """Update progress for a running task.
 
         Args:
             task_id: Task identifier.
             progress: Progress percentage (0-100).
         """
-        with self._lock:
+        async with self._lock:
             if task_id in self._tasks:
                 self._tasks[task_id]["progress"] = min(max(progress, 0.0), 100.0)
                 self._timestamps[task_id] = time.time()
 
-    def mark_completed(self, task_id: str, result: dict[str, Any]) -> None:
+    async def mark_completed(self, task_id: str, result: dict[str, Any]) -> None:
         """Mark a task as completed with its result.
 
         Args:
             task_id: Task identifier.
             result: The task result data.
         """
-        with self._lock:
+        async with self._lock:
             if task_id in self._tasks:
                 self._tasks[task_id]["status"] = TaskStatus.COMPLETED.value
                 self._tasks[task_id]["result"] = result
                 self._tasks[task_id]["progress"] = 100.0
                 self._timestamps[task_id] = time.time()
 
-    def mark_failed(self, task_id: str, error: str) -> None:
+    async def mark_failed(self, task_id: str, error: str) -> None:
         """Mark a task as failed with error information.
 
         Args:
             task_id: Task identifier.
             error: Error message.
         """
-        with self._lock:
+        async with self._lock:
             if task_id in self._tasks:
                 self._tasks[task_id]["status"] = TaskStatus.FAILED.value
                 self._tasks[task_id]["error"] = error
                 self._timestamps[task_id] = time.time()
 
-    def active_count(self) -> int:
+    async def active_count(self) -> int:
         """Return the number of active (non-expired) tasks."""
-        with self._lock:
-            self._cleanup_expired()
+        async with self._lock:
+            await self._cleanup_expired()
             return len(self._tasks)
 
-    def __contains__(self, task_id: str) -> bool:
-        """Check if task exists."""
-        with self._lock:
-            self._cleanup_expired()
-            return task_id in self._tasks
-
-    def __setitem__(self, task_id: str, data: dict[str, Any]) -> None:
-        """Dict-like setter for backward compatibility."""
-        self.set(task_id, data)
-
-    def __getitem__(self, task_id: str) -> dict[str, Any]:
-        """Dict-like getter for backward compatibility."""
-        result = self.get(task_id)
-        if result is None:
-            raise KeyError(task_id)
-        return result
-
-    def shutdown(self) -> None:
+    async def shutdown(self) -> None:
         """Cleanup resources on TaskManager shutdown (issue #2715).
 
         Closes the engine semaphore and prevents further operations.
         Call this when the TaskManager is no longer needed.
         """
-        with self._lock:
+        async with self._lock:
             self._closed = True
             # asyncio.Semaphore cleanup happens implicitly on GC,
             # but we log for diagnostics
             logger.debug("TaskManager shutdown: semaphore cleanup scheduled")
-
-    def __del__(self) -> None:
-        """Cleanup on garbage collection."""
-        if not self._closed:
-            self.shutdown()

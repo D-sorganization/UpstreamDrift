@@ -52,10 +52,13 @@ async def export_results(
             f"Must be one of: {', '.join(sorted(VALID_EXPORT_FORMATS))}",
         )
 
-    if task_id not in task_manager:
+    if not await task_manager.exists(task_id):
         raise HTTPException(status_code=404, detail="Task not found")
 
-    task = task_manager[task_id]
+    task = await task_manager.get(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
     if task["status"] != "completed":
         raise HTTPException(status_code=400, detail="Task not completed")
 

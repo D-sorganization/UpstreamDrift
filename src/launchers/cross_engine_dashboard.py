@@ -320,6 +320,33 @@ def _create_dashboard_window_class() -> type:
         FigureCanvasQTAgg = None
         Figure = None
 
+    class ComparisonWorkerSignals(QObject):
+        """Signals for the ComparisonWorker."""
+
+        finished = pyqtSignal(list, dict)
+        error = pyqtSignal(str)
+
+    class ComparisonWorker(QRunnable):
+        """Worker thread for cross-engine comparison (issue #2715).
+
+        Runs the CPU-heavy Monte Carlo simulation comparison in a background thread
+        to prevent UI blocking.
+        """
+
+        def __init__(self, engine_names: list[str], config: CrossEngineSimConfig) -> None:
+            super().__init__()
+            self.signals = ComparisonWorkerSignals()
+            self.engine_names = engine_names
+            self.config = config
+
+        def run(self) -> None:
+            """Execute comparison and emit results."""
+            try:
+                cv_summary = _run_headless(self.engine_names, self.config)
+                self.signals.finished.emit(self.engine_names, cv_summary)
+            except Exception as e:
+                self.signals.error.emit(str(e))
+
     class _Window(QMainWindow):
         """Cross-Engine Perturbation Comparison Dashboard main window."""
 
@@ -340,6 +367,9 @@ def _create_dashboard_window_class() -> type:
             root.addWidget(self._build_config_panel(), stretch=0)
             if _has_mpl:
                 root.addWidget(self._build_chart_panel(), stretch=1)
+
+            # Thread pool for background tasks
+            self._thread_pool = QThreadPool.globalInstance()
 
         # ------------------------------------------------------------------
         # Config panel
@@ -478,7 +508,7 @@ def _create_dashboard_window_class() -> type:
         # ------------------------------------------------------------------
 
         def _on_run(self) -> None:
-            """Build config, run comparison, update charts."""
+            """Build config, run comparison in background thread."""
             selected = [
                 name for name, cb in self._engine_checks.items() if cb.isChecked()
             ]
@@ -501,18 +531,25 @@ def _create_dashboard_window_class() -> type:
 
             self._run_btn.setEnabled(False)
             self._status_label.setText("Running…")
-            # Force UI repaint before blocking call
-            QApplication.processEvents()
 
-            try:
-                cv_summary = _run_headless(selected, config)
-                self._update_charts(selected, cv_summary)
-                self._status_label.setText("Done")
-            except Exception as exc:  # noqa: BLE001
-                self._status_label.setText(f"Error: {exc}")
-                logger.error("Comparison failed: %s", exc, exc_info=True)
-            finally:
-                self._run_btn.setEnabled(True)
+            worker = ComparisonWorker(selected, config)
+            worker.signals.finished.connect(self._on_comparison_finished)
+            worker.signals.error.connect(self._on_comparison_error)
+            self._thread_pool.start(worker)
+
+        def _on_comparison_finished(
+            self, engine_names: list[str], cv_summary: dict[str, float]
+        ) -> None:
+            """Handle successful comparison completion."""
+            self._update_charts(engine_names, cv_summary)
+            self._status_label.setText("Done")
+            self._run_btn.setEnabled(True)
+
+        def _on_comparison_error(self, error_msg: str) -> None:
+            """Handle comparison failure."""
+            self._status_label.setText(f"Error: {error_msg}")
+            logger.error("Comparison failed: %s", error_msg)
+            self._run_btn.setEnabled(True)
 
         # ------------------------------------------------------------------
         # Chart update

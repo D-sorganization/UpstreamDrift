@@ -163,8 +163,10 @@ class ProcessManager:
         if not merged_paths:
             return existing_path
 
-        new_paths = separator.join(merged_paths)
-        return f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
+        new_paths = separator.join(shlex.quote(p) for p in merged_paths)
+        if existing_path:
+            return f"{new_paths}{separator}{existing_path}"
+        return new_paths
 
     def get_subprocess_env(
         self,
@@ -208,7 +210,9 @@ class ProcessManager:
                 paths_to_add.append(p)
 
         if paths_to_add:
-            new_paths = separator.join(paths_to_add)
+            # Security: Safely quote each path entry (issue #2715)
+            quoted_paths = [shlex.quote(p) for p in paths_to_add]
+            new_paths = separator.join(quoted_paths)
             env["PYTHONPATH"] = (
                 f"{new_paths}{separator}{existing_path}" if existing_path else new_paths
             )
@@ -273,14 +277,16 @@ class ProcessManager:
                 self._log_file_path.exists()
                 and self._log_file_path.stat().st_size > 2 * 1024 * 1024
             ):
-                # Keep last 500 lines
-                lines = self._log_file_path.read_text(
-                    encoding="utf-8", errors="replace"
-                ).splitlines()
-                self._log_file_path.write_text(
-                    "\n".join(lines[-500:]) + "\n", encoding="utf-8"
-                )
-        except (RuntimeError, ValueError, OSError) as e:
+                # Optimized log truncation: Keep last 500 lines without loading entire file into RAM (issue #2715)
+                # We use a deque with maxlen=500 to efficiently store only the tail.
+                from collections import deque
+
+                with open(self._log_file_path, "r", encoding="utf-8", errors="replace") as f:
+                    tail = deque(f, maxlen=500)
+
+                with open(self._log_file_path, "w", encoding="utf-8") as f:
+                    f.writelines(tail)
+        except (RuntimeError, ValueError, OSError, ImportError) as e:
             logger.debug("Could not init log file: %s", e)
 
     @classmethod

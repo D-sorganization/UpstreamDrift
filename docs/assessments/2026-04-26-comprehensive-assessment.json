@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "date": "2026-04-26",
+    "assessor": "pragmatic-ao-assessment-agent",
+    "scope": "D-Sorganization fleet",
+    "repos_assessed": 10,
+    "criteria": "A-O (16 dimensions)",
+    "principles": "8 Pragmatic Programmer principles"
+  },
+  "fleet_summary": {
+    "average_overall": 5.3,
+    "strongest_dimension": "N (Compliance / Governance)",
+    "weakest_dimension": "F (Code Craftsmanship)",
+    "most_common_gaps": ["No lockfile (G)", "No benchmarks (E)", "No .coverage (C)", "No ADRs (B)"]
+  },
+  "repos": {
+    "runner-dashboard": {"overall": 5.3, "scores": {"A": 8, "B": 5, "C": 5, "D": 6, "E": 5, "F": 0, "G": 4, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 6, "N": 8, "O": 7}, "findings": 21, "issues_created": [163, 164]},
+    "controls": {"overall": 5.7, "scores": {"A": 8, "B": 6, "C": 5, "D": 6, "E": 5, "F": 5, "G": 4, "H": 7, "I": 7, "J": 5, "K": 4, "L": 4, "M": 5, "N": 7, "O": 7}, "findings": 10, "issues_created": [153]},
+    "Drake_Models": {"overall": 5.5, "scores": {"A": 8, "B": 6, "C": 5, "D": 6, "E": 5, "F": 3, "G": 4, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 5, "N": 8, "O": 7}, "findings": 9, "issues_created": [179]},
+    "Games": {"overall": 5.5, "scores": {"A": 8, "B": 6, "C": 5, "D": 6, "E": 5, "F": 0, "G": 6, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 5, "N": 8, "O": 7}, "findings": 22, "issues_created": [798]},
+    "Maxwell-Daemon": {"overall": 5.6, "scores": {"A": 8, "B": 7, "C": 5, "D": 6, "E": 5, "F": 5, "G": 4, "H": 7, "I": 6, "J": 5, "K": 3, "L": 4, "M": 5, "N": 8, "O": 6}, "findings": 7, "issues_created": []},
+    "Bitnet_Launcher": {"overall": 5.1, "scores": {"A": 7, "B": 6, "C": 5, "D": 6, "E": 5, "F": 3, "G": 4, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 5, "N": 3, "O": 7}, "findings": 15, "issues_created": []},
+    "MLProjects": {"overall": 5.4, "scores": {"A": 8, "B": 5, "C": 5, "D": 6, "E": 5, "F": 5, "G": 4, "H": 7, "I": 6, "J": 5, "K": 3, "L": 4, "M": 5, "N": 6, "O": 7}, "findings": 12, "issues_created": []},
+    "Playground": {"overall": 5.5, "scores": {"A": 8, "B": 6, "C": 5, "D": 6, "E": 5, "F": 3, "G": 4, "H": 7, "I": 7, "J": 5, "K": 4, "L": 4, "M": 5, "N": 6, "O": 7}, "findings": 12, "issues_created": []},
+    "QuatEngine": {"overall": 5.2, "scores": {"A": 4, "B": 5, "C": 5, "D": 6, "E": 5, "F": 5, "G": 4, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 5, "N": 6, "O": 7}, "findings": 13, "issues_created": []},
+    "Tools_Private": {"overall": 5.3, "scores": {"A": 8, "B": 6, "C": 5, "D": 6, "E": 5, "F": 0, "G": 4, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 5, "N": 7, "O": 7}, "findings": 19, "issues_created": []},
+    "UpstreamDrift": {"overall": 5.2, "scores": {"A": 8, "B": 7, "C": 5, "D": 6, "E": 5, "F": 0, "G": 6, "H": 4, "I": 7, "J": 3, "K": 3, "L": 4, "M": 5, "N": 8, "O": 7}, "findings": 225, "issues_created": []},
+    "Worksheet-Workshop": {"overall": 5.2, "scores": {"A": 8, "B": 6, "C": 5, "D": 6, "E": 5, "F": 0, "G": 4, "H": 7, "I": 6, "J": 5, "K": 4, "L": 4, "M": 5, "N": 6, "O": 7}, "findings": 18, "issues_created": []}
+  },
+  "delta_from_prior": null,
+  "integrity_notes": [
+    "Dirty trees in runner-dashboard, Drake_Models, Games, Maxwell-Daemon, Repository_Management, Tools",
+    "bandit, pip-audit, radon, vulture not installed on Windows host — heuristic-only findings",
+    "UpstreamDrift, Repository_Management, Tools sampled due to large file counts"
+  ]
+}
