@@ -80,3 +80,7 @@
 **Vulnerability:** Subprocess `shell=True` (Bandit B604) flagged in testing files intentionally checking security blocks.
 **Learning:** Static analysis tools flag intentional security failures in tests unless explicitly suppressed.
 **Prevention:** Added `# nosec` annotations to intentional `shell=True` tests.
+## 2024-04-27 - Command Injection Risk in Process Worker
+**Vulnerability:** Direct use of `subprocess.Popen` without command validation in `ProcessWorker`.
+**Learning:** Raw subprocess calls can allow arbitrary command injection if unsanitized inputs are provided as command arguments.
+**Prevention:** Always use the custom `secure_popen` wrapper from `src.shared.python.security.secure_subprocess` which provides validation against allowed commands and prevents dangerous arguments like `shell=True`.

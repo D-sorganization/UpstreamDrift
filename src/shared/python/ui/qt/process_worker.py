@@ -10,6 +10,7 @@ import threading
 from typing import Any
 
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.security.secure_subprocess import secure_popen
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +96,7 @@ class ProcessWorker(QThread):
                 run_env = os.environ.copy()
                 run_env.update(self.env)
 
-            self.process = subprocess.Popen(
+            self.process = secure_popen(
                 self.cmd,
                 cwd=self.cwd,
                 env=run_env,
@@ -127,7 +128,7 @@ class ProcessWorker(QThread):
             return_code = self.process.returncode
             self.finished_signal.emit(return_code, stderr_output)
 
-        except (OSError, subprocess.SubprocessError, ValueError) as e:
+        except Exception as e:  # noqa: BLE001
             self.log_signal.emit(f"Error starting process: {e}")
             self.finished_signal.emit(-1, str(e))
         finally:

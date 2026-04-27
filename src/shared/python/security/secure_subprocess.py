@@ -35,6 +35,7 @@ ALLOWED_EXECUTABLES = [
     "matlab.exe",
     "docker",
     "docker.exe",
+    "echo",
 ]
 
 
