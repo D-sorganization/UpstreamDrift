@@ -293,8 +293,13 @@ def _create_dashboard_window_class() -> type:
     ------
     ImportError if PyQt6 or Matplotlib is not available.
     """
+    from PyQt6.QtCore import (  # noqa: PLC0415
+        QObject,
+        QRunnable,
+        QThreadPool,
+        pyqtSignal,
+    )
     from PyQt6.QtWidgets import (  # noqa: PLC0415
-        QApplication,
         QCheckBox,
         QDoubleSpinBox,
         QGroupBox,
@@ -344,7 +349,9 @@ def _create_dashboard_window_class() -> type:
             try:
                 cv_summary = _run_headless(self.engine_names, self.config)
                 self.signals.finished.emit(self.engine_names, cv_summary)
-            except Exception as e:
+            # Worker thread must survive any error to emit a signal back to the
+            # GUI thread rather than crashing silently.
+            except Exception as e:  # noqa: BLE001
                 self.signals.error.emit(str(e))
 
     class _Window(QMainWindow):

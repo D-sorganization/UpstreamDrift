@@ -341,7 +341,9 @@ class ChatService:
                                 f"Tool execution timed out after {timeout_sec}s"
                             )
                             success = False
-                        except Exception as e:
+                        # Tool execution may raise arbitrary exceptions from user-defined
+                        # tools; catch-all prevents a single tool from crashing the session.
+                        except Exception as e:  # noqa: BLE001
                             result_str = str(e)
                             success = False
 
@@ -358,7 +360,9 @@ class ChatService:
                             temp_ctx.add_tool_result(tc.id, result_str)
                             self._persist_session(session_id)
 
-            except Exception as e:
+            # Worker thread must survive any error to send the sentinel and avoid
+            # hanging the queue consumer.
+            except Exception as e:  # noqa: BLE001
                 chunk_queue.put(f"\n[Error: {e}]")
             finally:
                 chunk_queue.put(None)  # Sentinel
