@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -50,7 +51,7 @@ class Sphere(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = np.linalg.norm(direction)
+        norm = math.hypot(*direction)
         if norm < 1e-10:
             return self.center.copy()
         return self.center + self.radius * direction / norm
@@ -179,7 +180,7 @@ class Capsule(GeometricPrimitive):
     def axis(self) -> np.ndarray:
         """Get capsule axis direction (normalized)."""
         diff = self.point_b - self.point_a
-        length = np.linalg.norm(diff)
+        length = math.hypot(*diff)
         if length < 1e-10:
             return np.array([0.0, 0.0, 1.0])
         return diff / length
@@ -224,7 +225,7 @@ class Capsule(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = np.linalg.norm(direction)
+        norm = math.hypot(*direction)
         if norm < 1e-10:
             return self.point_a.copy()
         d = direction / norm
@@ -315,7 +316,7 @@ class Cylinder(GeometricPrimitive):
 
         # Check radius (perpendicular distance)
         perp = to_point - along_axis * self.axis
-        return float(np.linalg.norm(perp)) <= self.radius
+        return float(math.hypot(*perp)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -324,7 +325,7 @@ class Cylinder(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = np.linalg.norm(direction)
+        norm = math.hypot(*direction)
         if norm < 1e-10:
             return self.center.copy()
 
@@ -342,7 +343,7 @@ class Cylinder(GeometricPrimitive):
             axis_support = self.center - self.half_height * self.axis
 
         # Support on radius (perpendicular)
-        perp_norm = np.linalg.norm(d_perp)
+        perp_norm = math.hypot(*d_perp)
         if perp_norm > 1e-10:
             return axis_support + self.radius * d_perp / perp_norm
 
@@ -396,7 +397,7 @@ class ConvexHull(GeometricPrimitive):
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
         to_point = point - self.center
-        norm = np.linalg.norm(to_point)
+        norm = math.hypot(*to_point)
         if norm < 1e-10:
             return True  # At center
 
