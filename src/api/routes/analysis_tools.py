@@ -16,6 +16,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import logging
 import math
 from typing import TYPE_CHECKING, Any
 
@@ -43,6 +44,8 @@ if TYPE_CHECKING:
     from src.shared.python.engine_core.engine_manager import EngineManager
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 def _check_position_support(engine: Any) -> None:
@@ -141,8 +144,8 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
 
             metrics["max_velocity"] = float(np.max(np.abs(v)))
             metrics["rms_velocity"] = float(np.sqrt(np.mean(v**2)))
-    except ImportError:
-        pass
+    except ImportError as exc:
+        logger.debug("numpy unavailable for velocity metrics: %s", exc)
 
     # Energy
     try:
@@ -152,8 +155,8 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
 
             q, v = engine.get_state()
             metrics["kinetic_energy"] = float(0.5 * v @ M @ v)
-    except ImportError:
-        pass
+    except ImportError as exc:
+        logger.debug("numpy unavailable for kinetic energy metric: %s", exc)
 
     # Club head speed
     try:
@@ -164,8 +167,8 @@ def _collect_metrics(engine_manager: EngineManager) -> dict[str, Any]:
             _, v = engine.get_state()
             linear_vel = jac["linear"] @ v
             metrics["club_head_speed"] = float(np.linalg.norm(linear_vel))
-    except ImportError:
-        pass
+    except ImportError as exc:
+        logger.debug("numpy unavailable for club head speed metric: %s", exc)
 
     return metrics
 

@@ -208,8 +208,9 @@ class GolfLauncher(
             try:
                 MR = _lazy_load_model_registry()
                 self.registry = MR(REPOS_ROOT / "src/config/models.yaml")
-            except (ImportError, Exception) as e:
-                logger.error(f"Failed to load ModelRegistry: {e}")
+            except ImportError as e:
+                # Lazy import may fail when optional dependencies are missing.
+                logger.error("Failed to load ModelRegistry: %s", e)
                 self.registry = None
 
     def _init_engine_manager(self, startup_results: StartupResults | None) -> None:

@@ -371,14 +371,15 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
             result = _EVALUATOR.eval(expression)
             self._last_eval_error = None
             return float(result)
+        # simpleeval may raise a variety of expression errors; catch the
+        # common ones and fall back to a safe default with user feedback.
         except (
             ValueError,
             TypeError,
             SyntaxError,
             NameError,
             KeyError,
-            Exception,
-        ):  # noqa: BLE001
+        ):
             msg = f"Invalid expression: {expression}"
             self._last_eval_error = msg
             logger.warning("Error evaluating torque expression: %s", expression)
