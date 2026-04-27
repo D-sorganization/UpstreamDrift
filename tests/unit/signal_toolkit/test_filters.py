@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.signal_toolkit.core import Signal
+
 from src.shared.python.signal_toolkit.filters import (
     apply_exponential_smoothing,
     apply_gaussian_smoothing,

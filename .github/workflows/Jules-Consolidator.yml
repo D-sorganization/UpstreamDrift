@@ -26,8 +26,24 @@ permissions:
   issues: write
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -48,13 +64,11 @@ jobs:
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  discover:
-    needs: pick-runner
+
+  consolidator:
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: self-hosted
-    outputs:
-      pr_count: ${{ steps.list.outputs.count }}
-      pr_list: ${{ steps.list.outputs.prs }}
-      should_consolidate: ${{ steps.list.outputs.should_consolidate }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -132,3 +146,4 @@ jobs:
             --label "jules:consolidation" \
             --base main \
             --head "$BRANCH_NAME"
+

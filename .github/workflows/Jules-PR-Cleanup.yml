@@ -31,8 +31,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -54,7 +70,8 @@ jobs:
             exit 1
           fi
   cleanup:
-    needs: pick-runner
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     name: Cleanup Stale Jules PRs
     runs-on: self-hosted
 
@@ -169,3 +186,4 @@ jobs:
           if [ "${{ inputs.dry_run || 'true' }}" = "true" ]; then
             echo "Run with \`dry_run=false\` to actually close stale PRs." >> $GITHUB_STEP_SUMMARY
           fi
+

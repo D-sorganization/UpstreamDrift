@@ -398,6 +398,7 @@ class UnitConversionService(
         # Invalidate cache as new unit might conflict or resolve previously unknown units
         self._normalized_cache.clear()
 
+
     def _user_unit_warnings(
         self,
         from_category: str | None,

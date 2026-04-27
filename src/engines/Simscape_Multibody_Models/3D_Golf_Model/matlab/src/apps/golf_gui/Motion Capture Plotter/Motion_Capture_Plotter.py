@@ -44,6 +44,7 @@ from .motion_capture_plotter_visualization import (
     MotionCapturePlotterVisualizationMixin,
 )
 
+
 logger = get_logger(__name__)
 
 

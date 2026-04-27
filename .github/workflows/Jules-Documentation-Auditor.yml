@@ -14,8 +14,24 @@ permissions:
   issues: write
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -36,11 +52,11 @@ jobs:
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  audit-documentation:
-    needs: pick-runner
-    runs-on: self-hosted
-    timeout-minutes: 60
 
+  documentation-auditor:
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
+    runs-on: self-hosted
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
@@ -199,3 +215,4 @@ jobs:
           echo "- **Missing Function Docs**: ${{ steps.scan.outputs.missing_func }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "See full report in docs/assessments/documentation/LATEST.md" >> $GITHUB_STEP_SUMMARY
+

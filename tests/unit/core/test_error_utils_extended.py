@@ -13,15 +13,19 @@ import pytest
 
 from src.shared.python.core.error_utils import (
     DataFormatError,
+    EngineNotAvailableError,
     EnvironmentError,
     EnvironmentValidationError,
+    FileOperationError,
     FileNotFoundError_,
     FileNotFoundIOError,
     FileParseError,
     IOError,
     IOUtilsError,
+    ModelError,
     PhysicalValidationError,
     ResourceError,
+    SimulationError,
     TimeoutError,
     ValidationError,
     format_range_error,
@@ -133,6 +137,97 @@ class TestHandleImportErrorFunction:
         with caplog.at_level(logging.WARNING):
             handle_import_error("missing_module", raise_error=False, log_warning=True)
         assert any("missing_module" in r.message for r in caplog.records)
+
+
+# ============================================================================
+# Tests for EngineNotAvailableError
+# ============================================================================
+
+
+class TestEngineNotAvailableError:
+    """Tests for EngineNotAvailableError exception."""
+
+    def test_basic(self) -> None:
+        err = EngineNotAvailableError("mujoco")
+        assert "mujoco" in str(err)
+        assert err.engine_name == "mujoco"
+
+    def test_with_operation(self) -> None:
+        err = EngineNotAvailableError("pinocchio", operation="forward kinematics")
+        assert "pinocchio" in str(err)
+        assert "forward kinematics" in str(err)
+
+    def test_with_install_hint(self) -> None:
+        err = EngineNotAvailableError("drake", install_hint="pip install drake")
+        assert "pip install drake" in str(err)
+
+    def test_default_install_hints(self) -> None:
+        err = EngineNotAvailableError("mujoco")
+        assert "pip install mujoco" in str(err)
+
+
+# ============================================================================
+# Tests for ModelError
+# ============================================================================
+
+
+class TestModelError:
+    """Tests for ModelError exception."""
+
+    def test_basic(self) -> None:
+        err = ModelError("humanoid", "loading")
+        assert "humanoid" in str(err)
+        assert "loading" in str(err)
+        assert err.model_name == "humanoid"
+        assert err.operation == "loading"
+
+    def test_with_details(self) -> None:
+        err = ModelError("club", "parsing", details="missing mass property")
+        assert "missing mass property" in str(err)
+        assert err.details == "missing mass property"
+
+
+# ============================================================================
+# Tests for SimulationError
+# ============================================================================
+
+
+class TestSimulationError:
+    """Tests for SimulationError exception."""
+
+    def test_basic(self) -> None:
+        err = SimulationError("divergence")
+        assert "divergence" in str(err)
+
+    def test_with_time_step(self) -> None:
+        err = SimulationError("collision", time_step=0.1234)
+        assert "0.1234" in str(err)
+        assert err.time_step == 0.1234
+
+    def test_with_state(self) -> None:
+        state = {"q": [0, 0, 0]}
+        err = SimulationError("unstable", state=state)
+        assert err.state == state
+
+
+# ============================================================================
+# Tests for FileOperationError
+# ============================================================================
+
+
+class TestFileOperationError:
+    """Tests for FileOperationError exception."""
+
+    def test_basic(self) -> None:
+        err = FileOperationError("test.xml", "write")
+        assert "test.xml" in str(err)
+        assert "write" in str(err)
+        assert isinstance(err.path, Path)
+
+    def test_with_reason(self) -> None:
+        err = FileOperationError("/root/file.txt", "delete", reason="permission denied")
+        assert "permission denied" in str(err)
+        assert err.reason == "permission denied"
 
 
 # ============================================================================

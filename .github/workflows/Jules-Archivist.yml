@@ -9,8 +9,24 @@ permissions:
   pull-requests: read
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -31,8 +47,10 @@ jobs:
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  archive-tasks:
-    needs: pick-runner
+
+  archivist:
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -56,3 +74,4 @@ jobs:
             # Delete remote branch
             git push origin --delete "$BRANCH" || true
           done
+

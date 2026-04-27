@@ -3,8 +3,24 @@ on:
   workflow_call:
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -25,13 +41,11 @@ jobs:
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  refactor-worst-file:
-    needs: pick-runner
-    runs-on: self-hosted
-    permissions:
-      contents: write
-      pull-requests: write
 
+  tech-custodian:
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -100,3 +114,4 @@ jobs:
           # 2. FORCE READY STATE (Fixes Draft Issue)
           # We use || true so it doesn't fail if the PR is already ready
           gh pr ready "$PR_URL" || true
+

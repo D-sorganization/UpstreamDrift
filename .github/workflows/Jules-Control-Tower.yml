@@ -89,12 +89,12 @@ jobs:
       # SAFEGUARD: Check if we've exceeded max repair iterations in the time window
       - name: Check Iteration Limits
         id: check-limits
-        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+        if: github.event_name == 'workflow_run' && (github.event.workflow_run && github.event.workflow_run.conclusion) == 'failure'
         env:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         run: |
           echo "Checking repair iteration limits..."
-          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          BRANCH="${{ (github.event.workflow_run && github.event.workflow_run.head_branch) }}"
           HOURS_AGO=$(date -u -d "${{ env.MAX_ITERATIONS_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.MAX_ITERATIONS_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
 
           FAILURE_COUNT=$(gh run list \
@@ -241,8 +241,8 @@ jobs:
     if: needs.triage.outputs.target == 'auto-repair'
     uses: ./.github/workflows/Jules-Auto-Repair.yml
     with:
-      run_id: ${{ format('{0}', github.event.workflow_run.id) }}
-      branch: ${{ github.event.workflow_run.head_branch || '' }}
+      run_id: ${{ format('{0}', (github.event.workflow_run && github.event.workflow_run.id)) }}
+      branch: ${{ (github.event.workflow_run && github.event.workflow_run.head_branch) || '' }}
     secrets: inherit
 
   call-hotfix-creator:
@@ -250,8 +250,8 @@ jobs:
     if: needs.triage.outputs.target == 'hotfix-creator'
     uses: ./.github/workflows/Jules-Hotfix-Creator.yml
     with:
-      run_id: ${{ format('{0}', github.event.workflow_run.id) }}
-      failed_branch: ${{ github.event.workflow_run.head_branch || '' }}
+      run_id: ${{ format('{0}', (github.event.workflow_run && github.event.workflow_run.id)) }}
+      failed_branch: ${{ (github.event.workflow_run && github.event.workflow_run.head_branch) || '' }}
     secrets: inherit
 
   call-scribe:

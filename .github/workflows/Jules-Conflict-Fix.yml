@@ -3,8 +3,24 @@ on:
   workflow_call:
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -25,10 +41,11 @@ jobs:
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  find-and-fix-conflicts:
-    needs: pick-runner
+
+  conflict-fix:
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: self-hosted
-    if: github.actor != 'jules-bot'
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
@@ -69,3 +86,4 @@ jobs:
                 3. This is conflict resolution attempt #$((ATTEMPTS+1))."
             fi
           done
+

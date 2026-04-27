@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.upstream_drift_tools.process_calculators.pressure_drop_calculator.utils.pipe_database import (
     create_custom_pipe,
     get_pipe_spec,

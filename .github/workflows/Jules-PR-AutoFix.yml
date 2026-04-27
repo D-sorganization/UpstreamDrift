@@ -52,8 +52,25 @@ env:
   CI_POLL_INTERVAL: 30
 
 jobs:
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -75,14 +92,15 @@ jobs:
             exit 1
           fi
   iterative-fix:
-    needs: pick-runner
+    needs: [check-kill-switch, pick-runner]
     name: Fix and Verify CI (Iterative)
     runs-on: self-hosted
     timeout-minutes: 30
     # Only run on failures (not success) for workflow_run events
     if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
+      needs.check-kill-switch.outputs.enabled == 'true' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'))
 
     outputs:
       final_status: ${{ steps.final-status.outputs.status }}

@@ -17,8 +17,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # -- Dispatcher: route to self-hosted if available --------------------------
+  check-kill-switch:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - name: Check Jules Kill Switch
+        id: check
+        run: |
+          if [ "${{ vars.JULES_ENABLED }}" = "false" ]; then
+            echo "Jules is DISABLED via kill switch."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
   pick-runner:
+    needs: check-kill-switch
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
@@ -39,29 +55,10 @@ jobs:
             echo "::error::No local self-hosted runner available; failing closed"
             exit 1
           fi
-  check-mention:
-    needs: pick-runner
-    runs-on: self-hosted
-    outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
-    steps:
-      - name: Check for @jules mention
-        id: check
-        env:
-          COMMENT_BODY: ${{ github.event.comment.body }}
-        run: |
-          # Check if @jules is mentioned as a standalone word (case insensitive)
-          if echo "$COMMENT_BODY" | grep -iqE "(^|[^a-zA-Z0-9_])@jules([^a-zA-Z0-9_]|$)"; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
-            echo "@jules mention detected!"
-          else
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "No @jules mention found"
-          fi
 
-  fix-issue:
-    needs: [pick-runner, check-mention]
-    if: needs.check-mention.outputs.should_run == 'true' && !github.event.issue.pull_request
+  issue-mention-handler:
+    needs: [check-kill-switch, pick-runner]
+    if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
@@ -267,3 +264,4 @@ jobs:
           if [ -n "${{ steps.jules.outputs.pr_url }}" ]; then
             echo "- **PR:** ${{ steps.jules.outputs.pr_url }}" >> $GITHUB_STEP_SUMMARY
           fi
+
