@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass, field
 
-import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger

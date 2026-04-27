@@ -19,11 +19,11 @@ generate_humanoid_urdf) is fully preserved.
 from __future__ import annotations
 
 import logging
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from pathlib import Path
 from typing import Any, cast
 
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from humanoid_character_builder.contracts import postcondition, precondition
 from humanoid_character_builder.core.anthropometry import (
     estimate_segment_dimensions,

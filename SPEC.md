@@ -27,7 +27,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.82                                             |
+| **Spec Version**        | 1.0.83                                             |
 | **Last Spec Update**    | 2026-04-26                                         |
 
 ## 2. Purpose & Mission
@@ -308,6 +308,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 
 | Tool       | Version | Purpose                | Blocking? |
 | ---------- | ------- | ---------------------- | --------- |
+| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | ruff       | latest  | Linting and formatting | Yes       |
 | mypy       | 1.7+    | Static type checking   | Yes       |
 | pytest     | 7.0+    | Testing framework      | Yes       |
@@ -375,6 +376,7 @@ Beyond standard tools, CI enforces custom checks:
 
 | Package    | Version | Purpose                |
 | ---------- | ------- | ---------------------- |
+| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | pytest     | 7.0+    | Testing framework      |
 | pytest-cov | 4.0+    | Coverage measurement   |
 | hypothesis | 6.0+    | Property-based testing |
@@ -466,6 +468,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 ## 12. Change Log
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | 2026-04-26 | 1.0.81  | fix: Restore missing jobs in `Code-Metrics.yml` and `release.yml`; correct non-UTF-8 characters in 55 workflows causing 0s CI failures. |
 | 2026-04-26 | 1.0.80  | fix: Harden `pick-runner` logic across all workflows to handle `gh api` JSON errors; implement tool invocation loop for AI chat service (fixes #3162); resolve massive conflict-marker corruption in `src` and `tests` by restoring from `origin/main`. |
 | 2026-04-26 | 1.0.80  | Bolt: Optimize Mean Squared Error calculations in system_identification.py |

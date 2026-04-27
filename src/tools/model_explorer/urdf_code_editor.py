@@ -11,10 +11,10 @@ with syntax highlighting, line numbers, validation, and auto-completion.
 from __future__ import annotations
 
 import re
-import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from typing import Any
 
 import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from PyQt6.QtCore import QRect, QRegularExpression, QSize, Qt, pyqtSignal
 from PyQt6.QtGui import (
     QColor,

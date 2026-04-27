@@ -7,10 +7,9 @@ Covers:
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 
-import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import pytest
 
 from src.shared.python.model_generation.editor._text_editor_models import (

@@ -9,7 +9,7 @@ This module tests the complete security hardening implementation including:
 
 import contextlib
 import os
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 import unittest
@@ -126,7 +126,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
     def test_secure_run_shell_blocked(self) -> None:
         """Test secure_run blocks shell execution."""
         with self.assertRaises(SecureSubprocessError) as context:
-            secure_run(["echo", "test"], shell=True)
+            secure_run(["echo", "test"], shell=True)  # nosec B604
 
         self.assertIn("shell=True is not allowed", str(context.exception))
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass
 from pathlib import Path

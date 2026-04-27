@@ -71,5 +71,5 @@ for p in src_dir.rglob("*.py"):
     try:
         if process_file(p):
             count += 1
-    except Exception:
+    except Exception:  # noqa: BLE001
         pass

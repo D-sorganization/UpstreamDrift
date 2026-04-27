@@ -13,10 +13,11 @@ structured list plus an overall ok/not-ok result.
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass, field
 from pathlib import Path
+
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
 # Bilateral joint stems required by the humanoid contract. Each stem
 # must be present as both ``left_<stem>`` and ``right_<stem>``.

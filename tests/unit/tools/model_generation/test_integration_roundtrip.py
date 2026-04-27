@@ -14,8 +14,6 @@ References:
 from __future__ import annotations
 
 import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
-import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
-
 import pytest
 from model_generation.builders.manual_builder import ManualBuilder
 from model_generation.builders.parametric_builder import ParametricBuilder

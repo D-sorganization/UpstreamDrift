@@ -15,7 +15,7 @@ class TestVideoRouteImportFallback:
         """video.py must expose _VIDEO_DEPS_AVAILABLE to gate pipeline construction."""
         try:
             import src.api.routes.video as video_mod
-        except Exception:
+        except Exception:  # noqa: BLE001
             return  # env missing other deps; skip
 
         assert hasattr(video_mod, "_VIDEO_DEPS_AVAILABLE"), (
@@ -29,7 +29,7 @@ class TestVideoRouteImportFallback:
 
         try:
             import src.api.routes.video as video_mod
-        except Exception:
+        except Exception:  # noqa: BLE001
             return  # env missing other deps; skip
 
         src = inspect.getsource(video_mod.analyze_video)

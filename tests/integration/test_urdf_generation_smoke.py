@@ -13,10 +13,10 @@ Generates a humanoid URDF from default body parameters and verifies that:
 from __future__ import annotations
 
 import tempfile
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
 from pathlib import Path
 
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import pytest
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_generator import (
@@ -191,7 +191,7 @@ class TestURDFMuJoCoLoad:
             assert model.nbody >= 1
         except AttributeError:
             pytest.skip("mujoco.MjModel.from_xml_path not available in this version")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.fail(f"MuJoCo failed to load generated URDF: {exc}")
 
 
@@ -217,7 +217,7 @@ class TestURDFDrakeLoad:
                 parser.AddModelFromFile(str(default_urdf_path))
             plant.Finalize()
             assert plant.num_bodies() >= 1
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.fail(f"Drake failed to load generated URDF: {exc}")
 
 
@@ -243,5 +243,5 @@ class TestURDFPinocchioLoad:
             # nq is an int in real pinocchio; skip nq check if it's not comparable
             if isinstance(model.nq, int):
                 assert model.nq >= 0
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             pytest.fail(f"Pinocchio failed to load generated URDF: {exc}")

@@ -9,7 +9,6 @@ Extracted from urdf_generator.py to isolate geometry concerns.
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from typing import Any
 

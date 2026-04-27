@@ -9,8 +9,6 @@ generates valid XML that can be round-tripped through ElementTree.
 from __future__ import annotations
 
 import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
-import xml.etree.ElementTree as ET  # stdlib for Element/SubElement
-
 import pytest
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_generator import (

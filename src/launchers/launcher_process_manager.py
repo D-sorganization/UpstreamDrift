@@ -281,7 +281,7 @@ class ProcessManager:
                 # We use a deque with maxlen=500 to efficiently store only the tail.
                 from collections import deque
 
-                with open(self._log_file_path, "r", encoding="utf-8", errors="replace") as f:
+                with open(self._log_file_path, encoding="utf-8", errors="replace") as f:
                     tail = deque(f, maxlen=500)
 
                 with open(self._log_file_path, "w", encoding="utf-8") as f:

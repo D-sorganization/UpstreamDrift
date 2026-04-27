@@ -6,7 +6,6 @@ to URDF XML elements.  Imported by ``urdf_io.URDFExporter``.
 
 from __future__ import annotations
 
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 
 import mujoco

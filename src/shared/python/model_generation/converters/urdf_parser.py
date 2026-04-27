@@ -15,12 +15,11 @@ import logging
 import math
 import os
 import subprocess
-import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 import xml.etree.ElementTree as ET  # stdlib retained for Element/SubElement
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as DefusedET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from model_generation.core.types import (
     Geometry,
     GeometryType,

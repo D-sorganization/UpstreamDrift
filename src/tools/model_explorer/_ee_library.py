@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as DefusedET
+import defusedxml.ElementTree as ET  # noqa: S314  # Security: defusedxml prevents XML attacks
 
 from src.tools.model_explorer._ee_model import EndEffector
 
