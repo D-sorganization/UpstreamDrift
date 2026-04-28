@@ -37,7 +37,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Prepare assessment branch
         run: |
-          BRANCH_NAME="automation/assessment-reports"
+          BRANCH_NAME="docs/assessment-reports"
           git fetch origin main
           git checkout -B "$BRANCH_NAME" origin/main
           echo "ASSESSMENT_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
@@ -547,4 +547,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "*Run without dry_run=true to execute these changes*" >> $GITHUB_STEP_SUMMARY
-

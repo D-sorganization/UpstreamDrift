@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -88,7 +88,7 @@ jobs:
 
           # Find open Jules PRs
           JULES_PRS=$(gh pr list --state open --json number,title,headRefName,files \
-            --jq '[.[] | select(.headRefName | test("^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^fix/pragmatic|^fix/compiled-|^fix/consolidated-prs-"))]')
+            --jq '[.[] | select(.headRefName | test("^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^docs/assessment-reports|^fix/pragmatic|^fix/compiled-|^fix/consolidated-prs-"))]')
 
           echo "Found $(echo "$JULES_PRS" | jq 'length') open Jules PRs"
 
@@ -181,4 +181,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Trigger**: Push to main" >> $GITHUB_STEP_SUMMARY
           echo "**Superseded PRs found**: ${{ steps.find.outputs.superseded_count || 0 }}" >> $GITHUB_STEP_SUMMARY
-

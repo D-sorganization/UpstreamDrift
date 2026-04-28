@@ -27,7 +27,8 @@ jobs:
             2>/dev/null || echo "0")
           if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
           if [[ "$ONLINE" -gt 0 ]]; then
-            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+            echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
             echo "Self-hosted runner online - routing locally"
           else
             echo "::error::No local self-hosted runner available; failing closed"

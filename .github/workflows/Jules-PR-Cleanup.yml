@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   check-kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -91,7 +91,7 @@ jobs:
           # Find Jules-generated PRs (by branch name pattern)
           JULES_PRS=$(gh pr list --state open --json number,title,headRefName,updatedAt,labels \
             --jq "[.[] | select(
-              (.headRefName | test(\"^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^fix/pragmatic|^fix/compiled-|^fix/consolidated-prs-\")) and
+              (.headRefName | test(\"^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^docs/assessment-reports|^fix/pragmatic|^fix/compiled-|^fix/consolidated-prs-\")) and
               (.updatedAt < \"$CUTOFF_DATE\") and
               (.labels | map(.name) | contains([\"jules-keep\"]) | not)
             )]")
@@ -186,4 +186,3 @@ jobs:
           if [ "${{ inputs.dry_run || 'true' }}" = "true" ]; then
             echo "Run with \`dry_run=false\` to actually close stale PRs." >> $GITHUB_STEP_SUMMARY
           fi
-

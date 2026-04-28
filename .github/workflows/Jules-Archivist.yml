@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   check-kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
@@ -62,7 +62,7 @@ jobs:
         run: |
           # Fetch list of merged PR branches with semantic prefixes
           # Note: We filter by the branch prefix used by your agent
-          BRANCHES=$(gh pr list --state merged --limit 100 --json headRefName --jq '.[] | select(.headRefName | test("^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^docs/update-|^refactor/custodian-|^refactor/compiled-|^fix/pragmatic|^fix/compiled-|^fix/consolidated-prs-")) | .headRefName')
+          BRANCHES=$(gh pr list --state merged --limit 100 --json headRefName --jq '.[] | select(.headRefName | test("^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^docs/assessment-reports|^docs/update-|^refactor/custodian-|^refactor/compiled-|^fix/pragmatic|^fix/compiled-|^fix/consolidated-prs-")) | .headRefName')
 
           if [ -z "$BRANCHES" ]; then
             echo "No branches to cleanup."
@@ -74,4 +74,3 @@ jobs:
             # Delete remote branch
             git push origin --delete "$BRANCH" || true
           done
-
