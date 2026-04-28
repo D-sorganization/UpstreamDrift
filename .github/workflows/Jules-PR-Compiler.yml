@@ -163,7 +163,7 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
               # Create compiled branch name
               date_str = datetime.now().strftime('%Y-%m-%d')
               category_short = category.replace('jules:', '').replace('-', '_')
-              compiled_branch = f"jules/compiled-{category_short}-{date_str}"
+              compiled_branch = f"fix/compiled-{category_short}-{date_str}"
 
               # Check if a compiled PR for this category already exists
               # Note: This checks if ANY PR with this category label is open.

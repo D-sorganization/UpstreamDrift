@@ -120,7 +120,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
           PR_LIST: ${{ needs.discover.outputs.pr_list }}
         run: |
-          BRANCH_NAME="consolidated-prs-$(date +%Y-%m-%d)"
+          BRANCH_NAME="fix/consolidated-prs-$(date +%Y-%m-%d)"
           git checkout -b "$BRANCH_NAME" origin/main
 
           included=""
