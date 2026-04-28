@@ -90,7 +90,6 @@ class TestRouteRegistry:
     def test_register_routes_on_app(self) -> None:
         """register_routes includes discovered routers on a FastAPI app."""
         from fastapi import FastAPI
-
         from src.api.route_registry import register_routes
 
         test_app = FastAPI()
@@ -102,7 +101,6 @@ class TestRouteRegistry:
     def test_register_routes_with_prefix(self) -> None:
         """Routes registered with a prefix include that prefix in paths."""
         from fastapi import FastAPI
-
         from src.api.route_registry import register_routes
 
         test_app = FastAPI()
@@ -115,7 +113,6 @@ class TestRouteRegistry:
     def test_tooling_routes_do_not_double_api_prefix(self) -> None:
         """Tooling routers mount once under the versioned API prefix."""
         from fastapi import FastAPI
-
         from src.api.route_registry import register_routes
 
         test_app = FastAPI()
@@ -143,7 +140,6 @@ class TestRouteRegistry:
     def test_expensive_route_modules_receive_quota_dependencies(self) -> None:
         """Simulation and video routes receive quota dependencies at registration."""
         from fastapi import FastAPI
-
         from src.api.auth.dependencies import CheckSimulationQuota, CheckVideoQuota
         from src.api.route_registry import register_routes
 

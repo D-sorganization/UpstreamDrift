@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.robotics.planning.motion import (
     PlannerConfig,
     PlannerResult,

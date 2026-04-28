@@ -15,7 +15,6 @@ from typing import Any
 
 import numpy as np
 import pytest
-
 from src.shared.python.engine_core.engine_availability import (
     OPENSIM_AVAILABLE,
     skip_if_unavailable,
@@ -202,7 +201,6 @@ class TestOpenSimMuscleAnalysis:
 
         try:
             import opensim
-
             from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )

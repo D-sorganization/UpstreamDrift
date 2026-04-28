@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.api.utils.error_codes import (
     ERROR_METADATA,
     APIError,

@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
-
 from src.shared.python.engine_core.sub_protocols import (
     CounterfactualComputable,
     DynamicsComputable,

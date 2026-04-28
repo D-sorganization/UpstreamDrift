@@ -15,7 +15,6 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-
 from src.shared.python.engine_core.engine_registry import (
     EngineRegistration,
     EngineType,

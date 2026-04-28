@@ -9,7 +9,6 @@ Validates:
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.physics.rust_kernel import (
     create_contact_parameters,
     create_integrator_config,

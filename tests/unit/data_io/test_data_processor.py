@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import pandas as pd
 import pytest
-
 from src.shared.python.data_processing.processor import (
     DataProcessor,
     DatasetInfo,

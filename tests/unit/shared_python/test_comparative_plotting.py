@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from src.shared.python.plotting import RecorderInterface
 from src.shared.python.validation_pkg.comparative_analysis import (
     AlignedSignals,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from src.shared.python.plotting.animation import AnimationConfig, SwingAnimator
 from src.shared.python.plotting.base import RecorderInterface
 from src.shared.python.plotting.energy import plot_energy_overview

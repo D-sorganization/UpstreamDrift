@@ -10,7 +10,6 @@ import math
 
 import numpy as np
 import pytest
-
 from src.unreal_integration.data_models import (
     BallState,
     ClubState,

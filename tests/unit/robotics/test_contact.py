@@ -12,7 +12,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-
 from src.robotics.contact.friction_cone import (
     FrictionCone,
     compute_friction_cone_constraint,

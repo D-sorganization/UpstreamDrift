@@ -234,7 +234,6 @@ class TestAPIError:
     def test_to_response_returns_json_response(self) -> None:
         """Test that to_response returns a JSONResponse."""
         from fastapi.responses import JSONResponse
-
         from src.api.utils.error_codes import APIError, ErrorCode
 
         error = APIError.from_code(ErrorCode.VALIDATION_FAILED)

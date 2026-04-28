@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest
-
 from src.shared.python.validation_pkg.data_fitting import (
     A3FittingPipeline,
     BodySegmentParams,

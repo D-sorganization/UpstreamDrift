@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from src.launchers.launcher_provider_compatibility import (
     assert_launcher_provider_compatibility,
     assert_provider_manifest_compatibility,

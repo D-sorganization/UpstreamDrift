@@ -75,7 +75,6 @@ class TestSecretKeyNotStaticFallback:
         configured with a random key must reject that forged token.
         """
         from fastapi import HTTPException
-
         from src.api.auth.security import SecurityManager
 
         static_key = "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL"

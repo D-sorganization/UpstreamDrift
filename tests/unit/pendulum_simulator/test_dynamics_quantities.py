@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.pendulum_simulator.dynamics_quantities import (
     angular_impulse_series,
     angular_power_at,

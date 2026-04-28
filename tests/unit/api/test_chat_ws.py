@@ -12,7 +12,6 @@ from unittest.mock import MagicMock
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from src.api.routes import chat_ws
 
 pytestmark = pytest.mark.anyio

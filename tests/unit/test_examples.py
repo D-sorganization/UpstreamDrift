@@ -5,7 +5,6 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-
 from src.shared.python.data_io.path_utils import get_repo_root
 from src.shared.python.physics.rust_kernel import is_rust_available
 

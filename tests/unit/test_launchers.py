@@ -9,7 +9,6 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
-
 from src.shared.python.data_io.path_utils import get_repo_root
 
 

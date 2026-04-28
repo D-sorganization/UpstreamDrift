@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.pendulum_simulator.constants import (
     GRAVITY_MSS,
     GRAVITY_STANDARD,

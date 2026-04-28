@@ -16,7 +16,6 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
 from src.engines.loaders import _ensure_engine_loaded, _load_engine_with_probe
 from src.shared.python.data_io.common_utils import GolfModelingError
 

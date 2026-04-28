@@ -16,7 +16,6 @@ import math
 
 import numpy as np
 import pytest
-
 from src.shared.python.physics.rust_kernel import (
     create_contact_parameters,
     create_integrator_config,

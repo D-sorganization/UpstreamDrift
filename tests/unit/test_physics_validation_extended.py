@@ -50,7 +50,6 @@ class TestPhysicsValidatorInit:
     def test_custom_gravity(self) -> None:
         """Custom gravity vector is stored correctly."""
         import numpy as np
-
         from src.shared.python.model_generation.core.physics_validation import (
             PhysicsValidator,
         )

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.pendulum_simulator.golfer_constraints import (
     analytical_constraint_jacobian,
     constraint_vector,

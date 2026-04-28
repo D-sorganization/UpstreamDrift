@@ -11,7 +11,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-
 from src.robotics.sensing.force_torque_sensor import (
     ForceTorqueSensor,
     ForceTorqueSensorConfig,

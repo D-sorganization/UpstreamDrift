@@ -13,7 +13,6 @@ import pytest
 
 try:
     from fastapi.testclient import TestClient
-
     from src.api.server import app
 except ImportError:
     pytest.skip("API server deps not available", allow_module_level=True)

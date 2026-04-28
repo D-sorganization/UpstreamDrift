@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from src.shared.python.physics.ball_flight_physics import (
     BallFlightSimulator,
     BallProperties,

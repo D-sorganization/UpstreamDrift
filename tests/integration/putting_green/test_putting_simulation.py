@@ -14,7 +14,6 @@ import tempfile
 
 import numpy as np
 import pytest
-
 from src.engines.physics_engines.putting_green.python.ball_roll_physics import (
     BallRollPhysics,
     BallState,

@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 from src.shared.python.core.physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     DRIVER_LENGTH_MAX_M,

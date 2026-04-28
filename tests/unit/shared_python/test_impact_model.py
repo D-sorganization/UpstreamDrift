@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.core.physics_constants import GOLF_BALL_MASS_KG
 from src.shared.python.physics.impact_model import (
     FiniteTimeImpactModel,

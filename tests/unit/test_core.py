@@ -7,7 +7,6 @@ Issue #2061: Updated to reflect stdlib-only logging in _core.py.
 import logging
 
 import pytest
-
 from src.shared.python.core import (
     DataFormatError,
     EngineNotFoundError,

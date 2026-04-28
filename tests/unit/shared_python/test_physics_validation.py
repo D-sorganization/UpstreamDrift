@@ -140,7 +140,6 @@ class TestPhysicsValidatorIntegration(unittest.TestCase):
         """Test validator with real MuJoCo if available."""
         try:
             import mujoco
-
             from src.shared.python.physics.physics_validation import PhysicsValidator
         except ImportError:
             self.skipTest("MuJoCo not installed")

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.engines.common.jacobian_diagnostics import (
     GOLF_TASK_POINTS,
     compute_constraint_diagnostics,

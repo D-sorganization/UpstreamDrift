@@ -16,7 +16,6 @@ This test suite:
 
 import numpy as np
 import pytest
-
 from src.shared.python.core.constants import GRAVITY_M_S2
 
 # Contact test constants

@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from src.shared.python.engine_core.engine_registry import EngineType
 
 if TYPE_CHECKING:
@@ -303,7 +302,6 @@ class TestAPIRouteConnectivity:
         """Create test client."""
         try:
             from fastapi.testclient import TestClient
-
             from src.api.server import app
         except ImportError as exc:
             pytest.skip(f"API server deps not available: {exc}")

@@ -12,7 +12,6 @@ from dataclasses import dataclass
 
 import numpy as np
 import pytest
-
 from src.shared.python.perturbation.config import PerturbationConfig
 from src.shared.python.perturbation.perturbation_base import (
     _ARRAY_METRICS,

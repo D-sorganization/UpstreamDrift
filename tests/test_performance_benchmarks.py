@@ -17,7 +17,6 @@ class TestCoriolisPerformance(unittest.TestCase):
         """Verify Coriolis computation completes within acceptable time."""
         try:
             import mujoco
-
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
                 KinematicForceAnalyzer,
             )
@@ -72,7 +71,6 @@ class TestCoriolisPerformance(unittest.TestCase):
         """Verify RNE method is faster than forward kinematics approach."""
         try:
             import mujoco
-
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
                 KinematicForceAnalyzer,
             )
@@ -127,7 +125,6 @@ class TestMassMatrixPerformance(unittest.TestCase):
         """Verify mass matrix is symmetric (physics requirement)."""
         try:
             import mujoco
-
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
                 KinematicForceAnalyzer,
             )
@@ -162,7 +159,6 @@ class TestMassMatrixPerformance(unittest.TestCase):
         """Verify mass matrix is positive definite (physics requirement)."""
         try:
             import mujoco
-
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
                 KinematicForceAnalyzer,
             )
@@ -202,7 +198,6 @@ class TestTrajectoryAnalysisPerformance(unittest.TestCase):
         """Test that trajectory analysis scales linearly with timesteps."""
         try:
             import mujoco
-
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.kinematic_forces import (
                 KinematicForceAnalyzer,
             )

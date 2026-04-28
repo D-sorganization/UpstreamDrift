@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from src.research.differentiable.engine import (
     AutodiffBackend,
     ContactDifferentiableEngine,

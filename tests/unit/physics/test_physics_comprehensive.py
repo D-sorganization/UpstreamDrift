@@ -11,7 +11,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 from src.shared.python.physics.energy_monitor import (
     ENERGY_DRIFT_CRITICAL_PCT,
     ENERGY_DRIFT_TOLERANCE_PCT,

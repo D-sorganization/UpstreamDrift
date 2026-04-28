@@ -15,7 +15,6 @@ from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
-
 from src.shared.python.ai.adapters.anthropic_adapter import (  # noqa: E402
     AnthropicAdapter,
 )

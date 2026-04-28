@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.perturbation.analyzer_base import (
     MANDATORY_METRICS,
     ComparisonReport,

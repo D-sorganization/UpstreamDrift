@@ -1,7 +1,6 @@
 from collections.abc import Iterator
 
 import pytest
-
 from src.api.services.chat_service import ChatService
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (

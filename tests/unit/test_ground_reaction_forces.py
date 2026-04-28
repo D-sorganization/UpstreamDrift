@@ -9,7 +9,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from src.shared.python.physics.ground_reaction_forces import (
     FootSide,
     GRFAnalyzer,

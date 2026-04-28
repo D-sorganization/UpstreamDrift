@@ -2,7 +2,6 @@
 
 import pytest
 from pydantic import ValidationError
-
 from src.api.models.chat import (
     ChatChunkResponse,
     ChatHistoryResponse,

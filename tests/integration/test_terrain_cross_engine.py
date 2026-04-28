@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.physics.terrain import (
     ElevationMap,
     Terrain,

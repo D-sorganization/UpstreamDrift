@@ -4,7 +4,6 @@ Unit tests for spatial algebra module.
 
 import numpy as np
 import pytest
-
 from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     skip_if_unavailable,

@@ -13,9 +13,9 @@ from typing import Any
 
 import numpy as np
 import pytest
-
 from src.shared.python.engine_core.cross_engine_validator import CrossEngineValidator
 from src.shared.python.logging_pkg.logging_config import get_logger
+
 from tests.fixtures.fixtures_lib import (
     TOLERANCE_ACCELERATION_M_S2,
     _check_drake_available,

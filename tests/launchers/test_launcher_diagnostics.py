@@ -4,7 +4,6 @@ import json  # noqa: E402
 from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 
 import yaml  # noqa: E402
-
 from src.launchers.launcher_diagnostics import (  # noqa: E402
     DiagnosticResult,
     LauncherDiagnostics,

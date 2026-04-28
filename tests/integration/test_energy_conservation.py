@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.core.numerical_constants import (
     GRAVITY_STANDARD,
     TOLERANCE_ENERGY_CONSERVATION,

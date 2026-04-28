@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from installer.windows.packaging_profiles import get_packaging_profile
 from installer.windows.setup_config import (
     build_setup_configuration,

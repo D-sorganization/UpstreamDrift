@@ -16,7 +16,6 @@ class TestBodyPositionSupportCheck:
     def test_check_raises_when_engine_has_neither_setter(self) -> None:
         """Engine with no setter methods → HTTPException (not silent success)."""
         from fastapi import HTTPException
-
         from src.api.routes.analysis_tools import _check_position_support
 
         engine = MagicMock()
@@ -50,7 +49,6 @@ class TestBodyMeasurementSupportCheck:
     def test_get_positions_raises_when_engine_has_no_getter(self) -> None:
         """Engine without get_body_position → HTTPException (not zero vectors)."""
         from fastapi import HTTPException
-
         from src.api.routes.analysis_tools import _get_body_position_vectors
 
         engine = MagicMock()
@@ -64,7 +62,6 @@ class TestBodyMeasurementSupportCheck:
     def test_get_positions_returns_vectors_when_supported(self) -> None:
         """Engine with get_body_position → returns actual position vectors."""
         import numpy as np
-
         from src.api.routes.analysis_tools import _get_body_position_vectors
 
         engine = MagicMock(spec=["get_body_position"])
@@ -80,7 +77,6 @@ class TestBodyMeasurementSupportCheck:
     def test_get_positions_handles_none_return(self) -> None:
         """Engine with get_body_position returning None → raises HTTPException."""
         from fastapi import HTTPException
-
         from src.api.routes.analysis_tools import _get_body_position_vectors
 
         engine = MagicMock(spec=["get_body_position"])

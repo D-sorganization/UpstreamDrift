@@ -16,7 +16,6 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
 from src.shared.python.engine_core.engine_manager import EngineManager
 
 # Skip if FastAPI not available

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.biomechanics.hill_muscle import HillMuscleModel, MuscleParameters
 from src.shared.python.biomechanics.muscle_equilibrium import (
     EquilibriumSolver,

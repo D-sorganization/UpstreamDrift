@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.unreal_integration.skeleton_mapper import (
     MIXAMO_TO_PHYSICS_MAP,
     MUJOCO_HUMANOID_JOINTS,

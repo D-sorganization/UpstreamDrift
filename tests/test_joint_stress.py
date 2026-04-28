@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from src.shared.python.injury.joint_stress import (
     JointSide,
     JointStressAnalyzer,

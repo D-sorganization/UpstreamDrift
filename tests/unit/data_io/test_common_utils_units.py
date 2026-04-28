@@ -9,7 +9,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-
 from src.shared.python.data_io.common_utils import (
     CONVERSION_FACTORS,
     convert_units,

@@ -12,7 +12,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from src.shared.python.biomechanics.myoconverter_integration import (
     MyoConverter,
     install_myoconverter_instructions,

@@ -10,7 +10,6 @@ import argparse
 from pathlib import Path
 
 import pytest
-
 from src.shared.python.cli_utils import (
     add_config_args,
     add_dry_run_arg,

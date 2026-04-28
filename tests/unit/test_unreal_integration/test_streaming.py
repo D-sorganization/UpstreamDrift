@@ -11,7 +11,6 @@ from collections.abc import Generator
 from unittest.mock import AsyncMock
 
 import pytest
-
 from src.unreal_integration.data_models import (  # noqa: E402
     JointState,
     Quaternion,

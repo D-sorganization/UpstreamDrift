@@ -7,7 +7,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
 from src.shared.python.plotting.export import (
     ExportConfig,
     export_figure,

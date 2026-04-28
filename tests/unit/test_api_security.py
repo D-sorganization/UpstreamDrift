@@ -148,7 +148,6 @@ class TestBcryptAPIKeyVerification:
         """Test full API key verification flow."""
         from fastapi import HTTPException
         from fastapi.security import HTTPAuthorizationCredentials
-
         from src.api.auth.dependencies import get_current_user_from_api_key
 
         # Create test API key

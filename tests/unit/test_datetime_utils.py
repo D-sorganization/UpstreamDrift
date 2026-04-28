@@ -12,7 +12,6 @@ from collections.abc import Callable
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from src.shared.python.core.datetime_utils import (
     TimestampFormat,
     add_days,

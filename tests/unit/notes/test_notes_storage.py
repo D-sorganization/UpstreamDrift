@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from src.shared.python.notes.models import RecycledNoteItem
 from src.shared.python.notes.storage import NotesStorage
 

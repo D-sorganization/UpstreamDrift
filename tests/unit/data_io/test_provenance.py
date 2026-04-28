@@ -6,7 +6,6 @@ import io
 from pathlib import Path
 
 import pytest
-
 from src.shared.python.data_io.provenance import (
     ProvenanceInfo,
     add_provenance_header_file,

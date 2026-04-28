@@ -11,7 +11,6 @@ pytest.importorskip("PyQt6")
 
 pytestmark = pytest.mark.integration
 from PyQt6.QtCore import Qt  # noqa: E402
-
 from src.launchers.help_dialogs import (  # noqa: E402
     ContextHelpDock,
     HelpDialog,

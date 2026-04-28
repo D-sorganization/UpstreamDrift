@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
 from src.shared.python.engine_core.engine_availability import (
     CV2_AVAILABLE,
     DRAKE_AVAILABLE,

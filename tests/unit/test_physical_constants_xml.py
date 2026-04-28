@@ -3,7 +3,6 @@
 import defusedxml.ElementTree as ET
 import numpy as np
 import pytest
-
 from src.shared.python.core.constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_MASS_KG,

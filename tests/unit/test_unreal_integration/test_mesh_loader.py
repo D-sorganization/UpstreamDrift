@@ -11,7 +11,6 @@ from typing import cast
 
 import numpy as np
 import pytest
-
 from src.unreal_integration.mesh_loader import (
     LoadedMesh,
     MeshBone,

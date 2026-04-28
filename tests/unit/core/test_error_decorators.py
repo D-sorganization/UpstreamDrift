@@ -8,7 +8,6 @@ from __future__ import annotations
 import logging
 
 import pytest
-
 from src.shared.python.core.error_decorators import (
     ErrorContext,
     check_module_available,

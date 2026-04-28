@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from src.shared.python.physics.terrain import ElevationMap, Terrain, TerrainType
 from src.shared.python.physics.terrain_mixin import TerrainMixin
 

@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
-
 from src.shared.python.biomechanics.swing_comparison import (
     ComparisonMetric,
     DTWResult,

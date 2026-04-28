@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.data_io.export import (
     CaptureExportData,
     get_available_export_formats,

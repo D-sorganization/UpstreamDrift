@@ -72,7 +72,6 @@ class TestAPIKeyOrmFieldAlignment:
 
         from fastapi import HTTPException
         from sqlalchemy.orm import Session
-
         from src.api.auth.dependencies import _lookup_api_key_by_prefix
 
         mock_db = MagicMock(spec=Session)

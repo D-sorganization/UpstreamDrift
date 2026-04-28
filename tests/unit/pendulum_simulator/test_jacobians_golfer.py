@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from src.shared.python.pendulum_simulator.jacobians_golfer import (
     ellipsoids_golfer,
     jacobian_golfer,

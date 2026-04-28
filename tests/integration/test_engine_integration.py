@@ -10,7 +10,6 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
 from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from src.shared.python.analysis.nonlinear_dynamics import NonlinearDynamicsMixin
 
 

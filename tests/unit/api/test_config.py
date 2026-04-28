@@ -4,7 +4,6 @@ import os
 from unittest.mock import patch
 
 import pytest
-
 from src.api.config import (
     DEFAULT_ALLOWED_HOSTS,
     DEFAULT_CORS_ORIGINS,

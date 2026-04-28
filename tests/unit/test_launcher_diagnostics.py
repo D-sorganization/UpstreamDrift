@@ -379,7 +379,6 @@ class TestTileLoadingVerification:
         """Verify expected tile IDs match models.yaml configuration."""
         try:
             import yaml
-
             from src.launchers.launcher_diagnostics import REPOS_ROOT
 
             models_yaml_path = REPOS_ROOT / "src" / "config" / "models.yaml"

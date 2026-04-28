@@ -10,7 +10,6 @@ import dataclasses
 
 import numpy as np
 import pytest
-
 from src.shared.python.analysis.dataclasses import (
     ANGLE_TOLERANCE_DEG,
     CITATION_CRUNCH_FACTOR,

@@ -4,7 +4,6 @@ import importlib.util
 
 import numpy as np
 import pytest
-
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.engine_core.engine_availability import MUJOCO_AVAILABLE
 

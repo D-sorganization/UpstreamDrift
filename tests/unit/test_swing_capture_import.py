@@ -14,7 +14,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
 from src.shared.python.data_io.swing_capture_import import (
     JointTrajectory,
     SwingCaptureImporter,

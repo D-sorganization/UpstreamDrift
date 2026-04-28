@@ -5,7 +5,6 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
 
 

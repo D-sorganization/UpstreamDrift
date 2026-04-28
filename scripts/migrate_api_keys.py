@@ -48,7 +48,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import ArgumentError
 from sqlalchemy.orm import Session, sessionmaker
-
 from src.api.auth.models import APIKey, User
 from src.api.auth.security import compute_prefix_hash, security_manager
 

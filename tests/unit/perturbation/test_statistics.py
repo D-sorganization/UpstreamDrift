@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.perturbation.statistics import (
     MetricStatistics,
     compute_metric_statistics,

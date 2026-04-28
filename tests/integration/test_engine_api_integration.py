@@ -16,7 +16,6 @@ import time
 from collections.abc import Generator
 
 import pytest
-
 from src.shared.python.engine_core.engine_registry import EngineType
 
 _api_deps_available = (
@@ -30,7 +29,6 @@ pytestmark = pytest.mark.skipif(
 
 if _api_deps_available:
     from fastapi.testclient import TestClient
-
     from src.api.server import app
 
 

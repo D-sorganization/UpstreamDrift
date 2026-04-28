@@ -9,7 +9,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
 from src.shared.python.core.datetime_utils import (
     add_days,
     end_of_day,
@@ -341,3 +340,66 @@ class TestTimestampExtended:
     def test_local_time_filename(self) -> None:
         ts = timestamp("filename", utc=False)
         assert "_" in ts
+
+
+class TestDateTimeUtilsComprehensive:
+    """Comprehensive tests to hit remaining branches in datetime_utils.py."""
+
+    def test_time_ago_months_years(self) -> None:
+        """Test the larger time units in time_ago."""
+        base = now_utc()
+
+        # Months (approx 30 days)
+        dt_months = base - timedelta(days=65)
+        assert time_ago(dt_months) == "2 months ago"
+
+        # Years (approx 365 days)
+        dt_years = base - timedelta(days=800)
+        assert time_ago(dt_years) == "2 years ago"
+
+    def test_format_duration_edge_cases(self) -> None:
+        """Test duration formatting for very small and very large values."""
+        # Very small (< 1ms)
+        assert "0.1ms" in format_duration(0.0001, short=True)
+        assert "0.1 milliseconds" in format_duration(0.0001, short=False)
+
+        # Large (multi-day)
+        # 2 days = 172800 seconds
+        # Note: format_duration stops at hours
+        assert "48 hours" in format_duration(172800, short=False)
+        assert "48h" in format_duration(172800, short=True)
+
+    @pytest.mark.parametrize(
+        "fmt_str",
+        [
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%d",
+            "%Y%m%d_%H%M%S",
+            "%Y%m%d%H%M%S",
+            "%Y/%m/%d %H:%M:%S",
+            "%Y/%m/%d",
+            "%d/%m/%Y %H:%M:%S",
+            "%d/%m/%Y",
+            "%m/%d/%Y %H:%M:%S",
+            "%m/%d/%Y",
+        ],
+    )
+    def test_parse_timestamp_all_common(self, fmt_str: str) -> None:
+        """Test that all common formats in parse_timestamp are actually supported."""
+        dt = datetime(2023, 5, 20, 10, 30, 0)
+        ts_str = dt.strftime(fmt_str)
+        parsed = parse_timestamp(ts_str)
+        assert parsed is not None
+        # Some formats only have date, so we check at least that
+        assert parsed.year == 2023
+        assert parsed.month == 5
+        assert parsed.day == 20
+
+    def test_add_days_validation(self) -> None:
+        with pytest.raises(ValueError, match="days must be provided"):
+            add_days(days=None)  # type: ignore[arg-type]
+
+    def test_is_expired_validation(self) -> None:
+        with pytest.raises(ValueError, match="dt must be provided"):
+            is_expired(None, ttl_seconds=10)  # type: ignore[arg-type]

@@ -1,5 +1,4 @@
 import pytest
-
 from src.shared.python.contracts import (
     ContractLevel,
     PreconditionError,

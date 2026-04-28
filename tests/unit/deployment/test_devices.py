@@ -1,5 +1,4 @@
 import numpy as np
-
 from src.deployment.teleoperation.devices import (
     BaseInputDevice,
     HapticDeviceInput,

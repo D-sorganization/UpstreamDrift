@@ -19,7 +19,6 @@ project_root = _parents[1]
 sys.path.insert(0, str(project_root))
 
 import numpy as np  # noqa: E402
-
 from src.shared.python.physics.topography import (  # noqa: E402
     create_flat_terrain,
     create_sloped_terrain,

@@ -13,7 +13,6 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pandas as pd
 import pytest
-
 from src.shared.python.data_io.output_manager import (
     OutputFormat,
     OutputManager,

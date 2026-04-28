@@ -152,6 +152,7 @@ include = [
 path = "build_hooks.py"
 
 [tool.ruff]
+src = ["src"]
 line-length = 88
 target-version = "py310"
 # Exclude third-party model files (legacy Python 2 scripts from OpenSim)
@@ -188,6 +189,8 @@ ignore = [
 "scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
+"tests/unit/test_calc_backend_protocols.py" = ["I"]
+
 
 [tool.mypy]
 python_version = "3.10"

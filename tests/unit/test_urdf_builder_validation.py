@@ -1,7 +1,6 @@
 """Tests for URDF builder physical parameter validation."""
 
 import pytest
-
 from src.tools.model_explorer.urdf_builder import URDFBuilder
 
 

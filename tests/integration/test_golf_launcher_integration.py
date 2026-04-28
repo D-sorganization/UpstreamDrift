@@ -9,7 +9,6 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from src.shared.python.config.model_registry import ModelRegistry
 
 # Mock PyQt6 for headless/CI environment where DLLs are broken/missing
