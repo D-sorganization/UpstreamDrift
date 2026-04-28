@@ -48,7 +48,7 @@ jobs:
           ONLINE=$(gh api -H "Accept: application/vnd.github+json" /orgs/${{ github.repository_owner }}/actions/runners --paginate \
             --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
             2>/dev/null || echo "0")
-if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
+          if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
           if [[ "$ONLINE" -gt 0 ]]; then
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
             echo "Self-hosted runner online - routing locally"
@@ -163,7 +163,7 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
               # Create compiled branch name
               date_str = datetime.now().strftime('%Y-%m-%d')
               category_short = category.replace('jules:', '').replace('-', '_')
-              compiled_branch = f"refactor/compiled-{category_short}-{date_str}"
+              compiled_branch = f"fix/auto-fix-consolidated-{category_short}-{date_str}"
 
               # Check if a compiled PR for this category already exists
               # Note: This checks if ANY PR with this category label is open.
@@ -287,4 +287,3 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
           # This step just cleans up tracking
           echo "Individual PRs will be auto-closed when the compiled PR is merged."
           echo "Branch cleanup happens automatically via GitHub's branch deletion on PR merge."
-
