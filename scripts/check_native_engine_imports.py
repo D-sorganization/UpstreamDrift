@@ -52,8 +52,8 @@ def run_checks(checks: dict[str, str]) -> tuple[dict[str, str], list[str]]:
             importlib.import_module(module_name)
             results[name] = "ok"
         except (
-            Exception
-        ) as exc:  # noqa: BLE001  # pragma: no cover - environment dependent
+            Exception  # noqa: BLE001  # pragma: no cover - environment dependent
+        ) as exc:
             results[name] = f"failed: {exc}"
             failures.append(f"{name}: {exc}")
 

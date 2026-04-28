@@ -31,8 +31,9 @@ try:
 except ImportError:
     HAS_PYQT = False
 
-from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.signal_toolkit.core import Signal
+
+from src.shared.python.logging_pkg.logging_config import get_logger
 
 # DRY note (issue #2340): This widget and signal_toolkit/widget.py are parallel
 # implementations with shared MplCanvas / dark-theme logic. The canonical split
