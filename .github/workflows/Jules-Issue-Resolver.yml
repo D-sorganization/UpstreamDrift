@@ -109,7 +109,7 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
         run: |
           # Check for existing open PR from this workflow
           EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
-            --jq '[.[] | select(.headRefName | startswith("jules/issue-resolver-"))] | .[0]')
+            --jq '[.[] | select(.headRefName | startswith("fix/issue-resolver-"))] | .[0]')
 
           if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
             # Reuse existing branch
@@ -122,7 +122,7 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
             echo "existing_pr_num=$PR_NUM" >> $GITHUB_OUTPUT
           else
             # Create new branch
-            BRANCH_NAME="jules/issue-resolver-$(date +%Y%m%d-%H%M)"
+            BRANCH_NAME="fix/issue-resolver-$(date +%Y%m%d-%H%M)"
             git checkout -b "$BRANCH_NAME"
             echo "reusing_pr=false" >> $GITHUB_OUTPUT
           fi

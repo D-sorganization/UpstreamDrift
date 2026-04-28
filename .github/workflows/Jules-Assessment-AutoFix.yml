@@ -268,7 +268,7 @@ jobs:
       - name: Create consolidated fix branch
         run: |
           # HARDENING: Single branch for all fixes
-          BRANCH_NAME="jules/auto-fix-consolidated-$(date +%Y%m%d)"
+          BRANCH_NAME="fix/auto-fix-consolidated-$(date +%Y%m%d)"
           git checkout -b "$BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 

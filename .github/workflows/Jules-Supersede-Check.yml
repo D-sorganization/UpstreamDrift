@@ -88,7 +88,7 @@ jobs:
 
           # Find open Jules PRs
           JULES_PRS=$(gh pr list --state open --json number,title,headRefName,files \
-            --jq '[.[] | select(.headRefName | test("^jules/|^fix/.*jules|^fix/pragmatic|^fix/code-quality"))]')
+            --jq '[.[] | select(.headRefName | test("^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^fix/pragmatic"))]')
 
           echo "Found $(echo "$JULES_PRS" | jq 'length') open Jules PRs"
 

@@ -188,7 +188,7 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
       - name: Create Processing Branch
         if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run != 'true'
         run: |
-          BRANCH_NAME="jules/comment-fixes-$(date +%Y%m%d-%H%M)"
+          BRANCH_NAME="fix/comment-fixes-$(date +%Y%m%d-%H%M)"
           git checkout -b "$BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 

@@ -91,7 +91,7 @@ jobs:
           # Find Jules-generated PRs (by branch name pattern)
           JULES_PRS=$(gh pr list --state open --json number,title,headRefName,updatedAt,labels \
             --jq "[.[] | select(
-              (.headRefName | test(\"^jules/|^fix/.*jules|^fix/pragmatic|^fix/code-quality\")) and
+              (.headRefName | test(\"^fix/auto-fix-consolidated-|^fix/code-quality-fix-|^fix/comment-fixes-|^fix/critics-comments-|^fix/issue-resolver-|^docs/laymans-terms-|^fix/pragmatic\")) and
               (.updatedAt < \"$CUTOFF_DATE\") and
               (.labels | map(.name) | contains([\"jules-keep\"]) | not)
             )]")

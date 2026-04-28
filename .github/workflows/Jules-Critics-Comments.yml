@@ -221,7 +221,7 @@ if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then ONLINE=0; fi
       - name: Create Working Branch
         if: steps.select.outputs.skip != 'true'
         run: |
-          BRANCH_NAME="jules/critics-comments-$(date +%Y%m%d-%H%M)"
+          BRANCH_NAME="fix/critics-comments-$(date +%Y%m%d-%H%M)"
           git checkout -b "$BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
