@@ -214,7 +214,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
             else self.environment.wind_velocity
         )
         rel_vel = vel - wind
-        speed = np.sqrt(np.sum(rel_vel**2, axis=0))
+        speed = np.sqrt(np.einsum("i...,i...->...", rel_vel, rel_vel))
 
         drag = np.zeros(vel.shape)
         magnus = np.zeros(vel.shape)
@@ -241,7 +241,7 @@ class BallFlightSimulator(TrajectoryAnalysisMixin):
 
         axis = spin_axis.reshape(3, 1)
         cross = np.cross(axis, valid_rel_vel / valid_speed, axis=0)
-        cross_norm = np.sqrt(np.sum(cross**2, axis=0))
+        cross_norm = np.sqrt(np.einsum("i...,i...->...", cross, cross))
         cross_mask = cross_norm > NUMERICAL_EPSILON
 
         if np.any(cross_mask):
