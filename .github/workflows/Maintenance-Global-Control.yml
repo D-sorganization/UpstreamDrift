@@ -41,7 +41,7 @@ jobs:
           fi
   control:
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       contents: write
     steps:

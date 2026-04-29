@@ -51,7 +51,7 @@ jobs:
   archivist:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6

@@ -78,7 +78,7 @@ jobs:
   assessment-autofix:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -242,7 +242,7 @@ jobs:
     name: Auto-Fix All Issues (Consolidated)
     needs: [pick-runner, run-assessments]
     if: github.event.inputs.auto_fix != 'false' && github.event.inputs.dry_run != 'true'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       contents: write
       pull-requests: write
@@ -413,7 +413,7 @@ jobs:
   create-github-issues:
     name: Create GitHub Issues for Untracked Problems
     needs: [pick-runner, run-assessments]
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       issues: write
 
@@ -467,7 +467,7 @@ jobs:
       inputs.source_pr_to_close != '' &&
       inputs.dry_run != 'true' &&
       needs.auto-fix-issues.result == 'success'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       pull-requests: write
 
@@ -512,7 +512,7 @@ jobs:
     needs: pick-runner
     name: Dry Run Summary
     if: inputs.dry_run == 'true'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
 
     steps:
       - name: Generate dry run report

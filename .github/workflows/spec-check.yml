@@ -55,7 +55,7 @@ jobs:
   spec-freshness:
     needs: pick-runner
     name: Verify SPEC.md freshness
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Skip if spec-exempt label is applied
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'spec-exempt') }}
     timeout-minutes: 5
@@ -125,7 +125,7 @@ jobs:
 
             Source files were modified in this PR but \`SPEC.md\` was not updated.
 
-            **Per the [Specification-Driven Development Policy](https://github.com/D-sorganization/Repository_Management/blob/main/docs/SPECIFICATION_DRIVEN_DEVELOPMENT_POLICY.md):**
+            **Per the [Specification-Driven Development Policy](${{ github.server_url }}/${{ vars.REPOSITORY_MANAGEMENT_REPOSITORY || format('{0}/Repository_Management', github.repository_owner) }}/blob/main/docs/SPECIFICATION_DRIVEN_DEVELOPMENT_POLICY.md):**
             - Any PR that adds, removes, or changes functionality must update SPEC.md
             - Update the relevant sections (features, architecture, tests, dependencies, etc.)
             - Bump the Spec Version if making substantive changes
