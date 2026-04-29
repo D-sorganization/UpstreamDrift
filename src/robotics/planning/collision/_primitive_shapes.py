@@ -43,9 +43,13 @@ class Sphere(GeometricPrimitive):
             raise ValueError("point must be provided")
         point = np.asarray(point)
 <<<<<<< HEAD
+        return math.hypot(*(point - self.center)) <= self.radius
+=======
+<<<<<<< HEAD
         return float(math.hypot(*(point - self.center))) <= self.radius
 =======
         return math.hypot(*(point - self.center)) <= self.radius
+>>>>>>> origin/main
 >>>>>>> origin/main
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
@@ -179,9 +183,13 @@ class Capsule(GeometricPrimitive):
     def length(self) -> float:
         """Get capsule length (distance between endpoints)."""
 <<<<<<< HEAD
+        return math.hypot(*(self.point_b - self.point_a))
+=======
+<<<<<<< HEAD
         return float(math.hypot(*(self.point_b - self.point_a)))
 =======
         return math.hypot(*(self.point_b - self.point_a))
+>>>>>>> origin/main
 >>>>>>> origin/main
 
     @property
@@ -225,9 +233,13 @@ class Capsule(GeometricPrimitive):
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
 <<<<<<< HEAD
+        return math.hypot(*(point - closest)) <= self.radius
+=======
+<<<<<<< HEAD
         return float(math.hypot(*(point - closest))) <= self.radius
 =======
         return math.hypot(*(point - closest)) <= self.radius
+>>>>>>> origin/main
 >>>>>>> origin/main
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
@@ -328,7 +340,7 @@ class Cylinder(GeometricPrimitive):
 
         # Check radius (perpendicular distance)
         perp = to_point - along_axis * self.axis
-        return float(math.hypot(*perp)) <= self.radius
+        return math.hypot(*perp) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""

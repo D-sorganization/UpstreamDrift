@@ -516,4 +516,10 @@ pytest tests/ --cov=src --cov-fail-under=70
 -->
 ## 2026-04-28 Spec Bump
 Bumped spec file slightly to bypass the spec check in CI.
+<<<<<<< HEAD
+
+## Performance Optimizations
+- Replaced `np.linalg.norm` with `math.hypot` in 3D distance calculations in `src/robotics/planning/collision/_primitive_shapes.py` to improve performance.
+=======
 | 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization |
+>>>>>>> origin/main
