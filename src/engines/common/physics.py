@@ -197,7 +197,7 @@ class AerodynamicsCalculator:
             raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
-        speed = float(np.linalg.norm(velocity))
+        speed = float(math.hypot(*velocity))
         if speed < 1e-6:
             return np.zeros(3)
 
@@ -227,7 +227,7 @@ class AerodynamicsCalculator:
             raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
-        speed = float(np.linalg.norm(velocity))
+        speed = float(math.hypot(*velocity))
         if speed < 1e-6:
             return np.zeros(3)
 
@@ -272,15 +272,15 @@ class AerodynamicsCalculator:
             raise ValueError("velocity must be provided")
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
-        speed = float(np.linalg.norm(velocity))
-        spin_mag = float(np.linalg.norm(spin))
+        speed = float(math.hypot(*velocity))
+        spin_mag = float(math.hypot(*spin))
 
         if speed < 1e-6 or spin_mag < 1e-6:
             return np.zeros(3)
 
         # Magnus direction: ω × v
         magnus_dir = np.cross(spin, velocity)
-        magnus_norm = np.linalg.norm(magnus_dir)
+        magnus_norm = math.hypot(*magnus_dir)
 
         if magnus_norm < 1e-6:
             return np.zeros(3)

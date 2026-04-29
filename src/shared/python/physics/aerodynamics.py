@@ -379,7 +379,7 @@ class LiftModel:
         # Lift direction: perpendicular to velocity, in spin plane
         spin_axis = spin_vec / spin_magnitude
         lift_dir = np.cross(spin_axis, velocity_vec)
-        lift_norm = float(np.linalg.norm(lift_dir))
+        lift_norm = float(math.hypot(*lift_dir))
 
         if lift_norm < 1e-10:
             return np.zeros_like(velocity_vec)
@@ -470,7 +470,7 @@ class MagnusModel:
 
         # Magnus direction: spin x velocity
         magnus_dir = np.cross(spin_vec, velocity_vec)
-        magnus_norm = float(np.linalg.norm(magnus_dir))
+        magnus_norm = float(math.hypot(*magnus_dir))
 
         if magnus_norm < 1e-10:
             return np.zeros_like(velocity_vec)
@@ -754,7 +754,7 @@ class WindModel:
             base_dir = self.config.direction
             random_perturb = self._rng.standard_normal(3) * 0.3
             gust_dir = base_dir + random_perturb
-            gust_dir = gust_dir / (np.linalg.norm(gust_dir) + 1e-10)
+            gust_dir = gust_dir / (math.hypot(*gust_dir) + 1e-10)
 
             gust = WindGust(
                 start_time=t,
