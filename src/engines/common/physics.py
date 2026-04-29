@@ -379,7 +379,9 @@ class AerodynamicsCalculator:
             raise ValueError("speed must be provided")
         speed = float(speed)
         # ⚡ Bolt: math.hypot is ~5x faster than np.linalg.norm for 3D vectors
-        spin_mag = math.hypot(*spin)
+        # Normalize array shape before unpacking (fixes #3450)
+        spin_vec = np.asarray(spin, dtype=float).reshape(-1)
+        spin_mag = 0.0 if spin_vec.size == 0 else math.hypot(*spin_vec)
         return self.ball.radius * spin_mag / (speed + 1e-10)
 
 

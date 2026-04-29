@@ -412,7 +412,9 @@ class BallRollPhysics:
 
         # Rotational: 0.5 * I * ω²
         # ⚡ Bolt: math.hypot is faster than np.linalg.norm for 3D vectors
-        spin_mag = math.hypot(state.spin[0], state.spin[1], state.spin[2])
+        # Normalize array shape before unpacking (fixes #3450)
+        spin_vec = np.asarray(state.spin, dtype=float).reshape(-1)
+        spin_mag = 0.0 if spin_vec.size == 0 else math.hypot(*spin_vec)
         rotational = 0.5 * self._moment_of_inertia * spin_mag**2
 
         return float(translational + rotational)
