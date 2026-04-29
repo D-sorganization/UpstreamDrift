@@ -5,6 +5,7 @@ Extracted from impact_model.py. Import via impact_model module.
 
 from __future__ import annotations
 
+import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -150,7 +151,14 @@ class RigidBodyImpactModel(ImpactModel):
         club_moi = pre_state.clubhead_moi
 
         if pre_state.impact_offset is not None and club_moi > 0:
-            r_offset = float(np.linalg.norm(pre_state.impact_offset))
+            r_offset = float(
+                0.0
+                if np.asarray(pre_state.impact_offset, dtype=float).reshape(-1).size
+                == 0
+                else math.hypot(
+                    *np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
+                )
+            )
             if r_offset > 1e-6:
                 return 1.0 / (1.0 / m_club + r_offset**2 / club_moi)
         return m_club
@@ -187,7 +195,11 @@ class RigidBodyImpactModel(ImpactModel):
         if not (pre_state is not None):
             raise ValueError("pre_state must be provided")
         v_tangent = v_rel - v_approach * n
-        tangent_mag = np.linalg.norm(v_tangent)
+        tangent_mag = (
+            0.0
+            if np.asarray(v_tangent, dtype=float).reshape(-1).size == 0
+            else math.hypot(*np.asarray(v_tangent, dtype=float).reshape(-1))
+        )
 
         if tangent_mag <= 1e-6:
             return pre_state.ball_angular_velocity.copy()
@@ -258,8 +270,13 @@ class RigidBodyImpactModel(ImpactModel):
             raise ValueError("pre_state must be provided")
         m_club_effective = self._compute_effective_club_mass(pre_state)
 
-        n = pre_state.clubhead_orientation / np.linalg.norm(
-            pre_state.clubhead_orientation
+        n = pre_state.clubhead_orientation / (
+            0.0
+            if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
+            == 0
+            else math.hypot(
+                *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+            )
         )
         v_rel = pre_state.clubhead_velocity - pre_state.ball_velocity
 
@@ -369,8 +386,13 @@ class SpringDamperImpactModel(ImpactModel):
         m_ball = GOLF_BALL_MASS_KG
         m_club = pre_state.clubhead_mass
 
-        n = pre_state.clubhead_orientation / np.linalg.norm(
-            pre_state.clubhead_orientation
+        n = pre_state.clubhead_orientation / (
+            0.0
+            if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
+            == 0
+            else math.hypot(
+                *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+            )
         )
 
         # Initial state - place ball at contact
@@ -494,12 +516,9 @@ class FiniteTimeImpactModel(ImpactModel):
 
 
 @precondition(
-    lambda impact_offset,
-    clubhead_velocity,
-    clubface_normal,
-    gear_factor=0.5,
-    h_scale=100.0,
-    v_scale=50.0: (0 <= gear_factor <= 1),
+    lambda impact_offset, clubhead_velocity, clubface_normal, gear_factor=0.5, h_scale=100.0, v_scale=50.0: (
+        0 <= gear_factor <= 1
+    ),
     "Gear effect factor must be between 0 and 1",
 )
 def compute_gear_effect_spin(
@@ -537,7 +556,11 @@ def compute_gear_effect_spin(
     v_offset = impact_offset[1]  # + = high on face
 
     # Speed affects spin magnitude
-    speed = np.linalg.norm(clubhead_velocity)
+    speed = (
+        0.0
+        if np.asarray(clubhead_velocity, dtype=float).reshape(-1).size == 0
+        else math.hypot(*np.asarray(clubhead_velocity, dtype=float).reshape(-1))
+    )
 
     # Gear effect spin rate (empirical relationship)
     # Higher offset = more spin, proportional to speed
@@ -549,8 +572,16 @@ def compute_gear_effect_spin(
     # Vertical axis is Z, horizontal axis perpendicular to both
     up = np.array([0.0, 0.0, 1.0])
     horizontal_axis = np.cross(clubface_normal, up)
-    if np.linalg.norm(horizontal_axis) > 1e-6:
-        horizontal_axis /= np.linalg.norm(horizontal_axis)
+    if (
+        0.0
+        if np.asarray(horizontal_axis, dtype=float).reshape(-1).size == 0
+        else math.hypot(*np.asarray(horizontal_axis, dtype=float).reshape(-1))
+    ) > 1e-6:
+        horizontal_axis /= (
+            0.0
+            if np.asarray(horizontal_axis, dtype=float).reshape(-1).size == 0
+            else math.hypot(*np.asarray(horizontal_axis, dtype=float).reshape(-1))
+        )
     else:
         horizontal_axis = np.array([0.0, 1.0, 0.0])
 
@@ -627,7 +658,13 @@ def validate_energy_balance(
         ),
         "expected_loss_factor": expected_loss_factor,
         "ball_ke_post": float(ke_ball_post),
-        "ball_launch_speed": float(np.linalg.norm(post_state.ball_velocity)),
+        "ball_launch_speed": float(
+            0.0
+            if np.asarray(post_state.ball_velocity, dtype=float).reshape(-1).size == 0
+            else math.hypot(
+                *np.asarray(post_state.ball_velocity, dtype=float).reshape(-1)
+            )
+        ),
     }
 
 

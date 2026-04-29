@@ -21,6 +21,7 @@ Cross-engine consistency thresholds:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
@@ -413,8 +414,16 @@ class GRFAnalyzer:
         return ImpulseMetrics(
             linear_impulse=linear_impulse,
             angular_impulse=angular_impulse,
-            linear_impulse_magnitude=float(np.linalg.norm(linear_impulse)),
-            angular_impulse_magnitude=float(np.linalg.norm(angular_impulse)),
+            linear_impulse_magnitude=float(
+                0.0
+                if np.asarray(linear_impulse, dtype=float).reshape(-1).size == 0
+                else math.hypot(*np.asarray(linear_impulse, dtype=float).reshape(-1))
+            ),
+            angular_impulse_magnitude=float(
+                0.0
+                if np.asarray(angular_impulse, dtype=float).reshape(-1).size == 0
+                else math.hypot(*np.asarray(angular_impulse, dtype=float).reshape(-1))
+            ),
             duration=duration,
         )
 
@@ -510,7 +519,14 @@ def extract_grf_from_contacts(
     # --- Primary path: query the engine's native contact solver -----------
     try:
         contact_force = engine.compute_contact_forces()
-        has_contact_data = float(np.linalg.norm(contact_force)) > 1e-10
+        has_contact_data = (
+            float(
+                0.0
+                if np.asarray(contact_force, dtype=float).reshape(-1).size == 0
+                else math.hypot(*np.asarray(contact_force, dtype=float).reshape(-1))
+            )
+            > 1e-10
+        )
     except NotImplementedError:
         # Engine does not support contact force queries (e.g., Pinocchio without contact solver)
         contact_force = np.zeros(3)

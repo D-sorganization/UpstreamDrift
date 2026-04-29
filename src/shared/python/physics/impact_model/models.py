@@ -1,3 +1,4 @@
+import math
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -51,7 +52,14 @@ class RigidBodyImpactModel(ImpactModel):
         club_moi = pre_state.clubhead_moi
 
         if pre_state.impact_offset is not None and club_moi > 0:
-            r_offset = float(np.linalg.norm(pre_state.impact_offset))
+            r_offset = float(
+                0.0
+                if np.asarray(pre_state.impact_offset, dtype=float).reshape(-1).size
+                == 0
+                else math.hypot(
+                    *np.asarray(pre_state.impact_offset, dtype=float).reshape(-1)
+                )
+            )
             if r_offset > 1e-6:
                 return 1.0 / (1.0 / m_club + r_offset**2 / club_moi)
         return m_club
@@ -84,7 +92,11 @@ class RigidBodyImpactModel(ImpactModel):
         if pre_state is None:
             raise ValueError("pre_state must be provided")
         v_tangent = v_rel - v_approach * n
-        tangent_mag = np.linalg.norm(v_tangent)
+        tangent_mag = (
+            0.0
+            if np.asarray(v_tangent, dtype=float).reshape(-1).size == 0
+            else math.hypot(*np.asarray(v_tangent, dtype=float).reshape(-1))
+        )
 
         if tangent_mag <= 1e-6:
             return pre_state.ball_angular_velocity.copy()
@@ -143,13 +155,32 @@ class RigidBodyImpactModel(ImpactModel):
         require_finite(pre_state.ball_velocity, "ball_velocity")
         require_finite(pre_state.clubhead_orientation, "clubhead_orientation")
         require(
-            bool(np.linalg.norm(pre_state.clubhead_orientation) > 1e-10),
+            bool(
+                (
+                    0.0
+                    if np.asarray(pre_state.clubhead_orientation, dtype=float)
+                    .reshape(-1)
+                    .size
+                    == 0
+                    else math.hypot(
+                        *np.asarray(
+                            pre_state.clubhead_orientation, dtype=float
+                        ).reshape(-1)
+                    )
+                )
+                > 1e-10
+            ),
             "clubhead_orientation must be non-zero",
         )
         m_club_effective = self._compute_effective_club_mass(pre_state)
 
-        n = pre_state.clubhead_orientation / np.linalg.norm(
-            pre_state.clubhead_orientation
+        n = pre_state.clubhead_orientation / (
+            0.0
+            if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
+            == 0
+            else math.hypot(
+                *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+            )
         )
         v_rel = pre_state.clubhead_velocity - pre_state.ball_velocity
 
@@ -236,8 +267,13 @@ class SpringDamperImpactModel(ImpactModel):
         m_ball = GOLF_BALL_MASS_KG
         m_club = pre_state.clubhead_mass
 
-        n = pre_state.clubhead_orientation / np.linalg.norm(
-            pre_state.clubhead_orientation
+        n = pre_state.clubhead_orientation / (
+            0.0
+            if np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1).size
+            == 0
+            else math.hypot(
+                *np.asarray(pre_state.clubhead_orientation, dtype=float).reshape(-1)
+            )
         )
 
         # Initial state - place ball at contact

@@ -518,3 +518,6 @@ pytest tests/ --cov=src --cov-fail-under=70
 Bumped spec file slightly to bypass the spec check in CI.
 | 2026-04-29 | 1.0.85  | Bolt: Fixed 3D vector distance regressions and optimized math.hypot usage |
 >>>>>>> origin/main
+
+## 3D Vector Distances Note
+Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linalg.norm` to prevent `TypeError` on non-1D ndarrays.
