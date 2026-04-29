@@ -279,7 +279,7 @@ class PerturbationAnalyzerBase(ABC):
         ee_vel_final = r.ee_vel_traj[last].copy()  # type: ignore[union-attr,attr-defined]
         ee_speed_final = float(np.linalg.norm(ee_vel_final))
 
-        speeds = np.linalg.norm(r.ee_vel_traj, axis=1)  # type: ignore[union-attr,attr-defined]
+        speeds = np.sqrt(np.einsum("ij,ij->i", r.ee_vel_traj, r.ee_vel_traj))  # type: ignore[union-attr,attr-defined]
         peak_speed = float(np.max(speeds))
 
         total_energy_final = float(
@@ -292,8 +292,9 @@ class PerturbationAnalyzerBase(ABC):
         if self._nominal_result is not None:
             nom_q = self._get_q_traj(self._nominal_result)
             n_cmp = min(len(q_traj), len(nom_q))
-            deviations = np.linalg.norm(q_traj[:n_cmp] - nom_q[:n_cmp], axis=1)
-            trajectory_rmse = float(np.sqrt(np.mean(deviations**2)))
+            diff = q_traj[:n_cmp] - nom_q[:n_cmp]
+            deviations = np.sqrt(np.einsum("ij,ij->i", diff, diff))
+            trajectory_rmse = float(np.sqrt(np.vdot(diff, diff) / n_cmp))
             trajectory_max_deviation = float(np.max(deviations))
 
         motion_duration = float(
