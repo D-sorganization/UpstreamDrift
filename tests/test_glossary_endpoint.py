@@ -81,9 +81,9 @@ class TestGlossaryRouteRegistered:
 
     def test_local_server_imports_glossary(self) -> None:
         """local_server.py imports the glossary router module."""
-        assert "glossary" in _LOCAL_SERVER_SRC, (
-            "local_server.py must import the glossary route module"
-        )
+        assert (
+            "glossary" in _LOCAL_SERVER_SRC
+        ), "local_server.py must import the glossary route module"
 
     def test_local_server_includes_glossary_router(self) -> None:
         """local_server.py calls app.include_router for glossary.router."""

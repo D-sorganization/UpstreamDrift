@@ -2,9 +2,6 @@
 
 ## Executive Summary
 
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
 
 - **Critical Gaps**: 328
 - **Feature Gaps (TRACKED_TASK)**: 44

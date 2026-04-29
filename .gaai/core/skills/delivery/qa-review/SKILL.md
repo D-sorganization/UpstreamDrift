@@ -35,20 +35,12 @@ Activate after implementation is complete. This is a **hard quality gate**.
 
 ### 1. Story Compliance Check
 
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
-
 - Parse Story YAML frontmatter
 - Extract acceptance criteria
 - Validate each criterion is demonstrably satisfied in code
 - Any criterion unclear or unmet → FAIL immediately
 
 ### 2. Scope Integrity Check
-
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
 
 - Only files within Story scope were modified
 - No feature creep introduced
@@ -57,29 +49,17 @@ Activate after implementation is complete. This is a **hard quality gate**.
 
 ### 3. Rule Enforcement
 
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
-
 - Confirm compliance with each applicable rule
 - Surface violations explicitly
 - Any broken rule → FAIL
 
 ### 4. Regression Scan
 
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
-
 - Broken tests → FAIL
 - Behavior drift → FAIL
 - Known risk patterns from memory → FAIL
 
 ### 5. Quality Checks
-
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
 
 - Error-prone operations lack error handling → FAIL
 - External input enters functions without validation → FAIL

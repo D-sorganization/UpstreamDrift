@@ -22,8 +22,9 @@ pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
 C3D_IMPORTS_AVAILABLE = False
 if PYQT6_AVAILABLE:
     try:
-        from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
         from c3d_reader import C3DDataReader
+
+        from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
 
         C3D_IMPORTS_AVAILABLE = True
     except (ImportError, OSError):

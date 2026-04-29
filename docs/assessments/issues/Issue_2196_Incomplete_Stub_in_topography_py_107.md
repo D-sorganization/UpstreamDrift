@@ -1,9 +1,7 @@
 ---
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2204_Incomplete_Stub_in_flight_models_py_164.md
-title: "Incomplete Stub in flight_models.py:164"
+<title: "Incomplete Stub in flight_models.py:164"
 ========
 title: "Incomplete Stub in topography.py:107"
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2196_Incomplete_Stub_in_topography_py_107.md
 labels: ["incomplete-implementation", "critical", "high-impact"]
 assignee: "unassigned"
 status: "open"
@@ -11,8 +9,7 @@ status: "open"
 
 # Issue Description
 
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2204_Incomplete_Stub_in_flight_models_py_164.md
-Found critical incomplete implementation in `./src/shared/python/physics/flight_models.py` at line 164.
+<Found critical incomplete implementation in `./src/shared/python/physics/flight_models.py` at line 164.
 
 ## Context
 
@@ -23,7 +20,6 @@ Found critical incomplete implementation in `./src/shared/python/physics/topogra
 ## Context
 
 **Type**: Stub | **Location**: `./src/shared/python/physics/topography.py:107`
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2196_Incomplete_Stub_in_topography_py_107.md
 
 ```python
 get_gradient_at

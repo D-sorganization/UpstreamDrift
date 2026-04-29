@@ -7,8 +7,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from src.api.routes import dataset
-pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio

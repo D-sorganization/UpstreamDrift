@@ -19,7 +19,6 @@ Found critical incomplete implementation in `./src/shared/python/physics/impact_
 
 **Type**: Stub | **Location**: `./src/shared/python/physics/impact_model.py:135`
 
-> > > > > > > > origin/staging:docs/assessments/issues/Issue_2159_Incomplete_Stub_in_impact_model_py_135.md
 
 ```python
 solve

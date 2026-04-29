@@ -443,7 +443,9 @@ def get_api_port(default: int = 8000) -> int:
         return get_env_int(
             "HUMANOID_API_PORT", default=default, min_value=1, max_value=65535
         )
-    return get_env_int("UPSTREAM_API_PORT", default=default, min_value=1, max_value=65535)
+    return get_env_int(
+        "UPSTREAM_API_PORT", default=default, min_value=1, max_value=65535
+    )
 
 
 def get_log_level(default: str = "INFO") -> str:

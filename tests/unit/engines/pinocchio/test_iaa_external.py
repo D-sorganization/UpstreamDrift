@@ -1,14 +1,13 @@
 import numpy as np
+import pytest
 
 pin = pytest.importorskip("pinocchio", reason="pinocchio not installed")
 
 from src.engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (  # noqa: E402
-
     InducedAccelerationAnalyzer,
 )
-import pytest
-pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
 
 
 def test_iaa_external_decomposition():

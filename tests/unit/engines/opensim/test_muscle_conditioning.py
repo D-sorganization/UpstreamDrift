@@ -50,9 +50,6 @@ if not OPENSIM_AVAILABLE:
 from src.engines.physics_engines.opensim.python.muscle_analysis import (  # noqa: E402
     OpenSimMuscleAnalyzer,
 )
-import pytest
-pytestmark = pytest.mark.unit
-
 
 if not OPENSIM_AVAILABLE:
     # Remove the collection-time stub right away.

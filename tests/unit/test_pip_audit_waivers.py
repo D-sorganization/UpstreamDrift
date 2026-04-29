@@ -8,8 +8,8 @@ from datetime import date
 from pathlib import Path
 
 import pytest
-pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
 
 
 def _load_script_module(name: str):

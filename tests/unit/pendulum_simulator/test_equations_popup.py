@@ -8,6 +8,7 @@ from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import pytest
+
 pytestmark = pytest.mark.unit
 
 

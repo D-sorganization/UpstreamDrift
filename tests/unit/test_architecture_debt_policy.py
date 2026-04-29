@@ -6,7 +6,9 @@ import ast
 import json
 from pathlib import Path
 from typing import cast
+
 import pytest
+
 pytestmark = pytest.mark.unit
 
 

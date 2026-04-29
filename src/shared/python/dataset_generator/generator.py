@@ -102,7 +102,7 @@ class DatasetGenerator:
             for key, value in data.items():
                 if isinstance(value, np.ndarray):
                     f.create_dataset(key, data=value)
-                elif isinstance(value, (int, float, str)):
+                elif isinstance(value, int | float | str):
                     f.attrs[key] = value
                 elif isinstance(value, dict):
                     # Handle nested dicts (like induced_accelerations)

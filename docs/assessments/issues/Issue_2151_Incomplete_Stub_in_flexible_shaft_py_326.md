@@ -19,7 +19,6 @@ Found critical incomplete implementation in `./src/shared/python/physics/flexibl
 
 **Type**: Stub | **Location**: `./src/shared/python/physics/flexible_shaft.py:365`
 
-> > > > > > > > origin/staging:docs/assessments/issues/Issue_2153_Incomplete_Stub_in_flexible_shaft_py_365.md
 
 ```python
 apply_load

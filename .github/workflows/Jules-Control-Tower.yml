@@ -59,7 +59,7 @@ permissions:
 jobs:
   # ── Kill-switch: honour JULES_ENABLED repo variable (issue #3065) ──────────
   kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     timeout-minutes: 2
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
@@ -84,7 +84,7 @@ jobs:
 
   # ── Anti-loop guard: bail out if recent commits are all from Jules ─────────
   anti-loop:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     timeout-minutes: 2
     needs: kill-switch
     if: needs.kill-switch.outputs.enabled == 'true'
@@ -134,8 +134,8 @@ jobs:
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
             echo "Self-hosted runner online — routing locally"
           else
-            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-            echo "No self-hosted runner — using GitHub-hosted"
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Routing to d-sorg-fleet"
           fi
   triage:
     needs: pick-runner

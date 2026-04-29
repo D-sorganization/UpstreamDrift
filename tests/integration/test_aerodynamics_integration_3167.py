@@ -14,8 +14,8 @@ import pytest
 
 from src.shared.python.physics.aerodynamics._config import AerodynamicsConfig
 from src.shared.python.physics.aerodynamics._engine import AerodynamicsEngine
-pytestmark = pytest.mark.integration
 
+pytestmark = pytest.mark.integration
 
 
 class TestAerodynamicsIntegration:
@@ -97,9 +97,9 @@ class TestAerodynamicsIntegration:
 
         # Spin should decay monotonically
         for i in range(len(spin_history) - 1):
-            assert spin_history[i + 1] <= spin_history[i], (
-                "Spin should decay monotonically"
-            )
+            assert (
+                spin_history[i + 1] <= spin_history[i]
+            ), "Spin should decay monotonically"
 
         # Spin should be noticeably reduced after 10 seconds
         assert spin_history[-1] < initial_spin[1] * 0.95
@@ -208,9 +208,9 @@ class TestAerodynamicsIntegration:
         landing_with_aero = np.max(np.linalg.norm(positions_with_aero[:, :2], axis=1))
 
         # Aerodynamics should reduce distance due to drag
-        assert landing_with_aero < landing_no_aero, (
-            "Aerodynamics should reduce landing distance due to drag"
-        )
+        assert (
+            landing_with_aero < landing_no_aero
+        ), "Aerodynamics should reduce landing distance due to drag"
 
         # Verify difference is meaningful (not just numerical noise)
         distance_reduction = (landing_no_aero - landing_with_aero) / landing_no_aero

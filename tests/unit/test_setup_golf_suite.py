@@ -4,9 +4,8 @@ import pathlib
 from unittest.mock import patch
 
 import pytest
-from PIL import Image
-
 import setup_golf_suite
+from PIL import Image
 
 pytestmark = pytest.mark.unit
 

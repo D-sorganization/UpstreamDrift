@@ -52,7 +52,6 @@ Level 3 — CROSS-DOMAIN SCAN (only for Decision Consistency Gate)
 ## Process
 
 1. **Read memory index** (`contexts/memory/index.md`). This contains:
-   <<<<<<< HEAD
 
    - Shared categories table (paths + purpose)
    - Decision Registry: one row per DEC-ID with domain, level, and title
@@ -66,7 +65,6 @@ Level 3 — CROSS-DOMAIN SCAN (only for Decision Consistency Gate)
 
 3. **Identify relevant decisions** for the current task:
 
-> > > > > > > origin/staging
 
 - Filter the Decision Registry by **domain** (e.g., `billing`, `matching`)
 - Filter by **level** if scope is known (e.g., only `architectural` for implementation tasks)

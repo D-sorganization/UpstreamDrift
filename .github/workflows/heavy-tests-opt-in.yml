@@ -2,7 +2,7 @@ name: Heavy Integration Tests (Opt-In)
 # ─────────────────────────────────────────────────────────────────────────────
 # ISOLATION CONTRACT: This workflow MUST NOT run on standard PR required lanes.
 #   • Trigger: manual dispatch OR weekly schedule ONLY
-#   • Runner: ubuntu-latest (or dedicated runner if configured)
+#   • Runner: d-sorg-fleet (or dedicated runner if configured)
 #   • Marker: live_simulation (explicitly EXCLUDED from ci-standard.yml)
 #
 # Parity: mirrors scripts/run_local_heavy_tests.sh exactly.
@@ -41,8 +41,8 @@ jobs:
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
             echo "Self-hosted runner online — routing locally"
           else
-            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-            echo "No self-hosted runner — using GitHub-hosted"
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "No self-hosted runner — using self-hosted"
           fi
   run-heavy-tests:
     needs: pick-runner

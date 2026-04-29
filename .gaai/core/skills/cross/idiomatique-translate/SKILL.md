@@ -80,9 +80,6 @@ Translate copy from any source language to any target language with idiomatic fl
 
 ### 1. **Idiomatic > Literal**
 
-# <<<<<<< HEAD
-
-> > > > > > > origin/staging
 
 - ❌ "You pay $0.50 per request" → literal French: "Vous payez 0,50 $ par requête"
 - ✅ "You pay $0.50 per request" → idiomatic French: "Vous payez 0,50 € par demande"

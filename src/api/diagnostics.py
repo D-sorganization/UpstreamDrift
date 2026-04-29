@@ -112,7 +112,9 @@ class APIDiagnostics:
         env_vars = {
             "UPSTREAM_SUITE_MODE": get_env("UPSTREAM_SUITE_MODE", default="not set")
             or "not set",
-            "UPSTREAM_AUTH_DISABLED": get_env("UPSTREAM_AUTH_DISABLED", default="not set")
+            "UPSTREAM_AUTH_DISABLED": get_env(
+                "UPSTREAM_AUTH_DISABLED", default="not set"
+            )
             or "not set",
             "UPSTREAM_PORT": get_env("UPSTREAM_PORT", default="not set") or "not set",
         }

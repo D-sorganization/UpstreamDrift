@@ -652,7 +652,9 @@ class C3DDataReader:
         else:
             labels = [
                 label.strip()
-                for label in analog_parameters.get("LABELS", {}).get("value", [])  # noqa: E501
+                for label in analog_parameters.get("LABELS", {}).get(
+                    "value", []
+                )  # noqa: E501
             ]
             units = [
                 unit.strip()

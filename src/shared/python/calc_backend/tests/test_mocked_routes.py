@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 
-
 # ──────────────────────────────────────────────────────────────────────────────
 # Mocked external-calculator routes
 # ──────────────────────────────────────────────────────────────────────────────

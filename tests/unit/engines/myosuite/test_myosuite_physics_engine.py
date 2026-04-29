@@ -50,9 +50,9 @@ class TestIssue2483MyoSuiteTerminationHandling:
 
         engine.step()
 
-        assert engine._terminated is True, (
-            "step() must record terminated=True from env.step() return value"
-        )
+        assert (
+            engine._terminated is True
+        ), "step() must record terminated=True from env.step() return value"
 
     def test_step_on_terminated_env_does_not_call_env_step(self) -> None:
         """step() must not call env.step() when the episode has already terminated."""

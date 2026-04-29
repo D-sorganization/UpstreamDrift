@@ -14,8 +14,8 @@ from src.shared.python.config.model_pack_manifest import (
     group_entries_by_canonical_id,
 )
 from src.shared.python.contracts import PreconditionError
-pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
 
 
 def _write_yaml(path: Path, data: dict) -> None:

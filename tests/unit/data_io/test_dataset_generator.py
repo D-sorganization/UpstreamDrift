@@ -13,7 +13,6 @@ from src.shared.python.data_io.dataset_generator import (
 pytestmark = pytest.mark.unit
 
 
-
 class TestParameterRange:
     def test_construction(self) -> None:
         pr = ParameterRange(name="mass", min_val=0.5, max_val=2.0)

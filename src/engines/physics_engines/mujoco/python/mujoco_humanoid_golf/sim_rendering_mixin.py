@@ -11,10 +11,9 @@ frame/COM overlays from MuJoCoSimWidget.
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from typing import Any
-
-import math
 
 import mujoco
 import numpy as np
@@ -381,7 +380,8 @@ class SimRenderingMixin:
                 continue
 
             world_force = external_forces[body_id, 3:6]
-            magnitude = math.hypot(*world_force)  # ⚡ Bolt: ~5x faster than np.linalg.norm for 3D
+            # ⚡ Bolt: ~5x faster than np.linalg.norm for 3D
+            magnitude = math.hypot(*world_force)
             if magnitude < FORCE_VISUALIZATION_THRESHOLD:
                 continue
             body_pos = self.data.xpos[body_id].copy()
@@ -394,7 +394,8 @@ class SimRenderingMixin:
                 continue
 
             joint_force = internal_forces[body_id, 3:6]
-            magnitude = math.hypot(*joint_force)  # ⚡ Bolt: ~5x faster than np.linalg.norm for 3D
+            # ⚡ Bolt: ~5x faster than np.linalg.norm for 3D
+            magnitude = math.hypot(*joint_force)
             if magnitude < FORCE_VISUALIZATION_THRESHOLD:
                 continue
             body_pos = self.data.xpos[body_id].copy()

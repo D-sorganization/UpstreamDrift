@@ -6,6 +6,7 @@ Also adds `import pytest` if not already present.
 Usage:
     python3 scripts/add_pytestmark.py
 """
+
 from __future__ import annotations
 
 import os
@@ -38,7 +39,6 @@ def find_safe_insert_point(lines: list[str]) -> int:
                 last_safe_end = i + 1
 
     return last_safe_end
-
 
 
 def process_file(path: str, marker: str) -> bool:

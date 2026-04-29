@@ -2,15 +2,14 @@ import sys
 import types
 
 import numpy as np
+import pytest
 
 import src.engines.physics_engines.pendulum.python.golf_swing_physics_engine as golf_engine
 from src.engines.physics_engines.pendulum.python.golf_swing_physics_engine import (
-
     GolfSwingPendulumEngine,
 )
-import pytest
-pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
 
 
 def test_rk4_samples_time_varying_torque_profile_at_stage_times(monkeypatch):

@@ -54,7 +54,7 @@ env:
 jobs:
   # ── Kill-switch: honour WORKFLOWS_PAUSED file/variable (issue #3065) ────────
   kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     timeout-minutes: 2
     steps:
       - name: Checkout (for file-based kill switch)
@@ -85,12 +85,12 @@ jobs:
             echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
             echo "Self-hosted runner online — routing locally"
           else
-            echo "runner=ubuntu-latest" >> $GITHUB_OUTPUT
-            echo "No self-hosted runner — using GitHub-hosted"
+            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
+            echo "Routing to d-sorg-fleet"
           fi
   remediate:
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: d-sorg-fleet
     timeout-minutes: 10
 
     steps:

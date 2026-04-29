@@ -35,27 +35,27 @@ class TestModelDuplicateEndpointDeclared:
 
     def test_duplicate_route_path_present(self) -> None:
         """Source contains the /models/duplicate path string."""
-        assert "/models/duplicate" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must declare a POST /models/duplicate route"
-        )
+        assert (
+            "/models/duplicate" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must declare a POST /models/duplicate route"
 
     def test_duplicate_model_function_present(self) -> None:
         """Source declares an async duplicate_model function."""
-        assert "async def duplicate_model" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must define `async def duplicate_model`"
-        )
+        assert (
+            "async def duplicate_model" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must define `async def duplicate_model`"
 
     def test_model_duplicate_request_class_present(self) -> None:
         """Source defines ModelDuplicateRequest Pydantic model."""
-        assert "class ModelDuplicateRequest" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must define ModelDuplicateRequest"
-        )
+        assert (
+            "class ModelDuplicateRequest" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must define ModelDuplicateRequest"
 
     def test_model_duplicate_response_class_present(self) -> None:
         """Source defines ModelDuplicateResponse Pydantic model."""
-        assert "class ModelDuplicateResponse" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must define ModelDuplicateResponse"
-        )
+        assert (
+            "class ModelDuplicateResponse" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must define ModelDuplicateResponse"
 
     def test_source_path_field_present(self) -> None:
         """ModelDuplicateRequest declares a source_path field."""
@@ -71,27 +71,27 @@ class TestModelDuplicateEndpointDeclared:
 
     def test_path_traversal_guard_present(self) -> None:
         """Source contains path-traversal protection logic."""
-        assert "relative_to" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py duplicate endpoint must guard against path traversal"
-        )
+        assert (
+            "relative_to" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py duplicate endpoint must guard against path traversal"
 
     def test_409_conflict_response_present(self) -> None:
         """Source returns 409 when destination already exists."""
-        assert "409" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must return HTTP 409 when the copy already exists"
-        )
+        assert (
+            "409" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must return HTTP 409 when the copy already exists"
 
     def test_shutil_copy_used(self) -> None:
         """Source uses shutil for file copying."""
-        assert "shutil" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must use shutil to copy model files"
-        )
+        assert (
+            "shutil" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must use shutil to copy model files"
 
     def test_safe_name_regex_present(self) -> None:
         """Source defines a safe-name regex for new_name validation."""
-        assert "_SAFE_STEM_RE" in _MODEL_EXPLORER_SRC, (
-            "model_explorer.py must define _SAFE_STEM_RE for name validation"
-        )
+        assert (
+            "_SAFE_STEM_RE" in _MODEL_EXPLORER_SRC
+        ), "model_explorer.py must define _SAFE_STEM_RE for name validation"
 
     def test_router_post_decorator(self) -> None:
         """The duplicate route uses @router.post."""
@@ -108,9 +108,9 @@ class TestModelDuplicateEndpointDeclared:
                             and isinstance(decorator.args[0], ast.Constant)
                         ):
                             post_routes.append(decorator.args[0].value)
-        assert any("duplicate" in r for r in post_routes), (
-            f"Expected a @router.post('/models/duplicate') decorator, found: {post_routes}"
-        )
+        assert any(
+            "duplicate" in r for r in post_routes
+        ), f"Expected a @router.post('/models/duplicate') decorator, found: {post_routes}"
 
 
 class TestSafeStemRegex:
@@ -174,15 +174,15 @@ class TestLocalServerPresetsRegistration:
 
     def test_presets_imported(self) -> None:
         """local_server.py imports the presets module."""
-        assert "presets" in self._LOCAL_SERVER_SRC, (
-            "local_server.py must import the presets router"
-        )
+        assert (
+            "presets" in self._LOCAL_SERVER_SRC
+        ), "local_server.py must import the presets router"
 
     def test_presets_router_included(self) -> None:
         """local_server.py calls include_router with presets.router."""
-        assert "presets.router" in self._LOCAL_SERVER_SRC, (
-            "local_server.py must register presets.router via include_router"
-        )
+        assert (
+            "presets.router" in self._LOCAL_SERVER_SRC
+        ), "local_server.py must register presets.router via include_router"
 
 
 class TestSimulationWsSummary:
@@ -205,9 +205,9 @@ class TestSimulationWsSummary:
 
     def test_peak_torques_tracked_in_loop(self) -> None:
         """Simulation loop tracks peak torques each step, not just at the end."""
-        assert "peak_torques" in self._WS_SRC, (
-            "simulation_ws.py must accumulate peak_torques during the loop"
-        )
+        assert (
+            "peak_torques" in self._WS_SRC
+        ), "simulation_ws.py must accumulate peak_torques during the loop"
 
 
 class TestModelExtensionAllowlist:
@@ -227,9 +227,9 @@ class TestModelExtensionAllowlist:
 
     def test_extension_check_present(self) -> None:
         """Source contains logic to check file extension against the allowlist."""
-        assert "_ALLOWED_MODEL_EXTENSIONS" in self._MODEL_EXPLORER_SRC, (
-            "model_explorer.py must define _ALLOWED_MODEL_EXTENSIONS allowlist"
-        )
+        assert (
+            "_ALLOWED_MODEL_EXTENSIONS" in self._MODEL_EXPLORER_SRC
+        ), "model_explorer.py must define _ALLOWED_MODEL_EXTENSIONS allowlist"
 
     def test_422_on_bad_extension(self) -> None:
         """Source raises HTTP 422 when extension is not in the allowlist."""
@@ -244,9 +244,9 @@ class TestModelExtensionAllowlist:
 
     def test_allowed_model_dirs_constant_present(self) -> None:
         """Source defines _ALLOWED_MODEL_DIRS for directory allowlist."""
-        assert "_ALLOWED_MODEL_DIRS" in self._MODEL_EXPLORER_SRC, (
-            "model_explorer.py must define _ALLOWED_MODEL_DIRS"
-        )
+        assert (
+            "_ALLOWED_MODEL_DIRS" in self._MODEL_EXPLORER_SRC
+        ), "model_explorer.py must define _ALLOWED_MODEL_DIRS"
 
     def test_sdf_extension_in_allowlist(self) -> None:
         """.sdf extension is in the allowlist (issue #3202)."""

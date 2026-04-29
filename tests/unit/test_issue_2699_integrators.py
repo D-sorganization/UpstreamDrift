@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-pytestmark = pytest.mark.unit
 
+pytestmark = pytest.mark.unit
 
 
 def test_pinocchio_rk4_uses_stage_states(monkeypatch: pytest.MonkeyPatch) -> None:

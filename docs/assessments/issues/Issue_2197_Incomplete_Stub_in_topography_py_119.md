@@ -1,19 +1,16 @@
 ---
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2159_Incomplete_Stub_in_impact_model_py_135.md
-title: "Incomplete Stub in impact_model.py:135"
+<title: "Incomplete Stub in impact_model.py:135"
 labels: ['incomplete-implementation', 'critical', 'high-impact']
 ========
 title: "Incomplete Stub in topography.py:119"
 labels: ["incomplete-implementation", "critical", "high-impact"]
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2197_Incomplete_Stub_in_topography_py_119.md
 assignee: "unassigned"
 status: "open"
 ---
 
 # Issue Description
 
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2159_Incomplete_Stub_in_impact_model_py_135.md
-Found critical incomplete implementation in `./src/shared/python/physics/impact_model.py` at line 135.
+<Found critical incomplete implementation in `./src/shared/python/physics/impact_model.py` at line 135.
 
 ## Context
 
@@ -31,7 +28,6 @@ Found critical incomplete implementation in `./src/shared/python/physics/topogra
 
 ```python
 bounds
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2197_Incomplete_Stub_in_topography_py_119.md
 ````
 
 ## Audit Metrics

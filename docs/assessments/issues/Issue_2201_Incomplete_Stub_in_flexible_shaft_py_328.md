@@ -1,9 +1,7 @@
 ---
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2282_Incomplete_Stub_in_flexible_shaft_py_342.md
-title: "Incomplete Stub in flexible_shaft.py:342"
+<title: "Incomplete Stub in flexible_shaft.py:342"
 ========
 title: "Incomplete Stub in flexible_shaft.py:328"
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2201_Incomplete_Stub_in_flexible_shaft_py_328.md
 labels: ["incomplete-implementation", "critical", "high-impact"]
 assignee: "unassigned"
 status: "open"
@@ -11,8 +9,7 @@ status: "open"
 
 # Issue Description
 
-<<<<<<<< HEAD:docs/assessments/issues/Issue_2282_Incomplete_Stub_in_flexible_shaft_py_342.md
-Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 342.
+<Found critical incomplete implementation in `./src/shared/python/physics/flexible_shaft.py` at line 342.
 
 ## Context
 
@@ -23,7 +20,6 @@ Found critical incomplete implementation in `./src/shared/python/physics/flexibl
 ## Context
 
 **Type**: Stub | **Location**: `./src/shared/python/physics/flexible_shaft.py:328`
->>>>>>>> origin/staging:docs/assessments/issues/Issue_2201_Incomplete_Stub_in_flexible_shaft_py_328.md
 
 ```python
 step

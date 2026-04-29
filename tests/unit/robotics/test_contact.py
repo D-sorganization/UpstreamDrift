@@ -278,9 +278,9 @@ class TestLinearizeFrictionCone:
         for f in inside_forces:
             # Should satisfy A @ f <= b (approximately, due to linearization)
             violations = A @ f - b
-            assert np.all(violations <= 1e-6), (
-                f"Force {f} should be inside linearized cone"
-            )
+            assert np.all(
+                violations <= 1e-6
+            ), f"Force {f} should be inside linearized cone"
 
     def test_compute_friction_cone_constraint(self) -> None:
         """Test compute_friction_cone_constraint returns complete info."""
@@ -642,9 +642,9 @@ class TestContactManagerBugFixes:
             state = manager._create_contact_from_info(info)
 
         assert state.normal_force == 0.0, "Negative normal force must clip to 0"
-        assert any("negative" in record.message.lower() for record in caplog.records), (
-            "Expected a WARNING log for negative normal force"
-        )
+        assert any(
+            "negative" in record.message.lower() for record in caplog.records
+        ), "Expected a WARNING log for negative normal force"
 
     def test_positive_normal_force_no_warning(
         self, caplog: pytest.LogCaptureFixture

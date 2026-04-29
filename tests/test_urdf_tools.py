@@ -91,15 +91,15 @@ class TestSimpleHumanoidAnthropometry:
 
     def test_torso_mass_is_de_leva_1996(self, urdf_root):
         mass = self._get_link_mass(urdf_root, "torso")
-        assert abs(mass - 30.42) < 0.1, (
-            f"torso mass {mass} not near de Leva 1996 value 30.42 kg"
-        )
+        assert (
+            abs(mass - 30.42) < 0.1
+        ), f"torso mass {mass} not near de Leva 1996 value 30.42 kg"
 
     def test_head_mass_is_de_leva_1996(self, urdf_root):
         mass = self._get_link_mass(urdf_root, "head")
-        assert abs(mass - 4.86) < 0.05, (
-            f"head mass {mass} not near de Leva 1996 value 4.86 kg"
-        )
+        assert (
+            abs(mass - 4.86) < 0.05
+        ), f"head mass {mass} not near de Leva 1996 value 4.86 kg"
 
     def test_upper_arm_mass_is_de_leva_1996(self, urdf_root):
         for link_name in ("right_upper_arm", "left_upper_arm"):
@@ -136,9 +136,9 @@ class TestGolferUrdfRightHandGrip:
 
     def test_right_grip_attachment_link_exists(self, urdf_root):
         names = {el.get("name") for el in urdf_root.iter("link")}
-        assert "right_grip_attachment" in names, (
-            "golfer.urdf missing right_grip_attachment link"
-        )
+        assert (
+            "right_grip_attachment" in names
+        ), "golfer.urdf missing right_grip_attachment link"
 
     def test_right_grip_joint_connects_to_hand_right(self, urdf_root):
         for joint in urdf_root.iter("joint"):
@@ -163,9 +163,9 @@ class TestGolferUrdfRightHandGrip:
 
     def test_left_hand_club_shaft_joint_still_present(self, urdf_root):
         names = {el.get("name") for el in urdf_root.iter("joint")}
-        assert "hand_left_to_club_shaft" in names, (
-            "left-hand grip was accidentally removed"
-        )
+        assert (
+            "hand_left_to_club_shaft" in names
+        ), "left-hand grip was accidentally removed"
 
 
 if __name__ == "__main__":

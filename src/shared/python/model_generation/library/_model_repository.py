@@ -165,7 +165,9 @@ def _fetch_github_models(
             elif item["type"] == "dir":
                 subdir_url = item["url"]
                 try:
-                    with urllib.request.urlopen(subdir_url) as sub_response:  # nosec B310
+                    with urllib.request.urlopen(
+                        subdir_url
+                    ) as sub_response:  # nosec B310
                         sub_contents = json.loads(sub_response.read().decode())
                     for sub_item in sub_contents:
                         if sub_item["type"] != "file":
