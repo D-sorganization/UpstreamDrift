@@ -33,6 +33,7 @@ dependencies = [
 
     # Structured logging (OBS-001: required for observability)
     "structlog>=24.1.0",
+    "h5py>=3.0.0",
     
 ]
 
