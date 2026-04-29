@@ -46,8 +46,8 @@ from src.shared.python.engine_core.interfaces import PhysicsEngine
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Re-export public data models for backward compatibility
-from ._dataset_export_mixin import _DatasetExportMixin
-from ._dataset_models import (
+from .._dataset_export_mixin import _DatasetExportMixin
+from .._dataset_models import (
     ControlProfile,
     GeneratorConfig,
     ParameterRange,

@@ -184,3 +184,8 @@ class GeneratorConfig:
             raise ValueError(f"duration must be positive, got {self.duration}")
         if self.timestep <= 0:
             raise ValueError(f"timestep must be positive, got {self.timestep}")
+        if self.duration < self.timestep:
+            raise ValueError(
+                f"duration ({self.duration}) must be >= timestep ({self.timestep}); "
+                "otherwise no steps would be recorded"
+            )

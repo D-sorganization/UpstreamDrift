@@ -35,24 +35,24 @@ class TestDatasetGeneratorFileSizes:
 
     @pytest.mark.unit
     def test_coordinator_loc(self) -> None:
-        loc = _count_lines(DATA_IO_DIR / "dataset_generator.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"dataset_generator.py has {loc} LOC; budget {LOC_BUDGET}"
+        loc = _count_lines(DATA_IO_DIR / "dataset_generator/core.py")
+        assert loc <= LOC_BUDGET, (
+            f"dataset_generator.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_models_loc(self) -> None:
         loc = _count_lines(DATA_IO_DIR / "_dataset_models.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_dataset_models.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_dataset_models.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
     @pytest.mark.unit
     def test_export_mixin_loc(self) -> None:
         loc = _count_lines(DATA_IO_DIR / "_dataset_export_mixin.py")
-        assert (
-            loc <= LOC_BUDGET
-        ), f"_dataset_export_mixin.py has {loc} LOC; budget {LOC_BUDGET}"
+        assert loc <= LOC_BUDGET, (
+            f"_dataset_export_mixin.py has {loc} LOC; budget {LOC_BUDGET}"
+        )
 
 
 class TestDatasetGeneratorPublicAPI:
