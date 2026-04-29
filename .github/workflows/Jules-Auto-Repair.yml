@@ -49,7 +49,7 @@ env:
 
 jobs:
   check-kill-switch:
-    runs-on: ubuntu-latest
+    runs-on: d-sorg-fleet
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
     steps:
