@@ -15,7 +15,7 @@ import numpy as np
 from src.shared.python.core.contracts import precondition
 from src.shared.python.logging_pkg.logging_config import get_logger
 
-from ._dataset_models import SimulationSample, TrainingDataset
+from .dataset_generator import SimulationSample, TrainingDataset
 
 logger = get_logger(__name__)
 

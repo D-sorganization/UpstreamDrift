@@ -223,7 +223,7 @@ class SimulationService:
         "Active tasks dictionary must not be None",
     )
     async def run_simulation_background(
-        self, task_id: str, request: SimulationRequest, active_tasks: dict[str, Any]
+        self, task_id: str, request: SimulationRequest, active_tasks: Any
     ) -> None:
         """Run simulation as background task.
 

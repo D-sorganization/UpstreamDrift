@@ -16,6 +16,7 @@ Contains widgets and a dialog for advanced signal processing analysis:
 from __future__ import annotations
 
 import numpy as np
+from typing import Any
 from PyQt6 import QtWidgets
 
 from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
@@ -461,11 +462,12 @@ class CorrelationTab(QtWidgets.QWidget):
 
         # Plot Heatmap
         im = self.ax.imshow(corr_mat, cmap="coolwarm", vmin=-1, vmax=1)
-        self.ax.set_xticks(np.arange(len(feature_names)))
-        self.ax.set_yticks(np.arange(len(feature_names)))
-        self.ax.set_xticklabels(feature_names, rotation=45, ha="right")
-        self.ax.set_yticklabels(feature_names)
-        self.ax.set_title("Correlation Matrix")
+        ax_any: Any = self.ax
+        ax_any.set_xticks(np.arange(len(feature_names)))
+        ax_any.set_yticks(np.arange(len(feature_names)))
+        ax_any.set_xticklabels(feature_names, rotation=45, ha="right")
+        ax_any.set_yticklabels(feature_names)
+        ax_any.set_title("Correlation Matrix")
 
         # Add colorbar
         self.canvas.fig.colorbar(im, ax=self.ax)
