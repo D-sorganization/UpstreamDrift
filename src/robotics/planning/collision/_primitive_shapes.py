@@ -43,7 +43,7 @@ class Sphere(GeometricPrimitive):
             raise ValueError("point must be provided")
         point = np.asarray(point)
         diff = np.ravel(point - self.center)
-        return math.hypot(*diff) <= self.radius
+        return math.hypot(*np.ravel(diff)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -218,7 +218,7 @@ class Capsule(GeometricPrimitive):
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
         diff = np.ravel(point - closest)
-        return math.hypot(*diff) <= self.radius
+        return math.hypot(*np.ravel(diff)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -271,7 +271,7 @@ class Cylinder(GeometricPrimitive):
 
         # Normalize axis
         diff = np.ravel(self.axis)
-        norm = math.hypot(*diff)
+        norm = math.hypot(*np.ravel(diff))
         if norm < 1e-10:
             raise ValueError("axis must be non-zero")
         self.axis = self.axis / norm
@@ -319,7 +319,7 @@ class Cylinder(GeometricPrimitive):
 
         # Check radius (perpendicular distance)
         perp = to_point - along_axis * self.axis
-        return math.hypot(*perp) <= self.radius
+        return math.hypot(*np.ravel(perp)) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -328,7 +328,7 @@ class Cylinder(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*direction)
+        norm = math.hypot(*np.ravel(direction))
         if norm < 1e-10:
             return self.center.copy()
 
@@ -346,7 +346,7 @@ class Cylinder(GeometricPrimitive):
             axis_support = self.center - self.half_height * self.axis
 
         # Support on radius (perpendicular)
-        perp_norm = math.hypot(*d_perp)
+        perp_norm = math.hypot(*np.ravel(d_perp))
         if perp_norm > 1e-10:
             return axis_support + self.radius * d_perp / perp_norm
 
@@ -400,7 +400,7 @@ class ConvexHull(GeometricPrimitive):
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
         to_point = point - self.center
-        norm = math.hypot(*to_point)
+        norm = math.hypot(*np.ravel(to_point))
         if norm < 1e-10:
             return True  # At center
 
