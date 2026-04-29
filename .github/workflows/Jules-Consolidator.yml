@@ -65,10 +65,13 @@ jobs:
             exit 1
           fi
 
-  consolidator:
+  discover:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    outputs:
+      should_consolidate: ${{ steps.list.outputs.should_consolidate }}
+      pr_list: ${{ steps.list.outputs.prs }}
     steps:
       - uses: actions/checkout@v6
         with:
