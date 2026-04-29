@@ -91,11 +91,12 @@ class SurfaceAnalysisMixin:
         t_values = np.linspace(0, 1, num_samples)
         positions = [start + t * (end - start) for t in t_values]
 
+        diff_arr = np.asarray(end - start, dtype=float).reshape(-1)
         return {
             "positions": np.array(positions),
             "elevations": np.array([self.get_elevation_at(p) for p in positions]),  # type: ignore[attr-defined]
             "slopes": np.array([self.get_slope_at(p) for p in positions]),  # type: ignore[attr-defined]
-            "distance": math.hypot(*(end - start)),
+            "distance": 0.0 if diff_arr.size == 0 else math.hypot(*diff_arr),
         }
 
     def to_heightmap(self, resolution: int = 100) -> np.ndarray:

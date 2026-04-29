@@ -132,7 +132,8 @@ class GreenSurface(
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        distance = math.hypot(*(position[:2] - self._hole_position))
+        arr = np.asarray(position[:2] - self._hole_position, dtype=float).reshape(-1)
+        distance = 0.0 if arr.size == 0 else math.hypot(*arr)
 
         if distance > self.hole_radius:
             return False

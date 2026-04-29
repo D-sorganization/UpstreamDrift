@@ -292,7 +292,8 @@ class SurfaceGeometryMixin:
 
         # Distance from line
         closest_on_line = start + projection * line_dir
-        distance = math.hypot(*(position - closest_on_line))
+        arr = np.asarray(position - closest_on_line, dtype=float).reshape(-1)
+        distance = 0.0 if arr.size == 0 else math.hypot(*arr)
 
         if distance > width:
             return 0.0
@@ -313,7 +314,8 @@ class SurfaceGeometryMixin:
         radius = depression["radius"]
         depth = depression["depth"]
 
-        distance = math.hypot(*(position - center))
+        arr = np.asarray(position - center, dtype=float).reshape(-1)
+        distance = 0.0 if arr.size == 0 else math.hypot(*arr)
 
         if distance > radius:
             return 0.0

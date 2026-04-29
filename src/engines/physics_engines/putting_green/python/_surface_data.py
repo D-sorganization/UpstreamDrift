@@ -55,7 +55,8 @@ class SlopeRegion:
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        distance = math.hypot(*(position[:2] - self.center[:2]))
+        arr = np.asarray(position[:2] - self.center[:2], dtype=float).reshape(-1)
+        distance = 0.0 if arr.size == 0 else math.hypot(*arr)
         return bool(distance <= self.radius)
 
     def get_weight(self, position: np.ndarray) -> float:
@@ -64,7 +65,8 @@ class SlopeRegion:
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        distance = math.hypot(*(position[:2] - self.center[:2]))
+        arr = np.asarray(position[:2] - self.center[:2], dtype=float).reshape(-1)
+        distance = 0.0 if arr.size == 0 else math.hypot(*arr)
         if distance >= self.radius:
             return 0.0
 
