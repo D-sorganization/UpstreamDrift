@@ -42,22 +42,8 @@ class Sphere(GeometricPrimitive):
         if not (point is not None):
             raise ValueError("point must be provided")
         point = np.asarray(point)
-<<<<<<< HEAD
-        return float(math.hypot(*np.atleast_1d(np.squeeze(point - self.center)))) <= self.radius
-=======
-<<<<<<< HEAD
-        return math.hypot(*(point - self.center)) <= self.radius
-=======
-<<<<<<< HEAD
-        return math.hypot(*(point - self.center)) <= self.radius
-=======
-<<<<<<< HEAD
-        return float(math.hypot(*(point - self.center))) <= self.radius
-=======
-        return math.hypot(*(point - self.center)) <= self.radius
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+        diff = np.ravel(point - self.center)
+        return math.hypot(*diff) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -66,7 +52,7 @@ class Sphere(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*direction)
+        norm = math.hypot(*np.ravel(direction))
         if norm < 1e-10:
             return self.center.copy()
         return self.center + self.radius * direction / norm
@@ -189,28 +175,13 @@ class Capsule(GeometricPrimitive):
     @property
     def length(self) -> float:
         """Get capsule length (distance between endpoints)."""
-<<<<<<< HEAD
-        return float(math.hypot(*np.atleast_1d(np.squeeze(self.point_b - self.point_a))))
-=======
-<<<<<<< HEAD
-        return math.hypot(*(self.point_b - self.point_a))
-=======
-<<<<<<< HEAD
-        return math.hypot(*(self.point_b - self.point_a))
-=======
-<<<<<<< HEAD
-        return float(math.hypot(*(self.point_b - self.point_a)))
-=======
-        return math.hypot(*(self.point_b - self.point_a))
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+        return math.hypot(*np.ravel(self.point_b - self.point_a))
 
     @property
     def axis(self) -> np.ndarray:
         """Get capsule axis direction (normalized)."""
         diff = self.point_b - self.point_a
-        length = math.hypot(*diff)
+        length = math.hypot(*np.ravel(diff))
         if length < 1e-10:
             return np.array([0.0, 0.0, 1.0])
         return diff / length
@@ -246,22 +217,8 @@ class Capsule(GeometricPrimitive):
             raise ValueError("point must be provided")
         point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
-<<<<<<< HEAD
-        return float(math.hypot(*np.atleast_1d(np.squeeze(point - closest)))) <= self.radius
-=======
-<<<<<<< HEAD
-        return math.hypot(*(point - closest)) <= self.radius
-=======
-<<<<<<< HEAD
-        return math.hypot(*(point - closest)) <= self.radius
-=======
-<<<<<<< HEAD
-        return float(math.hypot(*(point - closest))) <= self.radius
-=======
-        return math.hypot(*(point - closest)) <= self.radius
->>>>>>> origin/main
->>>>>>> origin/main
->>>>>>> origin/main
+        diff = np.ravel(point - closest)
+        return math.hypot(*diff) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -270,7 +227,7 @@ class Capsule(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*direction)
+        norm = math.hypot(*np.ravel(direction))
         if norm < 1e-10:
             return self.point_a.copy()
         d = direction / norm
@@ -313,7 +270,8 @@ class Cylinder(GeometricPrimitive):
             raise ValueError("height must be positive")
 
         # Normalize axis
-        norm = math.hypot(*self.axis)
+        diff = np.ravel(self.axis)
+        norm = math.hypot(*diff)
         if norm < 1e-10:
             raise ValueError("axis must be non-zero")
         self.axis = self.axis / norm
