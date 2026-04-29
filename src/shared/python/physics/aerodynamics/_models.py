@@ -137,7 +137,7 @@ class LiftModel:
 
         spin_axis = spin / spin_magnitude
         lift_dir = np.cross(spin_axis, velocity)
-        lift_norm = float(np.linalg.norm(lift_dir))
+        lift_norm = float(math.hypot(*lift_dir))
 
         if lift_norm < 1e-10:
             return np.zeros(3)
@@ -191,7 +191,7 @@ class MagnusModel:
             return np.zeros(3)
 
         magnus_dir = np.cross(spin, velocity)
-        magnus_norm = float(np.linalg.norm(magnus_dir))
+        magnus_norm = float(math.hypot(*magnus_dir))
 
         if magnus_norm < 1e-10:
             return np.zeros(3)
