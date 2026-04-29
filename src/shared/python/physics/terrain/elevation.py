@@ -204,7 +204,7 @@ class ElevationMap:
             raise ValueError("x must be provided")
         dzdx, dzdy = self.get_gradient(x, y)
         normal = np.array([-dzdx, -dzdy, 1.0])
-        normal = normal / np.linalg.norm(normal)
+        normal = normal / math.hypot(*normal)
         return normal
 
     def get_slope_angle(self, x: float, y: float) -> float:

@@ -10,6 +10,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -46,7 +47,7 @@ class FrictionCone:
 
         # Ensure normal is unit vector
         object.__setattr__(self, "normal", np.asarray(self.normal, dtype=np.float64))
-        norm = np.linalg.norm(self.normal)
+        norm = math.hypot(*self.normal)
         if norm < 1e-10:
             raise ValueError("Normal vector cannot be zero")
         object.__setattr__(self, "normal", self.normal / norm)
@@ -76,7 +77,7 @@ class FrictionCone:
             return False  # Pulling force (tensile)
 
         f_t = force - f_n * self.normal
-        f_t_mag = float(np.linalg.norm(f_t))
+        f_t_mag = math.hypot(*f_t)
 
         return f_t_mag <= self.mu * f_n + tolerance
 
@@ -126,7 +127,7 @@ def _compute_cone_generators(
     if not (normal is not None):
         raise ValueError("normal must be provided")
     normal = np.asarray(normal, dtype=np.float64)
-    normal = normal / np.linalg.norm(normal)
+    normal = normal / math.hypot(*normal)
 
     # Find two vectors perpendicular to normal
     t1, t2 = _get_tangent_vectors(normal)
@@ -161,10 +162,10 @@ def _get_tangent_vectors(
 
     # Gram-Schmidt
     t1 = init - np.dot(init, normal) * normal
-    t1 = t1 / np.linalg.norm(t1)
+    t1 = t1 / math.hypot(*t1)
 
     t2 = np.cross(normal, t1)
-    t2 = t2 / np.linalg.norm(t2)
+    t2 = t2 / math.hypot(*t2)
 
     return t1, t2
 
@@ -197,7 +198,7 @@ def linearize_friction_cone(
     if not (mu is not None):
         raise ValueError("mu must be provided")
     normal = np.asarray(normal, dtype=np.float64)
-    normal = normal / np.linalg.norm(normal)
+    normal = normal / math.hypot(*normal)
 
     t1, t2 = _get_tangent_vectors(normal)
 
@@ -252,7 +253,7 @@ def compute_friction_cone_constraint(
     if not (contact_normal is not None):
         raise ValueError("contact_normal must be provided")
     contact_normal = np.asarray(contact_normal, dtype=np.float64)
-    contact_normal = contact_normal / np.linalg.norm(contact_normal)
+    contact_normal = contact_normal / math.hypot(*contact_normal)
 
     # Linearize friction cone
     A_friction, b_friction = linearize_friction_cone(
@@ -302,7 +303,7 @@ def project_to_friction_cone(
     # Decompose into normal and tangential
     f_n = float(np.dot(force, cone.normal))
     f_t = force - f_n * cone.normal
-    f_t_mag = float(np.linalg.norm(f_t))
+    f_t_mag = math.hypot(*f_t)
 
     # Case 1: Force is inside cone
     if cone.contains(force):

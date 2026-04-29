@@ -265,7 +265,7 @@ def compute_roll_direction(
     dzdx, dzdy = elevation.get_gradient(x, y)
 
     roll_dir = np.array([-dzdx, -dzdy])
-    magnitude = np.linalg.norm(roll_dir)
+    magnitude = math.hypot(*roll_dir)
 
     if magnitude < 1e-10:
         return np.zeros(2)

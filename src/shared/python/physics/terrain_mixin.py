@@ -14,6 +14,7 @@ Usage:
 
 from __future__ import annotations
 
+import math
 from typing import Any, Protocol
 
 import numpy as np
@@ -493,7 +494,7 @@ class TerrainAwareSimulation:
         # Decompose velocity into normal and tangential
         v_normal_mag = abs(np.dot(impact_velocity, normal))
         v_tangent = impact_velocity - np.dot(impact_velocity, normal) * normal
-        v_tangent_mag = np.linalg.norm(v_tangent)
+        v_tangent_mag = math.hypot(*v_tangent)
 
         # Compute energy absorption if using turf model
         if self.turf_model is not None:
@@ -503,7 +504,7 @@ class TerrainAwareSimulation:
         else:
             energy_absorbed = 0.0
             energy_remaining = float(
-                0.5 * ball_mass * np.linalg.norm(impact_velocity) ** 2
+                0.5 * ball_mass * math.hypot(*impact_velocity) ** 2
             )
 
         # Estimate bounce velocity
@@ -518,7 +519,7 @@ class TerrainAwareSimulation:
 
         return {
             "terrain_type": terrain_type,
-            "impact_speed": np.linalg.norm(impact_velocity),
+            "impact_speed": math.hypot(*impact_velocity),
             "rebound_speed": np.sqrt(rebound_v_normal**2 + rebound_v_tangent_mag**2),
             "energy_absorbed": energy_absorbed,
             "energy_remaining": energy_remaining,

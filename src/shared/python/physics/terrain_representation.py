@@ -578,7 +578,7 @@ class ElevationMap:
 
         # Normal from gradient: n = (-dz/dx, -dz/dy, 1) normalized
         normal = np.array([-dzdx, -dzdy, 1.0])
-        normal = normal / np.linalg.norm(normal)
+        normal = normal / math.hypot(*normal)
 
         return normal
 
@@ -1246,7 +1246,7 @@ def compute_roll_direction(
 
     # Roll direction is opposite to gradient (downhill)
     roll_dir = np.array([-dzdx, -dzdy])
-    magnitude = np.linalg.norm(roll_dir)
+    magnitude = math.hypot(*roll_dir)
 
     if magnitude < 1e-10:
         return np.zeros(2)
