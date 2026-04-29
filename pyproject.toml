@@ -177,7 +177,11 @@ select = [
     "PERF",  # performance anti-patterns
     "RET",   # return statement cleanup
     "BLE",   # blind except (broad-exception-caught)
+    "C90",   # mccabe cyclomatic complexity
 ]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
 ignore = [
     "E501",    # line too long (handled by formatter)
     "B008",    # function call in default arg (FastAPI Depends)
