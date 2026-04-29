@@ -41,8 +41,9 @@ class Sphere(GeometricPrimitive):
             raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
-        point = np.asarray(point).ravel()
-        return math.hypot(*(point - self.center)) <= self.radius
+        point = np.asarray(point)
+        diff = np.ravel(point - self.center)
+        return math.hypot(*diff) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -51,7 +52,7 @@ class Sphere(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*direction)
+        norm = math.hypot(*np.ravel(direction))
         if norm < 1e-10:
             return self.center.copy()
         return self.center + self.radius * direction / norm
@@ -117,7 +118,7 @@ class Box(GeometricPrimitive):
             raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
-        point = np.asarray(point).ravel()
+        point = np.asarray(point)
         # Transform to local frame
         local_point = self.rotation.T @ (point - self.center)
         return bool(np.all(np.abs(local_point) <= self.half_extents))
@@ -174,13 +175,13 @@ class Capsule(GeometricPrimitive):
     @property
     def length(self) -> float:
         """Get capsule length (distance between endpoints)."""
-        return math.hypot(*(self.point_b - self.point_a))
+        return math.hypot(*np.ravel(self.point_b - self.point_a))
 
     @property
     def axis(self) -> np.ndarray:
         """Get capsule axis direction (normalized)."""
         diff = self.point_b - self.point_a
-        length = math.hypot(*diff)
+        length = math.hypot(*np.ravel(diff))
         if length < 1e-10:
             return np.array([0.0, 0.0, 1.0])
         return diff / length
@@ -214,9 +215,10 @@ class Capsule(GeometricPrimitive):
             raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
-        point = np.asarray(point).ravel()
+        point = np.asarray(point)
         closest = self._closest_point_on_segment(point)
-        return math.hypot(*(point - closest)) <= self.radius
+        diff = np.ravel(point - closest)
+        return math.hypot(*diff) <= self.radius
 
     def compute_support(self, direction: np.ndarray) -> np.ndarray:
         """Compute support point."""
@@ -225,7 +227,7 @@ class Capsule(GeometricPrimitive):
         if not (direction is not None):
             raise ValueError("direction must be provided")
         direction = np.asarray(direction)
-        norm = math.hypot(*direction)
+        norm = math.hypot(*np.ravel(direction))
         if norm < 1e-10:
             return self.point_a.copy()
         d = direction / norm
@@ -268,7 +270,8 @@ class Cylinder(GeometricPrimitive):
             raise ValueError("height must be positive")
 
         # Normalize axis
-        norm = math.hypot(*self.axis)
+        diff = np.ravel(self.axis)
+        norm = math.hypot(*diff)
         if norm < 1e-10:
             raise ValueError("axis must be non-zero")
         self.axis = self.axis / norm
@@ -305,7 +308,7 @@ class Cylinder(GeometricPrimitive):
             raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
-        point = np.asarray(point).ravel()
+        point = np.asarray(point)
         # Project onto axis
         to_point = point - self.center
         along_axis = np.dot(to_point, self.axis)
@@ -393,7 +396,7 @@ class ConvexHull(GeometricPrimitive):
             raise ValueError("point must be provided")
         if not (point is not None):
             raise ValueError("point must be provided")
-        point = np.asarray(point).ravel()
+        point = np.asarray(point)
         # Simple heuristic: point is inside if closer to center than
         # all vertices in the same direction
         to_point = point - self.center

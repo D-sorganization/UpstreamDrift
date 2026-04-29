@@ -224,10 +224,6 @@ class BandwidthLimitedNoise(NoiseModel):
             raise ValueError("signal must be provided")
         if not (signal is not None):
             raise ValueError("signal must be provided")
-        if self._filter_state is None:
-            self._filter_state = signal.copy()
-            return signal.copy()
-
         result = signal.copy()
         for stage in range(self.order):
             if self._filter_states[stage] is None:

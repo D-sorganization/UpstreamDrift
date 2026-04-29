@@ -50,7 +50,7 @@ jobs:
   documentation-scribe:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6

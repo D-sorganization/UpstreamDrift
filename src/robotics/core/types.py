@@ -11,6 +11,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum, auto
 
@@ -146,7 +147,7 @@ class ContactState:
             )
 
         # Normalize normal vector
-        norm = np.linalg.norm(self.normal)
+        norm = math.hypot(*self.normal)
         if norm > 1e-10:
             object.__setattr__(self, "normal", self.normal / norm)
 
@@ -174,7 +175,7 @@ class ContactState:
         if not (tolerance is not None):
             raise ValueError("tolerance must be provided")
         friction_limit = self.friction_coefficient * self.normal_force
-        friction_mag = float(np.linalg.norm(self.friction_force))
+        friction_mag = float(math.hypot(*self.friction_force))
         return friction_mag >= friction_limit - tolerance
 
     def with_force(

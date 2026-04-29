@@ -73,7 +73,7 @@ jobs:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
     name: Cleanup Stale Jules PRs
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
 
     steps:
       - name: Find Stale Jules PRs

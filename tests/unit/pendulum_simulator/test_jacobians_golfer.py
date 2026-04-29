@@ -65,9 +65,9 @@ class TestJacobianGolfer:
         q[1] = 0.2
         result = jacobian_golfer(q, _P)
         for key, J in result.items():
-            assert np.all(
-                np.isfinite(J)
-            ), f"Non-finite values for {key} at nonzero angles"
+            assert np.all(np.isfinite(J)), (
+                f"Non-finite values for {key} at nonzero angles"
+            )
 
     def test_club_tip_different_from_hub(self) -> None:
         result = jacobian_golfer(_Q, _P)
@@ -97,9 +97,9 @@ class TestEllipsoidsGolfer:
         result = ellipsoids_golfer(_Q, _P)
         for key, entry in result.items():
             axes = entry["mob_semi_axes"]
-            assert axes.shape == (
-                2,
-            ), f"Key {key}: expected shape (2,), got {axes.shape}"
+            assert axes.shape == (2,), (
+                f"Key {key}: expected shape (2,), got {axes.shape}"
+            )
 
     def test_mob_semi_axes_non_negative(self) -> None:
         result = ellipsoids_golfer(_Q, _P)

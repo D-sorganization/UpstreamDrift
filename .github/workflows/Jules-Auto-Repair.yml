@@ -90,7 +90,7 @@ jobs:
   intelligent-repair:
     needs: [check-kill-switch, pick-runner]
     if: needs.check-kill-switch.outputs.enabled == 'true'
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # Prevent multiple repairs on same branch simultaneously
     concurrency:
       group: auto-repair-${{ inputs.branch || github.event.workflow_run.head_branch }}

@@ -63,7 +63,7 @@ jobs:
           fi
   process-comments:
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     # HARDENING: Skip bot-triggered events to prevent cascades
     if: |
       github.event_name == 'workflow_dispatch' ||

@@ -63,7 +63,7 @@ jobs:
           fi
   check-and-trigger:
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     env:
       BOT_TRIGGER_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN || github.token }}
     # Only run for bot-authored PRs or scheduled/manual runs

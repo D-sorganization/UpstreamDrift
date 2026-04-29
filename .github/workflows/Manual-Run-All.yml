@@ -48,7 +48,7 @@ jobs:
           fi
   dispatch-workflows:
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     steps:
       - name: Dispatch Assessment Generator
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'

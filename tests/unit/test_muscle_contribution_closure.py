@@ -161,9 +161,9 @@ if MYOSUITE_AVAILABLE:
                 # Extensors (e.g., 'TRIlong') should induce negative
                 # This depends on MyoSuite's specific coordinate system
                 # Validation: Just check they are non-zero when active
-                assert (
-                    np.linalg.norm(a_muscle) > 1e-8
-                ), f"Muscle {muscle_name} induced zero acceleration"
+                assert np.linalg.norm(a_muscle) > 1e-8, (
+                    f"Muscle {muscle_name} induced zero acceleration"
+                )
 
                 # Log for inspection (useful for understanding muscle function)
 

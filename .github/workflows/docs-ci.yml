@@ -57,7 +57,7 @@ jobs:
   quality-gate:
     name: quality-gate
     needs: pick-runner
-    runs-on: self-hosted
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6

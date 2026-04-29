@@ -384,7 +384,7 @@ jobs:
       - name: Checkout Tools Hub
         uses: actions/checkout@v6
         with:
-          repository: D-sorganization/Tools
+          repository: ${{ vars.TOOLS_REPOSITORY || format('{0}/Tools', github.repository_owner) }}
           path: _tools_dep
       - name: Symlink Tools for Workspace
         run: bash "$GITHUB_WORKSPACE/scripts/setup_tools_workspace.sh"
@@ -586,7 +586,7 @@ jobs:
 
         uses: actions/checkout@v6
         with:
-          repository: D-sorganization/Tools
+          repository: ${{ vars.TOOLS_REPOSITORY || format('{0}/Tools', github.repository_owner) }}
           path: _tools_dep
           sparse-checkout: |
             rust_core
