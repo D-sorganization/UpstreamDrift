@@ -36,7 +36,6 @@ from .sim_widget import MuJoCoSimWidget
 logger = get_logger(__name__)
 
 
-
 class GripModellingTab(QtWidgets.QWidget):
     """Tab for manipulating advanced hand models (Shadow, Allegro)."""
 

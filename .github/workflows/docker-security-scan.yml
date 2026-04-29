@@ -21,7 +21,7 @@ on:
 jobs:
   trivy-scan:
     name: Trivy Container Scan
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
       contents: read
@@ -32,6 +32,7 @@ jobs:
 
       - name: Build Docker image
         # --target runtime avoids pulling in the ~10 GB training stage (PyTorch + CUDA)
+        shell: bash
         run: docker build --target runtime -t upstreamdrift:ci .
 
       - name: Run Trivy vulnerability scanner
@@ -43,6 +44,7 @@ jobs:
           severity: "CRITICAL,HIGH"
           # Don't fail the build initially - triage first
           exit-code: "0"
+          timeout: "30m0s"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -60,3 +62,4 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           vuln-type: "os,library"
+          timeout: "30m0s"

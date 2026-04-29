@@ -502,9 +502,32 @@ class TestIssue2472DatasetGeneratorInvariants:
         dataset = gen.generate(config)
 
         sample = dataset.samples[0]
-        assert "potential" in sample.energies, (
-            "potential_energy must be present in sample.energies"
-        )
-        assert np.any(sample.energies["potential"] != 0.0), (
-            "potential_energy must not be all zeros when engine provides it"
-        )
+        assert (
+            "potential" in sample.energies
+        ), "potential_energy must be present in sample.energies"
+        assert np.any(
+            sample.energies["potential"] != 0.0
+        ), "potential_energy must not be all zeros when engine provides it"
+
+    def test_export_to_hdf5(
+        self, generator: DatasetGenerator, basic_config: GeneratorConfig
+    ) -> None:
+        """Test HDF5 export creates correct files and groups."""
+        dataset = generator.generate(basic_config)
+        import tempfile
+        from pathlib import Path
+
+        import h5py
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            hdf5_path = generator.export_to_hdf5(
+                dataset, Path(tmpdir) / "test_out.hdf5"
+            )
+            assert hdf5_path.exists()
+
+            with h5py.File(hdf5_path, "r") as f:
+                assert "metadata" in f
+                assert "samples" in f
+
+                samples_grp = f["samples"]
+                assert len(samples_grp) == 3

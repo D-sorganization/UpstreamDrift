@@ -60,8 +60,6 @@ _NON_LEVEL_METADATA_KEYS: frozenset[str] = frozenset(
 )
 
 
-
-
 router = APIRouter()
 
 

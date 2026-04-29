@@ -35,7 +35,6 @@ class TestCalculationEngineProtocol:
     def test_protocol_structural_check(self) -> None:
         """A class with calculate() should satisfy the protocol at runtime."""
 
-
         class FakeRequest(BaseModel):
             value: float
 
