@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -37,7 +38,7 @@ def simulate_with_feedback(
         raise ValueError("stroke_params must be provided")
     result = sim.simulate_putt(stroke_params)
 
-    distance_from_hole = np.linalg.norm(result.final_position - sim.green.hole_position)
+    distance_from_hole = math.hypot(*(result.final_position - sim.green.hole_position))
 
     feedback = {
         "distance_from_hole": distance_from_hole,
@@ -138,7 +139,7 @@ def compute_aim_line(
 
     aim_point = target - break_info["break_direction"] * break_info["total_break"]
 
-    distance = float(np.linalg.norm(target - ball_position))
+    distance = float(math.hypot(*(target - ball_position)))
     avg_slope = np.dot(
         break_info["average_slope"], (target - ball_position) / (distance + 1e-10)
     )

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import math
+
 import numpy as np
 
 from src.shared.python.core.physics_constants import (
@@ -24,7 +26,7 @@ def compute_wind_force(
     A = GOLF_BALL_CROSS_SECTIONAL_AREA_M2
 
     relative_v = wind_direction * wind_speed - ball_velocity[:2]
-    rel_speed = np.linalg.norm(relative_v)
+    rel_speed = math.hypot(*relative_v)
 
     if rel_speed < 0.1:
         return np.zeros(2)

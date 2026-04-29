@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -277,7 +278,7 @@ class SurfaceGeometryMixin:
 
         # Project point onto ridge line
         line_vec = end - start
-        line_len = np.linalg.norm(line_vec)
+        line_len = math.hypot(*line_vec)
         if line_len < 1e-10:
             return 0.0
 
@@ -291,7 +292,7 @@ class SurfaceGeometryMixin:
 
         # Distance from line
         closest_on_line = start + projection * line_dir
-        distance = np.linalg.norm(position - closest_on_line)
+        distance = math.hypot(*(position - closest_on_line))
 
         if distance > width:
             return 0.0
@@ -312,7 +313,7 @@ class SurfaceGeometryMixin:
         radius = depression["radius"]
         depth = depression["depth"]
 
-        distance = np.linalg.norm(position - center)
+        distance = math.hypot(*(position - center))
 
         if distance > radius:
             return 0.0

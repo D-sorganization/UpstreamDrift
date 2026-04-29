@@ -79,7 +79,8 @@ class SimulationResult:
         if len(self.positions) < 2:
             return 0.0
 
-        distances = np.linalg.norm(np.diff(self.positions, axis=0), axis=1)
+        diffs = np.diff(self.positions, axis=0)
+        distances = np.sqrt(np.einsum("ij,ij->i", diffs, diffs))
         return float(np.sum(distances))
 
     @property

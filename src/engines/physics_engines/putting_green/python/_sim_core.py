@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -423,7 +424,7 @@ class PuttingGreenSimulator:
         if not (speed is not None):
             raise ValueError("speed must be provided")
         self._wind_speed = speed
-        mag = np.linalg.norm(direction)
+        mag = math.hypot(*direction)
         if mag > 0:
             self._wind_direction = direction / mag
 

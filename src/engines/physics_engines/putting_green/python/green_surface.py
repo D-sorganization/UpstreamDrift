@@ -132,7 +132,7 @@ class GreenSurface(
             raise ValueError("position must be provided")
         if not (position is not None):
             raise ValueError("position must be provided")
-        distance = np.linalg.norm(position[:2] - self._hole_position)
+        distance = math.hypot(*(position[:2] - self._hole_position))
 
         if distance > self.hole_radius:
             return False

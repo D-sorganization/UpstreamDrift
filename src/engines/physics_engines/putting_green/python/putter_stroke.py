@@ -17,6 +17,7 @@ References:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -88,7 +89,7 @@ class StrokeParameters:
     def __post_init__(self) -> None:
         """Normalize direction vector."""
         self.direction = np.array(self.direction, dtype=np.float64)
-        mag = np.linalg.norm(self.direction)
+        mag = math.hypot(*self.direction)
         if mag > 0:
             self.direction = self.direction / mag
         else:
@@ -340,7 +341,7 @@ class PutterStroke:
         v_transfer = (m1 * params.speed * (1 + e)) / (m1 + m2)
 
         # Off-center impact reduces velocity
-        impact_offset = float(np.linalg.norm(params.impact_location))
+        impact_offset = float(math.hypot(*params.impact_location))
         efficiency = self._compute_impact_efficiency(impact_offset)
 
         ball_speed = v_transfer * efficiency
@@ -479,7 +480,7 @@ class PutterStroke:
         if not (ball_position is not None):
             raise ValueError("ball_position must be provided")
         to_target = target - ball_position
-        distance = np.linalg.norm(to_target)
+        distance = math.hypot(*to_target)
 
         if distance < 1e-10:
             return target

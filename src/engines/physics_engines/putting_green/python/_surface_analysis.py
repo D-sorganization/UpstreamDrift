@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
@@ -36,7 +37,7 @@ class SurfaceAnalysisMixin:
 
         # Perpendicular to putt direction
         putt_dir = end - start
-        putt_len = np.linalg.norm(putt_dir)
+        putt_len = math.hypot(*putt_dir)
         if putt_len < 1e-10:
             return {
                 "total_break": 0.0,
@@ -94,7 +95,7 @@ class SurfaceAnalysisMixin:
             "positions": np.array(positions),
             "elevations": np.array([self.get_elevation_at(p) for p in positions]),  # type: ignore[attr-defined]
             "slopes": np.array([self.get_slope_at(p) for p in positions]),  # type: ignore[attr-defined]
-            "distance": np.linalg.norm(end - start),
+            "distance": math.hypot(*(end - start)),
         }
 
     def to_heightmap(self, resolution: int = 100) -> np.ndarray:
