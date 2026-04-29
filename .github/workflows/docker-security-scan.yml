@@ -21,7 +21,7 @@ on:
 jobs:
   trivy-scan:
     name: Trivy Container Scan
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
       contents: read
