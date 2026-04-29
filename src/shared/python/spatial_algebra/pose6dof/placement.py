@@ -1,3 +1,4 @@
+import math
 from collections.abc import Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -101,10 +102,12 @@ class EntityPlacement:
         if point is None:
             raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
-        return float(np.linalg.norm(self.pose.position - point))
+        arr = np.ravel(self.pose.position - point)
+        return 0.0 if arr.size == 0 else math.hypot(*arr)
 
     def distance_to_entity(self, other: "EntityPlacement") -> float:
-        return float(np.linalg.norm(self.pose.position - other.pose.position))
+        arr = np.ravel(self.pose.position - other.pose.position)
+        return 0.0 if arr.size == 0 else math.hypot(*arr)
 
     def to_transform(self) -> Transform6DOF:
         return Transform6DOF.from_pose(self.pose)

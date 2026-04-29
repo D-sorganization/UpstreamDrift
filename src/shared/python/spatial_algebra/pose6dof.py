@@ -15,6 +15,7 @@ Follows pragmatic programmer principles:
 
 from __future__ import annotations
 
+import math
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -1048,11 +1049,13 @@ class EntityPlacement:
         if not (point is not None):
             raise ValueError("point must be provided")
         point = np.asarray(point, dtype=np.float64)
-        return float(np.linalg.norm(self.pose.position - point))
+        arr = np.ravel(self.pose.position - point)
+        return 0.0 if arr.size == 0 else math.hypot(*arr)
 
     def distance_to_entity(self, other: EntityPlacement) -> float:
         """Calculate distance to another entity."""
-        return float(np.linalg.norm(self.pose.position - other.pose.position))
+        arr = np.ravel(self.pose.position - other.pose.position)
+        return 0.0 if arr.size == 0 else math.hypot(*arr)
 
     # -------------------------------------------------------------------------
     # Conversion Methods
