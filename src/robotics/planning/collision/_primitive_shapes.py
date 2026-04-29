@@ -49,6 +49,9 @@ class Sphere(GeometricPrimitive):
         return math.hypot(*(point - self.center)) <= self.radius
 =======
 <<<<<<< HEAD
+        return math.hypot(*(point - self.center)) <= self.radius
+=======
+<<<<<<< HEAD
         return float(math.hypot(*(point - self.center))) <= self.radius
 =======
         return math.hypot(*(point - self.center)) <= self.radius
@@ -193,6 +196,9 @@ class Capsule(GeometricPrimitive):
         return math.hypot(*(self.point_b - self.point_a))
 =======
 <<<<<<< HEAD
+        return math.hypot(*(self.point_b - self.point_a))
+=======
+<<<<<<< HEAD
         return float(math.hypot(*(self.point_b - self.point_a)))
 =======
         return math.hypot(*(self.point_b - self.point_a))
@@ -242,6 +248,9 @@ class Capsule(GeometricPrimitive):
         closest = self._closest_point_on_segment(point)
 <<<<<<< HEAD
         return float(math.hypot(*np.atleast_1d(np.squeeze(point - closest)))) <= self.radius
+=======
+<<<<<<< HEAD
+        return math.hypot(*(point - closest)) <= self.radius
 =======
 <<<<<<< HEAD
         return math.hypot(*(point - closest)) <= self.radius
