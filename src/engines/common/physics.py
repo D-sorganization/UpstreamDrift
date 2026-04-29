@@ -238,7 +238,9 @@ class AerodynamicsCalculator:
         # Lift direction: perpendicular to velocity, in spin plane
         # For backspin, this creates upward force
         # ⚡ Bolt: math.hypot is much faster than np.linalg.norm for small arrays
-        spin_axis = spin / (math.hypot(*spin) + 1e-10)
+        spin_vec = np.asarray(spin, dtype=float).reshape(-1)
+        spin_mag = 0.0 if spin_vec.size == 0 else math.hypot(*spin_vec)
+        spin_axis = spin / (spin_mag + 1e-10)
         lift_dir = np.cross(spin_axis, velocity)
         # ⚡ Bolt: math.hypot(*vec) is ~5x faster than np.linalg.norm for small magnitudes
         lift_norm = math.hypot(*lift_dir)
@@ -273,7 +275,8 @@ class AerodynamicsCalculator:
         if not (velocity is not None):
             raise ValueError("velocity must be provided")
         speed = float(math.hypot(*velocity))
-        spin_mag = float(math.hypot(*spin))
+        spin_vec = np.asarray(spin, dtype=float).reshape(-1)
+        spin_mag = float(0.0 if spin_vec.size == 0 else math.hypot(*spin_vec))
 
         if speed < 1e-6 or spin_mag < 1e-6:
             return np.zeros(3)
