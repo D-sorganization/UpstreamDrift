@@ -15,8 +15,9 @@ Contains widgets and a dialog for advanced signal processing analysis:
 
 from __future__ import annotations
 
-import numpy as np
 from typing import Any
+
+import numpy as np
 from PyQt6 import QtWidgets
 
 from src.shared.python.biomechanics.swing_plane_analysis import SwingPlaneAnalyzer
