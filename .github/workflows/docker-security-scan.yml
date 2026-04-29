@@ -43,6 +43,9 @@ jobs:
           severity: "CRITICAL,HIGH"
           # Don't fail the build initially - triage first
           exit-code: "0"
+          timeout: "30m0s"
+          timeout: 30m0s
+          timeout: "30m"
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
@@ -60,3 +63,6 @@ jobs:
           exit-code: "1"
           ignore-unfixed: true
           vuln-type: "os,library"
+          timeout: "30m0s"
+          timeout: 30m0s
+          timeout: "30m"
