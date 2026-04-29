@@ -10,6 +10,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -256,7 +257,10 @@ class IMUSensor:
             raise ValueError("angular_vel must be provided")
         if not (angular_vel is not None):
             raise ValueError("angular_vel must be provided")
-        omega_mag = float(np.linalg.norm(angular_vel))
+        angular_vel_arr = np.asarray(angular_vel, dtype=float).reshape(-1)
+        omega_mag = float(
+            0.0 if angular_vel_arr.size == 0 else math.hypot(*angular_vel_arr)
+        )
 
         if omega_mag < 1e-10:
             return
@@ -278,7 +282,10 @@ class IMUSensor:
         self._orientation = _quaternion_multiply(self._orientation, dq)
 
         # Normalize
-        self._orientation /= np.linalg.norm(self._orientation)
+        orientation_arr = np.asarray(self._orientation, dtype=float).reshape(-1)
+        self._orientation /= float(
+            1.0 if orientation_arr.size == 0 else math.hypot(*orientation_arr)
+        )
 
     def reset(self) -> None:
         """Reset sensor state."""
@@ -300,7 +307,10 @@ class IMUSensor:
             raise ValueError(f"Quaternion must be (4,), got {quaternion.shape}")
 
         # Normalize
-        self._orientation = quaternion / np.linalg.norm(quaternion)
+        quaternion_arr = np.asarray(quaternion, dtype=float).reshape(-1)
+        self._orientation = quaternion / float(
+            1.0 if quaternion_arr.size == 0 else math.hypot(*quaternion_arr)
+        )
 
     def get_gravity_in_sensor_frame(self) -> NDArray[np.float64]:
         """Get gravity vector in current sensor frame.

@@ -9,6 +9,7 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
+import math
 import os
 from typing import Any
 
@@ -490,7 +491,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                     mat_diff[1, 0] - mat_diff[0, 1],
                 ]
             )
-            axis_norm = np.linalg.norm(axis)
+            axis_arr = np.asarray(axis, dtype=float).reshape(-1)
+            axis_norm = float(0.0 if axis_arr.size == 0 else math.hypot(*axis_arr))
             if axis_norm > 1e-10:
                 axis = axis / axis_norm
 

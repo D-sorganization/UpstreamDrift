@@ -10,6 +10,7 @@ Design by Contract:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -308,7 +309,8 @@ class ForceTorqueSensor(ContractChecker):
         force = wrench[:3]
         torque = wrench[3:]
 
-        force_mag = float(np.linalg.norm(force))
+        force_arr = np.asarray(force, dtype=float).reshape(-1)
+        force_mag = float(0.0 if force_arr.size == 0 else math.hypot(*force_arr))
         if force_mag < 1e-6:
             return None
 
