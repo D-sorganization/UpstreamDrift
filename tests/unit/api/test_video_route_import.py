@@ -18,9 +18,9 @@ class TestVideoRouteImportFallback:
         except Exception:  # noqa: BLE001
             return  # env missing other deps; skip
 
-        assert hasattr(
-            video_mod, "_VIDEO_DEPS_AVAILABLE"
-        ), "_VIDEO_DEPS_AVAILABLE flag must exist so code paths can gate on dep availability"
+        assert hasattr(video_mod, "_VIDEO_DEPS_AVAILABLE"), (
+            "_VIDEO_DEPS_AVAILABLE flag must exist so code paths can gate on dep availability"
+        )
         assert isinstance(video_mod._VIDEO_DEPS_AVAILABLE, bool)
 
     def test_video_route_does_not_use_module_level_pipeline_type(self) -> None:

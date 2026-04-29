@@ -153,9 +153,7 @@ def cmd_check(args: argparse.Namespace) -> int:  # noqa: ARG001
     try:
         cfg = _get_alembic_config()
         command.check(cfg)
-        print(
-            "Migration check passed: models and migrations are in sync."
-        )  # noqa: T201
+        print("Migration check passed: models and migrations are in sync.")  # noqa: T201
         return 0
     except Exception as exc:  # noqa: BLE001
         print(  # noqa: T201
