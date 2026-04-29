@@ -37,6 +37,7 @@ jobs:
           GH_TOKEN: ${{ secrets.RUNNER_CHECK_TOKEN }}
         shell: bash
         run: |
+
           if [ -n "${GITHUB_OUTPUT:-}" ]; then
             mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           fi
@@ -72,6 +73,7 @@ jobs:
         id: check
         shell: bash
         run: |
+
           # Get the list of changed files in this PR
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
 
@@ -83,7 +85,7 @@ jobs:
           SOURCE_CHANGED=false
           SPEC_CHANGED=false
 
-          while IFS= read -r file; do
+          while IFS= read -r file || [ -n "$file" ]; do
             # Check if SPEC.md was modified
             if [[ "$file" == "SPEC.md" ]]; then
               SPEC_CHANGED=true
@@ -159,6 +161,7 @@ jobs:
         if: steps.check.outputs.needs_update == 'true'
         shell: bash
         run: |
+
           echo "::error::Source files changed but SPEC.md was not updated."
           echo "Update SPEC.md or add the 'spec-exempt' label to bypass."
           exit 1
@@ -167,6 +170,7 @@ jobs:
         if: steps.check.outputs.needs_update == 'false'
         shell: bash
         run: |
+
           echo "- Spec check passed."
           if [[ "${{ steps.check.outputs.spec_changed }}" == "true" ]]; then
             echo "   SPEC.md was updated alongside source changes. Good."
