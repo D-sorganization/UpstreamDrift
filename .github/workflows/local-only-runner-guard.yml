@@ -1,4 +1,5 @@
 # Triggered for required-check coverage on PR #3501 lint+format baseline.
+# Re-touch for required-check coverage on PR #3500 signal_toolkit tests.
 name: Local-Only Workflow Runner Guard
 
 on:
