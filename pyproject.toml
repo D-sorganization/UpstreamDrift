@@ -188,6 +188,10 @@ ignore = [
 "scripts/**" = ["T201"]
 "tests/**" = ["T201"]
 "examples/**" = ["T201"]
+# Jupyter notebooks: print() is the natural output mechanism for interactive
+# analysis. The CLAUDE.md "no print() in src/" rule targets *.py modules.
+"src/shared/python/upstream_drift_tools/process_calculators/psa_package/**/*.ipynb" = ["T201"]
+"**/*.ipynb" = ["T201"]
 
 [tool.mypy]
 python_version = "3.10"
