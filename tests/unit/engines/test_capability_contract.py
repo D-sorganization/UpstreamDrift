@@ -350,9 +350,9 @@ class TestEngineCapabilityContractGeneral:
 
         if Capability.MASS_MATRIX in caps:
             result = engine.compute_mass_matrix()
-            assert not isinstance(
-                result, type(NotImplemented)
-            ), "compute_mass_matrix raised NotImplementedError for declared capability"
+            assert not isinstance(result, type(NotImplemented)), (
+                "compute_mass_matrix raised NotImplementedError for declared capability"
+            )
 
         if Capability.INVERSE_DYNAMICS in caps:
             result = engine.compute_inverse_dynamics(qacc)

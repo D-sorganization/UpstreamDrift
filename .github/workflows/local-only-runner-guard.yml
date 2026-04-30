@@ -1,3 +1,4 @@
+# Triggered for required-check coverage on PR #3501 lint+format baseline.
 name: Local-Only Workflow Runner Guard
 
 on:

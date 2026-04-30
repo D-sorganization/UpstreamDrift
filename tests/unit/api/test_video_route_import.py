@@ -22,9 +22,9 @@ class TestVideoRouteImportFallback:
         except Exception:
             return  # env missing other deps; skip
 
-        assert hasattr(
-            video_mod, "_VIDEO_DEPS_AVAILABLE"
-        ), "_VIDEO_DEPS_AVAILABLE flag must exist so code paths can gate on dep availability"
+        assert hasattr(video_mod, "_VIDEO_DEPS_AVAILABLE"), (
+            "_VIDEO_DEPS_AVAILABLE flag must exist so code paths can gate on dep availability"
+        )
         assert isinstance(video_mod._VIDEO_DEPS_AVAILABLE, bool)
 
     @pytest.mark.xfail(

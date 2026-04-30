@@ -369,9 +369,7 @@ class ModelLibrary:
             # Download URDF file
             logger.info(f"Downloading URDF: {model_info['urdf_url']}")
             validate_url_https_only(model_info["urdf_url"])
-            with urllib.request.urlopen(
-                model_info["urdf_url"]
-            ) as response:  # nosec B310 - URL validated by validate_url_https_only() above
+            with urllib.request.urlopen(model_info["urdf_url"]) as response:  # nosec B310 - URL validated by validate_url_https_only() above
                 urdf_content = response.read().decode("utf-8")
                 urdf_path.write_text(urdf_content, encoding="utf-8")
 

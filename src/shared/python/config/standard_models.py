@@ -151,9 +151,7 @@ class StandardModelManager:
 
                 logger.info(f"Downloading {url} -> {local_path}")
                 validate_url_https_only(url)
-                urllib.request.urlretrieve(
-                    url, local_path
-                )  # nosec B310 - URL validated by validate_url_https_only() above
+                urllib.request.urlretrieve(url, local_path)  # nosec B310 - URL validated by validate_url_https_only() above
 
             # Download mesh files (this is a simplified approach - in practice you'd want
             # to download the actual mesh files from the repository)

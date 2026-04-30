@@ -34,9 +34,9 @@ def waivers() -> list[dict]:
     )
     data = yaml.safe_load(WAIVERS_PATH.read_text()) or {}
     entries = data.get("waivers")
-    assert isinstance(
-        entries, list
-    ), "Top-level 'waivers:' key must be a list of mappings."
+    assert isinstance(entries, list), (
+        "Top-level 'waivers:' key must be a list of mappings."
+    )
     return entries
 
 
@@ -46,9 +46,9 @@ def test_every_waiver_has_required_fields(waivers: list[dict]) -> None:
         assert isinstance(entry, dict), f"waivers[{idx}] is not a mapping"
         missing = REQUIRED_FIELDS - entry.keys()
         cve = entry.get("cve", "<unknown>")
-        assert (
-            not missing
-        ), f"waivers[{idx}] ({cve}) is missing required fields: {sorted(missing)}"
+        assert not missing, (
+            f"waivers[{idx}] ({cve}) is missing required fields: {sorted(missing)}"
+        )
 
 
 def test_every_waiver_expires_is_parseable_date(waivers: list[dict]) -> None:
@@ -58,9 +58,9 @@ def test_every_waiver_expires_is_parseable_date(waivers: list[dict]) -> None:
         cve = entry["cve"]
         if isinstance(expires, _dt.date) and not isinstance(expires, _dt.datetime):
             continue  # YAML date scalar is accepted
-        assert isinstance(
-            expires, str
-        ), f"{cve}: expires must be a YYYY-MM-DD string, got {type(expires).__name__}"
+        assert isinstance(expires, str), (
+            f"{cve}: expires must be a YYYY-MM-DD string, got {type(expires).__name__}"
+        )
         try:
             _dt.date.fromisoformat(expires)
         except ValueError as exc:  # pragma: no cover - assertion failure

@@ -57,9 +57,7 @@ def handle_mouse_move(owner: QWidget, event: QMouseEvent | None) -> None:
         owner._last_mouse_pos = event.position()
 
 
-def handle_mouse_release(
-    owner: QWidget, event: QMouseEvent | None
-) -> None:  # noqa: ARG001
+def handle_mouse_release(owner: QWidget, event: QMouseEvent | None) -> None:  # noqa: ARG001
     """Clear the drag-start position on button release.
 
     Args:

@@ -125,9 +125,9 @@ class TestBasicContactPhysics:
         )
 
         # Ball should be near ground (not still at 1m)
-        assert (
-            final_height < 0.1
-        ), f"Ball should settle near ground: height={final_height:.3f}m"
+        assert final_height < 0.1, (
+            f"Ball should settle near ground: height={final_height:.3f}m"
+        )
 
         # Log for cross-engine comparison
         np.sqrt(E_final / E_initial)
@@ -203,9 +203,9 @@ class TestBasicContactPhysics:
 
         # Verify contract (issue #3052): CONTACT_FORCES not in capabilities
         caps = engine.capabilities()
-        assert (
-            Capability.CONTACT_FORCES not in caps
-        ), "Pinocchio declares CONTACT_FORCES despite not supporting it"
+        assert Capability.CONTACT_FORCES not in caps, (
+            "Pinocchio declares CONTACT_FORCES despite not supporting it"
+        )
 
         # Verify NotImplementedError is raised when caller ignores capability check
         with pytest.raises(
