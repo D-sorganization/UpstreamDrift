@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - name: Build Docker image
         # --target runtime avoids pulling in the ~10 GB training stage (PyTorch + CUDA)
@@ -36,7 +36,7 @@ jobs:
         run: docker build --target runtime -t upstreamdrift:ci .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: "upstreamdrift:ci"
           format: "sarif"
@@ -47,13 +47,13 @@ jobs:
           timeout: "30m0s"
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@b25d0ebf40e5b63ee81e1bd6e5d2a12b7c2aeb61
         if: always()
         with:
           sarif_file: "trivy-results.sarif"
 
       - name: Run Trivy (table output for PR comments)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: "upstreamdrift:ci"
           format: "table"

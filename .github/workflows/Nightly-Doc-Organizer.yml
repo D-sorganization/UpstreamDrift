@@ -39,7 +39,7 @@ jobs:
     if: vars.WORKFLOWS_PAUSED != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
 
@@ -87,7 +87,7 @@ jobs:
           rm -rf .jules/debug_* || true
 
       - name: Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9
         with:
           commit_message: "docs: nightly documentation organization and workflow update"
           file_pattern: "docs/maintenance/WORKFLOWS.md docs/review_archive/* .jules/temp_* .jules/debug_*"
