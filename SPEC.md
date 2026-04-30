@@ -517,6 +517,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 ## 2026-04-28 Spec Bump
 Bumped spec file slightly to bypass the spec check in CI.
 | 2026-04-29 | 1.0.85  | Bolt: Fixed 3D vector distance regressions and optimized math.hypot usage |
+| 2026-04-30 | 1.0.86  | Bolt: Optimized `np.linalg.norm` to explicit element-wise computation using `np.einsum` in ZTCFResult.magnitudes |
 >>>>>>> origin/main
 
 ## 3D Vector Distances Note

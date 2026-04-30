@@ -218,4 +218,3 @@ jobs:
           echo "- **Missing Function Docs**: ${{ steps.scan.outputs.missing_func }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "See full report in docs/assessments/documentation/LATEST.md" >> $GITHUB_STEP_SUMMARY
-

@@ -216,4 +216,3 @@ jobs:
         with:
           commit_message: "docs(review): code quality review $(date +%Y-%m-%d)"
           file_pattern: "docs/assessments/**/*.md"
-

@@ -393,4 +393,3 @@ jobs:
           echo "- **PR numbers**: ${{ steps.analyze.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Queue has been cleared. Processed comments archived." >> $GITHUB_STEP_SUMMARY
-

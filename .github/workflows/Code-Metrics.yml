@@ -61,7 +61,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           radon cc src -s -a -nb C | head -20 >> $GITHUB_STEP_SUMMARY || true
           echo '```' >> $GITHUB_STEP_SUMMARY
-          
+
           echo "### Maintainability Index" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           radon mi src -s -nb B | head -20 >> $GITHUB_STEP_SUMMARY || true

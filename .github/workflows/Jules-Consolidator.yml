@@ -152,4 +152,3 @@ jobs:
             --label "jules:consolidation" \
             --base main \
             --head "$BRANCH_NAME"
-

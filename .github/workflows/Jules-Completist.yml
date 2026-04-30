@@ -272,4 +272,3 @@ jobs:
           file_pattern: |
             docs/assessments/completist/*.md
             .jules/completist.md
-
