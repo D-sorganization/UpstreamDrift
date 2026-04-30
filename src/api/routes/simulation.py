@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
@@ -19,6 +19,7 @@ from src.shared.python.core.contracts import precondition
 from ..dependencies import get_logger, get_simulation_service, get_task_manager
 from ..models.requests import SimulationRequest
 from ..models.responses import SimulationResponse
+from ..rate_limit import get_limit, limiter
 
 if TYPE_CHECKING:
     from ..services.simulation_service import SimulationService
@@ -27,11 +28,13 @@ router = APIRouter()
 
 
 @router.post("/simulate", response_model=SimulationResponse)
+@limiter.limit(get_limit("API_LIMIT_SIMULATE", "5/minute"))
 @precondition(
-    lambda request, service=None, logger=None: request is not None,
+    lambda http_request, request, service=None, logger=None: request is not None,
     "Simulation request must not be None",
 )
 async def run_simulation(
+    http_request: Request,
     request: SimulationRequest,
     service: SimulationService = Depends(get_simulation_service),
     logger: Any = Depends(get_logger),
@@ -39,6 +42,7 @@ async def run_simulation(
     """Run a physics simulation.
 
     Args:
+        http_request: FastAPI request object (used by the rate limiter).
         request: Simulation parameters.
         service: Injected simulation service.
         logger: Injected logger.
@@ -77,7 +81,9 @@ async def run_simulation(
 
 
 @router.post("/simulate/async")
+@limiter.limit(get_limit("API_LIMIT_SIMULATE_ASYNC", "10/minute"))
 async def run_simulation_async(
+    http_request: Request,
     request: SimulationRequest,
     background_tasks: BackgroundTasks,
     service: SimulationService = Depends(get_simulation_service),
@@ -86,6 +92,7 @@ async def run_simulation_async(
     """Start an asynchronous simulation.
 
     Args:
+        http_request: FastAPI request object (used by the rate limiter).
         request: Simulation parameters.
         background_tasks: FastAPI background task manager.
         service: Injected simulation service.

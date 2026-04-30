@@ -12,10 +12,11 @@ See issue #1206
 from __future__ import annotations
 
 import numpy as np
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel, Field
 
 from src.api.middleware.error_handler import handle_api_errors
+from src.api.rate_limit import get_limit, limiter
 from src.shared.python.core.contracts import precondition
 
 router = APIRouter(prefix="/tools/putting-green", tags=["putting-green"])
@@ -120,12 +121,16 @@ class GreenContourResponse(BaseModel):
 
 
 @router.post("/simulate", response_model=PuttSimulationResponse)
+@limiter.limit(get_limit("API_LIMIT_PUTT_SIMULATE", "10/minute"))
 @precondition(
-    lambda request: request.direction_x != 0.0 or request.direction_y != 0.0,
+    lambda http_request, request: request.direction_x != 0.0
+    or request.direction_y != 0.0,
     "Putt direction vector must not be zero",
 )
 @handle_api_errors
-async def simulate_putt(request: PuttSimulationRequest) -> PuttSimulationResponse:
+async def simulate_putt(
+    http_request: Request, request: PuttSimulationRequest
+) -> PuttSimulationResponse:
     """Simulate a single putt with given parameters.
 
     See issue #1206

@@ -27,9 +27,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 from src.shared.python.config.environment import get_environment
 from src.shared.python.engine_core.engine_manager import EngineManager
@@ -46,6 +45,7 @@ from .config import (
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
+from .rate_limit import limiter
 from .route_registry import register_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
@@ -55,9 +55,6 @@ from .versioning import get_app_version
 
 setup_logging()
 logger = get_logger(__name__)
-
-# Rate limiting
-limiter = Limiter(key_func=get_remote_address)
 
 # API version constant
 API_VERSION = "v1"
