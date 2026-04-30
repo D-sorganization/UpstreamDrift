@@ -1,6 +1,11 @@
 """Aerodynamic force models: DragModel, LiftModel, MagnusModel.
 
 Each model calculates one orthogonal force type from ball velocity and spin.
+
+The :class:`DragModel` Reynolds-number correction now delegates to
+:func:`src.shared.python.physics.atmosphere.cd_dimpled_sphere` which models
+the drag-crisis behaviour of dimpled spheres (Bearman & Harvey 1976,
+Mehta 1985); see issue #3504.
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ from src.shared.python.core.physics_constants import (
     GOLF_BALL_RADIUS_M,
     MAGNUS_COEFFICIENT,
 )
+from src.shared.python.physics.atmosphere import cd_dimpled_sphere
 
 
 class DragModel:
@@ -74,7 +80,14 @@ class DragModel:
         velocity: np.ndarray,
         air_density: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3),
     ) -> float:
-        """Get drag coefficient, optionally corrected for Reynolds number."""
+        """Get drag coefficient, optionally corrected for Reynolds number.
+
+        Uses the smoothed drag-crisis model from
+        :func:`src.shared.python.physics.atmosphere.cd_dimpled_sphere`
+        (Bearman & Harvey 1976, Mehta 1985). Reynolds numbers outside the
+        supported [1e3, 1e7] range fall back to the nearest endpoint so the
+        integrator never sees a discontinuity.
+        """
         if velocity is None:
             raise ValueError("velocity must be provided")
         if not self.reynolds_correction:
@@ -87,16 +100,10 @@ class DragModel:
         viscosity = float(AIR_VISCOSITY_KG_M_S)
         diameter = 2 * self.ball_radius
         re = air_density * speed * diameter / viscosity
-
-        laminar_cd = 0.5
-        turbulent_cd = self.base_coefficient
-
-        if re < 8e4:
-            return laminar_cd
-        if re < 2e5:
-            fraction = (re - 8e4) / (2e5 - 8e4)
-            return laminar_cd - fraction * (laminar_cd - turbulent_cd)
-        return turbulent_cd
+        # Clamp to the model's supported range; outside it the underlying
+        # correlation extrapolation is meaningless for golf balls.
+        re_clamped = max(1.0e3, min(1.0e7, re))
+        return cd_dimpled_sphere(re_clamped, base_cd=self.base_coefficient)
 
 
 class LiftModel:

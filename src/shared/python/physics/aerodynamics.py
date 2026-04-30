@@ -15,7 +15,9 @@ Design Principles (Pragmatic Programmer):
 
 Key Components:
 - AerodynamicsConfig: Immutable configuration with toggles
-- DragModel: Velocity-dependent drag with Reynolds correction
+- DragModel: Velocity-dependent drag with smooth drag-crisis correction
+  (delegated to :func:`atmosphere.cd_dimpled_sphere`; Bearman & Harvey 1976,
+  Mehta 1985); see issue #3504.
 - LiftModel: Spin-induced lift (backspin effect)
 - MagnusModel: Spin-induced lateral force (hook/slice)
 - WindModel: Sophisticated wind with gusts and turbulence
@@ -24,6 +26,7 @@ Key Components:
 
 References:
     - Bearman, P.W. & Harvey, J.K. (1976). Golf ball aerodynamics.
+    - Mehta, R.D. (1985). Aerodynamics of sports balls.
     - Smits, A.J. & Ogg, S. (2004). Golf ball aerodynamics. Physics Today.
     - Jorgensen, T. (1999). The Physics of Golf. Springer.
 """
@@ -48,6 +51,7 @@ from src.shared.python.core.physics_constants import (
     MAGNUS_COEFFICIENT,
     SPIN_DECAY_RATE_S,
 )
+from src.shared.python.physics.atmosphere import cd_dimpled_sphere
 
 MIN_AIR_DENSITY_KG_M3 = 0.01
 
@@ -296,22 +300,11 @@ class DragModel:
         viscosity = float(AIR_VISCOSITY_KG_M_S)
         diameter = 2 * self.ball_radius
         re = air_density * speed * diameter / viscosity
-
-        # Golf ball Cd variation with Re (empirical)
-        # Scale the low-Re branch with the same tuning factor as the
-        # turbulent anchor so coefficient adjustments remain continuous.
-        turbulent_cd = self.base_coefficient  # User-specified turbulent coefficient
-        cd_anchor = float(GOLF_BALL_DRAG_COEFFICIENT)
-        cd_scale = turbulent_cd / cd_anchor if cd_anchor > 0 else 1.0
-        laminar_cd = float(np.clip(0.5 * cd_scale, 0.10, 0.50))
-
-        if re < 8e4:
-            return laminar_cd  # Laminar flow
-        if re < 2e5:
-            # Transition region - interpolate between laminar and turbulent
-            fraction = (re - 8e4) / (2e5 - 8e4)
-            return laminar_cd - fraction * (laminar_cd - turbulent_cd)
-        return turbulent_cd  # Fully turbulent
+        # Delegate to the smoothed drag-crisis correlation (Bearman & Harvey
+        # 1976, Mehta 1985); clamp to the model's validated range so the
+        # integrator never sees a discontinuity. See issue #3504.
+        re_clamped = max(1.0e3, min(1.0e7, re))
+        return cd_dimpled_sphere(re_clamped, base_cd=self.base_coefficient)
 
 
 class LiftModel:

@@ -27,11 +27,19 @@ has been decomposed into focused submodules (P1 sprint, issue #2486):
     New simulation code should use the Rust-backed integrator for native
     performance and WASM parity with the React frontend.
 
-Planned enhancement: implement Environmental Gradient Modeling (wind shear, temperature gradients).
-Planned enhancement: implement Hydrodynamic Lubrication (wet ball physics).
-Planned enhancement: implement Dimple Geometry Optimization.
-Planned enhancement: implement Turbulence Modeling.
-Planned enhancement: implement Mud Ball Physics.
+Implemented (issue #3504):
+- Drag-crisis model for dimpled spheres -- see
+  :func:`src.shared.python.physics.atmosphere.cd_dimpled_sphere`
+  (Bearman & Harvey 1976, Mehta 1985).
+- Environmental gradient via the ISA-troposphere air density model in
+  :func:`src.shared.python.physics.atmosphere.air_density`, plumbed through
+  :class:`EnvironmentalConditions.from_altitude` and the
+  ``track_altitude_density`` flag on :class:`EnhancedBallFlightSimulator`.
+
+Still tracked under issue #3504 (follow-up PRs):
+- Hydrodynamic Lubrication (wet ball physics).
+- Dimple Geometry Optimization.
+- Mud Ball Physics.
 """
 
 from __future__ import annotations

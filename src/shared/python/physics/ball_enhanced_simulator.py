@@ -4,6 +4,10 @@ This submodule contains EnhancedBallFlightSimulator, which integrates with the
 aerodynamics module for configurable drag/lift/Magnus effects, wind models, and
 environment randomization. Extracted from ball_flight_physics.py as part of P1
 sprint decomposition (issue #2486).
+
+Environmental gradient support (altitude-dependent air density) is provided
+via the ``track_altitude_density`` flag and uses
+:func:`src.shared.python.physics.atmosphere.air_density`. See issue #3504.
 """
 
 from __future__ import annotations
@@ -13,6 +17,13 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from src.shared.python.core.contracts import postcondition, precondition
+from src.shared.python.physics.atmosphere import (
+    MAX_VALID_ALTITUDE_M,
+    MIN_VALID_ALTITUDE_M,
+)
+from src.shared.python.physics.atmosphere import (
+    air_density as _isa_air_density,
+)
 from src.shared.python.physics.ball_launch_conditions import (
     EnvironmentalConditions,
     LaunchConditions,
@@ -60,6 +71,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         wind_config: WindConfig | None = None,
         randomization_config: RandomizationConfig | None = None,
         seed: int | None = None,
+        track_altitude_density: bool = False,
     ) -> None:
         """Initialize enhanced simulator.
 
@@ -70,6 +82,17 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
             wind_config: Wind configuration (base wind, gusts, turbulence)
             randomization_config: Environment randomization configuration
             seed: Random seed for reproducibility
+            track_altitude_density: When ``True``, the integrator updates
+                ``rho`` each step from the ISA-troposphere model using the
+                ball's current altitude (course altitude plus trajectory z)
+                and the environment's ground temperature/pressure. Defaults
+                to ``False`` to preserve the supplied
+                ``environment.air_density`` (e.g. humidity- or
+                weather-calibrated values). Pair with
+                ``EnvironmentalConditions.from_altitude(...)`` to opt in to
+                ISA tracking; any non-``None``
+                ``environment.sea_level_pressure_pa`` is propagated to each
+                per-step density update.
         """
         # Import here to avoid circular dependency
         from src.shared.python.physics.aerodynamics import (
@@ -87,6 +110,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         self.wind_config = wind_config or WindConfig()
         self.randomization_config = randomization_config or RandomizationConfig()
         self._seed = seed
+        self.track_altitude_density = bool(track_altitude_density)
 
         # Initialize wind model
         self._wind_model = WindModel(self.wind_config, seed=seed)
@@ -173,6 +197,10 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         max_steps = int(max_time / dt) + 1
 
         for _ in range(max_steps):
+            # Update altitude-dependent air density before force evaluation
+            # so the integrator sees thinner air at higher Z (issue #3504).
+            self._update_air_density_for_position(position)
+
             # Calculate forces
             aero_forces = self._aero_engine.compute_forces(
                 velocity, spin, t=t, position=position
@@ -253,6 +281,7 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
                 raise ValueError("p must be provided")
             if not (p is not None):
                 raise ValueError("p must be provided")
+            self._update_air_density_for_position(p)
             aero_forces = self._aero_engine.compute_forces(v, spin, t=time, position=p)
             gravity_force = self.ball.mass * gravity_acc
             total_force = aero_forces["total"] + gravity_force
@@ -274,6 +303,33 @@ class EnhancedBallFlightSimulator(TrajectoryAnalysisMixin):
         new_vel = vel + (dt / 6.0) * (k1_a + 2 * k2_a + 2 * k3_a + k4_a)
 
         return new_pos, new_vel, spin
+
+    def _update_air_density_for_position(self, position: np.ndarray) -> None:
+        """Update the engine's current air density from ball altitude.
+
+        Combines the course altitude (``environment.altitude``) with the
+        instantaneous trajectory ``z`` to obtain altitude above mean sea
+        level, then queries
+        :func:`src.shared.python.physics.atmosphere.air_density`. The result
+        is clamped to the validated altitude range so the integrator never
+        crashes on extreme transient values during early RK4 iterations.
+
+        No-op when ``track_altitude_density`` is False.
+        """
+        if not self.track_altitude_density:
+            return
+        course_alt = float(getattr(self.environment, "altitude", 0.0))
+        ball_z = float(position[2]) if position is not None else 0.0
+        amsl = course_alt + ball_z
+        # Clamp to the validated atmosphere range; outside it we just hold
+        # at the boundary value rather than raising mid-integration.
+        amsl = max(MIN_VALID_ALTITUDE_M, min(MAX_VALID_ALTITUDE_M, amsl))
+        rho = _isa_air_density(
+            altitude_m=amsl,
+            temperature_c=float(getattr(self.environment, "temperature", 15.0)),
+            pressure_pa=getattr(self.environment, "sea_level_pressure_pa", None),
+        )
+        self._aero_engine._current_air_density = rho
 
     def simulate_with_comparison(
         self,
