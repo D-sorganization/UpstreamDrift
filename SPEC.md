@@ -27,8 +27,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.84                                             |
-| **Last Spec Update**    | 2026-04-26                                         |
+| **Spec Version**        | 1.0.87                                             |
+| **Last Spec Update**    | 2026-04-30                                         |
 
 ## 2. Purpose & Mission
 
@@ -265,6 +265,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Acceptance Tests**: End-to-end scenarios (e.g., full golf swing simulation with visualization)
 - **Cross-Engine Tests**: Validate physics consistency across multiple engines with tolerance thresholds
 - **Physics Validation Tests**: Verify results against known ground truth (analytical solutions, published benchmarks)
+- **Golf Ball-Flight Source Contracts**: Validate documented aerodynamic, impact, and atmosphere assumptions against `docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`
 - **Benchmark Tests**: Performance regression detection and optimization validation
 - **Property-Based Tests**: Hypothesis-driven fuzzing for robustness
 
@@ -277,6 +278,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 | Acceptance         | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`         |
 | Cross-Engine       | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`       |
 | Physics Validation | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation` |
+| Golf Source Contracts | `tests/unit/shared_python/` | pytest           | source-map contract tests         |
 | Benchmarks         | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`          |
 | Property-Based     | `tests/property/`           | hypothesis + pytest | `@pytest.mark.property`           |
 
@@ -296,6 +298,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - [ ] Cross-engine validation identifies discrepancies >5% between engines
 - [ ] IK solver converges within 10 iterations for standard human poses
 - [ ] ID computation returns physically plausible torques (within 2-sigma of analytical)
+- [ ] Ball-flight atmosphere utilities reject non-finite or out-of-troposphere altitudes and stay traceable to documented golf source contracts
 - [ ] FastAPI endpoints return 200 for valid requests and 400 for invalid schema
 - [ ] GUI loads model and renders 3D visualization without crashing
 - [ ] Trajectory optimization improves cost function by >20% over initial guess
@@ -468,6 +471,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 ## 12. Change Log
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| 2026-04-30 | 1.0.87  | Added source-backed golf ball-flight and impact validation contracts, including explicit altitude bounds for air-density computations and portfolio-facing golf modeling documentation. |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
 | 2026-04-27 | 1.0.83  | Bolt: Replace np.linalg.norm with math.hypot in collision queries. |
 | 2026-04-26 | 1.0.81  | fix: Restore missing jobs in `Code-Metrics.yml` and `release.yml`; correct non-UTF-8 characters in 55 workflows causing 0s CI failures. |

@@ -4,6 +4,8 @@
 > Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
 > All work on `main` branch. PRs target `main`.
 
+`CLAUDE.md` is the authoritative contributor and agent policy file.
+
 ## What This Is
 
 Golf ball flight and physics modeling suite. Simulates aerodynamics, ball-club impact,
@@ -23,7 +25,7 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 
 - **Python 3.10+**. Always `python3`, never `python`.
 
-- **Formatter:** Ruff format (NOT Black). 88-char line limit.
+- **Formatter:** Ruff format. 88-char line limit.
 - **Linter:** Ruff check. These are **separate CI steps** — both must pass independently.
 
 ## Development Commands

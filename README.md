@@ -28,6 +28,8 @@ UpstreamDrift (formerly Golf Modeling Suite) consolidates multiple golf swing mo
 - **MATLAB Integration**: Simscape Multibody models for additional analysis
 
 For detailed documentation, please visit the **[Documentation Hub](docs/README.md)**.
+For a focused reviewer walkthrough, start with the
+**[golf modeling portfolio demo](docs/portfolio/golf_modeling_demo.md)**.
 
 ## Key Features
 
@@ -45,7 +47,7 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 - **Inverse Kinematics**: Professional IK solver with nullspace optimization
 - **Inverse Dynamics**: Complete torque computation with force decomposition
 - **Kinematic Forces**: Coriolis, centrifugal, and gravitational force analysis
-- **Trajectory Optimization**: Generate optimal swings for speed, accuracy, or efficiency
+- **Trajectory Optimization**: Run trajectory-optimization experiments to compare candidate swing objectives for speed, accuracy, or efficiency
 
 ### Control and Robotics
 
@@ -196,14 +198,14 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 
 ### OpenSim (Experimental Biomechanics)
 
-- Stub-oriented integration surface for future biomechanics validation
+- Experimental integration interface for biomechanics validation
 - Not part of the required PR CI contract today
 - Use when explicitly working on biomechanics integration tasks
 - **See**: [src/engines/physics_engines/opensim/README.md](src/engines/physics_engines/opensim/README.md)
 
 ### MyoSuite (Experimental Muscle Modeling)
 
-- Stub-oriented integration surface for future muscle-modeling work
+- Experimental integration interface for future muscle-modeling work
 - Not part of the required PR CI contract today
 - Use when explicitly working on biomechanics integration tasks
 - **See**: [src/engines/physics_engines/myosuite/README.md](src/engines/physics_engines/myosuite/README.md)
@@ -224,8 +226,8 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 
 ### Recent Integration Guides
 
-- **[MyoSuite Integration](docs/MYOSUITE_INTEGRATION.md)** - Biomechanics features (January 2026)
-- **[OpenSim Integration](docs/OPENSIM_INTEGRATION.md)** - Musculoskeletal modeling (January 2026)
+- **[MyoSuite Integration](docs/development/MYOSUITE_INTEGRATION.md)** - Biomechanics features (January 2026)
+- **[OpenSim Integration](docs/development/OPENSIM_INTEGRATION.md)** - Musculoskeletal modeling (January 2026)
 
 ## Repository Structure
 
@@ -262,7 +264,7 @@ We welcome contributions! Please see:
 
 - [Contributing Guide](docs/development/contributing.md)
 - [Development Guidelines](docs/development/README.md)
-- [Testing Guide](docs/testing-guide.md)
+- [Testing Guide](docs/testing/testing-guide.md)
 
 ## Citation
 

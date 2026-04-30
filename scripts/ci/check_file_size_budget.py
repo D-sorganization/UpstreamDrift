@@ -55,29 +55,10 @@ def _line_count(path: Path) -> int:
         return sum(1 for _ in handle)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Enforce changed-file line-count budget."
-    )
-    parser.add_argument(
-        "--config-path",
-        type=Path,
-        default=DEFAULT_CONFIG_PATH,
-        help="Path to JSON config relative to repository root.",
-    )
-    parser.add_argument(
-        "--base-ref",
-        default="origin/main",
-        help="Git base ref used for changed-file detection.",
-    )
-    args = parser.parse_args()
-
-    repo_root = Path(__file__).resolve().parent.parent
-    config = _load_config(repo_root, args.config_path)
-    budget = int(config.get("max_lines", 1200))
-
+def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]]:
     active_exceptions: dict[str, dict] = {}
     invalid_exceptions: list[str] = []
+
     for exc in config.get("exceptions", []):
         path = str(exc.get("path", "")).strip()
         owner = str(exc.get("owner", "")).strip()
@@ -96,6 +77,32 @@ def main() -> int:
             invalid_exceptions.append(
                 f"Invalid expires_on date in exception: {path} ({exc.get('expires_on')})"
             )
+
+    return active_exceptions, invalid_exceptions
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Enforce changed-file line-count budget."
+    )
+    parser.add_argument(
+        "--config-path",
+        type=Path,
+        default=DEFAULT_CONFIG_PATH,
+        help="Path to JSON config relative to repository root.",
+    )
+    parser.add_argument(
+        "--base-ref",
+        default="origin/main",
+        help="Git base ref used for changed-file detection.",
+    )
+    args = parser.parse_args()
+
+    repo_root = Path(__file__).resolve().parents[2]
+    config = _load_config(repo_root, args.config_path)
+    budget = int(config.get("max_lines", 1200))
+
+    active_exceptions, invalid_exceptions = _collect_active_exceptions(config)
 
     try:
         changed_files = _changed_python_files(repo_root, args.base_ref)

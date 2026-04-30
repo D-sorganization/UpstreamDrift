@@ -216,14 +216,10 @@ pytest tests/unit/test_api/ --cov=src/api
 
 ---
 
-## For AI Agents
+## Development Operations
 
-See [AGENTS.md](../AGENTS.md) in the project root for:
-
-- Agent coding guidelines
-- Important files reference
-- Testing requirements
-- PR workflow
+See [AGENTS.md](../AGENTS.md) in the project root for internal automation and
+repository maintenance guidance.
 
 ---
 
@@ -241,14 +237,14 @@ See [AGENTS.md](../AGENTS.md) in the project root for:
 - [Drake](engines/drake.md) - Model-based design
 - [Pinocchio](engines/pinocchio.md) - Rigid body algorithms
 - [OpenSim](engines/opensim.md) - Biomechanical validation
-- [Engine Capabilities](engine_capabilities.md) - Feature comparison
+- [Engine Capabilities](engines/engine_capabilities.md) - Feature comparison
 
 ### [Development](development/README.md)
 
 - [Architecture](development/architecture.md) - System design
 - [Contributing](development/contributing.md) - Contribution guide
 - [Design by Contract](development/design_by_contract.md) - DbC patterns
-- [AI Agents](development/AGENTS.md) - Agent guidelines
+- [Maintenance Guidance](../AGENTS.md) - Automation and repository operations
 
 ### [Technical](technical/README.md)
 
@@ -257,8 +253,8 @@ See [AGENTS.md](../AGENTS.md) in the project root for:
 
 ### [Integration Guides]
 
-- [MyoSuite Integration](MYOSUITE_INTEGRATION.md) - 290-muscle models
-- [OpenSim Integration](OPENSIM_INTEGRATION.md) - Musculoskeletal
+- [MyoSuite Integration](development/MYOSUITE_INTEGRATION.md) - 290-muscle models
+- [OpenSim Integration](development/OPENSIM_INTEGRATION.md) - Musculoskeletal
 
 ---
 

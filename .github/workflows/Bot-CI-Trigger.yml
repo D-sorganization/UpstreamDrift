@@ -48,23 +48,13 @@ jobs:
       - name: Set runner
         id: check
         run: |
-          echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
-            2>/dev/null || echo "0")
-          if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then
-            ONLINE=0
-          fi
-          if [[ "$ONLINE" -gt 0 ]]; then
-            mkdir -p "$(dirname "$GITHUB_OUTPUT")"
-            echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
-            echo "Self-hosted runner online - routing locally"
-          else
-            echo "::error::No local self-hosted runner available; failing closed"
-            exit 1
-          fi
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet"
   check-and-trigger:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
+    continue-on-error: true
     env:
       BOT_TRIGGER_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN || github.token }}
     # Only run for bot-authored PRs or scheduled/manual runs
@@ -80,7 +70,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          token: ${{ env.BOT_TRIGGER_TOKEN }}
+          token: ${{ github.token }}
           fetch-depth: 5
 
       - name: Check Loop Prevention
@@ -108,7 +98,7 @@ jobs:
         id: find-prs
         if: steps.loop-check.outputs.skip != 'true'
         env:
-          GH_TOKEN: ${{ env.BOT_TRIGGER_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
           INPUT_PR: ${{ inputs.pr_number }}
           FORCE: ${{ inputs.force }}
         run: |

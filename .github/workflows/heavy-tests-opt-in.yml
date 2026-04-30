@@ -32,19 +32,9 @@ jobs:
       - name: Set runner
         id: check
         run: |
-          echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            --jq 'if .runners then [.runners[] | select(.status == "online") | select(.labels[].name == "d-sorg-fleet")] | length else 0 end' \
-            2>/dev/null || echo "0")
-          if ! [[ "$ONLINE" =~ ^[0-9]+$ ]]; then
-            ONLINE=0
-          fi
-          if [[ "$ONLINE" -gt 0 ]]; then
-            echo "runner=d-sorg-fleet" >> $GITHUB_OUTPUT
-            echo "Self-hosted runner online - routing locally"
-          else
-            echo "::error::No local self-hosted runner available; failing closed"
-            exit 1
-          fi
+          mkdir -p "$(dirname "$GITHUB_OUTPUT")"
+          echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
+          echo "Self-hosted dispatcher selected d-sorg-fleet"
   run-heavy-tests:
     needs: pick-runner
     name: Heavy Integration Tests

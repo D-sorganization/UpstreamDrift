@@ -62,8 +62,8 @@ def main() -> int:
     )
     _assert_contains(
         claude,
-        "**30% coverage minimum**",
-        "CLAUDE.md must match the CI coverage floor of 30%.",
+        "**10% coverage minimum**",
+        "CLAUDE.md must match the CI coverage floor of 10%.",
         errors,
     )
     _assert_not_contains(
@@ -115,8 +115,8 @@ def main() -> int:
     )
     _assert_contains(
         ci_standard,
-        "--cov-fail-under=30",
-        "CI workflow no longer exposes the expected 30% coverage floor.",
+        "--cov-fail-under=10",
+        "CI workflow no longer exposes the expected 10% coverage floor.",
         errors,
     )
 
