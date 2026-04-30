@@ -119,7 +119,8 @@ class DistanceResult:
             # Normalize the normal vector
             # ⚡ Bolt: Element-wise norm computation is faster than np.linalg.norm(..., axis=None) for tiny vectors
             # using math.hypot equivalent
-            norm = float(math.hypot(*self.normal))
+            arr = np.ravel(self.normal)
+            norm = 0.0 if arr.size == 0 else math.hypot(*arr)
             if norm > 1e-10:
                 object.__setattr__(self, "normal", self.normal / norm)
 
