@@ -65,9 +65,16 @@ class TaskManager:
             max_tasks: Override maximum number of stored tasks.
             max_concurrent: Override maximum concurrent engine instances.
 
-        Note: Issue #2715 — mixing threading.Lock with asyncio.Semaphore creates
-              deadlock risk. This class maintains sync access for backward compatibility.
-              For pure async, refactor to use asyncio.Lock exclusively.
+        Concurrency model (#2715, #3506):
+            - ``self._lock`` (threading.Lock) guards the in-memory task dict.
+              It is never held across an ``await``.
+            - ``self._engine_semaphore`` (asyncio.Semaphore) limits concurrent
+              engine instances. It is acquired only via ``async with`` and is
+              not touched while ``_lock`` is held.
+            The two primitives cover disjoint state, so no deadlock is possible
+            between them. See ``TestTaskManagerConcurrency`` in
+            ``tests/unit/test_api_architecture.py`` for the regression suite
+            that pins this contract.
         """
         if ttl_seconds is not None:
             self.TTL_SECONDS = ttl_seconds

@@ -315,6 +315,102 @@ class TestTaskManager:
         assert TaskStatus.CANCELLED.value == "cancelled"
 
 
+class TestTaskManagerConcurrency:
+    """Concurrency safety tests for TaskManager (#3506, #2715).
+
+    The TaskManager mixes a synchronous `threading.Lock` (guarding the in-memory
+    task dict) with an `asyncio.Semaphore` (limiting concurrent engine instances).
+    These two primitives cover *disjoint* state — the sync lock is never held
+    across an `await`, and `active_count()` does not touch the semaphore — so the
+    deadlock pattern hypothesised in #3506 is not actually realisable in the code.
+
+    These tests pin that contract down: stress the sync API from many threads in
+    parallel with async tasks awaiting the semaphore, and confirm everything
+    completes within a tight timeout (any deadlock would manifest as a hang).
+    """
+
+    def test_concurrent_threaded_access_does_not_deadlock(self) -> None:
+        """N threads hammering set/get/active_count finish well under 5s."""
+        import threading
+        from concurrent.futures import ThreadPoolExecutor, wait
+
+        from src.api.task_manager import TaskManager
+
+        tm = TaskManager(max_tasks=200)
+        stop = threading.Event()
+        errors: list[BaseException] = []
+
+        def worker(worker_id: int) -> None:
+            try:
+                for i in range(200):
+                    if stop.is_set():
+                        return
+                    key = f"w{worker_id}-t{i}"
+                    tm.set(key, {"status": "running", "i": i})
+                    tm.update_progress(key, float(i % 100))
+                    _ = tm.get(key)
+                    _ = key in tm
+                    _ = tm.active_count()
+            except BaseException as exc:  # noqa: BLE001
+                errors.append(exc)
+                stop.set()
+                raise
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            futures = [pool.submit(worker, w) for w in range(8)]
+            done, not_done = wait(futures, timeout=5.0)
+
+        # Any thread still alive is a deadlock signal.
+        assert not not_done, (
+            f"{len(not_done)} worker(s) did not complete in 5s — possible deadlock"
+        )
+        assert not errors, f"Worker errors: {errors!r}"
+        # active_count is bounded by max_tasks (LRU eviction).
+        assert tm.active_count() <= tm.MAX_TASKS
+
+    def test_async_semaphore_independent_of_sync_lock(self) -> None:
+        """`async with engine_semaphore` is not blocked by holders of `_lock`."""
+        import threading
+
+        from src.api.task_manager import TaskManager
+
+        tm = TaskManager(max_concurrent=2)
+        lock_held = threading.Event()
+        release_lock = threading.Event()
+
+        def hold_sync_lock() -> None:
+            # Acquire the internal sync lock and hold it. If the semaphore were
+            # gated on this lock (the hypothesised deadlock), the async code
+            # below would block forever.
+            with tm._lock:  # noqa: SLF001
+                lock_held.set()
+                release_lock.wait(timeout=5.0)
+
+        async def acquire_semaphore_under_lock() -> int:
+            # Wait for the holder thread to grab the sync lock.
+            assert lock_held.wait(timeout=2.0), "holder thread never acquired lock"
+            acquired = 0
+            # Acquire and release the engine semaphore twice. If this hangs,
+            # the timeout below trips and the test fails.
+            for _ in range(2):
+                async with tm.engine_semaphore:
+                    acquired += 1
+            return acquired
+
+        holder = threading.Thread(target=hold_sync_lock)
+        holder.start()
+        try:
+            count = asyncio.run(
+                asyncio.wait_for(acquire_semaphore_under_lock(), timeout=3.0)
+            )
+        finally:
+            release_lock.set()
+            holder.join(timeout=2.0)
+
+        assert count == 2
+        assert not holder.is_alive(), "holder thread did not exit cleanly"
+
+
 # ── API Versioning Tests ──────────────────────────────────────────
 
 
