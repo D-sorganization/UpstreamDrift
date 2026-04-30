@@ -2,7 +2,7 @@
 
 > **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
 > Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
-> All work on `staging` branch. PRs target `staging`. Never push directly to `main`.
+> All work on `main` branch. PRs target `main`.
 
 ## What This Is
 
