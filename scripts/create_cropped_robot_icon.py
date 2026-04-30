@@ -6,7 +6,6 @@ Uses shared image_utils for auto-cropping and enhancement.
 
 from pathlib import Path
 
-from scripts.script_utils import run_main, setup_script_logging
 from src.shared.python.gui_pkg.image_utils import (
     Image,
     auto_crop_to_content,
@@ -14,6 +13,8 @@ from src.shared.python.gui_pkg.image_utils import (
     save_ico,
     save_png_icons,
 )
+
+from scripts.script_utils import run_main, setup_script_logging
 
 logger = setup_script_logging(__name__)
 

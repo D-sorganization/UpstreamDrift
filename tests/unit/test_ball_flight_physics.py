@@ -13,7 +13,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from src.shared.python.physics.rust_kernel import is_rust_available
 
 pytestmark = pytest.mark.skipif(

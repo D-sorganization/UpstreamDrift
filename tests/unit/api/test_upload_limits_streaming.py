@@ -15,7 +15,6 @@ from unittest.mock import MagicMock
 
 import pytest
 from fastapi import BackgroundTasks, HTTPException
-
 from src.api.middleware import upload_limits
 
 pytestmark = pytest.mark.anyio

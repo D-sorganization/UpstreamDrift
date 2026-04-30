@@ -9,7 +9,6 @@ import defusedxml.ElementTree as ET
 import mujoco
 import numpy as np
 import pytest
-
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
     URDFExporter,
     URDFImporter,

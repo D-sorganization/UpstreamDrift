@@ -9,7 +9,6 @@ Tests the A3 model fitting pipeline:
 
 import numpy as np
 import pytest
-
 from src.shared.python.validation_pkg.data_fitting import (
     A3FittingPipeline,
     BodySegmentParams,

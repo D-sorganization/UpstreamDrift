@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from src.deployment.realtime.state import RobotState
 from src.deployment.safety.collision import (
     CollisionAvoidance,

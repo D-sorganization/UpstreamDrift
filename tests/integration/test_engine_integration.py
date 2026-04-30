@@ -10,7 +10,6 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
 from src.shared.python.engine_core.engine_manager import (
     EngineManager,
     EngineStatus,
@@ -52,9 +51,9 @@ class TestEngineIntegration:
         # For each available engine, verify its path actually exists
         for engine in available_engines:
             engine_path = manager.engine_paths[engine]
-            assert (
-                engine_path.exists()
-            ), f"{engine} marked available but path missing: {engine_path}"
+            assert engine_path.exists(), (
+                f"{engine} marked available but path missing: {engine_path}"
+            )
 
         # For unavailable engines, verify why they're unavailable
         for engine in EngineType:
@@ -64,9 +63,9 @@ class TestEngineIntegration:
                 if engine_path.exists():
                     # Path exists but validation failed - expected for incomplete installations
                     result = manager.validate_engine_configuration(engine)
-                    assert (
-                        result is False
-                    ), f"{engine} exists but should fail validation"
+                    assert result is False, (
+                        f"{engine} exists but should fail validation"
+                    )
 
     @pytest.mark.integration
     def test_engine_probe_consistency(self) -> None:

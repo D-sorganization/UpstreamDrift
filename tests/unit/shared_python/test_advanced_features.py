@@ -7,7 +7,6 @@ from typing import Any
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
 from src.shared.python.signal_toolkit.signal_processing import (
     compute_jerk,

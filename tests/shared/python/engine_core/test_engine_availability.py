@@ -15,7 +15,6 @@ from __future__ import annotations
 from unittest.mock import patch
 
 import pytest
-
 import src.shared.python.engine_core.engine_availability as ea
 from src.shared.python.engine_core.engine_availability import (
     EngineStatus,

@@ -101,9 +101,7 @@ class TestSecurityManagerVerifyPassword:
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret")
-            password = (
-                "correct_password"  # nosec B105 - test fixture, not a real credential
-            )
+            password = "correct_password"  # nosec B105 - test fixture, not a real credential
             hashed = manager.hash_password(password)
             assert manager.verify_password(password, hashed) is True
 
@@ -204,7 +202,6 @@ class TestSecurityManagerTokens:
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
         ):
             from fastapi import HTTPException
-
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -221,7 +218,6 @@ class TestSecurityManagerTokens:
             os.environ, {"GOLF_API_SECRET_KEY": "test-secret-key-32chars-long!!"}
         ):
             from fastapi import HTTPException
-
             from src.api.auth.security import SecurityManager
 
             manager = SecurityManager(secret_key="test-secret-32-chars-long!!")
@@ -539,9 +535,7 @@ class TestAuthCache:
             from src.api.auth.security import AuthCache
 
             cache = AuthCache()
-            api_key = (
-                "gms_test_key_12345"  # nosec B105 - test fixture, not a real credential
-            )
+            api_key = "gms_test_key_12345"  # nosec B105 - test fixture, not a real credential
             user_id = 42
 
             cache.set(api_key, user_id)

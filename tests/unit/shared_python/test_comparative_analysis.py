@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.validation_pkg.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,

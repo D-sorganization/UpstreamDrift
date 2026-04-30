@@ -11,7 +11,6 @@ from collections.abc import Generator
 from unittest.mock import AsyncMock
 
 import pytest
-
 from src.unreal_integration.data_models import (  # noqa: E402
     JointState,
     Quaternion,
@@ -510,9 +509,9 @@ class TestServerBindsRealSocket:
         assert server.state == StreamingState.STOPPED
         await server.start()
         try:
-            assert (
-                server.state == StreamingState.RUNNING
-            ), "Server is not RUNNING after start()"
+            assert server.state == StreamingState.RUNNING, (
+                "Server is not RUNNING after start()"
+            )
         finally:
             await server.stop()
 
@@ -553,8 +552,8 @@ class TestServerBindsRealSocket:
         try:
             with pytest.raises((RuntimeError, OSError)):
                 await server.start()
-            assert (
-                server.state == StreamingState.ERROR
-            ), "Server must be in ERROR state when binding fails"
+            assert server.state == StreamingState.ERROR, (
+                "Server must be in ERROR state when binding fails"
+            )
         finally:
             sock.close()

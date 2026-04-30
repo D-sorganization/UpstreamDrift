@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QWidget  # noqa: E402
-
 from src.launchers.settings_dialog import (  # noqa: E402
     TAB_CONFIG,
     TAB_DIAGNOSTICS,

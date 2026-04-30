@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 from src.launchers.launcher_model_sources import (
     get_model_python_paths,
     get_model_source_root,

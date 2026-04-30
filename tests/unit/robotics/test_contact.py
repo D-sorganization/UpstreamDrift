@@ -12,7 +12,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose
-
 from src.robotics.contact.friction_cone import (
     FrictionCone,
     compute_friction_cone_constraint,
@@ -276,9 +275,9 @@ class TestLinearizeFrictionCone:
         for f in inside_forces:
             # Should satisfy A @ f <= b (approximately, due to linearization)
             violations = A @ f - b
-            assert np.all(
-                violations <= 1e-6
-            ), f"Force {f} should be inside linearized cone"
+            assert np.all(violations <= 1e-6), (
+                f"Force {f} should be inside linearized cone"
+            )
 
     def test_compute_friction_cone_constraint(self) -> None:
         """Test compute_friction_cone_constraint returns complete info."""

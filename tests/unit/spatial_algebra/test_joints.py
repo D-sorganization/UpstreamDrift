@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.spatial_algebra.joints import (
     JOINT_AXIS_INDICES,
     S_PX,

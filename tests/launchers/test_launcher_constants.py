@@ -3,7 +3,6 @@ from typing import Any  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
 import pytest  # noqa: E402
-
 from src.launchers.launcher_constants import (  # noqa: E402
     _lazy_imports,
     _lazy_load_engine_manager,

@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest  # noqa: F401 - required for pytestmark
-
 from src.shared.python.core.constants import GRAVITY_M_S2
 from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,

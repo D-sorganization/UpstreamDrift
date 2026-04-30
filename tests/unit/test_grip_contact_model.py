@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.physics.grip_contact_model import (
     ContactPoint,
     ContactState,

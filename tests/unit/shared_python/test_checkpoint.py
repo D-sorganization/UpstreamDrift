@@ -6,7 +6,6 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-
 from src.shared.python.engine_core.base_physics_engine import (
     BasePhysicsEngine,
     EngineState,

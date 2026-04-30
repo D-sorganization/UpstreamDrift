@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.pendulum_simulator.joint_moments import (
     cross_2d,
     double_pendulum_moments,

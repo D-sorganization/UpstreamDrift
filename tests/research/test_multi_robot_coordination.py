@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import numpy as np
-
 from src.research.multi_robot.coordination import (
     CooperativeManipulation,
     FormationConfig,

@@ -20,7 +20,6 @@ import math
 
 import numpy as np
 import pytest
-
 from src.shared.python.physics.aerodynamics import (
     AerodynamicsConfig,
     RandomizationConfig,

@@ -1,7 +1,6 @@
 """Analytical solutions for physics validation baselines."""
 
 import numpy as np
-
 from src.shared.python.core.constants import GRAVITY_M_S2
 
 

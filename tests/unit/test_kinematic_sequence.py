@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.biomechanics.kinematic_sequence import (
     KinematicSequenceAnalyzer,
     SegmentTimingAnalyzer,
@@ -198,9 +197,9 @@ class TestSpeedGain:
 
         for name in ["mid_proximal", "mid_distal", "distal"]:
             assert peak_map[name].speed_gain is not None
-            assert (
-                peak_map[name].speed_gain > 1.0
-            ), f"{name} speed gain should be > 1.0, got {peak_map[name].speed_gain}"
+            assert peak_map[name].speed_gain > 1.0, (
+                f"{name} speed gain should be > 1.0, got {peak_map[name].speed_gain}"
+            )
 
     def test_speed_gain_missing_segment(self) -> None:
         """Speed gain should handle missing segments gracefully."""
@@ -243,12 +242,12 @@ class TestDecelerationRate:
         peak_map = {p.name: p for p in result.peaks}
 
         for name in ["proximal", "mid_proximal", "mid_distal", "distal"]:
-            assert (
-                peak_map[name].deceleration_rate is not None
-            ), f"{name} should have deceleration_rate computed"
-            assert (
-                peak_map[name].deceleration_rate > 0
-            ), f"{name} deceleration_rate should be positive"
+            assert peak_map[name].deceleration_rate is not None, (
+                f"{name} should have deceleration_rate computed"
+            )
+            assert peak_map[name].deceleration_rate > 0, (
+                f"{name} deceleration_rate should be positive"
+            )
 
     def test_proximal_decelerates_faster(self) -> None:
         """Proximal segments should decelerate faster (braking effect)."""

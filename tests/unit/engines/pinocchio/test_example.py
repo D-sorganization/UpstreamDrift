@@ -10,7 +10,6 @@ import logging
 import math
 
 import pytest
-
 import src.shared.python.logging_pkg.logger_utils as logger_utils
 from src.shared.python.core import constants
 

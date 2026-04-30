@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.control_features_registry import (
     ControlFeaturesRegistry,
     FeatureCategory,

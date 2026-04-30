@@ -5,7 +5,6 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from src.shared.python.plotting import GolfSwingPlotter
 from src.shared.python.validation_pkg.comparative_analysis import (
     ComparativeSwingAnalyzer,

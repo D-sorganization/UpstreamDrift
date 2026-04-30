@@ -9,7 +9,6 @@ import numpy as np
 
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt
-
 from src.shared.python.plotting import GolfSwingPlotter
 
 # Check if 3D projection is available (broken on some numpy/matplotlib combos)

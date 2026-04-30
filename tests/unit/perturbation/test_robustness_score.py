@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.perturbation.robustness_score import compute_robustness_score
 
 # ---------------------------------------------------------------------------

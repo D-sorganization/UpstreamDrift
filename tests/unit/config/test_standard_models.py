@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from src.shared.python.config.standard_models import StandardModelManager
 
 # ---------------------------------------------------------------------------

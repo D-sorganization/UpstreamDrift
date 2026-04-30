@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.pendulum_simulator.club_forces import (
     equivalent_couple,
     moment_of_net_force,

@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from src.shared.python.validation_pkg.workflow_diagnostics import (
     WorkflowDiagnosticContext,
 )

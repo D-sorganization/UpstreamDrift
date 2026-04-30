@@ -395,7 +395,6 @@ class TestC3DViewerIntegration(unittest.TestCase):
     def test_c3d_viewer_launch_method(self) -> None:
         """Test C3D viewer launch method."""
         from PyQt6.QtWidgets import QMainWindow
-
         from src.launchers.golf_launcher import GolfLauncher
 
         # Create launcher instance without full initialization.
@@ -439,7 +438,6 @@ class TestC3DViewerIntegration(unittest.TestCase):
     def test_c3d_viewer_missing_file_handling(self) -> None:
         """Test handling when C3D viewer file is missing."""
         from PyQt6.QtWidgets import QMainWindow
-
         from src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
@@ -563,7 +561,6 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
     def test_urdf_generator_launch_method(self) -> None:
         """Test URDF generator launch method."""
         from PyQt6.QtWidgets import QMainWindow
-
         from src.launchers.golf_launcher import GolfLauncher
 
         # Create launcher instance without full initialization.
@@ -619,7 +616,6 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         The method catches the exception and shows an error toast.
         """
         from PyQt6.QtWidgets import QMainWindow
-
         from src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)

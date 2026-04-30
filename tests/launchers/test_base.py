@@ -9,7 +9,6 @@ from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
-
 from src.launchers.base import BaseLauncher, LaunchItem, run_launcher  # noqa: E402
 
 

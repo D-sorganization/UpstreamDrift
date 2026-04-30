@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-
 from src.shared.python.physics.terrain import (
     ElevationMap,
     SurfaceMaterial,

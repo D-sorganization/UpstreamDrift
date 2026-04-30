@@ -366,6 +366,37 @@ jobs:
           failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
           echo "- Passed: $passed | - Failed: $failed" >> "$GITHUB_STEP_SUMMARY"
 
+      # Performance regression benchmarks (issue #3510)
+      # Lightweight, dependency-free benchmarks that compare median wall-
+      # clock time of critical hot paths against tests/benchmarks/baseline.json
+      # using a generous 5x regression multiplier. Failures here indicate a
+      # large performance drop (intentional or otherwise) and should be
+      # investigated before merging. To re-baseline, capture new medians and
+      # update tests/benchmarks/baseline.json in a follow-up commit.
+      - name: Performance Regression Benchmarks
+        if: matrix.python == '3.11'
+        env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+          QT_API: pyqt6
+        run: |
+          xvfb-run --auto-servernum python -m pytest \
+            tests/benchmarks/test_regression_benchmarks.py \
+            -p no:xvfb \
+            -m benchmark \
+            --timeout=120 \
+            --timeout-method=thread \
+            --no-cov \
+            -v --tb=short
+
+      - name: Upload Benchmark Baseline Artifact
+        if: matrix.python == '3.11'
+        uses: actions/upload-artifact@v7
+        with:
+          name: performance-baseline
+          path: tests/benchmarks/baseline.json
+          if-no-files-found: warn
+
       - uses: codecov/codecov-action@v6
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

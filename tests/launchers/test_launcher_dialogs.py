@@ -5,7 +5,6 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
 from PyQt6.QtWidgets import QMainWindow  # noqa: E402
-
 from src.launchers.launcher_dialogs import LauncherDialogsMixin  # noqa: E402
 
 

@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from src.shared.python.engine_core.engine_manager import EngineManager, EngineType
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -96,9 +95,9 @@ def test_mujoco_momentum_conservation() -> None:
 
     # Tolerance: 1e-12 should be achievable for floating point arithmetic if truly conservative
     # But contact solver might introduce slight drift. Let's start with 1e-6.
-    assert (
-        max_deviation < 1e-6
-    ), f"Momentum not conserved. Max deviation: {max_deviation}"
+    assert max_deviation < 1e-6, (
+        f"Momentum not conserved. Max deviation: {max_deviation}"
+    )
 
 
 def test_pinocchio_momentum_conservation() -> None:

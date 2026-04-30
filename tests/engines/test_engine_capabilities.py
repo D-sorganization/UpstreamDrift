@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
 from src.engines.common.capabilities import CapabilityLevel, EngineCapabilities
 from src.engines.common.export import DatasetExporter, DatasetRecord, VideoConfig
 from src.engines.common.simulation_control import (

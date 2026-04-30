@@ -8,7 +8,6 @@ import time
 
 import numpy as np
 import pytest
-
 from src.shared.python.data_io.reproducibility import (
     DEFAULT_SEED,
     MAX_SEED,

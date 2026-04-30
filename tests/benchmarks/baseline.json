@@ -1,0 +1,14 @@
+{
+  "_comment": "Performance regression baselines (issue #3510). Times are median per-call seconds, captured on a self-hosted dev runner with Python 3.11.15. Tests in test_regression_benchmarks.py compare measured medians against these values multiplied by tests.benchmarks.regression_helpers.DEFAULT_REGRESSION_MULTIPLIER (5x). Update this file when an intentional perf-affecting change is made; document the rationale in the commit.",
+  "_runner": {
+    "python": "3.11",
+    "captured_at": "2026-04-30",
+    "issue": "#3510"
+  },
+  "measurements": {
+    "drag_force_calculation": 4.0e-06,
+    "aerodynamics_engine_compute_forces": 1.3e-04,
+    "ball_flight_force_step": 2.7e-05,
+    "simulation_request_model_validate": 1.6e-06
+  }
+}

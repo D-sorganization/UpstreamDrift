@@ -20,7 +20,6 @@ from dataclasses import dataclass
 
 # Security: Use simpleeval for safe expression evaluation instead of eval()
 from simpleeval import SimpleEval
-
 from src.shared.python.core.constants import GRAVITY_M_S2
 
 # Physical constants with documented units and references
@@ -577,7 +576,9 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
+def compile_forcing_functions(
+    shoulder_expression: str, wrist_expression: str
+) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:

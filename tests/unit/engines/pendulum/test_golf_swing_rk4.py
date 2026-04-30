@@ -2,7 +2,6 @@ import sys
 import types
 
 import numpy as np
-
 import src.engines.physics_engines.pendulum.python.golf_swing_physics_engine as golf_engine
 from src.engines.physics_engines.pendulum.python.golf_swing_physics_engine import (
     GolfSwingPendulumEngine,

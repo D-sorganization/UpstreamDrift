@@ -5,7 +5,6 @@ from __future__ import annotations
 import secrets
 
 import pytest
-
 from src.shared.python.core.error_utils import (
     EnvironmentError as EnvironmentValidationError,
 )

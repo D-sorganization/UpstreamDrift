@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.pendulum_simulator.counterfactual import (
     zero_torque_joint_forces_double,
     zero_torque_joint_forces_triple,

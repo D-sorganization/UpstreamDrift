@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.biomechanics.activation_dynamics import ActivationDynamics
 from src.shared.python.biomechanics.hill_muscle import (
     HillMuscleModel,

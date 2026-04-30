@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.engines.physics_engines.putting_green.python.turf_properties import (
     GrassType,
     TurfCondition,

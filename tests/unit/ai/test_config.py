@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.ai.config import (
     DEFAULT_ANTHROPIC_MODEL,
     DEFAULT_ANTHROPIC_TIMEOUT,

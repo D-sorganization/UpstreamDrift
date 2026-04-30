@@ -35,7 +35,6 @@ class TestSecretKeyFallback:
     def test_secret_key_unsafe_placeholder_causes_auth_failure(self) -> None:
         """Unsafe placeholder key must cause JWT verification to fail gracefully."""
         from fastapi import HTTPException
-
         from src.api.auth.security import SecurityManager
 
         unsafe_manager = SecurityManager(

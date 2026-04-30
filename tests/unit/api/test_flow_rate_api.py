@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-
 from src.shared.python.calc_backend.routers.flow_rate import router
 
 _app = FastAPI()

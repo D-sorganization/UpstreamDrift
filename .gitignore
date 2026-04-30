@@ -5,6 +5,9 @@
 !.env.docker.example
 !.env.*.example
 
+# Claude Code agent worktrees (ephemeral, per-session)
+.claude/worktrees/
+
 # Merge conflict artifacts
 *.ours
 *.theirs

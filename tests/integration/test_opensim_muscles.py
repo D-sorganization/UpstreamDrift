@@ -15,7 +15,6 @@ from typing import Any
 
 import numpy as np
 import pytest
-
 from src.shared.python.engine_core.engine_availability import (
     OPENSIM_AVAILABLE,
     skip_if_unavailable,
@@ -118,9 +117,9 @@ class TestOpenSimMuscleModels:
         )
 
         # Basic sanity check: force should be positive and reasonable
-        assert (
-            0 < F_muscle <= F_max * 1.5
-        ), f"Muscle force {F_muscle} outside expected range"
+        assert 0 < F_muscle <= F_max * 1.5, (
+            f"Muscle force {F_muscle} outside expected range"
+        )
 
     def test_activation_dynamics(self, simple_arm_model) -> None:
         """Section J: Verify activation dynamics (30-50ms delay)."""
@@ -202,7 +201,6 @@ class TestOpenSimMuscleAnalysis:
 
         try:
             import opensim
-
             from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )

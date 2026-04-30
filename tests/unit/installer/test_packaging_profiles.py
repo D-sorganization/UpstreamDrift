@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from installer.windows.packaging_profiles import (
     build_profile_environment,
     get_packaging_profile,

@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest
-
 from src.shared.python.validation_pkg.validation import (
     PhysicalValidationError,
     validate_friction_coefficient,

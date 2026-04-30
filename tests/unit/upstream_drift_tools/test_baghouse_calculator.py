@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.upstream_drift_tools.process_calculators.baghouse_calculator import (
     BaghouseCalculator,
     BaghouseResult,

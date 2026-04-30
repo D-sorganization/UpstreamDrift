@@ -6,7 +6,6 @@ all physics engine implementations.
 
 import numpy as np
 import pytest
-
 from src.engines.common.physics import (
     AerodynamicsCalculator,
     AirProperties,

@@ -15,7 +15,6 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from src.shared.python.core.contracts.exceptions import PreconditionError
 from src.shared.python.plotting.renderers.force_vectors import (
     ForceVectorRenderer,

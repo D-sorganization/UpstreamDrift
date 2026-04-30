@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.engines.physics_engines.opensim.python.perturbation.analyzer import (
     MANDATORY_METRICS,
     OpenSimSimResult,

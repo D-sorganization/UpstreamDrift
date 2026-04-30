@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 from src.shared.python.contracts import PreconditionError
 from src.tools.code_quality_check import (
     check_ast_issues,

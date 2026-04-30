@@ -2,7 +2,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from src.shared.python.spatial_algebra.indexed_acceleration import (
     AccelerationClosureError,
     IndexedAcceleration,

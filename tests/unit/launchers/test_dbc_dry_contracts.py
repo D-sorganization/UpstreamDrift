@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-
 from src.launchers import docker_dialog, docker_manager
 from src.launchers.help_dialogs import ContextHelpDock
 from src.launchers.launcher_constants import validate_docker_stage

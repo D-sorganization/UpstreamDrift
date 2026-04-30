@@ -16,7 +16,6 @@ import math
 
 import numpy as np
 import pytest
-
 from src.shared.python.optimization.swing_optimizer import (
     ClubModel,
     GolferModel,

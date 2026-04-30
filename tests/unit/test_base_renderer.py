@@ -5,7 +5,6 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
-
 from src.shared.python.plotting.renderers.base import (
     DEFAULT_GRID_ALPHA,
     DEFAULT_GRID_STYLE,

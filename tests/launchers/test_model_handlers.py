@@ -12,7 +12,6 @@ from pathlib import Path  # noqa: E402
 from unittest.mock import MagicMock  # noqa: E402
 
 import pytest  # noqa: E402
-
 from src.launchers.launcher_model_handlers import (  # noqa: E402
     ModelHandlerRegistry,
     PuttingGreenHandler,

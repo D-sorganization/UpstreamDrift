@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from src.shared.python.pendulum_simulator.segment_geometry import (
     SegmentStyle,
     auto_radius_from_mass,

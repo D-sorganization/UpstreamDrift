@@ -4,7 +4,6 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from src.launchers.drake_dashboard import main as drake_main  # noqa: E402
 from src.launchers.matlab_launcher_unified import MatlabLauncher  # noqa: E402
 from src.launchers.matlab_launcher_unified import main as matlab_main  # noqa: E402

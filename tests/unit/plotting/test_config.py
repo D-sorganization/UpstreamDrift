@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from src.shared.python.plotting.config import (
     COLOR_CYCLE,
     COLORS,

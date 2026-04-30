@@ -379,7 +379,6 @@ class TestTileLoadingVerification:
         """Verify expected tile IDs match models.yaml configuration."""
         try:
             import yaml
-
             from src.launchers.launcher_diagnostics import REPOS_ROOT
 
             models_yaml_path = REPOS_ROOT / "src" / "config" / "models.yaml"
@@ -420,9 +419,9 @@ class TestTileLoadingVerification:
 
             missing = expected_ids - loaded_ids
             assert len(missing) == 0, f"Registry missing: {missing}"
-            assert (
-                len(all_models) >= 8
-            ), f"Expected at least 8 models, got {len(all_models)}"
+            assert len(all_models) >= 8, (
+                f"Expected at least 8 models, got {len(all_models)}"
+            )
 
         except ImportError as e:
             pytest.skip(f"Dependencies not available: {e}")

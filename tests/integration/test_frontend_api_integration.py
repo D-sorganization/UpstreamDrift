@@ -7,7 +7,6 @@ ensuring the contract between frontend and backend is maintained.
 from unittest.mock import MagicMock
 
 import pytest
-
 from src.shared.python.engine_core.engine_manager import EngineManager
 
 
@@ -284,7 +283,6 @@ class TestErrorResponses:
     def test_validation_error_structure(self) -> None:
         """Verify validation errors have proper structure."""
         from pydantic import ValidationError
-
         from src.api.models.requests import SimulationRequest
 
         # Try to create invalid request
