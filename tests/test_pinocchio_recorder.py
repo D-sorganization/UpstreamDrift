@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from src.shared.python.engine_core.engine_availability import (
     PINOCCHIO_AVAILABLE,
     skip_if_unavailable,

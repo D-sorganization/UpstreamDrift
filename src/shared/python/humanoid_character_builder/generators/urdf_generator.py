@@ -64,7 +64,9 @@ from humanoid_character_builder.generators.urdf_xml_builder import (
 from humanoid_character_builder.generators.urdf_xml_builder import (
     add_link_element as _add_link_element,
 )
-from humanoid_character_builder.generators.urdf_xml_builder import build_urdf_xml
+from humanoid_character_builder.generators.urdf_xml_builder import (
+    build_urdf_xml,
+)
 from humanoid_character_builder.mesh.inertia_calculator import (
     InertiaMode,
     InertiaResult,
@@ -434,7 +436,9 @@ class HumanoidURDFGenerator:
 def _is_valid_xml(xml_str: str) -> bool:
     """Return True if *xml_str* is parseable XML."""
     try:
-        DefusedET.fromstring(xml_str)  # nosec B314 — parsing self-generated URDF, not untrusted input
+        DefusedET.fromstring(
+            xml_str
+        )  # nosec B314 — parsing self-generated URDF, not untrusted input
         return True
     except ET.ParseError:
         return False

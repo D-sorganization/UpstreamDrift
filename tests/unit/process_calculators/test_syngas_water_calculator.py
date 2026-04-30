@@ -5,6 +5,7 @@ and water_vapor_pressure_calculator (Issues #1949, #1744).
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.upstream_drift_tools.process_calculators.syngas_water_calculator import (
     SYNGAS_PRESETS,
     SyngasComposition,

@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 import pytest
+
 from src.shared.python.security.subprocess_utils import (
     CommandRunner,
     ProcessManager,

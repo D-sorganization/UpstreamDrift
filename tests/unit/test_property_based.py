@@ -11,6 +11,7 @@ import pytest
 hypothesis = pytest.importorskip("hypothesis")
 from hypothesis import assume, given, settings  # noqa: E402
 from hypothesis import strategies as st  # noqa: E402
+
 from src.shared.python.spatial_algebra.pose6dof import (  # noqa: E402
     euler_to_rotation_matrix,
     rotation_matrix_to_euler,

@@ -14,6 +14,7 @@ import time
 from dataclasses import dataclass
 
 import numpy as np
+
 from src.robotics.planning.motion.planner_base import (
     CollisionCheckerProtocol,
     MotionPlanner,

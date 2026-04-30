@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+
 from src.shared.python.data_io.output_manager import (
     OutputFormat,
     OutputManager,

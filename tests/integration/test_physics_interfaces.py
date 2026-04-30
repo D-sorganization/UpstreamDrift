@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 # Mock modules using patch.dict (auto-cleans) before importing engines.

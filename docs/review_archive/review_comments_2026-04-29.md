@@ -1,21 +1,21 @@
 # Review Comments Archive - 2026-04-29
 
-Generated: 2026-04-29T15:28:26.209167
+Generated: 2026-04-29T20:21:49.574348
 
 ## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
 
-### PR #3493: src/shared/python/physics/impact_model/models.py:163
+### PR #3498: pyproject.toml:185
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve complex components when computing vector magnitudes**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Move Ruff ignore list back under lint section**
 
-This replacement changes behavior from `np.linalg.norm` to `math.hypot` after coercing to `dtype=float`, which silently discards imaginary components. In `RigidBodyImpactModel.solve`, complex-valued orientation/velocity inputs (which `np.linalg.norm` handled correctly) now get truncated to real parts, producing smaller magnitudes and incorrect no...
+Adding `[tool.ruff.lint.mccabe]` before `ignore = [...]` changes the TOML scope so `ignore` is parsed as a `mccabe` option, which Ruff does not support. In this state, any Ruff command fails to load the config (for example, `ruff check .` errors with `unknown field 'ignore', expected 'max-complexity'`), so linting/CI is effectively broken until `ignore` is plac...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3493#discussion_r3164510545)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3498#discussion_r3165433456)
 
 ---
 

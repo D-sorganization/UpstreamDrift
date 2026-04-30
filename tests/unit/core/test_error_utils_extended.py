@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 
 import pytest
+
 from src.shared.python.core.error_utils import (
     DataFormatError,
     EngineNotAvailableError,

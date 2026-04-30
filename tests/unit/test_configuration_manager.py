@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from src.shared.python.config.configuration_manager import (
     ConfigurationManager,
     SimulationConfig,

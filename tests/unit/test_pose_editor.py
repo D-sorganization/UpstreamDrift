@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.pose_editor.core import JointInfo, JointType, PoseEditorState
 from src.shared.python.pose_editor.library import (
     PoseLibrary,

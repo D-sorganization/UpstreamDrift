@@ -4,6 +4,7 @@ import os
 from unittest.mock import patch
 
 import pytest
+
 from src.shared.python.ai.config import (
     DEFAULT_ANTHROPIC_MODEL,
     DEFAULT_ANTHROPIC_TIMEOUT,

@@ -12,6 +12,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 from numpy.testing import assert_allclose, assert_array_equal
+
 from src.robotics.locomotion.footstep_planner import (
     Footstep,
     FootstepPlan,

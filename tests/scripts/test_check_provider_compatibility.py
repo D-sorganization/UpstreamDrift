@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import yaml
+
 from scripts.check_provider_compatibility import main
 
 

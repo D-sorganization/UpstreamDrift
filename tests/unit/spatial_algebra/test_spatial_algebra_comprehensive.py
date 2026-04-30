@@ -12,6 +12,7 @@ from collections.abc import Callable
 import numpy as np
 import numpy.typing as npt
 import pytest
+
 from src.shared.python.spatial_algebra.inertia import (
     mcI,
     mci,

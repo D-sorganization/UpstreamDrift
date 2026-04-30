@@ -4,6 +4,7 @@ import math
 
 import numpy as np
 import pytest
+
 from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
 )

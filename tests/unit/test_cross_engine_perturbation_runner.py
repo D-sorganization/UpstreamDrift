@@ -17,6 +17,7 @@ Design by Contract
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.perturbation.config import (
     PerturbationConfig,
     PerturbationSummary,

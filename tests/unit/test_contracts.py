@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.contracts import (
     DBC_LEVEL,
     ContractLevel,

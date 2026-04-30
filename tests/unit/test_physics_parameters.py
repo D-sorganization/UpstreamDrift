@@ -1,4 +1,5 @@
 import pytest
+
 from src.shared.python.physics.physics_parameters import (
     ParameterCategory,
     PhysicsParameter,

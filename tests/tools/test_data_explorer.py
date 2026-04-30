@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from src.tools.data_explorer.data_explorer_app import (
     SUPPORTED_EXTENSIONS,
     discover_datasets,

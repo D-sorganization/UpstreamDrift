@@ -6,6 +6,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+
 from src.shared.python.validation_pkg.statistical_analysis import StatisticalAnalyzer
 
 

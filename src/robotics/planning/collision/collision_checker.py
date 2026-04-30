@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
 import numpy as np
+
 from src.robotics.planning.collision.collision_types import (
     CollisionPair,
     CollisionQuery,

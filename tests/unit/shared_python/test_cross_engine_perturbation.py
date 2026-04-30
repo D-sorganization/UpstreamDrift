@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.pendulum_simulator.cross_engine_perturbation import (
     CrossEnginePerturbationRunner,
     CrossEngineRunResult,

@@ -87,12 +87,12 @@ def test_myosuite_simulation_core_mixin_declares_attrs() -> None:
         "Add `from typing import TYPE_CHECKING` and declare mixin attrs."
     )
     # env and sim must be declared
-    assert "env:" in content, (
-        "SimulationCoreMixin is missing `env:` declaration under TYPE_CHECKING guard."
-    )
-    assert "sim:" in content, (
-        "SimulationCoreMixin is missing `sim:` declaration under TYPE_CHECKING guard."
-    )
+    assert (
+        "env:" in content
+    ), "SimulationCoreMixin is missing `env:` declaration under TYPE_CHECKING guard."
+    assert (
+        "sim:" in content
+    ), "SimulationCoreMixin is missing `sim:` declaration under TYPE_CHECKING guard."
 
 
 @pytest.mark.unit
@@ -112,9 +112,9 @@ def test_myosuite_dynamics_mixin_declares_attrs() -> None:
     content = source_file.read_text()
     assert "TYPE_CHECKING" in content, "_dynamics.py is missing TYPE_CHECKING import."
     assert "sim:" in content, "DynamicsMixin is missing `sim:` declaration."
-    assert "is_initialized:" in content, (
-        "DynamicsMixin is missing `is_initialized:` declaration."
-    )
+    assert (
+        "is_initialized:" in content
+    ), "DynamicsMixin is missing `is_initialized:` declaration."
 
 
 @pytest.mark.unit
@@ -132,9 +132,9 @@ def test_myosuite_drift_control_mixin_declares_attrs() -> None:
     assert source_file.exists(), f"Source file not found: {source_file}"
 
     content = source_file.read_text()
-    assert "TYPE_CHECKING" in content, (
-        "_drift_control.py is missing TYPE_CHECKING import."
-    )
+    assert (
+        "TYPE_CHECKING" in content
+    ), "_drift_control.py is missing TYPE_CHECKING import."
     assert "sim:" in content, "DriftControlMixin is missing `sim:` declaration."
 
 
@@ -153,9 +153,9 @@ def test_myosuite_muscle_interface_mixin_declares_attrs() -> None:
     assert source_file.exists(), f"Source file not found: {source_file}"
 
     content = source_file.read_text()
-    assert "TYPE_CHECKING" in content, (
-        "_muscle_interface.py is missing TYPE_CHECKING import."
-    )
+    assert (
+        "TYPE_CHECKING" in content
+    ), "_muscle_interface.py is missing TYPE_CHECKING import."
     assert "sim:" in content, "MuscleInterfaceMixin is missing `sim:` declaration."
 
 
@@ -163,9 +163,9 @@ def test_myosuite_muscle_interface_mixin_declares_attrs() -> None:
 def test_no_type_ignore_import_untyped_in_signal_toolkit() -> None:
     """signal_toolkit files must not have import-untyped ignores for core.contracts."""
     signal_toolkit_dir = REPO_ROOT / "src" / "shared" / "python" / "signal_toolkit"
-    assert signal_toolkit_dir.exists(), (
-        f"signal_toolkit not found at {signal_toolkit_dir}"
-    )
+    assert (
+        signal_toolkit_dir.exists()
+    ), f"signal_toolkit not found at {signal_toolkit_dir}"
 
     violations = []
     for py_file in signal_toolkit_dir.rglob("*.py"):

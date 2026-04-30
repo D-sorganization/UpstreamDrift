@@ -5,6 +5,7 @@ from unittest.mock import mock_open, patch  # noqa: E402
 
 import pytest  # noqa: E402
 import yaml  # noqa: E402
+
 from src.launchers.model_registry import (  # noqa: E402
     ModelRegistry,
     ModelSpec,

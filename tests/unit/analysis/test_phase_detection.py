@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.analysis.dataclasses import SwingPhase
 from src.shared.python.analysis.phase_detection import PhaseDetectionMixin
 

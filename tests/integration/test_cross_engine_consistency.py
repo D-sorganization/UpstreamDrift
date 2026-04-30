@@ -13,9 +13,9 @@ from typing import Any
 
 import numpy as np
 import pytest
+
 from src.shared.python.engine_core.cross_engine_validator import CrossEngineValidator
 from src.shared.python.logging_pkg.logging_config import get_logger
-
 from tests.fixtures.fixtures_lib import (
     TOLERANCE_ACCELERATION_M_S2,
     _check_drake_available,
@@ -387,6 +387,6 @@ class TestThreeWayTriangulation:
 
         # For now, just verify that at least two engines agree closely
         min_deviation = min(deviations.values()) if deviations else float("inf")
-        assert min_deviation < agreement_threshold, (
-            f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
-        )
+        assert (
+            min_deviation < agreement_threshold
+        ), f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"

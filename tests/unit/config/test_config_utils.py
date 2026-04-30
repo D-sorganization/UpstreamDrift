@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from src.shared.python.config.config_utils import (
     ConfigLoader,
     load_json_config,

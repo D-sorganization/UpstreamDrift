@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.plotting.core import GolfSwingPlotter
 from src.shared.python.plotting.renderers.club import ClubRenderer
 from src.shared.python.plotting.renderers.comparison import ComparisonRenderer

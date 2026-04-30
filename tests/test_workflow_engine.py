@@ -2,6 +2,7 @@ from collections import namedtuple
 from unittest.mock import Mock
 
 import pytest
+
 from src.shared.python.ai.tool_registry import ToolRegistry, ToolResult
 from src.shared.python.ai.workflow_engine import (
     ExpertiseLevel,

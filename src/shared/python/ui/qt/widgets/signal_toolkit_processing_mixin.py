@@ -16,6 +16,7 @@ from typing import Any
 
 import numpy as np
 from PyQt6.QtWidgets import QFileDialog, QMessageBox
+
 from src.shared.python.signal_toolkit.calculus import (
     Differentiator,
     Integrator,

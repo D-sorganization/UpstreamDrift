@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
 from src.shared.python.engine_core.engine_availability import skip_if_unavailable
 
 # Import paths configured at test runner level via pyproject.toml/conftest.py

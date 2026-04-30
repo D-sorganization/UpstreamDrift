@@ -20,8 +20,9 @@ sys.modules[
 
 import subprocess  # noqa: E402
 
-import build_hooks  # noqa: E402
 import pytest  # noqa: E402
+
+import build_hooks  # noqa: E402
 
 
 class DummyConfig:

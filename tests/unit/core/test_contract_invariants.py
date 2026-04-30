@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.core.contracts.exceptions import InvariantError
 from src.shared.python.core.contracts.invariants import (
     ContractChecker,

@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+
 from src.shared.python.injury.injury_risk import (
     InjuryRiskReport,
     InjuryRiskScorer,

@@ -138,6 +138,7 @@ class TestOptionalAuthContract:
     def test_inherits_from_http_bearer(self) -> None:
         """Postcondition: OptionalAuth inherits from HTTPBearer."""
         from fastapi.security import HTTPBearer
+
         from src.api.auth.middleware import OptionalAuth
 
         assert issubclass(OptionalAuth, HTTPBearer)

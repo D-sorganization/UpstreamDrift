@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.biomechanics.ztcf import (
     ZTCFResult,
     compute_force_delta,

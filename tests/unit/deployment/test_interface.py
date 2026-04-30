@@ -2,6 +2,7 @@ from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray
+
 from src.deployment.realtime import ControlMode
 from src.deployment.teleoperation.interface import (
     TeleoperationInterface,
@@ -200,6 +201,6 @@ class TestIssue2476TeleoperationPolling:
             for i, c in enumerate(device.method_calls)
             if c[0] in ("get_pose", "get_twist", "get_gripper_state", "get_buttons")
         ]
-        assert all(update_idx < idx for idx in state_read_indices), (
-            "input.update() must be called before any state reads in update()"
-        )
+        assert all(
+            update_idx < idx for idx in state_read_indices
+        ), "input.update() must be called before any state reads in update()"

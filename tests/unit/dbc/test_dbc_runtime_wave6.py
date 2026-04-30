@@ -14,6 +14,7 @@ import unittest
 from typing import Any
 
 import numpy as np
+
 from src.shared.python.core.contracts import PreconditionError
 
 # ── Helper factories ───────────────────────────────────────────────

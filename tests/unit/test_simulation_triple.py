@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.pendulum_simulator.physics_triple import TriplePendulumParams
 from src.shared.python.pendulum_simulator.simulation_triple import (
     TripleSimulationResult,

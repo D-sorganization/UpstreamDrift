@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
 from src.shared.python.core.contracts import StateError
 
 # Mock pyopenpose using patch.dict (auto-cleans) BEFORE importing the estimator,

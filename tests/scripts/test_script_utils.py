@@ -1,4 +1,5 @@
 import pytest
+
 from scripts.script_utils import run_command, run_pytest
 
 

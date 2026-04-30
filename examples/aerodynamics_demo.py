@@ -19,6 +19,7 @@ project_root = _parents[1]
 sys.path.insert(0, str(project_root))
 
 import numpy as np  # noqa: E402
+
 from src.shared.python.physics.aerodynamics import (  # noqa: E402
     AerodynamicsConfig,
     AerodynamicsEngine,

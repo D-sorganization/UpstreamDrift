@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 
 import pytest
+
 from src.tools.video_analyzer.types import Landmark
 
 

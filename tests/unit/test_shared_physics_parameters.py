@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import mock_open, patch
 
 import pytest
+
 from src.shared.python.physics.physics_parameters import (
     ParameterCategory,
     PhysicsParameter,

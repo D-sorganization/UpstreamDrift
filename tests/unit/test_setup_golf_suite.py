@@ -3,8 +3,9 @@ from __future__ import annotations
 import pathlib
 from unittest.mock import patch
 
-import setup_golf_suite
 from PIL import Image
+
+import setup_golf_suite
 
 
 def test_apply_icon_optimizations() -> None:

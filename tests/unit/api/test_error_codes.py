@@ -84,9 +84,9 @@ class TestErrorMetadata:
 
         for code, metadata in ERROR_METADATA.items():
             status = metadata.get("status_code")
-            assert status in valid_status_codes, (
-                f"Invalid status code {status} for {code}"
-            )
+            assert (
+                status in valid_status_codes
+            ), f"Invalid status code {status} for {code}"
 
     def test_messages_are_non_empty_strings(self) -> None:
         """Test that all messages are non-empty strings."""
@@ -119,9 +119,9 @@ class TestErrorMetadata:
             expected_category = code_to_category.get(code_prefix)
 
             if expected_category:
-                assert metadata.get("category") == expected_category, (
-                    f"Category mismatch for {code}"
-                )
+                assert (
+                    metadata.get("category") == expected_category
+                ), f"Category mismatch for {code}"
 
 
 class TestAPIErrorContract:
@@ -234,6 +234,7 @@ class TestAPIError:
     def test_to_response_returns_json_response(self) -> None:
         """Test that to_response returns a JSONResponse."""
         from fastapi.responses import JSONResponse
+
         from src.api.utils.error_codes import APIError, ErrorCode
 
         error = APIError.from_code(ErrorCode.VALIDATION_FAILED)

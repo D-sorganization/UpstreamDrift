@@ -17,6 +17,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from src.engines.physics_engines.pinocchio.python.perturbation.analyzer import (
     MANDATORY_METRICS,
     PinocchioSimResult,

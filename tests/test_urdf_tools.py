@@ -2,6 +2,7 @@ import os
 import sys
 
 import pytest
+
 from src.shared.python.data_io.common_utils import get_shared_urdf_path
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 

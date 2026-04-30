@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
-import installer.windows.build_installer as bi
 import pytest
+
+import installer.windows.build_installer as bi
 
 
 def test_check_prerequisites(monkeypatch) -> None:

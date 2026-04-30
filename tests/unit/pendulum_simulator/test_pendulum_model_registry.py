@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.pendulum_simulator.model_registry import (
     ModelConfig,
     clear_registry,

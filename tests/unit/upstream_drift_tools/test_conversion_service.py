@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 import pytest
+
 from src.shared.python.upstream_drift_tools.calculators.conversion.service import (
     ConversionResult,
     IncompatibleUnitsError,

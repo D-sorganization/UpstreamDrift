@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
 from src.shared.python.analysis.basic_stats import BasicStatsMixin
 from src.shared.python.analysis.dataclasses import (

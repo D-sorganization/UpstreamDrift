@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.pendulum_simulator.counterfactual_golfer import (
     zero_torque_accelerations,
     zero_torque_joint_forces,

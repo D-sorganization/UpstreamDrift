@@ -19,6 +19,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
+
 from src.api.routes.simulation_ws import (
     _apply_initial_state,
     _engine_state_to_dict,

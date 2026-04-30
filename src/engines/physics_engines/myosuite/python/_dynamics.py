@@ -14,6 +14,7 @@ class DynamicsMixin:
     # Attributes provided by EngineInitMixin.__init__; declared here for type checking.
     if TYPE_CHECKING:
         sim: Any
+
         @property
         def is_initialized(self) -> bool: ...
 

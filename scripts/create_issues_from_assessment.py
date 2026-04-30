@@ -14,9 +14,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.assessment.analysis import classify_assessment_category
-
 from scripts.script_utils import run_main, setup_script_logging
+from src.shared.python.assessment.analysis import classify_assessment_category
 
 logger = setup_script_logging(__name__)
 

@@ -88,6 +88,6 @@ class TestDashboardModulesHaveCallableMain:
     @pytest.mark.parametrize("dashboard_module", _DASHBOARD_MODULES)
     def test_main_is_callable(self, dashboard_module: str) -> None:
         mod = importlib.import_module(dashboard_module)
-        assert callable(getattr(mod, "main", None)), (
-            f"{dashboard_module} does not expose a callable main()"
-        )
+        assert callable(
+            getattr(mod, "main", None)
+        ), f"{dashboard_module} does not expose a callable main()"

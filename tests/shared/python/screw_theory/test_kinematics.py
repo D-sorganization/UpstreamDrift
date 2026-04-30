@@ -1,4 +1,5 @@
 import numpy as np
+
 from src.shared.python.screw_theory.kinematics import (
     Twist,
     compute_screw_axis,

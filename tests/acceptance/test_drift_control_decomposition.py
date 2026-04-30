@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 import pytest
+
 from src.shared.python.logging_pkg.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -116,9 +117,9 @@ class TestDriftControlDecomposition:
                 "model may not support clean decomposition"
             )
 
-        assert max_res < SUPERPOSITION_TOLERANCE, (
-            f"{engine_name}: Superposition failed (res={max_res:.2e})"
-        )
+        assert (
+            max_res < SUPERPOSITION_TOLERANCE
+        ), f"{engine_name}: Superposition failed (res={max_res:.2e})"
 
     def test_zero_control(self, engine_name, pendulum_urdf) -> None:
         """Verify full dynamics with tau=0 equals drift acceleration."""

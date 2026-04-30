@@ -28,11 +28,11 @@ from model_generation.core.types import Joint, JointType, Link, Material, Origin
 
 from .editor_clipboard import ClipboardMixin
 from .editor_modifications import ModificationMixin
+from .editor_types import ComponentReference  # noqa: F401
+from .editor_types import PendingOperation  # noqa: F401
 from .editor_types import (
-    ComponentReference,  # noqa: F401
     ComponentType,
     EditorState,
-    PendingOperation,  # noqa: F401
 )
 
 logger = logging.getLogger(__name__)

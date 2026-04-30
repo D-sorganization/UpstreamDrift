@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.data_io.dataset_generator import (
     ControlProfile,
     ParameterRange,

@@ -10,6 +10,7 @@ from typing import NoReturn
 
 import numpy as np
 import pytest
+
 from src.shared.python.core.contracts import StateError
 from src.shared.python.physics.energy_monitor import (
     ENERGY_DRIFT_CRITICAL_PCT,

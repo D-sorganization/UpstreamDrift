@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.engine_core.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.logging_pkg.logging_config import get_logger
 
@@ -388,9 +389,9 @@ class TestMyoSuiteEngine:
             ):
                 actuator_id = analyzer.muscle_actuator_ids[0]
                 ctrl_value = engine.sim.data.ctrl[actuator_id]
-                assert 0.7 <= ctrl_value <= 0.9, (
-                    f"Activation not set correctly: {ctrl_value}"
-                )
+                assert (
+                    0.7 <= ctrl_value <= 0.9
+                ), f"Activation not set correctly: {ctrl_value}"
 
         except Exception as e:  # noqa: BLE001
             pytest.skip(f"Activation setting test failed: {e}")

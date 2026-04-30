@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
 from src.engines.physics_engines.pinocchio.python.pinocchio_screw_kinematics import (
     PinocchioScrewKinematics,
 )

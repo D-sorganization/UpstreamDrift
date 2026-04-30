@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
 from src.shared.python.theme.style_constants import Styles
 
 try:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 
 import pytest
+
 from src.shared.python.data_io.import_utils import (
     check_minimum_version,
     check_optional_dependency,

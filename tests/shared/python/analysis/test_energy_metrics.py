@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.analysis.energy_metrics import EnergyMetricsMixin
 
 pytestmark = pytest.mark.unit

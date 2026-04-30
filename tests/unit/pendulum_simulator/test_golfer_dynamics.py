@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.pendulum_simulator.golfer_dynamics import (
     analytical_coriolis,
     analytical_fk_jacobians,

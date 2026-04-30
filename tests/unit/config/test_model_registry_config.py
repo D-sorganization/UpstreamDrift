@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import yaml
+
 from src.shared.python.config.model_registry import ModelConfig, ModelRegistry
 
 # ---------------------------------------------------------------------------

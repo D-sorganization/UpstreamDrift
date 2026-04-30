@@ -4,6 +4,7 @@ import unittest
 
 import numpy as np
 import pytest  # noqa: F401 - required for pytestmark
+
 from src.shared.python.engine_core.engine_availability import (
     PYQT6_AVAILABLE,
     skip_if_unavailable,

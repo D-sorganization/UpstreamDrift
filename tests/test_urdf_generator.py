@@ -2,6 +2,7 @@ from typing import Any
 
 import defusedxml.ElementTree as ET
 import pytest
+
 from src.tools.model_explorer.urdf_builder import URDFBuilder
 
 

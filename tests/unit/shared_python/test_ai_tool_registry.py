@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
+
 from src.shared.python.ai.exceptions import ToolExecutionError
 from src.shared.python.ai.tool_registry import (
     Tool,

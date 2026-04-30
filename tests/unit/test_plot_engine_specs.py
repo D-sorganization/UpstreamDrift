@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.plot_engine.specs import (
     HistogramSpec,
     PlotSpec,

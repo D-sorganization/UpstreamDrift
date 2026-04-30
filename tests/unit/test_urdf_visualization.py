@@ -7,6 +7,7 @@ Issue #2502: Tests for partial-import crash and unsafe temp-file handling.
 from unittest.mock import patch
 
 import pytest
+
 from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     PYQT6_AVAILABLE,

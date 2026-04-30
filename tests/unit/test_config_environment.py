@@ -6,6 +6,7 @@ import os
 from unittest.mock import patch
 
 import pytest
+
 from src.shared.python.config.environment import (
     EnvironmentError,
     get_env,

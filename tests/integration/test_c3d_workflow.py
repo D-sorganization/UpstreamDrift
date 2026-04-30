@@ -11,6 +11,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pandas as pd
 import pytest
+
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.gui_pkg.gui_utils import get_qapp
 
@@ -21,8 +22,9 @@ pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
 C3D_IMPORTS_AVAILABLE = False
 if PYQT6_AVAILABLE:
     try:
-        from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
         from c3d_reader import C3DDataReader
+
+        from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
 
         C3D_IMPORTS_AVAILABLE = True
     except (ImportError, OSError):

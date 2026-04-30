@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 import yaml
+
 from src.shared.python.config.model_pack_manifest import (
     LauncherPresentationMetadata,
     ModelPackEntry,

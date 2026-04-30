@@ -6,6 +6,7 @@ import json
 from typing import TYPE_CHECKING
 
 import pytest
+
 from src.shared.python.core import constants
 
 if TYPE_CHECKING:

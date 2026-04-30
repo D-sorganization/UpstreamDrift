@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
+
 from src.shared.python.core.constants import MPS_TO_MPH
 from src.shared.python.data_io.common_utils import (
     DataFormatError,

@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
 from src.shared.python.calc_backend.routers.syngas_water import router
 
 _app = FastAPI()

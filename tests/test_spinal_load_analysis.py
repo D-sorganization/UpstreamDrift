@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from src.shared.python.injury.spinal_load_analysis import (
     SpinalLoadAnalyzer,
     SpinalLoadResult,

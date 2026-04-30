@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from src.reinforcement_learning.trajectory_funnel_benchmark import (
     TrajectoryFunnelBenchmark,
 )

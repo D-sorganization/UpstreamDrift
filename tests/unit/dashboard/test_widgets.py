@@ -5,6 +5,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 from PyQt6.QtWidgets import QApplication
+
 from src.shared.python.dashboard.widgets import (
     ControlPanel,
     FrequencyAnalysisDialog,

@@ -8,6 +8,13 @@ from __future__ import annotations
 
 import pytest
 from pydantic import BaseModel, ValidationError
+
+from src.shared.python import calc_backend
+from src.shared.python.calc_backend import (
+    CalculationEngine,
+    ExpressionEvaluator,
+    ValidationMixin,
+)
 from src.shared.python.calc_backend.contracts.flow_rate import (
     FlowRateConvertRequest,
     FlowRateConvertResponse,
@@ -15,13 +22,6 @@ from src.shared.python.calc_backend.contracts.flow_rate import (
 from src.shared.python.calc_backend.contracts.rotation_converter import (
     ReferenceFrameConversionRequest,
     RotationConverterRequest,
-)
-
-from src.shared.python import calc_backend
-from src.shared.python.calc_backend import (
-    CalculationEngine,
-    ExpressionEvaluator,
-    ValidationMixin,
 )
 
 

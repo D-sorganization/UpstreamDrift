@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.core.contracts.validators import (
     check_finite,
     check_non_negative,

@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 import src.shared.python.engine_core.engine_probes as engine_probes_mod
 from src.shared.python.data_io.common_utils import GolfModelingError
 from src.shared.python.engine_core.engine_loaders import (

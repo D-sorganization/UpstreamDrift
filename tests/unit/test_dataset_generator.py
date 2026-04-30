@@ -15,6 +15,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from src.shared.python.data_io.dataset_generator import (
     ControlProfile,
     DatasetGenerator,
@@ -502,12 +503,12 @@ class TestIssue2472DatasetGeneratorInvariants:
         dataset = gen.generate(config)
 
         sample = dataset.samples[0]
-        assert "potential" in sample.energies, (
-            "potential_energy must be present in sample.energies"
-        )
-        assert np.any(sample.energies["potential"] != 0.0), (
-            "potential_energy must not be all zeros when engine provides it"
-        )
+        assert (
+            "potential" in sample.energies
+        ), "potential_energy must be present in sample.energies"
+        assert np.any(
+            sample.energies["potential"] != 0.0
+        ), "potential_energy must not be all zeros when engine provides it"
 
     def test_export_to_hdf5(
         self, generator: DatasetGenerator, basic_config: GeneratorConfig

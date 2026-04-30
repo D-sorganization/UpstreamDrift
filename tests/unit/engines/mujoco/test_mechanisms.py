@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import mujoco
 import pytest
+
 from src.engines.physics_engines.mujoco.head_models import (
     TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML,
 )

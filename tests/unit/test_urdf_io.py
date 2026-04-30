@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import defusedxml.ElementTree as ET
 import numpy as np
 import pytest
+
 from src.shared.python.engine_core.engine_availability import (
     MUJOCO_AVAILABLE,
     skip_if_unavailable,
@@ -17,6 +18,7 @@ pytestmark = skip_if_unavailable("mujoco")
 
 if MUJOCO_AVAILABLE:
     import mujoco
+
     from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
         URDFImporter,
         export_model_to_urdf,

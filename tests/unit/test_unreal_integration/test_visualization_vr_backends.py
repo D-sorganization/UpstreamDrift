@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.unreal_integration.data_models import (
     ForceVector,
     Quaternion,

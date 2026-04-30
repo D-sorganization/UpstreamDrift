@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.pendulum_simulator.hub_options import (
     compute_system_com,
     effective_hub_mass,

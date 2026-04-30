@@ -6,6 +6,7 @@ import math
 
 import numpy as np
 import pytest
+
 from src.shared.python.spatial_algebra.pose6dof import (
     Pose6DOF,
     Transform6DOF,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.plot_theme.manager import (
     PlotThemeManager,
     get_plot_theme_manager,

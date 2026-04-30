@@ -7,6 +7,7 @@ Issue #1741: Populate Pinocchio test directories.
 from pathlib import Path
 
 import pytest
+
 from src.engines.physics_engines.pinocchio.python.dtack.utils.optical_parser import (
     OpticalParser,
 )

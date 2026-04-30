@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.upstream_drift_tools.calculators.conversion.core import (
     convert_temperature,
     convert_via_table,

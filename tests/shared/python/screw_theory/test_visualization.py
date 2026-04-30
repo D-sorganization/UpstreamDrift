@@ -10,6 +10,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
+
 from src.shared.python.screw_theory.kinematics import (
     Twist,
     compute_screw_axis,

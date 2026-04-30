@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+
 from src.shared.python.assessment.analysis import (
     assess_error_handling_content,
     assess_logging_content,

@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+
 from src.shared.python.config.model_registry import ModelRegistry
 
 

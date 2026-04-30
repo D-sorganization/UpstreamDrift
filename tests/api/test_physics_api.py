@@ -19,6 +19,7 @@ from collections.abc import Generator
 
 import pytest
 from pydantic import ValidationError
+
 from src.api.models.requests import (
     VALID_CAMERA_PRESETS,
     VALID_CONTROL_STRATEGIES,
@@ -42,6 +43,7 @@ from src.api.models.responses import (
 
 try:
     from fastapi.testclient import TestClient
+
     from src.api.server import app
 
     HAS_FASTAPI = True

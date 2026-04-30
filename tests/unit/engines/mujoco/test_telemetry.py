@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, mock_open, patch
 import mujoco
 import numpy as np
 import pytest
+
 import src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry as _telemetry_mod
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry import (
     TelemetryRecorder,

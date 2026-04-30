@@ -7,6 +7,7 @@ from double_pendulum_model.physics.double_pendulum import DoublePendulumState
 from double_pendulum_model.physics.triple_pendulum import TriplePendulumState
 from double_pendulum_model.ui.pendulum_pyqt_app import PendulumController
 from PyQt6 import QtWidgets
+
 from src.shared.python.ui.qt.utils import get_qapp
 
 

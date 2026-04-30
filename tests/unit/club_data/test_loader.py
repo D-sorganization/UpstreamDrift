@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from src.shared.python.club_data.loader import (
     ClubDataLoader,
     ClubSpecification,

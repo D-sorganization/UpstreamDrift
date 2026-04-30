@@ -5,6 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 import pytest
+
 from src.shared.python.ai.exceptions import WorkflowError
 from src.shared.python.ai.tool_registry import ToolRegistry
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.upstream_drift_tools.calculators.electrical.config import (
     ElectrodeConfig,
 )

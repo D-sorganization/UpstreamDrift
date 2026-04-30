@@ -41,9 +41,9 @@ class TestStandardModelManagerPaths:
 
         mgr = StandardModelManager()
         # config_file should be a child of models_dir, not in a double-shared subtree
-        assert mgr.config_file.parent == mgr.models_dir, (
-            f"config_file parent {mgr.config_file.parent} != models_dir {mgr.models_dir}"
-        )
+        assert (
+            mgr.config_file.parent == mgr.models_dir
+        ), f"config_file parent {mgr.config_file.parent} != models_dir {mgr.models_dir}"
 
 
 class TestSharedModelRegistryDefaultPath:
@@ -66,18 +66,18 @@ class TestSharedModelRegistryDefaultPath:
         registry = ModelRegistry()
         # The correct file lives under src/config/
         path_str = str(registry.config_path).replace("\\", "/")
-        assert "src/config/models.yaml" in path_str, (
-            f"Default config_path does not point to src/config/models.yaml: {registry.config_path}"
-        )
+        assert (
+            "src/config/models.yaml" in path_str
+        ), f"Default config_path does not point to src/config/models.yaml: {registry.config_path}"
 
     def test_default_config_path_file_exists(self) -> None:
         """Default ModelRegistry() config_path must exist on disk."""
         from src.shared.python.config.model_registry import ModelRegistry
 
         registry = ModelRegistry()
-        assert registry.config_path.exists(), (
-            f"Default config_path does not exist: {registry.config_path}"
-        )
+        assert (
+            registry.config_path.exists()
+        ), f"Default config_path does not exist: {registry.config_path}"
 
 
 class TestLaunchersModelRegistryDefaultPath:
@@ -92,9 +92,7 @@ class TestLaunchersModelRegistryDefaultPath:
         # After the fix the path should contain src/config, not just config/models.yaml at root
         assert "src/config/models.yaml" in config_str or not config_str.endswith(
             "config/models.yaml"
-        ), (
-            f"launchers.ModelRegistry still defaults to bare 'config/models.yaml': {registry.config_path}"
-        )
+        ), f"launchers.ModelRegistry still defaults to bare 'config/models.yaml': {registry.config_path}"
 
     def test_launchers_default_file_found_from_repo_root(self) -> None:
         """load() with repo root must find the models.yaml without falling back to a warning."""

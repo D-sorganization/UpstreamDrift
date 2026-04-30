@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+
 from src.shared.python.data_io.path_utils import (
     ensure_directory,
     find_file_in_parents,

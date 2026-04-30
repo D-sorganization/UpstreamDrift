@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+
 from src.shared.python.pendulum_simulator.constraint_solver import (
     constrained_accelerations,
     constraint_violation,

@@ -17,6 +17,7 @@ import pytest
 pytest.importorskip("PyQt6")
 
 from PyQt6 import QtWidgets  # noqa: E402
+
 from src.shared.python.ui.simulation_gui_base import SimulationGUIBase  # noqa: E402
 
 # ---------------------------------------------------------------------------

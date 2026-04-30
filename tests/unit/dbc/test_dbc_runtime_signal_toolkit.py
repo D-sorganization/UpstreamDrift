@@ -9,6 +9,7 @@ from __future__ import annotations
 import unittest
 
 import numpy as np
+
 from src.shared.python.core.contracts import PreconditionError
 from src.shared.python.signal_toolkit.core import Signal
 from src.shared.python.signal_toolkit.filters import (

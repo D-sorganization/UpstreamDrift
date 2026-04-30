@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from src.shared.python.engine_core.engine_probes import (
     DrakeProbe,
     EngineProbe,

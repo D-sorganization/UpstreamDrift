@@ -15,6 +15,7 @@ from typing import Any  # noqa: E402
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
+
 from src.shared.python.ai.adapters.base import ToolDeclaration  # noqa: E402
 from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter  # noqa: E402
 from src.shared.python.ai.exceptions import (  # noqa: E402

@@ -19,6 +19,8 @@ if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
 
 import uvicorn  # noqa: E402
+
+from api.server import app  # noqa: E402
 from src.shared.python.gui_pkg.launcher_utils import (  # noqa: E402
     check_python_dependencies,
     ensure_environment_var,
@@ -29,8 +31,6 @@ from src.shared.python.logging_pkg.logging_config import (  # noqa: E402
     get_logger,
     setup_logging,
 )
-
-from api.server import app  # noqa: E402
 
 setup_logging(use_simple_format=True)
 logger = get_logger(__name__)

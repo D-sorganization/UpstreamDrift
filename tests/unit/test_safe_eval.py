@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.shared.python.safe_eval import (
     NUMPY_MATH_NAMESPACE,
     SCALAR_MATH_NAMESPACE,

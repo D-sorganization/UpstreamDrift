@@ -12,6 +12,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from src.shared.python.gui_pkg.plot_generator import (
     ALL_PLOT_TYPES,
     PlotConfig,

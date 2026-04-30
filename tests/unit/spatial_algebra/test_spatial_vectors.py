@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.spatial_algebra.spatial_vectors import (
     crf,
     crm,

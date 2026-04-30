@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+
 from src.shared.python.signal_toolkit.signal_processing import (
     KalmanFilter,
     compute_cwt,
