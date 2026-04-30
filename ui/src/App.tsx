@@ -6,6 +6,7 @@ import { PuttingGreenPage } from './pages/PuttingGreen';
 import { VideoAnalyzerPage } from './pages/VideoAnalyzer';
 import { DataExplorerPage } from './pages/DataExplorer';
 import { MotionCapturePage } from './pages/MotionCapture';
+import { ChatPage } from './pages/Chat';
 import { ToastProvider } from './components/ui/Toast';
 import { DiagnosticsPanel } from './components/ui/DiagnosticsPanel';
 import { HelpPanel } from './components/ui/HelpPanel';
@@ -27,6 +28,8 @@ function App() {
           <Route path="/tools/video-analyzer" element={<VideoAnalyzerPage />} />
           <Route path="/tools/data-explorer" element={<DataExplorerPage />} />
           <Route path="/tools/motion-capture" element={<MotionCapturePage />} />
+          {/* Chat (#3505): wires chat_ws backend into the UI */}
+          <Route path="/chat" element={<ChatPage />} />
         </Routes>
         <DiagnosticsPanel />
         <HelpPanel isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
