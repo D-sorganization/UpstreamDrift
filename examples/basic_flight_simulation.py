@@ -85,3 +85,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+    print("\nPhysics: Includes aerodynamic effects like drag and lift.")
