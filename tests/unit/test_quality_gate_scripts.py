@@ -8,7 +8,10 @@ from pathlib import Path
 
 
 def _load_script_module(name: str) -> types.ModuleType:
-    script_path = Path(__file__).resolve().parents[2] / "scripts" / f"{name}.py"
+    repo_root = Path(__file__).resolve().parents[2]
+    script_path = repo_root / "scripts" / f"{name}.py"
+    if not script_path.exists():
+        script_path = repo_root / "scripts" / "ci" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, script_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -31,3 +34,9 @@ def test_file_size_exception_active_handles_valid_and_expired_dates() -> None:
 
     assert module._exception_is_active({"expires_on": "2999-01-01"}) is True
     assert module._exception_is_active({"expires_on": "2000-01-01"}) is False
+
+
+def test_file_size_budget_script_resolves_repo_root() -> None:
+    module = _load_script_module("check_file_size_budget")
+
+    assert module._repo_root() == Path(__file__).resolve().parents[2]

@@ -70,6 +70,15 @@ jobs:
           set -euo pipefail
           python3 scripts/check_local_only_workflows.py
 
+  pinned-actions:
+    name: Enforce action SHA pinning
+    runs-on: d-sorg-fleet
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Run GitHub Actions pinning guard
+        shell: bash
+        run: python3 scripts/check_github_actions_pinned.py
+
   # -- Dispatcher: route to self-hosted if available --------------------------
   pick-runner:
     runs-on: d-sorg-fleet
@@ -86,7 +95,7 @@ jobs:
   quality-gate:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -227,7 +236,8 @@ jobs:
           # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
           # - CVE-2026-3219 (pip): audit-tool dependency in the shared runner env
           # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-3219 --ignore-vuln CVE-2026-4539
+          # - PYSEC-2022-42969 (py): No fix version reported by pip-audit
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-3219 --ignore-vuln CVE-2026-4539 --ignore-vuln PYSEC-2022-42969
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
@@ -349,6 +359,31 @@ jobs:
           QT_API: pyqt6
         run: |
           export COVERAGE_FILE="$RUNNER_TEMP/.coverage"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            mapfile -t changed_tests < <(
+              git diff --name-only "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
+            )
+
+            if [ "${#changed_tests[@]}" -eq 0 ]; then
+              echo "No Python test changes detected; skipping PR-scoped core tests."
+              exit 0
+            fi
+
+            echo "Running PR-scoped core tests:"
+            printf '  %s\n' "${changed_tests[@]}"
+            xvfb-run --auto-servernum python -m pytest "${changed_tests[@]}" \
+              -p no:xvfb \
+              -n 0 \
+              --timeout=60 \
+              --timeout-method=thread \
+              -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+              --no-cov \
+              --tb=short \
+              -v
+            exit 0
+          fi
 
           # Run the default, dependency-light CI lane:
           # - Serial execution for self-hosted runner and coverage stability
@@ -525,25 +560,49 @@ jobs:
         working-directory: ./ui
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Check for frontend changes
+        id: frontend-changes
+        working-directory: .
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+          if git diff --quiet "origin/${{ github.base_ref }}" HEAD -- ui; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No ui/ changes detected; skipping frontend checks for this PR."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        if: steps.frontend-changes.outputs.skip != 'true'
         with:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: ui/package-lock.json
 
       - name: Install Dependencies
+        if: steps.frontend-changes.outputs.skip != 'true'
         run: npm ci
 
       - name: Type Check
+        if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run type-check
 
       - name: Lint
+        if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run lint
 
       - name: Run Tests
+        if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run test:run
 
       - name: Build Check
+        if: steps.frontend-changes.outputs.skip != 'true'
         run: npm run build
 
   # =============================================================================

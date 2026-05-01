@@ -10,7 +10,15 @@ import sys
 import textwrap
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+PYTHON_FENCE_RE = re.compile(r"\\?```python\s*\n(.*?)\\?```", re.DOTALL)
+
+
+def _repo_root() -> Path:
+    """Return the repository root for this script."""
+    return Path(__file__).resolve().parents[2]
+
+
+ROOT = _repo_root()
 DOC_TARGETS = (
     ROOT / "docs" / "UPSTREAM_DRIFT_USER_MANUAL.md",
     *sorted((ROOT / "docs" / "tutorials" / "content").glob("*.md")),
@@ -20,7 +28,6 @@ CANONICAL_MODULES = (
     "src.shared.python.engine_core.engine_manager",
     "src.shared.python.engine_core.engine_registry",
 )
-PYTHON_FENCE_RE = re.compile(r"\\?```python\s*\n(.*?)\\?```", re.DOTALL)
 
 
 def extract_python_blocks(markdown: str) -> list[str]:

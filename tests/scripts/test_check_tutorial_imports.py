@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from scripts.check_tutorial_imports import (
+from scripts.ci.check_tutorial_imports import (
+    _repo_root,
     check_doc_imports,
     extract_python_blocks,
     iter_import_from_modules,
@@ -50,3 +51,7 @@ def test_check_doc_imports_reports_deprecated_engine_manager_import(
 
     assert errors
     assert "src.shared.python.engine_manager" in "\n".join(errors)
+
+
+def test_tutorial_imports_script_resolves_repo_root() -> None:
+    assert _repo_root() == Path(__file__).resolve().parents[2]

@@ -1,5 +1,7 @@
 # CLAUDE.md — UpstreamDrift
 
+`CLAUDE.md` is the authoritative contributor and agent policy file.
+
 > **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
 > Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
 > All work on `main` branch. PRs target `main`.
@@ -37,7 +39,7 @@ python3 -m ruff format .                          # auto-format
 python3 -m pytest -n auto --timeout=60            # full test suite
 python3 -m pytest -m unit -n auto --timeout=60    # unit tests only
 python3 -m pytest -m "not slow and not live_simulation" -n auto --timeout=60
-python3 scripts/check_file_size_budget.py         # file size check
+python3 scripts/ci/check_file_size_budget.py      # file size check
 maturin develop                                   # build Rust extensions locally
 ```
 

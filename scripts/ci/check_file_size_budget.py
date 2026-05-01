@@ -16,6 +16,11 @@ logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = Path("scripts/config/file_size_budget.json")
 
 
+def _repo_root() -> Path:
+    """Return the repository root for this script."""
+    return Path(__file__).resolve().parents[2]
+
+
 def _run_git(args: list[str], repo_root: Path) -> str:
     result = subprocess.run(
         ["git", *args],
@@ -98,7 +103,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    repo_root = Path(__file__).resolve().parents[2]
+    repo_root = _repo_root()
     config = _load_config(repo_root, args.config_path)
     budget = int(config.get("max_lines", 1200))
 
