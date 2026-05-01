@@ -58,7 +58,7 @@ def main() -> None:
 
     # --- Print summary every 0.5 s (index step of 10) ---
     print("Trajectory Summary (every 0.5 seconds):")
-    print(f"{'Time (s)':<12} {'X (m)':<12} {'Height (m)':<15} {'Speed (m/s)':<12}")
+    print(f"{'t (s)':<12} {'x (m)':<12} {'z (m)':<15} {'|v| (m/s)':<12}")
     print("-" * 51)
     for pt in trajectory[::10]:
         print(
@@ -66,12 +66,14 @@ def main() -> None:
             f"{pt.height:<15.2f} {pt.speed:<12.2f}"
         )
 
+    print("\nPhysics: trajectory simulates lift and drag forces on the ball.")
+
     # --- Carry distance: last point before height < 0 ---
     landing_pts = [p for p in trajectory if p.height <= 0.0]
     if len(landing_pts) >= 2:
         carry_m = float(landing_pts[-1].position[0])
         carry_yards = carry_m * 1.0936
-        print(f"\nCarry Distance: {carry_m:.2f} m ({carry_yards:.2f} yards)")
+        print(f"\nCarry distance: {carry_m:.2f} m ({carry_yards:.2f} yd)")
     else:
         print("\nBall did not land (insufficient trajectory data)")
 
