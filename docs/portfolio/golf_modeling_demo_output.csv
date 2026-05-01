@@ -12,6 +12,14 @@ cl1,assumption,0.0,1,demo aerodynamic profile
 cl2,assumption,0.0,1,demo aerodynamic profile
 air_density,assumption,1.225,kg/m^3,sea-level standard atmosphere
 gravity,assumption,9.81,m/s^2,default simulation environment
+mass,assumption,0.0459,kg,custom ball properties
+diameter,assumption,0.04267,m,custom ball properties
+cd0,assumption,0.25,dimensionless,custom ball properties
+cd1,assumption,0.0,s/rad,custom ball properties
+cd2,assumption,0.0,(s/rad)^2,custom ball properties
+cl0,assumption,0.15,dimensionless,custom ball properties
+cl1,assumption,0.0,s/rad,custom ball properties
+cl2,assumption,0.0,(s/rad)^2,custom ball properties
 carry_distance,simulated_output,186.9,m,portfolio reference fixture
 carry_distance,simulated_output,204.4,yd,portfolio reference fixture
 peak_height,simulated_output,42.4,m,portfolio reference fixture
