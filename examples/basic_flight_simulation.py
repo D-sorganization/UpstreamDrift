@@ -78,6 +78,10 @@ def main() -> None:
         print("\nBall did not land (insufficient trajectory data)")
     print("Physics: Simulation incorporates aerodynamic drag and Magnus lift.")
 
+    print(
+        "\nPhysics: Drag slows the ball down, while lift (from backspin) keeps it in the air longer."
+    )
+
 
 if __name__ == "__main__":
     main()
