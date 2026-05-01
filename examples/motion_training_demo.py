@@ -274,6 +274,10 @@ def main() -> None:
     output_dir = Path(args.output)
 
     if not trajectory_path.exists():
+        print(f"Error: Missing trajectory file at {trajectory_path}.")
+        print(
+            "Please use a supported Excel fixture file, such as data/Wiffle_ProV1_club_3D_data.xlsx"
+        )
         sys.exit(1)
 
     if args.plot_only:
