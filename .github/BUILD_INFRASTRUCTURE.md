@@ -223,7 +223,7 @@ nalgebra = "0.33"
 
 ```yaml
 # docker-size-gates.yml & ci-optional-stack.yml
-uses: docker/setup-buildx-action@v4
+uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
   cache-from: type=gha
   cache-to: type=gha,mode=max
 ```
