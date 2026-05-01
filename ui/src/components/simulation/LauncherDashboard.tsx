@@ -14,7 +14,8 @@
  *   - "Launch Simulation" button always visible (sticky bottom)
  */
 
-import { HelpCircle, Loader2, AlertTriangle, Zap, Wrench, ExternalLink, RefreshCw } from 'lucide-react';
+import { HelpCircle, Loader2, AlertTriangle, Zap, Wrench, ExternalLink, RefreshCw, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
 
@@ -27,6 +28,34 @@ interface Props {
     onLaunchTile: (tileId: string) => void;
     onShowHelp: () => void;
     onRefetch: () => void;
+}
+
+/** Navigation button to routable pages */
+function NavButton({
+    to,
+    label,
+    icon: Icon,
+    onClick,
+}: {
+    to: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+    onClick?: () => void;
+}) {
+    const navigate = useNavigate();
+    return (
+        <button
+            onClick={() => {
+                navigate(to);
+                onClick?.();
+            }}
+            aria-label={label}
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+            <Icon className="w-5 h-5" aria-hidden="true" />
+            <span className="text-sm font-medium hidden sm:inline">{label}</span>
+        </button>
+    );
 }
 
 /** Map status values to display colors and labels */
@@ -202,15 +231,18 @@ export function LauncherDashboard({
                         {tiles.length} tiles · {engines.length} engines · {toolsAndExternal.length} tools
                     </p>
                 </div>
-                <button
-                    id="help-button"
-                    onClick={onShowHelp}
-                    aria-label="Help"
-                    className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
-                >
-                    <HelpCircle className="w-5 h-5" aria-hidden="true" />
-                    <span className="text-sm font-medium">Help</span>
-                </button>
+                <div className="flex items-center gap-2">
+                    <NavButton to="/chat" label="Chat" icon={MessageSquare} />
+                    <button
+                        id="help-button"
+                        onClick={onShowHelp}
+                        aria-label="Help"
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                        <HelpCircle className="w-5 h-5" aria-hidden="true" />
+                        <span className="text-sm font-medium hidden sm:inline">Help</span>
+                    </button>
+                </div>
             </header>
 
             {/* Scrollable tile grid */}

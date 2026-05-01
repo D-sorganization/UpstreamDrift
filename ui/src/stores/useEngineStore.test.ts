@@ -58,7 +58,7 @@ describe('useEngineStore', () => {
   });
 
   describe('unloadEngine', () => {
-    it('sets engine to idle', () => {
+    it('sets engine to idle', async () => {
       // Manually set an engine to loaded
       useEngineStore.setState((state) => ({
         engines: state.engines.map((e) =>
@@ -66,8 +66,8 @@ describe('useEngineStore', () => {
         ),
       }));
 
-      act(() => {
-        useEngineStore.getState().unloadEngine('mujoco');
+      await act(async () => {
+        await useEngineStore.getState().unloadEngine('mujoco');
       });
 
       const mujoco = useEngineStore
@@ -76,7 +76,7 @@ describe('useEngineStore', () => {
       expect(mujoco?.loadState).toBe('idle');
     });
 
-    it('clears selection if unloading the selected engine', () => {
+    it('clears selection if unloading the selected engine', async () => {
       useEngineStore.setState({
         selectedEngine: 'mujoco',
         engines: useEngineStore.getState().engines.map((e) =>
@@ -84,18 +84,18 @@ describe('useEngineStore', () => {
         ),
       });
 
-      act(() => {
-        useEngineStore.getState().unloadEngine('mujoco');
+      await act(async () => {
+        await useEngineStore.getState().unloadEngine('mujoco');
       });
 
       expect(useEngineStore.getState().selectedEngine).toBeNull();
     });
 
-    it('does not clear selection if unloading a different engine', () => {
+    it('does not clear selection if unloading a different engine', async () => {
       useEngineStore.setState({ selectedEngine: 'mujoco' });
 
-      act(() => {
-        useEngineStore.getState().unloadEngine('drake');
+      await act(async () => {
+        await useEngineStore.getState().unloadEngine('drake');
       });
 
       expect(useEngineStore.getState().selectedEngine).toBe('mujoco');

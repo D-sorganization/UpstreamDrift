@@ -52,7 +52,7 @@ describe('useEngineCapabilities', () => {
     });
 
     expect(result.current.capabilities).toEqual(mockCapabilities);
-    expect(fetchMock).toHaveBeenCalledWith('/engines/mujoco/capabilities');
+    expect(fetchMock).toHaveBeenCalledWith('/api/engines/mujoco/capabilities');
   });
 
   it('handles fetch errors', async () => {

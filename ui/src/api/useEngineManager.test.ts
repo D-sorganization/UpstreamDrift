@@ -338,8 +338,8 @@ describe('useEngineManager', () => {
             });
 
             // Unload
-            act(() => {
-                result.current.unloadEngine('mujoco');
+            await act(async () => {
+                await result.current.unloadEngine('mujoco');
             });
 
             expect(result.current.getEngine('mujoco')!.loadState).toBe('idle');
@@ -359,8 +359,8 @@ describe('useEngineManager', () => {
                 expect(result.current.getEngine('mujoco')!.error).toBeDefined();
             });
 
-            act(() => {
-                result.current.unloadEngine('mujoco');
+            await act(async () => {
+                await result.current.unloadEngine('mujoco');
             });
 
             expect(result.current.getEngine('mujoco')!.error).toBeUndefined();

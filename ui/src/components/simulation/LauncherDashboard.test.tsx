@@ -12,11 +12,16 @@
  *   - Loading and error states
  */
 
+import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
 import { screen, fireEvent, within } from '@testing-library/dom';
+import { MemoryRouter } from 'react-router-dom';
 import { LauncherDashboard } from './LauncherDashboard';
 import type { LauncherTile } from '@/api/useLauncherManifest';
+
+const renderWithRouter = (ui: React.ReactElement) =>
+    render(<MemoryRouter>{ui}</MemoryRouter>);
 
 const MOCK_TILES: LauncherTile[] = [
     {
@@ -116,8 +121,8 @@ describe('LauncherDashboard', () => {
     // Tile Grid Rendering (#1171)
     // ────────────────────────────────────────────────────────────
     describe('tile grid rendering (#1171)', () => {
-        it('renders all tiles from the manifest', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders all tiles from the manifest', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
 
             expect(screen.getByText('MuJoCo')).toBeInTheDocument();
             expect(screen.getByText('Drake')).toBeInTheDocument();
@@ -127,15 +132,15 @@ describe('LauncherDashboard', () => {
             expect(screen.getByText('Matlab Models')).toBeInTheDocument();
         });
 
-        it('renders category sections', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders category sections', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
 
             expect(screen.getByRole('region', { name: /physics engines/i })).toBeInTheDocument();
             expect(screen.getByRole('region', { name: /tools and utilities/i })).toBeInTheDocument();
         });
 
-        it('groups engines separately from tools', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('groups engines separately from tools', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
 
             const engineGrid = screen.getByRole('group', { name: /physics engine tiles/i });
             const toolGrid = screen.getByRole('group', { name: /tool tiles/i });
@@ -151,23 +156,23 @@ describe('LauncherDashboard', () => {
     // Status Chips (#1168)
     // ────────────────────────────────────────────────────────────
     describe('status chips (#1168)', () => {
-        it('shows GUI Ready for gui_ready engines', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('shows GUI Ready for gui_ready engines', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getAllByText('GUI Ready').length).toBeGreaterThan(0);
         });
 
-        it('shows Utility for special_app tools', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('shows Utility for special_app tools', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getAllByText('Utility').length).toBeGreaterThan(0);
         });
 
-        it('shows Simulator for putting_green', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('shows Simulator for putting_green', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('Simulator')).toBeInTheDocument();
         });
 
-        it('shows External for matlab', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('shows External for matlab', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('External')).toBeInTheDocument();
         });
     });
@@ -176,37 +181,37 @@ describe('LauncherDashboard', () => {
     // Launch Button Accessibility (#1165)
     // ────────────────────────────────────────────────────────────
     describe('launch button always visible (#1165)', () => {
-        it('renders the launch button', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders the launch button', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByRole('button', { name: /launch simulation/i })).toBeInTheDocument();
         });
 
-        it('launch button is in a sticky footer', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('launch button is in a sticky footer', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             const footer = document.getElementById('launch-footer');
             expect(footer).not.toBeNull();
             expect(footer?.classList.contains('flex-shrink-0')).toBe(true);
         });
 
-        it('launch button is disabled when no tile selected', () => {
-            render(<LauncherDashboard {...defaultProps} selectedTileId={null} />);
+    it('launch button is disabled when no tile selected', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} selectedTileId={null} />);
             expect(screen.getByRole('button', { name: /launch simulation/i })).toBeDisabled();
         });
 
-        it('launch button is enabled when tile selected', () => {
-            render(<LauncherDashboard {...defaultProps} selectedTileId="mujoco_unified" />);
+    it('launch button is enabled when tile selected', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} selectedTileId="mujoco_unified" />);
             expect(screen.getByRole('button', { name: /launch mujoco/i })).not.toBeDisabled();
         });
 
-        it('clicking launch button calls onLaunchTile', () => {
-            const onLaunchTile = vi.fn();
-            render(
-                <LauncherDashboard
-                    {...defaultProps}
-                    selectedTileId="mujoco_unified"
-                    onLaunchTile={onLaunchTile}
-                />
-            );
+    it('clicking launch button calls onLaunchTile', () => {
+        const onLaunchTile = vi.fn();
+        renderWithRouter(
+            <LauncherDashboard
+                {...defaultProps}
+                selectedTileId="mujoco_unified"
+                onLaunchTile={onLaunchTile}
+            />
+        );
 
             fireEvent.click(screen.getByRole('button', { name: /launch mujoco/i }));
             expect(onLaunchTile).toHaveBeenCalledWith('mujoco_unified');
@@ -217,20 +222,20 @@ describe('LauncherDashboard', () => {
     // Help Button (#1170)
     // ────────────────────────────────────────────────────────────
     describe('help button (#1170)', () => {
-        it('renders a prominent help button', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders a prominent help button', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByRole('button', { name: /help/i })).toBeInTheDocument();
         });
 
-        it('help button has visible text (not icon-only)', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('help button has visible text (not icon-only)', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             const helpBtn = screen.getByRole('button', { name: /help/i });
             expect(helpBtn.textContent).toContain('Help');
         });
 
-        it('clicking help button calls onShowHelp', () => {
-            const onShowHelp = vi.fn();
-            render(<LauncherDashboard {...defaultProps} onShowHelp={onShowHelp} />);
+    it('clicking help button calls onShowHelp', () => {
+        const onShowHelp = vi.fn();
+        renderWithRouter(<LauncherDashboard {...defaultProps} onShowHelp={onShowHelp} />);
 
             fireEvent.click(screen.getByRole('button', { name: /help/i }));
             expect(onShowHelp).toHaveBeenCalled();
@@ -241,32 +246,32 @@ describe('LauncherDashboard', () => {
     // Tile Selection
     // ────────────────────────────────────────────────────────────
     describe('tile selection', () => {
-        it('clicking a tile calls onSelectTile', () => {
-            const onSelectTile = vi.fn();
-            render(<LauncherDashboard {...defaultProps} onSelectTile={onSelectTile} />);
+    it('clicking a tile calls onSelectTile', () => {
+        const onSelectTile = vi.fn();
+        renderWithRouter(<LauncherDashboard {...defaultProps} onSelectTile={onSelectTile} />);
 
             const tile = document.getElementById('tile-mujoco_unified')!;
             fireEvent.click(tile);
             expect(onSelectTile).toHaveBeenCalledWith('mujoco_unified');
         });
 
-        it('selected tile has aria-pressed=true', () => {
-            render(<LauncherDashboard {...defaultProps} selectedTileId="drake_golf" />);
+    it('selected tile has aria-pressed=true', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} selectedTileId="drake_golf" />);
             const tile = document.getElementById('tile-drake_golf')!;
             expect(tile).toHaveAttribute('aria-pressed', 'true');
         });
 
-        it('double-clicking a tile calls onLaunchTile', () => {
-            const onLaunchTile = vi.fn();
-            render(<LauncherDashboard {...defaultProps} onLaunchTile={onLaunchTile} />);
+    it('double-clicking a tile calls onLaunchTile', () => {
+        const onLaunchTile = vi.fn();
+        renderWithRouter(<LauncherDashboard {...defaultProps} onLaunchTile={onLaunchTile} />);
 
             const tile = document.getElementById('tile-mujoco_unified')!;
             fireEvent.doubleClick(tile);
             expect(onLaunchTile).toHaveBeenCalledWith('mujoco_unified');
         });
 
-        it('shows selected tile name in footer', () => {
-            render(<LauncherDashboard {...defaultProps} selectedTileId="mujoco_unified" />);
+    it('shows selected tile name in footer', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} selectedTileId="mujoco_unified" />);
             const footer = document.getElementById('launch-footer');
             expect(footer?.textContent).toContain('MuJoCo');
         });
@@ -276,36 +281,36 @@ describe('LauncherDashboard', () => {
     // Loading & Error States
     // ────────────────────────────────────────────────────────────
     describe('loading and error states', () => {
-        it('shows loading spinner', () => {
-            render(<LauncherDashboard {...defaultProps} loadState="loading" tiles={[]} />);
+    it('shows loading spinner', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} loadState="loading" tiles={[]} />);
             expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
         });
 
-        it('shows error with retry button', () => {
-            render(
-                <LauncherDashboard
-                    {...defaultProps}
-                    loadState="error"
-                    error="Connection refused"
-                    tiles={[]}
-                />
-            );
+    it('shows error with retry button', () => {
+        renderWithRouter(
+            <LauncherDashboard
+                {...defaultProps}
+                loadState="error"
+                error="Connection refused"
+                tiles={[]}
+            />
+        );
             expect(screen.getByRole('alert')).toBeInTheDocument();
             expect(screen.getByText('Connection refused')).toBeInTheDocument();
             expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
         });
 
-        it('clicking Retry calls onRefetch', () => {
-            const onRefetch = vi.fn();
-            render(
-                <LauncherDashboard
-                    {...defaultProps}
-                    loadState="error"
-                    error="fail"
-                    tiles={[]}
-                    onRefetch={onRefetch}
-                />
-            );
+    it('clicking Retry calls onRefetch', () => {
+        const onRefetch = vi.fn();
+        renderWithRouter(
+            <LauncherDashboard
+                {...defaultProps}
+                loadState="error"
+                error="fail"
+                tiles={[]}
+                onRefetch={onRefetch}
+            />
+        );
 
             fireEvent.click(screen.getByRole('button', { name: /retry/i }));
             expect(onRefetch).toHaveBeenCalled();
@@ -316,23 +321,23 @@ describe('LauncherDashboard', () => {
     // Missing Tiles Parity (#1162)
     // ────────────────────────────────────────────────────────────
     describe('all required tiles present (#1162)', () => {
-        it('renders Motion Capture tile', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders Motion Capture tile', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('Motion Capture')).toBeInTheDocument();
         });
 
-        it('renders Matlab Models tile', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders Matlab Models tile', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('Matlab Models')).toBeInTheDocument();
         });
 
-        it('renders Model Explorer tile', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders Model Explorer tile', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('Model Explorer')).toBeInTheDocument();
         });
 
-        it('renders Putting Green tile', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('renders Putting Green tile', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('Putting Green')).toBeInTheDocument();
         });
     });
@@ -341,13 +346,13 @@ describe('LauncherDashboard', () => {
     // Header
     // ────────────────────────────────────────────────────────────
     describe('header', () => {
-        it('shows application title', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('shows application title', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText('Golf Modeling Suite')).toBeInTheDocument();
         });
 
-        it('shows tile counts', () => {
-            render(<LauncherDashboard {...defaultProps} />);
+    it('shows tile counts', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
             expect(screen.getByText(/6 tiles/)).toBeInTheDocument();
             expect(screen.getByText(/3 engines/)).toBeInTheDocument();
         });
