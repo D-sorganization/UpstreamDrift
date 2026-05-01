@@ -7,7 +7,7 @@
  * See issue #1206
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, memo } from 'react';
 
 /** Dataset info from the API. See issue #1206 */
 export interface DatasetInfo {
@@ -46,7 +46,7 @@ export interface DatasetStats {
 /**
  * DataTable - Tabular display of dataset rows.
  */
-function DataTable({
+const DataTable = memo(function DataTable({
   columns,
   rows,
   sortColumn,
@@ -110,7 +110,7 @@ function DataTable({
       </table>
     </div>
   );
-}
+});
 
 /**
  * StatsPanel - Column summary statistics display.
@@ -349,26 +349,28 @@ export function DataExplorerPage() {
   );
 
   // Sort rows
-  const sortedRows = preview?.rows
-    ? sortColumn
-      ? [...preview.rows].sort((a, b) => {
-          const aVal = a[sortColumn];
-          const bVal = b[sortColumn];
-          if (aVal == null && bVal == null) return 0;
-          if (aVal == null) return 1;
-          if (bVal == null) return -1;
+  const sortedRows = useMemo(() => {
+    return preview?.rows
+      ? sortColumn
+        ? [...preview.rows].sort((a, b) => {
+            const aVal = a[sortColumn];
+            const bVal = b[sortColumn];
+            if (aVal == null && bVal == null) return 0;
+            if (aVal == null) return 1;
+            if (bVal == null) return -1;
 
-          const aNum = Number(aVal);
-          const bNum = Number(bVal);
-          if (!isNaN(aNum) && !isNaN(bNum)) {
-            return sortAscending ? aNum - bNum : bNum - aNum;
-          }
+            const aNum = Number(aVal);
+            const bNum = Number(bVal);
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+              return sortAscending ? aNum - bNum : bNum - aNum;
+            }
 
-          const cmp = String(aVal).localeCompare(String(bVal));
-          return sortAscending ? cmp : -cmp;
-        })
-      : preview.rows
-    : [];
+            const cmp = String(aVal).localeCompare(String(bVal));
+            return sortAscending ? cmp : -cmp;
+          })
+        : preview.rows
+      : [];
+  }, [preview?.rows, sortColumn, sortAscending]);
 
   return (
     <div className="flex h-screen bg-gray-900 overflow-hidden">

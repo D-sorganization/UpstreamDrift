@@ -52,7 +52,7 @@ function NavButton({
             aria-label={label}
             className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg border border-blue-600/40 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-            <Icon className="w-5 h-5" aria-hidden="true" />
+            <Icon className="w-5 h-5" aria-hidden={true} />
             <span className="text-sm font-medium hidden sm:inline">{label}</span>
         </button>
     );
