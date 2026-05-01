@@ -31,7 +31,16 @@ def generate_portfolio_demo_output(output_path: Path | None = None) -> None:
         )
 
     # Match the values in docs/portfolio/golf_modeling_demo.md
-    ball = BallProperties()  # Use defaults
+    ball = BallProperties(
+        mass=0.0459,
+        diameter=0.04267,
+        cd0=0.25,
+        cd1=0.0,
+        cd2=0.0,
+        cl0=0.15,
+        cl1=0.0,
+        cl2=0.0,
+    )
     env = EnvironmentalConditions(
         gravity=9.81,
         air_density=1.225,
@@ -123,9 +132,11 @@ def generate_portfolio_demo_output(output_path: Path | None = None) -> None:
     ]
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with output_path.open("w", newline="") as f:
+    with output_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(
-            f, fieldnames=["quantity", "category", "value", "unit", "source"]
+            f,
+            fieldnames=["quantity", "category", "value", "unit", "source"],
+            lineterminator="\n",
         )
         writer.writeheader()
         writer.writerows(rows)
