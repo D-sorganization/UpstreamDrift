@@ -121,7 +121,6 @@ run_log.txt
 
 # CI/PR artifact files (prevent accumulation at root)
 checks.json
-pr_comments.json
 pr_list.json
 review_comments.json
 !.jules/sentinel.md
