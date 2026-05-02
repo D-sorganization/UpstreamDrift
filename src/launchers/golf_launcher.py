@@ -230,9 +230,11 @@ class GolfLauncher(
         from src.shared.python.theme.typography import Weights, get_display_font
 
         try:
-            from src.shared.python.theme import get_current_colors
+            from src.shared.python.theme import (
+                get_current_colors,  # type: ignore[attr-defined]
+            )
 
-            c = get_current_colors()
+            c = get_current_colors()  # type: ignore[attr-defined]
         except ImportError:
             from src.shared.python.theme import (
                 DARK_THEME as c,  # type: ignore[assignment]
@@ -493,9 +495,11 @@ class GolfLauncher(
 
         # Update visual selection state using theme colors
         try:
-            from src.shared.python.theme import get_current_colors
+            from src.shared.python.theme import (
+                get_current_colors,  # type: ignore[attr-defined]
+            )
 
-            c = get_current_colors()
+            c = get_current_colors()  # type: ignore[attr-defined]
         except ImportError:
             from src.shared.python.theme import (
                 DARK_THEME as c,  # type: ignore[assignment]
@@ -535,9 +539,11 @@ class GolfLauncher(
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
         try:
-            from src.shared.python.theme import get_current_colors
+            from src.shared.python.theme import (
+                get_current_colors,  # type: ignore[attr-defined]
+            )
 
-            c = get_current_colors()
+            c = get_current_colors()  # type: ignore[attr-defined]
         except ImportError:
             from src.shared.python.theme import (
                 DARK_THEME as c,  # type: ignore[assignment]

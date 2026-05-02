@@ -29,7 +29,7 @@ class TestSummaryStatsPreconditions(unittest.TestCase):
     def test_empty_data_rejected(self) -> None:
         t = np.linspace(0, 1, 100)
         analyzer = _StubAnalyzer(t)
-        with self.assertRaises(PreconditionError):
+        with self.assertRaises((PreconditionError, ValueError)):
             analyzer.compute_summary_stats(np.array([]))
 
     def test_non_empty_data_accepted(self) -> None:

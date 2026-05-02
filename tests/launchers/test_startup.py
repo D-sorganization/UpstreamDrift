@@ -11,6 +11,7 @@ from src.launchers.startup import (  # noqa: E402
     AsyncStartupWorker,
     GolfSplashScreen,
     StartupResults,
+    _fallback_qfont,
     _get_theme_colors,
 )
 
@@ -138,6 +139,15 @@ def test_splash_screen_resolve_theme_colors(mock_theme_available) -> None:
 def test_splash_screen_resolve_theme_colors_fallback(mock_theme_unavailable) -> None:
     res = GolfSplashScreen._resolve_theme_colors()
     assert res == ("#FFFFFF", "#A0A0A0", "#0A84FF", "#2D2D2D", "#666666")
+
+
+def test_fallback_qfont_uses_standardized_stack() -> None:
+    font = _fallback_qfont(
+        '"Outfit", "Inter", "Segoe UI", sans-serif', 11, QFont.Weight.Bold
+    )
+    assert font.pointSize() == 11
+    assert font.weight() == QFont.Weight.Bold
+    assert "Outfit" in font.families()
 
 
 def test_drawContents(mock_theme_available, qapp) -> None:

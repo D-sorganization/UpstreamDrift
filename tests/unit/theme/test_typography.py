@@ -68,11 +68,17 @@ class TestFontStacks:
     def test_ui_stack_is_string(self) -> None:
         assert isinstance(FONT_STACK_UI, str)
 
+    def test_ui_stack_prioritizes_outfit(self) -> None:
+        assert FONT_STACK_UI.split(",")[0].strip() == '"Outfit"'
+
     def test_mono_stack_is_string(self) -> None:
         assert isinstance(FONT_STACK_MONO, str)
 
     def test_display_stack_is_string(self) -> None:
         assert isinstance(FONT_STACK_DISPLAY, str)
+
+    def test_display_stack_prioritizes_outfit(self) -> None:
+        assert FONT_STACK_DISPLAY.split(",")[0].strip() == '"Outfit"'
 
     def test_ui_stack_has_fallback(self) -> None:
         assert "sans-serif" in FONT_STACK_UI
@@ -87,6 +93,9 @@ class TestFontStacks:
 class TestCSSStrings:
     def test_css_font_ui_is_string(self) -> None:
         assert isinstance(CSS_FONT_UI, str)
+
+    def test_css_font_ui_mentions_outfit(self) -> None:
+        assert "Outfit" in CSS_FONT_UI
 
     def test_css_font_ui_has_font_family(self) -> None:
         assert "font-family" in CSS_FONT_UI

@@ -2,7 +2,7 @@ import math
 from collections.abc import Iterator
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import numpy.typing as npt
@@ -11,7 +11,7 @@ from .pose import Pose6DOF
 from .rotations import axis_angle_to_rotation_matrix, rotation_matrix_to_euler
 from .transform import Transform6DOF
 
-Vec3 = npt.NDArray[np.float64]
+Vec3: TypeAlias = npt.NDArray[np.float64]
 
 
 @dataclass

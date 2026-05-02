@@ -19,9 +19,10 @@ if TYPE_CHECKING:
 # Cross-platform font stacks
 # Each stack provides platform-specific fonts with sensible fallbacks
 
-# Primary UI font - clean sans-serif for interface elements
+# Primary UI font - geometric sans-serif for interface elements
 FONT_STACK_UI = (
-    '"Inter", '  # Modern, highly legible (if installed)
+    '"Outfit", '  # Preferred geometric UI face
+    '"Inter", '  # Common modern fallback
     '"SF Pro Display", '  # macOS system font
     '"Segoe UI", '  # Windows system font
     '"Roboto", '  # Android/Linux common
@@ -43,9 +44,10 @@ FONT_STACK_MONO = (
 
 # Display font - for headings and titles
 FONT_STACK_DISPLAY = (
+    '"Outfit", '  # Preferred geometric display face
     '"SF Pro Display", '  # macOS
+    '"Inter", '  # Common modern fallback
     '"Segoe UI", '  # Windows
-    '"Inter", '  # Cross-platform
     '"Roboto", '  # Android/Linux
     "sans-serif"
 )

@@ -6,7 +6,7 @@ Provides the tile component for each model/application in the launcher.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import (
     QEasingCurve,
@@ -138,7 +138,7 @@ class DraggableModelCard(QFrame):
     def hoverOffset(self) -> float:
         return self._hover_offset
 
-    @hoverOffset.setter
+    @hoverOffset.setter  # type: ignore[no-redef]
     def hoverOffset(self, value: float) -> None:
         self._hover_offset = value
         # Animate drop shadow (lift effect)

@@ -43,7 +43,7 @@ def simulate_with_feedback(
     ).reshape(-1)
     distance_from_hole = 0.0 if arr.size == 0 else math.hypot(*arr)
 
-    feedback = {
+    feedback: dict[str, Any] = {
         "distance_from_hole": distance_from_hole,
         "holed": result.holed,
         "total_distance": result.total_distance,

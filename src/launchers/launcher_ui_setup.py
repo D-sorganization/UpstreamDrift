@@ -9,7 +9,7 @@ context help, and AI panel setup methods.
 from __future__ import annotations
 
 import datetime
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import (

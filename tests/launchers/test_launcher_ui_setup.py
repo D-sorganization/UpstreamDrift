@@ -82,6 +82,7 @@ def test_setup_grid_area(launcher) -> None:
 def test_setup_bottom_bar(launcher) -> None:
     launcher._setup_bottom_bar()
     assert hasattr(launcher, "btn_launch")
+    assert "Outfit" in launcher.btn_launch.font().families()
 
 
 def test_setup_search_shortcuts(launcher) -> None:

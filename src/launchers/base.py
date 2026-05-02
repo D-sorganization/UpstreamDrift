@@ -18,7 +18,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtGui import QFont, QScreen
+from PyQt6.QtGui import QScreen
 from PyQt6.QtWidgets import (
     QApplication,
     QFrame,
@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     pass
 
 from src.shared.python.theme.style_constants import Styles
+from src.shared.python.theme.typography import Weights, get_display_font, get_qfont
 
 logger = logging.getLogger(__name__)
 
@@ -131,8 +132,8 @@ class BaseLauncher(QMainWindow):
         QPushButton:disabled { background-color: #6c757d; }
     """
 
-    HEADER_FONT = QFont("Segoe UI", 24, QFont.Weight.Bold)
-    CARD_TITLE_FONT = QFont("Segoe UI", 12, QFont.Weight.Bold)
+    HEADER_FONT = get_display_font(size=24, weight=Weights.BOLD)
+    CARD_TITLE_FONT = get_qfont(size=12, weight=Weights.BOLD)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the base launcher."""

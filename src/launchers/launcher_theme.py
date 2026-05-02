@@ -12,6 +12,7 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import QMenu
 
 from src.shared.python.logging_pkg.logging_config import get_logger
+from src.shared.python.theme.typography import CSS_FONT_UI
 
 logger = get_logger(__name__)
 
@@ -66,7 +67,7 @@ class LauncherThemeMixin:
             # Fallback minimal dark style if theme system unavailable
             self.setStyleSheet(
                 "QMainWindow { background-color: #1E1E1E; }"
-                "QWidget { color: #FFFFFF; font-family: 'Segoe UI', sans-serif; }"
+                f"QWidget {{ color: #FFFFFF; {CSS_FONT_UI} }}"
             )
 
     def _apply_theme_system(self) -> None:

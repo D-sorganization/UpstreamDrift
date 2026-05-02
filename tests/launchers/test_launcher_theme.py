@@ -53,6 +53,7 @@ def test_apply_styles_fallback(qapp) -> None:
 
     style = launcher.styleSheet()
     assert "background-color: #1E1E1E" in style
+    assert "Outfit" in style
 
 
 def test_apply_theme_system(qapp) -> None:

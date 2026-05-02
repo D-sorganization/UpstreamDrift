@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch  # noqa: E402
 import pytest  # noqa: E402
 from PyQt6.QtCore import QMimeData, QPoint, Qt  # noqa: E402
 from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent  # noqa: E402
-from PyQt6.QtWidgets import QWidget  # noqa: E402
+from PyQt6.QtWidgets import QLabel, QWidget  # noqa: E402
 from src.launchers.model_card import DraggableModelCard  # noqa: E402
 
 
@@ -224,6 +224,19 @@ def test_refresh_theme(mock_model, parent_launcher, qapp) -> None:
 
         with patch.object(card, "findChild", side_effect=find_mock):
             card.refresh_theme()
+
+
+def test_model_card_uses_shared_typography(mock_model, parent_launcher, qapp) -> None:
+    card = DraggableModelCard(mock_model, parent_launcher)
+    labels = card.findChildren(QLabel)
+    target_labels = [
+        label
+        for label in labels
+        if label.text() in {"MuJoCo", "Test Description", "GUI Ready"}
+    ]
+    assert target_labels
+    for label in target_labels:
+        assert "Outfit" in label.font().families()
 
 
 def test_mouse_move_event(mock_model, parent_launcher, qapp) -> None:

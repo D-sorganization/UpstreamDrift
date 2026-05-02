@@ -9,6 +9,7 @@ from __future__ import annotations
 import unittest
 
 import numpy as np
+
 try:
     from shared.python._contracts_exceptions import PreconditionError
 except ImportError:

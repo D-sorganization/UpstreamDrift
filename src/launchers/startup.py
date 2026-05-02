@@ -6,7 +6,7 @@ Provides the splash screen, async startup worker, and startup result container.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap
@@ -29,6 +29,8 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 # Theme availability check
 try:
     from src.shared.python.theme import (  # type: ignore[attr-defined]
+        CSS_FONT_DISPLAY,
+        CSS_FONT_UI,
         Colors,
         Sizes,
         Weights,
@@ -39,6 +41,28 @@ try:
     THEME_AVAILABLE = True
 except ImportError:
     THEME_AVAILABLE = False
+    CSS_FONT_DISPLAY = (
+        '"Outfit", "Inter", "SF Pro Display", "Segoe UI", "Roboto", sans-serif'
+    )
+    CSS_FONT_UI = '"Outfit", "Inter", "SF Pro Display", "Segoe UI", "Roboto", "Helvetica Neue", system-ui, sans-serif'
+
+
+def _font_stack_to_families(font_stack: str) -> list[str]:
+    """Convert a CSS-style font stack string to ordered Qt family names."""
+    if not (font_stack is not None):
+        raise ValueError("font_stack must be provided")
+    return [family.strip().strip('"') for family in font_stack.split(",")]
+
+
+def _fallback_qfont(font_stack: str, size: int, weight: QFont.Weight) -> QFont:
+    """Create a Qt font from a shared font stack when theme helpers are unavailable."""
+    if not (font_stack is not None):
+        raise ValueError("font_stack must be provided")
+    font = QFont()
+    font.setFamilies(_font_stack_to_families(font_stack))
+    font.setPointSize(size)
+    font.setWeight(weight)
+    return font
 
 
 def _get_theme_colors() -> ThemeColors:
@@ -150,7 +174,7 @@ class GolfSplashScreen(QSplashScreen):
         title_font = (
             get_display_font(size=Sizes.XXL, weight=Weights.BOLD)
             if THEME_AVAILABLE
-            else QFont("Segoe UI", 24, QFont.Weight.Bold)
+            else _fallback_qfont(CSS_FONT_DISPLAY, 24, QFont.Weight.Bold)
         )
         painter.setFont(title_font)
         painter.setPen(QColor(text_primary))
@@ -163,7 +187,7 @@ class GolfSplashScreen(QSplashScreen):
         subtitle_font = (
             get_qfont(size=Sizes.MD, weight=Weights.NORMAL)
             if THEME_AVAILABLE
-            else QFont("Segoe UI", 11)
+            else _fallback_qfont(CSS_FONT_UI, 11, QFont.Weight.Normal)
         )
         painter.setFont(subtitle_font)
         painter.setPen(QColor(text_secondary))
@@ -182,7 +206,7 @@ class GolfSplashScreen(QSplashScreen):
         status_font = (
             get_qfont(size=Sizes.SM, weight=Weights.MEDIUM)
             if THEME_AVAILABLE
-            else QFont("Segoe UI", 9, QFont.Weight.Medium)
+            else _fallback_qfont(CSS_FONT_UI, 9, QFont.Weight.Medium)
         )
         painter.setFont(status_font)
         painter.setPen(QColor(accent))
@@ -217,7 +241,7 @@ class GolfSplashScreen(QSplashScreen):
         version_font = (
             get_qfont(size=Sizes.XS, weight=Weights.NORMAL)
             if THEME_AVAILABLE
-            else QFont("Segoe UI", 8)
+            else _fallback_qfont(CSS_FONT_UI, 8, QFont.Weight.Normal)
         )
         painter.setFont(version_font)
         painter.setPen(QColor(text_quaternary))

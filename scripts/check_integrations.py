@@ -361,9 +361,7 @@ def main() -> int:
             if not result.passed and result.fix_command:
                 logger.info("  Running: %s", result.fix_command)
                 try:
-                    subprocess.run(
-                        result.fix_command, shell=True, check=True
-                    )  # nosec B602 - fix_command from predefined integration check list
+                    subprocess.run(result.fix_command, shell=True, check=True)  # nosec B602 - fix_command from predefined integration check list
                     logger.info("  Success!")
                 except (subprocess.CalledProcessError, OSError) as e:
                     logger.error("  Failed: %s", e)
