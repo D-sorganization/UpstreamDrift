@@ -291,11 +291,11 @@ class LayoutManager:
             return "Core Physics Engines"
         if t == "matlab_suite":
             return "Matlab Simscape Models"
-        if t in ["special_app"]:
+        if t == "special_app":
             return "Analysis Tools"
         return "Utilities"
 
-    def rebuild_grid(self, grid_layout: QGridLayout) -> None:
+    def rebuild_grid(self, grid_layout: QGridLayout) -> None:  # noqa: C901
         """Rebuild the grid layout based on current model order.
 
         Args:
