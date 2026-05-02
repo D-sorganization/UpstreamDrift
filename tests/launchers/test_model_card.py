@@ -59,7 +59,7 @@ def test_resolve_image_name(mock_model, parent_launcher, qapp) -> None:
     assert card._resolve_image_name() == "matlab_logo.png"
 
     mock_model.id = "motion_test"
-    assert card._resolve_image_name() == "c3d_icon.png"
+    assert card._resolve_image_name() == "c3d_viewer_modern.png"
 
     mock_model.id = "model_explorer_test"
     assert card._resolve_image_name() == "urdf_icon.png"
