@@ -11,8 +11,11 @@ Usage:
 
 import argparse
 import logging
+import os
 from os import environ, getcwd
 from sys import exit, path
+
+path.append(os.path.join(getcwd(), "src"))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -146,3 +149,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+# CI trigger: pip repair 2026-05-02

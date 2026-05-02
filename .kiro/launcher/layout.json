@@ -6,28 +6,26 @@
     "opensim_golf",
     "myosim_suite",
     "putting_green",
-    "simscape_2d",
-    "simscape_3d",
-    "dataset_generator",
-    "matlab_analysis",
     "c3d_viewer",
     "openpose_analysis",
     "mediapipe_analysis",
     "model_explorer",
     "video_analyzer",
     "data_explorer",
-    "project_map"
+    "project_map",
+    "movement_optimizer",
+    "matlab_suite"
   ],
-  "selected_model": "opensim_golf",
+  "selected_model": "matlab_suite",
   "window_geometry": {
-    "x": 574,
-    "y": -30,
+    "x": 40,
+    "y": 40,
     "width": 1880,
-    "height": 999
+    "height": 992
   },
   "options": {
     "live_visualization": true,
     "gpu_acceleration": false,
-    "docker_mode": true
+    "docker_mode": false
   }
 }

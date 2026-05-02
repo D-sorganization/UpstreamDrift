@@ -23,7 +23,6 @@ import contextlib
 import sys
 from typing import Any
 
-# Add current directory to path so we can import ui_components if needed locally
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
 from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
@@ -225,12 +224,40 @@ class GolfLauncher(
                 logger.warning(f"Failed to initialize EngineManager: {e}")
                 self.engine_manager = None
 
+    def _create_category_header(self, title: str) -> Any:
+        from PyQt6.QtWidgets import QLabel
+
+        from src.shared.python.theme.typography import Weights, get_display_font
+
+        try:
+            from src.shared.python.theme import get_current_colors
+
+            c = get_current_colors()
+        except ImportError:
+            from src.shared.python.theme import (
+                DARK_THEME as c,  # type: ignore[assignment]
+            )
+
+        lbl = QLabel(title)
+        lbl.setFont(get_display_font(size=14, weight=Weights.BOLD))
+        lbl.setStyleSheet(f"""
+            QLabel {{
+                color: {c.text_primary};
+                padding-top: 20px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid {c.border_default};
+                margin-bottom: 10px;
+            }}
+        """)
+        return lbl
+
     def _init_layout_manager(self) -> None:
         self.layout_manager = LayoutManager(
             config_file=LAYOUT_CONFIG_FILE,
             available_models=self.available_models,
             get_model_func=self._get_model,
             create_card_func=lambda model: DraggableModelCard(model, self),
+            create_header_func=self._create_category_header,
         )
         self.model_cards = self.layout_manager.model_cards
         self.model_order = self.layout_manager.model_order
@@ -666,7 +693,7 @@ class GolfLauncher(
         ]
         self._on_cleanup_finished(finished_keys)
 
-    def closeEvent(self, event: QCloseEvent | None) -> None:
+    def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
         """Handle window close event to save layout."""
         running_count = sum(
             1 for p in self.running_processes.values() if p.poll() is None
@@ -721,6 +748,15 @@ class GolfLauncher(
 
 def main() -> None:
     """Application entry point."""
+    import traceback
+
+    def excepthook(exc_type, exc_value, exc_tb):
+        with open("crash_traceback.txt", "w") as f:
+            traceback.print_exception(exc_type, exc_value, exc_tb, file=f)
+        QApplication.quit()
+
+    sys.excepthook = excepthook
+
     if sys.platform == "win32":
         try:
             import ctypes
@@ -753,17 +789,36 @@ def main() -> None:
     def on_startup_finished(results: StartupResults) -> None:
         """Create and display the main window after startup completes."""
         nonlocal main_window
-        main_window = GolfLauncher(results)
-        main_window.show()
-        splash.finish(main_window)
+        try:
+            main_window = GolfLauncher(results)
+            main_window.show()
+            splash.finish(main_window)
+        except Exception as e:  # noqa: BLE001
+            import traceback
+
+            traceback.print_exc()
+            logger.error(f"Failed to initialize GolfLauncher: {e}")
+            QApplication.quit()
         worker.wait(1000)
 
     def on_startup_progress(msg: str, percent: int) -> None:
         """Forward startup progress to the splash screen."""
         splash.show_message(msg, percent)
 
+    def on_startup_error(error_msg: str) -> None:
+        """Handle startup failure."""
+        logger.error(f"Startup failed: {error_msg}")
+        splash.hide()
+        from PyQt6.QtWidgets import QMessageBox
+
+        QMessageBox.critical(
+            None, "Startup Error", f"Failed to initialize UpstreamDrift:\n\n{error_msg}"
+        )
+        QApplication.quit()
+
     worker.progress_signal.connect(on_startup_progress)
     worker.finished_signal.connect(on_startup_finished)
+    worker.error_signal.connect(on_startup_error)
 
     worker.start()
 

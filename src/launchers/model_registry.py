@@ -20,6 +20,7 @@ class ModelSpec:
     type: str  # 'engine_managed' or 'special_app'
     path: str
     engine_type: str | None = None
+    launcher: dict[str, str] | None = None
 
 
 class ModelRegistry:

@@ -48,7 +48,7 @@ from __future__ import annotations
 
 import sys
 
-from shared.python._contracts_decorators import (
+from src.shared.python._contracts_decorators import (
     F,
     _check_class_invariant,
     _evaluate_precondition,
@@ -58,7 +58,7 @@ from shared.python._contracts_decorators import (
     postcondition,
     precondition,
 )
-from shared.python._contracts_exceptions import (
+from src.shared.python._contracts_exceptions import (
     _VIOLATION_CLASSES,
     ContractViolationError,
     InvariantError,
@@ -66,8 +66,11 @@ from shared.python._contracts_exceptions import (
     PreconditionError,
     _handle_violation,
 )
-from shared.python._contracts_invariant_mixin import ContractChecker, invariant_checked
-from shared.python._contracts_level import (
+from src.shared.python._contracts_invariant_mixin import (
+    ContractChecker,
+    invariant_checked,
+)
+from src.shared.python._contracts_level import (
     CONTRACTS_ENABLED,
     DBC_LEVEL,
     ContractLevel,
@@ -76,8 +79,8 @@ from shared.python._contracts_level import (
     get_contract_level,
     set_contract_level,
 )
-from shared.python._contracts_primitives import ensure, invariant, require
-from shared.python._contracts_validators import (
+from src.shared.python._contracts_primitives import ensure, invariant, require
+from src.shared.python._contracts_validators import (
     check_non_negative,
     check_positive,
     check_pressure,

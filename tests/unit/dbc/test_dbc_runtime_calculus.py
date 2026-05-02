@@ -9,7 +9,10 @@ from __future__ import annotations
 import unittest
 
 import numpy as np
-from src.shared.python.core.contracts import PreconditionError
+try:
+    from shared.python._contracts_exceptions import PreconditionError
+except ImportError:
+    from src.shared.python._contracts_exceptions import PreconditionError
 from src.shared.python.signal_toolkit.calculus import (
     DifferentiationMethod,
     Differentiator,

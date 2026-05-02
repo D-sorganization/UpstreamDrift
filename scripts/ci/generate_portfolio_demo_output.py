@@ -31,7 +31,7 @@ def generate_portfolio_demo_output(output_path: Path | None = None) -> None:
         )
 
     # Match the values in docs/portfolio/golf_modeling_demo.md
-    # Match the values in examples/basic_flight_simulation.py
+
     ball = BallProperties(
         mass=0.0459,
         diameter=0.04267,

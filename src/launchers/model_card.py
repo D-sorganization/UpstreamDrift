@@ -6,13 +6,30 @@ Provides the tile component for each model/application in the launcher.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, TYPE_CHECKING
 
-from PyQt6.QtCore import QMimeData, QPoint, Qt
-from PyQt6.QtGui import QDrag, QDragEnterEvent, QDropEvent, QFont, QMouseEvent, QPixmap
+from PyQt6.QtCore import (
+    QEasingCurve,
+    QEvent,
+    QMimeData,
+    QPoint,
+    QPropertyAnimation,
+    Qt,
+    pyqtProperty,
+)
+from PyQt6.QtGui import (
+    QColor,
+    QDrag,
+    QDragEnterEvent,
+    QDropEvent,
+    QEnterEvent,
+    QMouseEvent,
+    QPixmap,
+)
 from PyQt6.QtWidgets import (
     QApplication,
     QFrame,
+    QGraphicsDropShadowEffect,
     QHBoxLayout,
     QLabel,
     QVBoxLayout,
@@ -21,6 +38,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
+from src.shared.python.theme.typography import Weights, get_display_font, get_qfont
 
 from .startup import ASSETS_DIR, _get_theme_colors
 
@@ -44,11 +62,15 @@ MODEL_IMAGES = {
     # MATLAB/Simscape
     "Matlab Models": _IMG_MATLAB,
     # Tools
-    "Motion Capture": "c3d_icon.png",
+    "Motion Capture": "c3d_viewer_modern.png",
     "Model Explorer": "urdf_icon.png",
-    "Putting Green": "putting_green.svg",
-    "Video Analyzer": "video_analyzer.svg",
-    "Data Explorer": "data_explorer.svg",
+    "Putting Green": "putting_green_modern.png",
+    "Video Analyzer": "video_analyzer_modern.png",
+    "Data Explorer": "data_explorer_modern.png",
+    "OpenPose": "openpose.png",
+    "MediaPipe": "mediapipe.png",
+    "Project Map": "project_map.png",
+    "Movement Optimizer": "movement_optimizer.png",
     # Legacy names (backward compatibility)
     "MuJoCo Humanoid": "mujoco_humanoid.png",
     "MuJoCo Dashboard": "mujoco_hand.png",
@@ -64,7 +86,7 @@ MODEL_IMAGES = {
     "Golf Swing Analysis GUI": _IMG_MATLAB,
     "MATLAB Code Analyzer": _IMG_MATLAB,
     "URDF Generator": "urdf_icon.png",
-    "C3D Motion Viewer": "c3d_icon.png",
+    "C3D Motion Viewer": "c3d_viewer_modern.png",
     "Shot Tracer": "golf_icon.png",
 }
 
@@ -84,10 +106,79 @@ class DraggableModelCard(QFrame):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.drag_start_position = QPoint()
 
+        # Glassmorphism styling
+        self.setStyleSheet("""
+            #ModelCard {
+                background-color: rgba(255, 255, 255, 0.03);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+            }
+            #ModelCard:hover {
+                background-color: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+        """)
+
+        # Drop Shadow
+        self.shadow = QGraphicsDropShadowEffect(self)
+        self.shadow.setBlurRadius(15)
+        self.shadow.setOffset(0, 4)
+        self.shadow.setColor(QColor(0, 0, 0, 60))
+        self.setGraphicsEffect(self.shadow)
+
+        # Micro-animations
+        self._hover_offset = 0.0
+        self._hover_anim = QPropertyAnimation(self, b"hoverOffset", self)
+        self._hover_anim.setDuration(150)
+        self._hover_anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+
         self.setup_ui()
 
-    def _resolve_image_name(self) -> str | None:
+    @pyqtProperty(float)
+    def hoverOffset(self) -> float:
+        return self._hover_offset
+
+    @hoverOffset.setter
+    def hoverOffset(self, value: float) -> None:
+        self._hover_offset = value
+        # Animate drop shadow (lift effect)
+        self.shadow.setBlurRadius(15 + value * 2)
+        self.shadow.setOffset(0, 4 + value)
+
+        # Animate icon scale (scale up by 3%)
+        scale_factor = 1.0 + (value / 4.0) * 0.03
+        if hasattr(self, "lbl_img") and hasattr(self, "base_pixmap"):  # noqa: SIM102
+            if self.base_pixmap and not self.base_pixmap.isNull():
+                new_size = int(180 * scale_factor)
+                scaled = self.base_pixmap.scaled(
+                    new_size,
+                    new_size,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+                self.lbl_img.setPixmap(scaled)
+
+    def enterEvent(self, event: QEnterEvent | None) -> None:
+        """Trigger micro-animation on hover enter."""
+        self._hover_anim.setStartValue(self._hover_offset)
+        self._hover_anim.setEndValue(4.0)
+        self._hover_anim.start()
+        super().enterEvent(event)
+
+    def leaveEvent(self, event: QEvent | None) -> None:
+        """Reverse micro-animation on hover leave."""
+        self._hover_anim.setStartValue(self._hover_offset)
+        self._hover_anim.setEndValue(0.0)
+        self._hover_anim.start()
+        super().leaveEvent(event)
+
+    def _resolve_image_name(self) -> str | None:  # noqa: C901
         """Determine the image filename for this model card."""
+        # Use explicit launcher metadata if present (ensures Web App/PyQt parity)
+        launcher = getattr(self.model, "launcher", None)
+        if launcher and getattr(launcher, "logo", None):
+            return Path(launcher.logo).name
+
         img_name = MODEL_IMAGES.get(self.model.name)
         if img_name:
             return img_name
@@ -106,9 +197,17 @@ class DraggableModelCard(QFrame):
         if "matlab" in model_id:
             return "matlab_logo.png"
         if "motion" in model_id or "capture" in model_id or "c3d" in model_id:
-            return "c3d_icon.png"
+            return "c3d_viewer_modern.png"
         if "model_explorer" in model_id or "urdf" in model_id:
             return "urdf_icon.png"
+        if "openpose" in model_id:
+            return "openpose.png"
+        if "mediapipe" in model_id:
+            return "mediapipe.png"
+        if "project_map" in model_id:
+            return "project_map.png"
+        if "movement_optimizer" in model_id:
+            return "movement_optimizer.png"
         if (
             "engine_managed" in getattr(self.model, "type", "")
             and getattr(self.model, "engine_type", "") == "mujoco"
@@ -139,32 +238,33 @@ class DraggableModelCard(QFrame):
         img_name = self._resolve_image_name()
         img_path = self._find_image_path(img_name)
 
-        lbl_img = QLabel()
-        lbl_img.setObjectName("CardImage")
-        lbl_img.setFixedSize(200, 200)
-        lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.setAlignment(lbl_img, Qt.AlignmentFlag.AlignCenter)
-        lbl_img.setStyleSheet(Styles.LABEL_TRANSPARENT)
+        self.lbl_img = QLabel()
+        self.lbl_img.setObjectName("CardImage")
+        self.lbl_img.setFixedSize(200, 200)
+        self.lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setAlignment(self.lbl_img, Qt.AlignmentFlag.AlignCenter)
+        self.lbl_img.setStyleSheet(Styles.LABEL_TRANSPARENT)
+        self.base_pixmap = None
 
         if img_path and img_path.exists():
-            pixmap = QPixmap(str(img_path))
-            pixmap = pixmap.scaled(
+            self.base_pixmap = QPixmap(str(img_path))
+            pixmap = self.base_pixmap.scaled(
                 180,
                 180,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )
-            lbl_img.setPixmap(pixmap)
+            self.lbl_img.setPixmap(pixmap)
         else:
             c = _get_theme_colors()
-            lbl_img.setText("No Image")
-            lbl_img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
+            self.lbl_img.setText("No Image")
+            self.lbl_img.setStyleSheet(Styles.no_image_label(c.text_quaternary))
 
         img_container = QWidget()
         img_layout = QHBoxLayout(img_container)
         img_layout.setContentsMargins(0, 0, 0, 0)
         img_layout.addStretch()
-        img_layout.addWidget(lbl_img)
+        img_layout.addWidget(self.lbl_img)
         img_layout.addStretch()
         layout.addWidget(img_container)
 
@@ -177,7 +277,7 @@ class DraggableModelCard(QFrame):
         status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
         lbl_status.setObjectName("StatusChip")
-        lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
+        lbl_status.setFont(get_qfont(size=8, weight=Weights.BOLD))
         lbl_status.setStyleSheet(Styles.status_chip(status_color, text_color))
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_status.setMinimumWidth(80)
@@ -196,13 +296,13 @@ class DraggableModelCard(QFrame):
         self._create_image_widget(layout)
 
         lbl_name = QLabel(self.model.name)
-        lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        lbl_name.setFont(get_display_font(size=11, weight=Weights.BOLD))
         lbl_name.setWordWrap(True)
         lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_name)
 
         lbl_desc = QLabel(self.model.description)
-        lbl_desc.setFont(QFont("Segoe UI", 9))
+        lbl_desc.setFont(get_qfont(size=9))
         lbl_desc.setObjectName("CardDescription")
         lbl_desc.setWordWrap(True)
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)

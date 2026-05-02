@@ -271,16 +271,16 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 
 ### Test Organization
 
-| Category           | Location                    | Framework           | Markers                           |
-| ------------------ | --------------------------- | ------------------- | --------------------------------- |
-| Unit               | `tests/unit/`               | pytest              | `@pytest.mark.unit`               |
-| Integration        | `tests/integration/`        | pytest              | `@pytest.mark.integration`        |
-| Acceptance         | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`         |
-| Cross-Engine       | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`       |
-| Physics Validation | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation` |
-| Golf Source Contracts | `tests/unit/shared_python/` | pytest           | source-map contract tests         |
-| Benchmarks         | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`          |
-| Property-Based     | `tests/property/`           | hypothesis + pytest | `@pytest.mark.property`           |
+| Category              | Location                    | Framework           | Markers                           |
+| --------------------- | --------------------------- | ------------------- | --------------------------------- |
+| Unit                  | `tests/unit/`               | pytest              | `@pytest.mark.unit`               |
+| Integration           | `tests/integration/`        | pytest              | `@pytest.mark.integration`        |
+| Acceptance            | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`         |
+| Cross-Engine          | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`       |
+| Physics Validation    | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation` |
+| Golf Source Contracts | `tests/unit/shared_python/` | pytest              | source-map contract tests         |
+| Benchmarks            | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`          |
+| Property-Based        | `tests/property/`           | hypothesis + pytest | `@pytest.mark.property`           |
 
 ### Coverage Requirements
 
@@ -309,15 +309,15 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 
 ### Code Quality Tools
 
-| Tool       | Version | Purpose                | Blocking? |
-| ---------- | ------- | ---------------------- | --------- |
+| Tool       | Version | Purpose                                                                            | Blocking? |
+| ---------- | ------- | ---------------------------------------------------------------------------------- | --------- |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
-| ruff       | latest  | Linting and formatting | Yes       |
-| mypy       | 1.7+    | Static type checking   | Yes       |
-| pytest     | 7.0+    | Testing framework      | Yes       |
-| pytest-cov | 4.0+    | Coverage measurement   | Yes       |
-| bandit     | 1.7+    | Security scanning      | Yes       |
-| hypothesis | 6.0+    | Property-based testing | No        |
+| ruff       | latest  | Linting and formatting                                                             | Yes       |
+| mypy       | 1.7+    | Static type checking                                                               | Yes       |
+| pytest     | 7.0+    | Testing framework                                                                  | Yes       |
+| pytest-cov | 4.0+    | Coverage measurement                                                               | Yes       |
+| bandit     | 1.7+    | Security scanning                                                                  | Yes       |
+| hypothesis | 6.0+    | Property-based testing                                                             | No        |
 
 ### Design Principles
 
@@ -377,16 +377,16 @@ Beyond standard tools, CI enforces custom checks:
 
 ### Development Dependencies
 
-| Package    | Version | Purpose                |
-| ---------- | ------- | ---------------------- |
+| Package    | Version | Purpose                                                                            |
+| ---------- | ------- | ---------------------------------------------------------------------------------- |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
-| pytest     | 7.0+    | Testing framework      |
-| pytest-cov | 4.0+    | Coverage measurement   |
-| hypothesis | 6.0+    | Property-based testing |
-| ruff       | latest  | Linting and formatting |
-| mypy       | 1.7+    | Type checking          |
-| bandit     | 1.7+    | Security scanning      |
-| black      | 23.0+   | Code formatter         |
+| pytest     | 7.0+    | Testing framework                                                                  |
+| pytest-cov | 4.0+    | Coverage measurement                                                               |
+| hypothesis | 6.0+    | Property-based testing                                                             |
+| ruff       | latest  | Linting and formatting                                                             |
+| mypy       | 1.7+    | Type checking                                                                      |
+| bandit     | 1.7+    | Security scanning                                                                  |
+| black      | 23.0+   | Code formatter                                                                     |
 
 ### Fleet Dependencies
 
@@ -469,23 +469,24 @@ pytest tests/ --cov=src --cov-fail-under=70
 - Performance scaling beyond 100-muscle models not yet tested
 
 ## 12. Change Log
+
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------- | ------- | ------------------------------------------------------------------------------------------------------------- |
-| 2026-04-30 | 1.0.88  | Added an offline GitHub Actions supply-chain guard that rejects external workflow actions not pinned to commit SHAs. |
-| 2026-04-30 | 1.0.87  | Added source-backed golf ball-flight and impact validation contracts, including explicit altitude bounds for air-density computations and portfolio-facing golf modeling documentation. |
-| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations. |
-| 2026-04-27 | 1.0.83  | Bolt: Replace np.linalg.norm with math.hypot in collision queries. |
-| 2026-04-26 | 1.0.81  | fix: Restore missing jobs in `Code-Metrics.yml` and `release.yml`; correct non-UTF-8 characters in 55 workflows causing 0s CI failures. |
-| 2026-04-26 | 1.0.80  | fix: Harden `pick-runner` logic across all workflows to handle `gh api` JSON errors; implement tool invocation loop for AI chat service (fixes #3162); resolve massive conflict-marker corruption in `src` and `tests` by restoring from `origin/main`. |
-| 2026-04-26 | 1.0.80  | Bolt: Optimize Mean Squared Error calculations in system_identification.py |
-| 2026-04-26 | 1.0.80  | Bolt: Replaced `np.linalg.norm` with `np.sqrt(np.vdot)` in `src/robotics/planning/collision/_distance_queries.py` and `src/robotics/planning/collision/_primitive_shapes.py` to avoid NumPy reduction overhead for small 3D geometric vectors. |
-| 2026-04-26 | 1.0.80  | Bolt: Optimized `np.sum(error**2)` to `np.vdot(error, error)` in `trajectory_funnel_benchmark.py` to avoid temporary array allocation and speed up calculation. |
-| 2026-04-26 | 1.0.79  | Generate updated assessment reports (A-O and Comprehensive) and auto-fix formatting issue in Motion Capture Plotter. |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-30 | 1.0.88  | Added an offline GitHub Actions supply-chain guard that rejects external workflow actions not pinned to commit SHAs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-04-30 | 1.0.87  | Added source-backed golf ball-flight and impact validation contracts, including explicit altitude bounds for air-density computations and portfolio-facing golf modeling documentation.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 2026-04-27 | 1.0.83  | Bolt: Replace np.linalg.norm with math.hypot in collision queries.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 2026-04-26 | 1.0.81  | fix: Restore missing jobs in `Code-Metrics.yml` and `release.yml`; correct non-UTF-8 characters in 55 workflows causing 0s CI failures.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 2026-04-26 | 1.0.80  | fix: Harden `pick-runner` logic across all workflows to handle `gh api` JSON errors; implement tool invocation loop for AI chat service (fixes #3162); resolve massive conflict-marker corruption in `src` and `tests` by restoring from `origin/main`.                                                                                                                                                                                                                                                                                                                                                                               |
+| 2026-04-26 | 1.0.80  | Bolt: Optimize Mean Squared Error calculations in system_identification.py                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 2026-04-26 | 1.0.80  | Bolt: Replaced `np.linalg.norm` with `np.sqrt(np.vdot)` in `src/robotics/planning/collision/_distance_queries.py` and `src/robotics/planning/collision/_primitive_shapes.py` to avoid NumPy reduction overhead for small 3D geometric vectors.                                                                                                                                                                                                                                                                                                                                                                                        |
+| 2026-04-26 | 1.0.80  | Bolt: Optimized `np.sum(error**2)` to `np.vdot(error, error)` in `trajectory_funnel_benchmark.py` to avoid temporary array allocation and speed up calculation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 2026-04-26 | 1.0.79  | Generate updated assessment reports (A-O and Comprehensive) and auto-fix formatting issue in Motion Capture Plotter.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-04-02 | 1.0.12  | fix(#2273): Extracted `PerturbationAnalyzerBase` to `src/shared/python/perturbation/perturbation_base.py`, eliminating 3,603-line DRY violation across drake/mujoco/myosuite/opensim/pinocchio perturbation analyzers. Engine-specific analyzers now inherit the base class and override only `_simulate()`, `_get_q_traj()`, `_get_v_traj()`, and `_validate_sim_result_type()`. Removed ARCHITECTURE_DEBT headers from all five analyzer files. Updated perturbation contract tests to accept `ValueError` (DbC-correct) in addition to legacy `AssertionError`. Added 42 unit tests for `PerturbationAnalyzerBase`.                |
 | 2026-04-02 | 1.0.11  | Bolt: Optimized `np.linalg.norm(..., axis=1)` to explicit squared distances in `trajectory_funnel_benchmark.py` to avoid expensive reduction and sqrt overhead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization |
-| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization. |
-| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization |
+| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2026-04-29 | 1.0.11  | Bolt: Replaced np.linalg.norm with math.hypot in collision shapes for 3D vector distance optimization                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-04-01 | 1.0.8   | Sentinel: restricted legacy `np.load` callers to `allow_pickle=False` in shared I/O and golf-physics utilities, matching the repository's no-unsafe-deserialization policy.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | 2026-04-01 | 1.0.7   | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for camera framing in GUI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-03-31 | 1.0.6   | Bolt: Optimized `np.linalg.norm` to explicit element-wise calculation for validation metrics                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
@@ -519,11 +520,14 @@ pytest tests/ --cov=src --cov-fail-under=70
   5. VERSION: Bump the Spec Version field when making substantive changes.
      Use semver: major (structure change), minor (new features), patch (corrections).
 -->
+
 ## 2026-04-28 Spec Bump
+
 Bumped spec file slightly to bypass the spec check in CI.
-| 2026-04-29 | 1.0.85  | Bolt: Fixed 3D vector distance regressions and optimized math.hypot usage |
-| 2026-04-30 | 1.0.86  | Bolt: Optimized `np.linalg.norm` to explicit element-wise computation using `np.einsum` in ZTCFResult.magnitudes |
-| 2026-05-02 | 1.0.87  | Bolt: Optimized bounding sphere radius computation in mesh primitive fitting using `np.einsum` instead of `np.linalg.norm` |
+| 2026-04-29 | 1.0.85 | Bolt: Fixed 3D vector distance regressions and optimized math.hypot usage |
+| 2026-04-30 | 1.0.86 | Bolt: Optimized `np.linalg.norm` to explicit element-wise computation using `np.einsum` in ZTCFResult.magnitudes |
+| 2026-05-02 | 1.0.87 | Bolt: Optimized bounding sphere radius computation in mesh primitive fitting using `np.einsum` instead of `np.linalg.norm` |
 
 ## 3D Vector Distances Note
+
 Per Issue #3474, 3D vector operations must use `math.hypot` instead of `np.linalg.norm` to prevent `TypeError` on non-1D ndarrays.

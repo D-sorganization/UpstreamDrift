@@ -68,21 +68,21 @@ BallFlightSimulator LaunchConditions
 
 The demo uses one driver-launch condition:
 
-| Quantity | Value | Role |
-| --- | ---: | --- |
-| Ball speed | 70.0 m/s | Measured input |
-| Launch angle | 12.0 deg | Measured input |
-| Backspin | 2700 rpm | Measured input |
-| Air density | 1.225 kg/m^3 | Environmental assumption |
-| Gravity | 9.81 m/s^2 | Environmental assumption |
-| Ball mass | 0.0459 kg | Custom ball property |
-| Ball diameter | 0.04267 m | Custom ball property |
-| cd0 | 0.25 | Custom ball property |
-| cd1 | 0.0 | Custom ball property |
-| cd2 | 0.0 | Custom ball property |
-| cl0 | 0.15 | Custom ball property |
-| cl1 | 0.0 | Custom ball property |
-| cl2 | 0.0 | Custom ball property |
+| Quantity      |        Value | Role                     |
+| ------------- | -----------: | ------------------------ |
+| Ball speed    |     70.0 m/s | Measured input           |
+| Launch angle  |     12.0 deg | Measured input           |
+| Backspin      |     2700 rpm | Measured input           |
+| Air density   | 1.225 kg/m^3 | Environmental assumption |
+| Gravity       |   9.81 m/s^2 | Environmental assumption |
+| Ball mass     |    0.0459 kg | Custom ball property     |
+| Ball diameter |    0.04267 m | Custom ball property     |
+| cd0           |         0.25 | Custom ball property     |
+| cd1           |          0.0 | Custom ball property     |
+| cd2           |          0.0 | Custom ball property     |
+| cl0           |         0.15 | Custom ball property     |
+| cl1           |          0.0 | Custom ball property     |
+| cl2           |          0.0 | Custom ball property     |
 
 These values describe a plausible driver shot. They are not presented as
 measured data from a named player, launch monitor, or published study.
@@ -92,11 +92,11 @@ measured data from a named player, launch monitor, or published study.
 The committed reference fixture is
 [`golf_modeling_demo_output.csv`](golf_modeling_demo_output.csv).
 
-| Output | Reference value | Interpretation |
-| --- | ---: | --- |
+| Output         |    Reference value | Interpretation                                          |
+| -------------- | -----------------: | ------------------------------------------------------- |
 | Carry distance | 186.9 m / 204.4 yd | Simulated landing range for the stated launch condition |
-| Peak height | 42.4 m | Simulated apex height |
-| Flight time | 7.6 s | Simulated time aloft |
+| Peak height    |             42.4 m | Simulated apex height                                   |
+| Flight time    |              7.6 s | Simulated time aloft                                    |
 
 Reviewers should treat these as model-conditioned outputs and sample fixture
 values. They are useful for checking output shape, units, and assumptions before

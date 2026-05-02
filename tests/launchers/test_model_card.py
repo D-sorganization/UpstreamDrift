@@ -22,8 +22,8 @@ def mock_model() -> MagicMock:
     model.id = "mujoco_unified"
     model.name = "MuJoCo"
     model.description = "Test Description"
-    model.type = "engine_managed"
     model.engine_type = "mujoco"
+    model.launcher = None
     return model
 
 
@@ -59,7 +59,7 @@ def test_resolve_image_name(mock_model, parent_launcher, qapp) -> None:
     assert card._resolve_image_name() == "matlab_logo.png"
 
     mock_model.id = "motion_test"
-    assert card._resolve_image_name() == "c3d_icon.png"
+    assert card._resolve_image_name() == "c3d_viewer_modern.png"
 
     mock_model.id = "model_explorer_test"
     assert card._resolve_image_name() == "urdf_icon.png"
@@ -301,3 +301,26 @@ def test_drop_event_empty(mock_model, parent_launcher, qapp) -> None:
     event.mimeData.return_value = mime
     card.dropEvent(event)
     parent_launcher._swap_models.assert_not_called()
+
+
+def test_enter_event(mock_model, parent_launcher, qapp) -> None:
+    card = DraggableModelCard(mock_model, parent_launcher)
+    from PyQt6.QtCore import QPointF
+    from PyQt6.QtGui import QEnterEvent
+
+    event = QEnterEvent(QPointF(0, 0), QPointF(0, 0), QPointF(0, 0))
+    with patch.object(card._hover_anim, "start") as mock_start:
+        card.enterEvent(event)
+        mock_start.assert_called_once()
+        assert card._hover_anim.endValue() == 4.0
+
+
+def test_leave_event(mock_model, parent_launcher, qapp) -> None:
+    card = DraggableModelCard(mock_model, parent_launcher)
+    from PyQt6.QtCore import QEvent
+
+    event = QEvent(QEvent.Type.Leave)
+    with patch.object(card._hover_anim, "start") as mock_start:
+        card.leaveEvent(event)
+        mock_start.assert_called_once()
+        assert card._hover_anim.endValue() == 0.0

@@ -18,4 +18,3 @@ This change replaces `BallProperties()` defaults with custom aerodynamic coeffic
 [View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3625#discussion_r3172882900)
 
 ---
-
