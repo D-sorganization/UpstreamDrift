@@ -149,3 +149,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+# CI trigger: pip repair 2026-05-02
