@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, Any
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import (
     QAction,
-    QFont,
     QKeySequence,
     QShortcut,
 )
@@ -37,6 +36,7 @@ from PyQt6.QtWidgets import (
 
 from src.shared.python.logging_pkg.logging_config import get_logger
 from src.shared.python.theme.style_constants import Styles
+from src.shared.python.theme.typography import Weights, get_display_font
 
 if TYPE_CHECKING:
     pass
@@ -59,13 +59,25 @@ class LauncherUISetupMixin:
         # Main Widget
         central = QWidget()
         self.setCentralWidget(central)
-        main_layout = QVBoxLayout(central)
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(30, 30, 30, 30)
+
+        # Main layout is now horizontal to accommodate the sidebar
+        main_layout = QHBoxLayout(central)
+        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+
+        # --- Global Sidebar ---
+        sidebar = self._setup_global_sidebar()
+        main_layout.addWidget(sidebar)
+
+        # Content Container
+        content_container = QWidget()
+        content_layout = QVBoxLayout(content_container)
+        content_layout.setSpacing(20)
+        content_layout.setContentsMargins(30, 30, 30, 30)
 
         # --- Top Bar ---
         top_bar = self._setup_top_bar()
-        main_layout.addLayout(top_bar)
+        content_layout.addLayout(top_bar)
 
         # --- Content area with horizontal splitter (tiles | AI chat) ---
         self.content_splitter = QSplitter(Qt.Orientation.Horizontal)
@@ -90,7 +102,9 @@ class LauncherUISetupMixin:
         if AI_AVAILABLE:
             self._setup_ai_panel()
 
-        main_layout.addWidget(self.content_splitter, 1)
+        content_layout.addWidget(self.content_splitter, 1)
+
+        main_layout.addWidget(content_container, 1)
 
         # Apply dark theme
         self.apply_styles()
@@ -100,6 +114,73 @@ class LauncherUISetupMixin:
 
         # Initialize Overlay
         self._init_overlay()
+
+    def _setup_global_sidebar(self) -> QWidget:
+        """Create the thin global sidebar navigation."""
+        sidebar = QWidget()
+        sidebar.setFixedWidth(70)
+
+        try:
+            from src.shared.python.theme import get_current_colors
+
+            c = get_current_colors()
+        except ImportError:
+            from src.shared.python.theme import (
+                DARK_THEME as c,  # type: ignore[assignment]
+            )
+
+        sidebar.setStyleSheet(f"""
+            QWidget {{
+                background-color: {c.bg_elevated};
+                border-right: 1px solid {c.border_default};
+            }}
+            QPushButton {{
+                background-color: transparent;
+                border: none;
+                border-radius: 8px;
+                color: {c.text_secondary};
+                font-weight: bold;
+                font-size: 10px;
+                padding: 10px 0;
+            }}
+            QPushButton:hover {{
+                background-color: {c.bg_highlight};
+                color: {c.text_primary};
+            }}
+            QPushButton:checked {{
+                background-color: {c.primary};
+                color: {c.bg};
+            }}
+        """)
+
+        layout = QVBoxLayout(sidebar)
+        layout.setContentsMargins(8, 20, 8, 20)
+        layout.setSpacing(15)
+
+        btn_home = QPushButton("Home")
+        btn_home.setCheckable(True)
+        btn_home.setChecked(True)
+
+        btn_engines = QPushButton("Engines")
+        btn_engines.setCheckable(True)
+
+        # If open_settings exists in the mixed-in class, use it.
+        # Otherwise, we gracefully handle it to avoid crashes in tests.
+        btn_settings = QPushButton("Settings")
+        if hasattr(self, "_open_settings"):
+            btn_settings.clicked.connect(self._open_settings)
+
+        btn_docs = QPushButton("Docs")
+        if hasattr(self, "_show_help_dialog"):
+            btn_docs.clicked.connect(lambda: self._show_help_dialog())
+
+        layout.addWidget(btn_home)
+        layout.addWidget(btn_engines)
+        layout.addStretch()
+        layout.addWidget(btn_settings)
+        layout.addWidget(btn_docs)
+
+        return sidebar
 
     def _setup_menu_bar(self) -> None:
         """Set up the application menu bar."""
@@ -386,7 +467,7 @@ class LauncherUISetupMixin:
         self.btn_launch = QPushButton("Select a Model")
         self.btn_launch.setEnabled(False)
         self.btn_launch.setFixedHeight(50)
-        self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        self.btn_launch.setFont(get_display_font(size=12, weight=Weights.BOLD))
         self.btn_launch.setStyleSheet(Styles.BTN_LAUNCH_READY)
         self.btn_launch.clicked.connect(self.launch_simulation)
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)

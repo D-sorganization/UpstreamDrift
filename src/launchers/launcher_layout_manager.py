@@ -43,6 +43,7 @@ class LayoutManager:
         available_models: dict[str, Any],
         get_model_func: Any,
         create_card_func: Any,
+        create_header_func: Any = None,
     ) -> None:
         """Initialize the layout manager.
 
@@ -61,6 +62,7 @@ class LayoutManager:
         self.available_models = available_models
         self._get_model = get_model_func
         self._create_card = create_card_func
+        self._create_header = create_header_func
 
         # State
         self.model_order: list[str] = []
@@ -82,10 +84,7 @@ class LayoutManager:
                 "opensim_golf",
                 "myosim_suite",
                 "putting_green",
-                "simscape_2d",
-                "simscape_3d",
-                "dataset_generator",
-                "matlab_analysis",
+                "matlab_suite",
                 "c3d_viewer",
                 "openpose_analysis",
                 "mediapipe_analysis",
@@ -264,6 +263,38 @@ class LayoutManager:
 
         return filtered
 
+    def _get_model_category(self, model: Any) -> str:
+        """Determine the category of a model for layout grouping."""
+        launcher = getattr(model, "launcher", None)
+        if isinstance(launcher, dict):
+            cat = launcher.get("category")
+        else:
+            cat = getattr(launcher, "category", None) if launcher else None
+
+        if cat:
+            if cat == "physics_engine":
+                return "Core Physics Engines"
+            if cat == "tool":
+                return "Analysis Tools"
+            if cat == "external":
+                return "Utilities"
+
+        t = getattr(model, "type", "").lower()
+        if t in [
+            "custom_humanoid",
+            "drake",
+            "pinocchio",
+            "opensim",
+            "myosim",
+            "putting_green",
+        ]:
+            return "Core Physics Engines"
+        if t == "matlab_suite":
+            return "Matlab Simscape Models"
+        if t in ["special_app"]:
+            return "Analysis Tools"
+        return "Utilities"
+
     def rebuild_grid(self, grid_layout: QGridLayout) -> None:
         """Rebuild the grid layout based on current model order.
 
@@ -285,8 +316,15 @@ class LayoutManager:
         # Get filtered model order
         filtered_order = self.get_filtered_order()
 
-        # Get or create widgets
-        widgets = []
+        # Group widgets by category maintaining order
+        categories = {
+            "Core Physics Engines": [],
+            "Analysis Tools": [],
+            "Matlab Simscape Models": [],
+            "Utilities": [],
+            "Other": [],
+        }
+
         for model_id in filtered_order:
             if model_id not in self.model_cards:
                 model = self._get_model(model_id)
@@ -294,16 +332,33 @@ class LayoutManager:
                     self.model_cards[model_id] = self._create_card(model)
 
             if model_id in self.model_cards:
-                widgets.append(self.model_cards[model_id])
+                model = self._get_model(model_id)
+                cat = self._get_model_category(model) if model else "Other"
+                if cat not in categories:
+                    cat = "Other"
+                categories[cat].append(self.model_cards[model_id])
 
         # Add to grid
         row = 0
-        col = 0
-        for widget in widgets:
-            grid_layout.addWidget(widget, row, col)
-            col += 1
-            if col >= LayoutConfig.GRID_COLUMNS:
-                col = 0
+        for cat_name, widgets in categories.items():
+            if not widgets:
+                continue
+
+            # Add section header
+            if self._create_header:
+                header = self._create_header(cat_name)
+                grid_layout.addWidget(header, row, 0, 1, LayoutConfig.GRID_COLUMNS)
+            row += 1
+
+            col = 0
+            for widget in widgets:
+                grid_layout.addWidget(widget, row, col)
+                col += 1
+                if col >= LayoutConfig.GRID_COLUMNS:
+                    col = 0
+                    row += 1
+
+            if col > 0:
                 row += 1
 
     def set_edit_mode(self, enabled: bool) -> None:

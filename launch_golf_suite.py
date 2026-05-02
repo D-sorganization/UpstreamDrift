@@ -11,8 +11,11 @@ Usage:
 
 import argparse
 import logging
+import os
 from os import environ, getcwd
 from sys import exit, path
+
+path.append(os.path.join(getcwd(), "src"))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")

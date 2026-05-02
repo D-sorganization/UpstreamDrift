@@ -54,11 +54,15 @@ def create_card_func() -> Callable[[ModelSpec], MagicMock]:
 
 @pytest.fixture
 def layout_manager(available_models, get_model_func, create_card_func) -> LayoutManager:
+    def create_header(name: str) -> MagicMock:
+        return MagicMock()
+
     return LayoutManager(
         config_file=Path("/fake/config.json"),
         available_models=available_models,
         get_model_func=get_model_func,
         create_card_func=create_card_func,
+        create_header_func=create_header,
     )
 
 
@@ -267,8 +271,8 @@ def test_rebuild_grid(layout_manager) -> None:
     # Check that previous widget was cleared
     mock_widget.setParent.assert_called_with(None)
 
-    # grid_layout should have addWidget called twice
-    assert grid_layout.addWidget.call_count == 2
+    # grid_layout should have addWidget called 3 times: 1 header + 2 widgets
+    assert grid_layout.addWidget.call_count == 3
 
 
 def test_rebuild_grid_no_widget(layout_manager) -> None:
@@ -309,7 +313,9 @@ def test_rebuild_grid_existing_card(layout_manager) -> None:
     with patch.object(layout_manager, "_create_card") as mock_create:
         layout_manager.rebuild_grid(grid_layout)
         mock_create.assert_not_called()
-        grid_layout.addWidget.assert_called_once_with(mock_card, 0, 0)
+        assert grid_layout.addWidget.call_count == 2
+        # Check that the card was added at row 1, col 0
+        grid_layout.addWidget.assert_any_call(mock_card, 1, 0)
 
 
 def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None:
@@ -323,10 +329,11 @@ def test_rebuild_grid_multiple_columns(layout_manager, available_models) -> None
     layout_manager.rebuild_grid(grid_layout)
 
     # Check that it wrapped around
-    assert grid_layout.addWidget.call_count == 5
-    # The last call should be row=1, col=0 because GRID_COLUMNS=4
+    # 5 widgets + 1 header = 6 calls
+    assert grid_layout.addWidget.call_count == 6
+    # The last call should be row=2, col=0 because GRID_COLUMNS=4 and row 0 is header
     last_call = grid_layout.addWidget.call_args_list[-1]
-    assert last_call[0][1] == 1  # row
+    assert last_call[0][1] == 2  # row
     assert last_call[0][2] == 0  # col
 
 

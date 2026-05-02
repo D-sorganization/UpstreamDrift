@@ -271,6 +271,13 @@ except (RuntimeError, TypeError, AttributeError) as e:
             self._launch_matlab_app(model)
             return
 
+        if model.type == "matlab_suite":
+            from src.launchers.matlab_suite_dialog import MatlabSuiteDialog
+
+            dialog = MatlabSuiteDialog(self)
+            dialog.exec()
+            return
+
         if self._try_launch_docker(model):
             return
 

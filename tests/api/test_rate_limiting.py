@@ -13,12 +13,11 @@ import importlib
 import pytest
 
 try:
-    from fastapi.testclient import TestClient
-
     # Importing the server module up front catches missing transitive deps
     # (e.g. uvicorn) so the whole module skips cleanly rather than producing
     # a hard error inside an individual test.
     import src.api.server as _server  # noqa: F401
+    from fastapi.testclient import TestClient
 except ImportError:
     pytest.skip("FastAPI/server deps not available", allow_module_level=True)
 

@@ -159,3 +159,29 @@ class TestGolfLauncherLogic:
 
             mock_mujoco.MjModel.from_xml_path.assert_called_once()
             mock_mujoco.viewer.launch.assert_called_once()
+
+    @patch("src.launchers.golf_launcher.DockerCheckThread")
+    def test_launch_matlab_suite(self, mock_thread, qtbot):
+        from src.launchers.golf_launcher import GolfLauncher
+
+        launcher = GolfLauncher()
+        qtbot.addWidget(launcher)
+
+        mock_model = SimpleNamespace(
+            name="Matlab Suite",
+            path="virtual/matlab_suite",
+            id="matlab_suite",
+            type="matlab_suite",
+        )
+        launcher.registry = MagicMock()
+        launcher.registry.get_all_models.return_value = [mock_model]
+        launcher.registry.get_model.return_value = mock_model
+        launcher._build_available_models()
+        launcher.select_model("matlab_suite")
+
+        with patch(
+            "src.launchers.matlab_suite_dialog.MatlabSuiteDialog"
+        ) as mock_dialog:
+            launcher.launch_simulation()
+            mock_dialog.assert_called_once_with(launcher)
+            mock_dialog.return_value.exec.assert_called_once()
