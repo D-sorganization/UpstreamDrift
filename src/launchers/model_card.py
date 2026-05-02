@@ -147,7 +147,7 @@ class DraggableModelCard(QFrame):
 
         # Animate icon scale (scale up by 3%)
         scale_factor = 1.0 + (value / 4.0) * 0.03
-        if hasattr(self, "lbl_img") and hasattr(self, "base_pixmap"):
+        if hasattr(self, "lbl_img") and hasattr(self, "base_pixmap"):  # noqa: SIM102
             if self.base_pixmap and not self.base_pixmap.isNull():
                 new_size = int(180 * scale_factor)
                 scaled = self.base_pixmap.scaled(
