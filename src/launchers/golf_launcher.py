@@ -23,7 +23,6 @@ import contextlib
 import sys
 from typing import Any
 
-# Add current directory to path so we can import ui_components if needed locally
 from PyQt6.QtCore import QEventLoop, QObject, QRunnable, QThreadPool, QTimer, pyqtSignal
 from PyQt6.QtGui import QCloseEvent, QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox
@@ -694,7 +693,7 @@ class GolfLauncher(
         ]
         self._on_cleanup_finished(finished_keys)
 
-    def closeEvent(self, event: QCloseEvent | None) -> None:
+    def closeEvent(self, event: QCloseEvent | None) -> None:  # noqa: C901
         """Handle window close event to save layout."""
         running_count = sum(
             1 for p in self.running_processes.values() if p.poll() is None
@@ -794,7 +793,7 @@ def main() -> None:
             main_window = GolfLauncher(results)
             main_window.show()
             splash.finish(main_window)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             import traceback
 
             traceback.print_exc()
