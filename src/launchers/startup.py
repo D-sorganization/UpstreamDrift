@@ -6,7 +6,7 @@ Provides the splash screen, async startup worker, and startup result container.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, TYPE_CHECKING
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QFont, QPainter, QPixmap
@@ -301,7 +301,7 @@ class AsyncStartupWorker(QThread):
             try:
                 secure_run(["docker", "--version"], timeout=2.0, check=True)
                 self.results.docker_available = True
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 self.results.docker_available = False
                 logger.debug(f"Docker not available or timed out: {e}")
 
@@ -310,6 +310,6 @@ class AsyncStartupWorker(QThread):
                 500
             )  # QThread.msleep: non-blocking within the Qt thread scheduler
             self.finished_signal.emit(self.results)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.error(f"Startup failed: {e}")
             self.error_signal.emit(str(e))
