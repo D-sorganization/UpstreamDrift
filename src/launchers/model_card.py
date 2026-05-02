@@ -6,7 +6,7 @@ Provides the tile component for each model/application in the launcher.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any, TYPE_CHECKING
 
 from PyQt6.QtCore import (
     QEasingCurve,
@@ -172,7 +172,7 @@ class DraggableModelCard(QFrame):
         self._hover_anim.start()
         super().leaveEvent(event)
 
-    def _resolve_image_name(self) -> str | None:
+    def _resolve_image_name(self) -> str | None:  # noqa: C901
         """Determine the image filename for this model card."""
         # Use explicit launcher metadata if present (ensures Web App/PyQt parity)
         launcher = getattr(self.model, "launcher", None)
