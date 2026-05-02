@@ -68,13 +68,21 @@ BallFlightSimulator LaunchConditions
 
 The demo uses one driver-launch condition:
 
-| Quantity     |        Value | Role                     |
-| ------------ | -----------: | ------------------------ |
-| Ball speed   |     70.0 m/s | Measured input           |
-| Launch angle |     12.0 deg | Measured input           |
-| Backspin     |     2700 rpm | Measured input           |
-| Air density  | 1.225 kg/m^3 | Environmental assumption |
-| Gravity      |   9.81 m/s^2 | Environmental assumption |
+| Quantity      |        Value | Role                     |
+| ------------- | -----------: | ------------------------ |
+| Ball speed    |     70.0 m/s | Measured input           |
+| Launch angle  |     12.0 deg | Measured input           |
+| Backspin      |     2700 rpm | Measured input           |
+| Air density   | 1.225 kg/m^3 | Environmental assumption |
+| Gravity       |   9.81 m/s^2 | Environmental assumption |
+| Ball mass     |    0.0459 kg | Custom ball property     |
+| Ball diameter |    0.04267 m | Custom ball property     |
+| cd0           |         0.25 | Custom ball property     |
+| cd1           |          0.0 | Custom ball property     |
+| cd2           |          0.0 | Custom ball property     |
+| cl0           |         0.15 | Custom ball property     |
+| cl1           |          0.0 | Custom ball property     |
+| cl2           |          0.0 | Custom ball property     |
 
 These values describe a plausible driver shot. They are not presented as
 measured data from a named player, launch monitor, or published study.

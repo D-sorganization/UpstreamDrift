@@ -65,6 +65,8 @@ For a focused reviewer walkthrough, start with the
 
 ## Quick Start
 
+**Hiring Manager or Reviewer?** See the [Golf Modeling Portfolio Demo](docs/portfolio/golf_modeling_demo.md) for a focused, reproducible showcase of the physics capabilities.
+
 ### Prerequisites
 
 - **Python** 3.11+ (Python 3.13 recommended)

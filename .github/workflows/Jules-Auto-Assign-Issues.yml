@@ -57,8 +57,16 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.BOT_PAT || secrets.RUNNER_CHECK_TOKEN }}
           LABELS: ${{ toJson(github.event.issue.labels) }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
-          # LABELS is passed via env to prevent shell injection
+          # LABELS and ISSUE_BODY are passed via env to prevent shell injection
+
+          # Skip issues created by Jules itself (prevents runaway cascade)
+          if echo "$ISSUE_BODY" | grep -q "jules.google.com/task/"; then
+            echo "Skipping - Jules-generated follow-up issue"
+            echo "should_assign=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           # Skip if labeled with 'no-jules', 'question', 'documentation', or 'wontfix'
           SKIP_LABELS="no-jules question documentation wontfix duplicate invalid jules-assigned"
