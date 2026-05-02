@@ -17,7 +17,7 @@ Performance optimizations:
 from __future__ import annotations
 
 import functools
-from typing import cast
+from typing import cast  # noqa: I001
 
 import numpy as np
 from scipy import fft, signal
@@ -88,8 +88,6 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     Returns:
         DTW distance (float)
     """
-    if series1 is None:
-        raise ValueError("series1 must be provided")
     n = len(series1)
     m = len(series2)
 
@@ -145,7 +143,7 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
 
 
 @jit(nopython=True, cache=True)
-def _dtw_path_core(
+def _dtw_path_core(  # noqa: C901
     series1: np.ndarray, series2: np.ndarray, window: int
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Numba-optimized DTW path computation core.
@@ -163,8 +161,6 @@ def _dtw_path_core(
         tuple: (distance, path_i, path_j)
         path_i, path_j are arrays of indices (reversed order)
     """
-    if series1 is None:
-        raise ValueError("series1 must be provided")
     n = len(series1)
     m = len(series2)
 
