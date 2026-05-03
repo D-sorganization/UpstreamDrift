@@ -6,6 +6,10 @@
       "max_exclusions": 46
     },
     {
+      "effective_on": "2026-08-01",
+      "max_exclusions": 44
+    },
+    {
       "effective_on": "2026-10-01",
       "max_exclusions": 35
     },
@@ -20,6 +24,62 @@
     {
       "effective_on": "2027-07-01",
       "max_exclusions": 0
+    }
+  ],
+  "coverage_gates": [
+    {
+      "name": "api-routes",
+      "path": "src/api/routes/",
+      "min_coverage": 30.0,
+      "owner": "@api",
+      "reason": "FastAPI route handlers are production entry points and need package-level coverage beyond the global floor",
+      "ratchet_to": 35.0,
+      "ratchet_on": "2026-08-01"
+    },
+    {
+      "name": "data-io",
+      "path": "src/shared/python/data_io/",
+      "min_coverage": 30.0,
+      "owner": "@motion-analysis",
+      "reason": "motion-data import and export paths need package-level coverage without relying on broad global coverage",
+      "ratchet_to": 35.0,
+      "ratchet_on": "2026-08-01"
+    },
+    {
+      "name": "execution-checkpointing",
+      "path": "src/shared/python/engine_core/",
+      "min_coverage": 30.0,
+      "owner": "@engine-core",
+      "reason": "execution and checkpoint recovery code needs explicit coverage tracking",
+      "ratchet_to": 35.0,
+      "ratchet_on": "2026-08-01"
+    },
+    {
+      "name": "deployment",
+      "path": "src/deployment/",
+      "min_coverage": 30.0,
+      "owner": "@deployment",
+      "reason": "deployment controllers and digital-twin runtime paths need package-level regression coverage",
+      "ratchet_to": 35.0,
+      "ratchet_on": "2026-08-01"
+    },
+    {
+      "name": "optimization",
+      "path": "src/shared/python/optimization/",
+      "min_coverage": 30.0,
+      "owner": "@physics-core",
+      "reason": "swing optimization code needs package-level coverage before tightening numeric refactors",
+      "ratchet_to": 35.0,
+      "ratchet_on": "2026-08-01"
+    },
+    {
+      "name": "engine-adapters",
+      "path": "src/engines/",
+      "min_coverage": 30.0,
+      "owner": "@engine-integrations",
+      "reason": "engine adapter behavior needs explicit package-level coverage across optional physics backends",
+      "ratchet_to": 35.0,
+      "ratchet_on": "2026-08-01"
     }
   ],
   "exclusions": [
