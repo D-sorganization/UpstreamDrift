@@ -4,14 +4,12 @@
 
 > **GAAI Fleet Member.** GAAI framework installed in `.gaai/`. Read `.gaai/core/GAAI.md` for full governance spec.
 > Rules: `@.gaai/core/contexts/rules/base.rules.md` and `@.gaai/project/contexts/rules/project.rules.md`
-> All work on `main` branch. PRs target `main`.
-
-`CLAUDE.md` is the authoritative contributor and agent policy file.
+> PRs target `main`. Use focused topic branches such as `fix/...`, `feat/...`, `chore/...`, or `claude/...`.
 
 ## What This Is
 
-Golf ball flight and physics modeling suite. Simulates aerodynamics, ball-club impact,
-and trajectory using multiple physics engines (MuJoCo, Drake, Pinocchio, OpenSim).
+A unified platform for golf swing analysis across multiple physics engines and
+biomechanical modeling approaches.
 Optional Rust extensions built via Maturin for performance-critical paths.
 
 ## Key Directories
@@ -20,12 +18,14 @@ Optional Rust extensions built via Maturin for performance-critical paths.
 - `tests/` — pytest suite (unit, integration, live simulation)
 - `scripts/` — CI helpers including `check_file_size_budget.py`
 - `scripts/config/file_size_budget.json` — per-file size exceptions
-- `module_size_budget_baseline.json` — modules exceeding default size limits
-- `rust/` — optional Rust features built with Maturin
+- `scripts/config/module_size_budget_baseline.json` — modules exceeding default size limits
+- `rust_core/` — optional Rust features built with Maturin
 
 ## Python and Tooling
 
-- **Python 3.10+**. Always `python3`, never `python`.
+- **Python 3.10+** is the supported minimum from `pyproject.toml`.
+- **Python 3.11** is the default CI interpreter in `.github/workflows/ci-standard.yml`.
+- Always `python3`, never `python`.
 
 - **Formatter:** Ruff format. 88-char line limit.
 - **Linter:** Ruff check. These are **separate CI steps** — both must pass independently.
@@ -51,7 +51,7 @@ maturin develop                                   # build Rust extensions locall
 4. Module size budget: checked against `module_size_budget_baseline.json`
 
 5. No TODO/FIXME unless tied to a tracked GitHub issue
-6. pytest with `-n auto`, 60s timeout, **10% coverage minimum**
+6. pytest with `-n auto`, 60s timeout, and the coverage threshold defined by `fail_under` in `pyproject.toml [tool.coverage.report]`
 7. No `print()` in `src/` — use logging
 
 ## Test Markers
@@ -67,13 +67,13 @@ maturin develop                                   # build Rust extensions locall
 
 ## Known Constraints
 
-- **Branch naming:** `fix/issue-XXXX-description`
-- **Remote:** origin URL references `Golf_Modeling_Suite.git`
+- **Branch naming:** use focused topic branches such as `fix/...`, `feat/...`, `chore/...`, or `claude/...`
+- **Remote:** `D-sorganization/UpstreamDrift`
 - Rust builds: `maturin develop` for local dev; CI handles wheel builds
 
 ## Coding Standards (Enforced by CI and QA)
 
-- **DRY:** No duplicated logic blocks >5 lines. CI tracks DRY adoption metrics.
+- **DRY:** No duplicated logic blocks >5 lines.
 - **DbC:** Public functions validate preconditions, raise `ValueError`/`TypeError` with descriptive messages. Document postconditions in docstrings.
 - **LOD:** No method chains >2 levels (`a.b.c.d()` violates). Add delegating methods instead.
 - **TDD:** Tests in same PR as implementation. Coverage must not decrease.
@@ -81,7 +81,7 @@ maturin develop                                   # build Rust extensions locall
 
 ## Cross-Repo Dependencies
 
-- **Imports from Tools** (D-sorganization/Tools): URDF generation, signal processing, shared utilities.
+- **Tools integration surface:** shared Python utilities are vendored in `vendor/ud-tools/`, and optional editable sibling wiring lives behind `scripts/setup_tools_workspace.sh` plus the pytest `--tools-mode` fixtures in `tests/conftest.py`.
 - Breaking changes to Tools public API require a coordinated PR here.
 - Gasification_Model also depends on Tools — avoid transitive breakage.
 
