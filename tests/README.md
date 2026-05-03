@@ -49,7 +49,7 @@ directories below.
 
 ## Layout Guard
 
-`scripts/check_test_layout.py` enforces that new tests live under topic
-subdirectories and prevents new `src/**/tests` directories. It contains legacy
-allowlists for pre-existing in-tree test directories and root-level tests that
-were not stable enough to move safely in the issue #3841 launcher/layout pass.
+`scripts/check_test_layout.py` enforces that Python test files live under topic
+subdirectories and prevents new `src/**/tests` directories. It retains a legacy
+allowlist only for pre-existing in-tree test directories that still need staged
+migration; root-level `tests/test_*.py` files are not allowed.

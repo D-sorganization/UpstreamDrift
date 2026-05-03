@@ -17,6 +17,8 @@ from unittest.mock import MagicMock, Mock, patch
 from src.shared.python.engine_core.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.gui_pkg.gui_utils import get_qapp
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QPoint
 
@@ -352,7 +354,7 @@ class TestDockerConfiguration(unittest.TestCase):
 
     def test_dockerfile_exists(self) -> None:
         """Test that Dockerfile exists and is readable."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = REPO_ROOT / "Dockerfile"
         self.assertTrue(dockerfile_path.exists(), "Dockerfile should exist")
 
         # Test that it's readable
@@ -362,7 +364,7 @@ class TestDockerConfiguration(unittest.TestCase):
 
     def test_docker_image_tag(self) -> None:
         """Test that Dockerfile uses a pinned base image."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = REPO_ROOT / "Dockerfile"
         content = dockerfile_path.read_text()
         self.assertIn("FROM python:3.12-slim AS builder", content)
         self.assertIn("FROM python:3.12-slim AS runtime", content)

@@ -45,15 +45,7 @@ LEGACY_SRC_TEST_DIRS = frozenset(
     }
 )
 
-LEGACY_ROOT_TEST_FILES = frozenset(
-    {
-        "tests/test_architecture_dbc.py",
-        "tests/test_ci_infrastructure.py",
-        "tests/test_drag_drop_functionality.py",
-        "tests/test_launcher_fixes.py",
-        "tests/test_urdf_tools.py",
-    }
-)
+LEGACY_ROOT_TEST_FILES = frozenset()
 
 
 @dataclass(frozen=True)

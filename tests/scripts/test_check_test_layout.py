@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from scripts.check_test_layout import audit_test_layout
+from scripts.check_test_layout import LEGACY_ROOT_TEST_FILES, audit_test_layout
+
+
+def test_no_legacy_root_test_allowlist_remains() -> None:
+    assert frozenset() == LEGACY_ROOT_TEST_FILES
 
 
 def test_audit_test_layout_accepts_clean_tree(tmp_path: Path) -> None:

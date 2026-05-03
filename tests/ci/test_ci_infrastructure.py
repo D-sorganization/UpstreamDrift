@@ -10,9 +10,12 @@ This file addresses infrastructure issues identified in CI pipeline failures.
 """
 
 import sys
+from pathlib import Path
 from typing import Any
 
 import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class TestCoreDependencies:
@@ -217,24 +220,17 @@ class TestPyprojectTomlConsistency:
 
     def test_pyproject_exists(self) -> None:
         """Test that pyproject.toml exists at repo root."""
-        from pathlib import Path
-
-        # Navigate from test file to repo root
-        repo_root = Path(__file__).parent.parent
-        pyproject = repo_root / "pyproject.toml"
+        pyproject = REPO_ROOT / "pyproject.toml"
         assert pyproject.exists(), f"pyproject.toml not found at {pyproject}"
 
     def test_pyproject_has_required_sections(self) -> None:
         """Test that pyproject.toml has required sections."""
-        from pathlib import Path
-
         try:
             import tomllib  # Python 3.11+
         except ImportError:
             import tomli as tomllib  # type: ignore[import-not-found]
 
-        repo_root = Path(__file__).parent.parent
-        pyproject = repo_root / "pyproject.toml"
+        pyproject = REPO_ROOT / "pyproject.toml"
 
         with open(pyproject, "rb") as f:
             data = tomllib.load(f)
@@ -245,15 +241,12 @@ class TestPyprojectTomlConsistency:
 
     def test_structlog_in_dependencies(self) -> None:
         """Test that structlog is declared in dependencies."""
-        from pathlib import Path
-
         try:
             import tomllib
         except ImportError:
             import tomli as tomllib  # type: ignore[import-not-found]
 
-        repo_root = Path(__file__).parent.parent
-        pyproject = repo_root / "pyproject.toml"
+        pyproject = REPO_ROOT / "pyproject.toml"
 
         with open(pyproject, "rb") as f:
             data = tomllib.load(f)
