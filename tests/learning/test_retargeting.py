@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from src.learning import retargeting
 from src.learning.retargeting import SkeletonConfig
 
 
@@ -217,3 +218,15 @@ class TestMotionRetargeter:
         target_motion = retargeter.retarget_from_mocap(marker_positions, marker_names)
 
         assert target_motion.shape == (n_frames, target.n_joints)
+
+
+def test_squared_euclidean_error_matches_sum_of_squares() -> None:
+    """The optimized error helper preserves the original objective value."""
+    current = np.array([1.5, -2.0, 0.25])
+    target = np.array([-0.5, 1.0, 0.75])
+
+    expected = np.sum((current - target) ** 2)
+
+    assert retargeting.retargeter._squared_euclidean_error(
+        current, target
+    ) == pytest.approx(expected)

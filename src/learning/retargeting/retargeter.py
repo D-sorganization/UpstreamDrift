@@ -15,6 +15,14 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 
+def _squared_euclidean_error(
+    current: NDArray[np.floating], target: NDArray[np.floating]
+) -> float:
+    """Return squared Euclidean error without allocating squared temporaries."""
+    diff = current - target
+    return float(np.vdot(diff, diff))
+
+
 @dataclass
 class SkeletonConfig:
     """Skeleton configuration for motion retargeting.
@@ -468,6 +476,22 @@ class MotionRetargeter:
 
         return positions  # type: ignore[return-value]
 
+    def _compute_end_effector_error(
+        self,
+        current_positions: dict[str, NDArray[np.floating]],
+        target_positions: dict[str, NDArray[np.floating]],
+    ) -> float:
+        """Return the squared end-effector objective for configured targets."""
+        total_error = 0.0
+        for ee_name in self.target.end_effectors:
+            if ee_name in target_positions:
+                target_position = target_positions.get(ee_name, np.zeros(3))
+                current_position = current_positions.get(ee_name, np.zeros(3))
+                total_error += _squared_euclidean_error(
+                    current_position, target_position
+                )
+        return total_error
+
     def _optimize_frame(
         self,
         initial_angles: NDArray[np.floating],
@@ -496,13 +520,9 @@ class MotionRetargeter:
             current_ee = self._compute_end_effector_positions(angles, self.target)
 
             # Compute error
-            total_error = 0.0
-            for ee_name in self.target.end_effectors:
-                if ee_name in target_ee_positions:
-                    # Scale target position
-                    scaled_target = target_ee_positions.get(ee_name, np.zeros(3))
-                    current_pos = current_ee.get(ee_name, np.zeros(3))
-                    total_error += np.sum((current_pos - scaled_target) ** 2)
+            total_error = self._compute_end_effector_error(
+                current_ee, target_ee_positions
+            )
 
             if total_error < 1e-6:
                 break
@@ -516,12 +536,9 @@ class MotionRetargeter:
                 angles_plus[j] += eps
                 ee_plus = self._compute_end_effector_positions(angles_plus, self.target)
 
-                error_plus = 0.0
-                for ee_name in self.target.end_effectors:
-                    if ee_name in target_ee_positions:
-                        scaled_target = target_ee_positions.get(ee_name, np.zeros(3))
-                        current_pos = ee_plus.get(ee_name, np.zeros(3))
-                        error_plus += np.sum((current_pos - scaled_target) ** 2)
+                error_plus = self._compute_end_effector_error(
+                    ee_plus, target_ee_positions
+                )
 
                 gradient[j] = (error_plus - total_error) / eps
 
