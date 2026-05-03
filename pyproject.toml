@@ -39,6 +39,7 @@ dependencies = [
     # Runtime security floor constraints documented in issue #3838.
     "pillow>=12.2.0",
     "requests>=2.33.0",
+    "python-dotenv>=1.2.2",
     "bokeh>=3.8.2",
     "flask>=3.1.3",
 ]

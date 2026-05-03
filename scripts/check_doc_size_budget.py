@@ -21,6 +21,7 @@ EXCLUDED_PARTS = {
     "node_modules",
     "dist",
     "build",
+    "vendor",
 }
 
 

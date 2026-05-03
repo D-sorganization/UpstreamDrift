@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -165,7 +166,8 @@ def main() -> int:
         for waiver in expired:
             print(
                 f"Expired pip-audit waiver: {waiver.vuln} for {waiver.package} "
-                f"(expired {waiver.expires_on.isoformat()})"
+                f"(expired {waiver.expires_on.isoformat()})",
+                file=sys.stderr,
             )
         return 1
 
@@ -175,7 +177,8 @@ def main() -> int:
             for waiver in stale:
                 print(
                     f"Stale pip-audit waiver: {waiver.vuln} for {waiver.package} "
-                    "is not present in the current audit report"
+                    "is not present in the current audit report",
+                    file=sys.stderr,
                 )
             return 1
 
