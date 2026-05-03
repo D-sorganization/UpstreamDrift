@@ -1,0 +1,45 @@
+name: OSV Monitor
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  security-events: write
+
+jobs:
+  osv-monitor:
+    runs-on: d-sorg-fleet
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Run OSV scanner action
+        uses: google/osv-scanner-action@375a0e8ebdc98e99b02ac4338a724f5750f21213
+        with:
+          scan-args: |
+            --recursive
+            ./
+          fail-on-vuln: false
+
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with:
+          go-version: "1.23"
+
+      - name: Export OSV JSON for SLA triage
+        shell: bash
+        run: |
+          go run github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.3.1 \
+            scan --format json --output osv-results.json . || true
+          python3 scripts/security/triage_osv_findings.py \
+            --osv-json osv-results.json > osv-triage.jsonl || true
+
+      - name: Upload OSV triage summary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: osv-triage
+          path: |
+            osv-results.json
+            osv-triage.jsonl

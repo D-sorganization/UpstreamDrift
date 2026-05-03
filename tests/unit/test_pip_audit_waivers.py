@@ -29,6 +29,7 @@ def test_load_waivers_and_emit_ignore_flags(tmp_path):
     {
       "id": "CVE-2024-0001",
       "package": "demo",
+      "tier": "core",
       "reason": "Waiting for upstream fix.",
       "expires_at": "2099-01-01"
     }
@@ -52,6 +53,7 @@ def test_find_expired_waivers_detects_past_dates(tmp_path):
     {
       "id": "CVE-2024-0001",
       "package": "demo",
+      "tier": "extended",
       "reason": "Waiting for upstream fix.",
       "expires_at": "2020-01-01"
     }
@@ -74,7 +76,8 @@ def test_load_waivers_rejects_missing_fields(tmp_path):
   "waivers": [
     {
       "id": "CVE-2024-0001",
-      "package": "demo"
+      "package": "demo",
+      "tier": "core"
     }
   ]
 }""",
@@ -82,4 +85,23 @@ def test_load_waivers_rejects_missing_fields(tmp_path):
     )
 
     with pytest.raises(ValueError, match="missing waiver field: reason"):
+        module.load_waivers(waiver_file)
+
+
+def test_load_waivers_requires_supported_tier(tmp_path):
+    module = _load_script_module("check_pip_audit_waivers")
+    waiver_file = tmp_path / "waivers.yml"
+    waiver_file.write_text(
+        """
+waivers:
+  - id: CVE-2024-0001
+    package: demo
+    tier: unsupported
+    reason: Waiting for upstream fix.
+    expires_at: 2099-01-01
+""".strip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unsupported waiver tier: unsupported"):
         module.load_waivers(waiver_file)

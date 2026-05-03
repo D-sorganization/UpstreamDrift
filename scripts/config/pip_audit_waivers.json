@@ -3,48 +3,56 @@
     {
       "id": "CVE-2024-23342",
       "package": "ecdsa",
+      "tier": "core",
       "reason": "No fixed release is available yet.",
       "expires_at": "2026-06-30"
     },
     {
       "id": "CVE-2026-0994",
       "package": "protobuf",
+      "tier": "core",
       "reason": "No fixed release is available yet; this is a transitive dependency from dm_control.",
       "expires_at": "2026-06-30"
     },
     {
       "id": "CVE-2026-1703",
       "package": "pip",
+      "tier": "core",
       "reason": "The workflow upgrades pip at runtime, but the runner image can still report the bundled advisory.",
       "expires_at": "2026-05-31"
     },
     {
       "id": "CVE-2026-3219",
       "package": "pip",
+      "tier": "core",
       "reason": "This is reported through an audit-tool dependency in the shared runner environment.",
       "expires_at": "2026-05-31"
     },
     {
       "id": "CVE-2026-4539",
       "package": "pygments",
+      "tier": "core",
       "reason": "No fixed release is available yet.",
       "expires_at": "2026-06-30"
     },
     {
       "id": "PYSEC-2022-42969",
       "package": "py",
+      "tier": "core",
       "reason": "No fixed release is reported by pip-audit.",
       "expires_at": "2026-06-30"
     },
     {
       "id": "CVE-2026-40192",
       "package": "pillow",
+      "tier": "core",
       "reason": "This remains transitive via opencv and imageio until the upstream stacks publish a compatible fix.",
       "expires_at": "2026-06-30"
     },
     {
       "id": "CVE-2026-28684",
       "package": "pillow",
+      "tier": "core",
       "reason": "This remains transitive via opencv and imageio until the upstream stacks publish a compatible fix.",
       "expires_at": "2026-06-30"
     }

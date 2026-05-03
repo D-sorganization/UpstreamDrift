@@ -27,7 +27,8 @@ If you discover a security vulnerability in the Golf Modeling Suite, please repo
 
 - **Acknowledgment**: Within 48 hours
 - **Initial Assessment**: Within 1 week
-- **Fix Timeline**: Critical issues within 2 weeks, others within 30 days
+- **Fix Timeline**: Based on the per-tier vulnerability triage SLA in
+  [`docs/operations/security-policy.md`](docs/operations/security-policy.md)
 - **Disclosure**: Coordinated disclosure after fix is available
 
 ## Security Measures
@@ -51,6 +52,9 @@ If you discover a security vulnerability in the Golf Modeling Suite, please repo
 ### Dependency Security
 
 - **Automated Auditing**: pip-audit runs in CI/CD (blocking)
+- **Per-Tier Triage**: Vulnerabilities are classified by dependency tier and
+  handled under the SLA in
+  [`docs/operations/security-policy.md`](docs/operations/security-policy.md)
 - **Version Pinning**: Core dependencies version-locked
 - **Regular Updates**: Monthly security patch reviews
 - **Vulnerability Scanning**: Automated with Dependabot (if enabled)

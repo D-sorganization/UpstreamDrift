@@ -1,3 +1,4 @@
+.gitattributes text eol=lf
 * text=auto
 *.py text eol=lf
 *.js text eol=lf
@@ -7,6 +8,7 @@
 *.json text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.sh text eol=lf
 
 # Exclude archived legacy code from language statistics
 engines/pendulum_models/archive/** linguist-vendored
