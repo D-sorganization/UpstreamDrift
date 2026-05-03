@@ -60,6 +60,7 @@ from src.shared.python._contracts_decorators import (
 )
 from src.shared.python._contracts_exceptions import (
     _VIOLATION_CLASSES,
+    ContractEvaluationError,
     ContractViolationError,
     InvariantError,
     PostconditionError,
@@ -138,6 +139,7 @@ __all__ = [
     "require_unit_vector",
     "set_contract_level",
     "set_contracts_enabled",
+    "ContractEvaluationError",
 ]
 
 _this_module = sys.modules[__name__]

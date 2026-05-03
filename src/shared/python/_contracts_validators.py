@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from shared.python._contracts_exceptions import PostconditionError, PreconditionError
-from shared.python._contracts_level import ContractLevel, _ContractState
-from shared.python._contracts_primitives import require
+from src.shared.python._contracts_exceptions import PostconditionError, PreconditionError
+from src.shared.python._contracts_level import ContractLevel, _ContractState
+from src.shared.python._contracts_primitives import require
 
 
 def check_positive(value: float, name: str = "value") -> None:
@@ -44,7 +44,7 @@ def set_contracts_enabled(enabled: bool) -> None:
     maps ``True`` to ``ENFORCE`` and ``False`` to ``OFF``, preserving
     backward compatibility with satellite modules.
     """
-    from shared.python._contracts_level import set_contract_level
+    from src.shared.python._contracts_level import set_contract_level
 
     set_contract_level(ContractLevel.ENFORCE if enabled else ContractLevel.OFF)
 

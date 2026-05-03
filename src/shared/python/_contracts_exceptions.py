@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from shared.python._contracts_level import (
+from src.shared.python._contracts_level import (
     ContractLevel,
     _ContractState,
 )
@@ -65,10 +65,26 @@ class InvariantError(ContractViolationError):
         super().__init__("invariant", message, value)
 
 
+class ContractEvaluationError(ContractViolationError):
+    """Raised when a contract condition cannot be evaluated.
+    
+    This error is raised when a precondition or postcondition lambda/function
+    cannot be evaluated due to signature mismatches, type errors, or other
+    evaluation failures. This ensures contracts fail closed rather than silently
+    passing when the condition cannot be checked.
+    """
+
+    def __init__(self, message: str, value=None) -> None:
+        if not (message is not None):
+            raise ValueError("message must be provided")
+        super().__init__("evaluation-error", message, value)
+
+
 _VIOLATION_CLASSES: dict[str, type[ContractViolationError]] = {
     "pre-condition": PreconditionError,
     "post-condition": PostconditionError,
     "invariant": InvariantError,
+    "evaluation-error": ContractEvaluationError,
 }
 
 

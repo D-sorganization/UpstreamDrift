@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from shared.python._contracts_exceptions import _handle_violation
-from shared.python._contracts_level import ContractLevel, _ContractState
+from src.shared.python._contracts_exceptions import _handle_violation
+from src.shared.python._contracts_level import ContractLevel, _ContractState
 
 
 def require(condition: bool, message: str, value: Any = None) -> None:

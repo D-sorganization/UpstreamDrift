@@ -5,8 +5,8 @@ import logging
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
 
-from shared.python._contracts_exceptions import InvariantError
-from shared.python._contracts_level import ContractLevel, _ContractState
+from src.shared.python._contracts_exceptions import InvariantError
+from src.shared.python._contracts_level import ContractLevel, _ContractState
 
 logger = logging.getLogger(__name__)
 

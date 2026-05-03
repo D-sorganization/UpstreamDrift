@@ -5,8 +5,12 @@ import inspect
 from collections.abc import Callable
 from typing import Any, TypeVar, cast
 
-from shared.python._contracts_exceptions import InvariantError, _handle_violation
-from shared.python._contracts_level import ContractLevel, _ContractState
+from src.shared.python._contracts_exceptions import (
+    ContractEvaluationError,
+    InvariantError,
+    _handle_violation,
+)
+from src.shared.python._contracts_level import ContractLevel, _ContractState
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -23,11 +27,17 @@ def _evaluate_precondition(
     the decorated function's parameters (e.g. ``lambda gender_factor: ...``
     should receive ``gender_factor`` by name, not the first positional arg).
     Falls back to positional call only when the condition accepts all args.
+    
+    Raises:
+        ContractEvaluationError: If the condition cannot be evaluated due to
+            signature mismatches, type errors, or other evaluation failures.
     """
     if not (condition is not None):
         raise ValueError("condition must be provided")
     if not (condition is not None):
         raise ValueError("condition must be provided")
+    
+    # Try name-based binding first
     try:
         func_sig = inspect.signature(func)
         bound = func_sig.bind(*args, **kwargs)
@@ -40,15 +50,18 @@ def _evaluate_precondition(
         if cond_params and cond_params <= set(all_arguments):
             call_args = {name: all_arguments[name] for name in cond_params}
             return bool(condition(**call_args))
-    except (TypeError, ValueError):
-        pass
+    except (TypeError, ValueError) as exc:
+        raise ContractEvaluationError(
+            f"Failed to bind arguments for precondition of {func.__qualname__}: {exc}"
+        ) from exc
 
+    # Fall back to positional call
     try:
         return bool(condition(*args, **kwargs))
-    except TypeError:
-        pass
-
-    return True
+    except TypeError as exc:
+        raise ContractEvaluationError(
+            f"Failed to evaluate precondition for {func.__qualname__}: {exc}"
+        ) from exc
 
 
 def precondition(
@@ -72,14 +85,7 @@ def precondition(
 
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                result = _evaluate_precondition(condition, func, args, kwargs)
-            except (TypeError, ValueError) as exc:
-                _handle_violation(
-                    "pre-condition",
-                    f"Failed to evaluate precondition for {func.__qualname__}: {exc}",
-                )
-                return func(*args, **kwargs)
+            result = _evaluate_precondition(condition, func, args, kwargs)
 
             if not result:
                 _handle_violation("pre-condition", message)
@@ -112,12 +118,10 @@ def postcondition(
 
             try:
                 check = condition(result)
-            except (TypeError, ValueError) as exc:
-                _handle_violation(
-                    "post-condition",
-                    f"Failed to evaluate postcondition for {func.__qualname__}: {exc}",
-                )
-                return result
+            except (TypeError, ValueError, ZeroDivisionError, AttributeError, KeyError, ArithmeticError) as exc:
+                raise ContractEvaluationError(
+                    f"Failed to evaluate postcondition for {func.__qualname__}: {exc}"
+                ) from exc
 
             if not check:
                 _handle_violation("post-condition", message, result)
