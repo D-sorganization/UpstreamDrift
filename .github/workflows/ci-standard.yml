@@ -320,7 +320,7 @@ jobs:
           exit $exit_code
 
       - name: Trivy Filesystem Security Scan
-        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
           scan-ref: .
@@ -623,6 +623,7 @@ jobs:
           POSTGRES_DB: upstreamdrift_migrations
           POSTGRES_USER: upstreamdrift
           POSTGRES_PASSWORD: upstreamdrift
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
