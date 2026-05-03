@@ -32,14 +32,16 @@ except ImportError:
     ChatMessageRequest = None  # type: ignore[assignment, misc]
     ChatSessionInfo = None  # type: ignore[assignment, misc]
 
-try:
-    from .chat_dock_widget import ChatDockWidget, ChatMessageBubble
+_PYQT6_AVAILABLE = None
 
-    _PYQT6_AVAILABLE = True
-except ImportError:
-    _PYQT6_AVAILABLE = False
-    ChatDockWidget = None  # type: ignore[assignment, misc]
-    ChatMessageBubble = None  # type: ignore[assignment, misc]
+
+def __getattr__(name: str):
+    if name in {"ChatDockWidget", "ChatMessageBubble"}:
+        from . import chat_dock_widget
+
+        return getattr(chat_dock_widget, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     "ChatDockWidget",
