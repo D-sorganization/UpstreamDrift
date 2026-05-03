@@ -146,7 +146,7 @@ jobs:
 
           # Count commits with autofix signature in the time window
           FIX_COUNT=$(gh api "repos/${{ github.repository }}/commits?sha=$BRANCH&since=$HOURS_AGO" \
-            --jq '[.[] | select(.commit.message | test("\\[AutoFix\\]|Jules PR AutoFix"))] | length' 2>/dev/null || echo "0")
+            --jq '[.[] | select(.commit.message | test("\\[AutoFix\\]|Jules PR AutoFix"))] | length' || echo "0")
 
           echo "Found $FIX_COUNT autofix commits in last ${{ env.FIX_WINDOW_HOURS }} hours"
 
@@ -181,7 +181,9 @@ jobs:
           # Pin versions to match CI Standard quality gate
           pip install ruff==0.14.10 black==26.1.0 mypy==1.13.0 autoflake
           # Install project deps so mypy can resolve imports
-          pip install -e ".[dev]" 2>/dev/null || pip install -e . 2>/dev/null || true
+          if ! pip install -e ".[dev]"; then
+            pip install -e .
+          fi
 
       # ============================================================
       # ITERATIVE FIX LOOP - The core improvement
@@ -213,7 +215,7 @@ jobs:
             # ----- STEP 0: Collect changed files for this PR -----
             echo ">>> Collecting changed files..."
             # Get base branch from PR info or default to main
-            BASE_BRANCH=$(gh pr view "$PR_NUMBER" --json baseRefName --jq '.baseRefName' 2>/dev/null || echo "main")
+            BASE_BRANCH=$(gh pr view "$PR_NUMBER" --json baseRefName --jq '.baseRefName' || echo "main")
             git fetch origin "$BASE_BRANCH" --depth=1
             CHANGED_FILES=$(git diff --diff-filter=ACMRT --name-only "origin/$BASE_BRANCH" HEAD -- '*.py' | tr '\n' ' ')
             

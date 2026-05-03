@@ -103,11 +103,11 @@ jobs:
 
             # Get review comments (inline code comments)
             gh api "repos/${{ github.repository }}/pulls/${PR_NUM}/comments" \
-              > ".github/review_comments/pr_${PR_NUM}_review_comments.json" 2>/dev/null || echo "[]" > ".github/review_comments/pr_${PR_NUM}_review_comments.json"
+              > ".github/review_comments/pr_${PR_NUM}_review_comments.json" || echo "[]" > ".github/review_comments/pr_${PR_NUM}_review_comments.json"
 
             # Get PR conversation comments
             gh api "repos/${{ github.repository }}/issues/${PR_NUM}/comments" \
-              > ".github/review_comments/pr_${PR_NUM}_issue_comments.json" 2>/dev/null || echo "[]" > ".github/review_comments/pr_${PR_NUM}_issue_comments.json"
+              > ".github/review_comments/pr_${PR_NUM}_issue_comments.json" || echo "[]" > ".github/review_comments/pr_${PR_NUM}_issue_comments.json"
           done
 
       - name: Process and Create Issues

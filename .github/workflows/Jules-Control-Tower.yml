@@ -94,7 +94,7 @@ jobs:
             --limit=20 \
             --json conclusion,createdAt,status \
             --jq "[.[] | select(.conclusion == \"failure\" and .createdAt > \"$HOURS_AGO\")] | length" \
-            2>/dev/null || echo "0")
+            || echo "0")
 
           if [ "$FAILURE_COUNT" -ge "${{ env.MAX_REPAIR_ITERATIONS }}" ]; then
             echo "::error::Max repair iterations reached. Manual intervention required."

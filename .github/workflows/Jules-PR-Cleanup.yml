@@ -111,7 +111,7 @@ jobs:
             PR_TITLE=$(echo "$pr_json" | jq -r '.title')
 
             # Check if CI is failing
-            CI_STATUS=$(gh pr checks "$PR_NUM" --json bucket --jq '[.[] | .bucket] | if contains(["fail"]) then "failing" else "passing" end' 2>/dev/null || echo "unknown")
+            CI_STATUS=$(gh pr checks "$PR_NUM" --json bucket --jq '[.[] | .bucket] | if contains(["fail"]) then "failing" else "passing" end' || echo "unknown")
 
             echo "PR #$PR_NUM: CI=$CI_STATUS"
 

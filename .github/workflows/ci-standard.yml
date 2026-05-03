@@ -88,7 +88,7 @@ jobs:
           # Shared self-hosted runners can retain broken tool packages without
           # RECORD metadata. Ignore ambient installs so pip lays down clean
           # copies instead of trying to uninstall corrupted cache entries.
-          python -m pip install --ignore-installed ruff==0.14.10 "mypy>=1.15.0" bandit==1.7.7 pydocstyle==6.3.0
+          python -m pip install --ignore-installed ruff==0.14.10 "mypy>=1.15.0" bandit==1.7.7 pydocstyle==6.3.0 semgrep
 
       - name: Lint
         shell: bash
@@ -268,11 +268,26 @@ jobs:
             exit 1
           fi
 
+          set +e
+          pip-audit --format json --output pip-audit-report.json
+          audit_status=$?
+          set -e
+
+          if [ "$audit_status" -ne 0 ] && [ ! -s pip-audit-report.json ]; then
+            echo "::error::pip-audit failed before producing a JSON report"
+            exit "$audit_status"
+          fi
+
           mapfile -t pip_audit_waiver_flags < <(
             python3 scripts/ci/check_pip_audit_waivers.py \
-              --waiver-file scripts/config/pip_audit_waivers.json
+              --waiver-file scripts/config/pip_audit_waivers.json \
+              --audit-report pip-audit-report.json
           )
           pip-audit "${pip_audit_waiver_flags[@]}"
+
+      - name: Semgrep SAST Scan
+        shell: bash
+        run: semgrep --config p/python --config p/security-audit --config p/owasp-top-ten --error
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)
@@ -285,6 +300,15 @@ jobs:
           echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
           echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
           exit $exit_code
+
+      - name: Trivy Filesystem Security Scan
+        uses: aquasecurity/trivy-action@6c175e9c4083a92bbca2f9724c8a5e33bc2d97a5
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          exit-code: '1'
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check

@@ -66,7 +66,7 @@ jobs:
           echo "Checking for superseded Jules PRs after push to main..."
 
           # Get files changed in this push
-          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD HEAD 2>/dev/null || echo "")
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD HEAD || echo "")
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No changed files detected, skipping"
@@ -94,7 +94,7 @@ jobs:
             PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName')
 
             # Get files changed in the PR
-            PR_FILES=$(gh pr view "$PR_NUM" --json files --jq '.files[].path' 2>/dev/null || echo "")
+            PR_FILES=$(gh pr view "$PR_NUM" --json files --jq '.files[].path' || echo "")
 
             if [ -z "$PR_FILES" ]; then
               continue

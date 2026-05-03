@@ -72,8 +72,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt || true
-          pip install ruff black mypy || true
+          pip install -r requirements.txt
+          pip install ruff black mypy
           npm install -g @google/jules
 
       - name: Gather Priority Issues

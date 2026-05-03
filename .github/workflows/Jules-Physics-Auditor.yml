@@ -72,7 +72,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt || true
+          pip install -r requirements.txt
           npm install -g @google/jules
 
       - name: Identify Physics-Critical Files

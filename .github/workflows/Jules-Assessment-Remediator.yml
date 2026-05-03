@@ -125,7 +125,7 @@ jobs:
             fi
 
             # Check if already assigned to jules
-            labels=$(gh issue view "$SPECIFIC_ISSUE" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+            labels=$(gh issue view "$SPECIFIC_ISSUE" --json labels --jq '.labels[].name' || echo "")
             if echo "$labels" | grep -q "jules-assigned"; then
               echo "::warning::Issue #$SPECIFIC_ISSUE already has jules-assigned label"
               skipped_issues="$SPECIFIC_ISSUE"
@@ -170,7 +170,7 @@ jobs:
               --limit 50 \
               --json number,title,labels,createdAt \
               --jq 'sort_by(.createdAt) | .[] | select(.labels | map(.name) | index("jules-assigned") | not) | .number' \
-              2>/dev/null || echo "")
+              || echo "")
 
             if [ -z "$all_issues" ]; then
               echo "No unassigned assessment issues found"
@@ -187,7 +187,7 @@ jobs:
                 fi
 
                 # Get issue labels
-                labels=$(gh issue view "$issue_num" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+                labels=$(gh issue view "$issue_num" --json labels --jq '.labels[].name' || echo "")
 
                 # Apply priority filter
                 should_process=false
@@ -215,11 +215,11 @@ jobs:
                 # Check cooldown - skip if recently commented by this workflow
                 recent_comment=$(gh issue view "$issue_num" --json comments \
                   --jq '.comments | map(select(.body | contains("Jules Assessment Remediator"))) | last | .createdAt // ""' \
-                  2>/dev/null || echo "")
+                  || echo "")
 
                 if [ -n "$recent_comment" ]; then
                   # Check if comment is within cooldown period
-                  comment_date=$(date -d "$recent_comment" +%s 2>/dev/null || echo "0")
+                  comment_date=$(date -d "$recent_comment" +%s || echo "0")
                   current_date=$(date +%s)
                   cooldown_seconds=$((COOLDOWN_DAYS * 86400))
 

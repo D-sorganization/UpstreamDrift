@@ -112,7 +112,7 @@ jobs:
             PR_NUMBER="${{ github.event.pull_request.number }}"
 
             # Check if CI has already run
-            checks=$(gh pr checks "$PR_NUMBER" 2>/dev/null || echo "")
+            checks=$(gh pr checks "$PR_NUMBER" || echo "")
 
             if [ -z "$checks" ] || [ "$FORCE" == "true" ]; then
               prs_to_trigger="$PR_NUMBER"
@@ -127,7 +127,7 @@ jobs:
             bot_prs=$(gh pr list --author "github-actions[bot]" --state open --json number,author --jq '.[].number' || echo "")
 
             for pr in $bot_prs; do
-              checks=$(gh pr checks "$pr" 2>/dev/null || echo "")
+              checks=$(gh pr checks "$pr" || echo "")
               if [ -z "$checks" ] || ! echo "$checks" | grep -qE "(quality-gate|ci-standard|CI Standard)"; then
                 prs_to_trigger="$prs_to_trigger $pr"
               fi
@@ -135,9 +135,9 @@ jobs:
 
             # Also check PRs from other bot-like authors
             for author in "dependabot[bot]" "renovate[bot]" "claude[bot]" "google-labs-jules[bot]"; do
-              more_prs=$(gh pr list --author "$author" --state open --json number --jq '.[].number' 2>/dev/null || echo "")
+              more_prs=$(gh pr list --author "$author" --state open --json number --jq '.[].number' || echo "")
               for pr in $more_prs; do
-                checks=$(gh pr checks "$pr" 2>/dev/null || echo "")
+                checks=$(gh pr checks "$pr" || echo "")
                 if [ -z "$checks" ] || ! echo "$checks" | grep -qE "(quality-gate|ci-standard)"; then
                   prs_to_trigger="$prs_to_trigger $pr"
                 fi

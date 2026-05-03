@@ -62,7 +62,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt || true
+          pip install -r requirements.txt
           sudo apt-get install -y jq
 
       - name: Archive Existing Assessments
@@ -112,7 +112,7 @@ jobs:
           if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
             echo "::warning::Repository $REPO not found in Jules sources."
             echo "Available sources:"
-            echo "$SOURCES" | jq -r '.sources[] | "\(.githubRepo.owner)/\(.githubRepo.repo)"' 2>/dev/null || echo "(none or error parsing)"
+            echo "$SOURCES" | jq -r '.sources[] | "\(.githubRepo.owner)/\(.githubRepo.repo)"' || echo "(none or error parsing)"
             exit 0
           fi
 

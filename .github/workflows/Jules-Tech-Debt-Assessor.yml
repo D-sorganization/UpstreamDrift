@@ -76,7 +76,9 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install ruff==0.14.10 mypy bandit radon pip-audit vulture
-          pip install -e .[dev] || pip install -r requirements.txt || true
+          if ! pip install -e ".[dev]"; then
+            pip install -r requirements.txt
+          fi
           sudo apt-get install -y jq bc
 
       - name: Create Report Directory

@@ -25,13 +25,14 @@ def test_load_waivers_and_emit_ignore_flags(tmp_path):
     waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
         """{
+  "schema_version": 1,
   "waivers": [
     {
-      "id": "CVE-2024-0001",
+      "vuln": "CVE-2024-0001",
       "package": "demo",
-      "tier": "core",
       "reason": "Waiting for upstream fix.",
-      "expires_at": "2099-01-01"
+      "tracked_in": "#3844",
+      "expires_on": "2099-01-01"
     }
   ]
 }""",
@@ -49,13 +50,14 @@ def test_find_expired_waivers_detects_past_dates(tmp_path):
     waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
         """{
+  "schema_version": 1,
   "waivers": [
     {
-      "id": "CVE-2024-0001",
+      "vuln": "CVE-2024-0001",
       "package": "demo",
-      "tier": "extended",
       "reason": "Waiting for upstream fix.",
-      "expires_at": "2020-01-01"
+      "tracked_in": "#3844",
+      "expires_on": "2020-01-01"
     }
   ]
 }""",
@@ -65,7 +67,7 @@ def test_find_expired_waivers_detects_past_dates(tmp_path):
     waivers = module.load_waivers(waiver_file)
     expired = module.find_expired_waivers(waivers, today=date(2026, 4, 23))
 
-    assert [waiver.id for waiver in expired] == ["CVE-2024-0001"]
+    assert [waiver.vuln for waiver in expired] == ["CVE-2024-0001"]
 
 
 def test_load_waivers_rejects_missing_fields(tmp_path):
@@ -73,11 +75,11 @@ def test_load_waivers_rejects_missing_fields(tmp_path):
     waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
         """{
+  "schema_version": 1,
   "waivers": [
     {
-      "id": "CVE-2024-0001",
-      "package": "demo",
-      "tier": "core"
+      "vuln": "CVE-2024-0001",
+      "package": "demo"
     }
   ]
 }""",
@@ -90,18 +92,47 @@ def test_load_waivers_rejects_missing_fields(tmp_path):
 
 def test_load_waivers_requires_supported_tier(tmp_path):
     module = _load_script_module("check_pip_audit_waivers")
-    waiver_file = tmp_path / "waivers.yml"
+    waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
-        """
-waivers:
-  - id: CVE-2024-0001
-    package: demo
-    tier: unsupported
-    reason: Waiting for upstream fix.
-    expires_at: 2099-01-01
-""".strip(),
+        """{
+  "schema_version": 2,
+  "waivers": [
+    {
+      "vuln": "CVE-2024-0001",
+      "package": "demo",
+      "reason": "Waiting for upstream fix.",
+      "tracked_in": "#3844",
+      "expires_on": "2099-01-01"
+    }
+  ]
+}""",
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="unsupported waiver tier: unsupported"):
+    with pytest.raises(ValueError, match="unsupported schema_version: 2"):
         module.load_waivers(waiver_file)
+
+
+def test_find_stale_waivers_detects_fixed_vulns(tmp_path):
+    module = _load_script_module("check_pip_audit_waivers")
+    waiver_file = tmp_path / "waivers.json"
+    waiver_file.write_text(
+        """{
+  "schema_version": 1,
+  "waivers": [
+    {
+      "vuln": "CVE-2024-0001",
+      "package": "demo",
+      "reason": "Waiting for upstream fix.",
+      "tracked_in": "#3844",
+      "expires_on": "2099-01-01"
+    }
+  ]
+}""",
+        encoding="utf-8",
+    )
+
+    waivers = module.load_waivers(waiver_file)
+    stale = module.find_stale_waivers(waivers, reported_vulns=set())
+
+    assert stale == waivers

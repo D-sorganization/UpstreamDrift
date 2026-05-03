@@ -178,8 +178,8 @@ jobs:
           if [[ "${{ steps.pinocchio_install.outputs.available }}" == "true" ]]; then
             echo "- Pinocchio: installed" >> "$GITHUB_STEP_SUMMARY"
             python3 -c "import pinocchio; print('  version:', pinocchio.__version__)" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
-            python3 -c "import pink; print('- Pink: installed')" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "- Pink: not available" >> "$GITHUB_STEP_SUMMARY"
-            python3 -c "import crocoddyl; print('- Crocoddyl: installed')" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "- Crocoddyl: not available" >> "$GITHUB_STEP_SUMMARY"
+            python3 -c "import pink; print('- Pink: installed')" >> "$GITHUB_STEP_SUMMARY" || echo "- Pink: not available" >> "$GITHUB_STEP_SUMMARY"
+            python3 -c "import crocoddyl; print('- Crocoddyl: installed')" >> "$GITHUB_STEP_SUMMARY" || echo "- Crocoddyl: not available" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Pinocchio: not available on this runner (ecosystem tests will be skipped)" >> "$GITHUB_STEP_SUMMARY"
             echo "  _Install via conda: conda install pinocchio pink crocoddyl -c conda-forge_" >> "$GITHUB_STEP_SUMMARY"

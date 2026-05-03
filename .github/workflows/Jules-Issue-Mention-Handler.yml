@@ -99,7 +99,7 @@ jobs:
 
           # Lookup repository source
           echo "Looking up repository source..."
-          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" 2>/dev/null || echo '{"sources":[]}')
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
 
           OWNER=$(echo "$REPO" | cut -d'/' -f1)
           REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
@@ -159,7 +159,7 @@ jobs:
             -H "X-Goog-Api-Key: $JULES_API_KEY" \
             -H "Content-Type: application/json" \
             -d "$REQUEST_JSON" \
-            "$API_BASE/sessions" 2>/dev/null || echo "000")
+            "$API_BASE/sessions" || echo "000")
 
           echo "HTTP Status: $HTTP_CODE"
 
@@ -180,7 +180,7 @@ jobs:
           ELAPSED=0
 
           while [ $ELAPSED -lt $MAX_WAIT ]; do
-            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID" 2>/dev/null || echo '{}')
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID" || echo '{}')
             STATE=$(echo "$SESSION_STATUS" | jq -r '.state // "UNKNOWN"')
             echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
 

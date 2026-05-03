@@ -38,7 +38,7 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.96                                             |
+| **Spec Version**        | 1.0.97                                             |
 | **Last Spec Update**    | 2026-05-03                                         |
 
 ## SPEC Ownership and Update Cadence
@@ -383,14 +383,15 @@ Beyond standard tools, CI enforces custom checks:
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
 - **Physics Fitness**: Cross-engine validation must pass with <5% tolerance
-- **Security Audit Isolation**: `pip-audit` runs from a dedicated virtualenv plus `scripts/config/pip_audit_waivers.json` so self-hosted runner toolcache drift cannot mask or invent vulnerabilities
+- **Security Audit Isolation**: `pip-audit` runs with `scripts/config/pip_audit_waivers.json` and `scripts/ci/check_pip_audit_waivers.py` so waivers require issue tracking, expiry, and current pip-audit findings before ignore flags are emitted
+- **Blocking SAST and Secret Scans**: `ci-standard.yml` runs blocking Bandit, Semgrep, pip-audit, and Trivy filesystem scans for pull requests and pushes
 - **Docker Size Gate**: Built images must not exceed 800 MB
 
 ### CI/CD Pipeline
 
 | Workflow                       | Trigger                                | Purpose                                                         | Blocking?          |
 | ------------------------------ | -------------------------------------- | --------------------------------------------------------------- | ------------------ |
-| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests, workflow inventory     | Yes                |
+| `ci-standard.yml`              | Push/PR                                | Lint, type check, unit/integration tests, workflow inventory, blocking security scans | Yes                |
 | `heavy-tests-opt-in.yml`       | Manual dispatch or `/heavy-test` label | Cross-engine and physics validation (long-running)              | No (opt-in)        |
 | `nightly-cross-validation.yml` | Daily 2:00 UTC                         | Full multi-engine validation suite against all model variations | No (informational) |
 | `tauri-build.yml`              | Tag release                            | Build desktop apps for Windows/macOS/Linux                      | Yes (for releases) |
@@ -528,6 +529,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-03 | 1.0.97  | Hardened issue #3844 security CI acceptance: added blocking Semgrep and Trivy filesystem scans to `ci-standard.yml`, moved pip-audit waivers to the documented issue/expiry schema with stale-waiver detection, added CODEOWNERS backup owners, documented branch protection, and added Trivy secret-scan test coverage. |
 | 2026-05-03 | 1.0.96  | Guarded local diagnostic and debug API endpoints in production mode unless `UPSTREAM_DRIFT_DEBUG_ENDPOINTS=true` is explicitly set.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-05-03 | 1.0.96  | Established `pyproject.toml` as the canonical Python dependency source, generated `environment.yml` from it, added `make sync-deps`, promoted documented CVE floors to runtime dependencies, removed the deprecated root CRA UI build, and added dependency-consistency CI drift/audit coverage.                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-03 | 1.0.96  | Added tier-aware vulnerability SLA policy, pip-audit waiver tier validation, OSV triage deadline helpers, and local per-tier SBOM metadata generation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |

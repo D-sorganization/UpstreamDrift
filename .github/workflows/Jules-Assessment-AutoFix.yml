@@ -149,8 +149,8 @@ jobs:
       - name: Run Assessment I (Security)
         run: |
           # Run security scans
-          pip-audit --output security_audit.json --format json || true
-          bandit -r python/ -f json -o bandit_results.json || true
+          pip-audit --output security_audit.json --format json
+          bandit -r python/ -f json -o bandit_results.json
 
           python scripts/run_assessment.py --assessment I --output docs/assessments/Assessment_I_Results_$(date +%Y-%m-%d).md
 
@@ -253,7 +253,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt || true
+          pip install -r requirements.txt
           pip install ruff mypy pip-tools
 
       - name: Create consolidated fix branch
@@ -292,7 +292,7 @@ jobs:
 
           # Generate lock file if requirements.txt exists
           if [ -f requirements.txt ]; then
-            pip-compile requirements.txt -o requirements-lock.txt 2>/dev/null || true
+            pip-compile requirements.txt -o requirements-lock.txt
           fi
 
           CHANGES_AFTER=$(git status --porcelain | wc -l)

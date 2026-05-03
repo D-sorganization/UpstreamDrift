@@ -98,7 +98,7 @@ jobs:
           if [ -n "$INPUT_BRANCH" ]; then
             BRANCH="$INPUT_BRANCH"
           elif [ -n "$TARGET_RUN_ID" ]; then
-            BRANCH=$(gh run view $TARGET_RUN_ID --json headBranch --jq '.headBranch' 2>/dev/null || echo "")
+            BRANCH=$(gh run view $TARGET_RUN_ID --json headBranch --jq '.headBranch' || echo "")
           fi
 
           if [ -z "$BRANCH" ]; then
@@ -124,7 +124,7 @@ jobs:
           fi
 
           # Check for associated PR
-          PR_INFO=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --state open --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
+          PR_INFO=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --state open --json number --jq '.[0].number // empty' || echo "")
 
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           echo "pr_number=$PR_INFO" >> $GITHUB_OUTPUT
@@ -140,7 +140,7 @@ jobs:
           HOURS_AGO=$(date -u -d "${{ env.REPAIR_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.REPAIR_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
 
           REPAIR_COUNT=$(gh api "repos/${{ github.repository }}/commits?sha=$BRANCH&since=$HOURS_AGO" \
-            --jq '[.[] | select(.commit.message | test("\\[Jules-Repair\\]|Jules Auto-Repair"))] | length' 2>/dev/null || echo "0")
+            --jq '[.[] | select(.commit.message | test("\\[Jules-Repair\\]|Jules Auto-Repair"))] | length' || echo "0")
 
           echo "Found $REPAIR_COUNT repair commits in last ${{ env.REPAIR_WINDOW_HOURS }} hours"
 
@@ -180,13 +180,13 @@ jobs:
           TARGET_RUN_ID: ${{ inputs.run_id }}
         run: |
           if [ -n "$TARGET_RUN_ID" ]; then
-            gh run view $TARGET_RUN_ID --log-failed > /tmp/ci_logs.txt 2>/dev/null || echo "No logs available" > /tmp/ci_logs.txt
+            gh run view $TARGET_RUN_ID --log-failed > /tmp/ci_logs.txt || echo "No logs available" > /tmp/ci_logs.txt
           else
             # Get latest failed run for this branch
             BRANCH="${{ steps.branch.outputs.branch }}"
-            LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
+            LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' || echo "")
             if [ -n "$LATEST_RUN" ]; then
-              gh run view $LATEST_RUN --log-failed > /tmp/ci_logs.txt 2>/dev/null || echo "No logs available" > /tmp/ci_logs.txt
+              gh run view $LATEST_RUN --log-failed > /tmp/ci_logs.txt || echo "No logs available" > /tmp/ci_logs.txt
             else
               echo "No failed runs found" > /tmp/ci_logs.txt
             fi
@@ -295,7 +295,7 @@ jobs:
               API_BASE="https://jules.googleapis.com/v1alpha"
 
               # Look up repository source
-              SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" 2>/dev/null || echo '{"sources":[]}')
+              SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
 
               OWNER=$(echo "$REPO" | cut -d'/' -f1)
               REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
@@ -326,7 +326,7 @@ jobs:
                   -H "X-Goog-Api-Key: $JULES_API_KEY" \
                   -H "Content-Type: application/json" \
                   -d "$REQUEST_JSON" \
-                  "$API_BASE/sessions" 2>/dev/null || echo "000")
+                  "$API_BASE/sessions" || echo "000")
 
                 if [ "$HTTP_CODE" == "200" ]; then
                   SESSION_ID=$(jq -r '.name' /tmp/jules_response.json)
@@ -386,7 +386,7 @@ jobs:
                     else
                       echo "- CI still failing"
                       # Refresh logs for next iteration
-                      LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
+                      LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' || echo "")
                       if [ -n "$LATEST_RUN" ]; then
                         gh run view $LATEST_RUN --log-failed > /tmp/ci_logs.txt 2>/dev/null || true
                         head -c 50000 /tmp/ci_logs.txt > /tmp/ci_logs_truncated.txt
@@ -397,7 +397,7 @@ jobs:
                   fi
                 else
                   # No PR - check workflow runs directly
-                  LATEST_STATUS=$(gh run list --branch "$BRANCH" --limit 1 --json status,conclusion --jq '.[0]' 2>/dev/null || echo '{}')
+                  LATEST_STATUS=$(gh run list --branch "$BRANCH" --limit 1 --json status,conclusion --jq '.[0]' || echo '{}')
                   STATUS=$(echo "$LATEST_STATUS" | jq -r '.status')
                   if [ "$STATUS" == "completed" ]; then
                     CONCLUSION=$(echo "$LATEST_STATUS" | jq -r '.conclusion')

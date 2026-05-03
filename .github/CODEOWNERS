@@ -1,9 +1,9 @@
 # Autofix Safety: Require review for workflow and script changes
-.github/workflows/ @dieterolson
-scripts/ @dieterolson
+.github/workflows/ @dieterolson @D-sorganization/security-reviewers
+scripts/ @dieterolson @D-sorganization/security-reviewers
 
 # Core / critical surface
-/src/ @dieterolson
+/src/ @dieterolson @D-sorganization/core-maintainers
 
 # No blanket *.py owner — rely on per-package ownership above to reduce
 # bus-factor risk (issue #3074).
