@@ -87,11 +87,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { runner: d-sorg-fleet, python: "3.10" }
-          - { runner: d-sorg-fleet, python: "3.11" }
-          - { runner: d-sorg-fleet, python: "3.12" }
-          - { runner: d-sorg-fleet, python: "3.13" }
-    runs-on: ${{ matrix.runner }}
+          - { os: ubuntu-latest, python: "3.10" }
+          - { os: ubuntu-latest, python: "3.11" }
+          - { os: ubuntu-latest, python: "3.12" }
+          - { os: ubuntu-latest, python: "3.13" }
+          - { os: macos-14, python: "3.11" }
+          - { os: macos-14, python: "3.12" }
+          - { os: windows-latest, python: "3.11" }
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405

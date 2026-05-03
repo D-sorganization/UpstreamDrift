@@ -2,9 +2,23 @@
   "schema_version": 1,
   "waivers": [
     {
+      "vuln": "CVE-2024-23342",
+      "package": "ecdsa",
+      "reason": "No fixed release is available yet.",
+      "tracked_in": "#3844",
+      "expires_on": "2026-06-30"
+    },
+    {
       "vuln": "CVE-2026-4539",
       "package": "pygments",
       "reason": "No fixed release is available yet.",
+      "tracked_in": "#3844",
+      "expires_on": "2026-06-30"
+    },
+    {
+      "vuln": "PYSEC-2022-42969",
+      "package": "py",
+      "reason": "No fixed release is reported by pip-audit.",
       "tracked_in": "#3844",
       "expires_on": "2026-06-30"
     }
