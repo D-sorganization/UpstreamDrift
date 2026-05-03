@@ -21,6 +21,8 @@ from src.shared.python.core.physics_constants import (
     SPIN_DECAY_RATE_S,
 )
 
+MIN_AIR_DENSITY_KG_M3 = 0.01
+
 
 @dataclass(frozen=True)
 class AerodynamicsConfig:

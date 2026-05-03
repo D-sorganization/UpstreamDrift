@@ -6,14 +6,168 @@ and adherence to the DRY principle.
 
 from __future__ import annotations
 
+import importlib
+import importlib.util
 import os
 import sys
 from collections.abc import Callable, Generator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+@dataclass(frozen=True)
+class OptionalCollectionRule:
+    """Collection rule for test stacks that require optional modules."""
+
+    path_suffixes: tuple[str, ...]
+    modules: tuple[str, ...] = ()
+    symbols: tuple[tuple[str, str], ...] = ()
+
+
+_PROCESS_CALCULATOR_ANCHOR = (
+    "src.shared.python.upstream_drift_tools.process_calculators."
+    "acid_gas_dewpoint_calculator"
+)
+_PROCESS_CALCULATOR_TESTS = (
+    "tests/unit/process_calculators",
+    "tests/unit/injury/test_injury_risk.py",
+    "tests/unit/injury/test_joint_stress.py",
+    "tests/unit/injury/test_spinal_load_analysis.py",
+    "tests/unit/upstream_drift_tools/test_acid_gas_dewpoint.py",
+    "tests/unit/upstream_drift_tools/test_analysis_utils.py",
+    "tests/unit/upstream_drift_tools/test_baghouse_calculator.py",
+    "tests/unit/upstream_drift_tools/test_electrode_and_thermal.py",
+    "tests/unit/upstream_drift_tools/test_financial_calculator.py",
+    "tests/unit/upstream_drift_tools/test_flare_calculator.py",
+    "tests/unit/upstream_drift_tools/test_gas_properties.py",
+    "tests/unit/upstream_drift_tools/test_pipe_database.py",
+    "tests/unit/upstream_drift_tools/test_pressure_drop_interface.py",
+    "tests/unit/upstream_drift_tools/test_process_constants.py",
+    "tests/unit/upstream_drift_tools/test_syngas_compression.py",
+    "tests/unit/upstream_drift_tools/test_ui_modules_importable.py",
+    "tests/unit/upstream_drift_tools/test_wgs_reactor_calculator.py",
+)
+_CALC_BACKEND_TESTS = (
+    "tests/security/test_rate_limiting.py",
+    "tests/unit/calc_backend",
+    "tests/unit/test_calc_backend_protocols.py",
+    "tests/unit/api/test_acid_gas_dewpoint_mocked.py",
+    "tests/unit/api/test_baghouse_mocked.py",
+    "tests/unit/api/test_financial_mocked.py",
+    "tests/unit/api/test_flare_mocked.py",
+    "tests/unit/api/test_flow_rate_api.py",
+    "tests/unit/api/test_ode_solver.py",
+    "tests/unit/api/test_pressure_drop.py",
+    "tests/unit/api/test_scrubber_mocked.py",
+    "tests/unit/api/test_syngas_water_mocked.py",
+    "tests/unit/api/test_thermal_profile.py",
+    "tests/unit/api/test_wgs_reactor_mocked.py",
+)
+_OPTIONAL_COLLECTION_RULES = (
+    OptionalCollectionRule(
+        path_suffixes=_PROCESS_CALCULATOR_TESTS,
+        modules=(_PROCESS_CALCULATOR_ANCHOR,),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=_CALC_BACKEND_TESTS,
+        modules=("src.shared.python.calc_backend",),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=(
+            "tests/unit/signal_toolkit",
+            "tests/unit/shared_python/test_signal_toolkit_calculus.py",
+            "tests/unit/shared_python/test_signal_toolkit_core.py",
+            "tests/unit/shared_python/test_signal_toolkit_filters.py",
+            "tests/unit/shared_python/test_signal_toolkit_fitting.py",
+            "tests/unit/shared_python/test_signal_toolkit_limits.py",
+            "tests/unit/shared_python/test_signal_toolkit_noise.py",
+            "tests/unit/shared_python/test_signal_toolkit_series.py",
+            "tests/unit/dbc/test_dbc_runtime_calculus.py",
+            "tests/unit/dbc/test_dbc_runtime_signal_toolkit.py",
+        ),
+        modules=("src.shared.python.signal_toolkit.core",),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=(
+            "tests/unit/data_io/test_data_processor.py",
+            "tests/unit/data_io/test_dataset_generator.py",
+            "tests/unit/test_dataset_generator.py",
+        ),
+        symbols=(
+            ("src.shared.python.data_processing.processor", "DatasetInfo"),
+            ("src.shared.python.data_io.dataset_generator", "SimulationSample"),
+        ),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=("tests/unit/test_c3d_export_features.py",),
+        modules=("c3d_reader",),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=("tests/unit/test_setup_golf_suite.py",),
+        modules=("setup_golf_suite",),
+    ),
+    OptionalCollectionRule(
+        path_suffixes=("tests/unit/test_start_api_server.py",),
+        modules=("start_api_server",),
+    ),
+)
+
+
+def _normalized_collection_path(path: object) -> str:
+    return Path(str(path)).as_posix().lower()
+
+
+def _matches_collection_suffix(path_text: str, suffix: str) -> bool:
+    normalized_suffix = suffix.lower().strip("/")
+    return (
+        path_text == normalized_suffix
+        or path_text.startswith(f"{normalized_suffix}/")
+        or path_text.endswith(f"/{normalized_suffix}")
+        or f"/{normalized_suffix}/" in path_text
+    )
+
+
+def _module_available(module_name: str) -> bool:
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except (ImportError, AttributeError, ValueError):
+        return False
+
+
+def _symbol_available(module_name: str, symbol_name: str) -> bool:
+    try:
+        module = importlib.import_module(module_name)
+    except Exception:  # noqa: BLE001
+        return False
+    return hasattr(module, symbol_name)
+
+
+def _rule_requirement_missing(rule: OptionalCollectionRule) -> bool:
+    missing_module = any(not _module_available(module) for module in rule.modules)
+    missing_symbol = any(
+        not _symbol_available(module, symbol) for module, symbol in rule.symbols
+    )
+    return missing_module or missing_symbol
+
+
+def _should_ignore_optional_collection_path(path: object) -> bool:
+    path_text = _normalized_collection_path(path)
+    for rule in _OPTIONAL_COLLECTION_RULES:
+        if any(
+            _matches_collection_suffix(path_text, suffix)
+            for suffix in rule.path_suffixes
+        ):
+            return _rule_requirement_missing(rule)
+    return False
+
+
+def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool:
+    """Do not collect tests for optional stacks that are absent in this checkout."""
+    return _should_ignore_optional_collection_path(collection_path)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

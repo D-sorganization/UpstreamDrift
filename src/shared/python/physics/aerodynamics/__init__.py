@@ -19,7 +19,12 @@ References:
 
 from __future__ import annotations
 
-from ._config import AerodynamicsConfig, RandomizationConfig, WindConfig
+from ._config import (
+    MIN_AIR_DENSITY_KG_M3,
+    AerodynamicsConfig,
+    RandomizationConfig,
+    WindConfig,
+)
 from ._engine import AerodynamicsEngine
 from ._environment import EnvironmentRandomizer, EnvironmentSnapshot
 from ._models import DragModel, LiftModel, MagnusModel
@@ -32,6 +37,7 @@ __all__ = [
     "EnvironmentRandomizer",
     "EnvironmentSnapshot",
     "LiftModel",
+    "MIN_AIR_DENSITY_KG_M3",
     "MagnusModel",
     "RandomizationConfig",
     "TurbulenceModel",
