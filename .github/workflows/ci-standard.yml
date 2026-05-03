@@ -675,7 +675,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
       - uses: matlab-actions/setup-matlab@a0180c939fb1a28de13f44f7b778b912384ced1f
-      - uses: matlab-actions/run-command@37b454c384483087929a3d652be474ba585a9659
+      - uses: matlab-actions/run-command@2970c890bd6dfbc8ba4d640879c4c496dec4e426
         with:
           command: |
             addpath('matlab');
