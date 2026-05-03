@@ -40,12 +40,14 @@ release version must stay aligned with `src/api/_version.py`,
 1. Merge the release PR to `main`.
 2. Create and push a signed tag from a trusted workstation:
    `git tag -s vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`.
-3. Confirm `.github/workflows/release.yml` starts from the tag.
-4. Verify the workflow builds wheels and source distributions.
-5. Verify `SHA256SUMS.txt`, the CycloneDX SBOM, and GitHub artifact
+3. Run schema migrations against the production database before starting the new server version:
+   `python3 scripts/db_migrate.py upgrade head`.
+4. Confirm `.github/workflows/release.yml` starts from the tag.
+5. Verify the workflow builds wheels and source distributions.
+6. Verify `SHA256SUMS.txt`, the CycloneDX SBOM, and GitHub artifact
    attestations are attached to the release.
-6. Verify the PyPI publish job completes for `upstream-drift`.
-7. Verify a clean environment resolves the package:
+7. Verify the PyPI publish job completes for `upstream-drift`.
+8. Verify a clean environment resolves the package:
    `pip install upstream-drift==X.Y.Z`.
 
 ## Post-release

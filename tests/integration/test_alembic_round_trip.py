@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any, cast
 
@@ -12,12 +13,25 @@ from alembic.script.base import Script
 from sqlalchemy import create_engine, inspect
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+ROUND_TRIP_DATABASE_URL_ENV = "ALEMBIC_ROUND_TRIP_DATABASE_URL"
 
 
 def _alembic_config(db_path: Path) -> Config:
     cfg = Config(str(REPO_ROOT / "alembic.ini"))
-    cfg.set_main_option("sqlalchemy.url", f"sqlite:///{db_path}")
+    cfg.set_main_option("sqlalchemy.url", _round_trip_database_url(db_path))
     return cfg
+
+
+def _round_trip_database_url(db_path: Path) -> str:
+    """Return the migration round-trip database URL.
+
+    Postcondition: CI can opt into PostgreSQL by setting
+    ``ALEMBIC_ROUND_TRIP_DATABASE_URL``; local tests keep using temp SQLite.
+    """
+    configured_url = os.getenv(ROUND_TRIP_DATABASE_URL_ENV)
+    if configured_url:
+        return configured_url
+    return f"sqlite:///{db_path}"
 
 
 def _schema_snapshot(db_url: str) -> dict[str, dict[str, Any]]:
@@ -85,11 +99,15 @@ def test_round_trip_through_every_revision(tmp_path: Path) -> None:
     script = ScriptDirectory.from_config(cfg)
     revisions = list(script.walk_revisions("base", "heads"))
 
+    command.downgrade(cfg, "base")
     command.upgrade(cfg, "head")
     head_schema = _schema_snapshot(db_url)
 
-    for revision in revisions:
-        down_target = _downgrade_target(revision)
-        command.downgrade(cfg, down_target)
-        command.upgrade(cfg, revision.revision)
-        assert _schema_snapshot(db_url) == head_schema
+    try:
+        for revision in revisions:
+            down_target = _downgrade_target(revision)
+            command.downgrade(cfg, down_target)
+            command.upgrade(cfg, revision.revision)
+            assert _schema_snapshot(db_url) == head_schema
+    finally:
+        command.downgrade(cfg, "base")

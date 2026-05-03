@@ -205,6 +205,15 @@ jobs:
       - name: SPEC.md Path Check
         run: python3 scripts/check_spec_paths.py
 
+      - name: Alembic Drift Check
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f "$RUNNER_TEMP/alembic-drift.db"
+          export DATABASE_URL="sqlite:///$RUNNER_TEMP/alembic-drift.db"
+          python3 scripts/db_migrate.py upgrade head
+          python3 scripts/check_alembic_drift.py
+
       # UI Security and Quality Checks (only when ui/ files change)
       - name: UI Security Audit
         if: github.event_name == 'pull_request'
@@ -525,6 +534,47 @@ jobs:
           fail_ci_if_error: false # Do not block if token is missing
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
+
+  alembic-postgres-round-trip:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: upstreamdrift_migrations
+          POSTGRES_USER: upstreamdrift
+          POSTGRES_PASSWORD: upstreamdrift
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U upstreamdrift -d upstreamdrift_migrations"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+      - name: Create stub ui/dist for editable install
+        run: mkdir -p ui/dist
+      - name: Install migration test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+          python -m pip install "psycopg[binary]>=3.1"
+      - name: Run Alembic PostgreSQL round-trip
+        env:
+          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:5432/upstreamdrift_migrations
+        run: |
+          python3 -m pytest tests/integration/test_alembic_round_trip.py \
+            -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \
+            --timeout=60 \
+            --timeout-method=thread \
+            --no-cov \
+            -v --tb=short
 
   shared-tools-consumer-contracts:
     needs: [pick-runner, quality-gate]
