@@ -57,6 +57,25 @@ If you need editable cross-repository Python integration code from
 `D-sorganization/Tools`, run `scripts/setup_tools_workspace.sh` to attach the
 optional sibling workspace and helper `PYTHONPATH` entries.
 
+### Building the UI
+
+The UI lives under `ui/`. It is built with Vite, packaged with Tauri 2,
+and bundled into the Python wheel via the hatch custom build hook
+(`build_hooks.py`).
+
+To develop:
+
+```bash
+cd ui && npm install && npm run dev
+```
+
+To build for distribution:
+
+```bash
+cd ui && npm run build
+# ui/dist is then included in `pip install -e .` builds via build_hooks.py.
+```
+
 ## ✅ Code Standards
 
 ### Python

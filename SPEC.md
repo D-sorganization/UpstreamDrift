@@ -41,6 +41,17 @@
 | **Spec Version**        | 1.0.95                                             |
 | **Last Spec Update**    | 2026-05-03                                         |
 
+## SPEC Ownership and Update Cadence
+
+- **Owner:** D-sorganization (responsible for accepting SPEC.md edits)
+- **Update triggers (mandatory):**
+  - Any PR that adds, removes, or moves a top-level `src/` package or a public
+    engine adapter must update §6 (Component Locations) and §7 (Feature Status).
+  - Any PR that changes the version in `pyproject.toml` must update §1 (Identity).
+  - Any PR that changes a CI gate threshold must update §X (Quality Gates).
+- **Review cadence:** SPEC.md is reviewed for staleness on every release
+  (per `docs/operations/release-runbook.md`, see #3842).
+
 ## 2. Purpose & Mission
 
 UpstreamDrift is a multi-physics golf swing biomechanical simulation platform that consolidates five leading physics engines (MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite) for cross-validated biomechanical analysis. It enables researchers and biomechanists to simulate human movement across models ranging from simplified 2-DOF pendulums to complex 290-muscle musculoskeletal systems, providing a unified interface for comparative physics analysis and professional-grade visualization.
@@ -78,17 +89,21 @@ UpstreamDrift sits at the center of a biomechanical simulation ecosystem. It dep
 UpstreamDrift/
 ├── src/
 │   ├── engines/
-│   │   ├── physics_engines/        # Engine adapters and integrations
+│   │   ├── physics_engines/        # Engine adapters and integrations (package directories)
 │   │   │   ├── mujoco/             # MuJoCo backend (supported)
 │   │   │   ├── drake/              # Drake backend (extended)
 │   │   │   ├── pinocchio/          # Pinocchio backend (extended)
 │   │   │   ├── opensim/            # OpenSim backend (experimental)
-│   │   │   └── myosuite/           # MyoSuite backend (experimental)
+│   │   │   ├── myosuite/           # MyoSuite backend (experimental)
+│   │   │   ├── pendulum/           # Simplified educational models
+│   │   │   └── putting_green/      # Putting green simulation
 │   │   └── pendulum_models/        # Simplified educational models
 │   │       ├── twodof_pendulum.py
 │   │       └── biomechanical_pendulum.py
 │   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── golf_launcher.py        # PyQt6 professional GUI
+│   │   ├── golf_launcher.py        # PyQt6 professional GUI (main entrypoint)
+│   │   ├── golf_suite_launcher.py  # Multi-engine suite launcher
+│   │   ├── unified_launcher.py     # Unified launcher interface
 │   │   └── cli_launcher.py         # Command-line interface
 │   ├── api/                        # FastAPI REST backend
 │   │   ├── main.py                 # API entry point
@@ -153,7 +168,7 @@ UpstreamDrift/
 | Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio/` | Extended Pinocchio support for efficient rigid-body dynamics computation                    |
 | OpenSim Engine Adapter   | `src/engines/physics_engines/opensim/`   | Experimental OpenSim integration for clinical biomechanics workflows                        |
 | MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite/`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
-| Pendulum Models          | `src/engines/pendulum_models/`           | Educational simplified models for learning and quick prototyping                            |
+| Pendulum Models          | `src/engines/physics_engines/pendulum/`  | Educational simplified models for learning and quick prototyping                            |
 | FastAPI Backend          | `src/api/`                               | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
 | PyQt6 GUI                | `src/launchers/golf_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
 | Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
@@ -281,15 +296,16 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 
 ### Test Organization
 
-| Category              | Location                    | Framework        | Markers                           |
-| --------------------- | --------------------------- | ---------------- | --------------------------------- |
-| Unit                  | `tests/unit/`               | pytest           | `@pytest.mark.unit`               |
-| Integration           | `tests/integration/`        | pytest           | `@pytest.mark.integration`        |
-| Acceptance            | `tests/acceptance/`         | pytest           | `@pytest.mark.acceptance`         |
-| Cross-Engine          | `tests/cross_engine/`       | pytest           | `@pytest.mark.cross_engine`       |
-| Physics Validation    | `tests/physics_validation/` | pytest           | `@pytest.mark.physics_validation` |
-| Golf Source Contracts | `tests/unit/shared_python/` | pytest           | source-map contract tests         |
-| Benchmarks            | `tests/benchmarks/`         | pytest-benchmark | `@pytest.mark.benchmark`          |
+| Category              | Location                    | Framework           | Markers                           |
+| --------------------- | --------------------------- | ------------------- | --------------------------------- |
+| Unit                  | `tests/unit/`               | pytest              | `@pytest.mark.unit`               |
+| Integration           | `tests/integration/`        | pytest              | `@pytest.mark.integration`        |
+| Acceptance            | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`         |
+| Cross-Engine          | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`       |
+| Physics Validation    | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation` |
+| Golf Source Contracts | `tests/unit/shared_python/` | pytest              | source-map contract tests         |
+| Benchmarks            | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`          |
+| Property-Based        | `tests/unit/`               | hypothesis + pytest | `@pytest.mark.property`           |
 
 ### Coverage Requirements
 

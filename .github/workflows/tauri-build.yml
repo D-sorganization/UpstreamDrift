@@ -1,7 +1,7 @@
 # =============================================================================
 # Tauri Desktop Application Build Workflow
 # =============================================================================
-# Builds the Golf Modeling Suite as a native desktop app using Tauri 2
+# Builds the UpstreamDrift desktop app using Tauri 2
 # Runs on: Pull requests (check only), Releases (build artifacts)
 #
 # Prerequisites:

@@ -40,7 +40,7 @@ updates:
 
   # npm (UI dependencies)
   - package-ecosystem: "npm"
-    directory: "/src/ui"
+    directory: "/ui"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
