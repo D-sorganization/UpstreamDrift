@@ -69,39 +69,35 @@ For a focused reviewer walkthrough, start with the
 
 ### Prerequisites
 
-- **Python** 3.11+ (Python 3.13 recommended)
+- **Python** 3.11 or 3.12 for the supported pip and lockfile workflow
 - **Git** with Git LFS
 - **MATLAB** R2023a+ with Simulink and Simscape Multibody (optional, for MATLAB models)
 
 ### Installation
 
-**Recommended: Conda** (handles binary dependencies like MuJoCo)
+**Recommended: Pip** (canonical dependency source: `pyproject.toml`)
 
 ```bash
 git clone https://github.com/D-sorganization/UpstreamDrift.git
 cd UpstreamDrift
 git lfs install && git lfs pull
 
-# Create conda environment (most reliable)
-conda env create -f environment.yml
-conda activate upstream-drift
+# Install the supported default surface
+pip install -e ".[dev]"
 
 # Verify installation
 python scripts/verify_installation.py
 ```
 
-**Alternative: Pip**
+**Conda convenience wrapper**
 
 ```bash
-# Matches the required PR CI surface (MuJoCo + dev tooling)
-pip install -e ".[dev]"
-
-# Adds Drake and Pinocchio for cross-engine work
-pip install -e ".[dev,all-engines]"
-
-# Adds OpenSim and MyoSuite integrations on a best-effort basis
-pip install -e ".[dev,biomechanics]"
+conda env create -f environment.yml
+conda activate upstream-drift
 ```
+
+`environment.yml` is generated from `pyproject.toml`; edit Python dependencies
+in `pyproject.toml` and run `make sync-deps`.
 
 **Light Installation** (for UI development without heavy physics engines)
 

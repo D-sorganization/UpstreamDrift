@@ -292,7 +292,9 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Cross-Engine Tests**: Validate physics consistency across multiple engines with tolerance thresholds
 - **Physics Validation Tests**: Verify results against known ground truth (analytical solutions, published benchmarks)
 - **Golf Ball-Flight Source Contracts**: Validate documented aerodynamic, impact, and atmosphere assumptions against `docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`
+- **Dependency Source Contracts**: Validate generated dependency artifacts against `pyproject.toml` and fail CI when lockfiles or `environment.yml` drift
 - **Benchmark Tests**: Performance regression detection and optimization validation
+- **Property-Based Tests**: Hypothesis-driven fuzzing for robustness
 
 ### Test Organization
 
@@ -304,6 +306,7 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 | Cross-Engine          | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`       |
 | Physics Validation    | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation` |
 | Golf Source Contracts | `tests/unit/shared_python/` | pytest              | source-map contract tests         |
+| Dependency Source Contracts | `tests/unit/scripts/`  | pytest              | generated dependency contract tests |
 | Benchmarks            | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`          |
 | Property-Based        | `tests/unit/`               | hypothesis + pytest | `@pytest.mark.property`           |
 
@@ -388,6 +391,7 @@ Beyond standard tools, CI enforces custom checks:
 | mujoco   | 3.3.0+  | Primary physics engine (required)            |
 | PyQt6    | 6.0+    | Professional GUI framework                   |
 | tauri-py | 1.0+    | Tauri bridge for Python backend              |
+| pillow, requests, bokeh, flask | CVE floors | Runtime security constraints validated outside dev extras |
 
 ### Optional Runtime Dependencies
 
@@ -409,6 +413,7 @@ Beyond standard tools, CI enforces custom checks:
 | pytest     | 7.0+    | Testing framework                                                                  |
 | pytest-cov | 4.0+    | Coverage measurement                                                               |
 | hypothesis | 6.0+    | Property-based testing                                                             |
+| pip-tools  | 7.4+    | Regenerate Python dependency lockfiles from `pyproject.toml`                       |
 | ruff       | latest  | Linting and formatting                                                             |
 | mypy       | 1.7+    | Type checking                                                                      |
 | bandit     | 1.7+    | Security scanning                                                                  |
@@ -499,6 +504,7 @@ pytest tests/ --cov=src --cov-fail-under=70
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-05-03 | 1.0.96  | Guarded local diagnostic and debug API endpoints in production mode unless `UPSTREAM_DRIFT_DEBUG_ENDPOINTS=true` is explicitly set.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-05-03 | 1.0.96  | Established `pyproject.toml` as the canonical Python dependency source, generated `environment.yml` from it, added `make sync-deps`, promoted documented CVE floors to runtime dependencies, removed the deprecated root CRA UI build, and added dependency-consistency CI drift/audit coverage.                                                                                                                                                                                                                                                                                                                                     |
 | 2026-05-03 | 1.0.95  | Added a mypy exclusion budget and ratchet checker so path exclusions have explicit owner, reason, expiry, and scheduled shrinkage metadata.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 2026-05-03 | 1.0.96  | Added a workflow and agent-configuration inventory guard that documents active workflow ownership, records consolidation candidates, blocks undocumented workflow growth, and rejects unsafe `permissions: write-all`.                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-05-03 | 1.0.94  | Hardened the standard CI security-audit bootstrap to install a patched Black before `pip-audit`, preventing shared-runner cache drift from failing docs/governance PRs on CVE-2026-32274.                                                                                                                                                                                                                                                                                                                                                                                                                                             |

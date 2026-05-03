@@ -34,7 +34,12 @@ dependencies = [
     # Structured logging (OBS-001: required for observability)
     "structlog>=24.1.0",
     "h5py>=3.0.0",
-    
+
+    # Runtime security floor constraints documented in issue #3838.
+    "pillow>=12.2.0",
+    "requests>=2.33.0",
+    "bokeh>=3.8.2",
+    "flask>=3.1.3",
 ]
 
 [project.optional-dependencies]
@@ -69,6 +74,7 @@ dev = [
     "pytest-xdist>=3.0.0",
     "ruff>=0.15.10",
     "mypy>=1.20.1",
+    "tomli>=2.0.0; python_version<'3.11'",
     "build",
     # Required for tests that import common_utils and model_explorer
     "pandas>=2.0.0",
@@ -97,8 +103,6 @@ dev = [
     "python-multipart>=0.0.26",
     # Required for video/image processing tests
     "opencv-python-headless>=4.13.0.92",
-    # Security: pillow>=12.2.0 fixes CVE-2026-40192 (transitive dep via matplotlib/meshcat)
-    "pillow>=12.2.0",
     # Required for property-based testing
     "hypothesis>=6.0.0",
     # Required for database migration tooling (issue #2078)
@@ -106,12 +110,6 @@ dev = [
     # Type stubs for untyped third-party packages (GH2034)
     "types-PyYAML>=6.0",
     "scipy-stubs>=1.13.0",
-    # Security: requests>=2.33.0 fixes CVE-2024-47081 and CVE-2026-25645
-    "requests>=2.33.0",
-    # Security: bokeh>=3.8.2 fixes CVE-2026-21883
-    "bokeh>=3.8.2",
-    # Security: flask>=3.1.3 fixes CVE-2026-27205
-    "flask>=3.1.3",
 ]
 
 # GUI testing (requires PyQt6)

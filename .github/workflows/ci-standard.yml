@@ -286,8 +286,35 @@ jobs:
           name: matlab-quality-report
           path: matlab_quality_report.txt
 
+  dependency-consistency:
+    name: dependency-consistency
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with: { python-version: "3.12" }
+      - name: Regenerate dependency artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          make sync-deps
+          git diff --exit-code -- pyproject.toml requirements.lock requirements-dev.lock environment.yml
+      - name: Audit runtime install without extras
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/runtime-audit-venv"
+          source "$RUNNER_TEMP/runtime-audit-venv/bin/activate"
+          python -m pip install --upgrade pip
+          mkdir -p ui/dist
+          python -m pip install .
+          python -m pip install pip-audit
+          pip-audit -r <(pip freeze)
+
   tests:
-    needs: [pick-runner, quality-gate]
+    needs: [pick-runner, quality-gate, dependency-consistency]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     timeout-minutes: 20 # Prevent runaway tests - hard cutoff
     strategy:

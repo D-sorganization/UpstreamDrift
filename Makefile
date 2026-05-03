@@ -8,7 +8,7 @@
 #   make test     - Run tests
 #   make clean    - Clean build artifacts
 
-.PHONY: help lint format test test-unit test-int clean install check all docs
+.PHONY: help lint format test test-unit test-int clean install check all docs sync-deps
 
 # Default target
 help:
@@ -23,6 +23,7 @@ help:
 	@echo "  make check     - Run all checks (lint + test)"
 	@echo "  make clean     - Remove build artifacts"
 	@echo "  make docs      - Build documentation"
+	@echo "  make sync-deps - Regenerate Python lockfiles and environment.yml"
 	@echo "  make all       - Install, format, lint, test"
 	@echo ""
 
@@ -49,6 +50,13 @@ format:
 	ruff format .
 	@echo "Running ruff fix..."
 	ruff check . --fix || true
+
+# Regenerate dependency artifacts from pyproject.toml, the canonical Python source.
+sync-deps:
+	python3 -m pip install "pip-tools>=7.4" "tomli>=2.0.0; python_version<'3.11'"
+	python3 -m piptools compile -o requirements.lock pyproject.toml
+	python3 -m piptools compile --extra dev -o requirements-dev.lock pyproject.toml
+	python3 scripts/sync_environment_yml.py
 
 # Run all tests
 test:

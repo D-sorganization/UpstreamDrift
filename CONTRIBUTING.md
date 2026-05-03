@@ -36,6 +36,22 @@ pip install -e ".[dev,all-engines]"
 See `docs/engines/support_tiers.md` before enabling heavier or experimental
 engine combinations.
 
+### Where dependencies live
+
+- Python runtime: `pyproject.toml [project] dependencies`
+- Python optional features: `pyproject.toml [project.optional-dependencies]`
+- Python pinned for CI: `requirements.lock` and `requirements-dev.lock`
+  generated from `pyproject.toml`
+- Conda convenience: `environment.yml` generated from `pyproject.toml`
+- Rust extension: `Cargo.toml`, `Cargo.lock`, and `rust_core/upstream-physics/`
+- UI build: `ui/package.json` only; the deprecated root Create React App
+  build was removed in favor of the Vite + Tauri surface
+- DB migrations: `alembic.ini`
+
+Adding a new Python dependency starts in `pyproject.toml`. Run
+`make sync-deps` to regenerate the lockfiles and `environment.yml`, then commit
+the canonical source and generated artifacts together.
+
 ### Rust kernel development
 
 The Rust workspace no longer requires a sibling `../Tools` checkout just to
