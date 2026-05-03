@@ -304,6 +304,41 @@ jobs:
           name: matlab-quality-report
           path: matlab_quality_report.txt
 
+  core-only-install:
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with: { python-version: "3.11" }
+      - name: Create isolated core install
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv .venv-core-only
+          . .venv-core-only/bin/activate
+          python3 -m pip install --upgrade pip
+          mkdir -p ui/dist
+          python3 -m pip install -e .
+      - name: Verify optional engines are absent from core install
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-only/bin/activate
+          python3 scripts/check_core_install_isolation.py
+      - name: Run core-only test slice
+        shell: bash
+        run: |
+          set -euo pipefail
+          . .venv-core-only/bin/activate
+          python3 -m pip install pytest pytest-timeout
+          python3 -m pytest \
+            tests/architecture/test_core_public_api.py \
+            tests/unit/test_core_install_isolation.py \
+            -m core_only \
+            --timeout=60
+
   dependency-consistency:
     name: dependency-consistency
     needs: pick-runner

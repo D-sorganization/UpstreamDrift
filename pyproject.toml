@@ -322,6 +322,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "core_only: tests that must pass in a default install with no optional engine extras",
     "requires_gl: Tests needing OpenGL/moderngl or a display",
     "headless_safe: marks tests verified to work in headless mode",
     "slow_numba: Tests that require numba JIT or are heavy",
