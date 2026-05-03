@@ -82,8 +82,18 @@ jobs:
 
       - name: Install System Dependencies
         run: |
-          sudo apt-get -o DPkg::Lock::Timeout=300 update
-          sudo apt-get -o DPkg::Lock::Timeout=300 install -y \
+          apt_retry() {
+            for attempt in {1..12}; do
+              if sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying after lock backoff"
+              sleep 10
+            done
+            sudo apt-get -o DPkg::Lock::Timeout=300 -o APT::Get::Lock-Timeout=300 "$@"
+          }
+          apt_retry update
+          apt_retry install -y \
             libegl1 libgl1 xvfb \
             libxkbcommon-x11-0 \
             libxcb-cursor0 \
