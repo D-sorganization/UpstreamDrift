@@ -1,3 +1,5 @@
+"""Session conftest: import MuJoCo early to avoid Windows DLL collection crashes."""
+
 import contextlib
 
 with contextlib.suppress(ImportError):

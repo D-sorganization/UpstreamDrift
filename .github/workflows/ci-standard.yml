@@ -96,7 +96,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
             mapfile -d '' py_files < <(
-              git diff --name-only -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
             )
             if [ "${#py_files[@]}" -eq 0 ]; then
               echo "No changed Python files; skipping Ruff lint check."
@@ -117,7 +117,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
             mapfile -d '' py_files < <(
-              git diff --name-only -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- '*.py'
             )
             if [ "${#py_files[@]}" -eq 0 ]; then
               echo "No changed Python files; skipping Ruff format check."
@@ -142,7 +142,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
             mapfile -d '' src_py_files < <(
-              git diff --name-only -z "origin/${{ github.base_ref }}" HEAD -- 'src/**/*.py' 'src/*.py'
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- 'src/**/*.py' 'src/*.py'
             )
             if [ "${#src_py_files[@]}" -eq 0 ]; then
               echo "No changed source Python files; skipping baseline mypy check."
@@ -161,7 +161,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
             mapfile -d '' api_py_files < <(
-              git diff --name-only -z "origin/${{ github.base_ref }}" HEAD -- 'src/api/**/*.py' 'src/api/*.py'
+              git diff --name-only --diff-filter=ACMRT -z "origin/${{ github.base_ref }}" HEAD -- 'src/api/**/*.py' 'src/api/*.py'
             )
             if [ "${#api_py_files[@]}" -eq 0 ]; then
               echo "No changed API Python files; skipping strict API mypy check."
@@ -192,6 +192,9 @@ jobs:
 
       - name: Security Workflow Silent-Failure Guard
         run: python3 scripts/check_workflows_no_silent_failures.py
+
+      - name: Test Layout Guard
+        run: python3 scripts/check_test_layout.py
 
       - name: Tutorial Import Check
         run: python3 scripts/ci/check_tutorial_imports.py
@@ -410,7 +413,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
             mapfile -t changed_tests < <(
-              git diff --name-only "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
+              git diff --name-only --diff-filter=ACMRT "origin/${{ github.base_ref }}" HEAD -- 'tests/**/*.py'
             )
 
             if [ "${#changed_tests[@]}" -eq 0 ]; then

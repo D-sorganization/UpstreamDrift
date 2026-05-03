@@ -22,7 +22,6 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-
 from src.launchers.cross_engine_dashboard import (
     CrossEngineSimConfig,
     _build_arg_parser,

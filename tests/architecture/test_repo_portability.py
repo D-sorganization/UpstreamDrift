@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import patch_analyzers
+from scripts.chore import patch_analyzers
 
 WORKSTATION_ROOT_LITERAL = "C:/Users/diete/Repositories/UpstreamDrift"
 
@@ -16,15 +16,15 @@ def _maintained_script_paths(repo_root: Path) -> list[Path]:
     return [path for path in candidates if path.is_file()]
 
 
-def test_patch_analyzers_resolves_repo_root_from_script_location() -> None:
-    """The maintenance script should discover the repo root relative to itself."""
-    expected_root = Path(__file__).resolve().parents[1]
+def test_patch_analyzers_resolves_script_dir_from_script_location() -> None:
+    """The maintenance script should discover its own directory."""
+    expected_root = Path(__file__).resolve().parents[2] / "scripts" / "chore"
     assert patch_analyzers.resolve_repo_root() == expected_root
 
 
 def test_maintained_scripts_do_not_contain_workstation_specific_repo_paths() -> None:
     """Maintained scripts should not pin one developer checkout path."""
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     offending_files: list[str] = []
     for path in _maintained_script_paths(repo_root):
         normalized = path.read_text(encoding="utf-8").replace("\\\\", "/")

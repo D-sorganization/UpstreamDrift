@@ -1,3 +1,8 @@
+"""Regression harness for the historical actuator signal-loop repro.
+
+Issue #3841 moved this orphan repro into the regression test layout.
+"""
+
 import sys
 
 from PyQt6.QtCore import Qt

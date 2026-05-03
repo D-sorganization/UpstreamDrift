@@ -1,3 +1,5 @@
+"""Shared-contract conftest: resolve the real or vendored Tools checkout."""
+
 from __future__ import annotations
 
 import os
