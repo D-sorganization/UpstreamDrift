@@ -9,13 +9,19 @@ Supports:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import hashlib
+import json
+import os
+import tempfile
+from collections.abc import Callable
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.core.contracts import precondition
+from src.shared.python.data_io.provenance import ProvenanceInfo
 from src.shared.python.engine_core.engine_availability import (
     C3D_AVAILABLE,
     EZC3D_AVAILABLE,
@@ -36,143 +42,346 @@ if H5PY_AVAILABLE:
     import h5py
 
 
+@dataclass(frozen=True)
+class ExportOutcome:
+    """Structured export result.
+
+    Postcondition: successful outcomes include an artifact path, SHA256 checksum,
+    and provenance sidecar path. Failed outcomes include a non-empty error.
+    """
+
+    success: bool
+    path: Path
+    checksum_sha256: str | None = None
+    provenance_path: Path | None = None
+    error: str | None = None
+
+
+def _hash_file(path: Path) -> str:
+    """Compute a SHA256 checksum for an exported artifact."""
+    sha256 = hashlib.sha256()
+    with open(path, "rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            sha256.update(chunk)
+    return sha256.hexdigest()
+
+
+def _provenance_sidecar_path(artifact_path: Path) -> Path:
+    """Return the sidecar path for an exported artifact."""
+    return artifact_path.with_name(f"{artifact_path.name}.provenance.json")
+
+
+def _write_text_atomic(path: Path, content: str) -> None:
+    """Write text through a same-directory temporary file and replace."""
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            delete=False,
+            dir=path.parent,
+            encoding="utf-8",
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+        ) as handle:
+            temp_path = Path(handle.name)
+            handle.write(content)
+        os.replace(temp_path, path)
+    except Exception:
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+        raise
+
+
+def _write_provenance_sidecar(
+    artifact_path: Path,
+    checksum_sha256: str,
+    export_format: str,
+) -> Path:
+    """Write provenance metadata for a binary export artifact."""
+    provenance = ProvenanceInfo.capture(parameters={"export_format": export_format})
+    sidecar_path = _provenance_sidecar_path(artifact_path)
+    payload = {
+        "artifact": {
+            "path": str(artifact_path),
+            "checksum_algorithm": "sha256",
+            "checksum_sha256": checksum_sha256,
+            "format": export_format,
+        },
+        "provenance": asdict(provenance),
+    }
+    _write_text_atomic(sidecar_path, json.dumps(payload, indent=2, sort_keys=True))
+    return sidecar_path
+
+
+def _write_artifact_atomic(
+    output_path: Path,
+    writer: Callable[[Path], None],
+    export_format: str,
+) -> ExportOutcome:
+    """Write an export artifact via temporary file, replace, and sidecar."""
+    temp_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "wb",
+            delete=False,
+            dir=output_path.parent,
+            prefix=f".{output_path.name}.",
+            suffix=".tmp",
+        ) as handle:
+            temp_path = Path(handle.name)
+        writer(temp_path)
+        os.replace(temp_path, output_path)
+        checksum_sha256 = _hash_file(output_path)
+        sidecar_path = _write_provenance_sidecar(
+            output_path,
+            checksum_sha256,
+            export_format,
+        )
+        return ExportOutcome(
+            success=True,
+            path=output_path,
+            checksum_sha256=checksum_sha256,
+            provenance_path=sidecar_path,
+        )
+    except Exception as exc:  # noqa: BLE001  # preserve bool API for export failures
+        if temp_path is not None:
+            temp_path.unlink(missing_ok=True)
+        return ExportOutcome(success=False, path=output_path, error=str(exc))
+
+
+def _return_export_result(
+    outcome: ExportOutcome,
+    return_outcome: bool,
+) -> bool | ExportOutcome:
+    """Return either the backward-compatible bool or the structured outcome."""
+    if return_outcome:
+        return outcome
+    return outcome.success
+
+
+def _prepare_matlab_data(data_dict: dict[str, Any]) -> dict[str, Any]:
+    """Convert Python data into MATLAB-compatible fields."""
+    output_data: dict[str, Any] = {}
+
+    for key, value in data_dict.items():
+        if isinstance(value, np.ndarray):
+            # MATLAB uses Fortran (column-major) order
+            output_data[key] = np.asarray(value, order="F")
+        elif isinstance(value, list | tuple):
+            output_data[key] = np.array(value, order="F")
+        elif isinstance(value, int | float | str | bool):
+            output_data[key] = value
+        elif isinstance(value, dict):
+            _add_flattened_matlab_dict(output_data, key, value)
+
+    return output_data
+
+
+def _add_flattened_matlab_dict(
+    output_data: dict[str, Any],
+    key: str,
+    value: dict[str, Any],
+) -> None:
+    """Flatten one nested dictionary into MATLAB-compatible fields."""
+    for subkey, subvalue in value.items():
+        flat_key = f"{key}_{subkey}".replace(" ", "_")
+        if isinstance(subvalue, np.ndarray):
+            output_data[flat_key] = np.asarray(subvalue, order="F")
+        elif isinstance(subvalue, list | tuple):
+            output_data[flat_key] = np.array(subvalue, order="F")
+        else:
+            output_data[flat_key] = subvalue
+
+
+def _write_hdf5_data(
+    temp_path: Path,
+    data_dict: dict[str, Any],
+    compression: str,
+) -> None:
+    """Write a data dictionary into an HDF5 file path."""
+    min_size_for_compression = 100
+    with h5py.File(str(temp_path), "w") as f:
+        timeseries_group = f.create_group("timeseries")
+        metadata_group = f.create_group("metadata")
+        f.create_group("statistics")
+
+        for key, value in data_dict.items():
+            if isinstance(value, np.ndarray):
+                _create_hdf5_dataset(
+                    timeseries_group,
+                    key,
+                    value,
+                    compression,
+                    min_size_for_compression,
+                )
+            elif isinstance(value, int | float | str):
+                metadata_group.attrs[key] = value
+            elif isinstance(value, dict):
+                _write_hdf5_subgroup(
+                    f,
+                    key,
+                    value,
+                    compression,
+                    min_size_for_compression,
+                )
+
+
+def _create_hdf5_dataset(
+    group: Any,
+    key: str,
+    value: np.ndarray,
+    compression: str,
+    min_size_for_compression: int,
+) -> None:
+    """Create one HDF5 dataset with thresholded compression."""
+    group.create_dataset(
+        key,
+        data=value,
+        compression=compression if value.size > min_size_for_compression else None,
+    )
+
+
+def _write_hdf5_subgroup(
+    file_obj: Any,
+    key: str,
+    value: dict[str, Any],
+    compression: str,
+    min_size_for_compression: int,
+) -> None:
+    """Write a nested dictionary as an HDF5 subgroup."""
+    subgroup = file_obj.create_group(key)
+    for subkey, subvalue in value.items():
+        if isinstance(subvalue, np.ndarray):
+            _create_hdf5_dataset(
+                subgroup,
+                subkey,
+                subvalue,
+                compression,
+                min_size_for_compression,
+            )
+        else:
+            subgroup.attrs[subkey] = subvalue
+
+
 @precondition(
-    lambda output_path, data_dict, compress=True: (
+    lambda output_path, data_dict, compress=True, return_outcome=False: (
         output_path is not None and len(output_path) > 0
     ),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, data_dict, compress=True: data_dict is not None,
+    lambda output_path, data_dict, compress=True, return_outcome=False: (
+        data_dict is not None
+    ),
     "Data dictionary must not be None",
 )
 def export_to_matlab(
     output_path: str,
     data_dict: dict[str, Any],
     compress: bool = True,
-) -> bool:
-    """Export recording to MATLAB .mat format."""
+    return_outcome: bool = False,
+) -> bool | ExportOutcome:
+    """Export recording to MATLAB .mat format.
+
+    Returns a bool by default for backward compatibility. When
+    ``return_outcome`` is true, returns an ``ExportOutcome`` with the artifact
+    checksum and provenance sidecar path.
+    """
     if not (output_path is not None):
         raise ValueError("output_path must be provided")
     if not (output_path is not None):
         raise ValueError("output_path must be provided")
     if not SCIPY_AVAILABLE:
         logger.error("scipy required for MATLAB export (pip install scipy)")
-        return False
+        outcome = ExportOutcome(
+            success=False,
+            path=Path(output_path),
+            error="scipy required for MATLAB export",
+        )
+        return _return_export_result(outcome, return_outcome)
 
     try:
-        # Convert all data to MATLAB-compatible format
-        output_data: dict[str, Any] = {}
+        output_data = _prepare_matlab_data(data_dict)
 
-        for key, value in data_dict.items():
-            if isinstance(value, np.ndarray):
-                # MATLAB uses Fortran (column-major) order
-                output_data[key] = np.asarray(value, order="F")
-            elif isinstance(value, list | tuple):
-                output_data[key] = np.array(value, order="F")
-            elif isinstance(value, int | float | str | bool):
-                output_data[key] = value
-            elif isinstance(value, dict):
-                # Nested dict - flatten keys
-                for subkey, subvalue in value.items():
-                    flat_key = f"{key}_{subkey}".replace(" ", "_")
-                    if isinstance(subvalue, np.ndarray):
-                        output_data[flat_key] = np.asarray(subvalue, order="F")
-                    elif isinstance(subvalue, list | tuple):
-                        output_data[flat_key] = np.array(subvalue, order="F")
-                    else:
-                        output_data[flat_key] = subvalue
+        def write_matlab(temp_path: Path) -> None:
+            savemat(
+                str(temp_path),
+                output_data,
+                do_compression=compress,
+                format="5",  # MATLAB 5 format (compatible with most versions)
+                oned_as="column",  # Save 1D arrays as column vectors
+            )
 
-        # Save to .mat file
-        savemat(
-            output_path,
-            output_data,
-            do_compression=compress,
-            format="5",  # MATLAB 5 format (compatible with most versions)
-            oned_as="column",  # Save 1D arrays as column vectors
+        outcome = _write_artifact_atomic(
+            Path(output_path),
+            write_matlab,
+            "matlab",
         )
-
-        return True
+        if not outcome.success:
+            logger.error(f"Failed to export to MATLAB: {outcome.error}")
+        return _return_export_result(outcome, return_outcome)
 
     except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to MATLAB: {e}")
-        return False
+        outcome = ExportOutcome(success=False, path=Path(output_path), error=str(e))
+        return _return_export_result(outcome, return_outcome)
 
 
 @precondition(
-    lambda output_path, data_dict, compression="gzip": (
+    lambda output_path, data_dict, compression="gzip", return_outcome=False: (
         output_path is not None and len(output_path) > 0
     ),
     "Output path must be a non-empty string",
 )
 @precondition(
-    lambda output_path, data_dict, compression="gzip": data_dict is not None,
+    lambda output_path, data_dict, compression="gzip", return_outcome=False: (
+        data_dict is not None
+    ),
     "Data dictionary must not be None",
 )
 def export_to_hdf5(
     output_path: str,
     data_dict: dict[str, Any],
     compression: str = "gzip",
-) -> bool:
-    """Export recording to HDF5 format."""
+    return_outcome: bool = False,
+) -> bool | ExportOutcome:
+    """Export recording to HDF5 format.
+
+    Returns a bool by default for backward compatibility. When
+    ``return_outcome`` is true, returns an ``ExportOutcome`` with the artifact
+    checksum and provenance sidecar path.
+    """
     if not (output_path is not None):
         raise ValueError("output_path must be provided")
     if not (output_path is not None):
         raise ValueError("output_path must be provided")
     if not H5PY_AVAILABLE:
         logger.error("h5py required for HDF5 export (pip install h5py)")
-        return False
-
-    # Compression threshold: only compress arrays larger than this
-    MIN_SIZE_FOR_COMPRESSION = 100
+        outcome = ExportOutcome(
+            success=False,
+            path=Path(output_path),
+            error="h5py required for HDF5 export",
+        )
+        return _return_export_result(outcome, return_outcome)
 
     try:
-        with h5py.File(output_path, "w") as f:
-            # Create groups for organization
-            timeseries_group = f.create_group("timeseries")
-            metadata_group = f.create_group("metadata")
-            f.create_group("statistics")
 
-            for key, value in data_dict.items():
-                if isinstance(value, np.ndarray):
-                    # Store arrays in timeseries group
-                    timeseries_group.create_dataset(
-                        key,
-                        data=value,
-                        compression=(
-                            compression
-                            if value.size > MIN_SIZE_FOR_COMPRESSION
-                            else None
-                        ),
-                    )
-                elif isinstance(value, int | float):
-                    # Store scalars as attributes
-                    metadata_group.attrs[key] = value
-                elif isinstance(value, str):
-                    # Store strings as attributes
-                    metadata_group.attrs[key] = value
-                elif isinstance(value, dict):
-                    # Create subgroup for nested dict
-                    subgroup = f.create_group(key)
-                    for subkey, subvalue in value.items():
-                        if isinstance(subvalue, np.ndarray):
-                            subgroup.create_dataset(
-                                subkey,
-                                data=subvalue,
-                                compression=(
-                                    compression
-                                    if subvalue.size > MIN_SIZE_FOR_COMPRESSION
-                                    else None
-                                ),
-                            )
-                        else:
-                            subgroup.attrs[subkey] = subvalue
+        def write_hdf5(temp_path: Path) -> None:
+            _write_hdf5_data(temp_path, data_dict, compression)
 
-        return True
+        outcome = _write_artifact_atomic(
+            Path(output_path),
+            write_hdf5,
+            "hdf5",
+        )
+        if not outcome.success:
+            logger.error(f"Failed to export to HDF5: {outcome.error}")
+        return _return_export_result(outcome, return_outcome)
 
     except Exception as e:  # noqa: BLE001  # broad-catch intentional: any I/O error returns False
         logger.error(f"Failed to export to HDF5: {e}")
-        return False
+        outcome = ExportOutcome(success=False, path=Path(output_path), error=str(e))
+        return _return_export_result(outcome, return_outcome)
 
 
 @dataclass
@@ -282,7 +491,7 @@ def export_to_c3d(
         return False
 
 
-def _export_to_c3d_ezc3d(
+def _export_to_c3d_ezc3d(  # noqa: C901
     output_path: str,
     data: CaptureExportData,
 ) -> bool:
@@ -395,7 +604,7 @@ def _export_json(output_path: Path, data_dict: dict[str, Any]) -> bool:
     return True
 
 
-def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:
+def _flatten_dict_for_csv(data_dict: dict[str, Any]) -> dict[str, Any]:  # noqa: C901
     """Flatten a nested data dictionary into a flat dictionary for CSV export.
 
     Handles time series arrays and nested dictionaries of arrays.

@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
 import numpy as np
 import pytest
+import src.shared.python.data_io.export as export_module
 from src.shared.python.data_io.export import (
     CaptureExportData,
     get_available_export_formats,
@@ -118,3 +124,153 @@ class TestCaptureExportData:
         assert "position" in data.units
         assert "force" in data.units
         assert "moment" in data.units
+
+
+class TestProvenanceBackedAtomicExports:
+    def test_matlab_export_writes_temp_then_replaces_final_path(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        output_path = tmp_path / "recording.mat"
+        output_path.write_bytes(b"old-content")
+        seen_paths: list[Path] = []
+
+        def fake_savemat(path: str, *_args: Any, **_kwargs: Any) -> None:
+            temp_path = Path(path)
+            seen_paths.append(temp_path)
+            assert temp_path.parent == output_path.parent
+            assert temp_path != output_path
+            assert output_path.read_bytes() == b"old-content"
+            temp_path.write_bytes(b"new-content")
+
+        monkeypatch.setattr(export_module, "SCIPY_AVAILABLE", True)
+        monkeypatch.setattr(export_module, "savemat", fake_savemat)
+
+        result = export_module.export_to_matlab(
+            str(output_path),
+            {"positions": np.array([1.0, 2.0])},
+        )
+
+        assert result is True
+        assert seen_paths
+        assert output_path.read_bytes() == b"new-content"
+
+    def test_matlab_export_failure_leaves_existing_file_untouched(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        output_path = tmp_path / "recording.mat"
+        output_path.write_bytes(b"old-content")
+
+        def fake_savemat(path: str, *_args: Any, **_kwargs: Any) -> None:
+            Path(path).write_bytes(b"partial-content")
+            raise OSError("disk full")
+
+        monkeypatch.setattr(export_module, "SCIPY_AVAILABLE", True)
+        monkeypatch.setattr(export_module, "savemat", fake_savemat)
+
+        result = export_module.export_to_matlab(
+            str(output_path),
+            {"positions": np.array([1.0, 2.0])},
+        )
+
+        assert result is False
+        assert output_path.read_bytes() == b"old-content"
+
+    def test_matlab_export_can_return_structured_outcome_with_sidecar_checksum(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        output_path = tmp_path / "recording.mat"
+
+        def fake_savemat(path: str, *_args: Any, **_kwargs: Any) -> None:
+            Path(path).write_bytes(b"matlab-payload")
+
+        monkeypatch.setattr(export_module, "SCIPY_AVAILABLE", True)
+        monkeypatch.setattr(export_module, "savemat", fake_savemat)
+
+        outcome = export_module.export_to_matlab(
+            str(output_path),
+            {"positions": np.array([1.0, 2.0])},
+            return_outcome=True,
+        )
+
+        expected_checksum = hashlib.sha256(b"matlab-payload").hexdigest()
+        sidecar_path = tmp_path / "recording.mat.provenance.json"
+        sidecar = json.loads(sidecar_path.read_text())
+        assert outcome.success is True
+        assert outcome.path == output_path
+        assert outcome.checksum_sha256 == expected_checksum
+        assert outcome.provenance_path == sidecar_path
+        assert sidecar["artifact"]["checksum_sha256"] == expected_checksum
+        assert sidecar["artifact"]["path"] == str(output_path)
+
+    def test_matlab_export_preserves_bool_api_by_default(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        def fake_savemat(path: str, *_args: Any, **_kwargs: Any) -> None:
+            Path(path).write_bytes(b"matlab-payload")
+
+        monkeypatch.setattr(export_module, "SCIPY_AVAILABLE", True)
+        monkeypatch.setattr(export_module, "savemat", fake_savemat)
+
+        result = export_module.export_to_matlab(
+            str(tmp_path / "recording.mat"),
+            {"positions": np.array([1.0, 2.0])},
+        )
+
+        assert isinstance(result, bool)
+
+    def test_hdf5_export_can_return_structured_outcome_with_sidecar_checksum(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        class FakeGroup:
+            def __init__(self) -> None:
+                self.attrs: dict[str, Any] = {}
+
+            def create_dataset(self, *_args: Any, **_kwargs: Any) -> None:
+                return None
+
+        class FakeFile(FakeGroup):
+            def __init__(self, path: str, _mode: str) -> None:
+                super().__init__()
+                self.path = Path(path)
+
+            def __enter__(self) -> FakeFile:
+                self.path.write_bytes(b"hdf5-payload")
+                return self
+
+            def __exit__(self, *_args: Any) -> None:
+                return None
+
+            def create_group(self, _name: str) -> FakeGroup:
+                return FakeGroup()
+
+        class FakeH5py:
+            File = FakeFile
+
+        output_path = tmp_path / "recording.h5"
+        monkeypatch.setattr(export_module, "H5PY_AVAILABLE", True)
+        monkeypatch.setattr(export_module, "h5py", FakeH5py, raising=False)
+
+        outcome = export_module.export_to_hdf5(
+            str(output_path),
+            {"positions": np.array([1.0, 2.0]), "club": "driver"},
+            return_outcome=True,
+        )
+
+        expected_checksum = hashlib.sha256(b"hdf5-payload").hexdigest()
+        sidecar_path = tmp_path / "recording.h5.provenance.json"
+        sidecar = json.loads(sidecar_path.read_text())
+        assert outcome.success is True
+        assert outcome.path == output_path
+        assert outcome.checksum_sha256 == expected_checksum
+        assert outcome.provenance_path == sidecar_path
+        assert sidecar["artifact"]["checksum_sha256"] == expected_checksum
