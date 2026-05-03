@@ -60,6 +60,24 @@ def _line_count(path: Path) -> int:
         return sum(1 for _ in handle)
 
 
+def _get_owner(path: str, repo_root: Path) -> str:
+    codeowners_path = repo_root / ".github" / "CODEOWNERS"
+    if not codeowners_path.exists():
+        return "Unknown"
+    
+    owner = "Unknown"
+    for line in codeowners_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split()
+        if len(parts) >= 2:
+            pattern = parts[0]
+            if path.startswith(pattern.lstrip("/")) or f"/{path}".startswith(pattern):
+                owner = " ".join(parts[1:])
+    return owner
+
+
 def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]]:
     active_exceptions: dict[str, dict] = {}
     invalid_exceptions: list[str] = []
@@ -70,6 +88,9 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
         reason = str(exc.get("reason", "")).strip()
         if not path or not owner or not reason:
             invalid_exceptions.append(f"Invalid exception entry: {exc}")
+            continue
+        if "issue" not in reason.lower() and "#" not in reason and "decomposition" not in reason.lower():
+            invalid_exceptions.append(f"Exception missing linked issue in reason: {path}")
             continue
         try:
             if _exception_is_active(exc):
@@ -86,7 +107,7 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
     return active_exceptions, invalid_exceptions
 
 
-def main() -> int:
+def main() -> int:  # noqa: C901
     parser = argparse.ArgumentParser(
         description="Enforce changed-file line-count budget."
     )
@@ -114,7 +135,11 @@ def main() -> int:
     except RuntimeError:
         changed_files = _changed_python_files(repo_root, "HEAD~1")
 
+    if len(config.get("exceptions", [])) > 5:
+        invalid_exceptions.append(f"Too many exceptions: {len(config.get('exceptions', []))} (max 5)")
+
     violations = list(invalid_exceptions)
+    watchlist: list[str] = []
     for file_path in changed_files:
         rel = str(file_path.relative_to(repo_root)).replace("\\", "/")
         if rel.startswith("tests/"):
@@ -124,8 +149,17 @@ def main() -> int:
         count = _line_count(file_path)
         if count > budget:
             violations.append(f"{rel}: {count} lines (budget={budget})")
+        elif budget * 0.9 <= count <= budget:
+            owner = _get_owner(rel, repo_root)
+            watchlist.append(f"{rel}: {count} lines (owner: {owner})")
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    if watchlist:
+        logger.info("WATCHLIST (1080-1200 lines):")
+        for item in watchlist:
+            logger.info("  %s", item)
+        logger.info("")
 
     if violations:
         logger.error("FAIL: file size budget violations detected:\n")

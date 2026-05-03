@@ -5,19 +5,19 @@
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Motion Capture Plotter/Motion_Capture_Plotter.py",
       "owner": "@simscape-gui",
       "reason": "Legacy plotting module staged for decomposition",
-      "expires_on": "2026-12-31"
+      "expires_on": "2026-07-31"
     },
     {
       "path": "src/shared/python/spatial_algebra/pose6dof.py",
       "owner": "@physics-core",
       "reason": "Pose6DOF at 1229 lines due to comprehensive SE(3) operations. Decomposition pending.",
-      "expires_on": "2027-06-30"
+      "expires_on": "2026-07-31"
     },
     {
       "path": "src/shared/python/physics/terrain_representation.py",
       "owner": "@physics-core",
       "reason": "Terrain representation at 1253 lines combines mesh, elevation, and surface-material models. Split into domain submodules planned, tracked in issue #2456.",
-      "expires_on": "2027-06-30"
+      "expires_on": "2026-07-31"
     }
   ]
 }

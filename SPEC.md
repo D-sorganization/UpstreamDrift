@@ -17,6 +17,17 @@
   Write clearly, use concrete examples, and avoid ambiguity.
 -->
 
+## SPEC Ownership and Update Cadence
+
+- **Owner:** @diete (responsible for accepting SPEC.md edits)
+- **Update triggers (mandatory):**
+  - Any PR that adds, removes, or moves a top-level `src/` package or a public
+    engine adapter must update §6 (Component Locations) and §7 (Feature Status).
+  - Any PR that changes the version in `pyproject.toml` must update §1 (Identity).
+  - Any PR that changes a CI gate threshold must update §X (Quality Gates).
+- **Review cadence:** SPEC.md is reviewed for staleness on every release
+  (per `docs/operations/release-runbook.md`, see #3842).
+
 ## 1. Identity
 
 | Field                   | Value                                              |
@@ -68,23 +79,23 @@ UpstreamDrift/
 ├── src/
 │   ├── engines/
 │   │   ├── physics_engines/        # Engine adapters and integrations
-│   │   │   ├── mujoco_engine.py    # MuJoCo backend (supported)
-│   │   │   ├── drake_engine.py     # Drake backend (extended)
-│   │   │   ├── pinocchio_engine.py # Pinocchio backend (extended)
-│   │   │   ├── opensim_engine.py   # OpenSim backend (experimental)
-│   │   │   └── myosuite_engine.py  # MyoSuite backend (experimental)
+│   │   │   ├── mujoco/             # MuJoCo backend (supported)
+│   │   │   ├── drake/              # Drake backend (extended)
+│   │   │   ├── pinocchio/          # Pinocchio backend (extended)
+│   │   │   ├── opensim/            # OpenSim backend (experimental)
+│   │   │   └── myosuite/           # MyoSuite backend (experimental)
 │   │   └── pendulum_models/        # Simplified educational models
 │   │       ├── twodof_pendulum.py
 │   │       └── biomechanical_pendulum.py
 │   ├── launchers/                  # GUI/CLI entry points
-│   │   ├── gui_launcher.py         # PyQt6 professional GUI
+│   │   ├── golf_launcher.py        # PyQt6 professional GUI
 │   │   └── cli_launcher.py         # Command-line interface
 │   ├── api/                        # FastAPI REST backend
 │   │   ├── main.py                 # API entry point
 │   │   ├── endpoints/              # REST endpoint definitions
 │   │   └── models.py               # Pydantic request/response models
 │   ├── config/                     # Configuration management
-│   │   └── configuration.py        # Config loading and validation
+│   │   └── launcher_manifest_loader.py # Config loading and validation
 │   ├── shared/                     # Cross-engine utilities
 │   │   ├── validators.py           # Shared validation logic
 │   │   ├── utilities.py            # Helper functions
@@ -135,21 +146,21 @@ UpstreamDrift/
 
 ### Key Components
 
-| Component                | Location                                          | Purpose                                                                                     |
-| ------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| MuJoCo Engine Adapter    | `src/engines/physics_engines/mujoco_engine.py`    | Primary physics engine integration with full support for contact dynamics and muscle models |
-| Drake Engine Adapter     | `src/engines/physics_engines/drake_engine.py`     | Extended Drake support for trajectory optimization and manipulation tasks                   |
-| Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio_engine.py` | Extended Pinocchio support for efficient rigid-body dynamics computation                    |
-| OpenSim Engine Adapter   | `src/engines/physics_engines/opensim_engine.py`   | Experimental OpenSim integration for clinical biomechanics workflows                        |
-| MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite_engine.py`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
-| Pendulum Models          | `src/engines/pendulum_models/`                    | Educational simplified models for learning and quick prototyping                            |
-| FastAPI Backend          | `src/api/`                                        | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
-| PyQt6 GUI                | `src/launchers/gui_launcher.py`                   | Professional interactive GUI with real-time 3D visualization                                |
-| Tauri Desktop App        | `ui/`                                             | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
-| Rust Physics Kernels     | `rust_core/upstream-physics/`                     | High-performance compiled physics routines for critical paths                               |
-| Configuration Manager    | `src/config/`                                     | Centralized configuration loading, validation, and environment management                   |
-| Shared Utilities         | `src/shared/`                                     | Cross-engine validators, helpers, and exception definitions                                 |
-| URDF Models              | `shared/models/`                                  | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
+| Component                | Location                                 | Purpose                                                                                     |
+| ------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------- |
+| MuJoCo Engine Adapter    | `src/engines/physics_engines/mujoco/`    | Primary physics engine integration with full support for contact dynamics and muscle models |
+| Drake Engine Adapter     | `src/engines/physics_engines/drake/`     | Extended Drake support for trajectory optimization and manipulation tasks                   |
+| Pinocchio Engine Adapter | `src/engines/physics_engines/pinocchio/` | Extended Pinocchio support for efficient rigid-body dynamics computation                    |
+| OpenSim Engine Adapter   | `src/engines/physics_engines/opensim/`   | Experimental OpenSim integration for clinical biomechanics workflows                        |
+| MyoSuite Engine Adapter  | `src/engines/physics_engines/myosuite/`  | Experimental MyoSuite integration for detailed muscle physiology simulation                 |
+| Pendulum Models          | `src/engines/pendulum_models/`           | Educational simplified models for learning and quick prototyping                            |
+| FastAPI Backend          | `src/api/`                               | REST API exposing simulation, IK/ID, trajectory optimization, and control endpoints         |
+| PyQt6 GUI                | `src/launchers/golf_launcher.py`         | Professional interactive GUI with real-time 3D visualization                                |
+| Tauri Desktop App        | `ui/`                                    | Cross-platform desktop application wrapper (Windows, macOS, Linux)                          |
+| Rust Physics Kernels     | `rust_core/upstream-physics/`            | High-performance compiled physics routines for critical paths                               |
+| Configuration Manager    | `src/config/`                            | Centralized configuration loading, validation, and environment management                   |
+| Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
+| URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
 
 ## 5. Desired Functionality
 
@@ -214,7 +225,7 @@ UpstreamDrift/
 | ------------------------ | ------------- | ------------------------------- | -------------------------------------------------------- |
 | Biomechanical Models     | URDF          | `shared/models/`                | URDF 1.0 standard with custom muscle actuator extensions |
 | Motion Capture Data      | C3D, BVH, TRC | External mocap systems or files | Standard formats with marker sets and frame data         |
-| Optimization Constraints | JSON          | User input or configuration     | Custom constraint schema in `src/config/schemas/`        |
+| Optimization Constraints | JSON          | User input or configuration     | Custom constraint schema in `src/config/`                |
 | Control Parameters       | YAML/JSON     | Configuration files or API      | Engine-specific parameter maps validated against schemas |
 
 ### Output Data
@@ -267,20 +278,18 @@ UpstreamDrift employs a comprehensive test pyramid with multiple specialized cat
 - **Physics Validation Tests**: Verify results against known ground truth (analytical solutions, published benchmarks)
 - **Golf Ball-Flight Source Contracts**: Validate documented aerodynamic, impact, and atmosphere assumptions against `docs/physics/GOLF_BALL_FLIGHT_IMPACT_SOURCE_MAP.md`
 - **Benchmark Tests**: Performance regression detection and optimization validation
-- **Property-Based Tests**: Hypothesis-driven fuzzing for robustness
 
 ### Test Organization
 
-| Category              | Location                    | Framework           | Markers                           |
-| --------------------- | --------------------------- | ------------------- | --------------------------------- |
-| Unit                  | `tests/unit/`               | pytest              | `@pytest.mark.unit`               |
-| Integration           | `tests/integration/`        | pytest              | `@pytest.mark.integration`        |
-| Acceptance            | `tests/acceptance/`         | pytest              | `@pytest.mark.acceptance`         |
-| Cross-Engine          | `tests/cross_engine/`       | pytest              | `@pytest.mark.cross_engine`       |
-| Physics Validation    | `tests/physics_validation/` | pytest              | `@pytest.mark.physics_validation` |
-| Golf Source Contracts | `tests/unit/shared_python/` | pytest              | source-map contract tests         |
-| Benchmarks            | `tests/benchmarks/`         | pytest-benchmark    | `@pytest.mark.benchmark`          |
-| Property-Based        | `tests/property/`           | hypothesis + pytest | `@pytest.mark.property`           |
+| Category              | Location                    | Framework        | Markers                           |
+| --------------------- | --------------------------- | ---------------- | --------------------------------- |
+| Unit                  | `tests/unit/`               | pytest           | `@pytest.mark.unit`               |
+| Integration           | `tests/integration/`        | pytest           | `@pytest.mark.integration`        |
+| Acceptance            | `tests/acceptance/`         | pytest           | `@pytest.mark.acceptance`         |
+| Cross-Engine          | `tests/cross_engine/`       | pytest           | `@pytest.mark.cross_engine`       |
+| Physics Validation    | `tests/physics_validation/` | pytest           | `@pytest.mark.physics_validation` |
+| Golf Source Contracts | `tests/unit/shared_python/` | pytest           | source-map contract tests         |
+| Benchmarks            | `tests/benchmarks/`         | pytest-benchmark | `@pytest.mark.benchmark`          |
 
 ### Coverage Requirements
 
@@ -472,9 +481,9 @@ pytest tests/ --cov=src --cov-fail-under=70
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-03 | 1.0.94  | Hardened the standard CI security-audit bootstrap to install a patched Black before `pip-audit`, preventing shared-runner cache drift from failing docs/governance PRs on CVE-2026-32274.                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| 2026-05-03 | 1.0.93  | Normalized contributor governance docs around `CLAUDE.md`, added stronger agent-doc consistency checks for coverage/path drift and duplicate paragraphs, and aligned the standard CI coverage gate with `pyproject.toml`.                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 2026-05-02 | 1.0.93  | UI: converted the launcher's global sidebar to icon-first navigation with accessible Home, Engines, Settings, and Documentation controls.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 2026-05-03 | 1.0.94  | Hardened the standard CI security-audit bootstrap to install a patched Black before `pip-audit`, preventing shared-runner cache drift from failing docs/governance PRs on CVE-2026-32274.                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-05-03 | 1.0.93  | Normalized contributor governance docs around `CLAUDE.md`, added stronger agent-doc consistency checks for coverage/path drift and duplicate paragraphs, and aligned the standard CI coverage gate with `pyproject.toml`.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-05-02 | 1.0.93  | UI: converted the launcher's global sidebar to icon-first navigation with accessible Home, Engines, Settings, and Documentation controls.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 2026-04-30 | 1.0.88  | Added an offline GitHub Actions supply-chain guard that rejects external workflow actions not pinned to commit SHAs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-04-30 | 1.0.87  | Added source-backed golf ball-flight and impact validation contracts, including explicit altitude bounds for air-density computations and portfolio-facing golf modeling documentation.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 2026-04-27 | 1.0.83  | Fixed Bandit B604 false positive alerts in test files by adding nosec annotations.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
