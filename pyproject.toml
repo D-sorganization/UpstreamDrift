@@ -43,6 +43,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Default extras policy:
+#   extras_default = "core"
+# The runtime dependencies list above is the canonical core dependency set.
+# Optional extras add only tier-specific or feature-specific dependencies.
 rust = ["upstream-physics>=0.1.0"]
 drake = ["drake>=1.22.0"]
 pinocchio = ["pinocchio>=2.6.0", "meshcat>=0.3.0"]
@@ -57,6 +61,7 @@ pose = ["mediapipe>=0.10.33", "opencv-python>=4.8.0", "imageio[ffmpeg]>=2.31.0"]
 
 # Biomechanics engines
 biomechanics = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
+experimental = ["myosuite>=2.0.0", "opensim>=4.4.0", "gymnasium>=0.29.0"]
 
 # Reinforcement learning (for MyoSuite muscle training)
 rl = ["stable-baselines3>=2.0.0", "gymnasium>=0.29.0"]

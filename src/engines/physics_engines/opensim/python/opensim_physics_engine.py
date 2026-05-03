@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.tiers import warn_if_experimental
 from src.shared.python.core.contracts import (
     check_finite,
     postcondition,
@@ -41,6 +42,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     """OpenSim Physics Engine Implementation."""
 
     def __init__(self) -> None:
+        warn_if_experimental("opensim", "OpenSim")
         self._model = None
         self._state = None
         self._manager = None

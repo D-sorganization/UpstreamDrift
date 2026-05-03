@@ -177,6 +177,18 @@ UpstreamDrift/
 | Shared Utilities         | `src/shared/`                            | Cross-engine validators, helpers, and exception definitions                                 |
 | URDF Models              | `shared/models/`                         | Canonical model definitions (URDF format) for golf swings, human body, pendulums            |
 
+### Engine Tier Policy
+
+| Tier         | Examples                | Stability bar                                            | Deps installed by default | Vulnerability SLA |
+| ------------ | ----------------------- | -------------------------------------------------------- | ------------------------- | ----------------- |
+| core         | MuJoCo, FastAPI, shared | Must pass on every PR; semver-stable public API; no skip | yes                       | High/Critical: 7d |
+| extended     | Drake, Pinocchio        | Must pass nightly; semver-stable in major versions       | only with extra           | High: 30d         |
+| experimental | OpenSim, MyoSuite       | Best-effort; may be skipped; API may break               | only with extra; warning  | Best effort       |
+| archived     | (none today)            | Read-only; not built; not tested                         | no                        | n/a               |
+
+Engine tier metadata is declared in each in-scope engine package with
+`_tier.py` and enforced by `scripts/check_engine_tiers.py`.
+
 ## 5. Desired Functionality
 
 ### Core Features
@@ -572,6 +584,7 @@ Bumped spec file slightly to bypass the spec check in CI.
 | 2026-04-29 | 1.0.85 | Bolt: Fixed 3D vector distance regressions and optimized math.hypot usage |
 | 2026-04-30 | 1.0.86 | Bolt: Optimized `np.linalg.norm` to explicit element-wise computation using `np.einsum` in ZTCFResult.magnitudes |
 | 2026-05-02 | 1.0.87 | Bolt: Optimized bounding sphere radius computation in mesh primitive fitting using `np.einsum` instead of `np.linalg.norm` |
+| 2026-05-03 | 1.0.96 | Hardened CI Standard security audit bootstrapping to use `--ignore-installed` for corrupted shared-runner packages, including the missing-RECORD `urllib3` case. |
 
 ## 3D Vector Distances Note
 

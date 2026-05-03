@@ -175,6 +175,9 @@ jobs:
       - name: Dependency Direction Fitness Check
         run: python3 scripts/check_dependency_direction.py
 
+      - name: Engine Tier Metadata Check
+        run: python3 scripts/check_engine_tiers.py
+
       - name: Changed-File Size Budget Check
         run: python3 scripts/ci/check_file_size_budget.py
 
@@ -228,13 +231,13 @@ jobs:
       - name: Security Audit
         shell: bash
         run: |
-          # Force-reinstall sortedcontainers after the editable install: the shared
-          # runner toolcache can carry a half-installed copy that breaks cyclonedx.
-          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0"
-          # Remove any runner-bundled Black before installing the patched release.
-          python -m pip uninstall -y black || true
-          python -m pip install --force-reinstall --no-deps "black==26.3.1"
-          python -m pip install --ignore-installed pip-audit
+          # Shared runners can leave toolcache packages without RECORD metadata,
+          # so refresh audit dependencies without uninstalling them first.
+          python -m pip install --upgrade --ignore-installed --no-deps "sortedcontainers>=2.4.0" "urllib3==2.6.3"
+          # Force a patched Black into the audit environment so pip-audit does not
+          # fail on a vulnerable formatter version lingering in the shared runner cache.
+          python -m pip install --upgrade --ignore-installed --no-deps "black==26.3.1"
+          python -m pip install --upgrade --ignore-installed pip-audit
 
           audit_black_version="$(python - <<'PY'
           from importlib import metadata
