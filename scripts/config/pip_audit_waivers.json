@@ -1,12 +1,4 @@
 {
   "schema_version": 1,
-  "waivers": [
-    {
-      "vuln": "CVE-2026-4539",
-      "package": "pygments",
-      "reason": "No fixed release is available yet.",
-      "tracked_in": "#3844",
-      "expires_on": "2026-06-30"
-    }
-  ]
+  "waivers": []
 }
