@@ -9,7 +9,6 @@ import math
 import defusedxml.ElementTree as ET
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
-from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from src.shared.python.engine_core.engine_availability import (  # noqa: E402
@@ -349,8 +348,8 @@ class VisualizationWidget(QWidget):
         return self._joint_names.copy()
 
 
-class Simple3DVisualizationWidget(QOpenGLWidget):
-    """Simple OpenGL-based 3D visualization widget using QPainter.
+class Simple3DVisualizationWidget(QWidget):
+    """Simple 3D visualization widget using QPainter.
 
 
 
@@ -427,18 +426,10 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         self.update()
 
     def initializeGL(self) -> None:
-        """Initialize OpenGL.
-
-
-
-        Note: Not used in this implementation as we use QPainter
-
-        in paintGL for maximum compatibility.
-
-        """
+        """Compatibility hook for callers that expect an OpenGL widget API."""
 
     def resizeGL(self, width: int, height: int) -> None:
-        """Handle OpenGL resize.
+        """Compatibility hook for callers that expect an OpenGL widget API.
 
 
 
@@ -448,9 +439,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
             height: New height.
 
-
-
-        Note: Not used in this implementation.
 
         """
 
@@ -558,8 +546,12 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         )
         painter.drawText(10, 50, "Grid View (Fallback)")
 
+    def paintEvent(self, _event: object | None) -> None:
+        """Paint the fallback visualization in regular headless-safe Qt paths."""
+        self.paintGL()
+
     def paintGL(self) -> None:
-        """Paint the OpenGL scene using QPainter for fallback visualization."""
+        """Paint the scene using QPainter for fallback visualization."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.fillRect(self.rect(), QColor(40, 40, 40))

@@ -26,12 +26,25 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyqtgraph as pg
+_pg: Any | None = None
+_pyqtgraph_checked = False
 
-    _HAS_PYQTGRAPH = True
-except ImportError:
-    _HAS_PYQTGRAPH = False
+
+def _load_pyqtgraph() -> Any | None:
+    """Return pyqtgraph when available, without importing it during collection."""
+    global _pg, _pyqtgraph_checked
+    if _pyqtgraph_checked:
+        return _pg
+    _pyqtgraph_checked = True
+    try:
+        import pyqtgraph as pg
+    except (ImportError, OSError, RuntimeError) as exc:
+        logger.debug("pyqtgraph unavailable, using torque plot fallback: %s", exc)
+        _pg = None
+    else:
+        _pg = pg
+    return _pg
+
 
 # ── Try to import shared PlotThemeManager ──────────────────────────────────
 _PLOT_THEME_AVAILABLE = False
@@ -124,7 +137,7 @@ class TorqueHistoryWidget(QWidget):
         """Update backgrounds when the plot theme changes."""
         if not (theme is not None):
             raise ValueError("theme must be provided")
-        if not _HAS_PYQTGRAPH:
+        if _load_pyqtgraph() is None:
             return
         try:
             self._bg_color = theme.axes_facecolor  # type: ignore[attr-defined]
@@ -152,7 +165,7 @@ class TorqueHistoryWidget(QWidget):
         )
         self._outer_layout.addWidget(title)
 
-        if not _HAS_PYQTGRAPH:
+        if _load_pyqtgraph() is None:
             fallback = QLabel(
                 "Install pyqtgraph for torque plots:\n  pip install pyqtgraph"
             )
@@ -179,7 +192,8 @@ class TorqueHistoryWidget(QWidget):
         """
         if not (n_joints is not None):
             raise ValueError("n_joints must be provided")
-        if not _HAS_PYQTGRAPH:
+        pg = _load_pyqtgraph()
+        if pg is None:
             return
 
         # Clear old plots
@@ -251,7 +265,8 @@ class TorqueHistoryWidget(QWidget):
             raise ValueError("Result must have at least 2 time steps")
         self._result = result
 
-        if not _HAS_PYQTGRAPH:
+        pg = _load_pyqtgraph()
+        if pg is None:
             return
 
         t = result.t
@@ -299,7 +314,7 @@ class TorqueHistoryWidget(QWidget):
             - set_simulation() has been called.
             - 0 <= idx < result.n_steps.
         """
-        if self._result is None or not _HAS_PYQTGRAPH:
+        if self._result is None or _load_pyqtgraph() is None:
             return
         if not (0 <= idx < self._result.n_steps):
             raise ValueError("DbC Blocked: Precondition failed.")
@@ -310,7 +325,7 @@ class TorqueHistoryWidget(QWidget):
     def clear(self) -> None:
         """Reset to an empty state (called on simulation reset)."""
         self._result = None
-        if not _HAS_PYQTGRAPH:
+        if _load_pyqtgraph() is None:
             return
         for j_curves in self._curves:
             for curve in j_curves.values():
