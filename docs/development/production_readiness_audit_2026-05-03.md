@@ -1,132 +1,214 @@
-# Production Readiness Audit (Managerial Review)
+# Production Readiness Audit (Managerial + Issue Authoring Pack)
 
 Date: 2026-05-03  
-Scope: Whole-repo architecture, operability, quality gates, and productization fitness.
+Repository: `D-sorganization/UpstreamDrift`  
+Audience: Engineering management, staff engineers, release managers
 
 ## Executive Verdict
 
-**Not yet production-grade as a coherent software product.** The repository contains substantial valuable technical assets, but current composition resembles a **research mega-monorepo** rather than a tightly governed production application.
+**Current state: strong technical ambition, not yet production-grade as an integrated software product.**
 
-Top blockers:
+UpstreamDrift contains meaningful technical depth and clear domain expertise. However, the operational posture still resembles a large research monorepo with mixed maturity tiers rather than a tightly governed production platform.
 
-1. **Architecture/spec drift**: canonical spec maps to paths that do not exist.
-2. **Monolithic code concentration**: 494 Python files exceed the repository’s own 400-line limit.
-3. **CI contract fragmentation**: multiple overlapping workflows and unclear single source of truth.
-4. **Packaging/runtime ambiguity**: mixed interfaces (PyQt, FastAPI, Tauri, Rust) without one authoritative deployment path.
-5. **Governance mismatch**: standards in AGENTS/SPEC exceed what appears enforceable in current codebase.
+### Production Readiness Scorecard (Managerial)
 
-## Key Findings
+| Dimension | Rating (1-5) | Why |
+|---|---:|---|
+| Product architecture clarity | 2 | Documented architecture and implemented module layout are not fully aligned. |
+| Maintainability | 2 | Significant concentration of very large files and broad module responsibilities. |
+| CI/CD governance | 2 | Many workflows exist, but the blocking contract is not obvious to contributors. |
+| Release engineering | 2 | Multiple entrypoints/artifacts without one explicit canonical production unit. |
+| Observability/operations | 2 | Baseline SRE contract is not clearly standardized across runtime surfaces. |
+| Security posture | 3 | Tooling exists, but optional stack breadth increases attack surface complexity. |
 
-### 1) Spec-to-code mismatch (critical)
+## Evidence Snapshot
 
-`SPEC.md` documents an architecture rooted in modules like `src/api/main.py` and `src/config/configuration.py`, but key paths are absent in current tree. This undermines onboarding, trust, and release confidence.
+1. **Spec-to-code drift evidence**
+   - The architecture narrative in `SPEC.md` references canonical paths such as `src/api/main.py`, `src/config/configuration.py`, and flat engine adapter paths that are absent in the current tree.
+2. **Maintainability evidence**
+   - Repo scan indicates **494 Python files >400 lines**, conflicting with the repository’s own maintainability threshold.
+3. **Workflow/governance evidence**
+   - `.github/workflows/` includes a large set of CI, bot, remediation, and archived workflows, making it difficult for contributors to identify the merge-blocking contract quickly.
 
-### 2) Monolith and maintainability risk (critical)
+## High-Impact Findings and Why They Matter
 
-A repository scan found **494 Python files over 400 lines**, conflicting with stated engineering policy and increasing defect surface, review fatigue, and change coupling.
+### F1. SPEC drift undermines engineering trust (Critical)
+When the canonical specification diverges from reality, onboarding, code review, and release decisions are made on incorrect assumptions.
 
-### 3) Workflow sprawl and CI discoverability debt (high)
+### F2. Monolithic files drive defects and slow delivery (Critical)
+Oversized modules increase cognitive load, make behavior changes risky, and degrade review quality.
 
-`.github/workflows/` currently includes many automation and bot workflows plus archived entries. While automation is useful, there is no obvious “single operational CI contract” for humans; this raises release risk and confusion about what blocks merges.
+### F3. CI contract discoverability is weak (High)
+Workflow volume without explicit classification leads to confusion over which checks are required for safe merges.
 
-### 4) Product boundary ambiguity (high)
+### F4. Product boundary is too porous (High)
+Core, extended, and experimental surfaces are mixed, increasing blast radius for dependencies and regressions.
 
-The project claims to be one “suite,” but mixes:
-- research sandboxes,
-- production-adjacent launchers,
-- multiple engine adapters with differing maturity,
-- large legacy/vendor-like directories,
-- and multiple UI/runtime surfaces.
+### F5. Release artifact strategy is ambiguous (High)
+CLI, GUI launcher, API, Tauri bundle, and Rust components coexist without one explicit production deployment contract.
 
-Without stronger boundarying, it is difficult to guarantee SLOs, support expectations, and secure deployment.
+### F6. Ops baseline is under-defined (Medium-High)
+Without uniform observability, incidents become harder to detect, triage, and remediate quickly.
 
-### 5) Quality policy inconsistency (medium-high)
+### F7. Security tiering needs sharper policy (Medium-High)
+Optional engine ecosystems and multi-surface packaging require explicit security SLAs and SBOM segmentation.
 
-User/developer guidance references strict black/isort/ruff/mypy and quality scripts; however, repository config includes selective exclusions and reduced strictness in places. This is understandable during migration, but not consistent with “professional-grade” claims unless transparently tiered.
+---
 
-## Recommended GitHub Issues to Create
+## GitHub Issues to Create (Detailed, Ready to File)
 
-> These are written to be copy-pasted into `gh issue create`.
+The following issues are prepared for direct creation in GitHub. They include business impact and concrete acceptance criteria.
 
-### Issue 1 — SPEC drift remediation
-**Title:** `docs(spec): eliminate architecture drift between SPEC.md and real module map`
+> Note: In this environment, `gh` is unavailable, so these are authored for immediate copy/paste into GitHub.
 
-**Body:**
-- Problem: `SPEC.md` references non-existent core paths (e.g., `src/api/main.py`, `src/config/configuration.py`, flat engine adapter files).
-- Why it matters: breaks architecture trust, invalidates onboarding/review assumptions, and weakens release readiness.
-- Acceptance criteria:
-  1. Update `SPEC.md` module map to existing paths OR implement missing paths with compatibility shims.
-  2. Add CI check that validates listed critical paths exist.
-  3. Add “spec ownership” section naming update cadence and owners.
+### Issue 1
+**Title:** `docs(spec): eliminate architecture drift between SPEC.md and implemented module map`
 
-### Issue 2 — Monolith decomposition program
-**Title:** `refactor(maintainability): reduce oversized Python modules above 400 LOC threshold`
+**Labels:** `type:docs`, `area:architecture`, `priority:P0`, `production-readiness`
 
-**Body:**
-- Problem: 494 Python files exceed 400 lines.
-- Why it matters: high cognitive load, high regression risk, difficult reviews.
-- Acceptance criteria:
-  1. Generate ranked inventory (LOC + churn + defect density).
-  2. Refactor top 25 files into cohesive modules with stable API facades.
-  3. Add CI warning gate for new/expanded files >400 LOC and blocker at >800 LOC.
+**Problem Statement**
+`SPEC.md` currently documents canonical component paths that do not resolve in the implementation tree.
 
-### Issue 3 — CI contract simplification
-**Title:** `ci(governance): establish single blocking CI workflow and classify all other workflows`
+**Business Impact**
+- Incorrect engineering assumptions during planning/review
+- Increased onboarding time
+- Lower confidence in release sign-off
 
-**Body:**
-- Problem: workflow sprawl obscures blocking status.
-- Why it matters: unclear merge quality bar and ownership.
-- Acceptance criteria:
-  1. Publish CI taxonomy (blocking, advisory, scheduled, bot-maintenance).
-  2. Add README + CONTRIBUTING table mapping each workflow to purpose/owner/blocking behavior.
-  3. Enforce branch protection against exactly defined blocking checks.
+**Acceptance Criteria**
+1. Reconcile `SPEC.md` module map to actual paths or implement missing compatibility-layer modules.
+2. Add automated verification for “critical paths listed in SPEC must exist”.
+3. Add `SPEC ownership` section: owners, update trigger conditions, and review cadence.
 
-### Issue 4 — Product boundary and support tiers hardening
-**Title:** `architecture(product): define production core vs experimental/research boundaries`
+---
 
-**Body:**
-- Problem: production and research surfaces are mixed in a single runtime/developer experience.
-- Why it matters: unclear support contract, release blast radius too large.
-- Acceptance criteria:
-  1. Create boundary doc: `core`, `extended`, `experimental`, `archived`.
-  2. Separate import/runtime paths so core can run without experimental dependencies.
-  3. Add CI matrix validating core independently from extended/experimental.
+### Issue 2
+**Title:** `refactor(maintainability): decompose oversized Python modules beyond policy thresholds`
 
-### Issue 5 — Release engineering and deployment contract
-**Title:** `release: define supported deployment topology and reproducible release artifacts`
+**Labels:** `type:refactor`, `area:code-quality`, `priority:P0`, `production-readiness`
 
-**Body:**
-- Problem: multiple entrypoints (CLI, launcher, API, Tauri, Rust bindings) with ambiguous primary release unit.
-- Why it matters: hard to operate or support in production.
-- Acceptance criteria:
-  1. Pick canonical production artifact(s) (e.g., Python package + API container + optional desktop).
-  2. Add version compatibility matrix (Python, engines, OS, GPU stack).
-  3. Add smoke tests per shipped artifact.
+**Problem Statement**
+A substantial set of Python files exceed the 400-line threshold, with numerous modules far beyond that limit.
 
-### Issue 6 — Observability and operations baseline
-**Title:** `ops(observability): define minimum telemetry and failure handling baseline`
+**Business Impact**
+- Slower code reviews and onboarding
+- Higher regression risk
+- Reduced velocity for safe feature delivery
 
-**Body:**
-- Problem: broad feature claims but unclear uniform SRE baseline.
-- Why it matters: poor production diagnosability.
-- Acceptance criteria:
-  1. Standard structured logging schema across core modules.
-  2. Health/readiness checks for API and launcher-critical subsystems.
-  3. Error budget + alert mapping for production endpoints.
+**Acceptance Criteria**
+1. Produce prioritized decomposition backlog (LOC, ownership, churn, defect history).
+2. Refactor top 25 highest-risk files into cohesive modules behind stable facades.
+3. Add CI policy: warning >400 LOC, blocking >800 LOC for newly modified files.
 
-### Issue 7 — Security posture tightening for mixed-surface repo
-**Title:** `security: enforce hardened dependency and artifact policy across core + optional stacks`
+---
 
-**Body:**
-- Problem: many optional integrations increase supply-chain and runtime attack surface.
-- Why it matters: high likelihood of latent vulnerabilities and inconsistent patch cadence.
-- Acceptance criteria:
-  1. Security policy by tier (core required deps vs optional engines).
-  2. Separate SBOMs for core and full-stack installs.
-  3. Automated vuln triage SLA labels (critical/high/medium).
+### Issue 3
+**Title:** `ci(governance): define and publish the single merge-blocking CI contract`
+
+**Labels:** `type:ci`, `area:governance`, `priority:P1`, `production-readiness`
+
+**Problem Statement**
+Current workflow ecosystem is rich but hard to parse; blocking vs advisory vs scheduled checks are not obvious.
+
+**Business Impact**
+- Wasted contributor effort
+- Unclear quality gate ownership
+- Increased merge friction
+
+**Acceptance Criteria**
+1. Publish CI taxonomy table in `README` + `docs/development`.
+2. Mark each workflow as `blocking`, `advisory`, `scheduled`, or `automation`.
+3. Align branch protection to exactly the documented blocking checks.
+
+---
+
+### Issue 4
+**Title:** `architecture(product): formalize core vs extended vs experimental boundaries`
+
+**Labels:** `type:architecture`, `area:product`, `priority:P1`, `production-readiness`
+
+**Problem Statement**
+Repository contains mixed-maturity components with insufficient runtime and dependency boundary isolation.
+
+**Business Impact**
+- Core reliability coupled to experimental churn
+- Harder support commitments
+- Broader dependency blast radius
+
+**Acceptance Criteria**
+1. Define tiered boundary contract (`core`, `extended`, `experimental`, `archived`).
+2. Ensure core runtime starts with only core dependency set.
+3. Add CI matrix that validates core independently from optional tiers.
+
+---
+
+### Issue 5
+**Title:** `release: codify canonical production artifacts and compatibility matrix`
+
+**Labels:** `type:release`, `area:deployment`, `priority:P1`, `production-readiness`
+
+**Problem Statement**
+Multiple interfaces are present without one explicit production artifact strategy.
+
+**Business Impact**
+- Operational ambiguity
+- Harder incident response ownership
+- Fragmented user support expectations
+
+**Acceptance Criteria**
+1. Define primary production artifact(s) (for example: API container + pip package, desktop optional).
+2. Publish compatibility matrix (OS, Python, GPU/driver, engine tiers).
+3. Add smoke/integration checks per shipped artifact.
+
+---
+
+### Issue 6
+**Title:** `ops(observability): standardize telemetry and runtime health contracts`
+
+**Labels:** `type:ops`, `area:observability`, `priority:P1`, `production-readiness`
+
+**Problem Statement**
+Observability expectations are not consistently defined across API, launcher, and compute paths.
+
+**Business Impact**
+- Higher MTTR
+- Inconsistent production diagnostics
+- Incident trend analysis gaps
+
+**Acceptance Criteria**
+1. Define required log schema fields and severity policy.
+2. Implement health/readiness probes for core surfaces.
+3. Publish runbook with alert mapping and error-budget signals.
+
+---
+
+### Issue 7
+**Title:** `security: introduce tiered dependency risk policy and SBOM segmentation`
+
+**Labels:** `type:security`, `area:dependencies`, `priority:P1`, `production-readiness`
+
+**Problem Statement**
+Optional engines and mixed deployment surfaces increase supply-chain complexity.
+
+**Business Impact**
+- Uneven patching posture
+- Higher latent vulnerability risk
+- Less predictable compliance reporting
+
+**Acceptance Criteria**
+1. Document security requirements by tier (`core` vs optional stacks).
+2. Produce separate SBOMs for minimal/core and full-stack profiles.
+3. Define vulnerability triage SLA and ownership model.
+
+---
+
+## Suggested Sequencing (Program View)
+
+1. **P0 (Sprint 1-2):** Issue 1 + Issue 2
+2. **P1 (Sprint 2-3):** Issue 3 + Issue 4
+3. **P1 (Sprint 3-4):** Issue 5 + Issue 6 + Issue 7
 
 ## Managerial Bottom Line
 
-- **Does the big picture make conceptual sense?** Yes: unified biomechanical suite across engines is strategically coherent.
-- **Is it set up like modern professional software today?** Not fully; execution and governance maturity lag behind ambition.
-- **Can it become production-grade?** Yes, if architecture boundaries, CI governance, and module decomposition are tackled as a deliberate program over multiple releases.
+- **Does the app concept make sense?** Yes. The strategic concept is coherent and compelling.
+- **Is it professional-grade today?** Not yet, due to governance and architecture execution gaps.
+- **Is productionization feasible?** Yes, with disciplined boundarying, CI contract simplification, and targeted decomposition.
