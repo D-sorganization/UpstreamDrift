@@ -3,7 +3,7 @@
 This inventory is the ownership ledger for active GitHub Actions workflows.
 Archived workflows under `.github/workflows/archived/` are intentionally excluded.
 
-The current durable guardrail is a no-growth cap at 58 active workflows. The
+The current durable guardrail is a no-growth cap at 59 active workflows. The
 consolidation target for issue #3835 remains 25 active workflows or fewer after
 owners validate low-risk removals.
 
@@ -70,6 +70,7 @@ this table and treated as a security boundary.
 | pr-auto-labeler.yml | pull_request | @triage | pull-requests: write | KEEP: PR labeling. | n/a |
 | PR-Comment-Responder.yml | issue_comment/workflow_dispatch | @triage | issues/pull-requests: write | KEEP: canonical PR comment responder. | n/a |
 | release.yml | push/workflow_dispatch | @release | contents: write | KEEP: build and publish releases. | n/a |
+| security-osv-monitor.yml | schedule/workflow_dispatch | @security | contents/issues/security-events: write | KEEP: scheduled OSV vulnerability triage SLA monitor. | n/a |
 | spec-check.yml | pull_request/workflow_dispatch | @core | contents: read | KEEP: SPEC freshness validation. | n/a |
 | stale-cleanup.yml | schedule/workflow_dispatch | @infra | issues/pull-requests: write | KEEP: stale issue and PR cleanup. | n/a |
 | tauri-build.yml | push/pull_request/workflow_dispatch | @desktop | contents: read | KEEP: Tauri desktop build. | n/a |

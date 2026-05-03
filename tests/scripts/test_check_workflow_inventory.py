@@ -119,3 +119,8 @@ def test_audit_repository_rejects_undocumented_agent_roots(tmp_path: Path) -> No
         "agent config root exists without docs/development/agents/migration.md row: "
         ".claude/"
     ) in findings
+
+
+def test_checked_in_repository_inventory_is_current() -> None:
+    """The default guard must pass on the checked-in repository state."""
+    assert audit_repository(Path(".")) == []
