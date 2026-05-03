@@ -2,10 +2,15 @@
 
 import os
 from collections.abc import Generator
+from pathlib import Path
 
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.sql import text
 
 from src.api.auth.models import Base
 
@@ -39,6 +44,66 @@ def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
 
 
+def _repo_root() -> Path:
+    """Return the repository root that contains alembic.ini."""
+    return Path(__file__).resolve().parents[2]
+
+
+def _get_codebase_alembic_heads() -> set[str]:
+    """Return Alembic head revisions from the checked-out migration scripts."""
+    cfg = Config(str(_repo_root() / "alembic.ini"))
+    script = ScriptDirectory.from_config(cfg)
+    return set(script.get_heads())
+
+
+def _get_database_alembic_heads() -> set[str]:
+    """Return the currently applied Alembic revision heads.
+
+    Postcondition: returns the non-empty revision set recorded in
+    ``alembic_version`` or raises ``RuntimeError`` with startup-safe context.
+    """
+    try:
+        with engine.connect() as connection:
+            rows = connection.execute(text("SELECT version_num FROM alembic_version"))
+            revisions = {row[0] for row in rows if row[0]}
+    except SQLAlchemyError as exc:
+        raise RuntimeError(
+            "Database schema revision could not be verified because "
+            "alembic_version is missing or unreadable. Run Alembic migrations "
+            "before starting production."
+        ) from exc
+
+    if not revisions:
+        raise RuntimeError(
+            "Database schema revision could not be verified because "
+            "alembic_version has no recorded revision."
+        )
+    return revisions
+
+
+def _assert_alembic_head_applied() -> None:
+    """Raise unless the database Alembic revision matches the codebase head.
+
+    Production startup depends on this check so schema changes are applied by
+    the deployment migration step, not by SQLAlchemy ``create_all()``.
+    Postcondition: returns only when all codebase Alembic heads are applied.
+    """
+    code_heads = _get_codebase_alembic_heads()
+    database_heads = _get_database_alembic_heads()
+    if database_heads != code_heads:
+        raise RuntimeError(
+            "Database schema revision mismatch: "
+            f"database has {sorted(database_heads)}, "
+            f"codebase expects {sorted(code_heads)}. "
+            "Run `python3 scripts/db_migrate.py upgrade head` before startup."
+        )
+
+
+def _is_production_environment() -> bool:
+    """Return whether startup is running under the production DB contract."""
+    return os.getenv("UPSTREAM_DRIFT_ENV", "").strip().lower() == "production"
+
+
 def get_db() -> Generator[Session, None, None]:
     """Dependency to get database session."""
     db = SessionLocal()
@@ -54,6 +119,11 @@ def init_db() -> None:
     import secrets
 
     logger = logging.getLogger(__name__)
+
+    if _is_production_environment():
+        _assert_alembic_head_applied()
+        logger.info("Production database schema revision verified at Alembic head")
+        return
 
     create_tables()
 
