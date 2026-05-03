@@ -88,7 +88,7 @@ jobs:
           # Shared self-hosted runners can retain broken tool packages without
           # RECORD metadata. Ignore ambient installs so pip lays down clean
           # copies instead of trying to uninstall corrupted cache entries.
-          python -m pip install --ignore-installed ruff==0.14.10 "mypy>=1.15.0" bandit==1.7.7 pydocstyle==6.3.0 semgrep
+          python -m pip install --ignore-installed ruff==0.14.10 "mypy==1.20.1" bandit==1.7.7 pydocstyle==6.3.0 semgrep
 
       - name: Lint
         shell: bash
@@ -128,10 +128,28 @@ jobs:
             ruff format --check .
           fi
 
-      - run: pip install mypy types-PyYAML types-requests
+      - run: pip install mypy==1.20.1 types-PyYAML types-requests
       - name: Create stub ui/dist for editable install (quality checks only)
         run: mkdir -p ui/dist
       - run: pip install -e .[dev]
+
+      - name: Pin Type Toolchain
+        run: |
+          python -m pip install --force-reinstall --no-cache-dir "mypy==1.20.1" "numpy==2.2.6"
+          mypy --version
+          python - << 'PY'
+          from importlib import metadata
+
+          for package_name in ("numpy", "mypy", "types-numpy"):
+              try:
+                  version = metadata.version(package_name)
+              except metadata.PackageNotFoundError:
+                  version = "not installed"
+              print(f"{package_name}: {version}")
+          PY
+
+      - name: MyPy Exclusion Budget
+        run: python3 scripts/check_mypy_exclusion_budget.py
 
       # Baseline mypy check across all of src/. On PRs, only check changed
       # source files so unrelated repository-wide type debt does not block

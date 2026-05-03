@@ -268,20 +268,19 @@ exclude = [
     "src/research/deformable/objects.py",
 ]
 
-# Mypy overrides for modules with pre-existing type issues
-[[tool.mypy.overrides]]
-module = [
-    "src.shared.python.plotting.*",
-    "src.shared.python.ui.*",
-    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.*",
-    "src.engines.physics_engines.pinocchio.python.pinocchio_golf.*",
-]
-ignore_errors = true
-
 [[tool.mypy.overrides]]
 module = "src.shared.python.spatial_algebra.*"
+disallow_untyped_defs = true
 warn_return_any = true
 disable_error_code = ["arg-type", "no-any-return"]
+
+[[tool.mypy.overrides]]
+module = "src.shared.python.physics.*"
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "src.engines.common.*"
+disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = "src.api.*"

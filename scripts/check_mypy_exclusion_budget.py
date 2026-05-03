@@ -48,6 +48,14 @@ class ScheduleEntry:
     max_exclusions: int
 
 
+@dataclass(frozen=True)
+class MypyOverride:
+    """A normalized mypy module override block."""
+
+    modules: tuple[str, ...]
+    ignore_errors: bool
+
+
 def _normalize_path(raw_path: str) -> str:
     if not isinstance(raw_path, str) or not raw_path.strip():
         raise ValueError("path must be a non-empty string")
@@ -71,6 +79,32 @@ def load_pyproject_exclusions(path: Path) -> list[str]:
     if not isinstance(exclusions, list):
         raise ValueError("[tool.mypy].exclude must be a list")
     return [_normalize_path(entry) for entry in exclusions]
+
+
+def load_mypy_overrides(path: Path) -> list[MypyOverride]:
+    """Return normalized mypy override metadata from ``pyproject.toml``."""
+    data = tomllib.loads(path.read_text(encoding="utf-8"))
+    mypy_config = data.get("tool", {}).get("mypy", {})
+    raw_overrides = mypy_config.get("overrides", [])
+    if not isinstance(raw_overrides, list):
+        raise ValueError("[tool.mypy].overrides must be a list")
+    return [_parse_mypy_override(raw_override) for raw_override in raw_overrides]
+
+
+def _parse_mypy_override(raw_override: Any) -> MypyOverride:
+    if not isinstance(raw_override, dict):
+        raise ValueError("each mypy override must be an object")
+    raw_modules = raw_override.get("module", ())
+    if isinstance(raw_modules, str):
+        modules: tuple[str, ...] = (raw_modules.strip(),)
+    elif isinstance(raw_modules, list):
+        modules = tuple(str(module).strip() for module in raw_modules)
+    else:
+        raise ValueError("mypy override module must be a string or list")
+    return MypyOverride(
+        modules=tuple(module for module in modules if module),
+        ignore_errors=raw_override.get("ignore_errors") is True,
+    )
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:
@@ -143,6 +177,7 @@ def validate_budget(
     budget_entries: list[BudgetEntry],
     schedule: list[ScheduleEntry],
     today: date,
+    overrides: list[MypyOverride] | None = None,
 ) -> list[str]:
     """Return validation errors for mypy exclusion budget drift."""
     errors: list[str] = []
@@ -150,6 +185,7 @@ def validate_budget(
     errors.extend(_validate_duplicates(pyproject_exclusions, "pyproject"))
     errors.extend(_validate_duplicates(budget_paths, "budget"))
     errors.extend(_validate_metadata(budget_entries, today))
+    errors.extend(_validate_no_ignore_errors(overrides or []))
     errors.extend(_validate_path_sets(pyproject_exclusions, budget_paths))
     cap = active_cap(schedule, today)
     if len(budget_entries) > cap:
@@ -175,6 +211,18 @@ def _validate_metadata(entries: list[BudgetEntry], today: date) -> list[str]:
             errors.append(f"{entry.path}: missing reason")
         if entry.expires_on < today:
             errors.append(f"{entry.path}: expired on {entry.expires_on.isoformat()}")
+    return errors
+
+
+def _validate_no_ignore_errors(overrides: list[MypyOverride]) -> list[str]:
+    errors: list[str] = []
+    for override in overrides:
+        if override.ignore_errors:
+            modules = ", ".join(override.modules) or "<unknown>"
+            errors.append(
+                "mypy override uses ignore_errors=true; move debt into "
+                f"mypy_exclusion_budget.json instead: {modules}"
+            )
     return errors
 
 
@@ -206,8 +254,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         today = _parse_iso_date(args.today, "today")
         exclusions = load_pyproject_exclusions(Path(args.pyproject))
+        overrides = load_mypy_overrides(Path(args.pyproject))
         budget_entries, schedule = load_budget(Path(args.budget))
-        errors = validate_budget(exclusions, budget_entries, schedule, today)
+        errors = validate_budget(exclusions, budget_entries, schedule, today, overrides)
     except (OSError, ValueError, tomllib.TOMLDecodeError, json.JSONDecodeError) as exc:
         sys.stderr.write(f"mypy exclusion budget failed: {exc}\n")
         return 1

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 from scripts import check_mypy_exclusion_budget as checker
 
 
@@ -18,6 +19,17 @@ def _pyproject(tmp_path: Path, exclusions: list[str]) -> Path:
         tmp_path / "pyproject.toml",
         f'[tool.mypy]\npython_version = "3.10"\nexclude = [\n{quoted_exclusions}\n]\n',
     )
+
+
+def _pyproject_with_override(
+    tmp_path: Path, exclusions: list[str], override: str
+) -> Path:
+    pyproject = _pyproject(tmp_path, exclusions)
+    pyproject.write_text(
+        pyproject.read_text(encoding="utf-8") + "\n" + override,
+        encoding="utf-8",
+    )
+    return pyproject
 
 
 def _budget(tmp_path: Path, entries: list[dict[str, str]], cap: int = 5) -> Path:
@@ -222,3 +234,65 @@ def test_budget_fails_when_count_exceeds_current_schedule_cap(
         == 1
     )
     assert "exclusions exceed active cap" in capsys.readouterr().err
+
+
+def test_budget_fails_for_ignore_errors_override(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    """Whole-module ignore_errors bypasses are not accountable enough."""
+    pyproject = _pyproject_with_override(
+        tmp_path,
+        ["src/legacy/"],
+        "\n".join(
+            [
+                "[[tool.mypy.overrides]]",
+                'module = ["src.shared.python.plotting.*"]',
+                "ignore_errors = true",
+            ]
+        ),
+    )
+    budget = _budget(
+        tmp_path,
+        [
+            {
+                "path": "src/legacy/",
+                "owner": "@platform",
+                "reason": "legacy imports need incremental typing",
+                "expires_on": "2026-08-01",
+            }
+        ],
+    )
+
+    assert (
+        checker.main(
+            [
+                "--pyproject",
+                str(pyproject),
+                "--budget",
+                str(budget),
+                "--today",
+                "2026-05-03",
+            ]
+        )
+        == 1
+    )
+    assert "ignore_errors=true" in capsys.readouterr().err
+
+
+def test_ci_standard_runs_mypy_exclusion_budget() -> None:
+    """The ratchet is only useful when the main CI gate runs it."""
+    workflow = yaml.safe_load(Path(".github/workflows/ci-standard.yml").read_text())
+    quality_gate_steps = workflow["jobs"]["quality-gate"]["steps"]
+
+    matching_steps = [
+        step
+        for step in quality_gate_steps
+        if step.get("name") == "MyPy Exclusion Budget"
+    ]
+
+    assert matching_steps == [
+        {
+            "name": "MyPy Exclusion Budget",
+            "run": "python3 scripts/check_mypy_exclusion_budget.py",
+        }
+    ]
