@@ -60,6 +60,7 @@ _EXCLUDED_MODULES: frozenset[str] = frozenset(
 # Modules not listed here are appended alphabetically after these.
 _REGISTRATION_ORDER: tuple[str, ...] = (
     "auth",
+    "observability",
     "core",
     "engines",
     "simulation",

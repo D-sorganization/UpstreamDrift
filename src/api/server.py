@@ -19,6 +19,7 @@ API Versioning (#1488):
     compatibility.
 """
 
+import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
@@ -132,6 +133,8 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         fastapi_app.state.analysis_service = AnalysisService(engine_manager)
         fastapi_app.state.task_manager = active_tasks
         fastapi_app.state.logger = logger
+        fastapi_app.state.api_started_at = time.time()
+        fastapi_app.state.static_files_mounted = False
 
         # Initialize video pipeline with default config
         video_pipeline = _init_video_pipeline()

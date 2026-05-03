@@ -10,9 +10,10 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from src.api.utils.datetime_compat import iso_format, utc_now
+from src.shared.python.config.environment import is_production
 from src.shared.python.core.contracts import precondition
 
 from .._version import __version__
@@ -61,6 +62,9 @@ async def health_check(
 @router.get("/api/diagnostics", response_model=None)
 async def get_diagnostics() -> dict[str, Any]:
     """Get comprehensive diagnostic information for browser mode."""
+    if is_production():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     repo_root = Path(__file__).parent.parent.parent.parent
 
     return {

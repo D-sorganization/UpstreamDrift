@@ -75,6 +75,7 @@ from src.api.routes import (  # noqa: E402
     simulation_ws,
 )
 from src.api.services.chat_service import ChatService  # noqa: E402
+from src.shared.python.config.environment import is_production  # noqa: E402
 from src.shared.python.engine_core.engine_manager import EngineManager  # noqa: E402
 from src.shared.python.logging_pkg.logging_config import get_logger  # noqa: E402
 
@@ -94,6 +95,12 @@ _startup_metrics: dict[str, Any] = {
     "engines_loaded": [],
     "errors": [],
 }
+
+
+def _raise_if_diagnostics_disabled() -> None:
+    """Hide development diagnostics from production deployments."""
+    if is_production():
+        raise HTTPException(status_code=404)
 
 
 class _LazyServiceProxy:
@@ -479,6 +486,7 @@ def _register_health_and_diagnostic_endpoints(
     @app.get("/api/diagnostics")
     async def get_diagnostics() -> dict[str, Any]:
         """Return comprehensive diagnostic information as JSON."""
+        _raise_if_diagnostics_disabled()
         diagnostics = APIDiagnostics(app)
         results = diagnostics.run_all_checks()
         results["startup_metrics"] = _startup_metrics
@@ -487,6 +495,7 @@ def _register_health_and_diagnostic_endpoints(
     @app.get("/api/diagnostics/html", response_class=HTMLResponse)
     async def get_diagnostics_html() -> HTMLResponse:
         """Return diagnostic information as an HTML page."""
+        _raise_if_diagnostics_disabled()
         diagnostics = APIDiagnostics(app)
         results = diagnostics.run_all_checks()
         results["startup_metrics"] = _startup_metrics
@@ -496,6 +505,7 @@ def _register_health_and_diagnostic_endpoints(
     @app.get("/api/debug/routes")
     async def debug_routes() -> dict[str, Any]:
         """List all registered API routes for debugging."""
+        _raise_if_diagnostics_disabled()
         routes = []
         for route in app.routes:
             route_info = {
@@ -512,6 +522,7 @@ def _register_health_and_diagnostic_endpoints(
     @app.get("/api/debug/static")
     async def debug_static() -> dict[str, Any]:
         """Check static file configuration."""
+        _raise_if_diagnostics_disabled()
         ui_path = Path(__file__).parent.parent.parent / "ui" / "dist"
         details: dict[str, Any] = {
             "ui_path": str(ui_path),
