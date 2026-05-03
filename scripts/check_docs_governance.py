@@ -13,6 +13,7 @@ REQUIRED_FILES = [
     ROOT / "docs" / "adr" / "ADR_TEMPLATE.md",
     ROOT / "docs" / "governance" / "DOCS_GOVERNANCE.md",
 ]
+CANONICAL_PROCESS_DIRECTORY_NAMES = ("assessments", "issues")
 
 
 def _git_changed_files() -> list[str]:
@@ -34,11 +35,37 @@ def _fail(msg: str) -> int:
     return 1
 
 
+def _duplicate_process_directories() -> list[str]:
+    duplicates: list[str] = []
+    for name in CANONICAL_PROCESS_DIRECTORY_NAMES:
+        canonical_path = ROOT / "docs" / name
+        root_path = ROOT / name
+        if root_path.is_dir():
+            duplicates.append(
+                f"{name}/ duplicates canonical {canonical_path.relative_to(ROOT)}"
+            )
+        for parent in ROOT.iterdir():
+            if not parent.is_dir() or parent == ROOT / "docs":
+                continue
+            process_dir = parent / name
+            if process_dir.is_dir():
+                duplicates.append(
+                    f"{process_dir.relative_to(ROOT)}/ duplicates canonical "
+                    f"{canonical_path.relative_to(ROOT)}"
+                )
+    return duplicates
+
+
 def main() -> int:
     missing = [str(p.relative_to(ROOT)) for p in REQUIRED_FILES if not p.exists()]
     if missing:
         return _fail(
             "Missing required docs governance files:\n- " + "\n- ".join(missing)
+        )
+    duplicates = _duplicate_process_directories()
+    if duplicates:
+        return _fail(
+            "Duplicate root process directories detected:\n- " + "\n- ".join(duplicates)
         )
 
     changed = _git_changed_files()

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts import check_doc_catalog, check_doc_size_budget
+from scripts import check_doc_catalog, check_doc_size_budget, check_docs_governance
 
 
 def _write(path: Path, text: str) -> None:
@@ -110,3 +110,35 @@ def test_doc_catalog_accepts_complete_catalog_and_rendered_docs_link(
     )
 
     assert check_doc_catalog.main() == 0
+
+
+def test_docs_governance_rejects_duplicate_root_process_directories(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _write(tmp_path / "docs" / "README.md", "# Docs\n")
+    _write(tmp_path / "docs" / "assessments" / "README.md", "# Assessments\n")
+    _write(tmp_path / "docs" / "adr" / "README.md", "# ADRs\n")
+    _write(tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md", "# ADR Template\n")
+    _write(
+        tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        "# Docs Governance\n",
+    )
+    (tmp_path / "docs" / "issues").mkdir(parents=True)
+    (tmp_path / "issues").mkdir()
+    (tmp_path / "assessments").mkdir()
+    (tmp_path / ".github" / "issues").mkdir(parents=True)
+    monkeypatch.setattr(check_docs_governance, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        check_docs_governance,
+        "REQUIRED_FILES",
+        [
+            tmp_path / "docs" / "README.md",
+            tmp_path / "docs" / "assessments" / "README.md",
+            tmp_path / "docs" / "adr" / "README.md",
+            tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md",
+            tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        ],
+    )
+    monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+
+    assert check_docs_governance.main() == 1

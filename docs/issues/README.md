@@ -50,3 +50,7 @@ When an issue is resolved, update status in both places.
 - [KNOWN_ISSUES.md](KNOWN_ISSUES.md) - Current known issues and bugs
 - [TECHNICAL_DEBT.md](TECHNICAL_DEBT.md) - Code quality and refactoring items
 - [ROADMAP_ISSUES.md](ROADMAP_ISSUES.md) - Planned improvements (linked to existing GitHub issues)
+- [backlog/](backlog/) - Legacy root-level issue briefs consolidated here so
+  `docs/issues/` is the single process-document home.
+- [github-audit/](github-audit/) - Former `.github/issues/` audit briefs retained
+  under the canonical issue-document tree.

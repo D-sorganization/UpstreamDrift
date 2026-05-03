@@ -4,6 +4,7 @@
 
 - Canonical status file: `docs/assessments/CANONICAL_QUALITY_STATUS.md`
 - Archive index: `docs/assessments/archive/INDEX.md`
+- Legacy root-level assessment artifacts: `docs/assessments/archive/root-2026-04-26/`
 
 When assessments are superseded, move old artifacts into `docs/assessments/archive/` and update the archive index.
 
