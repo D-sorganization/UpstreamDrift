@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QSize, Qt, QTimer
 from PyQt6.QtGui import (
     QAction,
     QKeySequence,
@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSplitter,
+    QStyle,
     QToolButton,
     QVBoxLayout,
     QWidget,
@@ -50,6 +51,26 @@ class LauncherUISetupMixin:
     Provides methods for building the menu bar, top bar, grid area,
     bottom bar, search shortcuts, process console, context help, and AI panel.
     """
+
+    def _build_sidebar_button(
+        self,
+        label: str,
+        icon_name: QStyle.StandardPixmap,
+        *,
+        checkable: bool = False,
+    ) -> QToolButton:
+        """Create an icon-first sidebar control with accessible labeling."""
+        button = QToolButton()
+        button.setText("")
+        button.setToolTip(label)
+        button.setAccessibleName(label)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
+        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        button.setIcon(self.style().standardIcon(icon_name))
+        button.setIconSize(QSize(22, 22))
+        button.setCheckable(checkable)
+        button.setAutoRaise(True)
+        return button
 
     def init_ui(self) -> None:
         """Initialize the user interface."""
@@ -123,33 +144,31 @@ class LauncherUISetupMixin:
         try:
             from src.shared.python.theme import get_current_colors
 
-            c = get_current_colors()
+            colors = get_current_colors()
         except ImportError:
-            from src.shared.python.theme import (
-                DARK_THEME as c,  # type: ignore[assignment]
-            )
+            from src.shared.python.theme import DARK_THEME
+
+            colors = DARK_THEME
 
         sidebar.setStyleSheet(f"""
             QWidget {{
-                background-color: {c.bg_elevated};
-                border-right: 1px solid {c.border_default};
+                background-color: {colors.bg_elevated};
+                border-right: 1px solid {colors.border_default};
             }}
-            QPushButton {{
+            QToolButton {{
                 background-color: transparent;
                 border: none;
                 border-radius: 8px;
-                color: {c.text_secondary};
-                font-weight: bold;
-                font-size: 10px;
-                padding: 10px 0;
+                color: {colors.text_secondary};
+                padding: 12px 0;
             }}
-            QPushButton:hover {{
-                background-color: {c.bg_highlight};
-                color: {c.text_primary};
+            QToolButton:hover {{
+                background-color: {colors.bg_highlight};
+                color: {colors.text_primary};
             }}
-            QPushButton:checked {{
-                background-color: {c.primary};
-                color: {c.bg};
+            QToolButton:checked {{
+                background-color: {colors.primary};
+                color: {colors.bg};
             }}
         """)
 
@@ -157,20 +176,32 @@ class LauncherUISetupMixin:
         layout.setContentsMargins(8, 20, 8, 20)
         layout.setSpacing(15)
 
-        btn_home = QPushButton("Home")
-        btn_home.setCheckable(True)
+        btn_home = self._build_sidebar_button(
+            "Home",
+            QStyle.StandardPixmap.SP_DirHomeIcon,
+            checkable=True,
+        )
         btn_home.setChecked(True)
 
-        btn_engines = QPushButton("Engines")
-        btn_engines.setCheckable(True)
+        btn_engines = self._build_sidebar_button(
+            "Engines",
+            QStyle.StandardPixmap.SP_ComputerIcon,
+            checkable=True,
+        )
 
         # If open_settings exists in the mixed-in class, use it.
         # Otherwise, we gracefully handle it to avoid crashes in tests.
-        btn_settings = QPushButton("Settings")
+        btn_settings = self._build_sidebar_button(
+            "Settings",
+            QStyle.StandardPixmap.SP_FileDialogDetailedView,
+        )
         if hasattr(self, "_open_settings"):
             btn_settings.clicked.connect(self._open_settings)
 
-        btn_docs = QPushButton("Docs")
+        btn_docs = self._build_sidebar_button(
+            "Documentation",
+            QStyle.StandardPixmap.SP_DialogHelpButton,
+        )
         if hasattr(self, "_show_help_dialog"):
             btn_docs.clicked.connect(lambda: self._show_help_dialog())
 

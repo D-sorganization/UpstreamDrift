@@ -3,7 +3,12 @@
 from unittest.mock import MagicMock, patch  # noqa: E402
 
 import pytest  # noqa: E402
-from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QVBoxLayout  # noqa: E402
+from PyQt6.QtWidgets import (
+    QHBoxLayout,
+    QMainWindow,
+    QToolButton,
+    QVBoxLayout,
+)  # noqa: E402
 from src.launchers.launcher_ui_setup import LauncherUISetupMixin  # noqa: E402
 
 
@@ -61,6 +66,20 @@ def test_setup_top_bar(launcher) -> None:
     with patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", False):
         top_bar = launcher._setup_top_bar()
         assert isinstance(top_bar, QHBoxLayout)
+
+
+def test_setup_global_sidebar_uses_icon_navigation(launcher) -> None:
+    sidebar = launcher._setup_global_sidebar()
+    buttons = sidebar.findChildren(QToolButton)
+    assert len(buttons) == 4
+
+    button_names = {button.toolTip() for button in buttons}
+    assert button_names == {"Home", "Engines", "Settings", "Documentation"}
+
+    for button in buttons:
+        assert not button.icon().isNull()
+        assert button.text() == ""
+        assert button.accessibleName() in button_names
 
 
 @patch("src.launchers.launcher_constants.HELP_SYSTEM_AVAILABLE", True)
