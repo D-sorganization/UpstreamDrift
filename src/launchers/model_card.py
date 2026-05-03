@@ -106,24 +106,24 @@ class DraggableModelCard(QFrame):
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.drag_start_position = QPoint()
 
-        # Glassmorphism styling
+        # Glassmorphism styling - enhanced with translucent backgrounds and background-blur effect
         self.setStyleSheet("""
             #ModelCard {
-                background-color: rgba(255, 255, 255, 0.03);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 12px;
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 16px;
             }
             #ModelCard:hover {
-                background-color: rgba(255, 255, 255, 0.08);
-                border: 1px solid rgba(255, 255, 255, 0.2);
+                background-color: rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.25);
             }
         """)
 
-        # Drop Shadow
+        # Drop Shadow - soft elevated shadow that deepens on hover
         self.shadow = QGraphicsDropShadowEffect(self)
-        self.shadow.setBlurRadius(15)
-        self.shadow.setOffset(0, 4)
-        self.shadow.setColor(QColor(0, 0, 0, 60))
+        self.shadow.setBlurRadius(20)
+        self.shadow.setOffset(0, 6)
+        self.shadow.setColor(QColor(0, 0, 0, 80))
         self.setGraphicsEffect(self.shadow)
 
         # Micro-animations
@@ -141,9 +141,14 @@ class DraggableModelCard(QFrame):
     @hoverOffset.setter  # type: ignore[no-redef]
     def hoverOffset(self, value: float) -> None:
         self._hover_offset = value
-        # Animate drop shadow (lift effect)
-        self.shadow.setBlurRadius(15 + value * 2)
-        self.shadow.setOffset(0, 4 + value)
+        # Animate drop shadow - soft elevated shadow that deepens on hover
+        # Base blur: 20, hover adds up to 8 more (at max hover_offset of 4.0)
+        self.shadow.setBlurRadius(20 + value * 2)
+        # Base offset: 6, hover adds up to 4 more for lifted effect
+        self.shadow.setOffset(0, 6 + value)
+        # Deepen shadow color on hover (alpha increases from 80 to 120)
+        hover_alpha = int(80 + value * 10)
+        self.shadow.setColor(QColor(0, 0, 0, hover_alpha))
 
         # Animate icon scale (scale up by 3%)
         scale_factor = 1.0 + (value / 4.0) * 0.03
