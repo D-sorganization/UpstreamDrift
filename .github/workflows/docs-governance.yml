@@ -5,12 +5,18 @@ on:
     paths:
       - "docs/**"
       - "scripts/check_docs_governance.py"
+      - "scripts/check_doc_catalog.py"
+      - "scripts/check_doc_size_budget.py"
+      - "scripts/config/doc_size_budget.json"
       - ".github/workflows/docs-governance.yml"
   push:
     branches: [main]
     paths:
       - "docs/**"
       - "scripts/check_docs_governance.py"
+      - "scripts/check_doc_catalog.py"
+      - "scripts/check_doc_size_budget.py"
+      - "scripts/config/doc_size_budget.json"
       - ".github/workflows/docs-governance.yml"
 
 jobs:
@@ -27,3 +33,22 @@ jobs:
           mkdir -p "$(dirname "$GITHUB_OUTPUT")"
           echo "runner=d-sorg-fleet" >> "$GITHUB_OUTPUT"
           echo "Self-hosted dispatcher selected d-sorg-fleet"
+
+  doc-governance:
+    name: doc-governance
+    needs: pick-runner
+    runs-on: ${{ needs.pick-runner.outputs.runner }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+
+      - name: Validate documentation governance files
+        run: python3 scripts/check_docs_governance.py
+
+      - name: Validate documentation catalog
+        run: python3 scripts/check_doc_catalog.py
+
+      - name: Validate documentation size budget
+        run: python3 scripts/check_doc_size_budget.py

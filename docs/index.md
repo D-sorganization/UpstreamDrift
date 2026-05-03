@@ -1,72 +1,68 @@
 # UpstreamDrift Documentation
 
-> **Navigation Index** — Organized into 6 strategic documentation buckets.
+This index is the canonical inventory for the repository documentation tree.
+Every top-level directory under `docs/` must be represented in the catalog
+below with an owner and stability tag so new documentation has a clear home.
 
-## 📚 Documentation Structure
+## Canonical User Documentation
 
-### 1. Getting Started
-- [Installation Guide](installation/README.md)
-- [User Guide](user_guide/README.md)
-- [Tutorials](tutorials/)
-- [Troubleshooting](troubleshooting/)
-- [Help](help/)
+The rendered documentation surface is
+[upstream-drift.readthedocs.io](https://upstream-drift.readthedocs.io), backed
+by the Sphinx project in `docs/sphinx/`. Repository Markdown remains useful for
+development notes, governance records, and source-adjacent references, but user
+navigation should start with the rendered documentation URL.
 
-### 2. Architecture & Design
-- [Architecture Decisions (ADRs)](adr/)
-- [Architecture Overview](architecture/)
-- [Design Documents](design/)
-- [Engine Documentation](engines/)
-- [Physics Models](physics/)
+## Directory Catalog
 
-### 3. API Reference
-- [REST API](api/)
-- [Sphinx Auto-Generated](sphinx/)
+| Directory | Owner | Stability | Description |
+| --- | --- | --- | --- |
+| `adr/` | @architecture-team | stable | Architecture decision records and templates for durable design decisions. |
+| `ai_implementation/` | @automation-team | draft | AI-assisted implementation notes and operational agent guidance. |
+| `api/` | @api-team | stable | REST API architecture, endpoint references, and integration guidance. |
+| `architecture/` | @architecture-team | stable | System architecture diagrams, dependency boundaries, and design overviews. |
+| `assessments/` | @quality-team | archived | Generated repository health assessments retained for historical comparison. |
+| `audit_reports/` | @quality-team | archived | Audit outputs and review evidence from repository-wide inspections. |
+| `code-quality/` | @quality-team | stable | Coding standards, quality gates, and maintainability guidance. |
+| `competitive_analysis/` | @product-team | draft | Market and ecosystem comparisons used for planning context. |
+| `deployment/` | @platform-team | stable | Deployment procedures, packaging notes, and release environment guidance. |
+| `design/` | @architecture-team | draft | Feature design sketches and deeper design rationale before ADR promotion. |
+| `development/` | @engineering-team | stable | Developer workflow notes, implementation reports, and local contribution guidance. |
+| `engineering/` | @engineering-team | stable | Engineering practices and cross-cutting technical standards. |
+| `engines/` | @physics-team | stable | Physics engine support tiers, capabilities, and backend-specific documentation. |
+| `examples/` | @developer-experience | stable | Example workflows and sample usage for common simulation tasks. |
+| `governance/` | @maintainers | stable | Repository governance policies, documentation rules, and maintenance process. |
+| `help/` | @support-team | stable | User support material and task-oriented help pages. |
+| `historical/` | @maintainers | archived | Historical records preserved for context but not current guidance. |
+| `installation/` | @developer-experience | stable | Installation instructions and environment setup guidance. |
+| `issues/` | @maintainers | archived | Issue-derived notes and local tracking artifacts retained under docs. |
+| `legal/` | @maintainers | stable | License, compliance, and legal reference material. |
+| `motion_training/` | @research-team | draft | Motion training research notes and prototype workflow documentation. |
+| `operations/` | @platform-team | stable | Operational runbooks, observability notes, and production maintenance guidance. |
+| `physics/` | @physics-team | stable | Physics assumptions, validation sources, and biomechanical modeling references. |
+| `plans/` | @product-team | draft | Roadmaps, implementation plans, and active planning documents. |
+| `portfolio/` | @developer-experience | stable | Reviewer-facing demonstrations and concise project showcase material. |
+| `proposals/` | @product-team | draft | Proposed changes and design alternatives pending acceptance or archival. |
+| `references/` | @research-team | stable | External references, source maps, and supporting research material. |
+| `review_archive/` | @quality-team | archived | Older review records retained until consolidated into `reviews/archive/`. |
+| `reviews/` | @quality-team | stable | Current review records, remediation notes, and quality findings. |
+| `specs/` | @architecture-team | stable | Specifications that expand or support the root `SPEC.md` contract. |
+| `sphinx/` | @docs-team | stable | Sphinx source and generated artifacts for the rendered documentation site. |
+| `status_quo_analysis/` | @product-team | archived | Status quo analysis snapshots preserved for planning history. |
+| `strategic/` | @product-team | draft | Strategic planning notes that should eventually consolidate into `plans/`. |
+| `technical/` | @engineering-team | stable | Technical reference pages for implementation details and subsystem behavior. |
+| `technical_debt/` | @quality-team | draft | Technical debt inventories, cleanup plans, and remediation tracking. |
+| `testing/` | @quality-team | stable | Testing strategy, validation guidance, and quality assurance references. |
+| `troubleshooting/` | @support-team | stable | Troubleshooting guides for installation, runtime, and development issues. |
+| `tutorials/` | @developer-experience | stable | Step-by-step learning paths and task walkthroughs for users. |
+| `user_guide/` | @docs-team | stable | User-facing guides for common workflows and product capabilities. |
+| `workflows/` | @platform-team | stable | Automation workflow documentation and CI/CD process references. |
 
-### 4. Development
-- [Development Guide](development/)
-- [Testing Guide](testing/)
-- [Code Quality Standards](code-quality/)
-- [Engineering Standards](engineering/)
-- [Workflow Documentation](workflows/)
-- [Deployment](deployment/)
-- [Operations](operations/)
+## Governance Checks
 
-### 5. Strategic & Planning
-- [Plans & Roadmaps](plans/)
-- [Proposals](proposals/)
-- [AI Implementation](ai_implementation/)
-- [Motion Training](motion_training/)
-- [Competitive Analysis](competitive_analysis/)
-- [Status Quo Analysis](status_quo_analysis/)
-- [Strategic Documents](strategic/)
-- [Technical Debt Tracking](technical_debt/)
-- [Governance](governance/)
-- [Legal](legal/)
+`scripts/check_doc_catalog.py` verifies that this catalog covers every
+top-level `docs/` directory and that `README.md` points readers to the rendered
+documentation URL from `pyproject.toml`.
 
-### 6. Archive & History
-- [Archive](archive/)
-- [Assessments](assessments/) — Auto-generated health reports
-- [Audit Reports](audit_reports/)
-- [Historical](historical/)
-- [Issues](issues/)
-- [References](references/)
-- [Reviews](reviews/)
-
----
-
-## Consolidation Notes
-
-This index organizes 39+ documentation directories into 6 strategic buckets
-as recommended in issue #1750. The physical directory structure is preserved
-for backward compatibility, but this index serves as the canonical navigation
-point.
-
-**Bucket Mapping:**
-| Bucket | Directories |
-|--------|-------------|
-| Getting Started | `installation/`, `user_guide/`, `tutorials/`, `troubleshooting/`, `help/` |
-| Architecture | `adr/`, `architecture/`, `design/`, `engines/`, `physics/` |
-| API Reference | `api/`, `sphinx/` |
-| Development | `development/`, `testing/`, `code-quality/`, `engineering/`, `workflows/`, `deployment/`, `operations/` |
-| Strategic | `plans/`, `proposals/`, `ai_implementation/`, `motion_training/`, `competitive_analysis/`, `status_quo_analysis/`, `strategic/`, `technical_debt/`, `governance/`, `legal/` |
-| Archive | `archive/`, `assessments/`, `audit_reports/`, `historical/`, `issues/`, `references/`, `reviews/` |
+`scripts/check_doc_size_budget.py` enforces the 50 KB Markdown/Quarto budget.
+Temporary exceptions must live in `scripts/config/doc_size_budget.json` with an
+owner and expiration date.

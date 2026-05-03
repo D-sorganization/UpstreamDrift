@@ -1,0 +1,23 @@
+{
+  "max_bytes": 51200,
+  "exceptions": [
+    {
+      "path": "docs/UPSTREAM_DRIFT_USER_MANUAL.md",
+      "owner": "@docs-team",
+      "reason": "Legacy monolithic user manual tracked by issue #3839; staged for Sphinx chapter decomposition.",
+      "expires_on": "2026-08-01"
+    },
+    {
+      "path": "docs/development/ARCHITECTURE_IMPLEMENTATION_PLAN.md",
+      "owner": "@architecture-team",
+      "reason": "Legacy implementation plan above the documentation budget; staged for topic split or archival.",
+      "expires_on": "2026-08-01"
+    },
+    {
+      "path": "SPEC.md",
+      "owner": "@maintainers",
+      "reason": "Root repository specification is governed separately and updated by feature PRs.",
+      "expires_on": "2026-08-01"
+    }
+  ]
+}
