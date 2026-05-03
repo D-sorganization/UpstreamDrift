@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.104                                            |
-| **Last Spec Update**    | 2026-05-03 (DbC fail-open fix, test cleanup)       |
+| **Spec Version**        | 1.0.105                                            |
+| **Last Spec Update**    | 2026-05-03 (contract shim export alignment)        |
 
 ## 2. Purpose & Mission
 
@@ -525,6 +525,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-03 | 1.0.105 | Realigned the `model_generation.core.contracts` compatibility shim so its invariant alias and helper re-exports stay synchronized with the canonical shared contracts module while remaining Ruff-clean. |
 | 2026-05-03 | 1.0.103 | Optimized collision detection distance calculations by replacing `np.linalg.norm` with `math.hypot` for 3D collision-distance and gradient normalization paths. |
 | 2026-05-03 | 1.0.98  | Added experimental OpenFOAM CFD execution support to the engine inventory, including `decomposeParDict` generation and MPI command plumbing for parallel OpenFOAM runs. |
 | 2026-05-03 | 1.0.100 | Repaired issue #3926 CI hygiene by updating CI Standard to the working Trivy action pin, syncing generated dependency artifacts with `pyproject.toml`, exempting vendored trees from doc-size budgeting, and removing obsolete helper/backup files. |
