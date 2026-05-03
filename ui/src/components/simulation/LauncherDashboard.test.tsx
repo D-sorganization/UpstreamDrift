@@ -135,20 +135,31 @@ describe('LauncherDashboard', () => {
     it('renders category sections', () => {
         renderWithRouter(<LauncherDashboard {...defaultProps} />);
 
-            expect(screen.getByRole('region', { name: /physics engines/i })).toBeInTheDocument();
-            expect(screen.getByRole('region', { name: /tools and utilities/i })).toBeInTheDocument();
+            expect(screen.getByRole('region', { name: /core physics engines/i })).toBeInTheDocument();
+            expect(screen.getByRole('region', { name: /analysis tools/i })).toBeInTheDocument();
+            expect(screen.getByRole('region', { name: /utilities/i })).toBeInTheDocument();
         });
 
     it('groups engines separately from tools', () => {
         renderWithRouter(<LauncherDashboard {...defaultProps} />);
 
-            const engineGrid = screen.getByRole('group', { name: /physics engine tiles/i });
-            const toolGrid = screen.getByRole('group', { name: /tool tiles/i });
+            const engineGrid = screen.getByRole('group', { name: /core physics engine tiles/i });
+            const analysisGrid = screen.getByRole('group', { name: /analysis tool tiles/i });
+            const utilityGrid = screen.getByRole('group', { name: /utility tiles/i });
 
-            // MuJoCo should be in engine grid
             expect(within(engineGrid).getByText('MuJoCo')).toBeInTheDocument();
-            // Model Explorer should be in tool grid
-            expect(within(toolGrid).getByText('Model Explorer')).toBeInTheDocument();
+            expect(within(analysisGrid).getByText('Motion Capture')).toBeInTheDocument();
+            expect(within(utilityGrid).getByText('Model Explorer')).toBeInTheDocument();
+            expect(within(utilityGrid).getByText('Matlab Models')).toBeInTheDocument();
+        });
+
+    it('uses glass card styling with hover elevation', () => {
+        renderWithRouter(<LauncherDashboard {...defaultProps} />);
+
+            const tile = document.getElementById('tile-mujoco_unified')!;
+            expect(tile.className).toContain('backdrop-blur');
+            expect(tile.className).toContain('shadow-black');
+            expect(tile.className).toContain('hover:shadow-blue');
         });
     });
 

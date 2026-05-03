@@ -14,7 +14,17 @@
  *   - "Launch Simulation" button always visible (sticky bottom)
  */
 
-import { HelpCircle, Loader2, AlertTriangle, Zap, Wrench, ExternalLink, RefreshCw, MessageSquare } from 'lucide-react';
+import {
+    Activity,
+    AlertTriangle,
+    ExternalLink,
+    HelpCircle,
+    Loader2,
+    MessageSquare,
+    RefreshCw,
+    Wrench,
+    Zap,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { LauncherTile } from '@/api/useLauncherManifest';
 import type { ManifestLoadState } from '@/api/useLauncherManifest';
@@ -28,6 +38,15 @@ interface Props {
     onLaunchTile: (tileId: string) => void;
     onShowHelp: () => void;
     onRefetch: () => void;
+}
+
+interface TileSection {
+    id: string;
+    title: string;
+    ariaLabel: string;
+    groupLabel: string;
+    icon: typeof Zap;
+    tiles: LauncherTile[];
 }
 
 /** Navigation button to routable pages */
@@ -111,17 +130,18 @@ function TileCard({
             aria-label={`${tile.name} — ${tile.description}`}
             aria-pressed={isSelected}
             className={`
-        group relative flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-200
-        hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5
+        group relative flex flex-col items-center p-4 rounded-xl border transition-all duration-200
+        bg-white/[0.07] backdrop-blur-md shadow-lg shadow-black/25
+        hover:bg-white/[0.11] hover:shadow-xl hover:shadow-blue-500/20 hover:-translate-y-0.5
         focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 focus:ring-offset-gray-900
         ${isSelected
-                    ? 'border-blue-500 bg-blue-500/15 ring-1 ring-blue-500/40 shadow-md shadow-blue-500/20'
-                    : 'border-gray-700 bg-gray-800/80 hover:border-gray-500'
+                    ? 'border-blue-400 bg-blue-500/20 ring-1 ring-blue-400/50 shadow-blue-500/25'
+                    : 'border-white/10 hover:border-white/25'
                 }
       `}
         >
             {/* Logo area */}
-            <div className="w-16 h-16 rounded-lg bg-gray-700/50 flex items-center justify-center mb-3 group-hover:bg-gray-600/50 transition-colors">
+            <div className="w-16 h-16 rounded-lg bg-gray-950/35 border border-white/10 flex items-center justify-center mb-3 group-hover:bg-gray-900/50 transition-colors">
                 <img
                     src={`/api/launcher/logos/${tile.logo}`}
                     alt={`${tile.name} logo`}
@@ -177,6 +197,54 @@ function TileCard({
     );
 }
 
+function isAnalysisTile(tile: LauncherTile): boolean {
+    const searchableText = [
+        tile.id,
+        tile.name,
+        tile.description,
+        tile.type,
+        ...tile.capabilities,
+    ].join(' ').toLowerCase();
+    return /analysis|capture|viewer|mediapipe|openpose|c3d|video|data/.test(searchableText);
+}
+
+function buildTileSections(tiles: LauncherTile[]): TileSection[] {
+    const engines = tiles.filter((tile) => tile.category === 'physics_engine');
+    const analysisTools = tiles.filter(
+        (tile) => tile.category !== 'physics_engine' && isAnalysisTile(tile)
+    );
+    const utilities = tiles.filter(
+        (tile) => tile.category !== 'physics_engine' && !isAnalysisTile(tile)
+    );
+
+    return [
+        {
+            id: 'core-engine-tiles-grid',
+            title: 'Core Physics Engines',
+            ariaLabel: 'Core Physics Engines',
+            groupLabel: 'Core physics engine tiles',
+            icon: Zap,
+            tiles: engines,
+        },
+        {
+            id: 'analysis-tool-tiles-grid',
+            title: 'Analysis Tools',
+            ariaLabel: 'Analysis Tools',
+            groupLabel: 'Analysis tool tiles',
+            icon: Activity,
+            tiles: analysisTools,
+        },
+        {
+            id: 'utility-tiles-grid',
+            title: 'Utilities',
+            ariaLabel: 'Utilities',
+            groupLabel: 'Utility tiles',
+            icon: Wrench,
+            tiles: utilities,
+        },
+    ].filter((section) => section.tiles.length > 0);
+}
+
 export function LauncherDashboard({
     tiles,
     loadState,
@@ -190,6 +258,7 @@ export function LauncherDashboard({
     const engines = tiles.filter((t) => t.category === 'physics_engine');
     const toolsAndExternal = tiles.filter((t) => t.category === 'tool' || t.category === 'external');
     const selectedTile = tiles.find((t) => t.id === selectedTileId);
+    const tileSections = buildTileSections(tiles);
 
     if (loadState === 'loading') {
         return (
@@ -247,57 +316,39 @@ export function LauncherDashboard({
 
             {/* Scrollable tile grid */}
             <main className="flex-1 overflow-y-auto px-6 py-6" id="tile-grid-container">
-                {/* Physics Engines */}
-                {engines.length > 0 && (
-                    <section aria-label="Physics Engines" className="mb-8">
-                        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <Zap className="w-4 h-4" aria-hidden="true" />
-                            Physics Engines
-                        </h2>
-                        <div
-                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-                            role="group"
-                            aria-label="Physics engine tiles"
-                            id="engine-tiles-grid"
-                        >
-                            {engines.map((tile) => (
-                                <TileCard
-                                    key={tile.id}
-                                    tile={tile}
-                                    isSelected={selectedTileId === tile.id}
-                                    onSelect={() => onSelectTile(tile.id)}
-                                    onLaunch={() => onLaunchTile(tile.id)}
+                {tileSections.map((section) => {
+                    const Icon = section.icon;
+                    return (
+                        <section key={section.id} aria-label={section.ariaLabel} className="mb-9">
+                            <div className="mb-4 flex items-center gap-3">
+                                <h2 className="text-sm font-semibold text-gray-300 uppercase tracking-wider flex items-center gap-2 whitespace-nowrap">
+                                    <Icon className="w-4 h-4" aria-hidden="true" />
+                                    {section.title}
+                                </h2>
+                                <div
+                                    className="h-px flex-1 bg-gradient-to-r from-white/20 via-white/10 to-transparent"
+                                    aria-hidden="true"
                                 />
-                            ))}
-                        </div>
-                    </section>
-                )}
-
-                {/* Tools & Utilities */}
-                {toolsAndExternal.length > 0 && (
-                    <section aria-label="Tools and Utilities" className="mb-8">
-                        <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <Wrench className="w-4 h-4" aria-hidden="true" />
-                            Tools & Utilities
-                        </h2>
-                        <div
-                            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-                            role="group"
-                            aria-label="Tool tiles"
-                            id="tool-tiles-grid"
-                        >
-                            {toolsAndExternal.map((tile) => (
-                                <TileCard
-                                    key={tile.id}
-                                    tile={tile}
-                                    isSelected={selectedTileId === tile.id}
-                                    onSelect={() => onSelectTile(tile.id)}
-                                    onLaunch={() => onLaunchTile(tile.id)}
-                                />
-                            ))}
-                        </div>
-                    </section>
-                )}
+                            </div>
+                            <div
+                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+                                role="group"
+                                aria-label={section.groupLabel}
+                                id={section.id}
+                            >
+                                {section.tiles.map((tile) => (
+                                    <TileCard
+                                        key={tile.id}
+                                        tile={tile}
+                                        isSelected={selectedTileId === tile.id}
+                                        onSelect={() => onSelectTile(tile.id)}
+                                        onLaunch={() => onLaunchTile(tile.id)}
+                                    />
+                                ))}
+                            </div>
+                        </section>
+                    );
+                })}
             </main>
 
             {/* Sticky bottom bar — Launch button always visible (fixes #1165) */}
