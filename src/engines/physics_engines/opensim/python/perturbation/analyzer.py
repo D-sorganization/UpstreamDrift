@@ -280,7 +280,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
     # Internal helpers
     # ------------------------------------------------------------------
 
-    def _simulate(self, coeffs: list[list[float]]) -> OpenSimSimResult:
+    def _simulate(self, coeffs: list[list[float]]) -> OpenSimSimResult:  # noqa: C901
         """Run an OpenSim forward simulation with polynomial torques.
 
         Each actuator's control follows ctrl_j(t) = sum_k c_jk * t^k.
@@ -331,11 +331,11 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                     force_obj.setControls(
                         osim.Vector(1, ctrl), model.updDefaultControls()
                     )
-                except Exception:  # noqa: BLE001
+                except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
                     pass
 
             # Realize to acceleration
-            with contextlib.suppress(Exception):
+            with contextlib.suppress(ValueError, RuntimeError, TypeError):
                 model.realizeAcceleration(state)
 
             # Read state
@@ -360,7 +360,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                     ee_pos = np.array(
                         [pos_in_ground[0], pos_in_ground[1], pos_in_ground[2]]
                     )
-            except Exception:  # noqa: BLE001
+            except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
                 # Fallback: use simple forward kinematics from joint angles
                 link_len = 0.5
                 angle_sum = float(np.sum(q))
@@ -387,7 +387,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                 model.realizeVelocity(state)
                 ke = float(model.calcKineticEnergy(state))
                 pe = float(model.calcPotentialEnergy(state))
-            except Exception:  # noqa: BLE001
+            except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
                 pass
 
             t_list.append(t)
@@ -405,7 +405,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                 manager.setInitialTime(t)
                 manager.setFinalTime(t + dt)
                 manager.integrate(state)
-            except Exception:  # noqa: BLE001
+            except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
                 # Manual Euler fallback for joint coordinates
                 for k in range(nq):
                     coord = coord_set.get(k)
@@ -413,7 +413,7 @@ class OpenSimPerturbationAnalyzer(PerturbationAnalyzerBase):
                         new_val = q[k] + qdot[k] * dt
                         coord.setValue(state, new_val)
                         coord.setSpeedValue(state, qdot[k])
-                    except Exception:  # noqa: BLE001
+                    except (ValueError, RuntimeError, TypeError):  # noqa: BLE001
                         pass
 
         t_arr = np.array(t_list)

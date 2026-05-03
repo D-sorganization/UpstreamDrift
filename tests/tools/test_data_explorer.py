@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 
 import pytest
+from src.api.routes import data_explorer as data_explorer_routes
 from src.tools.data_explorer.data_explorer_app import (
     SUPPORTED_EXTENSIONS,
     discover_datasets,
@@ -131,3 +132,27 @@ class TestMain:
         """Main returns 0 (success) when called."""
         result = main()
         assert result == 0
+
+
+@pytest.mark.asyncio
+async def test_imported_dataset_cache_returns_snapshot() -> None:
+    """Cached API datasets are copied while held under the lock."""
+    data_explorer_routes._loaded_datasets.clear()
+    data_explorer_routes._loaded_datasets["sample.csv"] = {
+        "columns": ["time", "value"],
+        "rows": [{"time": "1", "value": "2"}],
+        "format": "csv",
+    }
+
+    cached = await data_explorer_routes._get_cached_dataset("sample.csv")
+    assert cached is not None
+    columns, rows, dataset_format = cached
+    data_explorer_routes._loaded_datasets["sample.csv"]["columns"].append("mutated")
+    data_explorer_routes._loaded_datasets["sample.csv"]["rows"].append(
+        {"time": "2", "value": "3"}
+    )
+
+    assert columns == ["time", "value"]
+    assert rows == [{"time": "1", "value": "2"}]
+    assert dataset_format == "csv"
+    data_explorer_routes._loaded_datasets.clear()

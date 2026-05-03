@@ -462,7 +462,7 @@ class PendulumPerturbationAnalyzer:
     # Profile comparison
     # ------------------------------------------------------------------
 
-    def compare_profiles(
+    def compare_profiles(  # noqa: C901
         self,
         profile_a: object,
         profile_b: object,
@@ -522,7 +522,7 @@ class PendulumPerturbationAnalyzer:
                     if isinstance(v, np.ndarray):
                         v = float(np.linalg.norm(v))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except (ValueError, RuntimeError, FloatingPointError, AssertionError):
                     pass
             return np.array(values) if values else np.array([0.0])
 

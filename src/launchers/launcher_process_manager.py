@@ -59,6 +59,56 @@ else:
     CREATE_NO_WINDOW = 0
     CREATE_NEW_CONSOLE = 0
 
+
+def _assign_to_job(proc: subprocess.Popen[bytes]) -> None:
+    """Attach a child process to the platform cascade-termination guard."""
+
+
+_preexec_fn: Callable[[], None] | None = None
+if sys.platform == "win32":
+    try:
+        import win32api
+        import win32con
+        import win32job
+
+        _job = win32job.CreateJobObject(None, "")
+        _info = win32job.QueryInformationJobObject(
+            _job,
+            win32job.JobObjectExtendedLimitInformation,
+        )
+        _info["BasicLimitInformation"]["LimitFlags"] = (
+            win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        )
+        win32job.SetInformationJobObject(
+            _job,
+            win32job.JobObjectExtendedLimitInformation,
+            _info,
+        )
+
+        def _assign_to_job(proc: subprocess.Popen[bytes]) -> None:
+            try:
+                handle = win32api.OpenProcess(
+                    win32con.PROCESS_SET_QUOTA | win32con.PROCESS_TERMINATE,
+                    False,
+                    proc.pid,
+                )
+                win32job.AssignProcessToJobObject(_job, handle)
+            except (OSError, RuntimeError, TypeError) as exc:
+                logger.debug("Failed to assign process to job object: %s", exc)
+    except ImportError:
+        logger.debug("win32job not available, orphaned processes may leak on crash")
+else:
+    try:
+        import ctypes
+        import signal
+
+        libc = ctypes.CDLL("libc.so.6")
+
+        def _preexec_fn() -> None:
+            libc.prctl(1, signal.SIGTERM)
+    except (AttributeError, OSError):
+        _preexec_fn = None
+
 # VcXsrv paths for Windows X11 support
 VCXSRV_PATHS = [
     Path("C:/Program Files/VcXsrv/vcxsrv.exe"),
@@ -442,6 +492,7 @@ class ProcessManager:
                         cwd=cwd,
                         suite_root=self.repo_root,
                         env=process_env,
+                        preexec_fn=_preexec_fn,
                     )
             else:
                 # Unified console: capture output via pipes
@@ -453,6 +504,7 @@ class ProcessManager:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                    preexec_fn=_preexec_fn,
                 )
                 # Stream output in a background thread
                 t = threading.Thread(
@@ -462,6 +514,8 @@ class ProcessManager:
                 )
                 t.start()
                 self._output_threads[name] = t
+
+            _assign_to_job(process)
 
             # Guard running_processes dict with lock (issue #2715)
             with self._process_lock:
@@ -479,7 +533,7 @@ class ProcessManager:
             logger.error(f"Failed to launch {name}: {e}")
             return None
 
-    def launch_module(
+    def launch_module(  # noqa: C901
         self,
         name: str,
         module_name: str,
@@ -575,6 +629,7 @@ class ProcessManager:
                         cwd=cwd,
                         suite_root=self.repo_root,
                         env=process_env,
+                        preexec_fn=_preexec_fn,
                     )
             else:
                 # Unified console: capture output via pipes
@@ -586,6 +641,7 @@ class ProcessManager:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                    preexec_fn=_preexec_fn,
                 )
                 t = threading.Thread(
                     target=self._stream_output,
@@ -594,6 +650,8 @@ class ProcessManager:
                 )
                 t.start()
                 self._output_threads[name] = t
+
+            _assign_to_job(process)
 
             # Guard running_processes dict with lock (issue #2715)
             with self._process_lock:

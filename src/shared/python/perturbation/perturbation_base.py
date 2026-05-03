@@ -358,7 +358,7 @@ class PerturbationAnalyzerBase(ABC):
                         v = float(math.hypot(*v.flatten()))
                     metric_lists[m].append(float(v))
                 n_success += 1
-            except Exception:  # noqa: BLE001
+            except (ValueError, RuntimeError):
                 logger.debug("Trial %d failed", i, exc_info=True)
 
         success_rate = n_success / config.n_trials if config.n_trials > 0 else 0.0
@@ -436,7 +436,7 @@ class PerturbationAnalyzerBase(ABC):
                     if isinstance(v, np.ndarray):
                         v = float(math.hypot(*v.flatten()))
                     values.append(float(v))
-                except Exception:  # noqa: BLE001
+                except (ValueError, RuntimeError):
                     pass
             return np.array(values) if values else np.array([0.0])
 

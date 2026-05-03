@@ -3,9 +3,8 @@
 Replaces all uses of ``eval()`` with a hardened AST-based evaluator that:
 
 1. Parses the expression into an AST and validates every node type.
-2. Compiles the validated AST into a code object (no raw string eval).
-3. Executes the compiled code in a namespace that contains **only** the
-   caller-supplied names -- ``__builtins__`` is always empty.
+2. Evaluates the validated AST with a small recursive interpreter.
+3. Resolves names exclusively from the caller-supplied namespace.
 
 This eliminates the class of attacks where ``eval()`` can be abused even
 when ``__builtins__`` is set to ``{}``.
@@ -24,6 +23,7 @@ from __future__ import annotations
 
 import ast
 import math
+import operator
 from typing import Any
 
 import numpy as np
@@ -68,6 +68,8 @@ _ALLOWED_NODE_TYPES: tuple[type, ...] = (
     # Literals & names
     ast.Constant,
     ast.Name,
+    ast.List,
+    ast.Tuple,
     # Function calls (only bare-name calls, no attribute calls)
     ast.Call,
     ast.keyword,
@@ -212,6 +214,124 @@ def validate_expression(
     return tree
 
 
+_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+    ast.LShift: operator.lshift,
+    ast.RShift: operator.rshift,
+    ast.BitOr: operator.or_,
+    ast.BitXor: operator.xor,
+    ast.BitAnd: operator.and_,
+    ast.MatMult: operator.matmul,
+    ast.Eq: operator.eq,
+    ast.NotEq: operator.ne,
+    ast.Lt: operator.lt,
+    ast.LtE: operator.le,
+    ast.Gt: operator.gt,
+    ast.GtE: operator.ge,
+    ast.Is: operator.is_,
+    ast.IsNot: operator.is_not,
+    ast.In: lambda a, b: a in b,
+    ast.NotIn: lambda a, b: a not in b,
+    ast.UAdd: operator.pos,
+    ast.USub: operator.neg,
+    ast.Not: operator.not_,
+    ast.Invert: operator.invert,
+}
+
+
+def _eval_sequence(nodes: list[ast.AST], namespace: dict[str, Any]) -> list[Any]:
+    return [_eval_ast(node, namespace) for node in nodes]
+
+
+def _eval_compare(node: ast.Compare, namespace: dict[str, Any]) -> bool:
+    left = _eval_ast(node.left, namespace)
+    for op, right_node in zip(node.ops, node.comparators, strict=True):
+        right = _eval_ast(right_node, namespace)
+        if not _OPERATORS[type(op)](left, right):
+            return False
+        left = right
+    return True
+
+
+def _eval_bool(node: ast.BoolOp, namespace: dict[str, Any]) -> bool:
+    if isinstance(node.op, ast.And):
+        return all(_eval_ast(value, namespace) for value in node.values)
+    if isinstance(node.op, ast.Or):
+        return any(_eval_ast(value, namespace) for value in node.values)
+    raise ValueError(f"Unsupported boolean operator: {type(node.op).__name__}")
+
+
+def _eval_call(node: ast.Call, namespace: dict[str, Any]) -> Any:
+    func = _eval_ast(node.func, namespace)
+    args: list[Any] = []
+    for arg in node.args:
+        if isinstance(arg, ast.Starred):
+            args.extend(_eval_ast(arg.value, namespace))
+            continue
+        args.append(_eval_ast(arg, namespace))
+    kwargs = {
+        kw.arg: _eval_ast(kw.value, namespace)
+        for kw in node.keywords
+        if kw.arg is not None
+    }
+    return func(*args, **kwargs)
+
+
+def _eval_slice(node: ast.Slice, namespace: dict[str, Any]) -> slice:
+    lower = _eval_ast(node.lower, namespace) if node.lower else None
+    upper = _eval_ast(node.upper, namespace) if node.upper else None
+    step = _eval_ast(node.step, namespace) if node.step else None
+    return slice(lower, upper, step)
+
+
+def _eval_ast(node: ast.AST, namespace: dict[str, Any]) -> Any:  # noqa: C901
+    if isinstance(node, ast.Expression):
+        return _eval_ast(node.body, namespace)
+    if isinstance(node, ast.Constant):
+        return node.value
+    if isinstance(node, ast.Name):
+        if node.id in namespace:
+            return namespace[node.id]
+        raise NameError(f"name '{node.id}' is not defined")
+    if isinstance(node, ast.BinOp):
+        left = _eval_ast(node.left, namespace)
+        right = _eval_ast(node.right, namespace)
+        return _OPERATORS[type(node.op)](left, right)
+    if isinstance(node, ast.UnaryOp):
+        operand = _eval_ast(node.operand, namespace)
+        return _OPERATORS[type(node.op)](operand)
+    if isinstance(node, ast.Compare):
+        return _eval_compare(node, namespace)
+    if isinstance(node, ast.BoolOp):
+        return _eval_bool(node, namespace)
+    if isinstance(node, ast.Call):
+        return _eval_call(node, namespace)
+    if isinstance(node, ast.Subscript):
+        value = _eval_ast(node.value, namespace)
+        slice_val = _eval_ast(node.slice, namespace)
+        return value[slice_val]
+    if isinstance(node, ast.Index):  # Python 3.8 compat
+        return _eval_ast(node.value, namespace)
+    if isinstance(node, ast.Slice):
+        return _eval_slice(node, namespace)
+    if isinstance(node, ast.List):
+        return _eval_sequence(node.elts, namespace)
+    if isinstance(node, ast.Tuple):
+        return tuple(_eval_sequence(node.elts, namespace))
+    if isinstance(node, ast.IfExp):
+        test = _eval_ast(node.test, namespace)
+        if test:
+            return _eval_ast(node.body, namespace)
+        return _eval_ast(node.orelse, namespace)
+    raise ValueError(f"Unsupported AST node: {type(node).__name__}")
+
+
 def safe_eval(
     expression: str,
     namespace: dict[str, Any],
@@ -243,8 +363,7 @@ def safe_eval(
         allowed_names = set(namespace.keys())
 
     tree = validate_expression(expression, allowed_names)
-    code = compile(tree, "<safe_eval>", "eval")
-    return eval(code, {"__builtins__": {}}, namespace)  # noqa: S307  # nosec B307 - AST validated by validate_expression before eval
+    return _eval_ast(tree, namespace)
 
 
 def safe_eval_math(

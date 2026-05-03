@@ -8,6 +8,7 @@ See issue #1206
 
 from __future__ import annotations
 
+import asyncio
 import contextlib
 import csv
 import io
@@ -92,6 +93,48 @@ class ImportResponse(BaseModel):
 # ── In-memory dataset cache ──
 
 _loaded_datasets: dict[str, dict[str, Any]] = {}
+_cache_lock = asyncio.Lock()
+
+
+async def _get_cached_dataset(
+    name: str,
+) -> tuple[list[str], list[dict[str, Any]], str] | None:
+    """Return a copy of an imported dataset under the cache lock."""
+    async with _cache_lock:
+        dataset = _loaded_datasets.get(name)
+        if dataset is None:
+            return None
+        columns = list(dataset["columns"])
+        rows = list(dataset["rows"])
+        dataset_format = str(dataset["format"])
+    return columns, rows, dataset_format
+
+
+def _row_matches_filter(row: dict[str, Any], request: DatasetFilterRequest) -> bool:
+    value = str(row.get(request.column, ""))
+    if request.operator == "eq":
+        return value == request.value
+    if request.operator == "ne":
+        return value != request.value
+    if request.operator == "contains":
+        return request.value.lower() in value.lower()
+    if request.operator not in {"gt", "lt", "gte", "lte"}:
+        return False
+
+    try:
+        row_value = float(value)
+        filter_value = float(request.value)
+    except (ValueError, TypeError) as exc:
+        logger.debug("Non-numeric value in filter comparison: %s", exc)
+        return False
+
+    comparisons = {
+        "gt": row_value > filter_value,
+        "lt": row_value < filter_value,
+        "gte": row_value >= filter_value,
+        "lte": row_value <= filter_value,
+    }
+    return comparisons[request.operator]
 
 
 def _get_output_dir() -> Path:
@@ -162,17 +205,18 @@ async def list_datasets() -> DatasetListResponse:
                 )
 
     # Also include any loaded (imported) datasets
-    for name, ds in _loaded_datasets.items():
-        if not any(d.name == name for d in datasets):
-            datasets.append(
-                DatasetInfo(
-                    name=name,
-                    path="(imported)",
-                    format=ds.get("format", "unknown"),
-                    size_bytes=0,
-                    columns=ds.get("columns", []),
+    async with _cache_lock:
+        for name, ds in _loaded_datasets.items():
+            if not any(d.name == name for d in datasets):
+                datasets.append(
+                    DatasetInfo(
+                        name=name,
+                        path="(imported)",
+                        format=ds.get("format", "unknown"),
+                        size_bytes=0,
+                        columns=ds.get("columns", []),
+                    )
                 )
-            )
 
     return DatasetListResponse(
         datasets=datasets,
@@ -193,15 +237,15 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
     See issue #1206
     """
     # Check in-memory cache first
-    if name in _loaded_datasets:
-        ds = _loaded_datasets[name]
-        rows = ds["rows"][:limit]
+    cached_dataset = await _get_cached_dataset(name)
+    if cached_dataset is not None:
+        columns, rows, dataset_format = cached_dataset
         return DatasetPreviewResponse(
             name=name,
-            columns=ds["columns"],
-            rows=rows,
-            total_rows=len(ds["rows"]),
-            format=ds["format"],
+            columns=columns,
+            rows=rows[:limit],
+            total_rows=len(rows),
+            format=dataset_format,
         )
 
     # Try to load from disk
@@ -243,10 +287,9 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
     See issue #1206
     """
     # Get dataset rows
-    if name in _loaded_datasets:
-        ds = _loaded_datasets[name]
-        columns = ds["columns"]
-        rows = ds["rows"]
+    cached_dataset = await _get_cached_dataset(name)
+    if cached_dataset is not None:
+        columns, rows, _dataset_format = cached_dataset
     else:
         output_dir = _get_output_dir()
         matches = list(output_dir.rglob(name))
@@ -316,11 +359,12 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
     else:
         columns, rows = _parse_json_content(content)
 
-    _loaded_datasets[file.filename] = {
-        "columns": columns,
-        "rows": rows,
-        "format": suffix.lstrip("."),
-    }
+    async with _cache_lock:
+        _loaded_datasets[file.filename] = {
+            "columns": columns,
+            "rows": rows,
+            "format": suffix.lstrip("."),
+        }
 
     return ImportResponse(
         name=file.filename,
@@ -343,11 +387,9 @@ async def filter_dataset(
     See issue #1206
     """
     # First get the dataset
-    if name in _loaded_datasets:
-        ds = _loaded_datasets[name]
-        columns = ds["columns"]
-        rows = ds["rows"]
-        fmt = ds["format"]
+    cached_dataset = await _get_cached_dataset(name)
+    if cached_dataset is not None:
+        columns, rows, fmt = cached_dataset
     else:
         output_dir = _get_output_dir()
         matches = list(output_dir.rglob(name))
@@ -371,33 +413,9 @@ async def filter_dataset(
             detail=f"Column '{request.column}' not found. Available: {columns}",
         )
 
-    # Apply filter
     filtered: list[dict[str, Any]] = []
     for row in rows:
-        val = str(row.get(request.column, ""))
-        match = False
-        if request.operator == "eq":
-            match = val == request.value
-        elif request.operator == "ne":
-            match = val != request.value
-        elif request.operator == "contains":
-            match = request.value.lower() in val.lower()
-        elif request.operator in ("gt", "lt", "gte", "lte"):
-            try:
-                num_val = float(val)
-                num_filter = float(request.value)
-                if request.operator == "gt":
-                    match = num_val > num_filter
-                elif request.operator == "lt":
-                    match = num_val < num_filter
-                elif request.operator == "gte":
-                    match = num_val >= num_filter
-                elif request.operator == "lte":
-                    match = num_val <= num_filter
-            except (ValueError, TypeError) as exc:
-                logger.debug("Non-numeric value in filter comparison: %s", exc)
-
-        if match:
+        if _row_matches_filter(row, request):
             filtered.append(row)
             if len(filtered) >= request.limit:
                 break

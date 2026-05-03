@@ -168,7 +168,7 @@ def _try_build_real_engine(name: str) -> object | None:
 
             return PinocchioPhysicsEngine()
 
-    except Exception:  # noqa: BLE001
+    except (ImportError, ValueError, RuntimeError):  # noqa: BLE001
         logger.warning("Engine '%s' unavailable — will use stub", name, exc_info=False)
     return None
 
@@ -281,7 +281,7 @@ class CrossEngineDashboardWindow:
         )
 
 
-def _create_dashboard_window_class() -> type:
+def _create_dashboard_window_class() -> type:  # noqa: C901
     """Construct and return the _Window class with deferred Qt/mpl imports.
 
     Returns

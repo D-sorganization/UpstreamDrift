@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, mock_open, patch  # noqa: E402
 import pytest  # noqa: E402
 from src.launchers.launcher_process_manager import (  # noqa: E402
     ProcessManager,
+    _assign_to_job,
     is_vcxsrv_running,
     start_vcxsrv,
 )
@@ -120,6 +121,12 @@ def test_attach_process(manager) -> None:
         assert manager.running_processes["TestApp"] == mock_proc
         assert "TestApp" in manager._output_threads
         mock_thread.start.assert_called_once()
+
+
+def test_assign_to_job_fallback_is_noop() -> None:
+    mock_proc = MagicMock()
+
+    assert _assign_to_job(mock_proc) is None
 
 
 def test_stream_output(manager) -> None:

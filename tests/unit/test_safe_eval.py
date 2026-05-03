@@ -110,6 +110,19 @@ class TestSafeEval:
         result = safe_eval("1 if flag else 0", {"flag": True})
         assert result == 1
 
+    def test_safe_eval_does_not_call_python_eval(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        def fail_eval(*_args: object, **_kwargs: object) -> object:
+            raise AssertionError("eval must not be called")
+
+        monkeypatch.setattr("builtins.eval", fail_eval)
+
+        assert safe_eval("x + 1", {"x": 2}) == 3
+
+    def test_safe_eval_supports_star_args_without_eval(self) -> None:
+        assert safe_eval("sum(*values)", {"sum": sum, "values": [[1, 2, 3]]}) == 6
+
 
 # ---------------------------------------------------------------------------
 # safe_eval_math
