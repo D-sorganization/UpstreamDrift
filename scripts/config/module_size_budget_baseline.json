@@ -4,37 +4,37 @@
     {
       "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py",
       "owner": "@simscape-gui",
-      "reason": "Legacy application code (1662 lines)",
+      "reason": "Legacy application code (1662 lines, pending decomposition)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/engines/physics_engines/drake/python/src/drake_gui_app.py",
       "owner": "@physics-core",
-      "reason": "Drake GUI application (2177 lines)",
+      "reason": "Drake GUI application (2177 lines, pending decomposition)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/engines/physics_engines/mujoco/head_models.py",
       "owner": "@physics-core",
-      "reason": "MuJoCo head models (1666 lines)",
+      "reason": "MuJoCo head models (1666 lines, pending decomposition)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
       "owner": "@physics-core",
-      "reason": "MuJoCo humanoid launcher (1583 lines)",
+      "reason": "MuJoCo humanoid launcher (1583 lines, pending decomposition)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py",
       "owner": "@physics-core",
-      "reason": "Pinocchio golf GUI (2007 lines)",
+      "reason": "Pinocchio golf GUI (2007 lines, pending decomposition)",
       "expires_on": "2026-07-31"
     },
     {
       "path": "src/shared/python/humanoid_character_builder/generators/mesh_generator.py",
       "owner": "@physics-core",
-      "reason": "Mesh generator (1675 lines)",
+      "reason": "Mesh generator (1675 lines, pending decomposition)",
       "expires_on": "2026-07-31"
     }
   ]
