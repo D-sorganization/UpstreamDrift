@@ -62,6 +62,7 @@ from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from src.api._version import __version__  # noqa: E402
+from src.api.debug_guard import debug_endpoints_enabled  # noqa: E402
 from src.api.diagnostics import (  # noqa: E402
     APIDiagnostics,
     get_diagnostic_endpoint_html,
@@ -482,6 +483,15 @@ def _register_health_and_diagnostic_endpoints(
             "engines": [e.value for e in engine_manager.get_available_engines()],
             "ui_available": _startup_metrics.get("static_files_mounted", False),
         }
+
+    _register_diagnostic_and_debug_endpoints(app)
+
+
+def _register_diagnostic_and_debug_endpoints(app: FastAPI) -> None:
+    """Register opt-in diagnostic and debug endpoints."""
+
+    if not debug_endpoints_enabled():
+        return
 
     @app.get("/api/diagnostics")
     async def get_diagnostics() -> dict[str, Any]:
