@@ -104,7 +104,10 @@ jobs:
         with: { python-version: "3.11" }
       - name: Install Quality Tools
         run: |
-          python -m pip install ruff==0.14.10 "mypy>=1.15.0" bandit==1.7.7 pydocstyle==6.3.0
+          # Shared self-hosted runners can retain broken tool packages without
+          # RECORD metadata. Ignore ambient installs so pip lays down clean
+          # copies instead of trying to uninstall corrupted cache entries.
+          python -m pip install --ignore-installed ruff==0.14.10 "mypy>=1.15.0" bandit==1.7.7 pydocstyle==6.3.0
 
       - name: Lint
         shell: bash
@@ -203,6 +206,9 @@ jobs:
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 
+      - name: Security Workflow Silent-Failure Guard
+        run: python3 scripts/check_workflows_no_silent_failures.py
+
       - name: Tutorial Import Check
         run: python3 scripts/ci/check_tutorial_imports.py
 
@@ -239,23 +245,35 @@ jobs:
 
       # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
       - name: Security Audit
+        shell: bash
         run: |
-          # Force-reinstall sortedcontainers before pip-audit: the shared runner toolcache
-          # can carry a half-installed sortedcontainers that makes cyclonedx (pip-audit dep) fail.
-          python -m pip install --ignore-installed --no-deps "sortedcontainers>=2.4.0"
-          # Force a patched Black into the audit environment so pip-audit does not
-          # fail on a vulnerable formatter version lingering in the shared runner cache.
-          python -m pip install --ignore-installed --no-deps "black>=26.3.1"
+          # Force-reinstall sortedcontainers after the editable install: the shared
+          # runner toolcache can carry a half-installed copy that breaks cyclonedx.
+          python -m pip install --force-reinstall --no-deps "sortedcontainers>=2.4.0"
+          # Remove any runner-bundled Black before installing the patched release.
+          python -m pip uninstall -y black || true
+          python -m pip install --force-reinstall --no-deps "black==26.3.1"
           python -m pip install --ignore-installed pip-audit
 
-          # Ignore CVEs with no fix version available or transitive dependencies:
-          # - CVE-2024-23342 (ecdsa): No fix version available
-          # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
-          # - CVE-2026-1703 (pip): pip upgrade may not persist in GHA runner env
-          # - CVE-2026-3219 (pip): audit-tool dependency in the shared runner env
-          # - CVE-2026-4539 (pygments): No fix version available at time of writing
-          # - PYSEC-2022-42969 (py): No fix version reported by pip-audit
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703 --ignore-vuln CVE-2026-3219 --ignore-vuln CVE-2026-4539 --ignore-vuln PYSEC-2022-42969
+          audit_black_version="$(python - <<'PY'
+          from importlib import metadata
+
+          try:
+              print(metadata.version("black"))
+          except metadata.PackageNotFoundError:
+              print("")
+          PY
+          )"
+          if [ "$audit_black_version" != "26.3.1" ]; then
+            echo "::error::Security audit expected black==26.3.1 but found '$audit_black_version'"
+            exit 1
+          fi
+
+          mapfile -t pip_audit_waiver_flags < <(
+            python3 scripts/ci/check_pip_audit_waivers.py \
+              --waiver-file scripts/config/pip_audit_waivers.json
+          )
+          pip-audit "${pip_audit_waiver_flags[@]}"
 
       # SECURITY: Bandit static security analysis (Issue #782)
       # Blocking on medium+ severity, medium+ confidence findings (Issue #2067)

@@ -67,21 +67,43 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install safety bandit pip-audit semgrep || true
+          python -m pip install safety bandit pip-audit semgrep
           npm install -g @google/jules
 
       - name: Run Security Scanners
         run: |
+          set -euo pipefail
           mkdir -p reports
 
           echo "Running pip-audit..."
-          pip-audit --format json -o reports/pip_audit.json 2>/dev/null || echo "[]" > reports/pip_audit.json
+          mapfile -t pip_audit_waiver_flags < <(
+            python3 scripts/ci/check_pip_audit_waivers.py \
+              --waiver-file scripts/config/pip_audit_waivers.json
+          )
+          pip_audit_status=0
+          pip-audit --format json -o reports/pip_audit.json \
+            "${pip_audit_waiver_flags[@]}" || pip_audit_status=$?
+          if [ "$pip_audit_status" -gt 1 ]; then
+            echo "::error::pip-audit failed with status $pip_audit_status"
+            exit "$pip_audit_status"
+          fi
 
           echo "Running bandit..."
-          bandit -r . -f json -o reports/bandit.json --exclude './.venv,./venv,./env,./.git' 2>/dev/null || echo "[]" > reports/bandit.json
+          bandit_status=0
+          bandit -r . -f json -o reports/bandit.json \
+            --exclude './.venv,./venv,./env,./.git' || bandit_status=$?
+          if [ "$bandit_status" -gt 1 ]; then
+            echo "::error::bandit failed with status $bandit_status"
+            exit "$bandit_status"
+          fi
 
           echo "Running semgrep..."
-          semgrep --config=auto --json -o reports/semgrep.json . 2>/dev/null || echo "{}" > reports/semgrep.json
+          semgrep_status=0
+          semgrep --config=auto --json -o reports/semgrep.json . || semgrep_status=$?
+          if [ "$semgrep_status" -gt 1 ]; then
+            echo "::error::semgrep failed with status $semgrep_status"
+            exit "$semgrep_status"
+          fi
 
       - name: Jules Sentinel Analysis
         env:

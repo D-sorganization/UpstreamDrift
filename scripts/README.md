@@ -13,8 +13,13 @@ This directory contains utility and maintenance scripts for the UpstreamDrift pr
   - `run_local_heavy_tests.sh` — Run the full test suite with heavy markers on local machine
   - `check_file_size_budget.py` — Verify files don't exceed size budget (runs in CI)
   - `check_tutorial_imports.py` — Validate Python imports in tutorial documentation (runs in CI)
-  - `check_pip_audit_waivers.py` — Validate pip-audit waivers and enforce expiry dates (runs in CI)
+  - `check_pip_audit_waivers.py` — Validate JSON pip-audit waivers and enforce expiry dates (runs in CI)
   - `verify_installation.py` — Verify the UpstreamDrift installation and dependencies
+
+- **`config/`** — Script-owned CI configuration
+  - `pip_audit_waivers.json` — Time-bounded pip-audit CVE waivers consumed by `scripts/ci/check_pip_audit_waivers.py`
+
+- `check_workflows_no_silent_failures.py` — Reject silent security scanner failure patterns in core security workflows
 
 - **`maintenance/`** — System and deployment utilities
   - `start-gaai-daemon.sh` — Bootstrap the GAAI framework daemon

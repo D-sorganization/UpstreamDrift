@@ -11,7 +11,7 @@ import pytest
 
 
 def _load_script_module(name: str):
-    script_path = Path(__file__).resolve().parents[2] / "scripts" / f"{name}.py"
+    script_path = Path(__file__).resolve().parents[2] / "scripts" / "ci" / f"{name}.py"
     spec = importlib.util.spec_from_file_location(name, script_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
@@ -22,15 +22,18 @@ def _load_script_module(name: str):
 
 def test_load_waivers_and_emit_ignore_flags(tmp_path):
     module = _load_script_module("check_pip_audit_waivers")
-    waiver_file = tmp_path / "waivers.yml"
+    waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
-        """
-waivers:
-  - id: CVE-2024-0001
-    package: demo
-    reason: Waiting for upstream fix.
-    expires_at: 2099-01-01
-""".strip(),
+        """{
+  "waivers": [
+    {
+      "id": "CVE-2024-0001",
+      "package": "demo",
+      "reason": "Waiting for upstream fix.",
+      "expires_at": "2099-01-01"
+    }
+  ]
+}""",
         encoding="utf-8",
     )
 
@@ -42,15 +45,18 @@ waivers:
 
 def test_find_expired_waivers_detects_past_dates(tmp_path):
     module = _load_script_module("check_pip_audit_waivers")
-    waiver_file = tmp_path / "waivers.yml"
+    waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
-        """
-waivers:
-  - id: CVE-2024-0001
-    package: demo
-    reason: Waiting for upstream fix.
-    expires_at: 2020-01-01
-""".strip(),
+        """{
+  "waivers": [
+    {
+      "id": "CVE-2024-0001",
+      "package": "demo",
+      "reason": "Waiting for upstream fix.",
+      "expires_at": "2020-01-01"
+    }
+  ]
+}""",
         encoding="utf-8",
     )
 
@@ -62,13 +68,16 @@ waivers:
 
 def test_load_waivers_rejects_missing_fields(tmp_path):
     module = _load_script_module("check_pip_audit_waivers")
-    waiver_file = tmp_path / "waivers.yml"
+    waiver_file = tmp_path / "waivers.json"
     waiver_file.write_text(
-        """
-waivers:
-  - id: CVE-2024-0001
-    package: demo
-""".strip(),
+        """{
+  "waivers": [
+    {
+      "id": "CVE-2024-0001",
+      "package": "demo"
+    }
+  ]
+}""",
         encoding="utf-8",
     )
 

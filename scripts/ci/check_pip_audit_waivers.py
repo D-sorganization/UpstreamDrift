@@ -4,11 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import json
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
-
-import yaml
 
 
 @dataclass(frozen=True)
@@ -22,8 +21,16 @@ class Waiver:
 
 
 def load_waivers(path: Path) -> list[Waiver]:
-    """Load waiver definitions from YAML."""
-    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    """Load waiver definitions from JSON.
+
+    Preconditions:
+        path points to a JSON object with a top-level ``waivers`` list.
+    """
+    if not path.exists():
+        raise FileNotFoundError(f"pip-audit waiver file not found: {path}")
+    raw = json.loads(path.read_text(encoding="utf-8") or "{}")
+    if not isinstance(raw, dict):
+        raise ValueError("waiver file must contain a JSON object")
     items = raw.get("waivers", [])
     if not isinstance(items, list):
         raise ValueError("waivers must be a list")
@@ -71,7 +78,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--waiver-file",
         type=Path,
-        default=Path(".github/security/pip-audit-ignore.yml"),
+        default=Path("scripts/config/pip_audit_waivers.json"),
         help="Path to the pip-audit waiver manifest.",
     )
     return parser.parse_args()
