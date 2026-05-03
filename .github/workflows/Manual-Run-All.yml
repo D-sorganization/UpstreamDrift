@@ -43,7 +43,7 @@ jobs:
     steps:
       - name: Dispatch Assessment Generator
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -60,7 +60,7 @@ jobs:
 
       - name: Dispatch Code Quality Reviewer
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -77,7 +77,7 @@ jobs:
 
       - name: Dispatch Completist
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -94,7 +94,7 @@ jobs:
 
       - name: Dispatch Sentinel
         if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -111,7 +111,7 @@ jobs:
 
       - name: Dispatch Issue Resolver
         if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             await github.rest.actions.createWorkflowDispatch({
@@ -128,7 +128,7 @@ jobs:
 
       - name: Dispatch PR Compiler
         if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only' || inputs.workflows == 'pr-compiler-only'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const dry_run = '${{ inputs.dry_run }}' === 'true';
