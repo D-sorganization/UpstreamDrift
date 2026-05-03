@@ -41,17 +41,6 @@
 | **Spec Version**        | 1.0.98                                             |
 | **Last Spec Update**    | 2026-05-03                                         |
 
-## SPEC Ownership and Update Cadence
-
-- **Owner:** D-sorganization (responsible for accepting SPEC.md edits)
-- **Update triggers (mandatory):**
-  - Any PR that adds, removes, or moves a top-level `src/` package or a public
-    engine adapter must update §6 (Component Locations) and §7 (Feature Status).
-  - Any PR that changes the version in `pyproject.toml` must update §1 (Identity).
-  - Any PR that changes a CI gate threshold must update §X (Quality Gates).
-- **Review cadence:** SPEC.md is reviewed for staleness on every release
-  (per `docs/operations/release-runbook.md`, see #3842).
-
 ## 2. Purpose & Mission
 
 UpstreamDrift is a multi-physics golf swing biomechanical simulation platform that consolidates five leading physics engines (MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite) for cross-validated biomechanical analysis. It enables researchers and biomechanists to simulate human movement across models ranging from simplified 2-DOF pendulums to complex 290-muscle musculoskeletal systems, providing a unified interface for comparative physics analysis and professional-grade visualization.

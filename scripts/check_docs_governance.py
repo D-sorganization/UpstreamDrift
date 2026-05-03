@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,6 +15,14 @@ REQUIRED_FILES = [
     ROOT / "docs" / "governance" / "DOCS_GOVERNANCE.md",
 ]
 CANONICAL_PROCESS_DIRECTORY_NAMES = ("assessments", "issues")
+SOURCE_OF_TRUTH_HEADINGS = {
+    "SPEC.md": {
+        "SPEC Ownership and Update Cadence",
+        "Quality Gates",
+        "Architecture Principles",
+        "Support Matrix",
+    }
+}
 
 
 def _git_changed_files() -> list[str]:
@@ -56,6 +65,25 @@ def _duplicate_process_directories() -> list[str]:
     return duplicates
 
 
+def _duplicate_source_of_truth_headings() -> list[str]:
+    duplicates: list[str] = []
+    for relative_path, guarded_headings in SOURCE_OF_TRUTH_HEADINGS.items():
+        document = ROOT / relative_path
+        if not document.exists():
+            continue
+        headings = [
+            line[3:].strip()
+            for line in document.read_text(encoding="utf-8").splitlines()
+            if line.startswith("## ") and line[3:].strip() in guarded_headings
+        ]
+        for heading, count in Counter(headings).items():
+            if count > 1:
+                duplicates.append(
+                    f"{relative_path}: duplicate `## {heading}` heading appears {count} times"
+                )
+    return duplicates
+
+
 def main() -> int:
     missing = [str(p.relative_to(ROOT)) for p in REQUIRED_FILES if not p.exists()]
     if missing:
@@ -66,6 +94,12 @@ def main() -> int:
     if duplicates:
         return _fail(
             "Duplicate root process directories detected:\n- " + "\n- ".join(duplicates)
+        )
+    duplicate_headings = _duplicate_source_of_truth_headings()
+    if duplicate_headings:
+        return _fail(
+            "Duplicate source-of-truth documentation headings detected:\n- "
+            + "\n- ".join(duplicate_headings)
         )
 
     changed = _git_changed_files()

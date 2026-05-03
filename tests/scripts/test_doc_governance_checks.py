@@ -142,3 +142,40 @@ def test_docs_governance_rejects_duplicate_root_process_directories(
     monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
 
     assert check_docs_governance.main() == 1
+
+
+def test_docs_governance_rejects_duplicate_source_of_truth_headings(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _write(tmp_path / "docs" / "README.md", "# Docs\n")
+    _write(tmp_path / "docs" / "assessments" / "README.md", "# Assessments\n")
+    _write(tmp_path / "docs" / "adr" / "README.md", "# ADRs\n")
+    _write(tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md", "# ADR Template\n")
+    _write(
+        tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        "# Docs Governance\n",
+    )
+    _write(
+        tmp_path / "SPEC.md",
+        "# SPEC\n\n"
+        "## SPEC Ownership and Update Cadence\n\n"
+        "- **Owner:** @diete\n\n"
+        "## 1. Identity\n\n"
+        "## SPEC Ownership and Update Cadence\n\n"
+        "- **Owner:** D-sorganization\n",
+    )
+    monkeypatch.setattr(check_docs_governance, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        check_docs_governance,
+        "REQUIRED_FILES",
+        [
+            tmp_path / "docs" / "README.md",
+            tmp_path / "docs" / "assessments" / "README.md",
+            tmp_path / "docs" / "adr" / "README.md",
+            tmp_path / "docs" / "adr" / "ADR_TEMPLATE.md",
+            tmp_path / "docs" / "governance" / "DOCS_GOVERNANCE.md",
+        ],
+    )
+    monkeypatch.setattr(check_docs_governance, "_git_changed_files", list)
+
+    assert check_docs_governance.main() == 1
