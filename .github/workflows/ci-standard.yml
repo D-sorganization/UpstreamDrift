@@ -320,7 +320,7 @@ jobs:
           exit $exit_code
 
       - name: Trivy Filesystem Security Scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0ff4673ed794105fd953c3f3ffa80e37f619aec3
         with:
           scan-type: fs
           scan-ref: .
