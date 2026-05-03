@@ -100,7 +100,9 @@ pydantic-core==2.41.5
 pyopengl==3.1.10
     # via mujoco
 python-dotenv==1.2.2
-    # via uvicorn
+    # via
+    #   upstream-drift (pyproject.toml)
+    #   uvicorn
 pyyaml==6.0.2
     # via
     #   bokeh

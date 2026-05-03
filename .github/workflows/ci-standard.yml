@@ -320,7 +320,7 @@ jobs:
           exit $exit_code
 
       - name: Trivy Filesystem Security Scan
-        uses: aquasecurity/trivy-action@0ff4673ed794105fd953c3f3ffa80e37f619aec3
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           scan-type: fs
           scan-ref: .
@@ -623,14 +623,14 @@ jobs:
           POSTGRES_DB: upstreamdrift_migrations
           POSTGRES_USER: upstreamdrift
           POSTGRES_PASSWORD: upstreamdrift
-          POSTGRES_HOST_AUTH_METHOD: trust
         ports:
           - 5432:5432
         options: >-
           --health-cmd "pg_isready -U upstreamdrift -d upstreamdrift_migrations"
-          --health-interval 10s
+          --health-interval 5s
+          --health-start-period 30s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 12
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
