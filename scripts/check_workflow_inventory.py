@@ -12,6 +12,14 @@ DEFAULT_MAX_ACTIVE_WORKFLOWS = 59
 AGENT_CONFIG_ROOTS = (".claude", ".gaai", ".agent", ".kiro", ".jules")
 INVENTORY_PATH = Path(".github/WORKFLOWS.md")
 AGENT_GOVERNANCE_PATH = Path("docs/development/agents/migration.md")
+AGENT_BUDGET_CONTRACT_HEADING = "## Agent Automation Budget Contract"
+AGENT_BUDGET_CONTRACT_TERMS = (
+    "Max wall time",
+    "Max parallel sessions",
+    "Concurrency",
+    "Audit artifact",
+    "Human approval",
+)
 
 
 def iter_active_workflows(workflow_dir: Path) -> list[Path]:
@@ -159,6 +167,34 @@ def audit_agent_config_roots(repo_root: Path) -> list[str]:
     return findings
 
 
+def audit_agent_budget_contract(repo_root: Path) -> list[str]:
+    """Audit that mutating agent workflows have documented safety budgets."""
+    inventory_path = repo_root / INVENTORY_PATH
+    try:
+        inventory_rows = parse_inventory_table(inventory_path)
+    except FileNotFoundError as exc:
+        return [str(exc)]
+
+    mutating_agent_workflows = [
+        file_name
+        for file_name, cells in inventory_rows.items()
+        if len(cells) >= 4 and cells[2] == "@agents" and "write" in cells[3]
+    ]
+    if not mutating_agent_workflows:
+        return []
+
+    inventory_text = inventory_path.read_text(encoding="utf-8")
+    missing_terms = [
+        term for term in AGENT_BUDGET_CONTRACT_TERMS if term not in inventory_text
+    ]
+    if AGENT_BUDGET_CONTRACT_HEADING not in inventory_text or missing_terms:
+        return [
+            f"{INVENTORY_PATH.as_posix()} is missing Agent Automation Budget "
+            "Contract for mutating agent workflows"
+        ]
+    return []
+
+
 def audit_repository(
     repo_root: Path,
     max_active_workflows: int = DEFAULT_MAX_ACTIVE_WORKFLOWS,
@@ -173,6 +209,7 @@ def audit_repository(
     findings.extend(audit_workflow_inventory(repo_root, max_active_workflows))
     findings.extend(audit_permissions(repo_root))
     findings.extend(audit_agent_config_roots(repo_root))
+    findings.extend(audit_agent_budget_contract(repo_root))
     return findings
 
 

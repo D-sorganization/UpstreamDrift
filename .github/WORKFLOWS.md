@@ -14,6 +14,26 @@ the runner executes jobs with workflow-scoped `GITHUB_TOKEN` permissions and any
 secrets explicitly exposed by each workflow, every write scope must be visible in
 this table and treated as a security boundary.
 
+## Agent Automation Budget Contract
+
+Mutating workflows owned by `@agents` are permitted only under these default
+guardrails until the active workflow count reaches the 25-workflow target:
+
+- **Max wall time:** each mutating agent workflow must set a workflow or job
+  timeout and fail closed when the budget is exhausted.
+- **Max parallel sessions:** agent launchers must keep explicit parallelism
+  limits in workflow inputs or command arguments; unbounded fan-out is not
+  allowed.
+- **Concurrency:** queue writers and branch mutators must document the
+  concurrency group, queue lock, or idempotency key that prevents duplicate
+  writes.
+- **Audit artifact:** prompts, target refs, modified files, approvals, command
+  outcomes, and generated PR/issue links must be reconstructable from workflow
+  logs or durable artifacts without exposing secrets.
+- **Human approval:** destructive, release-impacting, or security-impacting
+  agent actions require owner review before merge, release, or workflow-control
+  mutation.
+
 | File | Trigger | Owner | Permissions | Purpose | Replaceable by |
 |------|---------|-------|-------------|---------|----------------|
 | agent-metrics-dashboard.yml | workflow_dispatch/schedule | @infra | contents: read | KEEP: publish agent metrics dashboard data. | n/a |

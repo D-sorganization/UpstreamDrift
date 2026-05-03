@@ -31,6 +31,17 @@ def _write_inventory(root: Path, rows: str) -> None:
     )
 
 
+def _agent_budget_contract() -> str:
+    return (
+        "\n## Agent Automation Budget Contract\n\n"
+        "- Max wall time: every mutating agent workflow must declare a timeout.\n"
+        "- Max parallel sessions: workflows that launch agents must bound parallelism.\n"
+        "- Concurrency: mutating workflows must define a concurrency/idempotency plan.\n"
+        "- Audit artifact: prompts, refs, modified files, and outcomes must be durable.\n"
+        "- Human approval: destructive or release-impacting actions require owner review.\n"
+    )
+
+
 def _write_agent_governance(root: Path, rows: str) -> None:
     _write(
         root / "docs" / "development" / "agents" / "migration.md",
@@ -119,6 +130,39 @@ def test_audit_repository_rejects_undocumented_agent_roots(tmp_path: Path) -> No
         "agent config root exists without docs/development/agents/migration.md row: "
         ".claude/"
     ) in findings
+
+
+def test_audit_repository_rejects_mutating_agent_workflows_without_budget_contract(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / ".github" / "workflows" / "agent.yml", _workflow())
+    _write_inventory(
+        tmp_path,
+        "| agent.yml | workflow_dispatch | @agents | contents: write | "
+        "KEEP: mutating agent workflow. | n/a |\n",
+    )
+    _write_agent_governance(tmp_path, "")
+
+    findings = audit_repository(tmp_path, max_active_workflows=1)
+
+    assert (
+        ".github/WORKFLOWS.md is missing Agent Automation Budget Contract "
+        "for mutating agent workflows"
+    ) in findings
+
+
+def test_audit_repository_accepts_mutating_agent_workflows_with_budget_contract(
+    tmp_path: Path,
+) -> None:
+    _write(tmp_path / ".github" / "workflows" / "agent.yml", _workflow())
+    _write_inventory(
+        tmp_path,
+        "| agent.yml | workflow_dispatch | @agents | contents: write | "
+        "KEEP: mutating agent workflow. | n/a |\n" + _agent_budget_contract(),
+    )
+    _write_agent_governance(tmp_path, "")
+
+    assert audit_repository(tmp_path, max_active_workflows=1) == []
 
 
 def test_checked_in_repository_inventory_is_current() -> None:
