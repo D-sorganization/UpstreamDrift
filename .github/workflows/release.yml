@@ -46,8 +46,36 @@ jobs:
           name: dist
           path: dist/
 
-  publish-pypi:
+  smoke-python-wheel:
     needs: [pick-runner, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.10" }
+          - { os: ubuntu-latest, python: "3.11" }
+          - { os: ubuntu-latest, python: "3.12" }
+          - { os: ubuntu-latest, python: "3.13" }
+          - { os: macos-14, python: "3.11" }
+          - { os: macos-14, python: "3.12" }
+          - { os: windows-latest, python: "3.11" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: dist
+          path: dist/
+      - name: Install smoke dependencies
+        run: python -m pip install pytest
+      - name: Run Python wheel smoke tests
+        run: python -m pytest tests/smoke/python_wheel
+
+  publish-pypi:
+    needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     environment:
@@ -66,7 +94,7 @@ jobs:
           skip-existing: true
 
   create-release:
-    needs: [pick-runner, build]
+    needs: [pick-runner, build, smoke-python-wheel]
     runs-on: ${{ needs.pick-runner.outputs.runner }}
     permissions:
       contents: write

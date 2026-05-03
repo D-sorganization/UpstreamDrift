@@ -15,6 +15,8 @@ import os
 from os import environ, getcwd
 from sys import exit, path
 
+from src.api._version import warn_if_unsupported_platform
+
 path.append(os.path.join(getcwd(), "src"))
 
 # Configure logging
@@ -143,6 +145,7 @@ def route_launch(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """Main entry point for unified launcher."""
+    warn_if_unsupported_platform()
     args = parse_arguments()
     route_launch(args)
 

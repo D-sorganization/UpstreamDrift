@@ -8,7 +8,7 @@
 #   make test     - Run tests
 #   make clean    - Clean build artifacts
 
-.PHONY: help lint format test test-unit test-int clean install check all docs sync-deps
+.PHONY: help lint format test test-unit test-int smoke clean install check all docs sync-deps
 
 # Default target
 help:
@@ -20,6 +20,7 @@ help:
 	@echo "  make test      - Run pytest"
 	@echo "  make test-unit - Run unit tests only"
 	@echo "  make test-int  - Run integration tests only"
+	@echo "  make smoke     - Run release smoke tests for available artifacts"
 	@echo "  make check     - Run all checks (lint + test)"
 	@echo "  make clean     - Remove build artifacts"
 	@echo "  make docs      - Build documentation"
@@ -72,6 +73,25 @@ test-unit:
 test-int:
 	@echo "Running integration tests..."
 	pytest tests/integration/ -v --tb=short
+
+# Run smoke tests against locally built release artifacts
+smoke:
+	@echo "Running Python wheel smoke tests..."
+	pytest tests/smoke/python_wheel
+	@if command -v docker >/dev/null 2>&1 && [ -n "$$UPSTREAM_DRIFT_API_IMAGE" ]; then \
+		echo "Running Docker API smoke tests..."; \
+		pytest tests/smoke/docker_api; \
+	else \
+		echo "Skipping Docker API smoke tests; docker or UPSTREAM_DRIFT_API_IMAGE unavailable."; \
+	fi
+	@if [ -n "$$UPSTREAM_DRIFT_TAURI_BUNDLE" ] || [ -d ui/dist ]; then \
+		echo "Running Tauri desktop smoke tests..."; \
+		pytest tests/smoke/tauri_desktop; \
+	else \
+		echo "Skipping Tauri desktop smoke tests; no bundle path or ui/dist present."; \
+	fi
+	@echo "Running Rust crate smoke tests..."
+	pytest tests/smoke/rust_crate
 
 # Run all checks
 check: lint test
