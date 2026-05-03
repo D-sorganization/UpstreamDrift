@@ -1,0 +1,114 @@
+"""Tests for the release version consistency guard."""
+
+from __future__ import annotations
+
+import importlib.util
+import sys
+from pathlib import Path
+
+import pytest
+
+_REPO_ROOT = Path(__file__).parents[3]
+_SCRIPT_PATH = _REPO_ROOT / "scripts" / "check_version_consistency.py"
+
+
+def _load_script_module():
+    spec = importlib.util.spec_from_file_location(
+        "check_version_consistency", _SCRIPT_PATH
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _write_project(root: Path, *, version: str) -> None:
+    (root / "src" / "api").mkdir(parents=True)
+    (root / "ui").mkdir()
+    (root / "rust_core" / "upstream-physics").mkdir(parents=True)
+    (root / "pyproject.toml").write_text(
+        f'[project]\nname = "upstream-drift"\nversion = "{version}"\n',
+        encoding="utf-8",
+    )
+    (root / "src" / "api" / "_version.py").write_text(
+        f'__version__ = "{version}"\n',
+        encoding="utf-8",
+    )
+    (root / "ui" / "package.json").write_text(
+        f'{{"name": "upstream-drift-ui", "version": "{version}"}}\n',
+        encoding="utf-8",
+    )
+    (root / "Cargo.toml").write_text(
+        f'[workspace.package]\nversion = "{version}"\n',
+        encoding="utf-8",
+    )
+    (root / "rust_core" / "upstream-physics" / "pyproject.toml").write_text(
+        f'[project]\nname = "upstream-physics"\nversion = "{version}"\n',
+        encoding="utf-8",
+    )
+
+
+def test_check_versions_passes_when_all_surfaces_match_latest_tag(
+    tmp_path: Path,
+) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.0")
+
+    report = module.check_versions(
+        tmp_path,
+        tag_reader=lambda _root: ("v1.9.0", "v2.1.0", "pre-rust-migration"),
+    )
+
+    assert report.ok is True
+    assert report.canonical_version == "2.1.0"
+    assert report.latest_tag == "v2.1.0"
+    assert report.errors == ()
+
+
+def test_check_versions_reports_surface_drift(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.0")
+    (tmp_path / "ui" / "package.json").write_text(
+        '{"name": "upstream-drift-ui", "version": "2.0.0"}\n',
+        encoding="utf-8",
+    )
+
+    report = module.check_versions(tmp_path, tag_reader=lambda _root: ("v2.1.0",))
+
+    assert report.ok is False
+    assert any("ui/package.json" in error for error in report.errors)
+
+
+def test_check_versions_reports_missing_semver_tag(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.1.0")
+
+    report = module.check_versions(
+        tmp_path,
+        tag_reader=lambda _root: ("pre-rust-migration", "refactor-start-v1"),
+    )
+
+    assert report.ok is False
+    assert any("No SemVer release tags" in error for error in report.errors)
+
+
+def test_check_versions_rejects_version_behind_latest_tag(tmp_path: Path) -> None:
+    module = _load_script_module()
+    _write_project(tmp_path, version="2.0.9")
+
+    report = module.check_versions(
+        tmp_path,
+        tag_reader=lambda _root: ("v2.0.9", "v2.1.0"),
+    )
+
+    assert report.ok is False
+    assert any("behind latest release tag" in error for error in report.errors)
+
+
+def test_check_versions_validates_repo_root_type() -> None:
+    module = _load_script_module()
+
+    with pytest.raises(TypeError, match="repo_root"):
+        module.check_versions("not-a-path")

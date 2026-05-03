@@ -193,6 +193,9 @@ jobs:
       - name: Security Workflow Silent-Failure Guard
         run: python3 scripts/check_workflows_no_silent_failures.py
 
+      - name: Version Consistency Check
+        run: python3 scripts/check_version_consistency.py
+
       - name: Test Layout Guard
         run: python3 scripts/check_test_layout.py
 

@@ -1,8 +1,22 @@
 # Production Readiness
 
-This document is the source of truth for release deliverables and support
-commitments. README files and release automation should link here instead of
-repeating version or platform lists.
+This document is the source of truth for production release surfaces,
+deliverables, version governance, and support commitments. README files and
+release automation should link here instead of repeating version or platform
+lists.
+
+## Production Surfaces
+
+- Python library and CLI package published as `upstream-drift` on PyPI.
+- FastAPI service when deployed by an operator from the released package or
+  container image.
+- Tauri desktop application when attached to a GitHub release.
+- Rust physics kernels when shipped as part of the Python package or as
+  buildable workspace crates.
+
+Experimental notebooks, archived engine code, local assessment output,
+developer-only scripts, `Dockerfile.heavy_test`, and MATLAB Simscape reference
+models are not production surfaces.
 
 ## Canonical Production Artifacts
 
@@ -16,13 +30,14 @@ repository is a development or test convenience.
 | Tauri desktop app | `ui/` build via `tauri-build.yml` | GitHub Releases | End users, researchers, and practitioners |
 | `upstream-physics` Rust crate | `rust_core/upstream-physics/` via `release.yml` | crates.io or bundled native extension | Performance-sensitive embedders |
 
-Items not shipped as production:
+## Version Contract
 
-- MATLAB Simscape models in `src/engines/Simscape_Multibody_Models/` are
-  research and comparison references only.
-- `Dockerfile.heavy_test` is a CI-only test image.
-- Launchers in `src/launchers/*.py`, except the public console script declared
-  in `[project.scripts]`, are development conveniences.
+- `pyproject.toml` `[project].version` is canonical.
+- `src/api/_version.py`, `ui/package.json`, root `Cargo.toml`, and
+  `rust_core/upstream-physics/pyproject.toml` must match the canonical version.
+- The canonical version must match the latest `vX.Y.Z` tag or be ahead of it
+  during release preparation.
+- `scripts/check_version_consistency.py` is the CI gate for this contract.
 
 ## Compatibility Matrix
 
@@ -36,6 +51,19 @@ Items not shipped as production:
 Supported means a release has a green smoke test in `tests/smoke/` for the
 artifact and the combination is on the release checklist. Combinations outside
 this matrix are best-effort.
+
+## Service Objectives
+
+- API readiness: `/health` returns success within 500 ms p95 on the reference
+  deployment profile.
+- API launch metadata: launcher listing endpoints return within 500 ms p95 for
+  the default bundled engine set.
+- Engine determinism: dependency-free validators and core unit tests pass
+  across the supported Python matrix.
+- Packaging: `pip install upstream-drift==X.Y.Z` resolves in a clean virtual
+  environment for every published production release.
+- Release integrity: release artifacts include checksums, a CycloneDX SBOM,
+  and GitHub artifact attestations.
 
 ## Release-Blocking Smoke Tests
 
@@ -52,3 +80,38 @@ The existing tag release workflow blocks PyPI and GitHub Release publication
 until the built Python wheel passes its matrix smoke tests. Docker, desktop,
 and Rust artifact jobs must call their matching smoke suite before their
 publish steps when those release jobs are enabled.
+
+## Supported Environments
+
+- Python: 3.10, 3.11, and 3.12 for the published package; wheel smoke tests also
+  cover 3.13 where release artifacts are built.
+- Operating systems: Linux for CI and service deployments; Windows 10+ and
+  macOS arm64/x64 for desktop artifacts when produced by the Tauri workflow.
+- Native engines: MuJoCo is part of the default package dependency set. Drake,
+  Pinocchio, OpenSim, and MyoSuite are optional and only supported when their
+  extras and platform prerequisites are installed.
+- Rust: the pinned toolchain in `rust-toolchain.toml`.
+
+## Support Window
+
+- Latest two minor releases receive regression fixes.
+- Security fixes target the latest minor release first and may be backported
+  one minor version when downstream consumers cannot upgrade immediately.
+- Pre-release and `.dev0` builds are unsupported outside release validation.
+
+## Release Gates
+
+- CI is green on the release PR.
+- `CHANGELOG.md` has a dated release section for the target version.
+- `scripts/check_version_consistency.py` passes.
+- The release workflow publishes artifacts, checksums, an SBOM, and
+  attestations.
+- Release-blocking smoke tests pass for every artifact being published.
+- PyPI installation is verified after publish by a human release operator.
+
+## Open Operational Follow-up
+
+- Tag creation and PyPI publication are intentionally human-operated and cannot
+  be completed from development worktrees.
+- Documentation hosting must be checked for each release version at
+  `https://upstream-drift.readthedocs.io`.

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Release governance guard `scripts/check_version_consistency.py` with CI wiring,
+  release runbook, production-readiness contract, SBOM generation, and release
+  artifact attestations for issue #3842.
+
 ### April 2026
 
 #### Added

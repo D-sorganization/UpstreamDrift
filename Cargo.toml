@@ -8,7 +8,7 @@ members = ["rust_core/upstream-physics"]
 exclude = ["ui/src-tauri"]
 
 [workspace.package]
-version = "0.1.0"
+version = "2.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["D-sorganization"]
