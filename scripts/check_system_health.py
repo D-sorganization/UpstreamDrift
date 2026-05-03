@@ -130,14 +130,14 @@ def main() -> None:
             log_result("Docker Libs (libEGL/XCB)", "FAIL", str(e))
 
     logger.info("\n--- File Integrity ---")
-    # Check for critical launcher files
+    # Check for critical launcher files (paths relative to repo root)
+    # Note: Script is in scripts/, so we need to go up one level to repo root
     files = [
-        "launchers/golf_launcher.py",
-        "engines/physics_engines/mujoco/python/humanoid_launcher.py",
-        "engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py",
+        "src/launchers/golf_launcher.py",
+        "src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
     ]
 
-    root = Path(__file__).parent.resolve()
+    root = Path(__file__).parent.parent.resolve()
     for f in files:
         path = root / f
         exists = path.exists()

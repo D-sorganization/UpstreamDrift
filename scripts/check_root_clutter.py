@@ -34,6 +34,7 @@ ALLOWLIST = frozenset(
         "conftest.py",
         "launch_golf_suite.py",
         "install.sh",
+        "VERSION",
     }
 )
 
