@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import logging
 import subprocess
 import sys
@@ -22,6 +23,15 @@ FORBIDDEN_FILES = frozenset(
     }
 )
 FORBIDDEN_DIR_PREFIXES = (".jules/completist_data/",)
+FORBIDDEN_PATTERNS = (
+    "*.bak",
+    "*.swp",
+    "*.orig",
+    "*.rej",
+    "pr_body_*.md",
+    "fix_*.py",
+    ".ci_trigger*",
+)
 
 
 def normalize_git_path(path: str | Path) -> str:
@@ -37,7 +47,15 @@ def is_forbidden_artifact(path: str | Path) -> bool:
     normalized = normalize_git_path(path)
     if normalized in FORBIDDEN_FILES:
         return True
-    return any(normalized.startswith(prefix) for prefix in FORBIDDEN_DIR_PREFIXES)
+    if any(normalized.startswith(prefix) for prefix in FORBIDDEN_DIR_PREFIXES):
+        return True
+
+    # Check patterns against the filename part (or the whole path if it matches)
+    name = Path(path).name
+    return any(
+        fnmatch.fnmatch(name, pat) or fnmatch.fnmatch(normalized, pat)
+        for pat in FORBIDDEN_PATTERNS
+    )
 
 
 def find_forbidden_artifacts(

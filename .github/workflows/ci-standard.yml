@@ -194,6 +194,9 @@ jobs:
       - name: Changed-File Size Budget Check
         run: python3 scripts/ci/check_file_size_budget.py
 
+      - name: Repo Root Clutter Check
+        run: python3 scripts/check_root_clutter.py
+
       - name: Agent Docs Consistency Check
         run: python3 scripts/check_agent_docs_consistency.py
 
