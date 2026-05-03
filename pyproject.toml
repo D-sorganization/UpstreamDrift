@@ -34,6 +34,7 @@ dependencies = [
     # Structured logging (OBS-001: required for observability)
     "structlog>=24.1.0",
     "h5py>=3.0.0",
+    "jinja2>=3.1.0",
 
     # Runtime security floor constraints documented in issue #3838.
     "pillow>=12.2.0",

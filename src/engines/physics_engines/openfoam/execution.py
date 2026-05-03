@@ -12,6 +12,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+import jinja2
+
 OPENFOAM_DECOMPOSITION_METHODS = frozenset(
     {"scotch", "simple", "hierarchical", "manual", "metis", "kahip", "structured"}
 )
@@ -24,6 +26,16 @@ OPENFOAM_TOKEN_CHARS = frozenset(
 OpenFoamRunner = Callable[
     [list[str], Path | str | None, float], subprocess.CompletedProcess[str]
 ]
+_ASSETS_DIR = Path(__file__).with_name("assets")
+
+
+def _template_env() -> jinja2.Environment:
+    return jinja2.Environment(
+        loader=jinja2.FileSystemLoader(_ASSETS_DIR),
+        autoescape=False,
+        keep_trailing_newline=True,
+        undefined=jinja2.StrictUndefined,
+    )
 
 
 def _utc_now_iso() -> str:
@@ -93,16 +105,12 @@ class OpenFoamDecompositionConfig:
     def render_decompose_par_dict(self) -> str:
         """Return a deterministic OpenFOAM `decomposeParDict` document."""
         return (
-            "FoamFile\n"
-            "{\n"
-            "    version     2.0;\n"
-            "    format      ascii;\n"
-            "    class       dictionary;\n"
-            "    object      decomposeParDict;\n"
-            "}\n"
-            "\n"
-            f"numberOfSubdomains {self.number_of_subdomains};\n"
-            f"method          {self.method};\n"
+            _template_env()
+            .get_template("decompose_par_dict.j2")
+            .render(
+                number_of_subdomains=self.number_of_subdomains,
+                method=self.method,
+            )
         )
 
 

@@ -19,6 +19,27 @@ def _completed(cmd: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
 
 
+def test_decompose_par_dict_template_asset_exists() -> None:
+    template_path = (
+        Path(openfoam_execution.__file__).parent / "assets" / "decompose_par_dict.j2"
+    )
+
+    assert template_path.is_file()
+
+
+def test_decomposition_config_renders_from_template() -> None:
+    rendered = OpenFoamDecompositionConfig(
+        number_of_subdomains=8,
+        method="hierarchical",
+    ).render_decompose_par_dict()
+
+    assert "FoamFile" in rendered
+    assert "object      decomposeParDict;" in rendered
+    assert "numberOfSubdomains 8;" in rendered
+    assert "method          hierarchical;" in rendered
+    assert rendered.endswith("\n")
+
+
 def test_sequential_openfoam_run_uses_solver_without_mpi(tmp_path: Path) -> None:
     calls: list[list[str]] = []
     case_dir = tmp_path / "case"

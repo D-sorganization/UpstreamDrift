@@ -1,0 +1,1 @@
+"""Packaged OpenFOAM template assets."""
