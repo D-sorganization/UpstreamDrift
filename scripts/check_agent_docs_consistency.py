@@ -3,8 +3,12 @@
 
 from __future__ import annotations
 
+import re
 import sys
+from collections import Counter
 from pathlib import Path
+
+import tomllib
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
@@ -13,6 +17,8 @@ CONTRIBUTING = ROOT / "CONTRIBUTING.md"
 PYPROJECT = ROOT / "pyproject.toml"
 CHANGELOG = ROOT / "CHANGELOG.md"
 CI_STANDARD = ROOT / ".github" / "workflows" / "ci-standard.yml"
+_COVERAGE_LITERAL = re.compile(r"(\d+)%")
+_COVERAGE_GATE = re.compile(r"--cov-fail-under=(\d+)")
 
 
 def _read(path: Path) -> str:
@@ -31,6 +37,102 @@ def _assert_not_contains(
         errors.append(message)
 
 
+def _load_coverage_threshold(pyproject_text: str) -> int:
+    return int(
+        tomllib.loads(pyproject_text)["tool"]["coverage"]["report"]["fail_under"]
+    )
+
+
+def _iter_duplicate_paragraphs(text: str) -> list[str]:
+    paragraphs = [
+        " ".join(paragraph.split())
+        for paragraph in re.split(r"\n\s*\n", text)
+        if paragraph.strip()
+    ]
+    return [paragraph for paragraph, count in Counter(paragraphs).items() if count > 1]
+
+
+def _iter_repo_relative_paths(text: str) -> list[str]:
+    candidates = re.findall(r"`([^`\n]+)`", text)
+    repo_roots = {
+        ".gaai",
+        ".github",
+        "docs",
+        "installer",
+        "rust",
+        "rust_core",
+        "scripts",
+        "shared",
+        "src",
+        "tests",
+        "ui",
+        "vendor",
+    }
+    exact_files = {
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "CLAUDE.md",
+        "CONTRIBUTING.md",
+        "Cargo.toml",
+        "README.md",
+        "SPEC.md",
+        "pyproject.toml",
+    }
+    paths: list[str] = []
+    for candidate in candidates:
+        normalized = candidate.strip().lstrip("@")
+        if (
+            not normalized
+            or " " in normalized
+            or normalized.startswith(("http://", "https://", "/", "D-sorganization/"))
+        ):
+            continue
+        first_segment = normalized.split("/", 1)[0]
+        if (
+            first_segment in repo_roots or normalized in exact_files
+        ) and normalized not in paths:
+            paths.append(normalized)
+    return paths
+
+
+def _assert_coverage_alignment(
+    claude: str, ci_standard: str, coverage_threshold: int, errors: list[str]
+) -> None:
+    for paragraph in re.split(r"\n\s*\n", claude):
+        if "coverage" not in paragraph.lower():
+            continue
+        for match in _COVERAGE_LITERAL.findall(paragraph):
+            value = int(match)
+            if value != coverage_threshold:
+                errors.append(
+                    "CLAUDE.md cites "
+                    f"{value}% coverage but pyproject.toml [tool.coverage.report] "
+                    f"fail_under is {coverage_threshold}%."
+                )
+    gate_match = _COVERAGE_GATE.search(ci_standard)
+    if gate_match is None:
+        errors.append("CI workflow must define a --cov-fail-under gate.")
+        return
+    gate_value = int(gate_match.group(1))
+    if gate_value != coverage_threshold:
+        errors.append(
+            "CI workflow coverage floor "
+            f"{gate_value}% does not match pyproject.toml fail_under {coverage_threshold}%."
+        )
+
+
+def _assert_path_references_exist(claude: str, errors: list[str]) -> None:
+    for path_text in _iter_repo_relative_paths(claude):
+        if not (ROOT / path_text.rstrip("/")).exists():
+            errors.append(f"CLAUDE.md references a missing path: {path_text}")
+
+
+def _assert_no_duplicate_paragraphs(claude: str, errors: list[str]) -> None:
+    duplicates = _iter_duplicate_paragraphs(claude)
+    if duplicates:
+        errors.append("CLAUDE.md contains duplicate paragraphs.")
+
+
 def main() -> int:
     errors: list[str] = []
 
@@ -40,6 +142,7 @@ def main() -> int:
     pyproject = _read(PYPROJECT)
     changelog = _read(CHANGELOG)
     ci_standard = _read(CI_STANDARD)
+    coverage_threshold = _load_coverage_threshold(pyproject)
 
     _assert_not_contains(
         readme,
@@ -60,18 +163,15 @@ def main() -> int:
         "CLAUDE.md must declare itself the authoritative policy file.",
         errors,
     )
-    _assert_contains(
-        claude,
-        "**10% coverage minimum**",
-        "CLAUDE.md must match the CI coverage floor of 10%.",
-        errors,
-    )
     _assert_not_contains(
         claude,
         "NOT Black",
         "CLAUDE.md should state Ruff directly instead of referencing Black.",
         errors,
     )
+    _assert_coverage_alignment(claude, ci_standard, coverage_threshold, errors)
+    _assert_path_references_exist(claude, errors)
+    _assert_no_duplicate_paragraphs(claude, errors)
 
     _assert_contains(
         contributing,
@@ -111,12 +211,6 @@ def main() -> int:
         changelog,
         "All notable changes to UpstreamDrift will be documented in this file.",
         "CHANGELOG.md still uses the old project name.",
-        errors,
-    )
-    _assert_contains(
-        ci_standard,
-        "--cov-fail-under=10",
-        "CI workflow no longer exposes the expected 10% coverage floor.",
         errors,
     )
 

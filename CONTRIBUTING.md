@@ -93,7 +93,7 @@ python3 -m pytest
 
 > **Note on CI parity**: `CLAUDE.md` is authoritative for required commands, and
 > `.github/workflows/ci-standard.yml` is the canonical enforcement surface.
-> Today that means Ruff formatting plus a 30% coverage floor in CI.
+> The coverage threshold is the `fail_under` value in `pyproject.toml [tool.coverage.report]`.
 
 ## 🎯 Physics Engine Guidelines
 
