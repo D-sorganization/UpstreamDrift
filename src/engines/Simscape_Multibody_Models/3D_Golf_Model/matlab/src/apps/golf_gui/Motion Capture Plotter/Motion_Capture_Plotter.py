@@ -457,7 +457,7 @@ class MotionCapturePlotter(
             self.swing_combo.addItems(list(self.swing_data.keys()))
 
             if self.swing_data:
-                self.current_swing = list(self.swing_data.keys())[0]
+                self.current_swing = next(iter(self.swing_data.keys()))
                 logger.info(f"Selected swing: {self.current_swing}")
                 self.swing_combo.setCurrentText(self.current_swing)
                 self.setup_frame_slider()
