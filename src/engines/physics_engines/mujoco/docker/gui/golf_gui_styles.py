@@ -7,14 +7,13 @@ visual styling is independent of simulation logic and tab construction.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 
 logger = logging.getLogger(__name__)
 
-try:
+with contextlib.suppress(ImportError):
     from tkinter import ttk
-except ImportError:
-    pass
 
 
 class StyleMixin:
