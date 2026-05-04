@@ -546,7 +546,7 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-config=pyproject.toml \
 
-            --cov-fail-under=45 \
+            --cov-fail-under=55 \
             --tb=short \
             -v
 

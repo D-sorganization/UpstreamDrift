@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.107                                            |
-| **Last Spec Update**    | 2026-05-04 (Docker digest update, coverage floor raise, durable dataset storage, API production-readiness hardening) |
+| **Spec Version**        | 1.0.109                                            |
+| **Last Spec Update**    | 2026-05-04 (CI coverage-floor alignment, Docker digest update, durable dataset storage, API production-readiness hardening) |
 
 ## 2. Purpose & Mission
 
@@ -545,6 +545,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-04 | 1.0.109 | Optimized mean squared error calculation in validation solver by replacing np.mean(residuals**2) with np.vdot(residuals, residuals) / residuals.size. |
+| 2026-05-04 | 1.0.109 | Aligned the pull-request `ci-standard.yml` coverage gate with the documented `pyproject.toml` repository floor by raising `--cov-fail-under` from 45 to 55, restoring agent-doc consistency with the published quality gates. |
 | 2026-05-04 | 1.0.108 | Optimized RMS diff and magnitude calculation in cross engine validator by replacing np.mean(diff**2) with np.vdot(diff, diff) / diff.size to prevent intermediate array allocations. |
 | 2026-05-04 | 1.0.106 | Pinned Docker base images to digest `sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117` (python:3.12-slim) for reproducible builds; raised overall coverage floor from 45% to 55% with per-module risk-tier thresholds (85% for API routes/engine adapters/task management, 70% for shared utilities); replaced in-memory dataset cache in `src/api/routes/data_explorer.py` with durable SQLite-backed `DatasetStorage` (issue #3943); documented API production-readiness hardening for issues #3941, #3942, and #3943: process-local `TaskManager` lifecycle and TTL touch semantics, async video background execution off the event loop with temp cleanup warning logs, and bounded Data Explorer import cache behavior with duplicate and ambiguous filename conflict handling. |
 | 2026-05-04 | 1.0.107 | Replaced six sum-of-squares hot paths in analysis, biomechanics, injury, plotting, data-processing, and validation helpers with `np.vdot`-based accumulators to avoid temporary array allocation while preserving existing R² and load metric behavior. |
