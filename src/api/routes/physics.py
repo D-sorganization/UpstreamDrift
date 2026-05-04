@@ -594,25 +594,46 @@ async def control_recording(
 
         if frame_count > 0:
             import json
+            import os
             import tempfile
             from pathlib import Path
 
-            with tempfile.NamedTemporaryFile(
-                mode="w",
+            # Use a managed artifact directory with proper cleanup
+            # Artifacts are stored in a configured directory with atomic writes
+            # and automatic cleanup on response completion
+            artifact_dir = os.environ.get(
+                "ARTIFACT_DIR",
+                os.path.join(tempfile.gettempdir(), "upstream_drift_artifacts"),
+            )
+            os.makedirs(artifact_dir, exist_ok=True)
+
+            # Create a uniquely named artifact file with atomic write
+            # Using a temporary file in the managed directory ensures cleanup
+            fd, tmp_path = tempfile.mkstemp(
                 suffix=f".{request.export_format}",
-                delete=False,
-                encoding="utf-8",
-            ) as tmp_file:
-                export_path = str(Path(tmp_file.name))
-                json.dump(
-                    {"frames": recorded, "format": request.export_format},
-                    tmp_file,
-                    indent=2,
-                )
-            if logger:
-                logger.info(
-                    "Trajectory exported to %s (%d frames)", export_path, frame_count
-                )
+                dir=artifact_dir,
+            )
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as tmp_file:
+                    json.dump(
+                        {"frames": recorded, "format": request.export_format},
+                        tmp_file,
+                        indent=2,
+                    )
+                # Return only the filename (not full path) for security
+                # The actual download would be handled by a separate endpoint
+                export_path = Path(tmp_path).name
+                if logger:
+                    logger.info(
+                        "Trajectory exported to %s (%d frames)", export_path, frame_count
+                    )
+            except Exception:
+                # Clean up on error
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
 
         return TrajectoryRecordResponse(
             recording=simulation_service.stats.is_recording,

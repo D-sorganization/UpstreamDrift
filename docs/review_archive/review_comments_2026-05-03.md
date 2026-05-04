@@ -1,36 +1,21 @@
 # Review Comments Archive - 2026-05-03
 
-Generated: 2026-05-03T11:13:38.450411
+Generated: 2026-05-03T19:29:19.271110
 
-## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (1 comments)
 
-### PR #3932: src/shared/python/_contracts_decorators.py:None
-
-Actionable: Yes
-Has Suggestion: No
-
-```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Route precondition eval failures through level policy**
-
-This direct `ContractEvaluationError` raise bypasses `_handle_violation`, so `DBC_LEVEL=warn` no longer behaves as documented (`warn` should log without raising in `src/shared/python/contracts.py`). In practice, a malformed precondition (for example, a signature mismatch such as `lambda a, b: ...` on a single-arg function) now throws and aborts executio...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3932#discussion_r3178487123)
-
----
-
-### PR #3932: src/shared/python/_contracts_decorators.py:None
+### PR #3944: Dockerfile:135
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Preserve WARN semantics on postcondition eval errors**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Expand FORWARDED_ALLOW_IPS before passing to uvicorn**
 
-Raising `ContractEvaluationError` here also skips `_handle_violation`, so evaluation-time postcondition errors now raise even when contracts are configured to `WARN`. That means callers running with warn-mode soft contracts can crash on condition bugs (e.g., `ZeroDivisionError` inside the postcondition) instead of getting a warning, which changes runtime...
+The `CMD` uses Docker’s exec form, so `"${FORWARDED_ALLOW_IPS:-127.0.0.1}"` is passed to uvicorn as a literal string instead of being shell-expanded. That makes the new proxy trust setting effectively non-configurable at runtime (setting `FORWARDED_ALLOW_IPS` won’t change behavior), and forwarded headers from real reverse proxies will not be trusted as i...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3932#discussion_r3178487127)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3944#discussion_r3179164612)
 
 ---
 

@@ -9,7 +9,13 @@ import time
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, datetime
+import sys
+from datetime import datetime, timezone
+
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 from pathlib import Path
 
 import jinja2

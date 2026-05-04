@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-27T12:11:54.959964",
+  "timestamp": "2026-05-03T20:26:23.427079",
   "overall_score": 7.17,
   "category_scores": {
     "A": {
@@ -19,11 +19,11 @@
       "name": "Error Handling"
     },
     "E": {
-      "score": 7.5,
+      "score": 0.0,
       "name": "Performance"
     },
     "F": {
-      "score": 7.0,
+      "score": 8.0,
       "name": "Security"
     },
     "G": {
@@ -39,7 +39,7 @@
       "name": "Code Style"
     },
     "J": {
-      "score": 7.5,
+      "score": 0.0,
       "name": "API Design"
     },
     "K": {
@@ -67,21 +67,16 @@
     "Code Quality": 7.625,
     "Testing": 6.0,
     "Documentation": 7.0,
-    "Security": 7.0,
-    "Performance": 7.25,
+    "Security": 7.5,
+    "Performance": 7.0,
     "Ops & Config": 7.75,
-    "Design": 7.5
+    "Design": 0.0
   },
-  "total_issues": 18,
+  "total_issues": 15,
   "issues": [
     {
       "severity": "MAJOR",
       "description": "Source directory structure exists (src/ or shared/).",
-      "source": "Assessment_A_Code_Structure"
-    },
-    {
-      "severity": "MAJOR",
-      "description": "Engines directory found, indicating modular architecture.",
       "source": "Assessment_A_Code_Structure"
     },
     {
@@ -101,22 +96,17 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Found 443 test files in tests/ directory.",
+      "description": "Found 1026 test files in tests/ directory.",
       "source": "Assessment_C_Test_Coverage"
     },
     {
       "severity": "MAJOR",
-      "description": "Found 3643 try blocks and 4 bare except blocks.",
+      "description": "Found 4066 try blocks and 4 bare except blocks.",
       "source": "Assessment_D_Error_Handling"
     },
     {
       "severity": "MAJOR",
-      "description": "Profiling tools usage detected.",
-      "source": "Assessment_E_Performance"
-    },
-    {
-      "severity": "MAJOR",
-      "description": "Potential hardcoded secrets found in 204 files (needs verification).",
+      "description": "No obvious hardcoded secret patterns found outside of test fixtures.",
       "source": "Assessment_F_Security"
     },
     {
@@ -126,7 +116,7 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Found 63 GitHub Actions workflows.",
+      "description": "Found 59 GitHub Actions workflows.",
       "source": "Assessment_H_CICD"
     },
     {
@@ -136,22 +126,17 @@
     },
     {
       "severity": "MAJOR",
-      "description": "api/ directory exists.",
-      "source": "Assessment_J_API_Design"
-    },
-    {
-      "severity": "MAJOR",
       "description": "Assessed data handling patterns.",
       "source": "Assessment_K_Data_Handling"
     },
     {
       "severity": "MAJOR",
-      "description": "Found 6664 logging calls and 618 print calls.",
+      "description": "Found 6774 logging calls and 210 print calls.",
       "source": "Assessment_L_Logging"
     },
     {
       "severity": "MAJOR",
-      "description": "Found 366 configuration files (yaml/toml).",
+      "description": "Found 39 configuration files (yaml/toml).",
       "source": "Assessment_M_Configuration"
     },
     {
@@ -161,9 +146,9 @@
     },
     {
       "severity": "MAJOR",
-      "description": "Average complexity (branches/func): 0.98",
+      "description": "Average complexity (branches/func): 0.96",
       "source": "Assessment_O_Maintainability"
     }
   ],
-  "reports_analyzed": 15
+  "reports_analyzed": 13
 }

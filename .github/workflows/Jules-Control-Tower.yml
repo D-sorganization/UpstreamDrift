@@ -39,21 +39,36 @@ on:
           - issue-resolver
           - pr-compiler
 
+# =============================================================================
+# AGENT GOVERNANCE CONFIGURATION
+# =============================================================================
 # SAFEGUARD: Maximum iterations to prevent infinite repair loops
 env:
   MAX_REPAIR_ITERATIONS: 3
   MAX_ITERATIONS_WINDOW_HOURS: 1
+  # Path allowlist: Jules workflows can only modify these paths
+  AGENT_ALLOWED_PATHS: "docs/,tests/,src/**/test_*,.github/workflows/"
+  # Branch quarantine: Agent output must go to prefixed branches
+  AGENT_BRANCH_PREFIX: "jules-auto/"
+  # API budget: Max API calls per run (enforced by workers)
+  AGENT_MAX_API_CALLS: 50
+  # Wall-clock budget: Max minutes per job
+  AGENT_MAX_JOB_MINUTES: 30
 
 concurrency:
   group: jules-control-tower-${{ github.repository }}
   cancel-in-progress: false
 
+# HARDENED PERMISSIONS:
+# - Scheduled runs: read-only by default
+# - Write permissions granted only to specific worker workflows via needs
+# - Branch protection and path restrictions enforced at worker level
 permissions:
-  contents: write
-  pull-requests: write
-  actions: write
-  issues: write
-  security-events: write
+  contents: read
+  pull-requests: read
+  actions: read
+  issues: read
+  security-events: read
   checks: read
 
 jobs:
@@ -227,6 +242,12 @@ jobs:
 
   # --- WORKER DISPATCH ---
 
+  # =============================================================================
+  # WORKER DISPATCH - With branch quarantine and path restrictions
+  # =============================================================================
+  # All worker workflows receive write permissions via their own permissions blocks
+  # This parent workflow only routes and passes context
+
   call-repair:
     needs: triage
     if: needs.triage.outputs.target == 'auto-repair'
@@ -234,6 +255,11 @@ jobs:
     with:
       run_id: ${{ format('{0}', (github.event.workflow_run && github.event.workflow_run.id)) }}
       branch: ${{ (github.event.workflow_run && github.event.workflow_run.head_branch) || '' }}
+      # Branch quarantine: all agent changes go to prefixed branches
+      target_branch: ${{ format('{0}{1}', env.AGENT_BRANCH_PREFIX, (github.event.workflow_run && github.event.workflow_run.head_branch) || 'main') }}
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-hotfix-creator:
@@ -243,18 +269,33 @@ jobs:
     with:
       run_id: ${{ format('{0}', (github.event.workflow_run && github.event.workflow_run.id)) }}
       failed_branch: ${{ (github.event.workflow_run && github.event.workflow_run.head_branch) || '' }}
+      target_branch: ${{ format('{0}hotfix/{1}', env.AGENT_BRANCH_PREFIX, (github.event.workflow_run && github.event.workflow_run.head_branch) || 'main') }}
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-scribe:
     needs: triage
     if: needs.triage.outputs.target == 'doc-scribe'
     uses: ./.github/workflows/Jules-Documentation-Scribe.yml
+    with:
+      # Documentation writes restricted to docs/ path only
+      allowed_paths: "docs/"
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-tests:
     needs: triage
     if: needs.triage.outputs.target == 'test-generator'
     uses: ./.github/workflows/Jules-Test-Generator.yml
+    with:
+      target_branch: ${{ format('{0}tests/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   # call-auto-refactor: archived (was a placeholder stub only) -- issue #2055
@@ -264,46 +305,83 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'archivist'
     uses: ./.github/workflows/Jules-Archivist.yml
+    # Archivist is read-only - no write permissions needed
     secrets: inherit
 
   call-sentinel:
     needs: triage
     if: needs.triage.outputs.target == 'sentinel'
     uses: ./.github/workflows/Jules-Sentinel.yml
+    # Sentinel is read-only security scanner
     secrets: inherit
 
   call-code-quality-reviewer:
     needs: triage
     if: needs.triage.outputs.target == 'code-quality-reviewer'
     uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
+    with:
+      target_branch: ${{ format('{0}cq-review/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-assessment-generator:
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
     uses: ./.github/workflows/Jules-Assessment-Generator.yml
+    with:
+      # Assessments only write to docs/assessments/
+      allowed_paths: "docs/assessments/,runner-dashboard/assessments/"
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-issue-resolver:
     needs: triage
     if: needs.triage.outputs.target == 'issue-resolver'
     uses: ./.github/workflows/Jules-Issue-Resolver.yml
+    with:
+      target_branch: ${{ format('{0}fix/', env.AGENT_BRANCH_PREFIX) }}${{ github.event.issue.number || 'unknown' }}-${{ github.event.issue.title || 'issue' }}
+      # Path restrictions enforced by worker
+      allowed_paths: ${{ env.AGENT_ALLOWED_PATHS }}
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     secrets: inherit
 
   call-completist:
     needs: triage
     if: needs.triage.outputs.target == 'completist'
     uses: ./.github/workflows/Jules-Completist.yml
+    with:
+      target_branch: ${{ format('{0}completist/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-documentation-auditor:
     needs: triage
     if: needs.triage.outputs.target == 'documentation-auditor'
     uses: ./.github/workflows/Jules-Documentation-Auditor.yml
+    with:
+      # Documentation changes restricted to docs/ and README files
+      allowed_paths: "docs/,README*.md,CONTRIBUTING.md,CHANGELOG.md"
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit
 
   call-pr-compiler:
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml
+    with:
+      target_branch: ${{ format('{0}pr-compile/{1}', env.AGENT_BRANCH_PREFIX, github.head_ref || 'main') }}
+    permissions:
+      contents: write
+      pull-requests: write
     secrets: inherit

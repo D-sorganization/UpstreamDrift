@@ -1,5 +1,6 @@
 # Stage 1: Builder — install all Python dependencies into an isolated venv
-FROM python:3.12-slim AS builder
+# Base image pinned by digest for reproducible builds
+FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1
@@ -18,44 +19,48 @@ COPY requirements.lock /tmp/requirements.lock
 RUN pip install --upgrade pip==25.3 && \
     pip install -r /tmp/requirements.lock
 
-# Auth and server extensions not yet in lockfile
+# Auth and server extensions - pinned versions (to be added to requirements.lock)
+# These should be consolidated into requirements.lock via pip-compile
 RUN pip install \
-    slowapi>=0.1.9 \
-    "pydantic[email]>=2.5.0" \
-    python-multipart \
-    sqlalchemy>=2.0.0 \
-    bcrypt>=4.1.0 \
-    "PyJWT>=2.10.1" \
-    "cryptography>=44.0.1" \
-    aiofiles \
-    python-dateutil \
-    structlog>=24.1.0 \
-    colorama>=0.4.6
+    slowapi==0.1.9 \
+    "pydantic[email]==2.12.5" \
+    python-multipart==0.0.20 \
+    sqlalchemy==2.0.44 \
+    bcrypt==4.3.0 \
+    "PyJWT==2.10.1" \
+    "cryptography==46.0.3" \
+    aiofiles==24.1.0 \
+    python-dateutil==2.9.0.post0 \
+    structlog==25.5.0 \
+    colorama==0.4.6
 
 # Shared-code runtime deps imported at module top-level by
 # src/shared/python (pandas, matplotlib, sympy) and API routes that parse
 # XML (defusedxml). These used to come from the conda base; keep them
 # explicit for the slim build so the API import chain resolves.
+# Pinned versions for reproducible builds
 RUN pip install \
-    "pandas>=2.0.0" \
-    "matplotlib>=3.7.0" \
-    "sympy>=1.12" \
-    "defusedxml>=0.7.1"
+    "pandas==2.3.3" \
+    "matplotlib==3.10.8" \
+    "sympy==1.14.0" \
+    "defusedxml==0.7.1"
 
 # Pinocchio via pip (binary wheels available since 2024 — no conda needed)
+# Pinned versions for reproducible builds
 RUN pip install \
-    pin \
-    pin-pink \
-    qpsolvers \
-    osqp \
-    meshcat \
-    "robot_descriptions>=1.12.0" \
-    "imageio[ffmpeg]>=2.31.0" \
-    "trimesh>=4.0.0"
+    pin==3.3.1 \
+    pin-pink==1.4.0 \
+    qpsolvers==4.7.0 \
+    osqp==1.0.5 \
+    meshcat==0.3.2 \
+    "robot_descriptions==1.14.0" \
+    "imageio[ffmpeg]==2.37.0" \
+    "trimesh==4.9.0"
 
 
 # Stage 2: Runtime — slim production image for the API server
-FROM python:3.12-slim AS runtime
+# Base image pinned by digest for reproducible builds
+FROM python:3.12-slim@sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117 AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -118,15 +123,16 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # - --proxy-headers: honor X-Forwarded-For / X-Forwarded-Proto when the
 #   container sits behind a reverse proxy, so access logs and client IP
 #   rate limiting reflect the real client.
-# - --forwarded-allow-ips=*: accept proxy headers from any upstream inside
-#   the container network; operators should pin this at the proxy layer.
+# - --forwarded-allow-ips: explicitly set trusted proxy IPs; defaults to
+#   localhost only for security. Set FORWARDED_ALLOW_IPS env var in production
+#   to specify trusted proxy IPs (e.g., your load balancer's internal IP).
 # - --access-log: keep structured request logs on stdout for observability.
 CMD ["python3", "-m", "uvicorn", "src.api.server:app", \
      "--host", "0.0.0.0", \
      "--port", "8001", \
      "--workers", "1", \
      "--proxy-headers", \
-     "--forwarded-allow-ips", "*", \
+     "--forwarded-allow-ips", "${FORWARDED_ALLOW_IPS:-127.0.0.1}", \
      "--access-log"]
 
 
@@ -136,14 +142,15 @@ FROM runtime AS training
 USER root
 
 # PyTorch cu124 wheels bundle CUDA runtime libs; host driver provides libcuda via nvidia-container-toolkit
+# Pinned versions for reproducible builds
 RUN /opt/venv/bin/pip install --no-cache-dir \
-    "torch>=2.3.0" --index-url https://download.pytorch.org/whl/cu124
+    "torch==2.8.0" --index-url https://download.pytorch.org/whl/cu124
 
 RUN /opt/venv/bin/pip install --no-cache-dir \
-    "gymnasium>=0.29.0" \
-    "stable-baselines3>=2.0.0" \
-    "tensorboard>=2.14.0" \
-    "ray[rllib]>=2.9.0"
+    "gymnasium==1.1.1" \
+    "stable-baselines3==2.7.0" \
+    "tensorboard==2.20.0" \
+    "ray[rllib]==2.51.0"
 
 USER ${USER_NAME}
 

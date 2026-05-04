@@ -263,8 +263,9 @@ In addition to the standard framework, specialized audits monitor specific quali
 
 | 3.7 | 2026-04 | Added A-N Assessment 2026-04-10 refresh (see `A-N_Assessment_2026-04-10.md`) |
 | 3.8 | 2026-04 | Added Completist Report 2026-04-26 |
+| 3.9 | 2026-05 | Added Assessment_H_CICD.md; updated A, B, C, D, F, G, I, K, L, M, N, O assessments for Python 3.10 compatibility; added issues ISSUE_Assessment_E_Performance.md and ISSUE_Assessment_J_API_Design.md; refreshed Comprehensive_Assessment.md and assessment_summary.json |
 
 ---
 
 _See individual Assessment_Prompt_X.md files for detailed prompts._
-Updated Thu Apr 23 2026
+Updated Sun May 3 2026

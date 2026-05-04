@@ -1,10 +1,11 @@
 # Assessment: Error Handling
 
-**Date**: 2026-04-26
-**Grade**: 10.0/10
+**Date**: 2026-05-03
+**Grade**: 7.0/10
 
 ## Details
-Found 1838 try blocks, 0 bare excepts.
+Found 4066 try blocks and 4 bare except blocks.
 
 ## Recommendations
-1. Avoid bare excepts.
+1. Ensure specific exceptions are caught.
+2. Avoid bare except clauses.

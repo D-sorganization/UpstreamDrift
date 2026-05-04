@@ -6,6 +6,8 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import asyncio
+import hashlib
 import os
 import tempfile
 import uuid
@@ -14,6 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
+from fastapi.concurrency import run_in_threadpool
 
 from src.api.config import (
     MAX_CONFIDENCE,
@@ -236,18 +239,45 @@ async def analyze_video_async(
     if not file.content_type or not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="File must be a video")
 
+    # Upload size validation (100MB max for video)
+    if file.size and file.size > 100 * 1024 * 1024:
+        raise HTTPException(
+            status_code=413,
+            detail="Video file too large. Maximum size is 100MB."
+        )
+
     task_id = str(uuid.uuid4())
 
-    temp_fd, temp_file_name = tempfile.mkstemp(suffix=".mp4")
+    # Use managed artifact directory for temp files (issue #3938 alignment)
+    artifact_dir = os.environ.get(
+        "ARTIFACT_DIR",
+        os.path.join(tempfile.gettempdir(), "upstream_drift_artifacts", "video"),
+    )
+    os.makedirs(artifact_dir, exist_ok=True)
+
+    temp_fd, temp_file_name = tempfile.mkstemp(
+        suffix=".mp4",
+        dir=artifact_dir,
+    )
     os.close(temp_fd)
     temp_path = Path(temp_file_name)
     await write_upload_file_to_path(file, temp_path)
 
+    # Compute input hash for reproducibility
+    input_hash = hashlib.sha256(temp_path.read_bytes()).hexdigest()[:16]
+
+    # Store task with durable metadata for replay (issue #3941 alignment)
     await task_manager.set(
         task_id,
         {
-            "status": "started",
+            "status": "pending",
             "created_at": datetime.now(UTC),
+            "input_hash": input_hash,
+            "filename": file.filename,
+            "content_type": file.content_type,
+            "file_size": file.size,
+            "estimator_type": estimator_type,
+            "min_confidence": min_confidence,
         },
     )
 
@@ -258,10 +288,11 @@ async def analyze_video_async(
         file.filename or "unknown",
         estimator_type,
         min_confidence,
+        input_hash,
         task_manager,
     )
 
-    return {"task_id": task_id, "status": "started"}
+    return {"task_id": task_id, "status": "pending"}
 
 
 async def _process_video_background(
@@ -270,9 +301,13 @@ async def _process_video_background(
     filename: str,
     estimator_type: str,
     min_confidence: float,
+    input_hash: str,
     task_manager: Any,
 ) -> None:
     """Background task for video processing.
+
+    Runs blocking video processing in thread pool to avoid blocking
+    the asyncio event loop (issue #3942).
 
     Args:
         task_id: Unique task identifier.
@@ -280,8 +315,13 @@ async def _process_video_background(
         filename: Original filename.
         estimator_type: Pose estimation backend.
         min_confidence: Minimum confidence threshold.
+        input_hash: Hash of input video for reproducibility.
         task_manager: Task manager for status updates.
     """
+    import logging
+
+    log = logging.getLogger(__name__)
+
     try:
         task_data = await task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
@@ -292,6 +332,7 @@ async def _process_video_background(
                 "status": "processing",
                 "progress": 0,
                 "created_at": created_at,
+                "input_hash": input_hash,
             },
         )
 
@@ -305,22 +346,33 @@ async def _process_video_background(
         )
         pipeline = VideoPosePipeline(config)
 
-        result = pipeline.process_video(video_path)
+        # Run blocking CPU/GPU work in thread pool to avoid event loop blocking
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,  # Use default thread pool
+            lambda: pipeline.process_video(str(video_path))
+        )
 
         task_data = await task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
 
+        # Store comprehensive result metadata for reproducibility
         await task_manager.set(
             task_id,
             {
                 "status": "completed",
                 "created_at": created_at,
+                "completed_at": datetime.now(UTC),
+                "input_hash": input_hash,
                 "result": {
                     "filename": filename,
                     "total_frames": result.total_frames,
                     "valid_frames": result.valid_frames,
                     "average_confidence": result.average_confidence,
                     "quality_metrics": result.quality_metrics,
+                    # Add processing metadata for reproducibility
+                    "estimator_type": estimator_type,
+                    "min_confidence": min_confidence,
                 },
             },
         )
@@ -335,8 +387,15 @@ async def _process_video_background(
                 "status": "failed",
                 "error": str(e),
                 "created_at": created_at,
+                "completed_at": datetime.now(UTC),
+                "input_hash": input_hash,
             },
         )
     finally:
+        # Hardened cleanup with error handling (issue #3942)
         if video_path.exists():
-            video_path.unlink()
+            try:
+                video_path.unlink()
+            except OSError as e:
+                # Log but don't propagate cleanup errors
+                log.warning("Failed to cleanup temp video %s: %s", video_path, e)

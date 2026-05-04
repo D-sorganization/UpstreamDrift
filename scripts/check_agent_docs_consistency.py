@@ -8,7 +8,12 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-import tomllib
+import sys
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"

@@ -38,8 +38,8 @@
 | **Primary Language(s)** | Python 3.10+, Rust, TypeScript                     |
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
-| **Spec Version**        | 1.0.105                                            |
-| **Last Spec Update**    | 2026-05-03 (contract shim export alignment)        |
+| **Spec Version**        | 1.0.106                                            |
+| **Last Spec Update**    | 2026-05-04 (Docker digest update, coverage floor raise, durable dataset storage) |
 
 ## 2. Purpose & Mission
 
@@ -325,7 +325,7 @@ overlapping fixture names in nested conftests.
 
 | Scope            | Minimum | Current | Enforced By                |
 | ---------------- | ------- | ------- | -------------------------- |
-| Overall          | 45%     | CI baseline | `pyproject.toml` and `ci-standard.yml` |
+| Overall          | 55%     | CI baseline | `pyproject.toml` and `ci-standard.yml` |
 | API routes       | 30%     | Ratchet baseline | `scripts/config/mypy_exclusion_budget.json` |
 | Data I/O         | 30%     | Ratchet baseline | `scripts/config/mypy_exclusion_budget.json` |
 | Execution/checkpointing | 30% | Ratchet baseline | `scripts/config/mypy_exclusion_budget.json` |
@@ -363,7 +363,7 @@ overlapping fixture names in nested conftests.
 
 ### Design Principles
 
-- **TDD**: Unit tests written before implementation; the current global coverage floor is 45%, with per-package production ratchets tracked toward higher thresholds.
+- **TDD**: Unit tests written before implementation; the current global coverage floor is 55%, with per-package production ratchets tracked toward higher thresholds (85% for API routes/engine adapters, 70% for shared utilities).
 - **Design by Contract (DbC)**: Explicit preconditions and postconditions in engine adapters
 - **DRY**: Cross-engine utilities in `src/shared/` prevent code duplication
 - **Orthogonality**: Engines are loosely coupled; each can be used independently
@@ -475,7 +475,7 @@ cd ui && npm install && npm run tauri build
 # Running Tests
 pytest tests/unit/ -v
 pytest tests/integration/ -v
-pytest tests/ --cov=src --cov-fail-under=45
+pytest tests/ --cov=src --cov-fail-under=55
 ```
 
 ### Build Artifacts
@@ -525,6 +525,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-04 | 1.0.106 | Pinned Docker base images to digest `sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117` (python:3.12-slim) for reproducible builds; raised overall coverage floor from 45% to 55% with per-module risk-tier thresholds (85% for API routes/engine adapters/task management, 70% for shared utilities); replaced in-memory dataset cache in `src/api/routes/data_explorer.py` with durable SQLite-backed `DatasetStorage` (issue #3943). |
 | 2026-05-03 | 1.0.105 | Realigned the `model_generation.core.contracts` compatibility shim so its invariant alias and helper re-exports stay synchronized with the canonical shared contracts module while remaining Ruff-clean. |
 | 2026-05-03 | 1.0.103 | Optimized collision detection distance calculations by replacing `np.linalg.norm` with `math.hypot` for 3D collision-distance and gradient normalization paths. |
 | 2026-05-03 | 1.0.98  | Added experimental OpenFOAM CFD execution support to the engine inventory, including `decomposeParDict` generation and MPI command plumbing for parallel OpenFOAM runs. |

@@ -1,10 +1,11 @@
 # Assessment: Security
 
-**Date**: 2026-04-26
+**Date**: 2026-05-03
 **Grade**: 8.0/10
 
 ## Details
-Found 1 potential hardcoded secrets.
+No obvious hardcoded secret patterns found outside of test fixtures.
 
 ## Recommendations
-1. Use environment variables for secrets.
+1. Run bandit security analysis regularly.
+2. Use environment variables for all secrets.

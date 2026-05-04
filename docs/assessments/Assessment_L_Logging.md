@@ -1,10 +1,11 @@
 # Assessment: Logging
 
-**Date**: 2026-04-26
-**Grade**: 8.0/10
+**Date**: 2026-05-03
+**Grade**: 7.0/10
 
 ## Details
-Found 165 logs, 2 prints in sample.
+Found 6774 logging calls and 210 print calls.
 
 ## Recommendations
-1. Use structured logging instead of print.
+1. Replace print statements with structured logging.
+2. Configure log levels.

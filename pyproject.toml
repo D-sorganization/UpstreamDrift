@@ -367,7 +367,12 @@ omit = [
 # Coverage threshold — enforced in CI and locally when running with --cov.
 # Per-package coverage ratchets for production-critical surfaces are tracked
 # in scripts/config/mypy_exclusion_budget.json (#3912).
-fail_under = 45
+#
+# Coverage floors by risk tier (issue #3939):
+#   - 85% for API routes, engine adapters, task management (production-critical)
+#   - 70% for shared utilities, services (important but lower risk)
+#   - 55% overall floor (raised from 45% to catch regressions)
+fail_under = 55
 show_missing = true
 skip_empty = true
 precision = 1
@@ -378,6 +383,16 @@ exclude_lines = [
     "raise NotImplementedError",
     "if TYPE_CHECKING:",
 ]
+
+# Per-module coverage minimums for production-critical surfaces
+# These are enforced by scripts/config/coverage_enforcer.py in CI
+# See issue #3939 for remediation details
+# Note: coverage.py does not support per-module fail_under in config;
+# use scripts/config/coverage_enforcer.py in CI to enforce these thresholds:
+#   - API routes/services: 85%
+#   - Engine core/control_interface: 85%
+#   - Task management: 80%
+#   - Shared utilities: 70%
 
 [tool.coverage.html]
 directory = "htmlcov"
