@@ -655,7 +655,7 @@ class FrameProcessor:
                     # For single values, we need to get the corresponding
                     # X, Y, Z components
                     # The column name should indicate which component it is
-                    if col_name.endswith("_x") or col_name.endswith("x"):
+                    if col_name.endswith(("_x", "x")):
                         # Get Y and Z components from corresponding columns
                         base_name = col_name.replace("_x", "").replace("x", "")
                         y_col = f"{base_name}_y" if base_name else "CHy"
@@ -665,7 +665,7 @@ class FrameProcessor:
                         z_val = df.iloc[row_idx][z_col] if z_col in df.columns else 0.0
 
                         return np.array([data, y_val, z_val], dtype=np.float32)
-                    elif col_name.endswith("_y") or col_name.endswith("y"):
+                    elif col_name.endswith(("_y", "y")):
                         # Get X and Z components from corresponding columns
                         base_name = col_name.replace("_y", "").replace("y", "")
                         x_col = f"{base_name}_x" if base_name else "CHx"
@@ -675,7 +675,7 @@ class FrameProcessor:
                         z_val = df.iloc[row_idx][z_col] if z_col in df.columns else 0.0
 
                         return np.array([x_val, data, z_val], dtype=np.float32)
-                    elif col_name.endswith("_z") or col_name.endswith("z"):
+                    elif col_name.endswith(("_z", "z")):
                         # Get X and Y components from corresponding columns
                         base_name = col_name.replace("_z", "").replace("z", "")
                         x_col = f"{base_name}_x" if base_name else "CHx"
