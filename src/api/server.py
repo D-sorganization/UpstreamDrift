@@ -109,6 +109,7 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
     - Cleaner separation of concerns
     - Type-safe dependency resolution
     """
+    task_manager: TaskManager | None = None
     try:
         # Validate environment variables before any service initialisation.
         # env_validator checks GOLF_API_SECRET_KEY, DATABASE_URL, and the
@@ -131,7 +132,8 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         # Initialize services and store in app.state for dependency injection
         fastapi_app.state.simulation_service = SimulationService(engine_manager)
         fastapi_app.state.analysis_service = AnalysisService(engine_manager)
-        fastapi_app.state.task_manager = active_tasks
+        task_manager = TaskManager()
+        fastapi_app.state.task_manager = task_manager
         fastapi_app.state.logger = logger
         fastapi_app.state.api_started_at = time.time()
         fastapi_app.state.static_files_mounted = False
@@ -158,7 +160,11 @@ async def lifespan(fastapi_app: FastAPI) -> AsyncGenerator[None, None]:
         logger.exception("Unexpected error during API initialization: %s", e)
         raise
 
-    yield
+    try:
+        yield
+    finally:
+        if task_manager is not None:
+            await task_manager.shutdown()
 
 
 # Initialize FastAPI app with enhanced OpenAPI metadata (#1488)

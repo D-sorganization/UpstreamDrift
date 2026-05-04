@@ -28,7 +28,7 @@ def _handle_common_exceptions(e: Exception, func_name: str) -> None:
         HTTPException: With appropriate status code based on exception type
     """
     if isinstance(e, HTTPException):
-        raise
+        raise e
     if isinstance(e, ValueError):
         raise HTTPException(status_code=400, detail=str(e)) from e
     if isinstance(e, FileNotFoundError):
@@ -42,7 +42,7 @@ def _handle_common_exceptions(e: Exception, func_name: str) -> None:
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
-def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:
+def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:  # noqa: C901
     """Decorator that provides consistent error handling for API route handlers.
 
     Catches common exceptions and maps them to appropriate HTTP responses:

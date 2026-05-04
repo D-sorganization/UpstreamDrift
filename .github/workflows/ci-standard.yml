@@ -76,7 +76,7 @@ jobs:
   quality-gate:
     needs: pick-runner
     runs-on: ${{ needs.pick-runner.outputs.runner }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
@@ -232,9 +232,23 @@ jobs:
           python3 scripts/db_migrate.py upgrade head
           python3 scripts/check_alembic_drift.py
 
+      - name: Check for UI changes
+        id: ui_changes
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --quiet "${{ github.event.pull_request.base.sha }}" HEAD -- ui; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
       # UI Security and Quality Checks (only when ui/ files change)
       - name: UI Security Audit
-        if: github.event_name == 'pull_request'
+        if: steps.ui_changes.outputs.changed == 'true'
         working-directory: ui
         run: npm ci && npm audit --audit-level=high || echo "::warning::npm audit skipped - package-lock.json may not exist yet"
 
@@ -611,13 +625,13 @@ jobs:
           POSTGRES_USER: upstreamdrift
           POSTGRES_PASSWORD: upstreamdrift
         ports:
-          - 5432:5432
+          - 5432
         options: >-
           --health-cmd "pg_isready -U upstreamdrift -d upstreamdrift_migrations"
           --health-interval 5s
-          --health-start-period 30s
+          --health-start-period 60s
           --health-timeout 5s
-          --health-retries 12
+          --health-retries 24
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
@@ -632,7 +646,7 @@ jobs:
           python -m pip install "psycopg[binary]>=3.1"
       - name: Run Alembic PostgreSQL round-trip
         env:
-          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:5432/upstreamdrift_migrations
+          ALEMBIC_ROUND_TRIP_DATABASE_URL: postgresql+psycopg://upstreamdrift:upstreamdrift@localhost:${{ job.services.postgres.ports[5432] }}/upstreamdrift_migrations
         run: |
           python3 -m pytest tests/integration/test_alembic_round_trip.py \
             -m "not slow and not benchmark and not requires_gl and not requires_network and not requires_gpu" \

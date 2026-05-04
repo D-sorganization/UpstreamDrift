@@ -46,7 +46,7 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+            server_default=sa.func.now(),
             nullable=True,
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
@@ -90,7 +90,7 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+            server_default=sa.func.now(),
             nullable=True,
         ),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=True),
@@ -124,14 +124,14 @@ def upgrade() -> None:
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+            server_default=sa.func.now(),
             nullable=True,
         ),
         sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column(
             "last_accessed",
             sa.DateTime(timezone=True),
-            server_default=sa.text("(CURRENT_TIMESTAMP)"),
+            server_default=sa.func.now(),
             nullable=True,
         ),
         sa.ForeignKeyConstraint(

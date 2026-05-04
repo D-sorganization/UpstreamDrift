@@ -109,3 +109,35 @@ async def test_engine_semaphore_enforces_max_concurrent() -> None:
         assert peak <= 2, f"Semaphore violated max_concurrent=2 (peak={peak})"
     finally:
         await tm.shutdown()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_get_touches_task_ttl() -> None:
+    """Reading a task refreshes retention for active polling clients (#3941)."""
+    tm = TaskManager(ttl_seconds=0.05)
+    try:
+        await tm.set("task-1", {"status": "running"})
+        await asyncio.sleep(0.03)
+
+        assert await tm.get("task-1") is not None
+
+        await asyncio.sleep(0.03)
+        assert await tm.get("task-1") is not None
+    finally:
+        await tm.shutdown()
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_shutdown_closes_and_clears_task_manager() -> None:
+    """Shutdown prevents process-local task state from being reused (#3941)."""
+    tm = TaskManager()
+    await tm.set("task-1", {"status": "running"})
+
+    await tm.shutdown()
+
+    with pytest.raises(RuntimeError, match="closed"):
+        await tm.set("task-2", {"status": "pending"})
+    with pytest.raises(RuntimeError, match="closed"):
+        await tm.get("task-1")

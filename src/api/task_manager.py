@@ -89,7 +89,13 @@ class TaskManager:
             async with task_manager.engine_semaphore:
                 await run_simulation(...)
         """
+        self._ensure_open()
         return self._engine_semaphore
+
+    def _ensure_open(self) -> None:
+        """Raise when callers try to use a shutdown manager."""
+        if self._closed:
+            raise RuntimeError("TaskManager is closed")
 
     async def _cleanup_expired(self) -> None:
         """Remove expired tasks. Called internally under lock."""
@@ -129,7 +135,9 @@ class TaskManager:
         """
         if not task_id or not task_id.strip():
             raise ValueError("task_id must be a non-empty string")
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
             await self._cleanup_expired()
             self._tasks[task_id] = data
             self._timestamps[task_id] = time.time()
@@ -144,15 +152,25 @@ class TaskManager:
         Returns:
             Task data or None if not found / expired.
         """
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
             await self._cleanup_expired()
-            return self._tasks.get(task_id)
+            task = self._tasks.get(task_id)
+            if task is not None:
+                self._timestamps[task_id] = time.time()
+            return task
 
     async def exists(self, task_id: str) -> bool:
         """Check if task exists and is not expired."""
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
             await self._cleanup_expired()
-            return task_id in self._tasks
+            exists = task_id in self._tasks
+            if exists:
+                self._timestamps[task_id] = time.time()
+            return exists
 
     async def update_progress(self, task_id: str, progress: float) -> None:
         """Update progress for a running task.
@@ -161,7 +179,10 @@ class TaskManager:
             task_id: Task identifier.
             progress: Progress percentage (0-100).
         """
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
+            await self._cleanup_expired()
             if task_id in self._tasks:
                 self._tasks[task_id]["progress"] = min(max(progress, 0.0), 100.0)
                 self._timestamps[task_id] = time.time()
@@ -173,7 +194,10 @@ class TaskManager:
             task_id: Task identifier.
             result: The task result data.
         """
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
+            await self._cleanup_expired()
             if task_id in self._tasks:
                 self._tasks[task_id]["status"] = TaskStatus.COMPLETED.value
                 self._tasks[task_id]["result"] = result
@@ -187,7 +211,10 @@ class TaskManager:
             task_id: Task identifier.
             error: Error message.
         """
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
+            await self._cleanup_expired()
             if task_id in self._tasks:
                 self._tasks[task_id]["status"] = TaskStatus.FAILED.value
                 self._tasks[task_id]["error"] = error
@@ -195,7 +222,9 @@ class TaskManager:
 
     async def active_count(self) -> int:
         """Return the number of active (non-expired) tasks."""
+        self._ensure_open()
         async with self._lock:
+            self._ensure_open()
             await self._cleanup_expired()
             return len(self._tasks)
 
@@ -206,7 +235,11 @@ class TaskManager:
         Call this when the TaskManager is no longer needed.
         """
         async with self._lock:
+            if self._closed:
+                return
             self._closed = True
+            self._tasks.clear()
+            self._timestamps.clear()
             # asyncio.Semaphore cleanup happens implicitly on GC,
             # but we log for diagnostics
             logger.debug("TaskManager shutdown: semaphore cleanup scheduled")

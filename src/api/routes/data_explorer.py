@@ -11,10 +11,18 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import csv
+import hashlib
 import io
 import json
 import os
+import sqlite3
 import tempfile
+import threading
+import time
+import uuid
+from collections import OrderedDict
+from collections.abc import Generator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -99,24 +107,17 @@ class ImportResponse(BaseModel):
 # - Use stable dataset IDs instead of raw filenames
 # - Support pagination for preview/stats operations
 
-import hashlib
-import sqlite3
-import threading
-import time
-import uuid
-from dataclasses import dataclass
-from typing import Generator
-
 # Configuration constants for upload limits
 MAX_DATASET_SIZE_BYTES = 50 * 1024 * 1024  # 50MB max file size
 MAX_DATASET_ROWS = 100000  # 100K rows max
 MAX_DATASET_COLUMNS = 500  # 500 columns max
 MAX_CACHE_AGE_SECONDS = 3600  # 1 hour cache TTL
 
-# Dataset record for durable storage
+
 @dataclass
 class DatasetRecord:
     """Dataset metadata and content for durable storage."""
+
     dataset_id: str
     original_filename: str
     format: str
@@ -130,14 +131,14 @@ class DatasetRecord:
 
 class DatasetStorage:
     """SQLite-backed dataset storage with limits and pagination.
-    
-    Replaces the unbounded process-global cache with durable, 
+
+    Replaces the unbounded process-global cache with durable,
     size-limited storage that survives process restarts.
     """
-    
+
     def __init__(self, db_path: Path | None = None):
         """Initialize dataset storage.
-        
+
         Args:
             db_path: Path to SQLite database. Defaults to ARTIFACT_DIR/datasets.db
         """
@@ -148,12 +149,12 @@ class DatasetStorage:
             )
             os.makedirs(artifact_dir, exist_ok=True)
             db_path = Path(artifact_dir) / "datasets.db"
-        
+
         self.db_path = db_path
         self._local = threading.local()
         self._lock = threading.Lock()
         self._init_db()
-    
+
     def _get_conn(self) -> sqlite3.Connection:
         """Get thread-local database connection."""
         if not hasattr(self._local, "conn") or self._local.conn is None:
@@ -164,7 +165,7 @@ class DatasetStorage:
             )
             self._local.conn.execute("PRAGMA journal_mode=WAL")
         return self._local.conn
-    
+
     @contextlib.contextmanager
     def _transaction(self) -> Generator[sqlite3.Connection, None, None]:
         """Context manager for database transactions."""
@@ -176,7 +177,7 @@ class DatasetStorage:
         except Exception:
             conn.execute("ROLLBACK")
             raise
-    
+
     def _init_db(self) -> None:
         """Initialize database schema."""
         with self._lock, self._transaction() as conn:
@@ -203,12 +204,13 @@ class DatasetStorage:
                 )
             """)
             conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_rows_dataset ON dataset_rows(dataset_id)"
+                "CREATE INDEX IF NOT EXISTS idx_rows_dataset"
+                " ON dataset_rows(dataset_id)"
             )
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_datasets_ttl ON datasets(ttl_at)"
             )
-    
+
     def store_dataset(
         self,
         filename: str,
@@ -218,63 +220,77 @@ class DatasetStorage:
         size_bytes: int,
     ) -> str:
         """Store a dataset with limits enforcement.
-        
+
         Args:
             filename: Original filename
             fmt: Dataset format (csv, json)
             columns: Column names
             rows: All rows (validated against limits)
             size_bytes: Size in bytes
-            
+
         Returns:
             Stable dataset ID
-            
+
         Raises:
             ValueError: If limits are exceeded
         """
-        # Enforce limits
         if len(rows) > MAX_DATASET_ROWS:
             raise ValueError(
                 f"Dataset exceeds maximum row limit ({len(rows)} > {MAX_DATASET_ROWS})"
             )
         if len(columns) > MAX_DATASET_COLUMNS:
             raise ValueError(
-                f"Dataset exceeds maximum column limit ({len(columns)} > {MAX_DATASET_COLUMNS})"
+                f"Dataset exceeds maximum column limit"
+                f" ({len(columns)} > {MAX_DATASET_COLUMNS})"
             )
         if size_bytes > MAX_DATASET_SIZE_BYTES:
             raise ValueError(
-                f"Dataset exceeds maximum size ({size_bytes} > {MAX_DATASET_SIZE_BYTES})"
+                f"Dataset exceeds maximum size"
+                f" ({size_bytes} > {MAX_DATASET_SIZE_BYTES})"
             )
-        
+
         dataset_id = str(uuid.uuid4())
         content_hash = hashlib.sha256(
             json.dumps({"columns": columns, "rows": rows}, sort_keys=True).encode()
         ).hexdigest()[:16]
         now = time.time()
-        
+
         with self._lock, self._transaction() as conn:
-            # Store metadata
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO datasets (
                     dataset_id, original_filename, format, columns,
                     row_count, size_bytes, content_hash, created_at, ttl_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                dataset_id, filename, fmt, json.dumps(columns),
-                len(rows), size_bytes, content_hash, now, now + MAX_CACHE_AGE_SECONDS
-            ))
-            
-            # Store rows
+                """,
+                (
+                    dataset_id,
+                    filename,
+                    fmt,
+                    json.dumps(columns),
+                    len(rows),
+                    size_bytes,
+                    content_hash,
+                    now,
+                    now + MAX_CACHE_AGE_SECONDS,
+                ),
+            )
             for i, row in enumerate(rows):
                 conn.execute(
-                    "INSERT INTO dataset_rows (dataset_id, row_data, row_index) VALUES (?, ?, ?)",
-                    (dataset_id, json.dumps(row), i)
+                    "INSERT INTO dataset_rows"
+                    " (dataset_id, row_data, row_index) VALUES (?, ?, ?)",
+                    (dataset_id, json.dumps(row), i),
                 )
-        
-        logger.info("Stored dataset %s (%s): %d rows, %d columns", 
-                   dataset_id, filename, len(rows), len(columns))
+
+        logger.info(
+            "Stored dataset %s (%s): %d rows, %d columns",
+            dataset_id,
+            filename,
+            len(rows),
+            len(columns),
+        )
         return dataset_id
-    
+
     def get_dataset_metadata(self, dataset_id: str) -> DatasetRecord | None:
         """Get dataset metadata."""
         with self._lock:
@@ -296,22 +312,23 @@ class DatasetStorage:
                     ttl_at=row[8],
                 )
             return None
-    
+
     def get_dataset_rows(
-        self, 
-        dataset_id: str, 
-        offset: int = 0, 
-        limit: int = 100
+        self,
+        dataset_id: str,
+        offset: int = 0,
+        limit: int = 100,
     ) -> list[dict[str, Any]]:
         """Get paginated dataset rows."""
         with self._lock:
             conn = self._get_conn()
             cursor = conn.execute(
-                "SELECT row_data FROM dataset_rows WHERE dataset_id = ? ORDER BY row_index LIMIT ? OFFSET ?",
-                (dataset_id, limit, offset)
+                "SELECT row_data FROM dataset_rows"
+                " WHERE dataset_id = ? ORDER BY row_index LIMIT ? OFFSET ?",
+                (dataset_id, limit, offset),
             )
             return [json.loads(row[0]) for row in cursor.fetchall()]
-    
+
     def cleanup_expired(self) -> int:
         """Remove expired datasets."""
         now = time.time()
@@ -329,9 +346,10 @@ class DatasetStorage:
 # Global storage instance (lazy initialized)
 _dataset_storage: DatasetStorage | None = None
 
-# Legacy cache for backward compatibility (issue #3943)
-# New imports use durable storage; legacy cache remains for backward compat
-_loaded_datasets: dict[str, dict[str, Any]] = {}
+# In-memory LRU cache for backward compatibility and fast repeated access
+# (issue #3943). New imports also write to durable SQLite storage.
+MAX_LOADED_DATASETS = 32
+_loaded_datasets: OrderedDict[str, dict[str, Any]] = OrderedDict()
 _cache_lock = asyncio.Lock()
 
 
@@ -341,47 +359,6 @@ def get_dataset_storage() -> DatasetStorage:
     if _dataset_storage is None:
         _dataset_storage = DatasetStorage()
     return _dataset_storage
-
-
-async def _get_cached_dataset(
-    name: str,
-) -> tuple[list[str], list[dict[str, Any]], str] | None:
-    """Return a copy of an imported dataset under the cache lock."""
-    async with _cache_lock:
-        dataset = _loaded_datasets.get(name)
-        if dataset is None:
-            return None
-        columns = list(dataset["columns"])
-        rows = list(dataset["rows"])
-        dataset_format = str(dataset["format"])
-    return columns, rows, dataset_format
-
-
-def _row_matches_filter(row: dict[str, Any], request: DatasetFilterRequest) -> bool:
-    value = str(row.get(request.column, ""))
-    if request.operator == "eq":
-        return value == request.value
-    if request.operator == "ne":
-        return value != request.value
-    if request.operator == "contains":
-        return request.value.lower() in value.lower()
-    if request.operator not in {"gt", "lt", "gte", "lte"}:
-        return False
-
-    try:
-        row_value = float(value)
-        filter_value = float(request.value)
-    except (ValueError, TypeError) as exc:
-        logger.debug("Non-numeric value in filter comparison: %s", exc)
-        return False
-
-    comparisons = {
-        "gt": row_value > filter_value,
-        "lt": row_value < filter_value,
-        "gte": row_value >= filter_value,
-        "lte": row_value <= filter_value,
-    }
-    return comparisons[request.operator]
 
 
 def _get_output_dir() -> Path:
@@ -407,6 +384,119 @@ def _parse_json_content(content: str) -> tuple[list[str], list[dict[str, Any]]]:
         columns = list(data.keys())
         return columns, [data]
     return [], []
+
+
+def _enforce_loaded_dataset_limit_locked() -> None:
+    """Evict least-recently-used imported datasets beyond the cache ceiling."""
+    while len(_loaded_datasets) > MAX_LOADED_DATASETS:
+        evicted_name, _ = _loaded_datasets.popitem(last=False)
+        logger.debug("Evicted imported dataset from cache: %s", evicted_name)
+
+
+async def _get_cached_dataset(
+    name: str,
+) -> tuple[list[str], list[dict[str, Any]], str] | None:
+    """Return a copy of an imported dataset and refresh its LRU position."""
+    async with _cache_lock:
+        dataset = _loaded_datasets.get(name)
+        if dataset is None:
+            return None
+        _loaded_datasets.move_to_end(name)
+        columns = list(dataset["columns"])
+        rows = list(dataset["rows"])
+        dataset_format = str(dataset["format"])
+    return columns, rows, dataset_format
+
+
+async def _store_cached_dataset(
+    name: str, columns: list[str], rows: list[dict[str, Any]], dataset_format: str
+) -> None:
+    """Store an imported dataset with duplicate rejection and LRU eviction."""
+    async with _cache_lock:
+        if name in _loaded_datasets:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Dataset '{name}' is already imported",
+            )
+        _loaded_datasets[name] = {
+            "columns": columns,
+            "rows": rows,
+            "format": dataset_format,
+        }
+        _enforce_loaded_dataset_limit_locked()
+
+
+def _find_dataset_path(name: str) -> Path:
+    """Resolve a dataset filename from output, rejecting ambiguous matches."""
+    output_dir = _get_output_dir()
+    matches = sorted(path for path in output_dir.rglob(name) if path.is_file())
+    if not matches:
+        raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
+    if len(matches) > 1:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Dataset name '{name}' is ambiguous; {len(matches)} matches found",
+        )
+    return matches[0]
+
+
+def _load_dataset_from_path(filepath: Path) -> tuple[list[str], list[dict[str, Any]]]:
+    """Load previewable dataset rows from a resolved path."""
+    content = filepath.read_text(encoding="utf-8")
+    if filepath.suffix.lower() == ".csv":
+        return _parse_csv_content(content)
+    if filepath.suffix.lower() == ".json":
+        return _parse_json_content(content)
+    raise HTTPException(
+        status_code=400,
+        detail=f"Preview not supported for {filepath.suffix} format",
+    )
+
+
+async def _load_dataset_for_operation(
+    name: str, unsupported_detail: str
+) -> tuple[list[str], list[dict[str, Any]], str]:
+    """Load an imported or disk dataset for endpoint-specific operations."""
+    cached_dataset = await _get_cached_dataset(name)
+    if cached_dataset is not None:
+        return cached_dataset
+
+    filepath = _find_dataset_path(name)
+    try:
+        columns, rows = _load_dataset_from_path(filepath)
+    except HTTPException as exc:
+        if exc.status_code == 400:
+            raise HTTPException(status_code=400, detail=unsupported_detail) from exc
+        raise
+    return columns, rows, filepath.suffix.lstrip(".")
+
+
+def _row_matches_filter(row: dict[str, Any], request: DatasetFilterRequest) -> bool:
+    """Return whether a row satisfies the requested filter expression."""
+    val = str(row.get(request.column, ""))
+    if request.operator == "eq":
+        return val == request.value
+    if request.operator == "ne":
+        return val != request.value
+    if request.operator == "contains":
+        return request.value.lower() in val.lower()
+    if request.operator not in ("gt", "lt", "gte", "lte"):
+        return False
+
+    try:
+        num_val = float(val)
+        num_filter = float(request.value)
+    except (ValueError, TypeError) as exc:
+        logger.debug("Non-numeric value in filter comparison: %s", exc)
+        return False
+
+    if request.operator == "gt":
+        return num_val > num_filter
+    if request.operator == "lt":
+        return num_val < num_filter
+    if request.operator == "gte":
+        return num_val >= num_filter
+    return num_val <= num_filter
 
 
 # ── Endpoints ──
@@ -495,23 +585,8 @@ async def preview_dataset(name: str, limit: int = 50) -> DatasetPreviewResponse:
             format=dataset_format,
         )
 
-    # Try to load from disk
-    output_dir = _get_output_dir()
-    matches = list(output_dir.rglob(name))
-    if not matches:
-        raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
-
-    filepath = matches[0]
-    content = filepath.read_text(encoding="utf-8")
-    if filepath.suffix.lower() == ".csv":
-        columns, rows = _parse_csv_content(content)
-    elif filepath.suffix.lower() == ".json":
-        columns, rows = _parse_json_content(content)
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Preview not supported for {filepath.suffix} format",
-        )
+    filepath = _find_dataset_path(name)
+    columns, rows = _load_dataset_from_path(filepath)
 
     return DatasetPreviewResponse(
         name=name,
@@ -533,26 +608,9 @@ async def dataset_stats(name: str) -> DatasetStatsResponse:
 
     See issue #1206
     """
-    # Get dataset rows
-    cached_dataset = await _get_cached_dataset(name)
-    if cached_dataset is not None:
-        columns, rows, _dataset_format = cached_dataset
-    else:
-        output_dir = _get_output_dir()
-        matches = list(output_dir.rglob(name))
-        if not matches:
-            raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
-        filepath = matches[0]
-        content = filepath.read_text(encoding="utf-8")
-        if filepath.suffix.lower() == ".csv":
-            columns, rows = _parse_csv_content(content)
-        elif filepath.suffix.lower() == ".json":
-            columns, rows = _parse_json_content(content)
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Stats not supported for {filepath.suffix}",
-            )
+    columns, rows, _ = await _load_dataset_for_operation(
+        name, "Stats not supported for this format"
+    )
 
     # Compute statistics per column
     stats: dict[str, dict[str, float | None]] = {}
@@ -603,16 +661,24 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
             status_code=400,
             detail=f"Unsupported format: {suffix}. Use .csv or .json",
         )
+    if await _get_cached_dataset(file.filename) is not None:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Dataset '{file.filename}' is already imported",
+        )
 
     content_bytes = await read_upload_file_bytes(file)
-    
+
     # Size validation
     if len(content_bytes) > MAX_DATASET_SIZE_BYTES:
         raise HTTPException(
             status_code=413,
-            detail=f"File too large ({len(content_bytes)} bytes, max {MAX_DATASET_SIZE_BYTES})"
+            detail=(
+                f"File too large ({len(content_bytes)} bytes,"
+                f" max {MAX_DATASET_SIZE_BYTES})"
+            ),
         )
-    
+
     content = content_bytes.decode("utf-8")
 
     if suffix == ".csv":
@@ -633,14 +699,15 @@ async def import_dataset(file: UploadFile) -> ImportResponse:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 
-    # Also keep in legacy cache for backward compatibility
+    # Also keep in LRU cache for fast repeated access
     async with _cache_lock:
         _loaded_datasets[file.filename] = {
             "columns": columns,
             "rows": rows,
             "format": suffix.lstrip("."),
-            "dataset_id": dataset_id,  # Reference to durable storage
+            "dataset_id": dataset_id,
         }
+        _enforce_loaded_dataset_limit_locked()
 
     return ImportResponse(
         name=file.filename,
@@ -662,26 +729,9 @@ async def filter_dataset(
 
     See issue #1206
     """
-    # First get the dataset
-    cached_dataset = await _get_cached_dataset(name)
-    if cached_dataset is not None:
-        columns, rows, fmt = cached_dataset
-    else:
-        output_dir = _get_output_dir()
-        matches = list(output_dir.rglob(name))
-        if not matches:
-            raise HTTPException(status_code=404, detail=f"Dataset '{name}' not found")
-        filepath = matches[0]
-        content = filepath.read_text(encoding="utf-8")
-        if filepath.suffix.lower() == ".csv":
-            columns, rows = _parse_csv_content(content)
-        elif filepath.suffix.lower() == ".json":
-            columns, rows = _parse_json_content(content)
-        else:
-            raise HTTPException(
-                status_code=400, detail="Filter not supported for this format"
-            )
-        fmt = filepath.suffix.lstrip(".")
+    columns, rows, fmt = await _load_dataset_for_operation(
+        name, "Filter not supported for this format"
+    )
 
     if request.column not in columns:
         raise HTTPException(

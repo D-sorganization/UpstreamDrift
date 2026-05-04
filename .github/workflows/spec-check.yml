@@ -52,7 +52,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Check if source files changed without SPEC.md update
         id: check
@@ -60,7 +60,11 @@ jobs:
         run: |
 
           # Get the list of changed files in this PR
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          fi
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" HEAD)
 
           echo "Changed files:"
           echo "$CHANGED_FILES"

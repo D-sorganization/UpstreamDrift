@@ -39,7 +39,7 @@
 | **License**             | MIT                                                |
 | **Current Version**     | 2.1.0                                              |
 | **Spec Version**        | 1.0.106                                            |
-| **Last Spec Update**    | 2026-05-04 (Docker digest update, coverage floor raise, durable dataset storage) |
+| **Last Spec Update**    | 2026-05-04 (Docker digest update, coverage floor raise, durable dataset storage, API production-readiness hardening) |
 
 ## 2. Purpose & Mission
 
@@ -214,6 +214,26 @@ Engine tier metadata is declared in each in-scope engine package with
 - `POST /trajectory-optimize` — Optimize trajectory subject to constraints
 - `GET /engines` — List available physics engines and their status
 - `POST /export` — Export simulation model to URDF, MATLAB, or other formats
+
+**API Production-Readiness Contracts**:
+
+- Background task state is process-local and owned by the FastAPI application
+  lifespan. Each app lifecycle creates its own `TaskManager`; shutdown marks the
+  manager closed, clears retained task records, and subsequent task operations
+  fail with a closed-state error instead of silently accepting writes.
+- `TaskManager` entries expire after the configured TTL and enforce the
+  configured maximum task count. Reads and existence checks refresh the task's
+  retention timestamp so actively polled async jobs are not evicted while a
+  client is still observing them.
+- Async video analysis queues request handling quickly, then runs the blocking
+  video pose pipeline off the event loop. Temporary uploaded video files are
+  deleted after completion or failure; cleanup failures are logged as warnings
+  and do not mask the task result.
+- Data Explorer imported datasets are kept in a bounded in-memory LRU cache.
+  Importing a duplicate filename returns a conflict instead of replacing the
+  existing dataset. Disk-backed dataset lookup rejects ambiguous duplicate
+  filenames with a conflict response so callers do not receive an arbitrary
+  match.
 
 **GUI Interface (PyQt6)**:
 
@@ -525,7 +545,7 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-04 | 1.0.106 | Pinned Docker base images to digest `sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117` (python:3.12-slim) for reproducible builds; raised overall coverage floor from 45% to 55% with per-module risk-tier thresholds (85% for API routes/engine adapters/task management, 70% for shared utilities); replaced in-memory dataset cache in `src/api/routes/data_explorer.py` with durable SQLite-backed `DatasetStorage` (issue #3943). |
+| 2026-05-04 | 1.0.106 | Pinned Docker base images to digest `sha256:4386a385d81dba9f72ed72a6fe4237755d7f5440c84b417650f38336bbc43117` (python:3.12-slim) for reproducible builds; raised overall coverage floor from 45% to 55% with per-module risk-tier thresholds (85% for API routes/engine adapters/task management, 70% for shared utilities); replaced in-memory dataset cache in `src/api/routes/data_explorer.py` with durable SQLite-backed `DatasetStorage` (issue #3943); documented API production-readiness hardening for issues #3941, #3942, and #3943: process-local `TaskManager` lifecycle and TTL touch semantics, async video background execution off the event loop with temp cleanup warning logs, and bounded Data Explorer import cache behavior with duplicate and ambiguous filename conflict handling. |
 | 2026-05-03 | 1.0.105 | Realigned the `model_generation.core.contracts` compatibility shim so its invariant alias and helper re-exports stay synchronized with the canonical shared contracts module while remaining Ruff-clean. |
 | 2026-05-03 | 1.0.103 | Optimized collision detection distance calculations by replacing `np.linalg.norm` with `math.hypot` for 3D collision-distance and gradient normalization paths. |
 | 2026-05-03 | 1.0.98  | Added experimental OpenFOAM CFD execution support to the engine inventory, including `decomposeParDict` generation and MPI command plumbing for parallel OpenFOAM runs. |

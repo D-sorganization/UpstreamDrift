@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, UploadFile
-from fastapi.concurrency import run_in_threadpool
 
 from src.api.config import (
     MAX_CONFIDENCE,
@@ -27,6 +26,7 @@ from src.api.config import (
 from src.api.middleware.upload_limits import write_upload_file_to_path
 from src.api.utils.datetime_compat import UTC
 from src.shared.python.core.contracts import precondition
+from src.shared.python.logging_pkg.logging_config import get_logger as get_module_logger
 
 from ..dependencies import get_logger, get_task_manager, get_video_pipeline
 from ..models.responses import VideoAnalysisResponse
@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from src.shared.python.gui_pkg.video_pose_pipeline import VideoPosePipeline
 
 router = APIRouter()
+logger = get_module_logger(__name__)
 
 
 def _load_video_pipeline_classes() -> tuple[type, type]:
@@ -243,7 +244,7 @@ async def analyze_video_async(
     if file.size and file.size > 100 * 1024 * 1024:
         raise HTTPException(
             status_code=413,
-            detail="Video file too large. Maximum size is 100MB."
+            detail="Video file too large. Maximum size is 100MB.",
         )
 
     task_id = str(uuid.uuid4())
@@ -318,10 +319,6 @@ async def _process_video_background(
         input_hash: Hash of input video for reproducibility.
         task_manager: Task manager for status updates.
     """
-    import logging
-
-    log = logging.getLogger(__name__)
-
     try:
         task_data = await task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
@@ -336,22 +333,13 @@ async def _process_video_background(
             },
         )
 
-        from src.shared.python.gui_pkg.video_pose_pipeline import (
-            VideoPosePipeline,
-            VideoProcessingConfig,
-        )
-
-        config = VideoProcessingConfig(
+        video_pipeline_cls, video_config_cls = _load_video_pipeline_classes()
+        config = video_config_cls(
             estimator_type=estimator_type, min_confidence=min_confidence
         )
-        pipeline = VideoPosePipeline(config)
+        pipeline = video_pipeline_cls(config)
 
-        # Run blocking CPU/GPU work in thread pool to avoid event loop blocking
-        loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            None,  # Use default thread pool
-            lambda: pipeline.process_video(str(video_path))
-        )
+        result = await asyncio.to_thread(pipeline.process_video, video_path)
 
         task_data = await task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
@@ -370,22 +358,22 @@ async def _process_video_background(
                     "valid_frames": result.valid_frames,
                     "average_confidence": result.average_confidence,
                     "quality_metrics": result.quality_metrics,
-                    # Add processing metadata for reproducibility
                     "estimator_type": estimator_type,
                     "min_confidence": min_confidence,
                 },
             },
         )
 
-    except (RuntimeError, ValueError, OSError, ImportError) as e:
+    except (RuntimeError, ValueError, OSError, ImportError, HTTPException) as e:
         task_data = await task_manager.get(task_id) or {}
         created_at = task_data.get("created_at", datetime.now(UTC))
+        error = e.detail if isinstance(e, HTTPException) else str(e)
 
         await task_manager.set(
             task_id,
             {
                 "status": "failed",
-                "error": str(e),
+                "error": error,
                 "created_at": created_at,
                 "completed_at": datetime.now(UTC),
                 "input_hash": input_hash,
@@ -396,6 +384,9 @@ async def _process_video_background(
         if video_path.exists():
             try:
                 video_path.unlink()
-            except OSError as e:
-                # Log but don't propagate cleanup errors
-                log.warning("Failed to cleanup temp video %s: %s", video_path, e)
+            except OSError as cleanup_error:
+                logger.warning(
+                    "Failed to clean up temp video %s: %s",
+                    video_path,
+                    cleanup_error,
+                )
