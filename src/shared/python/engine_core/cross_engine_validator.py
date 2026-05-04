@@ -318,8 +318,12 @@ class CrossEngineValidator(ContractChecker):
             )
 
         # RMS difference
-        rms_diff = np.sqrt(np.mean((engine1_torques - engine2_torques) ** 2))
-        rms_mag = np.sqrt(np.mean(engine1_torques**2))
+        diff = engine1_torques - engine2_torques
+        # ⚡ Bolt: Using np.vdot avoids intermediate array allocation compared to np.mean(diff**2)
+        rms_diff = np.sqrt(np.vdot(diff, diff) / diff.size)
+        rms_mag = np.sqrt(
+            np.vdot(engine1_torques, engine1_torques) / engine1_torques.size
+        )
 
         if rms_mag < 1e-10:  # Avoid division by zero
             rms_pct = 0.0 if rms_diff < 1e-10 else 100.0
