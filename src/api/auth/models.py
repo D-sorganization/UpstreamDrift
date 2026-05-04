@@ -62,8 +62,8 @@ class User(Base):  # type: ignore[misc,valid-type]
         ),
         CheckConstraint(
             f"subscription_status IN ('{SubscriptionStatus.ACTIVE.value}', "
-            f"'{SubscriptionStatus.CANCELED.value}', '{SubscriptionStatus.PAST_DUE.value}', "
-            f"'{SubscriptionStatus.TRIALING.value}', '{SubscriptionStatus.INCOMPLETE.value}')",
+            f"'{SubscriptionStatus.CANCELED.value}', '{SubscriptionStatus.PAST_DUE.value}', "  # noqa: E501
+            f"'{SubscriptionStatus.TRIALING.value}', '{SubscriptionStatus.INCOMPLETE.value}')",  # noqa: E501
             name="valid_subscription_status",
         ),
         CheckConstraint("api_calls_this_month >= 0", name="non_negative_api_calls"),
