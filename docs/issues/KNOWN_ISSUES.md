@@ -99,26 +99,26 @@ Last Updated: 2026-01-19
 
 ### [CRITICAL] API Endpoints Unauthenticated
 
-- **Status**: Open
-- **Component**: `api/server.py`, `api/routes/auth.py`
+- **Status**: Resolved
+- **Component**: `api/server.py`, `api/routes/auth.py`, `api/route_registry.py`
 - **Description**: Auth router is not mounted and core endpoints do not require authentication or API keys
-- **Suggested Fix**: Include auth router and apply `RequireAuth` dependencies to protected endpoints
+- **Resolution**: Auth router is auto-discovered and registered via route_registry.py. Protected endpoints use `RequireAuth` and `RequireAdmin` dependencies. API key authentication is supported.
 - **GitHub Issue**: #543
 
 ### [HIGH] Database Initialization Not Invoked
 
-- **Status**: Open
-- **Component**: `api/database.py`, `start_api_server.py`
+- **Status**: Resolved
+- **Component**: `api/server.py`
 - **Description**: Database initialization exists but is not called during API startup
-- **Suggested Fix**: Invoke `init_db()` on startup or before server run
+- **Resolution**: `init_db()` is now called in the lifespan startup event (server.py line 123)
 - **GitHub Issue**: #544
 
 ### [HIGH] Upload Size Limit Not Enforced
 
-- **Status**: Open
-- **Component**: `api/server.py`
+- **Status**: Resolved
+- **Component**: `api/server.py`, `api/middleware/upload_limits.py`
 - **Description**: Video upload endpoints read full payloads without enforcing MAX_UPLOAD_SIZE_BYTES
-- **Suggested Fix**: Enforce size limit via Content-Length checks or streaming guards
+- **Resolution**: `validate_upload_size` middleware checks Content-Length header and rejects oversized requests. Upload streaming utilities enforce byte limits during read operations.
 - **GitHub Issue**: #545
 
 ## CI/CD

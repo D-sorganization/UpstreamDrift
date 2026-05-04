@@ -55,18 +55,18 @@ Last Updated: 2026-01-19
 
 ### [LOW] Missing Environment Variable Template
 
-- **Status**: Open
+- **Status**: Resolved
 - **Component**: `.env.example`, setup documentation
 - **Description**: No standardized template for required API environment variables
-- **Suggested Fix**: Add `.env.example` and document configuration
+- **Resolution**: `.env.example` and `.env.docker.example` files exist with comprehensive environment variable templates.
 - **GitHub Issue**: #546
 
 ## Repository Hygiene
 
 ### [LOW] Coverage Artifacts Not Ignored
 
-- **Status**: Open
+- **Status**: Resolved
 - **Component**: `.gitignore`
 - **Description**: `.coverage.*` artifacts can be committed accidentally
-- **Suggested Fix**: Add `.coverage.*` to `.gitignore`
+- **Resolution**: `.coverage`, `.coverage.*`, and `coverage.xml` are all included in `.gitignore` (lines 23-25, 90).
 - **GitHub Issue**: #547
