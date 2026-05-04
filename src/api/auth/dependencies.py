@@ -216,7 +216,7 @@ def require_role(required_role: UserRole) -> Callable[[User], User]:
         if not role_checker(current_user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Insufficient permissions. Required role: {required_role.value}",
+                detail=f"Insufficient permissions. Required role: {required_role.value}",  # noqa: E501
             )
 
         return current_user
