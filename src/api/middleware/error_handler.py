@@ -17,6 +17,31 @@ from fastapi import HTTPException
 logger = logging.getLogger(__name__)
 
 
+def _handle_common_exceptions(e: Exception, func_name: str) -> None:
+    """Handle common exceptions and raise appropriate HTTPException.
+
+    Args:
+        e: The exception to handle
+        func_name: Name of the function where the exception occurred
+
+    Raises:
+        HTTPException: With appropriate status code based on exception type
+    """
+    if isinstance(e, HTTPException):
+        raise
+    if isinstance(e, ValueError):
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    if isinstance(e, FileNotFoundError):
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    if isinstance(e, PermissionError):
+        raise HTTPException(status_code=403, detail=str(e)) from e
+    if isinstance(e, NotImplementedError):
+        raise HTTPException(status_code=501, detail=str(e)) from e
+    if isinstance(e, (RuntimeError, TypeError, KeyError, AttributeError, OSError)):
+        logger.exception("Unhandled error in %s: %s", func_name, e)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+
 def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator that provides consistent error handling for API route handlers.
 
@@ -36,21 +61,20 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:
         async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return await func(*args, **kwargs)
-            except HTTPException:
-                raise
-            except ValueError as e:
-                raise HTTPException(status_code=400, detail=str(e)) from e
-            except FileNotFoundError as e:
-                raise HTTPException(status_code=404, detail=str(e)) from e
-            except PermissionError as e:
-                raise HTTPException(status_code=403, detail=str(e)) from e
-            except NotImplementedError as e:
-                raise HTTPException(status_code=501, detail=str(e)) from e
-            except (RuntimeError, TypeError, KeyError, AttributeError, OSError) as e:
-                logger.exception("Unhandled error in %s: %s", func.__name__, e)
-                raise HTTPException(
-                    status_code=500, detail="Internal server error"
-                ) from e
+            except (
+                HTTPException,
+                ValueError,
+                FileNotFoundError,
+                PermissionError,
+                NotImplementedError,
+                RuntimeError,
+                TypeError,
+                KeyError,
+                AttributeError,
+                OSError,
+            ) as e:
+                _handle_common_exceptions(e, func.__name__)
+                return None  # pragma: no cover
 
         return async_wrapper
 
@@ -58,18 +82,19 @@ def handle_api_errors(func: Callable[..., Any]) -> Callable[..., Any]:
     def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
-        except HTTPException:
-            raise
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e)) from e
-        except FileNotFoundError as e:
-            raise HTTPException(status_code=404, detail=str(e)) from e
-        except PermissionError as e:
-            raise HTTPException(status_code=403, detail=str(e)) from e
-        except NotImplementedError as e:
-            raise HTTPException(status_code=501, detail=str(e)) from e
-        except (RuntimeError, TypeError, KeyError, AttributeError, OSError) as e:
-            logger.exception("Unhandled error in %s: %s", func.__name__, e)
-            raise HTTPException(status_code=500, detail="Internal server error") from e
+        except (
+            HTTPException,
+            ValueError,
+            FileNotFoundError,
+            PermissionError,
+            NotImplementedError,
+            RuntimeError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+        ) as e:
+            _handle_common_exceptions(e, func.__name__)
+            return None  # pragma: no cover
 
     return sync_wrapper
