@@ -429,7 +429,7 @@ usage_tracker = UsageTracker()
 
 
 class AuthCache:
-    """Thread-safe cache for API authentication results to avoid expensive BCrypt hashing.
+    """Thread-safe cache for API authentication results to avoid expensive BCrypt hashing.  # noqa: E501
 
     Fixes Performance Issue: N+1 Auth checks.
     """
