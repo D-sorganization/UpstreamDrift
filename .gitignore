@@ -205,3 +205,7 @@ venv/
 test_venv/
 .claude/worktrees/
 .jules/pending/
+
+# 3D golf ML generated datasets and model runs
+src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/data/processed/
+src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/runs/
