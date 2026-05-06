@@ -20,15 +20,21 @@ Public surface
 from __future__ import annotations
 
 from src.engines.simscape._errors import (
+    SimscapeEngineStartupError,
     SimscapeModelNotFoundError,
     SimscapeNotInstalledError,
+    SimscapeSimulationError,
     SimscapeStateError,
 )
+from src.engines.simscape._output import SimscapeOutput
 from src.engines.simscape.adapter import SimscapeAdapter
 
 __all__ = [
     "SimscapeAdapter",
+    "SimscapeEngineStartupError",
     "SimscapeModelNotFoundError",
     "SimscapeNotInstalledError",
+    "SimscapeOutput",
+    "SimscapeSimulationError",
     "SimscapeStateError",
 ]

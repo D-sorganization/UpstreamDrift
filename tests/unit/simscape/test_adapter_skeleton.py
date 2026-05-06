@@ -9,6 +9,7 @@ import pytest
 from src.engines.simscape import SimscapeAdapter
 from src.engines.simscape._errors import (
     SimscapeModelNotFoundError,
+    SimscapeNotInstalledError,
     SimscapeStateError,
 )
 from src.engines.simscape._lifecycle import AdapterState
@@ -180,18 +181,24 @@ def test_get_state_before_load_raises_state_error(
 
 
 @pytest.mark.unit
-def test_step_after_load_raises_not_implemented_in_skeleton(
+def test_step_after_load_raises_not_installed_without_matlab(
     loaded_adapter: SimscapeAdapter,
 ) -> None:
-    with pytest.raises(NotImplementedError, match="#4006"):
+    """#4006: step now performs a real MATLAB call; without MATLAB it
+    must raise :class:`SimscapeNotInstalledError`, not ``NotImplementedError``.
+    """
+    with pytest.raises(SimscapeNotInstalledError):
         loaded_adapter.step()
 
 
 @pytest.mark.unit
-def test_simulate_with_coefficients_raises_not_implemented_in_skeleton(
+def test_simulate_with_coefficients_raises_not_installed_without_matlab(
     loaded_adapter: SimscapeAdapter,
 ) -> None:
-    with pytest.raises(NotImplementedError, match="#4006"):
+    """#4006: simulate now performs a real MATLAB call; without MATLAB it
+    must raise :class:`SimscapeNotInstalledError`, not ``NotImplementedError``.
+    """
+    with pytest.raises(SimscapeNotInstalledError):
         loaded_adapter.simulate_with_coefficients(np.zeros(16 * 7))
 
 

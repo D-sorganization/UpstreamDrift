@@ -16,8 +16,10 @@ from __future__ import annotations
 from src.shared.python.core.error_utils import SimulationError
 
 __all__ = [
+    "SimscapeEngineStartupError",
     "SimscapeModelNotFoundError",
     "SimscapeNotInstalledError",
+    "SimscapeSimulationError",
     "SimscapeStateError",
 ]
 
@@ -51,6 +53,44 @@ class SimscapeModelNotFoundError(SimulationError):
         message = f"Simscape model not found: {path}"
         if reason:
             message = f"{message} ({reason})"
+        super().__init__(message)
+
+
+class SimscapeSimulationError(SimulationError):
+    """Raised when a Simscape simulation fails on the MATLAB side.
+
+    Wraps integrator divergence, missing-block errors, and any
+    ``MException`` propagated from the MATLAB Engine. The original
+    MATLAB error id and traceback are preserved on the instance.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        matlab_error_id: str = "",
+        matlab_traceback: str = "",
+    ) -> None:
+        self.matlab_error_id = matlab_error_id
+        self.matlab_traceback = matlab_traceback
+        super().__init__(message)
+
+
+class SimscapeEngineStartupError(SimulationError):
+    """Raised when ``matlab.engine.start_matlab`` fails or times out.
+
+    Includes license-checkout failures (``MATLAB:license:*``) and the
+    case where the engine process dies mid-call. The ``matlab_error_id``
+    attribute carries the MATLAB error identifier when one is available.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        matlab_error_id: str = "",
+    ) -> None:
+        self.matlab_error_id = matlab_error_id
         super().__init__(message)
 
 

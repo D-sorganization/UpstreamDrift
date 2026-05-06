@@ -41,11 +41,15 @@ from typing import Any
 
 import numpy as np
 
+from src.engines.simscape._cache import _ResultCache, make_cache_key
 from src.engines.simscape._errors import (
     SimscapeModelNotFoundError,
+    SimscapeNotInstalledError,
+    SimscapeSimulationError,
     SimscapeStateError,
 )
 from src.engines.simscape._lifecycle import AdapterState, LifecycleGuard
+from src.engines.simscape._output import SimscapeOutput
 from src.shared.python.core.contracts import (
     invariant,
     postcondition,
@@ -172,6 +176,24 @@ class SimscapeAdapter:
         self._sim_time: float = 0.0
         self._control: np.ndarray | None = None
 
+        # Lazy MATLAB-engine handle and result cache. The cache may
+        # legitimately have ``capacity == 0`` (caching disabled).
+        self._engine: Any | None = None
+        self._cache: _ResultCache[SimscapeOutput] = _ResultCache(
+            capacity=cache_max_entries if cache_enabled else 0,
+        )
+        self._matlab_version: str = ""
+
+    # ------------------------------------------------------------------
+    # Concurrency / pool note
+    # ------------------------------------------------------------------
+    # **Single MATLAB engine per process.** ``_engine`` is initialised
+    # via :func:`src.engines.simscape._engine_pool.get_shared_engine`
+    # on the first MATLAB-bound call. A pool with multiple engines and
+    # work-stealing is tracked in issue #4008 / #039. Until then, every
+    # adapter in the same process shares the singleton, and the adapter
+    # itself does not run MATLAB calls in parallel.
+
     # ------------------------------------------------------------------
     # Convenience / introspection (LoD-friendly delegators)
     # ------------------------------------------------------------------
@@ -243,12 +265,13 @@ class SimscapeAdapter:
     def load_from_path(self, path: str) -> None:
         """Load a Simulink ``.slx`` model and read joint metadata.
 
-        The skeleton does **not** start a MATLAB Engine. It instead
-        verifies that the .slx and its sibling
-        ``PolynomialInputValues.mat`` are present on disk and synthesises
-        the joint-name list from a constant validated against
-        ``getPolynomialParameterInfo.m``. The real metadata round-trip
-        ships with #4006.
+        On the first call this also lazily starts the shared MATLAB
+        engine via
+        :func:`src.engines.simscape._engine_pool.get_shared_engine`.
+        When MATLAB is unavailable the adapter falls back to skeleton
+        behaviour (existence-check on the .slx + metadata sibling, plus
+        the hard-coded :data:`_GOLFSWING3D_JOINT_NAMES`) so that purely
+        offline workflows continue to function.
 
         Args:
             path: Path to a Simulink ``.slx`` model.
@@ -275,15 +298,92 @@ class SimscapeAdapter:
                 reason="metadata sibling required for skeleton load",
             )
 
-        # Skeleton metadata: hard-coded joint list, validated by tests.
-        self._joint_names = _GOLFSWING3D_JOINT_NAMES
-        self._dof = len(self._joint_names)
         self._model_name = slx_path.stem
         self._model_path = slx_path
         self._sim_time = 0.0
 
+        # Try to start the shared MATLAB engine and pull live joint
+        # metadata. If MATLAB is unavailable we still load the model in
+        # skeleton mode using the hard-coded joint list.
+        from src.engines.simscape._engine_pool import (
+            get_shared_engine,
+            is_matlab_available,
+        )
+
+        if is_matlab_available():
+            self._engine = get_shared_engine(startup_timeout_s=self._startup_timeout_s)
+            self._load_matlab_model(slx_path)
+            self._joint_names, self._dof = self._fetch_joint_metadata()
+        else:
+            self._joint_names = _GOLFSWING3D_JOINT_NAMES
+            self._dof = len(self._joint_names)
+
         self._lifecycle.transition(AdapterState.LOADED, operation="load_from_path")
-        logger.info("simscape adapter loaded model %s (skeleton)", self._model_name)
+        logger.info("simscape adapter loaded model %s", self._model_name)
+
+    def _load_matlab_model(self, slx_path: Path) -> None:
+        """Load the .slx into the shared MATLAB engine workspace.
+
+        Adds the model directory to the MATLAB path (so sibling
+        ``getPolynomialParameterInfo.m`` resolves) and invokes
+        ``load_system`` on the model name.
+
+        Raises:
+            SimscapeSimulationError: If the MATLAB-side load fails.
+        """
+        if self._engine is None:  # pragma: no cover - defensive
+            raise SimscapeSimulationError(
+                "internal error: _engine is None inside _load_matlab_model"
+            )
+        eng = self._engine
+        try:
+            eng.addpath(str(slx_path.parent), nargout=0)
+            eng.load_system(self._model_name, nargout=0)
+            self._matlab_version = str(eng.version(nargout=1))
+        except Exception as exc:  # noqa: BLE001 - wrap MATLAB error
+            err_id = getattr(exc, "MatlabError", "") or ""
+            raise SimscapeSimulationError(
+                f"MATLAB failed to load model '{self._model_name}': {exc}",
+                matlab_error_id=err_id,
+            ) from exc
+
+    def _fetch_joint_metadata(self) -> tuple[tuple[str, ...], int]:
+        """Query ``getPolynomialParameterInfo`` for joint names + dof.
+
+        The MATLAB function returns a struct with field ``JointNames``
+        (cellstr) and ``NumJoints`` (double). We coerce them to
+        Python-native types here.
+
+        Returns:
+            ``(joint_names, dof)`` tuple.
+
+        Raises:
+            SimscapeSimulationError: If the MATLAB call fails or the
+                returned struct is malformed.
+        """
+        if self._engine is None:  # pragma: no cover - defensive
+            raise SimscapeSimulationError(
+                "internal error: _engine is None inside _fetch_joint_metadata"
+            )
+        try:
+            info = self._engine.getPolynomialParameterInfo(nargout=1)
+        except Exception as exc:  # noqa: BLE001 - wrap MATLAB error
+            err_id = getattr(exc, "MatlabError", "") or ""
+            raise SimscapeSimulationError(
+                f"getPolynomialParameterInfo failed: {exc}",
+                matlab_error_id=err_id,
+            ) from exc
+
+        try:
+            names_raw = info["JointNames"]
+            num_joints = int(info["NumJoints"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise SimscapeSimulationError(
+                f"unexpected getPolynomialParameterInfo struct: {exc}"
+            ) from exc
+
+        joint_names = tuple(str(n) for n in names_raw)
+        return joint_names, num_joints
 
     def load_from_string(  # noqa: ARG002 - signature mandated by protocol
         self,
@@ -328,18 +428,17 @@ class SimscapeAdapter:
         lambda self, dt=None: dt is None or (isinstance(dt, float) and dt > 0),
         "dt must be a positive float or None",
     )
-    def step(self, dt: float | None = None) -> None:  # noqa: ARG002
-        """Advance the simulation by ``dt`` seconds (deferred to #4006).
+    def step(self, dt: float | None = None) -> None:
+        """Advance the simulation by ``dt`` seconds.
 
-        The lifecycle check still runs so that
-        ``test_step_before_load_raises_state_error`` can verify the
-        state-machine guard fires before any MATLAB call would have
-        happened.
+        The MATLAB engine is required. We invoke ``sim()`` over a short
+        horizon (``dt`` seconds, default 1 ms) and update the internal
+        clock from the returned logsout.
 
         Raises:
             SimscapeStateError: If no model is loaded.
-            NotImplementedError: After lifecycle checks pass — the MATLAB
-                Engine call is deferred to issue #4006.
+            SimscapeNotInstalledError: If MATLAB is unavailable.
+            SimscapeSimulationError: On any MATLAB-side failure.
         """
         self._lifecycle.require(
             AdapterState.LOADED,
@@ -347,7 +446,33 @@ class SimscapeAdapter:
             operation="step",
         )
         self._lifecycle.transition(AdapterState.RUNNING, operation="step")
-        self._deferred("step")
+
+        from src.engines.simscape._engine_pool import (
+            get_shared_engine,
+            is_matlab_available,
+        )
+
+        if self._engine is None:
+            if not is_matlab_available():
+                raise SimscapeNotInstalledError("step requires MATLAB Engine")
+            self._engine = get_shared_engine(startup_timeout_s=self._startup_timeout_s)
+
+        horizon = float(dt) if dt is not None else 1e-3
+        try:
+            self._engine.set_param(
+                self._model_name,
+                "StopTime",
+                str(self._sim_time + horizon),
+                nargout=0,
+            )
+            self._engine.sim(self._model_name, nargout=0)
+        except Exception as exc:  # noqa: BLE001 - wrap MATLAB error
+            err_id = getattr(exc, "MatlabError", "") or ""
+            raise SimscapeSimulationError(
+                f"step({horizon}) failed: {exc}",
+                matlab_error_id=err_id,
+            ) from exc
+        self._sim_time += horizon
 
     def forward(self) -> None:
         """Compute kinematics/dynamics without advancing time (deferred)."""
@@ -363,20 +488,36 @@ class SimscapeAdapter:
     # ------------------------------------------------------------------
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
-        """Return zero-valued (q, v) of length ``dof`` (deferred to #4006).
+        """Return current ``(q, v)`` from the Simscape state vector.
 
-        The skeleton returns trivial zero arrays of the correct shape so
-        that downstream code can wire the protocol; the real Simscape
-        state-extraction lands with #4006.
+        When MATLAB is unavailable (skeleton mode) we return zeros of
+        the correct shape. With MATLAB present we read the model
+        operating point via ``Simulink.SimulationData.Dataset``.
         """
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
             operation="get_state",
         )
-        return np.zeros(self._dof, dtype=np.float64), np.zeros(
-            self._dof, dtype=np.float64
-        )
+        if self._engine is None:
+            return (
+                np.zeros(self._dof, dtype=np.float64),
+                np.zeros(self._dof, dtype=np.float64),
+            )
+        try:
+            op = self._engine.eval(
+                f"Simulink.BlockDiagram.getInitialState('{self._model_name}')",
+                nargout=1,
+            )
+            q = np.asarray(self._engine.getfield(op, "q"), dtype=np.float64)
+            v = np.asarray(self._engine.getfield(op, "v"), dtype=np.float64)
+        except Exception as exc:  # noqa: BLE001 - wrap MATLAB error
+            err_id = getattr(exc, "MatlabError", "") or ""
+            raise SimscapeSimulationError(
+                f"get_state failed: {exc}",
+                matlab_error_id=err_id,
+            ) from exc
+        return q.reshape(-1), v.reshape(-1)
 
     @precondition(
         lambda self, q, v: bool(
@@ -389,14 +530,53 @@ class SimscapeAdapter:
         ),
         "q and v must be finite 1-D numpy arrays",
     )
-    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:  # noqa: ARG002
-        """Set the simulation state (deferred to #4006)."""
+    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Set the simulation state on the Simscape model.
+
+        Builds a ``Simulink.SimulationData.Dataset`` whose two elements
+        carry ``q`` and ``v`` respectively, then writes it back to the
+        model workspace via ``setVariable``.
+
+        Raises:
+            ValueError: If ``q`` or ``v`` has length other than ``dof``.
+            SimscapeNotInstalledError: If MATLAB is unavailable.
+            SimscapeSimulationError: On any MATLAB-side failure.
+        """
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
             operation="set_state",
         )
-        self._deferred("set_state")
+        if q.shape != (self._dof,) or v.shape != (self._dof,):
+            raise ValueError(
+                f"q and v must have shape ({self._dof},); got q={q.shape}, v={v.shape}"
+            )
+        if self._engine is None:
+            raise SimscapeNotInstalledError("set_state requires MATLAB Engine")
+
+        from src.engines.simscape._simscape_io import _to_matlab_double
+
+        try:
+            self._engine.set_param(
+                self._model_name, "LoadInitialState", "on", nargout=0
+            )
+            self._engine.assignin("base", "ud_q", _to_matlab_double(q), nargout=0)
+            self._engine.assignin("base", "ud_v", _to_matlab_double(v), nargout=0)
+            self._engine.eval(
+                "ud_state = Simulink.SimulationData.Dataset; "
+                "ud_state = ud_state.addElement(timeseries(ud_q,0),'q'); "
+                "ud_state = ud_state.addElement(timeseries(ud_v,0),'v');",
+                nargout=0,
+            )
+            self._engine.set_param(
+                self._model_name, "InitialState", "ud_state", nargout=0
+            )
+        except Exception as exc:  # noqa: BLE001 - wrap MATLAB error
+            err_id = getattr(exc, "MatlabError", "") or ""
+            raise SimscapeSimulationError(
+                f"set_state failed: {exc}",
+                matlab_error_id=err_id,
+            ) from exc
 
     @precondition(
         lambda self, u: bool(
@@ -709,19 +889,125 @@ class SimscapeAdapter:
         ),
         "coeffs must be a finite 1-D numpy array of length n_joints*7",
     )
-    def simulate_with_coefficients(self, coeffs: np.ndarray) -> Any:  # noqa: ARG002
-        """Run one Simscape simulation — deferred to #4006.
+    @postcondition(
+        lambda result: isinstance(result, SimscapeOutput),
+        "simulate_with_coefficients must return a SimscapeOutput",
+    )
+    def simulate_with_coefficients(
+        self,
+        coeffs: np.ndarray,
+        *,
+        opts: dict[str, Any] | None = None,
+    ) -> SimscapeOutput:
+        """Run one Simscape simulation with the given polynomial coefficients.
 
-        After a successful lifecycle check, raises ``NotImplementedError``
-        so that callers can verify the protocol contract today and the
-        full implementation lands cleanly with the next issue.
+        Behaviour:
+            1. Hash ``(coeffs, model_params, matlab_version)`` and check cache.
+            2. On cache hit, return the cached :class:`SimscapeOutput`.
+            3. On miss, build a ``Simulink.SimulationInput``, call ``sim()``
+               via the MATLAB Engine, extract logsout into a
+               :class:`SimscapeOutput`, and cache it.
+
+        Latency: ~50-200 ms warm, ~10-30 s on the first call (engine startup).
+
+        Args:
+            coeffs: Flat 1-D float64 vector of length ``n_joints * 7``.
+            opts: Optional simulation options forwarded to the MATLAB
+                helper (e.g. integration tolerances). Treated as opaque
+                model parameters for cache-key purposes.
+
+        Returns:
+            Frozen :class:`SimscapeOutput` with consistent ``N`` across
+            all arrays.
+
+        Raises:
+            SimscapeStateError: If no model is loaded.
+            SimscapeNotInstalledError: If the MATLAB Engine is required
+                (cache miss) but unavailable.
+            SimscapeSimulationError: If the MATLAB-side simulation fails.
         """
         self._lifecycle.require(
             AdapterState.LOADED,
             AdapterState.RUNNING,
             operation="simulate_with_coefficients",
         )
-        self._deferred("simulate_with_coefficients")
+
+        key = make_cache_key(
+            coeffs,
+            model_params=self._serialise_model_params(opts),
+            matlab_version=self._matlab_version,
+        )
+        cached = self._cache.get(key)
+        if cached is not None:
+            logger.debug("simscape cache hit for key=%s", key[:12])
+            return cached
+
+        result = self._simulate_uncached(coeffs, opts=opts)
+        self._cache.put(key, result)
+        return result
+
+    def _serialise_model_params(self, opts: dict[str, Any] | None) -> bytes:
+        """Return a stable bytes representation of opts + tunable params.
+
+        Used as one component of the cache key. We sort keys so
+        ``{"a": 1, "b": 2}`` and ``{"b": 2, "a": 1}`` collide.
+        """
+        import json
+
+        payload = {
+            "opts": opts or {},
+            "model_name": self._model_name,
+            "rng_seed": self._rng_seed,
+        }
+        return json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
+
+    def _simulate_uncached(
+        self,
+        coeffs: np.ndarray,
+        *,
+        opts: dict[str, Any] | None = None,  # noqa: ARG002 - reserved for #4008
+    ) -> SimscapeOutput:
+        """Perform the actual MATLAB ``sim()`` call (no caching).
+
+        Split out from :meth:`simulate_with_coefficients` so tests can
+        mock this method to verify cache behaviour without a live MATLAB
+        engine.
+
+        Raises:
+            SimscapeNotInstalledError: If MATLAB is unavailable.
+            SimscapeSimulationError: On any MATLAB-side failure.
+        """
+        from src.engines.simscape._engine_pool import (
+            get_shared_engine,
+            is_matlab_available,
+        )
+        from src.engines.simscape._simscape_io import (
+            build_simulation_input,
+            logsout_to_simscape_output,
+        )
+
+        if self._engine is None:
+            if not is_matlab_available():
+                raise SimscapeNotInstalledError(
+                    "simulate_with_coefficients requires MATLAB Engine"
+                )
+            self._engine = get_shared_engine(startup_timeout_s=self._startup_timeout_s)
+
+        sim_input = build_simulation_input(
+            self._engine,
+            model_name=self._model_name,
+            coeffs=coeffs,
+            n_joints=self._dof,
+        )
+        try:
+            logsout = self._engine.simulate_with_coefficients(sim_input, nargout=1)
+        except Exception as exc:  # noqa: BLE001 - wrap MATLAB error
+            err_id = getattr(exc, "MatlabError", "") or ""
+            raise SimscapeSimulationError(
+                f"sim() failed for model '{self._model_name}': {exc}",
+                matlab_error_id=err_id,
+            ) from exc
+        return logsout_to_simscape_output(logsout)
 
     # ------------------------------------------------------------------
     # Checkpointable
@@ -770,9 +1056,24 @@ class SimscapeAdapter:
     # ------------------------------------------------------------------
 
     def close(self) -> None:
-        """Shut down the adapter; idempotent."""
+        """Shut down the adapter; idempotent.
+
+        Releases this adapter's reference to the shared MATLAB engine
+        (the engine itself is process-scoped — see
+        :func:`src.engines.simscape._engine_pool.shutdown_shared_engine`).
+        Calling ``close`` twice is a no-op.
+        """
         if self._lifecycle.is_stopped():
             return
+        # Best-effort close_system on the loaded model so the engine
+        # workspace stays clean for subsequent adapters in this process.
+        if self._engine is not None and self._model_name:
+            try:
+                self._engine.close_system(self._model_name, 0, nargout=0)
+            except Exception:  # noqa: BLE001 - shutdown best-effort
+                logger.exception("close_system failed (ignored)")
+        self._engine = None
+        self._cache.clear()
         self._lifecycle.transition(AdapterState.STOPPED, operation="close")
         self._control = None
 
