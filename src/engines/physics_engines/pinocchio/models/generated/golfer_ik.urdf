@@ -28,6 +28,25 @@
     - PINOCCHIO_PARITY_SPEC.md                  (engine spec; PR #4103)
 -->
 <robot name="golfer">
+  <!--
+    golfer_ik.urdf — body-only model used for inverse kinematics.
+
+    Scope:
+      * No club. The club is tracked externally as a free-floating object
+        whose pose is supplied by `ClubTrajectory` (see PINOCCHIO_PARITY_SPEC
+        §2.6). This URDF is intentionally byte-compatible with `golfer.urdf`
+        on the body skeleton so that IK seeds can be transferred 1:1 to the
+        forward-simulation model.
+      * `hand_left_tip` and `hand_right_tip` virtual frames are included
+        for marker-based IK targeting.
+      * Pelvis is the URDF root link. Callers that need a free-floating
+        base load this URDF with `pin.JointModelFreeFlyer()` so the model
+        gets 6 base DOFs + 23 internal = 29 generalised velocity DOFs
+        (nq = 30 with the unit-quaternion w element).
+
+    Sister model: `golfer.urdf` — adds the `mid_hands` virtual frame and
+    welds `club_shaft` + `club_head` to it for forward simulation.
+  -->
   <!-- Generated from canonical YAML specification -->
   <link name="pelvis">
     <inertial>

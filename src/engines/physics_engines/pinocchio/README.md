@@ -384,6 +384,23 @@ def gradient(q, v):
 
 All models in URDF format compatible with Pinocchio.
 
+### `golfer.urdf` vs `golfer_ik.urdf`
+
+The two canonical URDFs in `models/generated/` share the same body skeleton but differ in scope:
+
+- **`golfer.urdf`** — forward-simulation model. The club (`club_shaft` and `club_head`) is welded via fixed joints to a virtual `mid_hands` frame placed at the geometric centre of the grip (midpoint of `hand_left_tip` and `hand_right_tip` in the address pose). This realises the cross-engine parity-spec §2.6 requirement that the club is locked to the mid-hands frame, not to a single hand. `mid_hands` is itself a fixed-joint child of `thorax3`, so Pinocchio loads the entire club + `mid_hands` chain as frames (not joints) — the correct semantic for a 6-DOF rigid weld.
+- **`golfer_ik.urdf`** — body-only IK model. The club is intentionally absent and tracked externally via the `ClubTrajectory` dataclass. Adds `hand_left_tip` and `hand_right_tip` virtual frames for marker-based IK targeting.
+
+Both URDFs leave `pelvis` as the root link. Callers that need a free-floating base load the URDF with `pin.JointModelFreeFlyer()`:
+
+```python
+import pinocchio as pin
+model = pin.buildModelFromUrdf("models/generated/golfer.urdf", pin.JointModelFreeFlyer())
+# model.nq == 30  (6 base DOFs + 23 internal + quaternion w element)
+# model.nv == 29  (6 base velocity DOFs + 23 internal)
+mid_hands_id = model.getFrameId("mid_hands")  # virtual grip-centre frame
+```
+
 ## Integration with Other Engines
 
 ### Cross-Validation

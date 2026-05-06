@@ -24,6 +24,30 @@
   See also: PARITY-MODEL-BUILD #4094 for regeneration provenance.
 -->
 <robot name="golfer">
+  <!--
+    golfer.urdf — forward-simulation model with club welded to mid-hands.
+
+    Scope:
+      * Used for forward dynamics / RNEA / ABA: the club is rigidly attached
+        to a virtual `mid_hands` frame placed at the geometric centre of the
+        grip (midpoint of `hand_left_tip` and `hand_right_tip` in the
+        address pose). This realises the cross-engine parity-spec §2.6
+        requirement that the club be locked to the mid-hands frame, not to
+        a single hand.
+      * The `mid_hands` virtual link is a fixed-joint child of `thorax3`.
+        The club shaft and head are then welded to `mid_hands` via fixed
+        joints, so Pinocchio loads the chain as frames (not joints) — the
+        correct semantic for a 6-DOF lock.
+      * The pelvis is exposed via a 6-DOF floating base. When the URDF is
+        loaded with `pin.JointModelFreeFlyer()` (the default for
+        `buildModelFromUrdf` with a free-flyer arg) the model has 6 base
+        DOFs + 23 internal DOFs = 29 generalised coordinates (nq = 30
+        because the free-flyer quaternion contributes an extra w element).
+
+    Sister model: `golfer_ik.urdf` — body-only IK target model. Same body
+    skeleton, no club, plus `hand_left_tip` and `hand_right_tip` virtual
+    frames for marker-based IK.
+  -->
   <!-- Generated from canonical YAML specification -->
   <link name="pelvis">
     <inertial>
@@ -606,10 +630,37 @@
       </material>
     </visual>
   </link>
-  <joint name="hand_left_to_club_shaft" type="fixed">
-    <parent link="hand_left"/>
+  <!--
+    mid_hands virtual link (PIN-MODEL-GRIP-FRAME, issue #4112).
+
+    Position: midpoint of `hand_left_tip` and `hand_right_tip` in the
+    neutral / address pose. At q = q0 the two tips lie at
+      (0,  +0.22, -0.07 - 0.10) = (0,  0.22, -0.17)   relative to thorax3
+      (0,  -0.22, -0.07 - 0.10) = (0, -0.22, -0.17)   relative to thorax3
+    so their geometric mean is (0, 0, -0.17) — see acceptance criterion
+    "<= 1 cm from the geometric mean of the two hand-tip frames".
+
+    The link is a fixed-joint child of `thorax3` so the club is rigidly
+    locked to the torso (not to either hand) — this is the URDF
+    realisation of the Simscape "club locked to mid-hands frame" 6-DOF
+    weld. Pinocchio loads fixed joints as frames, not joints, so the
+    resulting model has the correct DOF count.
+  -->
+  <joint name="thorax3_to_mid_hands" type="fixed">
+    <parent link="thorax3"/>
+    <child link="mid_hands"/>
+    <origin xyz="0.0 0.0 -0.17" rpy="0.0 0.0 0.0"/>
+  </joint>
+  <link name="mid_hands">
+    <inertial>
+      <mass value="0.001"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
+    </inertial>
+  </link>
+  <joint name="mid_hands_to_club_shaft" type="fixed">
+    <parent link="mid_hands"/>
     <child link="club_shaft"/>
-    <origin xyz="0.0 0.0 -0.12" rpy="0.0 0.0 0.0"/>
+    <origin xyz="0.0 0.0 -0.05" rpy="0.0 0.0 0.0"/>
   </joint>
   <link name="club_shaft">
     <inertial>
