@@ -109,16 +109,33 @@ function overrides = solve_starting_pose(target, base_input_mat, opts)
         "Precondition: target.events.A_sample must be finite");
 
     % Map A_sample (1-indexed sample number from the Wiffle row-1 header)
-    % onto an index into the aligned target arrays.  We pin to the first
-    % row when the sheet's A_sample falls before the aligned series, which
-    % is the dominant case (the alignment helper trims pre-address data).
+    % onto an index into the aligned target arrays.
+    %
+    % A_sample is a raw sheet sample number (e.g., 240 Hz frame count). The
+    % aligned target arrays (target.grip, target.grip_quat, etc.) are
+    % resampled onto the simulation grid via align_to_simulation_grid, which
+    % also trims pre-address data. Therefore, A_sample cannot be used
+    % directly as an index.
+    %
+    % DOMINANT CASE: The aligned series starts at or after the address frame,
+    % so address is at row 1 (target.time(1) == 0). We pin to index 1.
+    %
+    % FALLBACK: If the aligned series somehow starts before address (rare),
+    % clamp to the first row.
+    %
+    % TODO(#4091 resolution): If callers need arbitrary-frame addressing
+    % (e.g., top-of-backswing at a later time), the loader must capture a
+    % mapping from raw sample numbers to aligned indices, or A_sample must
+    % be documented as "the time of address in raw timegrid", not "sample #".
     n_rows = size(target.grip, 1);
-    addr_idx = max(1, min(n_rows, round(target.events.A_sample)));
-    if isfield(target, 'time') && ~isempty(target.time) && ...
-       isfield(target.events, 'A_sample')
-        % If the aligned series has a sane "address" it is row 1; clamp.
-        addr_idx = max(1, min(n_rows, addr_idx));
+    if isfield(target, 'time') && ~isempty(target.time)
+        % Aligned series with resampling: address is always row 1.
+        addr_idx = 1;
+    else
+        % No time field: raw (unaligned) arrays. Pin to first row (fallback).
+        addr_idx = 1;
     end
+    addr_idx = max(1, min(n_rows, addr_idx));  % Safety clamp.
 
     grip_target_xyz = target.grip(addr_idx, :);
     R_meas_grip     = local_quat_to_rotmat(target.grip_quat(addr_idx, :));
