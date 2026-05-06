@@ -4,6 +4,8 @@ The "club IK" is misnamed for Phase 1 — there is no actual joint-angle inverse
 
 When body markers come online, this same module gains a real IK stage that solves shoulder/elbow/wrist joint angles. Until then, only the club is observed.
 
+> **Test-trial inventory:** The canonical list of measured swings used by the test suite — sheet names, event markers, expected CHS_mph values, per-trial data-quality notes, and instructions for adding a new trial — lives in [TEST_TRIALS.md](TEST_TRIALS.md).
+
 ## Output schema (canonical `target` struct)
 
 ```matlab
@@ -59,7 +61,7 @@ class ClubTarget:
 - **Conversion:** cm → metres via `× 0.01`.
 - **Event markers:** row 1 of each sheet is `<trial> | A | <addr#> | T | <top#> | I | <impact#> | F | <finish#> | CHS | <mph>`.  The loader reads these into `target.events` and uses the documented `I_sample` for `impact_idx` (the speed-argmax heuristic is not authoritative — it can latch onto the wrong local maximum).
 - **Orientation:** the file stores 3×3 rotation matrices per frame; convert to unit quaternion with sign normalised so `q[0] >= 0` to suppress the `q ↔ -q` ambiguity at the source.
-- **Sheets:** `TW_wiffle`, `TW_ProV1`, `GW_wiffle`, `GW_ProV11`. Each is one swing.
+- **Sheets:** `TW_wiffle`, `TW_ProV1`, `GW_wiffle`, `GW_ProV11`. Each is one swing. See [TEST_TRIALS.md](TEST_TRIALS.md) for the canonical inventory of trials, their event markers, expected CHS values, and per-trial data-quality notes.
 
 ### 2. C3D (priority for Phase 1, validation)
 

@@ -96,7 +96,89 @@ classdef test_load_club_target_excel < matlab.unittest.TestCase
                 @() load_club_target_excel("does_not_exist.xlsx", "TW_ProV1"), ...
                 ?MException);
         end
+
+        % --- Additional swing trials wired in for issue #4081 -----------
+        % Each trial gets the same plausibility battery: load succeeds,
+        % required fields present, event markers parse and (if present)
+        % are finite, shaft length within 0.7-1.4 m.  See TEST_TRIALS.md
+        % for the canonical inventory of trials and known data-quality
+        % issues per trial.
+
+        function test_loads_TW_wiffle_sheet(testCase)
+            % TW_wiffle: row-1 header omits A/T/I/F sample numbers in
+            % this trial (only CHS_mph is populated).  We therefore
+            % verify CHS_mph is finite but tolerate NaN sample markers
+            % and require impact_idx still landed in-bounds via the
+            % clubhead-speed argmax fallback.
+            xlsx = locate_xlsx(testCase);
+            target = load_club_target_excel(xlsx, "TW_wiffle");
+            verify_canonical_target_fields(testCase, target);
+            ev = target.events;
+            testCase.verifyTrue(isfinite(ev.CHS_mph));
+            testCase.verifyEqual(ev.CHS_mph, 114.5, "AbsTol", 0.1);
+            verify_shaft_length_plausible(testCase, target);
+        end
+
+        function test_loads_GW_wiffle_sheet(testCase)
+            % GW_wiffle: A=240, T=448, I=517, F=724, CHS=104.6 mph.
+            xlsx = locate_xlsx(testCase);
+            target = load_club_target_excel(xlsx, "GW_wiffle");
+            verify_canonical_target_fields(testCase, target);
+            ev = target.events;
+            for f = ["A_sample","T_sample","I_sample","F_sample","CHS_mph"]
+                testCase.verifyTrue(isfinite(ev.(f)), ...
+                    sprintf("GW_wiffle event marker %s should be finite", f));
+            end
+            testCase.verifyEqual(ev.A_sample, 240);
+            testCase.verifyEqual(ev.I_sample, 517);
+            testCase.verifyEqual(ev.CHS_mph, 104.6, "AbsTol", 0.1);
+            verify_shaft_length_plausible(testCase, target);
+        end
+
+        function test_loads_GW_ProV11_sheet(testCase)
+            % GW_ProV11: A=240, T=452, I=521, F=721, CHS=115.1 mph.
+            xlsx = locate_xlsx(testCase);
+            target = load_club_target_excel(xlsx, "GW_ProV11");
+            verify_canonical_target_fields(testCase, target);
+            ev = target.events;
+            for f = ["A_sample","T_sample","I_sample","F_sample","CHS_mph"]
+                testCase.verifyTrue(isfinite(ev.(f)), ...
+                    sprintf("GW_ProV11 event marker %s should be finite", f));
+            end
+            testCase.verifyEqual(ev.A_sample, 240);
+            testCase.verifyEqual(ev.I_sample, 521);
+            testCase.verifyEqual(ev.CHS_mph, 115.1, "AbsTol", 0.1);
+            verify_shaft_length_plausible(testCase, target);
+        end
     end
+end
+
+
+function verify_canonical_target_fields(testCase, target)
+%VERIFY_CANONICAL_TARGET_FIELDS  Common shape/field assertions per CLUB_IK_SPEC.
+    testCase.verifyTrue(isstruct(target));
+    for f = ["time","grip","grip_quat","butt","clubhead","club_quat", ...
+             "impact_idx","events","source"]
+        testCase.verifyTrue(isfield(target, f), ...
+            sprintf("Missing field: %s", f));
+    end
+    N = numel(target.time);
+    testCase.verifyGreaterThan(N, 0);
+    testCase.verifyEqual(size(target.grip,      2), 3);
+    testCase.verifyEqual(size(target.grip_quat, 2), 4);
+    testCase.verifyEqual(size(target.clubhead,  2), 3);
+    testCase.verifyEqual(size(target.club_quat, 2), 4);
+    testCase.verifyEqual(target.butt, target.grip);
+    testCase.verifyGreaterThanOrEqual(target.impact_idx, 1);
+    testCase.verifyLessThanOrEqual(target.impact_idx, N);
+end
+
+
+function verify_shaft_length_plausible(testCase, target)
+%VERIFY_SHAFT_LENGTH_PLAUSIBLE  Median mid-hands -> clubhead in 0.7-1.4 m.
+    shaft = vecnorm(target.clubhead - target.grip, 2, 2);
+    testCase.verifyGreaterThan(median(shaft), 0.7);
+    testCase.verifyLessThan(median(shaft), 1.4);
 end
 
 
