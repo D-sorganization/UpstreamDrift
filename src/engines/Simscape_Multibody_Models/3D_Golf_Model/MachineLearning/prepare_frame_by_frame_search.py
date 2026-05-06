@@ -149,6 +149,8 @@ def build_search_manifest(
     smoothness_weight: float = 1.0e-4,
     smoothing_window_frames: int = 7,
     polynomial_degree: int = 6,
+    run_dir: Path | None = None,
+    checkpoint_interval_frames: int = 10,
 ) -> dict[str, Any]:
     if horizon_frames < 1:
         raise ValueError("horizon_frames must be >= 1")
@@ -162,6 +164,8 @@ def build_search_manifest(
         raise ValueError("polynomial_degree must be >= 1")
     if use_parallel not in {"auto", "always", "never"}:
         raise ValueError("use_parallel must be one of: auto, always, never")
+    if checkpoint_interval_frames < 1:
+        raise ValueError("checkpoint_interval_frames must be >= 1")
 
     levels = candidate_levels if candidate_levels is not None else [-1.0, 0.0, 1.0]
     if not levels:
@@ -191,12 +195,20 @@ def build_search_manifest(
             f"{max_candidates_per_frame}. Reduce controls/levels or raise the cap."
         )
 
+    if run_dir is None:
+        run_dir = output_json.parent / f"{output_json.stem}_run"
+    run_dir = Path(run_dir)
     outputs = {
         "torque_csv": str(torque_output_csv),
         "polynomial_mat": str(polynomial_output_mat),
         "polynomial_summary_json": str(
             polynomial_output_mat.with_suffix(".summary.json")
         ),
+        "run_dir": str(run_dir),
+        "progress_csv": str(run_dir / "progress.csv"),
+        "checkpoint_mat": str(run_dir / "checkpoint.mat"),
+        "summary_json": str(run_dir / "summary.json"),
+        "manifest_copy_json": str(run_dir / "manifest.json"),
     }
     manifest: dict[str, Any] = {
         "schema_version": 1,
@@ -244,6 +256,10 @@ def build_search_manifest(
             "smoothing_window_frames": int(smoothing_window_frames),
             "polynomial_degree": int(polynomial_degree),
         },
+        "checkpoint": {
+            "interval_frames": int(checkpoint_interval_frames),
+            "stale_lock_multiplier": 2.0,
+        },
         "outputs": outputs,
         "validation": {
             "target_rows": int(len(desired)),
@@ -256,8 +272,14 @@ def build_search_manifest(
     }
 
     output_json.parent.mkdir(parents=True, exist_ok=True)
-    output_json.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    payload = json.dumps(manifest, indent=2).encode("utf-8")
+    output_json.write_bytes(payload)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    Path(outputs["manifest_copy_json"]).write_bytes(payload)
     LOGGER.info("Wrote frame-by-frame search manifest to %s", output_json)
+    # The manifest dict returned mirrors the on-disk JSON exactly; callers
+    # that need the SHA-256 should call frame_search_artifacts.manifest_sha256
+    # on the written file (the MATLAB runner does the same on its side).
     return manifest
 
 
@@ -299,6 +321,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smoothness-weight", type=float, default=1.0e-4)
     parser.add_argument("--smoothing-window-frames", type=int, default=7)
     parser.add_argument("--polynomial-degree", type=int, default=6)
+    parser.add_argument("--run-dir", type=Path, default=None)
+    parser.add_argument("--checkpoint-interval-frames", type=int, default=10)
     return parser.parse_args()
 
 
@@ -329,6 +353,8 @@ def main() -> None:
         smoothness_weight=args.smoothness_weight,
         smoothing_window_frames=args.smoothing_window_frames,
         polynomial_degree=args.polynomial_degree,
+        run_dir=args.run_dir,
+        checkpoint_interval_frames=args.checkpoint_interval_frames,
     )
 
 
