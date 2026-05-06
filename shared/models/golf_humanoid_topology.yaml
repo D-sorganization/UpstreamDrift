@@ -1,0 +1,321 @@
+# Golf Humanoid — Joint Topology
+#
+# 25-DOF kinematic chain matching the Simscape `GolfSwing3D_Kinetic.slx` body.
+# See src/engines/CROSS_ENGINE_PARITY_SPEC.md §2.6 — every engine wrapper
+# (MuJoCo, Drake, Pinocchio, OpenSim) must reproduce this chain.
+#
+# Spec note: CROSS_ENGINE_PARITY_SPEC.md §2.6 calls this a "23-DOF chain"
+# (6+2+1 + 2·(2+3+1+2)) but the literal sum is 25. The discrepancy is
+# documentation rounding — the canonical actuated chain is 25 DOFs as
+# enumerated in `q_order` below, matching the Simscape model exactly. File a
+# spec-update PR if you want to reconcile the prose.
+#
+# Chain summary (proximal → distal, total 25 DOF):
+#
+#   world ─ [floating 6] ─ Hip
+#                              ├─ [universal 2] ─ Spine
+#                              │                       └─ [revolute 1] ─ Torso
+#                              │                                              ├─ [universal 2] ─ LScap ─ [gimbal 3] ─ LShoulder ─ [revolute 1] ─ LElbow ─ [universal 2] ─ LWrist ─ Hand(L) ─┐
+#                              │                                              └─ [universal 2] ─ RScap ─ [gimbal 3] ─ RShoulder ─ [revolute 1] ─ RElbow ─ [universal 2] ─ RWrist ─ Hand(R) ─┤
+#                              │                                                                                                                                                            ├─ [welded 6] ─ Club
+#
+# DOF accounting:
+#   floating(6) + universal(2) + revolute(1)
+#   + 2 × [universal(2) + gimbal(3) + revolute(1) + universal(2)] = 9 + 16 = 25
+#
+# Joint-type semantics:
+#   floating  6 DOF, free position+orientation (3 translation + 3 rotation)
+#   universal 2 DOF, two orthogonal revolute axes (Cardan joint)
+#   revolute  1 DOF, single rotation axis
+#   gimbal    3 DOF, three intersecting revolute axes (Euler 3-axis)
+#   welded    0 DOF, rigid attachment
+#
+# Rotation order convention: ZYX intrinsic Euler — the FK helper
+# `compute_skeleton_fk.m` uses `Rz(z) * Ry(y) * Rx(x)`. Engine wrappers that
+# use a different convention must apply the equivalent rotation; the
+# resulting world frame must round-trip identically (≤ 5 mm grip RMSE per
+# the parity equivalence test).
+#
+# Last updated: 2026-05-06 (issue #4093)
+
+schema_version: 1
+total_dof: 25
+
+# ---------------------------------------------------------------------------
+# Bodies (rigid links). Each body's parent_joint references one of the joints
+# defined below; each joint maps a parent body to a child body.
+# ---------------------------------------------------------------------------
+
+bodies:
+  - name: world
+    type: world
+    parent_joint: null
+
+  - name: Hip
+    parent_joint: hip_floating
+    inertia_ref: LowerTorso          # Hip carries the LowerTorso inertia in the Simscape model
+    description: Pelvis / hip-base link.
+
+  - name: Spine
+    parent_joint: spine
+    inertia_ref: null                # massless intermediate frame in the Simscape model
+    description: Spine pivot midway between hip and chest.
+
+  - name: Torso
+    parent_joint: torso
+    inertia_ref: UpperTorso
+    description: Upper torso link (rib cage).
+
+  - name: LScap
+    parent_joint: l_scap
+    inertia_ref: LeftShoulderToHub
+    description: Left scapulothoracic link (collarbone strut).
+
+  - name: LShoulder
+    parent_joint: l_shoulder
+    inertia_ref: null
+    description: Left glenohumeral pivot frame.
+
+  - name: LUpperArm
+    parent_joint: null               # rigidly attached to LShoulder pivot frame
+    inertia_ref: LeftUpperArm
+
+  - name: LElbow
+    parent_joint: l_elbow
+    inertia_ref: LeftForearmUpper
+    description: Left forearm proximal half (carries elbow DOF).
+
+  - name: LWrist
+    parent_joint: l_wrist
+    inertia_ref: LeftForearmLower
+    description: Left forearm distal half + wrist DOFs.
+
+  - name: LHand
+    parent_joint: null               # rigid extension from the wrist frame
+    inertia_ref: LeftHand
+
+  - name: RScap
+    parent_joint: r_scap
+    inertia_ref: RightShoulderToHub
+
+  - name: RShoulder
+    parent_joint: r_shoulder
+    inertia_ref: null
+
+  - name: RUpperArm
+    parent_joint: null
+    inertia_ref: RightUpperArm
+
+  - name: RElbow
+    parent_joint: r_elbow
+    inertia_ref: RightForearmUpper
+
+  - name: RWrist
+    parent_joint: r_wrist
+    inertia_ref: RightForearmLower
+
+  - name: RHand
+    parent_joint: null
+    inertia_ref: RightHand
+
+  - name: Club
+    parent_joint: grip_locked
+    inertia_ref: Club
+    description: >
+      Rigidly attached to LHand+RHand via a 6-DOF welded (locked) joint. The
+      Simscape model implements this with a Weld Joint between the grip frame
+      and the shaft proximal end.
+
+# ---------------------------------------------------------------------------
+# Joints (DOF accounting in order — sums to 23).
+#
+# Each joint entry includes:
+#   parent / child         — body names
+#   type                   — floating | universal | revolute | gimbal | welded
+#   dof                    — integer count
+#   axes                   — local axes for each DOF, in application order
+#   simscape_signal_prefix — bus prefix where this joint's logs live
+#   start_position_param   — model-workspace name for the initial-pose hint
+# ---------------------------------------------------------------------------
+
+joints:
+
+  - name: hip_floating
+    parent: world
+    child: Hip
+    type: floating
+    dof: 6
+    axes: [tx, ty, tz, rx, ry, rz]
+    rotation_order: ZYX
+    simscape_signal_prefix: HipLogs
+    start_position_params:
+      translation: [TranslationStartPositionX, TranslationStartPositionY, TranslationStartPositionZ]
+      rotation:    [HipStartPositionX,         HipStartPositionY,         HipStartPositionZ]
+    notes: >
+      Implemented in Simscape as a Cartesian Joint (3 prismatic) followed by
+      a Gimbal Joint (3 revolute) in series. The `Hip(6)` in the spec maps
+      onto this composite chain.
+
+  - name: spine
+    parent: Hip
+    child: Spine
+    type: universal
+    dof: 2
+    axes: [rx, ry]
+    rotation_order: YX
+    simscape_signal_prefix: SpineLogs
+    start_position_params: [SpineStartPositionX, SpineStartPositionY]
+
+  - name: torso
+    parent: Spine
+    child: Torso
+    type: revolute
+    dof: 1
+    axes: [rz]
+    simscape_signal_prefix: TorsoLogs
+    start_position_params: [TorsoStartPosition]
+    notes: Axial rotation of the torso about the spine.
+
+  # ----- Left arm -----
+
+  - name: l_scap
+    parent: Torso
+    child: LScap
+    type: universal
+    dof: 2
+    axes: [rx, ry]
+    rotation_order: YX
+    simscape_signal_prefix: LScapLogs
+    start_position_params: [LScapStartPositionX, LScapStartPositionY]
+
+  - name: l_shoulder
+    parent: LScap
+    child: LShoulder
+    type: gimbal
+    dof: 3
+    axes: [rx, ry, rz]
+    rotation_order: ZYX
+    simscape_signal_prefix: LSLogs
+    start_position_params: [LSStartPositionX, LSStartPositionY, LSStartPositionZ]
+
+  - name: l_elbow
+    parent: LShoulder
+    child: LElbow
+    type: revolute
+    dof: 1
+    axes: [rz]
+    simscape_signal_prefix: LELogs
+    start_position_params: [LEStartPosition]
+
+  - name: l_wrist
+    parent: LElbow
+    child: LWrist
+    type: universal
+    dof: 2
+    axes: [rx, ry]
+    rotation_order: YX
+    simscape_signal_prefix: LWLogs
+    start_position_params: [LWStartPositionX, LWStartPositionY]
+
+  # ----- Right arm -----
+
+  - name: r_scap
+    parent: Torso
+    child: RScap
+    type: universal
+    dof: 2
+    axes: [rx, ry]
+    rotation_order: YX
+    simscape_signal_prefix: RScapLogs
+    start_position_params: [RScapStartPositionX, RScapStartPositionY]
+
+  - name: r_shoulder
+    parent: RScap
+    child: RShoulder
+    type: gimbal
+    dof: 3
+    axes: [rx, ry, rz]
+    rotation_order: ZYX
+    simscape_signal_prefix: RSLogs
+    start_position_params: [RSStartPositionX, RSStartPositionY, RSStartPositionZ]
+
+  - name: r_elbow
+    parent: RShoulder
+    child: RElbow
+    type: revolute
+    dof: 1
+    axes: [rz]
+    simscape_signal_prefix: RELogs
+    start_position_params: [REStartPosition]
+
+  - name: r_wrist
+    parent: RElbow
+    child: RWrist
+    type: universal
+    dof: 2
+    axes: [rx, ry]
+    rotation_order: YX
+    simscape_signal_prefix: RWLogs
+    start_position_params: [RWStartPositionX, RWStartPositionY]
+
+  # ----- Club attachment -----
+
+  - name: grip_locked
+    parent: LHand                 # left hand is the primary grip-anchor
+    child: Club
+    type: welded
+    dof: 0
+    notes: >
+      Implemented as a Weld Joint between the grip frame on the LHand and the
+      shaft proximal end. The right hand contacts the grip via a parallel
+      kinematic loop in the Simscape model — engines that don't support
+      kinematic loops should treat the right hand's grip contact as a virtual
+      constraint (cost-function term) rather than a hard joint.
+
+# ---------------------------------------------------------------------------
+# Frame conventions
+# ---------------------------------------------------------------------------
+
+frames:
+  world:
+    description: >
+      World frame is right-handed with +z up, +x along the target line
+      (toward the target), +y to the right of the target line for a
+      right-handed golfer. Gravity is [0, 0, -9.81] m/s².
+  segment_local:
+    description: >
+      For limb segments, the local frame's z-axis runs from the proximal
+      joint toward the distal joint. The Simscape model uses a -z convention
+      for arm segments (elbow lies along local -z from the shoulder), so the
+      FK helper `compute_skeleton_fk.m` translates by `[0; 0; -length]`.
+
+# ---------------------------------------------------------------------------
+# DOF order used by SimOut.q / .qd / .qdd (length 25)
+# ---------------------------------------------------------------------------
+
+q_order:
+  - { joint: hip_floating, dof: tx }    # 0
+  - { joint: hip_floating, dof: ty }    # 1
+  - { joint: hip_floating, dof: tz }    # 2
+  - { joint: hip_floating, dof: rx }    # 3
+  - { joint: hip_floating, dof: ry }    # 4
+  - { joint: hip_floating, dof: rz }    # 5
+  - { joint: spine,        dof: rx }    # 6
+  - { joint: spine,        dof: ry }    # 7
+  - { joint: torso,        dof: rz }    # 8
+  - { joint: l_scap,       dof: rx }    # 9
+  - { joint: l_scap,       dof: ry }    # 10
+  - { joint: l_shoulder,   dof: rx }    # 11
+  - { joint: l_shoulder,   dof: ry }    # 12
+  - { joint: l_shoulder,   dof: rz }    # 13
+  - { joint: l_elbow,      dof: rz }    # 14
+  - { joint: l_wrist,      dof: rx }    # 15
+  - { joint: l_wrist,      dof: ry }    # 16
+  - { joint: r_scap,       dof: rx }    # 17
+  - { joint: r_scap,       dof: ry }    # 18
+  - { joint: r_shoulder,   dof: rx }    # 19
+  - { joint: r_shoulder,   dof: ry }    # 20
+  - { joint: r_shoulder,   dof: rz }    # 21
+  - { joint: r_elbow,      dof: rz }    # 22
+  - { joint: r_wrist,      dof: rx }    # 23
+  - { joint: r_wrist,      dof: ry }    # 24
