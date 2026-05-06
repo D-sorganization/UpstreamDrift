@@ -18,18 +18,34 @@ option3_inverse_nn/INTERFACES.md`` for the full design contract.
 
 from ._validate import ValidationReport, round_trip_validate
 from .cvae import CVAEConfig, EncoderOutput, SwingInverseCVAE
+from .diagnostics import (
+    CoverageMap,
+    CoverageTrial,
+    DiversityReport,
+    LatentProjection,
+    dataset_coverage_map,
+    latent_projection,
+    sample_diversity,
+)
 from .predict import InverseFitResult, predict_coefficients
 from .train import TrainedInverseCVAE, TrainInverseConfig, train_inverse_cvae
 
 __all__ = [
     "CVAEConfig",
+    "CoverageMap",
+    "CoverageTrial",
+    "DiversityReport",
     "EncoderOutput",
     "InverseFitResult",
+    "LatentProjection",
     "SwingInverseCVAE",
     "TrainInverseConfig",
     "TrainedInverseCVAE",
     "ValidationReport",
+    "dataset_coverage_map",
+    "latent_projection",
     "predict_coefficients",
     "round_trip_validate",
+    "sample_diversity",
     "train_inverse_cvae",
 ]
