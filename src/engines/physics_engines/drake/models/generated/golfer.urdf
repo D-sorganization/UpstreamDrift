@@ -1,0 +1,496 @@
+<?xml version="1.0" ?>
+<robot name="golf_humanoid">
+  <material name="gray">
+    <color rgba="0.5 0.5 0.5 1.0"/>
+  </material>
+  <link name="pelvis">
+    <inertial>
+      <mass value="12"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.09" iyy="0.13" izz="0.13" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.2 0.2"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.2 0.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="pelvis_floating" type="floating">
+    <parent link="world"/>
+    <child link="pelvis"/>
+    <origin xyz="0 0 1" rpy="0 0 0"/>
+  </joint>
+  <link name="lower_spine_spine_universal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="lower_spine">
+    <inertial>
+      <mass value="7.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.06" iyy="0.06" izz="0.05" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.2 0.25"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.2 0.25"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="spine_universal_1" type="revolute">
+    <parent link="pelvis"/>
+    <child link="lower_spine_spine_universal_dummy_1"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.6" upper="0.6" effort="200" velocity="20"/>
+    <dynamics damping="0.5"/>
+  </joint>
+  <joint name="spine_universal_2" type="revolute">
+    <parent link="lower_spine_spine_universal_dummy_1"/>
+    <child link="lower_spine"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.6" upper="0.6" effort="200" velocity="20"/>
+    <dynamics damping="0.5"/>
+  </joint>
+  <link name="upper_spine">
+    <inertial>
+      <mass value="7.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.06" iyy="0.06" izz="0.05" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.2 0.25"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.2 0.2 0.25"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="spine_twist" type="revolute">
+    <parent link="lower_spine"/>
+    <child link="upper_spine"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <dynamics damping="0.5"/>
+  </joint>
+  <link name="upper_torso_hub">
+    <inertial>
+      <mass value="5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.06" iyy="0.06" izz="0.075" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.3 0.2"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.3 0.3 0.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="torso_weld" type="fixed">
+    <parent link="upper_spine"/>
+    <child link="upper_torso_hub"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+  </joint>
+  <link name="right_scapula_rod_right_scapula_universal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="right_scapula_rod">
+    <inertial>
+      <mass value="1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0014" iyy="0.0014" izz="0.00045" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.12"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.12"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_scapula_universal_1" type="revolute">
+    <parent link="upper_torso_hub"/>
+    <child link="right_scapula_rod_right_scapula_universal_dummy_1"/>
+    <origin xyz="0 -0.18 0.1" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <joint name="right_scapula_universal_2" type="revolute">
+    <parent link="right_scapula_rod_right_scapula_universal_dummy_1"/>
+    <child link="right_scapula_rod"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <link name="right_upper_arm_right_shoulder_gimbal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="right_upper_arm_right_shoulder_gimbal_dummy_2">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="right_upper_arm">
+    <inertial>
+      <mass value="2"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.018" iyy="0.018" izz="0.0024" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.3"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.3"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_shoulder_gimbal_1" type="revolute">
+    <parent link="right_scapula_rod"/>
+    <child link="right_upper_arm_right_shoulder_gimbal_dummy_1"/>
+    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <joint name="right_shoulder_gimbal_2" type="revolute">
+    <parent link="right_upper_arm_right_shoulder_gimbal_dummy_1"/>
+    <child link="right_upper_arm_right_shoulder_gimbal_dummy_2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <joint name="right_shoulder_gimbal_3" type="revolute">
+    <parent link="right_upper_arm_right_shoulder_gimbal_dummy_2"/>
+    <child link="right_upper_arm"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <link name="right_forearm">
+    <inertial>
+      <mass value="1.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.012" iyy="0.012" izz="0.0014" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.27"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.27"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_elbow" type="revolute">
+    <parent link="right_upper_arm"/>
+    <child link="right_forearm"/>
+    <origin xyz="0 0 -0.3" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.5" upper="0" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <link name="right_hand_right_wrist_universal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="right_hand">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.00057" iyy="0.00057" izz="0.000225" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.1"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_wrist_universal_1" type="revolute">
+    <parent link="right_forearm"/>
+    <child link="right_hand_right_wrist_universal_dummy_1"/>
+    <origin xyz="0 0 -0.27" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <dynamics damping="0.2"/>
+  </joint>
+  <joint name="right_wrist_universal_2" type="revolute">
+    <parent link="right_hand_right_wrist_universal_dummy_1"/>
+    <child link="right_hand"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <dynamics damping="0.2"/>
+  </joint>
+  <link name="left_scapula_rod_left_scapula_universal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="left_scapula_rod">
+    <inertial>
+      <mass value="1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.0014" iyy="0.0014" izz="0.00045" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.12"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.12"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_scapula_universal_1" type="revolute">
+    <parent link="upper_torso_hub"/>
+    <child link="left_scapula_rod_left_scapula_universal_dummy_1"/>
+    <origin xyz="0 0.18 0.1" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <joint name="left_scapula_universal_2" type="revolute">
+    <parent link="left_scapula_rod_left_scapula_universal_dummy_1"/>
+    <child link="left_scapula_rod"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.5" upper="0.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <link name="left_upper_arm_left_shoulder_gimbal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="left_upper_arm_left_shoulder_gimbal_dummy_2">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="left_upper_arm">
+    <inertial>
+      <mass value="2"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.018" iyy="0.018" izz="0.0024" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.3"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.04" length="0.3"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_shoulder_gimbal_1" type="revolute">
+    <parent link="left_scapula_rod"/>
+    <child link="left_upper_arm_left_shoulder_gimbal_dummy_1"/>
+    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14" upper="3.14" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <joint name="left_shoulder_gimbal_2" type="revolute">
+    <parent link="left_upper_arm_left_shoulder_gimbal_dummy_1"/>
+    <child link="left_upper_arm_left_shoulder_gimbal_dummy_2"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <joint name="left_shoulder_gimbal_3" type="revolute">
+    <parent link="left_upper_arm_left_shoulder_gimbal_dummy_2"/>
+    <child link="left_upper_arm"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.5" upper="1.5" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <link name="left_forearm">
+    <inertial>
+      <mass value="1.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.012" iyy="0.012" izz="0.0014" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.27"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.035" length="0.27"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_elbow" type="revolute">
+    <parent link="left_upper_arm"/>
+    <child link="left_forearm"/>
+    <origin xyz="0 0 -0.3" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-2.5" upper="0" effort="200" velocity="20"/>
+    <dynamics damping="0.3"/>
+  </joint>
+  <link name="left_hand_left_wrist_universal_dummy_1">
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-06" iyy="1e-06" izz="1e-06" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <link name="left_hand">
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.00057" iyy="0.00057" izz="0.000225" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.1"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.03" length="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_wrist_universal_1" type="revolute">
+    <parent link="left_forearm"/>
+    <child link="left_hand_left_wrist_universal_dummy_1"/>
+    <origin xyz="0 0 -0.27" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <dynamics damping="0.2"/>
+  </joint>
+  <joint name="left_wrist_universal_2" type="revolute">
+    <parent link="left_hand_left_wrist_universal_dummy_1"/>
+    <child link="left_hand"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1" upper="1" effort="200" velocity="20"/>
+    <dynamics damping="0.2"/>
+  </joint>
+  <link name="club_shaft">
+    <inertial>
+      <mass value="0.4"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.037" iyy="0.037" izz="2.88e-05" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.012" length="1.05"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.012" length="1.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="grip_lead" type="fixed">
+    <parent link="right_hand"/>
+    <child link="club_shaft"/>
+    <origin xyz="0 0 -0.1" rpy="0 0 0"/>
+  </joint>
+</robot>
