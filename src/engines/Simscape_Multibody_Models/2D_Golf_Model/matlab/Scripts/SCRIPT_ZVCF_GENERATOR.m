@@ -18,8 +18,9 @@
 % applied as constant values and the joint interaction forces are
 % calculated at time zero and tabulated. 
 
-cd(matlabdrive);
-cd '2DModel';
+scriptDir = fileparts(mfilename('fullpath'));
+modelDir = fileparts(scriptDir);
+cd(modelDir);
 warning off Simulink:cgxe:LeakedJITEngine;
 
 % Copy the model inputs file that was used to generate the ZTCF and run the
@@ -30,26 +31,21 @@ cd 'Scripts/_ZVCF Scripts/';
 % Rename the file using the movefile function
 movefile 'ModelInputs.mat' 'ModelInputsZVCF.mat';
 % Move the file using the copyfile function
-cd(matlabdrive);
-cd '2DModel';
+cd(modelDir);
 copyfile Scripts/'_ZVCF Scripts'/'ModelInputsZVCF.mat';
 
 % Delete the file that was copied into the ZVCF Scripts folder
-cd(matlabdrive);
-cd '2DModel/Scripts/';
-cd '_ZVCF Scripts';
+cd(fullfile(scriptDir, '_ZVCF Scripts'));
 delete 'ModelInputsZVCF.mat';
 
 
 % Go back to the main folder. Open GolfSwingZVCF model. The model is set to
 % look for ModelInputsZVCF when it is opened.
-cd(matlabdrive);
-cd '2DModel';
+cd(modelDir);
 GolfSwingZVCF
 
 % Load mdlWks for ZVCF Model from File
-cd(matlabdrive);
-cd '2DModel';
+cd(modelDir);
 mdlWks=get_param('GolfSwingZVCF','ModelWorkspace');
 mdlWks.DataSource = 'MAT-File';
 mdlWks.FileName = 'ModelInputsZVCF.mat';
@@ -74,8 +70,7 @@ assignin(mdlWks,'StopTime',Simulink.Parameter(0.05));
 out=sim("GolfSwingZVCF");
 
 % Run Table Generation Script on "out"
-cd(matlabdrive);
-cd '2DModel/Scripts';
+cd(scriptDir);
 SCRIPT_TableGeneration;
 
 % Copy Data to ZTCF Table to Get Variable Names
@@ -204,11 +199,9 @@ ZVCFTable(:,:)=[]; %Delete All Data in ZTCF Table and Replace with Blanks
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate the Q Table By Running Script
-cd(matlabdrive);
-cd '2DModel/Scripts/_ZVCF Scripts';
+cd(fullfile(scriptDir, '_ZVCF Scripts'));
 SCRIPT_ZVCF_QTableGenerate;
-cd(matlabdrive);
-cd '2DModel';
+cd(modelDir);
 
 
     

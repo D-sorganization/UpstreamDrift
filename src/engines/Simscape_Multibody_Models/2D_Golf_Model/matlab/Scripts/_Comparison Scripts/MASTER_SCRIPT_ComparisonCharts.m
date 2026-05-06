@@ -1,5 +1,4 @@
-cd(matlabdrive);
-cd '2DModel/Scripts/_Comparison Scripts';
+cd(fileparts(mfilename('fullpath')));
 % PauseTime=1;
 
 SCRIPT_701_QUIVER_Comparison_NetForceEquivalentCouple;

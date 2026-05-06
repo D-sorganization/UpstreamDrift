@@ -1,5 +1,4 @@
-cd(matlabdrive);
-cd '2DModel/Scripts/_ZVCF Scripts';
+cd(fileparts(mfilename('fullpath')));
 % PauseTime=1;
 
 SCRIPT_ZVCF_QUIVER_LWRWForce;

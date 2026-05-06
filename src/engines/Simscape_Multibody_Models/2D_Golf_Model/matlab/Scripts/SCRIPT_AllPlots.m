@@ -1,28 +1,24 @@
 %Master Script Plot:
 PauseTime=0;
 
-cd(matlabdrive);
-cd '2DModel/Scripts/_BaseData Scripts'/;
+scriptDir = fileparts(mfilename('fullpath'));
+
+cd(fullfile(scriptDir, '_BaseData Scripts'));
 MASTER_SCRIPT_BaseDataCharts;
 
-cd(matlabdrive);
-cd '2DModel/Scripts/_ZTCF Scripts';
+cd(fullfile(scriptDir, '_ZTCF Scripts'));
 MASTER_SCRIPT_ZTCFCharts;
 
-cd(matlabdrive);
-cd '2DModel/Scripts/_Delta Scripts';
+cd(fullfile(scriptDir, '_Delta Scripts'));
 MASTER_SCRIPT_DeltaCharts;
 
-cd(matlabdrive);
-cd '2DModel/Scripts/_Comparison Scripts';
+cd(fullfile(scriptDir, '_Comparison Scripts'));
 MASTER_SCRIPT_ComparisonCharts;
 
-cd(matlabdrive);
-cd '2DModel/Scripts/';
+cd(scriptDir);
 SCRIPT_ResultsFolderGeneration;
 
-cd(matlabdrive);
-cd '2DModel/Scripts/_ZVCF Scripts';
+cd(fullfile(scriptDir, '_ZVCF Scripts'));
 MASTER_SCRIPT_ZVCF_CHARTS;
 
 clear PauseTime;

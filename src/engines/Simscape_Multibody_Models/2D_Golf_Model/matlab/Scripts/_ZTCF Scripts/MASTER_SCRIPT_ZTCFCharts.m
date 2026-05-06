@@ -1,5 +1,4 @@
-cd(matlabdrive);
-cd '2DModel/Scripts/_ZTCF Scripts';
+cd(fileparts(mfilename('fullpath')));
 %PauseTime=0;
 
 SCRIPT_301_PLOT_ZTCF_AngularWork;

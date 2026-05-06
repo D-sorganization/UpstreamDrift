@@ -1,9 +1,9 @@
 %SCRIPT_mdlWksGenerate.m;
-cd(matlabdrive);
-cd '2DModel';
+scriptDir = fileparts(mfilename('fullpath'));
+modelDir = fileparts(scriptDir);
+cd(modelDir);
 mdlWks=get_param('GolfSwing','ModelWorkspace');
 mdlWks.DataSource = 'MAT-File';
 mdlWks.FileName = 'ModelInputs.mat';
-cd(matlabdrive); 
-cd '2DModel'%added to see if it fixes things
+cd(modelDir); %added to see if it fixes things
 mdlWks.reload;
