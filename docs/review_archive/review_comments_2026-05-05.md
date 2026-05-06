@@ -1,38 +1,36 @@
 # Review Comments Archive - 2026-05-05
 
-Generated: 2026-05-05T12:33:21.616149
+Generated: 2026-05-05T21:24:43.946314
 
 ## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
 
-### PR #3965: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/extract_dynamics_dataset.py:24
+### PR #4012: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/compute_cost.m:33
 
 Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Keep default dataset filenames consistent across pipeline**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Accept row vectors for `theta` in `compute_cost`**
 
-The extraction script writes to `golf_dynamics_slim.parquet` by default, but `train_dynamics_surrogate.py` reads `golf_inverse_ready.parquet` by default. Running both scripts with defaults (as a typical first pass) makes training fail with a missing-file error unless users manually override one side. Aligning these defaults avoids a broken out-of-th...
+The argument block currently constrains `theta` to `(:,1)`, which rejects 1xN row vectors before `validators.mustBeFiniteVector` runs. This contradicts the function contract in the header (`column or row`) and will fail when callers pass row-shaped optimization variables (for example, `surrogateopt` objectives are typically row-vector inputs), causing immedi...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3965#discussion_r3191027575)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4012#discussion_r3192982980)
 
 ---
 
-### PR #3965: src/engines/Simscape_Multibody_Models/3D_Golf_Model/MachineLearning/README.md:232
+### PR #4012: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/compute_total_work.m:37
 
-Actionable: No
+Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Invoke MATLAB helper directly instead of `matlab.` namespace**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Enforce monotonic simulation time before work integration**
 
-The documented call uses `matlab.run_ml_polynomial_input_swing(...)`, but this function is stored in a normal `matlab/` folder, not a `+matlab` package. In MATLAB this namespace call does not resolve and users following the documented workflow will hit an undefined function/package error before simulation starts.
-
-Useful? React with 👍 / 👎.
+`compute_total_work` integrates a nonnegative power integrand with `trapz(t, ...)` but never validates that `sim_out.time` is strictly increasing. If a simulator returns reversed/unsorted timestamps, `trapz` can produce a negative integral and trip the postcondition assert, aborting optimization runs even though torques/velocities are valid. This sh...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/3965#discussion_r3191027578)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4012#discussion_r3192982984)
 
 ---
 
