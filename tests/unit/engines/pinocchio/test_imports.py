@@ -33,12 +33,12 @@ def test_import_coppelia_bridge() -> None:
     assert coppelia_bridge is not None
 
 
-def test_import_torque_fitting() -> None:
-    """Test importing the torque fitting module."""
+def test_import_poly_torque_util() -> None:
+    """Test importing the poly torque util module."""
     pytest.importorskip(
         "python.pinocchio_golf",
         reason="python.pinocchio_golf not available (install pinocchio engine)",
     )
-    from python.pinocchio_golf import torque_fitting  # noqa: PLC0415
+    from python.pinocchio_golf import poly_torque_util  # noqa: PLC0415
 
-    assert torque_fitting is not None
+    assert poly_torque_util is not None
