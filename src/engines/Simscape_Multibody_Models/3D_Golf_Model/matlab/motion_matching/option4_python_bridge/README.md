@@ -10,9 +10,13 @@
 
 ## Status
 
-**Phase 2.** Greenfield. Docs scaffolded; implementation deferred until Options 1 and 2 deliver value. This is by design — the whole point of Option 4 is to amortize the high setup cost across many downstream consumers, and we want those consumers proven before we invest the engineering time.
+**Phase 2 — partial implementation landed for issue #4077.** The motion-matching headline surface is shipping:
 
-Implementation is delegated to issues **#036–#040** (see [GitHub issues](#github-issues-for-option-4)).
+- `simscape_adapter.py` — `SimscapeAdapter` lifecycle (`start()` / `close()` / `__enter__`/`__exit__`), `simulate_with_coefficients(theta) -> SimOut`, `target_from_xlsx(path, sheet) -> ClubTarget`, `compute_cost(theta, target, opts) -> float`, `get_polynomial_bounds(n_joints)`, `get_n_joints(default=...)`. Errors wrapped as `SimulationError` / `EngineStartupError`.
+- `fit_swing_python.py` — `fit_swing_scipy(target, adapter, options) -> FitResult` driving `scipy.optimize.minimize(method="SLSQP")` over the bound-constrained polynomial coefficients. `fit_swing_jax` raises `NotImplementedError` referencing issue #4075 (Option-2 surrogate) — a JAX path needs the differentiable surrogate.
+- `tests/` — three `test_simscape_adapter.py` round-trip tests and one `test_fit_swing_python.py` recovery test, all marked `@pytest.mark.requires_matlab_engine`. The conftest auto-skips the marked tests with a loud "matlab.engine not importable" reason on hosts without MATLAB Engine for Python; tests that need Simscape Multibody additionally skip with a license-missing reason.
+
+The full PhysicsEngine protocol coverage (step / reset / compute_mass_matrix / SimscapeAdapterPool / loader.py wiring) is deliberately deferred to issues **#036–#040** (see [GitHub issues](#github-issues-for-option-4)) and tracked separately. Issue #4077's scope was the headline motion-matching surface only.
 
 ## When to use this option
 

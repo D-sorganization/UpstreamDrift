@@ -21,33 +21,49 @@ ls src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\src\model\GolfSwin
 
 If any of those three fail, stop and run [INSTALLATION.md](INSTALLATION.md) end to end.
 
-## 1. Smoke test
+## 1. Smoke test (issue #4077 surface)
 
-The simplest "is the bridge alive" check.
-
-```powershell
-python -m pytest src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\tests\test_lifecycle.py -v
-```
-
-Expected output (with MATLAB available):
-
-```
-test_load_invalid_path_raises PASSED
-test_engine_starts_and_stops_cleanly PASSED       (slow; ~30 s)
-test_load_simscape_model_succeeds PASSED          (slow; ~10 s)
-```
-
-Without MATLAB, the `requires_matlab` tests are skipped and only `test_load_invalid_path_raises` runs.
-
-## 2. Run the full Option-4 test suite
+The simplest "is the bridge alive" check uses the test suite that ships with #4077:
 
 ```powershell
-python -m pytest src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\tests -v --timeout=120
+python -m pytest src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\motion_matching\option4_python_bridge\tests -v
 ```
 
-The `--timeout=120` is needed because some tests start a fresh engine; the project default 60 s is too tight for the 10–30 s engine startup.
+Expected output (with MATLAB Engine for Python installed and Simscape Multibody licensed):
 
-Expected wall-clock on the dev box: **~2–4 minutes** (most of it is engine startup amortized across module-scoped fixtures).
+```
+test_simulate_rejects_bad_theta_shape           PASSED
+test_simout_dataclass_is_frozen                 PASSED
+test_fit_options_defaults                       PASSED
+test_fit_swing_jax_is_explicitly_unimplemented  PASSED
+test_fit_swing_scipy_rejects_bad_theta0         PASSED
+test_engine_starts_and_stops_cleanly            PASSED  (~5–30 s)
+test_get_polynomial_bounds_shape                PASSED
+test_simulate_with_coefficients_returns_canonical_simout PASSED  (slow)
+test_round_trip_against_direct_matlab_call      PASSED  (slow; ~15 s)
+test_recover_theta_from_synthetic_target        PASSED  (slow; ~30–120 s)
+```
+
+Without MATLAB Engine for Python on the active interpreter (`pip show matlabengine` returns nothing), every `requires_matlab_engine` test auto-skips with a loud reason pointing at [INSTALLATION.md](INSTALLATION.md). The pure-Python tests (`test_simulate_rejects_bad_theta_shape`, `test_simout_dataclass_is_frozen`, `test_fit_options_defaults`, `test_fit_swing_jax_is_explicitly_unimplemented`, `test_fit_swing_scipy_rejects_bad_theta0`) still run.
+
+If MATLAB Engine for Python is installed but Simscape Multibody is not licensed (`license('test', 'Simscape_Multibody')` returns 0 inside MATLAB), the forward-sim tests skip with a Simscape-license reason and the lifecycle / bounds tests still pass — useful for partial validation in license-constrained CI.
+
+## 2. Manual smoke (one-liner)
+
+```powershell
+python -c @"
+from option4_python_bridge.simscape_adapter import SimscapeAdapter
+import numpy as np
+with SimscapeAdapter() as a:
+    n = a.get_n_joints(default=28)
+    lb, ub = a.get_polynomial_bounds(n)
+    theta = np.zeros(lb.size)
+    sim = a.simulate_with_coefficients(theta)
+    print('grip shape:', sim.grip.shape, 'status:', sim.solver_status)
+"@
+```
+
+The `option4_python_bridge` package directory must be on `sys.path` (e.g. via `PYTHONPATH=src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching`).
 
 ## 3. Run a Python-driven `system_identification` against the adapter
 

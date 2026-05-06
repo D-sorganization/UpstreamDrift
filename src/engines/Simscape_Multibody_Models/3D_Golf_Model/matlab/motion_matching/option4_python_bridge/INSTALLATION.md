@@ -12,15 +12,52 @@ The MathWorks compatibility matrix maps each MATLAB release to a small range of 
 
 | MATLAB release | Supported Python | `matlabengine` pip version | Notes |
 |---|---|---|---|
-| **R2024a** ✅ | 3.9, 3.10, **3.11** | `matlabengine==24.1.*` | Recommended for this repo (Python 3.11 = CI default per `CLAUDE.md`). |
+| **R2025b** ✅ | 3.9, 3.10, 3.11, **3.12** | `matlabengine==25.2.*` | Verified working on the dev box (May 2026). |
+| R2024a | 3.9, 3.10, **3.11** | `matlabengine==24.1.*` | Originally recommended row. |
 | R2023b | 3.9, 3.10, 3.11 | `matlabengine==23.2.*` | Also fine if R2024a not available. |
 | R2023a | 3.8, 3.9, 3.10 | `matlabengine==9.14.*` | Pre-versioning-rename. |
 | R2022b | 3.8, 3.9, 3.10 | `matlabengine==9.13.*` | Older but still supported by the `matlabengine` package. |
 | ≤ R2022a | varies | use `cd "$matlabroot/extern/engines/python" && python setup.py install` | The pre-pip era; out of scope. |
 
+> **Heads up — Python 3.13 / 3.14 are NOT yet supported** by any released `matlabengine` wheel as of MATLAB R2025b. If your repo's default interpreter is 3.13 or newer, install `matlabengine` into a 3.12 or 3.11 sidecar interpreter and run the Option-4 tests with that (e.g. `py -3.12 -m pytest ...` on Windows). The repo's `pyproject.toml` requires `>=3.10`, but only `<=3.12` interpreters can drive the bridge.
+
 > **Always** verify the row against [https://www.mathworks.com/support/requirements/python-compatibility.html](https://www.mathworks.com/support/requirements/python-compatibility.html) at install time — the matrix is updated with each MATLAB release.
 
-The repo's recommended row is **MATLAB R2024a + Python 3.11 + `matlabengine==24.1.*`**.
+The repo's recommended row is **MATLAB R2024a + Python 3.11 + `matlabengine==24.1.*`**. The dev box at the time of issue #4077 was actually **MATLAB R2025b + Python 3.12 + `matlabengine==25.2.*`** — the procedure below is identical aside from the version triple.
+
+### Install attempt log — issue #4077 dev box (2026-05-06)
+
+For future agents debugging install pain. The dev box had MATLAB R2025b at `C:/Program Files/MATLAB/R2025b/` and three Python interpreters available (3.10, 3.11, 3.12, 3.13, 3.14). The repo `pyproject.toml` says `requires-python = ">=3.10"`, so `where python` first picked **3.14**.
+
+Attempt 1 — Python 3.14 + `pip install <matlabroot>/extern/engines/python`:
+
+```text
+UserWarning: MATLAB Engine for Python supports Python version 3.9, 3.10, 3.11, and 3.12,
+             but your version of Python is 3.14
+error: could not create 'dist\matlabengine.egg-info': Access is denied
+```
+
+Two failures stacked: (1) Python 3.14 is past the supported window for `matlabengine 25.2`, (2) running setup from `C:/Program Files/...` triggers the Windows ACL on the read-only install dir. Both go away when you switch to a supported interpreter and use the PyPI wheel.
+
+Attempt 2 — Python 3.12 + `python -m pip install matlabengine` (PyPI):
+
+```powershell
+py -3.12 -m pip install matlabengine --user
+# Successfully installed matlabengine-25.2.2
+py -3.12 -c "import matlab.engine; print('OK')"
+# OK
+```
+
+Attempt 3 — verify Simscape Multibody license:
+
+```powershell
+py -3.12 -c "import matlab.engine; e = matlab.engine.start_matlab('-nodesktop -nosplash'); \
+    print('Simscape_Multibody:', e.eval(\"license('test','Simscape_Multibody')\", nargout=1)); \
+    e.quit()"
+# Simscape_Multibody: 0.0       <-- license missing on this dev box
+```
+
+Result: `matlab.engine` is importable and an engine starts in ~5 seconds, so the round-trip and lifecycle tests pass. The forward-sim tests skip with a "Simscape Multibody license not available" reason — see [RUNBOOK.md § Smoke test](RUNBOOK.md#1-smoke-test-issue-4077-surface).
 
 ## Prerequisites
 
