@@ -18,13 +18,13 @@ a single `fit_swing(target, engine, options)` call.
 
 ## 1. The five engines and their roles
 
-| Engine | Path | License | Strengths | Why we have it |
-|---|---|---|---|---|
-| **Simscape Multibody** | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/` | MATLAB Home | Primary path. Full Stateflow torque polynomial, integrated Simulink toolchain | Reference implementation; ground-truth oracle for every other engine |
-| **MuJoCo** | `src/engines/physics_engines/mujoco/` | Apache-2.0 | Speed (orders of magnitude faster than Simscape), MJCF model authoring, GPU-friendly contact dynamics | Production training datasets + real-time inference |
-| **Drake** | `src/engines/physics_engines/drake/` | BSD-3 | Rigorous multibody dynamics, automatic-differentiation gradients, mathematical-program optimization | Gradient-based fitting; verifiable optimization |
-| **Pinocchio** | `src/engines/physics_engines/pinocchio/` | BSD-2 | Fastest articulated-body algorithms in robotics; analytical Jacobians and Hessians | Online inference, embedded deployment, real-time analysis |
-| **OpenSim** | `src/engines/physics_engines/opensim/` | Apache-2.0 | Biomechanics-grade muscle models, peer-reviewed model library, clinical credibility | Muscle-level analysis (post-MVP); body-marker IK |
+| Engine                 | Path                                                   | License     | Strengths                                                                                             | Why we have it                                                       |
+| ---------------------- | ------------------------------------------------------ | ----------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Simscape Multibody** | `src/engines/Simscape_Multibody_Models/3D_Golf_Model/` | MATLAB Home | Primary path. Full Stateflow torque polynomial, integrated Simulink toolchain                         | Reference implementation; ground-truth oracle for every other engine |
+| **MuJoCo**             | `src/engines/physics_engines/mujoco/`                  | Apache-2.0  | Speed (orders of magnitude faster than Simscape), MJCF model authoring, GPU-friendly contact dynamics | Production training datasets + real-time inference                   |
+| **Drake**              | `src/engines/physics_engines/drake/`                   | BSD-3       | Rigorous multibody dynamics, automatic-differentiation gradients, mathematical-program optimization   | Gradient-based fitting; verifiable optimization                      |
+| **Pinocchio**          | `src/engines/physics_engines/pinocchio/`               | BSD-2       | Fastest articulated-body algorithms in robotics; analytical Jacobians and Hessians                    | Online inference, embedded deployment, real-time analysis            |
+| **OpenSim**            | `src/engines/physics_engines/opensim/`                 | Apache-2.0  | Biomechanics-grade muscle models, peer-reviewed model library, clinical credibility                   | Muscle-level analysis (post-MVP); body-marker IK                     |
 
 Each engine consumes the **same** target struct + cost function + visualisation
 contracts. The differences are in the forward simulator and (eventually) the
@@ -140,7 +140,7 @@ Every engine has **a single canonical full-body humanoid model** with the
 club rigidly attached at the grip via a 6-DOF locked joint (or the
 engine-native equivalent). Anatomical conventions:
 
-- Skeleton parity with the Simscape model: 23 DOF distributed across the
+- Skeleton parity with the Simscape model: 25 DOF distributed across the
   Hip(6) → Spine(2) → Torso(1) → Scapula(2)+(2) → Shoulder(3)+(3) →
   Elbow(1)+(1) → Wrist(2)+(2) → Hand(rigid) + Club(rigid) chain.
 - Segment lengths come from the **same model-workspace constants** the
@@ -190,33 +190,33 @@ Detailed implementation plans live in the per-engine spec docs:
 
 The summary table:
 
-| Engine | Humanoid model | `simulate_with_coefficients` | `fit_swing_*` | Visualisation | Tests | Status |
-|---|---|---|---|---|---|---|
-| Simscape | ✅ `.slx` | ✅ | ✅ fmincon/multistart/hybrid | ✅ MATLAB plots | ✅ 17/17 | **Production** |
-| MuJoCo | ✅ MJCF (3 variants + myo*) | 🟡 inline (needs decoupling) | 🟡 inline | ✅ Mujoco viewer + custom GUI | 🟡 partial | **Closest to parity** |
-| Pinocchio | ✅ URDF (`golfer.urdf`) | 🟡 inside `motion_training/` | 🟡 `torque_fitting.py` | 🟡 Meshcat stubs | 🟡 partial | **Second** |
-| Drake | 🔴 missing | 🔴 missing | 🟡 `motion_optimization.py` skeleton | 🟡 stubs | 🔴 none | **Big gap** |
-| OpenSim | 🔴 missing | 🔴 missing | 🔴 missing | 🔴 missing | 🔴 none | **Greenfield** |
+| Engine    | Humanoid model               | `simulate_with_coefficients` | `fit_swing_*`                        | Visualisation                 | Tests      | Status                |
+| --------- | ---------------------------- | ---------------------------- | ------------------------------------ | ----------------------------- | ---------- | --------------------- |
+| Simscape  | ✅ `.slx`                    | ✅                           | ✅ fmincon/multistart/hybrid         | ✅ MATLAB plots               | ✅ 17/17   | **Production**        |
+| MuJoCo    | ✅ MJCF (3 variants + myo\*) | 🟡 inline (needs decoupling) | 🟡 inline                            | ✅ Mujoco viewer + custom GUI | 🟡 partial | **Closest to parity** |
+| Pinocchio | ✅ URDF (`golfer.urdf`)      | 🟡 inside `motion_training/` | 🟡 `torque_fitting.py`               | 🟡 Meshcat stubs              | 🟡 partial | **Second**            |
+| Drake     | 🔴 missing                   | 🔴 missing                   | 🟡 `motion_optimization.py` skeleton | 🟡 stubs                      | 🔴 none    | **Big gap**           |
+| OpenSim   | 🔴 missing                   | 🔴 missing                   | 🔴 missing                           | 🔴 missing                    | 🔴 none    | **Greenfield**        |
 
 ---
 
 ## 4. Cross-cutting milestones
 
-| ID | Title | Description |
-|---|---|---|
-| **PARITY-DIMENSIONS** | Shared anthropometric YAML | Pull segment lengths + masses + inertias from the Simscape model workspace into `shared/models/golf_humanoid_dimensions.yaml` and `…_inertia.yaml`. Single source of truth. |
-| **PARITY-MODEL-BUILD** | `build_humanoid_models.py` | Generate engine-native URDF/MJCF/.osim from the shared YAML. Run as a CI step so model files never drift. |
-| **PARITY-LOADERS** | Promote shared loaders to top level | Move/refactor `shared/python/motion_matching/cost.py` and add `load_club_target.py`, `align_to_simulation_grid.py`, `synthesize_target_from_coefficients.py` so every engine imports from one place. |
-| **PARITY-EQUIVALENCE** | Cross-engine equivalence test | Fixed `theta` → 5 engines → grip RMSE vs Simscape ≤ 5 mm at three poses. CI gate. |
-| **PARITY-LEADERBOARD** | Cross-engine leaderboard | Run all 5 engines on every test trial; emit `LEADERBOARD.md`. |
-| **PARITY-DOCS** | Cross-engine docs currency | Extend the docs-currency lint to every engine subtree. |
+| ID                     | Title                               | Description                                                                                                                                                                                          |
+| ---------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PARITY-DIMENSIONS**  | Shared anthropometric YAML          | Pull segment lengths + masses + inertias from the Simscape model workspace into `shared/models/golf_humanoid_dimensions.yaml` and `…_inertia.yaml`. Single source of truth.                          |
+| **PARITY-MODEL-BUILD** | `build_humanoid_models.py`          | Generate engine-native URDF/MJCF/.osim from the shared YAML. Run as a CI step so model files never drift.                                                                                            |
+| **PARITY-LOADERS**     | Promote shared loaders to top level | Move/refactor `shared/python/motion_matching/cost.py` and add `load_club_target.py`, `align_to_simulation_grid.py`, `synthesize_target_from_coefficients.py` so every engine imports from one place. |
+| **PARITY-EQUIVALENCE** | Cross-engine equivalence test       | Fixed `theta` → 5 engines → grip RMSE vs Simscape ≤ 5 mm at three poses. CI gate.                                                                                                                    |
+| **PARITY-LEADERBOARD** | Cross-engine leaderboard            | Run all 5 engines on every test trial; emit `LEADERBOARD.md`.                                                                                                                                        |
+| **PARITY-DOCS**        | Cross-engine docs currency          | Extend the docs-currency lint to every engine subtree.                                                                                                                                               |
 
 ---
 
 ## 5. Why this matters
 
 > "We want full humanoid models implemented and we need club traces and
-> comparisons to the desired trajectories in here as well."  — project owner
+> comparisons to the desired trajectories in here as well." — project owner
 
 Specifically:
 
@@ -254,4 +254,4 @@ Same as PROJECT_SPEC.md plus:
 
 ---
 
-*Last updated 2026-05-06 alongside the cross-engine parity issue wave.*
+_Last updated 2026-05-06 alongside the cross-engine parity issue wave._
