@@ -64,7 +64,7 @@ def _get_owner(path: str, repo_root: Path) -> str:
     codeowners_path = repo_root / ".github" / "CODEOWNERS"
     if not codeowners_path.exists():
         return "Unknown"
-    
+
     owner = "Unknown"
     for line in codeowners_path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
@@ -89,8 +89,14 @@ def _collect_active_exceptions(config: dict) -> tuple[dict[str, dict], list[str]
         if not path or not owner or not reason:
             invalid_exceptions.append(f"Invalid exception entry: {exc}")
             continue
-        if "issue" not in reason.lower() and "#" not in reason and "decomposition" not in reason.lower():
-            invalid_exceptions.append(f"Exception missing linked issue in reason: {path}")
+        if (
+            "issue" not in reason.lower()
+            and "#" not in reason
+            and "decomposition" not in reason.lower()
+        ):
+            invalid_exceptions.append(
+                f"Exception missing linked issue in reason: {path}"
+            )
             continue
         try:
             if _exception_is_active(exc):
@@ -136,7 +142,9 @@ def main() -> int:  # noqa: C901
         changed_files = _changed_python_files(repo_root, "HEAD~1")
 
     if len(config.get("exceptions", [])) > 5:
-        invalid_exceptions.append(f"Too many exceptions: {len(config.get('exceptions', []))} (max 5)")
+        invalid_exceptions.append(
+            f"Too many exceptions: {len(config.get('exceptions', []))} (max 5)"
+        )
 
     violations = list(invalid_exceptions)
     watchlist: list[str] = []
