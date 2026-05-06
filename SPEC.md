@@ -30,16 +30,16 @@
 
 ## 1. Identity
 
-| Field                   | Value                                                                                  |
-| ----------------------- | -------------------------------------------------------------------------------------- |
-| **Repository Name**     | `UpstreamDrift`                                                                        |
-| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                                     |
-| **Owner**               | D-sorganization                                                                        |
-| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                                         |
-| **License**             | MIT                                                                                    |
-| **Current Version**     | 2.1.0                                                                                  |
-| **Spec Version**        | 1.0.111                                                                                |
-| **Last Spec Update**    | 2026-05-05 (Removed misplaced OpenFOAM CFD helper from biomechanical engine inventory) |
+| Field                   | Value                                                                 |
+| ----------------------- | --------------------------------------------------------------------- |
+| **Repository Name**     | `UpstreamDrift`                                                       |
+| **GitHub URL**          | `https://github.com/D-sorganization/UpstreamDrift`                    |
+| **Owner**               | D-sorganization                                                       |
+| **Primary Language(s)** | Python 3.10+, Rust, TypeScript                                        |
+| **License**             | MIT                                                                   |
+| **Current Version**     | 2.1.0                                                                 |
+| **Spec Version**        | 1.0.113                                                               |
+| **Last Spec Update**    | 2026-05-06 (Skipped core test matrix for workflow-only pull requests) |
 
 ## 2. Purpose & Mission
 
@@ -391,6 +391,21 @@ overlapping fixture names in nested conftests.
 Beyond standard tools, CI enforces custom checks:
 
 - **Dependency Direction**: No reverse dependencies (leaf → branch → root)
+- **SAST Delta Scan**: Pull requests run Semgrep against changed supported
+  source/application files and Bandit against changed supported Python
+  source/application files, and Trivy against changed supported
+  dependency/container/config files while non-PR CI retains the full repository
+  scans, keeping new code blocking without letting existing repository baseline
+  findings block unrelated PRs.
+- **Alembic PostgreSQL Round Trip**: PostgreSQL migration round-trip CI has a
+  finite job budget, an explicit SQL readiness probe, isolated pytest plugin
+  loading, and verbose duration output so migration hangs produce actionable
+  diagnostics instead of opaque cancellation or unrelated desktop-display plugin
+  failures.
+- **Core Test Relevance Filter**: Pull requests with no Python source, test,
+  project metadata, or dependency-file changes skip the expensive Python test
+  matrix after checkout so workflow-only and documentation-only CI fixes remain
+  finite on constrained self-hosted runners.
 - **File Size Budget**: No module exceeds 500 lines; classes capped at 200 LOC
 - **Documentation Catalog and Size Budget**: Every top-level `docs/` directory is listed in `docs/index.md`; oversized Markdown/Quarto docs require owned, expiring exceptions.
 - **Import Depth**: Maximum 4 import levels to prevent circular dependencies
@@ -542,6 +557,8 @@ blocks Python package publication on the built-wheel smoke matrix.
 
 | Date       | Version | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-06 | 1.0.113 | Added a core-test relevance filter to `ci-standard.yml` so pull requests with only workflow, documentation, or other non-Python/non-dependency changes skip the expensive Python test matrix after checkout while source, test, metadata, and dependency changes still run the full matrix.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 2026-05-05 | 1.0.112 | Made pull-request CI finite in the presence of existing repository-wide blockers: Semgrep SAST, Bandit, and Trivy now scan changed supported files on PRs while retaining full scans for non-PR runs, and the Alembic PostgreSQL round-trip job has a larger finite job budget, an explicit SQL readiness probe, isolated pytest plugin loading, and verbose duration output for diagnostics.                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 2026-05-05 | 1.0.111 | Removed the misplaced experimental OpenFOAM CFD execution helper from UpstreamDrift's biomechanical physics-engine inventory so OpenFOAM execution can live with the Tools_Private glass-model CFD stack where it is used.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-05-05 | 1.0.110 | Bolt: Optimized clubhead speed computation in swing kinematics by replacing `np.linalg.norm(clubhead_vel, axis=1)` with `np.sqrt(np.einsum("ij,ij->i", clubhead_vel, clubhead_vel))` to avoid temporary array allocations, achieving ~35% performance improvement.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 2026-05-04 | 1.0.109 | Optimized mean squared error calculation in validation solver by replacing np.mean(residuals\*\*2) with np.vdot(residuals, residuals) / residuals.size.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
