@@ -49,27 +49,44 @@ function target = load_club_target_c3d(c3d_path, opts)
     [marker_xyz, present_markers] = pivot_marker_array(points_df, marker_labels);
     log_info(opts, "C3D markers present: %s", strjoin(present_markers, ", "));
 
-    [butt_idx, head_idx, mapping_method] = pick_butt_and_head(present_markers, ...
-                                                              marker_xyz);
-    log_info(opts, "Marker mapping (%s): butt=%s, clubhead=%s", ...
-        mapping_method, present_markers(butt_idx), present_markers(head_idx));
+    [~, fname_only, fext_only] = fileparts(c3d_path);
+    is_optical = is_optical_schema(strcat(fname_only, fext_only), present_markers);
 
-    butt_m     = marker_xyz(:, :, butt_idx);
-    clubhead_m = marker_xyz(:, :, head_idx);
+    if is_optical
+        log_info(opts, "Detected Optical C3D schema; using cluster pose pipeline");
+        [butt_m, clubhead_m, club_quat] = extract_optical_pose(marker_xyz, ...
+                                                             present_markers, opts);
+        keep = all(isfinite(butt_m), 2) & all(isfinite(clubhead_m), 2) & ...
+               all(isfinite(club_quat), 2);
+        if nnz(keep) < 5
+            error("load_club_target_c3d:tooFewValidFrames", ...
+                  "Only %d valid Optical frames after cluster pose", nnz(keep));
+        end
+        butt_m     = butt_m(keep, :);
+        clubhead_m = clubhead_m(keep, :);
+        club_quat  = club_quat(keep, :);
+        M          = size(butt_m, 1);
+        t_raw      = (0:M-1).' / frame_rate;
+    else
+        [butt_idx, head_idx, mapping_method] = pick_butt_and_head( ...
+            present_markers, marker_xyz);
+        log_info(opts, "Marker mapping (%s): butt=%s, clubhead=%s", ...
+            mapping_method, present_markers(butt_idx), present_markers(head_idx));
 
-    % Drop frames where either endpoint is NaN
-    keep = all(isfinite(butt_m), 2) & all(isfinite(clubhead_m), 2);
-    if nnz(keep) < 5
-        error("load_club_target_c3d:tooFewValidFrames", ...
-              "Only %d non-NaN frames after marker selection", nnz(keep));
+        butt_m     = marker_xyz(:, :, butt_idx);
+        clubhead_m = marker_xyz(:, :, head_idx);
+
+        keep = all(isfinite(butt_m), 2) & all(isfinite(clubhead_m), 2);
+        if nnz(keep) < 5
+            error("load_club_target_c3d:tooFewValidFrames", ...
+                  "Only %d non-NaN frames after marker selection", nnz(keep));
+        end
+        butt_m     = butt_m(keep, :);
+        clubhead_m = clubhead_m(keep, :);
+        M          = size(butt_m, 1);
+        t_raw      = (0:M-1).' / frame_rate;
+        club_quat  = shaft_vector_to_quaternion(butt_m, clubhead_m);
     end
-    butt_m     = butt_m(keep, :);
-    clubhead_m = clubhead_m(keep, :);
-    M          = size(butt_m, 1);
-
-    t_raw = (0:M-1).' / frame_rate;
-
-    club_quat = shaft_vector_to_quaternion(butt_m, clubhead_m);
 
     raw = struct( ...
         "time",      t_raw, ...
@@ -281,6 +298,167 @@ function quats = shaft_vector_to_quaternion(butt, head)
         R(:, :, k) = [x_axis.', y_axis.', z_axis.'];
     end
     quats = rotmat_to_quaternion(R);
+end
+
+
+function tf = is_optical_schema(filename, marker_labels)
+%IS_OPTICAL_SCHEMA  True if the C3D file follows the Optical convention.
+%   See optical_marker_map.m for the validated schema.
+    fname_lower = lower(string(filename));
+    if startsWith(fname_lower, "captureexport")
+        tf = true;
+        return;
+    end
+    map = optical_marker_map();
+    tf = any(marker_labels == map.clubhead_cluster(1));
+end
+
+
+function [butt_m, clubhead_m, club_quat] = extract_optical_pose(marker_xyz, ...
+                                                              present_markers, opts)
+%EXTRACT_OPTICAL_POSE  Compute butt/clubhead centroids + club_quat from Optical
+%   marker clusters using a Procrustes/SVD rigid-body pose against the
+%   address-frame reference, with Y-up -> Z-up conversion.
+    map = optical_marker_map();
+
+    head_idx = find_cluster(present_markers, map.clubhead_cluster);
+    grip_idx = find_cluster(present_markers, map.grip_cluster);
+
+    head_xyz = marker_xyz(:, :, head_idx);  % (M x 3 x 3)
+    grip_xyz = marker_xyz(:, :, grip_idx);  % (M x 3 x 3)
+
+    % Spline-fill short NaN gaps (<= max_gap_frames).
+    head_xyz = fill_short_gaps_3d(head_xyz, map.max_gap_frames);
+    grip_xyz = fill_short_gaps_3d(grip_xyz, map.max_gap_frames);
+
+    % Find first all-finite frame across both clusters as the address ref.
+    nFrames = size(head_xyz, 1);
+    address = 0;
+    for i = 1:nFrames
+        if all(isfinite(head_xyz(i, :, :)), "all") && ...
+           all(isfinite(grip_xyz(i, :, :)), "all")
+            address = i;
+            break;
+        end
+    end
+    if address == 0
+        error("load_club_target_c3d:noCleanAddressFrame", ...
+              "No frame where all Optical cluster markers are simultaneously finite");
+    end
+
+    % Reshape to (3 markers x 3 xyz x N frames) for pose_from_cluster.
+    head_stack = permute(head_xyz, [3, 2, 1]);  % (3 x 3 x M)
+    grip_stack = permute(grip_xyz, [3, 2, 1]);
+
+    head_ref = head_stack(:, :, address);
+    grip_ref = grip_stack(:, :, address);
+
+    [R_head, c_head] = pose_from_cluster(head_stack, head_ref);
+    [~,      c_grip] = pose_from_cluster(grip_stack, grip_ref);
+
+    % Apply Y-up -> Z-up.
+    clubhead_m = y_to_z_up(c_head);
+    butt_m     = y_to_z_up(c_grip);
+
+    R_world = nan(3, 3, size(R_head, 3));
+    R_swap  = [1 0 0; 0 0 -1; 0 1 0];
+    for k = 1:size(R_head, 3)
+        if all(isfinite(R_head(:, :, k)), "all")
+            R_world(:, :, k) = R_swap * R_head(:, :, k);
+        end
+    end
+
+    % Fill NaN rotations with the previous valid one (post-fill).
+    last = eye(3); seen = false;
+    for k = 1:size(R_world, 3)
+        if all(isfinite(R_world(:, :, k)), "all")
+            last = R_world(:, :, k);
+            seen = true;
+        elseif ~seen
+            R_world(:, :, k) = eye(3);
+        else
+            R_world(:, :, k) = last;
+        end
+    end
+    club_quat = rotmat_to_quaternion(R_world);
+end
+
+
+function idx = find_cluster(present_markers, cluster_names)
+    idx = zeros(1, numel(cluster_names));
+    for i = 1:numel(cluster_names)
+        m = find(present_markers == cluster_names(i), 1, "first");
+        if isempty(m)
+            error("load_club_target_c3d:missingClusterMarker", ...
+                  "Required Optical cluster marker '%s' not found", cluster_names(i));
+        end
+        idx(i) = m;
+    end
+end
+
+
+function out = fill_short_gaps_3d(arr, max_gap)
+%FILL_SHORT_GAPS_3D  Spline-fill short NaN runs along the frame axis.
+%   ARR is (N x 3 x M).  Each (frame, xyz, marker) column is interpolated
+%   independently using fillmissing with linear/spline; gaps strictly larger
+%   than MAX_GAP are left as NaN.
+    out = arr;
+    [N, ~, M] = size(arr);
+    for m = 1:M
+        for d = 1:3
+            col = arr(:, d, m);
+            nan_mask = isnan(col);
+            if ~any(nan_mask) || all(nan_mask)
+                continue;
+            end
+            % Identify runs of NaN.
+            runs = find_nan_runs(nan_mask);
+            for r = 1:size(runs, 1)
+                s = runs(r, 1); e = runs(r, 2);
+                if s == 1 || e == N
+                    continue;  % leading / trailing gap
+                end
+                if (e - s + 1) > max_gap
+                    continue;
+                end
+                % Use a small neighbourhood around the gap for cubic poly.
+                left  = find(~nan_mask(1:s-1));
+                right = find(~nan_mask(e+1:end)) + e;
+                if numel(left) >= 3
+                    left = left(end-2:end);
+                end
+                if numel(right) >= 3
+                    right = right(1:3);
+                end
+                anchors = [left(:); right(:)];
+                if numel(anchors) < 2
+                    continue;
+                end
+                order = min(3, numel(anchors) - 1);
+                p = polyfit(anchors, col(anchors), order);
+                col(s:e) = polyval(p, (s:e).');
+            end
+            out(:, d, m) = col;
+        end
+    end
+end
+
+
+function runs = find_nan_runs(mask)
+    runs = zeros(0, 2);
+    n = numel(mask);
+    i = 1;
+    while i <= n
+        if ~mask(i)
+            i = i + 1;
+            continue;
+        end
+        s = i;
+        while i <= n && mask(i)
+            i = i + 1;
+        end
+        runs(end+1, :) = [s, i-1]; %#ok<AGROW>
+    end
 end
 
 

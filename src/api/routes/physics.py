@@ -16,6 +16,7 @@ No module-level mutable state.
 
 from __future__ import annotations
 
+import contextlib
 import time
 from typing import TYPE_CHECKING, Any
 
@@ -625,14 +626,14 @@ async def control_recording(
                 export_path = Path(tmp_path).name
                 if logger:
                     logger.info(
-                        "Trajectory exported to %s (%d frames)", export_path, frame_count
+                        "Trajectory exported to %s (%d frames)",
+                        export_path,
+                        frame_count,
                     )
             except Exception:
                 # Clean up on error
-                try:
+                with contextlib.suppress(OSError):
                     os.unlink(tmp_path)
-                except OSError:
-                    pass
                 raise
 
         return TrajectoryRecordResponse(
