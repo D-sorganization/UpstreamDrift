@@ -1,36 +1,53 @@
 # Review Comments Archive - 2026-05-05
 
-Generated: 2026-05-05T21:24:43.946314
+Generated: 2026-05-05T21:54:15.555901
 
-## Reviewer (chatgpt-codex-connector[bot]) (2 comments)
+## Reviewer (chatgpt-codex-connector[bot]) (3 comments)
 
-### PR #4012: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/compute_cost.m:33
+### PR #4022: src/shared/python/motion_matching/loaders/excel.py:47
 
 Actionable: No
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Accept row vectors for `theta` in `compute_cost`**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Resolve mocap loader path from module location**
 
-The argument block currently constrains `theta` to `(:,1)`, which rejects 1xN row vectors before `validators.mustBeFiniteVector` runs. This contradicts the function contract in the header (`column or row`) and will fail when callers pass row-shaped optimization variables (for example, `surrogateopt` objectives are typically row-vector inputs), causing immedi...
+`_import_mocap_loader` only searches for `mocap_data_loader.py` relative to `Path.cwd()` and its parents, so `load_club_target_excel` fails with `ImportError` whenever the process runs from a working directory outside the repository tree (for example, a service launched from `/opt` or a notebook started elsewhere). This makes the public loader brittle even whe...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4012#discussion_r3192982980)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4022#discussion_r3193036540)
 
 ---
 
-### PR #4012: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/compute_total_work.m:37
+### PR #4022: src/shared/python/motion_matching/loaders/c3d.py:57
+
+Actionable: No
+Has Suggestion: No
+
+```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Resolve C3D reader path from module location**
+
+`_import_c3d_reader` uses `Path.cwd()` ancestry to locate `c3d_reader.py`, so `load_club_target_c3d` breaks in the same way when callers run outside the repo root hierarchy. In those environments the function raises `ImportError` despite the reader existing in the source tree/package, which blocks C3D ingestion in production-style runtimes.
+
+Useful? React with 👍...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4022#discussion_r3193036544)
+
+---
+
+### PR #4022: src/shared/python/motion_matching/dataset/sweep.py:111
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Enforce monotonic simulation time before work integration**
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Honor lazy mode without eager timesteps materialization**
 
-`compute_total_work` integrates a nonnegative power integrand with `trapz(t, ...)` but never validates that `sim_out.time` is strictly increasing. If a simulator returns reversed/unsorted timestamps, `trapz` can produce a negative integral and trip the postcondition assert, aborting optimization runs even though torques/velocities are valid. This sh...
+`load_sweep_dataset(..., lazy=True)` still reads `timesteps.parquet` eagerly into pandas before returning a LazyFrame, because `pd.read_parquet(timesteps_path)` happens unconditionally. For large sweep datasets this defeats the advertised lazy path and can cause unnecessary memory blowups/OOM during loading; the lazy branch should avoid full eager mat...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4012#discussion_r3192982984)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4022#discussion_r3193036547)
 
 ---
 
