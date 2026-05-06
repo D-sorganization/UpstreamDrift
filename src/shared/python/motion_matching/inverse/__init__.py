@@ -12,10 +12,21 @@ See ``src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching
 option3_inverse_nn/INTERFACES.md`` for the full design contract.
 """
 
+from ._validate import ValidationReport, round_trip_validate
 from .cvae import CVAEConfig, EncoderOutput, SwingInverseCVAE
+from .predict import (
+    InverseFitResult,
+    TrainedInverseCVAE,
+    predict_coefficients,
+)
 
 __all__ = [
     "CVAEConfig",
     "EncoderOutput",
+    "InverseFitResult",
     "SwingInverseCVAE",
+    "TrainedInverseCVAE",
+    "ValidationReport",
+    "predict_coefficients",
+    "round_trip_validate",
 ]
