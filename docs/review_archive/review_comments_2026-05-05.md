@@ -1,53 +1,53 @@
 # Review Comments Archive - 2026-05-05
 
-Generated: 2026-05-05T21:54:15.555901
+Generated: 2026-05-05T23:25:27.963172
 
 ## Reviewer (chatgpt-codex-connector[bot]) (3 comments)
 
-### PR #4022: src/shared/python/motion_matching/loaders/excel.py:47
-
-Actionable: No
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Resolve mocap loader path from module location**
-
-`_import_mocap_loader` only searches for `mocap_data_loader.py` relative to `Path.cwd()` and its parents, so `load_club_target_excel` fails with `ImportError` whenever the process runs from a working directory outside the repository tree (for example, a service launched from `/opt` or a notebook started elsewhere). This makes the public loader brittle even whe...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4022#discussion_r3193036540)
-
----
-
-### PR #4022: src/shared/python/motion_matching/loaders/c3d.py:57
-
-Actionable: No
-Has Suggestion: No
-
-```
-**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Resolve C3D reader path from module location**
-
-`_import_c3d_reader` uses `Path.cwd()` ancestry to locate `c3d_reader.py`, so `load_club_target_c3d` breaks in the same way when callers run outside the repo root hierarchy. In those environments the function raises `ImportError` despite the reader existing in the source tree/package, which blocks C3D ingestion in production-style runtimes.
-
-Useful? React with 👍...
-```
-
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4022#discussion_r3193036544)
-
----
-
-### PR #4022: src/shared/python/motion_matching/dataset/sweep.py:111
+### PR #4048: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/option1_direct_optimization/fit_swing_hybrid.m:50
 
 Actionable: Yes
 Has Suggestion: No
 
 ```
-**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Honor lazy mode without eager timesteps materialization**
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Compare skip tolerance against surrogate RMSE, not raw loss**
 
-`load_sweep_dataset(..., lazy=True)` still reads `timesteps.parquet` eagerly into pandas before returning a LazyFrame, because `pd.read_parquet(timesteps_path)` happens unconditionally. For large sweep datasets this defeats the advertised lazy path and can cause unnecessary memory blowups/OOM during loading; the lazy branch should avoid full eager mat...
+`skip_polish_tol_m` is documented/used as a metre tolerance, but this branch compares it to `surrogate_phase.final_loss` and later derives `final_rmse_m` as `sqrt(final_loss)`. The Python surrogate's `final_loss` is a weighted objective (position + quaternion + optional bound penalty), not a pure squared RMSE in metres, so this can incorrectly ski...
 ```
 
-[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4022#discussion_r3193036547)
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4048#discussion_r3193373610)
+
+---
+
+### PR #4048: src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/motion_matching/shared/private/result_to_table_row.m:79
+
+Actionable: No
+Has Suggestion: No
+
+```
+**<sub><sub>![P2 Badge](https://img.shields.io/badge/P2-yellow?style=flat)</sub></sub>  Parse string-valued option IDs numerically**
+
+When `result.option` is provided as a string (the docstring explicitly allows values like `"1".."4"`), `double(result.option)` returns character code values (e.g. `"1" -> 49`) instead of the intended option number. This silently corrupts leaderboard rows and sort/filter behavior for any results that persist `option` as text.
+
+Useful? React with 👍 / 👎.
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4048#discussion_r3193373614)
+
+---
+
+### PR #4048: src/shared/python/motion_matching/loaders/c3d.py:216
+
+Actionable: Yes
+Has Suggestion: No
+
+```
+**<sub><sub>![P1 Badge](https://img.shields.io/badge/P1-orange?style=flat)</sub></sub>  Select Optical address frame after short-gap interpolation**
+
+This computes the address frame from raw marker arrays before `extract_optical_pose` runs its short-gap interpolation, so traces with staggered short NaN gaps (each marker recoverable, but no raw frame where all six markers are simultaneously finite) will fail early with `No frame where all Optical cluster markers are simultaneously finite`. That contrad...
+```
+
+[View on GitHub](https://github.com/D-sorganization/UpstreamDrift/pull/4048#discussion_r3193373616)
 
 ---
 

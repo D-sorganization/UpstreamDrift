@@ -134,6 +134,32 @@ def _r2_by_column(
     return {column: float(value) for column, value in zip(columns, r2, strict=True)}
 
 
+def compute_phase_stratified_metrics(
+    pred: np.ndarray,
+    target: np.ndarray,
+    time_values: np.ndarray,
+    phase_breakpoints: dict[str, float] | None = None,
+) -> dict[str, float]:
+    """Optional per-phase RMSE report.
+
+    Time is *not* a model input. ``time_values`` is metadata only, used
+    here to bucket evaluation rows into swing phases for residual reporting.
+    Returns an empty dict when ``time_values`` has no positive range.
+    """
+    from .surrogate_validation import evaluate_per_phase, phase_stratified_split
+
+    if time_values.size == 0:
+        return {}
+    if float(np.max(time_values)) <= float(np.min(time_values)):
+        return {}
+    masks = phase_stratified_split(
+        {"t": np.asarray(time_values)},
+        time_col="t",
+        phase_breakpoints=phase_breakpoints,
+    )
+    return evaluate_per_phase(pred, target, masks)
+
+
 def _normalized_rmse_by_column(
     pred: np.ndarray,
     target: np.ndarray,

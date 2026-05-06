@@ -333,6 +333,7 @@ markers = [
     "requires_network: marks tests that require network access (skip with '-m not requires_network')",
     "requires_gpu: marks tests that require a GPU (skip with '-m not requires_gpu')",
     "smoke: release-blocking smoke tests for built production artifacts",
+    "requires_matlab: tests that require the MATLAB Engine for Python (alias of live_simulation for the Simscape adapter)",
 ]
 filterwarnings = [
     # Suppress hppfcl→coal rename noise (third-party, not actionable in this repo)

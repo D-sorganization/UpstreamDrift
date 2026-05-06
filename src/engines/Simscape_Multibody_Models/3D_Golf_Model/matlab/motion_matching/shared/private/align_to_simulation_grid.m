@@ -48,7 +48,8 @@ function aligned = align_to_simulation_grid(raw, opts)
     end
 
     % --- Step 1: impact detection via 5-point central differences ---
-    raw_impact_idx = local_impact_idx(t_raw, raw.clubhead);
+    %     (DRY: shared with synthesize_target_from_coefficients.m)
+    raw_impact_idx = detect_clubhead_impact(t_raw, raw.clubhead);
     t_impact_raw = t_raw(raw_impact_idx);
 
     % --- Step 2: define window in raw time ---
@@ -79,7 +80,7 @@ function aligned = align_to_simulation_grid(raw, opts)
     quat_q     = local_slerp_resample(t_raw, raw.club_quat, raw_query);
 
     % Recompute impact on the simulation grid (should be near sim_t_impact)
-    sim_impact_idx = local_impact_idx(sim_time, clubhead_q);
+    sim_impact_idx = detect_clubhead_impact(sim_time, clubhead_q);
 
     aligned = struct( ...
         "time",       sim_time, ...
@@ -108,40 +109,6 @@ function aligned = align_to_simulation_grid(raw, opts)
         "Postcondition: club_quat rows must be unit-norm to 1e-6");
     assert(aligned.impact_idx >= 1 && aligned.impact_idx <= N, ...
         "Postcondition: 1 <= impact_idx <= N");
-end
-
-
-function idx = local_impact_idx(t, clubhead)
-    % 5-point central difference for d/dt on possibly nonuniform grid:
-    % fall back to gradient (which is 2nd-order central + forward/backward
-    % at endpoints). For uniform grids this matches a 3-point stencil; for
-    % the 5-point requirement we apply a uniform-grid 5-point stencil after
-    % linear-interp to a uniform spacing for the velocity computation only.
-    M = numel(t);
-    if M < 5
-        v = zeros(M, 3);
-        for d = 1:3
-            v(:, d) = gradient(clubhead(:, d), t);
-        end
-    else
-        % Uniform resample for velocity computation
-        tu = linspace(t(1), t(end), M).';
-        cu = interp1(t, clubhead, tu, "linear");
-        h  = tu(2) - tu(1);
-        vu = zeros(M, 3);
-        for d = 1:3
-            col = cu(:, d);
-            vu(3:M-2, d) = (-col(5:M) + 8*col(4:M-1) - 8*col(2:M-3) + col(1:M-4)) / (12*h);
-            vu(1, d)     = (col(2) - col(1)) / h;
-            vu(2, d)     = (col(3) - col(1)) / (2*h);
-            vu(M-1, d)   = (col(M) - col(M-2)) / (2*h);
-            vu(M, d)     = (col(M) - col(M-1)) / h;
-        end
-        % Map velocity back onto the raw grid (1:1 since same M)
-        v = interp1(tu, vu, t, "linear", "extrap");
-    end
-    speed = sqrt(sum(v.^2, 2));
-    [~, idx] = max(speed);
 end
 
 
